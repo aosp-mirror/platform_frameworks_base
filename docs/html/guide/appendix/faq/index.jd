@@ -1,0 +1,15 @@
+page.title=FAQs, Tips, and How-to
+@jd:body
+
+<dl>
+    <dt><a href="commontasks.html">Common Development Tasks and How To Do Them</a></dt>
+    <dd>Quick and to the point &mdash; how-to's for a variety of development tasks you are likely to use.</dd>
+    <dt><a href="framework.html">Application Framework FAQ</a></dt>
+    <dd>Common questions about the Android Application Framework.</dd>
+    <dt><a href="troubleshooting.html">Troubleshooting Tips</a></dt>
+    <dd>Answers to help you troubleshoot common problems.</dd>
+    <dt><a href="licensingandoss.html">Open Source Licensing FAQ</a></dt>
+    <dd>Common topics around licensing and Android Open Source</dd>
+    <dt><a href="security.html">Android Security FAQ</a></dt>
+    <dd>Answers to common questions about Android security.</dd>
+</dl>

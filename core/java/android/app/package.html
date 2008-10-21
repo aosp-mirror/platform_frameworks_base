@@ -1,0 +1,72 @@
+<html>
+<head>
+<script type="text/javascript" src="http://www.corp.google.com/style/prettify.js"></script>
+<script src="http://www.corp.google.com/eng/techpubs/include/navbar.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+<p>High-level classes encapsulating the overall Android application model.
+The central class is {@link android.app.Activity}, with other top-level
+application components being defined by {@link android.app.Service} and,
+from the {@link android.content} package, {@link android.content.BroadcastReceiver}
+and {@link android.content.ContentProvider}.  It also includes application
+tools, such as dialogs and notifications.</p>
+
+<p>This package builds on top of the lower-level Android packages
+{@link android.widget}, {@link android.view}, {@link android.content},
+{@link android.text}, {@link android.graphics}, {@link android.os}, and
+{@link android.util}.</p>
+
+<p>An {@link android.app.Activity Activity} is a specific operation the
+user can perform, generally corresponding
+to one screen in the user interface.
+It is the basic building block of an Android application.
+Examples of activities are "view the
+list of people," "view the details of a person," "edit information about
+a person," "view an image," etc.  Switching from one activity to another
+generally implies adding a new entry on the navigation history; that is,
+going "back" means moving to the previous activity you were doing.</p>
+
+<p>A set of related activities can be grouped together as a "task".  Until
+a new task is explicitly specified, all activites you start are considered
+to be part of the current task.  While the only way to navigate between
+individual activities is by going "back" in the history stack, the group
+of activities in a task can be moved in relation to other tasks: for example
+to the front or the back of the history stack.  This mechanism can be used
+to present to the user a list of things they have been doing, moving
+between them without disrupting previous work.
+</p>
+
+<p>A complete "application" is a set of activities that allow the user to do a
+cohesive group of operations -- such as working with contacts, working with a
+calendar, messaging, etc.  Though there can be a custom application object
+associated with a set of activities, in many cases this is not needed --
+each activity provides a particular path into one of the various kinds of
+functionality inside of the application, serving as its on self-contained
+"mini application".
+</p>
+
+<p>This approach allows an application to be broken into pieces, which
+can be reused and replaced in a variety of ways.  Consider, for example,
+a "camera application."  There are a number of things this application
+must do, each of which is provided by a separate activity: take a picture
+(creating a new image), browse through the existing images, display a
+specific image, etc.  If the "contacts application" then wants to let the
+user associate an image with a person, it can simply launch the existing
+"take a picture" or "select an image" activity that is part of the camera
+application and attach the picture it gets back.
+</p>
+
+<p>Note that there is no hard relationship between tasks the user sees and
+applications the developer writes.  A task can be composed of activities from
+multiple applications (such as the contact application using an activity in 
+the camera application to get a picture for a person), and multiple active
+tasks may be running for the same application (such as editing e-mail messages
+to two different people).  The way tasks are organized is purely a UI policy
+decided by the system; for example, typically a new task is started when the
+user goes to the application launcher and selects an application.
+</p>
+
+</body>
+</html>

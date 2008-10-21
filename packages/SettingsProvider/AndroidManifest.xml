@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.providers.settings"
+        android:sharedUserId="android.uid.system">
+    <application android:allowClearUserData="false"
+                 android:label="Settings Storage"
+                 android:icon="@drawable/ic_launcher_settings">
+        <provider android:name="SettingsProvider" android:authorities="settings"
+                  android:process="system" android:multiprocess="false"
+                  android:writePermission="android.permission.WRITE_SETTINGS"
+                  android:initOrder="100" />
+    </application>
+</manifest>

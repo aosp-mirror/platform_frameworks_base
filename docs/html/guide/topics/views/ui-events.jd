@@ -1,0 +1,31 @@
+page.title=Handling UI Events
+@jd:body
+
+<p>Many Android classes declare callback methods for handling relevant UI events such as keypresses, touch events, focus changes, and so on. For example, {@link android.app.Activity Activity} provides the methods onKeyDown() and onKeyUp() and {@link android.widget.TextView TextView} provides onFocusChanged(). </p>
+
+<p>In most cases, you can handle events just by overriding the appropriate handler methods. When an event is received, the Android system calls your handler method with the event data.</p>
+
+<p>However, some classes do not declare handler methods for specific events. For example, {@link android.widget.Button Button} does not declare an onClick() handler method. To handle such events, you need to create an anonymous class to act as a listener for the event, then register the listener with the target class object. The example below shows how to set up a handler for click events in a Button object. </p>
+
+
+
+</p>
+<pre>public class ExampleSendResult extends Activity
+{
+    protected void onCreate(Bundle savedValues)
+    {
+        ...
+
+        // Listen for button clicks.
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(mCorkyListener);
+    }
+
+    // Create an anonymous class to act as a button click listener.
+    private OnClickListener mCorkyListener = new OnClickListener()
+    {
+        public void onClick(View v)
+        {
+          //handle click event...
+        }
+    };</pre>

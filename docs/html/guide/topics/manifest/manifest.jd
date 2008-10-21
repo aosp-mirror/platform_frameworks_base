@@ -1,0 +1,183 @@
+page.title=The Manifest File (AndroidManifest.xml)
+@jd:body
+
+<p>Every Android application has a <em>manifest file</em> that declares global values for the application.
+For example, the manifest file declares the appliication's fully qualified package name, as well as the application components (activities, services, etc) it exposes, the implementation classes for each, the kinds of data each can handle, 
+and where they can be launched. </p>
+
+<p>The manifest is an XML file that is always stored under the name <code>AndroidManifest.xml</code> in the root folder of the application. Only one manifest file is allowed per application package. As part of developing your android application, you will be creating the application's manifest file using the XML vocabulary described in this document. </p>
+
+<p>An important aspect of this file is the <em>intent filters</em> that it includes.
+    These filters describe where and when that activity can be started. When an activity
+    (or the operating system) wants to perform an action such as open a Web page
+    or open a contact picker screen, it creates an {@link android.content.Intent
+    Intent} object. This object can hold several descriptors describing what you
+    want to do, what data you want to do it to, the type of data, and other bits
+    of information. Android compares the information in an Intent object with the
+    intent filter exposed by every application and finds the activity most appropriate
+    to handle the data or action specified by the caller. More details
+    on intents is given in the {@link android.content.Intent
+    Intent} reference page.</p>
+    
+<p>Besides declaring your application's activities, content providers, services,
+and intent receivers, you can also specify permissions and instrumentation
+(security control and testing) in AndroidManifest.xml. For a reference of the tags and
+their attributes, please see {@link android.R.styleable#AndroidManifest}.</p>
+
+<p>A simple AndroidManifest.xml looks like this:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.my_domain.app.helloactivity"&gt;
+        
+    &lt;application android:label="@string/app_name"&gt;
+    
+        &lt;activity android:name=".HelloActivity"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN"/&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER"/&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        
+    &lt;/application&gt;
+    
+&lt;/manifest&gt;
+</pre>
+
+<p>Some general items to note:</p>
+
+<ul>
+<li> <p>Almost every AndroidManifest.xml (as well as many other Android
+XML files) will include the namespace declaration
+<code>xmlns:android="http://schemas.android.com/apk/res/android"</code> in
+its first element.  This makes a variety of standard Android attributes
+available in the file, which will be used to supply most of the data for
+elements in that file.</code>
+<li> <p>Most manifests include a single <code>&lt;application&gt;</code>
+element, which defines all of the application-level components and
+properties that are available in the package.</p>
+<li> <p>Any package that will be presented to the user as a top-level
+application available from the program launcher will need to include at
+least one {@link android.app.Activity} component that supports the
+{@link android.content.Intent#ACTION_MAIN MAIN} action and
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} category as
+shown here.</p>
+</ul>
+
+<p>Here is a detailed outline of the structure of an AndroidManifest.xml file,
+describing all tags that are available.</p>
+
+<dl>
+  <dt>{@link android.R.styleable#AndroidManifest &lt;manifest&gt;}</dt>
+  <dd>The root node of the file, describing the complete contents of
+	   the package.  Under it you can place:
+    <dl>
+      <dt>{@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}</dt>
+      <dd>Requests a security permission that your package must be granted in
+           order for it to operate correctly.  See the
+           <a href="{@docRoot}devel/security.html">Security Model</a>
+           document for more information on permissions.  A manifest can
+           contain zero or more of these elements.</dd>
+      <dt>{@link android.R.styleable#AndroidManifestPermission &lt;permission&gt;}</dt>
+      <dd>Declares a security permission that can be used to restrict which
+           applications can access components or features in your (or
+           another) package.  See the
+           <a href="{@docRoot}devel/security.html">Security Model</a>
+           document for more information on permissions.  A manifest can
+           contain zero or more of these elements.</dd>
+      <dt>{@link android.R.styleable#AndroidManifestInstrumentation &lt;instrumentation&gt;}</dt>
+      <dd>Declares the code of an instrumentation component that is available
+           to test the functionality of this <em>or another</em> package.
+           See {@link android.app.Instrumentation} for more details.  A manifest can
+           contain zero or more of these elements.</dd>
+      <dt>{@link android.R.styleable#AndroidManifestApplication &lt;application&gt;}</dt>
+      <dd>Root element containing declarations of the application-level
+           components contained in the package.  This element can also
+           include global and/or default attributes for the application,
+           such as a label, icon, theme, required permission, etc.  A manifest
+           can contain zero or one of these elements (more than one application
+           tag is not allowed).  Under it you can place zero or more of
+           each of the following component declarations:
+        <dl>
+          <dt>{@link android.R.styleable#AndroidManifestActivity &lt;activity&gt;}</dt>
+          <dd>An {@link android.app.Activity} is the primary facility for
+               an application to interact with the user.  The initial screen
+               the user sees when launching an application is an activity,
+               and most other screens they use will be implemented as
+               separate activities declared with additional activity tags.
+               
+               <p><em><strong>Note:</strong></em> Every
+               Activity must have an &lt;activity&gt; tag in the manifest whether it is exposed
+               to the world or intended for use only within its own package. If an Activity
+               has no matching tag in the manifest, you won't be able to launch it.
+            
+               <p>Optionally, to support late runtime lookup of your
+               activity, you can include one or more &lt;intent-filter&gt;
+               elements to describe the actions the activity supports.
+            <dl>
+              <dt><a name="intent-filter">
+                   {@link android.R.styleable#AndroidManifestIntentFilter &lt;intent-filter&gt;}</a></dt>
+              <dd>Declares a specific set of {@link android.content.Intent} values
+                   that a component supports, in the form of an
+                   {@link android.content.IntentFilter}.  In addition to the
+                   various kinds of values
+                   that can be specified under this element, attributes
+                   can be given here to supply a unique label, icon, and
+                   other information for the action being described.
+                <dl>
+                  <dt>{@link android.R.styleable#AndroidManifestAction &lt;action&gt;}</dt>
+                  <dd>An {@link android.content.IntentFilter#addAction Intent action}
+                       that the component supports.</dd>
+                  <dt>{@link android.R.styleable#AndroidManifestCategory &lt;category&gt;}</dt>
+                  <dd>An {@link android.content.IntentFilter#addCategory Intent category}
+                       that the component supports.</dd>
+                  <dt>{@link android.R.styleable#AndroidManifestData &lt;data&gt;}</dt>
+                  <dd>An {@link android.content.IntentFilter#addDataType Intent data MIME type},
+                       {@link android.content.IntentFilter#addDataScheme Intent data URI scheme},
+                       {@link android.content.IntentFilter#addDataAuthority Intent data URI authority}, or
+                       {@link android.content.IntentFilter#addDataPath Intent data URI path}
+                       that the component supports.</dd>
+                </dl>
+            </dl>
+            
+               <p>You can also optionally associate one or more pieces of meta-data
+               with your activity that other clients can retrieve to find
+               additional arbitrary information about it:</p>
+            <dl>
+              <dt><a name="meta-data">
+                   {@link android.R.styleable#AndroidManifestMetaData &lt;meta-data&gt;}</a></dt>
+              <dd>Adds a new piece of meta data to the activity, which clients
+                   can retrieve through
+                   {@link android.content.pm.ComponentInfo#metaData
+                   ComponentInfo.metaData}.
+            </dl>
+          <dt>{@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}</dt>
+          <dd>An {@link android.content.BroadcastReceiver} allows an application
+               to be told about changes to data or actions that happen,
+               even if it is not currently running.  As with the activity
+               tag, you can optionally include one or more &lt;intent-filter&gt;
+               elements that the receiver supports or &lt;meta-data&gt; values;
+               see the activity's
+               <a href="#intent-filter">&lt;intent-filter&gt;</a> and
+               <a href="#meta-data">&lt;meta-data&gt;</a> descriptions
+               for more information.</dd>
+          <dt>{@link android.R.styleable#AndroidManifestService &lt;service&gt;}</dt>
+          <dd>A {@link android.app.Service} is a component that can run in
+               the background for an arbitrary amount of time.  As with the activity
+               tag, you can optionally include one or more &lt;intent-filter&gt;
+               elements that the service supports or &lt;meta-data&gt; values;
+               see the activity's
+               <a href="#intent-filter">&lt;intent-filter&gt;</a> and
+               <a href="#meta-data">&lt;meta-data&gt;</a> descriptions
+               for more information.</dd>
+          <dt>{@link android.R.styleable#AndroidManifestProvider &lt;provider&gt;}</dt>
+          <dd>A {@link android.content.ContentProvider} is a component that
+               manages persistent data and publishes it for access by other
+               applications.  You can also optionally attach one or more
+               &lt;meta-data&gt; values, as described in the activity's
+               <a href="#meta-data">&lt;meta-data&gt;</a> description.</dd>
+        </dl>
+    </dl>
+</dl>

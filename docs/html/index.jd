@@ -1,0 +1,114 @@
+home=true
+page.title=Home
+@jd:body
+
+
+<script type="text/javascript" src="{@docRoot}assets/carousel.js"></script>
+<script type="text/javascript">
+  var preview = function() { showPreview('amazonmp3'); };
+  addLoadEvent(preview);
+</script>
+
+	<div id="mainBodyFixed">
+              <div id="mainBodyLeft">			
+                    <div id="homeMiddle">
+                        <div id="homeTitle">
+                            <div style="float:left;">
+                                <h2>Just Announced: Developer Challenge 2</h2>
+                            </div>
+                            <div style="float:right;" align="center">
+                                <a href="{@docRoot}adc/adc2.html">Sign up today!</a><br />
+                                <img src="{@docRoot}assets/images/icon_robot.jpg" style="padding:8px 10px 8px 10px; clear:both;" />
+                            </div>
+                        </div><!-- end homeTitle -->
+                        <div id="carouselMain">
+                            <div id="carouselImg"></div>
+                            <div id="carouselDesc"></div>
+                        </div>
+                        <div class="clearer"></div>
+                        <div class="app-list-container" align="center"> 
+                            <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
+                            <div id="list-clip">
+                                <div style="left: 0px;" id="app-list">
+                                    <!--ps:app-list-->
+                                    <a id="droidlink-amazonmp3" href="javascript:showPreview('amazonmp3')">
+                                      <img src="{@docRoot}assets/images/amazonmp3-sm.png" alt="Amazon MP3 for Android">
+                                    </a> 
+                                    <a id="droidlink-bonsaiblast" href="javascript:showPreview('bonsaiblast')">
+                                      <img src="{@docRoot}assets/images/bonsaiblast-sm.png" alt="Bonsai Blast">
+                                    </a> 
+                                    <a id="droidlink-breadcrumbz" href="javascript:showPreview('breadcrumbz')">
+                                      <img src="{@docRoot}assets/images/breadcrumbz-sm.png" alt="BreadCrumbz">
+                                    </a>
+                                    <a id="droidlink-cookingcapsules" href="javascript:showPreview('cookingcapsules')">
+                                      <img src="{@docRoot}assets/images/cookingcapsules-sm.png" alt="Cooking Capsules™ Taster">
+                                    </a> 
+                                    <!--pe:app-list-->
+                                </div>
+                            </div><!-- end list-clip -->
+                            <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                            <div class="clearer"></div>
+                        </div><!-- end app-list container -->
+                    </div><!-- end homeMiddle -->
+
+                    <div style="clear:both">&nbsp;</div>
+
+                    <div id="homeBottom">
+                        <table>
+                            <tr>
+                                <td>
+                                    <br />
+                                    <h2>Featured Developer App: BreadCrumbz</h2>
+                                    <p>Amos Yoffe takes navigation to the next level with BreadCrumbz.</p>
+                                    <p><a href="http://www.bcrumbz.com">Learn more about this developer &rarr;</a></p>
+                                </td>
+                                <td>
+                                    <img src="{@docRoot}assets/images/logo_breadcrumbz.jpg" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div><!-- end homeBottom -->
+              </div><!-- end mainBodyLeft -->
+
+              <div id="mainBodyRight">
+                      <table id="rightColumn">
+                              <tr>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_download.jpg" /></td>
+                                      <td>
+                                              <h2 class="green">Download</h2>
+                                              <p>Latest SDK</p>
+                                              <p><a href="{@docRoot}sdk/">Download now</a></p>
+                                      </td>
+                              </tr>
+                              <tr>
+                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
+                              </tr>
+                              <tr>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_market.jpg" /></td>
+                                      <td valign="middle"><br /><h2 class="green">Market</h2></td>
+                              </tr>
+                              <tr>
+                                      <td colspan="2">
+                                              <br />
+                                              <p>Android Market is an open service that will give developers the opportunity to distribute applications to handsets.</p>
+                                              <p><a href="http://www.android.com/market.html">Learn more &rarr;</a></p>
+                                      </td>
+                              </tr>
+                              <tr>
+                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
+                              </tr>
+                              <tr>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_contribute.jpg" /></td>
+                                      <td>
+                                              <h2 class="green">Contribute</h2>
+                                              <p>Create using our open source codebase and help us keep this project growing.</p>
+                                              <p><a href="http://open.android.com">Learn more &rarr;</a></p>
+                                      </td>
+                              </tr>
+                              <tr>
+                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
+                              </tr>
+                      </table>
+              </div>
+	</div>
+

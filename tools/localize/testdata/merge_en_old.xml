@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="changed_in_xx">aaa</string>
+    <string name="first_translation">bbb</string>
+    <string name="previously_translated">ccc</string>
+    <string name="deleted_string">ddd</string>
+
+    <string name="formatted_string"><b>bold</b><i>italic<u>italic_underline</u></i><u>underline</u></string>
+
+    <array name="growing_array">
+        <!-- somebody wrote a comment! -->
+        <item>1-One</item>
+        <item>1-Two</item>
+        <item>1-Three</item>
+    </array>
+    <array name="shrinking_array">
+        <!-- somebody wrote a comment! -->
+        <item>2-One</item>
+        <item>2-Two</item>
+        <item>2-Three</item>
+        <item>2-Four</item>
+    </array>
+    <array name="deleted_array">
+        <!-- somebody wrote a comment! -->
+        <item>4-One</item>
+        <item>4-Two</item>
+        <item>4-Three</item>
+    </array>
+</resources>
+

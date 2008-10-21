@@ -1,0 +1,47 @@
+community=true
+page.title=Community
+@jd:body
+
+<div id="mainBodyFixed">
+        <div id="mainBodyLeft">
+                <div id="communityDiv">
+                <h2>Latest News</h2>
+                <br /><br />
+
+                <a href="groups.html" class="orangeLink">Developers get hands on unlocked phones</a>
+                <p>mobile.google.com</p>
+                <br />
+                
+                <a href="groups.html" class="orangeLink">Google announces availability of Google Mobile products on T-Mobile G1</a>
+                <p>mobile.google.com</p>
+                <br />
+                
+                <a href="groups.html" class="orangeLink">Android 1.0 SDK R1 now available</a>
+                <p>android-developers.com</p>
+                <br />
+                
+                <a href="groups.html" class="orangeLink">Android Market Announcement</a>
+                <p>market.android.com</p>
+                <br />
+                </div>
+        </div>
+        
+        <div id="mainBodyRight">
+                <table id="rightColumn">
+                        <tr>					
+                                <td>
+                                        <h2 class="green">Mailing Lists</h2>
+                                        <p><a href="groups.html">android-beginners</a></p>
+                                        <p><a href="groups.html">android-developers</a></p>
+                                        <p><a href="groups.html">android-internals</a></p>
+                                        <p><a href="groups.html">android-discuss</a></p>
+                                        <p><a href="groups.html">android-security-discuss</a></p>
+                                        <p><a href="groups.html">android-security-announce</a></p>						
+                                </td>
+                        </tr>
+                        <tr>
+                                <td colspan="2"><div class="seperator">&nbsp;</div></td>
+                        </tr>				
+                </table>
+        </div>
+</div>

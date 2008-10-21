@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="day_labels">
+    <item>Ne</item>
+    <item>Po</item>
+    <item>Út</item>
+    <item>St</item>
+    <item>Čt</item>
+    <item>Pá</item>
+    <item>So</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>Výchozí</item>
+    <item>Zaměstnání</item>
+    <item>Primární</item>
+    <item>Vlastní\u2026</item>
+  </string-array>
+  <string-array name="phoneTypes">
+    <item>Výchozí</item>
+    <item>Mobil</item>
+    <item>Zaměstnání</item>
+    <item>Fax do zaměstnání</item>
+    <item>Fax domů</item>
+    <item>Operátor</item>
+    <item>Vlastní\u2026</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>Poštovní</item>
+    <item>Výchozí</item>
+    <item>Zaměstnání</item>
+    <item>Vlastní\u2026</item>
+  </string-array>
+  <string name="CLIRDefaultOffNextCallOff">Výchozí nastavení omezení ID - bez omezení. Další hovor: bez omezení</string>
+  <string name="CLIRDefaultOffNextCallOn">Výchozí nastavení omezení ID - bez omezení. Další hovor: omezení</string>
+  <string name="CLIRDefaultOnNextCallOff">Výchozí nastavení omezení ID - omezení. Další hovor: bez omezení</string>
+  <string name="CLIRDefaultOnNextCallOn">Výchozí nastavení omezení ID - omezení. Další hovor: omezení</string>
+  <string name="CLIRPermanent">Omezení ID v trvalém režimu.</string>
+  <string name="activate_keyguard">Aktivovat zámek kláves</string>
+  <string name="ago">před</string>
+  <string name="am">dop.</string>
+  <string name="before">Před</string>
+  <string name="browserSavedFormData">Uložená data formuláře</string>
+  <string name="cfReasonBusy">Přesměrování hovorů - je-li obsazeno</string>
+  <string name="cfReasonNR">Přesměrování hovorů - je-li nedostupný</string>
+  <string name="cfReasonNRy">Přesměrování hovorů - neodpovídá-li</string>
+  <string name="cfReasonUnconditional">Přesměrování hovorů - bezpodmínečné</string>
+  <string name="cfTemplateForwarded">{0}: {1}</string>
+  <string name="cfTemplateForwardedTime">{0}: {1} po {2} sekundách</string>
+  <string name="cfTemplateNotForwarded">{0}: Nepřesměrováno</string>
+  <string name="cfTemplateRegistered">{0}: Nepřesměrováno ({1})</string>
+  <string name="cfTemplateRegisteredTime">{0}: Nepřesměrováno ({1} po {2} sekundách)</string>
+  <string name="contentServiceSync">Synchronizace</string>
+  <string name="contentServiceSyncNotificationDesc">Synchronizace</string>
+  <string name="contentServiceSyncNotificationTitle">Synchronizace</string>
+  <string name="contentServiceXmppAvailable">XMPP aktivní</string>
+  <string name="daily">Denně</string>
+  <string name="day">den</string>
+  <string name="days">dnů</string>
+  <string name="defaultMsisdnAlphaTag">Msisdn1</string>
+  <string name="defaultVoiceMailAlphaTag">Hlasová schránka</string>
+  <string name="ellipsis">\u2026</string>
+  <string name="emptyPhoneNumber">(žádné telefonní číslo)</string>
+  <string name="every_weekday">"Každý den v týdnu (Po\u2013Pá)"</string>
+  <string name="factorytest_failed">Výrobní test skončil chybou</string>
+  <string name="factorytest_no_action">Nebyla nalezena žádná sada, která zajišťuje
+        akci FACTORY_TEST.</string>
+  <string name="factorytest_not_system">Akce FACTORY_TEST
+        je podporována pouze pro sady instalované v adresáři /system/app.</string>
+  <string name="factorytest_reboot">Restartovat</string>
+  <string name="friday">Pátek</string>
+  <string name="hour">hodinu</string>
+  <string name="hours">hodin</string>
+  <string name="httpError">Neznámá chyba</string>
+  <string name="httpErrorAuth">Ověřování se nezdařilo</string>
+  <string name="httpErrorBadUrl">Nepodařilo se analyzovat URL</string>
+  <string name="httpErrorConnect">Připojení k serveru se nezdařilo</string>
+  <string name="httpErrorFailedSslHandshake">Navázání spojení typu SSL handshake se nezdařilo</string>
+  <string name="httpErrorIO">Čtení nebo zápis na server se nezdařil</string>
+  <string name="httpErrorLookup">Neznámý hostitel</string>
+  <string name="httpErrorOk">OK</string>
+  <string name="httpErrorProxyAuth">Ověření serverem proxy se nezdařilo</string>
+  <string name="httpErrorRedirectLoop">Příliš mnoho přesměrování serverů</string>
+  <string name="httpErrorTimeout">Časový limit připojení k serveru vypršel</string>
+  <string name="httpErrorUnsupportedAuthScheme">Nepodporované schéma ověření. Ověření se nezdařilo.</string>
+  <string name="httpErrorUnsupportedScheme">Nepodporovaný protokol</string>
+  <!-- generic file error --><string name="httpErrorFile">File error</string>
+  <!-- file not found error --><string name="httpErrorFileNotFound">File not found</string>
+  <string name="in">v</string>
+  <string name="keyguard_label_text">Telefon odemknete stisknutím tlačítka nabídky a poté 0.</string>
+  <string name="keyguard_password_emergency_instructions">Chcete-li provést tísňové volání, stiskněte tlačítko Odeslat.</string>
+  <string name="keyguard_password_instructions">Zadejte heslo nebo vytočte číslo tísňového volání.</string>
+  <string name="minute">minutu</string>
+  <string name="minutes">minut</string>
+  <string name="mmiComplete">MMI dokončeno</string>
+  <string name="mmiError">Chyba sítě nebo neplatný kód MMI.</string>
+  <string name="monday">Pondělí</string>
+  <string name="monthly">Měsíčně</string>
+  <string name="more_item_label">Další</string>
+  <string name="passwordIncorrect">Nesprávné heslo.</string>
+  <string name="permdesc_accessCoarseLocation">Identifikátory pro technologii využívající polohu vysílačů mobilních sítí (je-li k dispozici) se používají k určení přibližné polohy zařízení. Toto oprávnění vyžaduje oprávnění ACCESS_LOCATION. Škodlivé aplikace toho mohou využívat k určení vaší přibližné polohy.</string>
+  <string name="permdesc_accessFineLocation">Technologii GPS v zařízení lze používat, pokud je k dispozici. Toto oprávnění vyžaduje oprávnění ACCESS_LOCATION. Škodlivé aplikace toho mohou využívat k určení vaší polohy a mohou spotřebovávat zbytečně energii baterie.</string>
+  <string name="permdesc_accessSurfaceFlinger">Umožňuje aplikacím používat
+        funkce nižší úrovně SurfaceFlinger.</string>
+  <string name="permdesc_addSystemService">Umožňuje aplikacím vydávat
+        vlastní systémové služby nižší úrovně. Škodlivé aplikace mohou napadnout
+        systém a vykrást nebo poškodit jeho data.</string>
+  <string name="permdesc_broadcastPackageRemoved">Umožňuje aplikacím
+        vysílat oznámení o odebrání sady aplikací.
+        Škodlivé aplikace toho mohou využít k likvidaci jiné spuštěné
+        aplikace.</string>
+  <string name="permdesc_broadcastSticky">Umožňuje aplikacím odesílat
+        tzv. lepivé (sticky) vysílání, které zůstává i po ukončení vysílání.
+        Škodlivé aplikace mohou zpomalit zařízení nebo narušit jeho stabilitu
+        vynucením využívání příliš velké části paměti.</string>
+  <string name="permdesc_callPhone">Umožňuje aplikacím volat
+        telefonní čísla bez vašeho zásahu. Škodlivé aplikace mohou
+        přinést na váš telefonní účet neočekávané hovory.</string>
+  <string name="permdesc_changeComponentState">Umožňuje změnu aplikace bez ohledu na to, zda
+        je součást další aplikace povolená nebo zakázaná. Škodlivá aplikace toho může využít
+        k zakázání důležitých funkcí zařízení. Je třeba nakládat s oprávněními opatrně, protože
+        se mohou součásti aplikace dostat do stavu nepoužitelnosti, nekonzistence nebo nestability.
+    </string>
+  <string name="permdesc_deletePackages">Umožňuje aplikacím odstranit
+        sady systému Android. Škodlivé aplikace toho mohou využít k odstranění důležitých aplikací.</string>
+  <string name="permdesc_dump">Umožňuje aplikacím načítat
+        vnitřní stav systému. Škodlivé aplikace mohou načítat
+        široký rozsah soukromých a důvěrných informací, jež by
+        obvykle neměly nikdy vyžadovat.</string>
+  <string name="permdesc_fotaUpdate">Umožňuje aplikacím přijímat
+        oznámení o aktualizacích systému čekajících na dokončení a spouštět jejich
+        instalaci. Škodlivé aplikace toho mohou využít k poškození systému
+        neautorizovanými aktualizacemi nebo obecně k zásahům do aktualizačního
+        procesu.</string>
+  <string name="permdesc_getTasks">Umožňuje aplikacím načítat
+        informace o aktuálně a naposledy spuštěných úkolech. Umožňuje
+        škodlivým aplikacím
+        zjišťovat soukromé informace o jiných aplikacích.</string>
+  <string name="permdesc_installPackages">Umožňuje aplikacím instalovat nové nebo aktualizované
+        sady systému Android. Škodlivé aplikace toho mohou využít k přidání nových aplikací s libovolně
+        silnými oprávněními.</string>
+  <string name="permdesc_internalSystemWindow">Umožňuje vytváření
+        oken určených k použití uživatelským rozhraním vnitřního systému
+        . Není určeno k použití normálními aplikacemi.</string>
+  <string name="permdesc_raisedThreadPriority">Umožňuje aplikacím používat
+        vyšších priorit vláken, případně ovlivnit reagování uživatelského rozhraní
+        .</string>
+  <string name="permdesc_readContacts">Umožňuje aplikacím číst všechna
+        data o kontaktech (adresy) uložená v zařízení. Škodlivé aplikace
+        toho mohou využívat k odesílání vašich dat jiným osobám.</string>
+  <string name="permdesc_readFrameBuffer">Umožňuje aplikacím používat
+        čtení obsahu vyrovnávací paměti rámce.</string>
+  <string name="permdesc_receiveBootCompleted">Umožňuje aplikacím
+        spouštět se po dokončení spuštění systému.
+        Tím se může prodlužovat doba spouštění zařízení a
+        aplikace může svým stálým spouštěním zpomalovat celé zařízení.</string>
+  <string name="permdesc_receiveSms">Umožňuje aplikacím přijímat
+      a zpracovávat zprávy SMS. Škodlivé aplikace mohou sledovat
+      vaše zprávy nebo je odstraňovat, aniž by se zobrazily.</string>
+  <string name="permdesc_receiveMms">Umožňuje aplikacím přijímat
+      a zpracovávat zprávy MMS. Škodlivé aplikace mohou sledovat
+      vaše zprávy nebo je odstraňovat, aniž by se zobrazily.</string>
+  <string name="permdesc_receiveWapPush">Umožňuje aplikacím přijímat
+      a zpracovávat zprávy WAP. Škodlivé aplikace mohou sledovat
+      vaše zprávy nebo je odstraňovat, aniž by se zobrazily.</string>
+  <string name="permdesc_runInstrumentation">Umožňuje aplikacím
+        vložit kód vlastního nástroje do libovolné jiné aplikace.
+        Škodlivé aplikace mohou zcela zničit systém. Toto
+        oprávnění je nutné pouze pro vývoj, nikdy pro normální
+        používání zařízení.</string>
+  <string name="permdesc_runSetActivityWatcher">Umožňuje aplikacím
+        sledovat a řídit spouštění činností systému.
+        Škodlivé aplikace mohou zcela zničit systém. Toto
+        oprávnění je nutné pouze pro vývoj, nikdy pro normální
+        používání zařízení.</string>
+  <string name="permdesc_setPreferredApplications">Umožňuje aplikacím
+        upravovat oblíbené aplikace. Škodlivé aplikace tak mohou
+        bez upozornění měnit spouštěné aplikace a klamně využívat
+        stávající aplikace ke shromažďování vašich soukromých dat.</string>
+  <string name="permdesc_signalPersistentProcesses">Umožňuje aplikacím vyžadovat, aby
+        se přiváděný signál odesílal do všech trvalých procesů.</string>
+  <string name="permdesc_systemAlertWindow">Umožňuje aplikacím
+        zobrazovat okna systémových výstrah. Škodlivé aplikace mohou ovládnout
+        celou obrazovku zařízení.</string>
+  <string name="permdesc_writeContacts">Umožňuje aplikacím upravovat
+        data o kontaktech (adresy) uložená v zařízení. Škodlivé
+        aplikace toho mohou využívat k vymazání nebo úpravě dat o kontaktech.</string>
+  <string name="permdesc_writeSettings">Umožňuje aplikacím upravovat
+        data nastavení systému. Škodlivé aplikace mohou narušit systémovou
+        konfiguraci.</string>
+  <string name="permlab_accessCoarseLocation">Používat službu Cell ID</string>
+  <string name="permlab_accessFineLocation">Používat službu GPS</string>
+  <string name="permlab_accessSurfaceFlinger">Používat službu SurfaceFlinger</string>
+  <string name="permlab_addSystemService">Přidat systémovou službu</string>
+  <string name="permlab_broadcastPackageRemoved">Sada vysílání odebrána</string>
+  <string name="permlab_broadcastSticky">Vysílat lepivý obsah (sticky)</string>
+  <string name="permlab_callPhone">Volat telefonní čísla</string>
+  <string name="permlab_changeComponentState">Povolit nebo zakázat součásti aplikací</string>
+  <string name="permlab_deletePackages">Odstranit sady</string>
+  <string name="permlab_dump">Výpis stavu systému</string>
+  <string name="permlab_fotaUpdate">Instalace aktualizace systému</string>
+  <string name="permlab_getTasks">Získat informace o úkolech</string>
+  <string name="permlab_installPackages">Instalovat sady</string>
+  <string name="permlab_internalSystemWindow">Okno vnitřního systému</string>
+  <string name="permlab_raisedThreadPriority">Vyšší priority vláken</string>
+  <string name="permlab_readContacts">Čtení dat o kontaktech</string>
+  <string name="permlab_readFrameBuffer">Čtení vyrovnávací paměti rámce</string>
+  <string name="permlab_receiveBootCompleted">Spustit při spouštění</string>
+  <string name="permlab_receiveSms">Příjem zpráv SMS</string>
+  <string name="permlab_receiveMms">Příjem zpráv MMS</string>
+  <string name="permlab_receiveWapPush">Příjem zpráv WAP</string>
+  <string name="permlab_runInstrumentation">Spustit nástroje</string>
+  <string name="permlab_runSetActivityWatcher">Nastavení sledování činností</string>
+  <string name="permlab_setPreferredApplications">Nastavení upřednostňovaných aplikací</string>
+  <string name="permlab_signalPersistentProcesses">Signálové trvalé procesy</string>
+  <string name="permlab_systemAlertWindow">Okno systémových výstrah</string>
+  <string name="permlab_writeContacts">Zápis dat o kontaktech</string>
+  <string name="permlab_writeSettings">Nastavení systému pro zápis</string>
+  <string name="pm">odp.</string>
+  <string name="power_dialog">Možnosti napájení</string>
+  <string name="power_off">Vypnuto</string>
+  <string name="prepend_shortcut_label">Menu+</string>
+  <string name="primaryEmailAddressLabel">E-mail</string>
+  <string name="saturday">Sobota</string>
+  <string name="screen_progress">Pracuji...</string>
+  <string name="search_go">PŘEJÍT</string>
+  <string name="search_hint_placeholder">Zde zadejte hledaný text</string>
+  <string name="second">sekund</string>
+  <string name="seconds">sekund</string>
+  <string name="selectMenuLabel">Vybrat</string>
+  <string name="serviceClassData">Data</string>
+  <string name="serviceClassDataAsync">Asynchronní</string>
+  <string name="serviceClassDataSync">Synchronizace</string>
+  <string name="serviceClassFAX">FAX</string>
+  <string name="serviceClassPAD">PAD</string>
+  <string name="serviceClassPacket">Pakety</string>
+  <string name="serviceClassSMS">SMS</string>
+  <string name="serviceClassVoice">Hlasový záznam</string>
+  <string name="serviceDisabled">Služba zakázána</string>
+  <string name="serviceEnabled">Služba povolena</string>
+  <string name="serviceEnabledFor">Služba povolena pro:</string>
+  <string name="serviceErased">Odstranění úspěšné</string>
+  <string name="serviceNotProvisioned">Služba není poskytována.</string>
+  <string name="serviceRegistered">Registrace úspěšná</string>
+  <string name="silent_mode">Tichý režim</string>
+  <string name="simAbsentLabel">Chybí karta SIM nebo je nesprávně vložena</string>
+  <string name="simNetworkPersonalizationLabel">Tuto kartu SIM nelze v zařízení používat</string>
+  <string name="simPINLabel">Vyžadován kód PIN karty SIM (nyní nepodporován)</string>
+  <string name="simPUKLabel">Vyžadován kód PUK karty SIM (nyní nepodporován)</string>
+  <string name="status_bar_applications_label">Aplikace</string>
+  <string name="status_bar_close">Zavřít</string>
+  <string name="status_bar_latest_events_label">Poslední události</string>
+  <string name="status_bar_no_notifications">Neupozorňovat</string>
+  <string name="status_bar_ongoing_events_label">Probíhá</string>
+  <string name="sunday">Neděle</string>
+  <string name="thursday">Čtvrtek</string>
+  <string name="time_picker_ColonBetweenHourAndMinute_text">:</string>
+  <string name="time_picker_setButton_text">Nastavit</string>
+  <string name="today">Dnes</string>
+  <string name="tomorrow">Zítra</string>
+  <string name="tuesday">Úterý</string>
+  <string name="turn_off_radio">Vypnout rádio</string>
+  <string name="turn_on_radio">Zapnout rádio</string>
+  <string name="unknownName">(neznámý)</string>
+  <string name="untitled">&lt;bez názvu&gt;</string>
+  <string name="web_user_agent">Mozilla/5.0 (Linux; U; Android 0.5; en)
+        AppleWebKit/522+ (KHTML, like Gecko) Safari/419.3</string>
+  <string name="wednesday">Středa</string>
+  <string name="week">týden</string>
+  <string name="weekly">"Týdně (%s)"</string>
+  <string name="weeks">týdnů</string>
+  <string name="yearly">Ročně</string>
+  <string name="yesterday">Včera</string>
+</resources>

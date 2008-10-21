@@ -1,0 +1,17 @@
+guide=true
+page.title=Android Samples
+@jd:body
+
+
+<p>Sometimes, the best way to learn how things are done is to just look at some code.
+So here we've provided the source code for some simple Android applications.</p>
+
+<dl>
+ <dt><a href="ApiDemos/">API Demos</a></dt>
+  <dd>A variety of small applications that demonstrate simple views and widgets.</dd>
+ <dt><a href="LunarLander/">Lunar Lander</a></dt>
+  <dd>A classic Lunar Lander game.</dd>
+ <dt><a href="NotePad/">Notepad</a></dt>
+  <dd>An application for saving notes. Similar (but not identical) to the 
+    <a href="{@docRoot}guide/tutorials/notepad/notepad-index.html">Notepad tutorial</a>.</dd>
+</dl>

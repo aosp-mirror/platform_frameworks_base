@@ -1,0 +1,45 @@
+page.title=Views and Layout
+@jd:body
+
+<p>To build a user interface fors your Android application, you work with <em>views</em> and <em>viewgroups</em> -- basic units of user interface expression on the Android platform. All views and viewgroups are descendants of the class {@link android.view.View}. To help you build your UI more quickly, Android provides a set of fully implemented views and viewgroups &mdash; called widgets and layouts &mdash; that you can use. 
+
+The topics below describe the basics of how you use views to implement a user interface. including the types of screen elements available, the ways that you can declare them in your application, how you can bind a screen elements to local data, and how views can catch and handle screen or keypad events. </p>
+
+<p>For a quick start on how to create the Views you need for your UI, check out the <a href="{@docRoot}guide/tutorials/views/hello-views-index.html">Hello Views tutorials</a>. You can look at a variety of available layouts and screen elements as they would be rendered on a device, then look at the code for declaring and invoking each one. </p>
+
+<p>You can find additional sample code in the API Demos application, included in the SDK's samples directory. </p>
+
+<div class="sidebox">
+<p>Using Android resources is an important part of building your application's user interface. For information about what resources are available to you and how you use them, see the <a href="{@docRoot}guide/topics/resources/index.html">Resources</a> topics area.</p>
+</div>
+
+<ul>
+    <li>
+        <a href="hierarchy.html">Hierarchy of Screen Elements</a> 
+    </li>
+    <li>
+        <a href="layout.html">Common Layout Objects</a>
+    </li>
+    <li>
+        <a href="ui-xml.html">Declaring a UI in XML</a>
+    </li>
+    <li>
+        <a href="binding.html">Binding to Data with AdapterView</a>
+    </li>
+    <li>
+        <a href="ui-events.html">Handling UI Events</a>
+    </li>
+    <li>
+        <a href="themes.html">Applying Styles and Themes to Your Application</a>
+    </li>
+    <li>
+        <a href="custom-views.html">Building Custom Views</a>
+    </li>
+    <li>
+        <a href="glossary.html">UI Elements and Concepts Glossary</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/tutorials/views/hello-views-index.html">Hello Views</a>
+    </li>
+
+</ul>

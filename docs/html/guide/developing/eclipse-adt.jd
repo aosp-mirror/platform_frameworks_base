@@ -1,0 +1,146 @@
+page.title=In Eclipse, with ADT
+@jd:body
+
+<p>To begin developing Android applications in the Eclipse IDE with ADT, you first create an Android 
+project and then set up a launch configuration. After that, you can write, run, and debug 
+your application.  </p>
+
+<p>The sections below provide instructions assuming that you have installed the ADT plugin 
+in your Eclipse environment. If you haven't installed the ADT plugin, you should do that 
+before using the instructions below. See the <a href="{@docRoot}intro/installing.html#installingplugin">Installing the 
+Eclipse Plugin (ADT)</a> for more information.
+
+<a name="creatingaproject" id="creatingaproject"></a>
+
+<h3>Creating an Android Project</h3>
+
+<p>The ADT plugin provides a New Project Wizard that you can use to quickly create an 
+Eclipse project for new or existing code. To create the project, follow these steps:</p>
+
+<a name="existingcode"></a>
+
+<ol>
+    <li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong></li>
+    <li>Select <strong>Android</strong> &gt; <strong>Android Project</strong>, and press <strong>Next</strong></li>
+    <li>Select the contents for the project:
+		<ul>
+			<li>Select <strong>Create new project in workspace</strong> to start a project for new code. 
+			<p>Enter the project name, the base package name, the name of a single Activity class to create as a stub .java file, and a name to use for your application.</p></li>
+			<li>Select <strong>Create project from existing source</strong> to start a project from existing code. Use this option if you want to build and run any of the sample applications included with the SDK. The sample applications are located in the samples/ directory in the SDK. 
+                        <p>Browse to the directory containing the existing source code and click OK. If the directory contains a valid Android manifest file, the ADT plugin fills in the package, activity, and application names for you.</p>
+                        </li>
+                </ul>
+    </li>
+    <li>Press <strong>Finish</strong>.</li>
+</ol>
+
+<p>The ADT plugin creates the these folders and
+        files for you as appropriate for the type of project:</p>
+
+        <ul>
+            <li>src/&nbsp;&nbsp;&nbsp;A
+                folder that includes your stub .java Activity file.</li>
+            <li>res/&nbsp;&nbsp;&nbsp;A folder for your
+                resources.</li>
+            <li>AndroidManifest.xml&nbsp;&nbsp;&nbsp;The
+                manifest for your project.   </li>
+        </ul>
+
+</ol>
+
+<a name="launchconfig" id="launchconfig"></a>
+
+<h3>Creating a Launch Configuration </h3>
+
+<p>Before you can run and debug your application in Eclipse, you must create a launch configuration for it. A launch configuration specifies the project to launch, the Activity to start, the emulator options to use, and so on. </p>
+
+<p>To create a launch configuration for the application, follow these steps as appropriate for your Eclipse version:</p>
+
+<ol>
+
+    <li>Open the launch configuration manager.
+         <ul>
+            <li>In Eclipse 3.3 (Europa), select <strong>Run </strong>&gt; 
+              <strong>Open Run Dialog... </strong>or <strong>Run </strong>&gt; 
+              <strong>Open Debug Dialog... </strong>as appropriate.
+            </li>
+            <li>In Eclipse 3.4 (Ganymede), select <strong>Run </strong>&gt; 
+              <strong>Run Configurations... </strong>or <strong>Run </strong>&gt; 
+              <strong>Debug Configurations... </strong>as appropriate.
+            </li>
+        </ul>
+    </li>
+    <li>In the project type list on the left, locate the <strong> Android Application</strong> item and double-click it (or right-click &gt; <strong>New</strong>), to create a new launch configuration.</li>
+    <li>Enter a name for your configuration.</li>
+    <li>On the Android tab, browse for the project and Activity to start.</li>
+    <li>On the Target tab, set the desired screen and network properties, as well as any other <a href="{@docRoot}reference/emulator.html#startup-options">emulator startup options</a>.</li>
+    <li>You can set additional options on the Common tab as desired.</li>
+	<li>Press <strong>Apply</strong> to save the launch configuration, or press <strong>Run</strong> or <strong>Debug</strong> (as appropriate).</li>
+
+</ol>
+
+<a name="installingrunningdebugging" id="installingrunningdebugging"></a>
+
+<h3>Running and Debugging an Application</h3>
+
+<p>Once you've set up the project and launch configuration for your application, you can run or debug it as described below.</p>
+
+From the Eclipse main menu, select <strong>Run</strong> &gt; <strong>Run</strong> or <strong>Run</strong> &gt; <strong>Debug</strong> as appropriate, to run or debug the active launch configuration. </li>
+
+<p>Note that the active launch configuration is the one most recently selected in the Run configuration manager. It does not necessarily correspond to the application that is selected in the Eclipse Navigation pane (if any).</p>
+
+<p>To set or change the active launch configuration, use the launch configuration manager. See <a href="#launchconfig">Creating a Launch Configuration</a> for information about how to access the launch configuration manager.</strong>.</p>
+
+<p>Running or debugging the application triggers these actions:</p>
+<ul><li>Starts the emulator, if it is not already running. </li>
+                    <li>Compiles the project, if there have been changes since the last build, and installs the application on the emulator. </li>
+                    <li><strong>Run</strong> starts the application. </li>
+            		<li><strong>Debug</strong> starts the application in "Wait for debugger" mode, then opens the Debug perspective and attaches the Eclipse Java debugger to the application.</li>
+
+        </ul>
+
+	<h2 id="tips">Eclipse Tips </h2>
+	<h3>Executing arbitrary Java expressions in Eclipse<a name="arbitraryexpressions" id="arbitraryexpressions"></a></h3>
+	<p>You can execute arbitrary code when paused at a breakpoint in Eclipse. For example,
+	    when in a function with a String argument called &quot;zip&quot;, you can get
+	    information about packages and call class methods. You can also invoke arbitrary
+	    static methods: for example, entering <code>android.os.Debug.startMethodTracing()</code> will
+	    start dmTrace. </p>
+	<p>Open a code execution window, select <strong>Window</strong>&gt;<strong>Show
+	        View</strong>&gt;<strong>Display</strong> from the main menu to open the
+	        Display window, a simple text editor. Type your expression, highlight the
+	        text, and click the 'J' icon (or CTRL + SHIFT + D) to run your
+	        code. The code runs in the context of the selected thread, which must be
+	        stopped at a breakpoint or single-step point. (If you suspend the thread
+	        manually, you have to single-step once; this doesn't work if the thread is
+	        in Object.wait().)</p>
+	<p>If you are currently paused on a breakpoint, you can simply highlight and execute
+	    a piece of source code by pressing CTRL + SHIFT + D. </p>
+	<p>You can highlight a block of text within the same scope by pressing ALT +SHIFT
+	    + UP ARROW to select larger and larger enclosing blocks, or DOWN ARROW to select
+	    smaller blocks. </p>
+	<p>Here are a few sample inputs and responses in Eclipse using the Display window.</p>
+	<table width="100%" border="1">
+	    <tr>
+	        <th scope="col">Input</th>
+	        <th scope="col">Response</th>
+	    </tr>
+	    <tr>
+	        <td><code>zip</code></td>
+	        <td><code>(java.lang.String) /work/device/out/linux-x86-debug/android/app/android_sdk.zip</code></td>
+	    </tr>
+	    <tr>
+	        <td><code>zip.endsWith(&quot;.zip&quot;)</code></td>
+	        <td><code>(boolean) true</code></td>
+	    </tr>
+	    <tr>
+	        <td><code>zip.endsWith(&quot;.jar&quot;)</code></td>
+	        <td><code>(boolean) false</code></td>
+	    </tr>
+	</table>
+	<p>You can also execute arbitrary code when not debugging by using a scrapbook page.
+	    Search the Eclipse documentation for &quot;scrapbook&quot;.</p>
+	
+		<h3>Running DDMS Manually</h3>
+
+		<p>Although the recommended way to debug is to use the ADT plugin, you can manually run DDMS and configure Eclipse to debug on port 8700. (<strong>Note: </strong>Be sure that you have first started <a href="{@docRoot}reference/ddms.html">DDMS</a>). </p>

@@ -1,0 +1,21 @@
+page.title=Application Design Goals
+@jd:body
+
+<p>When learning how to build applications on a new platform, you first learn what APIs are available and how to use them. Later, you learn the nuances of the platform. Put another way: first you learn how you <em>can</em> build applications; later, you learn how you <em>should</em> build them, to ensure that your applications offer outstanding performance and a great user experience. </p>
+
+<p>The documents below help you learn the nuances of Android and get started building great applications more quickly, They discuss important aspects of application design that directly influence the user experience of your application, when in the hands of a mobile device user. You should read and consider these design goals as you plan your application and throughout its development, especially if you are new to developing for mobile devices.</p>
+
+<p>Successful mobile applications offer an outstanding user experience, in addition to a compelling technical feature set. The user experience is more than just its visual design or UI flow. It is also influenced by how well the application responds to the user's keypresses and other actions, how it well it interacts with other applications, and how fully and efficiently it uses device and system capabilities.</p>
+
+<p>An outstanding user experience has three key characteristics: it is
+<em>fast</em>; it is <em>responsive</em>; and it is <em>seamless</em>. Of course
+every platform since the dawn of computing has probably cited those same three
+qualities at one time or another. However, each platform achieves them in
+different ways; the documents below explain how you can build Android
+applications that are fast, responsive, and seamless. </p>
+
+<ul>
+<li><a href="performance.html">Designing for Performance</a> (writing efficient Android code)</a></li>
+<li><a href="responsiveness.html">Designing for Responsiveness</a> (avoiding ANR)</a></li>
+<li><a href="seamlessness.html">Designing for Seamlessness</a> (coexisting with other applications)</a></li>
+</ul>

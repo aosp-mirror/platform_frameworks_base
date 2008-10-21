@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2"
+        version="1.2"
+        >
+    <file datatype="x-android-res"
+            original="//device/tools/localization/tests/res/values/strings.xml"
+            product-version="1.0"
+            date="08:10:54 12/07/07 PST"
+            source-language="en-US"
+            product-name="kila"
+            target-language="zz-ZZ"
+            build-num="32138"
+            >
+        <body>
+            <trans-unit id="string:complex">
+                <source>First <g id="string:complex:0" ctype="underline">underline</g>, <g id="string:complex:1" ctype="italic">italic<g id="string:complex:2" ctype="bold">italicbold</g></g> End </source>
+            </trans-unit>
+            <trans-unit id="string:complex-quoted">
+                <source xml:space="preserve">First <g id="string:complex-quoted:0" ctype="underline">underline</g>, <g id="string:complex-quoted:1" ctype="italic">italic<g id="string:complex-quoted:2" ctype="bold">italicbold</g></g> End</source>
+            </trans-unit>
+            <trans-unit id="string:simple">
+                <source>Simple</source>
+            </trans-unit>
+            <trans-unit id="array:0:simple">
+                <source>Simple</source>
+            </trans-unit>
+            <trans-unit id="array:1:simple">
+                <source>Simple</source>
+            </trans-unit>
+            <trans-unit id="string:simple-quoted">
+                <source xml:space="preserve"> Quote</source>
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve"> OLD Quote</source>
+                    <target xml:lang="xx"> OLD Ờũỡŧę</target>
+                </alt-trans>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+

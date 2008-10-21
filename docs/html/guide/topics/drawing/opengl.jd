@@ -1,0 +1,53 @@
+page.title=OpenGL
+@jd:body
+
+<p>Android includes support for 3D hardware acceleration. This functionality is
+accessed via the OpenGL API &mdash; specifically, the OpenGL ES API.</p>
+
+<p>OpenGL ES is a flavor of the OpenGL specification intended for embedded
+devices. Versions of OpenGL ES are loosely peered to versions of the primary
+OpenGL standard. Android currently supports OpenGL ES 1.0, which corresponds
+to OpenGL 1.3. So, if the application you have in mind is possible with OpenGL
+1.3 on a desktop system, it should be possible on Android.</p>
+
+<p>The specific API provided by Android is similar to the J2ME JSR239 OpenGL
+ES API. However, it may not be identical, so watch out for deviations.</p>
+
+<h2>Using the API</h2>
+
+<p>Here's how to use the API at an extremely high level:</p>
+
+<ol>
+<li>Write a custom View subclass.</li>
+<li>Obtain a handle to an OpenGLContext, which provides access to the OpenGL functionality.</li>
+<li>In your View's onDraw() method, get a handle to a GL object, and use its methods to perform GL operations.</li>
+</ol>
+
+<p>For an example of this usage model (based on the classic GL ColorCube),
+see
+<a href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/GLView1.html">com.android.samples.graphics.GLView1.java</a>
+in the ApiDemos sample code project. A slightly more sophisticated version showing how to use
+it with threads can be found in 
+<a href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">com.android.samples.graphics.GLSurfaceViewActivity.java</a>.
+</p>
+
+<p>Writing a summary of how to actually write 3D applications using OpenGL is
+beyond the scope of this text and is left as an exercise for the reader.</p>
+
+<h2>Links to Additional Information</h2>
+
+<p>Information about OpenGL ES can be
+found at <a title="http://www.khronos.org/opengles/"
+href="http://www.khronos.org/opengles/">http://www.khronos.org/opengles/</a>.</p> 
+
+<p>Information specifically
+about OpenGL ES 1.0 (including a detailed specification) can be found
+at <a title="http://www.khronos.org/opengles/1_X/"
+href="http://www.khronos.org/opengles/1_X/">http://www.khronos.org/opengles/1_X/</a>.</p>
+
+<p>The documentation for the Android {@link javax.microedition.khronos.opengles.GL
+OpenGL ES implementations} are also available.</p>
+
+<p>Finally, note that though Android does include some basic support for
+OpenGL ES 1.1, the support is <strong>not complete</strong>, and should not be relied
+upon at this time.</p>

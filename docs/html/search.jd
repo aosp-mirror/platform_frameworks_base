@@ -1,0 +1,81 @@
+page.title=Search Results
+@jd:body
+
+
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+      google.load('search', '1');
+      
+      // the cse class encapsulates a left and right search control
+      // both controls are driven by a shared search form
+      function cse() {
+        var sFormDiv = document.getElementById("searchForm");
+        var leftScDiv = document.getElementById("leftSearchControl");
+
+        // create a left, right search control
+        // create a custom search form
+        this.leftControl = new google.search.SearchControl();
+        this.searchForm = new google.search.SearchForm(true, sFormDiv);
+
+        // bind clear and submit functions
+        this.searchForm.setOnSubmitCallback(this, cse.prototype.onSubmit);
+        this.searchForm.setOnClearCallback(this, cse.prototype.onClear);
+
+        // set up for small result sets
+        this.leftControl.setResultSetSize(google.search.Search.LARGE_RESULTSET);
+
+        var searcher;
+        var options;
+
+        // configure left control
+        // Site Restrict to CSE ID for reviews
+        searcher = new google.search.WebSearch();
+        options = new google.search.SearcherOptions();
+        //searcher.setSiteRestriction("000455696194071821846:reviews");
+        //searcher.setUserDefinedLabel("Product Reviews");
+        options.setExpandMode(GSearchControl.EXPAND_MODE_OPEN);
+        this.leftControl.addSearcher(searcher, options);
+
+        // draw the left and right controls
+        this.leftControl.draw(leftScDiv);
+
+        // execute a starter search
+		urlquery=location.href.split("?");
+		urlterms=urlquery[1].split(",");
+		document.getElementById("searchTitle").innerHTML = urlterms[0];
+        this.searchForm.execute(urlterms[0]);
+
+      }
+
+      // when the form fires a submit, grab its
+      // value and call the left and right control
+      cse.prototype.onSubmit = function(form) {
+        var q = form.input.value;
+        if (q && q!= "") {
+          this.leftControl.execute(q);
+		  
+		document.getElementById("searchTitle").innerHTML = "search results for " + q;
+        }
+        return false;
+      }
+
+      // when the form fires a clear, call the left and right control
+      cse.prototype.onClear = function(form) {
+        //this.leftControl.clearAllResults();
+        //form.input.value = "";
+		document.getElementById("searchTitle").innerHTML = form.input.value;
+        return false;
+      }
+
+      function OnLoad() {
+        new cse();
+      }
+      google.setOnLoadCallback(OnLoad, true);
+</script>
+
+<div id="mainBodyFixed">
+	<h2 id="searchTitle">search results</h2>
+	<img src="{@docRoot}assets/images/hr_gray_main.jpg" />
+	<div><br /></div>
+	<div id="leftSearchControl" class="search-control">Loading...</div>
+</div>

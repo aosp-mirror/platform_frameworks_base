@@ -1,0 +1,189 @@
+page.title=Android Supported Media Formats
+@jd:body
+
+<p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed here. </p>
+<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes the additional media formats supported by the T-Mobile G1 device. </p>
+
+
+<h2 id="core">Core Media Formats</h2>
+
+<table>
+<tbody>
+<tr>
+
+<th>Type</th>
+<th>Format</th>
+<th>Encoder</th>
+<th>Decoder</th>
+<th>Details</th>
+<th>File Type(s) Supported</th>
+</tr>
+
+<tr>
+<td rowspan="8">Audio</td>
+<td>AAC LC/LTP</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td rowspan="3">Mono/Stereo content in any combination of standard bit rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
+<td rowspan="3">3GPP (.3gp) and MPEG-4 (.mp4, .m4a). No support for raw AAC (.aac)</td>
+</tr>
+
+<tr>
+<td>HE-AACv1 (AAC+)</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+</tr>
+
+<tr>
+<td>HE-AACv2 (enhanced AAC+)</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+</tr>
+
+<tr>
+<td>AMR-NB</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+<td>4.75 to 12.2 kbps sampled @ 8kHz</td>
+<td>3GPP (.3gp)
+</td>
+</tr>
+
+<tr>
+<td>AMR-WB</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>9 rates from 6.60 kbit/s to 23.85 kbit/s sampled @ 16kHz</td>
+<td>3GPP (.3gp)</td>
+</tr>
+
+<tr>
+<td>MP3</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>Mono/Stereo 8-320Kbps constant (CBR) or variable bit-rate (VBR)
+</td>
+<td>MP3 (.mp3)</td>
+</tr>
+
+<tr>
+<td>MIDI</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>MIDI Type 0 and 1. DLS Version 1 and 2. XMF and Mobile XMF. Support for ringtone formats RTTTL/RTX, OTA, and iMelody </td>
+<td>Type 0 and 1 (.mid, .xmf, .mxmf). Also RTTTL/RTX (.rtttl, .rtx), OTA (.ota), and iMelody (.imy)</td>
+</tr>
+
+<tr>
+<td>Ogg Vorbis</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>Ogg (.ogg)</td>
+</tr>
+
+<tr>
+<td rowspan="4">Image</td>
+<td>JPEG</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+<td>base+progressive</td>
+<td>JPEG (.jpg)</td>
+</tr>
+
+<tr>
+<td>GIF</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>GIF (.gif)</td>
+</tr>
+
+<tr>
+<td>PNG</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>PNG (.png)</td>
+</tr>
+
+<tr>
+<td>BMP</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>BMP (.bmp)</td>
+</tr>
+
+ 
+<tr>
+<td rowspan="3">Video</td>
+<td>H.263</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>3GPP (.3gp)</td>
+</tr>
+
+<tr>
+<td>H.264</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
+</tr>
+
+<tr>
+<td>MPEG4 SP</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>3GPP (.3gp)</td>
+</tr>
+
+</tbody></table>
+
+<h2 id="g1">T-Mobile G1 Media Formats</h2>
+
+<p>In addition to the core media formats supported in the Android platform, the T-Mobile G1 also supports the formats listed below.</p>
+
+<table>
+<tbody>
+
+<tr>
+<th>Type</th>
+<th>Format</th>
+<th>Encoder</th>
+<th>Decoder</th>
+<th>Details</th>
+<th>File Type(s) Supported</th>
+</tr>
+
+<tr>
+<td>Audio</td>
+<td>WMA</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>Supports WMA standard L1-L3:
+<ul>
+<li>L1: 64 kbps - 161 kbps @ 44.1kHz</li>
+<li>L2: &lt;=161 kbps &lt;=48 kHz</li>
+<li>L3: &lt;385 kbps &lt;=48 kHz</li>
+</ul>
+Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA Pro, Lossless, or Speech codecs.
+</td>
+<td>Windows Media Audio (.wma)</td>
+</tr>
+
+<tr>
+<td>Video</td>
+<td>WMV</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>Versions 7, 8 and 9. Simple profile only</td>
+<td>Windows Media Video (.wmv)</td>
+</tr>
+</tbody></table>
+
+
+<p>Note that Windows Media codecs are not part of the Android platform and require special licensing from Microsoft or an authorized developer such as Packet Video.</p>

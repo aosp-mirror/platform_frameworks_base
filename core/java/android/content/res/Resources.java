@@ -1,0 +1,1659 @@
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.content.res;
+
+
+import android.graphics.Movie;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
+import android.os.SystemProperties;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.SparseArray;
+import android.util.TypedValue;
+
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+
+/**
+ * Class for accessing an application's resources.  This sits on top of the
+ * asset manager of the application (accessible through getAssets()) and
+ * provides a higher-level API for getting typed data from the assets.
+ */
+public class Resources {
+    static final String TAG = "Resources";
+    private static final boolean DEBUG_LOAD = false;
+    private static final boolean DEBUG_CONFIG = false;
+
+    private static final int sSdkVersion = SystemProperties.getInt(
+            "ro.build.version.sdk", 0);
+    private static final Object mSync = new Object();
+    private static Resources mSystem = null;
+    
+    // Information about preloaded resources.  Note that they are not
+    // protected by a lock, because while preloading in zygote we are all
+    // single-threaded, and after that these are immutable.
+    private static final SparseArray<Drawable.ConstantState> mPreloadedDrawables
+            = new SparseArray<Drawable.ConstantState>();
+    private static boolean mPreloaded;
+
+    /*package*/ final TypedValue mTmpValue = new TypedValue();
+
+    // These are protected by the mTmpValue lock.
+    private final SparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
+            = new SparseArray<WeakReference<Drawable.ConstantState> >();
+    private final SparseArray<WeakReference<ColorStateList> > mColorStateListCache
+            = new SparseArray<WeakReference<ColorStateList> >();
+    private boolean mPreloading;
+
+    /*package*/ TypedArray mCachedStyledAttributes = null;
+
+    private int mLastCachedXmlBlockIndex = -1;
+    private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
+    private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
+
+    /*package*/ final AssetManager mAssets;
+    private final Configuration mConfiguration = new Configuration();
+    /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
+    PluralRule mPluralRule;
+    
+    /**
+     * This exception is thrown by the resource APIs when a requested resource
+     * can not be found.
+     */
+    public static class NotFoundException extends RuntimeException {
+        public NotFoundException() {
+        }
+
+        public NotFoundException(String name) {
+            super(name);
+        }
+    };
+
+    /**
+     * Create a new Resources object on top of an existing set of assets in an
+     * AssetManager.
+     * 
+     * @param assets Previously created AssetManager. 
+     * @param metrics Current display metrics to consider when 
+     *                selecting/computing resource values.
+     * @param config Desired device configuration to consider when 
+     *               selecting/computing resource values (optional).
+     */
+    public Resources(AssetManager assets, DisplayMetrics metrics,
+            Configuration config) {
+        mAssets = assets;
+        mConfiguration.setToDefaults();
+        mMetrics.setToDefaults();
+        updateConfiguration(config, metrics);
+        assets.ensureStringBlocks();
+    }
+
+    /**
+     * Return a global shared Resources object that provides access to only
+     * system resources (no application resources), and is not configured for 
+     * the current screen (can not use dimension units, does not change based 
+     * on orientation, etc). 
+     */
+    public static Resources getSystem() {
+        synchronized (mSync) {
+            Resources ret = mSystem;
+            if (ret == null) {
+                ret = new Resources();
+                mSystem = ret;
+            }
+
+            return ret;
+        }
+    }
+
+    /**
+     * Return the string value associated with a particular resource ID.  The
+     * returned object will be a String if this is a plain string; it will be
+     * some other type of CharSequence if it is styled.
+     * {@more}
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     *         possibly styled text information.
+     */
+    public CharSequence getText(int id) throws NotFoundException {
+        CharSequence res = mAssets.getResourceText(id);
+        if (res != null) {
+            return res;
+        }
+        throw new NotFoundException("String resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+    /**
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     *         possibly styled text information.
+     */
+    public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
+        PluralRule rule = getPluralRule();
+        CharSequence res = mAssets.getResourceBagText(id, rule.attrForNumber(quantity));
+        if (res != null) {
+            return res;
+        }
+        res = mAssets.getResourceBagText(id, PluralRule.ID_OTHER);
+        if (res != null) {
+            return res;
+        }
+        throw new NotFoundException("Plural resource ID #0x" + Integer.toHexString(id)
+                + " quantity=" + quantity
+                + " item=" + PluralRule.stringForQuantity(rule.quantityForNumber(quantity)));
+    }
+
+    private PluralRule getPluralRule() {
+        synchronized (mSync) {
+            if (mPluralRule == null) {
+                mPluralRule = PluralRule.ruleForLocale(mConfiguration.locale);
+            }
+            return mPluralRule;
+        }
+    }
+
+    /**
+     * Return the string value associated with a particular resource ID.  It
+     * will be stripped of any styled text information.
+     * {@more}
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return String The string data associated with the resource,
+     * stripped of styled text information.
+     */
+    public String getString(int id) throws NotFoundException {
+        CharSequence res = getText(id);
+        if (res != null) {
+            return res.toString();
+        }
+        throw new NotFoundException("String resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+
+    /**
+     * Return the string value associated with a particular resource ID,
+     * substituting the format arguments as defined in {@link java.util.Formatter}
+     * and {@link java.lang.String#format}. It will be stripped of any styled text
+     * information.
+     * {@more}
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *           
+     * @param formatArgs The format arguments that will be used for substitution.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return String The string data associated with the resource,
+     * stripped of styled text information.
+     */
+    public String getString(int id, Object... formatArgs) throws NotFoundException {
+        String raw = getString(id);
+        return String.format(mConfiguration.locale, raw, formatArgs);
+    }
+
+    /**
+     * Return the string value associated with a particular resource ID for a particular
+     * numerical quantity, substituting the format arguments as defined in
+     * {@link java.util.Formatter} and {@link java.lang.String#format}. It will be
+     * stripped of any styled text information.
+     * {@more}
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @param quantity The number used to get the correct string for the current language's
+     *           plural rules.
+     * @param formatArgs The format arguments that will be used for substitution.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return String The string data associated with the resource,
+     * stripped of styled text information.
+     */
+    public String getQuantityString(int id, int quantity, Object... formatArgs)
+            throws NotFoundException {
+        String raw = getQuantityText(id, quantity).toString();
+        return String.format(mConfiguration.locale, raw, formatArgs);
+    }
+
+    /**
+     * Return the string value associated with a particular resource ID for a particular
+     * numerical quantity.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @param quantity The number used to get the correct string for the current language's
+     *           plural rules.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return String The string data associated with the resource,
+     * stripped of styled text information.
+     */
+    public String getQuantityString(int id, int quantity) throws NotFoundException {
+        return getQuantityText(id, quantity).toString();
+    }
+
+    /**
+     * Return the string value associated with a particular resource ID.  The
+     * returned object will be a String if this is a plain string; it will be
+     * some other type of CharSequence if it is styled.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * 
+     * @param def The default CharSequence to return.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     *         possibly styled text information, or def if id is 0 or not found.
+     */
+    public CharSequence getText(int id, CharSequence def) {
+        CharSequence res = id != 0 ? mAssets.getResourceText(id) : null;
+        return res != null ? res : def;
+    }
+
+    /**
+     * Return the styled text array associated with a particular resource ID.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return The styled text array associated with the resource.
+     */
+    public CharSequence[] getTextArray(int id) throws NotFoundException {
+        CharSequence[] res = mAssets.getResourceTextArray(id);
+        if (res != null) {
+            return res;
+        }
+        throw new NotFoundException("Text array resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+    /**
+     * Return the string array associated with a particular resource ID.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return The string array associated with the resource.
+     */
+    public String[] getStringArray(int id) throws NotFoundException {
+        String[] res = mAssets.getResourceStringArray(id);
+        if (res != null) {
+            return res;
+        }
+        throw new NotFoundException("String array resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+    /**
+     * Return the int array associated with a particular resource ID.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return The int array associated with the resource.
+     */
+    public int[] getIntArray(int id) throws NotFoundException {
+        int[] res = mAssets.getArrayIntResource(id);
+        if (res != null) {
+            return res;
+        }
+        throw new NotFoundException("Int array resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+    /**
+     * Return an array of heterogeneous values.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return Returns a TypedArray holding an array of the array values.
+     * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+     * when done with it.
+     */
+    public TypedArray obtainTypedArray(int id) throws NotFoundException {
+        int len = mAssets.getArraySize(id);
+        if (len < 0) {
+            throw new NotFoundException("Array resource ID #0x"
+                                        + Integer.toHexString(id));
+        }
+        
+        TypedArray array = getCachedStyledAttributes(len);
+        array.mLength = mAssets.retrieveArray(id, array.mData);
+        array.mIndices[0] = 0;
+        
+        return array;
+    }
+
+    /**
+     * Retrieve a dimensional for a particular resource ID.  Unit 
+     * conversions are based on the current {@link DisplayMetrics} associated
+     * with the resources.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * 
+     * @return Resource dimension value multiplied by the appropriate 
+     * metric.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     * @see #getDimensionPixelOffset
+     * @see #getDimensionPixelSize
+     */
+    public float getDimension(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type == TypedValue.TYPE_DIMENSION) {
+                return TypedValue.complexToDimension(value.data, mMetrics);
+            }
+            throw new NotFoundException(
+                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                    + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+
+    /**
+     * Retrieve a dimensional for a particular resource ID for use
+     * as an offset in raw pixels.  This is the same as
+     * {@link #getDimension}, except the returned value is converted to
+     * integer pixels for you.  An offset conversion involves simply
+     * truncating the base value to an integer.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * 
+     * @return Resource dimension value multiplied by the appropriate 
+     * metric and truncated to integer pixels.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     * @see #getDimension
+     * @see #getDimensionPixelSize
+     */
+    public int getDimensionPixelOffset(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type == TypedValue.TYPE_DIMENSION) {
+                return TypedValue.complexToDimensionPixelOffset(
+                        value.data, mMetrics);
+            }
+            throw new NotFoundException(
+                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                    + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+
+    /**
+     * Retrieve a dimensional for a particular resource ID for use
+     * as a size in raw pixels.  This is the same as
+     * {@link #getDimension}, except the returned value is converted to
+     * integer pixels for use as a size.  A size conversion involves
+     * rounding the base value, and ensuring that a non-zero base value
+     * is at least one pixel in size.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * 
+     * @return Resource dimension value multiplied by the appropriate 
+     * metric and truncated to integer pixels.
+     *  
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return CharSequence The string data associated with the resource, plus
+     * @see #getDimension
+     * @see #getDimensionPixelOffset
+     */
+    public int getDimensionPixelSize(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type == TypedValue.TYPE_DIMENSION) {
+                return TypedValue.complexToDimensionPixelSize(
+                        value.data, mMetrics);
+            }
+            throw new NotFoundException(
+                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                    + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+
+    /**
+     * Return a drawable object associated with a particular resource ID.
+     * Various types of objects will be returned depending on the underlying
+     * resource -- for example, a solid color, PNG image, scalable image, etc.
+     * The Drawable API hides these implementation details.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @return Drawable An object that can be used to draw this resource.
+     */
+    public Drawable getDrawable(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            return loadDrawable(value, id);
+        }
+    }
+
+    /**
+     * Return a movie object associated with the particular resource ID.
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     */
+    public Movie getMovie(int id) throws NotFoundException {
+        InputStream is = openRawResource(id);
+        Movie movie = Movie.decodeStream(is);
+        try {
+            is.close();
+        }
+        catch (java.io.IOException e) {
+            // don't care, since the return value is valid
+        }
+        return movie;
+    }
+
+    /**
+     * Return a color integer associated with a particular resource ID.
+     * If the resource holds a complex
+     * {@link android.content.res.ColorStateList}, then the default color from
+     * the set is returned.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return Returns a single color value in the form 0xAARRGGBB.
+     */
+    public int getColor(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type >= TypedValue.TYPE_FIRST_INT
+                && value.type <= TypedValue.TYPE_LAST_INT) {
+                return value.data;
+            } else if (value.type == TypedValue.TYPE_STRING) {
+                ColorStateList csl = loadColorStateList(mTmpValue, id);
+                return csl.getDefaultColor();
+            }
+            throw new NotFoundException(
+                "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+
+    /**
+     * Return a color state list associated with a particular resource ID.  The
+     * resource may contain either a single raw color value, or a complex
+     * {@link android.content.res.ColorStateList} holding multiple possible colors.
+     *
+     * @param id The desired resource identifier of a {@link ColorStateList},
+     *        as generated by the aapt tool. This integer encodes the package, type, and resource
+     *        entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return Returns a ColorStateList object containing either a single
+     * solid color or multiple colors that can be selected based on a state.
+     */
+    public ColorStateList getColorStateList(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            return loadColorStateList(value, id);
+        }
+    }
+
+    /**
+     * Return an integer associated with a particular resource ID.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     * @return Returns the integer value contained in the resource.
+     */
+    public int getInteger(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type >= TypedValue.TYPE_FIRST_INT
+                && value.type <= TypedValue.TYPE_LAST_INT) {
+                return value.data;
+            }
+            throw new NotFoundException(
+                "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+
+    /**
+     * Return an XmlResourceParser through which you can read a view layout
+     * description for the given resource ID.  This parser has limited
+     * functionality -- in particular, you can't change its input, and only
+     * the high-level events are available.
+     * 
+     * <p>This function is really a simple wrapper for calling
+     * {@link #getXml} with a layout resource.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @return A new parser object through which you can read
+     *         the XML data.
+     *         
+     * @see #getXml
+     */
+    public XmlResourceParser getLayout(int id) throws NotFoundException {
+        return loadXmlResourceParser(id, "layout");
+    }
+
+    /**
+     * Return an XmlResourceParser through which you can read an animation
+     * description for the given resource ID.  This parser has limited
+     * functionality -- in particular, you can't change its input, and only
+     * the high-level events are available.
+     * 
+     * <p>This function is really a simple wrapper for calling
+     * {@link #getXml} with an animation resource.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @return A new parser object through which you can read
+     *         the XML data.
+     *         
+     * @see #getXml
+     */
+    public XmlResourceParser getAnimation(int id) throws NotFoundException {
+        return loadXmlResourceParser(id, "anim");
+    }
+
+    /**
+     * Return an XmlResourceParser through which you can read a generic XML
+     * resource for the given resource ID.
+     * 
+     * <p>The XmlPullParser implementation returned here has some limited
+     * functionality.  In particular, you can't change its input, and only
+     * high-level parsing events are available (since the document was
+     * pre-parsed for you at build time, which involved merging text and
+     * stripping comments).
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @return A new parser object through which you can read
+     *         the XML data.
+     *         
+     * @see android.util.AttributeSet
+     */
+    public XmlResourceParser getXml(int id) throws NotFoundException {
+        return loadXmlResourceParser(id, "xml");
+    }
+
+    /**
+     * Open a data stream for reading a raw resource.  This can only be used
+     * with resources whose value is the name of an asset files -- that is, it can be
+     * used to open drawable, sound, and raw resources; it will fail on string
+     * and color resources.
+     * 
+     * @param id The resource identifier to open, as generated by the appt
+     *           tool.
+     * 
+     * @return InputStream Access to the resource data.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     */
+    public InputStream openRawResource(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+
+            try {
+                return mAssets.openNonAsset(
+                    value.assetCookie, value.string.toString(),
+                    AssetManager.ACCESS_STREAMING);
+            } catch (Exception e) {
+                NotFoundException rnf = new NotFoundException(
+                    "File " + value.string.toString()
+                    + " from drawable resource ID #0x"
+                    + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+
+        }
+    }
+
+    /**
+     * Open a file descriptor for reading a raw resource.  This can only be used
+     * with resources whose value is the name of an asset files -- that is, it can be
+     * used to open drawable, sound, and raw resources; it will fail on string
+     * and color resources.
+     * 
+     * <p>This function only works for resources that are stored in the package
+     * as uncompressed data, which typically includes things like mp3 files
+     * and png images.
+     * 
+     * @param id The resource identifier to open, as generated by the appt
+     *           tool.
+     * 
+     * @return AssetFileDescriptor A new file descriptor you can use to read
+     * the resource.  This includes the file descriptor itself, as well as the
+     * offset and length of data where the resource appears in the file.  A
+     * null is returned if the file exists but is compressed.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     */
+    public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+
+            try {
+                return mAssets.openNonAssetFd(
+                    value.assetCookie, value.string.toString());
+            } catch (Exception e) {
+                NotFoundException rnf = new NotFoundException(
+                    "File " + value.string.toString()
+                    + " from drawable resource ID #0x"
+                    + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+
+        }
+    }
+
+    /**
+     * Return the raw data associated with a particular resource ID.
+     * 
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @param outValue Object in which to place the resource data.
+     * @param resolveRefs If true, a resource that is a reference to another
+     *                    resource will be followed so that you receive the
+     *                    actual final resource data.  If false, the TypedValue
+     *                    will be filled in with the reference itself.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     */
+    public void getValue(int id, TypedValue outValue, boolean resolveRefs)
+            throws NotFoundException {
+        boolean found = mAssets.getResourceValue(id, outValue, resolveRefs);
+        if (found) {
+            return;
+        }
+        throw new NotFoundException("Resource ID #0x"
+                                    + Integer.toHexString(id));
+    }
+
+    /**
+     * Return the raw data associated with a particular resource ID.
+     * See getIdentifier() for information on how names are mapped to resource
+     * IDs, and getString(int) for information on how string resources are
+     * retrieved.
+     * 
+     * <p>Note: use of this function is discouraged.  It is much more
+     * efficient to retrieve resources by identifier than by name.
+     * 
+     * @param name The name of the desired resource.  This is passed to
+     *             getIdentifier() with a default type of "string".
+     * @param outValue Object in which to place the resource data.
+     * @param resolveRefs If true, a resource that is a reference to another
+     *                    resource will be followed so that you receive the
+     *                    actual final resource data.  If false, the TypedValue
+     *                    will be filled in with the reference itself.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     *
+     */
+    public void getValue(String name, TypedValue outValue, boolean resolveRefs)
+            throws NotFoundException {
+        int id = getIdentifier(name, "string", null);
+        if (id != 0) {
+            getValue(id, outValue, resolveRefs);
+            return;
+        }
+        throw new NotFoundException("String resource name " + name);
+    }
+
+    /**
+     * This class holds the current attribute values for a particular theme.
+     * In other words, a Theme is a set of values for resource attributes;
+     * these are used in conjunction with {@link TypedArray}
+     * to resolve the final value for an attribute.
+     * 
+     * <p>The Theme's attributes come into play in two ways: (1) a styled
+     * attribute can explicit reference a value in the theme through the
+     * "?themeAttribute" syntax; (2) if no value has been defined for a
+     * particular styled attribute, as a last resort we will try to find that
+     * attribute's value in the Theme.
+     * 
+     * <p>You will normally use the {@link #obtainStyledAttributes} APIs to
+     * retrieve XML attributes with style and theme information applied.
+     */
+    public final class Theme {
+        /**
+         * Place new attribute values into the theme.  The style resource
+         * specified by <var>resid</var> will be retrieved from this Theme's
+         * resources, its values placed into the Theme object.
+         * 
+         * <p>The semantics of this function depends on the <var>force</var>
+         * argument:  If false, only values that are not already defined in
+         * the theme will be copied from the system resource; otherwise, if
+         * any of the style's attributes are already defined in the theme, the
+         * current values in the theme will be overwritten.
+         * 
+         * @param resid The resource ID of a style resource from which to
+         *              obtain attribute values.
+         * @param force If true, values in the style resource will always be
+         *              used in the theme; otherwise, they will only be used
+         *              if not already defined in the theme.
+         */
+        public void applyStyle(int resid, boolean force) {
+            AssetManager.applyThemeStyle(mTheme, resid, force);
+        }
+
+        /**
+         * Set this theme to hold the same contents as the theme
+         * <var>other</var>.  If both of these themes are from the same
+         * Resources object, they will be identical after this function
+         * returns.  If they are from different Resources, only the resources
+         * they have in common will be set in this theme.
+         * 
+         * @param other The existing Theme to copy from.
+         */
+        public void setTo(Theme other) {
+            AssetManager.copyTheme(mTheme, other.mTheme);
+        }
+
+        /**
+         * Return a StyledAttributes holding the values defined by
+         * <var>Theme</var> which are listed in <var>attrs</var>.
+         * 
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         * 
+         * @param attrs The desired attributes.
+         *
+         * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+         * 
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+         * when done with it.
+         * 
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int, int[])
+         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+         */
+        public TypedArray obtainStyledAttributes(int[] attrs) {
+            int len = attrs.length;
+            TypedArray array = getCachedStyledAttributes(len);
+            array.mRsrcs = attrs;
+            AssetManager.applyStyle(mTheme, 0, 0, 0, attrs,
+                    array.mData, array.mIndices);
+            return array;
+        }
+
+        /**
+         * Return a StyledAttributes holding the values defined by the style
+         * resource <var>resid</var> which are listed in <var>attrs</var>.
+         * 
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         * 
+         * @param resid The desired style resource.
+         * @param attrs The desired attributes in the style.
+         * 
+         * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+         * 
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+         * when done with it.
+         * 
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int[])
+         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+         */
+        public TypedArray obtainStyledAttributes(int resid, int[] attrs)
+                throws NotFoundException {
+            int len = attrs.length;
+            TypedArray array = getCachedStyledAttributes(len);
+            array.mRsrcs = attrs;
+
+            AssetManager.applyStyle(mTheme, 0, resid, 0, attrs,
+                    array.mData, array.mIndices);
+            if (false) {
+                int[] data = array.mData;
+                
+                System.out.println("**********************************************************");
+                System.out.println("**********************************************************");
+                System.out.println("**********************************************************");
+                System.out.println("Attributes:");
+                String s = "  Attrs:";
+                int i;
+                for (i=0; i<attrs.length; i++) {
+                    s = s + " 0x" + Integer.toHexString(attrs[i]);
+                }
+                System.out.println(s);
+                s = "  Found:";
+                TypedValue value = new TypedValue();
+                for (i=0; i<attrs.length; i++) {
+                    int d = i*AssetManager.STYLE_NUM_ENTRIES;
+                    value.type = data[d+AssetManager.STYLE_TYPE];
+                    value.data = data[d+AssetManager.STYLE_DATA];
+                    value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
+                    value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
+                    s = s + " 0x" + Integer.toHexString(attrs[i])
+                        + "=" + value;
+                }
+                System.out.println(s);
+            }
+            return array;
+        }
+
+        /**
+         * Return a StyledAttributes holding the attribute values in
+         * <var>set</var>
+         * that are listed in <var>attrs</var>.  In addition, if the given
+         * AttributeSet specifies a style class (through the "style" attribute),
+         * that style will be applied on top of the base attributes it defines.
+         * 
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         * 
+         * <p>When determining the final value of a particular attribute, there
+         * are four inputs that come into play:</p>
+         * 
+         * <ol>
+         *     <li> Any attribute values in the given AttributeSet.
+         *     <li> The style resource specified in the AttributeSet (named
+         *     "style").
+         *     <li> The default style specified by <var>defStyleAttr</var> and
+         *     <var>defStyleRes</var>
+         *     <li> The base values in this theme.
+         * </ol>
+         * 
+         * <p>Each of these inputs is considered in-order, with the first listed
+         * taking precedence over the following ones.  In other words, if in the
+         * AttributeSet you have supplied <code>&lt;Button
+         * textColor="#ff000000"&gt;</code>, then the button's text will
+         * <em>always</em> be black, regardless of what is specified in any of
+         * the styles.
+         * 
+         * @param set The base set of attribute values.  May be null.
+         * @param attrs The desired attributes to be retrieved.
+         * @param defStyleAttr An attribute in the current theme that contains a
+         *                     reference to a style resource that supplies
+         *                     defaults values for the StyledAttributes.  Can be
+         *                     0 to not look for defaults.
+         * @param defStyleRes A resource identifier of a style resource that
+         *                    supplies default values for the StyledAttributes,
+         *                    used only if defStyleAttr is 0 or can not be found
+         *                    in the theme.  Can be 0 to not look for defaults.
+         * 
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+         * when done with it.
+         * 
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int[])
+         * @see #obtainStyledAttributes(int, int[])
+         */
+        public TypedArray obtainStyledAttributes(AttributeSet set,
+                int[] attrs, int defStyleAttr, int defStyleRes) {
+            int len = attrs.length;
+            TypedArray array = getCachedStyledAttributes(len);
+
+            // XXX note that for now we only work with compiled XML files.
+            // To support generic XML files we will need to manually parse
+            // out the attributes from the XML file (applying type information
+            // contained in the resources and such).
+            XmlBlock.Parser parser = (XmlBlock.Parser)set;
+            AssetManager.applyStyle(
+                mTheme, defStyleAttr, defStyleRes,
+                parser != null ? parser.mParseState : 0, attrs,
+                        array.mData, array.mIndices);
+
+            array.mRsrcs = attrs;
+            array.mXml = parser;
+
+            if (false) {
+                int[] data = array.mData;
+                
+                System.out.println("Attributes:");
+                String s = "  Attrs:";
+                int i;
+                for (i=0; i<set.getAttributeCount(); i++) {
+                    s = s + " " + set.getAttributeName(i);
+                    int id = set.getAttributeNameResource(i);
+                    if (id != 0) {
+                        s = s + "(0x" + Integer.toHexString(id) + ")";
+                    }
+                    s = s + "=" + set.getAttributeValue(i);
+                }
+                System.out.println(s);
+                s = "  Found:";
+                TypedValue value = new TypedValue();
+                for (i=0; i<attrs.length; i++) {
+                    int d = i*AssetManager.STYLE_NUM_ENTRIES;
+                    value.type = data[d+AssetManager.STYLE_TYPE];
+                    value.data = data[d+AssetManager.STYLE_DATA];
+                    value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
+                    value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
+                    s = s + " 0x" + Integer.toHexString(attrs[i])
+                        + "=" + value;
+                }
+                System.out.println(s);
+            }
+
+            return array;
+        }
+
+        /**
+         * Retrieve the value of an attribute in the Theme.  The contents of
+         * <var>outValue</var> are ultimately filled in by
+         * {@link Resources#getValue}.
+         * 
+         * @param resid The resource identifier of the desired theme
+         *              attribute.
+         * @param outValue Filled in with the ultimate resource value supplied
+         *                 by the attribute.
+         * @param resolveRefs If true, resource references will be walked; if
+         *                    false, <var>outValue</var> may be a
+         *                    TYPE_REFERENCE.  In either case, it will never
+         *                    be a TYPE_ATTRIBUTE.
+         * 
+         * @return boolean Returns true if the attribute was found and
+         *         <var>outValue</var> is valid, else false.
+         */
+        public boolean resolveAttribute(int resid, TypedValue outValue,
+                boolean resolveRefs) {
+            boolean got = mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
+            if (false) {
+                System.out.println(
+                    "resolveAttribute #" + Integer.toHexString(resid)
+                    + " got=" + got + ", type=0x" + Integer.toHexString(outValue.type)
+                    + ", data=0x" + Integer.toHexString(outValue.data));
+            }
+            return got;
+        }
+
+        /**
+         * Print contents of this theme out to the log.  For debugging only.
+         * 
+         * @param priority The log priority to use.
+         * @param tag The log tag to use.
+         * @param prefix Text to prefix each line printed.
+         */
+        public void dump(int priority, String tag, String prefix) {
+            AssetManager.dumpTheme(mTheme, priority, tag, prefix);
+        }
+        
+        protected void finalize() throws Throwable {
+            super.finalize();
+            mAssets.releaseTheme(mTheme);
+        }
+
+        /*package*/ Theme() {
+            mAssets = Resources.this.mAssets;
+            mTheme = mAssets.createTheme();
+        }
+
+        private final AssetManager mAssets;
+        private final int mTheme;
+    }
+
+    /**
+     * Generate a new Theme object for this set of Resources.  It initially
+     * starts out empty.
+     * 
+     * @return Theme The newly created Theme container.
+     */
+    public final Theme newTheme() {
+        return new Theme();
+    }
+
+    /**
+     * Retrieve a set of basic attribute values from an AttributeSet, not
+     * performing styling of them using a theme and/or style resources.
+     * 
+     * @param set The current attribute values to retrieve.
+     * @param attrs The specific attributes to be retrieved.
+     * @return Returns a TypedArray holding an array of the attribute values.
+     * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
+     * when done with it.
+     * 
+     * @see Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+     */
+    public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
+        int len = attrs.length;
+        TypedArray array = getCachedStyledAttributes(len);
+
+        // XXX note that for now we only work with compiled XML files.
+        // To support generic XML files we will need to manually parse
+        // out the attributes from the XML file (applying type information
+        // contained in the resources and such).
+        XmlBlock.Parser parser = (XmlBlock.Parser)set;
+        mAssets.retrieveAttributes(parser.mParseState, attrs,
+                array.mData, array.mIndices);
+
+        array.mRsrcs = attrs;
+        array.mXml = parser;
+
+        return array;
+    }
+    
+    /**
+     * Store the newly updated configuration.
+     */
+    public void updateConfiguration(Configuration config,
+            DisplayMetrics metrics) {
+        synchronized (mTmpValue) {
+            int configChanges = 0xfffffff;
+            if (config != null) {
+                configChanges = mConfiguration.updateFrom(config);
+            }
+            if (metrics != null) {
+                mMetrics.setTo(metrics);
+            }
+            mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+            String locale = null;
+            if (mConfiguration.locale != null) {
+                locale = mConfiguration.locale.getLanguage();
+                if (mConfiguration.locale.getCountry() != null) {
+                    locale += "-" + mConfiguration.locale.getCountry();
+                }
+            }
+            int width, height;
+            if (mMetrics.widthPixels >= mMetrics.heightPixels) {
+                width = mMetrics.widthPixels;
+                height = mMetrics.heightPixels;
+            } else {
+                width = mMetrics.heightPixels;
+                height = mMetrics.widthPixels;
+            }
+            mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
+                    locale, mConfiguration.orientation,
+                    mConfiguration.touchscreen,
+                    (int)(mMetrics.density*160), mConfiguration.keyboard,
+                    mConfiguration.keyboardHidden,
+                    mConfiguration.navigation, width, height, sSdkVersion);
+            int N = mDrawableCache.size();
+            if (DEBUG_CONFIG) {
+                Log.d(TAG, "Cleaning up drawables config changes: 0x"
+                        + Integer.toHexString(configChanges));
+            }
+            for (int i=0; i<N; i++) {
+                WeakReference<Drawable.ConstantState> ref = mDrawableCache.valueAt(i);
+                if (ref != null) {
+                    Drawable.ConstantState cs = ref.get();
+                    if (cs != null) {
+                        if (Configuration.needNewResources(
+                                configChanges, cs.getChangingConfigurations())) {
+                            if (DEBUG_CONFIG) {
+                                Log.d(TAG, "FLUSHING #0x"
+                                        + Integer.toHexString(mDrawableCache.keyAt(i))
+                                        + " / " + cs + " with changes: 0x"
+                                        + Integer.toHexString(cs.getChangingConfigurations()));
+                            }
+                            mDrawableCache.setValueAt(i, null);
+                        } else if (DEBUG_CONFIG) {
+                            Log.d(TAG, "(Keeping #0x"
+                                    + Integer.toHexString(mDrawableCache.keyAt(i))
+                                    + " / " + cs + " with changes: 0x"
+                                    + Integer.toHexString(cs.getChangingConfigurations())
+                                    + ")");
+                        }
+                    }
+                }
+            }
+            mDrawableCache.clear();
+            mColorStateListCache.clear();
+            flushLayoutCache();
+        }
+        synchronized (mSync) {
+            if (mPluralRule != null) {
+                mPluralRule = PluralRule.ruleForLocale(config.locale);
+            }
+        }
+    }
+
+    /**
+     * Return the current display metrics that are in effect for this resource 
+     * object.  The returned object should be treated as read-only.
+     * 
+     * @return The resource's current display metrics. 
+     */
+    public DisplayMetrics getDisplayMetrics() {
+        return mMetrics;
+    }
+
+    /**
+     * Return the current configuration that is in effect for this resource 
+     * object.  The returned object should be treated as read-only.
+     * 
+     * @return The resource's current configuration. 
+     */
+    public Configuration getConfiguration() {
+        return mConfiguration;
+    }
+
+    /**
+     * Return a resource identifier for the given resource name.  A fully
+     * qualified resource name is of the form "package:type/entry".  The first
+     * two components (package and type) are optional if defType and
+     * defPackage, respectively, are specified here.
+     * 
+     * <p>Note: use of this function is discouraged.  It is much more
+     * efficient to retrieve resources by identifier than by name.
+     * 
+     * @param name The name of the desired resource.
+     * @param defType Optional default resource type to find, if "type/" is
+     *                not included in the name.  Can be null to require an
+     *                explicit type.
+     * @param defPackage Optional default package to find, if "package:" is
+     *                   not included in the name.  Can be null to require an
+     *                   explicit package.
+     * 
+     * @return int The associated resource identifier.  Returns 0 if no such
+     *         resource was found.  (0 is not a valid resource ID.)
+     */
+    public int getIdentifier(String name, String defType, String defPackage) {
+        try {
+            return Integer.parseInt(name);
+        } catch (Exception e) {
+        }
+        return mAssets.getResourceIdentifier(name, defType, defPackage);
+    }
+
+    /**
+     * Return the full name for a given resource identifier.  This name is
+     * a single string of the form "package:type/entry".
+     * 
+     * @param resid The resource identifier whose name is to be retrieved.
+     * 
+     * @return A string holding the name of the resource.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @see #getResourcePackageName
+     * @see #getResourceTypeName
+     * @see #getResourceEntryName
+     */
+    public String getResourceName(int resid) throws NotFoundException {
+        String str = mAssets.getResourceName(resid);
+        if (str != null) return str;
+        throw new NotFoundException("Unable to find resource ID #0x"
+                + Integer.toHexString(resid));
+    }
+    
+    /**
+     * Return the package name for a given resource identifier.
+     * 
+     * @param resid The resource identifier whose package name is to be
+     * retrieved.
+     * 
+     * @return A string holding the package name of the resource.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @see #getResourceName
+     */
+    public String getResourcePackageName(int resid) throws NotFoundException {
+        String str = mAssets.getResourcePackageName(resid);
+        if (str != null) return str;
+        throw new NotFoundException("Unable to find resource ID #0x"
+                + Integer.toHexString(resid));
+    }
+    
+    /**
+     * Return the type name for a given resource identifier.
+     * 
+     * @param resid The resource identifier whose type name is to be
+     * retrieved.
+     * 
+     * @return A string holding the type name of the resource.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @see #getResourceName
+     */
+    public String getResourceTypeName(int resid) throws NotFoundException {
+        String str = mAssets.getResourceTypeName(resid);
+        if (str != null) return str;
+        throw new NotFoundException("Unable to find resource ID #0x"
+                + Integer.toHexString(resid));
+    }
+    
+    /**
+     * Return the entry name for a given resource identifier.
+     * 
+     * @param resid The resource identifier whose entry name is to be
+     * retrieved.
+     * 
+     * @return A string holding the entry name of the resource.
+     * 
+     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * 
+     * @see #getResourceName
+     */
+    public String getResourceEntryName(int resid) throws NotFoundException {
+        String str = mAssets.getResourceEntryName(resid);
+        if (str != null) return str;
+        throw new NotFoundException("Unable to find resource ID #0x"
+                + Integer.toHexString(resid));
+    }
+    
+    /**
+     * Retrieve underlying AssetManager storage for these resources.
+     */
+    public final AssetManager getAssets() {
+        return mAssets;
+    }
+
+    /**
+     * Call this to remove all cached loaded layout resources from the
+     * Resources object.  Only intended for use with performance testing
+     * tools.
+     */
+    public final void flushLayoutCache() {
+        synchronized (mCachedXmlBlockIds) {
+            // First see if this block is in our cache.
+            final int num = mCachedXmlBlockIds.length;
+            for (int i=0; i<num; i++) {
+                mCachedXmlBlockIds[i] = -0;
+                XmlBlock oldBlock = mCachedXmlBlocks[i];
+                if (oldBlock != null) {
+                    oldBlock.close();
+                }
+                mCachedXmlBlocks[i] = null;
+            }
+        }
+    }
+
+    /**
+     * Start preloading of resource data using this Resources object.  Only
+     * for use by the zygote process for loading common system resources.
+     * {@hide}
+     */
+    public final void startPreloading() {
+        synchronized (mSync) {
+            if (mPreloaded) {
+                throw new IllegalStateException("Resources already preloaded");
+            }
+            mPreloaded = true;
+            mPreloading = true;
+        }
+    }
+    
+    /**
+     * Called by zygote when it is done preloading resources, to change back
+     * to normal Resources operation.
+     */
+    public final void finishPreloading() {
+        if (mPreloading) {
+            mPreloading = false;
+            flushLayoutCache();
+        }
+    }
+    
+    /*package*/ Drawable loadDrawable(TypedValue value, int id)
+            throws NotFoundException {
+        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+            && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            // Should we be caching these?  If we use constant colors much
+            // at all, most likely...
+            //System.out.println("Creating drawable for color: #" +
+            //                   Integer.toHexString(value.data));
+            Drawable dr = new ColorDrawable(value.data);
+            dr.setChangingConfigurations(value.changingConfigurations);
+            return dr;
+        }
+
+        final int key = (value.assetCookie<<24)|value.data;
+        Drawable dr = getCachedDrawable(key);
+        //System.out.println("Cached drawable @ #" +
+        //                   Integer.toHexString(key.intValue()) + ": " + dr);
+        if (dr != null) {
+            return dr;
+        }
+
+        Drawable.ConstantState cs = mPreloadedDrawables.get(key);
+        if (cs != null) {
+            dr = cs.newDrawable();
+            
+        } else {
+            if (value.string == null) {
+                throw new NotFoundException(
+                        "Resource is not a Drawable (color or path): " + value);
+            }
+            
+            String file = value.string.toString();
+    
+            if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
+                    + value.assetCookie + ": " + file);
+            
+            if (file.endsWith(".xml")) {
+                try {
+                    XmlResourceParser rp = loadXmlResourceParser(
+                            file, id, value.assetCookie, "drawable"); 
+                    dr = Drawable.createFromXml(this, rp);
+                    rp.close();
+                } catch (Exception e) {
+                    NotFoundException rnf = new NotFoundException(
+                        "File " + file + " from drawable resource ID #0x"
+                        + Integer.toHexString(id));
+                    rnf.initCause(e);
+                    throw rnf;
+                }
+    
+            } else {
+                try {
+                    InputStream is = mAssets.openNonAsset(
+                            value.assetCookie, file, AssetManager.ACCESS_BUFFER);
+    //                System.out.println("Opened file " + file + ": " + is);
+                    dr = Drawable.createFromStream(is, file);
+                    is.close();
+    //                System.out.println("Created stream: " + dr);
+                } catch (Exception e) {
+                    NotFoundException rnf = new NotFoundException(
+                        "File " + file + " from drawable resource ID #0x"
+                        + Integer.toHexString(id));
+                    rnf.initCause(e);
+                    throw rnf;
+                }
+            }
+        }
+
+        if (dr != null) {
+            dr.setChangingConfigurations(value.changingConfigurations);
+            cs = dr.getConstantState();
+            if (cs != null) {
+                if (mPreloading) {
+                    mPreloadedDrawables.put(key, cs);
+                }
+                synchronized (mTmpValue) {
+                    //Log.i(TAG, "Saving cached drawable @ #" +
+                    //        Integer.toHexString(key.intValue())
+                    //        + " in " + this + ": " + cs);
+                    mDrawableCache.put(
+                        key, new WeakReference<Drawable.ConstantState>(cs));
+                }
+            }
+        }
+
+        return dr;
+    }
+
+    private final Drawable getCachedDrawable(int key) {
+        synchronized (mTmpValue) {
+            WeakReference<Drawable.ConstantState> wr = mDrawableCache.get(key);
+            if (wr != null) {   // we have the key
+                Drawable.ConstantState entry = wr.get();
+                if (entry != null) {
+                    //Log.i(TAG, "Returning cached drawable @ #" +
+                    //        Integer.toHexString(((Integer)key).intValue())
+                    //        + " in " + this + ": " + entry);
+                    return entry.newDrawable();
+                }
+                else {  // our entry has been purged
+                    mDrawableCache.delete(key);
+                }
+            }
+        }
+        return null;
+    }
+
+    /*package*/ ColorStateList loadColorStateList(TypedValue value, int id)
+            throws NotFoundException {
+        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+            && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            return ColorStateList.valueOf(value.data);
+        }
+
+        final int key = (value.assetCookie<<24)|value.data;
+        ColorStateList csl = getCachedColorStateList(key);
+        if (csl != null) {
+            return csl;
+        }
+
+        if (value.string == null) {
+            throw new NotFoundException(
+                    "Resource is not a ColorStateList (color or path): " + value);
+        }
+        
+        String file = value.string.toString();
+
+        if (file.endsWith(".xml")) {
+            try {
+                XmlResourceParser rp = loadXmlResourceParser(
+                        file, id, value.assetCookie, "colorstatelist"); 
+                csl = ColorStateList.createFromXml(this, rp);
+                rp.close();
+            } catch (Exception e) {
+                NotFoundException rnf = new NotFoundException(
+                    "File " + file + " from color state list resource ID #0x"
+                    + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+        } else {
+            throw new NotFoundException(
+                    "File " + file + " from drawable resource ID #0x"
+                    + Integer.toHexString(id) + ": .xml extension required");
+        }
+
+        if (csl != null) {
+            synchronized (mTmpValue) {
+                //Log.i(TAG, "Saving cached color state list @ #" +
+                //        Integer.toHexString(key.intValue())
+                //        + " in " + this + ": " + csl);
+                mColorStateListCache.put(
+                    key, new WeakReference<ColorStateList>(csl));
+            }
+        }
+
+        return csl;
+    }
+
+    private ColorStateList getCachedColorStateList(int key) {
+        synchronized (mTmpValue) {
+            WeakReference<ColorStateList> wr = mColorStateListCache.get(key);
+            if (wr != null) {   // we have the key
+                ColorStateList entry = wr.get();
+                if (entry != null) {
+                    //Log.i(TAG, "Returning cached color state list @ #" +
+                    //        Integer.toHexString(((Integer)key).intValue())
+                    //        + " in " + this + ": " + entry);
+                    return entry;
+                }
+                else {  // our entry has been purged
+                    mColorStateListCache.delete(key);
+                }
+            }
+        }
+        return null;
+    }
+
+    /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
+            throws NotFoundException {
+        synchronized (mTmpValue) {
+            TypedValue value = mTmpValue;
+            getValue(id, value, true);
+            if (value.type == TypedValue.TYPE_STRING) {
+                return loadXmlResourceParser(value.string.toString(), id,
+                        value.assetCookie, type);
+            }
+            throw new NotFoundException(
+                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                    + Integer.toHexString(value.type) + " is not valid");
+        }
+    }
+    
+    /*package*/ XmlResourceParser loadXmlResourceParser(String file, int id,
+            int assetCookie, String type) throws NotFoundException {
+        if (id != 0) {
+            try {
+                // These may be compiled...
+                synchronized (mCachedXmlBlockIds) {
+                    // First see if this block is in our cache.
+                    final int num = mCachedXmlBlockIds.length;
+                    for (int i=0; i<num; i++) {
+                        if (mCachedXmlBlockIds[i] == id) {
+                            //System.out.println("**** REUSING XML BLOCK!  id="
+                            //                   + id + ", index=" + i);
+                            return mCachedXmlBlocks[i].newParser();
+                        }
+                    }
+
+                    // Not in the cache, create a new block and put it at
+                    // the next slot in the cache.
+                    XmlBlock block = mAssets.openXmlBlockAsset(
+                            assetCookie, file);
+                    if (block != null) {
+                        int pos = mLastCachedXmlBlockIndex+1;
+                        if (pos >= num) pos = 0;
+                        mLastCachedXmlBlockIndex = pos;
+                        XmlBlock oldBlock = mCachedXmlBlocks[pos];
+                        if (oldBlock != null) {
+                            oldBlock.close();
+                        }
+                        mCachedXmlBlockIds[pos] = id;
+                        mCachedXmlBlocks[pos] = block;
+                        //System.out.println("**** CACHING NEW XML BLOCK!  id="
+                        //                   + id + ", index=" + pos);
+                        return block.newParser();
+                    }
+                }
+            } catch (Exception e) {
+                NotFoundException rnf = new NotFoundException(
+                        "File " + file + " from xml type " + type + " resource ID #0x"
+                        + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+        }
+
+        throw new NotFoundException(
+                "File " + file + " from xml type " + type + " resource ID #0x"
+                + Integer.toHexString(id));
+    }
+
+    private TypedArray getCachedStyledAttributes(int len) {
+        synchronized (mTmpValue) {
+            TypedArray attrs = mCachedStyledAttributes;
+            if (attrs != null) {
+                mCachedStyledAttributes = null;
+
+                attrs.mLength = len;
+                int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
+                if (attrs.mData.length >= fullLen) {
+                    return attrs;
+                }
+                attrs.mData = new int[fullLen];
+                attrs.mIndices = new int[1+len];
+                return attrs;
+            }
+            return new TypedArray(this,
+                    new int[len*AssetManager.STYLE_NUM_ENTRIES],
+                    new int[1+len], len);
+        }
+    }
+
+    private Resources() {
+        mAssets = AssetManager.getSystem();
+        // NOTE: Intentionally leaving this uninitialized (all values set
+        // to zero), so that anyone who tries to do something that requires
+        // metrics will get a very wrong value.
+        mConfiguration.setToDefaults();
+        mMetrics.setToDefaults();
+        updateConfiguration(null, null);
+        mAssets.ensureStringBlocks();
+    }
+}
+

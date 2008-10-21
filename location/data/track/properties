@@ -1,0 +1,10 @@
+requiresNetwork true
+requiresSatellite false
+requiresCell false
+hasMonetaryCost false
+supportsAltitude true
+supportsBearing false
+supportsSpeed false
+repeat true
+accuracy 1
+powerRequirement 3

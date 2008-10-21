@@ -1,0 +1,14 @@
+Android Utility Function Library
+
+If you need a feature that is native to Linux but not present on other
+platforms, construct a platform-dependent implementation that shares
+the Linux interface.  That way the actual device runs as "light" as
+possible.
+
+If that isn't feasible, create a system-independent interface and hide
+the details.
+
+The ultimate goal is *not* to create a super-duper platform abstraction
+layer.  The goal is to provide an optimized solution for Linux with
+reasonable implementations for other platforms.
+

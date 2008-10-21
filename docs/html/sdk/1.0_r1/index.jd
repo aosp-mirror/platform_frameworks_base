@@ -1,0 +1,18 @@
+page.title=Download 1.0r1
+
+sdk.version=Android 1.0 SDK, release 1
+sdk.date=September 23, 2008
+
+sdk.win_download=android-sdk-windows-1.0_r1.zip
+sdk.win_bytes=89.7 MB
+sdk.win_checksum=d69f4ee93d4010f726c04302662fd999
+
+sdk.mac_download=android-sdk-mac_x86-1.0_r1.zip
+sdk.mac_bytes=87.5 MB
+sdk.mac_checksum=564876ada22872e50c2866806de9fc5c
+
+sdk.linux_download=android-sdk-linux_x86-1.0_r1.zip
+sdk.linux_bytes=87.8 MB
+sdk.linux_checksum=2660b4029039b7d714e59827e9a9a11d
+
+@jd:body

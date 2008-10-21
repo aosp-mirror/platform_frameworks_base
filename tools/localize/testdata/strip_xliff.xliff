@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2"
+        version="1.2"
+        >
+    <file datatype="x-android-res"
+            original="//device/tools/localization/tests/res/values/strings.xml"
+            product-version="1.0"
+            date="08:10:54 12/07/07 PST"
+            source-language="en-US"
+            product-name="kila"
+            target-language="zz-ZZ"
+            build-num="32138"
+            >
+        <body>
+
+            <trans-unit id="string:string-000-0">
+            </trans-unit>
+            <trans-unit id="string:string-001-0">
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve">source</source>
+                </alt-trans>
+            </trans-unit>
+            <trans-unit id="string:string-010-0">
+                <alt-trans>
+                    <target xml:lang="zz" xml:space="preserve">target</target>
+                </alt-trans>
+            </trans-unit>
+            <trans-unit id="string:string-011-0">
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve">source</source>
+                    <target xml:lang="zz" xml:space="preserve">target</target>
+                </alt-trans>
+            </trans-unit>
+
+            <trans-unit id="string:string-100-1">
+                <source xml:space="preserve">source</source>
+            </trans-unit>
+            <trans-unit id="string:string-101-1">
+                <source xml:space="preserve">source</source>
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve">source</source>
+                </alt-trans>
+            </trans-unit>
+            <trans-unit id="string:string-110-1">
+                <source xml:space="preserve">source</source>
+                <alt-trans>
+                    <target xml:lang="zz" xml:space="preserve">target</target>
+                </alt-trans>
+            </trans-unit>
+
+            <trans-unit id="string:string-111-0">
+                <source xml:space="preserve">source</source>
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve">source</source>
+                    <target xml:lang="zz" xml:space="preserve">target</target>
+                </alt-trans>
+            </trans-unit>
+            <trans-unit id="string:string-111-1">
+                <source xml:space="preserve">source</source>
+                <alt-trans>
+                    <source xml:lang="en" xml:space="preserve">alt-source</source>
+                    <target xml:lang="zz" xml:space="preserve">target</target>
+                </alt-trans>
+            </trans-unit>
+
+        </body>
+    </file>
+</xliff>
+
+
