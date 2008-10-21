@@ -1,6 +1,7 @@
 #include "generate_java.h"
 #include "AST.h"
 #include "Type.h"
+#include <string.h>
 #include <stdio.h>
 
 // =================================================

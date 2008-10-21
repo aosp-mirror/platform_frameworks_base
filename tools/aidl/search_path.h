@@ -5,6 +5,7 @@
 
 #if __cplusplus
 #include <vector>
+#include <string>
 using namespace std;
 extern "C" {
 #endif
