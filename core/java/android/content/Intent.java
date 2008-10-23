@@ -507,6 +507,8 @@ import java.util.Set;
  *     <li> {@link #ACTION_PACKAGE_REMOVED}
  *     <li> {@link #ACTION_UID_REMOVED}
  *     <li> {@link #ACTION_BATTERY_CHANGED}
+ *     <li> {@link #ACTION_POWER_CONNECTED}
+ *     <li> {@link #ACTION_POWER_DISCONNECTED} 
  * </ul>
  *
  * <h3>Standard Categories</h3>
@@ -1177,6 +1179,24 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
+    /**
+     * Broadcast Action:  External power has been connected to the device.
+     * This is intended for applications that wish to register specifically to this notification.
+     * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
+     * stay active to receive this notification.  This action can be used to implement actions
+     * that wait until power is available to trigger.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_CONNECTED = "android.intent.action.ACTION_POWER_CONNECTED";
+    /**
+     * Broadcast Action:  External power has been removed from the device.
+     * This is intended for applications that wish to register specifically to this notification.
+     * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
+     * stay active to receive this notification.  This action can be used to implement actions
+     * that wait until power is available to trigger. 
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";    
     /**
      * Broadcast Action:  Indicates low memory condition on the device
      */
