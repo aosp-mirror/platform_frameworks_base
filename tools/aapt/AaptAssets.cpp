@@ -78,7 +78,7 @@ static bool isHidden(const char *root, const char *path)
         // Skip CVS but don't chatter about it.
         return true;
     } else if (strcasecmp(path, "thumbs.db") == 0
-               || strcasecmp(path, "picassa.ini") == 0) {
+               || strcasecmp(path, "picasa.ini") == 0) {
         // Skip suspected image indexes files.
         type = "index";
     } else if (path[strlen(path)-1] == '~') {
