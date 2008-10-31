@@ -784,6 +784,9 @@ public class AlertController {
                                 Cursor cursor) {
                             CheckedTextView text = (CheckedTextView) view.findViewById(R.id.text1);
                             text.setText(cursor.getString(cursor.getColumnIndexOrThrow(mLabelColumn)));
+                            if (cursor.getInt(cursor.getColumnIndexOrThrow(mIsCheckedColumn)) == 1) {
+                                listView.setItemChecked(cursor.getPosition(), true);
+                            }
                         }
     
                         @Override
@@ -792,9 +795,6 @@ public class AlertController {
                             View view = mInflater.inflate(
                                     R.layout.select_dialog_multichoice, parent, false);
                             bindView(view, context, cursor);
-                            if (cursor.getInt(cursor.getColumnIndexOrThrow(mIsCheckedColumn)) == 1) {
-                                listView.setItemChecked(cursor.getPosition(), true);
-                            }
                             return view;
                         }
                         
