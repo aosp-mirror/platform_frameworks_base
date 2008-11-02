@@ -1170,7 +1170,7 @@ public class Contacts {
      */
     public interface OrganizationColumns {
         /**
-         * The type of the the phone number.
+         * The type of the organizations.
          * <P>Type: INTEGER (one of the constants below)</P>
          */
         public static final String TYPE = "type";
@@ -1229,7 +1229,7 @@ public class Contacts {
                 try {
                     display = labels[type - 1];
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    display = labels[People.Phones.TYPE_HOME - 1];
+                    display = labels[Organizations.TYPE_WORK - 1];
                 }
             } else {
                 if (!TextUtils.isEmpty(label)) {

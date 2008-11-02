@@ -731,7 +731,6 @@
     <!-- Organization types from android.provider.Contacts -->
     <string-array name="organizationTypes">
         <!-- The order of these is important, don't reorder without changing Contacts.java -->
-        <item>Home</item>
         <item>Work</item>
         <item>Other</item>
         <item>Custom\u2026</item>
