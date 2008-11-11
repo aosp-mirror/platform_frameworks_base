@@ -1325,11 +1325,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If the user is holding the menu key code, then we are
                 // going to boot into safe mode.
                 ActivityManagerNative.getDefault().enterSafeMode();
-            } else {
-                // tell the keyguard
-                mKeyguardMediator.onSystemReady();
-                android.os.SystemProperties.set("dev.bootcomplete", "1"); 
             }
+            // tell the keyguard
+            mKeyguardMediator.onSystemReady();
+            android.os.SystemProperties.set("dev.bootcomplete", "1"); 
         } catch (RemoteException e) {
             // Ignore
         }
