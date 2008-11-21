@@ -114,8 +114,7 @@ public class AudioSystem
     public static final int ROUTE_SPEAKER           = (1 << 1);
     public static final int ROUTE_BLUETOOTH         = (1 << 2);
     public static final int ROUTE_HEADSET           = (1 << 3);
-    public static final int ROUTE_ALL               =
-            (ROUTE_EARPIECE | ROUTE_SPEAKER | ROUTE_BLUETOOTH | ROUTE_HEADSET);
+    public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
     /*
      * Sets the audio routing for a specified mode
