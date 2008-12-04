@@ -582,6 +582,8 @@ public class LockPatternView extends View {
                     mInProgressY = y;
 
                     if (mPatternInProgress) {
+                        if (mPattern.isEmpty()) return false;
+
                         final ArrayList<Cell> pattern = mPattern;
                         final float radius = mSquareWidth * mDiameterFactor * 0.5f;
 
