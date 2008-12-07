@@ -470,8 +470,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
             for (int i = 0; i < size && l == null; i++) {
                 Listener test = mListeners.get(i);
                 if (binder.equals(test.mListener.asBinder())) {
-                    // listener already added
-                    return;
+                    l = test;
                 }
             }
 
