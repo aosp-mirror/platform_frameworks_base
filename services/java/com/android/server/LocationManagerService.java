@@ -905,6 +905,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGpsLocationProvider == null) {
             return false;
         }
+
+        if(mContext.checkCallingPermission(ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
+        }
+
         try {
             mGpsLocationProvider.addGpsStatusListener(listener);
         } catch (RemoteException e) {
