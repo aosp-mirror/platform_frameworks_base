@@ -906,7 +906,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return false;
         }
 
-        if(mContext.checkCallingPermission(ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingPermission(ACCESS_FINE_LOCATION) != 
+                PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
 
