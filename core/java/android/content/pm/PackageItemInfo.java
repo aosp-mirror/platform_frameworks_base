@@ -90,7 +90,10 @@ public class PackageItemInfo {
                 return label;
             }
         }
-        return name;
+        if(name != null) {
+            return name;
+        }
+        return packageName;
     }
     
     /**
@@ -179,7 +182,7 @@ public class PackageItemInfo {
             if (sa == null) sa = aa.name;
             CharSequence  sb = ab.loadLabel(mPM);
             if (sb == null) sb = ab.name;
-            return sCollator.compare(sa, sb);
+            return sCollator.compare(sa.toString(), sb.toString());
         }
 
         private final Collator   sCollator = Collator.getInstance();

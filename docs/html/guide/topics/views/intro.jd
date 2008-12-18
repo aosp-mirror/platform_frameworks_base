@@ -1,0 +1,49 @@
+page.title=Introduction to Views
+parent.title=Views and Layout
+parent.link=index.html
+@jd:body
+
+<p>The basic functional unit of an Android application is the <em>activity</em> &mdash; an object of the class {@link android.app.Activity android.app.Activity}. An activity can do many things, but by itself it does not have a  presence on the  screen. To give your activity a screen presence and design its UI, you work with <em>views</em> and <em>viewgroups</em> -- basic units of user interface expression on the Android platform.</p>
+
+<h2>Views</h2>
+<p>A view is an object of base class {@link android.view.View android.view.View}. It's a data structure whose   properties store the layout and content for a specific rectangular area of the screen. A View object handles measuring and layout, drawing, focus change, scrolling, and key/gestures for the screen area it represents. </p>
+<p>The View  class serves as a base  class for <em>widgets </em> &mdash; a set of fully implemented subclasses that draw interactive screen elements. Widgets handle their own measuring and drawing, so you can use them to build your UI more quickly. The list of  widgets available includes Text, EditText, InputMethod, MovementMethod, Button, RadioButton, Checkbox, and ScrollView.</p>
+
+<h2>Viewgroups </h2>
+
+<p>A viewgroup is an object of class {@link android.view.ViewGroup android.view.Viewgroup}. As its name indicates, a viewgroup is a special type of view object whose function is to contain and manage a subordinate set of views and other viewgroups, Viewgroups let you add structure to your UI and build up complex screen elements that can be addressed as a single entity. </p>
+
+<p>The Viewgroup class serves as a base class for <em>layouts</em> &mdash; a set of fully implemented subclasses that provide common types of screen layout. The layouts give you a way to build a structure for a set of views. </p>
+
+<h2>A Tree-Structured UI</h2>
+
+<p>On the Android platform, you define an Activity's UI using a tree of view and viewgroup nodes, as shown in the diagram below. The tree can be as simple or complex as you need to make it, and you can build it up using Android's set of predefined widgets and layouts  or  custom view types that you create yourself. </p>
+
+<img src={@docRoot}images/viewgroup.png alt="An example of a tree of views and viewgroups" width="312" height="211" align="center"/>
+
+<p>To attach the tree to the screen for rendering, your Activity calls its  setContentView() method and passes a reference to the root node  object. Once the Android system has the reference to the root node object, it can work directly with the node to invalidate, measure, and draw the tree. When your Activity becomes active and receives focus, the system notifies your activity and requests the root node to measure and draw the tree. The root node then requests that its child nodes draw themselves &mdash; in turn, each viewgroup node in the tree is responsible for drawing its direct children. </p>
+
+<p>As mentioned previously, each view group has the responsibility of
+  measuring its available space, laying out its children, and calling Draw() on
+  each child to let it render itself. The children may request a size and location
+  in the parent, but the parent object has the final decision on where how big
+  each child can be.</p>
+
+<h2>LayoutParams: How a Child Specifies Its Position and Size</h2>
+
+<p>Every viewgroup class uses a nested class that extends {@link
+android.view.ViewGroup.LayoutParams ViewGroup.LayoutParams}. This subclass
+  contains property types that define a child's size and position, in properties
+  appropriate for that view group class. </p>
+
+<img src={@docRoot}images/layoutparams.png alt="An example of layoutparams" width="632" height="369" align="center"/>
+
+<p>Note that every LayoutParams subclass has its own syntax for setting
+values. Each child element must define LayoutParams that are appropriate for its parent, although it may define different LayoutParams for its children. </p>
+
+<p>All viewgroups include width and height. Many also include margins and
+borders. You can specify width and height  exactly, though you probably won't want
+to do this often. More often you will tell your view to size itself either to
+the dimensions of its content, or to become as big as its containing object
+will allow.</p>
+

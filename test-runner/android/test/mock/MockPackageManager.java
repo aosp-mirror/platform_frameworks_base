@@ -140,6 +140,14 @@ public class MockPackageManager extends PackageManager {
     public String getNameForUid(int uid) {
         throw new UnsupportedOperationException();
     }
+    
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public int getUidForSharedUser(String sharedUserName) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public List<ApplicationInfo> getInstalledApplications(int flags) {

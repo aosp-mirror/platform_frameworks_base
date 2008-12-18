@@ -21,6 +21,7 @@
 
 const char* const RESOURCES_ROOT_NAMESPACE = "http://schemas.android.com/apk/res/";
 const char* const RESOURCES_ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android";
+const char* const RESOURCES_ROOT_PRV_NAMESPACE = "http://schemas.android.com/apk/prv/res/";
 
 const char* const XLIFF_XMLNS = "urn:oasis:names:tc:xliff:document:1.2";
 const char* const ALLOWED_XLIFF_ELEMENTS[] = {
@@ -43,15 +44,27 @@ bool isWhitespace(const char16_t* str)
 }
 
 static const String16 RESOURCES_PREFIX(RESOURCES_ROOT_NAMESPACE);
+static const String16 RESOURCES_PRV_PREFIX(RESOURCES_ROOT_PRV_NAMESPACE);
 
-String16 getNamespaceResourcePackage(String16 namespaceUri)
+String16 getNamespaceResourcePackage(String16 namespaceUri, bool* outIsPublic)
 {
     //printf("%s starts with %s?\n", String8(namespaceUri).string(),
     //       String8(RESOURCES_PREFIX).string());
-    if (!namespaceUri.startsWith(RESOURCES_PREFIX)) return String16();
+    size_t prefixSize;
+    bool isPublic = true;
+    if (namespaceUri.startsWith(RESOURCES_PREFIX)) {
+        prefixSize = RESOURCES_PREFIX.size();
+    } else if (namespaceUri.startsWith(RESOURCES_PRV_PREFIX)) {
+        isPublic = false;
+        prefixSize = RESOURCES_PRV_PREFIX.size();
+    } else {
+        if (outIsPublic) *outIsPublic = isPublic; // = true
+        return String16();
+    }
+
     //printf("YES!\n");
-    const size_t prefixSize = RESOURCES_PREFIX.size();
     //printf("namespace: %s\n", String8(String16(namespaceUri, namespaceUri.size()-prefixSize, prefixSize)).string());
+    if (outIsPublic) *outIsPublic = isPublic;
     return String16(namespaceUri, namespaceUri.size()-prefixSize, prefixSize);
 }
 
@@ -715,15 +728,18 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
         for (size_t i=0; i<N; i++) {
             const attribute_entry& e = mAttributes.itemAt(i);
             if (e.ns.size() <= 0) continue;
-            String16 pkg(getNamespaceResourcePackage(e.ns));
-            NOISY(printf("Elem %s %s=\"%s\": namespace %s ===> %s\n",
+            bool nsIsPublic;
+            String16 pkg(getNamespaceResourcePackage(e.ns, &nsIsPublic));
+            NOISY(printf("Elem %s %s=\"%s\": namespace(%s) %s ===> %s\n",
                     String8(getElementName()).string(),
                     String8(e.name).string(),
                     String8(e.string).string(),
-                    String8(e.ns).string(), String8(pkg).string()));
+                    String8(e.ns).string(),
+                    (nsIsPublic) ? "public" : "private",
+                    String8(pkg).string()));
             if (pkg.size() <= 0) continue;
             uint32_t res = table != NULL
-                ? table->getResId(e.name, &attr, &pkg, &errorMsg)
+                ? table->getResId(e.name, &attr, &pkg, &errorMsg, nsIsPublic)
                 : assets->getIncludedResources().
                     identifierForName(e.name.string(), e.name.size(),
                                       attr.string(), attr.size(),

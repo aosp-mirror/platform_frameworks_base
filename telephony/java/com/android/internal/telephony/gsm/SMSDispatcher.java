@@ -33,6 +33,7 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Telephony;
+import android.provider.Settings;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.gsm.SmsMessage;
 import android.telephony.gsm.SmsManager;
@@ -56,7 +57,7 @@ final class SMSDispatcher extends Handler {
     private static final int DEFAULT_SMS_CHECK_PERIOD = 3600000;
 
     /** Default number of SMS sent in checking period without uesr permit */
-    private static final int DEFAULT_SMS_MAX_ALLOWED = 100;
+    private static final int DEFAULT_SMS_MAX_COUNT = 100;
 
     /** Default timeout for SMS sent query */
     private static final int DEFAULT_SMS_TIMOUEOUT = 6000;
@@ -199,8 +200,14 @@ final class SMSDispatcher extends Handler {
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
         mSTracker = null;
-        mCounter = new SmsCounter(DEFAULT_SMS_MAX_ALLOWED,
+
+        int check_period = Settings.Gservices.getInt(mResolver,
+                Settings.Gservices.SMS_OUTGOING_CEHCK_INTERVAL_MS,
                 DEFAULT_SMS_CHECK_PERIOD);
+        int max_count = Settings.Gservices.getInt(mResolver,
+                Settings.Gservices.SMS_OUTGOING_CEHCK_MAX_COUNT,
+                DEFAULT_SMS_MAX_COUNT);
+        mCounter = new SmsCounter(max_count, check_period);
 
         mCm.setOnNewSMS(this, EVENT_NEW_SMS, null);
         mCm.setOnSmsStatus(this, EVENT_NEW_SMS_STATUS_REPORT, null);
@@ -245,8 +252,7 @@ final class SMSDispatcher extends Handler {
             }
 
             if (ar.exception != null) {
-                Log.e(TAG, "Exception processing incoming SMS",
-                        ar.exception);
+                Log.e(TAG, "Exception processing incoming SMS. Exception:" + ar.exception);
                 return;
             }
 

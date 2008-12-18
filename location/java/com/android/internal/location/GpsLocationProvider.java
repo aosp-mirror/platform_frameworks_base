@@ -16,12 +16,6 @@
 
 package com.android.internal.location;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Properties;
-
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -37,6 +31,12 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Config;
 import android.util.Log;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -470,8 +470,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
             for (int i = 0; i < size && l == null; i++) {
                 Listener test = mListeners.get(i);
                 if (binder.equals(test.mListener.asBinder())) {
-                    // listener already added
-                    return;
+                    l = test;
                 }
             }
 
@@ -872,7 +871,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] svs, float[] snrs,
             float[] elevations, float[] azimuths, int[] masks);
-            
+    
+    // XTRA Support    
     private native void native_inject_time(long time, long timeReference, int uncertainty);
     private native boolean native_supports_xtra();
     private native void native_inject_xtra_data(byte[] data, int length);

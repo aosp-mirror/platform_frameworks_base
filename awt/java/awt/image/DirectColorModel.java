@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.color.ColorSpace;
@@ -28,104 +29,141 @@ import org.apache.harmony.awt.gl.color.LUTColorConverter;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class DirectColorModel represents a standard (packed) RGB
- * color model with additional support for converting between sRGB
- * color space and 8 or 16 bit linear RGB color space using lookup tables.
+ * The Class DirectColorModel represents a standard (packed) RGB color model
+ * with additional support for converting between sRGB color space and 8 or 16
+ * bit linear RGB color space using lookup tables.
+ * 
+ * @since Android 1.0
  */
 public class DirectColorModel extends PackedColorModel {
 
-    /** The from_ linea r_ rg b_ lut. */
+    /**
+     * The from_ linea r_ rg b_ lut.
+     */
     private byte from_LINEAR_RGB_LUT[]; // Lookup table for conversion from
-                                        // Linear RGB Color Space into sRGB
 
-    /** The to_ linea r_8 rg b_ lut. */
-    private byte to_LINEAR_8RGB_LUT[];  // Lookup table for conversion from
-                                        // sRGB Color Space into Linear RGB 
-                                        // 8 bit
+    // Linear RGB Color Space into sRGB
 
-    /** The to_ linea r_16 rg b_ lut. */
-    private short to_LINEAR_16RGB_LUT[];  // Lookup table for conversion from
-                                          // sRGB Color Space into Linear RGB 
-                                          // 16 bit 
+    /**
+     * The to_ linea r_8 rg b_ lut.
+     */
+    private byte to_LINEAR_8RGB_LUT[]; // Lookup table for conversion from
 
-    /** The alpha lut. */
-    private byte alphaLUT[];            // Lookup table for scale alpha value  
+    // sRGB Color Space into Linear RGB
+    // 8 bit
 
-    /** The color lu ts. */
-    private byte colorLUTs[][];         // Lookup tables for scale color values 
+    /**
+     * The to_ linea r_16 rg b_ lut.
+     */
+    private short to_LINEAR_16RGB_LUT[]; // Lookup table for conversion from
 
-    /** The is_s rgb. */
-    private boolean is_sRGB;            // ColorModel has sRGB ColorSpace
+    // sRGB Color Space into Linear RGB
+    // 16 bit
 
-    /** The is_ linea r_ rgb. */
-    private boolean is_LINEAR_RGB;      // Color Model has Linear RGB Color 
-                                        // Space
+    /**
+     * The alpha lut.
+     */
+    private byte alphaLUT[]; // Lookup table for scale alpha value
 
-    /** The LINEA r_ rg b_ length. */
-    private int LINEAR_RGB_Length;      // Linear RGB bit length
+    /**
+     * The color lu ts.
+     */
+    private byte colorLUTs[][]; // Lookup tables for scale color values
 
-    /** The factor. */
-    private float fFactor;              // Scale factor
+    /**
+     * The is_s rgb.
+     */
+    private boolean is_sRGB; // ColorModel has sRGB ColorSpace
+
+    /**
+     * The is_ linea r_ rgb.
+     */
+    private boolean is_LINEAR_RGB; // Color Model has Linear RGB Color
+
+    // Space
+
+    /**
+     * The LINEA r_ rg b_ length.
+     */
+    private int LINEAR_RGB_Length; // Linear RGB bit length
+
+    /**
+     * The factor.
+     */
+    private float fFactor; // Scale factor
 
     /**
      * Instantiates a new direct color model.
      * 
-     * @param space the color space
-     * @param bits the array of component masks
-     * @param rmask the bitmask corresponding to the red band
-     * @param gmask the bitmask corresponding to the green band
-     * @param bmask the bitmask corresponding to the blue band
-     * @param amask the bitmask corresponding to the alpha band
-     * @param isAlphaPremultiplied whether the alpha is premultiplied in this color model
-     * @param transferType the transfer type (primitive java type 
-     * to use for the components)
-     * 
-     * @throws IllegalArgumentException if the number of bits in the combined 
-     * bitmasks for the color bands is less than one or greater than 32
+     * @param space
+     *            the color space.
+     * @param bits
+     *            the array of component masks.
+     * @param rmask
+     *            the bitmask corresponding to the red band.
+     * @param gmask
+     *            the bitmask corresponding to the green band.
+     * @param bmask
+     *            the bitmask corresponding to the blue band.
+     * @param amask
+     *            the bitmask corresponding to the alpha band.
+     * @param isAlphaPremultiplied
+     *            whether the alpha is pre-multiplied in this color model.
+     * @param transferType
+     *            the transfer type (primitive java type to use for the
+     *            components).
+     * @throws IllegalArgumentException
+     *             if the number of bits in the combined bitmasks for the color
+     *             bands is less than one or greater than 32.
      */
-    public DirectColorModel(ColorSpace space, int bits, int rmask, int gmask,
-            int bmask, int amask, boolean isAlphaPremultiplied,
-            int transferType) {
+    public DirectColorModel(ColorSpace space, int bits, int rmask, int gmask, int bmask, int amask,
+            boolean isAlphaPremultiplied, int transferType) {
 
         super(space, bits, rmask, gmask, bmask, amask, isAlphaPremultiplied,
-                (amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT),
-                transferType);
+                (amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT), transferType);
 
         initLUTs();
     }
 
     /**
-     * Instantiates a new direct color model, determining the transfer 
-     * type from the bits array, the transparency from the alpha mask, 
-     * and the default color space {@link ColorSpace#CS_sRGB}.
+     * Instantiates a new direct color model, determining the transfer type from
+     * the bits array, the transparency from the alpha mask, and the default
+     * color space {@link ColorSpace#CS_sRGB}.
      * 
-     * @param bits the array of component masks
-     * @param rmask the bitmask corresponding to the red band
-     * @param gmask the bitmask corresponding to the green band
-     * @param bmask the bitmask corresponding to the blue band
-     * @param amask the bitmask corresponding to the alpha band
+     * @param bits
+     *            the array of component masks.
+     * @param rmask
+     *            the bitmask corresponding to the red band.
+     * @param gmask
+     *            the bitmask corresponding to the green band.
+     * @param bmask
+     *            the bitmask corresponding to the blue band.
+     * @param amask
+     *            the bitmask corresponding to the alpha band.
      */
-    public DirectColorModel(int bits, int rmask, int gmask, int bmask,
-            int amask) {
+    public DirectColorModel(int bits, int rmask, int gmask, int bmask, int amask) {
 
-        super(ColorSpace.getInstance(ColorSpace.CS_sRGB), bits, rmask, gmask,
-                bmask, amask, false,
-                (amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT),
-                ColorModel.getTransferType(bits));
+        super(ColorSpace.getInstance(ColorSpace.CS_sRGB), bits, rmask, gmask, bmask, amask, false,
+                (amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT), ColorModel
+                        .getTransferType(bits));
 
         initLUTs();
     }
 
     /**
-     * Instantiates a new direct color model with no alpha channel, 
-     * determining the transfer type from the bits array, 
-     * the default color space {@link ColorSpace#CS_sRGB}, 
-     * and with the transparency set to {@link Transparency#OPAQUE}.
+     * Instantiates a new direct color model with no alpha channel, determining
+     * the transfer type from the bits array, the default color space
+     * {@link ColorSpace#CS_sRGB}, and with the transparency set to
+     * {@link Transparency#OPAQUE}.
      * 
-     * @param bits the array of component masks
-     * @param rmask the bitmask corresponding to the red band
-     * @param gmask the bitmask corresponding to the green band
-     * @param bmask the bitmask corresponding to the blue band
+     * @param bits
+     *            the array of component masks.
+     * @param rmask
+     *            the bitmask corresponding to the red band.
+     * @param gmask
+     *            the bitmask corresponding to the green band.
+     * @param bmask
+     *            the bitmask corresponding to the blue band.
      */
     public DirectColorModel(int bits, int rmask, int gmask, int bmask) {
         this(bits, rmask, gmask, bmask, 0);
@@ -139,42 +177,42 @@ public class DirectColorModel extends PackedColorModel {
         }
 
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[];
-            if (obj == null) {
-                ba = new byte[1];
-            } else {
-                ba = (byte[]) obj;
-            }
-            ba[0] = (byte) pixel;
-            obj = ba;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[];
+                if (obj == null) {
+                    ba = new byte[1];
+                } else {
+                    ba = (byte[])obj;
+                }
+                ba[0] = (byte)pixel;
+                obj = ba;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[];
-            if (obj == null) {
-                sa = new short[1];
-            } else {
-                sa = (short[]) obj;
-            }
-            sa[0] = (short) pixel;
-            obj = sa;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[];
+                if (obj == null) {
+                    sa = new short[1];
+                } else {
+                    sa = (short[])obj;
+                }
+                sa[0] = (short)pixel;
+                obj = sa;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[];
-            if (obj == null) {
-                ia = new int[1];
-            } else {
-                ia = (int[]) obj;
-            }
-            ia[0] = pixel;
-            obj = ia;
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[];
+                if (obj == null) {
+                    ia = new int[1];
+                } else {
+                    ia = (int[])obj;
+                }
+                ia[0] = pixel;
+                obj = ia;
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
 
         return obj;
@@ -187,7 +225,7 @@ public class DirectColorModel extends PackedColorModel {
             if (pixel == null) {
                 ia = new int[1];
             } else {
-                ia = (int[]) pixel;
+                ia = (int[])pixel;
             }
             ia[0] = rgb;
             return ia;
@@ -246,67 +284,66 @@ public class DirectColorModel extends PackedColorModel {
         int pxl = 0;
         if (hasAlpha) {
             float normAlpha = normComp[numColorComponents];
-            alpha = (int) (normAlpha * maxValues[numColorComponents] + 0.5f);
+            alpha = (int)(normAlpha * maxValues[numColorComponents] + 0.5f);
             if (isAlphaPremultiplied) {
-                red = (int) (normComp[0] * normAlpha * maxValues[0] + 0.5f);
-                green = (int) (normComp[1] * normAlpha * maxValues[1] + 0.5f);
-                blue = (int) (normComp[2] * normAlpha * maxValues[2] + 0.5f);
+                red = (int)(normComp[0] * normAlpha * maxValues[0] + 0.5f);
+                green = (int)(normComp[1] * normAlpha * maxValues[1] + 0.5f);
+                blue = (int)(normComp[2] * normAlpha * maxValues[2] + 0.5f);
             } else {
-                red = (int) (normComp[0] * maxValues[0] + 0.5f);
-                green = (int) (normComp[1] * maxValues[1] + 0.5f);
-                blue = (int) (normComp[2] * maxValues[2] + 0.5f);
+                red = (int)(normComp[0] * maxValues[0] + 0.5f);
+                green = (int)(normComp[1] * maxValues[1] + 0.5f);
+                blue = (int)(normComp[2] * maxValues[2] + 0.5f);
             }
             pxl = (alpha << offsets[3]) & componentMasks[3];
         } else {
-            red = (int) (normComp[0] * maxValues[0] + 0.5f);
-            green = (int) (normComp[1] * maxValues[1] + 0.5f);
-            blue = (int) (normComp[2] * maxValues[2] + 0.5f);
+            red = (int)(normComp[0] * maxValues[0] + 0.5f);
+            green = (int)(normComp[1] * maxValues[1] + 0.5f);
+            blue = (int)(normComp[2] * maxValues[2] + 0.5f);
         }
 
-        pxl |= ((red << offsets[0]) & componentMasks[0]) |
-               ((green << offsets[1]) & componentMasks[1]) |
-               ((blue << offsets[2]) & componentMasks[2]);
+        pxl |= ((red << offsets[0]) & componentMasks[0])
+                | ((green << offsets[1]) & componentMasks[1])
+                | ((blue << offsets[2]) & componentMasks[2]);
 
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[];
-            if (pixel == null) {
-                ba = new byte[1];
-            } else {
-                ba = (byte[]) pixel;
-            }
-            ba[0] = (byte) pxl;
-            return ba;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[];
+                if (pixel == null) {
+                    ba = new byte[1];
+                } else {
+                    ba = (byte[])pixel;
+                }
+                ba[0] = (byte)pxl;
+                return ba;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[];
-            if (pixel == null) {
-                sa = new short[1];
-            } else {
-                sa = (short[]) pixel;
-            }
-            sa[0] = (short) pxl;
-            return sa;
+            case DataBuffer.TYPE_USHORT:
+                short sa[];
+                if (pixel == null) {
+                    sa = new short[1];
+                } else {
+                    sa = (short[])pixel;
+                }
+                sa[0] = (short)pxl;
+                return sa;
 
-        case DataBuffer.TYPE_INT:
-            int ia[];
-            if (pixel == null) {
-                ia = new int[1];
-            } else {
-                ia = (int[]) pixel;
-            }
-            ia[0] = pxl;
-            return ia;
+            case DataBuffer.TYPE_INT:
+                int ia[];
+                if (pixel == null) {
+                    ia = new int[1];
+                } else {
+                    ia = (int[])pixel;
+                }
+                ia[0] = pxl;
+                return ia;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
     }
 
     @Override
-    public final ColorModel coerceData(WritableRaster raster,
-            boolean isAlphaPremultiplied) {
+    public final ColorModel coerceData(WritableRaster raster, boolean isAlphaPremultiplied) {
 
         if (!hasAlpha || this.isAlphaPremultiplied == isAlphaPremultiplied) {
             return this;
@@ -324,86 +361,82 @@ public class DirectColorModel extends PackedColorModel {
 
         if (isAlphaPremultiplied) {
             switch (transferType) {
-            case DataBuffer.TYPE_BYTE:
-            case DataBuffer.TYPE_USHORT:
-            case DataBuffer.TYPE_INT:
-                for (int i = 0; i < h; i++, minY++) {
-                    for (int j = 0, x = minX; j < w; j++, x++) {
-                        components = raster.getPixel(x, minY, components);
-                        if (components[numColorComponents] == 0) {
-                            raster.setPixel(x, minY, transparentComponents);
-                        } else {
-                            float alpha =
-                                components[numColorComponents] /
-                                    alphaFactor;
-                            for (int n = 0; n < numColorComponents; n++) {
-                                components[n] =
-                                    (int) (alpha * components[n] + 0.5f);
+                case DataBuffer.TYPE_BYTE:
+                case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_INT:
+                    for (int i = 0; i < h; i++, minY++) {
+                        for (int j = 0, x = minX; j < w; j++, x++) {
+                            components = raster.getPixel(x, minY, components);
+                            if (components[numColorComponents] == 0) {
+                                raster.setPixel(x, minY, transparentComponents);
+                            } else {
+                                float alpha = components[numColorComponents] / alphaFactor;
+                                for (int n = 0; n < numColorComponents; n++) {
+                                    components[n] = (int)(alpha * components[n] + 0.5f);
+                                }
+                                raster.setPixel(x, minY, components);
                             }
-                            raster.setPixel(x, minY, components);
                         }
+
                     }
+                    break;
 
-                }
-                break;
-
-            default:
-                // awt.214=This Color Model doesn't support this transferType
-                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+                default:
+                    // awt.214=This Color Model doesn't support this
+                    // transferType
+                    throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
             }
         } else {
             switch (transferType) {
-            case DataBuffer.TYPE_BYTE:
-            case DataBuffer.TYPE_USHORT:
-            case DataBuffer.TYPE_INT:
-                for (int i = 0; i < h; i++, minY++) {
-                    for (int j = 0, x = minX; j < w; j++, x++) {
-                        components = raster.getPixel(x, minY, components);
-                        if (components[numColorComponents] != 0) {
-                            float alpha =
-                                alphaFactor / components[numColorComponents];
-                            for (int n = 0; n < numColorComponents; n++) {
-                                components[n] =
-                                    (int) (alpha * components[n] + 0.5f);
+                case DataBuffer.TYPE_BYTE:
+                case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_INT:
+                    for (int i = 0; i < h; i++, minY++) {
+                        for (int j = 0, x = minX; j < w; j++, x++) {
+                            components = raster.getPixel(x, minY, components);
+                            if (components[numColorComponents] != 0) {
+                                float alpha = alphaFactor / components[numColorComponents];
+                                for (int n = 0; n < numColorComponents; n++) {
+                                    components[n] = (int)(alpha * components[n] + 0.5f);
+                                }
+                                raster.setPixel(x, minY, components);
                             }
-                            raster.setPixel(x, minY, components);
                         }
+
                     }
+                    break;
 
-                }
-                break;
-
-            default:
-                // awt.214=This Color Model doesn't support this transferType
-                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+                default:
+                    // awt.214=This Color Model doesn't support this
+                    // transferType
+                    throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
             }
 
         }
 
-        return new DirectColorModel(cs, pixel_bits, componentMasks[0],
-                componentMasks[1], componentMasks[2], componentMasks[3],
-                isAlphaPremultiplied, transferType);
+        return new DirectColorModel(cs, pixel_bits, componentMasks[0], componentMasks[1],
+                componentMasks[2], componentMasks[3], isAlphaPremultiplied, transferType);
     }
 
     @Override
     public String toString() {
-        // The output format based on 1.5 release behaviour. 
+        // The output format based on 1.5 release behaviour.
         // It could be reveled such way:
-        // BufferedImage bi = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        // BufferedImage bi = new BufferedImage(1, 1,
+        // BufferedImage.TYPE_INT_ARGB);
         // ColorModel cm = bi.getColorModel();
         // System.out.println(cm.toString());
         String str = "DirectColorModel:" + " rmask = " + //$NON-NLS-1$ //$NON-NLS-2$
-               Integer.toHexString(componentMasks[0]) + " gmask = " + //$NON-NLS-1$
-               Integer.toHexString(componentMasks[1]) + " bmask = " + //$NON-NLS-1$
-               Integer.toHexString(componentMasks[2]) + " amask = " + //$NON-NLS-1$
-               (!hasAlpha ? "0" : Integer.toHexString(componentMasks[3])); //$NON-NLS-1$
+                Integer.toHexString(componentMasks[0]) + " gmask = " + //$NON-NLS-1$
+                Integer.toHexString(componentMasks[1]) + " bmask = " + //$NON-NLS-1$
+                Integer.toHexString(componentMasks[2]) + " amask = " + //$NON-NLS-1$
+                (!hasAlpha ? "0" : Integer.toHexString(componentMasks[3])); //$NON-NLS-1$
 
         return str;
     }
 
     @Override
-    public final int[] getComponents(Object pixel, int components[],
-            int offset) {
+    public final int[] getComponents(Object pixel, int components[], int offset) {
 
         if (components == null) {
             components = new int[numComponents + offset];
@@ -412,25 +445,26 @@ public class DirectColorModel extends PackedColorModel {
         int intPixel = 0;
 
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) pixel;
-            intPixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])pixel;
+                intPixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) pixel;
-            intPixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])pixel;
+                intPixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) pixel;
-            intPixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])pixel;
+                intPixel = ia[0];
+                break;
 
-        default:
-            // awt.22D=This transferType ( {0} ) is not supported by this color model
-            throw new UnsupportedOperationException(Messages.getString("awt.22D", //$NON-NLS-1$
-                   transferType));
+            default:
+                // awt.22D=This transferType ( {0} ) is not supported by this
+                // color model
+                throw new UnsupportedOperationException(Messages.getString("awt.22D", //$NON-NLS-1$
+                        transferType));
         }
 
         return getComponents(intPixel, components, offset);
@@ -440,24 +474,24 @@ public class DirectColorModel extends PackedColorModel {
     public int getRed(Object inData) {
         int pixel = 0;
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) inData;
-            pixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])inData;
+                pixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) inData;
-            pixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])inData;
+                pixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) inData;
-            pixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])inData;
+                pixel = ia[0];
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
         return getRed(pixel);
     }
@@ -466,24 +500,24 @@ public class DirectColorModel extends PackedColorModel {
     public int getRGB(Object inData) {
         int pixel = 0;
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) inData;
-            pixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])inData;
+                pixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) inData;
-            pixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])inData;
+                pixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) inData;
-            pixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])inData;
+                pixel = ia[0];
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
         return getRGB(pixel);
     }
@@ -492,24 +526,24 @@ public class DirectColorModel extends PackedColorModel {
     public int getGreen(Object inData) {
         int pixel = 0;
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) inData;
-            pixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])inData;
+                pixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) inData;
-            pixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])inData;
+                pixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) inData;
-            pixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])inData;
+                pixel = ia[0];
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
         return getGreen(pixel);
     }
@@ -518,24 +552,24 @@ public class DirectColorModel extends PackedColorModel {
     public int getBlue(Object inData) {
         int pixel = 0;
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) inData;
-            pixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])inData;
+                pixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) inData;
-            pixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])inData;
+                pixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) inData;
-            pixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])inData;
+                pixel = ia[0];
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
         return getBlue(pixel);
     }
@@ -544,24 +578,24 @@ public class DirectColorModel extends PackedColorModel {
     public int getAlpha(Object inData) {
         int pixel = 0;
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) inData;
-            pixel = ba[0] & 0xff;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])inData;
+                pixel = ba[0] & 0xff;
+                break;
 
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) inData;
-            pixel = sa[0] & 0xffff;
-            break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])inData;
+                pixel = sa[0] & 0xffff;
+                break;
 
-        case DataBuffer.TYPE_INT:
-            int ia[] = (int[]) inData;
-            pixel = ia[0];
-            break;
+            case DataBuffer.TYPE_INT:
+                int ia[] = (int[])inData;
+                pixel = ia[0];
+                break;
 
-        default:
-            // awt.214=This Color Model doesn't support this transferType
-            throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
+            default:
+                // awt.214=This Color Model doesn't support this transferType
+                throw new UnsupportedOperationException(Messages.getString("awt.214")); //$NON-NLS-1$
         }
         return getAlpha(pixel);
     }
@@ -576,14 +610,11 @@ public class DirectColorModel extends PackedColorModel {
         int bandMasks[] = componentMasks.clone();
 
         if (pixel_bits > 16) {
-            return Raster.createPackedRaster(DataBuffer.TYPE_INT, w, h,
-                    bandMasks, null);
+            return Raster.createPackedRaster(DataBuffer.TYPE_INT, w, h, bandMasks, null);
         } else if (pixel_bits > 8) {
-            return Raster.createPackedRaster(DataBuffer.TYPE_USHORT, w, h,
-                    bandMasks, null);
+            return Raster.createPackedRaster(DataBuffer.TYPE_USHORT, w, h, bandMasks, null);
         } else {
-            return Raster.createPackedRaster(DataBuffer.TYPE_BYTE, w, h,
-                    bandMasks, null);
+            return Raster.createPackedRaster(DataBuffer.TYPE_BYTE, w, h, bandMasks, null);
         }
     }
 
@@ -594,7 +625,7 @@ public class DirectColorModel extends PackedColorModel {
             return false;
         }
 
-        SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel) sm;
+        SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel)sm;
 
         if (sppsm.getNumBands() != numComponents) {
             return false;
@@ -640,8 +671,8 @@ public class DirectColorModel extends PackedColorModel {
 
     @Override
     public final int getRGB(int pixel) {
-        return (getAlpha(pixel) << 24) | (getRed(pixel) << 16) |
-               (getGreen(pixel) << 8) | getBlue(pixel);
+        return (getAlpha(pixel) << 24) | (getRed(pixel) << 16) | (getGreen(pixel) << 8)
+                | getBlue(pixel);
     }
 
     @Override
@@ -681,7 +712,7 @@ public class DirectColorModel extends PackedColorModel {
     /**
      * Gets the red mask.
      * 
-     * @return the red mask
+     * @return the red mask.
      */
     public final int getRedMask() {
         return componentMasks[0];
@@ -690,7 +721,7 @@ public class DirectColorModel extends PackedColorModel {
     /**
      * Gets the green mask.
      * 
-     * @return the green mask
+     * @return the green mask.
      */
     public final int getGreenMask() {
         return componentMasks[1];
@@ -699,7 +730,7 @@ public class DirectColorModel extends PackedColorModel {
     /**
      * Gets the blue mask.
      * 
-     * @return the blue mask
+     * @return the blue mask.
      */
     public final int getBlueMask() {
         return componentMasks[2];
@@ -708,7 +739,7 @@ public class DirectColorModel extends PackedColorModel {
     /**
      * Gets the alpha mask.
      * 
-     * @return the alpha mask
+     * @return the alpha mask.
      */
     public final int getAlphaMask() {
         if (hasAlpha) {
@@ -727,16 +758,12 @@ public class DirectColorModel extends PackedColorModel {
         if (is_LINEAR_RGB) {
             if (maxBitLength > 8) {
                 LINEAR_RGB_Length = 16;
-                from_LINEAR_RGB_LUT =
-                    LUTColorConverter.getFrom16lRGBtosRGB_LUT();
-                to_LINEAR_16RGB_LUT =
-                    LUTColorConverter.getFromsRGBto16lRGB_LUT();
+                from_LINEAR_RGB_LUT = LUTColorConverter.getFrom16lRGBtosRGB_LUT();
+                to_LINEAR_16RGB_LUT = LUTColorConverter.getFromsRGBto16lRGB_LUT();
             } else {
                 LINEAR_RGB_Length = 8;
-                from_LINEAR_RGB_LUT =
-                    LUTColorConverter.getFrom8lRGBtosRGB_LUT();
-                to_LINEAR_8RGB_LUT =
-                    LUTColorConverter.getFromsRGBto8lRGB_LUT();
+                from_LINEAR_RGB_LUT = LUTColorConverter.getFrom8lRGBtosRGB_LUT();
+                to_LINEAR_8RGB_LUT = LUTColorConverter.getFromsRGBto8lRGB_LUT();
             }
             fFactor = ((1 << LINEAR_RGB_Length) - 1);
         } else {
@@ -746,7 +773,7 @@ public class DirectColorModel extends PackedColorModel {
         if (hasAlpha && bits[3] != 8) {
             alphaLUT = new byte[maxValues[3] + 1];
             for (int i = 0; i <= maxValues[3]; i++) {
-                alphaLUT[i] = (byte) (scales[3] * i + 0.5f);
+                alphaLUT[i] = (byte)(scales[3] * i + 0.5f);
             }
 
         }
@@ -765,7 +792,7 @@ public class DirectColorModel extends PackedColorModel {
                         }
                         colorLUTs[i] = new byte[maxValues[i] + 1];
                         for (int j = 0; j <= maxValues[i]; j++) {
-                            colorLUTs[i][j] = (byte) (scales[i] * j + 0.5f);
+                            colorLUTs[i][j] = (byte)(scales[i] * j + 0.5f);
                         }
                     }
                 }
@@ -784,9 +811,9 @@ public class DirectColorModel extends PackedColorModel {
                         for (int j = 0; j <= maxValues[0]; j++) {
                             int idx;
                             if (LINEAR_RGB_Length == 8) {
-                                idx = (int) (scales[i] * j + 0.5f);
+                                idx = (int)(scales[i] * j + 0.5f);
                             } else {
-                                idx = (int) (scales[i] * j * 257.0f + 0.5f);
+                                idx = (int)(scales[i] * j * 257.0f + 0.5f);
                             }
                             colorLUTs[i][j] = from_LINEAR_RGB_LUT[idx];
                         }
@@ -798,20 +825,20 @@ public class DirectColorModel extends PackedColorModel {
     }
 
     /**
-     * This method return RGB component value if Color Model has
-     * sRGB ColorSpace.
+     * This method return RGB component value if Color Model has sRGB
+     * ColorSpace.
      * 
-     * @param pixel - INT representation of pixel
-     * @param idx - index of pixel component
-     * 
-     * @return - value of the pixel component scaled fro 0 to 255
+     * @param pixel
+     *            the integer representation of the pixel.
+     * @param idx
+     *            the index of the pixel component.
+     * @return the value of the pixel component scaled from 0 to 255.
      */
     private int getComponentFrom_sRGB(int pixel, int idx) {
         int comp = (pixel & componentMasks[idx]) >> offsets[idx];
         if (isAlphaPremultiplied) {
             int alpha = (pixel & componentMasks[3]) >>> offsets[3];
-            comp = alpha == 0 ? 0 : (int) (scales[idx] * comp * 255.0f /
-                    (scales[3] * alpha) + 0.5f);
+            comp = alpha == 0 ? 0 : (int)(scales[idx] * comp * 255.0f / (scales[3] * alpha) + 0.5f);
         } else if (bits[idx] != 8) {
             comp = colorLUTs[idx][comp] & 0xff;
         }
@@ -819,21 +846,21 @@ public class DirectColorModel extends PackedColorModel {
     }
 
     /**
-     * This method return RGB component value if Color Model has
-     * Linear RGB ColorSpace.
+     * This method return RGB component value if Color Model has Linear RGB
+     * ColorSpace.
      * 
-     * @param pixel - INT representation of pixel
-     * @param idx - index of pixel component
-     * 
-     * @return - value of the pixel component scaled fro 0 to 255
+     * @param pixel
+     *            the integer representation of the pixel.
+     * @param idx
+     *            the index of the pixel component.
+     * @return the value of the pixel component scaled from 0 to 255.
      */
     private int getComponentFrom_LINEAR_RGB(int pixel, int idx) {
         int comp = (pixel & componentMasks[idx]) >> offsets[idx];
         if (isAlphaPremultiplied) {
             float factor = ((1 << LINEAR_RGB_Length) - 1);
             int alpha = (pixel & componentMasks[3]) >> offsets[3];
-            comp = alpha == 0 ? 0 : (int) (scales[idx] * comp * factor /
-                    (scales[3] * alpha) + 0.5f);
+            comp = alpha == 0 ? 0 : (int)(scales[idx] * comp * factor / (scales[3] * alpha) + 0.5f);
         } else if (bits[idx] != LINEAR_RGB_Length) {
             comp = colorLUTs[idx][comp] & 0xff;
         } else {
@@ -843,20 +870,20 @@ public class DirectColorModel extends PackedColorModel {
     }
 
     /**
-     * This method return RGB component value if Color Model has
-     * arbitrary RGB ColorSapce.
+     * This method return RGB component value if Color Model has arbitrary RGB
+     * ColorSapce.
      * 
-     * @param pixel - INT representation of pixel
-     * @param idx - index of pixel component
-     * 
-     * @return - value of the pixel component scaled fro 0 to 255
+     * @param pixel
+     *            the integer representation of the pixel.
+     * @param idx
+     *            the index of the pixel component.
+     * @return the value of the pixel component scaled from 0 to 255.
      */
     private int getComponentFrom_RGB(int pixel, int idx) {
         int components[] = getComponents(pixel, null, 0);
         float[] normComponents = getNormalizedComponents(components, 0, null, 0);
         float[] sRGBcomponents = cs.toRGB(normComponents);
-        return (int) (sRGBcomponents[idx] * 255.0f + 0.5f);
+        return (int)(sRGBcomponents[idx] * 255.0f + 0.5f);
     }
 
 }
-

@@ -210,7 +210,7 @@ class ZygoteConnection {
             }
 
             pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, parsedArgs.enableDebugger, rlimits);
+                    parsedArgs.gids, parsedArgs.debugFlags, rlimits);
         } catch (IllegalArgumentException ex) {
             logAndPrintError (newStderr, "Invalid zygote arguments", ex);
             pid = -1;
@@ -295,8 +295,8 @@ class ZygoteConnection {
         /** from --peer-wait */
         boolean peerWait;
 
-        /** from --enable-debugger */
-        boolean enableDebugger;
+        /** from --enable-debugger, --enable-checkjni, --enable-assert */
+        int debugFlags;
 
         /** from --classpath */
         String classpath;
@@ -362,7 +362,11 @@ class ZygoteConnection {
                     gid = Integer.parseInt(
                             arg.substring(arg.indexOf('=') + 1));
                 } else if (arg.equals("--enable-debugger")) {
-                    enableDebugger = true;
+                    debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+                } else if (arg.equals("--enable-checkjni")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                } else if (arg.equals("--enable-assert")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
                 } else if (arg.equals("--peer-wait")) {
                     peerWait = true;
                 } else if (arg.equals("--runtime-init")) {
@@ -567,7 +571,7 @@ class ZygoteConnection {
      */
     private static void applyDebuggerSecurityPolicy(Arguments args) {
         if ("1".equals(SystemProperties.get("ro.debuggable"))) {
-            args.enableDebugger = true;
+            args.debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
         }
     }
 

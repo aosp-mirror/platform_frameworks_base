@@ -82,6 +82,8 @@ public class SurfaceView extends View {
     final ArrayList<SurfaceHolder.Callback> mCallbacks
             = new ArrayList<SurfaceHolder.Callback>();
 
+    final int[] mLocation = new int[2];
+    
     final ReentrantLock mSurfaceLock = new ReentrantLock();
     final Surface mSurface = new Surface();
     boolean mDrawingStopped = true;
@@ -90,8 +92,9 @@ public class SurfaceView extends View {
             = new WindowManager.LayoutParams();
     IWindowSession mSession;
     MyWindow mWindow;
+    final Rect mVisibleInsets = new Rect();
     final Rect mWinFrame = new Rect();
-    final Rect mCoveredInsets = new Rect();
+    final Rect mContentInsets = new Rect();
 
     static final int KEEP_SCREEN_ON_MSG = 1;
     static final int GET_NEW_SURFACE_MSG = 2;
@@ -309,7 +312,7 @@ public class SurfaceView extends View {
                     mLayout.type = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
                     mLayout.gravity = Gravity.LEFT|Gravity.TOP;
                     mSession.add(mWindow, mLayout,
-                            mVisible ? VISIBLE : GONE, mCoveredInsets);
+                            mVisible ? VISIBLE : GONE, mContentInsets);
                 }
                 
                 if (visibleChanged && (!visible || mNewSurfaceNeeded)) {
@@ -321,8 +324,9 @@ public class SurfaceView extends View {
                 mSurfaceLock.lock();
                 mDrawingStopped = !visible;
                 final int relayoutResult = mSession.relayout(
-                    mWindow, mLayout, mWidth, mHeight,
-                    visible ? VISIBLE : GONE, mWinFrame, mCoveredInsets, mSurface);
+                        mWindow, mLayout, mWidth, mHeight,
+                        visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
+                        mVisibleInsets, mSurface);
                 if (localLOGV) Log.i(TAG, "New surface: " + mSurface
                         + ", vis=" + visible + ", frame=" + mWinFrame);
                 mSurfaceFrame.left = 0;
@@ -390,7 +394,8 @@ public class SurfaceView extends View {
     }
     
     private class MyWindow extends IWindow.Stub {
-        public void resized(int w, int h, boolean reportDraw) {
+        public void resized(int w, int h, Rect coveredInsets,
+                Rect visibleInsets, boolean reportDraw) {
             if (localLOGV) Log.v(
                 "SurfaceView", SurfaceView.this + " got resized: w=" +
                 w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);

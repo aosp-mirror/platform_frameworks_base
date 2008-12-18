@@ -23,27 +23,30 @@
 
 package java.awt.image;
 
-
 /**
- * The ShortLookupTable class provides provides functionality for 
- * lookup operations, and is defined by an input short array for 
- * bands or components of image and an offset value.
- * The offset value will be subtracted from the input values before 
- * indexing the input arrays. The output of a lookup operation is 
+ * The ShortLookupTable class provides provides functionality for lookup
+ * operations, and is defined by an input short array for bands or components of
+ * image and an offset value. The offset value will be subtracted from the input
+ * values before indexing the input arrays. The output of a lookup operation is
  * represented as an unsigned short array.
+ * 
+ * @since Android 1.0
  */
 public class ShortLookupTable extends LookupTable {
-    
-    /** The data. */
+
+    /**
+     * The data.
+     */
     private short data[][];
 
     /**
-     * Instantiates a new ShortLookupTable with the specified offset value
-     * and the specified short array which represents lookup table for
-     * all bands.
+     * Instantiates a new ShortLookupTable with the specified offset value and
+     * the specified short array which represents lookup table for all bands.
      * 
-     * @param offset the offset value.
-     * @param data the data array.
+     * @param offset
+     *            the offset value.
+     * @param data
+     *            the data array.
      */
     public ShortLookupTable(int offset, short[] data) {
         super(offset, 1);
@@ -53,12 +56,14 @@ public class ShortLookupTable extends LookupTable {
     }
 
     /**
-     * Instantiates a new ShortLookupTable with the specified offset value
-     * and the specified short array of arrays which represents lookup table
-     * for each band.
+     * Instantiates a new ShortLookupTable with the specified offset value and
+     * the specified short array of arrays which represents lookup table for
+     * each band.
      * 
-     * @param offset the offset value.
-     * @param data the data array of arrays for each band.
+     * @param offset
+     *            the offset value.
+     * @param data
+     *            the data array of arrays for each band.
      */
     public ShortLookupTable(int offset, short[][] data) {
         super(offset, data.length);
@@ -70,9 +75,9 @@ public class ShortLookupTable extends LookupTable {
     }
 
     /**
-     * Gets the lookup table of this ShortLookupTable object. If 
-     * this ShortLookupTable object has one short array for all bands, 
-     * the returned array length is one.
+     * Gets the lookup table of this ShortLookupTable object. If this
+     * ShortLookupTable object has one short array for all bands, the returned
+     * array length is one.
      * 
      * @return the lookup table of this ShortLookupTable object.
      */
@@ -81,14 +86,14 @@ public class ShortLookupTable extends LookupTable {
     }
 
     /**
-     * Returns a short array which contains samples of the specified
-     * pixel which is translated with the lookup table of this 
-     * ShortLookupTable object. The resulted array is stored to
-     * the dst array.
+     * Returns a short array which contains samples of the specified pixel which
+     * is translated with the lookup table of this ShortLookupTable object. The
+     * resulted array is stored to the dst array.
      * 
-     * @param src the source array.
-     * @param dst the destination array where the result can be stored.
-     * 
+     * @param src
+     *            the source array.
+     * @param dst
+     *            the destination array where the result can be stored.
      * @return the short array of translated samples of a pixel.
      */
     public short[] lookupPixel(short[] src, short[] dst) {
@@ -99,11 +104,11 @@ public class ShortLookupTable extends LookupTable {
         int offset = getOffset();
         if (getNumComponents() == 1) {
             for (int i = 0; i < src.length; i++) {
-                dst[i] = data[0][src[i]-offset];
+                dst[i] = data[0][src[i] - offset];
             }
         } else {
             for (int i = 0; i < getNumComponents(); i++) {
-                dst[i] = data[i][src[i]-offset];
+                dst[i] = data[i][src[i] - offset];
             }
         }
 
@@ -119,11 +124,11 @@ public class ShortLookupTable extends LookupTable {
         int offset = getOffset();
         if (getNumComponents() == 1) {
             for (int i = 0; i < src.length; i++) {
-                dst[i] = data[0][src[i]-offset];
+                dst[i] = data[0][src[i] - offset];
             }
         } else {
             for (int i = 0; i < getNumComponents(); i++) {
-                dst[i] = data[i][src[i]-offset];
+                dst[i] = data[i][src[i] - offset];
             }
         }
 

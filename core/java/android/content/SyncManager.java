@@ -50,14 +50,14 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.pim.DateUtils;
-import android.pim.Time;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
 import android.provider.Sync;
 import android.provider.Settings;
 import android.provider.Sync.History;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
@@ -1484,7 +1484,8 @@ class SyncManager {
                     // skip the sync if it isn't a force and the settings are off for this provider
                     final boolean force = syncOperation.extras.getBoolean(
                             ContentResolver.SYNC_EXTRAS_FORCE, false);
-                    if (!force && (!syncSettings.getListenForNetworkTickles()
+                    if (!force && (!syncSettings.getBackgroundData()
+                            || !syncSettings.getListenForNetworkTickles()
                             || !syncSettings.getSyncProviderAutomatically(
                             syncOperation.authority))) {
                         if (isLoggable) {

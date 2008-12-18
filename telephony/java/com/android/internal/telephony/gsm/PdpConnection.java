@@ -19,10 +19,12 @@ package com.android.internal.telephony.gsm;
 import android.os.*;
 import android.database.Cursor;
 import android.provider.Telephony;
+import android.text.util.Regex;
 import android.util.EventLog;
 import android.util.Log;
 
 import java.util.ArrayList;
+import com.android.internal.telephony.Phone;
 
 /**
  * {@hide}
@@ -204,6 +206,9 @@ public class PdpConnection extends Handler {
             }
         } else if (state == PdpState.ACTIVATING) {
             receivedDisconnectReq = true;
+        } else {
+            // state == INACTIVE.  Nothing to do, so notify immediately.
+            notifyDisconnect(msg);
         }
     }
 
@@ -395,6 +400,8 @@ public class PdpConnection extends Handler {
                         // Don't bother reporting success if there's already a
                         // pending disconnect request, since DataConnectionTracker
                         // has already updated its state.
+                        // Set ACTIVE so that disconnect does the right thing.
+                        state = PdpState.ACTIVE;
                         disconnect(onDisconnect);
                     } else {
                         String[] response = ((String[]) ar.result);
@@ -416,10 +423,16 @@ public class PdpConnection extends Handler {
                             if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])) {
                                 // Work around a race condition where QMI does not fill in DNS:
                                 // Deactivate PDP and let DataConnectionTracker retry.
-                                EventLog.writeEvent(EVENT_LOG_BAD_DNS_ADDRESS, dnsServers[0]);
-                                phone.mCM.deactivateDefaultPDP(cid,
-                                        obtainMessage(EVENT_FORCE_RETRY));
-                                break;
+                                // Do not apply the race condition workaround for MMS APN
+                                // if Proxy is an IP-address.
+                                // Otherwise, the default APN will not be restored anymore.
+                                if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
+                                        || !isIpAddress(apn.mmsProxy)) {
+                                    EventLog.writeEvent(EVENT_LOG_BAD_DNS_ADDRESS, dnsServers[0]);
+                                    phone.mCM.deactivateDefaultPDP(cid,
+                                            obtainMessage(EVENT_FORCE_RETRY));
+                                    break;
+                                }
                             }
                         }
                         
@@ -469,5 +482,11 @@ public class PdpConnection extends Handler {
                 notifyDisconnect((Message) ar.userObj);
                 break;
         }
+    }
+
+    private boolean isIpAddress(String address) {
+        if (address == null) return false;
+
+        return Regex.IP_ADDRESS_PATTERN.matcher(apn.mmsProxy).matches();
     }
 }

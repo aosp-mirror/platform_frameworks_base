@@ -15,7 +15,6 @@
  *  limitations under the License.
  */
 
-
 package javax.imageio.stream;
 
 import org.apache.harmony.x.imageio.stream.RandomAccessMemoryCache;
@@ -23,24 +22,30 @@ import org.apache.harmony.x.imageio.stream.RandomAccessMemoryCache;
 import java.io.OutputStream;
 import java.io.IOException;
 
-
 /**
- * The MemoryCacheImageOutputStream class implements ImageOutputStream
- * using a memory buffer for caching the data.
+ * The MemoryCacheImageOutputStream class implements ImageOutputStream using a
+ * memory buffer for caching the data.
+ * 
+ * @since Android 1.0
  */
 public class MemoryCacheImageOutputStream extends ImageOutputStreamImpl {
-    
-    /** The os. */
+
+    /**
+     * The os.
+     */
     OutputStream os;
-    
-    /** The ramc. */
+
+    /**
+     * The ramc.
+     */
     RandomAccessMemoryCache ramc = new RandomAccessMemoryCache();
 
     /**
-     * Instantiates a new MemoryCacheImageOutputStream
-     * which writes to the specified OutputStream.
+     * Instantiates a new MemoryCacheImageOutputStream which writes to the
+     * specified OutputStream.
      * 
-     * @param stream the OutputStream.
+     * @param stream
+     *            the OutputStream.
      */
     public MemoryCacheImageOutputStream(OutputStream stream) {
         if (stream == null) {
@@ -125,6 +130,6 @@ public class MemoryCacheImageOutputStream extends ImageOutputStreamImpl {
         ramc.getData(os, nBytes, flushedPosition);
         ramc.freeBefore(newFlushedPosition);
 
-        os.flush();        
+        os.flush();
     }
 }

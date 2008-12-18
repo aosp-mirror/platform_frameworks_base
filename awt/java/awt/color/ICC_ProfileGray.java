@@ -22,21 +22,26 @@ package java.awt.color;
 
 /**
  * The ICC_ProfileGray class represent profiles with TYPE_GRAY color space type,
- * and includes the grayTRCTag and mediaWhitePointTag tags. 
+ * and includes the grayTRCTag and mediaWhitePointTag tags. The gray component
+ * can be transformed from a GRAY device profile color space to the CIEXYZ
+ * Profile through the tone reproduction curve (TRC):
+ * <p>
+ * PCSY = grayTRC[deviceGray]
  * 
- * The gray component can be transformed from a GRAY device profile color space 
- * to the CIEXYZ Profile through the tone reproduction curve (TRC): 
- * <p>PCSY = grayTRC[deviceGray]
+ * @since Android 1.0
  */
 public class ICC_ProfileGray extends ICC_Profile {
     
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -1124721290732002649L;
 
     /**
      * Instantiates a new iC c_ profile gray.
      * 
-     * @param profileHandle the profile handle
+     * @param profileHandle
+     *            the profile handle
      */
     ICC_ProfileGray(long profileHandle) {
         super(profileHandle);
@@ -45,12 +50,17 @@ public class ICC_ProfileGray extends ICC_Profile {
     /**
      * Gets the TRC as an array of shorts.
      * 
-     * @return a short array of the TRC.
+     * @return the short array of the TRC.
      */
     public short[] getTRC() {
         return super.getTRC(icSigGrayTRCTag);
     }
 
+    /**
+     * Gets the media white point.
+     * 
+     * @return the media white point
+     */
     @Override
     public float[] getMediaWhitePoint() {
         return super.getMediaWhitePoint();

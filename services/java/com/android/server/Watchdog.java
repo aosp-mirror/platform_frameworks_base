@@ -783,7 +783,15 @@ public class Watchdog extends Thread {
         c.set(Calendar.SECOND, (int)secondsSinceMidnight - (val*60));
         c.set(Calendar.MILLISECOND, 0);
         
-        return c.getTimeInMillis();
+        long newTime = c.getTimeInMillis();
+        if (newTime < curTime) {
+            // The given time (in seconds since midnight) has already passed for today, so advance
+            // by one day (due to daylight savings, etc., the delta may differ from 24 hours).
+            c.add(Calendar.DAY_OF_MONTH, 1);
+            newTime = c.getTimeInMillis();
+        }
+            
+        return newTime;
     }
     
     @Override

@@ -54,7 +54,7 @@ page.title=Search Results
         if (q && q!= "") {
           this.leftControl.execute(q);
 		  
-		document.getElementById("searchTitle").innerHTML = "search results for " + q;
+		document.getElementById("searchTitle").innerHTML = "search results for \"" + q + "\"";
         }
         return false;
       }
@@ -72,10 +72,9 @@ page.title=Search Results
       }
       google.setOnLoadCallback(OnLoad, true);
 </script>
-
-<div id="mainBodyFixed">
-	<h2 id="searchTitle">search results</h2>
-	<img src="{@docRoot}assets/images/hr_gray_main.jpg" />
-	<div><br /></div>
-	<div id="leftSearchControl" class="search-control">Loading...</div>
-</div>
+  <div id="mainBodyFixed" style="width:auto; margin:20px">
+          <h2 id="searchTitle">search results</h2>
+          <img src="{@docRoot}assets/images/hr_gray_main.jpg" />
+          <div><br /></div>
+          <div id="leftSearchControl" class="search-control">Loading...</div>
+  </div>

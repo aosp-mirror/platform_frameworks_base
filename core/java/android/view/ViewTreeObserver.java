@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.graphics.Rect;
+
 import java.util.ArrayList;
 
 /**
@@ -32,6 +34,7 @@ public final class ViewTreeObserver {
     private ArrayList<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
     private ArrayList<OnPreDrawListener> mOnPreDrawListeners;
     private ArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
+    private ArrayList<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
 
     private boolean mAlive = true;
 
@@ -96,6 +99,108 @@ public final class ViewTreeObserver {
     }
 
     /**
+     * Parameters used with OnComputeInternalInsetsListener.
+     * {@hide pending API Council approval}
+     */
+    public final static class InternalInsetsInfo {
+        /**
+         * Offsets from the frame of the window at which the content of
+         * windows behind it should be placed.
+         */
+        public final Rect contentInsets = new Rect();
+        
+        /**
+         * Offsets from the fram of the window at which windows behind it
+         * are visible.
+         */
+        public final Rect visibleInsets = new Rect();
+        
+        /**
+         * Option for {@link #setTouchableInsets(int)}: the entire window frame
+         * can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_FRAME = 0;
+        
+        /**
+         * Option for {@link #setTouchableInsets(int)}: the area inside of
+         * the content insets can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_CONTENT = 1;
+        
+        /**
+         * Option for {@link #setTouchableInsets(int)}: the area inside of
+         * the visible insets can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_VISIBLE = 2;
+        
+        /**
+         * Set which parts of the window can be touched: either
+         * {@link #TOUCHABLE_INSETS_FRAME}, {@link #TOUCHABLE_INSETS_CONTENT},
+         * or {@link #TOUCHABLE_INSETS_VISIBLE}. 
+         */
+        public void setTouchableInsets(int val) {
+            mTouchableInsets = val;
+        }
+        
+        public int getTouchableInsets() {
+            return mTouchableInsets;
+        }
+        
+        int mTouchableInsets;
+        
+        void reset() {
+            final Rect givenContent = contentInsets;
+            final Rect givenVisible = visibleInsets;
+            givenContent.left = givenContent.top = givenContent.right
+                    = givenContent.bottom = givenVisible.left = givenVisible.top
+                    = givenVisible.right = givenVisible.bottom = 0;
+            mTouchableInsets = TOUCHABLE_INSETS_FRAME;
+        }
+        
+        @Override public boolean equals(Object o) {
+            try {
+                if (o == null) {
+                    return false;
+                }
+                InternalInsetsInfo other = (InternalInsetsInfo)o;
+                if (!contentInsets.equals(other.contentInsets)) {
+                    return false;
+                }
+                if (!visibleInsets.equals(other.visibleInsets)) {
+                    return false;
+                }
+                return mTouchableInsets == other.mTouchableInsets;
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+        
+        void set(InternalInsetsInfo other) {
+            contentInsets.set(other.contentInsets);
+            visibleInsets.set(other.visibleInsets);
+            mTouchableInsets = other.mTouchableInsets;
+        }
+    }
+    
+    /**
+     * Interface definition for a callback to be invoked when layout has
+     * completed and the client can compute its interior insets.
+     * {@hide pending API Council approval}
+     */
+    public interface OnComputeInternalInsetsListener {
+        /**
+         * Callback method to be invoked when layout has completed and the
+         * client can compute its interior insets.
+         *
+         * @param inoutInfo Should be filled in by the implementation with
+         * the information about the insets of the window.  This is called
+         * with whatever values the previous OnComputeInternalInsetsListener
+         * returned, if there are multiple such listeners in the window.
+         */
+        public void onComputeInternalInsets(InternalInsetsInfo inoutInfo);
+    }
+
+    /**
      * Creates a new ViewTreeObserver. This constructor should not be called
      */
     ViewTreeObserver() {
@@ -138,6 +243,14 @@ public final class ViewTreeObserver {
                 mOnTouchModeChangeListeners.addAll(observer.mOnTouchModeChangeListeners);
             } else {
                 mOnTouchModeChangeListeners = observer.mOnTouchModeChangeListeners;
+            }
+        }
+
+        if (observer.mOnComputeInternalInsetsListeners != null) {
+            if (mOnComputeInternalInsetsListeners != null) {
+                mOnComputeInternalInsetsListeners.addAll(observer.mOnComputeInternalInsetsListeners);
+            } else {
+                mOnComputeInternalInsetsListeners = observer.mOnComputeInternalInsetsListeners;
             }
         }
 
@@ -281,6 +394,43 @@ public final class ViewTreeObserver {
         mOnTouchModeChangeListeners.remove(victim);
     }
 
+    /**
+     * Register a callback to be invoked when the invoked when it is time to
+     * compute the window's internal insets.
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     * {@hide pending API Council approval}
+     */
+    public void addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener listener) {
+        checkIsAlive();
+
+        if (mOnComputeInternalInsetsListeners == null) {
+            mOnComputeInternalInsetsListeners = new ArrayList<OnComputeInternalInsetsListener>();
+        }
+
+        mOnComputeInternalInsetsListeners.add(listener);
+    }
+
+    /**
+     * Remove a previously installed internal insets computation callback
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener)
+     * {@hide pending API Council approval}
+     */
+    public void removeOnComputeInternalInsetsListener(OnComputeInternalInsetsListener victim) {
+        checkIsAlive();
+        if (mOnComputeInternalInsetsListeners == null) {
+            return;
+        }
+        mOnComputeInternalInsetsListeners.remove(victim);
+    }
+
     private void checkIsAlive() {
         if (!mAlive) {
             throw new IllegalStateException("This ViewTreeObserver is not alive, call "
@@ -370,6 +520,27 @@ public final class ViewTreeObserver {
             final int count = touchModeListeners.size();
             for (int i = count - 1; i >= 0; i--) {
                 touchModeListeners.get(i).onTouchModeChanged(inTouchMode);
+            }
+        }
+    }
+
+    /**
+     * Returns whether there are listeners for computing internal insets.
+     */
+    final boolean hasComputeInternalInsetsListeners() {
+        final ArrayList<OnComputeInternalInsetsListener> listeners = mOnComputeInternalInsetsListeners;
+        return (listeners != null && listeners.size() > 0);
+    }
+    
+    /**
+     * Calls all listeners to compute the current insets.
+     */
+    final void dispatchOnComputeInternalInsets(InternalInsetsInfo inoutInfo) {
+        final ArrayList<OnComputeInternalInsetsListener> listeners = mOnComputeInternalInsetsListeners;
+        if (listeners != null) {
+            final int count = listeners.size();
+            for (int i = count - 1; i >= 0; i--) {
+                listeners.get(i).onComputeInternalInsets(inoutInfo);
             }
         }
     }

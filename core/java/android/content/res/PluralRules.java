@@ -23,7 +23,7 @@ import java.util.Locale;
  * object has been integrated to android, we should switch to that.  For now, yuck-o.
  */
 
-abstract class PluralRule {
+abstract class PluralRules {
 
     static final int QUANTITY_OTHER = 0x0000;
     static final int QUANTITY_ZERO  = 0x0001;
@@ -37,7 +37,7 @@ abstract class PluralRule {
     abstract int quantityForNumber(int n);
 
     final int attrForNumber(int n) {
-        return PluralRule.attrForQuantity(quantityForNumber(n));
+        return PluralRules.attrForQuantity(quantityForNumber(n));
     }
 
     static final int attrForQuantity(int quantity) {
@@ -69,7 +69,7 @@ abstract class PluralRule {
         }
     }
 
-    static final PluralRule ruleForLocale(Locale locale) {
+    static final PluralRules ruleForLocale(Locale locale) {
         String lang = locale.getLanguage();
         if ("cs".equals(lang)) {
             if (cs == null) cs = new cs();
@@ -81,8 +81,8 @@ abstract class PluralRule {
         }
     }
 
-    private static PluralRule cs;
-    private static class cs extends PluralRule {
+    private static PluralRules cs;
+    private static class cs extends PluralRules {
         int quantityForNumber(int n) {
             if (n == 1) {
                 return QUANTITY_ONE;
@@ -96,8 +96,8 @@ abstract class PluralRule {
         }
     }
 
-    private static PluralRule en;
-    private static class en extends PluralRule {
+    private static PluralRules en;
+    private static class en extends PluralRules {
         int quantityForNumber(int n) {
             if (n == 1) {
                 return QUANTITY_ONE;

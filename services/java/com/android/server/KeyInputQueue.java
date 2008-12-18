@@ -32,7 +32,7 @@ import android.view.WindowManagerPolicy;
 public abstract class KeyInputQueue {
     static final String TAG = "KeyInputQueue";
 
-    SparseArray<InputDevice> mDevices = new SparseArray();
+    SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
     
     int mGlobalMetaState = 0;
     boolean mHaveGlobalMetaState = false;
@@ -498,6 +498,7 @@ public abstract class KeyInputQueue {
                 ev.inputDevice.mAbs.currentMove = null;
             }
             if (ev.event == ev.inputDevice.mRel.currentMove) {
+                if (false) Log.i(TAG, "Detach rel " + ev.event);
                 ev.inputDevice.mRel.currentMove = null;
                 ev.inputDevice.mRel.x = 0;
                 ev.inputDevice.mRel.y = 0;

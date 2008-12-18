@@ -18,24 +18,31 @@
  * @author Pavel Dolgov
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.security.BasicPermission;
 
 /**
- * The AWTPermission specifies the name of the permission and the 
- * corresponding action list.
+ * The AWTPermission specifies the name of the permission and the corresponding
+ * action list.
+ * 
+ * @since Android 1.0
  */
 public final class AWTPermission extends BasicPermission {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 8890392402588814465L;
 
     /**
      * Instantiates a new AWTPermission with defined name and actions.
      * 
-     * @param name the name of a new AWTPermission. 
-     * @param actions the actions of a new AWTPermission.
+     * @param name
+     *            the name of a new AWTPermission.
+     * @param actions
+     *            the actions of a new AWTPermission.
      */
     public AWTPermission(String name, String actions) {
         super(name, actions);
@@ -44,11 +51,11 @@ public final class AWTPermission extends BasicPermission {
     /**
      * Instantiates a new AWT permission with the defined name.
      * 
-     * @param name the name of a new AWTPermission. 
+     * @param name
+     *            the name of a new AWTPermission.
      */
     public AWTPermission(String name) {
         super(name);
     }
 
 }
-

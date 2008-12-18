@@ -171,7 +171,16 @@ public enum ResultCode {
      * Retrieves the actual result code that this object represents.
      * @return Actual result code
      */
-    public int code() {
+    public int value() {
         return mCode;
+    }
+
+    public static ResultCode fromInt(int value) {
+        for (ResultCode r : ResultCode.values()) {
+            if (r.mCode == value) {
+                return r;
+            }
+        }
+        return null;
     }
 }

@@ -71,17 +71,13 @@ public class AlarmManager
      */
     public static final int ELAPSED_REALTIME = 3;
 
-    private static IAlarmManager mService;
+    private final IAlarmManager mService;
 
-    static {
-        mService = IAlarmManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ALARM_SERVICE));
-    }
-    
     /**
      * package private on purpose
      */
-    AlarmManager() {
+    AlarmManager(IAlarmManager service) {
+        mService = service;
     }
     
     /**
@@ -97,7 +93,7 @@ public class AlarmManager
      * this one.
      *
      * <p>
-     * The alarm is an intent broadcast that goes to an intent receiver that
+     * The alarm is an intent broadcast that goes to a broadcast receiver that
      * you registered with {@link android.content.Context#registerReceiver}
      * or through the &lt;receiver&gt; tag in an AndroidManifest.xml file.
      *
@@ -188,6 +184,72 @@ public class AlarmManager
         }
     }
 
+    /**
+     * Available inexact recurrence intervals recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)} 
+     */
+    public static final long INTERVAL_FIFTEEN_MINUTES = 15 * 60 * 1000;
+    public static final long INTERVAL_HALF_HOUR = 2*INTERVAL_FIFTEEN_MINUTES;
+    public static final long INTERVAL_HOUR = 2*INTERVAL_HALF_HOUR;
+    public static final long INTERVAL_HALF_DAY = 12*INTERVAL_HOUR;
+    public static final long INTERVAL_DAY = 2*INTERVAL_HALF_DAY;
+    
+    /**
+     * Schedule a repeating alarm that has inexact trigger time requirements;
+     * for example, an alarm that repeats every hour, but not necessarily at
+     * the top of every hour.  These alarms are more power-efficient than
+     * the strict recurrences supplied by {@link #setRepeating}, since the
+     * system can adjust alarms' phase to cause them to fire simultaneously,
+     * avoiding waking the device from sleep more than necessary.
+     * 
+     * <p>Your alarm's first trigger will not be before the requested time,
+     * but it might not occur for almost a full interval after that time.  In
+     * addition, while the overall period of the repeating alarm will be as
+     * requested, the time between any two successive firings of the alarm
+     * may vary.  If your application demands very low jitter, use
+     * {@link #setRepeating} instead.
+     * 
+     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP}, RTC or
+     *             RTC_WAKEUP.
+     * @param triggerAtTime Time the alarm should first go off, using the
+     *                      appropriate clock (depending on the alarm type).  This
+     *                      is inexact: the alarm will not fire before this time,
+     *                      but there may be a delay of almost an entire alarm
+     *                      interval before the first invocation of the alarm.
+     * @param interval Interval between subsequent repeats of the alarm.  If
+     *                 this is one of INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR,
+     *                 INTERVAL_HOUR, INTERVAL_HALF_DAY, or INTERVAL_DAY then the
+     *                 alarm will be phase-aligned with other alarms to reduce
+     *                 the number of wakeups.  Otherwise, the alarm will be set
+     *                 as though the application had called {@link #setRepeating}.
+     * @param operation Action to perform when the alarm goes off;
+     * typically comes from {@link PendingIntent#getBroadcast
+     * IntentSender.getBroadcast()}.
+     *
+     * @see android.os.Handler
+     * @see #set
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     * @see #INTERVAL_FIFTEEN_MINUTES
+     * @see #INTERVAL_HALF_HOUR
+     * @see #INTERVAL_HOUR
+     * @see #INTERVAL_HALF_DAY
+     * @see #INTERVAL_DAY
+     */
+    public void setInexactRepeating(int type, long triggerAtTime, long interval,
+            PendingIntent operation) {
+        try {
+            mService.setInexactRepeating(type, triggerAtTime, interval, operation);
+        } catch (RemoteException ex) {
+        }
+    }
+    
     /**
      * Remove any alarms with a matching {@link Intent}.
      * Any alarm, of any type, whose Intent matches this one (as defined by

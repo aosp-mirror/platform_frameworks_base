@@ -64,6 +64,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import android.telephony.NeighboringCellInfo;
 
 /**
  * Service to communicate to the Google Location Server (GLS) via MASF server
@@ -127,6 +128,12 @@ public class LocationMasfClient {
     private static final String EXTRA_KEY_LOCATION_SOURCE = "networkLocationSource";
     private static final String EXTRA_VALUE_LOCATION_SOURCE_CACHED = "cached";
     private static final String EXTRA_VALUE_LOCATION_SOURCE_SERVER = "server";
+
+    // Maximum accuracy tolerated for a valid location
+    private static final int MAX_ACCURACY_ALLOWED = 5000; // 5km
+
+    // Indicates whether this is the first message after a device restart
+    private boolean mDeviceRestart = true;
 
     /**
      * Initializes the MobileServiceMux. Must be called before using any other function in the
@@ -204,10 +211,16 @@ public class LocationMasfClient {
         ProtoBuf requestElement = new ProtoBuf(LocserverMessageTypes.GLOC_REQUEST_ELEMENT);
 
         // Debug profile
+        ProtoBuf debugProfile = new ProtoBuf(GdebugprofileMessageTypes.GDEBUG_PROFILE);
+        requestElement.setProtoBuf(GLocRequestElement.DEBUG_PROFILE, debugProfile);
+        
+        if (mDeviceRestart) {
+            debugProfile.setBool(GDebugProfile.DEVICE_RESTART, true);
+            mDeviceRestart = false;
+        }
+
         if (trigger != -1) {
-            ProtoBuf debugProfile = new ProtoBuf(GdebugprofileMessageTypes.GDEBUG_PROFILE);
             debugProfile.setInt(GDebugProfile.TRIGGER, trigger);
-            requestElement.setProtoBuf(GLocRequestElement.DEBUG_PROFILE, debugProfile);
         }
 
         // Cellular profile
@@ -226,6 +239,11 @@ public class LocationMasfClient {
                 primaryCell.setInt(GCell.MCC, mCellState.getMcc());
                 primaryCell.setInt(GCell.MNC, mCellState.getMnc());
             }
+
+            if (mCellState.getSignalStrength() != -1) {
+                primaryCell.setInt(GCell.RSSI, mCellState.getSignalStrength());
+            }
+
             cellularProfile.setProtoBuf(GCellularProfile.PRIMARY_CELL, primaryCell);
 
             // History of cells
@@ -237,9 +255,17 @@ public class LocationMasfClient {
                     pastCell.setInt(GCell.MCC, c.getMcc());
                     pastCell.setInt(GCell.MNC, c.getMnc());
                 }
+
+                if (c.getSignalStrength() != -1) {
+                    pastCell.setInt(GCell.RSSI, c.getSignalStrength());
+                }
+
                 pastCell.setInt(GCell.AGE, (int)(mCellState.getTime() - c.getTime()));
                 cellularProfile.addProtoBuf(GCellularProfile.HISTORICAL_CELLS, pastCell);
             }
+
+            // Neighboring Cells
+            addNeighborsToCellProfile(mCellState, cellularProfile);
 
             requestElement.setProtoBuf(GLocRequestElement.CELLULAR_PROFILE, cellularProfile);
         }
@@ -344,13 +370,6 @@ public class LocationMasfClient {
         }
         ProtoBuf replyElement = response.getProtoBuf(GLocReply.REPLY_ELEMENTS);
 
-        int status2 = replyElement.getInt(GLocReplyElement.STATUS);
-        if (status2 != ResponseCodes.STATUS_STATUS_SUCCESS &&
-            status2 != ResponseCodes.STATUS_STATUS_FAILED) {
-            Log.e(TAG, "getNetworkLocation(): GLS failed with status " + status2);
-            return false;
-        }
-
         // Get prefetched data to add to the device cache
         Log.d(TAG, "getNetworkLocation(): Number of prefetched entries " +
             replyElement.getCount(GLocReplyElement.DEVICE_LOCATION));
@@ -404,6 +423,13 @@ public class LocationMasfClient {
 
         mLocationCache.save();
 
+        int status2 = replyElement.getInt(GLocReplyElement.STATUS);
+        if (status2 != ResponseCodes.STATUS_STATUS_SUCCESS &&
+            status2 != ResponseCodes.STATUS_STATUS_FAILED) {
+            Log.e(TAG, "getNetworkLocation(): GLS failed with status " + status2);
+            return false;
+        }
+
         // For consistent results for user, always return cache computed location
         boolean foundInCache =
             mLocationCache.lookup(mCellState, mCellHistory, mWifiScanResults, mLocation);
@@ -445,6 +471,11 @@ public class LocationMasfClient {
         int accuracy = 0;
         if (location.has(GLocation.ACCURACY)) {
             accuracy = location.getInt(GLocation.ACCURACY);
+        }
+
+        if (accuracy > MAX_ACCURACY_ALLOWED) {
+            Log.e(TAG, "getNetworkLocation(): accuracy is too high " + accuracy);
+            return false;
         }
 
         mLocation.setLatitude(lat);
@@ -738,11 +769,16 @@ public class LocationMasfClient {
         ProtoBuf requestElement = new ProtoBuf(LocserverMessageTypes.GLOC_REQUEST_ELEMENT);
 
         // Include debug profile
-        if (trigger != -1) {
-            ProtoBuf debugProfile = new ProtoBuf(GdebugprofileMessageTypes.GDEBUG_PROFILE);
-            debugProfile.setInt(GDebugProfile.TRIGGER, trigger);
-            requestElement.setProtoBuf(GLocRequestElement.DEBUG_PROFILE, debugProfile);
+        ProtoBuf debugProfile = new ProtoBuf(GdebugprofileMessageTypes.GDEBUG_PROFILE);
+        requestElement.setProtoBuf(GLocRequestElement.DEBUG_PROFILE, debugProfile);
 
+        if (mDeviceRestart) {
+            debugProfile.setBool(GDebugProfile.DEVICE_RESTART, true);
+            mDeviceRestart = false;
+        }
+
+        if (trigger != -1) {
+            debugProfile.setInt(GDebugProfile.TRIGGER, trigger);
             EventLog.writeEvent(COLLECTION_EVENT_LOG_TAG, trigger);            
         }
 
@@ -760,7 +796,15 @@ public class LocationMasfClient {
                 primaryCell.setInt(GCell.MNC, cellState.getMnc());
             }
 
+            if (cellState.getSignalStrength() != -1) {
+                primaryCell.setInt(GCell.RSSI, cellState.getSignalStrength());
+            }
+
             cellularProfile.setProtoBuf(GCellularProfile.PRIMARY_CELL, primaryCell);
+
+            // Cell neighbors
+            addNeighborsToCellProfile(cellState, cellularProfile);
+
             requestElement.setProtoBuf(GLocRequestElement.CELLULAR_PROFILE, cellularProfile);
         }
 
@@ -818,8 +862,28 @@ public class LocationMasfClient {
                 platformProfile.setProtoBuf(GPlatformProfile.CELLULAR_PLATFORM_PROFILE,
                     cellularPlatform);
             }
+
             mCurrentCollectionRequest.setProtoBuf(GLocRequest.PLATFORM_PROFILE, platformProfile);
+
+        } else {
+
+            ProtoBuf platformProfile =
+                mCurrentCollectionRequest.getProtoBuf(GLocRequest.PLATFORM_PROFILE);
+            if (platformProfile == null) {
+                platformProfile = createPlatformProfile();
+                mCurrentCollectionRequest.setProtoBuf(
+                    GLocRequest.PLATFORM_PROFILE, platformProfile);
+            }
+
+            // Add cellular platform profile is not already included
+            if (platformProfile.getProtoBuf(GPlatformProfile.CELLULAR_PLATFORM_PROFILE) == null &&
+                cellState != null && cellState.isValid()) {
+                ProtoBuf cellularPlatform = createCellularPlatformProfile(cellState);
+                platformProfile.setProtoBuf(GPlatformProfile.CELLULAR_PLATFORM_PROFILE,
+                    cellularPlatform);
+            }
         }
+
         mCurrentCollectionRequest.addProtoBuf(GLocRequest.REQUEST_ELEMENTS, requestElement);
 
         // Immediately upload collection events if buffer exceeds certain size
@@ -990,32 +1054,33 @@ public class LocationMasfClient {
     }
 
     private ProtoBuf createCellularPlatformProfile(CellState cellState) {
-        if (mCellularPlatformProfile == null) {
-            // Radio type
-            int radioType = -1;
-            if (cellState.getRadioType() == CellState.RADIO_TYPE_GPRS) {
-                radioType = GCellularPlatformProfile.RADIO_TYPE_GPRS;
-            } else if (cellState.getRadioType() == CellState.RADIO_TYPE_CDMA) {
-                radioType = GCellularPlatformProfile.RADIO_TYPE_CDMA;
-            } else if (cellState.getRadioType() == CellState.RADIO_TYPE_WCDMA) {
-                radioType = GCellularPlatformProfile.RADIO_TYPE_WCDMA;
-            }
-
-            // Cellular platform profile
-            ProtoBuf cellularPlatform =
-                new ProtoBuf(GlocationMessageTypes.GCELLULAR_PLATFORM_PROFILE);
-            cellularPlatform.setInt(GCellularPlatformProfile.RADIO_TYPE, radioType);
-            if ((cellState.getHomeMcc() != -1) && (cellState.getHomeMnc() != -1)) {
-                cellularPlatform.setInt(GCellularPlatformProfile.HOME_MCC, cellState.getHomeMcc());
-                cellularPlatform.setInt(GCellularPlatformProfile.HOME_MNC, cellState.getHomeMnc());
-            }
-            if (cellState.getCarrier() != null) {
-                cellularPlatform.setString(GCellularPlatformProfile.CARRIER,
-                    cellState.getCarrier());
-            }
-            mCellularPlatformProfile = cellularPlatform;
+        // Radio type
+        int radioType = -1;
+        if (cellState.getRadioType() == CellState.RADIO_TYPE_GPRS) {
+            radioType = GCellularPlatformProfile.RADIO_TYPE_GPRS;
+        } else if (cellState.getRadioType() == CellState.RADIO_TYPE_CDMA) {
+            radioType = GCellularPlatformProfile.RADIO_TYPE_CDMA;
+        } else if (cellState.getRadioType() == CellState.RADIO_TYPE_WCDMA) {
+            radioType = GCellularPlatformProfile.RADIO_TYPE_WCDMA;
         }
 
+        if (mCellularPlatformProfile == null) {
+            mCellularPlatformProfile =
+                new ProtoBuf(GlocationMessageTypes.GCELLULAR_PLATFORM_PROFILE);
+        }
+
+        mCellularPlatformProfile.setInt(GCellularPlatformProfile.RADIO_TYPE, radioType);
+        if ((cellState.getHomeMcc() != -1) && (cellState.getHomeMnc() != -1)) {
+            mCellularPlatformProfile.setInt(GCellularPlatformProfile.HOME_MCC,
+                cellState.getHomeMcc());
+            mCellularPlatformProfile.setInt(GCellularPlatformProfile.HOME_MNC,
+                cellState.getHomeMnc());
+        }
+        if (cellState.getCarrier() != null) {
+            mCellularPlatformProfile.setString(GCellularPlatformProfile.CARRIER,
+                cellState.getCarrier());
+        }
+        
         return mCellularPlatformProfile;
     }
 
@@ -1097,6 +1162,22 @@ public class LocationMasfClient {
             }
 
             addrs.add(output);
+        }
+    }
+
+    private void addNeighborsToCellProfile(CellState cellState, ProtoBuf cellularProfile) {
+        List<CellState.NeighborCell> neighbors = cellState.getNeighbors();
+        if (neighbors != null) {
+            for (CellState.NeighborCell neighbor : neighbors) {
+                ProtoBuf nCell = new ProtoBuf(GcellularMessageTypes.GCELL);
+                nCell.setInt(GCell.CELLID, neighbor.getCid());
+                nCell.setInt(GCell.LAC, neighbor.getLac());
+                nCell.setInt(GCell.RSSI, neighbor.getRssi());
+                if (neighbor.getPsc() != -1) {
+                    nCell.setInt(GCell.PRIMARY_SCRAMBLING_CODE, neighbor.getPsc());
+                }
+                cellularProfile.addProtoBuf(GCellularProfile.NEIGHBORS, nCell);
+            }
         }
     }
 

@@ -16,17 +16,18 @@
 
 package com.android.internal.telephony.test;
 
-import com.android.internal.os.HandlerThread;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import android.os.*;
-import android.util.Log;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 // Also in ATChannel.java
@@ -131,7 +132,7 @@ class InterpreterEx extends Exception
 }
 
 public class ModelInterpreter 
-            implements Runnable, HandlerInterface, SimulatedRadioControl
+            implements Runnable, SimulatedRadioControl
 {
     static final int MAX_CALLS = 6;
 
@@ -151,7 +152,7 @@ public class ModelInterpreter
 
     SimulatedGsmCallState simulatedCallState;
 
-    HandlerThread handlerThread;
+    HandlerThread mHandlerThread;
    
     int pausedResponseCount;
     Object pausedResponseMonitor = new Object();
@@ -186,15 +187,10 @@ public class ModelInterpreter
     init()
     {
         new Thread(this, "ModelInterpreter").start();
-
-        handlerThread 
-            = new HandlerThread(this, 
-                new Runnable() {
-                    public void run() {
-                        simulatedCallState = new SimulatedGsmCallState();
-                    }
-                },
-                "ModelInterpreter");
+        mHandlerThread = new HandlerThread("ModelInterpreter");
+        mHandlerThread.start();
+        Looper looper = mHandlerThread.getLooper();
+        simulatedCallState = new SimulatedGsmCallState(looper);        
     }
 
     //***** Runnable Implementation
@@ -271,14 +267,6 @@ public class ModelInterpreter
                 break;
             }
         }
-    }
-
-    //***** HandlerInterface Implementation
-
-    public void
-    handleMessage(Message msg)
-    {
-
     }
 
 
@@ -695,7 +683,10 @@ public class ModelInterpreter
     public void
     shutdown()
     {
-        handlerThread.getHandler().getLooper().quit();
+        Looper looper = mHandlerThread.getLooper();
+        if (looper != null) {
+            looper.quit();
+        }
 
         try {
             in.close();

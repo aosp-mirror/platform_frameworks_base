@@ -205,7 +205,7 @@ public final class ResourceHelper {
             this.unit = unit;
             this.scale = scale;
         }
-    };
+    }
 
     private final static UnitEntry[] sUnitNames = new UnitEntry[] {
         new UnitEntry("px", TypedValue.TYPE_DIMENSION, TypedValue.COMPLEX_UNIT_PX, 1.0f),
@@ -222,8 +222,6 @@ public final class ResourceHelper {
     /**
      * Returns the raw value from the given string.
      * This object is only valid until the next call on to {@link ResourceHelper}.
-     * @param s
-     * @return
      */
     public static TypedValue getValue(String s) {
         if (stringToFloat(s, mValue)) {

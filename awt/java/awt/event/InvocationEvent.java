@@ -25,6 +25,12 @@ import java.awt.ActiveEvent;
 
 import org.apache.harmony.awt.internal.nls.Messages;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class InvocationEvent extends AWTEvent implements ActiveEvent {
 
     private static final long serialVersionUID = 436056344909459450L;

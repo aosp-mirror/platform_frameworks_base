@@ -24,19 +24,24 @@
 package java.awt.image;
 
 /**
- * The ImagingOpException class provides error notification when 
- * the BufferedImageOp or RasterOp filter methods can not perform
- * the desired filter operation.
+ * The ImagingOpException class provides error notification when the
+ * BufferedImageOp or RasterOp filter methods can not perform the desired filter
+ * operation.
+ * 
+ * @since Android 1.0
  */
 public class ImagingOpException extends RuntimeException {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 8026288481846276658L;
 
     /**
      * Instantiates a new ImagingOpException with a detail message.
      * 
-     * @param s the detail message.
+     * @param s
+     *            the detail message.
      */
     public ImagingOpException(String s) {
         super(s);

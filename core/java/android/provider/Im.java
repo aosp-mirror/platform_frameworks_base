@@ -43,16 +43,25 @@ public class Im {
     public interface ProviderColumns {
         /**
          * The name of the IM provider
+         * <P>Type: TEXT</P>
          */
         String NAME = "name";
 
         /**
          * The full name of the provider
+         * <P>Type: TEXT</P>
          */
         String FULLNAME = "fullname";
 
         /**
+         * The category for the provider, used to form intent.
+         * <P>Type: TEXT</P>
+         */
+        String CATEGORY = "category";
+
+        /**
          * The url users should visit to create a new account for this provider
+         * <P>Type: TEXT</P>
          */
         String SIGNUP_URL = "signup_url";
     }
@@ -187,6 +196,9 @@ public class Im {
         public static final String ACTIVE_ACCOUNT_ID = "account_id";
         public static final String ACTIVE_ACCOUNT_USERNAME = "account_username";
         public static final String ACTIVE_ACCOUNT_PW = "account_pw";
+        public static final String ACTIVE_ACCOUNT_LOCKED = "account_locked";
+        public static final String ACCOUNT_PRESENCE_STATUS = "account_presenceStatus";
+        public static final String ACCOUNT_CONNECTION_STATUS = "account_connStatus";
 
         /**
          * The content:// style URL for this table
@@ -203,6 +215,9 @@ public class Im {
          */
         public static final String CONTENT_TYPE =
                 "vnd.android.cursor.dir/im-providers";
+
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/im-providers";
 
         /**
          * The default sort order for this table
@@ -317,6 +332,76 @@ public class Im {
          */
         public static final String DEFAULT_SORT_ORDER = "name ASC";
 
+    }
+
+    /**
+     * Connection status
+     */
+    public interface ConnectionStatus {
+        /**
+         * The connection is offline, not logged in.
+         */
+        int OFFLINE = 0;
+
+        /**
+         * The connection is attempting to connect.
+         */
+        int CONNECTING = 1;
+
+        /**
+         * The connection is suspended due to network not available.
+         */
+        int SUSPENDED = 2;
+
+        /**
+         * The connection is logged in and online.
+         */
+        int ONLINE = 3;
+    }
+
+    public interface AccountStatusColumns {
+        /**
+         * account id
+         * <P>Type: INTEGER</P>
+         */
+        String ACCOUNT = "account";
+
+        /**
+         * User's presence status, see definitions in {#link CommonPresenceColumn}
+         * <P>Type: INTEGER</P>
+         */
+        String PRESENCE_STATUS = "presenceStatus";
+
+        /**
+         * The connection status of this account, see {#link ConnectionStatus}
+         * <P>Type: INTEGER</P>
+         */
+        String CONNECTION_STATUS = "connStatus";
+    }
+
+    public static final class AccountStatus implements BaseColumns, AccountStatusColumns {
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://im/accountStatus");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of account status.
+         */
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/im-account-status";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single account status.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/im-account-status";
+
+        /**
+         * The default sort order for this table
+         */
+        public static final String DEFAULT_SORT_ORDER = "name ASC";
     }
 
     /**
@@ -451,7 +536,35 @@ public class Im {
          * <P>Type: INTEGER</P>
          */
         String REJECTED = "rejected";
+
+        /**
+         * Off The Record status: 0 for disabled, 1 for enabled
+         * <P>Type: INTEGER </P>
+         */
+        String OTR = "otr";
     }
+
+    /**
+     * This defines the different type of values of {@link ContactsColumns#OTR}
+     */
+    public interface OffTheRecordType {
+        /*
+         * Off the record not turned on
+         */
+        int DISABLED = 0;
+        /**
+         * Off the record turned on, but we don't know who turned it on
+         */
+        int ENABLED = 1;
+        /**
+         * Off the record turned on by the user
+         */
+        int ENABLED_BY_USER = 2;
+        /**
+         * Off the record turned on by the buddy
+         */
+        int ENABLED_BY_BUDDY = 3;
+    };
 
     /**
      * This table contains contacts.
@@ -755,15 +868,32 @@ public class Im {
      * Message type definition
      */
     public interface MessageType {
+        /* sent message */
         int OUTGOING = 0;
+        /* received message */
         int INCOMING = 1;
+        /* presence became available */
         int PRESENCE_AVAILABLE = 2;
+        /* presence became away */
         int PRESENCE_AWAY = 3;
+        /* presence became DND (busy) */
         int PRESENCE_DND = 4;
+        /* presence became unavailable */
         int PRESENCE_UNAVAILABLE = 5;
+        /* the message is converted to a group chat */
         int CONVERT_TO_GROUPCHAT = 6;
+        /* generic status */
         int STATUS = 7;
+        /* the message cannot be sent now, but will be sent later */
         int POSTPONED = 8;
+        /* off The Record status is turned off */
+        int OTR_IS_TURNED_OFF = 9;
+        /* off the record status is turned on */
+        int OTR_IS_TURNED_ON = 10;
+        /* off the record status turned on by user */
+        int OTR_TURNED_ON_BY_USER = 11;
+        /* off the record status turned on by buddy */
+        int OTR_TURNED_ON_BY_BUDDY = 12;
     }
 
     /**
@@ -1244,26 +1374,25 @@ public class Im {
     public interface ChatsColumns {
         /**
          * The contact ID this chat belongs to. The value is a long.
-         * <P>Type: TEXT</P>
+         * <P>Type: INT</P>
          */
         String CONTACT_ID = "contact_id";
 
         /**
          * The GTalk JID resource. The value is a string.
+         * <P>Type: TEXT</P>
          */
         String JID_RESOURCE = "jid_resource";
 
         /**
          * Whether this is a groupchat or not.
+         * <P>Type: INT</P>
          */
-        // TODO: remove this column since we already have a tag in contacts
-        // table to indicate it's a group chat.
         String GROUP_CHAT = "groupchat";
 
         /**
          * The last unread message. This both indicates that there is an
          * unread message, and what the message is.
-         *
          * <P>Type: TEXT</P>
          */
         String LAST_UNREAD_MESSAGE = "last_unread_message";
@@ -1278,10 +1407,17 @@ public class Im {
          * A message that is being composed.  This indicates that there was a
          * message being composed when the chat screen was shutdown, and what the
          * message is.
-         *
          * <P>Type: TEXT</P>
          */
         String UNSENT_COMPOSED_MESSAGE = "unsent_composed_message";
+        
+        /**
+         * A value from 0-9 indicating which quick-switch chat screen slot this
+         * chat is occupying.  If none (for instance, this is the 12th active chat)
+         * then the value is -1.
+         * <P>Type: INT</P>
+         */
+        String SHORTCUT = "shortcut";
     }
 
     /**

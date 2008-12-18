@@ -16,7 +16,7 @@
 
 package android.webkit;
 
-import android.pim.Time;
+import android.text.format.Time;
 
 import java.util.Calendar;
 import java.util.regex.Matcher;

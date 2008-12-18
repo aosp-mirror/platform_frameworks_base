@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image.renderable;
 
 import java.awt.RenderingHints;
@@ -29,35 +30,44 @@ import java.util.Vector;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class RenderableImageOp is a basic implementation of RenderableImage, 
- * with methods to access the parameter data and perform rendering
- * operations.
+ * The Class RenderableImageOp is a basic implementation of RenderableImage,
+ * with methods to access the parameter data and perform rendering operations.
+ * 
+ * @since Android 1.0
  */
 public class RenderableImageOp implements RenderableImage {
 
-    /** The CRIF. */
+    /**
+     * The CRIF.
+     */
     ContextualRenderedImageFactory CRIF;
-    
-    /** The param block. */
+
+    /**
+     * The param block.
+     */
     ParameterBlock paramBlock;
-    
-    /** The height. */
+
+    /**
+     * The height.
+     */
     float minX, minY, width, height;
 
     /**
      * Instantiates a new renderable image op.
      * 
-     * @param CRIF the cRIF
-     * @param paramBlock the param block
+     * @param CRIF
+     *            the cRIF.
+     * @param paramBlock
+     *            the param block.
      */
     public RenderableImageOp(ContextualRenderedImageFactory CRIF, ParameterBlock paramBlock) {
         this.CRIF = CRIF;
-        this.paramBlock = (ParameterBlock) paramBlock.clone();
+        this.paramBlock = (ParameterBlock)paramBlock.clone();
         Rectangle2D r = CRIF.getBounds2D(paramBlock);
-        minX = (float) r.getMinX();
-        minY = (float) r.getMinY();
-        width = (float) r.getWidth();
-        height = (float) r.getHeight();
+        minX = (float)r.getMinX();
+        minY = (float)r.getMinY();
+        width = (float)r.getWidth();
+        height = (float)r.getHeight();
     }
 
     public Object getProperty(String name) {
@@ -67,27 +77,27 @@ public class RenderableImageOp implements RenderableImage {
     /**
      * Sets the parameter block.
      * 
-     * @param paramBlock the param block
-     * 
-     * @return the parameter block
+     * @param paramBlock
+     *            the param block.
+     * @return the parameter block.
      */
     public ParameterBlock setParameterBlock(ParameterBlock paramBlock) {
         ParameterBlock oldParam = this.paramBlock;
-        this.paramBlock = (ParameterBlock) paramBlock.clone();
+        this.paramBlock = (ParameterBlock)paramBlock.clone();
         return oldParam;
     }
 
     public RenderedImage createRendering(RenderContext renderContext) {
 
         Vector<RenderableImage> sources = getSources();
-        ParameterBlock rdParam = (ParameterBlock) paramBlock.clone();
+        ParameterBlock rdParam = (ParameterBlock)paramBlock.clone();
 
         if (sources != null) {
             Vector<Object> rdSources = new Vector<Object>();
             int i = 0;
             while (i < sources.size()) {
-                RenderContext newContext = CRIF.mapRenderContext(i, renderContext, paramBlock,
-                        this);
+                RenderContext newContext = CRIF
+                        .mapRenderContext(i, renderContext, paramBlock, this);
                 RenderedImage rdim = sources.elementAt(i).createRendering(newContext);
 
                 if (rdim != null) {
@@ -103,20 +113,20 @@ public class RenderableImageOp implements RenderableImage {
     }
 
     public RenderedImage createScaledRendering(int w, int h, RenderingHints hints) {
-        if(w == 0 && h == 0) {
+        if (w == 0 && h == 0) {
             // awt.60=Width and Height mustn't be equal zero both
             throw new IllegalArgumentException(Messages.getString("awt.60")); //$NON-NLS-1$
         }
-        if(w == 0){
-            w = Math.round(h*(getWidth()/getHeight()));
+        if (w == 0) {
+            w = Math.round(h * (getWidth() / getHeight()));
         }
 
-        if(h == 0){
-            h = Math.round(w*(getHeight()/getWidth()));
+        if (h == 0) {
+            h = Math.round(w * (getHeight() / getWidth()));
         }
 
-        double sx = (double)w/getWidth();
-        double sy = (double)h/getHeight();
+        double sx = (double)w / getWidth();
+        double sy = (double)h / getHeight();
 
         AffineTransform at = AffineTransform.getScaleInstance(sx, sy);
         RenderContext context = new RenderContext(at, hints);
@@ -124,15 +134,15 @@ public class RenderableImageOp implements RenderableImage {
     }
 
     public Vector<RenderableImage> getSources() {
-        if(paramBlock.getNumSources() == 0) {
+        if (paramBlock.getNumSources() == 0) {
             return null;
         }
         Vector<RenderableImage> v = new Vector<RenderableImage>();
-        int  i = 0;
-        while(i < paramBlock.getNumSources()){
+        int i = 0;
+        while (i < paramBlock.getNumSources()) {
             Object o = paramBlock.getSource(i);
-            if(o instanceof RenderableImage){
-                v.addElement((RenderableImage) o);
+            if (o instanceof RenderableImage) {
+                v.addElement((RenderableImage)o);
             }
             i++;
         }
@@ -179,4 +189,3 @@ public class RenderableImageOp implements RenderableImage {
     }
 
 }
-

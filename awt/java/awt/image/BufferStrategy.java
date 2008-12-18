@@ -18,35 +18,37 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.BufferCapabilities;
 import java.awt.Graphics;
 
 /**
- * The BufferStrategy abstract class provides an opportunity 
- * to organize the buffers for a Canvas or Window. The BufferStrategy
- * implementation depends on hardware and software limitations.
- * These limitations are detectible through the capabilities 
- * object which can be obtained by the GraphicsConfiguration of the Canvas 
- * or Window.
+ * The BufferStrategy abstract class provides an opportunity to organize the
+ * buffers for a Canvas or Window. The BufferStrategy implementation depends on
+ * hardware and software limitations. These limitations are detectable through
+ * the capabilities object which can be obtained by the GraphicsConfiguration of
+ * the Canvas or Window.
+ * 
+ * @since Android 1.0
  */
 public abstract class BufferStrategy {
 
     /**
-     * Returns true if the drawing buffer was lost since the last call 
-     * of getDrawGraphics. 
+     * Returns true if the drawing buffer was lost since the last call of
+     * getDrawGraphics.
      * 
-     * @return true if the drawing buffer was lost since the last call 
-     * of getDrawGraphics, false otherwise.
+     * @return true if the drawing buffer was lost since the last call of
+     *         getDrawGraphics, false otherwise.
      */
     public abstract boolean contentsLost();
 
     /**
-     * Returns true if the drawing buffer is restored from a lost state. 
+     * Returns true if the drawing buffer is restored from a lost state.
      * 
-     * @return true if the drawing buffer is restored from a lost state,
-     * false otherwise.
+     * @return true if the drawing buffer is restored from a lost state, false
+     *         otherwise.
      */
     public abstract boolean contentsRestored();
 

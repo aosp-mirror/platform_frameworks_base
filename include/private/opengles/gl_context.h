@@ -532,6 +532,10 @@ struct compute_iterators_t
             vertex_t const* v1,
             vertex_t const* v2);
 
+    void initLine(
+            vertex_t const* v0,
+            vertex_t const* v1);
+
     inline void initLerp(vertex_t const* v0, uint32_t enables);
 
     int iteratorsScale(int32_t it[3],
@@ -541,6 +545,9 @@ struct compute_iterators_t
             GGLfixed c0, GGLfixed c1, GGLfixed c2) const;
 
     void iterators0032(int32_t it[3],
+            int32_t c0, int32_t c1, int32_t c2) const;
+
+    void iterators0032(int64_t it[3],
             int32_t c0, int32_t c1, int32_t c2) const;
 
     GGLcoord area() const { return m_area; }

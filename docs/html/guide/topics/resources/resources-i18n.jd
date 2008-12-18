@@ -1,6 +1,34 @@
-page.title=Resources and i18n
+page.title=Resources and Internationalization
+parent.title=Resources and Assets
+parent.link=index.html
 @jd:body
-<h1>Resources and Internationalization</h1>
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#CreatingResources">Creating Resources</a></li>
+    <li><a href="#UsingResources">Using Resources</a>
+      <ol>
+        <li><a href="#ResourcesInCode">Using Resources in Code</a></li>
+        <li><a href="#ReferencesToResources">References to Resources</a></li>
+        <li><a href="#ReferencesToThemeAttributes">References to Theme Attributes</a></li>
+        <li><a href="#UsingSystemResources">Using System Resources</a></li>
+      </ol>
+    </li>
+    <li><a href="#AlternateResources">Alternate Resources</a></li>
+    <li><a href="#ResourcesTerminology">Terminology</a></li>
+    <li><a href="#i18n">Internationalization (I18N)</a></li>
+  </ol>
+</div>
+</div>
 
 <p>Resources are external files (that is, non-code files) that are used by
 your code and compiled into your application at build time. Android
@@ -13,41 +41,19 @@ a binary, fast loading format for efficiency reasons. Strings, likewise are comp
 into a more efficient storage form. It is for these reasons that we have these
 different resource types in the Android platform.</p>
 
-<p>This document contains the following sections:</p>
-
-<ul>
-	<li> <a href="#Resources">Resources</a>
-		<ul>
-           <li> <a href="#CreatingResources">Creating Resources</a></li>
-           <li> <a href="#UsingResources">Using Resources</a>
-             <ul>
-               <li><a href="#ResourcesInCode">Using Resources in Code</a></li>
-               <li> <a href="#ReferencesToResources">References to Resources</a></li>
-               <li> <a href="#ReferencesToThemeAttributes">References to Theme Attributes</a></li>
-               <li> <a href="#UsingSystemResources">Using System Resources</a></li>
-             </ul>
-           </li>
-           <li><a href="#AlternateResources">Alternate Resources</a></li>
-           <li><a href="{@docRoot}reference/available-resources.html">
-           Resource Reference</a></li>
-			<li> <a href="#ResourcesTerminology">Terminology</a></li>
-		</ul>
-    </li>
-    <li><a href="#i18n">Internationalization (I18N)</a></li>
-</ul>
 <p>This is a fairly technically dense document, and together with the
-<a href="{@docRoot}reference/available-resources.html">Resource Reference</a>
+<a href="available-resources.html">Available Resources</a>
 document, they cover a lot of information about resources. It is not necessary
 to know this document by heart to use Android, but rather to know that the
 information is here when you need it.</p>
 
-<a name="Resources"></a>
-<h2>Resources</h2>
+<a name="intro"></a>
+<h2>Introduction</h2>
 
 <p>This topic includes a terminology list associated with resources, and a series
     of examples of using resources in code. For a complete guide to the supported 
     Android resource types, see 
-    <a href="{@docRoot}reference/available-resources.html">Resources</a>.
+    <a href="available-resources.html">Available Resources</a>.
     </p>
 <p>The Android resource system keeps track of all non-code
     assets associated with an application.  You use the
@@ -84,7 +90,7 @@ subdirectory under the <code>res/</code> directory in your project. Android
 has a resource compiler (aapt) that compiles resources according to which
 subfolder they are in, and the format of the file. Here is a list of the file
 types for each resource. See the 
-<a href="{@docRoot}reference/available-resources.html">resource reference</a> for
+<a href="available-resources.html">Available Resources</a> for
 descriptions of each type of object, the syntax, and the format or syntax of
 the containing file.</p>
 
@@ -96,9 +102,9 @@ the containing file.</p>
     <tr>
         <td><code>res/anim/</code></td>
         <td>XML files that are compiled into 
-        <a href="{@docRoot}reference/available-resources.html#animationdrawable">frame by
+        <a href="available-resources.html#animationdrawable">frame by
         frame animation</a> or 
-        <a href="{@docRoot}reference/available-resources.html#tweenedanimation">tweened
+        <a href="available-resources.html#tweenedanimation">tweened
         animation</a> objects </td>
     </tr>
     <tr>
@@ -107,14 +113,14 @@ the containing file.</p>
                 Drawable resource subtypes:</p>
             <p>To get a resource of this type, use <code>Resource.getDrawable(<em>id</em>)</code>
             <ul>
-                <li><a href="{@docRoot}reference/available-resources.html#imagefileresources">bitmap files</a></li>
-                <li><a href="{@docRoot}reference/available-resources.html#ninepatch">9-patches (resizable bitmaps)</a></li>
+                <li><a href="available-resources.html#imagefileresources">bitmap files</a></li>
+                <li><a href="available-resources.html#ninepatch">9-patches (resizable bitmaps)</a></li>
             </ul></td>
     </tr>
     <tr>
         <td><code>res/layout/</code></td>
         <td>XML files that are compiled into screen layouts (or part of a screen).
-            See <a href="{@docRoot}devel/ui/xml.html">layouts</a></td>
+            See <a href="{@docRoot}guide/topics/views/declaring-layout.html">Declaring Layout</a></td>
     </tr>
     <tr>
         <td><code>res/values/</code></td>
@@ -129,19 +135,19 @@ the containing file.</p>
             <ul>
                 <li><strong>arrays.xml</strong> to define arrays </li>  
                 <!-- TODO: add section on arrays -->
-                <li><strong>colors.xml</strong> to define <a href="{@docRoot}reference/available-resources.html#colordrawableresources">color
+                <li><strong>colors.xml</strong> to define <a href="available-resources.html#colordrawableresources">color
                         drawables</a> and <a  href="#colorvals">color string values</a>.
                         Use <code>Resources.getDrawable()</code> and
                         <code>Resources.getColor(), respectively,</code>
                 to get these resources.</li>
-                <li><strong>dimens.xml</strong> to define <a href="{@docRoot}reference/available-resources.html#dimension">dimension value</a>. Use <code>Resources.getDimension()</code> to get
+                <li><strong>dimens.xml</strong> to define <a href="available-resources.html#dimension">dimension value</a>. Use <code>Resources.getDimension()</code> to get
                 these resources.</li>
-                <li><strong>strings.xml</strong> to define <a href="{@docRoot}reference/available-resources.html#stringresources">string</a> values (use either         
+                <li><strong>strings.xml</strong> to define <a href="available-resources.html#stringresources">string</a> values (use either         
                 <code>Resources.getString</code> or preferably <code>Resources.getText()</code>
                 to get
                 these resources. <code>getText()</code> will retain any rich text styling
                 which is usually desirable for UI strings.</li>
-                <li><strong>styles.xml</strong> to define <a href="{@docRoot}reference/available-resources.html#stylesandthemes">style</a> objects.</li>
+                <li><strong>styles.xml</strong> to define <a href="available-resources.html#stylesandthemes">style</a> objects.</li>
             </ul></td>
     </tr>
     <tr>
@@ -233,8 +239,7 @@ defined in XML files, or the file name (without the extension) for resources
 defined by other file types. Each type of resource will be added to a specific
 R subclass, depending on the type of resource it is; to learn which R subclass
 hosts your compiled resource type, consult the 
-<a href="{@docRoot}reference/available-resources.html">resource
-reference</a> document. Resources compiled by your own application can
+<a href="available-resources.html">Available Resources</a> document. Resources compiled by your own application can
 be referred to without a package name (simply as
 <code>R.<em>resource_type</em>.<em>resource_name</em></code>). Android contains
 a number of standard resources, such as screen styles and button backgrounds. To
@@ -273,7 +278,7 @@ can be localized) and images (which exist in another file), though a reference
 can be any resource type including colors and integers.</p>
 
 <p>For example, if we have 
-<a href="{@docRoot}reference/available-resources.html#colordrawableresources">color 
+<a href="available-resources.html#colordrawableresources">color 
 resources</a>, we can write a layout file that sets the text color size to be
 the value contained in one of those resources:</p>
 
@@ -394,7 +399,7 @@ public class MyActivity extends Activity
 </pre>
 
 <a name="AlternateResources" id="AlternateResources"></a>
-<h2>Supporting Alternate Resources for Alternate Languages and Configurations</h2>
+<h2>Alternate Resources (for alternate languages and configurations)</h2>
 
 <p>You can supply different resources for your product according to the UI
 language or hardware configuration on the device. Note that although you can
@@ -485,7 +490,7 @@ MyApp/
     <tr>
         <td>Primary non-touchscreen<br />
             navigation method</td>
-        <td><code>notouch</code>, <code>dpad</code>, <code>trackball</code>, <code>wheel</code> </td>
+        <td><code>nonav</code>, <code>dpad</code>, <code>trackball</code>, <code>wheel</code> </td>
     </tr>
     <tr>
         <td>Screen dimensions</td>
@@ -684,7 +689,7 @@ user to select between different global appearances of their device, or
 download files with new appearances.</p>
 
 <h2>Resource Reference</h2>
-<p>The <a href="{@docRoot}reference/available-resources.html">Resource Reference</a>
+<p>The <a href="available-resources.html">Available Resources</a>
 document provides a detailed list of the various types of resource and how to use them
 from within the Java source code, or from other references.</p>
 

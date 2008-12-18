@@ -34,13 +34,14 @@ public final class OverrideMethod {
          *  
          * @param signature The signature of the method being invoked, composed of the
          *                  binary class name followed by the method descriptor (aka argument
-         *                  types). Example: "com/foo/MyClass/InnerClass/printInt(I)V"
+         *                  types). Example: "com/foo/MyClass/InnerClass/printInt(I)V".
+         * @param isNative True if the method was a native method.
          * @param caller The calling object. Null for static methods, "this" for instance methods.
          */
-        public void onInvoke(String signature, Object caller);
+        public void onInvoke(String signature, boolean isNative, Object caller);
     }
 
-    /** Map of method overriden. */
+    /** Map of method overridden. */
     private static HashMap<String, MethodListener> sMethods = new HashMap<String, MethodListener>();
     /** Default listener for all method not listed in sMethods. Nothing if null. */
     private static MethodListener sDefaultListener = null;
@@ -77,15 +78,16 @@ public final class OverrideMethod {
      * 
      * @param signature The signature of the method being invoked, composed of the
      *                  binary class name followed by the method descriptor (aka argument
-     *                  types). Example: "com/foo/MyClass/InnerClass/printInt(I)V"
+     *                  types). Example: "com/foo/MyClass/InnerClass/printInt(I)V".
+     * @param isNative True if the method was a native method.
      * @param caller The calling object. Null for static methods, "this" for instance methods.
      */
-    public static void invoke(String signature, Object caller) {
+    public static void invoke(String signature, boolean isNative, Object caller) {
         MethodListener i = sMethods.get(signature);
         if (i != null) {
-            i.onInvoke(signature, caller);
+            i.onInvoke(signature, isNative, caller);
         } else if (sDefaultListener != null) {
-            sDefaultListener.onInvoke(signature, caller);
+            sDefaultListener.onInvoke(signature, isNative, caller);
         }
     }
 }

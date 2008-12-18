@@ -1,7 +1,7 @@
 page.title=Android Emulator
 @jd:body
 
-<img src="{@docRoot}images/emulator-hvga-p.png" alt="Image of the Android Emulator" width="271" height="524" style="margin-left:0em;float:right;"/>
+<img src="{@docRoot}images/emulator-hvga-p.png" alt="Image of the Android Emulator" width="271" height="524" style="margin-left:0em;margin-top:-4em;float:right;"/>
 
 <p>The Android SDK includes a mobile device emulator -- a virtual mobile device 
 that runs on your computer. The emulator lets you prototype, develop, and test 
@@ -25,56 +25,64 @@ arriving SMS messages or phone calls), and simulate latency effects and dropouts
 on the data channel.</p>
 
 
-<h2 style="clear:right;">Contents</h2>
 
-<div class="g-section g-tpl-50-50">
-<div class="g-unit g-first">
 
-<dl>
-<dt><a href="#overview">Overview</a></dt>
-<dt><a href="#starting">Starting and Stopping the Emulator</a></dt>
-<dt><a href="#controlling">Controlling the Emulator</a></dt>
-<dt><a href="#startup-options">Emulator Startup Options</a></dt>
-<dt><a href="#diskimages">Working with Emulator Disk Images</a></dt>
-	<dd><a href="#systemimages">System Images</a></dd>
-	<dd><a href="#runtimeimages">Runtime Images: User Data and SD Card</a></dd>
-	<dd><a href="#temporaryimages">Temporary Images</a></dd>
-<dt><a href="#emulatornetworking">Emulator Networking</a></dt>
-	<dd><a href="#networkaddresses">Network Address Space</a></dd>
-	<dd><a href="#networkinglimitations">Local Networking Limitations</a></dd>
-	<dd><a href="#redirections">Using Network Redirections</a></dd>
-	<dd><a href="#dns">Configuring the Emulator's DNS Settings</a></dd>
-	<dd><a href="#proxy">Using the Emulator with a Proxy</a></dd>
-	<dd><a href="#connecting">Interconnecting Emulator Instances</a></dd>
-	<dd><a href="#calling">Sending a Voice Call or SMS to Another Emulator Instance</a></dd>
-</dl>
+<div class="inline-toc" style="whitespace:nowrap;">
+<h4>In this document:</h4>
+<div class="g-unit g-first" style="whitespace:nowrap;width:35%;">
+<ol class="toc">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#starting">Starting and Stopping the Emulator</a></li>
+<li><a href="#controlling">Controlling the Emulator</a></li>
+<li><a href="#startup-options">Emulator Startup Options</a></li>
+<li><a href="#diskimages">Working with Emulator Disk Images</a>
+	<ol class="toc">
+	<li><a href="#systemimages">System Images</a></li>
+	<li><a href="#runtimeimages">Runtime Images: User Data and SD Card</a></li>
+	<li><a href="#temporaryimages">Temporary Images</a></li>
+	</ol></li>
+<li><a href="#emulatornetworking">Emulator Networking</a>
+	<ol class="toc">
+	<li><a href="#networkaddresses">Network Address Space</a></li>
+	<li><a href="#networkinglimitations">Local Networking Limitations</a></li>
+	<li><a href="#redirections">Using Network Redirections</a></li>
+	<li><a href="#dns">Configuring the Emulator's DNS Settings</a></li>
+	<li><a href="#proxy">Using the Emulator with a Proxy</a></li>
+	<li><a href="#connecting">Interconnecting Emulator Instances</a></li>
+	<li><a href="#calling">Sending a Voice Call or SMS to Another Emulator Instance</a></li>
+	</ol></li>
+</ol>
 </div>
 
-<div class="g-unit">
-<dl>
-<dt><a href="#console">Using the Emulator Console</a></dt>
-	<dd><a href="#portredirection">Port Redirections</a></dd>
-	<dd><a href="#geo">Geo Location Provider Emulation</a></dd>
-	<dd><a href="#events">Sending Events</a></dd>
-	<dd><a href="#power">Emulating Device Power Characteristics</a></dd>
-	<dd><a href="#netstatus">Network Status</a></dd>
-	<dd><a href="#netdelay">Network Delay Emulation</a></dd>
-	<dd><a href="#netspeed">Network Speed Emulation</a></dd>
-	<dd><a href="#telephony">Telephony Emulation</a></dd>
-	<dd><a href="#sms">SMS Emulation</a></dd>
-	<dd><a href="#vm">VM State</a></dd>
-	<dd><a href="#window">Emulator Window</a></dd>
-	<dd><a href="#terminating">Terminating an Emulator Instance</a></dd>
-<dt><a href="#skins">Using Emulator Skins</a></dt>
-<dt><a href="#multipleinstances">Running Multiple Instances of the Emulator</a></dt>
-<dt><a href="#apps">Installing Applications on the Emulator</a></dt>
-<dt><a href="#sdcard">SD Card Emulation</a></dt>
-	<dd><a href="#creating">Creating a Disk Image</a></dd>
-	<dd><a href="#copying">Copying Files to a Disk Image</a></dd>
-	<dd><a href="#loading">Loading the Disk Image at Emulator Startup</a></dd>
-<dt><a href="#troubleshooting">Troubleshooting Emulator Problems</a></dt>
-<dt><a href="#limitations">Emulator Limitations</a></dt>
-</dl>
+<div class="g-unit" style="whitespace:nowrap;">
+<ol class="toc">
+<li><a href="#console">Using the Emulator Console</a>
+	<ol class="toc">
+	<li><a href="#portredirection">Port Redirections</a></li>
+	<li><a href="#geo">Geo Location Provider Emulation</a></li>
+	<li><a href="#events">Sending Events</a></li>
+	<li><a href="#power">Emulating Device Power Characteristics</a></li>
+	<li><a href="#netstatus">Network Status</a></li>
+	<li><a href="#netdelay">Network Delay Emulation</a></li>
+	<li><a href="#netspeed">Network Speed Emulation</a></li>
+	<li><a href="#telephony">Telephony Emulation</a></li>
+	<li><a href="#sms">SMS Emulation</a></li>
+	<li><a href="#vm">VM State</a></li>
+	<li><a href="#window">Emulator Window</a></li>
+	<li><a href="#terminating">Terminating an Emulator Instance</a></li>
+	</ol></li>
+<li><a href="#skins">Using Emulator Skins</a></li>
+<li><a href="#multipleinstances">Running Multiple Instances of the Emulator</a></li>
+<li><a href="#apps">Installing Applications on the Emulator</a></li>
+<li><a href="#sdcard">SD Card Emulation</a>
+	<ol class="toc">
+	<li><a href="#creating">Creating a Disk Image</a></li>
+	<li><a href="#copying">Copying Files to a Disk Image</a></li>
+	<li><a href="#loading">Loading the Disk Image at Emulator Startup</a></li>
+	</ol></li>
+<li><a href="#troubleshooting">Troubleshooting Emulator Problems</a></li>
+<li><a href="#limitations">Emulator Limitations</a></li>
+</ol>
 </div>
 
 </div>
@@ -209,7 +217,7 @@ the keys of your keyboard. </p>
   </tr>
   <tr>
     <td>Audio volume up button</td>
-    <td>KEYPAD_PLUS, Ctrl-F5</td>
+    <td>KEYPAD_PLUS, Ctrl-5</td>
   </tr>
 
   <tr>
@@ -242,7 +250,11 @@ the keys of your keyboard. </p>
   </tr>
   <tr>
     <td>Toggle trackball mode</td>
-    <td>Ctrl-T</td>
+    <td>F6</td>
+  </tr>
+  <tr>
+    <td>Enter trackball mode temporarily (while key is pressed)</td>
+    <td>Delete</td>
   </tr>
   <tr>
     <td>DPad left/up/right/down</td>
@@ -333,8 +345,8 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td>Use &lt;filepath&gt; as the working user-data disk image. </td>
   <td>Optionally, you can specify a path relative to the current working directory. 
   If <code>-data</code> is not used, the emulator looks for a file named &quot;userdata-qemu.img&quot; 
-  in the directory specified in &lt;datadir&gt;. ~/.android (on Linux/Mac) or 
-  C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android (on Windows). 
+  in the directory specified in &lt;datadir&gt;. ~/.android/SDK-1.0 (on Linux/Mac) or 
+  C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android\SDK-1.0 (on Windows). 
   <p> If you use <code>-data &lt;filepath&gt;</code> but the file does not exist, the emulator creates 
   a file at that location using the specified name. </p>
   <p>See <a href="#multipleinstances">Running Multiple Emulator Instances</a> for information about how 
@@ -348,8 +360,8 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td><code>&lt;dir&gt;</code> is a path relative to the current working directory. 
 
 <p>If you do not specify <code>-datadir</code>, the emulator looks for the user-data image in the 
-  directory ~/.android (on Linux/Mac) or C:\Documents and Settings\&lt;user&gt;\Local Settings\Application 
-  Data\Android (on Windows). </p><p>For more information on disk images, use <code>-help-disk-images</code>.</p>
+  directory ~/.android/SDK-1.0 (on Linux/Mac) or C:\Documents and Settings\&lt;user&gt;\Local Settings\Application 
+  Data\Android\SDK-1.0 (on Windows). </p><p>For more information on disk images, use <code>-help-disk-images</code>.</p>
 </td></tr>
 -->
 <tr>
@@ -776,8 +788,8 @@ described above. The emulator stores the default image in this location on
 on your development machine: </p>
 
 <ul>
-  <li>Linux and OS X: <code>~/.android</code></li>
-  <li>Windows: <code>C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android</code></li>
+  <li>Linux and OS X: <code>~/.android/SDK-1.0</code></li>
+  <li>Windows: <code>C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android\SDK-1.0</code></li>
 </ul>
 
 <!--
@@ -1034,7 +1046,7 @@ case, <code>redir</code> generates an error message to that effect. </p>
 
 <p>The Android Debug Bridge (ADB) tool provides port forwarding, an alternate
 way for you to set up network redirections. For more information, see <a
-href="{@docRoot}reference/adb.html#forwardports">Forwarding Ports</a> in the ADB
+href="{@docRoot}guide/developing/tools/adb.html#forwardports">Forwarding Ports</a> in the ADB
 documentation.</p>
 
 <p>Note that ADB does not currently offer any way to remove a redirection,
@@ -1159,7 +1171,7 @@ B:10.0.2.15:&lt;serverPort&gt;</code></li>
 
 <p><code>Android Emulator (5554)</code></p>
 
-<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}reference/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
+<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}guide/developing/tools/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
 
 <p class="note">Note: The emulator listens for connections on ports 5554-5587 and accepts connections only from localhost.</p>
 
@@ -1233,7 +1245,7 @@ B:10.0.2.15:&lt;serverPort&gt;</code></li>
 </tr>
 </table>
 
-<p>You can issue the <code>geo</code> command to fix the GPS location as soon as an emulator instance is running. The emulator creates a mock location provider that sends the location to GPS-aware applications as soon as they start and register location listeners. Any application can query the location manager to obtain the current GPS fix for the emulated device by calling:
+<p>You can issue the <code>geo</code> command to fix the GPS location as soon as an emulator instance is running. The emulator creates a mock location provider that sends it to GPS-aware applications as soon as they start and register location listeners. Any application can query the location manager to obtain the current GPS fix for the emulated device by calling:
 
 <pre>LocationManager.getLastKnownLocation("gps")</pre>
 
@@ -1443,7 +1455,7 @@ kilobits/sec):</p>
   <tr>
     <td><code>call &lt;phonenumber&gt;</code></td>
     <td>Simulate an inbound phone call from &lt;phonenumber&gt;.</td>
-    <td>See also <a href="#calling">Sending a Voice Call or SMS to another Emulator Instance</a>.</td>
+    <td>&nbsp;</td>
   </tr>
   <tr>
     <td><code>accept &lt;phonenumber&gt;</code></td>
@@ -1632,8 +1644,8 @@ kilobits/sec):</p>
 <ul>
   <li>By default, only the first-launched emulator instance can preserve user data across sessions. When a session closes, 
   the emulator stores the user data to a user-data image file &mdash; by default, it stores the data in the file 
-  <code>~/.android/userdata-qemu.img </code>(on Linux and Mac) or <code>C:\Documents and Settings\&lt;user&gt;\Local
-   Settings\Application Data\Android\userdata-qemu.img</code> (on Windows) in your development computer.</li>
+  <code>~/.android/SDK-1.0/userdata-qemu.img </code>(on Linux and Mac) or <code>C:\Documents and Settings\&lt;user&gt;\Local
+   Settings\Application Data\Android\SDK-1.0\userdata-qemu.img</code> (on Windows) in your development computer.</li>
 
 <li>Emulator instances that you start after the first instance (that are running concurrently) can also store user data during a session, but they <em>do not</em> preserve it for the next session, unless you have specified a unique user-data image file in which the data should be stored. </li>
 
@@ -1646,9 +1658,9 @@ kilobits/sec):</p>
 <h2>Installing Applications on the Emulator</h2>
 
 <p>If you don't have access to Eclipse or the ADT Plugin, you can install 
-your application on the emulator <a href="{@docRoot}reference/adb.html#move">using 
+your application on the emulator <a href="{@docRoot}guide/developing/tools/adb.html#move">using 
 the adb utility</a>. Before installing the application, you need to package it 
-in a .apk file using the <a href="aapt.html">Android Asset Packaging Tool</a>. 
+in a .apk file using the <a href="{@docRoot}guide/developing/tools/aapt.html">Android Asset Packaging Tool</a>. 
 Once the application is installed, you can start the emulator from the command 
 line, as described in this document, using any startup options necessary. 
 When the emulator is running, you can also connect to the emulator instance's 
@@ -1683,7 +1695,7 @@ see <a href="#diskimages">Working with Emulator Disk Images</a>.</p>
 
 <pre>mksdcard 1024M sdcard1.iso</pre>
 
-<p>For more information, see <a href="{@docRoot}reference/othertools.html">Other Tools</a>. </p>
+<p>For more information, see <a href="{@docRoot}guide/developing/tools/othertools.html">Other Tools</a>. </p>
 
 <a name="copying"></a>
 <h3>Copying Files to a Disk Image</h3>
@@ -1702,12 +1714,12 @@ see <a href="#diskimages">Working with Emulator Disk Images</a>.</p>
 
 <h2>Troubleshooting Emulator Problems</h2>
 
-<p>The adb utility sees the emulator as an actual physical device. For this reason, you might have to use the -d flag with some common adb commands, such as <code>install</code>. The -d flag lets you specify which of several connected devices to use as the target of a command. If you don't specify -d, the emulator will target the first device in its list. For more information about adb, see <a href="{@docRoot}reference/adb.html">Android Debug Bridge</a>.</p>
+<p>The adb utility sees the emulator as an actual physical device. For this reason, you might have to use the -d flag with some common adb commands, such as <code>install</code>. The -d flag lets you specify which of several connected devices to use as the target of a command. If you don't specify -d, the emulator will target the first device in its list. For more information about adb, see <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>.</p>
 
 <p>For emulators running on Mac OS X, if you see an error &quot;Warning: No DNS servers found&quot; when starting the emulator, check to see whether you have an <code>/etc/resolv.conf</code> file. If not, please run the following line in a command window:</p>
     <pre>ln -s /private/var/run/resolv.conf /etc/resolv.conf</pre>
 
-<p>See <a href="{@docRoot}kb/index.html">Frequently Asked Questions</a> for more troubleshooting information. </p>
+<p>See <a href="{@docRoot}guide/appendix/faq/index.html">Frequently Asked Questions</a> for more troubleshooting information. </p>
 
 <a name="limitations"></a>
     <h2>Emulator Limitations</h2>

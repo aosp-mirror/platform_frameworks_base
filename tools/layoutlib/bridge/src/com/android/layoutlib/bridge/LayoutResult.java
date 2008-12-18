@@ -71,7 +71,7 @@ public final class LayoutResult implements ILayoutResult {
     }
     
     /**
-     * Implementation of {@link ILayoutViewInfo}
+     * Implementation of {@link ILayoutResult.ILayoutViewInfo}
      */
     public static final class LayoutViewInfo implements ILayoutViewInfo {
         private final Object mKey;

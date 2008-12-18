@@ -700,7 +700,7 @@ static jint socket_readba (JNIEnv *env, jobject object,
     }
 
     if (off < 0 || len < 0 || (off + len) > env->GetArrayLength(buffer)) {
-        jniThrowException(env, "java/lang/ArrayIndexOutOfBounds", NULL);
+        jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
         return (jint)-1;
     }
 
@@ -767,7 +767,7 @@ static void socket_writeba (JNIEnv *env, jobject object,
     }
 
     if (off < 0 || len < 0 || (off + len) > env->GetArrayLength(buffer)) {
-        jniThrowException(env, "java/lang/ArrayIndexOutOfBounds", NULL);
+        jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
         return;
     }
 

@@ -3,13 +3,12 @@ page.title=Draw 9-patch
 
 <p>The Draw 9-patch tool allows you to easily create a 
    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor.</p>
-<p>To learn more about what a Nine-patch graphic is, and how they work, please read 
+<p>For an introduction to Nine-patch graphics and how they work, please read 
 the section on Nine-patch in the 
-<a href="{@docRoot}reference/available-resources.html#ninepatch">Available Resource 
-Types</a> document.</p>
+<a href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">Ninepatch Images</a> topic.</p>
 
 <div class="sidebox" style="width:auto"><br/>
-<img src="/android/images/draw9patch-norm.png" alt="" height="300" width="341" />
+<img src="{@docRoot}images/draw9patch-norm.png" alt="" height="300" width="341" />
 </div>
 
 <p>Here's a quick guide to create a Nine-patch graphic using the Draw 9-patch tool.
@@ -41,7 +40,7 @@ You'll need the PNG image with which you'd like to create a NinePatch.</p>
      with no drawing area added, because it already exists.</p>
 
 <div class="sidebox" style="width:auto"><br/>
-<img src="/android/images/draw9patch-bad.png" alt="" height="300" width="341" />
+<img src="{@docRoot}images/draw9patch-bad.png" alt="" height="300" width="341" />
 </div>
 
 <p>Optional controls include:</p>
@@ -57,5 +56,3 @@ You'll need the PNG image with which you'd like to create a NinePatch.</p>
   produce artifacts in the graphic when stretched. Visual coherence of your stretched
   image will be maintained if you eliminate all bad patches.</li>
 <ul>
-
-<p><strong><a href="/android/intro/tools.html">Back to Development Tools</a></strong></p>

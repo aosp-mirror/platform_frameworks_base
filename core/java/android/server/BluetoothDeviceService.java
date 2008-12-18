@@ -54,12 +54,16 @@ import java.util.HashMap;
 public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private static final String TAG = "BluetoothDeviceService";
     private int mNativeData;
-    private Context mContext;
     private BluetoothEventLoop mEventLoop;
     private IntentFilter mIntentFilter;
     private boolean mIsAirplaneSensitive;
     private volatile boolean mIsEnabled;  // local cache of isEnabledNative()
     private boolean mIsDiscovering;
+
+    private final Context mContext;
+
+    private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
+    private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
 
     static {
         classInitNative();
@@ -97,7 +101,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native void cleanupNativeDataNative();
 
     public boolean isEnabled() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mIsEnabled;
     }
     private native int isEnabledNative();
@@ -106,7 +110,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * Disable bluetooth. Returns true on success.
      */
     public synchronized boolean disable() {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
 
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
@@ -117,9 +122,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         mEventLoop.stop();
         disableNative();
         mIsEnabled = false;
+        Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.BLUETOOTH_ON, 0);
         mIsDiscovering = false;
         Intent intent = new Intent(BluetoothIntent.DISABLED_ACTION);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         return true;
     }
 
@@ -131,7 +137,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * notified when complete.
      */
     public synchronized boolean enable(IBluetoothDeviceCallback callback) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
 
         // Airplane mode can prevent Bluetooth radio from being turned on.
         if (mIsAirplaneSensitive && isAirplaneModeOn()) {
@@ -164,6 +171,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     };
 
     private EnableThread mEnableThread;
+    private String mOutgoingBondingDevAddress = null;
+
     private class EnableThread extends Thread {
         private final IBluetoothDeviceCallback mEnableCallback;
         public EnableThread(IBluetoothDeviceCallback callback) {
@@ -185,9 +194,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
             if (res) {
                 mIsEnabled = true;
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                                       Settings.Secure.BLUETOOTH_ON, 1);
                 mIsDiscovering = false;
                 Intent intent = new Intent(BluetoothIntent.ENABLED_ACTION);
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcast(intent, BLUETOOTH_PERM);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(REGISTER_SDP_RECORDS), 3000);
             }
             mEnableThread = null;
@@ -198,19 +209,20 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native int disableNative();
 
     public synchronized String getAddress() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getAddressNative();
     }
     private native String getAddressNative();
 
     public synchronized String getName() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getNameNative();
     }
     private native String getNameNative();
 
     public synchronized boolean setName(String name) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (name == null) {
             return false;
         }
@@ -220,19 +232,19 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean setNameNative(String name);
 
     public synchronized String[] listBondings() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return listBondingsNative();
     }
     private native String[] listBondingsNative();
 
     public synchronized String getMajorClass() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getMajorClassNative();
     }
     private native String getMajorClassNative();
 
     public synchronized String getMinorClass() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getMinorClassNative();
     }
     private native String getMinorClassNative();
@@ -248,7 +260,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return The user-friendly name of the specified remote device.
      */
     public synchronized String getRemoteName(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -277,7 +289,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *         false otherwise.
      */
     public synchronized boolean startDiscovery(boolean resolveNames) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         return startDiscoveryNative(resolveNames);
     }
     private native boolean startDiscoveryNative(boolean resolveNames);
@@ -289,13 +302,14 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *       started.
      */
     public synchronized boolean cancelDiscovery() {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         return cancelDiscoveryNative();
     }
     private native boolean cancelDiscoveryNative();
 
     public synchronized boolean isDiscovering() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mIsDiscovering;
     }
 
@@ -304,19 +318,21 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     public synchronized boolean startPeriodicDiscovery() {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         return startPeriodicDiscoveryNative();
     }
     private native boolean startPeriodicDiscoveryNative();
 
     public synchronized boolean stopPeriodicDiscovery() {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         return stopPeriodicDiscoveryNative();
     }
     private native boolean stopPeriodicDiscoveryNative();
 
     public synchronized boolean isPeriodicDiscovery() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return isPeriodicDiscoveryNative();
     }
     private native boolean isPeriodicDiscoveryNative();
@@ -331,7 +347,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @param timeout_s The discoverable timeout in seconds.
      */
     public synchronized boolean setDiscoverableTimeout(int timeout) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         return setDiscoverableTimeoutNative(timeout);
     }
     private native boolean setDiscoverableTimeoutNative(int timeout_s);
@@ -345,13 +362,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *         value indicates an error.
      */
     public synchronized int getDiscoverableTimeout() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getDiscoverableTimeoutNative();
     }
     private native int getDiscoverableTimeoutNative();
 
     public synchronized boolean isAclConnected(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -378,7 +395,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #setMode
      */
     public synchronized boolean isConnectable() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return isConnectableNative();
     }
     private native boolean isConnectableNative();
@@ -401,7 +418,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #setMode
      */
     public synchronized boolean isDiscoverable() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return isDiscoverableNative();
     }
     private native boolean isDiscoverableNative();
@@ -415,7 +432,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #setMode
      */
     public synchronized int getMode() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         String mode = getModeNative();
         if (mode == null) {
             return BluetoothDevice.MODE_UNKNOWN;
@@ -451,7 +468,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getMode
      */
     public synchronized boolean setMode(int mode) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         switch (mode) {
         case BluetoothDevice.MODE_OFF:
             return setModeNative("off");
@@ -477,7 +495,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return The alias of the remote device.
      */
     public synchronized String getRemoteAlias(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -496,7 +514,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @param alias Alias for the remote device
      */
     public synchronized boolean setRemoteAlias(String address, String alias) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (alias == null || !BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -513,7 +532,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @param address Bluetooth address of remote device
      */
     public synchronized boolean clearRemoteAlias(String address) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -522,7 +542,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean clearRemoteAliasNative(String address);
 
     public synchronized boolean disconnectRemoteDeviceAcl(String address) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -546,7 +567,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see android.bluetooth.PasskeyAgent
      */
     public synchronized boolean createBonding(String address, IBluetoothDeviceCallback callback) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -568,9 +590,19 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             callbacks.remove(address);
             return false;
         }
+        mOutgoingBondingDevAddress = address;
         return true;
     }
+           
     private native boolean createBondingNative(String address, int timeout_ms);
+    
+    /*package*/ String getOutgoingBondingDevAddress() {
+        return mOutgoingBondingDevAddress;
+    }
+
+    /*package*/ void setOutgoingBondingDevAddress(String outgoingBondingDevAddress) {
+        mOutgoingBondingDevAddress = outgoingBondingDevAddress;
+    }
 
     /**
      * This method cancels a pending bonding request.
@@ -593,7 +625,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #listBondings
      */
     public synchronized boolean cancelBondingProcess(String address) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -618,7 +651,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #listBondings
      */
     public synchronized boolean removeBonding(String address) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -627,7 +661,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean removeBondingNative(String address);
 
     public synchronized boolean hasBonding(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -636,7 +670,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean hasBondingNative(String address);
 
     public synchronized String[] listAclConnections() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return listConnectionsNative();
     }
     private native String[] listConnectionsNative();
@@ -652,7 +686,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *         remote devices that this adapter is aware of.
      */
     public synchronized String[] listRemoteDevices() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return listRemoteDevicesNative();
     }
     private native String[] listRemoteDevicesNative();
@@ -666,7 +700,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *         Bluetooth-chip version.
      */
     public synchronized String getVersion() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getVersionNative();
     }
     private native String getVersionNative();
@@ -683,7 +717,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return The HCI revision of this adapter.
      */
     public synchronized String getRevision() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getRevisionNative();
     }
     private native String getRevisionNative();
@@ -697,7 +731,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return Manufacturer name.
      */
     public synchronized String getManufacturer() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getManufacturerNative();
     }
     private native String getManufacturerNative();
@@ -716,7 +750,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return company name
      */
     public synchronized String getCompany() {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getCompanyNative();
     }
     private native String getCompanyNative();
@@ -731,7 +765,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getVersion
      */
     public synchronized String getRemoteVersion(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -749,7 +783,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getRevision
      */
     public synchronized String getRemoteRevision(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -767,7 +801,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getManufacturer
      */
     public synchronized String getRemoteManufacturer(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -785,7 +819,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getCompany
      */
     public synchronized String getRemoteCompany(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -801,7 +835,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return a String with the timestamp.
      */
     public synchronized String lastSeen(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -817,7 +851,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return a String with the timestamp.
      */
     public synchronized String lastUsed(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -841,7 +875,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      */
     public synchronized String getRemoteMajorClass(String address) {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return null;
         }
         return getRemoteMajorClassNative(address);
@@ -863,7 +897,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getRemoteClass
      */
     public synchronized String getRemoteMinorClass(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -880,7 +914,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getRemoteClass
      */
     public synchronized String[] getRemoteServiceClasses(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -904,7 +938,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      */
     public synchronized int getRemoteClass(String address) {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return -1;
         }
         return getRemoteClassNative(address);
@@ -919,7 +953,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @return byte array of features.
      */
     public synchronized byte[] getRemoteFeatures(String address) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -944,7 +978,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getRemoteServiceRecord
      */
     public synchronized int[] getRemoteServiceHandles(String address, String match) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -974,7 +1008,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @see #getRemoteServiceHandles
      */
     public synchronized byte[] getRemoteServiceRecord(String address, int handle) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
@@ -985,7 +1019,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     // AIDL does not yet support short's
     public synchronized boolean getRemoteServiceChannel(String address, int uuid16,
             IBluetoothDeviceCallback callback) {
-        checkPermissionBluetooth();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -1011,7 +1045,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean getRemoteServiceChannelNative(String address, short uuid16);
 
     public synchronized boolean setPin(String address, byte[] pin) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (pin == null || pin.length <= 0 || pin.length > 16 ||
             !BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
@@ -1036,7 +1071,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native boolean setPinNative(String address, String pin, int nativeData);
 
     public synchronized boolean cancelPin(String address) {
-        checkPermissionBluetoothAdmin();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
@@ -1061,7 +1097,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 // some random app is not sending this intent and disabling bluetooth
                 boolean enabled = !isAirplaneModeOn();
                 // If bluetooth is currently expected to be on, then enable or disable bluetooth
-                if (Settings.System.getInt(resolver, Settings.System.BLUETOOTH_ON, 0) > 0) {
+                if (Settings.Secure.getInt(resolver, Settings.Secure.BLUETOOTH_ON, 0) > 0) {
                     if (enabled) {
                         enable(null);
                     } else {
@@ -1089,25 +1125,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
 
-    private static final String BLUETOOTH_ADMIN = android.Manifest.permission.BLUETOOTH_ADMIN;
-    private static final String BLUETOOTH = android.Manifest.permission.BLUETOOTH;
-
-    private void checkPermissionBluetoothAdmin() {
-        if (mContext.checkCallingOrSelfPermission(BLUETOOTH_ADMIN) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires BLUETOOTH_ADMIN permission");
-        }
-    }
-
-    private void checkPermissionBluetooth() {
-        if (mContext.checkCallingOrSelfPermission(BLUETOOTH_ADMIN) !=
-                PackageManager.PERMISSION_GRANTED &&
-                mContext.checkCallingOrSelfPermission(BLUETOOTH) !=
-                PackageManager.PERMISSION_GRANTED ) {
-            throw new SecurityException("Requires BLUETOOTH or BLUETOOTH_ADMIN permission");
-        }
-    }
-
     private static final String DISABLE_ESCO_PATH = "/sys/module/sco/parameters/disable_esco";
     private static void disableEsco() {
         try {
@@ -1124,7 +1141,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             pw.println("\nBluetooth ENABLED: " + getAddress() + " (" + getName() + ")");
             pw.println("\nisDiscovering() = " + isDiscovering());
 
-            BluetoothHeadset headset = new BluetoothHeadset(mContext);
+            BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
 
             pw.println("\n--Bondings--");
             String[] addresses = listBondings();

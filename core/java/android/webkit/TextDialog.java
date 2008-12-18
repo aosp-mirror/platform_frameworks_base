@@ -124,6 +124,10 @@ import android.widget.AutoCompleteTextView;
         int flags = paint.getFlags() | Paint.SUBPIXEL_TEXT_FLAG |
                 Paint.ANTI_ALIAS_FLAG & ~Paint.DEV_KERN_TEXT_FLAG;
         paint.setFlags(flags);
+        // Set the text color to black, regardless of the theme.  This ensures
+        // that other applications that use embedded WebViews will properly
+        // display the text in textfields.
+        setTextColor(Color.BLACK);
     }
 
     @Override
@@ -395,6 +399,7 @@ import android.widget.AutoCompleteTextView;
      * focus to the host.
      */
     /* package */ void remove() {
+        mHandler.removeMessages(LONGPRESS);
         mWebView.removeView(this);
         mWebView.requestFocus();
     }
@@ -532,6 +537,7 @@ import android.widget.AutoCompleteTextView;
         mPreChange = text.toString();
         Editable edit = (Editable) getText();
         edit.replace(0, edit.length(), text);
+        updateCachedTextfield();
     }
     
     /**

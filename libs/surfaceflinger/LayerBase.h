@@ -23,6 +23,8 @@
 #include <private/ui/LayerState.h>
 
 #include <ui/Region.h>
+#include <ui/Overlay.h>
+
 #include <pixelflinger/pixelflinger.h>
 
 #include "Transform.h"
@@ -223,16 +225,14 @@ public:
         Surface(SurfaceID id, int identity) { 
             mParams.token = id;
             mParams.identity = identity;
-            mParams.type = 0;
         }
         Surface(SurfaceID id, 
                 const sp<IMemoryHeap>& heap0,
                 const sp<IMemoryHeap>& heap1,
-                int memory_type, int identity)
+                int identity)
         {
             mParams.token = id;
             mParams.identity = identity;
-            mParams.type = memory_type;
             mParams.heap[0] = heap0;
             mParams.heap[1] = heap1;
         }
@@ -240,8 +240,8 @@ public:
             // TODO: We now have a point here were we can clean-up the
             // client's mess.
             // This is also where surface id should be recycled.
-            //LOGD("Surface %d, heaps={%p, %p}, type=%d destroyed",
-            //        mId, mHeap[0].get(), mHeap[1].get(), mMemoryType);
+            //LOGD("Surface %d, heaps={%p, %p} destroyed",
+            //        mId, mHeap[0].get(), mHeap[1].get());
         }
 
         virtual void getSurfaceData(
@@ -254,6 +254,10 @@ public:
                 { return INVALID_OPERATION; }
         virtual void postBuffer(ssize_t offset) { }
         virtual void unregisterBuffers() { };
+        virtual sp<Overlay> createOverlay(
+                uint32_t w, uint32_t h, int32_t format) {
+            return NULL;
+        };
 
     private:
         ISurfaceFlingerClient::surface_data_t mParams;

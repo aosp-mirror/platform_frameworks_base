@@ -117,11 +117,11 @@ int32_t clampF(GLfixed f) {
 }
 
 static GLfixed fog_linear(ogles_context_t* c, GLfixed z) {
-    return clampF(gglMulx((c->fog.end - z), c->fog.invEndMinusStart));
+    return clampF(gglMulx((c->fog.end - ((z<0)?-z:z)), c->fog.invEndMinusStart));
 }
 
 static GLfixed fog_exp(ogles_context_t* c, GLfixed z) {
-    const float e = fixedToFloat(gglMulx(c->fog.density, z));
+    const float e = fixedToFloat(gglMulx(c->fog.density, ((z<0)?-z:z)));
     return clampF(gglFloatToFixed(fastexpf(-e)));
 }
 
@@ -556,11 +556,11 @@ static void fogx(GLenum pname, GLfixed param, ogles_context_t* c)
         ogles_error(c, GL_INVALID_VALUE);
         break;
     case GL_FOG_START:
-        c->fog.start = gglClampx(param);
+        c->fog.start = param;
         c->fog.invEndMinusStart = gglRecip(c->fog.end - c->fog.start);
         break;
     case GL_FOG_END:
-        c->fog.end = gglClampx(param);
+        c->fog.end = param;
         c->fog.invEndMinusStart = gglRecip(c->fog.end - c->fog.start);
         break;
     case GL_FOG_MODE:

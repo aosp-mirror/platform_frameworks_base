@@ -1,4 +1,6 @@
 page.title=Hello, DatePicker
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.DatePicker} is a widget that allows the user to select a month, day and year.</p>
@@ -146,4 +148,4 @@ protected Dialog onCreateDialog(int id) {
 <li>{@link android.widget.TextView}</li>
 <li>{@link java.util.Calendar}</li>
 </ul>
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
+

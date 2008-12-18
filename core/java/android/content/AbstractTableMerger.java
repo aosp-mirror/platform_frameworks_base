@@ -548,7 +548,8 @@ public abstract class AbstractTableMerger
         long numDeletedEntries = 0;
         if (mDeletedTable != null) {
             Cursor deletedCursor = mDb.query(mDeletedTable,
-                    syncIdAndVersionProjection, _SYNC_ACCOUNT + "=?", accountSelectionArgs,
+                    syncIdAndVersionProjection,
+                    _SYNC_ACCOUNT + "=? AND " + _SYNC_ID + " IS NOT NULL", accountSelectionArgs,
                     null, null, mDeletedTable + "." + _SYNC_ID);
 
             numDeletedEntries = deletedCursor.getCount();

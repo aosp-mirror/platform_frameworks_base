@@ -113,7 +113,7 @@ public class RequestHandle {
      * @param statusCode HTTP status code returned from original request
      * @param cacheHeaders Cache header for redirect URL
      * @return true if setup succeeds, false otherwise (redirect loop
-     * count exceeded)
+     * count exceeded, body provider unable to rewind on 307 redirect)
      */
     public boolean setupRedirect(String redirectTo, int statusCode,
             Map<String, String> cacheHeaders) {
@@ -164,8 +164,22 @@ public class RequestHandle {
             }
             mMethod = "GET";
         }
-        mHeaders.remove("Content-Type");
-        mBodyProvider = null;
+        /* Only repost content on a 307.  If 307, reset the body
+           provider so we can replay the body */
+        if (statusCode == 307) {
+            try {
+                if (mBodyProvider != null) mBodyProvider.reset();
+            } catch (java.io.IOException ex) {
+                if (HttpLog.LOGV) {
+                    HttpLog.v("setupAuthResponse() failed to reset body provider");
+                }
+                return false;
+            }
+
+        } else {
+            mHeaders.remove("Content-Type");
+            mBodyProvider = null;
+        }
 
         // Update the cache headers for this URL
         mHeaders.putAll(cacheHeaders);

@@ -18,6 +18,7 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.Graphics;
@@ -28,35 +29,36 @@ import java.awt.ImageCapabilities;
 import java.awt.Transparency;
 
 /**
- * The VolatileImage abstract class represents an image which can lose 
- * its contents at any point. VolatileImage objects are device specific.
- * This class provies methods for checking if operation of this image
- * are compatible for the GraphicsConfiguration. 
+ * The VolatileImage abstract class represents an image which can lose its
+ * contents at any point. VolatileImage objects are device specific. This class
+ * provides methods for checking if operation of this image are compatible for
+ * the GraphicsConfiguration.
+ * 
+ * @since Android 1.0
  */
 public abstract class VolatileImage extends Image
-    // Volatile image implements Transparency since 1.5
-    implements Transparency {
-    
-    /** 
-     * The Constant IMAGE_INCOMPATIBLE indicates that this VolatileImage 
-     * is not applicable for the GraphicsConfiguration object. 
+// Volatile image implements Transparency since 1.5
+        implements Transparency {
+
+    /**
+     * The Constant IMAGE_INCOMPATIBLE indicates that this VolatileImage is not
+     * applicable for the GraphicsConfiguration object.
      */
     public static final int IMAGE_INCOMPATIBLE = 2;
 
-    /** 
-     * The Constant IMAGE_OK indicates that VolatileImage is ready 
-     * for using.
+    /**
+     * The Constant IMAGE_OK indicates that VolatileImage is ready for using.
      */
     public static final int IMAGE_OK = 0;
 
-    /** 
-     * The Constant IMAGE_RESTORED indicates that VolatileImage
-     * will be ready to use after restoring. 
+    /**
+     * The Constant IMAGE_RESTORED indicates that VolatileImage will be ready to
+     * use after restoring.
      */
     public static final int IMAGE_RESTORED = 1;
 
-    /** 
-     * The transparency value of this image. 
+    /**
+     * The transparency value of this image.
      */
     protected int transparency = OPAQUE;
 
@@ -68,8 +70,8 @@ public abstract class VolatileImage extends Image
     }
 
     /**
-     * Returns true if rendering data is lost during validating.
-     * This method should be called after rendering operation of image.
+     * Returns true if rendering data is lost during validating. This method
+     * should be called after rendering operation of image.
      * 
      * @return true, if contents lost during validating, false otherwise.
      */
@@ -98,8 +100,8 @@ public abstract class VolatileImage extends Image
     public abstract int getHeight();
 
     /**
-     * Gets a BufferedImage representation of current VolatileImage that
-     * won't be affected by any changes to this VolatileImage.
+     * Gets a BufferedImage representation of current VolatileImage that won't
+     * be affected by any changes to this VolatileImage.
      * 
      * @return a BufferedImage representation of current VolatileImage.
      */
@@ -113,14 +115,14 @@ public abstract class VolatileImage extends Image
     public abstract int getWidth();
 
     /**
-     * Validates the drawing surface of the image if the surface had been 
-     * lost and if the spacified GraphicsConfiguration object is  
-     * applicable to this image. 
+     * Validates the drawing surface of the image if the surface had been lost
+     * and if the specified GraphicsConfiguration object is applicable to this
+     * image.
      * 
-     * @param gc GraphicsConfiguration object.
-     * 
+     * @param gc
+     *            the GraphicsConfiguration object.
      * @return one of the image status constants: IMAGE_OK, IMAGE_RESTORED or
-     * IMAGE_INCOMPATIBLE.
+     *         IMAGE_INCOMPATIBLE.
      */
     public abstract int validate(GraphicsConfiguration gc);
 

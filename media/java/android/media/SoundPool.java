@@ -77,6 +77,18 @@ public class SoundPool
         return id;
     }
 
+    public int load(AssetFileDescriptor afd, int priority) {
+        if (afd != null) {
+            return _load(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength(), priority);
+        } else {
+            return 0;
+        }
+    }
+
+    public int load(FileDescriptor fd, long offset, long length, int priority) {
+        return _load(fd, offset, length, priority);
+    }
+
     private native final int _load(String uri, int priority);
 
     private native final int _load(FileDescriptor fd, long offset, long length, int priority);
@@ -108,4 +120,3 @@ public class SoundPool
 
     protected void finalize() { release(); }
 }
-

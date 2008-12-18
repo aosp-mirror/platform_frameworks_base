@@ -367,6 +367,12 @@
         android:label="@string/permlab_writeSettings"
         android:description="@string/permdesc_writeSettings" />
 
+    <!-- Allows an application to read or write the secure system settings. -->
+    <permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_writeSecureSettings"
+        android:description="@string/permdesc_writeSecureSettings" />
+
     <!-- Allows an application to modify the Google service map. -->
     <permission android:name="android.permission.WRITE_GSERVICES"
         android:protectionLevel="signature"
@@ -746,6 +752,13 @@
         android:description="@string/permdesc_readInputState"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by input method services, to ensure that only the
+         system can bind to them. -->
+    <permission android:name="android.permission.BIND_INPUT_METHOD"
+        android:label="@string/permlab_bindInputMethod"
+        android:description="@string/permdesc_bindInputMethod"
+        android:protectionLevel="signature" />
+
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.  Not for use by normal applications. -->
     <permission android:name="android.permission.SET_ORIENTATION"
@@ -830,6 +843,20 @@
         android:description="@string/permdesc_broadcastPackageRemoved"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to broadcast an SMS receipt notification -->
+    <permission android:name="android.permission.BROADCAST_SMS"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:label="@string/permlab_broadcastSmsReceived"
+        android:description="@string/permdesc_broadcastSmsReceived"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to broadcast a WAP PUSH receipt notification -->
+    <permission android:name="android.permission.BROADCAST_WAP_PUSH"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:label="@string/permlab_broadcastWapPush"
+        android:description="@string/permdesc_broadcastWapPush"
+        android:protectionLevel="signature" />
+
     <permission android:name="android.permission.MASTER_CLEAR"
         android:label="@string/permlab_masterClear"
         android:description="@string/permdesc_masterClear"
@@ -865,6 +892,7 @@
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true"
                 android:multiprocess="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
@@ -873,6 +901,7 @@
         </activity>
         <activity android:name="com.android.internal.app.RingtonePickerActivity"
                 android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true"
                 android:multiprocess="true">
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
@@ -880,7 +909,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.UsbStorageActivity"
-                android:theme="@style/Theme.Dialog.Alert">
+                android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
         </activity>
         <provider android:name=".server.checkin.CheckinProvider"
                 android:authorities="android.server.checkin"
@@ -894,7 +924,7 @@
             android:name=".server.checkin.UpdateReceiver$DownloadCompletedBroadcastReceiver"
             android:exported="true" />
 
-        <receiver android:name=".server.checkin.SecretCodeReceiver">
+          <receiver android:name="com.google.android.server.checkin.SecretCodeReceiver">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SECRET_CODE" />
                 <data android:scheme="android_secret_code"

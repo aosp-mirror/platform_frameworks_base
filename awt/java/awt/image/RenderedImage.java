@@ -18,35 +18,37 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.Rectangle;
 import java.util.Vector;
 
 /**
- * The RenderedImage interface should be implemented by all objects which 
- * contains image data. The image data is represented as a single tile or 
- * an array of tiles.
+ * The RenderedImage interface should be implemented by all objects which
+ * contains image data. The image data is represented as a single tile or an
+ * array of tiles.
+ * 
+ * @since Android 1.0
  */
 public interface RenderedImage {
 
     /**
-     * Gets the property with the specified name from the property set 
-     * of this RenderedImage.
+     * Gets the property with the specified name from the property set of this
+     * RenderedImage.
      * 
-     * @param name the property's name.
-     * 
+     * @param name
+     *            the property's name.
      * @return the property value corresponded to this property's name.
      */
     public Object getProperty(String name);
 
     /**
-     * Copies the region of this RenderedImage to the specified 
-     * WritableRaster. The bounds of the region are the bounds of the 
-     * WritableRaster.
+     * Copies the region of this RenderedImage to the specified WritableRaster.
+     * The bounds of the region are the bounds of the WritableRaster.
      * 
-     * @param raster the WritableRaster.
-     * 
+     * @param raster
+     *            the WritableRaster.
      * @return the created WritableRaster.
      */
     public WritableRaster copyData(WritableRaster raster);
@@ -54,19 +56,19 @@ public interface RenderedImage {
     /**
      * Gets the image data of the image's region as one tile.
      * 
-     * @param rect the rectangular region of RenderedImage.
-     * 
+     * @param rect
+     *            the rectangular region of RenderedImage.
      * @return the image data of the image's region as one tile.
      */
     public Raster getData(Rectangle rect);
 
     /**
-     * Gets all RenderedImage objects which are the source of this
-     * RenderedImage object.
+     * Gets all RenderedImage objects which are the source of this RenderedImage
+     * object.
      * 
-     * @return a Vector of RenderedImage objects which are the source 
-     * of this RenderedImage object or null, if there is no information
-     * about them.
+     * @return a Vector of RenderedImage objects which are the source of this
+     *         RenderedImage object or null, if there is no information about
+     *         them.
      */
     public Vector<RenderedImage> getSources();
 
@@ -85,14 +87,13 @@ public interface RenderedImage {
     public SampleModel getSampleModel();
 
     /**
-     * Gets the tile corresponded to the specified indices in the tile
-     * array.
+     * Gets the tile corresponded to the specified indices in the tile array.
      * 
-     * @param tileX the X index of the tile.  
-     * @param tileY the Y index of the tile. 
-     * 
-     * @return the tile corresponded to the specified indices in the tile
-     * array.
+     * @param tileX
+     *            the X index of the tile.
+     * @param tileY
+     *            the Y index of the tile.
+     * @return the tile corresponded to the specified indices in the tile array.
      */
     public Raster getTile(int tileX, int tileY);
 
@@ -195,4 +196,3 @@ public interface RenderedImage {
     public int getHeight();
 
 }
-

@@ -17,7 +17,7 @@
 package android.webkit;
 
 import android.content.Context;
-import android.util.Log;
+import android.content.res.Resources;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -40,6 +40,8 @@ public class DateSorter {
 
     private long [] mBins = new long[DAY_COUNT];
     private String [] mLabels = new String[DAY_COUNT];
+    
+    private static final int NUM_DAYS_AGO = 5;
 
     Date mDate = new Date();
     Calendar mCal = Calendar.getInstance();
@@ -48,6 +50,7 @@ public class DateSorter {
      * @param context Application context
      */
     public DateSorter(Context context) {
+        Resources resources = context.getResources();
 
         Calendar c = Calendar.getInstance();
         beginningOfDay(c);
@@ -56,9 +59,9 @@ public class DateSorter {
         mBins[0] = c.getTimeInMillis(); // Today
         c.roll(Calendar.DAY_OF_YEAR, -1);
         mBins[1] = c.getTimeInMillis();  // Yesterday
-        c.roll(Calendar.DAY_OF_YEAR, -4);
+        c.roll(Calendar.DAY_OF_YEAR, -(NUM_DAYS_AGO - 1));
         mBins[2] = c.getTimeInMillis();  // Five days ago
-        c.roll(Calendar.DAY_OF_YEAR, 5); // move back to today
+        c.roll(Calendar.DAY_OF_YEAR, NUM_DAYS_AGO); // move back to today
         c.roll(Calendar.MONTH, -1);
         mBins[3] = c.getTimeInMillis();  // One month ago
         c.roll(Calendar.MONTH, -1);
@@ -67,14 +70,14 @@ public class DateSorter {
         // build labels
         mLabels[0] = context.getText(com.android.internal.R.string.today).toString();
         mLabels[1] = context.getText(com.android.internal.R.string.yesterday).toString();
-        mLabels[2] = context.getString(com.android.internal.R.string.daysDurationPastPlural, 5);
-        mLabels[3] = context.getText(com.android.internal.R.string.oneMonthDurationPast).toString();
-        StringBuilder sb = new StringBuilder();
-        sb.append(context.getText(com.android.internal.R.string.before)).append(" ");
-        sb.append(context.getText(com.android.internal.R.string.oneMonthDurationPast));
-        mLabels[4] = sb.toString();
-                
 
+        int resId = com.android.internal.R.plurals.num_days_ago;
+        String format = resources.getQuantityString(resId, NUM_DAYS_AGO);
+        mLabels[2] = String.format(format, NUM_DAYS_AGO);
+
+        mLabels[3] = context.getText(com.android.internal.R.string.oneMonthDurationPast).toString();
+        mLabels[4] = context.getText(com.android.internal.R.string.beforeOneMonthDurationPast)
+                .toString();
     }
 
     /**

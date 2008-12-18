@@ -17,11 +17,12 @@
 #ifndef ANDROID_MEDIAPLAYER_H
 #define ANDROID_MEDIAPLAYER_H
 
+#include <utils/IMemory.h>
 #include <ui/Surface.h>
-#include <media/AudioTrack.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
 #include <media/IMediaPlayerService.h>
+#include <utils/SortedVector.h>
 
 namespace android {
 
@@ -31,6 +32,7 @@ enum media_event_type {
     MEDIA_PLAYBACK_COMPLETE = 2,
     MEDIA_BUFFERING_UPDATE  = 3,
     MEDIA_SEEK_COMPLETE     = 4,
+    MEDIA_SET_VIDEO_SIZE    = 5,
     MEDIA_ERROR             = 100,
 };
 
@@ -52,18 +54,18 @@ enum media_player_states {
 
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
-class MediaPlayerListener: public RefBase
+class MediaPlayerListener: virtual public RefBase
 {
 public:
     virtual void notify(int msg, int ext1, int ext2) = 0;
 };
 
-class MediaPlayer : public BnMediaPlayerClient, public IBinder::DeathRecipient
+class MediaPlayer : public BnMediaPlayerClient
 {
 public:
     MediaPlayer();
     ~MediaPlayer();
-
+            void            onFirstRef();
             void            disconnect();
             status_t        setDataSource(const char *url);
             status_t        setDataSource(int fd, int64_t offset, int64_t length);
@@ -83,10 +85,11 @@ public:
             status_t        reset();
             status_t        setAudioStreamType(int type);
             status_t        setLooping(int loop);
+            bool            isLooping();
             status_t        setVolume(float leftVolume, float rightVolume);
             void            notify(int msg, int ext1, int ext2);
-    static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels);
-    static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels);
+    static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
+    static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
 
 private:
             void            clear_l();
@@ -96,7 +99,8 @@ private:
             status_t        setDataSource(const sp<IMediaPlayer>& player);
 
     static const sp<IMediaPlayerService>& getMediaPlayerService();
-    virtual void binderDied(const wp<IBinder>& who);
+    static void addObitRecipient(const wp<MediaPlayer>& recipient);
+    static void removeObitRecipient(const wp<MediaPlayer>& recipient);
 
     class DeathNotifier: public IBinder::DeathRecipient
     {
@@ -106,8 +110,6 @@ private:
 
         virtual void binderDied(const wp<IBinder>& who);
     };
-
-    static sp<DeathNotifier> mDeathNotifier;
 
     sp<IMediaPlayer>            mPlayer;
     Mutex                       mLock;
@@ -125,11 +127,15 @@ private:
     bool                        mLoop;
     float                       mLeftVolume;
     float                       mRightVolume;
+    int                         mVideoWidth;
+    int                         mVideoHeight;
 
     friend class DeathNotifier;
 
-    static  Mutex               mServiceLock;
-    static  sp<IMediaPlayerService>    mMediaPlayerService;
+    static  Mutex                           sServiceLock;
+    static  sp<IMediaPlayerService>         sMediaPlayerService;
+    static  sp<DeathNotifier>               sDeathNotifier;
+    static  SortedVector< wp<MediaPlayer> > sObitRecipients;
 };
 
 }; // namespace android

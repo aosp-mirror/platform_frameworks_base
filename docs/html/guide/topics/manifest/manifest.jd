@@ -1,183 +1,3063 @@
-page.title=The Manifest File (AndroidManifest.xml)
+page.title=The AndroidManifest.xml File
 @jd:body
 
-<p>Every Android application has a <em>manifest file</em> that declares global values for the application.
-For example, the manifest file declares the appliication's fully qualified package name, as well as the application components (activities, services, etc) it exposes, the implementation classes for each, the kinds of data each can handle, 
-and where they can be launched. </p>
+<div id="qv-wrapper">
+<div id="qv">
 
-<p>The manifest is an XML file that is always stored under the name <code>AndroidManifest.xml</code> in the root folder of the application. Only one manifest file is allowed per application package. As part of developing your android application, you will be creating the application's manifest file using the XML vocabulary described in this document. </p>
+<h2>In this document</h2>
+<ol>
+<li><a href="#filestruct">Structure of the Manifest File</a></li>
+<li><a href="#filef">File Features</a>
+	<ol>
+	<li><a href="#ifs">Intent Filter</a></li>
+	<li><a href="#iconlabel">Icons and Labels</a></li>
+	<li><a href="#perms">Using Permissions</a></li>
+	<li><a href="#libs">Libraries</a></li>
+	</ol></li>
+<li><a href="#elems">Elements of the Manifest File</a></li>
+</ol>
+</div>
+</div>
 
-<p>An important aspect of this file is the <em>intent filters</em> that it includes.
-    These filters describe where and when that activity can be started. When an activity
-    (or the operating system) wants to perform an action such as open a Web page
-    or open a contact picker screen, it creates an {@link android.content.Intent
-    Intent} object. This object can hold several descriptors describing what you
-    want to do, what data you want to do it to, the type of data, and other bits
-    of information. Android compares the information in an Intent object with the
-    intent filter exposed by every application and finds the activity most appropriate
-    to handle the data or action specified by the caller. More details
-    on intents is given in the {@link android.content.Intent
-    Intent} reference page.</p>
-    
-<p>Besides declaring your application's activities, content providers, services,
-and intent receivers, you can also specify permissions and instrumentation
-(security control and testing) in AndroidManifest.xml. For a reference of the tags and
-their attributes, please see {@link android.R.styleable#AndroidManifest}.</p>
+<p>
+Every application must have an AndroidManifest.xml file (with precisely that 
+name) in its root directory.  The manifest presents essential information about 
+the application to the Android system, information the system must have before 
+it can run any of the application's code.  Among other things, the manifest 
+does the following:
+</p>
 
-<p>A simple AndroidManifest.xml looks like this:</p>
+<ul>
+<li>It names the Java package for the application.
+The package name serves as a unique identifier for the application.</li>
+
+<li>It describes the components of the application &mdash; the activities, 
+services, broadcast receivers, and content providers that the application is 
+composed of.  It names the classes that implement each of the components and 
+publishes their capabilities (for example, which {@link android.content.Intent 
+Intent} messages they can handle).  These declarations let the Android system 
+know what the components are and under what conditions they can be launched.</li>
+
+<li>It determines which processes will host application components.</li>  
+
+<li>It declares which permissions the application must have in order to 
+access protected parts of the API and interact with other applications.</li>  
+
+<li>It also declares the permissions that others are required to have in 
+order to interact with the application's components.</li>
+
+<li>It lists the {@link android.app.Instrumentation} classes that provide 
+profiling and other information as the application is running.  These declarations 
+are present in the manifest only while the application is being developed and 
+tested; they're removed before the application is published.</li>
+
+<li>It declares the minimum version of the Android API that the application 
+requires.</li>
+
+<li>It lists the libraries that the application must be linked against.</li>
+</ul>
+
+
+<h2 id="filestruct">Structure of the Manifest File</h2>
+
+<p>
+A later section of this document, <a href="#elems">"Elements of the Manifest 
+File"</a>, describes all of the elements that can appear in the manifest file 
+and each of their attributes.  The diagram below shows the general structure of 
+the file and every element it can contain.   
+</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 
-&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.my_domain.app.helloactivity"&gt;
-        
-    &lt;application android:label="@string/app_name"&gt;
-    
-        &lt;activity android:name=".HelloActivity"&gt;
-            &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN"/&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER"/&gt;
-            &lt;/intent-filter&gt;
-        &lt;/activity&gt;
-        
+<a href="#manf">&lt;manifest&gt;</a>
+
+    <a href="#usesp">&lt;uses-permission /&gt;</a>
+    <a href="#prmsn">&lt;permission /&gt;</a>
+    <a href="#ptree">&lt;permission-tree /&gt;</a>
+    <a href="#pgroup">&lt;permission-group /&gt;</a>
+
+    <a href="#instru">&lt;instrumentation /&gt;</a>
+
+    <a href="#usess">&lt;uses-sdk /&gt;</a>
+
+    <a href="#app">&lt;application&gt;</a>
+
+        <a href="#actv">&lt;activity&gt;</a>
+            <a href="#ifilt">&lt;intent-filter&gt;</a>
+                <a href="#actn">&lt;action /&gt;</a>
+                <a href="#catg">&lt;category /&gt;</a>
+                <a href="#data">&lt;data /&gt;</a>
+            <a href="#ifilt">&lt;/intent-filter&gt;</a>
+            <a href="#meta">&lt;meta-data /&gt;</a>
+        <a href="#actv">&lt;/activity&gt;</a>
+
+        <a href="#alias">&lt;activity-alias&gt;</a>
+            <a href="#ifilt">&lt;intent-filter&gt;</a> . . . <a href="#ifilt">&lt;/intent-filter&gt;</a>
+            <a href="#meta">&lt;meta-data /&gt;</a>
+        <a href="#alias">&lt;/activity-alias&gt;</a>
+
+        <a href="#srvc">&lt;service&gt;</a>
+            <a href="#ifilt">&lt;intent-filter&gt;</a> . . . <a href="#ifilt">&lt;/intent-filter&gt;</a>
+            <a href="#meta">&lt;meta-data/&gt;</a>
+        <a href="#srvc">&lt;/service&gt;</a>
+
+        <a href="#rcvr">&lt;receiver&gt;</a>
+            <a href="#ifilt">&lt;intent-filter&gt;</a> . . . <a href="#ifilt">&lt;/intent-filter&gt;</a>
+            <a href="#meta">&lt;meta-data /&gt;</a>
+        <a href="#rcvr">&lt;/receiver&gt;</a>
+
+        <a href="#pvdr">&lt;provider&gt;</a>
+            <a href="#grantp">&lt;grant-uri-permission /&gt;</a>
+            <a href="#meta">&lt;meta-data /&gt;</a>
+        <a href="#pvdr">&lt;/provider&gt;</a>
+
+        <a href="#usesl">&lt;uses-library /&gt;</a>
+
+    <a href="#app">&lt;/application&gt;</a>
+
+<a href="#manf">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+Some conventions and rules apply generally to all elements and attributes 
+in the manifest:
+</p>
+
+<dl>
+<dt><b>Elements</b></dt>
+<dd>Only the {@code <a href="#manf">&lt;manifest&gt;</a>} and
+{@code <a href="#app">&lt;application&gt;</a>} elements are required, they each 
+must be present and can occur only once.  Most of the others can occur many times 
+or not at all &mdash; although at least some of them must be present for the 
+manifest to accomplish anything meaningful.
+
+<p>
+If an element contains anything at all, it contains other elements.  
+All values are set through attributes, not as character data within an element.
+</p>
+
+<p>
+Elements at the same level are generally not ordered.  For example,
+{@code <a href="#actv">&lt;activity&gt;</a>}, 
+{@code <a href{@code <a href="#pvdr">&lt;provider&gt;</a>}, and 
+{@code <a href="#srvc">&lt;service&gt;</a>} elements can be intermixed in 
+any sequence.  (An {@code <a href="#alias">&lt;activity-alias&gt;</a>} is the 
+exception to this rule:  It must follow the {@code <a href="#actv">&lt;activity&gt;</a>} 
+it is an alias for.)</p></dd>
+
+<dt><b>Attributes</b></dt>
+<dd>In a formal sense, all attributes are optional.  However, there are some 
+that must be specified for an element to accomplish its purpose.  Use the 
+documentation as a guide.  For truly optional attributes, it mentions a default 
+value or states what happens in the absence of a specification.
+
+<p>Except for some attributes of 
+the root {@code <a href="#manf">&lt;manifest&gt;</a>} element,
+all attribute names begin with an {@code android:} prefix &mdash; 
+for example, {@code android:alwaysRetainTaskState}.  Because the prefix is 
+universal, this documentation generally omits it when referring to attributes 
+by name.</p></dd>
+
+<dt><b>Declaring class names</b></dt>
+<dd>Many elements correspond to Java objects, including elements for the 
+application itself (the {@code <a href="#app">&lt;application&gt;</a>} element) 
+and its principal components &mdash;
+activities ({@code <a href="#actv">&lt;activity&gt;</a>}), 
+services ({@code <a href="#srvc">&lt;service&gt;</a>}), 
+broadcast receivers ({@code <a href="#rcvr">&lt;receiver&gt;</a>}), 
+and content providers ({@code <a href="#pvdr">&lt;provider&gt;</a>}).  
+
+<p>
+If you define a subclass, as you almost always would for the component classes 
+({@link android.app.Activity}, {@link android.app.Service}, 
+{@link android.content.BroadcastReceiver}, 
+and {@link android.content.ContentProvider}), the subclass is declared through 
+a {@code name} attribute.  The name must include the full package designation.  
+For example, an {@link android.app.Service} subclass might be declared as follows:
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
     &lt;/application&gt;
-    
+&lt;/manifest&gt;</pre>
+
+<p>
+However, as a shorthand, if the first character of the string is a period, the 
+string is appended to the application's package name (as specified by the 
+{@code <a href="#manf">&lt;manifest&gt;</a>} element's 
+{@code <a href="#manf_package">package</a>} attribute).  The following assignment 
+is the same as the one above: 
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+When starting a component, Android creates an instance of the named subclass.  
+If a subclass isn't specified, it creates an instance of the base class.
+</p></dd>
+
+<dt><b>Multiple values</b></dt>
+<dd>If more than one value can be specified, the element is almost always repeated, 
+rather than listing multiple values within a single element.  
+For example, an intent filter can list several actions:
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>Resource values</b></dt>
+<dd>Some attributes have values that can be displayed to users &mdash; for 
+example, a label and an icon for an activity.  The values of these attributes 
+should be localized and therefore set from a resource or theme.  Resource values 
+are expressed in the following format,</p>
+
+<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>:<i>name</i>}</p>
+
+<p>
+where the <i>package</i> name can be omitted if the resource is in the same package 
+as the application, <i>type</i> is a type of resource &mdash; such as "string" or 
+"drawable" &mdash; and <i>name</i> is the name that identifies the specific resource.  
+For example:
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+Values from a theme are expressed in a similar manner, but with an initial '?' 
+rather than '@':
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>:<i>name</i>}
+</p></dd>
+
+<dt><b>String values</b></dt>
+<dd>Where an attribute value is a string, double backslashes ('{@code \\}') 
+must be used to escape characters &mdash; for example, '{@code \\n}' for 
+a newline or '{@code \\uxxxx}' for a Unicode character.</dd>
+</dl>
+
+
+<h2 id="filef">File Features</h2>
+
+<p>
+The following sections describe how some Android features are reflected 
+in the manifest file.
+</p>
+
+
+<h3 id="ifs">Intent Filters</h3>
+
+<p>
+The core components of an application (its activities, services, and broadcast 
+receivers) are activated by <i>intents</i>.  An intent is a 
+bundle of information (an {@link android.content.Intent} object) describing a 
+desired action &mdash; including the data to be acted upon, the category of 
+component that should perform the action, and other pertinent instructions.  
+Android locates an appropriate component to respond to the intent, launches 
+a new instance of the component if one is needed, and passes it the 
+Intent object.
+</p>
+
+<p>
+Components advertise their capabilities &mdash; the kinds of intents they can 
+respond to &mdash; through <i>intent filters</i>.  Since the Android system 
+must learn which intents a component can handle before it launches the component, 
+intent filters are specified in the manifest as 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} elements.  A component may 
+have any number of filters, each one describing a different capability.
+</p>
+
+<p>
+An intent that explicitly names a target component will activate that component;
+the filter doesn't play a role.  But an intent that doesn't specify a target by
+name can activate a component only if it can pass through one of the component's
+filters.
+</p>
+
+<p>
+For information on how Intent objects are tested against intent filters, 
+a separate document, 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+and Intent Filters</a>.
+</p>
+
+
+<h3 id="iconlabel">Icons and Labels</h3>
+
+<p>
+A number of elements have {@code icon} and {@code label} attributes for an 
+icon and a text label that can displayed to users.  Some also have a 
+{@code description} attribute for longer explanatory text that can also be 
+shown on-screen.  For example, the {@code <a href="#prmsn">&lt;permission&gt;</a>}
+element has all three of these attributes, so that when the user is asked whether 
+to grant the permission to an application that has requested it, an icon representing 
+the permission, the name of the permission, and a description of what it 
+entails can all be presented to the user.
+</p>
+
+<p>
+In every case, the icon and label set in a containing element become the default 
+{@code icon} and {@code label} settings for all of the container's subelements.  
+Thus, the icon and label set in the {@code <a href="#app">&lt;application&gt;</a>} 
+element are the default icon and label for each of the application's components.  
+Similarly, the icon and label set for a component &mdash; for example, an 
+{@code <a href="#actv">&lt;activity&gt;</a>} element &mdash; are the default 
+settings for each of the component's 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} elements.  If an
+{@code <a href="#app">&lt;application&gt;</a>} element sets a label, but
+an activity and its intent filter do not, the application label is treated
+as the label for both the activity and the intent filter.
+</p>
+
+<p>
+The icon and label set for an intent filter are used to represent a component 
+whenever the component is presented to the user as fulfilling the function
+advertised by the filter.  For example, a filter with 
+"{@code android.intent.action.MAIN}" and 
+"{@code android.intent.category.LAUNCHER}" settings advertises an activity 
+as one that initiates an application &mdash; that is, as
+one that should be displayed in the application launcher.  The icon and label 
+set in the filter are therefore the ones displayed in the launcher.
+</p>
+
+
+<h3 id="perms">Permissions</h3>
+
+<p>
+A <i>permission</i> is a restriction limiting access to a part of the code 
+or to data on the device.   The limitation is imposed to protect critical 
+data and code that could be misused to distort or damage the user experience.  
+</p>
+
+<p>
+Each permission is identified 
+by a unique label.  Often the label indicates the action that's restricted.  
+For example, here are some permissions defined by Android:
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+A feature can be protected by at most one permission.
+</p>
+
+<p>
+If an application needs access to a feature protected by a permission, it must 
+declare that it requires that permission with a 
+{@code <a href="#usesp">&lt;uses-permission&gt;</a>} element in the manifest.  
+Then, when the application is installed on the device, the installer determines 
+whether or not to grant the requested permission by checking the authorities that 
+signed the application's certificates and, in some cases, asking the user.  
+If the permission is granted, the application is able to use the protected 
+features.  If not, its attempts to access those features will simply fail 
+without any notification to the user. 
+</p>
+
+<p>
+An application can also protect its own components (activities, services, 
+broadcast receivers, and content providers) with permissions.  It can employ 
+any of the permissions defined by Android (listed in 
+{@link android.Manifest.permission android.Manifest.permission}) or declared 
+by other applications.  Or it can define its own.  A new permission is declared 
+with the {@code <a href="#prmsn">&lt;permission&gt;</a>} element. 
+For example, an activity could be protected as follows:
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity" . . . &gt;
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+    . . .
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
 &lt;/manifest&gt;
 </pre>
 
-<p>Some general items to note:</p>
+<p>
+Note that, in this example, the {@code DEBIT_ACCT} permission is not only 
+declared with the {@code <a href="#prmsn">&lt;permission&gt;</a>} 
+element, its use is also requested with
+the {@code <a href="#usesp">&lt;uses-permission&gt;</a>} element.  Its use 
+must be requested in order for other components of the application to launch 
+the protected activity, even though the protection is imposed by the 
+application itself.  
+</p>
+
+<p>
+If, in the same example, the {@code permission} attribute was set to a 
+permission declared elsewhere 
+(such as {@code android.permission.CALL_EMERGENCY_NUMBERS}, it would not 
+have been necessary to declare it again with the 
+{@code <a href="#prmsn">&lt;permission&gt;</a>} element.  
+However, it would still have been necessary to request its use with 
+{@code <a href="#usesp">&lt;uses-permission&gt;</a>}. 
+</p>
+
+<p>
+The {@code <a href="#ptree">&lt;permission-tree&gt;</a>} element declares 
+a namespace for a group of permissions that will be defined in code.  
+And {@code <a href="#pgroup">&lt;permission-group&gt;</a>}
+defines a label for a set of permissions (both those declared in the 
+manifest with {@code <a href="#prmsn">&lt;permission&gt;</a>} elements and 
+those declared elsewhere).  It affects only how the permissions are grouped 
+when presented to the user.
+</p>
+
+
+<h3 id="libs">Libraries</h3>
+
+<p>
+Every application is linked against the default Android library, which 
+includes the basic packages for building applications (with common classes 
+such as Activity, Service, Intent, View, Button, Application, ContentProvider, 
+and so on).
+</p>
+
+<p>
+However, some packages reside in their own libraries.  If your application 
+uses code from any of these packages, it must explicitly asked to be linked 
+against them.  The manifest must contain a separate 
+{@code <a href="#usesl">&lt;uses-library&gt;</a>} element to name each 
+of the libraries.  (The library name can be found in the documentation 
+for the package.)
+</p>
+
+
+<h2 id="elems">Elements of the Manifest File</h2>
+
+<p>
+This section describes all the elements that can appear in the manifest and each 
+of their attributes in more detail.  Only the elements listed here are legal.  
+The list is alphabetical.
+</p>
+
+
+<h3 id="actn">&lt;action&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;action android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}</dd>
+
+<p>
+<dt>description:</dt>
+<dd>Adds an action to an intent filter. 
+An {@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element must contain 
+one or more {@code &lt;action&gt;} elements.  If it doesn't contain any, no
+Intent objects will get through the filter.  See 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and 
+Intent Filters</a> for details on intent filters and the role of action
+specifications within a filter.
+</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:name}</dt>
+<dd>The name of the action.  Some standard actions are defined in the
+{@link android.content.Intent#ACTION_CHOOSER Intent} class as 
+{@code ACTION_<i>string</i>} constants.  To assign one of these actions to 
+this attribute, prepend "{@code android.intent.action.}" to the 
+{@code <i>string</i>} that follows {@code ACTION_}.
+For example, for {@code ACTION_MAIN}, use "{@code android.intent.action.MAIN}"
+and for {@code ACTION_WEB_SEARCH}, use "{@code android.intent.action.WEB_SEARCH}".
+
+<p>
+For actions you define, it's best to use the package name as a prefix to
+ensure uniqueness.  For example, a {@code TRANSMOGRIFY} action might be specified 
+as follows:
+</p>
+
+<pre>&lt;action android:name="com.example.project.TRANSMOGRIFY" /&gt;</pre>
+</dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="actv">&lt;activity&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;activity android:allowTaskReparenting=["true" | "false"]
+          android:alwaysRetainTaskState=["true" | "false"]
+          android:clearTaskOnLaunch=["true"" | "false"]
+          android:configChanges=["mcc" | "mnc" | "locale" | 
+                                 "touchscreen" | "keyboard" |
+                                 "keyboardHidden" | "navigation" |
+                                 "orientation" | "fontScale"]
+          android:enabled=["true" | "false"]
+          android:excludeFromRecents=["true" | "false"]
+          android:exported=["true" | "false"]
+          android:finishOnTaskLaunch=["true" | "false"]
+          android:icon="<i>drawable resource</i>"
+          android:label="<i>string resource</i>"
+          android:launchMode=["multiple" | "singleTop" | 
+                              "singleTask" | "singleInstance"]
+          android:multiprocess=["true" | "false"]
+          android:name="<i>string</i>"
+          android:permission="<i>string</i>"
+          android:process="<i>string</i>"
+          android:screenOrientation=["unspecified" | "user" | "behind" |
+                                     "landscape" | "portrait" | 
+                                     "sensor" | "nonsensor"]
+          android:stateNotNeeded=["true" | "false"]
+          android:taskAffinity="<i>string</i>"
+          android:theme="<i>resource or theme</i>" &gt;
+    . . .
+&lt;/activity&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}
+<br/>{@code <a href="#meta">&lt;meta-data&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares an activity (an {@link android.app.Activity} subclass) that 
+implements part of the application's visual user interface.  All activities 
+must be represented by {@code &lt;activity&gt;} 
+elements in the manifest file.  Any that are not declared there will not be seen 
+by the system and will never be run.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a href name="actv_reparent"></a>{@code android:allowTaskReparenting}</dt>
+<dd>Whether or not the activity can move from the task that started it to 
+the task it has an affinity for when that task is next brought to the 
+front &mdash; "{@code true}" if it can move, and "{@code false}" if it 
+must remain with the task where it started.  
+
+<p>
+If this attribute is not set, the value set by the corresponding 
+{@code <a href="#app_reparent">allowTaskReparenting</a>}
+attribute of the {@code <a href="#app">&lt;application&gt;</a>} element 
+applies to the activity.  The default value is "{@code false}".
+</p>
+
+<p>
+Normally when an activity is started, it's associated with the task of 
+the activity that started it and it stays there for its entire lifetime.  
+You can use this attribute to force it to be re-parented to the task it 
+has an affinity for when its current task is no longer displayed.  
+Typically, it's used to cause the activities of an application to move 
+to the main task associated with that application.
+</p>
+
+<p>
+For example, if an e-mail message contains a link to a web page, clicking 
+the link brings up an activity that can display the page.  That activity 
+is defined by the browser application, but is launched as part of the e-mail 
+task.  If it's reparented to the browser task, it will be shown when the 
+browser next comes to the front, and will be absent when the e-mail task 
+again comes forward.
+</p>
+
+<p>
+The affinity of an activity is defined by the 
+{@code <a href="#actv_aff">taskAffinity</a>} attribute.  The affinity 
+of a task is determined by reading the affinity of its root activity.
+Therefore, by definition, a root activity is always in a task with the
+same affinity.  Since activities with "{@code singleTask}" or 
+"{@code singleInstance}" launch modes can only be at the root of a task,
+re-parenting is limited to the "{@code standard}" and "{@code singleTop}" 
+modes.  (See also the {@code <a href="#actv_lmode">launchMode</a>} 
+attribute.)
+</p></dd>
+
+<dt>{@code android:alwaysRetainTaskState}</dt>
+<dd>Whether or not the state of the task that the activity is in will always 
+be maintained by the system &mdash; "{@code true}" if it will be, and 
+"{@code false}" if the system is allowed to reset the task to its initial 
+state in certain situations.  The default value is "{@code false}".  This 
+attribute is meaningful only for the root activity of a task; it's ignored 
+for all other activities.
+
+<p>
+Normally, the system clears a task (removes all activities from the stack 
+above the root activity) in certain situations when the user re-selects that 
+task from the home screen.  Typically, this is done if the user hasn't visited 
+the task for a certain amount of time, such as 30 minutes.
+</p>
+
+<p>
+However, when this attribute is "{@code true}", users will always return 
+to the task in its last state, regardless of how they get there.  This is 
+useful, for example, in an application like the web browser where there is 
+a lot of state (such as multiple open tabs) that users would not like to lose.
+</p></dd>
+
+<dt>{@code android:clearTaskOnLaunch}</dt>
+<dd>Whether or not all activities will be removed from the task, except for 
+the root activity, whenever it is re-launched from the home screen &mdash; 
+"{@code true}" if the task is always stripped down to its root activity, and 
+"{@code false}" if not.  The default value is "{@code false}".  This attribute 
+is meaningful only for activities that start a new task (the root activity); 
+it's ignored for all other activities in the task.
+
+<p>
+When the value is "{@code true}", every time users start the task again, they 
+are brought to its root activity, regardless of what they were last doing in 
+the task and regardless of whether they used BACK or HOME to last leave it.  
+When the value is "{@code false}", the task may be cleared of activities in 
+some situations (see the {@code alwaysRetainTaskState} attribute), but not always.  
+</p>
+
+<p>
+Suppose, for example, that someone launches activity P from the home screen, 
+and from there goes to activity Q.  The user next presses HOME, and then returns 
+to activity P.  Normally, the user would see activity Q, since that is what they 
+were last doing in P's task.  However, if P set this flag to "{@code true}", all 
+of the activities on top of it (Q in this case) were removed when the user pressed 
+HOME and the task went to the background.  So the user sees only P when returning 
+to the task.
+</p>
+
+<p>
+If this attribute and {@code allowTaskReparenting} are both "{@code true}", 
+any activities that can be re-parented are moved to the task they share an 
+affinity with; the remaining activities are then dropped, as described above.
+</p></dd>
+
+<dt>{@code android:configChanges}</dt>
+<dd>Lists configuration changes that the activity will handle itself.  When 
+changes that are not listed occur, the activity is shut down and restarted.  
+When a listed change occurs, the activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged onConfigurationChanged()}</code> 
+method is called.
+
+<p>
+Any or all of the following strings can be used to set this attribute.  Values are 
+separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientation}".
+</p>
+
+<table>
+<tr>
+   <td><b>Value</b></td>
+   <td><b>Description</b></td>
+</tr><tr>
+   <td>"{@code mcc}"</td>
+   <td>The IMSI mobile country code (MCC) has changed &mdash; 
+       that is, a SIM has been detected and updated the MCC.</td>
+</tr><tr>
+   <td>"{@code mnc}"</td>
+   <td>The IMSI mobile network code (MNC) has changed &mdash; 
+       that is, a SIM has been detected and updated the MNC.</td>
+</tr><tr>
+   <td>"{@code locale}"</td>
+   <td>The locale has changed &mdash; for example, the user has selected a new 
+       language that text should be displayed in.</td>
+</tr><tr>
+   <td>"{@code touchscreen}"</td>
+   <td>The touchscreen has changed.  (This should never normally happen.)</td>
+</tr><tr>
+   <td>"{@code keyboard}"</td>
+   <td>The keyboard type has changed &mdash; for example, the user has 
+       plugged in an external keyboard.</td>
+</tr><tr>
+   <td>"{@code keyboardHidden}"</td>
+   <td>The keyboard accessibility has changed &mdash; for example, the 
+       user has slid the keyboard out to expose it.</td>
+</tr><tr>
+   <td>"{@code navigation}"</td>
+   <td>The navigation type has changed.  (This should never normally happen.)</td>
+</tr><tr>
+   <td>"{@code orientation}"</td> 
+   <td>The screen orientation has changed &mdash; that is, the user has rotated 
+       the device.</td>
+ </tr><tr>
+  <td>"{@code fontScale}"</td>
+   <td>The font scaling factor has changed &mdash; that is, the user has selected 
+       a new global font size.</td>
+</tr>
+</table>
+
+<p>
+All of these configuration changes can impact the resource values seen by the 
+application.  Therefore, when <code>{@link android.app.Activity#onConfigurationChanged 
+onConfigurationChanged()}</code> is called, it will generally be necessary to again 
+retrieve all resources (including view layouts, drawables, and so on) to correctly 
+handle the change. 
+</p></dd>
+
+<dt>{@code android:enabled}</dt>
+<dd>Whether or not the activity can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The {@code <a href="#app">&lt;application&gt;</a>} element has its own 
+{@code <a href="#app_enabled">enabled</a>} attribute that applies to all 
+application components, including activities.  The 
+{@code <a href="#app">&lt;application&gt;</a>} and {@code &lt;activity&gt;} 
+attributes must both be "{@code true}" (as they both are by default) for 
+the system to be able to instantiate the activity.  If either is 
+"{@code false}", it cannot be instantiated.
+</p></dd>
+
+<dt>{@code android:excludeFromRecents}</dt>
+<dd>Whether or not the activity should be excluded from the list of recently 
+launched activities that can be displayed to users &mdash; "{@code true}" if 
+it should be excluded, and "{@code false}" if it should be included.  
+The default value is "{@code false}".
+</p></dd>
+
+<dt>{@code android:exported}</dt>
+<dd>Whether or not the activity can be launched by components of other 
+applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+If "{@code false}", the activity can be launched only by components of the 
+same application or applications with the same user ID.  
+
+<p>
+The default value depends on whether the activity contains intent filters.  The 
+absence of any filters means that the activity can be invoked only by specifying 
+its exact class name.  This implies that the activity is intended only for 
+application-internal use (since others would not know the class name).  So in 
+this case, the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the activity 
+is intended for external use, so the default value is "{@code true}".
+</p>
+
+<p>
+This attribute is not the only way to limit an activity's exposure to other
+applications.  You can also use a permission to limit the external entities that 
+can invoke the activity  (see the {@code <a href="#actv_prmsn">permission</a>} 
+attribute).
+</p></dd>
+
+<dt>{@code android:finishOnTaskLaunch}</dt>
+<dd>Whether or not an existing instance of the activity should be shut down 
+(finished) whenever the user again launches its task (chooses the task on the 
+home screen) &mdash; "{@code true}" if it should be shut down, and "{@code false}" 
+if not.  The default value is "{@code false}". 
+
+<p>
+If this attribute and {@code <a href="#actv_reparent">allowTaskReparenting</a>} 
+are both "{@code true}", this attribute trumps the other.  The affinity of the 
+activity is ignored.  The activity is not re-parented, but destroyed.
+</p>
+
+<dt><a name="actv_icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the activity. The icon is displayed to users when 
+a representation of the activity is required on-screen.  For example, icons 
+for activities that initiate tasks are displayed in the launcher window.  
+The icon is often accompanied by a label (see the {@code label} attribute).
+</p>
+
+<p>
+This attribute must be set as a reference to a drawable resource containing 
+the image definition.  If it is not set, the icon specified for the application 
+as a whole is used instead (see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_icon">icon</a>} attribute).
+</p>
+
+<p>
+The activity's icon &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default icon for all the activity's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_icon">icon</a>} attribute). 
+</p></dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the activity.  The label is displayed on-screen 
+when the activity must be represented to the user. It's often displayed along 
+with the activity icon.
+
+<p>
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_label">label</a>} attribute).
+</p>
+
+<p>
+The activity's label &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default label for all the activity's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_label">label</a>} attribute). 
+</p>
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt><a name="actv_lmode"></a>{@code android:launchMode}</dt>
+<dd>An instruction on how the activity should be launched.  There are four modes 
+that work in conjunction with activity flags ({@code FLAG_ACTIVITY_*} constants) 
+in {@link android.content.Intent} objects to determine what should happen when 
+the activity is called upon to handle an intent:
+
+<p style="margin-left: 2em">"{@code standard}"
+<br>"{@code singleTop}"
+<br>"{@code singleTask}"
+<br>"{@code singleInstance}"</p>
+
+<p>
+The default mode is "{@code standard}".
+The modes differ from each other on three points:
+</p>
+
+<ol>
+
+<li><p><b>Whether or not a new instance of the class will be launched</b>.  For 
+the default "{@code standard}" mode, every time a new intent is received, a new 
+instance of the class is created to handle that intent.  For all the other modes, 
+an existing instance is re-used if it resides at the top of the activity stack.  
+As we'll see below, if there's an existing instance of a "{@code singleTask}" or 
+"{@code singleInstance}" activity, it will always be (or come to be) at the top 
+of the stack, so this condition will always be met for those two modes.  However, 
+an existing "{@code singleTop}" instance may or may not be at the top of the stack.  
+If it is, it will be re-used.  If not, a new instance is created.</p>
+
+<p>
+For example, suppose a task's activity stack consists of root activity A with 
+activities B, C, and D on top in that order, so the stack is A-B-C-D.  An intent 
+arrives for an activity of type D.  If D has the default "{@code standard}" launch 
+mode, a new instance of the class is launched and the stack becomes A-B-C-D-D.  
+However, if D's launch mode is "{@code singleTop}", the existing instance is 
+expected to handle the new intent (since it's at the top of the stack) and the 
+stack remains A-B-C-D.  
+</p>
+
+<p>
+If, on the other hand, the arriving intent is for an activity of type B, a new 
+instance of B would be launched no matter whether B's mode is "{@code standard}" 
+or "{@code singleTop}" (since B is not at the top of the stack), so the resulting 
+stack would be A-B-C-D-B.
+</p>
+
+<p>
+Now, suppose again that the stack is A-B-C-D and that the intent that arrives for 
+B has the <code>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</code> flag set.  Since 
+the intent is destined for an activity of type B and the stack already has an object 
+of that type, the flag causes activities C and D to be shut down and removed from 
+the stack.  If B's launch mode is "{@code standard}", it too will be removed, and 
+a new instance of B launched to handle the incoming intent.  That's because a new 
+instance is always created for a new intent when the launch mode is "{@code standard}".  
+However, if B's launch mode is "{@code singleTop}", the current instance would remain 
+in the stack and receive the intent.
+</p>
+
+<p>
+Whenever an existing "{@code singleTop}", "{@code singleTask}", or 
+"{@code singleInstance}" object is expected to handle an incoming intent, its 
+<code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> method is called with the 
+{@link android.content.Intent} object passed as an argument.
+</p>
+</li>
+
+<li><p><b>Which task will hold the activity that responds to the intent</b>.  
+For the "{@code standard}" and "{@code singleTop}" modes, it's the task that 
+originated the intent (and called <code>{@link android.content.Context#startActivity 
+startActivity()}</code>) &mdash; unless the Intent object contains the 
+<code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> flag.  In that case, 
+a different task is chosen as follows:</p>
 
 <ul>
-<li> <p>Almost every AndroidManifest.xml (as well as many other Android
-XML files) will include the namespace declaration
-<code>xmlns:android="http://schemas.android.com/apk/res/android"</code> in
-its first element.  This makes a variety of standard Android attributes
-available in the file, which will be used to supply most of the data for
-elements in that file.</code>
-<li> <p>Most manifests include a single <code>&lt;application&gt;</code>
-element, which defines all of the application-level components and
-properties that are available in the package.</p>
-<li> <p>Any package that will be presented to the user as a top-level
-application available from the program launcher will need to include at
-least one {@link android.app.Activity} component that supports the
-{@link android.content.Intent#ACTION_MAIN MAIN} action and
-{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} category as
-shown here.</p>
+<li>If there's an existing task with the same affinity as the target activity, 
+that task will hold the instance that responds to the intent.  (As noted above, 
+it could be an existing instance for a "{@code singleTop}" activity, but will 
+always be a new instance for a "{@code standard}" activity.)</li>
+
+<li>Otherwise, the activity is launched as the root of a new task.</li>
 </ul>
 
-<p>Here is a detailed outline of the structure of an AndroidManifest.xml file,
-describing all tags that are available.</p>
+<p>
+In contrast, the "{@code singleTask}" and "{@code singleInstance}" modes mark 
+activities that will always be at the root of a task; they can never be launched 
+as part of another task.  Moreover, once a "{@code singleTask}" or 
+"{@code singleInstance}" activity has been launched, that instance is re-used 
+to handle all new intents, so there is never more than one instance of the 
+activity on the device.
+</p>
 
-<dl>
-  <dt>{@link android.R.styleable#AndroidManifest &lt;manifest&gt;}</dt>
-  <dd>The root node of the file, describing the complete contents of
-	   the package.  Under it you can place:
-    <dl>
-      <dt>{@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}</dt>
-      <dd>Requests a security permission that your package must be granted in
-           order for it to operate correctly.  See the
-           <a href="{@docRoot}devel/security.html">Security Model</a>
-           document for more information on permissions.  A manifest can
-           contain zero or more of these elements.</dd>
-      <dt>{@link android.R.styleable#AndroidManifestPermission &lt;permission&gt;}</dt>
-      <dd>Declares a security permission that can be used to restrict which
-           applications can access components or features in your (or
-           another) package.  See the
-           <a href="{@docRoot}devel/security.html">Security Model</a>
-           document for more information on permissions.  A manifest can
-           contain zero or more of these elements.</dd>
-      <dt>{@link android.R.styleable#AndroidManifestInstrumentation &lt;instrumentation&gt;}</dt>
-      <dd>Declares the code of an instrumentation component that is available
-           to test the functionality of this <em>or another</em> package.
-           See {@link android.app.Instrumentation} for more details.  A manifest can
-           contain zero or more of these elements.</dd>
-      <dt>{@link android.R.styleable#AndroidManifestApplication &lt;application&gt;}</dt>
-      <dd>Root element containing declarations of the application-level
-           components contained in the package.  This element can also
-           include global and/or default attributes for the application,
-           such as a label, icon, theme, required permission, etc.  A manifest
-           can contain zero or one of these elements (more than one application
-           tag is not allowed).  Under it you can place zero or more of
-           each of the following component declarations:
-        <dl>
-          <dt>{@link android.R.styleable#AndroidManifestActivity &lt;activity&gt;}</dt>
-          <dd>An {@link android.app.Activity} is the primary facility for
-               an application to interact with the user.  The initial screen
-               the user sees when launching an application is an activity,
-               and most other screens they use will be implemented as
-               separate activities declared with additional activity tags.
-               
-               <p><em><strong>Note:</strong></em> Every
-               Activity must have an &lt;activity&gt; tag in the manifest whether it is exposed
-               to the world or intended for use only within its own package. If an Activity
-               has no matching tag in the manifest, you won't be able to launch it.
-            
-               <p>Optionally, to support late runtime lookup of your
-               activity, you can include one or more &lt;intent-filter&gt;
-               elements to describe the actions the activity supports.
-            <dl>
-              <dt><a name="intent-filter">
-                   {@link android.R.styleable#AndroidManifestIntentFilter &lt;intent-filter&gt;}</a></dt>
-              <dd>Declares a specific set of {@link android.content.Intent} values
-                   that a component supports, in the form of an
-                   {@link android.content.IntentFilter}.  In addition to the
-                   various kinds of values
-                   that can be specified under this element, attributes
-                   can be given here to supply a unique label, icon, and
-                   other information for the action being described.
-                <dl>
-                  <dt>{@link android.R.styleable#AndroidManifestAction &lt;action&gt;}</dt>
-                  <dd>An {@link android.content.IntentFilter#addAction Intent action}
-                       that the component supports.</dd>
-                  <dt>{@link android.R.styleable#AndroidManifestCategory &lt;category&gt;}</dt>
-                  <dd>An {@link android.content.IntentFilter#addCategory Intent category}
-                       that the component supports.</dd>
-                  <dt>{@link android.R.styleable#AndroidManifestData &lt;data&gt;}</dt>
-                  <dd>An {@link android.content.IntentFilter#addDataType Intent data MIME type},
-                       {@link android.content.IntentFilter#addDataScheme Intent data URI scheme},
-                       {@link android.content.IntentFilter#addDataAuthority Intent data URI authority}, or
-                       {@link android.content.IntentFilter#addDataPath Intent data URI path}
-                       that the component supports.</dd>
-                </dl>
-            </dl>
-            
-               <p>You can also optionally associate one or more pieces of meta-data
-               with your activity that other clients can retrieve to find
-               additional arbitrary information about it:</p>
-            <dl>
-              <dt><a name="meta-data">
-                   {@link android.R.styleable#AndroidManifestMetaData &lt;meta-data&gt;}</a></dt>
-              <dd>Adds a new piece of meta data to the activity, which clients
-                   can retrieve through
-                   {@link android.content.pm.ComponentInfo#metaData
-                   ComponentInfo.metaData}.
-            </dl>
-          <dt>{@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}</dt>
-          <dd>An {@link android.content.BroadcastReceiver} allows an application
-               to be told about changes to data or actions that happen,
-               even if it is not currently running.  As with the activity
-               tag, you can optionally include one or more &lt;intent-filter&gt;
-               elements that the receiver supports or &lt;meta-data&gt; values;
-               see the activity's
-               <a href="#intent-filter">&lt;intent-filter&gt;</a> and
-               <a href="#meta-data">&lt;meta-data&gt;</a> descriptions
-               for more information.</dd>
-          <dt>{@link android.R.styleable#AndroidManifestService &lt;service&gt;}</dt>
-          <dd>A {@link android.app.Service} is a component that can run in
-               the background for an arbitrary amount of time.  As with the activity
-               tag, you can optionally include one or more &lt;intent-filter&gt;
-               elements that the service supports or &lt;meta-data&gt; values;
-               see the activity's
-               <a href="#intent-filter">&lt;intent-filter&gt;</a> and
-               <a href="#meta-data">&lt;meta-data&gt;</a> descriptions
-               for more information.</dd>
-          <dt>{@link android.R.styleable#AndroidManifestProvider &lt;provider&gt;}</dt>
-          <dd>A {@link android.content.ContentProvider} is a component that
-               manages persistent data and publishes it for access by other
-               applications.  You can also optionally attach one or more
-               &lt;meta-data&gt; values, as described in the activity's
-               <a href="#meta-data">&lt;meta-data&gt;</a> description.</dd>
-        </dl>
-    </dl>
+<p>
+When a new intent arrives for an existing "{@code singleTask}" activity, all 
+other activities are removed from its stack, so that only the root activity 
+remains; it's as if the Intent object included the 
+<code>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</code> flag.  The activity 
+is then at the top of its stack, and in a position to receive the new intent 
+in an <code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> call.
+</p></li>
+
+<li><p><b>Whether the instance can have other activities in its task</b>.  
+A "{@code singleInstance}" activity stands alone as the only activity in its 
+task.  If it starts another activity, that activity will be launched in a 
+different task regardless of its launch mode.  In all other respects, the 
+"{@code singleInstance}" mode is identical to "{@code singleTask}".</p>
+
+<p>
+All modes other than "{@code singleInstance}" permit multiple activities 
+to belong to the task.
+</p></li>
+</ol>
+</dd>
+
+<dt>{@code android:multiprocess}</dt>
+<dd>Whether an instance of the activity can be launched into the process of the component 
+that started it &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+The default value is "{@code false}".
+
+<p>
+Normally, a new instance of an activity is launched into the process of the 
+application that defined it, so all instances of the activity run in the same 
+process.  However, if this flag is set to "{@code true}", instances of the 
+activity can run in multiple processes, allowing the system to create instances 
+wherever they are used (provided permissions allow it), something that is almost 
+never necessary or desirable.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the class that implements the activity, a subclass of 
+{@link android.app.Activity}.  The attribute value should be a fully qualified 
+class name (such as, "{@code com.example.project. ExtracurricularActivity}").  
+However, as a shorthand, if the first character of the name is a period 
+(for example, "{@code . ExtracurricularActivity}"), it is appended to the 
+package name specified in the {@code <a href="#manf">&lt;manifest&gt;</a>} 
+element.
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt><a name="actv_prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to launch the activity 
+or otherwise get it to respond to an intent.  If a caller of 
+<code>{@link android.content.Context#startActivity startActivity()}</code> or
+<code>{@link android.app.Activity#startActivityForResult startActivityForResult()}</code>
+has not been granted the specified permission, its intent will not be 
+delivered to the activity.
+
+<p>
+If this attribute is not set, the permission set by the 
+{@code <a href="#app">&lt;application&gt;</a>} element's
+{@code <a href="#app_prmsn">permission</a>} attribute applies 
+to the activity.  If neither attribute is set, the activity is
+not protected by a permission.
+</p>
+
+<p>
+For more information on permissions, see the <a href="#sectperm">Permissions</a> 
+section earlier in this document and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt>{@code android:process}</dt>
+<dd>The name of the process in which the activity should run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_proc">process</a>} attribute can set a different 
+default for all components.  But each component can override the default,
+allowing you to spread your application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the activity runs in that process.
+If the process name begins with a lowercase character, the activity will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+
+<dt>{@code android:screenOrientation}</dt>
+<dd>The orientation of the activity's display on the device.
+The value can be any one of the following strings:
+
+<table>
+<tr>
+   <td>"{@code unspecified}"</td>
+   <td>The default value.  The system chooses the orientation.  The policy it
+       uses, and therefore the choices made in specific contexts, may differ 
+       from device to device.</td>
+</tr><tr>
+   <td>"{@code landscape}"</td>
+   <td>Landscape orientation (the display is wider than it is tall).</td>
+</tr><tr>
+   <td>"{@code portrait}"</td>
+   <td>Portrait orientation (the display is taller than it is wide).</td>
+</tr><tr>
+   <td>"{@code user}"</td>
+   <td>The user's current preferred orientation.</td>
+</tr><tr>
+   <td>"{@code behind}"</td>
+   <td>The same orientation as the activity that's immediately beneath it in 
+       the activity stack.</td>
+</tr><tr>
+   <td>"{@code sensor}"</td>
+   <td>The orientation determined by a physical orientation sensor.  The 
+       orientation of the display depends on how the user is holding the device; 
+       it changes when the user rotates the device.</td>
+</tr><tr>
+   <td>"{@code nosensor}"</td>
+   <td>An orientation determined without reference to a physical orientation sensor.  
+       The sensor is ignored, so the display will not rotate based on how the user 
+       moves the device.  Except for this distinction, the system chooses the 
+       orientation using the same policy as for the "{@code unspecified}" setting.</td>
+</tr>
+</table></dd>
+
+<dt>{@code android:stateNotNeeded}</dt>
+<dd>Whether or not the activity can be killed and successfully restarted 
+without having saved its state &mdash; "{@code true}" if it can be restarted 
+without reference to its previous state, and "{@code false}" if its previous 
+state is required.  The default value is "{@code false}".
+
+<p>
+Normally, before an activity is temporarily shut down to save resources, its 
+<code>{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}</code> 
+method is called.  This method stores the current state of the activity in a 
+{@link android.os.Bundle} object, which is then passed to 
+<code>{@link android.app.Activity#onCreate onCreate()}</code> when the activity 
+is restarted.  If this attribute is set to "{@code true}", 
+{@code onSaveInstanceState()} may not be called and {@code onCreate()} will 
+be passed {@code null} instead of the Bundle &mdash; just as it was when the 
+activity started for the first time.
+</p>
+
+<p>
+A "{@code true}" setting ensures that the activity can be restarted in the 
+absence of retained state.  For example, the activity that displays the 
+home screen uses this setting to make sure that it does not get removed if it 
+crashes for some reason. 
+</p></dd>
+
+<dt><a name="actv_aff"></a>{@code android:taskAffinity}</dt>
+<dd>The task that the activity has an affinity for.  Activities with 
+the same affinity conceptually belong to the same task (to the same
+"application" from the user's perspective).  The affinity of a task 
+is determined by the affinity of its root activity. 
+
+<p>
+The affinity determines two things &mdash; the task that the activity is re-parented 
+to (see the {@code <a href="#actv_reparent">allowTaskReparenting</a>} 
+attribute) and the task that will house the activity when it is launched 
+with the <code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> 
+flag.
+</p>
+
+<p>
+By default, all activities in an application have the same affinity.  You
+can set this attribute to group them differently, and even place
+activities defined in different applications within the same task.  To 
+specify that the activity does not have an affinity for any task, set
+it to an empty string.
+
+<p>
+If this attribute is not set, the activity inherits the affinity set 
+for the application (see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_aff">taskAffinity</a>} attribute).  
+The name of the default affinity for an application is the package name set 
+by the {@code <a href="#manf">&lt;manifest&gt;</a>} element.
+</p>
+
+<dt><a name="actv_theme"></a>{@code android:theme}</dt>
+<dd>A reference to a style resource defining an overall theme for the activity.  
+This automatically sets the activity's context to use this theme (see
+<code>{@link android.content.Context#setTheme setTheme()}</code>, and may also 
+cause "starting" animations prior to the activity being launched (to better 
+match what the activity actually looks like).
+
+<p>
+If this attribute is not set, the activity inherits the theme set for the 
+application as a whole &mdash; see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_theme">theme</a>} attribute.  If that attribute is 
+also not set, the default system theme is used.
+</p>
+<dd> 
+</dl></dd>
+
 </dl>
+<hr>
+
+
+<h3 id="alias">&lt;activity-alias&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;activity-alias android:enabled=["true" | "false"]
+                android:exported=["true" | "false"]
+                android:icon="<i>drawable resource</i>"
+                android:label="<i>string resource</i>"
+                android:name="<i>string</i>"
+                android:permission="<i>string</i>"
+                android:targetActivity="<i>string</i>" &gt;
+    . . .
+&lt;/activity-alias&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}
+<br/>{@code <a href="#meta">&lt;meta-data&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>An alias for an activity, named by the {@code targetActivity} 
+attribute.  The target must be in the same application as the
+alias and it must be declared before the alias in the manifest.
+
+<p>
+The alias presents the target activity as a independent entity.
+It can have its own set of intent filters, and they, rather than the 
+intent filters on the target activity itself, determine which intents 
+can activate the target through the alias and how the system
+treats the alias.  For example, the intent filters on the alias may 
+specify the "<code>{@link android.content.Intent#ACTION_MAIN 
+android.intent.action.MAIN}</code>" 
+and "<code>{@link android.content.Intent#CATEGORY_LAUNCHER 
+android.intent.category.LAUNCHER}</code>" flags, causing it to be 
+represented in the application launcher, even though none of the 
+filters on the target activity itself set these flags.
+</p>
+
+<p>
+With the exception of {@code targetActivity}, {@code &lt;activity-alias&gt;} 
+attributes are a subset of {@code <a href="#actv">&lt;activity&gt;</a>} attributes.  
+For attributes in the subset, none of the values set for the target carry over
+to the alias.  However, for attributes not in the subset, the values set for 
+the target activity also apply to the alias.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:enabled}</dt>
+<dd>Whether or not the target activity can be instantiated by the system through 
+this alias &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+The default value is "{@code true}".
+
+<p>
+The {@code <a href="#app">&lt;application&gt;</a>} element has its own 
+{@code <a href="#app_enabled">enabled</a>} attribute that applies to all 
+application components, including activity aliases.  The 
+{@code <a href="#app">&lt;application&gt;</a>} and {@code &lt;activity-alias&gt;} 
+attributes must both be "{@code true}" for the system to be able to instantiate 
+the target activity through the alias.  If either is "{@code false}", the alias 
+does not work.
+</p></dd>
+
+<dt>{@code android:exported}</dt>
+<dd>Whether or not components of other applications can launch the target activity 
+through this alias &mdash; "{@code true}" if they can, and "{@code false}" if not.  
+If "{@code false}", the target activity can be launched through the alias only by 
+components of the same application as the alias or applications with the same user ID.  
+
+<p>
+The default value depends on whether the alias contains intent filters.  The 
+absence of any filters means that the activity can be invoked through the alias
+only by specifying the exact name of the alias.  This implies that the alias 
+is intended only for application-internal use (since others would not know its name)  
+&mdash; so the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the alias 
+is intended for external use &mdash; so the default value is "{@code true}".
+</p></dd>
+
+<dt>{@code android:icon}</dt>
+<dd>An icon for the target activity when presented to users through the alias.  
+See the {@code <a href="#actv">&lt;activity&gt;</a>} element's 
+{@code <a href="#actv_icon">icon</a>} attribute for more information.
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the alias when presented to users through the alias.
+See the the {@code <a href="#actv">&lt;activity&gt;</a>} element's 
+{@code <a href="#actv_label">label</a>} attribute for more information.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>A unique name for the alias.  The name should resemble a fully
+qualified class name.  But, unlike the name of the target activity, 
+the alias name is arbitrary; it does not refer to an actual class.  
+</p></dd>
+
+<dt>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to launch the target activity 
+or get it to do something via the alias.  If a caller of 
+<code>{@link android.content.Context#startActivity startActivity()}</code> or
+<code>{@link android.app.Activity#startActivityForResult startActivityForResult()}</code>
+has not been granted the specified permission, the target activity will not be
+activated. 
+
+<p>This attribute supplants any permission set for the target activity itself.  If
+it is not set, a permission is not needed to activate the target through the alias.
+</p>
+
+<p>
+For more information on permissions, see the {@code <a href="#perms">Permissions</a> 
+section earlier in this document.
+</p></dd>
+
+<dt>{@code android:targetActivity}</dt>
+<dd>The name of the activity that can be activated through the alias.
+This name must match the {@code name} attribute of an 
+{@code <a href="#actv">&lt;activity&gt;</a>} element that precedes
+the alias in the manifest.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#actv">&lt;activity&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="app">&lt;application&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;application android:allowClearUserData=["true" | "false"]
+             android:allowTaskReparenting=["true" | "false"]
+             android:debuggable=["true" | "false"]
+             android:description="<i>string resource</i>"
+             android:enabled=["true" | "false"]
+             android:hasCode=["true" | "false"]
+             android:icon="<i>drawable resource</i>"
+             android:label="<i>string resource</i>"
+             android:manageSpaceActivity="<i>string</i>"
+             android:name="<i>string</i>"
+             android:permission="<i>string</i>"
+             android:persistent=["true" | "false"]
+             android:process="<i>string</i>"
+             android:taskAffinity="<i>string</i>"
+             android:theme="<i>resource or theme</i>" &gt;
+    . . .
+&lt;/application&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#actv">&lt;activity&gt;</a>}
+<br/>{@code <a href="#alias">&lt;activity-alias&gt;</a>}
+<br/>{@code <a href="#srvc">&lt;service&gt;</a>}
+<br/>{@code <a href="#rcvr">&lt;receiver&gt;</a>}
+<br/>{@code <a href="#pvdr">&lt;provider&gt;</a>}
+<br/>{@code <a href="#usesl">&lt;uses-library&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>The declaration of the application.  This element contains subelements 
+that declare each of the application's components and has attributes 
+that can affect all the components.  Many of these attributes (such as 
+{@code icon}, {@code label}, {@code permission}, {@code process}, 
+{@code taskAffinity}, and {@code allowTaskReparenting}) set default values 
+for corresponding attributes of the component elements.  Others (such as
+{@code debuggable}, {@code enabled}, {@code description}, and 
+{@code allowClearUserData})  set values for the application as a whole and 
+cannot be overridden by the components.</dd>
+
+<dt>attributes</dt>
+<dd><dl class="attr">
+<dt>{@code android:allowClearUserData}</dt>
+<dd>Whether or not users are given the option to remove user data &mdash; 
+"{@code true}" if they are, and "{@code false}" if not.  If the value is 
+"{@code true}", as it is by default, the application manager includes an 
+option that allows users to clear the data.</dd>
+
+<dt><a name="app_reparent"></a>{@code android:allowTaskReparenting}</dt>
+<dd>Whether or not activities that the application defines can move from 
+the task that started them to the task they have an affinity for when that task 
+is next brought to the front &mdash; "{@code true}" if they can move, and 
+"{@code false}" if they must remain with the task where they started.  
+The default value is "{@code false}".
+
+<p>
+The {@code <a href="#actv">&lt;activity&gt;</a>} element has its own 
+{@code <a href="#act_reparent">allowTaskReparenting</a>} attribute
+that can override the value set here.  See that attribute for more 
+information.
+</p></dd>
+
+<dt>{@code android:debuggable}</dt>
+<dd>Whether or not the application can be debugged, even when running 
+on a device in user mode &mdash; "{@code true}" if it can be, and "{@code false}"
+if not.  The default value is "{@code false}".</dd> 
+
+<dt>{@code android:description}</dt>
+<dd>User-readable text about the application, longer and more descriptive than the application label.  The value must be set as a reference to a string resource.  Unlike the label, it cannot be a raw string.  There is no default value.</dd>
+
+<dt><a name="app_enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the Android system can instantiate components of 
+the application &mdash; "{@code true}" if it can, and "{@code false}" 
+if not.  If the value is "{@code true}", each component's 
+{@code enabled} attribute determines whether that component is enabled 
+or not.  If the value is "{@code false}", it overrides the 
+component-specific values; all components are disabled.
+
+<p>
+The default value is "{@code true}".
+</p></dd>  
+
+<dt>{@code android:hasCode}</dt>
+<dd>Whether or not the application contains any code &mdash; "{@code true}" 
+if it does, and "{@code false}" if not.  When the value is "{@code false}", 
+the system does not try to load any application code when launching components.  
+The default value is "{@code true}".
+
+<p>
+An application would not have any code of its own only if it's using nothing
+but built-in component classes, such as an activity that uses the {@link 
+android.app.AliasActivity} class, a rare occurrence.
+
+<dt><a name="app_icon"></a>{@code android:icon}</dt>
+<dd>An icon for the application as whole, and the default icon for 
+each of the application's components.  See the individual 
+{@code icon} attributes for 
+{@code <a href="#actv">&lt;activity&gt;</a>}, 
+{@code <a href="#alias">&lt;activity-alias&gt;</a>},
+{@code <a href="#srvc">&lt;service&gt;</a>}, 
+{@code <a href="#rcvr">&lt;receiver&gt;</a>}, and
+{@code <a href="#pvdr">&lt;provider&gt;</a>} elements.
+
+<p>
+This attribute must be set as a reference to a drawable resource containing
+the image definition.   There is no default icon.
+</p></dd>
+
+<dt><a name="app_label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the application as a whole, and a default 
+label for each of the application's components.  See the individual 
+{@code label} attributes for 
+{@code <a href="#actv">&lt;activity&gt;</a>}, 
+{@code <a href="#alias">&lt;activity-alias&gt;</a>},
+{@code <a href="#srvc">&lt;service&gt;</a>}, 
+{@code <a href="#rcvr">&lt;receiver&gt;</a>}, and
+{@code <a href="#pvdr">&lt;provider&gt;</a>} elements.
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt>{@code android:manageSpaceActivity}</dt>
+<dd>The fully qualified name of an Activity subclass that the system 
+can launch to let users manage the memory occupied by the application 
+on the device.  The activity should also be declared with an 
+{@code <a href="#actv">&lt;activity&gt;</a>} element.
+</dd>
+
+<dt>{@code android:name}</dt>
+<dd>The fully qualified name of an {@link android.app.Application} 
+subclass implemented for the application.  When the application process 
+is started, this class is instantiated before any of the application's 
+components.  
+
+<p>
+The subclass is optional; most applications won't need one.
+In the absence of a subclass, Android uses an instance of the base 
+Application class.
+</p></dd>
+
+<dt><a name="app_prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have in order to interact 
+with the application.  This attribute is a convenient way to set a 
+permission that applies to all of the application's components.  It can 
+be overwritten by setting the {@code permission} attributes of individual 
+components.
+
+<p>
+For more information on permissions, see the <a href="#sectperm">Permissions</a> 
+section earlier in this document and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt>{@code android:persistent}</dt>
+<dd>Whether or not the application should remain running at all times &mdash; 
+"{@code true}" if it should, and "{@code false}" if not.  The default value 
+is "{@code false}".  Applications should not normally set this flag; 
+persistence mode is intended only for certain system applications.</dd>
+
+<dt><a name="app_proc"></a>{@code android:process}</dt>
+<dd>The name of a process where all components of the application should run.
+Each component can override this default by setting its own {@code process}
+attribute.
+
+<p>
+By default, Android creates a process for an application when the first
+of its components needs to run.  All components then run in that process.
+The name of the default process matches the package name set by the
+{@code <a href="#manf">&lt;manifest&gt;</a>} element.
+</p>
+
+<p>By setting this attribute to a process name that's shared with another
+application, you can arrange for components of both applications to run in
+the same process &mdash; but only if the two applications also share a
+user ID and be signed with the same certificate.
+</p>
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed.
+If the process name begins with a lowercase character, a global process 
+of that name is created.  A global process can be shared with other
+applications, reducing resource usage.
+</p></dd>
+
+<dt><a href name="app_aff"></a>{@code android:taskAffinity}</dt>
+<dd>An affinity name that applies to all activities within the application,
+except for those that set a different affinity with their own {@code
+<a href="#actv_aff">taskAffinity</a>} attributes.  See that attribute
+for more information.
+
+<p>
+By default, all activities within an application share the same 
+affinity.  The name of that affinity is the same as the package name 
+set by the {@code <a href="#manf">&lt;manifest&gt;</a>} element.
+</p></dd>
+
+<dt><a name="app_theme"></a>{@code android:theme}</dt>
+<dd>A reference to a style resource defining a default theme for all
+activities in the application.  Individual activities can override
+the default by setting their own {@code <a href="#actv_theme">theme</a>} 
+attributes; see that attribute for more information.</dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#actv">&lt;activity&gt;</a>}
+<br/>{@code <a href="#srvc">&lt;service&gt;</a>}
+<br/>{@code <a href="#rcvr">&lt;receiver&gt;</a>}
+<br/>{@code <a href="#pvdr">&lt;provider&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="catg">&lt;category&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;category android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Adds a category name to an intent filter.  See 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and 
+Intent Filters</a> for details on intent filters and the role of category
+specifications within a filter.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:name}</dt>
+<dd>The name of the category.  Standard categories are defined in the 
+{@link android.content.Intent} class as {@code CATEGORY_<i>name</i>} 
+constants.  The name assigned here can be derived from those constants 
+by prefixing "{@code android.intent.category.}" to the 
+{@code <i>name</i>} that follows {@code CATEGORY_}.  For example,
+the string value for {@code CATEGORY_LAUNCHER} is 
+"{@code android.intent.category.LAUNCHER}".
+
+<p>
+Custom categories should use the package name as a prefix, to ensure
+that they are unique.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#actn">&lt;action&gt;</a>}
+<br/>{@code <a href="#data">&lt;data&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="data">&lt;data&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;data android:host="<i>string</i>"
+      android:mimeType="<i>string</i>"
+      android:path="<i>string</i>"
+      android:pathPattern="<i>string</i>"
+      android:pathPrefix="<i>string</i>"
+      android:port="<i>string</i>"
+      android:scheme="<i>string</i>" /&gt;</pre></dd>
+
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filter&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Adds a data specification to an intent filter.  The specification can 
+be just a data type (the {@code <a href="#data_mime">mimeType</a>} attribute), 
+just a URI, or both a data type and a URI.  A URI is specified by separate 
+attributes for each of its parts:
+
+<p style="margin-left: 2em">{@code scheme://host:port/path} <i>or</i> 
+{@code pathPrefix} <i>or</i> {@code pathPattern}</p>
+
+<p>
+These attributes are optional, but also mutually dependent: 
+If a {@code <a href="#data_scheme">scheme</a>} is not specified for the 
+intent filter, all the other URI attributes are ignored.  If a 
+{@code <a href="#data_host">host</a>} is not specified for the filer, 
+the {@code port} attribute and all the path attributes are ignored.
+</p>
+
+<p>
+All the {@code &lt;data&gt;} elements contained within the same
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element contribute to
+the same filter.  So, for example, the following filter specification,
+</p>
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;data android:scheme="something" android:host="project.example.com" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre>
+
+<p>is equivalent to this one:</p>
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;data android:scheme="something" /&gt
+    &lt;data android:host="project.example.com" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre>
+
+<p>
+You can place any number of &lt;data&gt; elements inside an
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} to give it multiple data 
+options.  None of its attributes have default values.  
+</p>
+
+<p>
+Information on how intent filters work, including the rules for how Intent objects
+are matched against filters, can be found in another document,
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+Intent Filters</a>.  See also the <a href="#ifs">Intent Filters</a> section
+earlier in this document.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="data_host"></a>{@code android:host}</dt>
+<dd>The host part of a URI authority.  This attribute is meaningless
+unless a {@code <a href="#data_scheme">scheme</a>} attribute is also 
+specified for the filter.
+</dd>
+
+<dt><a name="data_mime"></a>{@code android:mimeType}</dt>
+<dd>A MIME media type, such as {@code image/jpeg} or {@code audio/mpeg4-generic}.  
+The subtype can be the asterisk wildcard ({@code *}) to indicate that any 
+subtype matches.</dd>
+
+<dt>{@code android:path}
+<br/>{@code android:pathPrefix}
+<br/>{@code android:pathPattern}</dt>
+<dd>The path part of a URI.  The {@code path} attribute specifies a complete 
+path that is matched against the complete path in an Intent object.  The 
+{@code pathPrefix} attribute specifies a partial path that is matched against 
+only the initial part of the path in the Intent object.  The {@code pathPattern} 
+attribute specifies a complete path that is matched against the complete path 
+in the Intent object, but it can contain the following wildcards: 
+
+<ul>
+<li>An asterisk ('{@code *}') matches a sequence of 0 to many occurrences of
+the immediately preceding character.</li>
+
+<li><p>A period followed by an asterisk ("{@code .*}") matches any sequence of 
+0 to many characters.</p></li>
+</ul>
+
+<p>
+Because '{@code \}' is used as an escape character when the string is read 
+from XML (before it is parsed as a pattern), you will need to double-escape:  
+For example, a literal '{@code *}' would be written as "{@code \\*}" and a 
+literal '{@code \}' would be written as "{@code \\\\}".  This is basically 
+the same as what you would need to write if constructing the string in Java code.
+</p>
+
+<p>
+For more information on these three types of patterns, see the descriptions of 
+{@link android.os.PatternMatcher#PATTERN_LITERAL},
+{@link android.os.PatternMatcher#PATTERN_PREFIX}, and
+{@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB} in the
+{@link android.os.PatternMatcher} class.
+</p>
+
+<p>These attributes are meaningful only if the 
+{@code <a href="#data_scheme">scheme</a>} and 
+{@code <a href="#data_host">host</a>} 
+attributes are also specified for the filter.
+</p></dd>
+
+<dt>{@code android:port}</dt>
+<dd>The port part of a URI authority.  This attribute is meaningful only 
+if the {@code <a href="#data_scheme">scheme</a>} and 
+{@code <a href="#data_host">host</a>} attributes are also specified for 
+the filter.</dd>
+
+<dt><a name="data_scheme"></a>{@code android:scheme}</dt>
+<dd>The scheme part of a URI.  This is the minimal essential attribute for 
+specifying a URI; at least one {@code scheme} attribute must be set 
+for the filter, or none of the other URI attributes are meaningful.
+
+<p>
+A scheme is specified without the trailing colon (for example,
+{@code http}, rather than {@code http:}).
+</p>
+
+<p>
+If the filter has a data type set (the {@code <a href="#data_mime">mimeType</a>} 
+attribute) but no scheme, the {@code content:} and {@code file:} schemes are
+assumed.
+</p></dd>
+</dl></dd>  
+
+<dt>see also:</dt>
+<dd>{@code <a href="#actn">&lt;action&gt;</a>}
+<br/>{@code <a href="#catg">&lt;category&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="grantp">&lt;grant-uri-permission&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;grant-uri-permission android:path="<i>string</i>"
+                      android:pathPattern="<i>string</i>"
+                      android:pathPrefix="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#pvdr">&lt;provider&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Specifies which data subsets of the parent content provider permission
+can be granted for.  Data subsets are indicated by the path part of a 
+{@code content:} URI.  (The authority part of the URI identifies the
+content provider.)  
+Granting permission is a way of enabling clients of the provider that don't 
+normally have permission to access its data to overcome that restriction on 
+a one-time basis.
+
+<p> 
+If a content provider's {@code <a href="#pvdr_gprmsn">grantUriPermissions</a>} 
+attribute is "{@code true}", permission can be granted for any the data under 
+the provider's purview.  However, if that attribute is "{@code false}", permission 
+can be granted only to data subsets that are specified by this element.  
+A provider can contain any number of {@code &lt;grant-uri-permission&gt;} elements.  
+Each one can specify only one path (only one of the three possible attributes).
+</p>
+
+<p>
+For information on how permission is granted, see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's
+{@code <a href="#pvdr_gprmsn">grantUriPermissions</a>} attribute.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:path}
+<br/>{@code android:pathPrefix}
+<br/>{@code android:pathPattern}</dt>
+<dd>A path identifying the data subset or subsets that permission can be 
+granted for.  The {@code path} attribute specifies a complete path; 
+permission can be granted only to the particular data subset identified 
+by that path.  
+The {@code pathPrefix} attribute specifies the initial part of a path; 
+permission can be granted to all data subsets with paths that share that 
+initial part.   
+The {@code pathPattern} attribute specifies a complete path, but one 
+that can contain the following wildcards:
+
+<ul>
+<li>An asterisk ('{@code *}') matches a sequence of 0 to many occurrences of
+the immediately preceding character.</li>
+
+<li><p>A period followed by an asterisk ("{@code .*}") matches any sequence of 
+0 to many characters.</p></li>
+</ul>
+
+<p>
+Because '{@code \}' is used as an escape character when the string is read 
+from XML (before it is parsed as a pattern), you will need to double-escape:  
+For example, a literal '{@code *}' would be written as "{@code \\*}" and a 
+literal '{@code \}' would be written as "{@code \\\\}".  This is basically 
+the same as what you would need to write if constructing the string in Java code.
+</p>
+
+<p>
+For more information on these types of patterns, see the descriptions of 
+{@link android.os.PatternMatcher#PATTERN_LITERAL},
+{@link android.os.PatternMatcher#PATTERN_PREFIX}, and
+{@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB} in the
+{@link android.os.PatternMatcher} class.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>the {@code <a href="#pvdr_gprmsn">grantUriPermissions</a>} attribute
+of the {@code <a href="#pvdr">&lt;provider&gt;</a>} element</dd>
+
+
+</dl>
+<hr>
+
+<h3 id="instru">&lt;instrumentation&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;instrumentation android:functionalTest=["true" | "false"]
+                 android:handleProfiling=["true" | "false"]
+                 android:icon="<i>drawable resource</i>"
+                 android:label="<i>string resource</i>"
+                 android:name="<i>string</i>"
+                 android:targetPackage="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares an {@link android.app.Instrumentation} class that enables you
+to monitor an application's interaction with the system.  The Instrumentation
+object is instantiated before any of the application's components.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:functionalTest}</dt>
+<dd>Whether or not the Instrumentation class should run as a functional test 
+&mdash; "{@code true}" if it should, and "{@code false}" if not.  The
+default value is "{@code false}".</dd>
+
+<dt>{@code android:handleProfiling}</dt>
+<dd>Whether or not the Instrumentation object will turn profiling on and 
+off &mdash; "{@code true}" if it determines when profiling starts and 
+stops, and "{@code false}" if profiling continues the entire time it is 
+running.  A value of "{@code true}" enables the object to target profiling 
+at a specific set of operations.  The default value is "{@code false}".</dd>
+
+<dt>{@code android:icon}</dt>
+<dd>An icon that represents the Instrumentation class.  This attribute must
+be set as a reference to a drawable resource.</dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the Instrumentation class.  The label can
+be set as a raw string or a reference to a string resource.</dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the {@link android.app.Instrumentation} subclass.  
+This should be a fully qualified class name (such as, 
+"{@code com.example.project.StringInstrumentation}").  However, as a shorthand, 
+if the first character of the name is a period, it is appended to the package 
+name specified in the {@code <a href="#manf">&lt;manifest&gt;</a>} element.  
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt>{@code android:targetPackage}</dt>
+<dd>The application that the Instrumentation object will run against.
+An application is identified by the package name assigned in its manifest
+file by the {@code <a href="#manf">&lt;manifest&gt;</a>} element.</dd>
+
+</dl></dd>
+
+</dl>
+<hr>
+
+<h3 id="ifilt">&lt;intent-filter&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;intent-filter android:icon="<i>drawable resource</i>"
+               android:label="<i>string resource</i>"
+               android:priority="<i>integer</i>" &gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#actv">&lt;activity&gt;</a>}
+<br/>{@code <a href="#alias">&lt;activity-alias&gt;</a>}
+<br/>{@code <a href="#srvc">&lt;service&gt;</a>}
+<br/>{@code <a href="#rcvr">&lt;receiver&gt;</a>}</dd>
+
+<dt>must contain:</dt>
+<dd>{@code <a href="#actn">&lt;action&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#catg">&lt;category&gt;</a>}
+<br/>{@code <a href="#data">&lt;data&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Specifies the types of intents that an activity, service, or broadcast 
+receiver can respond to.  An intent filter declares the capabilities of its
+parent component &mdash; what an activity or service can do and what types 
+of broadcasts a receiver can handle.  It opens the component to receiving 
+intents of the advertised type, while filtering out those that are not 
+meaningful for the component.
+
+<p>
+Most of the contents of the filter are described by its 
+{@code <a href="#actn">&lt;action&gt;</a>}, 
+{@code <a href="#catg">&lt;category&gt;</a>}, and
+{@code <a href="#data">&lt;data&gt;</a>} subelements.
+</p>
+
+<p>
+For a more detailed discussion of filters, see the separate  
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+and Intent Filters</a> document, as well as the 
+<a href="#ifs">Intents Filters</a> section earlier in this document.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="ifilt_icon"></a>{@code android:icon}</dt>
+<dd>An icon that represents the parent activity, service, or broadcast
+receiver when that component is presented to the user as having the 
+capability described by the filter.
+
+<p>
+This attribute must be set as a reference to a drawable resource 
+containing the image definition.  The default value is the icon set 
+by the parent component's {@code icon} attribute.  If the parent 
+does not specify an icon, the default is the icon set by the
+{@code <a href="#app">&lt;application&gt;</a>} element.
+</p>
+
+<p>
+For more on intent filter icons, see <a href="#iconlabel">Icons and Labels</a>,
+earlier.
+</p></dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the parent component.  This label, rather than
+the one set by the parent component, is used when the component is presented
+to the user as having the capability described by the filter.
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p>
+
+<p>
+The default value is the label set by the parent component.  If the 
+parent does not specify a label, the default is the label set by the
+{@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_label"> label</a>} attribute.
+</p>
+
+<p>
+For more on intent filter labels, see <a href="#iconlabel">Icons and Labels</a>,
+earlier.
+</p></dd>
+
+<dt>{@code android:priority}</dt>
+<dd>The priority that should be given to the parent component with regard
+to handling intents of the type described by the filter.  This attribute has 
+meaning for both activities and broadcast receivers:
+
+<ul>
+<li>It provides information about how able an activity is to respond to 
+an intent that matches the filter, relative to other activities that could
+also respond to the intent.  When an intent could be handled by multiple 
+activities with different priorities, Android will consider only those with
+higher priority values as potential targets for the intent.</li>
+
+<li><p>It controls the order in which broadcast receivers are executed to
+receive broadcast messages.  Those with higher priority 
+values are called before those with lower values.  (The order applies only 
+to synchronous messages; it's ignored for asynchronous messages.)</p></li>
+</ul>
+
+<p>
+Use this attribute only if you really need to impose a specific order in 
+which the broadcasts are received, or want to force Android to prefer
+one activity over others.
+</p>
+
+<p>
+The value must be an integer, such as "{@code 100}".  Higher numbers have a
+higher priority.
+</p></dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#actn">&lt;action&gt;</a>}
+<br/>{@code <a href="#catg">&lt;category&gt;</a>}
+<br/>{@code <a href="#data">&lt;data&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+
+<h3 id="manf">&lt;manifest&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="<i>string</i>"
+          android:sharedUserId="<i>string</i>"
+          android:versionCode="<i>integer</i>"
+          android:versionName="<i>string</i>" &gt;
+    . . .
+&lt;/manifest&gt;</pre></dd>
+
+<p>
+<dt>contained in:</dt>
+<dd><i>none</i></dd>
+
+<p>
+<p>
+<dt>must contain:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#instru">&lt;instrumentation&gt;</a>}
+<br/>{@code <a href="#prmsn">&lt;permission&gt;</a>}
+<br/>{@code <a href="#pgroup">&lt;permission-group&gt;</a>}
+<br/>{@code <a href="#ptree">&lt;permission-tree&gt;</a>}
+<br/>{@code <a href="#usesp">&lt;uses-permission&gt;</a>}</dd>
+
+<p>
+<dt>description:</dt>
+<dd>The root element of the AndroidManifest.xml file.  It must 
+contain an {@code <a href="#app">&lt;application&gt;</a>} element 
+and specify {@code xlmns:android} and {@code package} attributes.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code xmlns:android}</dt>
+<dd>Defines the Android namespace.  This attribute should always be set 
+to "{@code http://schemas.android.com/apk/res/android}".</dd>
+
+<dt><a name="manf_package"></a>{@code package}</dt>
+<dd>A full Java package name for the application.  The name should 
+be unique.  For example, applications published by Google could have 
+names in the form <code>com.google.app.<i>application_name</i></code>.
+
+<p>
+The package name serves as a unique identifier for the application.  
+It's also the default name for the task affinity of components
+(see the {@code <a href="#app_aff">taskAffinity</a>} attribute).
+</p></dd>
+
+<dt>{@code android:sharedUserId}</dt>
+<dd>The name of a Linux user ID that will be shared with other applications.  
+By default, Android assigns each application its own unique user ID.  
+However, if this attribute is set to the same value for two or more applications, 
+they will all share the same ID &mdash; provided that they are also signed 
+by the same certificate.  Application with the same user ID can access each 
+other's data and, if desired, run in the same  process.</dd>  
+
+<dt>{@code android:versionCode}</dt>
+<dd>An internal version number.  This number is used only to determine whether 
+one version is more recent than another, with higher numbers indicating more 
+recent versions.  This is not the version number shown to users; that number 
+is set by the {@code versionName} attribute.
+
+<p>
+The value must be set as an integer, such as "100".  You can define it however
+you want, as long as each successive version has a higher number.  For example, 
+it could be a build number.  Or you could translate a version number in "x.y" 
+format to an integer by encoding the "x" and "y" separately in the lower and 
+upper 16 bits.  Or you could simply increase the number by one each time a new 
+version is released.
+</p></dd>
+
+<dt>{@code android:versionName}</dt>
+<dd>The version number shown to users.  This attribute can be set as a raw 
+string or as a reference to a string resource.  The string has no other purpose 
+than to be displayed to users.  The {@code versionCode} attribute holds 
+the significant version number used internally.
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="meta">&lt;meta-data&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;meta-data android:name="<i>string</i>"
+           android:resource="<i>resource specification</i>"
+           android:value="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#actv">&lt;activity&gt;</a>}
+<br/>{@code <a href="#alias">&lt;activity-alias&gt;</a>}
+<br/>{@code <a href="#srvc">&lt;service&gt;</a>}
+<br/>{@code <a href="#rcvr">&lt;receiver&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>A name-value pair for an item of additional, arbitrary data that can 
+be supplied to the parent component.  A component element can contain any 
+number of {@code &lt;meta-data&gt;} subelements.  The values from all of
+them are collected in a single {@link android.os.Bundle} object and made 
+available to the component as the 
+{@link android.content.pm.PackageItemInfo#metaData 
+PackageItemInfo.metaData} field.
+
+<p>
+Ordinary values are specified through the {@code <a href="#meta_value">value</a>} 
+attribute.  However, to assign a resource ID as the value, use the 
+{@code <a href="#meta_resource">resource</a>} attribute instead.  For example, 
+the following code assigns whatever value is stored in the {@code @string/kangaroo} 
+resource to the "{@code zoo}" name:
+</p>
+
+<pre>&lt;meta-data android:name="zoo" android:value="@string/kangaroo" /&gt;</pre>
+
+<p>
+On the other hand, using the {@code resource} attribute would assign "{@code zoo}"
+the numeric ID of the resource, not the value stored in the resource:
+</p>
+
+<pre>&lt;meta-data android:name="zoo" android:resource="@string/kangaroo" /&gt;</pre>
+
+<p>
+It is highly recommended that you avoid supplying related data as 
+multiple separate {@code &lt;meta-data&gt;} entries. Instead, if you 
+have complex data to associate with a component, store it as a resource and 
+use the {@code resource} attribute to inform the component of its ID.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:name}</dt>
+<dd>A unique name for the item.  To ensure that the name is unique, use a 
+Java-style naming convention &mdash; for example, 
+"{@code com.example.project.activity.fred}".</dd>
+
+<dt>{@code android:resource}</dt>
+<dd>A reference to a resource.  The ID of the resource is the value assigned 
+to the item.  The ID can be retrieved from the meta-data Bundle by the 
+{@link android.os.Bundle#getInt Bundle.getInt()} method.</dd>
+
+<dt>{@code android:value}</dt>
+<dd>The value assigned to the item.  The data types that can be assigned as values and the Bundle methods that  components use to retrieve those values are listed in the following table:
+
+<table>
+<tr>
+  <th>Type</th>
+  <th>Bundle method</th>
+</tr><tr>
+  <td>String value, using double backslashes ({@code \\}) to escape characters 
+      &mdash; such as "{@code \\n}" and "{@code \\uxxxxx}" for a Unicode character.</td>
+  <td>{@link android.os.Bundle#getString(String) getString()}</td>
+</tr><tr>
+  <td>Integer value, such as "{@code 100}"</td>
+  <td>{@link android.os.Bundle#getInt(String) getInt()}</td>
+</tr><tr>
+  <td>Boolean value, either "{@code true}" or "{@code false}"</td>
+  <td>{@link android.os.Bundle#getBoolean(String) getBoolean()}</td>
+</tr><tr>
+  <td>Color value, in the form "{@code #rgb}", "{@code #argb}", 
+      "{@code #rrggbb}", or "{@code #aarrggbb}"</td>
+  <td>{@link android.os.Bundle#getString(String) getString()}</td>
+</tr><tr>
+  <td>Float value, such as "{@code 1.23}"</td>
+  <td>{@link android.os.Bundle#getFloat(String) getFloat()}</td>
+</tr>
+</table>
+</dd>
+</dl></dd>
+
+</dl>
+<hr>
+
+<h3 id="prmsn">&lt;permission&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt></dt>
+<dd><pre class="stx">&lt;permission android:description="<i>string resource</i>"
+            android:icon="<i>drawable resource</i>"
+            android:label="<i>string resource</i>"
+            android:name="<i>string</i>"
+            android:permissionGroup="<i>string</i>"
+            android:protectionLevel=["normal" | "dangerous" | 
+                                     "signature" | "signatureOrSystem"] /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares a security permission that can be used to limit access 
+to specific components or features of this or other applications.  
+See the <a href="#perms">Permissions</a>, earlier in this document,
+and the <a href="{@docRoot}guide/topics/security/security.html">Security Model</a> 
+document for more information on how permissions work.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:description}</dt>
+<dd>A user-readable description of the permission, longer and more 
+informative than the label.  It may be displayed to explain the 
+permission to the user &mdash; for example, when the user is asked 
+whether to grant the permission to another application.
+
+<p>
+This attribute must be set as a reference to a string resource; 
+unlike the {@code label} attribute, it cannot be a raw string.
+</p></dd>
+
+<dt>{@code android:icon}</dt>
+<dd>A reference to a drawable resource for an icon that represents the 
+permission.</dd>
+
+<dt>{@code android:label}</dt>
+<dd>A name for the permission, one that can be displayed to users. 
+
+<p>
+As a convenience, the label can be directly set 
+as a raw string while you're developing the application.  However, 
+when the application is ready to be published, it should be set as a 
+reference to a string resource, so that it can be localized like other 
+strings in the user interface.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the permission.  This is the name that will be used in 
+code to refer to the permission &mdash; for example, in a 
+{@code <a href="#usesp">&lt;uses-permission&gt;</a>} element and the
+{@code permission} attributes of application components.</dd>
+
+<p>
+The name must be unique, so it should use Java-style scoping &mdash; 
+for example, "{@code com.example.project.PERMITTED_ACTION}".
+</p></dd>
+
+<dt>{@code android:permissionGroup}</dt>
+<dd>Assigns this permission to a group.  The value of this attribute is 
+the name of the group, which must be declared with the 
+{@code <a href="#pgroup">&lt;permission-group&gt;</a>} element in this 
+or another application.  If this attribute is not set, the permission
+does not belong to a group.</dd>
+
+<dt>{@code android:protectionLevel}</dt>
+<dd>Characterizes the potential risk implied in the permission and
+indicates the procedure the system should follow when determining
+whether or not to grant the permission to an application requesting it. 
+The value can be set to one of the following strings:
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Meaning</th>
+</tr><tr>
+   <td>"{@code normal}"</td>
+   <td>The default value.  A lower-risk permission that gives requesting 
+       applications access to isolated application-level features, with 
+       minimal risk to other applications, the system, or the user.  
+       The system automatically grants this type
+       of permission to a requesting application at installation, without
+       asking for the user's explicit approval (though the user always
+       has the option to review these permissions before installing).
+</tr><tr>
+   <td>"{@code dangerous}"</td>
+   <td>A higher-risk permission that would give a requesting application
+       access to private user data or control over the device that can
+       negatively impact the user.  Because this type of permission
+       introduces potential risk, the system may not automatically
+       grant it to the requesting application.  For example, any dangerous
+       permissions requested by an application may be displayed to the
+       user and require confirmation before proceeding, or some other
+       approach may be taken to avoid the user automatically allowing
+       the use of such facilities.
+</tr><tr>
+   <td>"{@code signature}"</td>
+   <td>A permission that the system grants only if the requesting
+       application is signed with the same certificate as the application
+       that declared the permission. If the certificates match, the system
+       automatically grants the permission without notifying the user or
+       asking for the user's explicit approval.
+</tr><tr>
+   <td>"{@code signatureOrSystem}"</td>
+   <td>A permission that the system grants only to applications that are 
+       in the Android system image <em>or</em> that are signed with the same
+       certificates as those in the system image.  Please avoid using this 
+       option, as the {@code signature} protection level should be sufficient 
+       for most needs and works regardless of exactly where applications are 
+       installed.  The "{@code signatureOrSystem}"
+       permission is used for certain special situations where multiple
+       vendors have applications built into a system image and need
+       to share specific features explicitly because they are being built
+       together.
+</tr>
+</table>
+</dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#usesp">&lt;uses-permission&gt;</a>}
+<br/>{@code <a href="#ptree">&lt;permission-tree&gt;</a>}
+<br/>{@code <a href="#pgroup">&lt;permission-group&gt;</a>}</dd>
+</dd>
+
+</dl>
+<hr>
+
+<h3 id="pgroup">&lt;permission-group&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;permission-group android:description="<i>string resource</i>"
+                  android:icon="<i>drawable resource</i>"
+                  android:label="<i>string resource</i>"
+                  android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares a name for a logical grouping of related permissions.  Individual 
+permission join the group through the {@code permissionGroup} attribute of the
+{@code <a href="#prmsn">&lt;permission&gt;</a>} element.  Members of a group are
+presented together in the user interface.
+
+<p>
+Note that this element does not declare a permission itself, only a category in 
+which permissions can be placed.  See the 
+{@code <a href="#prmsn">&lt;permission&gt;</a>} element for element for information 
+on declaring permissions and assigning them to groups.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:description}</dt>
+<dd>User-readable text that describes the group.  The text should be 
+longer and more explanatory than the label.  This attribute must be 
+set as a reference to a string resource.  Unlike the {@code label}
+attribute, it cannot be a raw string.</dd>
+
+<dt>{@code android:icon}</dt>
+<dd>An icon representing the permission.  This attribute must be set
+as a reference to a drawable resource containing the image definition.</dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable name for the group.  As a convenience, the label can 
+be directly set as a raw string while you're developing the application.  
+However, when the application is ready to be published, it should be set 
+as a reference to a string resource, so that it can be localized like other 
+strings in the user interface.</dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the group.  This is the name that can be assigned to a
+{@code <a href="#prmsn">&lt;permission&gt;</a>} element's 
+{@code permissionGroup} attribute.</dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#prmsn">&lt;permission&gt;</a>}
+<br/>{@code <a href="#ptree">&lt;permission-tree&gt;</a>}
+<br/>{@code <a href="#usesp">&lt;uses-permission&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="ptree">&lt;permission-tree&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;permission-tree android:icon="<i>drawable resource</i>"
+                 android:label="<i>string resource</i>" ]
+                 android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares the base name for a tree of permissions.  The application takes 
+ownership of all names within the tree.  It can dynamically add new permissions 
+to the tree by calling <code>{@link android.content.pm.PackageManager#addPermission PackageManager.addPermission()}</code>.  Names within the tree are separated by
+periods ('{@code .}').  For example, if the base name is
+{@code com.example.project.taxes}, permissions like the following might be
+added:
+
+<p style="margin-left: 2em">{@code com.example.project.taxes.CALCULATE}
+<br/>{@code com.example.project.taxes.deductions.MAKE_SOME_UP}
+<br/>{@code com.example.project.taxes.deductions.EXAGGERATE}</p>
+
+<p>
+Note that this element does not declare a permission itself, only a 
+namespace in which further permissions can be placed.  
+See the {@code <a href="#prmsn">&lt;permission&gt;</a>} element for 
+information on declaring permissions.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:icon}</dt>
+<dd>An icon representing all the permissions in the tree.  This attribute 
+must be set as a reference to a drawable resource containing the image 
+definition.</dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable name for the group.  As a convenience, the label can 
+be directly set as a raw string for quick and dirty programming.  However, 
+when the application is ready to be published, it should be set as a 
+reference to a string resource, so that it can be localized like other 
+strings in the user interface.</dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name that's at the base of the permission tree.  It serves as 
+a prefix to all permission names in the tree.  Java-style scoping should 
+be used to ensure that the name is unique.  The name must have more than 
+two period-separated seqments in its path &mdash; for example, 
+{@code com.example.base} is OK, but {@code com.example} is not.</dd>
+
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd>{@code <a href="#prmsn">&lt;permission&gt;</a>}
+<br/>{@code <a href="#pgroup">&lt;permission-group&gt;</a>}
+<br/>{@code <a href="#usesp">&lt;uses-permission&gt;</a>}
+</dd>
+
+</dl>
+<hr>
+
+<h3 id="pvdr">&lt;provider&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;provider android:authorities="<i>list</i>"
+          android:enabled=["true" | "false"]
+          android:exported=["true" | "false"]
+          android:grantUriPermissions=["true" | "false"]
+          android:icon="<i>drawable resource</i>"
+          android:initOrder="<i>integer</i>"
+          android:label="<i>string resource</i>"
+          android:multiprocess=["true" | "false"]
+          android:name="<i>string</i>"
+          android:permission="<i>string</i>"
+          android:process="<i>string</i>"
+          android:readPermission="<i>string</i>"
+          android:syncable=["true" | "false"]
+          android:writePermission="<i>string</i>" &gt;
+    . . .
+&lt;/provider&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#meta">&lt;meta-data&gt;</a>}
+<br/>{@code <a href="#grantp">&lt;grant-uri-permission&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares a content provider &mdash; a subclass of 
+{@link android.content.ContentProvider} &mdash; that supplies structured 
+access to data managed by the application.  All content providers that 
+are part of the application must be represented by {@code &lt;provider&gt;} 
+elements in the manifest file.  The system cannot see, and therefore will 
+not run, any that are not declared.  (You need to declare only 
+those content providers that you develop as part of your application,
+not those developed by others that your application uses.)
+
+<p>
+The Android system identifies content providers by the authority part
+ of a {@code content:} URI.  For example, suppose that the following URI 
+is passed to <code>{@link android.content.ContentResolver#query 
+ContentResolver.query()}</code>:
+
+<p style="margin-left: 2em">{@code content://com.example.project.healthcareprovider/nurses/rn}</p>
+
+<p>
+The {@code content:} scheme identifies the data as belonging to a content 
+provider and the authority ({@code com.example.project.healthcareprovider}) 
+identifies the particular provider.  The authority therefore must be unique.  
+Typically, as in this example, it's the fully qualified name of a 
+ContentProvider subclass.  The path part of a URI may be used by a content 
+provider to identify particular data subsets, but those paths are not
+declared in the manifest.
+</p>
+
+<p>
+For information on using and developing content providers, see a separate document, 
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:authorities}</dt>
+<dd>A list of one or more URI authorities that identify data under the purview 
+of the content provider.
+Multiple authorities are listed by separating their names with a semicolon. 
+To avoid conflicts, authority names should use a Java-style naming convention 
+(such as {@code com.example.provider.cartoonprovider}).  Typically, it's the name
+of the ContentProvider subclass.
+
+<p>
+There is no default.  At least one authority must be specified.
+</p></dd>
+
+<dt>{@code android:enabled}</dt>
+<dd>Whether or not the content provider can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The {@code <a href="#app">&lt;application&gt;</a>} element has its own 
+{@code <a href="#app_enabled">enabled</a>} attribute that applies to all 
+application components, including content providers.  The 
+{@code <a href="#app">&lt;application&gt;</a>} and {@code &lt;provider&gt;} 
+attributes must both be "{@code true}" (as they both
+are by default) for the content provider to be enabled.  If either is 
+"{@code false}", the provider is disabled; it cannot be instantiated.
+</p></dd>
+
+<dt>{@code android:exported}</dt>
+<dd>Whether or not the content provider can be used by components of other 
+applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+If "{@code false}", the provider is available only to components of the 
+same application or applications with the same user ID.  The default value
+is "{@code true}".
+
+<p>
+You can export a content provider but still limit access to it with the
+{@code <a href="#pvdr_prmsn">permission</a>} attribute.
+</p></dd> 
+
+<dt><a name="grantp_gprmns"></a>{@code android:grantUriPermissions}</dt>
+<dd>Whether or not those who ordinarily would not have permission to 
+access the content provider's data can be granted permission to do so,
+temporarily overcoming the restriction imposed by the
+{@code <a href="#pvdr_rprmsn">readPermission</a>},
+{@code <a href="#pvdr_wprmsn">writePermission</a>}, and 
+{@code <a href="#pvdr_prmsn">permission</a>} attributes 
+&mdash; 
+"{@code true}" if permission can be granted, and "{@ code false}" if not.  
+If "{@code true}", permission can be granted to any of the content 
+provider's data.  If "{@code false}", permission can be granted only 
+to the data subsets listed in 
+{@code <a href="#grantp">&lt;grant-uri-permission&gt;</a>} subelements, 
+if any.  The default value is "{@code false}".
+
+<p>
+Granting permission is a way of giving an application component one-time 
+access to data protected by a permission.  For example, when an e-mail 
+message contains an attachment, the mail application may call upon the 
+appropriate viewer to open it, even though the viewer doesn't have general 
+permission to look at all the content provider's data. 
+</p>
+
+<p>  
+In such cases, permission is granted by 
+<code>{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}</code> 
+and <code>{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}</code> 
+flags in the Intent object that activates the component.  For example, the 
+mail application might put {@code FLAG_GRANT_READ_URI_PERMISSION} in the 
+Intent passed to {@code Context.startActivity()}.  The permission is specific 
+to the URI in the Intent.  
+</p>
+
+<p>
+If you enable this feature, either by setting this attribute to "{@code true}"
+or by defining {@code <a href="#grantp">&lt;grant-uri-permission&gt;</a>} 
+subelements, you must call 
+<code>{@link android.content.Context#revokeUriPermission 
+Context.revokeUriPermission()}</code> when a covered URI is deleted from 
+the provider.
+</p>
+
+<p>
+See also the {@code <a href="#grantp">&lt;grant-uri-permission&gt;</a>}
+element.
+</p></dd>
+
+<dt><a name="pvdr_icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the content provider. 
+This attribute must be set as a reference to a drawable resource containing 
+the image definition.  If it is not set, the icon specified for the application 
+as a whole is used instead (see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_icon">icon</a>} attribute).</dd>
+
+<dt>{@code android:initOrder}</dt>
+<dd>The order in which the content provider should be instantiated, 
+relative to other content providers hosted by the same process.  
+When there are dependencies among content providers, setting this 
+attribute for each of them ensures that they are created in the order 
+required by those dependencies.  The value is a simple integer, 
+with higher numbers being initialized first.</dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the content provided.  
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_label">label</a>} attribute).
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt>{@code android:multiprocess}</dt>
+<dd>Whether or not an instance of the content provider can be created in 
+every client process &mdash; "{@code true}" if instances can run in multiple
+processes, and "{@code false}" if not.  The default value is "{@code false}".
+
+<p>
+Normally, a content provider is instantiated in the process of the 
+application that defined it.  However, if this flag is set to "{@code true}", 
+the system can create an instance in every process where there's a client 
+that wants to interact withit, thus avoiding the overhead of interprocess 
+communication.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the class that implements the content provider, a subclass of 
+{@link android.content.ContentProvider}.  This should be a fully qualified 
+class name (such as, "{@code com.example.project.TransportationProvider}").  
+However, as a shorthand, if the first character of the name is a period, 
+it is appended to the package name specified in the 
+{@code <a href="#manf">&lt;manifest&gt;</a>} element.
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+
+<dt>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to read or write the
+content provider's data.  This attribute is a convenient way of setting a 
+single permission for both reading and writing.  However, the 
+{@code <a href="#pvdr_rprmsn">readPermission</a>} and 
+{@code <a href="#pvdr_wprmsn">writePermission</a>} attributes take precedence
+over this one.  If the {@code <a href="#pvdr_rprmsn">readPermission</a>} 
+attribute is also set, it controls access for querying the content provider.
+And if the {@code <a href="#pvdr_wprmsn">writePermission</a>} attribute is set,
+it controls access for modifying the provider's data.
+
+<p>
+For more information on permissions, see the <a href="#sectperm">Permissions</a> 
+section earlier in this document and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt>{@code android:process}</dt>
+<dd>The name of the process in which the content provider should run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_proc">process</a>} attribute can set a different 
+default for all components.  But each component can override the default
+with its own {@code process} attribute, allowing you to spread your 
+application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the activity runs in that process.
+If the process name begins with a lowercase character, the activity will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+
+<dt>{@code android:readPermission}</dt>
+<dd>A permission that clients must have to query the content provider.  
+See also the {@code <a href="#pvdr_prmsn">permission</a>} and 
+{@code <a href="#pvdr_wprmsn">writePermission</a>} attributes.</dd>
+
+<dt>{@code android:syncable}</dt>
+<dd>Whether or not the data under the content provider's control 
+is to be synchronized with data on a server &mdash; "{@code true}" 
+if it is to be synchronized, and "{@ code false}" if not.</dd>
+
+<dt>{@code android:writePermission}</dt>
+<dd>A permission that clients must have to make changes to the data 
+controlled by the content provider.  
+See also the {@code <a href="#pvdr_prmsn">permission</a>} and 
+{@code <a href="#pvdr_rprmsn">readPermission</a>} attributes.</dd>
+
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd><a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></dd>
+
+</dl>
+<hr>
+
+<h3 id="rcvr">&lt;receiver&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;receiver android:enabled=["true" | "false"]
+          android:exported=["true" | "false"]
+          android:icon="<i>drawable resource</i>"
+          android:label="<i>string resource</i>"
+          android:name="<i>string</i>"
+          android:permission="<i>string</i>"
+          android:process="<i>string</i>" &gt;
+    . . .
+&lt;/receiver&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filer&gt;</a>}
+<br/>{@code <a href="#meta">&lt;meta-data&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares a broadcast receiver (a {@link android.content.BroadcastReceiver} 
+subclass) as one of the application's components.  Broadcast receivers enable 
+applications to receive intents that are broadcast by the system or by other 
+applications, even when other components of the application are not running.
+
+<p>
+There are two ways to make a broadcast receiver known to the system:  One is
+declare it in the manifest file with this element.  The other is to create
+the receiver dynamically in code and register it with the <code>{@link 
+android.content.Context#registerReceiver Context.registerReceiver()}</code>
+method.  See the {@link android.content.BroadcastReceiver} class description
+for more on dynamically created receivers.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:enabled}</dt>
+<dd>Whether or not the broadcast receiver can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The {@code <a href="#app">&lt;application&gt;</a>} element has its own 
+{@code <a href="#app_enabled">enabled</a>} attribute that applies to all 
+application components, including broadcast receivers.  The 
+{@code <a href="#app">&lt;application&gt;</a>} and
+{@code &lt;receiver&gt;} attributes must both be "{@code true}" for 
+the broadcast receiver to be enabled.  If either is "{@code false}", it is
+disabled; it cannot be instantiated.
+</p></dd>
+
+<dt>{@code android:exported}</dt>
+<dd>Whether or not the broadcast receiver can receive messages from sources 
+outside its application  &mdash; "{@code true}" if it can, and "{@code false}" 
+if not.  If "{@code false}", the only messages the broadcast receiver can 
+receive are those sent by components of the same application or applications 
+with the same user ID.  
+
+<p>
+The default value depends on whether the broadcast receiver contains intent filters.  
+The absence of any filters means that it can be invoked only by Intent objects that
+specify its exact class name.  This implies that the receiver is intended only for 
+application-internal use (since others would not normally know the class name).  
+So in this case, the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the broadcast 
+receiver is intended to receive intents broadcast by the system or other applications, 
+so the default value is "{@code true}".
+</p>
+
+<p>
+This attribute is not the only way to limit a broadcast receiver's external exposure.  
+You can also use a permission to limit the external entities that can send it messages 
+(see the {@code <a href="#rcvr_prmsn">permission</a>} attribute).
+</p></dd>
+
+<dt><a name="rcvr_icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the broadcast receiver. This attribute must be set 
+as a reference to a drawable resource containing the image definition.  
+If it is not set, the icon specified for the application as a whole is used 
+instead (see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_icon">icon</a>} attribute).
+
+<p>
+The broadcast receiver's icon &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default icon for all the receiver's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_icon">icon</a>} attribute). 
+</p></dd>
+
+<dt>{@code android:label}</dt>
+<dd>A user-readable label for the broadcast receiver.  If this attribute is not 
+set, the label set for the application as a whole is 
+used instead (see the {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_label">label</a>} attribute).
+
+<p>
+The broadcast receiver's label &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default label for all the receiver's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_label">label</a>} attribute). 
+</p>
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the class that implements the broadcast receiver, a subclass of 
+{@link android.content.BroadcastReceiver}.  This should be a fully qualified 
+class name (such as, "{@code com.example.project.ReportReceiver}").  However, 
+as a shorthand, if the first character of the name is a period (for example, 
+"{@code . ReportReceiver}"), it is appended to the package name specified in 
+the {@code <a href="#manf">&lt;manifest&gt;</a>} element.  
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt><a name="rcvr_prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that broadcasters must have to send a 
+message to the broadcast receiver.
+If this attribute is not set, the permission set by the 
+{@code <a href="#app">&lt;application&gt;</a>} element's
+{@code <a href="#app_prmsn">permission</a>} attribute applies 
+to the broadcast receiver.  If neither attribute is set, the receiver 
+is not protected by a permission.
+
+<p>
+For more information on permissions, see the <a href="#sectperm">Permissions</a> 
+section earlier in this document and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt>{@code android:process}</dt>
+<dd>The name of the process in which the broadcast receiver should run.  
+Normally, all components of an application run in the default process created 
+for the application.  It has the same name as the application package.  The 
+{@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_proc">process</a>} attribute can set a different 
+default for all components.  But each component can override the default
+with its own {@code process} attribute, allowing you to spread your 
+application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the broadcast receiver runs in that process.
+If the process name begins with a lowercase character, the receiver will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+</dl></dd>
+
+</dl>
+<hr>
+
+<h3 id="srvc">&lt;service&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;service android:enabled=["true" | "false"]
+         android:exported[="true" | "false"]
+         android:icon="<i>drawable resource</i>"
+         android:label="<i>string resource</i>"
+         android:name="<i>string</i>"
+         android:permission="<i>string</i>"
+         android:process="<i>string</i>" &gt;
+    . . .
+&lt;/service&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>can contain:</dt>
+<dd>{@code <a href="#ifilt">&lt;intent-filer&gt;</a>}
+<br/>{@code <a href="#meta">&lt;meta-data&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares a service (a {@link android.app.Service} subclass) as one 
+of the application's components.  Unlike activities, services lack a 
+visual user interface.  They're used to implement long-running background 
+operations or a rich communications API that can be called by other 
+applications.
+
+<p>
+All services must be represented by {@code &lt;service&gt;} elements in 
+the manifest file.  Any that are not declared there will not be seen 
+by the system and will never be run.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:enabled}</dt>
+<dd>Whether or not the service can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The {@code <a href="#app">&lt;application&gt;</a>} element has its own 
+{@code <a href="#app_enabled">enabled</a>} attribute that applies to all 
+application components, including services.  The 
+{@code <a href="#app">&lt;application&gt;</a>} and {@code &lt;service&gt;} 
+attributes must both be "{@code true}" (as they both
+are by default) for the service to be enabled.  If either is 
+"{@code false}", the service is disabled; it cannot be instantiated.
+</p></dd>
+
+<dt>{@code android:exported}</dt>
+<dd>Whether or not components of other applications can invoke 
+the service or interact with it &mdash; "{@code true}" if they can, and 
+"{@code false}" if not.  When the value is "{@code false}", only 
+components of the same application or applications 
+with the same user ID can start the service or bind to it.
+
+<p>
+The default value depends on whether the service contains intent filters.  The 
+absence of any filters means that it can be invoked only by specifying 
+its exact class name.  This implies that the service is intended only for 
+application-internal use (since others would not know the class name).  So in 
+this case, the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the service 
+is intended for external use, so the default value is "{@code true}".
+</p>
+
+<p>
+This attribute is not the only way to limit the exposure of a service to other
+applications.  You can also use a permission to limit the external entities that 
+can interact with the service (see the {@code <a href="#srvc_prmsn">permission</a>} 
+attribute).
+</p></dd>
+
+<dt><a name="srvc_icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the service.  This attribute must be set as a 
+reference to a drawable resource containing the image definition.  
+If it is not set, the icon specified for the application 
+as a whole is used instead (see the {@code <a href="#app">&lt;application&gt;</a>} 
+element's {@code <a href="#app_icon">icon</a>} attribute).
+</p>
+
+<p>
+The service's icon &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default icon for all the service's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_icon">icon</a>} attribute).
+</p></dd> 
+
+<dt>{@code android:label}</dt>
+<dd>A name for the service that can be displayed to users.  
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the {@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_label">label</a>} attribute).
+
+<p>
+The service's label &mdash; whether set here or by the 
+{@code <a href="#app">&lt;application&gt;</a>} element &mdash; is also the 
+default label for all the service's intent filters (see the 
+{@code <a href="#ifilt">&lt;intent-filter&gt;</a>} element's 
+{@code <a href="#ifilt_label">label</a>} attribute). 
+</p>
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt>{@code android:name}</dt>
+<dd>The name of the {@link android.app.Service} subclass that implements 
+the service.  This should be a fully qualified class name (such as, 
+"{@code com.example.project.RoomService}").  However, as a shorthand, if 
+the first character of the name is a period (for example, "{@code .RoomService}"),
+it is appended to the package name specified in the 
+{@code <a href="#manf">&lt;manifest&gt;</a>} element.  
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt><a name="srvc_prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that that an entity must have in order to 
+launch the service or bind to it.  If a caller of 
+<code>{@link android.content.Context#startService startService()}</code>,
+<code>{@link android.content.Context#bindService bindService()}</code>, or
+<code>{@link android.content.Context#stopService stopService()}</code>,
+has not been granted this permission, the method will not work and the
+Intent object will not be delivered to the service.
+
+<p>
+If this attribute is not set, the permission set by the 
+{@code <a href="#app">&lt;application&gt;</a>} element's
+{@code <a href="#app_prmsn">permission</a>} attribute applies 
+to the service.  If neither attribute is set, the service is
+not protected by a permission.
+</p>
+
+<p>
+For more information on permissions, see the <a href="#sectperm">Permissions</a> 
+section earlier in this document and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt>{@code android:process}</dt>
+<dd>The name of the process where the service is to run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The 
+{@code <a href="#app">&lt;application&gt;</a>} element's 
+{@code <a href="#app_proc">process</a>} attribute can set a different 
+default for all components.  But component can override the default
+with its own {@code process} attribute, allowing you to spread your 
+application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the service runs in that process.
+If the process name begins with a lowercase character, the service will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}
+<br>{@code <a href="#actv">&lt;activity&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+<h3 id="usesl">&lt;uses-library&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre>&lt;uses-library android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#app">&lt;application&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Specifies a shared library that the application must be linked against. 
+This element tells the system to include the library's code in the class 
+loader for the package.
+
+<p>
+All of the {@code android} packages (such as {@link android.app}, 
+{@link android.content}, {@link android.view}, and {@link android.widget}) 
+are in the default library that all applications are automatically linked 
+against.  However, some packages (such as {@code maps} and {@code awt} are 
+in separate libraries that are not automatically linked.  Consult the 
+documentation for the packages you're using to determine which library 
+contains the package code.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:name}</dt>
+<dd>The name of the library.</dd>
+</dl></dd>
+
+</dl>
+<hr>
+
+
+<h3 id="usesp">&lt;uses-permission&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-permission android:name="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Requests a permission that the application must be granted in 
+order for it to operate correctly.  Permissions are granted when the 
+application is installed, not while it's running.
+
+<p>
+For more information on permissions, see the 
+{@code <a href="#perms">Permissions</a>} section earlier in this document 
+and the separate <a href="{@docRoot}guide/topics/security/security.html">Security Model</a> 
+document.  
+A list of permissions defined by the base platform can be found at 
+{@link android.Manifest.permission android.Manifest.permission}.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:name}</dt>
+<dd>The name of the permission.  It can be a permission defined by the 
+application with the {@code <a href="#prmsn">&lt;permission&gt;</a>} 
+element, a permission defined by another application, or one of the 
+standard system permissions, such as "{@code android.permission.CAMERA}" 
+or "{@code android.permission.READ_CONTACTS}".  As these examples show, 
+a permission name typically includes the package name as a prefix.</dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>{@code <a href="#prmsn">&lt;permission&gt;</a>}</dd>
+
+</dl>
+<hr>
+
+
+<h3 id="usess">&lt;uses-sdk&gt;</h3>
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-sdk android:minSdkVersion="<i>integer</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd>{@code <a href="#manf">&lt;manifest&gt;</a>}</dd>
+
+<dt>description:</dt>
+<dd>Declares which versions of the Android SDK (software development kit) 
+the application can run against.  The version number is incremented when 
+there are additions to the API and resource tree, so an application developed 
+using version 3 of the SDK may not run against versions 1 or 2, but should 
+run against version 3, 4, 5, and above. 
+
+<p>
+The default is version 1.  The current version is also 1. 
+</p></dd> 
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code android:minSdkVersion}</dt>
+<dd>An integer designating the minimum version of the SDK that's required 
+for the application to run.</dd>
+
+</dl></dd>
+
+</dl>
+
+

@@ -20,6 +20,7 @@
 #include <utils/Errors.h>
 #include <utils/Parcel.h>
 #include <utils/ProcessState.h>
+#include <utils/Vector.h>
 
 #ifdef HAVE_WIN32_PROC
 typedef  int  uid_t;
@@ -92,6 +93,8 @@ private:
                                            void* cookie);
     
     const   sp<ProcessState>    mProcess;
+            Vector<BBinder*>    mPendingStrongDerefs;
+            Vector<RefBase::weakref_type*> mPendingWeakDerefs;
                                 
             Parcel              mIn;
             Parcel              mOut;

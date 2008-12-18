@@ -387,21 +387,23 @@ SimpleMemory::~SimpleMemory()
     start = (start + pagesize-1) & ~(pagesize-1);
     end &= ~(pagesize-1);    
 
-    void* const start_ptr = (void*)(intptr_t(getHeap()->base()) + start);
-    size_t size = end-start;
+    if (start < end) {
+        void* const start_ptr = (void*)(intptr_t(getHeap()->base()) + start);
+        size_t size = end-start;
 
 #ifndef NDEBUG
-    memset(start_ptr, 0xdf, size);
+        memset(start_ptr, 0xdf, size);
 #endif
-  
-// MADV_REMOVE is not defined on Dapper based Goobuntu 
+
+        // MADV_REMOVE is not defined on Dapper based Goobuntu 
 #ifdef MADV_REMOVE 
-    if (size) {
-        int err = madvise(start_ptr, size, MADV_REMOVE);
-        LOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
-                start_ptr, size, err<0 ? strerror(errno) : "Ok");
-    }
+        if (size) {
+            int err = madvise(start_ptr, size, MADV_REMOVE);
+            LOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
+                    start_ptr, size, err<0 ? strerror(errno) : "Ok");
+        }
 #endif
+    }
 }
 
 }; // namespace android

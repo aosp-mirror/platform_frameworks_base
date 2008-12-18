@@ -27,6 +27,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.HashMap;
+
 /**
  * Class for loading icons from the SIM card. Has two states: single, for loading 
  * one icon. Multi, for loading icons list.
@@ -34,17 +36,18 @@ import android.util.Log;
  */
 class IconLoader extends Handler {
     // members
-    int mState = STATE_SINGLE_ICON;
-    ImageDescriptor mId = null;
-    Bitmap mCurrentIcon = null;
-    int mRecordNumber;
-    SIMFileHandler mSimFH = null;
-    Message mEndMsg = null;
-    byte[] mIconData = null;
+    private int mState = STATE_SINGLE_ICON;
+    private ImageDescriptor mId = null;
+    private Bitmap mCurrentIcon = null;
+    private int mRecordNumber;
+    private SIMFileHandler mSimFH = null;
+    private Message mEndMsg = null;
+    private byte[] mIconData = null;
     // multi icons state members
-    int[] mRecordNumbers = null;
-    int mCurrentRecordIndex = 0;
-    Bitmap[] mIcons = null;
+    private int[] mRecordNumbers = null;
+    private int mCurrentRecordIndex = 0;
+    private Bitmap[] mIcons = null;
+    private HashMap<Integer, Bitmap> mIconsCache = null;
 
     private static IconLoader sLoader = null;
 
@@ -69,14 +72,16 @@ class IconLoader extends Handler {
     private IconLoader(Looper looper , SIMFileHandler fh) {
         super(looper);
         mSimFH = fh;
+
+        mIconsCache = new HashMap<Integer, Bitmap>(50);
     }
 
-    static IconLoader getInstance(Handler caller , SIMFileHandler fh) {
+    static IconLoader getInstance(Handler caller, SIMFileHandler fh) {
         if (sLoader != null) {
             return sLoader;
         }
         if (fh != null) {
-            HandlerThread thread = new HandlerThread("Stk Icon Laoder");
+            HandlerThread thread = new HandlerThread("Stk Icon Loader");
             thread.start();
             return new IconLoader(thread.getLooper(), fh);
         }
@@ -104,13 +109,20 @@ class IconLoader extends Handler {
         mState = STATE_SINGLE_ICON;
         startLoadingIcon(recordNumber);
     }
-    
+
     private void startLoadingIcon(int recordNumber) {
         // Reset the load variables.
         mId = null;
         mIconData = null;
         mCurrentIcon = null;
         mRecordNumber = recordNumber;
+
+        // make sure the icon was not already loaded and saved in the local cache.
+        if (mIconsCache.containsKey(recordNumber)) {
+            mCurrentIcon = mIconsCache.get(recordNumber);
+            postIcon();
+            return;
+        }
 
         // start the first phase ==> loading Image Descriptor.
         readId();
@@ -134,6 +146,7 @@ class IconLoader extends Handler {
                 byte[] rawData = ((byte[]) ar.result);
                 if (mId.codingScheme == ImageDescriptor.CODING_SCHEME_BASIC) {
                     mCurrentIcon = parseToBnW(rawData, rawData.length);
+                    mIconsCache.put(mRecordNumber, mCurrentIcon);
                     postIcon();
                 } else if (mId.codingScheme == ImageDescriptor.CODING_SCHEME_COLOUR) {
                     mIconData = rawData;
@@ -145,6 +158,7 @@ class IconLoader extends Handler {
                 byte [] clut = ((byte[]) ar.result);
                 mCurrentIcon = parseToRGB(mIconData, mIconData.length,
                         false, clut);
+                mIconsCache.put(mRecordNumber, mCurrentIcon);
                 postIcon();
                 break;
             }
@@ -181,6 +195,11 @@ class IconLoader extends Handler {
 
     // Start reading Image Descriptor from SIM card.
     private void readId() {
+        if (mRecordNumber < 0) {
+            mCurrentIcon = null;
+            postIcon();
+            return;
+        }
         Message msg = this.obtainMessage(EVENT_READ_EF_IMG_RECOED_DONE);
         mSimFH.loadEFImgLinearFixed(mRecordNumber, msg);
     }

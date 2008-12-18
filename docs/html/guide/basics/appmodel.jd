@@ -168,13 +168,18 @@ or <code>singleTask</code> launch mode when using this approach, so that
 the current instance is given the new intent instead of requiring that it
 be destroyed and a new instance started.</p>
 
-<p>Another approach you can take is to set the notification activity's task
-affinity to the empty string "" (indicating no affinity) and setting the
-{@link android.R.styleable#AndroidManifestActivity_finishOnTaskLaunch
-finishOnBackground} attribute.  This approach is useful if you would like the notification
+<p>Another approach you can take is to set the notification activity's
+<code>android:taskAffinity</code> to the empty string "" (indicating no affinity)
+and setting the
+<code>{@link android.R.styleable#AndroidManifestActivity_noHistory
+android:noHistory}</code> and
+<code>{@link android.R.styleable#AndroidManifestActivity_excludeFromRecents
+android:excludeFromRecents}</code> attributes.
+This approach is useful if you would like the notification
 to take the user to a separate activity describing it, rather than return
-to the application's task.  By specifying this attribute, the activity will
-be finished whether the user leaves it with BACK or HOME; if the attribute
+to the application's task.  By specifying these attributes, the activity will
+be finished whether the user leaves it with BACK or HOME and it will not
+show up in the recent tasks list; if the <code>noHistory</code> attribute
 isn't specified, pressing HOME will result in the activity and its task
 remaining in the system, possibly with no way to return to it.</p>
 

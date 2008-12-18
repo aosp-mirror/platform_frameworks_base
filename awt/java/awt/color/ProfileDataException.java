@@ -21,18 +21,23 @@
 package java.awt.color;
 
 /**
- * The ProfileDataException class represents an error which occurs 
- * while accessing or processing an ICC_Profile object.
+ * The ProfileDataException class represents an error which occurs while
+ * accessing or processing an ICC_Profile object.
+ * 
+ * @since Android 1.0
  */
 public class ProfileDataException extends RuntimeException {
     
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 7286140888240322498L;
 
     /**
      * Instantiates a new profile data exception with detailed message.
      * 
-     * @param s the detailed message.
+     * @param s
+     *            the detailed message of the exception.
      */
     public ProfileDataException(String s) {
         super(s);

@@ -191,4 +191,5 @@ final class JWebCoreJavaBridge extends Handler {
     private native void nativeFinalize();
     private native void sharedTimerFired();
     private native void setDeferringTimers(boolean defer);
+    public native void setNetworkOnLine(boolean online);
 }

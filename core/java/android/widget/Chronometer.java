@@ -22,7 +22,7 @@ import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.pim.DateUtils;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RemoteViews.RemoteView;

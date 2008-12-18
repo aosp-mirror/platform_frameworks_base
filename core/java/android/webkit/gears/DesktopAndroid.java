@@ -40,8 +40,6 @@ import android.webkit.WebView;
 public class DesktopAndroid {
 
   private static final String TAG = "Gears-J-Desktop";
-  private static final String BROWSER = "com.android.browser";
-  private static final String BROWSER_ACTIVITY = BROWSER + ".BrowserActivity";
   private static final String EXTRA_SHORTCUT_DUPLICATE = "duplicate";
   private static final String ACTION_INSTALL_SHORTCUT =
       "com.android.launcher.action.INSTALL_SHORTCUT";
@@ -78,11 +76,9 @@ public class DesktopAndroid {
         String url, String imagePath) {
     Context context = webview.getContext();
 
-    ComponentName browser = new ComponentName(BROWSER, BROWSER_ACTIVITY);
-
     Intent viewWebPage = new Intent(Intent.ACTION_VIEW);
-    viewWebPage.setComponent(browser);
     viewWebPage.setData(Uri.parse(url));
+    viewWebPage.addCategory(Intent.CATEGORY_BROWSABLE);
 
     Intent intent = new Intent(ACTION_INSTALL_SHORTCUT);
     intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, viewWebPage);

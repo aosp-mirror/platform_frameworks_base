@@ -39,18 +39,19 @@ import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
  * The TextLayout class defines the graphical representation of character data.
- * This class provides method for obtaining information about cursor 
- * positioning and movement, split cursors for text with different directions, 
- * logical and visual highlighting, multiple baselines, hits, justification, 
- * ascent, descent, and advance, and rendering. A TextLayout object can be 
- * rendered using Graphics context. 
+ * This class provides method for obtaining information about cursor positioning
+ * and movement, split cursors for text with different directions, logical and
+ * visual highlighting, multiple baselines, hits, justification, ascent,
+ * descent, and advance, and rendering. A TextLayout object can be rendered
+ * using Graphics context.
+ * 
+ * @since Android 1.0
  */
 public final class TextLayout implements Cloneable {
 
     /**
-     * The CaretPolicy class provides a policy for obtaining the 
-     * caret location. The single getStrongCaret method specifies 
-     * the policy.
+     * The CaretPolicy class provides a policy for obtaining the caret location.
+     * The single getStrongCaret method specifies the policy.
      */
     public static class CaretPolicy {
 
@@ -62,14 +63,15 @@ public final class TextLayout implements Cloneable {
         }
 
         /**
-         * Returns whichever of the two specified TextHitInfo objects 
-         * has the stronger caret (higher character level) in the 
-         * specified TextLayout.
+         * Returns whichever of the two specified TextHitInfo objects has the
+         * stronger caret (higher character level) in the specified TextLayout.
          * 
-         * @param hit1 the first TextHitInfo of the specified TextLayout.
-         * @param hit2 the second TextHitInfo of the specified TextLayout.
-         * @param layout the TextLayout.
-         * 
+         * @param hit1
+         *            the first TextHitInfo of the specified TextLayout.
+         * @param hit2
+         *            the second TextHitInfo of the specified TextLayout.
+         * @param layout
+         *            the TextLayout.
          * @return the TextHitInfo with the stronger caret.
          */
         public TextHitInfo getStrongCaret(TextHitInfo hit1, TextHitInfo hit2, TextLayout layout) {
@@ -87,50 +89,64 @@ public final class TextLayout implements Cloneable {
 
     }
 
-    /** 
+    /**
      * The Constant DEFAULT_CARET_POLICY indicates the default caret policy.
      */
     public static final TextLayout.CaretPolicy DEFAULT_CARET_POLICY = new CaretPolicy();
 
-    /** The breaker. */
+    /**
+     * The breaker.
+     */
     private TextRunBreaker breaker;
-    
-    /** The metrics valid. */
+
+    /**
+     * The metrics valid.
+     */
     private boolean metricsValid = false;
-    
-    /** The tmc. */
+
+    /**
+     * The tmc.
+     */
     private TextMetricsCalculator tmc;
-    
-    /** The metrics. */
+
+    /**
+     * The metrics.
+     */
     private BasicMetrics metrics;
-    
-    /** The caret manager. */
+
+    /**
+     * The caret manager.
+     */
     private CaretManager caretManager;
-    
-    /** The justification width. */
+
+    /**
+     * The justification width.
+     */
     float justificationWidth = -1;
 
     /**
-     * Instantiates a new TextLayout object from the specified string
-     * and Font.
+     * Instantiates a new TextLayout object from the specified string and Font.
      * 
-     * @param string the string to be displayed.
-     * @param font the font of the text.
-     * @param frc the FontRenderContext object for obtaining
-     * information about a graphics device.
+     * @param string
+     *            the string to be displayed.
+     * @param font
+     *            the font of the text.
+     * @param frc
+     *            the FontRenderContext object for obtaining information about a
+     *            graphics device.
      */
     public TextLayout(String string, Font font, FontRenderContext frc) {
-        if (string == null){
+        if (string == null) {
             // awt.01='{0}' parameter is null
             throw new IllegalArgumentException(Messages.getString("awt.01", "string")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
-        if (font == null){
+
+        if (font == null) {
             // awt.01='{0}' parameter is null
             throw new IllegalArgumentException(Messages.getString("awt.01", "font")); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        if (string.length() == 0){
+        if (string.length() == 0) {
             // awt.02='{0}' parameter has zero length
             throw new IllegalArgumentException(Messages.getString("awt.02", "string")); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -142,35 +158,35 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Instantiates a new TextLayout from the specified text and 
-     * a map of attributes.
+     * Instantiates a new TextLayout from the specified text and a map of
+     * attributes.
      * 
-     * @param string the string to be displayed.
-     * @param attributes the attributes to be used for obtaining the text 
-     * style.
-     * @param frc the FontRenderContext object for obtaining
-     * information about a graphics device.
+     * @param string
+     *            the string to be displayed.
+     * @param attributes
+     *            the attributes to be used for obtaining the text style.
+     * @param frc
+     *            the FontRenderContext object for obtaining information about a
+     *            graphics device.
      */
-    public TextLayout(
-            String string,
+    public TextLayout(String string,
             Map<? extends java.text.AttributedCharacterIterator.Attribute, ?> attributes,
-            FontRenderContext frc ) {
-        if (string == null){
+            FontRenderContext frc) {
+        if (string == null) {
             // awt.01='{0}' parameter is null
             throw new IllegalArgumentException(Messages.getString("awt.01", "string")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
-        if (attributes == null){
+
+        if (attributes == null) {
             // awt.01='{0}' parameter is null
             throw new IllegalArgumentException(Messages.getString("awt.01", "attributes")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
-        if (string.length() == 0){
+
+        if (string.length() == 0) {
             // awt.02='{0}' parameter has zero length
             throw new IllegalArgumentException(Messages.getString("awt.02", "string")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
-        
+
         AttributedString as = new AttributedString(string);
         as.addAttributes(attributes, 0, string.length());
         this.breaker = new TextRunBreaker(as.getIterator(), frc);
@@ -180,17 +196,19 @@ public final class TextLayout implements Cloneable {
     /**
      * Instantiates a new TextLayout from the AttributedCharacterIterator.
      * 
-     * @param text the AttributedCharacterIterator.
-     * @param frc the FontRenderContext object for obtaining
-     * information about a graphics device.
+     * @param text
+     *            the AttributedCharacterIterator.
+     * @param frc
+     *            the FontRenderContext object for obtaining information about a
+     *            graphics device.
      */
     public TextLayout(AttributedCharacterIterator text, FontRenderContext frc) {
-        if (text == null){
+        if (text == null) {
             // awt.03='{0}' iterator parameter is null
             throw new IllegalArgumentException(Messages.getString("awt.03", "text")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
-        if (text.getBeginIndex() == text.getEndIndex()){
+
+        if (text.getBeginIndex() == text.getEndIndex()) {
             // awt.04='{0}' iterator parameter has zero length
             throw new IllegalArgumentException(Messages.getString("awt.04", "text")); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -202,7 +220,8 @@ public final class TextLayout implements Cloneable {
     /**
      * Instantiates a new text layout.
      * 
-     * @param breaker the breaker
+     * @param breaker
+     *            the breaker.
      */
     TextLayout(TextRunBreaker breaker) {
         this.breaker = breaker;
@@ -226,7 +245,7 @@ public final class TextLayout implements Cloneable {
      */
     @Override
     protected Object clone() {
-        TextLayout res = new TextLayout((TextRunBreaker) breaker.clone());
+        TextLayout res = new TextLayout((TextRunBreaker)breaker.clone());
 
         if (justificationWidth >= 0) {
             res.handleJustify(justificationWidth);
@@ -238,10 +257,10 @@ public final class TextLayout implements Cloneable {
     /**
      * Compares this TextLayout object to the specified TextLayout object.
      * 
-     * @param layout the TextLayout object to be compared.
-     * 
-     * @return true, if this TextLayout object is equal to 
-     * the specified TextLayout object, false otherwise.
+     * @param layout
+     *            the TextLayout object to be compared.
+     * @return true, if this TextLayout object is equal to the specified
+     *         TextLayout object, false otherwise.
      */
     public boolean equals(TextLayout layout) {
         if (layout == null) {
@@ -253,14 +272,14 @@ public final class TextLayout implements Cloneable {
     /**
      * Compares this TextLayout object to the specified Object.
      * 
-     * @param obj the Object to be compared.
-     * 
-     * @return true, if this TextLayout object is equal to 
-     * the specified Object, false otherwise.
+     * @param obj
+     *            the Object to be compared.
+     * @return true, if this TextLayout object is equal to the specified Object,
+     *         false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof TextLayout ? equals((TextLayout) obj) : false;
+        return obj instanceof TextLayout ? equals((TextLayout)obj) : false;
     }
 
     /**
@@ -274,16 +293,19 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Draws this TextLayout at the specified location with the 
-     * specified Graphics2D context. 
+     * Draws this TextLayout at the specified location with the specified
+     * Graphics2D context.
      * 
-     * @param g2d the Graphics2D object which renders this TextLayout.
-     * @param x the X coordinate of the TextLayout origin. 
-     * @param y the Y coordinate of the TextLayout origin.
+     * @param g2d
+     *            the Graphics2D object which renders this TextLayout.
+     * @param x
+     *            the X coordinate of the TextLayout origin.
+     * @param y
+     *            the Y coordinate of the TextLayout origin.
      */
     public void draw(Graphics2D g2d, float x, float y) {
         updateMetrics();
-        breaker.drawSegments(g2d, x ,y);
+        breaker.drawSegments(g2d, x, y);
     }
 
     /**
@@ -325,15 +347,15 @@ public final class TextLayout implements Cloneable {
      */
     public byte getBaseline() {
         updateMetrics();
-        return (byte) metrics.getBaseLineIndex();
+        return (byte)metrics.getBaseLineIndex();
     }
 
     /**
-     * Gets the float array of offsets for the baselines which 
-     * are used in this TextLayout.
+     * Gets the float array of offsets for the baselines which are used in this
+     * TextLayout.
      * 
-     * @return the float array of offsets for the baselines which 
-     * are used in this TextLayout.
+     * @return the float array of offsets for the baselines which are used in
+     *         this TextLayout.
      */
     public float[] getBaselineOffsets() {
         updateMetrics();
@@ -341,14 +363,15 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the black box bounds of the characters in the specified area. 
-     * The black box bounds is an Shape which contains all 
-     * bounding boxes of all the glyphs of the characters 
-     * between firstEndpoint and secondEndpoint parameters values.     
-     *  
-     * @param firstEndpoint the first point of the area.
-     * @param secondEndpoint the second point of the area.
+     * Gets the black box bounds of the characters in the specified area. The
+     * black box bounds is an Shape which contains all bounding boxes of all the
+     * glyphs of the characters between firstEndpoint and secondEndpoint
+     * parameters values.
      * 
+     * @param firstEndpoint
+     *            the first point of the area.
+     * @param secondEndpoint
+     *            the second point of the area.
      * @return the Shape which contains black box bounds.
      */
     public Shape getBlackBoxBounds(int firstEndpoint, int secondEndpoint) {
@@ -372,8 +395,8 @@ public final class TextLayout implements Cloneable {
     /**
      * Gets information about the caret of the specified TextHitInfo.
      * 
-     * @param hitInfo the TextHitInfo.
-     * 
+     * @param hitInfo
+     *            the TextHitInfo.
      * @return the information about the caret of the specified TextHitInfo.
      */
     public float[] getCaretInfo(TextHitInfo hitInfo) {
@@ -382,12 +405,13 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets information about the caret of the specified TextHitInfo
-     * of a character in this TextLayout.
+     * Gets information about the caret of the specified TextHitInfo of a
+     * character in this TextLayout.
      * 
-     * @param hitInfo the TextHitInfo of a character in this TextLayout.
-     * @param bounds the bounds to which the caret info is constructed.
-     * 
+     * @param hitInfo
+     *            the TextHitInfo of a character in this TextLayout.
+     * @param bounds
+     *            the bounds to which the caret info is constructed.
      * @return the caret of the specified TextHitInfo.
      */
     public float[] getCaretInfo(TextHitInfo hitInfo, Rectangle2D bounds) {
@@ -396,12 +420,13 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape which represents the caret of the specified TextHitInfo
-     * in the bounds of this TextLayout.
+     * Gets a Shape which represents the caret of the specified TextHitInfo in
+     * the bounds of this TextLayout.
      * 
-     * @param hitInfo the TextHitInfo.
-     * @param bounds the bounds to which the caret info is constructed.
-     * 
+     * @param hitInfo
+     *            the TextHitInfo.
+     * @param bounds
+     *            the bounds to which the caret info is constructed.
      * @return the Shape which represents the caret.
      */
     public Shape getCaretShape(TextHitInfo hitInfo, Rectangle2D bounds) {
@@ -410,11 +435,11 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape which represents the caret of the specified TextHitInfo
-     * in the bounds of this TextLayout.
+     * Gets a Shape which represents the caret of the specified TextHitInfo in
+     * the bounds of this TextLayout.
      * 
-     * @param hitInfo the TextHitInfo.
-     * 
+     * @param hitInfo
+     *            the TextHitInfo.
      * @return the Shape which represents the caret.
      */
     public Shape getCaretShape(TextHitInfo hitInfo) {
@@ -423,45 +448,47 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets two Shapes for the strong and weak carets with
-     * default caret policy and null bounds: the first element 
-     * is the strong caret, the second is the weak caret or null. 
+     * Gets two Shapes for the strong and weak carets with default caret policy
+     * and null bounds: the first element is the strong caret, the second is the
+     * weak caret or null.
      * 
-     * @param offset an offset in the TextLayout.
-     * 
-     * @return an array of two Shapes corresponded to the strong
-     * and weak carets.
+     * @param offset
+     *            an offset in the TextLayout.
+     * @return an array of two Shapes corresponded to the strong and weak
+     *         carets.
      */
     public Shape[] getCaretShapes(int offset) {
         return getCaretShapes(offset, null, TextLayout.DEFAULT_CARET_POLICY);
     }
 
     /**
-     * Gets two Shapes for the strong and weak carets with
-     * the default caret policy: the first element is the strong 
-     * caret, the second is the weak caret or null.
+     * Gets two Shapes for the strong and weak carets with the default caret
+     * policy: the first element is the strong caret, the second is the weak
+     * caret or null.
      * 
-     * @param offset an offset in the TextLayout.
-     * @param bounds the bounds to which to extend the carets.
-     * 
-     * @return an array of two Shapes corresponded to the strong
-     * and weak carets.
+     * @param offset
+     *            an offset in the TextLayout.
+     * @param bounds
+     *            the bounds to which to extend the carets.
+     * @return an array of two Shapes corresponded to the strong and weak
+     *         carets.
      */
     public Shape[] getCaretShapes(int offset, Rectangle2D bounds) {
         return getCaretShapes(offset, bounds, TextLayout.DEFAULT_CARET_POLICY);
     }
 
     /**
-     * Gets two Shapes for the strong and weak carets: the first
-     * element is the strong caret, the second is the weak caret 
-     * or null.
+     * Gets two Shapes for the strong and weak carets: the first element is the
+     * strong caret, the second is the weak caret or null.
      * 
-     * @param offset an offset in the TextLayout.
-     * @param bounds the bounds to which to extend the carets.
-     * @param policy the specified CaretPolicy.
-     * 
-     * @return an array of two Shapes corresponded to the strong
-     * and weak carets.
+     * @param offset
+     *            an offset in the TextLayout.
+     * @param bounds
+     *            the bounds to which to extend the carets.
+     * @param policy
+     *            the specified CaretPolicy.
+     * @return an array of two Shapes corresponded to the strong and weak
+     *         carets.
      */
     public Shape[] getCaretShapes(int offset, Rectangle2D bounds, TextLayout.CaretPolicy policy) {
         if (offset < 0 || offset > breaker.getCharCount()) {
@@ -483,15 +510,15 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the level of the character with the specified index. 
-     *  
-     * @param index the specified index of the character.
+     * Gets the level of the character with the specified index.
      * 
+     * @param index
+     *            the specified index of the character.
      * @return the level of the character.
      */
     public byte getCharacterLevel(int index) {
         if (index == -1 || index == getCharacterCount()) {
-            return (byte) breaker.getBaseLevel();
+            return (byte)breaker.getBaseLevel();
         }
         return breaker.getLevel(index);
     }
@@ -507,16 +534,15 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the TextLayout wich is justified with the specified
-     * width related to this TextLayout.
+     * Gets the TextLayout wich is justified with the specified width related to
+     * this TextLayout.
      * 
-     * @param justificationWidth the width which is used 
-     * for justification.
-     * 
+     * @param justificationWidth
+     *            the width which is used for justification.
      * @return a TextLayout justified to the specified width.
-     * 
-     * @throws Error the error occures if this TextLayout has been
-     * already justified.
+     * @throws Error
+     *             the error occures if this TextLayout has been already
+     *             justified.
      */
     public TextLayout getJustifiedLayout(float justificationWidth) throws Error {
         float justification = breaker.getJustification();
@@ -528,7 +554,7 @@ public final class TextLayout implements Cloneable {
             return this;
         }
 
-        TextLayout justifiedLayout = new TextLayout((TextRunBreaker) breaker.clone());
+        TextLayout justifiedLayout = new TextLayout((TextRunBreaker)breaker.clone());
         justifiedLayout.handleJustify(justificationWidth);
         return justifiedLayout;
     }
@@ -544,15 +570,15 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape representing the logical selection betweeen 
-     * the specified endpoints and extended to the natural 
-     * bounds of this TextLayout.
+     * Gets a Shape representing the logical selection betweeen the specified
+     * endpoints and extended to the natural bounds of this TextLayout.
      * 
-     * @param firstEndpoint the first selected endpoint within the area of characters
-     * @param secondEndpoint the second selected endpoint within the area of characters
-     * 
-     * @return a Shape represented the logical selection betweeen 
-     * the specified endpoints.
+     * @param firstEndpoint
+     *            the first selected endpoint within the area of characters
+     * @param secondEndpoint
+     *            the second selected endpoint within the area of characters
+     * @return a Shape represented the logical selection betweeen the specified
+     *         endpoints.
      */
     public Shape getLogicalHighlightShape(int firstEndpoint, int secondEndpoint) {
         updateMetrics();
@@ -560,22 +586,19 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape representing the logical selection betweeen 
-     * the specified endpoints and extended to the specified 
-     * bounds of this TextLayout.
+     * Gets a Shape representing the logical selection betweeen the specified
+     * endpoints and extended to the specified bounds of this TextLayout.
      * 
-     * @param firstEndpoint the first selected endpoint within the area of characters
-     * @param secondEndpoint the second selected endpoint within the area of characters
-     * @param bounds the specified bounds of this TextLayout.
-     * 
-     * @return a Shape represented the logical selection betweeen 
-     * the specified endpoints.
+     * @param firstEndpoint
+     *            the first selected endpoint within the area of characters
+     * @param secondEndpoint
+     *            the second selected endpoint within the area of characters
+     * @param bounds
+     *            the specified bounds of this TextLayout.
+     * @return a Shape represented the logical selection betweeen the specified
+     *         endpoints.
      */
-    public Shape getLogicalHighlightShape(
-            int firstEndpoint,
-            int secondEndpoint,
-            Rectangle2D bounds
-    ) {
+    public Shape getLogicalHighlightShape(int firstEndpoint, int secondEndpoint, Rectangle2D bounds) {
         updateMetrics();
 
         if (firstEndpoint > secondEndpoint) {
@@ -583,62 +606,51 @@ public final class TextLayout implements Cloneable {
                 // awt.197=Endpoints are out of range
                 throw new IllegalArgumentException(Messages.getString("awt.197")); //$NON-NLS-1$
             }
-            return caretManager.getLogicalHighlightShape(
-                    secondEndpoint,
-                    firstEndpoint,
-                    bounds,
-                    this
-            );
+            return caretManager.getLogicalHighlightShape(secondEndpoint, firstEndpoint, bounds,
+                    this);
         }
         if (firstEndpoint < 0 || secondEndpoint > breaker.getCharCount()) {
             // awt.197=Endpoints are out of range
             throw new IllegalArgumentException(Messages.getString("awt.197")); //$NON-NLS-1$
         }
-        return caretManager.getLogicalHighlightShape(
-                firstEndpoint,
-                secondEndpoint,
-                bounds,
-                this
-        );
+        return caretManager.getLogicalHighlightShape(firstEndpoint, secondEndpoint, bounds, this);
     }
 
     /**
-     * Gets the logical ranges of text which corresponds to a visual 
-     * selection.
+     * Gets the logical ranges of text which corresponds to a visual selection.
      * 
-     * @param hit1 the first endpoint of the visual range.
-     * @param hit2 the second endpoint of the visual range.
-     * 
-     * @return the logical ranges of text which corresponds to a visual 
-     * selection.
+     * @param hit1
+     *            the first endpoint of the visual range.
+     * @param hit2
+     *            the second endpoint of the visual range.
+     * @return the logical ranges of text which corresponds to a visual
+     *         selection.
      */
     public int[] getLogicalRangesForVisualSelection(TextHitInfo hit1, TextHitInfo hit2) {
         return caretManager.getLogicalRangesForVisualSelection(hit1, hit2);
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the left (or
-     * up at the end of the line) of the specified offset. 
+     * Gets the TextHitInfo for the next caret to the left (or up at the end of
+     * the line) of the specified offset.
      * 
-     * @param offset the offset in this TextLayout.
-     * 
-     * @return the TextHitInfo for the next caret to the left (or
-     * up at the end of the line) of the specified hit, or null 
-     * if there is no hit.
+     * @param offset
+     *            the offset in this TextLayout.
+     * @return the TextHitInfo for the next caret to the left (or up at the end
+     *         of the line) of the specified hit, or null if there is no hit.
      */
     public TextHitInfo getNextLeftHit(int offset) {
         return getNextLeftHit(offset, DEFAULT_CARET_POLICY);
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the left (or
-     * up at the end of the line) of the specified hit. 
+     * Gets the TextHitInfo for the next caret to the left (or up at the end of
+     * the line) of the specified hit.
      * 
-     * @param hitInfo the initial hit.
-     * 
-     * @return the TextHitInfo for the next caret to the left (or
-     * up at the end of the line) of the specified hit, or null 
-     * if there is no hit.
+     * @param hitInfo
+     *            the initial hit.
+     * @return the TextHitInfo for the next caret to the left (or up at the end
+     *         of the line) of the specified hit, or null if there is no hit.
      */
     public TextHitInfo getNextLeftHit(TextHitInfo hitInfo) {
         breaker.createAllSegments();
@@ -646,15 +658,15 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the left (or
-     * up at the end of the line) of the specified offset, given the 
-     * specified caret policy. 
+     * Gets the TextHitInfo for the next caret to the left (or up at the end of
+     * the line) of the specified offset, given the specified caret policy.
      * 
-     * @param offset the offset in this TextLayout.
-     * @param policy the policy to be used for obtaining the strong caret.
-     * 
-     * @return the TextHitInfo for the next caret to the left of the 
-     * specified offset, or null if there is no hit.
+     * @param offset
+     *            the offset in this TextLayout.
+     * @param policy
+     *            the policy to be used for obtaining the strong caret.
+     * @return the TextHitInfo for the next caret to the left of the specified
+     *         offset, or null if there is no hit.
      */
     public TextHitInfo getNextLeftHit(int offset, TextLayout.CaretPolicy policy) {
         if (offset < 0 || offset > breaker.getCharCount()) {
@@ -673,14 +685,14 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the right (or
-     * down at the end of the line) of the specified hit. 
+     * Gets the TextHitInfo for the next caret to the right (or down at the end
+     * of the line) of the specified hit.
      * 
-     * @param hitInfo the initial hit.
-     * 
-     * @return the TextHitInfo for the next caret to the right (or
-     * down at the end of the line) of the specified hit, or null 
-     * if there is no hit.
+     * @param hitInfo
+     *            the initial hit.
+     * @return the TextHitInfo for the next caret to the right (or down at the
+     *         end of the line) of the specified hit, or null if there is no
+     *         hit.
      */
     public TextHitInfo getNextRightHit(TextHitInfo hitInfo) {
         breaker.createAllSegments();
@@ -688,28 +700,28 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the right (or
-     * down at the end of the line) of the specified offset. 
+     * Gets the TextHitInfo for the next caret to the right (or down at the end
+     * of the line) of the specified offset.
      * 
-     * @param offset the offset in this TextLayout.
-     * 
-     * @return the TextHitInfo for the next caret to the right of the 
-     * specified offset, or null if there is no hit.
+     * @param offset
+     *            the offset in this TextLayout.
+     * @return the TextHitInfo for the next caret to the right of the specified
+     *         offset, or null if there is no hit.
      */
     public TextHitInfo getNextRightHit(int offset) {
         return getNextRightHit(offset, DEFAULT_CARET_POLICY);
     }
 
     /**
-     * Gets the TextHitInfo for the next caret to the right (or
-     * down at the end of the line) of the specified offset, given the 
-     * specified caret policy. 
+     * Gets the TextHitInfo for the next caret to the right (or down at the end
+     * of the line) of the specified offset, given the specified caret policy.
      * 
-     * @param offset the offset in this TextLayout.
-     * @param policy the policy to be used for obtaining the strong caret.
-     * 
-     * @return the TextHitInfo for the next caret to the right of the 
-     * specified offset, or null if there is no hit.
+     * @param offset
+     *            the offset in this TextLayout.
+     * @param policy
+     *            the policy to be used for obtaining the strong caret.
+     * @return the TextHitInfo for the next caret to the right of the specified
+     *         offset, or null if there is no hit.
      */
     public TextHitInfo getNextRightHit(int offset, TextLayout.CaretPolicy policy) {
         if (offset < 0 || offset > breaker.getCharCount()) {
@@ -730,10 +742,9 @@ public final class TextLayout implements Cloneable {
     /**
      * Gets the outline of this TextLayout as a Shape.
      * 
-     * @param xform the AffineTransform to be used to transform 
-     * the outline before returning it, or null if no transformation
-     * is desired.
-     * 
+     * @param xform
+     *            the AffineTransform to be used to transform the outline before
+     *            returning it, or null if no transformation is desired.
      * @return the outline of this TextLayout as a Shape.
      */
     public Shape getOutline(AffineTransform xform) {
@@ -749,8 +760,8 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the visible advance of this TextLayout which is defined as
-     * diffence between leading (advance) and trailing whitespace.
+     * Gets the visible advance of this TextLayout which is defined as diffence
+     * between leading (advance) and trailing whitespace.
      * 
      * @return the visible advance of this TextLayout.
      */
@@ -764,15 +775,13 @@ public final class TextLayout implements Cloneable {
 
         if (lastNonWhitespace < 0) {
             return 0;
-        } else if (lastNonWhitespace == getCharacterCount()-1) {
+        } else if (lastNonWhitespace == getCharacterCount() - 1) {
             return getAdvance();
         } else if (justificationWidth >= 0) { // Layout is justified
             return justificationWidth;
         } else {
-            breaker.pushSegments(
-                    breaker.getACI().getBeginIndex(),
-                    lastNonWhitespace + breaker.getACI().getBeginIndex() + 1
-            );
+            breaker.pushSegments(breaker.getACI().getBeginIndex(), lastNonWhitespace
+                    + breaker.getACI().getBeginIndex() + 1);
 
             breaker.createAllSegments();
 
@@ -784,14 +793,16 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape which corresponds to the highlighted (selected) area
-     * based on two hit locations within the text and extends to the bounds.
+     * Gets a Shape which corresponds to the highlighted (selected) area based
+     * on two hit locations within the text and extends to the bounds.
      * 
-     * @param hit1 the first text hit location.
-     * @param hit2 the second text hit location.
-     * @param bounds the rectangle that the highlighted area should be 
-     * extended or restricted to.
-     * 
+     * @param hit1
+     *            the first text hit location.
+     * @param hit2
+     *            the second text hit location.
+     * @param bounds
+     *            the rectangle that the highlighted area should be extended or
+     *            restricted to.
      * @return a Shape which corresponds to the highlighted (selected) area.
      */
     public Shape getVisualHighlightShape(TextHitInfo hit1, TextHitInfo hit2, Rectangle2D bounds) {
@@ -799,12 +810,13 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets a Shape which corresponds to the highlighted (selected) area
-     * based on two hit locations within the text.
+     * Gets a Shape which corresponds to the highlighted (selected) area based
+     * on two hit locations within the text.
      * 
-     * @param hit1 the first text hit location.
-     * @param hit2 the second text hit location.
-     * 
+     * @param hit1
+     *            the first text hit location.
+     * @param hit2
+     *            the second text hit location.
      * @return a Shape which corresponds to the highlighted (selected) area.
      */
     public Shape getVisualHighlightShape(TextHitInfo hit1, TextHitInfo hit2) {
@@ -813,23 +825,23 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Gets the TextHitInfo for a hit on the opposite side of the 
-     * specified hit's caret.
+     * Gets the TextHitInfo for a hit on the opposite side of the specified
+     * hit's caret.
      * 
-     * @param hitInfo the specified TextHitInfo.
-     * 
-     * @return the TextHitInfo for a hit on the opposite side of the 
-     * specified hit's caret.
+     * @param hitInfo
+     *            the specified TextHitInfo.
+     * @return the TextHitInfo for a hit on the opposite side of the specified
+     *         hit's caret.
      */
     public TextHitInfo getVisualOtherHit(TextHitInfo hitInfo) {
         return caretManager.getVisualOtherHit(hitInfo);
     }
 
     /**
-     * Justifies the text; this method should be overridden
-     * by subclasses.
+     * Justifies the text; this method should be overridden by subclasses.
      * 
-     * @param justificationWidth the width for justification.
+     * @param justificationWidth
+     *            the width for justification.
      */
     protected void handleJustify(float justificationWidth) {
         float justification = breaker.getJustification();
@@ -851,54 +863,54 @@ public final class TextLayout implements Cloneable {
     }
 
     /**
-     * Returns a TextHitInfo object that gives information on which 
-     * division point (between two characters) is corresponds to a 
-     * hit (such as a mouse click) at the specified coordinates.
+     * Returns a TextHitInfo object that gives information on which division
+     * point (between two characters) is corresponds to a hit (such as a mouse
+     * click) at the specified coordinates.
      * 
-     * @param x the X coordinate in this TextLayout.
-     * @param y the Y coordinate in this TextLayout.
-     * 
-     * TextHitInfo object cooresponding to the given coordinates
-     * within the text.
+     * @param x
+     *            the X coordinate in this TextLayout.
+     * @param y
+     *            the Y coordinate in this TextLayout. TextHitInfo object
+     *            corresponding to the given coordinates within the text.
+     * @return the information about the character at the specified position.
      */
     public TextHitInfo hitTestChar(float x, float y) {
         return hitTestChar(x, y, getBounds());
     }
 
     /**
-     * Returns a TextHitInfo object that gives information on which 
-     * division point (between two characters) is corresponds to a 
-     * hit (such as a mouse click) at the specified coordinates within 
-     * the specified text rectangle.
+     * Returns a TextHitInfo object that gives information on which division
+     * point (between two characters) is corresponds to a hit (such as a mouse
+     * click) at the specified coordinates within the specified text rectangle.
      * 
-     * @param x the X coordinate in this TextLayout.
-     * @param y the Y coordinate in this TextLayout.
-     * @param bounds the bounds of the text area.
-     * 
-     * TextHitInfo object cooresponding to the given coordinates
-     * within the text.
+     * @param x
+     *            the X coordinate in this TextLayout.
+     * @param y
+     *            the Y coordinate in this TextLayout.
+     * @param bounds
+     *            the bounds of the text area. TextHitInfo object corresponding
+     *            to the given coordinates within the text.
+     * @return the information about the character at the specified position.
      */
     public TextHitInfo hitTestChar(float x, float y, Rectangle2D bounds) {
         if (x > bounds.getMaxX()) {
-            return breaker.isLTR() ?
-                    TextHitInfo.trailing(breaker.getCharCount() - 1) : TextHitInfo.leading(0);
+            return breaker.isLTR() ? TextHitInfo.trailing(breaker.getCharCount() - 1) : TextHitInfo
+                    .leading(0);
         }
 
         if (x < bounds.getMinX()) {
-            return breaker.isLTR() ?
-                    TextHitInfo.leading(0) : TextHitInfo.trailing(breaker.getCharCount() - 1);
+            return breaker.isLTR() ? TextHitInfo.leading(0) : TextHitInfo.trailing(breaker
+                    .getCharCount() - 1);
         }
 
         return breaker.hitTest(x, y);
     }
 
     /**
-     * Returns true if this TextLayout has a "left to right" 
-     * direction.
+     * Returns true if this TextLayout has a "left to right" direction.
      * 
-     * @return true if this TextLayout has a "left to right" 
-     * direction, false if this TextLayout has a "right to left" 
-     * direction. 
+     * @return true if this TextLayout has a "left to right" direction, false if
+     *         this TextLayout has a "right to left" direction.
      */
     public boolean isLeftToRight() {
         return breaker.isLTR();
@@ -913,4 +925,3 @@ public final class TextLayout implements Cloneable {
         return false;
     }
 }
-

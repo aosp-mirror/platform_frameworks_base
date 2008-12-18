@@ -18,6 +18,7 @@
  * @author Sergey I. Salishev
  * @version $Revision: 1.2 $
  */
+
 package javax.imageio;
 
 /* 
@@ -26,18 +27,19 @@ package javax.imageio;
  */
 
 /**
- * The IIOParamController specifies an activate method that invokes the 
+ * The IIOParamController specifies an activate method that invokes the
  * controller.
+ * 
+ * @since Android 1.0
  */
 public interface IIOParamController {
 
     /**
-     * Activates the controller. 
+     * Activates the controller.
      * 
-     * @param param the IIOParam.
-     * 
-     * @return true if the IIOParam has been modified, false otherwise.
+     * @param param
+     *            the IIOParam.
+     * @return true, if the IIOParam has been modified, false otherwise.
      */
     boolean activate(IIOParam param);
 }
-

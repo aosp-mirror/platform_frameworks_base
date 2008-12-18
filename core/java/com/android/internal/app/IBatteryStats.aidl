@@ -16,9 +16,14 @@
 
 package com.android.internal.app;
 
+import com.android.internal.os.BatteryStatsImpl;
+
 interface IBatteryStats {
+    BatteryStatsImpl getStatistics();
     void noteStartWakelock(int uid, String name, int type);
     void noteStopWakelock(int uid, String name, int type);
+    void noteStartSensor(int uid, int sensor);
+    void noteStopSensor(int uid, int sensor);
     void setOnBattery(boolean onBattery);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();

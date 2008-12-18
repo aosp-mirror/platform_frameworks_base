@@ -32,50 +32,60 @@ import org.apache.harmony.awt.gl.AwtImageBackdoorAccessor;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The AffineTransform class translates coordinates from 2D coordinates 
- * in the source image or Raster to 2D coordinates in the destination 
- * image or Raster using Affine transformation. The number of bands in 
- * the source Raster should equal to the number of bands in the destination
- * Raster.
+ * The AffineTransform class translates coordinates from 2D coordinates in the
+ * source image or Raster to 2D coordinates in the destination image or Raster
+ * using affine transformation. The number of bands in the source Raster should
+ * equal to the number of bands in the destination Raster.
+ * 
+ * @since Android 1.0
  */
 public class AffineTransformOp implements BufferedImageOp, RasterOp {
-    
-    /** 
-     * The Constant TYPE_NEAREST_NEIGHBOR indicates nearest-neighbor 
-     * interpolation type. 
+
+    /**
+     * The Constant TYPE_NEAREST_NEIGHBOR indicates nearest-neighbor
+     * interpolation type.
      */
     public static final int TYPE_NEAREST_NEIGHBOR = 1;
-    
-    /** 
-     * The Constant TYPE_BILINEAR indicates bilinear interpolation type. 
+
+    /**
+     * The Constant TYPE_BILINEAR indicates bilinear interpolation type.
      */
     public static final int TYPE_BILINEAR = 2;
-    
-    /** The Constant TYPE_BICUBIC indicates bicubic interpolation type. */
+
+    /**
+     * The Constant TYPE_BICUBIC indicates bi-cubic interpolation type.
+     */
     public static final int TYPE_BICUBIC = 3;
 
-    /** The i type. */
+    /**
+     * The i type.
+     */
     private int iType; // interpolation type
-    
-    /** The at. */
+
+    /**
+     * The at.
+     */
     private AffineTransform at;
-    
-    /** The hints. */
+
+    /**
+     * The hints.
+     */
     private RenderingHints hints;
 
     static {
         // TODO - uncomment
-        //System.loadLibrary("imageops");
+        // System.loadLibrary("imageops");
     }
 
     /**
-     * Instantiates a new AffineTransformOp with the specified
-     * AffineTransform and RenderingHints object which defines 
-     * the interpolation type.
+     * Instantiates a new AffineTransformOp with the specified AffineTransform
+     * and RenderingHints object which defines the interpolation type.
      * 
-     * @param xform the AffineTransform.
-     * @param hints the RenderingHints object which defines 
-     * the interpolation type.
+     * @param xform
+     *            the AffineTransform.
+     * @param hints
+     *            the RenderingHints object which defines the interpolation
+     *            type.
      */
     public AffineTransformOp(AffineTransform xform, RenderingHints hints) {
         this(xform, TYPE_NEAREST_NEIGHBOR);
@@ -95,20 +105,22 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
                 // Determine from rendering quality
                 if (hint == RenderingHints.VALUE_RENDER_QUALITY) {
                     this.iType = TYPE_BILINEAR;
-                // For speed use nearest neighbor
+                    // For speed use nearest neighbor
                 }
             }
         }
     }
 
     /**
-     * Instantiates a new AffineTransformOp with the specified
-     * AffineTransform and a specified interpolation type from the 
-     * list of predefined interpolation types.
+     * Instantiates a new AffineTransformOp with the specified AffineTransform
+     * and a specified interpolation type from the list of predefined
+     * interpolation types.
      * 
-     * @param xform the AffineTransform.
-     * @param interp the one of predefined interpolation types:
-     * TYPE_NEAREST_NEIGHBOR, TYPE_BILINEAR, or TYPE_BICUBIC.
+     * @param xform
+     *            the AffineTransform.
+     * @param interp
+     *            the one of predefined interpolation types:
+     *            TYPE_NEAREST_NEIGHBOR, TYPE_BILINEAR, or TYPE_BICUBIC.
      */
     public AffineTransformOp(AffineTransform xform, int interp) {
         if (Math.abs(xform.getDeterminant()) <= Double.MIN_VALUE) {
@@ -116,7 +128,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             throw new ImagingOpException(Messages.getString("awt.24F", xform)); //$NON-NLS-1$
         }
 
-        this.at = (AffineTransform) xform.clone();
+        this.at = (AffineTransform)xform.clone();
 
         if (interp != TYPE_NEAREST_NEIGHBOR && interp != TYPE_BILINEAR && interp != TYPE_BICUBIC) {
             // awt.250=Unknown interpolation type: {0}
@@ -129,7 +141,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
     /**
      * Gets the interpolation type.
      * 
-     * @return the interpolation type
+     * @return the interpolation type.
      */
     public final int getInterpolationType() {
         return iType;
@@ -165,7 +177,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
      * @return the AffineTransform.
      */
     public final AffineTransform getTransform() {
-        return (AffineTransform) at.clone();
+        return (AffineTransform)at.clone();
     }
 
     public final Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
@@ -177,21 +189,19 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
     }
 
     public final Rectangle2D getBounds2D(Raster src) {
-        // We position source raster to (0,0) even if it is translated child raster.
+        // We position source raster to (0,0) even if it is translated child
+        // raster.
         // This means that we need only width and height of the src
         int width = src.getWidth();
         int height = src.getHeight();
 
         float[] corners = {
-            0, 0,
-            width, 0,
-            width, height,
-            0, height
+                0, 0, width, 0, width, height, 0, height
         };
 
         at.transform(corners, 0, corners, 0, 4);
 
-        Rectangle2D.Float bounds = new Rectangle2D.Float(corners[0], corners[1], 0 , 0);
+        Rectangle2D.Float bounds = new Rectangle2D.Float(corners[0], corners[1], 0, 0);
         bounds.add(corners[2], corners[3]);
         bounds.add(corners[4], corners[5]);
         bounds.add(corners[6], corners[7]);
@@ -208,17 +218,14 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         double dstHeight = newBounds.getY() + newBounds.getHeight();
 
         if (dstWidth <= 0 || dstHeight <= 0) {
-            // awt.251=Transformed width ({0}) and height ({1}) should be greater than 0
-            throw new RasterFormatException(
-                    Messages.getString("awt.251", dstWidth, dstHeight)); //$NON-NLS-1$
+            // awt.251=Transformed width ({0}) and height ({1}) should be
+            // greater than 0
+            throw new RasterFormatException(Messages.getString("awt.251", dstWidth, dstHeight)); //$NON-NLS-1$
         }
 
         if (destCM != null) {
-            return new BufferedImage(destCM,
-                    destCM.createCompatibleWritableRaster((int)dstWidth, (int)dstHeight),
-                    destCM.isAlphaPremultiplied(),
-                    null
-            );
+            return new BufferedImage(destCM, destCM.createCompatibleWritableRaster((int)dstWidth,
+                    (int)dstHeight), destCM.isAlphaPremultiplied(), null);
         }
 
         ColorModel cm = src.getColorModel();
@@ -229,23 +236,18 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         }
 
         // OK, we can get source color model
-        return new BufferedImage(cm,
-                src.getRaster().createCompatibleWritableRaster((int)dstWidth, (int)dstHeight),
-                cm.isAlphaPremultiplied(),
-                null
-        );
+        return new BufferedImage(cm, src.getRaster().createCompatibleWritableRaster((int)dstWidth,
+                (int)dstHeight), cm.isAlphaPremultiplied(), null);
     }
 
-    public WritableRaster createCompatibleDestRaster (Raster src) {
+    public WritableRaster createCompatibleDestRaster(Raster src) {
         // Here approach is other then in createCompatibleDestImage -
         // destination should include only
         // transformed image, but not (0,0) in source coordinate system
 
         Rectangle2D newBounds = getBounds2D(src);
-        return src.createCompatibleWritableRaster(
-                (int) newBounds.getX(), (int) newBounds.getY(),
-                (int) newBounds.getWidth(), (int)newBounds.getHeight()
-        );
+        return src.createCompatibleWritableRaster((int)newBounds.getX(), (int)newBounds.getY(),
+                (int)newBounds.getWidth(), (int)newBounds.getHeight());
     }
 
     public final BufferedImage filter(BufferedImage src, BufferedImage dst) {
@@ -257,10 +259,8 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         ColorModel srcCM = src.getColorModel();
         BufferedImage finalDst = null;
 
-        if (
-                srcCM instanceof IndexColorModel &&
-                (iType != TYPE_NEAREST_NEIGHBOR || srcCM.getPixelSize() % 8 != 0)
-        ) {
+        if (srcCM instanceof IndexColorModel
+                && (iType != TYPE_NEAREST_NEIGHBOR || srcCM.getPixelSize() % 8 != 0)) {
             src = ((IndexColorModel)srcCM).convertToIntDiscrete(src.getRaster(), true);
             srcCM = src.getColorModel();
         }
@@ -269,15 +269,10 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             dst = createCompatibleDestImage(src, srcCM);
         } else {
             if (!srcCM.equals(dst.getColorModel())) {
-                // Treat BufferedImage.TYPE_INT_RGB and BufferedImage.TYPE_INT_ARGB as same
-                if (
-                   !(
-                     (src.getType() == BufferedImage.TYPE_INT_RGB ||
-                      src.getType() == BufferedImage.TYPE_INT_ARGB) &&
-                     (dst.getType() == BufferedImage.TYPE_INT_RGB ||
-                      dst.getType() == BufferedImage.TYPE_INT_ARGB)
-                    )
-                ) {
+                // Treat BufferedImage.TYPE_INT_RGB and
+                // BufferedImage.TYPE_INT_ARGB as same
+                if (!((src.getType() == BufferedImage.TYPE_INT_RGB || src.getType() == BufferedImage.TYPE_INT_ARGB) && (dst
+                        .getType() == BufferedImage.TYPE_INT_RGB || dst.getType() == BufferedImage.TYPE_INT_ARGB))) {
                     finalDst = dst;
                     dst = createCompatibleDestImage(src, srcCM);
                 }
@@ -287,10 +282,11 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         // Skip alpha channel for TYPE_INT_RGB images
         if (slowFilter(src.getRaster(), dst.getRaster()) != 0) {
             // awt.21F=Unable to transform source
-            throw new ImagingOpException (Messages.getString("awt.21F")); //$NON-NLS-1$
-        // TODO - uncomment
-        //if (ippFilter(src.getRaster(), dst.getRaster(), src.getType()) != 0)
-            //throw new ImagingOpException ("Unable to transform source");
+            throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
+            // TODO - uncomment
+            // if (ippFilter(src.getRaster(), dst.getRaster(), src.getType()) !=
+            // 0)
+            // throw new ImagingOpException ("Unable to transform source");
         }
 
         if (finalDst != null) {
@@ -320,9 +316,9 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         if (slowFilter(src, dst) != 0) {
             // awt.21F=Unable to transform source
             throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
-        // TODO - uncomment
-        //if (ippFilter(src, dst, BufferedImage.TYPE_CUSTOM) != 0)
-        //    throw new ImagingOpException("Unable to transform source");
+            // TODO - uncomment
+            // if (ippFilter(src, dst, BufferedImage.TYPE_CUSTOM) != 0)
+            // throw new ImagingOpException("Unable to transform source");
         }
 
         return dst;
@@ -332,11 +328,13 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
     /**
      * Ipp filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * @param imageType the image type
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @param imageType
+     *            the image type.
+     * @return the int.
      */
     @SuppressWarnings("unused")
     private int ippFilter(Raster src, WritableRaster dst, int imageType) {
@@ -349,8 +347,8 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_INT_RGB:
             case BufferedImage.TYPE_INT_BGR: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
                 skipChannel = true;
                 break;
             }
@@ -360,8 +358,8 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_4BYTE_ABGR:
             case BufferedImage.TYPE_4BYTE_ABGR_PRE: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
                 break;
             }
 
@@ -375,12 +373,13 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
 
             case BufferedImage.TYPE_3BYTE_BGR: {
                 channels = 3;
-                srcStride = src.getWidth()*3;
-                dstStride = dst.getWidth()*3;
+                srcStride = src.getWidth() * 3;
+                dstStride = dst.getWidth() * 3;
                 break;
             }
 
-            case BufferedImage.TYPE_USHORT_GRAY: // TODO - could be done in native code?
+            case BufferedImage.TYPE_USHORT_GRAY: // TODO - could be done in
+                // native code?
             case BufferedImage.TYPE_USHORT_565_RGB:
             case BufferedImage.TYPE_USHORT_555_RGB:
             case BufferedImage.TYPE_BYTE_BINARY: {
@@ -391,34 +390,29 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
                 SampleModel srcSM = src.getSampleModel();
                 SampleModel dstSM = dst.getSampleModel();
 
-                if (
-                        srcSM instanceof PixelInterleavedSampleModel &&
-                        dstSM instanceof PixelInterleavedSampleModel
-                ) {
+                if (srcSM instanceof PixelInterleavedSampleModel
+                        && dstSM instanceof PixelInterleavedSampleModel) {
                     // Check PixelInterleavedSampleModel
-                    if (
-                            srcSM.getDataType() != DataBuffer.TYPE_BYTE ||
-                            dstSM.getDataType() != DataBuffer.TYPE_BYTE
-                    ) {
+                    if (srcSM.getDataType() != DataBuffer.TYPE_BYTE
+                            || dstSM.getDataType() != DataBuffer.TYPE_BYTE) {
                         return slowFilter(src, dst);
                     }
 
-                    channels = srcSM.getNumBands(); // Have IPP functions for 1, 3 and 4 channels
+                    channels = srcSM.getNumBands(); // Have IPP functions for 1,
+                    // 3 and 4 channels
                     if (channels != 1 && channels != 3 && channels != 4) {
                         return slowFilter(src, dst);
                     }
 
                     int dataTypeSize = DataBuffer.getDataTypeSize(srcSM.getDataType()) / 8;
 
-                    srcStride = ((ComponentSampleModel) srcSM).getScanlineStride() * dataTypeSize;
-                    dstStride = ((ComponentSampleModel) dstSM).getScanlineStride() * dataTypeSize;
-                } else if (
-                        srcSM instanceof SinglePixelPackedSampleModel &&
-                        dstSM instanceof SinglePixelPackedSampleModel
-                ) {
+                    srcStride = ((ComponentSampleModel)srcSM).getScanlineStride() * dataTypeSize;
+                    dstStride = ((ComponentSampleModel)dstSM).getScanlineStride() * dataTypeSize;
+                } else if (srcSM instanceof SinglePixelPackedSampleModel
+                        && dstSM instanceof SinglePixelPackedSampleModel) {
                     // Check SinglePixelPackedSampleModel
-                    SinglePixelPackedSampleModel sppsm1 = (SinglePixelPackedSampleModel) srcSM;
-                    SinglePixelPackedSampleModel sppsm2 = (SinglePixelPackedSampleModel) dstSM;
+                    SinglePixelPackedSampleModel sppsm1 = (SinglePixelPackedSampleModel)srcSM;
+                    SinglePixelPackedSampleModel sppsm2 = (SinglePixelPackedSampleModel)dstSM;
 
                     // No IPP function for this type
                     if (sppsm1.getDataType() == DataBuffer.TYPE_USHORT) {
@@ -432,15 +426,13 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
                     }
 
                     // Check compatibility of sample models
-                    if (
-                            sppsm1.getDataType() != sppsm2.getDataType() ||
-                            !Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets()) ||
-                            !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())
-                    ) {
+                    if (sppsm1.getDataType() != sppsm2.getDataType()
+                            || !Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets())
+                            || !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())) {
                         return slowFilter(src, dst);
                     }
 
-                    for (int i=0; i<channels; i++) {
+                    for (int i = 0; i < channels; i++) {
                         if (sppsm1.getSampleSize(i) != 8) {
                             return slowFilter(src, dst);
                         }
@@ -460,12 +452,9 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
 
                 // Fill offsets if there's a child raster
                 if (src.getParent() != null || dst.getParent() != null) {
-                    if (
-                            src.getSampleModelTranslateX() != 0 ||
-                            src.getSampleModelTranslateY() != 0 ||
-                            dst.getSampleModelTranslateX() != 0 ||
-                            dst.getSampleModelTranslateY() != 0
-                    ) {
+                    if (src.getSampleModelTranslateX() != 0 || src.getSampleModelTranslateY() != 0
+                            || dst.getSampleModelTranslateX() != 0
+                            || dst.getSampleModelTranslateY() != 0) {
                         offsets = new int[4];
                         offsets[0] = -src.getSampleModelTranslateX() + src.getMinX();
                         offsets[1] = -src.getSampleModelTranslateY() + src.getMinY();
@@ -492,20 +481,19 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             return -1; // Unknown data buffer type
         }
 
-        return ippAffineTransform(
-            m00, m01, m02, m10, m11, m12,
-            srcData, src.getWidth(), src.getHeight(), srcStride,
-            dstData, dst.getWidth(), dst.getHeight(), dstStride,
-            iType, channels, skipChannel, offsets);
+        return ippAffineTransform(m00, m01, m02, m10, m11, m12, srcData, src.getWidth(), src
+                .getHeight(), srcStride, dstData, dst.getWidth(), dst.getHeight(), dstStride,
+                iType, channels, skipChannel, offsets);
     }
 
     /**
      * Slow filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @return the int.
      */
     private int slowFilter(Raster src, WritableRaster dst) {
         // TODO: make correct interpolation
@@ -518,7 +506,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
 
         AffineTransform inv = null;
         try {
-             inv = at.createInverse();
+            inv = at.createInverse();
         } catch (NoninvertibleTransformException e) {
             return -1;
         }
@@ -552,7 +540,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
                     int px = sx >> 8;
                     int py = sy >> 8;
                     if (px >= minSrcX && py >= minSrcY && px < maxSrcX && py < maxSrcY) {
-                        Object val = src.getDataElements(px , py , null);
+                        Object val = src.getDataElements(px, py, null);
                         dst.setDataElements(x, y, val);
                     }
                     sx += hx;
@@ -585,33 +573,46 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
     /**
      * Ipp affine transform.
      * 
-     * @param m00 the m00
-     * @param m01 the m01
-     * @param m02 the m02
-     * @param m10 the m10
-     * @param m11 the m11
-     * @param m12 the m12
-     * @param src the src
-     * @param srcWidth the src width
-     * @param srcHeight the src height
-     * @param srcStride the src stride
-     * @param dst the dst
-     * @param dstWidth the dst width
-     * @param dstHeight the dst height
-     * @param dstStride the dst stride
-     * @param iType the i type
-     * @param channels the channels
-     * @param skipChannel the skip channel
-     * @param offsets the offsets
-     * 
-     * @return the int
+     * @param m00
+     *            the m00.
+     * @param m01
+     *            the m01.
+     * @param m02
+     *            the m02.
+     * @param m10
+     *            the m10.
+     * @param m11
+     *            the m11.
+     * @param m12
+     *            the m12.
+     * @param src
+     *            the src.
+     * @param srcWidth
+     *            the src width.
+     * @param srcHeight
+     *            the src height.
+     * @param srcStride
+     *            the src stride.
+     * @param dst
+     *            the dst.
+     * @param dstWidth
+     *            the dst width.
+     * @param dstHeight
+     *            the dst height.
+     * @param dstStride
+     *            the dst stride.
+     * @param iType
+     *            the i type.
+     * @param channels
+     *            the channels.
+     * @param skipChannel
+     *            the skip channel.
+     * @param offsets
+     *            the offsets.
+     * @return the int.
      */
-    private native int ippAffineTransform(
-            double m00, double m01,
-            double m02, double m10,
-            double m11, double m12,
-            Object src, int srcWidth, int srcHeight, int srcStride,
-            Object dst, int dstWidth, int dstHeight, int dstStride,
-            int iType, int channels, boolean skipChannel,
-            int offsets[]);
+    private native int ippAffineTransform(double m00, double m01, double m02, double m10,
+            double m11, double m12, Object src, int srcWidth, int srcHeight, int srcStride,
+            Object dst, int dstWidth, int dstHeight, int dstStride, int iType, int channels,
+            boolean skipChannel, int offsets[]);
 }

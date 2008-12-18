@@ -44,7 +44,7 @@ class AppErrorDialog extends BaseErrorDialog {
         mProc = app;
         mResult = result;
         CharSequence name;
-        if (app.uniquePackage != null &&
+        if ((app.pkgList.size() == 1) &&
                 (name=context.getPackageManager().getApplicationLabel(app.info)) != null) {
             setMessage(res.getString(
                     com.android.internal.R.string.aerr_application,

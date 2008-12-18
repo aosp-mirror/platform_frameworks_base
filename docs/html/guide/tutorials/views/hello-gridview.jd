@@ -1,4 +1,6 @@
 page.title=Hello, GridView
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.GridView} displays items in a two-dimensional, scrolling grid. The items
@@ -124,4 +126,3 @@ public class ImageAdapter extends BaseAdapter {
 	<li>{@link android.widget.BaseAdapter}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>

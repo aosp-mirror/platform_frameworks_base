@@ -18,88 +18,92 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.plugins.jpeg;
 
 /**
- * The JPEGQTable class represents a single JPEG quantization table 
- * and provides for the standard tables taken from the JPEG specification.
+ * The JPEGQTable class represents a single JPEG quantization table and provides
+ * for the standard tables taken from the JPEG specification.
+ * 
+ * @since Android 1.0
  */
 public class JPEGQTable {
 
-    /** The Constant SIZE. */
+    /**
+     * The Constant SIZE.
+     */
     private final static int SIZE = 64;
-    
-    /** The Constant BASELINE_MAX. */
+
+    /**
+     * The Constant BASELINE_MAX.
+     */
     private final static int BASELINE_MAX = 255;
-    
-    /** The Constant MAX. */
+
+    /**
+     * The Constant MAX.
+     */
     private final static int MAX = 32767;
 
-
-    /** The table. */
+    /**
+     * The table.
+     */
     private int[] theTable;
 
     /*
-     * K1 & K2 tables can be found in the JPEG format specification 
-     * at http://www.w3.org/Graphics/JPEG/itu-t81.pdf
+     * K1 & K2 tables can be found in the JPEG format specification at
+     * http://www.w3.org/Graphics/JPEG/itu-t81.pdf
      */
 
-    /** The Constant K1LumTable. */
+    /**
+     * The Constant K1LumTable.
+     */
     private static final int[] K1LumTable = new int[] {
-        16,  11,  10,  16,  24,  40,  51,  61,
-        12,  12,  14,  19,  26,  58,  60,  55,
-        14,  13,  16,  24,  40,  57,  69,  56,
-        14,  17,  22,  29,  51,  87,  80,  62,
-        18,  22,  37,  56,  68,  109, 103, 77,
-        24,  35,  55,  64,  81,  104, 113, 92,
-        49,  64,  78,  87,  103, 121, 120, 101,
-        72,  92,  95,  98,  112, 100, 103, 99
+            16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57,
+            69, 56, 14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55,
+            64, 81, 104, 113, 92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100,
+            103, 99
     };
 
-    /** The Constant K2ChrTable. */
+    /**
+     * The Constant K2ChrTable.
+     */
     private static final int[] K2ChrTable = new int[] {
-        17,  18,  24,  47,  99,  99,  99,  99,
-        18,  21,  26,  66,  99,  99,  99,  99,
-        24,  26,  56,  99,  99,  99,  99,  99,
-        47,  66,  99,  99,  99,  99,  99,  99,
-        99,  99,  99,  99,  99,  99,  99,  99,
-        99,  99,  99,  99,  99,  99,  99,  99,
-        99,  99,  99,  99,  99,  99,  99,  99,
-        99,  99,  99,  99,  99,  99,  99,  99
+            17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66, 99, 99, 99, 99, 24, 26, 56, 99, 99, 99,
+            99, 99, 47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99
     };
 
-    /** 
-     * The K1Luminance indicates standart table K.1 from JPEG
-     * specification and produces "good" quality output. 
+    /**
+     * The K1Luminance indicates standard table K.1 from JPEG specification and
+     * produces "good" quality output.
      */
     public static final JPEGQTable K1Luminance = new JPEGQTable(K1LumTable);
-    
-    /** 
-     * The K1Div2Luminance indicates K.1 table from JPEG
-     * specification with all elements divided by 2 and produces
-     * "very good" quality output. 
+
+    /**
+     * The K1Div2Luminance indicates K.1 table from JPEG specification with all
+     * elements divided by 2 and produces "very good" quality output.
      */
     public static final JPEGQTable K1Div2Luminance = K1Luminance.getScaledInstance(0.5f, true);
-    
-    /** 
-     * The K2Chrominance indicates K.2 table from JPEG
-     * specification and produces "good" quality output. 
+
+    /**
+     * The K2Chrominance indicates K.2 table from JPEG specification and
+     * produces "good" quality output.
      */
     public static final JPEGQTable K2Chrominance = new JPEGQTable(K2ChrTable);
-    
-    /** 
+
+    /**
      * The Constant K2Div2Chrominance indicates K.2 table from JPEG
-     * specification with all elements divided by 2 and produces
-     * "very good" quality output. 
+     * specification with all elements divided by 2 and produces "very good"
+     * quality output.
      */
     public static final JPEGQTable K2Div2Chrominance = K2Chrominance.getScaledInstance(0.5f, true);;
 
-
     /**
-     * Instantiates a new JPEGQTable from the array, which 
-     * should contain 64 elements in natural order.
+     * Instantiates a new JPEGQTable from the array, which should contain 64
+     * elements in natural order.
      * 
-     * @param table the quantization table.
+     * @param table
+     *            the quantization table.
      */
     public JPEGQTable(int[] table) {
         if (table == null) {
@@ -112,23 +116,22 @@ public class JPEGQTable {
     }
 
     /**
-     * Gets the current quantization table as an array of int values.
+     * Gets the current quantization table as an array of integer values.
      * 
-     * @return the current quantization table as an array of int values.
+     * @return the current quantization table as an array of integer values.
      */
     public int[] getTable() {
         return theTable.clone();
     }
 
     /**
-     * Gets the scaled instance as quantization table where 
-     * the values are multiplied by the scaleFactor and then clamped 
-     * if forceBaseline is true.
+     * Gets the scaled instance as quantization table where the values are
+     * multiplied by the scaleFactor and then clamped if forceBaseline is true.
      * 
-     * @param scaleFactor the scale factor of table.
-     * @param forceBaseline the force baseline flag, the values 
-     * should be clamped if true.
-     * 
+     * @param scaleFactor
+     *            the scale factor of table.
+     * @param forceBaseline
+     *            the force baseline flag, the values should be clamped if true.
      * @return the new quantization table.
      */
     public JPEGQTable getScaledInstance(float scaleFactor, boolean forceBaseline) {
@@ -156,7 +159,7 @@ public class JPEGQTable {
      */
     @Override
     public String toString() {
-        //-- TODO more informative info
+        // -- TODO more informative info
         return "JPEGQTable";
     }
 }

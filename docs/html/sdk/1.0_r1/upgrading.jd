@@ -7,14 +7,14 @@ page.title=Upgrading the SDK
      <h2>Useful Links</h2>
 
       <ul class="noindent">
-        <li><a href="{@docRoot}migrating/0.9-1.0/changes-overview.html">Overview of Changes</a>
+        <li><a href="migrating/0.9-1.0/changes-overview.html">Overview of Changes</a>
 		      <p>A high-level look at what's changed in Android, with 
 		       discussion of how the changes may affect your apps.</p></li>
 
-        <li><a href="{@docRoot}migrating/0.9-1.0/changes.html">API Diff Report</a> 
+        <li><a href="migrating/0.9-1.0/changes.html">API Diff Report</a> 
                 <p>A detailed report that lists all the specific changes in the latest SDK.</p></li>
 
-        <li><a href="{@docRoot}RELEASENOTES.html">Release Notes</a> 
+        <li><a href="RELEASENOTES.html">Release Notes</a> 
                 <p>Version details, known issues, and resolved issues. </p></li>
 
         <li><a href="http://groups.google.com/group/android-developers">Android Developers Group</a> 
@@ -99,7 +99,7 @@ applications to the updated API. The sections below guide you through the proces
 the ADT plugin and the Ant-based build tools support this requirement by signing compiled 
 .apk files with a debug key. To do so, the build tools use the Keytool utility included 
 in the JDK to to create a keystore and a key with a known alias and password. For more 
-information, see <a href="{@docRoot}intro/develop-and-debug.html">Signing Your Applications</a>.
+information, see <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.
 
 <p>To support signing, you should first make sure that Keytool is available to the SDK build 
 tools. In most cases, you can tell the SDK build tools how to find Keytool by making sure that 
@@ -122,7 +122,7 @@ your build.xml file. To do that, follow these steps:</p>
   </li>
 </ol>
 
-<p>Run in this way, activityCreator will not erase or create new Java files (or manifest files), 
+<p>Run in this way, activitycreator will not erase or create new Java files (or manifest files), 
 provided the activity and package already exists. It is important that the package and the activity 
 are real. The tool creates a new build.xml file, as well as a new directory called "libs" in which 
 to place 3rd jar files, which are now automatically handled by the Ant script.</p>
@@ -130,22 +130,22 @@ to place 3rd jar files, which are now automatically handled by the Ant script.</
 <h2 id="migrate">Migrate your applications</h2>
 
 <p>After updating your SDK, you will likely encounter breakages in your code, due to 
-framework and API changes. You'll need to update your code to match changes in the Andriod APIs.</p>
+framework and API changes. You'll need to update your code to match changes in the Android APIs.</p>
 
 <p>One way to start is to open your project in Eclipse and see where the ADT
 identifies errors in your application. From there, you can lookup
 respective changes in the 
-<a href="{@docRoot}migrating/0.9-1.0/changes-overview.html">Overview of Changes</a>
-and <a href="{@docRoot}migrating/0.9-1.0/changes.html">API Diffs Report</a>.</p>
+<a href="migrating/changes-overview.html">Overview of Changes</a>
+and <a href="migrating/changes.html">API Diffs Report</a>.</p>
 
 <p>If you have additional trouble updating your code, visit the 
-<a href="{@docRoot}groups.html">Android Discussion Groups</a> to seek help from 
-other Android developers.</p>
+<a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
+to seek help from other Android developers.</p>
 
 <p>If you have modified one of the ApiDemos applications and would like to migrate it 
 to the new SDK, note that you will need to uninstall the version of ApiDemos that comes 
 preinstalled in the emulator. For more information, or if you encounter an "reinstallation" 
 error when running or installing ApiDemos, see the troubleshooting topic 
-<a href="{@docRoot}kb/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
+<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
 apps in my IDE because of a signing error</a> for information about how to solve the problem.</p>
 

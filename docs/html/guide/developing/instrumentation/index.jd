@@ -3,7 +3,7 @@ page.title=Instrumentation
 
 <dl>
     <dt><a href="inst-framework.html">Instrumentation Framework</a></dt>
-    <dt><a href="inst-testing">Instrumentation Testing</a></dt>
+    <dt><a href="inst-testing.html">Instrumentation Testing</a></dt>
 </dl>
 
 <!--
@@ -18,7 +18,7 @@ page.title=Instrumentation
 <li>Take a performance snapshot, and
 <li>Attach an 
 
-When running with instrumentation turned on, the system instantiates class will be instantiated for you before any of the application code, allowing you to monitor all of the interaction the system has with the application. An Instrumentation implementation is described to the system through an AndroidManifest.xml's <instrumentation> tag.
+When running with instrumentation turned on, the system instantiates class will be instantiated for you before any of the application code, allowing you to monitor all of the interaction the system has with the application. An Instrumentation implementation is described to the system through an AndroidManifest.xml's &lt;instrumentation> tag.
 
 
 <ul>
@@ -47,7 +47,7 @@ When running with instrumentation turned on, the system instantiates class will 
         <a href="glossary.html">UI Elements and Concepts Glossary</a>
     </li>
     <li>
-        <a href="{@docRoot}guide/tutorials/views/hello-views-index.html">Hello Views</a>
+        <a href="{@docRoot}guide/tutorials/views/index.html">Hello Views</a>
     </li>
 
 </ul>

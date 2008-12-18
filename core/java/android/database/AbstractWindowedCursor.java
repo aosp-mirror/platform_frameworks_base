@@ -172,7 +172,7 @@ public abstract class AbstractWindowedCursor extends AbstractCursor
         super.checkPosition();
         
         if (mWindow == null) {
-            throw new StaleDataException("This cursor has changed, you must call requery()");
+            throw new StaleDataException("Access closed cursor");
         }
     }
 

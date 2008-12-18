@@ -31,39 +31,53 @@ import java.io.IOException;
     order, so the element with the largest index will be drawn on top.
 */
 public class LayerDrawable extends Drawable implements Drawable.Callback {
-    
-    /* package */ LayerState  mLayerState;
+    LayerState mLayerState;
 
-    private int[]       mPaddingL;
-    private int[]       mPaddingT;
-    private int[]       mPaddingR;
-    private int[]       mPaddingB;
+    private int[] mPaddingL;
+    private int[] mPaddingT;
+    private int[] mPaddingR;
+    private int[] mPaddingB;
 
-    private final Rect  mTmpRect = new Rect();
+    private final Rect mTmpRect = new Rect();
 
-    public LayerDrawable(Drawable[] array) {
-        this((LayerState)null);
-        int length = array.length;
+    /**
+     * Create a new layer drawable with the list of specified layers.
+     *
+     * @param layers A list of drawables to use as layers in this new drawable.
+     */
+    public LayerDrawable(Drawable[] layers) {
+        this(layers, null);
+    }
+
+    /**
+     * Create a new layer drawable with the specified list of layers and the specified
+     * constant state.
+     *
+     * @param layers The list of layers to add to this drawable.
+     * @param state The constant drawable state.
+     */
+    LayerDrawable(Drawable[] layers, LayerState state) {
+        this(state);
+        int length = layers.length;
         Rec[] r = new Rec[length];
 
         for (int i = 0; i < length; i++) {
             r[i] = new Rec();
-            r[i].mDrawable = array[i];
-            array[i].setCallback(this);
-            mLayerState.mChildrenChangingConfigurations
-                    |= array[i].getChangingConfigurations();
+            r[i].mDrawable = layers[i];
+            layers[i].setCallback(this);
+            mLayerState.mChildrenChangingConfigurations |= layers[i].getChangingConfigurations();
         }
         mLayerState.mNum = length;
         mLayerState.mArray = r;
+
         ensurePadding();
     }
     
-    /* package */ LayerDrawable() {
+    LayerDrawable() {
         this((LayerState) null);
     }
-    
 
-    /* package */ LayerDrawable(LayerState state) {
+    LayerDrawable(LayerState state) {
         LayerState as = createConstantState(state);
         mLayerState = as;
         if (as.mNum > 0) {
@@ -71,10 +85,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    /* package */ LayerState createConstantState(LayerState state) {
+    LayerState createConstantState(LayerState state) {
         return new LayerState(state, this);
     }
-    
 
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
@@ -127,14 +140,24 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 dr = Drawable.createFromXmlInner(r, parser, attrs);
             }
 
-            addLayer(id, dr, left, top, right, bottom);
+            addLayer(dr, id, left, top, right, bottom);
         }
 
         ensurePadding();
         onStateChange(getState());
     }
 
-    private void addLayer(int id, Drawable dr, int l, int t, int r, int b) {
+    /**
+     * Add a new layer to this drawable. The new layer is identified by an id.
+     *
+     * @param layer The drawable to add as a layer.
+     * @param id The id of the new layer.
+     * @param left The left padding of the new layer.
+     * @param top The top padding of the new layer.
+     * @param right The right padding of the new layer.
+     * @param bottom The bottom padding of the new layer.
+     */
+    private void addLayer(Drawable layer, int id, int left, int top, int right, int bottom) {
         final LayerState st = mLayerState;
         int N = st.mArray != null ? st.mArray.length : 0;
         int i = st.mNum;
@@ -146,20 +169,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             st.mArray = nu;
         }
 
-        mLayerState.mChildrenChangingConfigurations
-                |= dr.getChangingConfigurations();
+        mLayerState.mChildrenChangingConfigurations |= layer.getChangingConfigurations();
         
         Rec rec = new Rec();
         st.mArray[i] = rec;
         rec.mId = id;
-        rec.mDrawable = dr;
-        rec.mInsetL = l;
-        rec.mInsetT = t;
-        rec.mInsetR = r;
-        rec.mInsetB = b;
+        rec.mDrawable = layer;
+        rec.mInsetL = left;
+        rec.mInsetT = top;
+        rec.mInsetR = right;
+        rec.mInsetB = bottom;
         st.mNum++;
 
-        dr.setCallback(this);
+        layer.setCallback(this);
     }
 
     /**
@@ -194,20 +216,31 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * Returns the number of layers contained within this.
      * @return The number of layers.
      */
-    // TODO: Remove this once XML inflation is there for ShapeDrawable?
     public int getNumberOfLayers() {
         return mLayerState.mNum;
     }
-    
-    // TODO: Remove once XML inflation...
+
+    /**
+     * Returns the drawable at the specified layer index.
+     *
+     * @param index The layer index of the drawable to retrieve.
+     *
+     * @return The {@link android.graphics.drawable.Drawable} at the specified layer index.
+     */
     public Drawable getDrawable(int index) {
         return mLayerState.mArray[index].mDrawable;
     }
-    
+
+    /**
+     * Returns the id of the specified layer.
+     *
+     * @param index The index of the layer.
+     *
+     * @return The id of the layer or {@link android.view.View#NO_ID} if the layer has no id. 
+     */
     public int getId(int index) {
         return mLayerState.mArray[index].mId;
     }
-    
     
     /**
      * Sets (or replaces) the {@link Drawable} for the layer with the given id.
@@ -295,10 +328,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             reapplyPadding(i, array[i]);
-            padding.left += mPaddingL[i];
-            padding.top += mPaddingT[i];
-            padding.right += mPaddingR[i];
-            padding.bottom += mPaddingB[i];
+            padding.left = Math.max(padding.left, mPaddingL[i]);
+            padding.top = Math.max(padding.top, mPaddingT[i]);
+            padding.right = Math.max(padding.right, mPaddingR[i]);
+            padding.bottom = Math.max(padding.bottom, mPaddingB[i]);
         }
         return true;
     }
@@ -427,7 +460,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             padL += mPaddingL[i];
             padR += mPaddingR[i];
         }
-        //System.out.println("Intrinsic width: " + width);
         return width;
     }
 
@@ -439,23 +471,21 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         int padT=0, padB=0;
         for (int i=0; i<N; i++) {
             final Rec r = array[i];
-            int h = r.mDrawable.getIntrinsicHeight()
-                  + r.mInsetT + r.mInsetB + + padT + padB;
+            int h = r.mDrawable.getIntrinsicHeight() + r.mInsetT + r.mInsetB + + padT + padB;
             if (h > height) {
                 height = h;
             }
             padT += mPaddingT[i];
             padB += mPaddingB[i];
         }
-        //System.out.println("Intrinsic height: " + height);
         return height;
     }
 
     private boolean reapplyPadding(int i, Rec r) {
         final Rect rect = mTmpRect;
         r.mDrawable.getPadding(rect);
-        if (rect.left != mPaddingL[i] || rect.top != mPaddingT[i]
-            || rect.right != mPaddingR[i] || rect.bottom != mPaddingB[i]) {
+        if (rect.left != mPaddingL[i] || rect.top != mPaddingT[i] ||
+                rect.right != mPaddingR[i] || rect.bottom != mPaddingB[i]) {
             mPaddingL[i] = rect.left;
             mPaddingT[i] = rect.top;
             mPaddingR[i] = rect.right;
@@ -485,13 +515,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
-    /* package */ static class Rec {
+    static class Rec {
         public Drawable mDrawable;
         public int mInsetL, mInsetT, mInsetR, mInsetB;
         public int mId;
     }
 
-    /* package */ static class LayerState extends ConstantState {
+    static class LayerState extends ConstantState {
         int mNum;
         Rec[] mArray;
 

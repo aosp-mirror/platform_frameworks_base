@@ -28,16 +28,16 @@ import java.util.Map;
 
 class FrameLoader {
 
-    protected LoadListener mListener;
-    protected Map<String, String> mHeaders;
-    protected String mMethod;
-    protected String mPostData;
-    protected boolean mIsHighPriority;
-    protected Network mNetwork;
-    protected int mCacheMode;
-    protected String mReferrer;
-    protected String mUserAgent;
-    protected String mContentType;
+    private final LoadListener mListener;
+    private final String mMethod;
+    private final boolean mIsHighPriority;
+    private final WebSettings mSettings;
+    private Map<String, String> mHeaders;
+    private byte[] mPostData;
+    private Network mNetwork;
+    private int mCacheMode;
+    private String mReferrer;
+    private String mContentType;
 
     private static final int URI_PROTOCOL = 0x100;
 
@@ -53,43 +53,14 @@ class FrameLoader {
 
     private static final String LOGTAG = "webkit";
     
-    /*
-     * Construct the Accept_Language once. If the user changes language, then
-     * the phone will be rebooted.
-     */
-    private static String ACCEPT_LANGUAGE;
-    static {
-        // Set the accept-language to the current locale plus US if we are in a
-        // different locale than US.
-        java.util.Locale l = java.util.Locale.getDefault();
-        ACCEPT_LANGUAGE = "";
-        if (l.getLanguage() != null) {
-            ACCEPT_LANGUAGE += l.getLanguage();
-            if (l.getCountry() != null) {
-                ACCEPT_LANGUAGE += "-" + l.getCountry();
-            }
-        }
-        if (!l.equals(java.util.Locale.US)) {
-            ACCEPT_LANGUAGE += ", ";
-            java.util.Locale us = java.util.Locale.US;
-            if (us.getLanguage() != null) {
-                ACCEPT_LANGUAGE += us.getLanguage();
-                if (us.getCountry() != null) {
-                    ACCEPT_LANGUAGE += "-" + us.getCountry();
-                }
-            }
-        }
-    }
-
-
-    FrameLoader(LoadListener listener, String userAgent,
+    FrameLoader(LoadListener listener, WebSettings settings,
             String method, boolean highPriority) {
         mListener = listener;
         mHeaders = null;
         mMethod = method;
         mIsHighPriority = highPriority;
         mCacheMode = WebSettings.LOAD_NORMAL;
-        mUserAgent = userAgent;
+        mSettings = settings;
     }
 
     public void setReferrer(String ref) {
@@ -97,7 +68,7 @@ class FrameLoader {
         if (URLUtil.isNetworkUrl(ref)) mReferrer = ref;
     }
 
-    public void setPostData(String postData) {
+    public void setPostData(byte[] postData) {
         mPostData = postData;
     }
 
@@ -140,12 +111,15 @@ class FrameLoader {
         }
 
         if (URLUtil.isNetworkUrl(url)){
+            if (mSettings.getBlockNetworkLoads()) {
+                mListener.error(EventHandler.ERROR_BAD_URL,
+                        mListener.getContext().getString(
+                                com.android.internal.R.string.httpErrorBadUrl));
+                return false;
+            }
             mNetwork = Network.getInstance(mListener.getContext());
-            return handleHTTPLoad(false);
-        } else if (URLUtil.isCookielessProxyUrl(url)) {
-            mNetwork = Network.getInstance(mListener.getContext());
-            return handleHTTPLoad(true);
-        } else if (handleLocalFile(url, mListener)) {
+            return handleHTTPLoad();
+        } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
         }
         if (Config.LOGV) {
@@ -160,14 +134,15 @@ class FrameLoader {
     }
 
     /* package */
-    static boolean handleLocalFile(String url, LoadListener loadListener) {
+    static boolean handleLocalFile(String url, LoadListener loadListener,
+            WebSettings settings) {
         if (URLUtil.isAssetUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    true);
+                    true, settings.getAllowFileAccess());
             return true;
         } else if (URLUtil.isFileUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    false);
+                    false, settings.getAllowFileAccess());
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
@@ -186,21 +161,12 @@ class FrameLoader {
         return false;
     }
     
-    protected boolean handleHTTPLoad(boolean proxyUrl) {
+    private boolean handleHTTPLoad() {
         if (mHeaders == null) {
             mHeaders = new HashMap<String, String>();
         }
         populateStaticHeaders();
-
-        if (!proxyUrl) {
-            // Don't add private information if this is a proxy load, ie don't
-            // add cookies and authentication
-            populateHeaders();
-        } else {
-            // If this is a proxy URL, fix it to be a network load
-            mListener.setUrl("http://"
-                    + mListener.url().substring(URLUtil.PROXY_BASE.length()));
-        }
+        populateHeaders();
 
         // response was handled by UrlIntercept, don't issue HTTP request
         if (handleUrlIntercept()) return true;
@@ -246,7 +212,7 @@ class FrameLoader {
      * This function is used by handleUrlInterecpt and handleCache to
      * setup a load from the byte stream in a CacheResult.
      */
-    protected void startCacheLoad(CacheResult result) {
+    private void startCacheLoad(CacheResult result) {
         if (Config.LOGV) {
             Log.v(LOGTAG, "FrameLoader: loading from cache: "
                   + mListener.url());
@@ -264,7 +230,7 @@ class FrameLoader {
      *
      * Returns true if the response was handled by UrlIntercept.
      */
-    protected boolean handleUrlIntercept() {
+    private boolean handleUrlIntercept() {
         // Check if the URL can be served from UrlIntercept. If
         // successful, return the data just like a cache hit.
         CacheResult result = UrlInterceptRegistry.getSurrogate(
@@ -284,7 +250,7 @@ class FrameLoader {
      * correctly.
      * Returns true if the response was handled from the cache
      */
-    protected boolean handleCache() {
+    private boolean handleCache() {
         switch (mCacheMode) {
             // This mode is normally used for a reload, it instructs the http
             // loader to not use the cached content.
@@ -357,11 +323,12 @@ class FrameLoader {
         }
         mHeaders.put("Accept-Charset", "utf-8, iso-8859-1, utf-16, *;q=0.7");
 
-        if (ACCEPT_LANGUAGE.length() > 0) {
-            mHeaders.put("Accept-Language", ACCEPT_LANGUAGE);
+        String acceptLanguage = mSettings.getAcceptLanguage();
+        if (acceptLanguage.length() > 0) {
+            mHeaders.put("Accept-Language", acceptLanguage);
         }
-
-        mHeaders.put("User-Agent", mUserAgent);
+        
+        mHeaders.put("User-Agent", mSettings.getUserAgentString());
     }
 
     /**

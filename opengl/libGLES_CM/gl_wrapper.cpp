@@ -373,6 +373,7 @@ public:
 
 static sp<GPURevokeRequester> gRevokerCallback;
 
+
 static request_gpu_t* gpu_acquire(void* user)
 {
     sp<ISurfaceComposer> server( getSurfaceFlinger() );
@@ -383,7 +384,10 @@ static request_gpu_t* gpu_acquire(void* user)
     }
     
     ISurfaceComposer::gpu_info_t info;
-    gRevokerCallback = new GPURevokeRequester();
+    
+    if (gRevokerCallback == 0)
+        gRevokerCallback = new GPURevokeRequester();
+
     status_t err = server->requestGPU(gRevokerCallback, &info);
     if (err != NO_ERROR) {
         LOGD("requestGPU returned %d", err);
@@ -549,6 +553,21 @@ int binarySearch(
     return -1;
 }
 
+static EGLint configToUniqueId(egl_display_t const* dp, int i, int index) 
+{
+    // NOTE: this mapping works only if we have no more than two EGLimpl
+    return (i>0 ? dp->numConfigs[0] : 0) + index;
+}
+
+static void uniqueIdToConfig(egl_display_t const* dp, EGLint configId,
+        int& i, int& index) 
+{
+    // NOTE: this mapping works only if we have no more than two EGLimpl
+    size_t numConfigs = dp->numConfigs[0];
+    i = configId / numConfigs;
+    index = configId % numConfigs;
+}
+
 static int cmp_configs(const void* a, const void *b)
 {
     EGLConfig c0 = *(EGLConfig const *)a;
@@ -557,7 +576,7 @@ static int cmp_configs(const void* a, const void *b)
 }
 
 static char const * const gVendorString     = "Android";
-static char const * const gVersionString    = "1.2 Android META-EGL";
+static char const * const gVersionString    = "1.3 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
 
 struct extention_map_t {
@@ -834,7 +853,13 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
             cnx->hooks = &gHooks[IMPL_HARDWARE];
-            cnx->dso = load_driver("libhgl.so", cnx->hooks);
+            property_get("debug.egl.profiler", value, "0");
+            if (atoi(value) == 0) {
+                cnx->dso = load_driver("libhgl.so", cnx->hooks);
+            } else {
+                LOGW("Using instrumented h/w OpenGL ES library");
+                cnx->dso = load_driver("libhgld.so", cnx->hooks);
+            }
         } else {
             LOGD("3D hardware acceleration is disabled");
         }
@@ -864,6 +889,8 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
         
         d->dpys[IMPL_HARDWARE] = cnx->hooks->egl.eglGetDisplay(display);
         if (d->dpys[IMPL_HARDWARE] == EGL_NO_DISPLAY) {
+            LOGE("h/w accelerated eglGetDisplay() failed (%s)",
+                    egl_strerror(cnx->hooks->egl.eglGetError()));
             dlclose((void*)cnx->dso);
             cnx->dso = 0;
             // in case of failure, we want to make sure we don't try again
@@ -900,7 +927,10 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
         egl_connection_t* const cnx = &gEGLImpl[i];
         cnx->major = -1;
         cnx->minor = -1;
-        if (cnx->dso && cnx->hooks->egl.eglInitialize(
+        if (!cnx->dso) 
+            continue;
+
+        if (cnx->hooks->egl.eglInitialize(
                 dp->dpys[i], &cnx->major, &cnx->minor)) {
 
             //LOGD("initialized %d dpy=%p, ver=%d.%d, cnx=%p",
@@ -912,10 +942,10 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
             dp->queryString[i].version =
                 cnx->hooks->egl.eglQueryString(dp->dpys[i], EGL_VERSION);
             dp->queryString[i].extensions = strdup(
-                cnx->hooks->egl.eglQueryString(dp->dpys[i], EGL_EXTENSIONS));
+                    cnx->hooks->egl.eglQueryString(dp->dpys[i], EGL_EXTENSIONS));
             dp->queryString[i].clientApi =
                 cnx->hooks->egl.eglQueryString(dp->dpys[i], EGL_CLIENT_APIS);
-            
+
             // Dynamically insert extensions we know about
             if (cnx->hooks->egl.eglSwapRectangleANDROID)
                 add_extension(dp, dp->queryString[i].extensions,
@@ -924,12 +954,15 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
             if (cnx->hooks->egl.eglQueryStringConfigANDROID)
                 add_extension(dp, dp->queryString[i].extensions,
                         "EGL_ANDROID_query_string_config");
+        } else {
+            LOGD("%d: eglInitialize() failed (%s)", 
+                    i, egl_strerror(cnx->hooks->egl.eglGetError()));
         }
     }
-            
+
     // Build the extension list that depends on the current config.
     // It is the intersection of our extension list and the
-    // underlaying EGL's extensions list
+    // underlying EGL's extensions list
     EGLBoolean res = EGL_FALSE;
     for (int i=0 ; i<2 ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
@@ -951,10 +984,10 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
             } while (*p);
             free((void*)our_extensions_org);
 
-            // remove the trailling white space
+            // remove the trailing white space
             if (extensions_config[0] != 0) {
                 size_t l = strlen(extensions_config) - 1; // new size
-                extensions_config[l] = 0; // remove the trailling white space
+                extensions_config[l] = 0; // remove the trailing white space
                 extensions_config = (char*)realloc(extensions_config, l+1);
             } else {
                 extensions_config = (char*)realloc(extensions_config, 1);
@@ -1065,15 +1098,74 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         return EGL_TRUE;
     }
 
+    EGLint n;
     EGLBoolean res = EGL_FALSE;
     *num_config = 0;
+
+    
+    // It is unfortunate, but we need to remap the EGL_CONFIG_IDs, 
+    // to do  this, we have to go through the attrib_list array once
+    // to figure out both its size and if it contains an EGL_CONFIG_ID
+    // key. If so, the full array is copied and patched.
+    // NOTE: we assume that there can be only one occurrence
+    // of EGL_CONFIG_ID.
+    
+    EGLint patch_index = -1;
+    GLint attr;
+    size_t size = 0;
+    while ((attr=attrib_list[size])) {
+        if (attr == EGL_CONFIG_ID)
+            patch_index = size;
+        size += 2;
+    }
+    if (patch_index >= 0) {
+        size += 2; // we need copy the sentinel as well
+        EGLint* new_list = (EGLint*)malloc(size*sizeof(EGLint));
+        if (new_list == 0)
+            return setError(EGL_BAD_ALLOC, EGL_FALSE);
+        memcpy(new_list, attrib_list, size*sizeof(EGLint));
+
+        // patch the requested EGL_CONFIG_ID
+        int i, index;
+        EGLint& configId(new_list[patch_index+1]);
+        uniqueIdToConfig(dp, configId, i, index);
+        
+        egl_connection_t* const cnx = &gEGLImpl[i];
+        if (cnx->dso) {
+            cnx->hooks->egl.eglGetConfigAttrib(
+                    dp->dpys[i], dp->configs[i][index], 
+                    EGL_CONFIG_ID, &configId);
+
+            // and switch to the new list
+            attrib_list = const_cast<const EGLint *>(new_list);
+
+            // At this point, the only configuration that can match is
+            // dp->configs[i][index], however, we don't know if it would be
+            // rejected because of the other attributes, so we do have to call
+            // cnx->hooks->egl.eglChooseConfig() -- but we don't have to loop
+            // through all the EGLimpl[].
+            // We also know we can only get a single config back, and we know
+            // which one.
+
+            res = cnx->hooks->egl.eglChooseConfig(
+                    dp->dpys[i], attrib_list, configs, config_size, &n);
+            if (res && n>0) {
+                // n has to be 0 or 1, by construction, and we already know
+                // which config it will return (since there can be only one).
+                configs[0] = MAKE_CONFIG(i, index);
+                *num_config = 1;
+            }
+        }
+
+        free(const_cast<EGLint *>(attrib_list));
+        return res;
+    }
+
     for (int i=0 ; i<2 ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
-            EGLint n;
             if (cnx->hooks->egl.eglChooseConfig(
-                    dp->dpys[i], attrib_list, configs, config_size, &n))
-            {
+                    dp->dpys[i], attrib_list, configs, config_size, &n)) {
                 // now we need to convert these client EGLConfig to our
                 // internal EGLConfig format. This is done in O(n log n).
                 for (int j=0 ; j<n ; j++) {
@@ -1102,6 +1194,13 @@ EGLBoolean eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config,
     int i=0, index=0;
     egl_connection_t* cnx = validate_display_config(dpy, config, dp, i, index);
     if (!cnx) return EGL_FALSE;
+    
+    if (attribute == EGL_CONFIG_ID) {
+        // EGL_CONFIG_IDs must be unique, just use the order of the selected
+        // EGLConfig.
+        *value = configToUniqueId(dp, i, index);
+        return EGL_TRUE;
+    }
     return cnx->hooks->egl.eglGetConfigAttrib(
             dp->dpys[i], dp->configs[i][index], attribute, value);
 }

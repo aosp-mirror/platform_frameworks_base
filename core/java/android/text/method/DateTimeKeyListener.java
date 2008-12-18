@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.text.InputType;
 import android.view.KeyEvent;
 
 /**
@@ -23,6 +24,11 @@ import android.view.KeyEvent;
  */
 public class DateTimeKeyListener extends NumberKeyListener
 {
+    public int getInputType() {
+        return InputType.TYPE_CLASS_DATETIME
+                | InputType.TYPE_DATETIME_VARIATION_NORMAL;
+    }
+    
     @Override
     protected char[] getAcceptedChars()
     {

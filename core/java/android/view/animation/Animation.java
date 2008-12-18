@@ -582,6 +582,16 @@ public abstract class Animation {
     }
 
     /**
+     * Compute a hint at how long the entire animation may last, in milliseconds.
+     * Animations can be written to cause themselves to run for a different
+     * duration than what is computed here, but generally this should be
+     * accurate.
+     */
+    public long computeDurationHint() {
+        return (getStartOffset() + getDuration()) * (getRepeatCount() + 1);
+    }
+    
+    /**
      * Gets the transformation to apply at a specified point in time. Implementations of this
      * method should always replace the specified Transformation or document they are doing
      * otherwise.

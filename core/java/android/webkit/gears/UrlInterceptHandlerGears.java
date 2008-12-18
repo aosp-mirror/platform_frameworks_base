@@ -407,6 +407,8 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
         true); // forceCache
 
     if (cacheResult == null) {
+      // With the no-cache policy we could end up
+      // with a null result
       return null;
     }
 
@@ -444,8 +446,7 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
     // be used for input.
     cacheResult = CacheManager.getCacheFile(gearsUrl, null);
     if (cacheResult != null) {
-      if (logEnabled)
-        log("Returning surrogate result");
+      log("Returning surrogate result");
       return cacheResult;
     } else {
       // Not an expected condition, but handle gracefully. Perhaps out
@@ -476,7 +477,10 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
   }
 
   /**
-   * Convenience debug function. Calls Android logging mechanism.
+   * Convenience debug function. Calls the Android logging
+   * mechanism. logEnabled is not a constant, so if the string
+   * evaluation is potentially expensive, the caller also needs to
+   * check it.
    * @param str String to log to the Android console.
    */
   private void log(String str) {

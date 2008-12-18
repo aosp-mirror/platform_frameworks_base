@@ -20,6 +20,12 @@
  */
 package java.awt.im;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public final class InputSubset extends Character.Subset {
 
     public static final InputSubset LATIN = new InputSubset("LATIN"); //$NON-NLS-1$

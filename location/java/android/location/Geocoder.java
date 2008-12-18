@@ -228,7 +228,7 @@ public final class Geocoder {
             ArrayList<Address> result = new ArrayList<Address>();
             String ex =  mService.getFromLocationName(locationName,
                 lowerLeftLatitude, lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, mLanguage, mCountry, mVariant, mAppName, new ArrayList<Address>());
+                maxResults, mLanguage, mCountry, mVariant, mAppName, result);
             if (ex != null) {
                 throw new IOException(ex);
             } else {

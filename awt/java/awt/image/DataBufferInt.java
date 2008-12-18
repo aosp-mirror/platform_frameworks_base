@@ -18,25 +18,32 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 /**
- * The Class DataBufferInt is the subclass of DataBuffer
- * for the case where the underlying data is of type int.
+ * The Class DataBufferInt is the subclass of DataBuffer for the case where the
+ * underlying data is of type integer.
+ * 
+ * @since Android 1.0
  */
 public final class DataBufferInt extends DataBuffer {
 
-    /** The data. */
+    /**
+     * The data.
+     */
     int data[][];
 
     /**
-     * Instantiates a new data buffer of type int.
+     * Instantiates a new data buffer of type integer.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param offsets the starting indices for reading the 
-     * data from the internal data arrays
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param offsets
+     *            the starting indices for reading the data from the internal
+     *            data arrays.
      */
     public DataBufferInt(int dataArrays[][], int size, int offsets[]) {
         super(TYPE_INT, size, dataArrays.length, offsets);
@@ -44,11 +51,12 @@ public final class DataBufferInt extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type int.
+     * Instantiates a new data buffer of type integer.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
      */
     public DataBufferInt(int dataArrays[][], int size) {
         super(TYPE_INT, size, dataArrays.length);
@@ -56,12 +64,15 @@ public final class DataBufferInt extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type int
-     * with a single underlying array of data.
+     * Instantiates a new data buffer of type integer with a single underlying
+     * array of data.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
-     * @param offset the starting index to use when reading the data
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
+     * @param offset
+     *            the starting index to use when reading the data.
      */
     public DataBufferInt(int dataArray[], int size, int offset) {
         super(TYPE_INT, size, 1, offset);
@@ -70,12 +81,13 @@ public final class DataBufferInt extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type int
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new data buffer of type integer with a single underlying
+     * array of data starting at index 0.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferInt(int dataArray[], int size) {
         super(TYPE_INT, size);
@@ -84,12 +96,13 @@ public final class DataBufferInt extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type int
-     * with offsets equal to zero.
+     * Instantiates a new empty data buffer of type integer with offsets equal
+     * to zero.
      * 
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param numBanks the number of data arrays to create
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param numBanks
+     *            the number of data arrays to create.
      */
     public DataBufferInt(int size, int numBanks) {
         super(TYPE_INT, size, numBanks);
@@ -101,11 +114,11 @@ public final class DataBufferInt extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type int
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new empty data buffer of type integer with a single
+     * underlying array of data starting at index 0.
      * 
-     * @param size the length (number of elements) to use 
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferInt(int size) {
         super(TYPE_INT, size);
@@ -133,9 +146,9 @@ public final class DataBufferInt extends DataBuffer {
     /**
      * Gets the data of the specified internal data array.
      * 
-     * @param bank the index of the desired data array
-     * 
-     * @return the data
+     * @param bank
+     *            the index of the desired data array.
+     * @return the data.
      */
     public int[] getData(int bank) {
         notifyTaken();
@@ -150,7 +163,7 @@ public final class DataBufferInt extends DataBuffer {
     /**
      * Gets the bank data.
      * 
-     * @return the bank data
+     * @return the bank data.
      */
     public int[][] getBankData() {
         notifyTaken();
@@ -160,11 +173,10 @@ public final class DataBufferInt extends DataBuffer {
     /**
      * Gets the data of the first data array.
      * 
-     * @return the data
+     * @return the data.
      */
     public int[] getData() {
         notifyTaken();
         return data[0];
     }
 }
-

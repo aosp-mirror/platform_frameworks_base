@@ -163,7 +163,12 @@ void EGLNativeWindowSurface::connect()
         egl_native_window_t::format = info.format;
         egl_native_window_t::base   = intptr_t(info.base);
         egl_native_window_t::offset = intptr_t(info.bits) - intptr_t(info.base);
-        egl_native_window_t::memory_type = mSurface->getMemoryType();
+        // FIXME: egl_native_window_t::memory_type used to be set from
+        // mSurface, but we wanted to break this dependency. We set it to
+        // GPU because the software rendered doesn't care, but the h/w
+        // accelerator needs it. Eventually, this value should go away
+        // completely, since memory will be managed by OpenGL.
+        egl_native_window_t::memory_type = NATIVE_MEMORY_TYPE_GPU; 
         egl_native_window_t::fd = 0;
     }
 }

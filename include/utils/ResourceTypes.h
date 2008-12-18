@@ -140,8 +140,6 @@ struct Res_png_9patch
     void serialize(void* outData);
     // Deserialize/Unmarshall the patch data
     static Res_png_9patch* deserialize(const void* data);
-    // Deserialize/Unmarshall the patch data into a newly malloc-ed block
-    static void deserialize(const void* data, Res_png_9patch* outData);
     // Compute the size of the serialized data structure
     size_t serializedSize();
 };
@@ -860,6 +858,7 @@ struct ResTable_config
         KEYSHIDDEN_ANY = 0x0000,
         KEYSHIDDEN_NO = 0x0001,
         KEYSHIDDEN_YES = 0x0002,
+        KEYSHIDDEN_SOFT = 0x0003,
     };
     
     union {
@@ -989,11 +988,20 @@ struct ResTable_config
         return diffs;
     }
     
-    // Return true if 'this' is more specific than 'o'.
+    // Return true if 'this' is more specific than 'o'.  Optionally, if
+    // 'requested' is null, then they will also be compared against the
+    // requested configuration and true will only be returned if 'this'
+    // is a better candidate than 'o' for the configuration.  This assumes that
+    // match() has already been used to remove any configurations that don't
+    // match the requested configuration at all; if they are not first filtered,
+    // non-matching results can be considered better than matching ones.
     inline bool
     isBetterThan(const ResTable_config& o, const ResTable_config* requested = NULL) const {
+        // The order of the following tests defines the importance of one
+        // configuration parameter over another.  Those tests first are more
+        // important, trumping any values in those following them.
         if (imsi != 0 && (!requested || requested->imsi != 0)) {
-            if (mcc != 0 && (!requested || requested->mcc!= 0)) {
+            if (mcc != 0 && (!requested || requested->mcc != 0)) {
                 if (o.mcc == 0) {
                     return true;
                 }
@@ -1034,9 +1042,24 @@ struct ResTable_config
             }
         }
         if (input != 0 && (!requested || requested->input != 0)) {
-            if ((inputFlags&MASK_KEYSHIDDEN) != 0 && (!requested
-                                                      || (requested->inputFlags&MASK_KEYSHIDDEN) != 0)) {
-                if ((o.inputFlags&MASK_KEYSHIDDEN) == 0) {
+            const int keysHidden = inputFlags&MASK_KEYSHIDDEN;
+            const int reqKeysHidden = requested
+                    ? requested->inputFlags&MASK_KEYSHIDDEN : 0;
+            if (keysHidden != 0 && reqKeysHidden != 0) {
+                const int oKeysHidden = o.inputFlags&MASK_KEYSHIDDEN;
+                //LOGI("isBetterThan keysHidden: cur=%d, given=%d, config=%d\n",
+                //        keysHidden, oKeysHidden, reqKeysHidden);
+                if (oKeysHidden == 0) {
+                    //LOGI("Better because 0!");
+                    return true;
+                }
+                // For compatibility, we count KEYSHIDDEN_NO as being
+                // the same as KEYSHIDDEN_SOFT.  Here we disambiguate these
+                // may making an exact match more specific.
+                if (keysHidden == reqKeysHidden && oKeysHidden != reqKeysHidden) {
+                    // The current configuration is an exact match, and
+                    // the given one is not, so the current one is better.
+                    //LOGI("Better because other not same!");
                     return true;
                 }
             }
@@ -1078,7 +1101,8 @@ struct ResTable_config
         return false;
     }
     
-    // Return true if 'this' matches the parameters in 'settings'.
+    // Return true if 'this' can be considered a match for the parameters in
+    // 'settings'.
     inline bool match(const ResTable_config& settings) const {
         if (imsi != 0) {
             if (settings.mcc != 0 && mcc != 0
@@ -1121,7 +1145,14 @@ struct ResTable_config
             const int setKeysHidden = settings.inputFlags&MASK_KEYSHIDDEN;
             if (setKeysHidden != 0 && keysHidden != 0
                 && keysHidden != setKeysHidden) {
-                return false;
+                // For compatibility, we count a request for KEYSHIDDEN_NO as also
+                // matching the more recent KEYSHIDDEN_SOFT.  Basically
+                // KEYSHIDDEN_NO means there is some kind of keyboard available.
+                //LOGI("Matching keysHidden: have=%d, config=%d\n", keysHidden, setKeysHidden);
+                if (keysHidden != KEYSHIDDEN_NO || setKeysHidden != KEYSHIDDEN_SOFT) {
+                    //LOGI("No match!");
+                    return false;
+                }
             }
             if (settings.keyboard != 0 && keyboard != 0
                 && keyboard != settings.keyboard) {

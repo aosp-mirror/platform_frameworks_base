@@ -17,10 +17,11 @@
 #ifndef ANDROID_TIME_H
 #define ANDROID_TIME_H
 
+#include <time.h>
+#include <cutils/tztime.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <time.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
 
@@ -58,7 +59,7 @@ public:
     Time();
 
     void switchTimezone(const char *timezone);
-    String8 format(const char *format) const;
+    String8 format(const char *format, const struct strftime_locale *locale) const;
     void format2445(short* buf, bool hasTime) const;
     String8 toString() const;
     void setToNow();

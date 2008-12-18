@@ -92,7 +92,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                                       int ellipsizedWidth) {
         boolean trust;
 
-        if (ellipsize == null) {
+        if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
             replaceWith(source, paint, outerwidth, align, spacingmult,
                         spacingadd);
 
@@ -145,7 +145,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         boolean trust;
 
-        if (ellipsize == null) {
+        if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
             mEllipsizedWidth = outerwidth;
             mEllipsizedStart = 0;
             mEllipsizedCount = 0;

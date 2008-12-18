@@ -112,6 +112,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:allowClearUserData} of the &lt;application&gt; tag.
      */
     public static final int FLAG_ALLOW_CLEAR_USER_DATA = 1<<6;
+    
+    
+    /**
+     * Value for {@link #flags}: default value for the corresponding ActivityInfo flag.
+     *  {@hide}
+     */
+    public static final int FLAG_UPDATED_SYSTEM_APP = 1<<7;
 
     /**
      * Flags associated with the application.  Any combination of
@@ -195,7 +202,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 sb = ab.packageName;
             }
             
-            return sCollator.compare(sa, sb);
+            return sCollator.compare(sa.toString(), sb.toString());
         }
 
         private final Collator   sCollator = Collator.getInstance();

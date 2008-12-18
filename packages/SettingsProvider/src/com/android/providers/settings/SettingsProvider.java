@@ -40,8 +40,6 @@ public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
     private static final boolean LOCAL_LOGV = false;
 
-    private static final String WRITE_GSERVICES_PERMISSION = "android.permission.WRITE_GSERVICES";
-
     private DatabaseHelper mOpenHelper;
 
     /**
@@ -65,7 +63,8 @@ public class SettingsProvider extends ContentProvider {
                 throw new UnsupportedOperationException("WHERE clause not supported: " + url);
             } else {
                 this.table = url.getPathSegments().get(0);
-                if ("gservices".equals(this.table) || "system".equals(this.table)) {
+                if ("gservices".equals(this.table) || "system".equals(this.table)
+                        || "secure".equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
                     this.args = new String[] { url.getPathSegments().get(1) };
                 } else {
@@ -99,7 +98,8 @@ public class SettingsProvider extends ContentProvider {
             throw new IllegalArgumentException("Invalid URI: " + tableUri);
         }
         String table = tableUri.getPathSegments().get(0);
-        if ("gservices".equals(table) || "system".equals(table)) {
+        if ("gservices".equals(table) || "system".equals(table)
+                || "secure".equals(table)) {
             String name = values.getAsString(Settings.NameValueTable.NAME);
             return Uri.withAppendedPath(tableUri, name);
         } else {
@@ -122,6 +122,8 @@ public class SettingsProvider extends ContentProvider {
         String property = null, table = uri.getPathSegments().get(0);
         if (table.equals("system")) {
             property = Settings.System.SYS_PROP_SETTING_VERSION;
+        } else if (table.equals("secure")) {
+            property = Settings.Secure.SYS_PROP_SETTING_VERSION;
         } else if (table.equals("gservices")) {
             property = Settings.Gservices.SYS_PROP_SETTING_VERSION;
         }
@@ -149,9 +151,16 @@ public class SettingsProvider extends ContentProvider {
      * @throws SecurityException if the caller is forbidden to write.
      */
     private void checkWritePermissions(SqlArguments args) {
+        if ("secure".equals(args.table) &&
+                getContext().checkCallingOrSelfPermission(
+                        android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Cannot write secure settings table");
+        
         // TODO: Move gservices into its own provider so we don't need this nonsense.
-        if ("gservices".equals(args.table) &&
-            getContext().checkCallingOrSelfPermission(WRITE_GSERVICES_PERMISSION) !=
+        } else if ("gservices".equals(args.table) &&
+            getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_GSERVICES) !=
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Cannot write gservices table");
         }
@@ -166,6 +175,13 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public Cursor query(Uri url, String[] select, String where, String[] whereArgs, String sort) {
         SqlArguments args = new SqlArguments(url, where, whereArgs);
+        // The favorites table was moved from this provider to a provider inside Home
+        // Home still need to query this table to upgrade from pre-cupcake builds
+        // However, a cupcake+ build with no data does not contain this table which will
+        // cause an exception in the SQL stack. The following line is a special case to
+        // let the caller of the query have a chance to recover and avoid the exception
+        if ("favorites".equals(args.table)) return null;
+
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(args.table);
 

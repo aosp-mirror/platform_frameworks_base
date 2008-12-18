@@ -18,35 +18,46 @@
  * @author Sergey I. Salishev
  * @version $Revision: 1.2 $
  */
+
 package javax.imageio.stream;
 
-/** 
-* @author Sergey I. Salishev
-* @version $Revision: 1.2 $
-*/
+// 
+// @author Sergey I. Salishev
+// @version $Revision: 1.2 $
+//
 
 /**
- * The IIOByteBuffer class represents a byte array with offset and 
- * length that is used by ImageInputStream for obtaining a sequence 
- * of bytes.
+ * The IIOByteBuffer class represents a byte array with offset and length that
+ * is used by ImageInputStream for obtaining a sequence of bytes.
+ * 
+ * @since Android 1.0
  */
 public class IIOByteBuffer {
-    
-    /** The data. */
+
+    /**
+     * The data.
+     */
     private byte[] data;
-    
-    /** The offset. */
+
+    /**
+     * The offset.
+     */
     private int offset;
-    
-    /** The length. */
+
+    /**
+     * The length.
+     */
     private int length;
 
     /**
      * Instantiates a new IIOByteBuffer.
      * 
-     * @param data the byte array.
-     * @param offset the offset in the array.
-     * @param length the length of array.
+     * @param data
+     *            the byte array.
+     * @param offset
+     *            the offset in the array.
+     * @param length
+     *            the length of array.
      */
     public IIOByteBuffer(byte[] data, int offset, int length) {
         this.data = data;
@@ -84,7 +95,8 @@ public class IIOByteBuffer {
     /**
      * Sets the new data array to this IIOByteBuffer object.
      * 
-     * @param data the new data array.
+     * @param data
+     *            the new data array.
      */
     public void setData(byte[] data) {
         this.data = data;
@@ -93,7 +105,8 @@ public class IIOByteBuffer {
     /**
      * Sets the length of data which will be used.
      * 
-     * @param length the new length.
+     * @param length
+     *            the new length.
      */
     public void setLength(int length) {
         this.length = length;
@@ -102,10 +115,10 @@ public class IIOByteBuffer {
     /**
      * Sets the offset in the data array of this IIOByteBuffer.
      * 
-     * @param offset the new offset.
+     * @param offset
+     *            the new offset.
      */
     public void setOffset(int offset) {
         this.offset = offset;
     }
 }
-

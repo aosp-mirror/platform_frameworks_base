@@ -32,56 +32,76 @@ import org.apache.harmony.awt.gl.AwtImageBackdoorAccessor;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The LookupOp class perfoms a lookup operation which transforms a 
- * source image by filtering each band using a table of data. 
- * The table may contain a single array or it may contain a 
- * different data array for each band of the image.
+ * The LookupOp class performs a lookup operation which transforms a source
+ * image by filtering each band using a table of data. The table may contain a
+ * single array or it may contain a different data array for each band of the
+ * image.
+ * 
+ * @since Android 1.0
  */
 public class LookupOp implements BufferedImageOp, RasterOp {
-    
-    /** The lut. */
+
+    /**
+     * The lut.
+     */
     private final LookupTable lut;
-    
-    /** The hints. */
+
+    /**
+     * The hints.
+     */
     private RenderingHints hints;
-    
+
     // TODO remove when this field is used
-    /** The can use ipp. */
+    /**
+     * The can use ipp.
+     */
     @SuppressWarnings("unused")
     private final boolean canUseIpp;
 
     // We don't create levels/values when it is possible to reuse old
-    /** The cached levels. */
+    /**
+     * The cached levels.
+     */
     private int cachedLevels[];
-    
-    /** The cached values. */
+
+    /**
+     * The cached values.
+     */
     private int cachedValues[];
+
     // Number of channels for which cache is valid.
-    // If negative number of channels is same as positive but skipAlpha was specified
-    /** The valid for channels. */
+    // If negative number of channels is same as positive but skipAlpha was
+    // specified
+    /**
+     * The valid for channels.
+     */
     private int validForChannels;
 
-    /** The level initializer. */
+    /**
+     * The level initializer.
+     */
     static int levelInitializer[] = new int[0x10000];
 
     static {
         // TODO
         // System.loadLibrary("imageops");
 
-        for (int i=1; i<=0x10000; i++) {
-            levelInitializer[i-1] = i;
+        for (int i = 1; i <= 0x10000; i++) {
+            levelInitializer[i - 1] = i;
         }
     }
 
     /**
-     * Instantiates a new LookupOp object from the specified 
-     * LookupTable object and a RenderingHints object.
+     * Instantiates a new LookupOp object from the specified LookupTable object
+     * and a RenderingHints object.
      * 
-     * @param lookup the specified LookupTable object. 
-     * @param hints the RenderingHints object or null.
+     * @param lookup
+     *            the specified LookupTable object.
+     * @param hints
+     *            the RenderingHints object or null.
      */
     public LookupOp(LookupTable lookup, RenderingHints hints) {
-        if (lookup == null){
+        if (lookup == null) {
             throw new NullPointerException(Messages.getString("awt.01", "lookup")); //$NON-NLS-1$ //$NON-NLS-2$
         }
         lut = lookup;
@@ -136,27 +156,16 @@ public class LookupOp implements BufferedImageOp, RasterOp {
                     transferType = DataBuffer.TYPE_SHORT;
                 }
 
-                dstCM = new ComponentColorModel(
-                        dstCM.cs,
-                        dstCM.hasAlpha(),
-                        dstCM.isAlphaPremultiplied,
-                        dstCM.transparency,
-                        transferType
-                );
+                dstCM = new ComponentColorModel(dstCM.cs, dstCM.hasAlpha(),
+                        dstCM.isAlphaPremultiplied, dstCM.transparency, transferType);
             }
         }
 
-        WritableRaster r =
-                dstCM.isCompatibleSampleModel(src.getSampleModel()) ?
-                src.getRaster().createCompatibleWritableRaster(src.getWidth(), src.getHeight()) :
-                dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight());
+        WritableRaster r = dstCM.isCompatibleSampleModel(src.getSampleModel()) ? src.getRaster()
+                .createCompatibleWritableRaster(src.getWidth(), src.getHeight()) : dstCM
+                .createCompatibleWritableRaster(src.getWidth(), src.getHeight());
 
-        return new BufferedImage(
-                dstCM,
-                r,
-                dstCM.isAlphaPremultiplied(),
-                null
-        );
+        return new BufferedImage(dstCM, r, dstCM.isAlphaPremultiplied(), null);
     }
 
     public final WritableRaster filter(Raster src, WritableRaster dst) {
@@ -166,25 +175,27 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             if (src.getNumBands() != dst.getNumBands()) {
                 throw new IllegalArgumentException(Messages.getString("awt.237")); //$NON-NLS-1$            }
             }
-            if (src.getWidth() != dst.getWidth()){
+            if (src.getWidth() != dst.getWidth()) {
                 throw new IllegalArgumentException(Messages.getString("awt.28F")); //$NON-NLS-1$            }
             }
-            if (src.getHeight() != dst.getHeight()){
+            if (src.getHeight() != dst.getHeight()) {
                 throw new IllegalArgumentException(Messages.getString("awt.290")); //$NON-NLS-1$            }
             }
         }
 
         if (lut.getNumComponents() != 1 && lut.getNumComponents() != src.getNumBands()) {
-            // awt.238=The number of arrays in the LookupTable does not meet the restrictions
+            // awt.238=The number of arrays in the LookupTable does not meet the
+            // restrictions
             throw new IllegalArgumentException(Messages.getString("awt.238")); //$NON-NLS-1$
         }
 
         // TODO
-        // if (!canUseIpp || ippFilter(src, dst, BufferedImage.TYPE_CUSTOM, false) != 0)
-            if (slowFilter(src, dst, false) != 0) {
-                // awt.21F=Unable to transform source
-                throw new ImagingOpException (Messages.getString("awt.21F")); //$NON-NLS-1$
-            }
+        // if (!canUseIpp || ippFilter(src, dst, BufferedImage.TYPE_CUSTOM,
+        // false) != 0)
+        if (slowFilter(src, dst, false) != 0) {
+            // awt.21F=Unable to transform source
+            throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
+        }
 
         return dst;
     }
@@ -202,18 +213,20 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         int nLUTComponents = lut.getNumComponents();
         boolean skipAlpha;
         if (srcCM.hasAlpha()) {
-            if (nLUTComponents == 1 || nLUTComponents == nComponents-1) {
+            if (nLUTComponents == 1 || nLUTComponents == nComponents - 1) {
                 skipAlpha = true;
             } else if (nLUTComponents == nComponents) {
                 skipAlpha = false;
             } else {
-                // awt.229=Number of components in the LUT does not match the number of bands
+                // awt.229=Number of components in the LUT does not match the
+                // number of bands
                 throw new IllegalArgumentException(Messages.getString("awt.229")); //$NON-NLS-1$
             }
         } else if (nLUTComponents == 1 || nLUTComponents == nComponents) {
             skipAlpha = false;
         } else {
-            // awt.229=Number of components in the LUT does not match the number of bands
+            // awt.229=Number of components in the LUT does not match the number
+            // of bands
             throw new IllegalArgumentException(Messages.getString("awt.229")); //$NON-NLS-1$
         }
 
@@ -222,21 +235,19 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             finalDst = dst;
             dst = createCompatibleDestImage(src, null);
         } else {
-            if (src.getWidth() != dst.getWidth()){
+            if (src.getWidth() != dst.getWidth()) {
                 throw new IllegalArgumentException(Messages.getString("awt.291")); //$NON-NLS-1$
             }
 
-            if (src.getHeight() != dst.getHeight()){
+            if (src.getHeight() != dst.getHeight()) {
                 throw new IllegalArgumentException(Messages.getString("awt.292")); //$NON-NLS-1$
             }
 
             if (!srcCM.equals(dst.getColorModel())) {
                 // Treat BufferedImage.TYPE_INT_RGB and
                 // BufferedImage.TYPE_INT_ARGB as same
-                if (!((src.getType() == BufferedImage.TYPE_INT_RGB || src
-                        .getType() == BufferedImage.TYPE_INT_ARGB) && (dst
-                        .getType() == BufferedImage.TYPE_INT_RGB || dst
-                        .getType() == BufferedImage.TYPE_INT_ARGB))) {
+                if (!((src.getType() == BufferedImage.TYPE_INT_RGB || src.getType() == BufferedImage.TYPE_INT_ARGB) && (dst
+                        .getType() == BufferedImage.TYPE_INT_RGB || dst.getType() == BufferedImage.TYPE_INT_ARGB))) {
                     finalDst = dst;
                     dst = createCompatibleDestImage(src, null);
                 }
@@ -244,11 +255,12 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         }
 
         // TODO
-        //if (!canUseIpp || ippFilter(src.getRaster(), dst.getRaster(), src.getType(), skipAlpha) != 0)
-            if (slowFilter(src.getRaster(), dst.getRaster(), skipAlpha) != 0) {
-                // awt.21F=Unable to transform source
-                throw new ImagingOpException (Messages.getString("awt.21F")); //$NON-NLS-1$
-            }
+        // if (!canUseIpp || ippFilter(src.getRaster(), dst.getRaster(),
+        // src.getType(), skipAlpha) != 0)
+        if (slowFilter(src.getRaster(), dst.getRaster(), skipAlpha) != 0) {
+            // awt.21F=Unable to transform source
+            throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
+        }
 
         if (finalDst != null) {
             Graphics2D g = finalDst.createGraphics();
@@ -264,11 +276,13 @@ public class LookupOp implements BufferedImageOp, RasterOp {
     /**
      * Slow filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * @param skipAlpha the skip alpha
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @return the int.
      */
     private final int slowFilter(Raster src, WritableRaster dst, boolean skipAlpha) {
         int minSrcX = src.getMinX();
@@ -286,39 +300,39 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         int[] pixels = null;
         int offset = lut.getOffset();
 
-        if (lut instanceof ByteLookupTable){
+        if (lut instanceof ByteLookupTable) {
             byte[][] byteData = ((ByteLookupTable)lut).getTable();
             pixels = src.getPixels(minSrcX, minSrcY, srcWidth, srcHeight, pixels);
 
-            if (lut.getNumComponents() != 1){
-                for (int i=0; i < pixels.length; i+= numBands){
-                    for (int b = 0; b < numBands2Process; b++){
-                        pixels[i+b] = byteData[b][pixels[i+b]-offset] & 0xFF;
+            if (lut.getNumComponents() != 1) {
+                for (int i = 0; i < pixels.length; i += numBands) {
+                    for (int b = 0; b < numBands2Process; b++) {
+                        pixels[i + b] = byteData[b][pixels[i + b] - offset] & 0xFF;
                     }
                 }
             } else {
-                for (int i=0; i < pixels.length; i+= numBands){
-                    for (int b = 0; b < numBands2Process; b++){
-                        pixels[i+b] = byteData[0][pixels[i+b]-offset] & 0xFF;
+                for (int i = 0; i < pixels.length; i += numBands) {
+                    for (int b = 0; b < numBands2Process; b++) {
+                        pixels[i + b] = byteData[0][pixels[i + b] - offset] & 0xFF;
                     }
                 }
             }
 
             dst.setPixels(minDstX, minDstY, srcWidth, srcHeight, pixels);
-        } else if (lut instanceof ShortLookupTable){
-            short[][] shortData  = ((ShortLookupTable)lut).getTable();
+        } else if (lut instanceof ShortLookupTable) {
+            short[][] shortData = ((ShortLookupTable)lut).getTable();
             pixels = src.getPixels(minSrcX, minSrcY, srcWidth, srcHeight, pixels);
 
-            if (lut.getNumComponents() != 1){
-                for (int i=0; i < pixels.length; i+= numBands){
-                    for (int b = 0; b < numBands2Process; b++){
-                        pixels[i+b] = shortData[b][pixels[i+b]-offset] & 0xFFFF;
+            if (lut.getNumComponents() != 1) {
+                for (int i = 0; i < pixels.length; i += numBands) {
+                    for (int b = 0; b < numBands2Process; b++) {
+                        pixels[i + b] = shortData[b][pixels[i + b] - offset] & 0xFFFF;
                     }
                 }
             } else {
-                for (int i=0; i < pixels.length; i+= numBands){
-                    for (int b = 0; b < numBands2Process; b++){
-                        pixels[i+b] = shortData[0][pixels[i+b]-offset] & 0xFFFF;
+                for (int i = 0; i < pixels.length; i += numBands) {
+                    for (int b = 0; b < numBands2Process; b++) {
+                        pixels[i + b] = shortData[0][pixels[i + b] - offset] & 0xFFFF;
                     }
                 }
             }
@@ -328,8 +342,8 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             int pixel[] = new int[src.getNumBands()];
             int maxY = minSrcY + srcHeight;
             int maxX = minSrcX + srcWidth;
-            for (int srcY=minSrcY, dstY = minDstY; srcY < maxY; srcY++, dstY++){
-                for (int srcX=minSrcX, dstX = minDstX; srcX < maxX; srcX++, dstX++){
+            for (int srcY = minSrcY, dstY = minDstY; srcY < maxY; srcY++, dstY++) {
+                for (int srcX = minSrcX, dstX = minDstX; srcX < maxX; srcX++, dstX++) {
                     src.getPixel(srcX, srcY, pixel);
                     lut.lookupPixel(pixel, pixel);
                     dst.setPixel(dstX, dstY, pixel);
@@ -343,16 +357,19 @@ public class LookupOp implements BufferedImageOp, RasterOp {
     /**
      * Creates the byte levels.
      * 
-     * @param channels the channels
-     * @param skipAlpha the skip alpha
-     * @param levels the levels
-     * @param values the values
-     * @param channelsOrder the channels order
+     * @param channels
+     *            the channels.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @param levels
+     *            the levels.
+     * @param values
+     *            the values.
+     * @param channelsOrder
+     *            the channels order.
      */
-    private final void createByteLevels(
-            int channels, boolean skipAlpha,
-            int levels[], int values[], int channelsOrder[]
-    ) {
+    private final void createByteLevels(int channels, boolean skipAlpha, int levels[],
+            int values[], int channelsOrder[]) {
         byte data[][] = ((ByteLookupTable)lut).getTable();
         int nLevels = data[0].length;
         int offset = lut.getOffset();
@@ -360,18 +377,18 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         // Use one data array for all channels or use several data arrays
         int dataIncrement = data.length > 1 ? 1 : 0;
 
-        for (int ch = 0, dataIdx = 0; ch<channels; dataIdx+=dataIncrement, ch++) {
+        for (int ch = 0, dataIdx = 0; ch < channels; dataIdx += dataIncrement, ch++) {
             int channelOffset = channelsOrder == null ? ch : channelsOrder[ch];
             int channelBase = nLevels * channelOffset;
 
             // Skip last channel if needed, zero values are OK -
             // no changes to the channel information will be done in IPP
-            if ((channelOffset == channels-1 && skipAlpha) || (dataIdx >= data.length)) {
+            if ((channelOffset == channels - 1 && skipAlpha) || (dataIdx >= data.length)) {
                 continue;
             }
 
             System.arraycopy(levelInitializer, offset, levels, channelBase, nLevels);
-            for (int from=0, to=channelBase; from<nLevels; from++, to++) {
+            for (int from = 0, to = channelBase; from < nLevels; from++, to++) {
                 values[to] = data[dataIdx][from] & 0xFF;
             }
         }
@@ -380,16 +397,19 @@ public class LookupOp implements BufferedImageOp, RasterOp {
     /**
      * Creates the short levels.
      * 
-     * @param channels the channels
-     * @param skipAlpha the skip alpha
-     * @param levels the levels
-     * @param values the values
-     * @param channelsOrder the channels order
+     * @param channels
+     *            the channels.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @param levels
+     *            the levels.
+     * @param values
+     *            the values.
+     * @param channelsOrder
+     *            the channels order.
      */
-    private final void createShortLevels(
-            int channels, boolean skipAlpha,
-            int levels[], int values[], int channelsOrder[]
-    ) {
+    private final void createShortLevels(int channels, boolean skipAlpha, int levels[],
+            int values[], int channelsOrder[]) {
         short data[][] = ((ShortLookupTable)lut).getTable();
         int nLevels = data[0].length;
         int offset = lut.getOffset();
@@ -397,18 +417,18 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         // Use one data array for all channels or use several data arrays
         int dataIncrement = data.length > 1 ? 1 : 0;
 
-        for (int ch = 0, dataIdx = 0; ch<channels; dataIdx+=dataIncrement, ch++) {
+        for (int ch = 0, dataIdx = 0; ch < channels; dataIdx += dataIncrement, ch++) {
             int channelOffset = channelsOrder == null ? ch : channelsOrder[ch];
 
             // Skip last channel if needed, zero values are OK -
             // no changes to the channel information will be done in IPP
-            if ((channelOffset == channels-1 && skipAlpha) || (dataIdx >= data.length)) {
+            if ((channelOffset == channels - 1 && skipAlpha) || (dataIdx >= data.length)) {
                 continue;
             }
 
             int channelBase = nLevels * channelOffset;
             System.arraycopy(levelInitializer, offset, levels, channelBase, nLevels);
-            for (int from=0, to=channelBase; from<nLevels; from++, to++) {
+            for (int from = 0, to = channelBase; from < nLevels; from++, to++) {
                 values[to] = data[dataIdx][from] & 0xFFFF;
             }
         }
@@ -418,18 +438,18 @@ public class LookupOp implements BufferedImageOp, RasterOp {
     /**
      * Ipp filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * @param imageType the image type
-     * @param skipAlpha the skip alpha
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @param imageType
+     *            the image type.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @return the int.
      */
     @SuppressWarnings("unused")
-    private final int ippFilter(
-            Raster src, WritableRaster dst,
-            int imageType, boolean skipAlpha
-    ) {
+    private final int ippFilter(Raster src, WritableRaster dst, int imageType, boolean skipAlpha) {
         int res;
 
         int srcStride, dstStride;
@@ -442,9 +462,11 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_INT_ARGB_PRE:
             case BufferedImage.TYPE_INT_RGB: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
-                channelsOrder = new int[] {2, 1, 0, 3};
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
+                channelsOrder = new int[] {
+                        2, 1, 0, 3
+                };
                 break;
             }
 
@@ -452,8 +474,8 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_4BYTE_ABGR_PRE:
             case BufferedImage.TYPE_INT_BGR: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
                 break;
             }
 
@@ -466,9 +488,11 @@ public class LookupOp implements BufferedImageOp, RasterOp {
 
             case BufferedImage.TYPE_3BYTE_BGR: {
                 channels = 3;
-                srcStride = src.getWidth()*3;
-                dstStride = dst.getWidth()*3;
-                channelsOrder = new int[] {2, 1, 0};
+                srcStride = src.getWidth() * 3;
+                dstStride = dst.getWidth() * 3;
+                channelsOrder = new int[] {
+                        2, 1, 0
+                };
                 break;
             }
 
@@ -483,15 +507,11 @@ public class LookupOp implements BufferedImageOp, RasterOp {
                 SampleModel srcSM = src.getSampleModel();
                 SampleModel dstSM = dst.getSampleModel();
 
-                if (
-                        srcSM instanceof PixelInterleavedSampleModel &&
-                        dstSM instanceof PixelInterleavedSampleModel
-                ) {
+                if (srcSM instanceof PixelInterleavedSampleModel
+                        && dstSM instanceof PixelInterleavedSampleModel) {
                     // Check PixelInterleavedSampleModel
-                    if (
-                            srcSM.getDataType() != DataBuffer.TYPE_BYTE ||
-                            dstSM.getDataType() != DataBuffer.TYPE_BYTE
-                    ) {
+                    if (srcSM.getDataType() != DataBuffer.TYPE_BYTE
+                            || dstSM.getDataType() != DataBuffer.TYPE_BYTE) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
@@ -501,40 +521,32 @@ public class LookupOp implements BufferedImageOp, RasterOp {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
-                    srcStride = ((ComponentSampleModel) srcSM).getScanlineStride();
-                    dstStride = ((ComponentSampleModel) dstSM).getScanlineStride();
+                    srcStride = ((ComponentSampleModel)srcSM).getScanlineStride();
+                    dstStride = ((ComponentSampleModel)dstSM).getScanlineStride();
 
-                    channelsOrder = ((ComponentSampleModel) srcSM).getBandOffsets();
-                } else if (
-                        srcSM instanceof SinglePixelPackedSampleModel &&
-                        dstSM instanceof SinglePixelPackedSampleModel
-                ) {
+                    channelsOrder = ((ComponentSampleModel)srcSM).getBandOffsets();
+                } else if (srcSM instanceof SinglePixelPackedSampleModel
+                        && dstSM instanceof SinglePixelPackedSampleModel) {
                     // Check SinglePixelPackedSampleModel
-                    SinglePixelPackedSampleModel sppsm1 =
-                            (SinglePixelPackedSampleModel) srcSM;
-                    SinglePixelPackedSampleModel sppsm2 =
-                            (SinglePixelPackedSampleModel) dstSM;
+                    SinglePixelPackedSampleModel sppsm1 = (SinglePixelPackedSampleModel)srcSM;
+                    SinglePixelPackedSampleModel sppsm2 = (SinglePixelPackedSampleModel)dstSM;
 
                     channels = sppsm1.getNumBands();
 
-                     // TYPE_INT_RGB, TYPE_INT_ARGB...
-                    if (
-                            sppsm1.getDataType() != DataBuffer.TYPE_INT ||
-                            sppsm2.getDataType() != DataBuffer.TYPE_INT ||
-                            !(channels == 3 || channels == 4)
-                    ) {
+                    // TYPE_INT_RGB, TYPE_INT_ARGB...
+                    if (sppsm1.getDataType() != DataBuffer.TYPE_INT
+                            || sppsm2.getDataType() != DataBuffer.TYPE_INT
+                            || !(channels == 3 || channels == 4)) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
                     // Check compatibility of sample models
-                    if (
-                            !Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets()) ||
-                            !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())
-                    ) {
+                    if (!Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets())
+                            || !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
-                    for (int i=0; i<channels; i++) {
+                    for (int i = 0; i < channels; i++) {
                         if (sppsm1.getSampleSize(i) != 8) {
                             return slowFilter(src, dst, skipAlpha);
                         }
@@ -542,11 +554,12 @@ public class LookupOp implements BufferedImageOp, RasterOp {
 
                     channelsOrder = new int[channels];
                     int bitOffsets[] = sppsm1.getBitOffsets();
-                    for (int i=0; i<channels; i++) {
+                    for (int i = 0; i < channels; i++) {
                         channelsOrder[i] = bitOffsets[i] / 8;
                     }
 
-                    if (channels == 3) { // Don't skip channel now, could be optimized
+                    if (channels == 3) { // Don't skip channel now, could be
+                        // optimized
                         channels = 4;
                     }
 
@@ -558,12 +571,9 @@ public class LookupOp implements BufferedImageOp, RasterOp {
 
                 // Fill offsets if there's a child raster
                 if (src.getParent() != null || dst.getParent() != null) {
-                    if (
-                            src.getSampleModelTranslateX() != 0 ||
-                            src.getSampleModelTranslateY() != 0 ||
-                            dst.getSampleModelTranslateX() != 0 ||
-                            dst.getSampleModelTranslateY() != 0
-                    ) {
+                    if (src.getSampleModelTranslateX() != 0 || src.getSampleModelTranslateY() != 0
+                            || dst.getSampleModelTranslateX() != 0
+                            || dst.getSampleModelTranslateY() != 0) {
                         offsets = new int[4];
                         offsets[0] = -src.getSampleModelTranslateX() + src.getMinX();
                         offsets[1] = -src.getSampleModelTranslateY() + src.getMinY();
@@ -576,24 +586,25 @@ public class LookupOp implements BufferedImageOp, RasterOp {
 
         int levels[] = null, values[] = null;
         int channelMultiplier = skipAlpha ? -1 : 1;
-        if (channelMultiplier*channels == validForChannels) { // use existing levels/values
+        if (channelMultiplier * channels == validForChannels) { // use existing
+            // levels/values
             levels = cachedLevels;
             values = cachedValues;
         } else { // create new levels/values
             if (lut instanceof ByteLookupTable) {
                 byte data[][] = ((ByteLookupTable)lut).getTable();
-                levels = new int[channels*data[0].length];
-                values = new int[channels*data[0].length];
+                levels = new int[channels * data[0].length];
+                values = new int[channels * data[0].length];
                 createByteLevels(channels, skipAlpha, levels, values, channelsOrder);
             } else if (lut instanceof ShortLookupTable) {
                 short data[][] = ((ShortLookupTable)lut).getTable();
-                levels = new int[channels*data[0].length];
-                values = new int[channels*data[0].length];
+                levels = new int[channels * data[0].length];
+                values = new int[channels * data[0].length];
                 createShortLevels(channels, skipAlpha, levels, values, channelsOrder);
             }
 
             // cache levels/values
-            validForChannels = channelMultiplier*channels;
+            validForChannels = channelMultiplier * channels;
             cachedLevels = levels;
             cachedValues = values;
         }
@@ -607,13 +618,8 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             return -1; // Unknown data buffer type
         }
 
-        res = ippLUT(
-            srcData, src.getWidth(), src.getHeight(), srcStride,
-            dstData, dst.getWidth(), dst.getHeight(), dstStride,
-            levels, values,
-            channels, offsets,
-            false
-        );
+        res = ippLUT(srcData, src.getWidth(), src.getHeight(), srcStride, dstData, dst.getWidth(),
+                dst.getHeight(), dstStride, levels, values, channels, offsets, false);
 
         return res;
     }
@@ -621,27 +627,35 @@ public class LookupOp implements BufferedImageOp, RasterOp {
     /**
      * Ipp lut.
      * 
-     * @param src the src
-     * @param srcWidth the src width
-     * @param srcHeight the src height
-     * @param srcStride the src stride
-     * @param dst the dst
-     * @param dstWidth the dst width
-     * @param dstHeight the dst height
-     * @param dstStride the dst stride
-     * @param levels the levels
-     * @param values the values
-     * @param channels the channels
-     * @param offsets the offsets
-     * @param linear the linear
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param srcWidth
+     *            the src width.
+     * @param srcHeight
+     *            the src height.
+     * @param srcStride
+     *            the src stride.
+     * @param dst
+     *            the dst.
+     * @param dstWidth
+     *            the dst width.
+     * @param dstHeight
+     *            the dst height.
+     * @param dstStride
+     *            the dst stride.
+     * @param levels
+     *            the levels.
+     * @param values
+     *            the values.
+     * @param channels
+     *            the channels.
+     * @param offsets
+     *            the offsets.
+     * @param linear
+     *            the linear.
+     * @return the int.
      */
-    final static native int ippLUT(
-            Object src, int srcWidth, int srcHeight, int srcStride,
-            Object dst, int dstWidth, int dstHeight, int dstStride,
-            int levels[], int values[],
-            int channels, int offsets[],
-            boolean linear
-    );
+    final static native int ippLUT(Object src, int srcWidth, int srcHeight, int srcStride,
+            Object dst, int dstWidth, int dstHeight, int dstStride, int levels[], int values[],
+            int channels, int offsets[], boolean linear);
 }

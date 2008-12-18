@@ -22,7 +22,6 @@ import java.io.IOException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.os.PowerManager;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Config;
@@ -41,6 +40,7 @@ public abstract class NetworkStateTracker extends Handler {
     protected NetworkInfo mNetworkInfo;
     protected Context mContext;
     protected Handler mTarget;
+    private boolean mTeardownRequested;
 
     private static boolean DBG = Config.LOGV; 
     private static final String TAG = "NetworkStateTracker";
@@ -54,12 +54,20 @@ public abstract class NetworkStateTracker extends Handler {
      */
     public static final int EVENT_NOTIFICATION_CHANGED = 3;
     public static final int EVENT_CONFIGURATION_CHANGED = 4;
+    public static final int EVENT_ROAMING_CHANGED = 5;
+    public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
 
-    public NetworkStateTracker(Context context, Handler target, int networkType) {
+    public NetworkStateTracker(Context context,
+            Handler target,
+            int networkType,
+            int subType,
+            String typeName,
+            String subtypeName) {
         super();
         mContext = context;
         mTarget = target;
-        this.mNetworkInfo = new NetworkInfo(networkType);
+        mTeardownRequested = false;
+        this.mNetworkInfo = new NetworkInfo(networkType, subType, typeName, subtypeName);
     }
 
     public NetworkInfo getNetworkInfo() {
@@ -222,6 +230,14 @@ public abstract class NetworkStateTracker extends Handler {
         mNetworkInfo.setDetailedState(state, null, null);
     }
 
+    public void setTeardownRequested(boolean isRequested) {
+        mTeardownRequested = isRequested;
+    }
+
+    public boolean isTeardownRequested() {
+        return mTeardownRequested;
+    }
+    
     /**
      * Send a  notification that the results of a scan for network access
      * points has completed, and results are available.
@@ -229,6 +245,32 @@ public abstract class NetworkStateTracker extends Handler {
     protected void sendScanResultsAvailable() {
         Message msg = mTarget.obtainMessage(EVENT_SCAN_RESULTS_AVAILABLE, mNetworkInfo);
         msg.sendToTarget();
+    }
+
+    /**
+     * Record the roaming status of the device, and if it is a change from the previous
+     * status, send a notification to any listeners.
+     * @param isRoaming {@code true} if the device is now roaming, {@code false}
+     * if it is no longer roaming.
+     */
+    protected void setRoamingStatus(boolean isRoaming) {
+        if (isRoaming != mNetworkInfo.isRoaming()) {
+            mNetworkInfo.setRoaming(isRoaming);
+            Message msg = mTarget.obtainMessage(EVENT_ROAMING_CHANGED, mNetworkInfo);
+            msg.sendToTarget();
+        }
+    }
+
+    protected void setSubtype(int subtype, String subtypeName) {
+        if (mNetworkInfo.isConnected()) {
+            int oldSubtype = mNetworkInfo.getSubtype();
+            if (subtype != oldSubtype) {
+                mNetworkInfo.setSubtype(subtype, subtypeName);
+                Message msg = mTarget.obtainMessage(
+                        EVENT_NETWORK_SUBTYPE_CHANGED, oldSubtype, 0, mNetworkInfo);
+                msg.sendToTarget();
+            }
+        }
     }
 
     public abstract void startMonitoring();

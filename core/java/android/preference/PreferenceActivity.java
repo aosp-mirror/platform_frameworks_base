@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.Window;
 
 /**
- * The {@link PreferenceActivity} activity shows a hierarchy of preferences as
+ * Shows a hierarchy of {@link Preference} objects as
  * lists, possibly spanning multiple screens. These preferences will
  * automatically save to {@link SharedPreferences} as the user interacts with
  * them. To retrieve an instance of {@link SharedPreferences} that the
@@ -108,7 +108,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         setContentView(com.android.internal.R.layout.preference_list_content);
         
         mPreferenceManager = onCreatePreferenceManager();
-        getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_INSET);
+        getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
     }
 
     @Override

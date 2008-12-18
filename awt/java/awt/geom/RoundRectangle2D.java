@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.util.NoSuchElementException;
@@ -25,53 +26,74 @@ import java.util.NoSuchElementException;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class RoundRectangle2D describes a rectangle with rounded 
- * corners with high-precision data that is appropriate for geometric
- * operations.
+ * The Class RoundRectangle2D describes a rectangle with rounded corners with
+ * high-precision data that is appropriate for geometric operations.
+ * 
+ * @since Android 1.0
  */
 public abstract class RoundRectangle2D extends RectangularShape {
 
     /**
-     * The Class Float is the subclass of RoundRectangle2D that has all 
-     * of its data values stored with float-level precision.
+     * The Class Float is the subclass of RoundRectangle2D that has all of its
+     * data values stored with float-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Float extends RoundRectangle2D {
 
-        /** The x coordinate of the rectangle's upper left corner. */
+        /**
+         * The x coordinate of the rectangle's upper left corner.
+         */
         public float x;
-        
-        /** The y coordinate of the rectangle's upper left corner. */
+
+        /**
+         * The y coordinate of the rectangle's upper left corner.
+         */
         public float y;
-        
-        /** The width of the rectangle. */
+
+        /**
+         * The width of the rectangle.
+         */
         public float width;
-        
-        /** The height of the rectangle. */
+
+        /**
+         * The height of the rectangle.
+         */
         public float height;
-        
-        /** The arcwidth of the rounded corners. */
+
+        /**
+         * The arc width of the rounded corners.
+         */
         public float arcwidth;
-        
-        /** The archeight of the rounded corners. */
+
+        /**
+         * The arc height of the rounded corners.
+         */
         public float archeight;
 
         /**
-         * Instantiates a new float-valued RoundRectangle2D with 
-         * its data-values set to zero.
+         * Instantiates a new float-valued RoundRectangle2D with its data-values
+         * set to zero.
          */
         public Float() {
         }
 
         /**
-         * Instantiates a new float-valued RoundRectangle2D with 
-         * the specified data values
+         * Instantiates a new float-valued RoundRectangle2D with the specified
+         * data values.
          * 
-         * @param x the x coordinate of the rectangle's upper left corner
-         * @param y the y coordinate of the rectangle's upper left corner
-         * @param width the width of the rectangle
-         * @param height the height of the rectangle
-         * @param arcwidth the arcwidth of the rounded corners
-         * @param archeight the archeight of the rounded corners
+         * @param x
+         *            the x coordinate of the rectangle's upper left corner.
+         * @param y
+         *            the y coordinate of the rectangle's upper left corner.
+         * @param width
+         *            the width of the rectangle.
+         * @param height
+         *            the height of the rectangle.
+         * @param arcwidth
+         *            the arc width of the rounded corners.
+         * @param archeight
+         *            the arc height of the rounded corners.
          */
         public Float(float x, float y, float width, float height, float arcwidth, float archeight) {
             setRoundRect(x, y, width, height, arcwidth, archeight);
@@ -113,16 +135,23 @@ public abstract class RoundRectangle2D extends RectangularShape {
         }
 
         /**
-         * Sets the data of the round rect.
+         * Sets the data of the round rectangle.
          * 
-         * @param x the x coordinate of the rectangle's upper left corner
-         * @param y the y coordinate of the rectangle's upper left corner
-         * @param width the width of the rectangle
-         * @param height the height of the rectangle
-         * @param arcwidth the arcwidth of the rounded corners
-         * @param archeight the archeight of the rounded corners
+         * @param x
+         *            the x coordinate of the rectangle's upper left corner.
+         * @param y
+         *            the y coordinate of the rectangle's upper left corner.
+         * @param width
+         *            the width of the rectangle.
+         * @param height
+         *            the height of the rectangle.
+         * @param arcwidth
+         *            the arc width of the rounded corners.
+         * @param archeight
+         *            the arc height of the rounded corners.
          */
-        public void setRoundRect(float x, float y, float width, float height, float arcwidth, float archeight) {
+        public void setRoundRect(float x, float y, float width, float height, float arcwidth,
+                float archeight) {
             this.x = x;
             this.y = y;
             this.width = width;
@@ -132,7 +161,8 @@ public abstract class RoundRectangle2D extends RectangularShape {
         }
 
         @Override
-        public void setRoundRect(double x, double y, double width, double height, double arcwidth, double archeight) {
+        public void setRoundRect(double x, double y, double width, double height, double arcwidth,
+                double archeight) {
             this.x = (float)x;
             this.y = (float)y;
             this.width = (float)width;
@@ -157,48 +187,69 @@ public abstract class RoundRectangle2D extends RectangularShape {
     }
 
     /**
-     * The Class Double is the subclass of RoundRectangle2D that has all 
-     * of its data values stored with double-level precision.
+     * The Class Double is the subclass of RoundRectangle2D that has all of its
+     * data values stored with double-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Double extends RoundRectangle2D {
 
-        /** The x coordinate of the rectangle's upper left corner. */
+        /**
+         * The x coordinate of the rectangle's upper left corner.
+         */
         public double x;
-        
-        /** The y coordinate of the rectangle's upper left corner. */
+
+        /**
+         * The y coordinate of the rectangle's upper left corner.
+         */
         public double y;
-        
-        /** The width of the rectangle. */
+
+        /**
+         * The width of the rectangle.
+         */
         public double width;
-        
-        /** The height of the rectangle. */
+
+        /**
+         * The height of the rectangle.
+         */
         public double height;
-        
-        /** The arcwidth of the rounded corners. */
+
+        /**
+         * The arc width of the rounded corners.
+         */
         public double arcwidth;
-        
-        /** The archeight of the rounded corners. */
+
+        /**
+         * The arc height of the rounded corners.
+         */
         public double archeight;
 
         /**
-         * Instantiates a new double-valued RoundRectangle2D with 
-         * its data-values set to zero.
+         * Instantiates a new double-valued RoundRectangle2D with its
+         * data-values set to zero.
          */
         public Double() {
         }
 
         /**
-         * Instantiates a new double-valued RoundRectangle2D with 
-         * the specified data values.
+         * Instantiates a new double-valued RoundRectangle2D with the specified
+         * data values.
          * 
-         * @param x the x coordinate of the rectangle's upper left corner
-         * @param y the y coordinate of the rectangle's upper left corner
-         * @param width the width of the rectangle
-         * @param height the height of the rectangle
-         * @param arcwidth the arcwidth of the rounded corners
-         * @param archeight the archeight of the rounded corners
+         * @param x
+         *            the x coordinate of the rectangle's upper left corner.
+         * @param y
+         *            the y coordinate of the rectangle's upper left corner.
+         * @param width
+         *            the width of the rectangle.
+         * @param height
+         *            the height of the rectangle.
+         * @param arcwidth
+         *            the arc width of the rounded corners.
+         * @param archeight
+         *            the arc height of the rounded corners.
          */
-        public Double(double x, double y, double width, double height, double arcwidth, double archeight) {
+        public Double(double x, double y, double width, double height, double arcwidth,
+                double archeight) {
             setRoundRect(x, y, width, height, arcwidth, archeight);
         }
 
@@ -238,7 +289,8 @@ public abstract class RoundRectangle2D extends RectangularShape {
         }
 
         @Override
-        public void setRoundRect(double x, double y, double width, double height, double arcwidth, double archeight) {
+        public void setRoundRect(double x, double y, double width, double height, double arcwidth,
+                double archeight) {
             this.x = x;
             this.y = y;
             this.width = width;
@@ -263,7 +315,7 @@ public abstract class RoundRectangle2D extends RectangularShape {
     }
 
     /*
-     * RoundRectangle2D path iterator 
+     * RoundRectangle2D path iterator
      */
     /**
      * The subclass of PathIterator to traverse a RoundRectangle2D.
@@ -274,70 +326,101 @@ public abstract class RoundRectangle2D extends RectangularShape {
          * Path for round corners generated the same way as Ellipse2D
          */
 
-        /** The coefficient to calculate control points of Bezier curves. */
+        /**
+         * The coefficient to calculate control points of Bezier curves.
+         */
         double u = 0.5 - 2.0 / 3.0 * (Math.sqrt(2.0) - 1.0);
 
-        /** The points coordinates calculation table. */
+        /**
+         * The points coordinates calculation table.
+         */
         double points[][] = {
-                { 0.0,  0.5, 0.0,  0.0 }, // MOVETO
-                { 1.0, -0.5, 0.0,  0.0 }, // LINETO
-                { 1.0,   -u, 0.0,  0.0,   // CUBICTO
-                  1.0,  0.0, 0.0,    u,
-                  1.0,  0.0, 0.0,  0.5 },
-                { 1.0,  0.0, 1.0, -0.5 }, // LINETO
-                { 1.0,  0.0, 1.0,   -u,   // CUBICTO
-                  1.0,   -u, 1.0,  0.0,
-                  1.0, -0.5, 1.0,  0.0 },
-                { 0.0,  0.5, 1.0,  0.0 }, // LINETO
-                { 0.0,    u, 1.0,  0.0,   // CUBICTO
-                  0.0,  0.0, 1.0,   -u,
-                  0.0,  0.0, 1.0, -0.5 },
-                { 0.0,  0.0, 0.0,  0.5 }, // LINETO
-                { 0.0,  0.0, 0.0,    u,   // CUBICTO
-                  0.0,    u, 0.0,  0.0,
-                  0.0,  0.5, 0.0,  0.0 } };
+                {
+                        0.0, 0.5, 0.0, 0.0
+                }, // MOVETO
+                {
+                        1.0, -0.5, 0.0, 0.0
+                }, // LINETO
+                {
+                        1.0, -u, 0.0, 0.0, // CUBICTO
+                        1.0, 0.0, 0.0, u, 1.0, 0.0, 0.0, 0.5
+                }, {
+                        1.0, 0.0, 1.0, -0.5
+                }, // LINETO
+                {
+                        1.0, 0.0, 1.0, -u, // CUBICTO
+                        1.0, -u, 1.0, 0.0, 1.0, -0.5, 1.0, 0.0
+                }, {
+                        0.0, 0.5, 1.0, 0.0
+                }, // LINETO
+                {
+                        0.0, u, 1.0, 0.0, // CUBICTO
+                        0.0, 0.0, 1.0, -u, 0.0, 0.0, 1.0, -0.5
+                }, {
+                        0.0, 0.0, 0.0, 0.5
+                }, // LINETO
+                {
+                        0.0, 0.0, 0.0, u, // CUBICTO
+                        0.0, u, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0
+                }
+        };
 
-        /** The segment types correspond to points array. */
+        /**
+         * The segment types correspond to points array.
+         */
         int types[] = {
-                SEG_MOVETO,
-                SEG_LINETO,
-                SEG_CUBICTO,
-                SEG_LINETO,
-                SEG_CUBICTO,
-                SEG_LINETO,
-                SEG_CUBICTO,
-                SEG_LINETO,
-                SEG_CUBICTO};
+                SEG_MOVETO, SEG_LINETO, SEG_CUBICTO, SEG_LINETO, SEG_CUBICTO, SEG_LINETO,
+                SEG_CUBICTO, SEG_LINETO, SEG_CUBICTO
+        };
 
-        /** The x coordinate of left-upper corner of the round rectangle bounds. */
+        /**
+         * The x coordinate of left-upper corner of the round rectangle bounds.
+         */
         double x;
-        
-        /** The y coordinate of left-upper corner of the round rectangle bounds. */
+
+        /**
+         * The y coordinate of left-upper corner of the round rectangle bounds.
+         */
         double y;
-        
-        /** The width of the round rectangle bounds. */
+
+        /**
+         * The width of the round rectangle bounds.
+         */
         double width;
-        
-        /** The height of the round rectangle bounds. */
+
+        /**
+         * The height of the round rectangle bounds.
+         */
         double height;
-        
-        /** The width of arc corners of the round rectangle. */
+
+        /**
+         * The width of arc corners of the round rectangle.
+         */
         double aw;
-        
-        /** The height of arc corners of the round rectangle. */
+
+        /**
+         * The height of arc corners of the round rectangle.
+         */
         double ah;
 
-        /** The path iterator transformation. */
+        /**
+         * The path iterator transformation.
+         */
         AffineTransform t;
 
-        /** The current segmenet index. */
+        /**
+         * The current segment index.
+         */
         int index;
 
         /**
-         * Constructs a new RoundRectangle2D.Iterator for given round rectangle and transformation.
+         * Constructs a new RoundRectangle2D.Iterator for given round rectangle
+         * and transformation.
          * 
-         * @param rr - the source RoundRectangle2D object
-         * @param at - the AffineTransform object to apply rectangle path
+         * @param rr
+         *            - the source RoundRectangle2D object
+         * @param at
+         *            - the AffineTransform object to apply rectangle path
          */
         Iterator(RoundRectangle2D rr, AffineTransform at) {
             this.x = rr.getX();
@@ -415,41 +498,48 @@ public abstract class RoundRectangle2D extends RectangularShape {
     /**
      * Gets the arc width.
      * 
-     * @return the arc width
+     * @return the arc width.
      */
     public abstract double getArcWidth();
 
     /**
      * Gets the arc height.
      * 
-     * @return the arc height
+     * @return the arc height.
      */
     public abstract double getArcHeight();
 
     /**
      * Sets the data of the RoundRectangle2D.
      * 
-     * @param x the x coordinate of the rectangle's upper left corner
-     * @param y the y coordinate of the rectangle's upper left corner
-     * @param width the width of the rectangle
-     * @param height the height of the rectangle
-     * @param arcWidth the arcwidth of the rounded corners
-     * @param arcHeight the archeight of the rounded corners
+     * @param x
+     *            the x coordinate of the rectangle's upper left corner.
+     * @param y
+     *            the y coordinate of the rectangle's upper left corner.
+     * @param width
+     *            the width of the rectangle.
+     * @param height
+     *            the height of the rectangle.
+     * @param arcWidth
+     *            the arc width of the rounded corners.
+     * @param arcHeight
+     *            the arc height of the rounded corners.
      */
     public abstract void setRoundRect(double x, double y, double width, double height,
             double arcWidth, double arcHeight);
 
     /**
-     * Sets the data of the RoundRectangle2D by copying the values
-     * from an existing RoundRectangle2D.
+     * Sets the data of the RoundRectangle2D by copying the values from an
+     * existing RoundRectangle2D.
      * 
-     * @param rr the round rectangle to copy the data from
-     * 
-     * @throws NullPointerException if rr is null
+     * @param rr
+     *            the round rectangle to copy the data from.
+     * @throws NullPointerException
+     *             if rr is null.
      */
     public void setRoundRect(RoundRectangle2D rr) {
-        setRoundRect(rr.getX(), rr.getY(), rr.getWidth(), rr.getHeight(), rr
-                .getArcWidth(), rr.getArcHeight());
+        setRoundRect(rr.getX(), rr.getY(), rr.getWidth(), rr.getHeight(), rr.getArcWidth(), rr
+                .getArcHeight());
     }
 
     @Override
@@ -478,21 +568,19 @@ public abstract class RoundRectangle2D extends RectangularShape {
 
         if (px < rx1 + aw) {
             cx = rx1 + aw;
-        } else
-            if (px > rx2 - aw) {
-                cx = rx2 - aw;
-            } else {
-                return true;
-            }
+        } else if (px > rx2 - aw) {
+            cx = rx2 - aw;
+        } else {
+            return true;
+        }
 
         if (py < ry1 + ah) {
             cy = ry1 + ah;
-        } else
-            if (py > ry2 - ah) {
-                cy = ry2 - ah;
-            } else {
-                return true;
-            }
+        } else if (py > ry2 - ah) {
+            cy = ry2 - ah;
+        } else {
+            return true;
+        }
 
         px = (px - cx) / aw;
         py = (py - cy) / ah;
@@ -537,11 +625,7 @@ public abstract class RoundRectangle2D extends RectangularShape {
         double rx2 = rx + rw;
         double ry2 = ry + rh;
 
-        return
-            contains(rx1, ry1) &&
-            contains(rx2, ry1) &&
-            contains(rx2, ry2) &&
-            contains(rx1, ry2);
+        return contains(rx1, ry1) && contains(rx2, ry1) && contains(rx2, ry2) && contains(rx1, ry2);
     }
 
     public PathIterator getPathIterator(AffineTransform at) {
@@ -549,4 +633,3 @@ public abstract class RoundRectangle2D extends RectangularShape {
     }
 
 }
-

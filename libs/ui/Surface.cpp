@@ -47,7 +47,7 @@ Surface::Surface(const sp<SurfaceComposerClient>& client,
         const ISurfaceFlingerClient::surface_data_t& data,
         uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
         bool owner)
-    : mClient(client), mSurface(surface), mMemoryType(data.type),
+    : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
       mFormat(format), mFlags(flags), mOwner(owner)
 {
@@ -67,7 +67,6 @@ Surface::Surface(Surface const* rhs)
     mSurface = rhs->mSurface;
     mHeap[0] = rhs->mHeap[0];
     mHeap[1] = rhs->mHeap[1];
-    mMemoryType = rhs->mMemoryType;
     mFormat  = rhs->mFormat;
     mFlags   = rhs->mFlags;
     mSurfaceHeapBase[0] = rhs->mSurfaceHeapBase[0];
@@ -186,7 +185,6 @@ sp<Surface> Surface::readFromParcel(Parcel* parcel)
     sp<ISurface> surface    = interface_cast<ISurface>(parcel->readStrongBinder());
     data.heap[0]            = interface_cast<IMemoryHeap>(parcel->readStrongBinder());
     data.heap[1]            = interface_cast<IMemoryHeap>(parcel->readStrongBinder());
-    data.type               = parcel->readInt32();
     data.token              = parcel->readInt32();
     data.identity           = parcel->readInt32();
     PixelFormat format      = parcel->readInt32();
@@ -207,7 +205,6 @@ status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
     sp<SurfaceComposerClient> client;
     sp<ISurface> sur;
     sp<IMemoryHeap> heap[2];
-    int type = 0;
     if (surface->isValid()) {
         token = surface->mToken;
         identity = surface->mIdentity;
@@ -215,7 +212,6 @@ status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
         sur = surface->mSurface;
         heap[0] = surface->mHeap[0];
         heap[1] = surface->mHeap[1];
-        type = surface->mMemoryType;
         format = surface->mFormat;
         flags = surface->mFlags;
     }
@@ -223,7 +219,6 @@ status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
     parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
     parcel->writeStrongBinder(heap[0]!=0 ? heap[0]->asBinder()  : NULL);
     parcel->writeStrongBinder(heap[1]!=0 ? heap[1]->asBinder()  : NULL);
-    parcel->writeInt32(type);
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
     parcel->writeInt32(format);

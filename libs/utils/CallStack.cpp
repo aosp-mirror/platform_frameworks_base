@@ -79,35 +79,35 @@ int backtrace(const void** addrs, size_t ignore, size_t size)
 /*****************************************************************************/
 
 static 
-const char *lookup_symbol(const void* addr, uint32_t *offset, char* name, size_t bufSize)
+const char *lookup_symbol(const void* addr, void **offset, char* name, size_t bufSize)
 {
 #if HAVE_DLADDR
-	Dl_info info;
-	if (dladdr(addr, &info)) {
-		*offset = (uint32_t)info.dli_saddr;
-		return info.dli_sname;
-	}
+    Dl_info info;
+    if (dladdr(addr, &info)) {
+        *offset = info.dli_saddr;
+        return info.dli_sname;
+    }
 #endif
-	return NULL;
+    return NULL;
 }
 
 static 
 int32_t linux_gcc_demangler(const char *mangled_name, char *unmangled_name, size_t buffersize)
 {
-	size_t out_len = 0;
+    size_t out_len = 0;
 #if HAVE_CXXABI
-	int status = 0;
-	char *demangled = abi::__cxa_demangle(mangled_name, 0, &out_len, &status);
-	if (status == 0) {
-		// OK
-		if (out_len < buffersize) memcpy(unmangled_name, demangled, out_len);
-		else out_len = 0;
-		free(demangled);
-	} else {
-		out_len = 0;
-	}
+    int status = 0;
+    char *demangled = abi::__cxa_demangle(mangled_name, 0, &out_len, &status);
+    if (status == 0) {
+        // OK
+        if (out_len < buffersize) memcpy(unmangled_name, demangled, out_len);
+        else out_len = 0;
+        free(demangled);
+    } else {
+        out_len = 0;
+    }
 #endif
-	return out_len;
+    return out_len;
 }
 
 /*****************************************************************************/
@@ -115,12 +115,12 @@ int32_t linux_gcc_demangler(const char *mangled_name, char *unmangled_name, size
 class MapInfo {
     struct mapinfo {
         struct mapinfo *next;
-        unsigned start;
-        unsigned end;
+        uint64_t start;
+        uint64_t end;
         char name[];
     };
 
-    const char *map_to_name(unsigned pc, const char* def) {
+    const char *map_to_name(uint64_t pc, const char* def) {
         mapinfo* mi = getMapInfoList();
         while(mi) {
             if ((pc >= mi->start) && (pc < mi->end))
@@ -139,8 +139,8 @@ class MapInfo {
         if (line[20] != 'x') return 0;
         mi = (mapinfo*)malloc(sizeof(mapinfo) + (len - 47));
         if (mi == 0) return 0;
-        mi->start = strtoul(line, 0, 16);
-        mi->end = strtoul(line + 9, 0, 16);
+        mi->start = strtoull(line, 0, 16);
+        mi->end = strtoull(line + 9, 0, 16);
         mi->next = 0;
         strcpy(mi->name, line + 49);
         return mi;
@@ -184,7 +184,7 @@ public:
     }
     
     static const char *mapAddressToName(const void* pc, const char* def) {
-        return sMapInfo.map_to_name((unsigned)pc, def);
+        return sMapInfo.map_to_name((uint64_t)pc, def);
     }
 
 };
@@ -278,7 +278,7 @@ String8 CallStack::toStringSingleLevel(const char* prefix, int32_t level) const
     char tmp[256];
     char tmp1[32];
     char tmp2[32];
-    uint32_t offs;
+    void *offs;
 
     const void* ip = mStack[level];
     if (!ip) return res;
@@ -291,14 +291,14 @@ String8 CallStack::toStringSingleLevel(const char* prefix, int32_t level) const
     if (name) {
         if (linux_gcc_demangler(name, tmp, 256) != 0)
             name = tmp;
-        snprintf(tmp1, 32, "0x%08x: <", (size_t)ip);
-        snprintf(tmp2, 32, ">+0x%08x", offs);
+        snprintf(tmp1, 32, "0x%p: <", ip);
+        snprintf(tmp2, 32, ">+0x%p", offs);
         res.append(tmp1);
         res.append(name);
         res.append(tmp2);
     } else { 
         name = MapInfo::mapAddressToName(ip, "<unknown>");
-        snprintf(tmp, 256, "pc %08x  %s", (size_t)ip, name);
+        snprintf(tmp, 256, "pc %p  %s", ip, name);
         res.append(tmp);
     }
     res.append("\n");

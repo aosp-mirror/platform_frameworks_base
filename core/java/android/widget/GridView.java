@@ -36,7 +36,8 @@ public class GridView extends AbsListView {
     public static final int NO_STRETCH = 0;
     public static final int STRETCH_SPACING = 1;
     public static final int STRETCH_COLUMN_WIDTH = 2;
-
+    public static final int STRETCH_SPACING_UNIFORM = 3;
+    
     public static final int AUTO_FIT = -1;
 
     private int mNumColumns = AUTO_FIT;
@@ -228,11 +229,11 @@ public class GridView extends AbsListView {
     }
 
     private View makeRow(int startPos, int y, boolean flow) {
-        int last;
-        int nextLeft = mListPadding.left;
-
         final int columnWidth = mColumnWidth;
         final int horizontalSpacing = mHorizontalSpacing;
+
+        int last;
+        int nextLeft = mListPadding.left + ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
 
         if (!mStackFromBottom) {
             last = Math.min(startPos + mNumColumns, mItemCount);
@@ -878,6 +879,17 @@ public class GridView extends AbsListView {
                     mHorizontalSpacing = requestedHorizontalSpacing + spaceLeftOver;
                 }
                 break;
+
+            case STRETCH_SPACING_UNIFORM:
+                // Stretch the spacing between columns
+                mColumnWidth = requestedColumnWidth;
+                if (mNumColumns > 1) {
+                    mHorizontalSpacing = requestedHorizontalSpacing + 
+                        spaceLeftOver / (mNumColumns + 1);
+                } else {
+                    mHorizontalSpacing = requestedHorizontalSpacing + spaceLeftOver;
+                }
+                break;
             }
 
             break;
@@ -1379,7 +1391,6 @@ public class GridView extends AbsListView {
                     handled = arrowScroll(FOCUS_LEFT);
                     break;
 
-
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                     handled = arrowScroll(FOCUS_RIGHT);
                     break;
@@ -1420,7 +1431,6 @@ public class GridView extends AbsListView {
                     }
                     break;
             }
-
         }
 
         if (!handled) {
@@ -1460,6 +1470,7 @@ public class GridView extends AbsListView {
 
         if (nextPage >= 0) {
             setSelectionInt(nextPage);
+            invokeOnItemScrollListener();
             return true;
         }
 
@@ -1478,10 +1489,12 @@ public class GridView extends AbsListView {
         if (direction == FOCUS_UP) {
             mLayoutMode = LAYOUT_SET_SELECTION;
             setSelectionInt(0);
+            invokeOnItemScrollListener();
             moved = true;
         } else if (direction == FOCUS_DOWN) {
             mLayoutMode = LAYOUT_SET_SELECTION;
             setSelectionInt(mItemCount - 1);
+            invokeOnItemScrollListener();
             moved = true;
         }
 
@@ -1547,6 +1560,7 @@ public class GridView extends AbsListView {
 
         if (moved) {
             playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
+            invokeOnItemScrollListener();
         }
 
         return moved;
@@ -1684,7 +1698,7 @@ public class GridView extends AbsListView {
      * Control how items are stretched to fill their space.
      *
      * @param stretchMode Either {@link #NO_STRETCH},
-     * {@link #STRETCH_SPACING}, or {@link #STRETCH_COLUMN_WIDTH}.
+     * {@link #STRETCH_SPACING}, {@link #STRETCH_SPACING_UNIFORM}, or {@link #STRETCH_COLUMN_WIDTH}.
      *
      * @attr ref android.R.styleable#GridView_stretchMode
      */

@@ -22,7 +22,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 /**
- * The {@link PreferenceCategory} class is used to group {@link Preference}s
+ * Used to group {@link Preference} objects
  * and provide a disabled title above the group.
  */
 public class PreferenceCategory extends PreferenceGroup {

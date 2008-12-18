@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.Point;
@@ -34,57 +35,78 @@ import org.apache.harmony.awt.gl.*;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Polygon class defines an closed area specified by n vertices and 
- * n edges. The coordinates of the vertices are specified by x, y arrays.
- * The edges are the line segments from the point (x[i], y[i]) to the point 
- * (x[i+1], y[i+1]), for -1 < i < (n-1) plus the line segment from 
- * the point (x[n-1], y[n-1]) to the point (x[0], y[0]) point. 
- * The Polygon is empty if the number of vertices is zero.   
+ * The Polygon class defines an closed area specified by n vertices and n edges.
+ * The coordinates of the vertices are specified by x, y arrays. The edges are
+ * the line segments from the point (x[i], y[i]) to the point (x[i+1], y[i+1]),
+ * for -1 < i < (n-1) plus the line segment from the point (x[n-1], y[n-1]) to
+ * the point (x[0], y[0]) point. The Polygon is empty if the number of vertices
+ * is zero.
+ * 
+ * @since Android 1.0
  */
 public class Polygon implements Shape, Serializable {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -6460061437900069969L;
 
-    /** The points buffer capacity. */
+    /**
+     * The points buffer capacity.
+     */
     private static final int BUFFER_CAPACITY = 4;
-    
-    /** The number of Polygon vertices.*/
+
+    /**
+     * The number of Polygon vertices.
+     */
     public int npoints;
-    
-    /** The array of X coordinates of the vertices. */
+
+    /**
+     * The array of X coordinates of the vertices.
+     */
     public int[] xpoints;
-    
-    /** The array of Y coordinates of the vertices. */
+
+    /**
+     * The array of Y coordinates of the vertices.
+     */
     public int[] ypoints;
-    
-    /**  
-     * The smallest Rectangle that completely contains this Polygon. 
+
+    /**
+     * The smallest Rectangle that completely contains this Polygon.
      */
     protected Rectangle bounds;
 
     /*
-     * Polygon path iterator  
+     * Polygon path iterator
      */
     /**
      * The internal Class Iterator.
      */
     class Iterator implements PathIterator {
 
-        /** The source Polygon object. */
+        /**
+         * The source Polygon object.
+         */
         public Polygon p;
-        
-        /** The path iterator transformation. */
+
+        /**
+         * The path iterator transformation.
+         */
         public AffineTransform t;
-        
-        /** The current segmenet index. */
+
+        /**
+         * The current segment index.
+         */
         public int index;
 
         /**
-         * Constructs a new Polygon.Iterator for the given polygon and transformation
+         * Constructs a new Polygon.Iterator for the given polygon and
+         * transformation
          * 
-         * @param at - the AffineTransform object to apply rectangle path
-         * @param p the p
+         * @param at
+         *            the AffineTransform object to apply rectangle path.
+         * @param p
+         *            the p.
          */
         public Iterator(AffineTransform at, Polygon p) {
             this.p = p;
@@ -148,18 +170,21 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Instantiates a new polygon with the specified number of vertices,
-     * and the given arrays of x, y vertex coordinates. The length of 
-     * each coordinate array may not be less than the specified number of 
-     * vertices but may be greater. Only the first n elements are used from 
-     * each coordinate array.
+     * Instantiates a new polygon with the specified number of vertices, and the
+     * given arrays of x, y vertex coordinates. The length of each coordinate
+     * array may not be less than the specified number of vertices but may be
+     * greater. Only the first n elements are used from each coordinate array.
      * 
-     * @param xpoints the array of X vertex coordinates. 
-     * @param ypoints the array of Y vertex coordinates.
-     * @param npoints the number vertices of the polygon.
-     * @throws IndexOutOfBoundsException if the length of xpoints or ypoints
-     * is less than n.
-     * @throws NegativeArraySizeException if n is negative.
+     * @param xpoints
+     *            the array of X vertex coordinates.
+     * @param ypoints
+     *            the array of Y vertex coordinates.
+     * @param npoints
+     *            the number vertices of the polygon.
+     * @throws IndexOutOfBoundsException
+     *             if the length of xpoints or ypoints is less than n.
+     * @throws NegativeArraySizeException
+     *             if n is negative.
      */
     public Polygon(int[] xpoints, int[] ypoints, int npoints) {
         if (npoints > xpoints.length || npoints > ypoints.length) {
@@ -178,9 +203,9 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Resets the current Polygon to an empty Polygon. More precisely, 
-     * the number of Polygon vertices is set to zero, but x, y coordinates 
-     * arrays are not affected.  
+     * Resets the current Polygon to an empty Polygon. More precisely, the
+     * number of Polygon vertices is set to zero, but x, y coordinates arrays
+     * are not affected.
      */
     public void reset() {
         npoints = 0;
@@ -188,21 +213,22 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Invalidates the data that depends on the vertex coordinates. 
-     * This method should be called after direct manipulations  
-     * of the x, y vertex coordinates arrays to avoid unpredictable 
-     * results of methods which rely on the bounding box.
+     * Invalidates the data that depends on the vertex coordinates. This method
+     * should be called after direct manipulations of the x, y vertex
+     * coordinates arrays to avoid unpredictable results of methods which rely
+     * on the bounding box.
      */
     public void invalidate() {
         bounds = null;
     }
 
     /**
-     * Adds the point to the Polygon and updates the bounding box 
-     * accordingly.
+     * Adds the point to the Polygon and updates the bounding box accordingly.
      * 
-     * @param px the X coordinate of the added vertex.
-     * @param py the Y coordinate of the added vertex.
+     * @param px
+     *            the X coordinate of the added vertex.
+     * @param py
+     *            the Y coordinate of the added vertex.
      */
     public void addPoint(int px, int py) {
         if (npoints == xpoints.length) {
@@ -222,20 +248,16 @@ public class Polygon implements Shape, Serializable {
         npoints++;
 
         if (bounds != null) {
-            bounds.setFrameFromDiagonal(
-                    Math.min(bounds.getMinX(), px),
-                    Math.min(bounds.getMinY(), py),
-                    Math.max(bounds.getMaxX(), px),
-                    Math.max(bounds.getMaxY(), py));
+            bounds.setFrameFromDiagonal(Math.min(bounds.getMinX(), px), Math.min(bounds.getMinY(),
+                    py), Math.max(bounds.getMaxX(), px), Math.max(bounds.getMaxY(), py));
         }
     }
 
     /**
-     * Gets the bounding rectangle of the Polygon. The bounding rectangle
-     * is the smallest rectangle which contains the Polygon.
+     * Gets the bounding rectangle of the Polygon. The bounding rectangle is the
+     * smallest rectangle which contains the Polygon.
      * 
      * @return the bounding rectangle of the Polygon.
-     * 
      * @see java.awt.Shape#getBounds()
      */
     public Rectangle getBounds() {
@@ -270,11 +292,10 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Gets the bounding rectangle of the Polygon. The bounding rectangle
-     * is the smallest rectangle which contains the Polygon.
+     * Gets the bounding rectangle of the Polygon. The bounding rectangle is the
+     * smallest rectangle which contains the Polygon.
      * 
      * @return the bounding rectangle of the Polygon.
-     * 
      * @deprecated Use getBounds() method.
      */
     @Deprecated
@@ -283,12 +304,10 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Gets the Rectangle2D which represents Polygon bounds.
-     * The bounding rectangle is the smallest rectangle which contains 
-     * the Polygon.
+     * Gets the Rectangle2D which represents Polygon bounds. The bounding
+     * rectangle is the smallest rectangle which contains the Polygon.
      * 
      * @return the bounding rectangle of the Polygon.
-     * 
      * @see java.awt.Shape#getBounds2D()
      */
     public Rectangle2D getBounds2D() {
@@ -296,11 +315,13 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Translates all vertices of Polygon the specified distances
-     * along X, Y axis.
+     * Translates all vertices of Polygon the specified distances along X, Y
+     * axis.
      * 
-     * @param mx the distance to translate horizontally.
-     * @param my the distance to translate vertically.
+     * @param mx
+     *            the distance to translate horizontally.
+     * @param my
+     *            the distance to translate vertically.
      */
     public void translate(int mx, int my) {
         for (int i = 0; i < npoints; i++) {
@@ -313,46 +334,47 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Checks whether or not the point given by the coordinates x, y lies inside 
+     * Checks whether or not the point given by the coordinates x, y lies inside
      * the Polygon.
      * 
-     * @param x the X coordinate of the point to check.
-     * @param y the Y coordinate of the point to check.
-     * 
-     * @return true, if the specified point lies inside the Polygon,
-     * otherwise false.
-     * 
+     * @param x
+     *            the X coordinate of the point to check.
+     * @param y
+     *            the Y coordinate of the point to check.
+     * @return true, if the specified point lies inside the Polygon, false
+     *         otherwise.
      * @deprecated Use contains(int, int) method.
      */
     @Deprecated
     public boolean inside(int x, int y) {
-        return contains((double) x, (double) y);
+        return contains((double)x, (double)y);
     }
 
     /**
-     * Checks whether or not the point given by the coordinates x, y lies inside 
+     * Checks whether or not the point given by the coordinates x, y lies inside
      * the Polygon.
      * 
-     * @param x the X coordinate of the point to check.
-     * @param y the Y coordinate of the point to check.
-     * 
-     * @return true, if the specified point lies inside the Polygon,
-     * otherwise false.
+     * @param x
+     *            the X coordinate of the point to check.
+     * @param y
+     *            the Y coordinate of the point to check.
+     * @return true, if the specified point lies inside the Polygon, false
+     *         otherwise.
      */
     public boolean contains(int x, int y) {
-        return contains((double) x, (double) y);
+        return contains((double)x, (double)y);
     }
 
     /**
-     * Checks whether or not the point with specified double coordinates 
-     * lies inside the Polygon.
+     * Checks whether or not the point with specified double coordinates lies
+     * inside the Polygon.
      * 
-     * @param x the X coordinate of the point to check.
-     * @param y the Y coordinate of the point to check.
-     * 
-     * @return true, if the point given by the double coordinates 
-     * lies inside the Polygon, otherwise false.
-     * 
+     * @param x
+     *            the X coordinate of the point to check.
+     * @param y
+     *            the Y coordinate of the point to check.
+     * @return true, if the point given by the double coordinates lies inside
+     *         the Polygon, false otherwise.
      * @see java.awt.Shape#contains(double, double)
      */
     public boolean contains(double x, double y) {
@@ -360,19 +382,21 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Checks whether or not the rectangle determined by the parameters  
-     * [x, y, width, height] lies inside the Polygon.
+     * Checks whether or not the rectangle determined by the parameters [x, y,
+     * width, height] lies inside the Polygon.
      * 
-     * @param x the X coordinate of the rectangles's left upper 
-     * corner as a double.
-     * @param y the Y coordinate of the rectangles's left upper 
-     * corner as a double.
-     * @param width the width of rectangle as a double.
-     * @param width the height of rectangle as a double.
-     * 
-     * @return true, if the specified rectangle lies inside the Polygon,
-     * otherwise false.
-     * 
+     * @param x
+     *            the X coordinate of the rectangles's left upper corner as a
+     *            double.
+     * @param y
+     *            the Y coordinate of the rectangles's left upper corner as a
+     *            double.
+     * @param width
+     *            the width of rectangle as a double.
+     * @param height
+     *            the height of rectangle as a double.
+     * @return true, if the specified rectangle lies inside the Polygon, false
+     *         otherwise.
      * @see java.awt.Shape#contains(double, double, double, double)
      */
     public boolean contains(double x, double y, double width, double height) {
@@ -381,20 +405,21 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Checks whether or not the rectangle determined by the parameters  
-     * [x, y, width, height] intersects the interior of
-     * the Polygon.
+     * Checks whether or not the rectangle determined by the parameters [x, y,
+     * width, height] intersects the interior of the Polygon.
      * 
-     * @param x the X coordinate of the rectangles's left upper 
-     * corner as a double.
-     * @param y the Y coordinate of the rectangles's left upper 
-     * corner as a double.
-     * @param width the width of rectangle as a double.
-     * @param width the height of rectangle as a double.
-     * 
-     * @return true, if the specified rectangle intersects the interior of
-     * the Polygon, otherwise false.
-     * 
+     * @param x
+     *            the X coordinate of the rectangles's left upper corner as a
+     *            double.
+     * @param y
+     *            the Y coordinate of the rectangles's left upper corner as a
+     *            double.
+     * @param width
+     *            the width of rectangle as a double.
+     * @param height
+     *            the height of rectangle as a double.
+     * @return true, if the specified rectangle intersects the interior of the
+     *         Polygon, false otherwise.
      * @see java.awt.Shape#intersects(double, double, double, double)
      */
     public boolean intersects(double x, double y, double width, double height) {
@@ -405,11 +430,10 @@ public class Polygon implements Shape, Serializable {
     /**
      * Checks whether or not the specified rectangle lies inside the Polygon.
      * 
-     * @param rect the Rectangle2D object.
-     * 
-     * @return true, if the specified rectangle lies inside the Polygon,
-     * otherwise false.
-     * 
+     * @param rect
+     *            the Rectangle2D object.
+     * @return true, if the specified rectangle lies inside the Polygon, false
+     *         otherwise.
      * @see java.awt.Shape#contains(java.awt.geom.Rectangle2D)
      */
     public boolean contains(Rectangle2D rect) {
@@ -419,10 +443,10 @@ public class Polygon implements Shape, Serializable {
     /**
      * Checks whether or not the specified Point lies inside the Polygon.
      * 
-     * @param point the Point object.
-     * 
-     * @return true, if the specified Point lies inside the Polygon,
-     * otherwise false.
+     * @param point
+     *            the Point object.
+     * @return true, if the specified Point lies inside the Polygon, false
+     *         otherwise.
      */
     public boolean contains(Point point) {
         return contains(point.getX(), point.getY());
@@ -431,11 +455,10 @@ public class Polygon implements Shape, Serializable {
     /**
      * Checks whether or not the specified Point2D lies inside the Polygon.
      * 
-     * @param point the Point2D object.
-     * 
-     * @return true, if the specified Point2D lies inside the Polygon,
-     * otherwise false.
-     * 
+     * @param point
+     *            the Point2D object.
+     * @return true, if the specified Point2D lies inside the Polygon, false
+     *         otherwise.
      * @see java.awt.Shape#contains(java.awt.geom.Point2D)
      */
     public boolean contains(Point2D point) {
@@ -443,14 +466,13 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Checks whether or not the interior of rectangle specified by 
-     * the Rectangle2D object intersects the interior of the Polygon.
+     * Checks whether or not the interior of rectangle specified by the
+     * Rectangle2D object intersects the interior of the Polygon.
      * 
-     * @param rect the Rectangle2D object.
-     * 
-     * @return true, if the Rectangle2D intersects the interior of
-     * the Polygon, otherwise false.
-     * 
+     * @param rect
+     *            the Rectangle2D object.
+     * @return true, if the Rectangle2D intersects the interior of the Polygon,
+     *         false otherwise.
      * @see java.awt.Shape#intersects(java.awt.geom.Rectangle2D)
      */
     public boolean intersects(Rectangle2D rect) {
@@ -458,13 +480,12 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Gets the PathIterator object which gives the coordinates of 
-     * the polygon, transformed according to the specified AffineTransform.
+     * Gets the PathIterator object which gives the coordinates of the polygon,
+     * transformed according to the specified AffineTransform.
      * 
-     * @param t the specified AffineTransform object, or null.
-     * 
+     * @param t
+     *            the specified AffineTransform object or null.
      * @return PathIterator object for the Polygon.
-     * 
      * @see java.awt.Shape#getPathIterator(java.awt.geom.AffineTransform)
      */
     public PathIterator getPathIterator(AffineTransform t) {
@@ -472,23 +493,23 @@ public class Polygon implements Shape, Serializable {
     }
 
     /**
-     * Gets the PathIterator object which gives the coordinates of 
-     * the polygon, transformed according to the specified AffineTransform.
-     * The flatness parameter is ignored.
+     * Gets the PathIterator object which gives the coordinates of the polygon,
+     * transformed according to the specified AffineTransform. The flatness
+     * parameter is ignored.
      * 
-     * @param t the specified AffineTransform object, or null.
-     * @param flatness the maximum number of the control points for 
-     * a given curve which varies from colinear before a subdivided curve 
-     * is replaced by a straight line connecting the endpoints. 
-     * This parameter is ignored for the Polygon class.
-     * 
+     * @param t
+     *            the specified AffineTransform object or null.
+     * @param flatness
+     *            the maximum number of the control points for a given curve
+     *            which varies from colinear before a subdivided curve is
+     *            replaced by a straight line connecting the endpoints. This
+     *            parameter is ignored for the Polygon class.
      * @return PathIterator object for the Polygon.
-     *  
-     * @see java.awt.Shape#getPathIterator(java.awt.geom.AffineTransform, double)
+     * @see java.awt.Shape#getPathIterator(java.awt.geom.AffineTransform,
+     *      double)
      */
     public PathIterator getPathIterator(AffineTransform t, double flatness) {
         return new Iterator(t, this);
     }
 
 }
-

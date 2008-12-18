@@ -18,27 +18,32 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
-
 /**
- * An asynchronous update interface for receiving notifications
- * about tile information when tiles of a WritableRenderedImage 
- * become modifiable or unmodifiable.
+ * An asynchronous update interface for receiving notifications about tile
+ * information when tiles of a WritableRenderedImage become modifiable or
+ * unmodifiable.
+ * 
+ * @since Android 1.0
  */
 public interface TileObserver {
 
     /**
-     * This method is called when information about a tile
-     * update is available.
+     * This method is called when information about a tile update is available.
      * 
-     * @param source the source image.
-     * @param tileX the X index of the tile.
-     * @param tileY the Y index of the tile.
-     * @param willBeWritable parameter which indicates whether
-     * the tile will be grabbed for writing or be released.
+     * @param source
+     *            the source image.
+     * @param tileX
+     *            the X index of the tile.
+     * @param tileY
+     *            the Y index of the tile.
+     * @param willBeWritable
+     *            parameter which indicates whether the tile will be grabbed for
+     *            writing or be released.
      */
-    public void tileUpdate(WritableRenderedImage source, int tileX, int tileY, boolean willBeWritable);
+    public void tileUpdate(WritableRenderedImage source, int tileX, int tileY,
+            boolean willBeWritable);
 
 }
-

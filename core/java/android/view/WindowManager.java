@@ -125,6 +125,9 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_APPLICATION_PANEL
          * @see #TYPE_APPLICATION_MEDIA
          * @see #TYPE_APPLICATION_SUB_PANEL
+         * @see #TYPE_APPLICATION_ATTACHED_DIALOG
+         * @see #TYPE_INPUT_METHOD
+         * @see #TYPE_INPUT_METHOD_DIALOG
          * @see #TYPE_STATUS_BAR
          * @see #TYPE_SEARCH_BAR
          * @see #TYPE_PHONE
@@ -133,6 +136,12 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_TOAST
          * @see #TYPE_SYSTEM_OVERLAY
          * @see #TYPE_PRIORITY_PHONE
+         * @see #TYPE_STATUS_BAR_PANEL
+         * @see #TYPE_SYSTEM_DIALOG
+         * @see #TYPE_KEYGUARD_DIALOG
+         * @see #TYPE_SYSTEM_ERROR
+         * @see #TYPE_INPUT_METHOD
+         * @see #TYPE_INPUT_METHOD_DIALOG
          */
         public int type;
     
@@ -193,12 +202,18 @@ public interface WindowManager extends ViewManager {
          * {@link #TYPE_APPLICATION_PANEL} panels.
          */
         public static final int TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW+2;
-    
+
+        /** Window type: like {@link #TYPE_APPLICATION_PANEL}, but layout
+         * of the window happens as that of a top-level window, <em>not</em>
+         * as a child of its container.
+         */
+        public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3;
+        
         /**
          * End of types of sub-windows.
          */
         public static final int LAST_SUB_WINDOW         = 1999;
-    
+        
         /**
          * Start of system-specific window types.  These are not normally
          * created by applications.
@@ -278,10 +293,23 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10;
         
         /**
+         * Window type: internal input methods windows, which appear above
+         * the normal UI.  Application windows may be resized or panned to keep
+         * the input focus visible while this window is displayed.
+         */
+        public static final int TYPE_INPUT_METHOD       = FIRST_SYSTEM_WINDOW+11;
+
+        /**
+         * Window type: internal input methods dialog windows, which appear above
+         * the current input method window.
+         */
+        public static final int TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
-    
+        
         /**
          * Specifies what type of memory buffers should be used by this window.
          * Default is normal.
@@ -330,7 +358,19 @@ public interface WindowManager extends ViewManager {
         /** Window flag: blur everything behind this window. */
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
         
-        /** Window flag: this window won't ever get focus. */
+        /** Window flag: this window won't ever get key input focus, so the
+         * user can not send key or other button events to it.  Those will
+         * instead go to whatever focusable window is behind it.  This flag
+         * will also enable {@link #FLAG_NOT_TOUCH_MODAL} whether or not that
+         * is explicitly set.
+         * 
+         * <p>Setting this flag also implies that the window will not need to
+         * interact with
+         * a soft input method, so it will be Z-ordered and positioned 
+         * independently of any active input method (typically this means it
+         * gets Z-ordered on top of the input method, so it can use the full
+         * screen for its content and cover the input method if needed.  You
+         * can use {@link #FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */
         public static final int FLAG_NOT_FOCUSABLE      = 0x00000008;
         
         /** Window flag: this window can never receive touch events. */
@@ -405,12 +445,123 @@ public interface WindowManager extends ViewManager {
          * set for you by Window as described in {@link Window#setFlags}.*/
         public static final int FLAG_LAYOUT_INSET_DECOR = 0x00010000;
         
+        /** Window flag: invert the state of {@link #FLAG_NOT_FOCUSABLE} with
+         * respect to how this window interacts with the current method.  That
+         * is, if FLAG_NOT_FOCUSABLE is set and this flag is set, then the
+         * window will behave as if it needs to interact with the input method
+         * and thus be placed behind/away from it; if FLAG_NOT_FOCUSABLE is
+         * not set and this flag is set, then the window will behave as if it
+         * doesn't need to interact with the input method and can be placed
+         * to use more space and cover the input method.
+         */
+        public static final int FLAG_ALT_FOCUSABLE_IM = 0x00020000;
+        
+        /** Window flag: if you have set {@link #FLAG_NOT_TOUCH_MODAL}, you
+         * can set this flag to receive a single special MotionEvent with
+         * the action
+         * {@link MotionEvent#ACTION_OUTSIDE MotionEvent.ACTION_OUTSIDE} for
+         * touches that occur outside of your window.  Note that you will not
+         * receive the full down/move/up gesture, only the location of the
+         * first down as an ACTION_OUTSIDE.
+         */
+        public static final int FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000;
+        
+        /** Window flag: set when this window was created from the restored
+         * state of a previous window, indicating this is not the first time
+         * the user has navigated to it.
+         */
+        public static final int FLAG_RESTORED_STATE = 0x00080000;
+        
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
          * {@hide} */
         public static final int FLAG_SYSTEM_ERROR = 0x40000000;
 
+        /**
+         * Mask for {@link #softInputMode} of the bits that determine the
+         * desired visibility state of the soft input area for this window.
+         */
+        public static final int SOFT_INPUT_MASK_STATE = 0x0f;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: no state has been specified.
+         */
+        public static final int SOFT_INPUT_STATE_UNSPECIFIED = 0;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: please don't change the state of
+         * the soft input area.
+         */
+        public static final int SOFT_INPUT_STATE_UNCHANGED = 1;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: please hide any soft input
+         * area.
+         */
+        public static final int SOFT_INPUT_STATE_HIDDEN = 2;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: please show the soft input area
+         * the first time the window is shown.
+         */
+        public static final int SOFT_INPUT_STATE_FIRST_VISIBLE = 3;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: please always show the soft
+         * input area.
+         */
+        public static final int SOFT_INPUT_STATE_VISIBLE = 4;
+        
+        /**
+         * Mask for {@link #softInputMode} of the bits that determine the
+         * way that the window should be adjusted to accomodate the soft
+         * input window.
+         */
+        public static final int SOFT_INPUT_MASK_ADJUST = 0xf0;
+        
+        /** Adjustment option for {@link #softInputMode}: nothing specified.
+         * The system will try to pick one or
+         * the other depending on the contents of the window.
+         */
+        public static final int SOFT_INPUT_ADJUST_UNSPECIFIED = 0x00;
+        
+        /** Adjustment option for {@link #softInputMode}: set to allow the
+         * window to be resized when an input
+         * method is shown, so that its contents are not covered by the input
+         * method.  This can <em>not<em> be combined with
+         * {@link #SOFT_INPUT_ADJUST_PAN}; if
+         * neither of these are set, then the system will try to pick one or
+         * the other depending on the contents of the window.
+         */
+        public static final int SOFT_INPUT_ADJUST_RESIZE = 0x10;
+        
+        /** Adjustment option for {@link #softInputMode}: set to have a window
+         * pan when an input method is
+         * shown, so it doesn't need to deal with resizing but just panned
+         * by the framework to ensure the current input focus is visible.  This
+         * can <em>not<em> be combined with {@link #SOFT_INPUT_ADJUST_RESIZE}; if
+         * neither of these are set, then the system will try to pick one or
+         * the other depending on the contents of the window.
+         */
+        public static final int SOFT_INPUT_ADJUST_PAN = 0x20;
+        
+        /**
+         * Desired operating mode for any soft input area.  May any combination
+         * of:
+         * 
+         * <ul>
+         * <li> One of the visibility states
+         * {@link #SOFT_INPUT_STATE_UNSPECIFIED}, {@link #SOFT_INPUT_STATE_UNCHANGED},
+         * {@link #SOFT_INPUT_STATE_HIDDEN}, {@link #SOFT_INPUT_STATE_FIRST_VISIBLE}, or
+         * {@link #SOFT_INPUT_STATE_VISIBLE}.
+         * <li> One of the adjustment options
+         * {@link #SOFT_INPUT_ADJUST_UNSPECIFIED},
+         * {@link #SOFT_INPUT_ADJUST_RESIZE}, or
+         * {@link #SOFT_INPUT_ADJUST_PAN}.
+         */
+        public int softInputMode;
+        
         /**
          * Placement of window within the screen as per {@link Gravity}
          *
@@ -533,6 +684,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(type);
             out.writeInt(memoryType);
             out.writeInt(flags);
+            out.writeInt(softInputMode);
             out.writeInt(gravity);
             out.writeFloat(horizontalMargin);
             out.writeFloat(verticalMargin);
@@ -565,6 +717,7 @@ public interface WindowManager extends ViewManager {
             type = in.readInt();
             memoryType = in.readInt();
             flags = in.readInt();
+            softInputMode = in.readInt();
             gravity = in.readInt();
             horizontalMargin = in.readFloat();
             verticalMargin = in.readFloat();
@@ -586,6 +739,7 @@ public interface WindowManager extends ViewManager {
         public static final int TITLE_CHANGED = 1<<6;
         public static final int ALPHA_CHANGED = 1<<7;
         public static final int MEMORY_TYPE_CHANGED = 1<<8;
+        public static final int SOFT_INPUT_MODE_CHANGED = 1<<9;
     
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
@@ -606,6 +760,22 @@ public interface WindowManager extends ViewManager {
                 y = o.y;
                 changes |= LAYOUT_CHANGED;
             }
+            if (horizontalWeight != o.horizontalWeight) {
+                horizontalWeight = o.horizontalWeight;
+                changes |= LAYOUT_CHANGED;
+            }
+            if (verticalWeight != o.verticalWeight) {
+                verticalWeight = o.verticalWeight;
+                changes |= LAYOUT_CHANGED;
+            }
+            if (horizontalMargin != o.horizontalMargin) {
+                horizontalMargin = o.horizontalMargin;
+                changes |= LAYOUT_CHANGED;
+            }
+            if (verticalMargin != o.verticalMargin) {
+                verticalMargin = o.verticalMargin;
+                changes |= LAYOUT_CHANGED;
+            }
             if (type != o.type) {
                 type = o.type;
                 changes |= TYPE_CHANGED;
@@ -617,6 +787,10 @@ public interface WindowManager extends ViewManager {
             if (flags != o.flags) {
                 flags = o.flags;
                 changes |= FLAGS_CHANGED;
+            }
+            if (softInputMode != o.softInputMode) {
+                softInputMode = o.softInputMode;
+                changes |= SOFT_INPUT_MODE_CHANGED;
             }
             if (gravity != o.gravity) {
                 gravity = o.gravity;
@@ -677,15 +851,37 @@ public interface WindowManager extends ViewManager {
     
         @Override
         public String toString() {
-            return "WM.LayoutParams{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " (" + x + "," + y + ")("
-                + (width==FILL_PARENT?"fill_parent":(width==WRAP_CONTENT?"wrap_content":width))
-                + "x"
-                + (height==FILL_PARENT?"fill_parent":(height==WRAP_CONTENT?"wrap_content":height))
-                + ") gr=#" + Integer.toHexString(gravity)
-                + " ty=" + type + " fl=#" + Integer.toHexString(flags)
-                + " fmt=" + format + "}";
+            StringBuilder sb = new StringBuilder(256);
+            sb.append("WM.LayoutParams{");
+            sb.append("(");
+            sb.append(x);
+            sb.append(',');
+            sb.append(y);
+            sb.append(")(");
+            sb.append((width==FILL_PARENT?"fill":(width==WRAP_CONTENT?"wrap":width)));
+            sb.append('x');
+            sb.append((height==FILL_PARENT?"fill":(height==WRAP_CONTENT?"wrap":height)));
+            sb.append(")");
+            if (softInputMode != 0) {
+                sb.append(" sim=#");
+                sb.append(Integer.toHexString(softInputMode));
+            }
+            if (gravity != 0) {
+                sb.append(" gr=#");
+                sb.append(Integer.toHexString(gravity));
+            }
+            sb.append(" ty=");
+            sb.append(type);
+            sb.append(" fl=#");
+            sb.append(Integer.toHexString(flags));
+            sb.append(" fmt=");
+            sb.append(format);
+            if (windowAnimations != 0) {
+                sb.append(" wanim=0x");
+                sb.append(Integer.toHexString(windowAnimations));
+            }
+            sb.append('}');
+            return sb.toString();
         }
     
         private CharSequence mTitle = "";

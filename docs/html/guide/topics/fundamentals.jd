@@ -1,0 +1,1411 @@
+page.title=Application Fundamentals
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.app.Activity}</li>
+<li>{@link android.app.Service}</li>
+<li>{@link android.content.BroadcastReceiver}</li>
+<li>{@link android.content.ContentProvider}</li>
+<li>{@link android.content.Intent}</li>
+</ol>
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#appcomp">Application Components</a>
+  <ol>
+    <li><a href="#actcomp">Activating components: intents</a></li>
+    <li><a href="#manfile">The manifest file</a></li>
+    <li><a href="#ifilters">Intent filters</a></li>
+  </ol></li>
+<li><a href="#acttask">Activities and Tasks</a>
+  <ol>
+    <li><a href="#afftask">Affinities and new tasks</a></li>
+    <li><a href="#lmodes">Launch modes</a></li>
+    <li><a href="#clearstack">Clearing the stack</a></li>
+    <li><a href="#starttask">Starting tasks</a></li>
+  </ol></li>
+<li><a href="#procthread">Processes and Threads</a></li>
+<li><a href="#lcycles">Lifecycles</a>
+  <ol>
+    <li><a href="#actlife">Activity lifecycle</a></li>
+    <li><a href="#servlife">Service lifecycle</a></li>
+    <li><a href="#broadlife">Broadcast receiver lifecycle</a></li>
+    <li><a href="#proclife">Processes and lifecycles</a></li>
+  </ol></li>
+</div>
+</div>
+
+<p>
+Android applications are written in the Java programming language. 
+The compiled Java code &mdash; along with data and 
+resource files required by the application and a manifest describing the
+application &mdash; is bundled by the aapt tool into an <i>Android package</i>, 
+an archive file marked by an {@code .apk} suffix.  This file is the vehicle 
+for distributing the application and installing it on mobile devices; it's 
+the file users download to their devices.  All the code in a single 
+{@code .apk} file is considered to be one <i>application</i>.
+</p>
+
+<p>
+In many ways, each Android application lives in its own world:
+</p>
+
+<ul>
+<li>By default, every application runs in its own Linux process.  
+Android starts the process when any of the application's code needs to be 
+executed, and shuts down the process when it's no longer needed and system 
+resources are required by other applications.</li>
+
+<li>Each process has its own Java virtual machine (VM), so application code 
+runs in isolation from the code of all other applications.</li>
+
+<li>By default, each application is assigned a unique Linux user ID.  
+Permissions are set so that the application's files are visible only 
+that user, only to the application itself &mdash; although there are ways 
+to export them to other applications as well.</li>
+</ul>
+
+<p>
+It's possible to arrange for two applications to share the same user ID, 
+in which case they will be able to see each other's files.  To conserve 
+system resources, applications with the same ID can also arrange to run 
+in the same Linux process, sharing the same VM.
+</p>
+
+
+<h2><a name="appcomp"></a>Application Components</h2>
+
+<p>
+A central feature of Android is that one application can make use of elements 
+of other applications (provided those applications permit it).  For example, 
+if your application needs to display a scrolling list of images and another 
+application has developed a suitable scroller and made it available to others, 
+you can call upon that scroller to do the work, rather than develop your own.  
+Your application doesn't incorporate the code of the other application or 
+link to it.  Rather, it simply starts up that piece of the other application 
+when the need arises.
+</p>
+
+<p>
+For this to work, the system must be able to start an application process 
+when any part of it is needed, and instantiate the Java objects for that part.  
+Therefore, unlike applications on most other systems, Android applications don't 
+have a single entry point for everything in the application (no {@code main()} 
+function, for example).  Rather, they have essential <i>components</i> that 
+the system can instantiate and run as needed.  There are four types of components:
+</p>
+
+<dl>
+
+<dt><b>Activities</b></dt>
+<dd>An <i>activity</i> presents a visual user interface for one focused endeavor 
+the user can undertake.  For example, an activity might present a list of 
+menu items users can choose from or it might display photographs along
+with their captions.  A text messaging application might have one activity 
+that shows a list of contacts to send messages to, a second activity to write 
+the message to the chosen contact, and other activities to review old messages 
+or change settings.  Though they work together to form a cohesive user interface, 
+each activity is independent of the others.  
+Each one is implemented as a subclass of the {@link android.app.Activity} base class.  
+
+<p>
+An application might consist of just one activity or, like the text messaging
+application just mentioned, it may contain several.  
+What the activities are, and how many there are depends, of course, on the 
+application and its design.  Typically, one of the activities is marked
+as the first one that should be presented to the user when the application is 
+launched.  Moving from one activity to another is accomplished by having the 
+current activity start the next one.  
+</p>
+
+<p>
+Each activity is given a default window to draw in.  Typically, the window 
+fills the screen, but it might be smaller than the screen and float on top 
+of other windows.  An activity can also make use of additional windows &mdash; 
+for example, a window that presents users with vital information when they 
+select a particular item on-screen, or a pop-up dialog that calls for a user 
+response in the midst of the activity.
+</p>
+
+<p>
+The visual content of the window is provided by a hierarchy of views &mdash; 
+objects derived from the base {@link android.view.View} class.  Each view 
+draws in a particular rectangular space within the window and responds to user 
+actions directed at that space.  Android has a number of ready-made views that 
+you can use &mdash; including buttons, text fields, scroll bars, menu items, 
+check boxes, and more.  A view hierarchy is placed within the activity's 
+window by the <code>{@link android.app.Activity#setContentView 
+Activity.setContentView()}</code> method.  The <i>content view</i> 
+is the View object at the root of the hierarchy.  
+(See <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> 
+for more information on views and the heirarchy.)
+</p></dd>
+
+<p><dt><b>Services</b></dt>
+<dd>A <i>service</i> doesn't have a visual user interface, but rather runs in 
+the background for an indefinite period of time.  For example, a service might 
+play background music as the user attends to other matters, or it might fetch 
+data over the network or calculate something and provide the result to activities 
+that need it.  Each service extends the {@link android.app.Service} base class.
+
+<p>
+A good example is a media player playing songs from a play list.  The player 
+application would probably have one or more activities that allow the user to 
+choose songs and start playing them.  However, the music playback itself would 
+not be handled by an activity because users will expect the music to keep 
+playing even after they leave the player and begin something different.  
+To keep the music going, the media player activity could start a service to run 
+in the background.  The system will then keep the music playback service running 
+even after the activity that started it leaves the screen.
+</p>
+
+<p> 
+It's possible to connect to (bind to) an ongoing service (and start the service 
+if it's not already running).  While connected, you can communicate with the 
+service through an interface that the service exposes.  For the music service, 
+this interface might allow users to pause, rewind, stop, and restart the playback.
+</p>
+
+<p>
+Like activities and the other components, services run in the main thread of 
+the application process.  So that they won't block other components or the 
+user interface, they often spawn another thread for time-consuming tasks 
+(like music playback).  See <a href="#procthread">Processes and Threads</a>, later.
+</p></dd>
+
+<dt><b>Broadcast receivers</b></dt>
+<dd>A <i>broadcast receiver</i> is a component that does nothing but 
+receive and react to broadcast announcements.  Many broadcasts originate in 
+system code &mdash; for example, announcements that the timezone has changed, 
+that the battery is low, that the keyboard has been exposed, or that the user 
+changed a language preference.
+
+<p>
+An application can have any number of broadcast receivers to respond to any 
+announcements it considers important.  All receivers extend the {@link 
+android.content.BroadcastReceiver} base class.
+</p>
+
+<p>
+Broadcast receivers do not display a user interface.  However, they may start
+an activity in response to the information they receive, or they may use 
+the {@link android.app.NotificationManager} to alert the user.  Notifications 
+can get the user's attention in various ways &mdash; flashing 
+the backlight, vibrating the device, playing a sound, and so on.  They 
+typically place a persistent icon in the status bar, which users can open to 
+get the message. 
+</p></dd>
+
+<dt><b>Content providers</b></dt>
+<dd>A <i>content provider</i> makes a specific set of the application's data 
+available to other applications. The data can be stored in the file system, 
+in an SQLite database, or in any other manner that makes sense.  
+The content provider extends the {@link android.content.ContentProvider} base 
+class to implement a standard set of methods that enable other applications 
+to retrieve and store data of the type it controls.  However, applications 
+do not call these methods directly.  Rather they use a {@link 
+android.content.ContentResolver} object and call its methods instead.  
+A ContentResolver can talk to any content provider; it cooperates with the
+provider to manage any interprocess communication that's involved. 
+
+<p>
+See the separate 
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content 
+Providers</a> document for more information on using content providers.
+</p></dd>
+
+</dl>
+
+<p>
+Whenever there's a request that should be handled by a particular component, 
+Android makes sure that the application process of the component is running, 
+starting it if necessary, and that an appropriate instance of the component 
+is available, creating the instance if necessary.  
+</p>
+
+
+<h3><a name="actcomp"></a>Activating components: intents</h3> 
+
+<p>
+Content providers are activated when they're targeted by a request from a 
+ContentResolver.  The other three components &mdash; activities, services, 
+and broadcast receivers &mdash; are activated by asynchronous messages 
+called <i>intents</i>.  An intent is an {@link android.content.Intent} 
+object that holds the content of the message.  Among other things, it names 
+the action an activity or service is being requested to take and specifies 
+the URI of the data to act on.  For broadcast receivers, it names the 
+action being announced.  For example, it might convey a request for 
+an activity to present an image to the user or let the user edit some
+text.  Or it might announce to interested broadcast receivers that the 
+camera button has been pressed.
+</p>
+
+<p>
+There are separate methods for activiating each type of component: 
+</p>
+
+<ul>
+
+<li>An activity is launched (or given something new to do) by passing an 
+Intent object to <code>{@link android.content.Context#startActivity 
+Context.startActivity()}</code> or <code>{@link 
+android.app.Activity#startActivityForResult 
+Activity.startActivityForResult()}</code>.  The responding activity can 
+look at the initial intent that caused it to be launched by calling its 
+<code>{@link android.app.Activity#getIntent getIntent()}</code> method.  
+Android calls the activity's <code>{@link 
+android.app.Activity#onNewIntent onNewIntent()}</code> method to pass 
+it any subsequent intents.
+
+<p>
+One activity often starts the next one.  If it expects a result back from 
+the activity it's starting, it calls {@code startActivityForResult()} 
+instead of {@code startActivity()}.  For example, if it starts an activity 
+that lets the user pick a photo, it might expect to be returned the chosen 
+photo.  The result is returned in an Intent object that's passed to the 
+calling activity's <code>{@link android.app.Activity#onActivityResult 
+onActivityResult()}</code> method.
+</p>
+</li>
+
+<li><p>A service is started (or new instructions are given to an ongoing 
+service) by passing an Intent object to <code>{@link 
+android.content.Context#startService Context.startService()}</code>.  
+Android calls the service's <code>{@link android.app.Service#onStart 
+onStart()}</code> method and passes it the Intent object.</p>
+
+<p>
+Similarly, an intent can be passed to <code>{@link 
+android.content.Context#bindService Context.bindService()}</code> to 
+establish an ongoing connection between the calling component and a 
+target service.  It initiates the service if it's not already running.  
+The service receives the Intent object in
+an <code>{@link android.app.Service#onBind onBind()}</code> call.
+For example, an activity might establish a connection with the music 
+playback service mentioned earlier so that it could provide the user 
+with an interface for controlling the playback.  The activity would 
+call {@code bindService()} to set up that connection.
+</p>
+</li>
+
+<li><p>An application can initiate a broadcast by passing an Intent object to 
+methods like <code>{@link 
+android.content.Context#sendBroadcast(Intent) Context.sendBroadcast()}</code>, 
+<code>{@link android.content.Context#sendOrderedBroadcast(Intent, String) 
+Context.sendOrderedBroadcast()}</code>, and <code>{@link 
+android.content.Context#sendStickyBroadcast Context.sendStickyBroadcast()}</code>
+in any of their variations.  Android delivers the intent to all interested 
+broadcast receivers by calling their <code>{@link 
+android.content.BroadcastReceiver#onReceive onReceive()}</code> methods.</p></li>
+
+</ul>
+
+<p>
+For more on intent messages, see the separate article, <a 
+href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+and Intent Filters</a>.
+
+
+<h3><a name="manfile"></a>The manifest file</h3>
+
+<p>
+Before Android can start an application component, it must learn that 
+the component exists.  Therefore, applications declare their components 
+in a manifest file that's bundled into the Android package, the {@code .apk} 
+file that also holds the application's code, files, and resources.  
+</p>
+
+<p>
+The manifest is a structured XML file and is always named AndroidManifest.xml 
+for all applications.  It does a number of things in addition to declaring the 
+application's components, such as naming any libraries the application needs 
+to be linked against (besides the default Android library) and identifying 
+any permissions the application expects to be granted.
+</p>
+
+<p>
+But the principal task of the manifest is to inform Android about the application's 
+components.  For example, an activity might be declared as follows:
+</p>
+
+<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:icon="@drawable/small_pic.png"
+                  android:label="@string/freneticLabel" 
+                  . . .  &gt;
+        &lt;/activity&gt;
+        . . .
+    &lt;/application&gt;
+&lt/manifest&gt;</pre>
+
+<p>
+The {@code name} attribute of the {@code &lt;activity&gt;} element 
+names the {@link android.app.Activity} subclass that implements the 
+activity.  The {@code icon} and {@code label} attributes point to 
+resource files containing an icon and label that can be displayed 
+to users to represent the activity.
+</p>
+
+<p>
+The other components are declared in a similar way &mdash; 
+{@code &lt;service&gt;} elements for services, {@code &lt;receiver&gt;}
+elements for broadcast receivers, and {@code &lt;provider&gt;} elements
+for content providers.  Activities, services, and content providers that 
+are not declared in the manifest are not visible to the system and are 
+consequently never run.  Broadcast receivers can be declared in the 
+manifest, or they can be created dynamically in code (as 
+{@link android.content.BroadcastReceiver} objects) 
+and registered with the system by calling <code>{@link 
+android.content.Context#registerReceiver Context.registerReceiver()}</code>.
+</p>
+
+<p>
+For more on how to structure a manifest file for your application, see 
+<a href="{@docRoot}guide/topics/manifest/manifest.html">The Manifest File</a>.
+</p>
+
+
+<h3><a name="ifilters"></a>Intent filters</h3>
+
+<p>
+An Intent object can explicitly name a target component.  If it does,
+Android finds that component (based on the declarations in the manifest 
+file) and activates it.  But if a target is not explicitly named, 
+Android must locate the best component to respond to the intent.  
+It does so by comparing the Intent object to the <i>intent filters</i> 
+of potential targets.  A component's intent filters inform Android of 
+the kinds of intents the component is able to handle.  Like other 
+essential information about the component, they're declared in the 
+manifest file.  Here's an extension of the previous example that adds 
+two intent filters to the activity:
+</p>
+
+<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:icon="@drawable/small_pic.png"
+                  android:label="@string/freneticLabel" 
+                  . . .  &gt;
+            &lt;intent-filter . . . &gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter . . . &gt;
+                &lt;action android:name="com.example.project.BOUNCE" /&gt;
+                &lt;data android:type="image/jpeg" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        . . .
+    &lt;/application&gt;
+&lt/manifest&gt;</pre>
+
+<p>
+The first filter in the example &mdash; the combination of the action
+"{@code android.intent.action.MAIN}" and the category
+"{@code android.intent.category.LAUNCHER}" &mdash; is a common one.
+It marks the activity as one that should be represented in the
+application launcher, the screen listing applications users can launch 
+on the device.  In other words, the activity is the entry point for 
+the application, the initial one users would see when they choose 
+the application in the launcher.
+</p>
+
+<p>
+The second filter declares an action that the activity can perform on 
+a particular type of data.
+</p>
+
+<p>
+A component can have any number of intent filters, each one declaring a 
+different set of capabilities.  If it doesn't have any filters, it can 
+be activated only by intents that explicitly name the component as the 
+target.
+</p>
+
+<p>
+For a broadcast receiver that's created and registered in code, the
+intent filter is instantiated directly as an {@link android.content.IntentFilter}
+object.  All other filters are set up in the manifest.
+</p>
+
+<p>
+For more on intent filters, see a separate document, 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+and Intent Filters</a>.
+</p>
+
+
+<h2><a name="acttask"></a>Activities and Tasks</h2>
+
+<p>
+As noted earlier,  one activity can start another, including one defined 
+in a different application.  Suppose, for example, that you'd like 
+to let users display a street map of some location.  There's already an 
+activity that can do that, so all your activity needs to do is put together 
+an Intent object with the required information and pass it to 
+{@code startActivity()}.  The map viewer will display the map.  When the user 
+hits the BACK key, your activity will reappear on screen.
+</p>
+
+<p>
+To the user, it will seem as if the map viewer is part of the same application 
+as your activity, even though it's defined in another application and runs in 
+that application's process.  Android maintains this user experience by keeping 
+both activities in the same <i>task</i>.  Simply put, a task is what the user 
+experiences as an "application."  It's a group of related activities, arranged 
+in a stack.  The root activity in the stack is the one that began the task 
+&mdash; typically, it's an activity the user selected in the application launcher.  
+The activity at the top of the stack is one that's currently running &mdash; 
+the one that is the focus for user actions.  When one activity starts another, 
+the new activity is pushed on the stack; it becomes the running activity.  
+The previous activity remains in the stack.  When the user presses the BACK key, 
+the current activity is popped from the stack, and the previous one resumes as 
+the running activity.  Activities in the stack are never rearranged, only 
+pushed and popped.  
+</p>
+
+<p>
+The stack contains objects, so if a task has more than one instance of the same 
+Activity subclass open &mdash; multiple map viewers, for example &mdash; the 
+stack has a separate entry for each instance.
+</p>
+
+<p>
+A task is a stack of activities, not a class or an element in the manifest file. 
+So there's no way to set values for a task independently of its activities.  
+Values for the task as a whole are set in the root activity.  For example, the 
+next section will talk about the "affinity of a task"; that value is read from 
+the affinity set for the task's root activity.
+</p>
+
+<p>
+All the activities in a task move together as a unit.  The entire task (the entire 
+activity stack) can be brought to the foreground or sent to the background.  
+Suppose, for instance, that the current task has four activities in its stack 
+&mdash; three under the current activity.  The user presses the HOME key, goes 
+to the application launcher, and selects a new application (actually, a new <i>task</i>).  
+The current task goes into the background and the root activity for the new task is displayed.  
+Then, after a short period, the user goes back to the home screen and again selects 
+the previous application (the previous task).  That task, with all four 
+activities in the stack, comes forward.  When the user presses the BACK 
+key, the screen does not display the activity the user just left (the root
+activity of the previous task).  Rather, the activity on the top of the stack 
+is removed and the previous activity in the same task is displayed. 
+</p>
+
+<p>
+The behavior just described is the default behavior for activities and tasks.  
+But there are ways to modify almost all aspects of it.  The association of 
+activities with tasks, and the behavior of an activity within a task, is 
+controlled by the interaction between flags set in the Intent object that
+started the activity and attributes set in the activity's {@code &lt;activity&gt;}
+element in the manifest.  Both requester and respondent have a say in what happens.
+</p>
+
+<p>
+In this regard, the principal Intent flags are:
+
+<p style="margin-left: 2em">{@code FLAG_ACTIVITY_NEW_TASK}
+<br/>{@code FLAG_ACTIVITY_CLEAR_TOP}
+<br/>{@code FLAG_ACTIVITY_RESET_TASK_IF_NEEDED}
+<br/>{@code FLAG_ACTIVITY_SINGLE_TOP}</p>
+
+<p>
+The principal {@code &lt;activity&gt;} attributes are:
+  
+<p style="margin-left: 2em">{@code taskAffinity}
+<br/>{@code launchMode}
+<br/>{@code allowTaskReparenting}
+<br/>{@code clearTaskOnLaunch}
+<br/>{@code alwaysRetainTaskState}
+<br/>{@code finishOnTaskLaunch}</p>
+
+<p>
+The following sections describe what some of these flags and attributes do,
+and how they interact.
+</p>
+
+
+<h3><a name="afftask"></a>Affinities and new tasks</h3>
+
+<p>
+By default, all the activities in an application have an <i>affinity</i> for each 
+other &mdash; that is, there's a preference for them all to belong to the 
+same task.  However, an individual affinity can be set for each activity 
+with the {@code taskAffinity} attribute.  Activities defined in different 
+applications can share an affinity, or activities defined in the same 
+application can be assigned different affinities.  
+The affinity comes into play in two circumstances:  When the Intent object 
+that launches an activity contains the {@code FLAG_ACTIVITY_NEW_TASK} flag, 
+and when an activity has its {@code allowTaskReparenting} attribute set 
+to "{@code true}". 
+</p>
+
+<dl>
+<dt>The <code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> flag</dt>
+<dd>As mentioned earlier, a new activity is, by default, launched into 
+the task of the activity that called {@code startActivity()}.  It's pushed
+ onto the same stack as the caller.  However, if the Intent object passed 
+to {@code startActivity()} contains the {@code FLAG_ACTIVITY_NEW_TASK} 
+flag, the system looks for a different task to house the new activity.  
+Often, as the name of the flag implies, it's a new task.  However, it 
+doesn't have to be.  If there's an existing task with the same affinity 
+as the new activity, the activity is launched into that task.  If not, 
+it begins a new task.</dd>
+
+<dt>The {@code allowTaskReparenting} attribute</dt>
+<dd>If an activity has its {@code allowTaskReparenting} attribute is 
+set to "{@code true}", it can move from the task it starts in to the task 
+it has an affinity for when that task comes to the fore.  For example, 
+suppose that an activity that reports weather conditions in selected 
+cities is defined as part of a travel application.  It has the same
+affinity as other activities in the same application (the default 
+affinity) and it allows reparenting.  One of your activities 
+starts the weather reporter, so it initially belongs to the same task as 
+your activity.  However, when the travel application, next comes forward, 
+the weather reporter will be reassigned to and displayed with that task.</dd>
+</dl>
+
+<p>
+If an {@code .apk} file contains more than one "application"
+from the user's point of view, you will probably want to assign different 
+affinities to the activities associated with each of them.
+</p>
+
+
+<h3><a name="lmodes"></a>Launch modes</h3>
+
+<p>
+There are four different launch modes that can be assigned to an {@code
+&lt;activity&gt;} element's {@code launchMode} attribute:
+</p>
+
+<p style="margin-left: 2em">"{@code standard}" (the default value)
+<br>"{@code singleTop}"
+<br>"{@code singleTask}"
+<br>"{@code singleInstance}"</p>
+
+<p>
+The launch mode determines three things:
+</p>
+
+<ul>
+<li>Whether the activity can belong to a task that includes other
+activities.  The answer is yes for all the modes except 
+"{@code singleInstance}".  A "{@code singleInstance}" activity is always 
+the only activity in its task.  If it tries to launch another activity, 
+that activity is assigned to a different task &mdash; as if {@code
+FLAG_ACTIVITY_NEW_TASK} was in the intent.</li>
+
+<li><p>Whether the activity always begins a task.  For "{@code singleTask}"
+and "{@code singleInstance}" the answer is yes.  They mark activities that
+can only be the root activities of a task; they define a task.  In contrast, 
+"{@code standard}" and "{@code singleTop}" activities can belong to any task.
+</p></li>
+
+<li><p>Whether an existing instance of the activity can handle new
+intents.  The answer is yes for all the modes except "{@code standard}".
+Existing "{@code singleTask}" and "{@code singleInstance}" activities 
+handle all new intents that come their way; a new instance is never
+created.  In the case of "{@code singleTask}", all other activities in
+the task are popped from the stack, so that the root "{@code singleTask}"
+activity is at the top and in position to respond to the intent. 
+</p>
+
+<p>
+If a "{@code singleTop}" activity is at the 
+top of its stack, that object is expected to handle any new intents. 
+However, if it's farther down the stack, a new instance is created for
+the intent and pushed on the stack.  
+</p>
+
+<p>
+In contrast, a new instance of a "{@code standard}" activity is always 
+created for each new intent.
+</p>
+</li>
+</ul>
+
+<p>
+When an existing activity is asked to handle a new intent, the Intent
+object is passed to the activity in an <code>{@link android.app.Activity#onNewIntent
+onNewIntent()}</code> call.  (The intent object that originally started the
+activity can be retrieved by calling 
+<code>{@link android.app.Activity#getIntent getIntent()}</code>.)
+</p>
+
+<p>
+Note that when a new instance of an Activity is created to handle a new
+intent, the user can always press the BACK key to return to the previous state
+(to the previous activity).  But when an existing instance of an 
+Activity handles a new intent, the user cannot press the BACK key to 
+return to what that instance was doing before the new intent arrived.
+</p>
+
+<p>
+For more on launch modes, see 
+<a href="{@docRoot}guide/topics/manifest/manifest.html">The
+AndroidManifest.xml File</a>
+</p>
+
+
+<h3><a name="clearstack"></a>Clearing the stack</h3>
+
+<p>
+If the user leaves a task for a long time, the system clears the task of all
+activities except the root activity.  When the user returns to the task again, 
+it's as the user left it, except that only the initial activity is present. 
+The idea is that, after
+a time, users will likely have abandoned what they were doing before and are
+returning to the task to begin something new.
+</p>
+
+<p>
+That's the default.  There are some activity attributes that can be used to 
+control this behavior and modify it:
+</p>
+
+<dl>
+<dt>The {@code alwaysRetainTaskState} attribute</dt>
+<dd>If this attribute is set to "{@code true}" in the root activity of a task, 
+the default behavior just described does not happen.  
+Activities are retained in the stack even after a long period.</dd>
+
+<dt>The {@code clearTaskOnLaunch} attribute</dt>
+<dd>If this attribute is set to "{@code true}" in the root activity of a task, 
+the stack is cleared down to the root activity whenever the user leaves the task 
+and returns to it.  In other words, it's the polar opposite of 
+{@code alwaysRetainTaskState}.  The user always returns to the task in its
+initial state, even after a momentary absence.</dd>
+
+<dt>The {@code finishOnTaskLaunch} attribute</dt>
+<dd>This attribute is like {@code clearTaskOnLaunch}, but it operates on a 
+single activity, not an entire task.  And it can cause any activity to go
+away, including the root activity.  When it's set to "{@code true}", the 
+activity remains part of the task only for the current session.  If the user 
+leaves and then relaunches the task, it no longer is present.</dd>
+</dl>
+
+<p>
+There's another way to force activities to be removed from the stack.  
+If an Intent object includes the <code>{@link 
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP FLAG_ACTIVITY_CLEAR_TOP}</code> 
+flag, and the target task already has an instance of the type of activity that 
+should handle the intent in its stack, all activities above that instance 
+are cleared away so that it stands at the top of the stack and can respond 
+to the intent.
+</p>
+
+<p>
+{@code FLAG_ACTIVITY_CLEAR_TOP} is most often used in conjunction
+with {@code FLAG_ACTIVITY_NEW_TASK}.  When used together, these flags are
+a way of locating an existing activity in another task and putting it in
+a position where it can respond to the intent.  
+</p>
+
+
+<h3><a name="starttask"></a>Starting tasks</h3>
+
+<p>
+An activity is set up as the entry point for a task by giving it 
+an intent filter with "{@code android.intent.action.MAIN}" as the 
+specified action and "{@code android.intent.category.LAUNCHER}" as 
+the specified category.  (There's an example of this type of filter 
+in the earlier <a href="#ifilters">Intent Filters</a> section.)  
+A filter of this kind causes an icon and label for the activity to be 
+displayed in the application launcher, giving users a way both to 
+launch the task and to return to it at any time after it has been 
+launched.
+</p>
+
+<p>
+This second ability is important:  Users must be able to leave a task
+and then come back to it later.  For this reason, the two launch modes
+that mark activities as always initiating a task, "{@code singleTask}" 
+and "{@code singleInstance}", should be used only when the activity has 
+a {@code MAIN} and {@code LAUNCHER} filter.  
+Imagine, for example, what could happen if the filter is missing.
+An intent launches a "{@code singleTask}" activity, initiating a new task, 
+and the user spends some time working in that task.  The user then presses 
+the HOME key.  The task is now ordered behind and obscured by the home 
+screen.  And, because it is not represented in the application launcher, 
+the user has no way to return to it.
+</p>
+
+<p>
+A similar difficulty attends the {@code FLAG_ACTIVITY_NEW_TASK} flag.
+If this flag causes an activity to
+begin a new task and the user presses the HOME key to leave it, there
+must be some way for the user to navigate back to it again.  Some 
+entities (such as the notification manager) always start activities 
+in an external task, never as part of their own, so they always put 
+{@code FLAG_ACTIVITY_NEW_TASK} in the intents they pass to 
+{@code startActivity()}.  If you have an activity that can be invoked 
+by an external entity that might use this flag, take care that the user 
+has a independent way to get back to the task that's started.
+</p> 
+
+<p>
+For those cases where you don't want the user to be able to return
+to an activity, set the {@code &lt;activity&gt;} element's {@code
+finishOnTaskLaunch} to "{@code true}".  
+See <a href="#clearstack">Clearing the stack</a>, earlier.
+</p>
+
+
+<h2><a name="procthread"></a>Processes and Threads</h2>
+
+<p>
+When the first of an application's components needs to be run, Android 
+starts a Linux process for it with a single thread of execution.  By default, 
+all components of the application run in that process and thread.
+</p>
+
+<p>
+However, you can arrange for components to run in other processes as well as
+spawn additional threads:
+</p>
+
+<ul>
+<li>The process where a component runs is controlled by the manifest file.  
+The component elements &mdash; {@code &lt;activity&gt;}, 
+{@code &lt;service&gt;}, {@code &lt;receiver&gt;}, and {@code &lt;provider&gt;} 
+&mdash; each have a {@code process} attribute that can specify a process
+where that component should run.  These attributes can be set so that each 
+component runs in its own process, or so that some components share a process 
+while others do not.  They can also be set so that components of 
+different applications run in the same process &mdash; provided that the 
+applications share the same Linux user ID and are signed by the same authorities.
+The {@code &lt;application&gt;} element also has a {@code process} attribute,
+for setting a default value that applies to all components.</li>
+
+<li><p>Threads are created in code using standard Java {@link java.lang.Thread}
+objects.  Android provides a number of convenience classes for managing threads
+&mdash; {@link android.os.Looper} for running a message loop within a thread, 
+{@link android.os.Handler} for processing messages, and 
+{@link android.os.HandlerThread} for setting up a thread with a message loop.</p>
+
+<p>
+Even though you may confine your application to a single process, there may be
+times when you will need to spawn a thread to do some background work.  Since the 
+user interface must always be quick to respond to user actions, the
+thread that hosts an activity should not also host time-consuming operations like
+network downloads, or anything else that may not be completed quickly. 
+</p></li>
+</ul>
+
+<p>
+Android may decide to shut down a process at some point, when memory is 
+low and required by other applications that are more immediately serving 
+the user.  Application components running in the process are consequently 
+destroyed.  A process is restarted for those components when there's again
+work for them to do.
+</p>  
+
+<p>
+When deciding which processes to terminate, Android weighs their relative
+importance to the user.  For example, it more readily shuts down a process 
+with activities that are no longer visible on screen than a process with
+visible activities.
+The decision whether to terminate a process, therefore, depends on the state 
+of the components running in that process.  Those states are the subject of
+the next section, <a href="#lcycles">Lifecycles</a>.
+</p>
+
+
+<h2><a name="lcycles"></a>Lifecycles</h2>
+
+<p>
+Application components have a lifecycle &mdash; a beginning when 
+Android instantiates them to respond to intents through to an end when 
+the instances are destroyed.  In between, they may sometimes be active 
+or inactive, or, in the case of activities, visible to the user or
+invisible.  This section discusses the lifecycles of activities,
+services, and broadcast receivers &mdash; including the states that they 
+can be in during their lifetimes, the methods that notify you of transitions
+between states, and the effect of those states on the possibility that
+the process hosting them might be terminated and the instances destroyed.
+</p> 
+
+
+<h3><a name="actlife"></a>Activity lifecycle</h3>
+
+<p>An activity has essentially three states:</p>
+
+<ul>
+<li> It is <em>active</em> or <em>running</em> when it is in the foreground of the 
+screen (at the top of the activity stack for the current task).  This is the
+activity that is the focus for the user's actions.</li>
+
+<li><p>It is <em>paused</em> if it has lost focus but is still visible to the user.
+That is, another activity lies on top of it and that activity either is transparent
+or doesn't cover the full screen, so some of the paused activity can show through. 
+A paused activity is completely alive (it maintains all state and member information 
+and remains attached to the window manager), but can be killed by the system in 
+extreme low memory situations.</p></li>
+
+<li><p>It is <em>stopped</em> if it is completely obscured by another activity.
+It still retains all state and member information.  However, it is no longer 
+visible to the user so its window is hidden and it will often be killed by the 
+system when memory is needed elsewhere.</p></li>
+</ul>
+
+<p>
+If an activity is paused or stopped, the system can drop it from memory either 
+by asking it to finish (calling its {@link android.app.Activity#finish finish()}
+method), or simply killing its process.  When it is displayed again 
+to the user, it must be completely restarted and restored to its previous state.
+</p>
+
+
+<h4>Lifecycle methods</h4>
+
+<p>
+As an activity transitions from state to state, it is notified of the change 
+by calls to the following protected methods:
+
+<p style="margin-left: 2em">{@code void onCreate(Bundle <i>savedInstanceState</i>)}
+<br/>{@code void onStart()}
+<br/>{@code void onRestart()}
+<br/>{@code void onResume()}
+<br/>{@code void onPause()}
+<br/>{@code void onStop()}
+<br/>{@code void onDestroy()}</p>
+
+<p>
+All of these methods are hooks that you can override to do appropriate work 
+when the state changes.
+All activities must implement <code>{@link android.app.Activity#onCreate 
+onCreate()}</code> to do initial setup when the activity is first instantiated.  
+Many will also implement <code>{@link android.app.Activity#onPause onPause()}</code> 
+to commit data changes and otherwise prepare to stop interacting with the user.
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Calling into the superclass</h2>
+<p>
+An implementation of any activity lifecycle method should always first 
+call the superclass version.  For example:
+</p>
+
+<pre>protected void onPause() {
+    super.onPause();
+    . . .
+}</pre>
+</div>
+</div> 
+
+
+<p>
+Taken together, these seven methods define the entire lifecycle of an 
+activity.  There are three nested loops that you can monitor by
+implementing them: 
+</p> 
+
+<ul>
+<li>The <b>entire lifetime</b> of an activity happens between the first call
+to <code>{@link android.app.Activity#onCreate onCreate()}</code> through to a 
+single final call to <code>{@link android.app.Activity#onDestroy}</code>.  
+An activity does all its initial setup of "global" state in {@code onCreate()}, 
+and releases all remaining resources in {@code onDestroy()}.  For example, 
+if it has a thread running in the background to download data from the network, 
+it may create that thread in {@code onCreate()} and then stop the thread in 
+{@code onDestroy()}.</li>
+
+<li><p>The <b>visible lifetime</b> of an activity happens between a call to
+<code>{@link android.app.Activity#onStart onStart()}</code> until a 
+corresponding call to <code>{@link android.app.Activity#onStop onStop()}</code>.  
+During this time, the user can see the activity on-screen, though it may not 
+be in the foreground and interacting with the user.  Between these two methods, 
+you can maintain resources that are needed to show the activity to the user.  
+For example, you can register a {@link android.content.BroadcastReceiver} in 
+{@code onStart()} to monitor for changes that impact your UI, and unregister 
+it in {@code onStop()} when the user can no longer see what you are displaying.  
+The {@code onStart()} and {@code onStop()} methods can be called multiple times, 
+as the activity alternates between being visible and hidden to the user.</p></li>
+
+<li><p>The <b>foreground lifetime</b> of an activity happens between a call 
+to <code>{@link android.app.Activity#onResume onResume()}</code> until a 
+corresponding call to <code>{@link android.app.Activity#onPause onPause()}</code>.  
+During this time, the activity is in front of all other activities on screen and 
+is interacting with the user.  An activity can frequently transition between the 
+resumed and paused states &mdash; for example, {@code onPause()} is called when 
+the device goes to sleep or when a new activity is started, {@code onResume()} 
+is called when an activity result or a new intent is delivered.  Therefore, the 
+code in these two methods should be fairly lightweight.</p></li>
+</ul>
+
+<p>
+The following diagram illustrates these loops and the paths an activity
+may take between states.  The colored ovals are major states the activity 
+can be in.  The square rectangles represent the callback methods you can implement 
+to perform operations when the activity transitions between states.
+<p>
+
+<p><img src="{@docRoot}images/activity_lifecycle.png"
+alt="State diagram for an Android activity lifecycle." border="0" /></p>  
+  
+<p>
+The following table describes each of these methods in more detail and 
+locates it within the activity's overall lifecycle:
+</p>
+
+<table border="2" width="85%" align="center" frame="hsides" rules="rows">
+<colgroup align="left" span="3" />
+<colgroup align="left" />
+<colgroup align="center" />
+<colgroup align="center" />
+
+<thead>
+<tr><th colspan="3">Method</th> <th>Description</th> <th>Killable?</th> <th>Next</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left" border="0"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>Called when the activity is first created.
+      This is where you should do all of your normal static set up &mdash;
+      create views, bind data to lists, and so on.  This method is passed
+      a Bundle object containing the activity's previous state, if that 
+      state was captured (see <a href="#actstate">Saving Activity State</a>, 
+      later).
+      <p>Always followed by {@code onStart()}.</p></td>
+  <td align="center">No</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onRestart 
+onRestart()}</code></td>
+   <td>Called after the activity has been stopped, just prior to it being
+       started again.
+       <p>Always followed by {@code onStart()}</p></td>
+   <td align="center">No</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>Called just before the activity becomes visible to the user.
+       <p>Followed by {@code onResume()} if the activity comes
+       to the foreground, or {@code onStop()} if it becomes hidden.</p></td>
+    <td align="center">No</td>
+    <td align="center">{@code onResume()} <br/>or<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left" border="0"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>Called just before the activity starts
+       interacting with the user.  At this point the activity is at
+       the top of the activity stack, with user input going to it.
+       <p>Always followed by {@code onPause()}.</p></td>
+   <td align="center">No</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left" border="0"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>Called when the system is about to start resuming another
+       activity.  This method is typically used to commit unsaved changes to
+       persistent data, stop animations and other things that may be consuming
+       CPU, and so on.  It should do whatever it does very quickly, because
+       the next activity will not be resumed until it returns.
+       <p>Followed either by {@code onResume()} if the activity
+       returns back to the front, or by {@code onStop()} if it becomes
+       invisible to the user.</td>
+   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center">{@code onResume()} <br/>or<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>Called when the activity is no longer visible to the user.  This
+       may happen because it is being destroyed, or because another activity 
+       (either an existing one or a new one) has been resumed and is covering it. 
+       <p>Followed either by {@code onRestart()} if
+       the activity is coming back to interact with the user, or by
+       {@code onDestroy()} if this activity is going away.</p></td>
+   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center">{@code onRestart()} <br/>or<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left" border="0"><code>{@link android.app.Activity#onDestroy 
+onDestroy()}</code></td>
+   <td>Called before the activity is destroyed.  This is the final call 
+       that the activity will receive.  It could be called either because the
+       activity is finishing (someone called <code>{@link android.app.Activity#finish 
+       finish()}</code> on it), or because the system is temporarily destroying this
+       instance of the activity to save space.  You can distinguish
+       between these two scenarios with the <code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code> method.</td>
+   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center"><em>nothing</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Note the <b>Killable</b> column in the table above.  It indicates
+whether or not the system can kill the process hosting the activity 
+<em>at any time after the method returns, without executing another
+line of the activity's code</em>.  Three methods ({@code onPause()},
+{@code onStop()}, and {@code onDestroy()}) are marked "Yes."  Because
+{@code onPause()} is the first of the three, it's the only one that's
+guaranteed to be called before the process is killed &mdash 
+{@code onStop()} and {@code onDestroy()} may not be.  Therefore, you 
+should use {@code onPause()} to write any persistent data (such as user 
+edits) to storage.
+</p>
+
+<p>
+Methods that are marked "No" in the <b>Killable</b> column protect the
+process hosting the activity from being killed from the moment they are 
+called.  Thus an activity is in a killable state, for example, from the 
+time {@code onPause()} returns to the time {@code onResume()} is called.
+It will not again be killable until {@code onPause()} again returns.
+</p>
+
+<p>
+As noted in a later section, <a href="#proclife">Processes and lifecycle</a>,
+an activity that's not technically "killable" by this definition might
+still be killed by the system &mdash; but that would happen only in
+extreme and dire circumstances when there is no other recourse.
+</p>
+
+
+<h4><a name="actstate"></a>Saving activity state</h4>
+
+<p>
+When the system, rather than the user, shuts down an activity to conserve 
+memory, the user may expect to return to the activity and find it in its 
+previous state.
+</p>
+
+<p>
+To capture that state before the activity is killed, you can implement
+an <code>{@link android.app.Activity#onSaveInstanceState 
+onSaveInstanceState()}</code> method for the activity.  Android calls this 
+method before making the activity vulnerable to being destroyed &mdash 
+that is, before {@code onPause()} is called.  It
+passes the method a {@link android.os.Bundle} object where you can record 
+the dynamic state of the activity as name-value pairs.  When the activity is 
+again started, the Bundle is passed both to {@code onCreate()} and to a
+method that's called after {@code onStart()}, <code>{@link 
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}</code>, 
+so that either or both of them can recreate the captured state.
+</p>
+
+<p>
+Unlike {@code onPause()} and the other methods discussed earlier,
+{@code onSaveInstanceState()} and {@code onRestoreInstanceState()} are
+not lifecycle methods.  They are not always called.  For example, Android
+calls {@code onSaveInstanceState()} before the activity becomes 
+vulnerable to being destroyed by the system, but does not bother
+calling it when the instance is actually being destroyed by a user action
+(such as pressing the BACK key).  In that case, the user won't expect to
+return to the activity, so there's no reason to save its state.
+</p>
+
+<p>
+Because {@code onSaveInstanceState()} is not always called, you
+should use it only to record the transient state of the activity, 
+not to store persistent data.  Use {@code onPause()} for that purpose 
+instead.
+</p>
+
+
+<h3><a name="servlife"></a>Service lifecycle</h3>
+
+<p>
+A service can be used in two ways:
+</p>
+
+<ul>
+<li>It can be started and allowed to run until someone stops it or
+it stops itself.  In this mode, it's started by calling 
+<code>{@link android.content.Context#startService Context.startService()}</code>
+and stopped by calling 
+<code>{@link android.content.Context#stopService Context.stopService()}</code>.
+It can stop itself by calling 
+<code>{@link android.app.Service#stopSelf() Service.stopSelf()}</code> or
+<code>{@link android.app.Service#stopSelfResult Service.stopSelfResult()}</code>.  
+Only one {@code stopService()} call is needed to stop the service, no matter how 
+many times {@code startService()} was called.</li>
+
+<li><p>It can be operated programmatically using an interface that
+it defines and exports.  Clients establish a connection to the Service 
+object and use that connection to call into the service.  The connection is 
+established by calling  
+<code>{@link android.content.Context#bindService Context.bindService()}</code>,
+and is closed by calling
+<code>{@link android.content.Context#unbindService Context.unbindService()}</code>.
+Multiple clients can bind to the same service.
+If the service has not already been launched, {@code bindService()} can optionally
+launch it.
+</p></li>
+</ul>
+
+<p>
+The two modes are not entirely separate.  You can bind to a service that 
+was started with {@code startService()}.  For example, a background music
+service could be started by calling {@code startService()} with an Intent
+object that identifies the music to play.  Only later, possibly when the 
+user wants to exercise some control over the player or get information 
+about the current song, would an activity
+establish a connection to the service by calling {@code bindService()}.  
+In cases like this, {@code stopService()} 
+will not actually stop the service until the last binding is closed.
+</p>
+
+<p>
+Like an activity, a service has lifecycle methods that you can implement
+to monitor changes in its state.  But they are fewer than the activity 
+methods &mdash; only three &mdash; and they are public, not protected:
+</p>
+
+<p style="margin-left: 2em">{@code void onCreate()}
+<br/>{@code void onStart(Intent <i>intent</i>)}
+<br/>{@code void onDestroy()}</p>
+
+<p>
+By implementing these methods, you can monitor two nested loops of the
+service's lifecycle:
+</p>
+
+<ul>
+<li>The <b>entire lifetime</b> of a service happens between the time
+<code>{@link android.app.Service#onCreate onCreate()}</code> is called and
+the time <code>{@link android.app.Service#onDestroy}</code> returns.  
+Like an activity, a service does its initial setup in {@code onCreate()}, 
+and releases all remaining resources in {@code onDestroy()}.  For example, 
+a music playback service could create the thread where the music will be played  
+in {@code onCreate()}, and then stop the thread in {@code onDestroy()}.</li>
+
+<li><p>The <b>active lifetime</b> of a service begins with a call to 
+<code>{@link android.app.Service#onStart onStart()}</code>.  This method 
+is handed the Intent object that was passed to {@code startService()}.
+The music service would open the Intent to discover which music to 
+play, and begin the playback.</p>
+
+<p>
+There's no equivalent callback for when the service stops &mdash; no
+{@code onStop()} method.
+</p></li>
+</ul>
+
+<p>
+The {@code onCreate()} and {@code onDestroy()} methods are called for all
+services, whether they're started by 
+<code>{@link android.content.Context#startService Context.startService()}</code>
+or 
+<code>{@link android.content.Context#bindService Context.bindService()}</code>.
+However, {@code onStart()} is called only for services started by {@code
+startService()}.
+</p>
+
+<p>
+If a service permits others to
+bind to it, there are additional callback methods for it to implement:
+</p>
+
+<p style="margin-left: 2em">{@code IBinder onBind(Intent <i>intent</i>)}
+<br/>{@code boolean onUnbind(Intent <i>intent</i>)}
+<br/>{@code void onRebind(Intent <i>intent</i>)}</p>
+
+<p>
+The <code>{@link android.app.Service#onBind onBind()}</code> callback is passed 
+the Intent object that was passed to {@code bindService} and 
+<code>{@link android.app.Service#onUnbind onUnbind()}</code> is handed
+the intent that was passed to {@code unbindService()}.   
+If the service permits the binding, {@code onBind()} 
+returns the communications channel that clients use to interact with the service. 
+The {@code onUnbind()} method can ask for 
+<code>{@link android.app.Service#onRebind onRebind()}</code>
+to be called if a new client connects to the service.
+</p>
+
+<p>
+The following diagram illustrates the callback methods for a service.  
+Although, it separates services that are created via {@code startService}
+from those created by {@code bindService()}, keep in mind that any service,
+no matter how it's started, can potentially allow clients to bind to it,
+so any service may receive {@code onBind()} and {@code onUnbind()} calls.
+</p>
+
+<p><img src="{@docRoot}images/service_lifecycle.png"
+alt="State diagram for Service callbacks." border="0" /></p>
+
+
+<h3><a name="broadlife"></a>Broadcast receiver lifecycle</h3>
+
+<p>
+A broadcast receiver has single callback method:
+</p>
+
+<p style="margin-left: 2em">{@code void onReceive(Context <i>curContext</i>, Intent <i>broadcastMsg</i>)}</p>
+
+<p>
+When a broadcast message arrives for the receiver, Android calls its 
+<code>{@link android.content.BroadcastReceiver#onReceive onReceive()}</code> 
+method and passes it the Intent object containing the message.  The broadcast 
+receiver is considered to be active only while it is executing this method.  
+When {@code onReceive()} returns, it is inactive.
+</p>
+
+<p>
+A process with an active broadcast receiver is protected from being killed. 
+But a process with only inactive components can be killed by the system at 
+any time, when the memory it consumes is needed by other processes.
+</p>
+
+<p>
+This presents a problem when the response to a broadcast message is time 
+consuming and, therefore, something that should be done in a separate thread, 
+away from the main thread where other components of the user interface run.
+If {@code onReceive()} spawns the thread and then returns, the entire process,
+including the new thread, is judged to be inactive (unless other application 
+components are active in the process), putting it in jeopardy of being killed.  
+The solution to this problem is for {@code onReceive()} to start a service 
+and let the service do the job, so the
+system knows that there is still active work being done in the process.
+</p>
+
+<p>
+The next section has more on the vulnerability of processes to being killed.
+</p>
+
+
+<h3><a name="proclife"></a>Processes and lifecycles</h3>
+
+<p>The Android system tries to maintain an application process for as
+long as possible, but eventually it will need to remove old processes when
+memory runs low.  To determine which processes to keep and which to kill, 
+Android places each process into an "importance hierarchy" based on the 
+components running in it and the state of those components.  There are 
+five levels in the hierarchy.  The following list presents them in order 
+of importance:
+</p>
+
+<ol>
+
+<li>A <b>foreground process</b> is one that is required for
+what the user is currently doing.  A process is considered to be 
+in the foreground if any of the following conditions hold:
+
+<ul>
+<li>It is running an activity that the user is interacting with 
+(the Activity object's <code>{@link android.app.Activity#onResume 
+onResume()}</code> method has been called).</p></li>
+
+<li><p>It hosts a service that's bound 
+to the activity that the user is interacting with.</p></li>
+
+<li><p>It has a {@link android.app.Service} object that's executing
+one of its lifecycle callbacks (<code>{@link android.app.Service#onCreate 
+onCreate()}</code>, <code>{@link android.app.Service#onStart onStart()}</code>, 
+or <code>{@link android.app.Service#onDestroy onDestroy()}</code>).</p></li>
+
+<li><p>It has a {@link android.content.BroadcastReceiver} object that's 
+executing its <code>{@link android.content.BroadcastReceiver#onReceive 
+onReceive()}</code> method.</p></li>
+</ul>
+
+<p>
+Only a few foreground processes will exist at any given time.  They 
+are killed only as a last resort &mdash; if memory is so low that 
+they cannot all continue to run.  Generally, at that point, the device has
+reached a memory paging state, so killing some foreground processes is 
+required to keep the user interface responsive.
+</p></li>
+
+<li><p>A <b>visible process</b> is one that doesn't have any foreground
+components, but still can affect what the user sees on screen.  
+A process is considered to be visible if either of the following conditions 
+holds:</p>
+
+<ul>
+<li>It hosts an activity that is not in the foreground, but is still visible 
+to the user (its <code>{@link android.app.Activity#onPause onPause()}</code> 
+method has been called).  This may occur, for example, if the foreground 
+activity is a dialog that allows the previous activity to be seen behind it.</li>
+
+<li><p>It hosts a service that's bound to a visible activity.</p></li>
+</ul>
+
+<p>
+A visible process is considered extremely important and will not be killed 
+unless doing so is required to keep all foreground processes running.
+</p></li>
+
+<li><p>A <b>service process</b> is one that is running a service that has 
+been started with the 
+<code>{@link android.content.Context#startService startService()}</code>
+method.  Although service processes are not directly tied to anything the 
+user sees, they are generally doing things that the user cares about (such 
+as playing an mp3 in the background or downloading  data on the network), 
+so the system keeps them running unless there's not enough 
+memory to retain them along with all foreground and visible processes.
+(Note that a service can be ranked higher than this by virtue of being 
+bound to a visible or foreground activity).  
+</p></li>
+
+<li><p>A <b>background process</b> is one holding an activity
+that's not currently visible to the user  (the Activity object's
+<code>{@link android.app.Activity#onStop onStop()}</code> method has been called).  
+These processes have no direct impact on the user experience, and can be killed 
+at any time to reclaim memory for a foreground, visible, or service process.  
+Usually there are many background processes running,
+so they are kept in an LRU list to ensure that the process with the activity that 
+was most recently seen by the user is the last to be killed.
+If an activity implements its lifecycle methods correctly, and captures its current 
+state, killing its process will not have a deleterious effect on the user experience. 
+</p></li>
+
+<li><p>An <b>empty process</b> is one that doesn't hold any active application
+components.  The only reason to keep such a process around is as a cache to
+improve startup time the next time a component needs to run in it.  The system 
+often kills these processes in order to balance overall system resources between 
+process caches and the underlying kernel caches.</p></li>
+
+</ol>
+
+<p>
+Android ranks a process at the highest level it can, based upon the
+importance of the components currently active in the process.  For example, 
+if a process hosts a service and a visible activity, the process will be 
+ranked as a visible process, not a service process.
+</p>
+
+<p>
+In addition, a process's ranking may be increased because other processes are
+dependent on it.  A process that is serving another process can never be 
+ranked lower than the process it is serving.  For example, if a content 
+provider in process A is serving a client in process B, or if a service in 
+process A is bound to a component in process B, process A will always be 
+considered at least as important as process B.
+</p> 
+
+<p>
+Because a process running a service is ranked higher than one with background
+activities, an activity that initiates a long-running operation might do
+well to start a service for that operation, rather than simply spawn a thread
+&mdash; particularly if the operation will likely outlast the activity.  
+Examples of this are playing music in the background 
+and uploading a picture taken by the camera to a web site.  Using a service
+guarantees that the operation will have at least "service process" priority,
+regardless of what happens to the activity.  As noted in the 
+<a href="#broadlife">Broadcast receiver lifecycle</a> section earlier, this
+is the same reason that broadcast receivers should employ services rather
+than simply put time-consuming operations in a thread.
+</p>

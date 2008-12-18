@@ -73,6 +73,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(publicSourceDir);
         dest.writeString(dataDir);
         dest.writeInt((handleProfiling == false) ? 0 : 1);
+        dest.writeInt((functionalTest == false) ? 0 : 1);
     }
 
     public static final Parcelable.Creator<InstrumentationInfo> CREATOR
@@ -92,5 +93,6 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         publicSourceDir = source.readString();
         dataDir = source.readString();
         handleProfiling = source.readInt() != 0;
+        functionalTest = source.readInt() != 0;
     }
 }

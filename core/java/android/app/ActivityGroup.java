@@ -16,14 +16,19 @@
 
 package android.app;
 
+import java.util.HashMap;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * A screen that contains and runs multiple embedded activities.
  */
 public class ActivityGroup extends Activity {
+    private static final String TAG = "ActivityGroup";
     private static final String STATES_KEY = "android:states";
+    static final String PARENT_NON_CONFIG_INSTANCE_KEY = "android:parent_non_config_instance";
 
     /**
      * This field should be made private, so it is hidden from the SDK.
@@ -78,6 +83,17 @@ public class ActivityGroup extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         mLocalActivityManager.dispatchDestroy(isFinishing());
+    }
+
+    /**
+     * Returns a HashMap mapping from child activity ids to the return values
+     * from calls to their onRetainNonConfigurationInstance methods.
+     *
+     * {@hide}
+     */
+    @Override
+    public HashMap<String,Object> onRetainNonConfigurationChildInstances() {
+        return mLocalActivityManager.dispatchRetainNonConfigurationInstance();
     }
 
     public Activity getCurrentActivity() {

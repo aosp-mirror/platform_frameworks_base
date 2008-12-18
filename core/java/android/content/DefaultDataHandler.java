@@ -28,42 +28,47 @@ import java.io.InputStream;
 import java.util.Stack;
 
 /**
- * insert default data from InputStream, should be in XML format:
- * if the provider syncs data to the server, the imported data will be synced to the server
- * Samples:
- *  insert one row
- * <row uri="content://contacts/people">
- *  <Col column = "name" value = "foo feebe "/>
- *  <Col column = "addr" value = "Tx"/>
- * </row>
- * 
- * delete, it must be in order of uri, select and arg
- * <del uri="content://contacts/people" select="name=? and addr=?" 
- *  arg1 = "foo feebe" arg2 ="Tx"/>
+ * Inserts default data from InputStream, should be in XML format.
+ * If the provider syncs data to the server, the imported data will be synced to the server.
+ * <p>Samples:</p>
+ * <br/>
+ *  Insert one row:
+ * <pre>
+ * &lt;row uri="content://contacts/people">
+ *  &lt;Col column = "name" value = "foo feebe "/>
+ *  &lt;Col column = "addr" value = "Tx"/>
+ * &lt;/row></pre>
+ * <br/>
+ * Delete, it must be in order of uri, select, and arg:
+ * <pre>
+ * &lt;del uri="content://contacts/people" select="name=? and addr=?" 
+ *  arg1 = "foo feebe" arg2 ="Tx"/></pre>
+ * <br/>
+ *  Use first row's uri to insert into another table,
+ *  content://contacts/people/1/phones:
+ * <pre>
+ * &lt;row uri="content://contacts/people">
+ *  &lt;col column = "name" value = "foo feebe"/>
+ *  &lt;col column = "addr" value = "Tx"/>
+ *  &lt;row postfix="phones">
+ *    &lt;col column="number" value="512-514-6535"/>
+ *  &lt;/row>
+ *  &lt;row postfix="phones">
+ *    &lt;col column="cell" value="512-514-6535"/>
+ *  &lt;/row>  
+ * &lt;/row></pre>
+ * <br/>
+ *  Insert multiple rows in to same table and same attributes:
+ * <pre>
+ * &lt;row uri="content://contacts/people" >
+ *  &lt;row>
+ *   &lt;col column= "name" value = "foo feebe"/>
+ *   &lt;col column= "addr" value = "Tx"/>
+ *  &lt;/row>
+ *  &lt;row>
+ *  &lt;/row>
+ * &lt;/row></pre>
  *
- *  use first row's uri to insert into another table
- *  content://contacts/people/1/phones
- * <row uri="content://contacts/people">
- *  <col column = "name" value = "foo feebe"/>
- *  <col column = "addr" value = "Tx"/>
- *  <row postfix="phones">
- *    <col column="number" value="512-514-6535"/>
- *  </row>
- *  <row postfix="phones">
- *    <col column="cell" value="512-514-6535"/>
- *  </row>  
- * </row>
- * 
- *  insert multiple rows in to same table and same attributes:
- * <row uri="content://contacts/people" >
- *  <row>
- *   <col column= "name" value = "foo feebe"/>
- *   <col column= "addr" value = "Tx"/>
- *  </row>
- *  <row>
- *  </row>
- * </row> 
- * 
  * @hide
  */ 
 public class DefaultDataHandler implements ContentInsertHandler {

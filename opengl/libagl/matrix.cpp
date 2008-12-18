@@ -98,8 +98,9 @@ static void validate_perspective(ogles_context_t* c, vertex_t* v)
     c->arrays.perspective = (c->clipPlanes.enable) ?
         ogles_vertex_clipAllPerspective3D : ogles_vertex_perspective3D;
     if (enables & (GGL_ENABLE_DEPTH_TEST|GGL_ENABLE_FOG)) {
-        c->arrays.perspective = (c->clipPlanes.enable) ?
-            ogles_vertex_clipAllPerspective3DZ : ogles_vertex_perspective3DZ;
+        c->arrays.perspective = ogles_vertex_perspective3DZ;
+        if (c->clipPlanes.enable || (enables&GGL_ENABLE_FOG))
+            c->arrays.perspective = ogles_vertex_clipAllPerspective3DZ;
     }
     if ((c->arrays.vertex.size != 4) &&
         (c->transforms.mvp4.flags & transform_t::FLAGS_2D_PROJECTION)) {

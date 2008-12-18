@@ -299,6 +299,12 @@
          be dropped as described here. -->
     <attr name="clearTaskOnLaunch" format="boolean" />
     
+    <!-- Specify whether an activity should be kept in its history stack.
+         If this attribute is set, then as soon as the user navigates away
+         from the activity it will be finished and they will no longer be
+         able to return to it. -->
+    <attr name="noHistory" format="boolean" />
+    
     <!-- Specify whether an acitivty's task state should always be maintained
          by the system, or if it is allowed to reset the task to its initial
          state in certain situations.
@@ -520,6 +526,37 @@
          functional test. -->
     <attr name="functionalTest" format="boolean" />
 
+    <!-- The touch screen type used by an application. -->
+    <attr name="reqTouchScreen">
+        <enum name="undefined" value="0" />
+        <enum name="notouch" value="1" />
+        <enum name="stylus" value="2" />
+        <enum name="finger" value="3" />
+    </attr>
+
+    <!-- The input method preferred by an application. -->
+    <attr name="reqKeyboardType">
+        <enum name="undefined" value="0" />
+        <enum name="nokeys" value="1" />
+        <enum name="qwerty" value="2" />
+        <enum name="twelvekey" value="3" />
+    </attr>
+
+    <!-- Application's requirement for a hard keyboard -->
+    <attr name="reqHardKeyboard" format="boolean" />
+
+    <!-- The navigation device preferred by an application. -->
+    <attr name="reqNavigation">
+        <enum name="undefined" value="0" />
+        <enum name="nonav" value="1" />
+        <enum name="dpad" value="2" />
+        <enum name="trackball" value="3" />
+        <enum name="wheel" value="4" />
+    </attr>
+
+    <!-- Application's requirement for five way navigation -->
+    <attr name="reqFiveWayNav" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -535,6 +572,7 @@
          {@link #AndroidManifestPermissionTree permission-tree},
          {@link #AndroidManifestUsesSdk uses-sdk},
          {@link #AndroidManifestUsesPermission uses-permission},
+         {@link #AndroidManifestUsesConfiguration uses-configuration},
          {@link #AndroidManifestApplication application},
          {@link #AndroidManifestInstrumentation instrumentation}.  -->
     <declare-styleable name="AndroidManifest">
@@ -682,7 +720,25 @@
         system permissions}. -->
         <attr name="name" />
     </declare-styleable>
-    
+
+    <!-- The <code>uses-configuration</code> tag specifies
+         a specific hardware configuration value used by the application.
+         For example an application might specify that it requires
+         a physical keyboard or a particular navigation method like
+         trackball. Multiple such attribute values can be specified by the
+         application.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestUsesConfiguration" parent="AndroidManifest">
+        <!-- The type of touch screen used by an application. -->
+        <attr name="reqTouchScreen" />
+        <attr name="reqKeyboardType" />
+        <attr name="reqHardKeyboard" />
+        <attr name="reqNavigation" />
+        <attr name="reqFiveWayNav" />
+    </declare-styleable>
+
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
          containing package must be running on to operate correctly.
          
@@ -858,6 +914,7 @@
         <attr name="allowTaskReparenting" />
         <attr name="finishOnTaskLaunch" />
         <attr name="clearTaskOnLaunch" />
+        <attr name="noHistory" />
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
@@ -867,6 +924,10 @@
              component specific values). -->
         <attr name="enabled" />
         <attr name="exported" />
+        <!-- Specify the default soft-input mode for the main window of
+             this activity.  A value besides "unspecified" here overrides
+             any value in the theme. -->
+        <attr name="windowSoftInputMode" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
@@ -1066,7 +1127,7 @@
     
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
          also include zero or more {@link #IntentCategory <category> and
-         {@link #IntentExtra <extra>} tags. -->
+         {@link #Extra <extra>} tags. -->
     <declare-styleable name="Intent">
         <!-- The action name to assign to the Intent, as per
             {@link android.content.Intent#setAction Intent.setAction()}. -->
@@ -1092,9 +1153,9 @@
         <attr name="name" />
     </declare-styleable>
     
-    <!-- An extra data value to place in the Intent, as per
-            {@link android.content.Intent#putExtra Intent.putExtra()}. -->
-    <declare-styleable name="IntentExtra" parent="Intent">
+    <!-- An extra data value to place into a an extra/name value pair held
+            in a Bundle, as per {@link android.os.Bundle}. -->
+    <declare-styleable name="Extra" parent="Intent">
         <!-- Required name of the extra data. -->
         <attr name="name" />
         <!-- Concrete value to put for this named extra data. -->

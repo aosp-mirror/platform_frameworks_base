@@ -224,6 +224,8 @@ public class CallerInfoAsyncQuery {
                 // accordingly.
                 if (cw.event == EVENT_EMERGENCY_NUMBER) {
                     mCallerInfo = new CallerInfo();
+                    // Note we're setting the phone number here (refer to javadoc
+                    // comments at the top of CallerInfo class). 
                     mCallerInfo.phoneNumber = mQueryContext.getString(com.android.internal
                             .R.string.emergency_call_dialog_number_for_display);
                     mCallerInfo.photoResource = com.android.internal.R.drawable.picture_emergency;
@@ -231,7 +233,10 @@ public class CallerInfoAsyncQuery {
                 } else if (cw.event == EVENT_VOICEMAIL_NUMBER) {
                     mCallerInfo = new CallerInfo();
                     try {
-                        mCallerInfo.name = TelephonyManager.getDefault().getVoiceMailAlphaTag();
+                        // Note we're setting the phone number here (refer to javadoc
+                        // comments at the top of CallerInfo class). 
+                        mCallerInfo.phoneNumber = 
+                                TelephonyManager.getDefault().getVoiceMailAlphaTag();
                     } catch (SecurityException ex) {
                         // Should never happen: if this process does not have
                         // permission to retrieve VM tag, it should not have

@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.stream;
 
 import java.io.EOFException;
@@ -25,38 +26,54 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 
 /**
- * The ImageInputStreamImpl abstract class implements
- * the ImageInputStream interface.
+ * The ImageInputStreamImpl abstract class implements the ImageInputStream
+ * interface.
+ * 
+ * @since Android 1.0
  */
 public abstract class ImageInputStreamImpl implements ImageInputStream {
 
-    /** The byte order. */
+    /**
+     * The byte order.
+     */
     protected ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
 
-    /** The stream position. */
+    /**
+     * The stream position.
+     */
     protected long streamPos = 0;
-    
-    /** The flushed position. */
+
+    /**
+     * The flushed position.
+     */
     protected long flushedPos = 0;
-    
-    /** The bit offset. */
+
+    /**
+     * The bit offset.
+     */
     protected int bitOffset = 0;
 
-    /** The closed. */
+    /**
+     * The closed.
+     */
     private boolean closed = false;
 
-    /** The position stack. */
+    /**
+     * The position stack.
+     */
     private final PositionStack posStack = new PositionStack();
 
     /**
      * Instantiates a new ImageInputStreamImpl.
      */
-    public ImageInputStreamImpl() {}
+    public ImageInputStreamImpl() {
+    }
 
     /**
      * Check if the stream is closed and if true, throws an IOException.
      * 
-     * @throws IOException Signals that the stream is closed.
+     * @throws IOException
+     *             if the stream is closed.
      */
     protected final void checkClosed() throws IOException {
         if (closed) {
@@ -106,7 +123,7 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
         if (b < 0) {
             throw new EOFException("EOF reached");
         }
-        return (byte) b;
+        return (byte)b;
     }
 
     public int readUnsignedByte() throws IOException {
@@ -125,58 +142,57 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
             throw new EOFException("EOF reached");
         }
 
-        return byteOrder == ByteOrder.BIG_ENDIAN ?
-                (short) ((b1 << 8) | (b2 & 0xff)) :
-                (short) ((b2 << 8) | (b1 & 0xff));
+        return byteOrder == ByteOrder.BIG_ENDIAN ? (short)((b1 << 8) | (b2 & 0xff))
+                : (short)((b2 << 8) | (b1 & 0xff));
     }
 
     public int readUnsignedShort() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public char readChar() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public int readInt() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public long readUnsignedInt() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public long readLong() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public float readFloat() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public double readDouble() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public String readLine() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public String readUTF() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(byte[] b, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -185,32 +201,32 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     }
 
     public void readFully(short[] s, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(char[] c, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(int[] i, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(long[] l, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(float[] f, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void readFully(double[] d, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -230,12 +246,12 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     }
 
     public int readBit() throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public long readBits(int numBits) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -244,12 +260,12 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     }
 
     public int skipBytes(int n) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public long skipBytes(long n) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -272,7 +288,7 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     }
 
     public void reset() throws IOException {
-        //-- TODO bit pos
+        // -- TODO bit pos
         if (!posStack.isEmpty()) {
             long p = posStack.pop();
             if (p < flushedPos) {
@@ -290,7 +306,7 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
             throw new IndexOutOfBoundsException("Trying to flush within already flushed portion");
         }
         flushedPos = pos;
-        //-- TODO implement
+        // -- TODO implement
     }
 
     public void flush() throws IOException {
@@ -302,15 +318,15 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     }
 
     public boolean isCached() {
-        return false; //def
+        return false; // def
     }
 
     public boolean isCachedMemory() {
-        return false; //def
+        return false; // def
     }
 
     public boolean isCachedFile() {
-        return false; //def
+        return false; // def
     }
 
     public void close() throws IOException {
@@ -322,7 +338,8 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
     /**
      * Finalizes this object.
      * 
-     * @throws Throwable if an error occurs.
+     * @throws Throwable
+     *             if an error occurs.
      */
     @Override
     protected void finalize() throws Throwable {
@@ -339,25 +356,31 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
      * The Class PositionStack.
      */
     private static class PositionStack {
-        
-        /** The Constant SIZE. */
+
+        /**
+         * The Constant SIZE.
+         */
         private static final int SIZE = 10;
 
-        /** The values. */
+        /**
+         * The values.
+         */
         private long[] values = new long[SIZE];
-        
-        /** The pos. */
-        private int pos = 0;
 
+        /**
+         * The pos.
+         */
+        private int pos = 0;
 
         /**
          * Push.
          * 
-         * @param v the v
+         * @param v
+         *            the v.
          */
         void push(long v) {
             if (pos >= values.length) {
-                ensure(pos+1);
+                ensure(pos + 1);
             }
             values[pos++] = v;
         }
@@ -365,7 +388,7 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
         /**
          * Pop.
          * 
-         * @return the long
+         * @return the long.
          */
         long pop() {
             return values[--pos];
@@ -374,7 +397,7 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
         /**
          * Checks if is empty.
          * 
-         * @return true, if is empty
+         * @return true, if is empty.
          */
         boolean isEmpty() {
             return pos == 0;
@@ -383,7 +406,8 @@ public abstract class ImageInputStreamImpl implements ImageInputStream {
         /**
          * Ensure.
          * 
-         * @param size the size
+         * @param size
+         *            the size.
          */
         private void ensure(int size) {
             long[] arr = new long[Math.max(2 * values.length, size)];

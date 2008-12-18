@@ -83,8 +83,21 @@ public abstract class LoginFilter implements InputFilter {
         }
         
         onStop();
+
+        if (!changed) {
+            return null;
+        }
         
-        return changed ? new String(out, 0, outidx) : null;
+        String s = new String(out, 0, outidx);
+        
+        if (source instanceof Spanned) {
+            SpannableString sp = new SpannableString(s);
+            TextUtils.copySpansFrom((Spanned) source,
+                                    start, end, null, sp, 0);
+            return sp;
+        } else {
+            return s;
+        }
     }
     
     /**

@@ -18,32 +18,35 @@
  * @author Pavel Dolgov
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.event.AdjustmentListener;
 
 /**
- * The Adjustable interface represents an adjustable numeric value 
- * contained within a bounded range of values, such as the current 
- * location in scrollable region or the value of a gauge.
+ * The Adjustable interface represents an adjustable numeric value contained
+ * within a bounded range of values, such as the current location in scrollable
+ * region or the value of a gauge.
+ * 
+ * @since Android 1.0
  */
 public interface Adjustable {
 
-    /** 
-     * The Constant HORIZONTAL indicates that the Adjustable's orientation 
-     * is horizontal. 
+    /**
+     * The Constant HORIZONTAL indicates that the Adjustable's orientation is
+     * horizontal.
      */
     public static final int HORIZONTAL = 0;
 
-    /** 
-     * The Constant VERTICAL indicates that the Adjustable's orientation 
-     * is vertical. 
+    /**
+     * The Constant VERTICAL indicates that the Adjustable's orientation is
+     * vertical.
      */
     public static final int VERTICAL = 1;
 
-    /** 
-     * The Constant NO_ORIENTATION indicates that the Adjustable 
-     * has no orientation.
+    /**
+     * The Constant NO_ORIENTATION indicates that the Adjustable has no
+     * orientation.
      */
     public static final int NO_ORIENTATION = 2;
 
@@ -57,14 +60,16 @@ public interface Adjustable {
     /**
      * Sets the value to the Adjustable object.
      * 
-     * @param a0 the new value of the Adjustable object. 
+     * @param a0
+     *            the new value of the Adjustable object.
      */
     public void setValue(int a0);
 
     /**
      * Adds the AdjustmentListener to current Adjustment.
      * 
-     * @param a0 the AdjustmentListener object.
+     * @param a0
+     *            the AdjustmentListener object.
      */
     public void addAdjustmentListener(AdjustmentListener a0);
 
@@ -85,7 +90,7 @@ public interface Adjustable {
     /**
      * Gets the minimum value of the Adjustable.
      * 
-     * @return the minimum value of the Adjustable. 
+     * @return the minimum value of the Adjustable.
      */
     public int getMinimum();
 
@@ -113,44 +118,49 @@ public interface Adjustable {
     /**
      * Removes the adjustment listener of the Adjustable.
      * 
-     * @param a0 the specified AdjustmentListener to be removed.
+     * @param a0
+     *            the specified AdjustmentListener to be removed.
      */
     public void removeAdjustmentListener(AdjustmentListener a0);
 
     /**
      * Sets the block increment for the Adjustable.
      * 
-     * @param a0 the new block increment.
+     * @param a0
+     *            the new block increment.
      */
     public void setBlockIncrement(int a0);
 
     /**
      * Sets the maximum value of the Adjustable.
      * 
-     * @param a0 the new maximum of the Adjustable.
+     * @param a0
+     *            the new maximum of the Adjustable.
      */
     public void setMaximum(int a0);
 
     /**
      * Sets the minimum value of the Adjustable.
      * 
-     * @param a0 the new minimum of the Adjustable.
+     * @param a0
+     *            the new minimum of the Adjustable.
      */
     public void setMinimum(int a0);
 
     /**
      * Sets the unit increment of the Adjustable.
      * 
-     * @param a0 the new unit increment of the Adjustable.
+     * @param a0
+     *            the new unit increment of the Adjustable.
      */
     public void setUnitIncrement(int a0);
 
     /**
      * Sets the visible amount of the Adjustable.
      * 
-     * @param a0 the new visible amount of the Adjustable.
+     * @param a0
+     *            the new visible amount of the Adjustable.
      */
     public void setVisibleAmount(int a0);
 
 }
-

@@ -18,6 +18,7 @@
  * @author Dmitry A. Durnev
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.io.File;
@@ -35,61 +36,99 @@ import org.apache.harmony.awt.wtk.NativeCursor;
 
 /**
  * The Cursor class represents the bitmap of the mouse cursor.
+ * 
+ * @since Android 1.0
  */
 public class Cursor implements Serializable {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 8028237497568985504L;
-    
-    /** The Constant DEFAULT_CURSOR indicates the default cursor type. */
+
+    /**
+     * The Constant DEFAULT_CURSOR indicates the default cursor type.
+     */
     public static final int DEFAULT_CURSOR = 0;
 
-    /** The Constant CROSSHAIR_CURSOR cursor type. */
+    /**
+     * The Constant CROSSHAIR_CURSOR cursor type.
+     */
     public static final int CROSSHAIR_CURSOR = 1;
 
-    /** The Constant TEXT_CURSOR cursor type. */
+    /**
+     * The Constant TEXT_CURSOR cursor type.
+     */
     public static final int TEXT_CURSOR = 2;
 
-    /** The Constant WAIT_CURSOR cursor type. */
+    /**
+     * The Constant WAIT_CURSOR cursor type.
+     */
     public static final int WAIT_CURSOR = 3;
 
-    /** The Constant SW_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant SW_RESIZE_CURSOR cursor type.
+     */
     public static final int SW_RESIZE_CURSOR = 4;
 
-    /** The Constant SE_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant SE_RESIZE_CURSOR cursor type.
+     */
     public static final int SE_RESIZE_CURSOR = 5;
 
-    /** The Constant NW_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant NW_RESIZE_CURSOR cursor type.
+     */
     public static final int NW_RESIZE_CURSOR = 6;
 
-    /** The Constant NE_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant NE_RESIZE_CURSOR cursor type.
+     */
     public static final int NE_RESIZE_CURSOR = 7;
 
-    /** The Constant N_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant N_RESIZE_CURSOR cursor type.
+     */
     public static final int N_RESIZE_CURSOR = 8;
 
-    /** The Constant S_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant S_RESIZE_CURSOR cursor type.
+     */
     public static final int S_RESIZE_CURSOR = 9;
 
-    /** The Constant W_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant W_RESIZE_CURSOR cursor type.
+     */
     public static final int W_RESIZE_CURSOR = 10;
 
-    /** The Constant E_RESIZE_CURSOR cursor type. */
+    /**
+     * The Constant E_RESIZE_CURSOR cursor type.
+     */
     public static final int E_RESIZE_CURSOR = 11;
 
-    /** The Constant HAND_CURSOR cursor type. */
+    /**
+     * The Constant HAND_CURSOR cursor type.
+     */
     public static final int HAND_CURSOR = 12;
 
-    /** The Constant MOVE_CURSOR cursor type. */
+    /**
+     * The Constant MOVE_CURSOR cursor type.
+     */
     public static final int MOVE_CURSOR = 13;
 
-    /** A mapping from names to system custom cursors. */
+    /**
+     * A mapping from names to system custom cursors.
+     */
     static Map<String, Cursor> systemCustomCursors;
-    
-    /** The cursor props. */
+
+    /**
+     * The cursor props.
+     */
     static Properties cursorProps;
 
-    /** The Constant predefinedNames. */
+    /**
+     * The Constant predefinedNames.
+     */
     static final String[] predefinedNames = {
             "Default", "Crosshair", "Text", "Wait", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             "Southwest Resize", "Southeast Resize", //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,41 +138,52 @@ public class Cursor implements Serializable {
 
     };
 
-    /** The predefined set of cursors. */
+    /**
+     * The predefined set of cursors.
+     */
     protected static Cursor[] predefined = {
-            new Cursor(DEFAULT_CURSOR), null, null, null,
-            null, null, null, null,
-            null, null, null, null,
-            null, null
+            new Cursor(DEFAULT_CURSOR), null, null, null, null, null, null, null, null, null, null,
+            null, null, null
     };
 
-    /** The Constant CUSTOM_CURSOR is associated with all custom cursor types. 
+    /**
+     * The Constant CUSTOM_CURSOR is associated with all custom cursor types.
      * (Those which are not predefined)
      */
     public static final int CUSTOM_CURSOR = -1;
 
-    /** The name of the cursor. */
+    /**
+     * The name of the cursor.
+     */
     protected String name;
 
-    /** The type of the cursor, chosen from the list of cursor type constants. */
+    /**
+     * The type of the cursor, chosen from the list of cursor type constants.
+     */
     private final int type;
-    
-    /** The native cursor. */
+
+    /**
+     * The native cursor.
+     */
     private transient NativeCursor nativeCursor;
-    
-    /** The exact point on the cursor image that indicates which point 
-     * the cursor is selecting (pointing to). The coordinates are given 
-     * with respect the origin of the Image (its upper left corner).
+
+    /**
+     * The exact point on the cursor image that indicates which point the cursor
+     * is selecting (pointing to). The coordinates are given with respect the
+     * origin of the Image (its upper left corner).
      */
     private Point hotSpot;
-    
-    /** The image to draw on the screen representing the cursor. */
+
+    /**
+     * The image to draw on the screen representing the cursor.
+     */
     private Image image;
 
     /**
      * Instantiates a new cursor with the specified name.
      * 
-     * @param name the name of cursor.
+     * @param name
+     *            the name of cursor.
      */
     protected Cursor(String name) {
         this(name, null, new Point());
@@ -142,7 +192,8 @@ public class Cursor implements Serializable {
     /**
      * Instantiates a new cursor of the specified type.
      * 
-     * @param type the type of cursor.
+     * @param type
+     *            the type of cursor.
      */
     public Cursor(int type) {
         checkType(type);
@@ -155,9 +206,12 @@ public class Cursor implements Serializable {
     /**
      * Instantiates a new cursor.
      * 
-     * @param name the name
-     * @param img the img
-     * @param hotSpot the hot spot
+     * @param name
+     *            the name.
+     * @param img
+     *            the img.
+     * @param hotSpot
+     *            the hot spot.
      */
     Cursor(String name, Image img, Point hotSpot) {
         this.name = name;
@@ -167,10 +221,11 @@ public class Cursor implements Serializable {
     }
 
     /**
-     * Finalize method overrided finalize method from Object class.
+     * Finalize method overrides the finalize method from Object class.
      * 
-     * @throws Throwable if the native cursor is not null and throws
-     * a throwable when destroyed.
+     * @throws Throwable
+     *             if the native cursor is not null and throws a Throwable when
+     *             destroyed.
      */
     @Override
     protected void finalize() throws Throwable {
@@ -201,7 +256,7 @@ public class Cursor implements Serializable {
     /**
      * Gets the cursor type.
      * 
-     * @return the cursor type
+     * @return the cursor type.
      */
     public int getType() {
         return type;
@@ -210,8 +265,8 @@ public class Cursor implements Serializable {
     /**
      * Gets the predefined cursor with the specified type.
      * 
-     * @param type the type of cursor.
-     * 
+     * @param type
+     *            the type of cursor.
      * @return the predefined cursor with the specified type.
      */
     public static Cursor getPredefinedCursor(int type) {
@@ -236,33 +291,33 @@ public class Cursor implements Serializable {
     /**
      * Gets the specified system custom cursor.
      * 
-     * @param name the name of the desired system cursor.
-     * 
+     * @param name
+     *            the name of the desired system cursor.
      * @return the specific system cursor with the specified name.
-     * 
-     * @throws AWTException if the desired cursor has malformed data
-     * such as an incorrectly defined hot spot.
-     * @throws HeadlessException if the isHeadless method of the GraphicsEnvironment
-     * returns true.
+     * @throws AWTException
+     *             if the desired cursor has malformed data such as an
+     *             incorrectly defined hot spot.
+     * @throws HeadlessException
+     *             if the isHeadless method of the GraphicsEnvironment returns
+     *             true.
      */
-    public static Cursor getSystemCustomCursor(String name)
-    throws AWTException, HeadlessException {
+    public static Cursor getSystemCustomCursor(String name) throws AWTException, HeadlessException {
         Toolkit.checkHeadless();
         return getSystemCustomCursorFromMap(name);
     }
 
     /**
-     * Gets the specified system custom cursor from the map of system custom cursors.
+     * Gets the specified system custom cursor from the map of system custom
+     * cursors.
      * 
-     * @param name the name of the desired cursor.
-     * 
-     * @return the desired system custom cursor from the 
-     * map of system custom cursors.
-     * 
-     * @throws AWTException the AWT exception
+     * @param name
+     *            the name of the desired cursor.
+     * @return the desired system custom cursor from the map of system custom
+     *         cursors.
+     * @throws AWTException
+     *             the AWT exception.
      */
-    private static Cursor getSystemCustomCursorFromMap (String name)
-    throws AWTException {
+    private static Cursor getSystemCustomCursorFromMap(String name) throws AWTException {
         loadCursorProps();
         if (systemCustomCursors == null) {
             systemCustomCursors = new HashMap<String, Cursor>();
@@ -284,8 +339,7 @@ public class Cursor implements Serializable {
         int x, y;
         try {
             x = new Integer(hotSpotStr.substring(0, idx)).intValue();
-            y = new Integer(hotSpotStr.substring(idx + 1,
-                                                 hotSpotStr.length())).intValue();
+            y = new Integer(hotSpotStr.substring(idx + 1, hotSpotStr.length())).intValue();
         } catch (NumberFormatException nfe) {
             throw new AWTException(exMsg);
         }
@@ -299,7 +353,8 @@ public class Cursor implements Serializable {
     /**
      * Load cursor props.
      * 
-     * @throws AWTException the AWT exception
+     * @throws AWTException
+     *             the AWT exception.
      */
     private static void loadCursorProps() throws AWTException {
         if (cursorProps != null) {
@@ -308,18 +363,18 @@ public class Cursor implements Serializable {
         String sep = File.separator;
         String cursorsDir = "lib" + sep + "images" + sep + "cursors"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         String cursorsAbsDir = System.getProperty("java.home") + sep + //$NON-NLS-1$
-                                cursorsDir;
+                cursorsDir;
         String cursorPropsFileName = "cursors.properties"; //$NON-NLS-1$
-        String cursorPropsFullFileName = (cursorsAbsDir + sep +
-                                          cursorPropsFileName);
+        String cursorPropsFullFileName = (cursorsAbsDir + sep + cursorPropsFileName);
         cursorProps = new Properties();
         try {
-            cursorProps.load(new FileInputStream(new File(
-                    cursorPropsFullFileName)));
+            cursorProps.load(new FileInputStream(new File(cursorPropsFullFileName)));
         } catch (FileNotFoundException e) {
             // awt.142=Exception: class {0} {1} occurred while loading: {2}
             throw new AWTException(Messages.getString("awt.142",//$NON-NLS-1$
-                      new Object[]{e.getClass(), e.getMessage(), cursorPropsFullFileName}));
+                    new Object[] {
+                            e.getClass(), e.getMessage(), cursorPropsFullFileName
+                    }));
         } catch (IOException e) {
             throw new AWTException(e.getMessage());
         }
@@ -329,7 +384,8 @@ public class Cursor implements Serializable {
     /**
      * Check type.
      * 
-     * @param type the type
+     * @param type
+     *            the type.
      */
     static void checkType(int type) {
         // can't use predefined array here because it may not have been
@@ -344,7 +400,7 @@ public class Cursor implements Serializable {
     /**
      * Gets the native cursor.
      * 
-     * @return the native cursor
+     * @return the native cursor.
      */
     NativeCursor getNativeCursor() {
         if (nativeCursor != null) {
@@ -354,8 +410,7 @@ public class Cursor implements Serializable {
         if (type != CUSTOM_CURSOR) {
             nativeCursor = toolkit.createNativeCursor(type);
         } else {
-            nativeCursor = toolkit.createCustomNativeCursor(image, hotSpot,
-                                                            name);
+            nativeCursor = toolkit.createCustomNativeCursor(image, hotSpot, name);
         }
         return nativeCursor;
     }
@@ -363,10 +418,10 @@ public class Cursor implements Serializable {
     /**
      * Sets the native cursor.
      * 
-     * @param nativeCursor the new native cursor
+     * @param nativeCursor
+     *            the new native cursor.
      */
     void setNativeCursor(NativeCursor nativeCursor) {
         this.nativeCursor = nativeCursor;
     }
 }
-

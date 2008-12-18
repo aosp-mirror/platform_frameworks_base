@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.gsm.stk;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Enumeration for representing the tone values for use with PLAY TONE
@@ -23,7 +25,7 @@ package com.android.internal.telephony.gsm.stk;
  *
  * {@hide}
  */
-public enum Tone {
+public enum Tone implements Parcelable {
     // Standard supervisory tones
 
     /**
@@ -163,4 +165,26 @@ public enum Tone {
         }
         return null;
     }
+
+    Tone(Parcel in) {
+        mValue = in.readInt();
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(ordinal());
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Tone> CREATOR = new Parcelable.Creator<Tone>() {
+        public Tone createFromParcel(Parcel in) {
+            return Tone.values()[in.readInt()];
+        }
+
+        public Tone[] newArray(int size) {
+            return new Tone[size];
+        }
+    };
 }

@@ -70,6 +70,8 @@
 
     <!-- Standard animations for a non-full-screen window or activity. -->
     <style name="Animation.Dialog">
+        <item name="windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="windowExitAnimation">@anim/dialog_exit</item>
     </style>
 
     <!-- Standard animations for a translucent window or activity. -->
@@ -109,6 +111,20 @@
     <style name="Animation.DropDownUp">
         <item name="windowEnterAnimation">@anim/grow_fade_in_from_bottom</item>
         <item name="windowExitAnimation">@anim/shrink_fade_out_from_bottom</item>
+    </style>
+
+    <!-- Window animations that are applied to input method overlay windows.
+         {@hide Pending API council approval} -->
+    <style name="Animation.InputMethod">
+        <item name="windowEnterAnimation">@anim/input_method_enter</item>
+        <item name="windowExitAnimation">@anim/input_method_exit</item>
+    </style>
+
+    <!-- Window animations that are applied to the search bar overlay window.
+         {@hide Pending API council approval} -->
+    <style name="Animation.SearchBar">
+        <item name="windowEnterAnimation">@anim/search_bar_enter</item>
+        <item name="windowExitAnimation">@anim/search_bar_exit</item>
     </style>
 
     <!-- Status Bar Styles -->
@@ -169,6 +185,11 @@
     <style name="Widget.CompoundButton.Star">
         <item name="android:background">@android:drawable/btn_star_label_background</item>
         <item name="android:button">@android:drawable/btn_star</item>
+    </style>
+
+    <style name="Widget.CompoundButton.StarButtonless">
+        <item name="android:background">@android:drawable/btn_star_label_background</item>
+        <item name="android:button">@android:drawable/btn_star_buttonless</item>
     </style>
 
     <style name="Widget.Button.Toggle">
@@ -309,6 +330,8 @@
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">-8px</item>
+        <item name="android:dropDownHorizontalOffset">2px</item>
     </style>
 
     <style name="Widget.Spinner">
@@ -378,6 +401,8 @@
 
     <style name="Widget.TabWidget">
         <item name="android:textAppearance">@style/TextAppearance.Widget.TabWidget</item>
+        <item name="ellipsize">marquee</item>
+        <item name="singleLine">true</item>
     </style>
 
     <style name="Widget.Gallery">
@@ -586,5 +611,17 @@
         <item name="android:showSilent">true</item>
         <item name="android:showDefault">true</item>
     </style>
-    
+
+    <style name="Widget.KeyboardView" parent="android:Widget">
+        <item name="android:background">@android:drawable/keyboard_background</item>
+        <item name="android:keyBackground">@android:drawable/btn_keyboard_key</item>
+        <item name="android:keyTextSize">22sp</item>
+        <item name="android:keyTextColor">#FFFFFFFF</item>
+        <item name="android:keyPreviewLayout">@android:layout/keyboard_key_preview</item>
+        <item name="android:keyPreviewOffset">-12dp</item>
+        <item name="android:keyPreviewHeight">80dp</item>
+        <item name="android:labelTextSize">14sp</item>
+        <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
+        <item name="android:verticalCorrection">-10dip</item>
+    </style>
 </resources>

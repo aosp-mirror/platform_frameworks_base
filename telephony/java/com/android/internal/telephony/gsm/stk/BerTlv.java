@@ -72,20 +72,7 @@ class BerTlv {
         try {
             /* tag */
             tag = data[curIndex++] & 0xff;
-            if (tag != BER_PROACTIVE_COMMAND_TAG) {
-                // If the buffer doesn't contain proactive command tag, but
-                // start with a command details tlv object ==> skip the length 
-                // parsing and look for tlv objects.
-                ComprehensionTlv ctlv = ComprehensionTlv.decode(data,
-                        curIndex--);
-                if (ctlv.getTag() == ComprehensionTlvTag.COMMAND_DETAILS.value()) {
-                    tag = BER_UNKNOWN_TAG;
-                    curIndex--;
-                } else {
-                    throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
-                }
-            } else {
-
+            if (tag == BER_PROACTIVE_COMMAND_TAG) {
                 /* length */
                 int temp = data[curIndex++] & 0xff;
                 if (temp < 0x80) {
@@ -101,8 +88,12 @@ class BerTlv {
                     throw new ResultException(
                             ResultCode.CMD_DATA_NOT_UNDERSTOOD);
                 }
+            } else {
+                if (ComprehensionTlvTag.COMMAND_DETAILS.value() == (tag & ~0x80)) {
+                    tag = BER_UNKNOWN_TAG;
+                    curIndex = 0;
+                }
             }
-
         } catch (IndexOutOfBoundsException e) {
             throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
         } catch (ResultException e) {

@@ -155,7 +155,7 @@ class Network {
      */
     public boolean requestURL(String method,
                               Map<String, String> headers,
-                              String postData,
+                              byte [] postData,
                               LoadListener loader,
                               boolean isHighPriority) {
 
@@ -178,9 +178,8 @@ class Network {
         InputStream bodyProvider = null;
         int bodyLength = 0;
         if (postData != null) {
-            byte[] data = postData.getBytes();
-            bodyLength = data.length;
-            bodyProvider = new ByteArrayInputStream(data);
+            bodyLength = postData.length;
+            bodyProvider = new ByteArrayInputStream(postData);
         }
 
         RequestQueue q = mRequestQueue;

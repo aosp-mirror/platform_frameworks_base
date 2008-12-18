@@ -44,6 +44,23 @@
 
 namespace android {
 
+static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv* env, jobject obj, jint fd, jint minswest)
+{
+#if HAVE_ANDROID_OS
+    struct timezone tz;
+
+    tz.tz_minuteswest = minswest;
+    tz.tz_dsttime = 0;
+
+    int result = ioctl(fd, ANDROID_ALARM_SET_TIMEZONE, &tz);
+    if (result < 0) {
+        LOGE("Unable to set kernel timezone to %d: %s\n", minswest, strerror(errno));
+        return -1;
+    }
+    return 0;
+#endif
+}
+
 static jint android_server_AlarmManagerService_init(JNIEnv* env, jobject obj)
 {
 #if HAVE_ANDROID_OS
@@ -101,6 +118,7 @@ static JNINativeMethod sMethods[] = {
 	{"close", "(I)V", (void*)android_server_AlarmManagerService_close},
 	{"set", "(IIJ)V", (void*)android_server_AlarmManagerService_set},
     {"waitForAlarm", "(I)I", (void*)android_server_AlarmManagerService_waitForAlarm},
+    {"setKernelTimezone", "(II)I", (void*)android_server_AlarmManagerService_setKernelTimezone},
 };
 
 int register_android_server_AlarmManagerService(JNIEnv* env)

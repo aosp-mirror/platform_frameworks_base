@@ -75,6 +75,7 @@ public class InputDevice {
             float temp;
             float scaledPressure = 1.0f;
             float scaledSize = 0;
+            int edgeFlags = 0;
             if (isAbs) {
                 int w = display.getWidth()-1;
                 int h = display.getHeight()-1;
@@ -118,6 +119,19 @@ public class InputDevice {
                         scaledY = temp;
                         break;
                 }
+
+                if (scaledX == 0) {
+                    edgeFlags += MotionEvent.EDGE_LEFT;
+                } else if (scaledX == display.getWidth() - 1.0f) {
+                    edgeFlags += MotionEvent.EDGE_RIGHT;
+                }
+                
+                if (scaledY == 0) {
+                    edgeFlags += MotionEvent.EDGE_TOP;
+                } else if (scaledY == display.getHeight() - 1.0f) {
+                    edgeFlags += MotionEvent.EDGE_BOTTOM;
+                }
+                
             } else {
                 scaledX *= xMoveScale;
                 scaledY *= yMoveScale;
@@ -137,19 +151,6 @@ public class InputDevice {
                         scaledY = temp;
                         break;
                 }
-            }
-
-            int edgeFlags = 0;
-            if (scaledX == 0) {
-                edgeFlags += MotionEvent.EDGE_LEFT;
-            } else if (scaledX == display.getWidth() - 1.0f) {
-                edgeFlags += MotionEvent.EDGE_RIGHT;
-            }
-            
-            if (scaledY == 0) {
-                edgeFlags += MotionEvent.EDGE_TOP;
-            } else if (scaledY == display.getHeight() - 1.0f) {
-                edgeFlags += MotionEvent.EDGE_BOTTOM;
             }
             
             changed = false;
@@ -171,6 +172,8 @@ public class InputDevice {
                         xPrecision, yPrecision, device.id, edgeFlags);
             } else {
                 if (currentMove != null) {
+                    if (false) Log.i("InputDevice", "Adding batch x=" + scaledX
+                            + " y=" + scaledY + " to " + currentMove);
                     currentMove.addBatch(curTime, scaledX, scaledY,
                             scaledPressure, scaledSize, metaState);
                     if (WindowManagerPolicy.WATCH_POINTER) {

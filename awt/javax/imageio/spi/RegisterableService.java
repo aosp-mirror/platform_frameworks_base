@@ -18,33 +18,37 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 /**
- * The RegisterableService interface provides service provider 
- * objects that can be registered by a ServiceRegistry, and 
- * notifications that registration and deregistration have been
- * performed.
+ * The RegisterableService interface provides service provider objects that can
+ * be registered by a ServiceRegistry, and notifications that registration and
+ * deregistration have been performed.
+ * 
+ * @since Android 1.0
  */
 public interface RegisterableService {
-    
+
     /**
-     * This method is called when the object which implements this
-     * interface is registered to the specified category of the 
-     * specified registry.
+     * This method is called when the object which implements this interface is
+     * registered to the specified category of the specified registry.
      * 
-     * @param registry the ServiceRegistry to be registered.
-     * @param category the class representing a category.
+     * @param registry
+     *            the ServiceRegistry to be registered.
+     * @param category
+     *            the class representing a category.
      */
     void onRegistration(ServiceRegistry registry, Class<?> category);
-    
+
     /**
-     * This method is called when the object which implements this
-     * interface is deregistered to the specified category of the 
-     * specified registry.
+     * This method is called when the object which implements this interface is
+     * deregistered to the specified category of the specified registry.
      * 
-     * @param registry the ServiceRegistry to be registered.
-     * @param category the class representing a category.
+     * @param registry
+     *            the ServiceRegistry to be registered.
+     * @param category
+     *            the class representing a category.
      */
     void onDeregistration(ServiceRegistry registry, Class<?> category);
 }

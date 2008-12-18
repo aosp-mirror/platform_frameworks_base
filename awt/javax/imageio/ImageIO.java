@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio;
 
 import javax.imageio.stream.ImageInputStream;
@@ -34,44 +35,47 @@ import java.awt.image.RenderedImage;
 import java.net.URL;
 
 /**
- * The ImageIO class provides static methods to perfom 
- * reading and writing operations using registered
- * ImageReader and ImageWriter objects.
+ * The ImageIO class provides static methods to perform reading and writing
+ * operations using registered ImageReader and ImageWriter objects.
+ * 
+ * @since Android 1.0
  */
 public final class ImageIO {
 
-    /** The Constant registry. */
+    /**
+     * The constant registry.
+     */
     private static final IIORegistry registry = IIORegistry.getDefaultInstance();
 
     /**
-     * Instantiates a new image io.
+     * Instantiates a new ImageIO.
      */
-    private ImageIO() {}
-    
+    private ImageIO() {
+    }
 
     /**
-     * Scans for plug-ins in the class path, 
-     * loads spi classes, and registers them with the IIORegistry.
+     * Scans for plug-ins in the class path, loads spi classes, and registers
+     * them with the IIORegistry.
      */
     public static void scanForPlugins() {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Sets flag which indicates whether a cache file is used when 
-     * creating ImageInputStreams and ImageOutputStreams or not.
+     * Sets flag which indicates whether a cache file is used when creating
+     * ImageInputStreams and ImageOutputStreams or not.
      * 
-     * @param useCache the use cache flag.
+     * @param useCache
+     *            the use cache flag.
      */
     public static void setUseCache(boolean useCache) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets the flag which indicates whether a cache file is used when 
-     * creating ImageInputStreams and ImageOutputStreams or not.
-     * This method returns the current value which is set by setUseCache
-     * method.
+     * Gets the flag which indicates whether a cache file is used when creating
+     * ImageInputStreams and ImageOutputStreams or not. This method returns the
+     * current value which is set by setUseCache method.
      * 
      * @return the use cache flag.
      */
@@ -83,44 +87,44 @@ public final class ImageIO {
     /**
      * Sets the cache directory.
      * 
-     * @param cacheDirectory the File which specifies a cache directory.
+     * @param cacheDirectory
+     *            the File which specifies a cache directory.
      */
     public static void setCacheDirectory(File cacheDirectory) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets the directory where cache files are created, returned
-     * the file which is set by setCacheDirectory method, or null.
+     * Gets the directory where cache files are created, returned the file which
+     * is set by setCacheDirectory method, or null.
      * 
-     * @return the File object which is set by setCacheDirectory method, 
-     * or null.
+     * @return the File object which is set by setCacheDirectory method, or
+     *         null.
      */
     public static File getCacheDirectory() {
         // TODO implement
-        //-- null indicates system-dep default temporary directory
+        // -- null indicates system-dep default temporary directory
         return null;
     }
 
     /**
-     * Creates an ImageInputStream from the specified Object.
-     * The specified Object should obtain the input source
-     * such as File, or InputStream.   
+     * Creates an ImageInputStream from the specified Object. The specified
+     * Object should obtain the input source such as File, or InputStream.
      * 
-     * @param input the input Object such as File, or InputStream.   
-     * 
+     * @param input
+     *            the input Object such as File, or InputStream.
      * @return the ImageInputStream object, or null.
-     * 
-     * @throws IOException signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public static ImageInputStream createImageInputStream(Object input)
-            throws IOException {
+    public static ImageInputStream createImageInputStream(Object input) throws IOException {
 
         if (input == null) {
             throw new IllegalArgumentException("input source cannot be NULL");
         }
 
-        Iterator<ImageInputStreamSpi> it = registry.getServiceProviders(ImageInputStreamSpi.class, true);
+        Iterator<ImageInputStreamSpi> it = registry.getServiceProviders(ImageInputStreamSpi.class,
+                true);
 
         while (it.hasNext()) {
             ImageInputStreamSpi spi = it.next();
@@ -132,23 +136,22 @@ public final class ImageIO {
     }
 
     /**
-     * Creates an ImageOutputStream using the specified Object.
-     * The specified Object should obtain the output source
-     * such as File, or OutputStream.   
+     * Creates an ImageOutputStream using the specified Object. The specified
+     * Object should obtain the output source such as File, or OutputStream.
      * 
-     * @param output the output Object such as File, or OutputStream.   
-     * 
+     * @param output
+     *            the output Object such as File, or OutputStream.
      * @return the ImageOutputStream object, or null.
-     * 
-     * @throws IOException signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public static ImageOutputStream createImageOutputStream(Object output)
-            throws IOException {
+    public static ImageOutputStream createImageOutputStream(Object output) throws IOException {
         if (output == null) {
             throw new IllegalArgumentException("output destination cannot be NULL");
         }
 
-        Iterator<ImageOutputStreamSpi> it = registry.getServiceProviders(ImageOutputStreamSpi.class, true);
+        Iterator<ImageOutputStreamSpi> it = registry.getServiceProviders(
+                ImageOutputStreamSpi.class, true);
 
         while (it.hasNext()) {
             ImageOutputStreamSpi spi = it.next();
@@ -161,8 +164,8 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the array of format names as String which can be 
-     * decoded by registered ImageReader objects.
+     * Gets the array of format names as String which can be decoded by
+     * registered ImageReader objects.
      * 
      * @return the array of format names.
      */
@@ -171,8 +174,8 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the array of MIME types as String which can be 
-     * decoded by registered ImageReader objects.
+     * Gets the array of MIME types as String which can be decoded by registered
+     * ImageReader objects.
      * 
      * @return the array of MIME types.
      */
@@ -181,13 +184,13 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator of registered ImageReader which are able to 
-     * decode an imput data specified by input Object.
+     * Gets the Iterator of registered ImageReader which are able to decode an
+     * input data specified by input Object.
      * 
-     * @param input the input Object with encoded data such as 
-     * ImageInputStream object.
-     * 
-     * @return the Iterator of registered ImageReader. 
+     * @param input
+     *            the input Object with encoded data such as ImageInputStream
+     *            object.
+     * @return the Iterator of registered ImageReader.
      */
     public static Iterator<ImageReader> getImageReaders(Object input) {
         if (input == null) {
@@ -201,11 +204,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator of registered ImageReader which are able to 
-     * decode the specified format.
+     * Gets the Iterator of registered ImageReader which are able to decode the
+     * specified format.
      * 
-     * @param formatName the format name such as "jpeg", or "gif".
-     * 
+     * @param formatName
+     *            the format name such as "jpeg", or "gif".
      * @return the Iterator of registered ImageReader.
      */
     public static Iterator<ImageReader> getImageReadersByFormatName(String formatName) {
@@ -220,11 +223,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator which lists the registered ImageReader objects that
-     * are able to decode files with the specified suffix.
+     * Gets the Iterator which lists the registered ImageReader objects that are
+     * able to decode files with the specified suffix.
      * 
-     * @param fileSuffix the file suffix such as "jpg".
-     * 
+     * @param fileSuffix
+     *            the file suffix such as "jpg".
      * @return the Iterator of registered ImageReaders.
      */
     public static Iterator<ImageReader> getImageReadersBySuffix(String fileSuffix) {
@@ -238,11 +241,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator of registered ImageReader objects that
-     * are able to decode files with the specified MIME type.
+     * Gets the Iterator of registered ImageReader objects that are able to
+     * decode files with the specified MIME type.
      * 
-     * @param MIMEType the MIME type such as "image/jpeg".
-     * 
+     * @param MIMEType
+     *            the MIME type such as "image/jpeg".
      * @return the Iterator of registered ImageReaders.
      */
     public static Iterator<ImageReader> getImageReadersByMIMEType(String MIMEType) {
@@ -250,8 +253,8 @@ public final class ImageIO {
     }
 
     /**
-     * Gets an array of Strings giving the names of the formats supported 
-     * by registered ImageWriter objects.
+     * Gets an array of Strings giving the names of the formats supported by
+     * registered ImageWriter objects.
      * 
      * @return the array of format names.
      */
@@ -260,7 +263,7 @@ public final class ImageIO {
     }
 
     /**
-     * Gets an array of Strings giving the MIME types of the formats supported 
+     * Gets an array of Strings giving the MIME types of the formats supported
      * by registered ImageWriter objects.
      * 
      * @return the array of MIME types.
@@ -270,11 +273,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator which lists the registered ImageReader objects that
-     * are able to encode the specified image format.
+     * Gets the Iterator which lists the registered ImageReader objects that are
+     * able to encode the specified image format.
      * 
-     * @param formatName the image format name such as "jpeg".
-     * 
+     * @param formatName
+     *            the image format name such as "jpeg".
      * @return the Iterator of registered ImageWriter.
      */
     public static Iterator<ImageWriter> getImageWritersByFormatName(String formatName) {
@@ -289,11 +292,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator which lists the registered ImageReader objects that
-     * are able to encode the specified suffix.
+     * Gets the Iterator which lists the registered ImageReader objects that are
+     * able to encode the specified suffix.
      * 
-     * @param fileSuffix the file suffix such as "jpg".
-     * 
+     * @param fileSuffix
+     *            the file suffix such as "jpg".
      * @return the Iterator of registered ImageWriter.
      */
     public static Iterator<ImageWriter> getImageWritersBySuffix(String fileSuffix) {
@@ -306,11 +309,11 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator which lists the registered ImageReader objects that
-     * are able to encode the specified MIME type.
+     * Gets the Iterator which lists the registered ImageReader objects that are
+     * able to encode the specified MIME type.
      * 
-     * @param MIMEType the MIME type such as "image/jpeg".
-     * 
+     * @param MIMEType
+     *            the MIME type such as "image/jpeg".
      * @return the Iterator of registered ImageWriter.
      */
     public static Iterator<ImageWriter> getImageWritersByMIMEType(String MIMEType) {
@@ -318,12 +321,12 @@ public final class ImageIO {
     }
 
     /**
-     * Gets an ImageWriter object which corresponds to the 
-     * specified ImageReader, or returns null if the specified
-     * ImageReader is not registered. 
+     * Gets an ImageWriter object which corresponds to the specified
+     * ImageReader, or returns null if the specified ImageReader is not
+     * registered.
      * 
-     * @param reader the specified ImageReader.
-     * 
+     * @param reader
+     *            the specified ImageReader.
      * @return the ImageWriter, or null.
      */
     public static ImageWriter getImageWriter(ImageReader reader) {
@@ -331,12 +334,12 @@ public final class ImageIO {
     }
 
     /**
-     * Gets an ImageReader object which corresponds to the 
-     * specified ImageWriter, or returns null if the specified
-     * ImageWriter is not registered. 
+     * Gets an ImageReader object which corresponds to the specified
+     * ImageWriter, or returns null if the specified ImageWriter is not
+     * registered.
      * 
-     * @param writer the registered ImageWriter object.
-     * 
+     * @param writer
+     *            the registered ImageWriter object.
      * @return the ImageReader.
      */
     public static ImageReader getImageReader(ImageWriter writer) {
@@ -344,17 +347,16 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator of ImageWriter objects which are able to
-     * encode images with the specified ImageTypeSpecifier and
-     * format.
+     * Gets the Iterator of ImageWriter objects which are able to encode images
+     * with the specified ImageTypeSpecifier and format.
      * 
-     * @param type the ImageTypeSpecifier, which defines layout.
-     * @param formatName the format name.
-     * 
+     * @param type
+     *            the ImageTypeSpecifier, which defines layout.
+     * @param formatName
+     *            the format name.
      * @return the Iterator of ImageWriter objects.
      */
-    public static Iterator<ImageWriter> getImageWriters(ImageTypeSpecifier type,
-                                           String formatName) {
+    public static Iterator<ImageWriter> getImageWriters(ImageTypeSpecifier type, String formatName) {
         if (type == null) {
             throw new NullPointerException("type cannot be NULL");
         }
@@ -370,31 +372,31 @@ public final class ImageIO {
     }
 
     /**
-     * Gets the Iterator of registered ImageTranscoders which 
-     * are able to transcode the metadata of the specified
-     * ImageReader object to a suitable object for encoding 
-     * by the specified ImageWriter.
+     * Gets the Iterator of registered ImageTranscoders which are able to
+     * transcode the metadata of the specified ImageReader object to a suitable
+     * object for encoding by the specified ImageWriter.
      * 
-     * @param reader the specified ImageReader.
-     * @param writer the specified ImageWriter.
-     * 
+     * @param reader
+     *            the specified ImageReader.
+     * @param writer
+     *            the specified ImageWriter.
      * @return the Iterator of registered ImageTranscoders.
      */
     public static Iterator<ImageTranscoder> getImageTranscoders(ImageReader reader,
-                                               ImageWriter writer) {
+            ImageWriter writer) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Reads image data from the specified File and decodes it using 
-     * the appropriate registered ImageReader object. 
-     * The File is wrapped in an ImageInputStream.
+     * Reads image data from the specified File and decodes it using the
+     * appropriate registered ImageReader object. The File is wrapped in an
+     * ImageInputStream.
      * 
-     * @param input the File to be read.
-     * 
+     * @param input
+     *            the File to be read.
      * @return the BufferedImage decoded from the specified File, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public static BufferedImage read(File input) throws IOException {
         if (input == null) {
@@ -406,15 +408,15 @@ public final class ImageIO {
     }
 
     /**
-     * Reads image data from the specified InputStream and decodes it 
-     * using an appropriate registered an ImageReader object.
+     * Reads image data from the specified InputStream and decodes it using an
+     * appropriate registered an ImageReader object.
      * 
-     * @param input the InputStream.
-     * 
-     * @return the BufferedImage decoded from the specified InputStream,
-     * or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param input
+     *            the InputStream.
+     * @return the BufferedImage decoded from the specified InputStream, or
+     *         null.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public static BufferedImage read(InputStream input) throws IOException {
         if (input == null) {
@@ -426,14 +428,14 @@ public final class ImageIO {
     }
 
     /**
-     * Reads image data from the specified URL and decodes it using 
-     * the appropriate registered ImageReader object. 
-     *  
-     * @param input the URL to be read.
+     * Reads image data from the specified URL and decodes it using the
+     * appropriate registered ImageReader object.
      * 
+     * @param input
+     *            the URL to be read.
      * @return the BufferedImage decoded from the specified URL, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public static BufferedImage read(URL input) throws IOException {
         if (input == null) {
@@ -443,20 +445,20 @@ public final class ImageIO {
         InputStream stream = input.openStream();
         BufferedImage res = read(stream);
         stream.close();
-        
+
         return res;
     }
 
     /**
-     * Reads image data from the specified ImageInputStream and decodes it 
-     * using appropriate registered an ImageReader object.
+     * Reads image data from the specified ImageInputStream and decodes it using
+     * appropriate registered an ImageReader object.
      * 
-     * @param stream the ImageInputStream.
-     * 
-     * @return the BufferedImage decoded from the specified ImageInputStream,
-     * or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param stream
+     *            the ImageInputStream.
+     * @return the BufferedImage decoded from the specified ImageInputStream, or
+     *         null.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public static BufferedImage read(ImageInputStream stream) throws IOException {
         if (stream == null) {
@@ -478,25 +480,25 @@ public final class ImageIO {
         } catch (IOException e) {
             // Stream could be already closed, proceed silently in this case
         }
-        
+
         return res;
     }
 
     /**
-     * Writes the specified image in the specified format (using an 
-     * appropriate ImageWriter) to the specified ImageOutputStream.
+     * Writes the specified image in the specified format (using an appropriate
+     * ImageWriter) to the specified ImageOutputStream.
      * 
-     * @param im the RenderedImage.
-     * @param formatName the format name.
-     * @param output the ImageOutputStream where Image to be written.
-     * 
+     * @param im
+     *            the RenderedImage.
+     * @param formatName
+     *            the format name.
+     * @param output
+     *            the ImageOutputStream where Image to be written.
      * @return true, if Image is written successfully, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public static boolean write(RenderedImage im,
-                                String formatName,
-                                ImageOutputStream output)
+    public static boolean write(RenderedImage im, String formatName, ImageOutputStream output)
             throws IOException {
 
         if (im == null) {
@@ -509,7 +511,8 @@ public final class ImageIO {
             throw new IllegalArgumentException("output cannot be NULL");
         }
 
-        Iterator<ImageWriter> it = getImageWriters(ImageTypeSpecifier.createFromRenderedImage(im), formatName);
+        Iterator<ImageWriter> it = getImageWriters(ImageTypeSpecifier.createFromRenderedImage(im),
+                formatName);
         if (it.hasNext()) {
             ImageWriter writer = it.next();
             writer.setOutput(output);
@@ -522,20 +525,20 @@ public final class ImageIO {
     }
 
     /**
-     * Writes the specified image in the specified format (using an 
-     * appropriate ImageWriter) to the specified File.
+     * Writes the specified image in the specified format (using an appropriate
+     * ImageWriter) to the specified File.
      * 
-     * @param im the RenderedImage.
-     * @param formatName the format name.
-     * @param output the output File where Image to be written.
-     * 
+     * @param im
+     *            the RenderedImage.
+     * @param formatName
+     *            the format name.
+     * @param output
+     *            the output File where Image to be written.
      * @return true, if Image is written successfully, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public static boolean write(RenderedImage im,
-                                String formatName,
-                                File output)
+    public static boolean write(RenderedImage im, String formatName, File output)
             throws IOException {
 
         if (output == null) {
@@ -553,20 +556,20 @@ public final class ImageIO {
     }
 
     /**
-     * Writes the specified image in the specified format (using an 
-     * appropriate ImageWriter) to the specified OutputStream.
+     * Writes the specified image in the specified format (using an appropriate
+     * ImageWriter) to the specified OutputStream.
      * 
-     * @param im the RenderedImage.
-     * @param formatName the format name.
-     * @param output the OutputStream where Image is to be written.
-     * 
+     * @param im
+     *            the RenderedImage.
+     * @param formatName
+     *            the format name.
+     * @param output
+     *            the OutputStream where Image is to be written.
      * @return true, if Image is written successfully, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public static boolean write(RenderedImage im,
-                                String formatName,
-                                OutputStream output)
+    public static boolean write(RenderedImage im, String formatName, OutputStream output)
             throws IOException {
 
         if (output == null) {
@@ -579,26 +582,28 @@ public final class ImageIO {
         return rt;
     }
 
-
     /**
      * Filter to match spi by format name.
      */
     static class FormatFilter implements ServiceRegistry.Filter {
-        
-        /** The name. */
+
+        /**
+         * The name.
+         */
         private String name;
 
         /**
          * Instantiates a new format filter.
          * 
-         * @param name the name
+         * @param name
+         *            the name.
          */
         public FormatFilter(String name) {
             this.name = name;
         }
 
         public boolean filter(Object provider) {
-            ImageReaderWriterSpi spi = (ImageReaderWriterSpi) provider;
+            ImageReaderWriterSpi spi = (ImageReaderWriterSpi)provider;
             return Arrays.asList(spi.getFormatNames()).contains(name);
         }
     }
@@ -608,14 +613,18 @@ public final class ImageIO {
      */
     static class FormatAndEncodeFilter extends FormatFilter {
 
-        /** The type. */
+        /**
+         * The type.
+         */
         private ImageTypeSpecifier type;
 
         /**
          * Instantiates a new format and encode filter.
          * 
-         * @param type the type
-         * @param name the name
+         * @param type
+         *            the type.
+         * @param name
+         *            the name.
          */
         public FormatAndEncodeFilter(ImageTypeSpecifier type, String name) {
             super(name);
@@ -624,7 +633,7 @@ public final class ImageIO {
 
         @Override
         public boolean filter(Object provider) {
-            ImageWriterSpi spi = (ImageWriterSpi) provider;
+            ImageWriterSpi spi = (ImageWriterSpi)provider;
             return super.filter(provider) && spi.canEncodeImage(type);
         }
     }
@@ -633,21 +642,24 @@ public final class ImageIO {
      * Filter to match spi by suffix.
      */
     static class SuffixFilter implements ServiceRegistry.Filter {
-        
-        /** The suf. */
+
+        /**
+         * The suf.
+         */
         private String suf;
 
         /**
          * Instantiates a new suffix filter.
          * 
-         * @param suf the suf
+         * @param suf
+         *            the suf.
          */
         public SuffixFilter(String suf) {
             this.suf = suf;
         }
 
         public boolean filter(Object provider) {
-            ImageReaderWriterSpi spi = (ImageReaderWriterSpi) provider;
+            ImageReaderWriterSpi spi = (ImageReaderWriterSpi)provider;
             return Arrays.asList(spi.getFileSuffixes()).contains(suf);
         }
     }
@@ -656,21 +668,24 @@ public final class ImageIO {
      * Filter to match spi by decoding possibility.
      */
     static class CanReadFilter implements ServiceRegistry.Filter {
-        
-        /** The input. */
+
+        /**
+         * The input.
+         */
         private Object input;
 
         /**
          * Instantiates a new can read filter.
          * 
-         * @param input the input
+         * @param input
+         *            the input.
          */
         public CanReadFilter(Object input) {
             this.input = input;
         }
 
         public boolean filter(Object provider) {
-            ImageReaderSpi spi = (ImageReaderSpi) provider;
+            ImageReaderSpi spi = (ImageReaderSpi)provider;
             try {
                 return spi.canDecodeInput(input);
             } catch (IOException e) {
@@ -684,13 +699,16 @@ public final class ImageIO {
      */
     static class SpiIteratorToWritersIteratorWrapper implements Iterator<ImageWriter> {
 
-        /** The backend. */
+        /**
+         * The backend.
+         */
         private Iterator<ImageWriterSpi> backend;
 
         /**
          * Instantiates a new spi iterator to writers iterator wrapper.
          * 
-         * @param backend the backend
+         * @param backend
+         *            the backend.
          */
         public SpiIteratorToWritersIteratorWrapper(Iterator<ImageWriterSpi> backend) {
             this.backend = backend;
@@ -699,7 +717,7 @@ public final class ImageIO {
         /**
          * Next.
          * 
-         * @return the image writer
+         * @return the image writer.
          */
         public ImageWriter next() {
             try {
@@ -713,7 +731,7 @@ public final class ImageIO {
         /**
          * Checks for next.
          * 
-         * @return true, if successful
+         * @return true, if successful.
          */
         public boolean hasNext() {
             return backend.hasNext();
@@ -723,7 +741,8 @@ public final class ImageIO {
          * Removes the.
          */
         public void remove() {
-            throw new UnsupportedOperationException("Use deregisterServiceprovider instead of Iterator.remove()");
+            throw new UnsupportedOperationException(
+                    "Use deregisterServiceprovider instead of Iterator.remove()");
         }
     }
 
@@ -731,14 +750,17 @@ public final class ImageIO {
      * Wraps spi's iterator to ImageReader iterator.
      */
     static class SpiIteratorToReadersIteratorWrapper implements Iterator<ImageReader> {
-        
-        /** The backend. */
+
+        /**
+         * The backend.
+         */
         private Iterator<ImageReaderSpi> backend;
 
         /**
          * Instantiates a new spi iterator to readers iterator wrapper.
          * 
-         * @param backend the backend
+         * @param backend
+         *            the backend.
          */
         public SpiIteratorToReadersIteratorWrapper(Iterator<ImageReaderSpi> backend) {
             this.backend = backend;
@@ -747,7 +769,7 @@ public final class ImageIO {
         /**
          * Next.
          * 
-         * @return the image reader
+         * @return the image reader.
          */
         public ImageReader next() {
             try {
@@ -761,7 +783,7 @@ public final class ImageIO {
         /**
          * Checks for next.
          * 
-         * @return true, if successful
+         * @return true, if successful.
          */
         public boolean hasNext() {
             return backend.hasNext();
@@ -771,7 +793,8 @@ public final class ImageIO {
          * Removes the.
          */
         public void remove() {
-            throw new UnsupportedOperationException("Use deregisterServiceprovider instead of Iterator.remove()");
+            throw new UnsupportedOperationException(
+                    "Use deregisterServiceprovider instead of Iterator.remove()");
         }
     }
 }

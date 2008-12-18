@@ -232,8 +232,8 @@ android.os.ServiceManager
 android.os.ServiceManagerNative
 android.os.ServiceManagerProxy
 android.os.Vibrator
-android.pim.DateUtils
-android.pim.Time
+android.text.format.DateUtils
+android.text.format.Time
 android.preference.DialogPreference
 android.preference.ListPreference
 android.preference.Preference
@@ -263,11 +263,6 @@ android.provider.Telephony$MmsSms$PendingMessages
 android.provider.Telephony$Threads
 android.server.search.SearchableInfo
 android.server.search.SearchableInfo$1
-android.speech.recognition.Codec
-android.speech.recognition.EmbeddedGrammarListener
-android.speech.recognition.impl.EmbeddedRecognizerImpl
-android.speech.recognition.impl.MicrophoneImpl
-android.speech.recognition.impl.System
 android.telephony.PhoneNumberUtils
 android.telephony.ServiceState
 android.telephony.gsm.SmsManager
@@ -481,13 +476,6 @@ com.android.internal.os.RuntimeInit
 com.android.internal.os.RuntimeInit$UncaughtHandler
 com.android.internal.os.ZygoteInit$MethodAndArgsCaller
 com.android.internal.policy.PolicyManager
-com.android.internal.policy.impl.PhoneLayoutInflater
-com.android.internal.policy.impl.PhoneWindow
-com.android.internal.policy.impl.PhoneWindow$1
-com.android.internal.policy.impl.PhoneWindow$ContextMenuCallback
-com.android.internal.policy.impl.PhoneWindow$DecorView
-com.android.internal.policy.impl.PhoneWindow$PanelFeatureState
-com.android.internal.policy.impl.PhoneWindow$PanelFeatureState$SavedState
 com.android.internal.telephony.Phone
 com.android.internal.telephony.Phone$DataActivityState
 com.android.internal.telephony.Phone$DataState
@@ -635,8 +623,6 @@ java.util.TreeSet
 java.util.Vector
 java.util.WeakHashMap
 java.util.WeakHashMap$Entry
-java.util.ZoneInfo
-java.util.ZoneInfoDB
 java.util.concurrent.TimeUnit
 java.util.concurrent.atomic.AtomicBoolean
 java.util.concurrent.atomic.AtomicInteger
@@ -674,6 +660,8 @@ org.apache.harmony.dalvik.ddmc.ChunkHandler
 org.apache.harmony.dalvik.ddmc.DdmServer
 org.apache.harmony.luni.internal.net.www.protocol.jar.Handler
 org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnection
+org.apache.harmony.luni.internal.util.ZoneInfo
+org.apache.harmony.luni.internal.util.ZoneInfoDB
 org.apache.harmony.luni.net.PlainSocketImpl2
 org.apache.harmony.luni.platform.PlatformAddress
 org.apache.harmony.luni.util.TwoKeyHashMap

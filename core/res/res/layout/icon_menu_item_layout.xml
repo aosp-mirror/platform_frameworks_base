@@ -19,6 +19,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:paddingBottom="1dip"
-    android:gravity="bottom|center_horizontal"
+    android:paddingLeft="3dip"
+    android:paddingRight="3dip"
     android:singleLine="true"
-    android:ellipsize="end" />
+    android:ellipsize="marquee"
+    android:fadingEdge="horizontal" />

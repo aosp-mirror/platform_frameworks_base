@@ -30,8 +30,17 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.harmony.kernel.vm.VM;
-import org.apache.harmony.luni.util.MsgHelp;
+// BEGIN android-deleted
+/*
+ * For Android, this module is a separate library and not part of the
+ * boot classpath, so its resources won't be found on the boot classpath
+ * as is assumed by MsgHelp.getString(). We instead use a local MsgHelp
+ * which bottoms out in a call to the useful part of its lower-level
+ * namesake.
+ */
+//import org.apache.harmony.kernel.vm.VM;
+//import org.apache.harmony.luni.util.MsgHelp;
+// END android-deleted
 
 /**
  * This class retrieves strings from a resource bundle and returns them,
@@ -49,8 +58,10 @@ import org.apache.harmony.luni.util.MsgHelp;
  */
 public class Messages {
 
-    private static final String sResource =
-        "org.apache.harmony.beans.internal.nls.messages"; //$NON-NLS-1$
+    // BEGIN android-deleted
+    // private static final String sResource =
+    //     "org.apache.harmony.beans.internal.nls.messages"; //$NON-NLS-1$
+    // END android-deleted
 
     /**
      * Retrieves a message which has no arguments.
@@ -60,7 +71,9 @@ public class Messages {
      * @return String the message for that key in the system message bundle.
      */
     static public String getString(String msg) {
-        return MsgHelp.getString(sResource, msg);
+        // BEGIN android-changed
+        return MsgHelp.getString(msg);
+        // END android-changed
     }
 
     /**
@@ -127,6 +140,12 @@ public class Messages {
      * @return String the message for that key in the system message bundle.
      */
     static public String getString(String msg, Object[] args) {
-        return MsgHelp.getString(sResource, msg, args);
+        // BEGIN android-changed
+        return MsgHelp.getString(msg, args);
+        // END android-changed
     }
+
+    // BEGIN android-note
+    // Duplicate code was dropped in favor of using MsgHelp.
+    // END android-note
 }

@@ -148,6 +148,21 @@ public abstract class PackageManager {
      * {@link PackageInfo#permissions}.
      */
     public static final int GET_PERMISSIONS               = 0x00001000;
+    
+    /**
+     * Flag parameter to retrieve all applications(even uninstalled ones) with data directories.
+     * This state could have resulted if applications have been deleted with flag 
+     * DONT_DELETE_DATA
+     * with a possibility of being replaced or reinstalled in future
+     */
+    public static final int GET_UNINSTALLED_PACKAGES = 0x00002000;
+    
+    /**
+     * {@link PackageInfo} flag: return information about
+     * hardware preferences
+     * {@link PackageInfo#configPreferences}
+     */
+    public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
      * Permission check result: this is returned by {@link #checkPermission}
@@ -427,16 +442,38 @@ public abstract class PackageManager {
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *                    desired package.
-     * @param flags Optional flags to control what information is returned.  If
-     *              0, none of the optional information is returned.
+
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES},
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
-     * @return Returns a PackageInfo containing information about the package.
-     *
+     * @return Returns a PackageInfo object containing information about the package.
+     *         If flag GET_UNINSTALLED_PACKAGES is set and  if the package is not
+     *         found in the list of installed applications, the package information is
+     *         retrieved from the list of uninstalled applications(which includes 
+     *         installed applications as well as applications
+     *         with data directory ie applications which had been
+     *         deleted with DONT_DELTE_DATA flag set).
+     *         
      * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
      * @see #GET_RECEIVERS
      * @see #GET_SERVICES
-     * @see #GET_INSTRUMENTATION
      * @see #GET_SIGNATURES
+     * @see #GET_UNINSTALLED_PACKAGES
+     *                  
      */
     public abstract PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException;
@@ -530,10 +567,23 @@ public abstract class PackageManager {
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of an
      *                    application.
-     * @param flags Additional option flags.  Currently should always be 0.
+     * @param flags Additional option flags. Use any combination of 
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
-     * @return {@link ApplicationInfo} containing information about the
-     *         application.
+     * @return  {@link ApplicationInfo} Returns ApplicationInfo object containing 
+     *         information about the package.
+     *         If flag GET_UNINSTALLED_PACKAGES is set and  if the package is not
+     *         found in the list of installed applications, 
+     *         the application information is retrieved from the 
+     *         list of uninstalled applications(which includes 
+     *         installed applications as well as applications
+     *         with data directory ie applications which had been
+     *         deleted with DONT_DELTE_DATA flag set).
+     *
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
+     * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract ApplicationInfo getApplicationInfo(String packageName,
             int flags) throws NameNotFoundException;
@@ -548,11 +598,15 @@ public abstract class PackageManager {
      * @param className The full name (i.e.
      *                  com.google.apps.contacts.ContactsList) of an Activity
      *                  class.
-     * @param flags Additional option flags.  Usually 0.
+     * @param flags Additional option flags. Use any combination of 
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * to modify the data (in ApplicationInfo) returned.
      *
      * @return {@link ActivityInfo} containing information about the activity.
      *
      * @see #GET_INTENT_FILTERS
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ActivityInfo getActivityInfo(ComponentName className,
             int flags) throws NameNotFoundException;
@@ -567,11 +621,15 @@ public abstract class PackageManager {
      * @param className The full name (i.e.
      *                  com.google.apps.contacts.CalendarAlarm) of a Receiver
      *                  class.
-     * @param flags Additional option flags.  Usually 0.
+     * @param flags Additional option flags.  Use any combination of 
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * to modify the data returned.
      *
      * @return {@link ActivityInfo} containing information about the receiver.
      *
      * @see #GET_INTENT_FILTERS
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ActivityInfo getReceiverInfo(ComponentName className,
             int flags) throws NameNotFoundException;
@@ -586,9 +644,14 @@ public abstract class PackageManager {
      * @param className The full name (i.e.
      *                  com.google.apps.media.BackgroundPlayback) of a Service
      *                  class.
-     * @param flags Additional option flags.  Currently should always be 0.
+     * @param flags Additional option flags.  Use any combination of 
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * to modify the data returned.
      *
      * @return ServiceInfo containing information about the service.
+     * 
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ServiceInfo getServiceInfo(ComponentName className,
             int flags) throws NameNotFoundException;
@@ -597,18 +660,36 @@ public abstract class PackageManager {
      * Return a List of all packages that are installed
      * on the device.
      *
-     * @param flags Optional flags to control what information is returned.  If
-     *              0, none of the optional information is returned.
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES},
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
      * @return A List of PackageInfo objects, one for each package that is
      *         installed on the device.  In the unlikely case of there being no
-     *         installed packages, an empty list is returned.
+     *         installed packages, an empty list is returned. 
+     *         If flag GET_UNINSTALLED_PACKAGES is set, a list of all
+     *         applications including those deleted with DONT_DELETE_DATA
+     *         (partially installed apps with data directory) will be returned.
      *
      * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
      * @see #GET_RECEIVERS
      * @see #GET_SERVICES
-     * @see #GET_INSTRUMENTATION
      * @see #GET_SIGNATURES
+     * @see #GET_UNINSTALLED_PACKAGES
+     * 
      */
     public abstract List<PackageInfo> getInstalledPackages(int flags);
 
@@ -731,16 +812,42 @@ public abstract class PackageManager {
      * user id is not currently assigned.
      */
     public abstract String getNameForUid(int uid);
+    
+    /**
+     * Return the user id associated with a shared user name. Multiple
+     * applications can specify a shared user name in their manifest and thus
+     * end up using a common uid. This might be used for new applications
+     * that use an existing shared user name and need to know the uid of the
+     * shared user.
+     *
+     * @param sharedUserName The shared user name whose uid is to be retrieved.
+     * @return Returns the uid associated with the shared user, or  NameNotFoundException
+     * if the shared user name is not being used by any installed packages
+     * @hide
+     */
+    public abstract int getUidForSharedUser(String sharedUserName)
+            throws NameNotFoundException;
 
     /**
      * Return a List of all application packages that are installed on the
-     * device.
-     *
-     * @param flags Additional option flags.  Currently should always be 0.
+     * device. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
+     * applications including those deleted with DONT_DELETE_DATA(partially
+     * installed apps with data directory) will be returned.
+     * 
+     * @param flags Additional option flags. Use any combination of 
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * {link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
      * @return A List of ApplicationInfo objects, one for each application that
      *         is installed on the device.  In the unlikely case of there being
-     *         no installed applications, an empty list is returned.
+     *         no installed applications, an empty list is returned. 
+     *         If flag GET_UNINSTALLED_PACKAGES is set, a list of all
+     *         applications including those deleted with DONT_DELETE_DATA
+     *         (partially installed apps with data directory) will be returned.
+     *         
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
+     * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract List<ApplicationInfo> getInstalledApplications(int flags);
 
@@ -1139,17 +1246,30 @@ public abstract class PackageManager {
      * in a package archive file
      *
      * @param archiveFilePath The path to the archive file
-     * @param flags Optional flags to control what information is returned.  If
-     *              0, none of the optional information is returned.
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES}, to modify the data returned.
      *
      * @return Returns the information about the package. Returns
      * null if the package could not be successfully parsed.
      *
      * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
      * @see #GET_RECEIVERS
      * @see #GET_SERVICES
-     * @see #GET_INSTRUMENTATION
      * @see #GET_SIGNATURES
+     * 
      */
     public PackageInfo getPackageArchiveInfo(String archiveFilePath, int flags) {
         PackageParser packageParser = new PackageParser(archiveFilePath);
@@ -1314,16 +1434,28 @@ public abstract class PackageManager {
      * first package on the list is the most preferred, the last is the
      * least preferred.
      *
-     * @param flags Optional flags to control what information is returned.  If
-     *              0, none of the optional information is returned.
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES}, to modify the data returned.
      *
      * @return Returns a list of PackageInfo objects describing each
      * preferred application, in order of preference.
      *
      * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
      * @see #GET_RECEIVERS
      * @see #GET_SERVICES
-     * @see #GET_INSTRUMENTATION
      * @see #GET_SIGNATURES
      */
     public abstract List<PackageInfo> getPreferredPackages(int flags);

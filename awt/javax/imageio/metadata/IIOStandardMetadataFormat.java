@@ -15,18 +15,19 @@
  *  limitations under the License.
  */
 
-
 package javax.imageio.metadata;
 
 import javax.imageio.ImageTypeSpecifier;
 import java.util.ArrayList;
 
 /**
- * The Class IIOStandardMetadataFormat describes the rules of the 
- * standard metadata format.
+ * The class IIOStandardMetadataFormat describes the rules of the standard
+ * metadata format.
+ * 
+ * @since Android 1.0
  */
-class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
-    
+class IIOStandardMetadataFormat extends IIOMetadataFormatImpl {
+
     /**
      * Instantiates a new IIOStandardMetadataFormat.
      */
@@ -41,7 +42,7 @@ class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
     }
 
     /**
-     * Builds the dtd that describes the standard metadata format.
+     * Builds the DTD that describes the standard metadata format.
      */
     private void buildDTD() {
         // CHROMA
@@ -80,7 +81,10 @@ class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
         addAttribute("ColorSpaceType", "name", DATATYPE_STRING, true, null, values);
 
         addElement("NumChannels", "Chroma", CHILD_POLICY_EMPTY);
-        addAttribute("NumChannels", "value", DATATYPE_INTEGER, true, 0, Integer.MAX_VALUE); // list - why?
+        addAttribute("NumChannels", "value", DATATYPE_INTEGER, true, 0, Integer.MAX_VALUE); // list
+        // -
+        // why
+        // ?
 
         addElement("Gamma", "Chroma", CHILD_POLICY_EMPTY);
         addAttribute("Gamma", "value", DATATYPE_FLOAT, true, null);
@@ -142,10 +146,8 @@ class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
         addAttribute("BitsPerSample", "value", DATATYPE_INTEGER, true, 1, Integer.MAX_VALUE); // list
 
         addElement("SignificantBitsPerSample", "Data", CHILD_POLICY_EMPTY);
-        addAttribute(
-                "SignificantBitsPerSample", "value",
-                DATATYPE_INTEGER, true, 1, Integer.MAX_VALUE
-        ); // list
+        addAttribute("SignificantBitsPerSample", "value", DATATYPE_INTEGER, true, 1,
+                Integer.MAX_VALUE); // list
 
         addElement("SampleMSB", "Data", CHILD_POLICY_EMPTY);
         addAttribute("SampleMSB", "value", DATATYPE_INTEGER, true, 1, Integer.MAX_VALUE); // list
@@ -224,49 +226,29 @@ class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
 
         addElement("ImageCreationTime", "Document", CHILD_POLICY_EMPTY);
         addAttribute("ImageCreationTime", "year", DATATYPE_INTEGER, true, null);
-        addAttribute(
-                "ImageCreationTime", "month",
-                DATATYPE_INTEGER, true, null, "1", "12", true, true
-        );
-        addAttribute(
-                "ImageCreationTime", "day",
-                DATATYPE_INTEGER, true, null, "1", "31", true, true
-        );
-        addAttribute(
-                "ImageCreationTime", "hour",
-                DATATYPE_INTEGER, false, "0", "0", "23", true, true
-        );
-        addAttribute(
-                "ImageCreationTime", "minute",
-                DATATYPE_INTEGER, false, "0", "0", "59", true, true
-        );
-        addAttribute(
-                "ImageCreationTime", "second",
-                DATATYPE_INTEGER, false, "0", "0", "60", true, true
-        );
+        addAttribute("ImageCreationTime", "month", DATATYPE_INTEGER, true, null, "1", "12", true,
+                true);
+        addAttribute("ImageCreationTime", "day", DATATYPE_INTEGER, true, null, "1", "31", true,
+                true);
+        addAttribute("ImageCreationTime", "hour", DATATYPE_INTEGER, false, "0", "0", "23", true,
+                true);
+        addAttribute("ImageCreationTime", "minute", DATATYPE_INTEGER, false, "0", "0", "59", true,
+                true);
+        addAttribute("ImageCreationTime", "second", DATATYPE_INTEGER, false, "0", "0", "60", true,
+                true);
 
         addElement("ImageModificationTime", "Document", CHILD_POLICY_EMPTY);
         addAttribute("ImageModificationTime", "year", DATATYPE_INTEGER, true, null);
-        addAttribute(
-                "ImageModificationTime", "month",
-                DATATYPE_INTEGER, true, null, "1", "12", true, true
-        );
-        addAttribute(
-                "ImageModificationTime", "day",
-                DATATYPE_INTEGER, true, null, "1", "31", true, true
-        );
-        addAttribute(
-                "ImageModificationTime", "hour",
-                DATATYPE_INTEGER, false, "0", "0", "23", true, true
-        );
-        addAttribute(
-                "ImageModificationTime", "minute",
-                DATATYPE_INTEGER, false, "0", "0", "59", true, true
-        );
-        addAttribute(
-                "ImageModificationTime", "second",
-                DATATYPE_INTEGER, false, "0", "0", "60", true, true
-        );
+        addAttribute("ImageModificationTime", "month", DATATYPE_INTEGER, true, null, "1", "12",
+                true, true);
+        addAttribute("ImageModificationTime", "day", DATATYPE_INTEGER, true, null, "1", "31", true,
+                true);
+        addAttribute("ImageModificationTime", "hour", DATATYPE_INTEGER, false, "0", "0", "23",
+                true, true);
+        addAttribute("ImageModificationTime", "minute", DATATYPE_INTEGER, false, "0", "0", "59",
+                true, true);
+        addAttribute("ImageModificationTime", "second", DATATYPE_INTEGER, false, "0", "0", "60",
+                true, true);
 
         // TEXT
         addElement("Text", standardMetadataFormatName, 0, Integer.MAX_VALUE); // CHILD_POLICY_REPEAT
@@ -313,4 +295,3 @@ class IIOStandardMetadataFormat  extends IIOMetadataFormatImpl {
         addAttribute("OpaqueTile", "y", DATATYPE_INTEGER, true, null);
     }
 }
-

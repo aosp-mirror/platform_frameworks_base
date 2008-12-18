@@ -130,7 +130,8 @@ public class Looper {
     }
 
     /**
-     * Return the Looper object associated with the current thread.
+     * Return the Looper object associated with the current thread.  Returns
+     * null if the calling thread is not associated with a Looper.
      */
     public static final Looper myLooper() {
         return (Looper)sThreadLocal.get();
@@ -151,7 +152,8 @@ public class Looper {
     
     /**
      * Return the {@link MessageQueue} object associated with the current
-     * thread.
+     * thread.  This must be called from a thread running a Looper, or a
+     * NullPointerException will be thrown.
      */
     public static final MessageQueue myQueue() {
         return myLooper().mQueue;
@@ -171,6 +173,16 @@ public class Looper {
         mQueue.enqueueMessage(msg, 0);
     }
 
+    /**
+     * Return the Thread associated with this Looper.
+     * 
+     * @since CURRENT
+     * {@hide pending API Council approval}
+     */
+    public Thread getThread() {
+        return mThread;
+    }
+    
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + this);
         pw.println(prefix + "mRun=" + mRun);

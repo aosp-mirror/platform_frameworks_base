@@ -8,7 +8,7 @@ page.title=Android Open Source Licensing FAQ
 </ul>
 
 <a name="mirror" id="mirror"></a><h2>Where can I find the open source components of Android?</h2>
-<p>The source code for the full Android stack is available from the <a href="http://www.android.com/opensource">Android Open Source Project </a> site. 
+<p>The source code for the full Android stack is available from the <a href="http://source.android.com">Android Open Source Project </a> site. 
 
 <p>Other mirrored GPL and LGPL'd components are available at <a href="http://code.google.com/p/android/downloads/list"><code>http://code.google.com/p/android/downloads/list</code></a>.</p>
 <p>Notices for other licenses can be found within the SDK.</p>

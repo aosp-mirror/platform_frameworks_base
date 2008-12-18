@@ -350,14 +350,14 @@ public class LocationCollector {
      * is healthy.
      *
      * Additionally, data collection will *never* happen if the system
-     * property ro.com.google.enable_google_location_features is not set.
+     * property ro.com.google.locationfeatures is not set.
      *
      * @return true if anonymous location collection is enabled
      */
     private boolean isCollectionEnabled() {
         // This class provides a Google-specific location feature, so it's enabled only
-        // when the system property ro.com.google.enable_google_location_features is set.
-        if (!SystemProperties.get("ro.com.google.enable_google_location_features").equals("1")) {
+        // when the system property ro.com.google.locationfeatures is set.
+        if (!SystemProperties.get("ro.com.google.locationfeatures").equals("1")) {
             return false;
         }
         return mBatteryLevelIsHealthy && mNetworkProviderIsEnabled;

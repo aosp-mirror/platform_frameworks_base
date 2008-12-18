@@ -1,4 +1,6 @@
 page.title=Hello, TimePicker
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.TimePicker} is a widget that allows the 
@@ -154,4 +156,4 @@ private static String pad(int c) {
   <li>{@link android.widget.TextView}</li>
   <li>{@link java.util.Calendar}</li>
 </ol>
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
+

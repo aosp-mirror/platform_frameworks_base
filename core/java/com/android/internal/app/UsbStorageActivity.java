@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
         p.mPositiveButtonText = getString(com.android.internal.R.string.usb_storage_button_mount);
         p.mPositiveButtonListener = this;
         p.mNegativeButtonText = getString(com.android.internal.R.string.usb_storage_button_unmount);
-        p.mPositiveButtonListener = this;
+        p.mNegativeButtonListener = this;
         setupAlert();
     }
 

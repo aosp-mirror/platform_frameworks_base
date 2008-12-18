@@ -16,15 +16,22 @@
 
 package android.test.suitebuilder;
 
+import android.content.Context;
+import android.test.AndroidTestRunner;
+import android.test.TestCaseUtil;
 import android.util.Log;
 import com.android.internal.util.Predicate;
+import com.google.android.collect.Lists;
 import static android.test.suitebuilder.TestGrouping.SORT_BY_FULLY_QUALIFIED_NAME;
 import static android.test.suitebuilder.TestPredicates.REJECT_SUPPRESSED;
 import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -37,8 +44,10 @@ import java.util.Collections;
  */
 public class TestSuiteBuilder {
 
+    private Context context;
     private final TestGrouping testGrouping = new TestGrouping(SORT_BY_FULLY_QUALIFIED_NAME);
     private final Set<Predicate<TestMethod>> predicates = new HashSet<Predicate<TestMethod>>();
+    private List<TestCase> testCases;
     private TestSuite rootSuite;
     private TestSuite suiteForCurrentClass;
     private String currentClassname;
@@ -59,8 +68,28 @@ public class TestSuiteBuilder {
     public TestSuiteBuilder(String name, ClassLoader classLoader) {
         this.suiteName = name;
         this.testGrouping.setClassLoader(classLoader);
+        this.testCases = Lists.newArrayList();
         addRequirements(REJECT_SUPPRESSED);
-        addRequirements(REJECT_PERFORMANCE);
+    }
+    
+    /** @hide pending API Council approval */
+    public TestSuiteBuilder addTestClassByName(String testClassName, String testMethodName, 
+            Context context) {
+
+        AndroidTestRunner atr = new AndroidTestRunner();
+        atr.setContext(context);
+        atr.setTestClassName(testClassName, testMethodName);
+
+        this.testCases.addAll(atr.getTestCases());
+        return this;
+    }
+    
+    /** @hide pending API Council approval */
+    public TestSuiteBuilder addTestSuite(TestSuite testSuite) {
+        for (TestCase testCase : (List<TestCase>) TestCaseUtil.getTests(testSuite, true)) {
+            this.testCases.add(testCase);
+        }
+        return this;
     }
 
     /**
@@ -156,6 +185,13 @@ public class TestSuiteBuilder {
                     addTest(test);
                 }
             }
+            if (testCases.size() > 0) {
+                for (TestCase testCase : testCases) {
+                    if (satisfiesAllPredicates(new TestMethod(testCase))) {
+                        addTest(testCase);
+                    }
+                }
+            }
         } catch (Exception exception) {
             Log.i("TestSuiteBuilder", "Failed to create test.", exception);
             TestSuite suite = new TestSuite(getSuiteName());
@@ -223,12 +259,16 @@ public class TestSuiteBuilder {
     }
 
     private void addTest(TestMethod testMethod) throws Exception {
-        addSuiteIfNecessary(testMethod);
+        addSuiteIfNecessary(testMethod.getEnclosingClassname());
         suiteForCurrentClass.addTest(testMethod.createTest());
     }
+    
+    private void addTest(Test test) {
+        addSuiteIfNecessary(test.getClass().getName());
+        suiteForCurrentClass.addTest(test);
+    }
 
-    private void addSuiteIfNecessary(TestMethod test) {
-        String parentClassname = test.getEnclosingClassname();
+    private void addSuiteIfNecessary(String parentClassname) {
         if (!parentClassname.equals(currentClassname)) {
             currentClassname = parentClassname;
             suiteForCurrentClass = new TestSuite(parentClassname);

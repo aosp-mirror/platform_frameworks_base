@@ -659,7 +659,7 @@ Java_android_drm_mobile1_DrmRawContent_nativeReadContent
     jfieldID field;
 
     if (NULL == buf) {
-        jclass newExcCls = (*env)->FindClass(env, "java.lang.NullPointerException");
+        jclass newExcCls = (*env)->FindClass(env, "java/lang/NullPointerException");
 
         if (newExcCls == NULL)
             /* Unable to find the exception class, give up. */

@@ -25,6 +25,12 @@ import java.awt.font.TextAttribute;
 
 import org.apache.harmony.awt.internal.nls.Messages;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class InputMethodHighlight {
 
     public static final int RAW_TEXT = 0;

@@ -18,12 +18,15 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 /**
- * The Class Dimension2D represents a size (width and height) of a 
- * geometric object. It stores double-valued data in order to be compatible
- * with high-precision geometric operations.
+ * The Class Dimension2D represents a size (width and height) of a geometric
+ * object. It stores double-valued data in order to be compatible with
+ * high-precision geometric operations.
+ * 
+ * @since Android 1.0
  */
 public abstract class Dimension2D implements Cloneable {
 
@@ -36,31 +39,34 @@ public abstract class Dimension2D implements Cloneable {
     /**
      * Gets the width.
      * 
-     * @return the width
+     * @return the width.
      */
     public abstract double getWidth();
 
     /**
      * Gets the height.
      * 
-     * @return the height
+     * @return the height.
      */
     public abstract double getHeight();
 
     /**
      * Sets the width and height.
      * 
-     * @param width the width
-     * @param height the height
+     * @param width
+     *            the width.
+     * @param height
+     *            the height.
      */
     public abstract void setSize(double width, double height);
 
     /**
-     * Sets the width and height based on the data of another 
-     * Dimension2D object.
+     * Sets the width and height based on the data of another Dimension2D
+     * object.
      * 
-     * @param d the Dimension2D object providing the data to copy 
-     * into this Dimension2D object
+     * @param d
+     *            the Dimension2D object providing the data to copy into this
+     *            Dimension2D object.
      */
     public void setSize(Dimension2D d) {
         setSize(d.getWidth(), d.getHeight());
@@ -75,4 +81,3 @@ public abstract class Dimension2D implements Cloneable {
         }
     }
 }
-

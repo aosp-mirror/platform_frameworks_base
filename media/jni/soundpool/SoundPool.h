@@ -32,7 +32,6 @@ static const int IDLE_PRIORITY = -1;
 
 // forward declarations
 class SoundEvent;
-class SoundPoolRestartThread;
 class SoundPoolThread;
 class SoundPool;
 
@@ -59,15 +58,17 @@ public:
     int sampleID() { return mSampleID; }
     int numChannels() { return mNumChannels; }
     int sampleRate() { return mSampleRate; }
+    int format() { return mFormat; }
     size_t size() { return mSize; }
     int state() { return mState; }
     uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
     void doLoad();
     void startLoad() { mState = LOADING; }
+    sp<IMemory> getIMemory() { return mData; }
 
     // hack
-    void init(int numChannels, int sampleRate, size_t size, sp<IMemory> data ) {
-        mNumChannels = numChannels; mSampleRate = sampleRate; mSize = size; mData = data; }
+    void init(int numChannels, int sampleRate, int format, size_t size, sp<IMemory> data ) {
+        mNumChannels = numChannels; mSampleRate = sampleRate; mFormat = format; mSize = size; mData = data; }
 
 private:
     void init();
@@ -78,6 +79,7 @@ private:
     uint16_t            mSampleRate;
     uint8_t             mState : 3;
     uint8_t             mNumChannels : 2;
+    uint8_t             mFormat : 2;
     int                 mFd;
     int64_t             mOffset;
     int64_t             mLength;
@@ -89,11 +91,20 @@ private:
 class SoundEvent
 {
 public:
-    SoundEvent(const sp<Sample>& sample, int channelID, float leftVolume,
-            float rightVolume, int priority, int loop, float rate) :
-                mSample(sample), mChannelID(channelID), mLeftVolume(leftVolume),
-                mRightVolume(rightVolume), mPriority(priority), mLoop(loop),
-                mRate(rate) {}
+    SoundEvent() : mChannelID(0), mLeftVolume(0), mRightVolume(0),
+            mPriority(IDLE_PRIORITY), mLoop(0), mRate(0) {}
+    void set(const sp<Sample>& sample, int channelID, float leftVolume,
+            float rightVolume, int priority, int loop, float rate);
+    sp<Sample>      sample() { return mSample; }
+    int             channelID() { return mChannelID; }
+    float           leftVolume() { return mLeftVolume; }
+    float           rightVolume() { return mRightVolume; }
+    int             priority() { return mPriority; }
+    int             loop() { return mLoop; }
+    float           rate() { return mRate; }
+    void            clear() { mChannelID = 0; mSample.clear(); }
+
+protected:
     sp<Sample>      mSample;
     int             mChannelID;
     float           mLeftVolume;
@@ -104,50 +115,42 @@ public:
 };
 
 // for channels aka AudioTracks
-class SoundChannel {
+class SoundChannel : public SoundEvent {
 public:
     enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
-    SoundChannel() : mAudioTrack(0), mNextEvent(0), mChannelID(0), mState(IDLE),
-            mNumChannels(1), mPos(0), mPriority(IDLE_PRIORITY), mLoop(0) {}
+    SoundChannel() : mAudioTrack(0), mState(IDLE), mNumChannels(1), mPos(0) {}
     ~SoundChannel();
     void init(SoundPool* soundPool);
-    void deleteTrack();
     void play(const sp<Sample>& sample, int channelID, float leftVolume, float rightVolume,
             int priority, int loop, float rate);
-    void doPlay(float leftVolume, float rightVolume, float rate);
+    void setVolume_l(float leftVolume, float rightVolume);
     void setVolume(float leftVolume, float rightVolume);
+    void stop_l();
     void stop();
     void pause();
     void resume();
     void setRate(float rate);
-    int channelID() { return mChannelID; }
     int state() { return mState; }
-    int priority() { return mPriority; }
     void setPriority(int priority) { mPriority = priority; }
-    void setLoop(int loop) { mLoop = loop; }
+    void setLoop(int loop);
     int numChannels() { return mNumChannels; }
-    SoundEvent* nextEvent() { return mNextEvent; }
-    void clearNextEvent();
-    void setNextEvent(SoundEvent* nextEvent);
+    void clearNextEvent() { mNextEvent.clear(); }
+    void nextEvent();
+    int nextChannelID() { return mNextEvent.channelID(); }
     void dump();
 
 private:
-    static void callback(void* user, const AudioTrack::Buffer& info);
-    void process(const AudioTrack::Buffer& b);
+    static void callback(int event, void* user, void *info);
+    void process(int event, void *info);
 
     SoundPool*          mSoundPool;
     AudioTrack*         mAudioTrack;
-    sp<Sample>          mSample;
-    SoundEvent*         mNextEvent;
+    SoundEvent          mNextEvent;
     Mutex               mLock;
-    int                 mChannelID;
     int                 mState;
     int                 mNumChannels;
     int                 mPos;
-    int                 mPriority;
-    int                 mLoop;
-    float               mLeftVolume;
-    float               mRightVolume;
+    int                 mAudioBufferSize;
 };
 
 // application object for managing a pool of sounds
@@ -189,15 +192,22 @@ private:
     SoundChannel* findChannel (int channelID);
     SoundChannel* findNextChannel (int channelID);
     SoundChannel* allocateChannel(int priority);
-    void moveToFront(List<SoundChannel*>& list, SoundChannel* channel);
+    void moveToFront(SoundChannel* channel);
     void dump();
+
+    // restart thread
+    void addToRestartList(SoundChannel* channel);
+    static int beginThread(void* arg);
+    int run();
+    void quit();
 
     jobject                 mSoundPoolRef;
     Mutex                   mLock;
-    SoundPoolRestartThread* mRestartThread;
+    Condition               mCondition;
     SoundPoolThread*        mDecodeThread;
     SoundChannel*           mChannelPool;
     List<SoundChannel*>     mChannels;
+    List<SoundChannel*>     mRestart;
     DefaultKeyedVector< int, sp<Sample> >   mSamples;
     int                     mMaxChannels;
     int                     mStreamType;
@@ -205,6 +215,9 @@ private:
     int                     mAllocated;
     int                     mNextSampleID;
     int                     mNextChannelID;
+    int                     mFrameCount;
+    int                     mSampleRate;
+    bool                    mQuit;
 };
 
 } // end namespace android

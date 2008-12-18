@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import com.android.internal.awt.AndroidGraphics2D;
@@ -39,184 +40,215 @@ import org.apache.harmony.awt.gl.Surface;
 import org.apache.harmony.awt.gl.image.BufferedImageSource;
 import org.apache.harmony.awt.internal.nls.Messages;
 
-
 /**
- * The BufferedImage class describes an Image which contains a buffer 
- * of image data and includes a ColorModel and a Raster for this data.
- * This class provides methods for obtaining and setting the Raster
- * and for manipulating the ColorModel parameters.
+ * The BufferedImage class describes an Image which contains a buffer of image
+ * data and includes a ColorModel and a Raster for this data. This class
+ * provides methods for obtaining and setting the Raster and for manipulating
+ * the ColorModel parameters.
+ * 
+ * @since Android 1.0
  */
-public class BufferedImage extends 
-Image implements WritableRenderedImage, Transparency{
+public class BufferedImage extends Image implements WritableRenderedImage, Transparency {
 
-    /** 
-     * The Constant TYPE_CUSTOM indicates that Image type 
-     * is unknown. 
+    /**
+     * The Constant TYPE_CUSTOM indicates that Image type is unknown.
      */
     public static final int TYPE_CUSTOM = 0;
 
-    /** 
-     * The Constant TYPE_INT_RGB indicates an image with 
-     * 8 bit RGB color components, it has a DirectColorModel 
-     * without alpha. 
+    /**
+     * The Constant TYPE_INT_RGB indicates an image with 8 bit RGB color
+     * components, it has a DirectColorModel without alpha.
      */
     public static final int TYPE_INT_RGB = 1;
 
-    /** 
-     * The Constant TYPE_INT_ARGB indicates an image with 
-     * 8 bit RGBA color components, it has a DirectColorModel 
-     * with alpha. 
+    /**
+     * The Constant TYPE_INT_ARGB indicates an image with 8 bit RGBA color
+     * components, it has a DirectColorModel with alpha.
      */
     public static final int TYPE_INT_ARGB = 2;
 
-    /** 
-     * The Constant TYPE_INT_ARGB_PRE indicates an image with 
-     * 8 bit RGBA color components, it has a DirectColorModel 
-     * with alpha, and image data is premultiplied by alpha. 
+    /**
+     * The Constant TYPE_INT_ARGB_PRE indicates an image with 8 bit RGBA color
+     * components, it has a DirectColorModel with alpha, and image data is
+     * pre-multiplied by alpha.
      */
     public static final int TYPE_INT_ARGB_PRE = 3;
 
-    /** 
-     * The Constant TYPE_INT_BGR indicates an image with 
-     * 8 bit RGB color components, BGR color model 
-     * (with the colors Blue, Green, and Red). There is no 
-     * alpha. The image has a DirectColorModel. 
+    /**
+     * The Constant TYPE_INT_BGR indicates an image with 8 bit RGB color
+     * components, BGR color model (with the colors Blue, Green, and Red). There
+     * is no alpha. The image has a DirectColorModel.
      */
     public static final int TYPE_INT_BGR = 4;
 
-    /** 
-     * The Constant TYPE_3BYTE_BGR indicates an image with 
-     * 8 bit RGB color components, BGR color model 
-     * (with the colors Blue, Green, and Red stored in 3 bytes). 
-     * There is no alpha. The image has a ComponentColorModel. 
+    /**
+     * The Constant TYPE_3BYTE_BGR indicates an image with 8 bit RGB color
+     * components, BGR color model (with the colors Blue, Green, and Red stored
+     * in 3 bytes). There is no alpha. The image has a ComponentColorModel.
      */
     public static final int TYPE_3BYTE_BGR = 5;
 
-    /** 
-     * The Constant TYPE_4BYTE_ABGR indicates an image with 
-     * 8 bit RGBA color components stored in 3 bytes and 1 byte of alpha.
-     * It has a ComponentColorModel with alpha.  
+    /**
+     * The Constant TYPE_4BYTE_ABGR indicates an image with 8 bit RGBA color
+     * components stored in 3 bytes and 1 byte of alpha. It has a
+     * ComponentColorModel with alpha.
      */
     public static final int TYPE_4BYTE_ABGR = 6;
 
-    /** 
-     * The Constant TYPE_4BYTE_ABGR_PRE indicates an image with 
-     * 8 bit RGBA color components stored in 3 bytes and 1 byte 
-     * for alpha. The image has a ComponentColorModel with alpha. 
-     * The color data is premultiplied with alpha.
+    /**
+     * The Constant TYPE_4BYTE_ABGR_PRE indicates an image with 8 bit RGBA color
+     * components stored in 3 bytes and 1 byte for alpha. The image has a
+     * ComponentColorModel with alpha. The color data is pre-multiplied with
+     * alpha.
      */
     public static final int TYPE_4BYTE_ABGR_PRE = 7;
 
-    /** 
-     * The Constant TYPE_USHORT_565_RGB indicates an image with 
-     * 565 RGB color components (5-bits red, 6-bits green, 5-bits blue) 
-     * with no alpha. This image has a DirectColorModel. 
+    /**
+     * The Constant TYPE_USHORT_565_RGB indicates an image with 565 RGB color
+     * components (5-bits red, 6-bits green, 5-bits blue) with no alpha. This
+     * image has a DirectColorModel.
      */
     public static final int TYPE_USHORT_565_RGB = 8;
 
-    /** 
-     * The Constant TYPE_USHORT_555_RGB indicates an image with 
-     * 555 RGB color components (5-bits red, 5-bits green, 5-bits blue) 
-     * with no alpha. This image has a DirectColorModel. 
+    /**
+     * The Constant TYPE_USHORT_555_RGB indicates an image with 555 RGB color
+     * components (5-bits red, 5-bits green, 5-bits blue) with no alpha. This
+     * image has a DirectColorModel.
      */
     public static final int TYPE_USHORT_555_RGB = 9;
 
-    /** 
-     * The Constant TYPE_BYTE_GRAY indicates a unsigned byte 
-     * image. This image has a ComponentColorModel with 
-     * a CS_GRAY ColorSpace. 
+    /**
+     * The Constant TYPE_BYTE_GRAY indicates a unsigned byte image. This image
+     * has a ComponentColorModel with a CS_GRAY ColorSpace.
      */
     public static final int TYPE_BYTE_GRAY = 10;
 
-    /** 
-     * The Constant TYPE_USHORT_GRAY indicates an unsigned short 
-     * image. This image has a ComponentColorModel with a CS_GRAY 
-     * ColorSpace. 
+    /**
+     * The Constant TYPE_USHORT_GRAY indicates an unsigned short image. This
+     * image has a ComponentColorModel with a CS_GRAY ColorSpace.
      */
     public static final int TYPE_USHORT_GRAY = 11;
 
-    /** 
-     * The Constant TYPE_BYTE_BINARY indicates an opaque byte-packed
-     * 1, 2 or 4 bit image. The image has an IndexColorModel without 
-     * alpha.  
+    /**
+     * The Constant TYPE_BYTE_BINARY indicates an opaque byte-packed 1, 2 or 4
+     * bit image. The image has an IndexColorModel without alpha.
      */
     public static final int TYPE_BYTE_BINARY = 12;
 
-    /** 
-     * The Constant TYPE_BYTE_INDEXED indicates an indexed byte image. 
+    /**
+     * The Constant TYPE_BYTE_INDEXED indicates an indexed byte image.
      */
     public static final int TYPE_BYTE_INDEXED = 13;
 
-    /** The Constant ALPHA_MASK. */
+    /**
+     * The Constant ALPHA_MASK.
+     */
     private static final int ALPHA_MASK = 0xff000000;
 
-    /** The Constant RED_MASK. */
+    /**
+     * The Constant RED_MASK.
+     */
     private static final int RED_MASK = 0x00ff0000;
 
-    /** The Constant GREEN_MASK. */
+    /**
+     * The Constant GREEN_MASK.
+     */
     private static final int GREEN_MASK = 0x0000ff00;
 
-    /** The Constant BLUE_MASK. */
+    /**
+     * The Constant BLUE_MASK.
+     */
     private static final int BLUE_MASK = 0x000000ff;
 
-    /** The Constant RED_BGR_MASK. */
+    /**
+     * The Constant RED_BGR_MASK.
+     */
     private static final int RED_BGR_MASK = 0x000000ff;
 
-    /** The Constant GREEN_BGR_MASK. */
+    /**
+     * The Constant GREEN_BGR_MASK.
+     */
     private static final int GREEN_BGR_MASK = 0x0000ff00;
 
-    /** The Constant BLUE_BGR_MASK. */
+    /**
+     * The Constant BLUE_BGR_MASK.
+     */
     private static final int BLUE_BGR_MASK = 0x00ff0000;
 
-    /** The Constant RED_565_MASK. */
+    /**
+     * The Constant RED_565_MASK.
+     */
     private static final int RED_565_MASK = 0xf800;
 
-    /** The Constant GREEN_565_MASK. */
+    /**
+     * The Constant GREEN_565_MASK.
+     */
     private static final int GREEN_565_MASK = 0x07e0;
 
-    /** The Constant BLUE_565_MASK. */
+    /**
+     * The Constant BLUE_565_MASK.
+     */
     private static final int BLUE_565_MASK = 0x001f;
 
-    /** The Constant RED_555_MASK. */
+    /**
+     * The Constant RED_555_MASK.
+     */
     private static final int RED_555_MASK = 0x7c00;
 
-    /** The Constant GREEN_555_MASK. */
+    /**
+     * The Constant GREEN_555_MASK.
+     */
     private static final int GREEN_555_MASK = 0x03e0;
 
-    /** The Constant BLUE_555_MASK. */
+    /**
+     * The Constant BLUE_555_MASK.
+     */
     private static final int BLUE_555_MASK = 0x001f;
 
-    /** The cm. */
+    /**
+     * The cm.
+     */
     private ColorModel cm;
 
-    /** The raster. */
+    /**
+     * The raster.
+     */
     private final WritableRaster raster;
 
-    /** The image type. */
+    /**
+     * The image type.
+     */
     private final int imageType;
 
-    /** The properties. */
+    /**
+     * The properties.
+     */
     private Hashtable<?, ?> properties;
 
-    // Surface of the Buffered Image - used for blitting one Buffered Image 
+    // Surface of the Buffered Image - used for blitting one Buffered Image
     // on the other one or on the Component
-    /** The image surf. */
+    /**
+     * The image surf.
+     */
     private final ImageSurface imageSurf;
 
     /**
-     * Instantiates a new BufferedImage with the specified ColorModel,
-     * and WritableRaster objects. The Raster data can be
-     * be divided or multiplied by alpha. It depends on the 
-     * alphaPremultiplied state in the ColorModel.
+     * Instantiates a new BufferedImage with the specified ColorModel, and
+     * WritableRaster objects. The Raster data can be be divided or multiplied
+     * by alpha. It depends on the alphaPremultiplied state in the ColorModel.
      * 
-     * @param cm the ColorModel of the new image.
-     * @param raster the WritableRaster of the new image.
-     * @param isRasterPremultiplied if true the data of the specified
-     * Raster is premultiplied by alpha.
-     * @param properties the properties of new Image.
+     * @param cm
+     *            the ColorModel of the new image.
+     * @param raster
+     *            the WritableRaster of the new image.
+     * @param isRasterPremultiplied
+     *            if true the data of the specified Raster is pre-multiplied by
+     *            alpha.
+     * @param properties
+     *            the properties of new Image.
      */
-    public BufferedImage(ColorModel cm, WritableRaster raster,
-            boolean isRasterPremultiplied, Hashtable<?, ?> properties) {
+    public BufferedImage(ColorModel cm, WritableRaster raster, boolean isRasterPremultiplied,
+            Hashtable<?, ?> properties) {
         if (!cm.isCompatibleRaster(raster)) {
             // awt.4D=The raster is incompatible with this ColorModel
             throw new IllegalArgumentException(Messages.getString("awt.4D")); //$NON-NLS-1$
@@ -227,7 +259,7 @@ Image implements WritableRenderedImage, Transparency{
             throw new IllegalArgumentException(Messages.getString("awt.228")); //$NON-NLS-1$
         }
 
-        this.cm  = cm;
+        this.cm = cm;
         this.raster = raster;
         this.properties = properties;
 
@@ -240,47 +272,52 @@ Image implements WritableRenderedImage, Transparency{
 
     /**
      * Instantiates a new BufferedImage with the specified width, height
-     * predefined image type (TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED) 
-     * and the specified IndexColorModel.
+     * predefined image type (TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED) and the
+     * specified IndexColorModel.
      * 
-     * @param width the width of new image.
-     * @param height the height of new image.
-     * @param imageType the predefined image type. 
-     * @param cm the specified IndexColorModel.
+     * @param width
+     *            the width of new image.
+     * @param height
+     *            the height of new image.
+     * @param imageType
+     *            the predefined image type.
+     * @param cm
+     *            the specified IndexColorModel.
      */
-    public BufferedImage(int width, int height, int imageType,
-            IndexColorModel cm) {
+    public BufferedImage(int width, int height, int imageType, IndexColorModel cm) {
         switch (imageType) {
-        case TYPE_BYTE_BINARY:
-            if (cm.hasAlpha()) {
-                // awt.227=This image type can't have alpha
-                throw new IllegalArgumentException(Messages.getString("awt.227")); //$NON-NLS-1$
-            }
-            int pixel_bits = 0;
-            int mapSize = cm.getMapSize();
-            if (mapSize <= 2) {
-                pixel_bits = 1;
-            } else if (mapSize <= 4) {
-                pixel_bits = 2;
-            } else if (mapSize <= 16) {
-                pixel_bits = 4;
-            } else {
-                // awt.221=The imageType is TYPE_BYTE_BINARY and the color map has more than 16 entries
-                throw new IllegalArgumentException(Messages.getString("awt.221")); //$NON-NLS-1$
-            }
+            case TYPE_BYTE_BINARY:
+                if (cm.hasAlpha()) {
+                    // awt.227=This image type can't have alpha
+                    throw new IllegalArgumentException(Messages.getString("awt.227")); //$NON-NLS-1$
+                }
+                int pixel_bits = 0;
+                int mapSize = cm.getMapSize();
+                if (mapSize <= 2) {
+                    pixel_bits = 1;
+                } else if (mapSize <= 4) {
+                    pixel_bits = 2;
+                } else if (mapSize <= 16) {
+                    pixel_bits = 4;
+                } else {
+                    // awt.221=The imageType is TYPE_BYTE_BINARY and the color
+                    // map has more than 16 entries
+                    throw new IllegalArgumentException(Messages.getString("awt.221")); //$NON-NLS-1$
+                }
 
-            raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, width,
-                    height, 1, pixel_bits, null);
-            break;
+                raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, width, height, 1,
+                        pixel_bits, null);
+                break;
 
-        case TYPE_BYTE_INDEXED:
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                    width, height, 1, null);
-            break;
+            case TYPE_BYTE_INDEXED:
+                raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, 1,
+                        null);
+                break;
 
-        default:
-            // awt.222=The imageType is not TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED
-            throw new IllegalArgumentException(Messages.getString("awt.222")); //$NON-NLS-1$
+            default:
+                // awt.222=The imageType is not TYPE_BYTE_BINARY or
+                // TYPE_BYTE_INDEXED
+                throw new IllegalArgumentException(Messages.getString("awt.222")); //$NON-NLS-1$
 
         }
 
@@ -296,187 +333,159 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Instantiates a new BufferedImage with the specified width, height
-     * and predefined image type.
+     * Instantiates a new BufferedImage with the specified width, height and
+     * predefined image type.
      * 
-     * @param width the width of new image.
-     * @param height the height of new image.
-     * @param imageType the predefined image type. 
+     * @param width
+     *            the width of new image.
+     * @param height
+     *            the height of new image.
+     * @param imageType
+     *            the predefined image type.
      */
     public BufferedImage(int width, int height, int imageType) {
 
         switch (imageType) {
-        case TYPE_INT_RGB:
-            cm = new DirectColorModel(24, RED_MASK, GREEN_MASK, BLUE_MASK);
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+            case TYPE_INT_RGB:
+                cm = new DirectColorModel(24, RED_MASK, GREEN_MASK, BLUE_MASK);
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_INT_ARGB:
-            cm = ColorModel.getRGBdefault();
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+            case TYPE_INT_ARGB:
+                cm = ColorModel.getRGBdefault();
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_INT_ARGB_PRE:
-            cm = new DirectColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    32,
-                    RED_MASK,
-                    GREEN_MASK,
-                    BLUE_MASK,
-                    ALPHA_MASK,
-                    true,
-                    DataBuffer.TYPE_INT);
+            case TYPE_INT_ARGB_PRE:
+                cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, RED_MASK,
+                        GREEN_MASK, BLUE_MASK, ALPHA_MASK, true, DataBuffer.TYPE_INT);
 
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_INT_BGR:
-            cm = new DirectColorModel(24,
-                    RED_BGR_MASK,
-                    GREEN_BGR_MASK,
-                    BLUE_BGR_MASK);
+            case TYPE_INT_BGR:
+                cm = new DirectColorModel(24, RED_BGR_MASK, GREEN_BGR_MASK, BLUE_BGR_MASK);
 
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_3BYTE_BGR: {
-            int bits[] = { 8, 8, 8 };
-            int bandOffsets[] = { 2, 1, 0 };
-            cm = new ComponentColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    bits, 
-                    false, 
-                    false, 
-                    Transparency.OPAQUE, 
-                    DataBuffer.TYPE_BYTE);
+            case TYPE_3BYTE_BGR: {
+                int bits[] = {
+                        8, 8, 8
+                };
+                int bandOffsets[] = {
+                        2, 1, 0
+                };
+                cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), bits,
+                        false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                    width, height, width * 3, 3, bandOffsets, null);
+                raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height,
+                        width * 3, 3, bandOffsets, null);
             }
-            break;
+                break;
 
-        case TYPE_4BYTE_ABGR: {
-            int bits[] = { 8, 8, 8, 8 };
-            int bandOffsets[] = { 3, 2, 1, 0 };
-            cm = new ComponentColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    bits, 
-                    true, 
-                    false, 
-                    Transparency.TRANSLUCENT, 
-                    DataBuffer.TYPE_BYTE);
+            case TYPE_4BYTE_ABGR: {
+                int bits[] = {
+                        8, 8, 8, 8
+                };
+                int bandOffsets[] = {
+                        3, 2, 1, 0
+                };
+                cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), bits,
+                        true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
 
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                    width, height, width * 4, 4, bandOffsets, null);
+                raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height,
+                        width * 4, 4, bandOffsets, null);
             }
-            break;
+                break;
 
-        case TYPE_4BYTE_ABGR_PRE: {
-            int bits[] = { 8, 8, 8, 8 };
-            int bandOffsets[] = { 3, 2, 1, 0 };
-            cm = new ComponentColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    bits, 
-                    true, 
-                    true, 
-                    Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+            case TYPE_4BYTE_ABGR_PRE: {
+                int bits[] = {
+                        8, 8, 8, 8
+                };
+                int bandOffsets[] = {
+                        3, 2, 1, 0
+                };
+                cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), bits,
+                        true, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
 
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                    width, height, width * 4, 4, bandOffsets, null);
+                raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height,
+                        width * 4, 4, bandOffsets, null);
             }
-            break;
+                break;
 
-        case TYPE_USHORT_565_RGB:
-            cm = new DirectColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    16,
-                    RED_565_MASK,
-                    GREEN_565_MASK,
-                    BLUE_565_MASK,
-                    0,
-                    false,
-                    DataBuffer.TYPE_USHORT);
+            case TYPE_USHORT_565_RGB:
+                cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 16,
+                        RED_565_MASK, GREEN_565_MASK, BLUE_565_MASK, 0, false,
+                        DataBuffer.TYPE_USHORT);
 
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_USHORT_555_RGB:
-            cm = new DirectColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    15,
-                    RED_555_MASK,
-                    GREEN_555_MASK,
-                    BLUE_555_MASK,
-                    0,
-                    false,
-                    DataBuffer.TYPE_USHORT);
+            case TYPE_USHORT_555_RGB:
+                cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 15,
+                        RED_555_MASK, GREEN_555_MASK, BLUE_555_MASK, 0, false,
+                        DataBuffer.TYPE_USHORT);
 
-            raster = cm.createCompatibleWritableRaster(width, height);
-            break;
+                raster = cm.createCompatibleWritableRaster(width, height);
+                break;
 
-        case TYPE_BYTE_GRAY: {
-            int bits[] = { 8 };
-            cm = new ComponentColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_GRAY),
-                    bits, 
-                    false, 
-                    false, 
-                    Transparency.OPAQUE, 
-                    DataBuffer.TYPE_BYTE);
+            case TYPE_BYTE_GRAY: {
+                int bits[] = {
+                    8
+                };
+                cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_GRAY), bits,
+                        false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 
-            raster = cm.createCompatibleWritableRaster(width, height);
+                raster = cm.createCompatibleWritableRaster(width, height);
             }
-            break;
+                break;
 
-        case TYPE_USHORT_GRAY: {
-            int bits[] = { 16 };
-            cm = new ComponentColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_GRAY),
-                    bits, 
-                    false, 
-                    false, 
-                    Transparency.OPAQUE, 
-                    DataBuffer.TYPE_USHORT);
-            raster = cm.createCompatibleWritableRaster(width, height);
+            case TYPE_USHORT_GRAY: {
+                int bits[] = {
+                    16
+                };
+                cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_GRAY), bits,
+                        false, false, Transparency.OPAQUE, DataBuffer.TYPE_USHORT);
+                raster = cm.createCompatibleWritableRaster(width, height);
             }
-            break;
+                break;
 
-        case TYPE_BYTE_BINARY: {
-            int colorMap[] = { 0, 0xffffff };
-            cm = new IndexColorModel(1, 2, colorMap, 0, false, -1,
-                    DataBuffer.TYPE_BYTE);
+            case TYPE_BYTE_BINARY: {
+                int colorMap[] = {
+                        0, 0xffffff
+                };
+                cm = new IndexColorModel(1, 2, colorMap, 0, false, -1, DataBuffer.TYPE_BYTE);
 
-            raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, width,
-                    height, 1, 1, null);
+                raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, width, height, 1, 1, null);
             }
-            break;
+                break;
 
-        case TYPE_BYTE_INDEXED: {
-            int colorMap[] = new int[256];
-            int i = 0;
-            for (int r = 0; r < 256; r += 51) {
-                for (int g = 0; g < 256; g += 51) {
-                    for (int b = 0; b < 256; b += 51) {
-                        colorMap[i] = (r << 16) | (g << 8) | b;
-                        i++;
+            case TYPE_BYTE_INDEXED: {
+                int colorMap[] = new int[256];
+                int i = 0;
+                for (int r = 0; r < 256; r += 51) {
+                    for (int g = 0; g < 256; g += 51) {
+                        for (int b = 0; b < 256; b += 51) {
+                            colorMap[i] = (r << 16) | (g << 8) | b;
+                            i++;
+                        }
                     }
                 }
-            }
 
-            int gray = 0x12;
-            for (; i < 256; i++, gray += 6) {
-                colorMap[i] = (gray << 16) | (gray << 8) | gray;
-            }
-            cm = new IndexColorModel(8, 256, colorMap, 0, false, -1,
-                    DataBuffer.TYPE_BYTE);
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-                    width, height, 1, null);
+                int gray = 0x12;
+                for (; i < 256; i++, gray += 6) {
+                    colorMap[i] = (gray << 16) | (gray << 8) | gray;
+                }
+                cm = new IndexColorModel(8, 256, colorMap, 0, false, -1, DataBuffer.TYPE_BYTE);
+                raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, 1,
+                        null);
 
             }
-            break;
-        default:
-            // awt.224=Unknown image type
-            throw new IllegalArgumentException(Messages.getString("awt.224")); //$NON-NLS-1$
+                break;
+            default:
+                // awt.224=Unknown image type
+                throw new IllegalArgumentException(Messages.getString("awt.224")); //$NON-NLS-1$
         }
         this.imageType = imageType;
         imageSurf = createImageSurface(imageType);
@@ -488,7 +497,7 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     public Object getProperty(String name) {
-        if(name == null) {
+        if (name == null) {
             // awt.225=Property name is null
             throw new NullPointerException(Messages.getString("awt.225")); //$NON-NLS-1$
         }
@@ -504,9 +513,8 @@ Image implements WritableRenderedImage, Transparency{
 
     public WritableRaster copyData(WritableRaster outRaster) {
         if (outRaster == null) {
-            outRaster = Raster.createWritableRaster(raster.getSampleModel(),
-                    new Point(raster.getSampleModelTranslateX(),
-                            raster.getSampleModelTranslateY()));
+            outRaster = Raster.createWritableRaster(raster.getSampleModel(), new Point(raster
+                    .getSampleModelTranslateX(), raster.getSampleModelTranslateY()));
         }
 
         int w = outRaster.getWidth();
@@ -530,8 +538,7 @@ Image implements WritableRenderedImage, Transparency{
 
         SampleModel sm = raster.getSampleModel();
         SampleModel nsm = sm.createCompatibleSampleModel(w, h);
-        WritableRaster outr = Raster.createWritableRaster(nsm, 
-                rect.getLocation());
+        WritableRaster outr = Raster.createWritableRaster(nsm, rect.getLocation());
         Object data = null;
 
         data = raster.getDataElements(minX, minY, w, h, data);
@@ -550,7 +557,7 @@ Image implements WritableRenderedImage, Transparency{
         Vector<String> v = new Vector<String>();
         for (Enumeration<?> e = properties.keys(); e.hasMoreElements();) {
             try {
-                v.add((String) e.nextElement());
+                v.add((String)e.nextElement());
             } catch (ClassCastException ex) {
             }
         }
@@ -573,7 +580,7 @@ Image implements WritableRenderedImage, Transparency{
     @Override
     public String toString() {
         return "BufferedImage@" + Integer.toHexString(hashCode()) + //$NON-NLS-1$
-            ": type = " + imageType + " " + cm + " " + raster; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                ": type = " + imageType + " " + cm + " " + raster; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     public WritableRaster getWritableTile(int tileX, int tileY) {
@@ -590,13 +597,12 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Gets a WritableRaster object which contains the alpha channel of 
-     * BufferedImage object with ColorModel objects that supports 
-     * a separate alpha channel such as ComponentColorModel 
-     * or DirectColorModel.
+     * Gets a WritableRaster object which contains the alpha channel of
+     * BufferedImage object with ColorModel objects that supports a separate
+     * alpha channel such as ComponentColorModel or DirectColorModel.
      * 
-     * @return the WritableRaster object which contains the alpha 
-     * channel of this BufferedImage. 
+     * @return the WritableRaster object which contains the alpha channel of
+     *         this BufferedImage.
      */
     public WritableRaster getAlphaRaster() {
         return cm.getAlphaRaster(raster);
@@ -643,10 +649,8 @@ Image implements WritableRenderedImage, Transparency{
         int minX = raster.getMinX();
         int minY = raster.getMinY();
 
-        WritableRaster outr = Raster.createWritableRaster(
-                raster.getSampleModel(),
-                new Point(raster.getSampleModelTranslateX(),
-                raster.getSampleModelTranslateY()));
+        WritableRaster outr = Raster.createWritableRaster(raster.getSampleModel(), new Point(raster
+                .getSampleModelTranslateX(), raster.getSampleModelTranslateY()));
 
         Object data = null;
 
@@ -678,11 +682,14 @@ Image implements WritableRenderedImage, Transparency{
     /**
      * Gets the rectangular area of this BufferedImage as a subimage.
      * 
-     * @param x the x coordinate.
-     * @param y the y coordinate.
-     * @param w the width of the subimage.
-     * @param h the height of the subimage.
-     * 
+     * @param x
+     *            the x coordinate.
+     * @param y
+     *            the y coordinate.
+     * @param w
+     *            the width of the subimage.
+     * @param h
+     *            the height of the subimage.
      * @return the BufferedImage.
      */
     public BufferedImage getSubimage(int x, int y, int w, int h) {
@@ -697,18 +704,17 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Creates the Graphics2D object which allows to draw into 
-     * this BufferedImage.
+     * Creates the Graphics2D object which allows to draw into this
+     * BufferedImage.
      * 
      * @return the graphics2D object.
      */
     public Graphics2D createGraphics() {
-        GraphicsEnvironment ge = 
-            GraphicsEnvironment.getLocalGraphicsEnvironment();
-        //return ge.createGraphics(this);
-        //???AWT hack, FIXME
-        //return AndroidGraphics2D.getInstance();
-        //throw new RuntimeException("Not implemented!");
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // return ge.createGraphics(this);
+        // ???AWT hack, FIXME
+        // return AndroidGraphics2D.getInstance();
+        // throw new RuntimeException("Not implemented!");
         return null;
     }
 
@@ -718,38 +724,44 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Coerces the data to achieve the state which is specified by 
-     * the isAlphaPremultiplied variable. 
+     * Coerces the data to achieve the state which is specified by the
+     * isAlphaPremultiplied variable.
      * 
-     * @param isAlphaPremultiplied the is alpha premultiplied state.
+     * @param isAlphaPremultiplied
+     *            the is alpha pre-multiplied state.
      */
     public void coerceData(boolean isAlphaPremultiplied) {
-        if (cm.hasAlpha() && 
-                cm.isAlphaPremultiplied() != isAlphaPremultiplied) {
+        if (cm.hasAlpha() && cm.isAlphaPremultiplied() != isAlphaPremultiplied) {
             cm = cm.coerceData(raster, isAlphaPremultiplied);
         }
     }
 
     /**
-     * Gets an array of colors in the TYPE_INT_ARGB color model and 
-     * default sRGB colorspace of the specified area of this
-     * BufferedImage. The result array is composed by the following
-     * algirithm:
-     * <p> 
-     * pixel   = rgbArray[offset + (y-startY)*scansize + (x-startX)]
+     * Gets an array of colors in the TYPE_INT_ARGB color model and default sRGB
+     * color space of the specified area of this BufferedImage. The result array
+     * is composed by the following algorithm:
+     * <p>
+     * pixel = rgbArray[offset + (y-startY)*scansize + (x-startX)]
+     * </p>
      * 
-     * @param startX the start X area coordinate. 
-     * @param startY the start Y area coordinate.
-     * @param w the width of the area. 
-     * @param h the height of the area.
-     * @param rgbArray the result array will be stored to this array.
-     * @param offset the offset of the rgbArray array. 
-     * @param scansize the scanline stride for the rgbArray.
-     * 
+     * @param startX
+     *            the start X area coordinate.
+     * @param startY
+     *            the start Y area coordinate.
+     * @param w
+     *            the width of the area.
+     * @param h
+     *            the height of the area.
+     * @param rgbArray
+     *            the result array will be stored to this array.
+     * @param offset
+     *            the offset of the rgbArray array.
+     * @param scansize
+     *            the scanline stride for the rgbArray.
      * @return an array of colors for the specified area.
      */
-    public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray,
-            int offset, int scansize) {
+    public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset,
+            int scansize) {
         if (rgbArray == null) {
             rgbArray = new int[offset + h * scansize];
         }
@@ -765,38 +777,47 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Sets RGB values from the specified array to the specified
-     * BufferedImage area. The pixels are in the default RGB color model 
-     * (TYPE_INT_ARGB) and default sRGB color space.
+     * Sets RGB values from the specified array to the specified BufferedImage
+     * area. The pixels are in the default RGB color model (TYPE_INT_ARGB) and
+     * default sRGB color space.
      * 
-     * @param startX the start X coordinate.
-     * @param startY the start Y coordinate.
-     * @param w the width of the BufferedImage area.
-     * @param h the height of the BufferedImage area.
-     * @param rgbArray the array of RGB values.
-     * @param offset the offset of the rgbArray array. 
-     * @param scansize the scanline stride for the rgbArray.
+     * @param startX
+     *            the start X coordinate.
+     * @param startY
+     *            the start Y coordinate.
+     * @param w
+     *            the width of the BufferedImage area.
+     * @param h
+     *            the height of the BufferedImage area.
+     * @param rgbArray
+     *            the array of RGB values.
+     * @param offset
+     *            the offset of the rgbArray array.
+     * @param scansize
+     *            the scanline stride for the rgbArray.
      */
-    public void setRGB(int startX, int startY, int w, int h, int[] rgbArray,
-            int offset, int scansize) {
+    public void setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset,
+            int scansize) {
         int off = offset;
         for (int y = startY; y < startY + h; y++, off += scansize) {
             int i = off;
             for (int x = startX; x < startX + w; x++, i++) {
-                raster.setDataElements(x, y, 
-                        cm.getDataElements(rgbArray[i], null));
+                raster.setDataElements(x, y, cm.getDataElements(rgbArray[i], null));
             }
         }
     }
 
     /**
-     * Sets a the specified RGB value to the specified pixel of
-     * this BufferedImage. The pixel should be in the default 
-     * RGB color model (TYPE_INT_ARGB) and default sRGB color space. 
-     *  
-     * @param x the X coordinate of the pixel.
-     * @param y the Y coordinate of the pixel.
-     * @param rgb the RGB value to be set.
+     * Sets a the specified RGB value to the specified pixel of this
+     * BufferedImage. The pixel should be in the default RGB color model
+     * (TYPE_INT_ARGB) and default sRGB color space.
+     * 
+     * @param x
+     *            the X coordinate of the pixel.
+     * @param y
+     *            the Y coordinate of the pixel.
+     * @param rgb
+     *            the RGB value to be set.
      */
     public synchronized void setRGB(int x, int y, int rgb) {
         raster.setDataElements(x, y, cm.getDataElements(rgb, null));
@@ -814,25 +835,26 @@ Image implements WritableRenderedImage, Transparency{
     }
 
     /**
-     * Gets a color in the TYPE_INT_ARGB color model and default 
-     * sRGB colorspace of the specified pixel. 
+     * Gets a color in the TYPE_INT_ARGB color model and default sRGB color
+     * space of the specified pixel.
      * 
-     * @param x the X coordinate of the pixel.
-     * @param y the Y coordinate of the pixel.
-     * 
-     * @return the color of the specified pixel in the TYPE_INT_ARGB 
-     * color model and default sRGB colorspace. 
+     * @param x
+     *            the X coordinate of the pixel.
+     * @param y
+     *            the Y coordinate of the pixel.
+     * @return the color of the specified pixel in the TYPE_INT_ARGB color model
+     *         and default sRGB color space.
      */
     public int getRGB(int x, int y) {
         return cm.getRGB(raster.getDataElements(x, y, null));
     }
 
     /**
-     * Returnes true if alpha is premultiplied, 
-     * false if alpha is not premultiplied or there is no alpha.
+     * Returns true if alpha is pre-multiplied, false if alpha is not
+     * pre-multiplied or there is no alpha.
      * 
-     * @return true if alpha is premultiplied, 
-     * false if alpha is not premultiplied or there is no alpha.
+     * @return true if alpha is pre-multiplied, false if alpha is not
+     *         pre-multiplied or there is no alpha.
      */
     public boolean isAlphaPremultiplied() {
         return cm.isAlphaPremultiplied();
@@ -907,9 +929,9 @@ Image implements WritableRenderedImage, Transparency{
     /**
      * Creates the image surface.
      * 
-     * @param type the type
-     * 
-     * @return the image surface
+     * @param type
+     *            the type.
+     * @return the image surface.
      */
     private ImageSurface createImageSurface(int type) {
         return new ImageSurface(getColorModel(), getRaster(), type);
@@ -918,7 +940,7 @@ Image implements WritableRenderedImage, Transparency{
     /**
      * Gets the image surface.
      * 
-     * @return the image surface
+     * @return the image surface.
      */
     ImageSurface getImageSurface() {
         return imageSurf;
@@ -928,4 +950,3 @@ Image implements WritableRenderedImage, Transparency{
         return cm.getTransparency();
     }
 }
-

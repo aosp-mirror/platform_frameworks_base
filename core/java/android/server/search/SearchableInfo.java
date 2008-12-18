@@ -402,7 +402,7 @@ public final class SearchableInfo implements Parcelable {
         // initialize as an "unsearchable" object
         mSearchable = false;
         mSearchActivity = cName;
-
+        
         // to access another activity's resources, I need its context.
         // BE SURE to release the cache sometime after construction - it's a large object to hold
         mCacheActivityContext = getActivityContext(context);
@@ -415,6 +415,7 @@ public final class SearchableInfo implements Parcelable {
             mIconId = a.getResourceId(com.android.internal.R.styleable.Searchable_icon, 0);
             mSearchButtonText = a.getResourceId(
                     com.android.internal.R.styleable.Searchable_searchButtonText, 0);
+
             setSearchModeFlags();
             if (DBG_INHIBIT_SUGGESTIONS == 0) {
                 mSuggestAuthority = a.getString(

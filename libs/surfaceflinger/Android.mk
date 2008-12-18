@@ -31,6 +31,7 @@ ifeq ($(TARGET_SIMULATOR),true)
 endif
 
 LOCAL_SHARED_LIBRARIES := \
+	libhardware \
 	libutils \
 	libcutils \
 	libui \

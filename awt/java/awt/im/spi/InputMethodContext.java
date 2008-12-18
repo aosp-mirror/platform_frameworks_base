@@ -26,6 +26,12 @@ import java.awt.im.InputMethodRequests;
 import java.text.AttributedCharacterIterator;
 //???AWT: import javax.swing.JFrame;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public interface InputMethodContext extends InputMethodRequests {
 
 //    ???AWT: public JFrame createInputMethodJFrame(String title, boolean attachToInputContext);

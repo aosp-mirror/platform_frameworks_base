@@ -21,7 +21,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:paddingRight="?android:attr/scrollbarSize">
     
     <RelativeLayout
         android:layout_width="wrap_content"

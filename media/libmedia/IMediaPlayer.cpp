@@ -33,7 +33,6 @@ enum {
     STOP,
     IS_PLAYING,
     PAUSE,
-    GET_VIDEO_SIZE,
     SEEK_TO,
     GET_CURRENT_POSITION,
     GET_DURATION,
@@ -106,16 +105,6 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         remote()->transact(PAUSE, data, &reply);
-        return reply.readInt32();
-    }
-
-    status_t getVideoSize(int* w, int* h)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
-        remote()->transact(GET_VIDEO_SIZE, data, &reply);
-        *w = reply.readInt32();
-        *h = reply.readInt32();
         return reply.readInt32();
     }
 
@@ -233,15 +222,6 @@ status_t BnMediaPlayer::onTransact(
         case PAUSE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(pause());
-            return NO_ERROR;
-        } break;
-        case GET_VIDEO_SIZE: {
-            CHECK_INTERFACE(IMediaPlayer, data, reply);
-            int w, h;
-            status_t ret = getVideoSize(&w, &h);
-            reply->writeInt32(w);
-            reply->writeInt32(h);
-            reply->writeInt32(ret);
             return NO_ERROR;
         } break;
         case SEEK_TO: {

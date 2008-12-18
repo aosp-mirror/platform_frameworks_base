@@ -134,6 +134,14 @@ public class Transformation {
     
     @Override
     public String toString() {
-        return "Transformation{alpha=" + mAlpha + " matrix=" + mMatrix + "}";
+        return "Transformation{alpha=" + mAlpha + " matrix="
+                + mMatrix.toShortString() + "}";
+    }
+    
+    /**
+     * Return a string representation of the transformation in a compact form.
+     */
+    public String toShortString() {
+        return "{alpha=" + mAlpha + " matrix=" + mMatrix.toShortString() + "}";
     }
 }

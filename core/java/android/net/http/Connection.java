@@ -375,6 +375,11 @@ abstract class Connection {
             if (HttpLog.LOGV) HttpLog.v("Failed to open connection");
             error = EventHandler.ERROR_LOOKUP;
             exception = e;
+        } catch (IllegalArgumentException e) {
+            if (HttpLog.LOGV) HttpLog.v("Illegal argument exception");
+            error = EventHandler.ERROR_CONNECT;
+            req.mFailCount = RETRY_REQUEST_LIMIT;
+            exception = e;
         } catch (SSLConnectionClosedByUserException e) {
             // hack: if we have an SSL connection failure,
             // we don't want to reconnect

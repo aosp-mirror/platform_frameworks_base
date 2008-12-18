@@ -85,7 +85,7 @@ private:
         TONE_RESTARTING  //
     };
 
-    static const unsigned int NUM_PCM_BUFFERS = 2; // number of pcm buffers of audio track
+    static const unsigned int NUM_PCM_BUFFERS = 2; // Number of AudioTrack pcm buffers
     
     static const unsigned int TONEGEN_MAX_WAVES = 3;
     static const unsigned int TONEGEN_MAX_SEGMENTS = 4;  // Maximun number of elenemts in
@@ -126,14 +126,17 @@ private:
     const ToneDescriptor *mpToneDesc;  // pointer to active tone descriptor
     const ToneDescriptor *mpNewToneDesc;  // pointer to next active tone descriptor
 
-    unsigned int mSamplingRate;  // Sampling rate
+    int mSamplingRate;  // AudioFlinger Sampling rate
+    int mBufferSize;  // PCM buffer size in frames
     AudioTrack *mpAudioTrack;  // Pointer to audio track used for playback
     Mutex mLock;  // Mutex to control concurent access to ToneGenerator object from audio callback and application API
     Mutex mCbkCondLock; // Mutex associated to mWaitCbkCond
     Condition mWaitCbkCond; // condition enabling interface to wait for audio callback completion after a change is requested
     float mVolume;  // Volume applied to audio track
+    int mStreamType; // Audio stream used for output
 
-    static void audioCallback(void* user, const AudioTrack::Buffer& info);
+    bool initAudioTrack();
+    static void audioCallback(int event, void* user, void *info);
     bool prepareWave();
     unsigned int numWaves();
     void clearWaveGens();

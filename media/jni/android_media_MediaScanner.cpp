@@ -189,6 +189,25 @@ android_media_MediaScanner_processFile(JNIEnv *env, jobject thiz, jstring path, 
     }
 }
 
+static void
+android_media_MediaScanner_setLocale(JNIEnv *env, jobject thiz, jstring locale)
+{
+    MediaScanner *mp = (MediaScanner *)env->GetIntField(thiz, fields.context);
+
+    if (locale == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+    const char *localeStr = env->GetStringUTFChars(locale, NULL);
+    if (localeStr == NULL) {  // Out of memory
+        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
+        return;
+    }
+    mp->setLocale(localeStr);
+
+    env->ReleaseStringUTFChars(locale, localeStr);
+}
+
 static jbyteArray
 android_media_MediaScanner_extractAlbumArt(JNIEnv *env, jobject thiz, jobject fileDescriptor)
 {
@@ -254,6 +273,7 @@ static JNINativeMethod gMethods[] = {
                                                         (void *)android_media_MediaScanner_processDirectory},
     {"processFile",       "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)V",    
                                                         (void *)android_media_MediaScanner_processFile},
+    {"setLocale",         "(Ljava/lang/String;)V",      (void *)android_media_MediaScanner_setLocale},
     {"extractAlbumArt",   "(Ljava/io/FileDescriptor;)[B",     (void *)android_media_MediaScanner_extractAlbumArt},
     {"native_setup",        "()V",                      (void *)android_media_MediaScanner_native_setup},
     {"native_finalize",     "()V",                      (void *)android_media_MediaScanner_native_finalize},

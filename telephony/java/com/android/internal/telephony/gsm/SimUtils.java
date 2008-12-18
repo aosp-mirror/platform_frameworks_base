@@ -326,4 +326,151 @@ public class SimUtils
 
         return ret;
     }
+
+    /**
+     * Convert a TS 131.102 image instance of code scheme '11' into Bitmap
+     * @param data The raw data
+     * @param length The length of image body
+     * @return The bitmap
+     */    
+    public static Bitmap parseToBnW(byte[] data, int length){
+        int valueIndex = 0;
+        int width = data[valueIndex++] & 0xFF;
+        int height = data[valueIndex++] & 0xFF;
+        int numOfPixels = width*height;
+
+        int[] pixels = new int[numOfPixels];
+
+        int pixelIndex = 0;
+        int bitIndex = 7;
+        byte currentByte = 0x00;
+        while (pixelIndex < numOfPixels) {
+            // reassign data and index for every byte (8 bits).
+            if (pixelIndex % 8 == 0) {
+                currentByte = data[valueIndex++];
+                bitIndex = 7;
+            }
+            pixels[pixelIndex++] = bitToRGB((currentByte >> bitIndex-- ) & 0x01);
+        };
+
+        if (pixelIndex != numOfPixels) {
+            Log.e(LOG_TAG, "parse end and size error");
+        }
+        return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+    }
+
+    private static int bitToRGB(int bit){
+        if(bit == 1){
+            return Color.WHITE;
+        } else {
+            return Color.BLACK;
+        }
+    }
+
+    /**
+     * a TS 131.102 image instance of code scheme '11' into color Bitmap
+     * 
+     * @param data The raw data
+     * @param length the length of image body
+     * @param transparency with or without transparency
+     * @return The color bitmap
+     */
+    public static Bitmap parseToRGB(byte[] data, int length,
+            boolean transparency) {
+        int valueIndex = 0;
+        int width = data[valueIndex++] & 0xFF;
+        int height = data[valueIndex++] & 0xFF;
+        int bits = data[valueIndex++] & 0xFF;
+        int colorNumber = data[valueIndex++] & 0xFF;
+        int clutOffset = ((data[valueIndex++] & 0xFF) << 8)
+                | data[valueIndex++];
+        length = length - 6;
+
+        int[] colorIndexArray = getCLUT(data, clutOffset, colorNumber);
+        if (true == transparency) {
+            colorIndexArray[colorNumber - 1] = Color.TRANSPARENT;
+        }
+
+        int[] resultArray = null;
+        if (0 == (8 % bits)) {
+            resultArray = mapTo2OrderBitColor(data, valueIndex,
+                    (width * height), colorIndexArray, bits);
+        } else {
+            resultArray = mapToNon2OrderBitColor(data, valueIndex,
+                    (width * height), colorIndexArray, bits);
+        }
+
+        return Bitmap.createBitmap(resultArray, width, height,
+                Bitmap.Config.RGB_565);
+    }
+
+    private static int[] mapTo2OrderBitColor(byte[] data, int valueIndex,
+            int length, int[] colorArray, int bits) {
+        if (0 != (8 % bits)) {
+            Log.e(LOG_TAG, "not event number of color");
+            return mapToNon2OrderBitColor(data, valueIndex, length, colorArray,
+                    bits);
+        }
+
+        int mask = 0x01;
+        switch (bits) {
+        case 1:
+            mask = 0x01;
+            break;
+        case 2:
+            mask = 0x03;
+            break;
+        case 4:
+            mask = 0x0F;
+            break;
+        case 8:
+            mask = 0xFF;
+            break;
+        }
+
+        int[] resultArray = new int[length];
+        int resultIndex = 0;
+        int run = 8 / bits;
+        while (resultIndex < length) {
+            byte tempByte = data[valueIndex++];
+            for (int runIndex = 0; runIndex < run; ++runIndex) {
+                int offset = run - runIndex - 1;
+                resultArray[resultIndex++] = colorArray[(tempByte >> (offset * bits))
+                        & mask];
+            }
+        }
+        return resultArray;
+    }
+
+    private static int[] mapToNon2OrderBitColor(byte[] data, int valueIndex,
+            int length, int[] colorArray, int bits) {
+        if (0 == (8 % bits)) {
+            Log.e(LOG_TAG, "not odd number of color");
+            return mapTo2OrderBitColor(data, valueIndex, length, colorArray,
+                    bits);
+        }
+
+        int[] resultArray = new int[length];
+        // TODO fix me:
+        return resultArray;
+    }
+
+    private static int[] getCLUT(byte[] rawData, int offset, int number) {
+        if (null == rawData) {
+            return null;
+        }
+
+        int[] result = new int[number];
+        int endIndex = offset + (number * 3); // 1 color use 3 bytes
+        int valueIndex = offset;
+        int colorIndex = 0;
+        int alpha = 0xff << 24;
+        do {
+            result[colorIndex++] = alpha
+                    | ((rawData[valueIndex++] & 0xFF) << 16)
+                    | ((rawData[valueIndex++] & 0xFF) << 8)
+                    | ((rawData[valueIndex++] & 0xFF));
+        } while (valueIndex < endIndex);
+        return result;
+    }
 }

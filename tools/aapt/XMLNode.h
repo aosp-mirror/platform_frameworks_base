@@ -17,7 +17,7 @@ extern const char* const RESOURCES_ANDROID_NAMESPACE;
 
 bool isWhitespace(const char16_t* str);
 
-String16 getNamespaceResourcePackage(String16 namespaceUri);
+String16 getNamespaceResourcePackage(String16 namespaceUri, bool* outIsPublic = NULL);
 
 status_t parseStyledString(Bundle* bundle,
                            const char* fileName,

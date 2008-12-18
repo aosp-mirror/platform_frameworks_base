@@ -3,50 +3,31 @@ page.title=Home
 @jd:body
 
 
-<script type="text/javascript" src="{@docRoot}assets/carousel.js"></script>
-<script type="text/javascript">
-  var preview = function() { showPreview('amazonmp3'); };
-  addLoadEvent(preview);
-</script>
-
 	<div id="mainBodyFixed">
               <div id="mainBodyLeft">			
                     <div id="homeMiddle">
                         <div id="homeTitle">
                             <div style="float:left;">
-                                <h2>Just Announced: Developer Challenge 2</h2>
+                                <h2>T-Mobile G1 Now Available!</h2>
                             </div>
                             <div style="float:right;" align="center">
-                                <a href="{@docRoot}adc/adc2.html">Sign up today!</a><br />
-                                <img src="{@docRoot}assets/images/icon_robot.jpg" style="padding:8px 10px 8px 10px; clear:both;" />
+                                <a href="http://www.t-mobileg1.com">Learn more &raquo;</a><br />
+                             <!--   <img src="{@docRoot}assets/images/icon_robot.jpg" style="margin:8px 10px 0 10px; clear:both;" /> -->
                             </div>
                         </div><!-- end homeTitle -->
                         <div id="carouselMain">
-                            <div id="carouselImg"></div>
-                            <div id="carouselDesc"></div>
+                            <div id="bulletinImg"></div>
+                            <div id="bulletinDesc"></div>
                         </div>
                         <div class="clearer"></div>
                         <div class="app-list-container" align="center"> 
                             <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
                             <div id="list-clip">
                                 <div style="left: 0px;" id="app-list">
-                                    <!--ps:app-list-->
-                                    <a id="droidlink-amazonmp3" href="javascript:showPreview('amazonmp3')">
-                                      <img src="{@docRoot}assets/images/amazonmp3-sm.png" alt="Amazon MP3 for Android">
-                                    </a> 
-                                    <a id="droidlink-bonsaiblast" href="javascript:showPreview('bonsaiblast')">
-                                      <img src="{@docRoot}assets/images/bonsaiblast-sm.png" alt="Bonsai Blast">
-                                    </a> 
-                                    <a id="droidlink-breadcrumbz" href="javascript:showPreview('breadcrumbz')">
-                                      <img src="{@docRoot}assets/images/breadcrumbz-sm.png" alt="BreadCrumbz">
-                                    </a>
-                                    <a id="droidlink-cookingcapsules" href="javascript:showPreview('cookingcapsules')">
-                                      <img src="{@docRoot}assets/images/cookingcapsules-sm.png" alt="Cooking Capsules™ Taster">
-                                    </a> 
-                                    <!--pe:app-list-->
+                                  <!-- populated by buildCarousel() -->
                                 </div>
                             </div><!-- end list-clip -->
-                            <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                            <a href="javascript:{}" id="arrow-right" onclick="" class="arrow-right-off"></a>
                             <div class="clearer"></div>
                         </div><!-- end app-list container -->
                     </div><!-- end homeMiddle -->
@@ -60,7 +41,7 @@ page.title=Home
                                     <br />
                                     <h2>Featured Developer App: BreadCrumbz</h2>
                                     <p>Amos Yoffe takes navigation to the next level with BreadCrumbz.</p>
-                                    <p><a href="http://www.bcrumbz.com">Learn more about this developer &rarr;</a></p>
+                                    <p><a href="http://www.bcrumbz.com">Learn more about this developer &raquo;</a></p>
                                 </td>
                                 <td>
                                     <img src="{@docRoot}assets/images/logo_breadcrumbz.jpg" />
@@ -73,36 +54,36 @@ page.title=Home
               <div id="mainBodyRight">
                       <table id="rightColumn">
                               <tr>
-                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_download.jpg" /></td>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_download.jpg" style="padding:0" /></td>
                                       <td>
                                               <h2 class="green">Download</h2>
                                               <p>Latest SDK</p>
-                                              <p><a href="{@docRoot}sdk/">Download now</a></p>
+                                              <p><a href="{@docRoot}sdk/index.html">Download now</a></p>
                                       </td>
                               </tr>
                               <tr>
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_market.jpg" /></td>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></td>
                                       <td valign="middle"><br /><h2 class="green">Market</h2></td>
                               </tr>
                               <tr>
                                       <td colspan="2">
                                               <br />
                                               <p>Android Market is an open service that will give developers the opportunity to distribute applications to handsets.</p>
-                                              <p><a href="http://www.android.com/market.html">Learn more &rarr;</a></p>
+                                              <p><a href="http://www.android.com/market.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_contribute.jpg" /></td>
+                                      <td class="imageCell"><img src="{@docRoot}assets/images/icon_contribute.jpg" style="padding:0" /></td>
                                       <td>
                                               <h2 class="green">Contribute</h2>
                                               <p>Create using our open source codebase and help us keep this project growing.</p>
-                                              <p><a href="http://open.android.com">Learn more &rarr;</a></p>
+                                              <p><a href="http://source.android.com">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -112,3 +93,65 @@ page.title=Home
               </div>
 	</div>
 
+<!--[if lte IE 6]>
+  <style>
+    #arrow-left {
+      margin:0 0 0 5px;
+    }
+    #arrow-right {
+      margin-left:0;
+    }
+    .app-list-container {
+      margin: 37px 0 0 23px;
+    }
+    div#list-clip { 
+      width:468px;
+    }
+  </style>
+<![endif]-->
+
+<script type="text/javascript">
+
+// * -- carousel dictionary -- * //
+  /* layout:  imgLeft, imgRight, imgTop
+     icon:    image for carousel entry. cropped (height:70px, width:90px)
+     name:    string for carousel entry
+     img:     image for bulletin post. cropped (height: 170, width:230px)
+     title:   header for bulletin (optional, insert "" value to skip
+     desc:    the bulletin post. must include html tags. 
+  */
+
+  var droidList = {
+    'sdk': {
+      'layout':"imgLeft",
+      'icon':"sdk-small.png",
+      'name':"SDK 1.0 r1",
+      'img':"sdk-large.png",
+      'title':"Android 1.0 SDK r1",
+      'desc': "<p>The first Android 1.0 SDK is available for download. This is the first release guaranteed to operate on the first Android devices. If you want to release an application for Android, you should be developing with this SDK.</p><p><a href='{@docRoot}sdk/index.html'>Download Android 1.0 SDK r1</a></p>"
+    },
+
+    'mapskey': {
+      'layout':"imgLeft",
+      'icon':"maps-small.png",
+      'name':"Maps API Key",
+      'img':"maps-large.png",
+      'title':"Maps API Key",
+      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='{@docRoot}guide/topics/geo/mapkey.html'>Learn how to get a Maps API Key</a></p>"
+    },
+
+    'market': {
+      'layout':"imgTop",
+      'icon':"market-small.png",
+      'name':"Android Market",
+      'img':"market-large.png",
+      'title':"",
+      'desc': "<p>Android Market helps you get your applications into the hands of users. The beta version of Market is now open and you can begin sharing your applications with users of the first Android-powered phone, the T-Mobile G1.</p><p><a href='http://market.android.com/publish/'>Publish your Android app on Market &raquo;</a></p>"
+    }
+
+  }
+</script>
+<script type="text/javascript" src="{@docRoot}assets/carousel.js"></script>
+<script type="text/javascript">
+  initCarousel("sdk");
+</script>

@@ -151,13 +151,34 @@ public final class CookieManager {
         }
 
         boolean domainMatch(String urlHost) {
-            return urlHost.equals(domain) ||
-                    (domain.startsWith(".") &&
-                     urlHost.endsWith(domain.substring(1)));
+            if (domain.startsWith(".")) {
+                if (urlHost.endsWith(domain.substring(1))) {
+                    int len = domain.length();
+                    int urlLen = urlHost.length();
+                    if (urlLen > len - 1) {
+                        // make sure bar.com doesn't match .ar.com
+                        return urlHost.charAt(urlLen - len) == PERIOD;
+                    }
+                    return true;
+                }
+                return false;
+            } else {
+                // exact match if domain is not leading w/ dot
+                return urlHost.equals(domain);
+            }
         }
 
         boolean pathMatch(String urlPath) {
-            return urlPath.startsWith (path);
+            if (urlPath.startsWith(path)) {
+                int len = path.length();
+                int urlLen = urlPath.length();
+                if (urlLen > len) {
+                    // make sure /wee doesn't match /we
+                    return urlPath.charAt(len) == PATH_DELIM;
+                }
+                return true;
+            }
+            return false;
         }
 
         public String toString() {
@@ -232,7 +253,7 @@ public final class CookieManager {
      * a system private class.
      */
     public synchronized void setCookie(WebAddress uri, String value) {
-        if (value != null && value.length() > 4096) {
+        if (value != null && value.length() > MAX_COOKIE_LENGTH) {
             return;
         }
         if (!mAcceptCookie || uri == null) {
@@ -246,25 +267,19 @@ public final class CookieManager {
         if (hostAndPath == null) {
             return;
         }
+        
+        // For default path, when setting a cookie, the spec says:
+        //Path:   Defaults to the path of the request URL that generated the
+        // Set-Cookie response, up to, but not including, the
+        // right-most /.
+        if (hostAndPath[1].length() > 1) {
+            int index = hostAndPath[1].lastIndexOf(PATH_DELIM);
+            hostAndPath[1] = hostAndPath[1].substring(0, 
+                    index > 0 ? index : index + 1);
+        }
 
         ArrayList<Cookie> cookies = null;
         try {
-            /* Google is setting cookies like the following to detect whether 
-             * a browser supports cookie. We need to skip the leading "www" for 
-             * the default host. Otherwise the second cookie will make the first
-             * cookie expired.
-             *  
-             * url: https://www.google.com/accounts/ServiceLoginAuth 
-             * value: LSID=xxxxxxxxxxxxx;Path=/accounts;
-             * Expires=Tue, 13-Mar-2018 01:41:39 GMT
-             * 
-             * url: https://www.google.com/accounts/ServiceLoginAuth 
-             * value:LSID=EXPIRED;Domain=www.google.com;Path=/accounts;
-             * Expires=Mon, 01-Jan-1990 00:00:00 GMT 
-             */  
-            if (hostAndPath[0].startsWith("www.")) {
-                hostAndPath[0] = hostAndPath[0].substring(3);
-            }
             cookies = parseCookie(hostAndPath[0], hostAndPath[1], value);
         } catch (RuntimeException ex) {
             Log.e(LOGTAG, "parse cookie failed for: " + value);
@@ -622,26 +637,17 @@ public final class CookieManager {
 
             /*
              * find cookie path, e.g. for http://www.google.com, the path is "/"
-             * for http://www.google.com/lab/, the path is "/lab/"
-             * for http://www.google.com/lab/foo, the path is "/lab/"
-             * for http://www.google.com/lab?hl=en, the path is "/lab/"
-             * for http://www.google.com/lab.asp?hl=en, the path is "/"
+             * for http://www.google.com/lab/, the path is "/lab"
+             * for http://www.google.com/lab/foo, the path is "/lab/foo"
+             * for http://www.google.com/lab?hl=en, the path is "/lab"
+             * for http://www.google.com/lab.asp?hl=en, the path is "/lab.asp"
              * Note: the path from URI has at least one "/"
+             * See:
+             * http://www.unix.com.ua/rfc/rfc2109.html
              */
             index = ret[1].indexOf(QUESTION_MARK);
             if (index != -1) {
                 ret[1] = ret[1].substring(0, index);
-                if (ret[1].charAt(ret[1].length() - 1) != PATH_DELIM) {
-                    index = ret[1].lastIndexOf(PATH_DELIM);
-                    if (ret[1].lastIndexOf('.') > index) {
-                        ret[1] = ret[1].substring(0, index + 1);
-                    } else {
-                        ret[1] += PATH_DELIM;
-                    }
-                }
-            } else if (ret[1].charAt(ret[1].length() - 1) != PATH_DELIM) {
-                ret[1] = ret[1].substring(0,
-                        ret[1].lastIndexOf(PATH_DELIM) + 1);
             }
             return ret;
         } else
@@ -687,10 +693,6 @@ public final class CookieManager {
             String cookieString) {
         ArrayList<Cookie> ret = new ArrayList<Cookie>();
 
-        // domain needs at least two PERIOD,
-        if (host.indexOf(PERIOD) == host.lastIndexOf(PERIOD)) {
-            host = PERIOD + host;
-        }
         int index = 0;
         int length = cookieString.length();
         while (true) {
@@ -841,15 +843,14 @@ public final class CookieManager {
                                     "illegal format for max-age: " + value);
                         }
                     } else if (name.equals(PATH)) {
-                        // make sure path ends with PATH_DELIM
-                        if (value.length() > 1 &&
-                                value.charAt(value.length() - 1) != PATH_DELIM) {
-                            cookie.path = value + PATH_DELIM;
-                        } else {
-                            cookie.path = value;
-                        }
+                        cookie.path = value;
                     } else if (name.equals(DOMAIN)) {
                         int lastPeriod = value.lastIndexOf(PERIOD);
+                        if (lastPeriod == 0) {
+                            // disallow cookies set for TLDs like [.com]
+                            cookie.domain = null;
+                            continue;
+                        }
                         try {
                             Integer.parseInt(value.substring(lastPeriod + 1));
                             // no wildcard for ip address match
@@ -862,15 +863,22 @@ public final class CookieManager {
                             // ignore the exception, value is a host name
                         }
                         value = value.toLowerCase();
-                        if (value.endsWith(host) || host.endsWith(value)) {
-                            // domain needs at least two PERIOD
-                            if (value.indexOf(PERIOD) == lastPeriod) {
-                                value = PERIOD + value;
+                        if (value.charAt(0) != PERIOD) {
+                            // pre-pended dot to make it as a domain cookie
+                            value = PERIOD + value;
+                            lastPeriod++;
+                        }
+                        if (host.endsWith(value.substring(1))) {
+                            int len = value.length();
+                            int hostLen = host.length();
+                            if (hostLen > (len - 1)
+                                    && host.charAt(hostLen - len) != PERIOD) {
+                                // make sure the bar.com doesn't match .ar.com
+                                cookie.domain = null;
+                                continue;
                             }
                             // disallow cookies set on ccTLDs like [.co.uk]
-                            int len = value.length();
-                            if ((value.charAt(0) == PERIOD)
-                                    && (len == lastPeriod + 3)
+                            if ((len == lastPeriod + 3)
                                     && (len >= 6 && len <= 8)) {
                                 String s = value.substring(1, lastPeriod);
                                 if (Arrays.binarySearch(BAD_COUNTRY_2LDS, s) >= 0) {
@@ -880,7 +888,7 @@ public final class CookieManager {
                             }
                             cookie.domain = value;
                         } else {
-                            // no cross-site cookie
+                            // no cross-site or more specific sub-domain cookie
                             cookie.domain = null;
                         }
                     }

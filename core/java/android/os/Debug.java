@@ -117,6 +117,10 @@ public final class Debug
      * waitForDebugger() call if you want to start tracing immediately.
      */
     public static void waitForDebugger() {
+        if (!VMDebug.isDebuggingEnabled()) {
+            //System.out.println("debugging not enabled, not waiting");
+            return;
+        }
         if (isDebuggerConnected())
             return;
 

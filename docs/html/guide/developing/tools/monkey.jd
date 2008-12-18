@@ -2,7 +2,7 @@ page.title=UI/Application Exerciser Monkey
 @jd:body
 
 <p>The Monkey is a program that runs on your 
-<a href="{@docRoot}reference/emulator.html">emulator</a> or device and generates pseudo-random
+<a href="{@docRoot}guide/developing/tools/emulator.html">emulator</a> or device and generates pseudo-random
 streams of user events such as clicks, touches, or gestures, as well as a number of system-level 
 events.  You can use the Monkey to stress-test applications that you are developing, in a random 
 yet repeatable manner.</p>
@@ -185,7 +185,7 @@ transitions invoked by your application.</td>
 <td>If set, this option will generate profiling reports immediately before and after
 the Monkey event sequence.
 This will generate large (~5Mb) files in data/misc, so use with care.  See 
-<a href="{@docRoot}reference/traceview.html" title="traceview">Traceview</a> for more information
+<a href="{@docRoot}guide/developing/tools/traceview.html" title="traceview">Traceview</a> for more information
 on trace files.</td>
 </tr>
 

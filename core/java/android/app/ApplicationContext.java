@@ -87,6 +87,7 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.policy.PolicyManager;
 
@@ -103,6 +104,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -139,12 +142,12 @@ class ReceiverRestrictedContext extends ContextWrapper {
  * Common implementation of Context API, which Activity and other application
  * classes inherit.
  */
-@SuppressWarnings({"EmptyCatchBlock"})
 class ApplicationContext extends Context {
     private final static String TAG = "ApplicationContext";
     private final static boolean DEBUG_ICONS = false;
 
     private static final Object sSync = new Object();
+    private static AlarmManager sAlarmManager;
     private static PowerManager sPowerManager;
     private static ConnectivityManager sConnectivityManager;
     private static WifiManager sWifiManager;
@@ -288,12 +291,15 @@ class ApplicationContext extends Context {
         }
         throw new RuntimeException("Not supported in system context");
     }
+    
+    private static File makeBackupFile(File prefsFile) {
+        return new File(prefsFile.getPath() + ".bak");
+    }
 
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
-        File f;
-        f = makeFilename(getPreferencesDir(), name + ".xml");
         SharedPreferencesImpl sp;
+        File f = makeFilename(getPreferencesDir(), name + ".xml");
         synchronized (sSharedPrefs) {
             sp = sSharedPrefs.get(f);
             if (sp != null && !sp.hasFileChanged()) {
@@ -301,15 +307,27 @@ class ApplicationContext extends Context {
                 return sp;
             }
         }
+        
+        FileInputStream str = null;
+        File backup = makeBackupFile(f);
+        if (backup.exists()) {
+            f.delete();
+            backup.renameTo(f);
+        }
 
         Map map = null;
-        try {
-            FileInputStream str = new FileInputStream(f);
-            map = XmlUtils.readMapXml(str);
-            str.close();
-        } catch (org.xmlpull.v1.XmlPullParserException e) {
-        } catch (java.io.FileNotFoundException e) {
-        } catch (java.io.IOException e) {
+        if (f.exists()) {
+            try {
+                str = new FileInputStream(f);
+                map = XmlUtils.readMapXml(str);
+                str.close();
+            } catch (org.xmlpull.v1.XmlPullParserException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            } catch (IOException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            }
         }
 
         synchronized (sSharedPrefs) {
@@ -350,7 +368,7 @@ class ApplicationContext extends Context {
         File f = makeFilename(getFilesDir(), name);
         try {
             FileOutputStream fos = new FileOutputStream(f, append);
-            setFilePermissionsFromMode(f.toString(), mode, 0);
+            setFilePermissionsFromMode(f.getPath(), mode, 0);
             return fos;
         } catch (FileNotFoundException e) {
         }
@@ -358,11 +376,11 @@ class ApplicationContext extends Context {
         File parent = f.getParentFile();
         parent.mkdir();
         FileUtils.setPermissions(
-            parent.toString(),
+            parent.getPath(),
             FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
             -1, -1);
         FileOutputStream fos = new FileOutputStream(f, append);
-        setFilePermissionsFromMode(f.toString(), mode, 0);
+        setFilePermissionsFromMode(f.getPath(), mode, 0);
         return fos;
     }
 
@@ -377,6 +395,16 @@ class ApplicationContext extends Context {
         synchronized (mSync) {
             if (mFilesDir == null) {
                 mFilesDir = new File(getDataDirFile(), "files");
+            }
+            if (!mFilesDir.exists()) {
+                if(!mFilesDir.mkdirs()) {
+                    Log.w(TAG, "Unable to create files directory");
+                    return null;
+                }
+                FileUtils.setPermissions(
+                        mFilesDir.getPath(),
+                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                        -1, -1);
             }
             return mFilesDir;
         }
@@ -394,7 +422,7 @@ class ApplicationContext extends Context {
                     return null;
                 }
                 FileUtils.setPermissions(
-                        mCacheDir.toString(),
+                        mCacheDir.getPath(),
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
                         -1, -1);
             }
@@ -418,14 +446,14 @@ class ApplicationContext extends Context {
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
         File dir = getDatabasesDir();
         if (!dir.isDirectory() && dir.mkdir()) {
-            FileUtils.setPermissions(dir.toString(),
+            FileUtils.setPermissions(dir.getPath(),
                 FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
                 -1, -1);
         }
 
         File f = makeFilename(dir, name);
         SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(f, factory);
-        setFilePermissionsFromMode(f.toString(), mode, 0);
+        setFilePermissionsFromMode(f.getPath(), mode, 0);
         return db;
     }
 
@@ -844,7 +872,7 @@ class ApplicationContext extends Context {
         } else if (ACTIVITY_SERVICE.equals(name)) {
             return getActivityManager();
         } else if (ALARM_SERVICE.equals(name)) {
-            return new AlarmManager();
+            return getAlarmManager();
         } else if (POWER_SERVICE.equals(name)) {
             return getPowerManager();
         } else if (CONNECTIVITY_SERVICE.equals(name)) {
@@ -878,6 +906,8 @@ class ApplicationContext extends Context {
             return getTelephonyManager();
         } else if (CLIPBOARD_SERVICE.equals(name)) {
             return getClipboardManager();
+        } else if (INPUT_METHOD_SERVICE.equals(name)) {
+            return InputMethodManager.getInstance(this);
         }
 
         return null;
@@ -891,6 +921,17 @@ class ApplicationContext extends Context {
             }
         }
         return mActivityManager;
+    }
+
+    private AlarmManager getAlarmManager() {
+        synchronized (sSync) {
+            if (sAlarmManager == null) {
+                IBinder b = ServiceManager.getService(ALARM_SERVICE);
+                IAlarmManager service = IAlarmManager.Stub.asInterface(b);
+                sAlarmManager = new AlarmManager(service);
+            }
+        }
+        return sAlarmManager;
     }
 
     private PowerManager getPowerManager() {
@@ -1299,7 +1340,7 @@ class ApplicationContext extends Context {
         File file = makeFilename(getDataDirFile(), name);
         if (!file.exists()) {
             file.mkdir();
-            setFilePermissionsFromMode(file.toString(), mode,
+            setFilePermissionsFromMode(file.getPath(), mode,
                     FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH);
         }
         return file;
@@ -1636,6 +1677,20 @@ class ApplicationContext extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
+        
+        @Override
+        public int getUidForSharedUser(String sharedUserName) 
+                throws NameNotFoundException {
+            try {
+                int uid = mPM.getUidForSharedUser(sharedUserName);
+                if(uid != -1) {
+                    return uid;
+                }
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+            throw new NameNotFoundException("No shared userid for user:"+sharedUserName);
+        }
 
         @Override
         public List<PackageInfo> getInstalledPackages(int flags) {
@@ -1899,7 +1954,9 @@ class ApplicationContext extends Context {
             if (app.packageName.equals("system")) {
                 return mContext.mMainThread.getSystemContext().getResources();
             }
-            Resources r = mContext.mMainThread.getTopLevelResources(app.publicSourceDir);
+            Resources r = mContext.mMainThread.getTopLevelResources(
+                    app.uid == Process.myUid() ? app.sourceDir
+                    : app.publicSourceDir);
             if (r != null) {
                 return r;
             }
@@ -2341,6 +2398,7 @@ class ApplicationContext extends Context {
     private static final class SharedPreferencesImpl implements SharedPreferences {
 
         private final File mFile;
+        private final File mBackupFile;
         private final int mMode;
         private Map mMap;
         private final FileStatus mFileStatus = new FileStatus();
@@ -2351,6 +2409,7 @@ class ApplicationContext extends Context {
         SharedPreferencesImpl(
             File file, int mode, Map initialContents) {
             mFile = file;
+            mBackupFile = makeBackupFile(file);
             mMode = mode;
             mMap = initialContents != null ? initialContents : new HashMap();
             if (FileUtils.getFileStatus(file.getPath(), mFileStatus)) {
@@ -2544,30 +2603,68 @@ class ApplicationContext extends Context {
         public Editor edit() {
             return new EditorImpl();
         }
+        
+        private FileOutputStream createFileOutputStream(File file) {
+            FileOutputStream str = null;
+            try {
+                str = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                File parent = file.getParentFile();
+                if (!parent.mkdir()) {
+                    Log.e(TAG, "Couldn't create directory for SharedPreferences file " + file);
+                    return null;
+                }
+                FileUtils.setPermissions(
+                    parent.getPath(),
+                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                    -1, -1);
+                try {
+                    str = new FileOutputStream(file);
+                } catch (FileNotFoundException e2) {
+                    Log.e(TAG, "Couldn't create SharedPreferences file " + file, e2);
+                }
+            }
+            return str;
+        }
 
         private boolean writeFileLocked() {
+            // Rename the current file so it may be used as a backup during the next read
+            if (mFile.exists()) {
+                if (!mFile.renameTo(mBackupFile)) {
+                    Log.e(TAG, "Couldn't rename file " + mFile + " to backup file " + mBackupFile);
+                }
+            }
+            
+            // Attempt to write the file, delete the backup and return true as atomically as
+            // possible.  If any exception occurs, delete the new file; next time we will restore
+            // from the backup.
             try {
-                FileOutputStream str;
-                try {
-                    str = new FileOutputStream(mFile);
-                } catch (Exception e) {
-                    File parent = mFile.getParentFile();
-                    parent.mkdir();
-                    FileUtils.setPermissions(
-                        parent.toString(),
-                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                        -1, -1);
-                    str = new FileOutputStream(mFile);
+                FileOutputStream str = createFileOutputStream(mFile);
+                if (str == null) {
+                    return false;
                 }
                 XmlUtils.writeMapXml(mMap, str);
                 str.close();
-                setFilePermissionsFromMode(mFile.toString(), mMode, 0);
+                setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
                 if (FileUtils.getFileStatus(mFile.getPath(), mFileStatus)) {
                     mTimestamp = mFileStatus.mtime;
                 }
-            } catch (org.xmlpull.v1.XmlPullParserException e) {
-            } catch (java.io.FileNotFoundException e) {
-            } catch (java.io.IOException e) {
+                
+                // Writing was successful, delete the backup file
+                if (!mBackupFile.delete()) {
+                    Log.e(TAG, "Couldn't delete new backup file " + mBackupFile);
+                }
+                return true;
+            } catch (XmlPullParserException e) {
+                Log.w(TAG, "writeFileLocked: Got exception:", e);
+            } catch (IOException e) {
+                Log.w(TAG, "writeFileLocked: Got exception:", e);
+            }
+            // Clean up an unsuccessfully written file
+            if (mFile.exists()) {
+                if (!mFile.delete()) {
+                    Log.e(TAG, "Couldn't clean up partially-written file " + mFile);
+                }
             }
             return false;
         }

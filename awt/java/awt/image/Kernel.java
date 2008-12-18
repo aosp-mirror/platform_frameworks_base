@@ -27,38 +27,53 @@ import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
  * The Kernel class provides a matrix. This matrix is stored as a float array
- * which describes how a specified pixel affects the value calculated for 
- * the pixel's position in the output image of a filtering operation. 
- * The X, Y origins indicate the kernel matrix element which corresponds to 
- * the pixel position for which an output value is being calculated.
+ * which describes how a specified pixel affects the value calculated for the
+ * pixel's position in the output image of a filtering operation. The X, Y
+ * origins indicate the kernel matrix element which corresponds to the pixel
+ * position for which an output value is being calculated.
+ * 
+ * @since Android 1.0
  */
 public class Kernel implements Cloneable {
-    
-    /** The x origin. */
+
+    /**
+     * The x origin.
+     */
     private final int xOrigin;
-    
-    /** The y origin. */
+
+    /**
+     * The y origin.
+     */
     private final int yOrigin;
-    
-    /** The width. */
+
+    /**
+     * The width.
+     */
     private int width;
-    
-    /** The height. */
+
+    /**
+     * The height.
+     */
     private int height;
-    
-    /** The data. */
+
+    /**
+     * The data.
+     */
     float data[];
 
     /**
-     * Instantiates a new Kernel with the specified float array.
-     * The width*height elements of the data array are copied. 
+     * Instantiates a new Kernel with the specified float array. The
+     * width*height elements of the data array are copied.
      * 
-     * @param width the width of the Kernel.
-     * @param height the height of the Kernel.
-     * @param data the data of Kernel.
+     * @param width
+     *            the width of the Kernel.
+     * @param height
+     *            the height of the Kernel.
+     * @param data
+     *            the data of Kernel.
      */
     public Kernel(int width, int height, float[] data) {
-        int dataLength = width*height;
+        int dataLength = width * height;
         if (data.length < dataLength) {
             // awt.22B=Length of data should not be less than width*height
             throw new IllegalArgumentException(Messages.getString("awt.22B")); //$NON-NLS-1$
@@ -70,8 +85,8 @@ public class Kernel implements Cloneable {
         this.data = new float[dataLength];
         System.arraycopy(data, 0, this.data, 0, dataLength);
 
-        xOrigin = (width-1)/2;
-        yOrigin = (height-1)/2;
+        xOrigin = (width - 1) / 2;
+        yOrigin = (height - 1) / 2;
     }
 
     /**
@@ -95,8 +110,8 @@ public class Kernel implements Cloneable {
     /**
      * Gets the float data array of this Kernel.
      * 
-     * @param data the float array where the resulted data will be stored.
-     * 
+     * @param data
+     *            the float array where the resulted data will be stored.
      * @return the float data array of this Kernel.
      */
     public final float[] getKernelData(float[] data) {

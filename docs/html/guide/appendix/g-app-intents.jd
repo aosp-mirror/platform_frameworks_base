@@ -2,7 +2,7 @@ page.title=Intents List: Invoking Google Applications on Android Devices
 @jd:body
 
 <div class="sidebox">
-For more information about intents, see the <a href="{@docRoot}guide/topics/intents/">Intents and Intent Filters</a>.
+For more information about intents, see the <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
 </div>
 
 <p>The table below lists the intents that your application can send, to invoke Google applications on Android devices in certain ways. For each action/uri pair, the table describes how the receiving Google application handles the intent. </p>
@@ -79,7 +79,8 @@ For more information about intents, see the <a href="{@docRoot}guide/topics/inte
           </td>
       </tr>
       <tr>
-          <td>Google Streetview</td>          <td>google.streetview:cbll=<em>lat</em>,<em>lng</em>&amp;cbp=1,<em>yaw</em>,,<em>pitch</em>,<em>zoom</em>&amp;mz=<em>mapZoom</em>
+          <td>Google Streetview</td>          
+<td>google.streetview:cbll=<em>lat</em>,<em>lng</em>&amp;cbp=1,<em>yaw</em>,,<em>pitch</em>,<em>zoom</em>&amp;mz=<em>mapZoom</em>
           </td>
           <td>VIEW</td>
           <td>Opens the Street View application to the given location. The URI scheme is

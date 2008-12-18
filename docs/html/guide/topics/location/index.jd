@@ -1,0 +1,109 @@
+page.title=Location
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#location">android.location</a></li>
+    <li><a href="#maps">com.google.android.maps</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The Android SDK includes two packages that provide Android's primary support
+for building location-based services:
+{@link android.location} and {@link-fixme com.google.android.maps}. 
+Please read on below for a brief introduction to each package.</p>
+
+<h2 id="location">android.location</h2>
+
+<p>This package contains several classes related to
+location services in the Android platform. Most importantly, it introduces the 
+{@link android.location.LocationManager}
+service, which provides an API to determine location and bearing if the
+underlying device (if it supports the service). The LocationManager 
+should <strong>not</strong> be
+instantiated directly; rather, a handle to it should be retrieved via
+{@link android.content.Context#getSystemService(String)
+getSystemService(Context.LOCATION_SERVICE)}.</p>
+
+<p>Once your application has a handle to the LocationManager, your application
+will be able to do three things:</p>
+
+<ul>
+    <li>Query for the list of all LocationProviders known to the
+    LocationManager for its last known location.</li>
+    <li>Register/unregister for periodic updates of current location from a
+    LocationProvider (specified either by Criteria or name).</li>
+    <li>Register/unregister for a given Intent to be fired if the device comes
+    within a given proximity (specified by radius in meters) of a given
+    lat/long.</li>
+</ul>
+
+<p>However, during initial development, you may not have access to real 
+data from a real location provider (Network or GPS). So it may be necessary to
+spoof some data for your application, with some mock location data.</p>
+
+<p class="note"><strong>Note:</strong> If you've used mock LocationProviders in
+previous versions of the SDK (m3/m5), you can no longer provide canned LocationProviders
+in the /system/etc/location directory. These directories will be wiped during boot-up.
+Please follow the new procedures below.</p>
+
+
+<h3>Providing Mock Location Data</h3>
+
+<p>When testing your application on the Android emulator, there are a couple different
+ways to send it some spoof location data: with the DDMS tool or the "geo" command.</p>
+
+<h4 id="ddms">Using DDMS</h4>
+<p>With the DDMS tool, you can simulate location data a few different ways:</p>
+<ul>
+    <li>Manually send individual longitude/latitude coordinates to the device.</li>
+    <li>Use a GPX file describing a route for playback to the device.</li>
+    <li>Use a KML file describing individual placemarks for sequenced playback to the device.</li>
+</ul>
+<p>For more information on using DDMS to spoof location data, see the 
+<a href="{@docRoot}guide/developing/tools/ddms.html#emulator-control">Using DDMS guide</a>.
+
+<h4 id="geo">Using the "geo" command</h4>
+<p>Launch your application in the Android emulator and open a terminal/console in
+your SDK's <code>/tools</code> directory. Now you can use:</p>
+<ul><li><code>geo fix</code> to send a fixed geo-location.
+	<p>This command accepts a longitude and latitude in decimal degrees, and
+	an optional altitude in meters. For example:</p>
+	<pre>geo fix -121.45356 46.51119 4392</pre>
+    </li>
+    <li><code>geo nmea</code> to send an NMEA 0183 sentence.
+	<p>This command accepts a single NMEA sentence of type '$GPGGA' (fix data) or '$GPRMC' (transit data).
+	For example:</p>
+	<pre>geo nmea $GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62</pre>
+    </li>
+</ul>
+
+
+<h2 id="maps">com.google.android.maps</h2>
+
+<p>This package introduces a number of classes related to
+rendering, controlling, and overlaying customized information on your own
+Google Mapified Activity. The most important of which is the 
+{@link-fixme com.google.android.maps.MapView} class, which automagically draws you a 
+basic Google Map when you add a MapView to your layout. Note that, if you 
+want to do so, then your Activity that handles the 
+MapView must extend {@link-fixme com.google.android.maps.MapActivity}. </p>
+
+<p>Also note that you must obtain a MapView API Key from the Google Maps
+service, before your MapView can load maps data. For more information, see 
+<a href="{@docRoot}guide/developing/mapkey.html">Obtaining a MapView API Key</a>.</p>
+
+<p>Once you've created a MapView, you'll probably want to use 
+{@link-fixme com.google.android.maps.MapView#getController()} to 
+retrieve a {@link-fixme com.google.android.maps.MapController}, for controlling and 
+animating the map, and {@link-fixme com.google.android.maps.ItemizedOverlay} to
+draw {@link-fixme com.google.android.maps.Overlay}s and other information on the Map.</p>
+
+<p>This is not a standard package in the Android library. In order to use it, you must add the following node to your Android Manifest file, as a child of the 
+<code>&lt;application></code> element:</p>
+<pre>&lt;uses-library android:name="com.google.android.maps" /></pre>
+

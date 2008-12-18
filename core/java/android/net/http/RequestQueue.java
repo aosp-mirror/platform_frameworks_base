@@ -596,7 +596,7 @@ public class RequestQueue implements RequestFeeder {
     }
 
     protected synchronized void queueRequest(Request request, boolean head) {
-        HttpHost host = request.mHost;
+        HttpHost host = request.mProxyHost == null ? request.mHost : request.mProxyHost;
         LinkedList<Request> reqList;
         if (mPending.containsKey(host)) {
             reqList = mPending.get(host);

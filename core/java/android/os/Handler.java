@@ -54,7 +54,7 @@ import java.lang.reflect.Modifier;
  * <p>When a
  * process is created for your application, its main thread is dedicated to
  * running a message queue that takes care of managing the top-level
- * application objects (activities, intent receivers, etc) and any windows
+ * application objects (activities, broadcast receivers, etc) and any windows
  * they create.  You can create your own threads, and communicate back with
  * the main application thread through a Handler.  This is done by calling
  * the same <em>post</em> or <em>sendMessage</em> methods as before, but from
@@ -71,20 +71,31 @@ public class Handler {
     private static final String TAG = "Handler";
 
     /**
+     * Callback interface you can use when instantiating a Handler to avoid
+     * having to implement your own subclass of Handler.
+     */
+    public interface Callback {
+        public boolean handleMessage(Message msg);
+    }
+    
+    /**
      * Subclasses must implement this to receive messages.
      */
-    public void handleMessage(Message msg)
-    {
+    public void handleMessage(Message msg) {
     }
     
     /**
      * Handle system messages here.
      */
-    public void dispatchMessage(Message msg)
-    {
+    public void dispatchMessage(Message msg) {
         if (msg.callback != null) {
             handleCallback(msg);
         } else {
+            if (mCallback != null) {
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
             handleMessage(msg);
         }
     }
@@ -95,8 +106,7 @@ public class Handler {
      *
      * If there isn't one, this handler won't be able to receive messages.
      */
-    public Handler()
-    {
+    public Handler() {
         if (FIND_POTENTIAL_LEAKS) {
             final Class<? extends Handler> klass = getClass();
             if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
@@ -112,15 +122,50 @@ public class Handler {
                 "Can't create handler inside thread that has not called Looper.prepare()");
         }
         mQueue = mLooper.mQueue;
+        mCallback = null;
+    }
+
+    /**
+     * Constructor associates this handler with the queue for the
+     * current thread and takes a callback interface in which you can handle
+     * messages.
+     */
+    public Handler(Callback callback) {
+        if (FIND_POTENTIAL_LEAKS) {
+            final Class<? extends Handler> klass = getClass();
+            if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
+                    (klass.getModifiers() & Modifier.STATIC) == 0) {
+                Log.w(TAG, "The following Handler class should be static or leaks might occur: " +
+                    klass.getCanonicalName());
+            }
+        }
+
+        mLooper = Looper.myLooper();
+        if (mLooper == null) {
+            throw new RuntimeException(
+                "Can't create handler inside thread that has not called Looper.prepare()");
+        }
+        mQueue = mLooper.mQueue;
+        mCallback = callback;
     }
 
     /**
      * Use the provided queue instead of the default one.
      */
-    public Handler(Looper looper)
-    {
+    public Handler(Looper looper) {
         mLooper = looper;
         mQueue = looper.mQueue;
+        mCallback = null;
+    }
+
+    /**
+     * Use the provided queue instead of the default one and take a callback
+     * interface in which to handle messages.
+     */
+    public Handler(Looper looper, Callback callback) {
+        mLooper = looper;
+        mQueue = looper.mQueue;
+        mCallback = callback;
     }
 
     /**
@@ -544,5 +589,6 @@ public class Handler {
 
     final MessageQueue mQueue;
     final Looper mLooper;
+    final Callback mCallback;
     IMessenger mMessenger;
 }

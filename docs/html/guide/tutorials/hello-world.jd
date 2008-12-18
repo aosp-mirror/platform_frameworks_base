@@ -1,114 +1,82 @@
 page.title=Hello, World
 @jd:body
 
-<p>First impressions matter, and as a developer you know that the first impression
+<p>As a developer, you know that the first impression
 you get of a development framework is how easy it is to write "Hello,
-World." Well, on Android, it's pretty easy. Here's the simple process:</p>
+World." Well, on Android, it's pretty easy. </p>
 
-<ol>
-  <li><a href="#create">Create the Project</a></li>
-  <li><a href="#ui">Construct the UI</a></li>
-  <li><a href="#run">Run the Code: Hello, Android</a></li>
-</ol>
+<p>It's particularly easy if you're using Eclipse as your IDE, because we've provided a
+great plugin that handles your project creation and management to greatly speed up your
+development cycles. Get <a href="http://www.eclipse.org/downloads/">Eclipse</a> and visit the 
+<a href="{@docRoot}guide/developing/tools/adt.html">ADT Plugin</a> page to install it.</p>
 
-<p>Afterwards, there's some additional information that you'll find useful:</p>
+<p>If you're not using Eclipse, that's okay. Familiarize yourself with 
+<a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.
+You can then come back here and ignore anything about Eclipse.</p>
 
-<ol>
-  <li><a href="#upgrading">Upgrading the UI to an XML Layout</a> </li>
-  <li><a href="#debugging">Debugging Your Project</a> </li>
-  <li><a href="#noeclipse">Creating a Project without Eclipse</a> </li>
-</ol>
-<p>Let's jump in!</p>
+<p class="note"><strong>Note:</strong>
+In some cases, you might want to click the screenshots below to get a bigger view.
+</p>
 
-<a name="create"></a>
+<h2 id="create">Create the Project</h2>
 
-<h2>Create the Project </h2>
-
-<p>Creating the project is as simple as can be. An Eclipse
-plugin is available making Android development a snap. </p>
-
-<p>You'll need to have a development computer with the Eclipse IDE installed (see <a
-href="intro/installing.html#developmentrequirements">System and Software Requirements</a>), and
-you'll need to install the <a 
-href="intro/installing.html#installingplugin">Android Eclipse Plugin (ADT)</a>. Once you have those ready, come back here. </p>
-
-<p>First, here's a high-level summary of how to build "Hello, World!":</p>
-
-<ol>
-  <li>
-    Create a new "Android Project" via the <strong>File &gt; New &gt; Project</strong> menu.
-  </li>
-  <li>
-    Fill out the project details in the New Android Project dialog.
-  </li>
-  <li>
-    Edit the auto-generated source code template to display some output.
-  </li>
-</ol>
-<p> That's it! Next, let's go through each step above in detail. </p>
 <ol class="listhead">
-    <li>Create a new Android Project
+    <li>Create a new Android Project.
         <p>From Eclipse, select the <strong>File &gt; New &gt; Project</strong> menu item. If the Android
             Plugin for Eclipse has been successfully installed, the resulting dialog
             should have a folder labeled "Android" which should contain a single entry:
             "Android Project".</p>
             
-            <img src="images/hello_world_0.png"/>
+            <a href="images/hello_world_0.png"><img src="images/hello_world_0.png" style="height:230px" alt="" /></a>
 
-            <p>Once you've selected "Android Project", click the Next button.</p>
+            <p>Once you've selected "Android Project", click <strong>Next</strong>.</p>
     </li>
 
-    <li>Fill out the project details
-        <p>The next screen allows you to enter the relevant details for your project.
-        Here's an example:</p>
+    <li>Fill out the project details.
+        <p>The next screen allows you to enter the relevant details for your project:</p>
+        <ul>
+          <li><em>Project name:</em> HelloAndroid</li>
+          <li><em>Package name:</em> com.example.hello (or your own private namespace)</li>
+          <li><em>Activity name:</em> HelloAndroid</li>
+          <li><em>Application name:</em> Hello, Android</li>
+        </ul>
 
-        <img src="images/hello_world_1.png"/>
+        <a href="images/hello_world_1.png"><img src="images/hello_world_1.png" style="height:230px" alt="" /></a>
 
         <p>Here's what each field on this screen means:</p>
+      
+        <dl>
+            <dt><em>Project Name</em></dt>
+                <dd>This is the name of the directory or folder on your computer that you
+                      want to contain the project.</dd>
+            <dt><em>Package Name</em></dt>
+                <dd>This is the package namespace (following the same rules as for
+                  packages in the Java programming language) that you want all your source code to
+                  reside under. This also sets the package name under which the stub
+                  Activity will be generated.
+                  <p>The package name you use in your application must be unique across
+                  all packages installed on the system;  for this reason, it's very
+                  important to use a standard domain-style package for your
+                  applications.  In the example above, we used the
+                  package domain "com.android"; you should use a
+                  different one appropriate to your organization.</p></dd>
+            <dt><em>Activity Name</em></dt>
+                <dd>This is the name for the class stub that will be generated by the plugin.
+                      This will be a subclass of Android's Activity class.  An Activity is simply a
+                      class that can run and do work. It can create a UI if it chooses, but it
+                      doesn't need to.</dd>
+            <dt><em>Application Name</em></dt>
+                <dd>This is the human-readable title for your application.</dd>
+        </dl>
+      
+        <p>The checkbox for toggling "Use default location" allows you to change 
+                  the location on disk where the project's files will be generated and stored.</p>
 
-    
-  <table>
-      <tbody>
-        <tr>
-            <td>Project Name </td>
-            <td>This is the name of the directory or folder on your computer that you
-                want to contain the project.</td>
-        </tr>
-        <tr>
-            <td>Package Name </td>
-            <td>This is the package namespace (following the same rules as for
-            packages in the Java programming language) that you want all your source code to
-            reside under. This also sets the package name under which the stub
-            Activity will be generated.<p/>
-            The package name you use in your application must be unique across
-            all packages installed on the system;  for this reason, it's very
-            important to use a standard domain-style package for your
-            applications.  In the example above, we used the
-            package domain "com.android"; you should use a
-            different one appropriate to your organization.</td>
-        </tr>
-        <tr>
-            <td>Activity Name </td>
-            <td>This is the name for the class stub that will be generated by the plugin.
-                This will be a subclass of Android's Activity class.  An Activity is simply a
-                class that can run and do work. It can create a UI if it chooses, but it
-                doesn't need to. </td>
-        </tr>
-        <tr>
-            <td> Application Name </td>
-            <td> This is the human-readable title for your application. </td>
-        </tr>
-    </tbody>
-  </table>
+    </li>
 
-<p>The checkbox for toggling "Use default location" allows you to change the
-location on disk where the project's files will be generated and stored.</p>
-</li>
-
-<li>Edit the auto-generated source code
-
-<p>After the plugin runs, you'll have a class named HelloAndroid 
-(found in your package, HelloAndroid > src > com.android.hello). It should look like
+<li>Edit the auto-generated source code.
+<p>After the plugin runs, you'll have a class named <code>HelloAndroid</code> 
+(found in your package, <em>HelloAndroid > src > com.android.hello</em>). It should look like
 this:</p>
 
 <pre>public class HelloAndroid extends Activity {
@@ -126,9 +94,8 @@ So, the next step is to modify some code! </p>
 </li>
 </ol>
 
-<a name="ui"></a>
 
-<h2>Construct the UI</h2>
+<h2 id="ui">Construct the UI</h2>
 
 <p>Take a look at this revised code, below, and make the same changes to your HelloAndroid.java file. We'll dissect
 it line by line:</p>
@@ -192,23 +159,23 @@ the TextView we just created.</p>
 <p>There it is &mdash; "Hello, World" in Android! The next step, of course, is
 to see it running.</p>
 
-<a name="run"></a>
 
-<h2>Run the Code: Hello, Android</h2>
+
+<h2 id="run">Run the Code: Hello, Android</h2>
 
 <p>The Eclipse plugin makes it very easy to run your applications. Begin by
 selecting the <strong>Run &gt; Open Run Dialog</strong> menu entry (in Eclipse 3.4, it's 
 <strong>Run > Run Configurations</strong>). You should see a dialog
 like this:</p>
 
-  <img src="images/hello_world_2.png"/>
+  <a href="images/hello_world_2.png"><img src="images/hello_world_2.png" style="height:230px" alt="" /></a>
 
 <p>Next, highlight the "Android Application" entry, and then click the icon in the
 top left corner (the one depicting a sheet of paper with a plus sign in the
 corner) or simply double-click the "Android Application" entry. You should
 have a new launcher entry named "New_configuration".</p>
 
-  <img src="images/hello_world_3.png"/>
+  <a href="images/hello_world_3.png"><img src="images/hello_world_3.png" style="height:230px" alt="" /></a>
 
 <p>Change the name to something expressive, like "Hello, Android", and then pick
 your project by clicking the Browse button. (If you have more than one
@@ -220,21 +187,21 @@ simply continue.</p>
 
 <p>Click the "Apply" button. Here's an example:</p>
 
-  <img src="images/hello_world_4.png"/>
+  <a href="images/hello_world_4.png"><img src="images/hello_world_4.png" style="height:230px" alt="" /></a>
 
 <p>That's it &mdash; you're done! Click the Run button, and the Android Emulator
 should start.  Once it's booted up your application will appear.  When all is said and done, you should
 see something like this:</p>
 
-  <img src="images/hello_world_5.png"/>
+  <a href="images/hello_world_5.png"><img src="images/hello_world_5.png" style="height:230px" alt="" /></a>
 
 <p>That's "Hello, World" in Android. Pretty straightforward, eh?
 The next sections of the tutorial offer more detailed information that you may find valuable as you
 learn more about Android.</p>
 
-<a name="upgrading"></a>
 
-<h2>Upgrading the UI to an XML Layout</h2>
+
+<h2 id="upgrading">Upgrading the UI to an XML Layout</h2>
 
 <p>The "Hello, World" example you just completed uses what we call "programmatic"
 UI layout. This means that you construct and build your application's UI
@@ -255,18 +222,18 @@ programmatically-constructed example you just completed:</p>
   android:layout_height=&quot;fill_parent&quot;
   android:text=&quot;Hello, Android&quot;/&gt;</pre>
 
-<p>The general structure of an Android XML layout file is simple.  It's a tree
-of tags, where each tag is the name of a View class. In this example, it's
-a very simple tree of one element, a TextView. You can use the
-name of any class that extends View as a tag name in your XML layouts,
+<p>The general structure of an Android XML layout file is simple: it's a tree
+of XML elements, where each element is the name of a View class 
+(this example, however, is just one element). You can use the
+name of any class that extends View as an element in your XML layouts,
 including custom View classes you define in your own code. This
-structure makes it very easy to quickly build up UIs, using a much simpler
+structure makes it very easy to quickly build up UIs, using a more simple
 structure and syntax than you would in source code. This model is inspired
 by the web development model, where you can separate the presentation of your
 application (its UI) from the application logic used to fetch and fill in data.</p>
 
-<p>In this example, there are also four XML attributes.  Here's a summary of what
-they mean:</p>
+<p>In this example, there's just one View element, the <code>TextView</code>, 
+which has four XML attributes.  Here's a summary of what they mean:</p>
 
 <table>
     <tbody>
@@ -314,18 +281,62 @@ they mean:</p>
 </table>
 
 
-<p>So, that's what the XML layout looks like, but where do you put it?  Under the /res/layout directory in your project. The "res" is
+<p>This layout file belongs in the <code>res/layout/</code> directory in your project. The "res" is
 short for "resources" and that directory contains all the non-code assets that
-your application requires. This includes things like images, localized
+your application requires. Resources also include things like images, localized
 strings, and XML layout files.</p>
 
-<p>The Eclipse plugin creates one of these XML files for you.  In our example
-above, we simply never used it.  In the Package Explorer, expand the
-folder /res/layout, and edit the file main.xml.  Replace its contents with
-the text above and save your changes.</p>
+<div class="sidebox">
+  <h2>Landscape layout</h2>
+  <p>When you want a different design for landscape, put your layout XML file
+  in <code>res/layout-land/</code>. Android will automatically look here when the layout changes.
+  Without it the layout will just be stretched.</p>
+</div>
 
-<p>Now open the file named R.java in your source code folder in the Package
-Explorer. You'll see that it now looks something like this:</p>
+<p>The Eclipse plugin creates one of these XML files for you (<code>main.xml</code>). In our example
+above, we just ignored it and created our layout programmatically.  In the Eclipse Package Explorer, expand the
+folder res/layout/, and open the file <code>main.xml</code> (once opened, you might need to click 
+the "main.xml" tab at the bottom to see the XML source). Replace its contents with
+the sample XML above and save your changes.</p>
+
+<p>Now open and modify your <code>HelloAndroid</code> class source code to read the
+XML layout, instead of the hard-coded version. Edit the file to look like this:</p>
+
+<pre>
+package com.android.hello;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+public class HelloAndroid extends Activity {
+    /** Called when the activity is first created. */
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+}</pre>
+
+<p>When you make this change, type it by hand to try the code-completion feature on that R class. You'll probably find that it helps a lot.</p>
+
+<p>The <code>setContentView()</code> method we're now using expects a reference to a layout resource.
+We pass it <code>R.layout.main</code>, which is the reference to the <code>layout/main.xml</code> once it's
+compiled into our R class by the Eclipse plugin. (More about the R class in a moment.)</p>
+
+<p>Now that you've made this change, go ahead and re-run your application &mdash; all
+you need to do is click the green Run arrow icon, or select 
+<strong>Run &gt; Run History &gt; Hello, Android</strong>  from the menu. You should see.... well, exactly the same thing
+you saw before! After all, the point was to show that the two different
+layout approaches produce identical results.</p>
+
+<p>There's a lot more to creating these XML layouts, but that's as far as we'll go
+here. Read the <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> documentation for more 
+information on creating layouts.</p>
+
+<div class="special">
+<h3>R class</h3>
+<p>Open the file named R.java in your source code folder in the Package
+Explorer. It should look something like this:</p>
 
 <pre>
 public final class R {
@@ -350,46 +361,14 @@ particularly powerful with the code-completion features of IDEs like Eclipse
 because it lets you quickly and interactively locate the specific reference
 you're looking for.</p>
 
-<p>The important thing to notice for now is the inner class named "layout", and its
-member field "main". The Eclipse plugin noticed that you added a new XML
-layout file and then regenerated this R.java file.  As you add other
-resources to your projects you'll see R.java change to keep up.</p>
+<p>For now, notice the inner class named "layout", and its
+member field "main". The Eclipse plugin noticed the XML
+layout file named main.xml and generated a class for it here.  As you add other
+resources to your project (in the <code>res/</code> directory), you'll see R.java change to keep up.</p>
+<p><em>You should never edit this file by hand.</em></p>
+</div>
 
-<p>The last thing you need to do is modify your HelloAndroid source code to use the new
-XML version of your UI, instead of the hard-coded version. Here's what
-your new class will look like.  As you can see, the source code becomes much
-simpler:</p>
-
-<pre>package com.android.hello;
-
-import android.app.Activity;
-import android.os.Bundle;
-
-public class HelloAndroid extends Activity {
-    /** Called when the activity is first created. */
-    &#64;Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-    }
-}</pre>
-
-<p>When you make this change, don't just copy-and-paste it in. Try out the code-completion feature on that R class. You'll probably find that it helps a lot.</p>
-
-<p>Now that you've made this change, go ahead and re-run your application &mdash; all
-you need to do is click the green Run arrow icon, or select 
-<strong>Run &gt; Run History &gt; Hello, Android</strong>  from the menu. You should see.... well, exactly the same thing
-you saw before! After all, the point was to show that the two different
-layout approaches produce identical results.</p>
-
-<p>There's a lot more to creating these XML layouts, but that's as far as we'll go
-here. Read the <a
-href="{@docRoot}devel/implementing-ui.html">Implementing a User Interface</a> documentation for more 
-information on the power of this approach.</p>
-
-<a name="debugging"></a>
-
-<h2>Debugging Your Project</h2>
+<h2 id="debugging">Debugging Your Project</h2>
 
 <p>The Android Plugin for Eclipse also has excellent integration with the Eclipse
 debugger. To demonstrate this, let's introduce a bug into
@@ -415,7 +394,7 @@ public class HelloAndroid extends Activity {
 <p>This change simply introduces a NullPointerException into your code. If
 you run your application again, you'll eventually see this:</p>
 
-  <img src="images/hello_world_8.png"/>
+  <a href="images/hello_world_8.png"><img src="images/hello_world_8.png" style="height:230px" alt="" /></a>
 
 <p>Press "Force Quit" to terminate the application and close the emulator window.</p>
 
@@ -426,36 +405,35 @@ emulator, but this time it will suspend when it reaches the breakpoint you
 set. You can then step through the code in Eclipse's Debug Perspective,
 just as you would for any other application.</p>
 
-  <img src="images/hello_world_9.png"/>
+  <a href="images/hello_world_9.png"><img src="images/hello_world_9.png" style="height:230px" alt="" /></a>
 
-<a name="noeclipse"></a>
 
-<h2>Creating the Project without Eclipse</h2>
-
-<p>If you don't use Eclipse (such as if you prefer another IDE, or simply use text
-editors and command line tools) then the Eclipse plugin can't help you.
-Don't worry though &mdash; you don't lose any functionality just because you don't
-use Eclipse.</p>
-
-<p>The Android Plugin for Eclipse is really just a wrapper around a set of tools
-included with the Android SDK. (These tools, like the emulator, aapt, adb,
-ddms, and others are <a href="tools.html">documented elsewhere.</a>) Thus, it's possible to
-wrap those tools with another tool, such as an 'ant' build file.</p>
-
-<p>The Android SDK includes a Python script named "activitycreator.py" that can be
-used to create all the source code and directory stubs for your project, as well
-as an ant-compatible build.xml file. This allows you to build your project
-from the command line, or integrate it with the IDE of your choice.</p>
-
-<p>For example, to create a HelloAndroid project similar to the one we just created
-via Eclipse, you'd use this command:</p>
-
-<pre>activitycreator.py --out HelloAndroid com.android.hello.HelloAndroid</pre>
-
-<p>To build the project, you'd then run the command 'ant'. When that command
-successfully completes, you'll be left with a file named HelloAndroid.apk under
-the 'bin' directory. That .apk file is an Android Package, and can be
-installed and run in your emulator using the 'adb' tool.</p>
-
-<p>For more information on how to use these tools, please read the documentation
-cited above.</p>
+<h2 id="noeclipse">Creating the Project without Eclipse</h2>
+  
+  <p>If you don't use Eclipse (such as if you prefer another IDE, or simply use text
+  editors and command line tools) then the Eclipse plugin can't help you.
+  Don't worry though &mdash; you don't lose any functionality just because you don't
+  use Eclipse.</p>
+  
+  <p>The Android Plugin for Eclipse is really just a wrapper around a set of tools
+  included with the Android SDK. (These tools, like the emulator, aapt, adb,
+  ddms, and others are <a href="{@docRoot}guide/developing/tools/index.html">documented elsewhere.</a>) Thus, it's possible to
+  wrap those tools with another tool, such as an 'ant' build file.</p>
+  
+  <p>The Android SDK includes a Python script named "activitycreator.py" that can be
+  used to create all the source code and directory stubs for your project, as well
+  as an ant-compatible build.xml file. This allows you to build your project
+  from the command line, or integrate it with the IDE of your choice.</p>
+  
+  <p>For example, to create a HelloAndroid project similar to the one we just created
+  via Eclipse, you'd use this command:</p>
+  
+  <pre>activitycreator.py --out HelloAndroid com.android.hello.HelloAndroid</pre>
+  
+  <p>To build the project, you'd then run the command 'ant'. When that command
+  successfully completes, you'll be left with a file named HelloAndroid.apk under
+  the 'bin' directory. That .apk file is an Android Package, and can be
+  installed and run in your emulator using the 'adb' tool.</p>
+  
+  <p>For more information on how to use these tools, please read the documentation
+  cited above.</p>

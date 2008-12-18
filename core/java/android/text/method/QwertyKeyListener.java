@@ -58,6 +58,10 @@ public class QwertyKeyListener extends BaseKeyListener {
         return sInstance[off];
     }
 
+    public int getInputType() {
+        return makeTextContentType(mAutoCap, mAutoText);
+    }
+    
     public boolean onKeyDown(View view, Editable content,
                              int keyCode, KeyEvent event) {
         int selStart, selEnd;
@@ -219,7 +223,7 @@ public class QwertyKeyListener extends BaseKeyListener {
             if ((pref & TextKeyListener.AUTO_TEXT) != 0 && mAutoText &&
                 (i == ' ' || i == '\t' || i == '\n' ||
                  i == ',' || i == '.' || i == '!' || i == '?' ||
-                 i == '"' || i == ')' || i == ']') &&
+                 i == '"' || Character.getType(i) == Character.END_PUNCTUATION) &&
                  content.getSpanEnd(TextKeyListener.INHIBIT_REPLACEMENT)
                      != oldStart) {
                 int x;
@@ -257,7 +261,16 @@ public class QwertyKeyListener extends BaseKeyListener {
                         content.charAt(selEnd - 2) == ' ') {
                         char c = content.charAt(selEnd - 3);
 
-                        if (Character.isLetter(c)) {
+                        for (int j = selEnd - 3; j > 0; j--) {
+                            if (c == '"' ||
+                                Character.getType(c) == Character.END_PUNCTUATION) {
+                                c = content.charAt(j - 1);
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (Character.isLetter(c) || Character.isDigit(c)) {
                             content.replace(selEnd - 2, selEnd - 1, ".");
                         }
                     }

@@ -32,7 +32,11 @@ import android.widget.RemoteViews.RemoteView;
  * <p><strong>XML attributes</strong></p> <p> See {@link
  * android.R.styleable#ViewGroup ViewGroup Attributes}, {@link
  * android.R.styleable#View View Attributes}</p>
+ * 
+ * @deprecated Use {@link android.widget.FrameLayout}, {@link android.widget.RelativeLayout}
+ *             or a custom layout instead.
  */
+@Deprecated
 @RemoteView
 public class AbsoluteLayout extends ViewGroup {
     public AbsoluteLayout(Context context) {

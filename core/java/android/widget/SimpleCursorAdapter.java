@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * An easy adapter to map columns from a cursor to TextViews or ImageViews
@@ -79,14 +80,36 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      *            are given the values of the first N columns in the from
      *            parameter.
      */
-    public SimpleCursorAdapter(Context context, int layout, Cursor c,
-                               String[] from, int[] to) {
+    public SimpleCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
         super(context, layout, c);
         mTo = to;
         mOriginalFrom = from;
         findColumns(from);
     }
-    
+
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return generateViewHolder(super.newView(context, cursor, parent));
+    }
+
+    @Override
+    public View newDropDownView(Context context, Cursor cursor, ViewGroup parent) {
+        return generateViewHolder(super.newDropDownView(context, cursor, parent));
+    }
+
+    private View generateViewHolder(View v) {
+        final int[] to = mTo;
+        final int count = to.length;
+        final View[] holder = new View[count];
+
+        for (int i = 0; i < count; i++) {
+            holder[i] = v.findViewById(to[i]);
+        }
+        v.setTag(holder);
+
+        return v;
+    }
+
     /**
      * Binds all of the field names passed into the "to" parameter of the
      * constructor with their corresponding cursor columns as specified in the
@@ -113,17 +136,22 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        for (int i = 0; i < mTo.length; i++) {
-            final View v = view.findViewById(mTo[i]);
+        final View[] holder = (View[]) view.getTag();
+        final ViewBinder binder = mViewBinder;
+        final int count = mTo.length;
+        final int[] from = mFrom;
+
+        for (int i = 0; i < count; i++) {
+            final View v = holder[i];
             if (v != null) {
-                String text = cursor.getString(mFrom[i]);
+                String text = cursor.getString(from[i]);
                 if (text == null) {
                     text = "";
                 }
 
                 boolean bound = false;
-                if (mViewBinder != null) {
-                    bound = mViewBinder.setViewValue(v, cursor, mFrom[i]);
+                if (binder != null) {
+                    bound = binder.setViewValue(v, cursor, from[i]);
                 }
 
                 if (!bound) {

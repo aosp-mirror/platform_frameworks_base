@@ -20,6 +20,12 @@
  */
 package java.awt.event;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public abstract class MouseMotionAdapter implements MouseMotionListener {
 
     public MouseMotionAdapter() {

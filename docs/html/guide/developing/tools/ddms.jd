@@ -19,7 +19,7 @@ the device. On Android, every application runs in its own process,
 each of which hosts its own virtual machine (VM). And each process
 listens for a debugger on a different port.</p>
 
-<p>When it starts, DDMS connects to <a href="{@docRoot}reference/adb.html">adb</a> and 
+<p>When it starts, DDMS connects to <a href="{@docRoot}guide/developing/tools/adb.html">adb</a> and 
 starts a device monitoring service between the two, which will notify DDMS when a device is
 connected or disconnected. When a device is connected, a VM monitoring service is created
 between adb and DDMS, which will notify DDMS when a VM on the device is started 
@@ -32,7 +32,7 @@ DDMS can now talk to the VM using a custom wire protocol.</p>
 <p>DDMS also opens another local port, the DDMS "base port" (8700, by default), upon which it also listens for a debugger. When a debugger connects to this base port, all traffic is forwarded to the VM currently selected in DDMS, so this is typically where you debugger should connect.</p>
 
 <p>For more information on port-forwarding with DDMS,
-read <a href="{@docRoot}intro/installing.html#eclipse">Configuring your IDE to attach
+read <a href="{@docRoot}guide/developing/debug-tasks.html#ide-debug-port">Configuring your IDE to attach
 to port 8700 for debugging</a>.</p>
 
 <p class="note"><strong>Tip:</strong>
@@ -58,7 +58,7 @@ cursor may jump to the last line in the method for one step.</p>
     currently selected VM. (Notice, as you select a VM in the list, the listed port includes 8700.)
     This way, there's no need to reconfigure the debugger's port each time you switch between VMs.</p>
 <p>When an application running on the device calls {@link android.os.Debug#waitForDebugger()}
-    (or you select this option in the <a href="{@docRoot}intro/installing.html#additionaldebugging">developer
+    (or you select this option in the <a href="{@docRoot}guide/developing/debug-tasks.html#additionaldebugging">developer
     options</a>), a red icon will be shown next to the client name, while it waits for the 
     debugger to attach to the VM. When a debugger is connected, the icon will turn green. </p>
 <p>If you see a crossed-out bug icon, this means that the DDMS was unable to complete a 
@@ -181,8 +181,8 @@ From here, you can:</p>
 	Future releases may support timed placement and routes within a single coordinate element.</p>
     </li>
   </ul>
-  <p>For <em>additional</em> methods of spoofing location-based data, see the 
-  <a href="{@docRoot}toolbox/apis/lbs.html">Location-based Service APIs</a> document.</p>
+  <p>For <em>additional</em> methods of setting up mocks of location-based data, see the 
+  <a href="{@docRoot}guide/topics/location/index.html">Location</a> topic.</p>
   </li>
 </ul>
 
@@ -192,7 +192,7 @@ From here, you can:</p>
 
 <h2 id="file-explorer">File Explorer</h2>
 <p>With the File Explorer, you can view the device file system and perform basic management, 
-like pushing and pulling files. This circumvents using the <a href="{@docRoot}reference/adb.html">adb</a>
+like pushing and pulling files. This circumvents using the <a href="{@docRoot}guide/developing/tools/adb.html">adb</a>
 <code>push</code> and <code>pull</code> commands, with a GUI experience.</p>
 <p>With DDMS open, select <strong>Device</strong> > <strong>File Explorer...</strong> to open the
 File Explorer window. You can drag-and-drop into the device directories, but cannot drag <em>out</em> of them.
@@ -210,7 +210,7 @@ sdcard directory. However, your files may not appear automatically. For example,
 MP3 file to the sdcard, the media player won't see them until you restart the emulator. (When restarting
 the emulator from command line, be sure to mount the sdcard again.)</p>
 <p>For more information on creating an SD card image, see the 
-<a href="{@docRoot}/reference/othertools.html#mksdcard">Other Tools</a> document.</p>
+<a href="{@docRoot}guide/developing/tools/othertools.html#mksdcard">Other Tools</a> document.</p>
 
 <h2 id="screen-capture">Screen Capture</h2>
 <p>You can capture screen images on the device or emulator by selecting <strong>Device</strong>
@@ -234,7 +234,7 @@ the emulator from command line, be sure to mount the sdcard again.)</p>
 <h2 id="examine-radio-state">Examine Radio State</h2>
 <p>By default, radio state is not output during a standard logcat (it is a lot of
     information). To see radio information, either click <strong>Device</strong> &gt; <strong>Dump radio
-    state...</strong> or run logcat as described in <a href="{@docRoot}intro/installing.html#logradio">Logging
+    state...</strong> or run logcat as described in <a href="{@docRoot}guide/developing/debug-tasks.html#logradio">Logging
     Radio Information</a>. </p>
 
 <h2 id="stop-a-vitrual-machine">Stop a Virtual Machine </h2>

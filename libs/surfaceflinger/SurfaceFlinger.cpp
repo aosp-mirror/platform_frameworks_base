@@ -38,7 +38,6 @@
 #include <utils/String16.h>
 #include <utils/StopWatch.h>
 
-#include <ui/BlitHardware.h>
 #include <ui/PixelFormat.h>
 #include <ui/DisplayInfo.h>
 #include <ui/EGLDisplaySurface.h>
@@ -202,23 +201,6 @@ void SurfaceFlinger::init()
 {
     LOGI("SurfaceFlinger is starting");
 
-    // create the shared control-block
-    mServerHeap = new MemoryDealer(4096, MemoryDealer::READ_ONLY);
-    LOGE_IF(mServerHeap==0, "can't create shared memory dealer");
-
-    mServerCblkMemory = mServerHeap->allocate(4096);
-    LOGE_IF(mServerCblkMemory==0, "can't create shared control block");
-
-    mServerCblk = static_cast<surface_flinger_cblk_t *>(mServerCblkMemory->pointer());
-    LOGE_IF(mServerCblk==0, "can't get to shared control block's address");
-    new(mServerCblk) surface_flinger_cblk_t;
-
-    // create the surface Heap manager, which manages the heaps
-    // (be it in RAM or VRAM) where surfaces are allocated
-    // We give 8 MB per client.
-    mSurfaceHeapManager = new SurfaceHeapManager(8 << 20);
-    mGPU = new GPUHardware();
-
     // debugging stuff...
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.showupdates", value, "0");
@@ -244,9 +226,14 @@ SurfaceFlinger::~SurfaceFlinger()
     glDeleteTextures(1, &mWormholeTexName);
 }
 
-copybit_t* SurfaceFlinger::getBlitEngine() const
+copybit_device_t* SurfaceFlinger::getBlitEngine() const
 {
     return graphicPlane(0).displayHardware().getBlitEngine();
+}
+
+overlay_device_t* SurfaceFlinger::getOverlayEngine() const
+{
+    return graphicPlane(0).displayHardware().getOverlayEngine();
 }
 
 sp<IMemory> SurfaceFlinger::getCblk() const
@@ -257,7 +244,9 @@ sp<IMemory> SurfaceFlinger::getCblk() const
 status_t SurfaceFlinger::requestGPU(const sp<IGPUCallback>& callback,
         gpu_info_t* gpu)
 {
-    status_t err = mGPU->request(callback, gpu);
+    IPCThreadState* ipc = IPCThreadState::self();
+    const int pid = ipc->getCallingPid();
+    status_t err = mGPU->request(pid, callback, gpu);
     return err;
 }
 
@@ -360,7 +349,26 @@ status_t SurfaceFlinger::readyToRun()
     LOGI(   "SurfaceFlinger's main thread ready to run. "
             "Initializing graphics H/W...");
 
-    //
+    // create the shared control-block
+    mServerHeap = new MemoryDealer(4096, MemoryDealer::READ_ONLY);
+    LOGE_IF(mServerHeap==0, "can't create shared memory dealer");
+
+    mServerCblkMemory = mServerHeap->allocate(4096);
+    LOGE_IF(mServerCblkMemory==0, "can't create shared control block");
+
+    mServerCblk = static_cast<surface_flinger_cblk_t *>(mServerCblkMemory->pointer());
+    LOGE_IF(mServerCblk==0, "can't get to shared control block's address");
+    new(mServerCblk) surface_flinger_cblk_t;
+
+    // get a reference to the GPU if we have one
+    mGPU = GPUFactory::getGPU();
+
+    // create the surface Heap manager, which manages the heaps
+    // (be it in RAM or VRAM) where surfaces are allocated
+    // We give 8 MB per client.
+    mSurfaceHeapManager = new SurfaceHeapManager(this, 8 << 20);
+
+    
     GLES_localSurfaceManager = static_cast<ISurfaceComposer*>(this);
 
     // we only support one display currently
@@ -395,7 +403,7 @@ status_t SurfaceFlinger::readyToRun()
     dcblk->xdpi         = hw.getDpiX();
     dcblk->ydpi         = hw.getDpiY();
     dcblk->fps          = hw.getRefreshRate();
-    dcblk->density      = 1.0f; // XXX: do someting more real here...
+    dcblk->density      = hw.getDensity();
     asm volatile ("":::"memory");
 
     // Initialize OpenGL|ES
@@ -407,6 +415,7 @@ status_t SurfaceFlinger::readyToRun()
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glPixelStorei(GL_PACK_ALIGNMENT, 4); 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_SCISSOR_TEST);
     glShadeModel(GL_FLAT);
@@ -1679,7 +1688,7 @@ status_t SurfaceFlinger::onTransact(
 Client::Client(ClientID clientID, const sp<SurfaceFlinger>& flinger)
     : ctrlblk(0), cid(clientID), mPid(0), mBitmap(0), mFlinger(flinger)
 {
-    mSharedHeapAllocator = getSurfaceHeapManager()->createHeap(NATIVE_MEMORY_TYPE_HEAP);
+    mSharedHeapAllocator = getSurfaceHeapManager()->createHeap();
     const int pgsize = getpagesize();
     const int cblksize=((sizeof(per_client_cblk_t)+(pgsize-1))&~(pgsize-1));
     mCblkHeap = new MemoryDealer(cblksize);
@@ -1701,10 +1710,6 @@ Client::~Client() {
 
 const sp<SurfaceHeapManager>& Client::getSurfaceHeapManager() const {
     return mFlinger->getSurfaceHeapManager();
-}
-
-const sp<GPUHardwareInterface>& Client::getGPU() const {
-    return mFlinger->getGPU();
 }
 
 int32_t Client::generateId(int pid)
@@ -1734,25 +1739,11 @@ void Client::free(int32_t id)
     }
 }
 
-sp<MemoryDealer> Client::createAllocator(int memory_type)
+sp<MemoryDealer> Client::createAllocator(uint32_t flags)
 {
     sp<MemoryDealer> allocator;
-    if (memory_type == NATIVE_MEMORY_TYPE_GPU) {
-        allocator = getGPU()->request(getClientPid());
-        if (allocator == 0)
-            memory_type = NATIVE_MEMORY_TYPE_PMEM;
-    }
-    if (memory_type == NATIVE_MEMORY_TYPE_PMEM) {
-        allocator = mPMemAllocator;
-        if (allocator == 0) {
-            allocator = getSurfaceHeapManager()->createHeap(
-                    NATIVE_MEMORY_TYPE_PMEM);
-            mPMemAllocator = allocator;
-        }
-    }
-    if (allocator == 0)
-        allocator = mSharedHeapAllocator;
-
+    allocator = getSurfaceHeapManager()->createHeap(
+            flags, getClientPid(), mSharedHeapAllocator);
     return allocator;
 }
 

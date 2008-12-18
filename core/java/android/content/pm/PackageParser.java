@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -103,6 +104,15 @@ public class PackageParser {
         pi.applicationInfo = p.applicationInfo;
         if ((flags&PackageManager.GET_GIDS) != 0) {
             pi.gids = gids;
+        }
+        if ((flags&PackageManager.GET_CONFIGURATIONS) != 0) {
+            int N = p.configPreferences.size();
+            if (N > 0) {
+                pi.configPreferences = new ConfigurationInfo[N];
+                for (int i=0; i<N; i++) {
+                    pi.configPreferences[i] = p.configPreferences.get(i);
+                }
+            }
         }
         if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
             int N = p.activities.size();
@@ -245,18 +255,24 @@ public class PackageParser {
 
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
+        boolean assetError = true;
         try {
             assmgr = new AssetManager();
-            assmgr.addAssetPath(mArchiveSourcePath);
-            parser = assmgr.openXmlResourceParser("AndroidManifest.xml");
+            if(assmgr.addAssetPath(mArchiveSourcePath) != 0) {
+                parser = assmgr.openXmlResourceParser("AndroidManifest.xml");
+                assetError = false;
+            } else {
+                Log.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);
+            }
         } catch (Exception e) {
-            if (assmgr != null) assmgr.close();
             Log.w(TAG, "Unable to read AndroidManifest.xml of "
                     + mArchiveSourcePath, e);
+        }
+        if(assetError) {
+            if (assmgr != null) assmgr.close();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
             return null;
         }
-
         String[] errorText = new String[1];
         Package pkg = null;
         Exception errorException = null;
@@ -626,7 +642,35 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("uses-sdk")) {
+            } else if (tagName.equals("uses-configuration")) {
+                ConfigurationInfo cPref = new ConfigurationInfo();
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration);
+                cPref.reqTouchScreen = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration_reqTouchScreen,
+                        Configuration.TOUCHSCREEN_UNDEFINED);
+                cPref.reqKeyboardType = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration_reqKeyboardType,
+                        Configuration.KEYBOARD_UNDEFINED);
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration_reqHardKeyboard,
+                        false)) {
+                    cPref.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
+                }
+                cPref.reqNavigation = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration_reqNavigation,
+                        Configuration.NAVIGATION_UNDEFINED);
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesConfiguration_reqFiveWayNav,
+                        false)) {
+                    cPref.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
+                }
+                sa.recycle();
+                pkg.configPreferences.add(cPref);
+
+                XmlUtils.skipCurrentTag(parser);
+
+            }  else if (tagName.equals("uses-sdk")) {
                 if (mSdkVersion > 0) {
                     sa = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AndroidManifestUsesSdk);
@@ -650,6 +694,10 @@ public class PackageParser {
                 if (parseInstrumentation(pkg, res, parser, attrs, outError) == null) {
                     return null;
                 }
+            } else if (tagName.equals("eat-comment")) {
+                // Just skip this tag
+                XmlUtils.skipCurrentTag(parser);
+                continue;
             } else if (RIGID_PARSER) {
                 outError[0] = "Bad element under <manifest>: "
                     + parser.getName();
@@ -1038,11 +1086,6 @@ public class PackageParser {
         if (outError[0] != null) {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return false;
-        } else if (ai.processName != null && !ai.processName.equals(ai.packageName)
-                && ai.className != null) {
-            Log.w(TAG, "In package " + ai.packageName
-                    + " <application> specifies both a name and a process; ignoring the process");
-            ai.processName = null;
         }
 
         final int innerDepth = parser.getDepth();
@@ -1258,6 +1301,12 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_noHistory,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestActivity_alwaysRetainTaskState,
                 false)) {
             a.info.flags |= ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE;
@@ -1290,6 +1339,9 @@ public class PackageParser {
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             a.info.configChanges = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_configChanges,
+                    0);
+            a.info.softInputMode = sa.getInt(
+                    com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
                     0);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
@@ -2002,6 +2054,12 @@ public class PackageParser {
 
         // Additional data supplied by callers.
         public Object mExtras;
+        
+        /*
+         *  Applications hardware preferences
+         */
+        public final ArrayList<ConfigurationInfo> configPreferences =
+                new ArrayList<ConfigurationInfo>();
 
         public Package(String _name) {
             packageName = _name;
@@ -2031,7 +2089,7 @@ public class PackageParser {
             metaData = clone.metaData;
         }
     }
-
+    
     public final static class Permission extends Component<IntentInfo> {
         public final PermissionInfo info;
         public boolean tree;

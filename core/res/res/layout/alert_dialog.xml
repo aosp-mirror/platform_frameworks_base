@@ -50,8 +50,10 @@
                 android:paddingTop="6dip"
                 android:paddingRight="10dip"
                 android:src="@drawable/ic_dialog_info" />
-            <TextView android:id="@+id/alertTitle" 
-                style="?android:attr/textAppearanceMedium"
+            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle" 
+                style="?android:attr/textAppearanceLarge"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:layout_width="fill_parent" 
                 android:layout_height="wrap_content" />
         </LinearLayout>

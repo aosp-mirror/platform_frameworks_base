@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import javax.imageio.stream.ImageOutputStream;
@@ -25,13 +26,17 @@ import java.io.IOException;
 import java.io.File;
 
 /**
- * The ImageOutputStreamSpi abstract class is a service provider 
- * interface (SPI) for ImageOutputStreams. 
+ * The ImageOutputStreamSpi abstract class is a service provider interface (SPI)
+ * for ImageOutputStreams.
+ * 
+ * @since Android 1.0
  */
 public abstract class ImageOutputStreamSpi extends IIOServiceProvider implements
         RegisterableService {
-    
-    /** The output class. */
+
+    /**
+     * The output class.
+     */
     protected Class<?> outputClass;
 
     /**
@@ -44,9 +49,12 @@ public abstract class ImageOutputStreamSpi extends IIOServiceProvider implements
     /**
      * Instantiates a new ImageOutputStreamSpi.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
-     * @param outputClass the output class.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
+     * @param outputClass
+     *            the output class.
      */
     public ImageOutputStreamSpi(String vendorName, String version, Class<?> outputClass) {
         super(vendorName, version);
@@ -54,8 +62,8 @@ public abstract class ImageOutputStreamSpi extends IIOServiceProvider implements
     }
 
     /**
-     * Gets an output Class object that represents the class or 
-     * interface that must be implemented by an output source.
+     * Gets an output Class object that represents the class or interface that
+     * must be implemented by an output source.
      * 
      * @return the output class.
      */
@@ -64,63 +72,61 @@ public abstract class ImageOutputStreamSpi extends IIOServiceProvider implements
     }
 
     /**
-     * Returns true if the ImageOutputStream can use a cache 
-     * file. If this method returns false, the value of the 
-     * useCache parameter of createOutputStreamInstance will 
-     * be ignored. The default implementation returns false.
+     * Returns true if the ImageOutputStream can use a cache file. If this
+     * method returns false, the value of the useCache parameter of
+     * createOutputStreamInstance will be ignored. The default implementation
+     * returns false.
      * 
-     * @return true if the ImageOutputStream can use a cache 
-     * file, false otherwise.
+     * @return true, if the ImageOutputStream can use a cache file, false
+     *         otherwise.
      */
     public boolean canUseCacheFile() {
         return false; // def
     }
 
     /**
-     * Returns true if the ImageOutputStream  implementation 
-     * requires the use of a cache file. The default implementation 
-     * returns false.
+     * Returns true if the ImageOutputStream implementation requires the use of
+     * a cache file. The default implementation returns false.
      * 
-     * @return true if the ImageOutputStream  implementation 
-     * requires the use of a cache file, false otherwise.
+     * @return true, if the ImageOutputStream implementation requires the use of
+     *         a cache file, false otherwise.
      */
     public boolean needsCacheFile() {
         return false; // def
     }
 
     /**
-     * Creates the ImageOutputStream associated with this 
-     * service provider. The output object should
-     * be an instance of the class returned by getOutputClass 
-     * method. This method uses the default system directory
-     * for the cache file, if it is needed. 
+     * Creates the ImageOutputStream associated with this service provider. The
+     * output object should be an instance of the class returned by
+     * getOutputClass method. This method uses the default system directory for
+     * the cache file, if it is needed.
      * 
-     * @param output the output Object.
-     * 
+     * @param output
+     *            the output Object.
      * @return the ImageOutputStream.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public ImageOutputStream createOutputStreamInstance(Object output) throws IOException {
         return createOutputStreamInstance(output, true, null);
     }
 
     /**
-     * Creates the ImageOutputStream associated with this 
-     * service provider. The output object should
-     * be an instance of the class returned by getInputClass 
-     * method. This method uses the specified directory
-     * for the cache file, if the useCache parameter is true. 
+     * Creates the ImageOutputStream associated with this service provider. The
+     * output object should be an instance of the class returned by
+     * getInputClass method. This method uses the specified directory for the
+     * cache file, if the useCache parameter is true.
      * 
-     * @param output the output Object.
-     * @param useCache the flag indicating if cache file 
-     * is needed or not.
-     * @param cacheDir the cache directory.
-     * 
+     * @param output
+     *            the output Object.
+     * @param useCache
+     *            the flag indicating if cache file is needed or not.
+     * @param cacheDir
+     *            the cache directory.
      * @return the ImageOutputStream.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public abstract ImageOutputStream createOutputStreamInstance(Object output,
-            boolean useCache, File cacheDir) throws IOException;
+    public abstract ImageOutputStream createOutputStreamInstance(Object output, boolean useCache,
+            File cacheDir) throws IOException;
 }

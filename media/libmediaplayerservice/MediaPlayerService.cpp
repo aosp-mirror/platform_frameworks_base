@@ -34,11 +34,17 @@
 #include <utils/IServiceManager.h>
 #include <utils/MemoryHeapBase.h>
 #include <utils/MemoryBase.h>
+#include <cutils/properties.h>
 
 #include <media/MediaPlayerInterface.h>
+#include <media/mediarecorder.h>
+#include <media/MediaMetadataRetrieverInterface.h>
 #include <media/AudioTrack.h>
 
+#include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"
+#include "MetadataRetrieverClient.h"
+
 #include "MidiFile.h"
 #include "VorbisPlayer.h"
 #include <media/PVPlayer.h>
@@ -72,7 +78,7 @@ pid_t gettid() { return syscall(__NR_gettid);}
     restart continuously.
 */
 #define USE_SIGBUS_HANDLER 0
- 
+
 // TODO: Temp hack until we can register players
 static const char* MIDI_FILE_EXTS[] =
 {
@@ -87,8 +93,10 @@ static const char* MIDI_FILE_EXTS[] =
 
 namespace android {
 
-// TODO: should come from audio driver
-/* static */ const uint32_t MediaPlayerService::AudioOutput::kDriverLatencyInMsecs = 150;
+// TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
+/* static */ const uint32_t MediaPlayerService::AudioOutput::kAudioVideoDelayMs = 96;
+/* static */ int MediaPlayerService::AudioOutput::mMinBufferCount = 4;
+/* static */ bool MediaPlayerService::AudioOutput::mIsOnEmulator = false;
 
 static struct sigaction oldact;
 static pthread_key_t sigbuskey;
@@ -172,7 +180,7 @@ MediaPlayerService::MediaPlayerService()
 
     pthread_key_create(&sigbuskey, NULL);
 
-  
+
 #if USE_SIGBUS_HANDLER
     struct sigaction act;
     memset(&act,0, sizeof act);
@@ -189,6 +197,20 @@ MediaPlayerService::~MediaPlayerService()
 #endif
     pthread_key_delete(sigbuskey);
     LOGV("MediaPlayerService destroyed");
+}
+
+sp<IMediaRecorder> MediaPlayerService::createMediaRecorder(pid_t pid)
+{
+    sp<MediaRecorderClient> recorder = new MediaRecorderClient(pid);
+    LOGV("Create new media recorder client from pid %d", pid);
+    return recorder;
+}
+
+sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pid)
+{
+    sp<MetadataRetrieverClient> retriever = new MetadataRetrieverClient(pid);
+    LOGV("Create new media retriever from pid %d", pid);
+    return retriever;
 }
 
 sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url)
@@ -237,8 +259,8 @@ status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& ar
                 mHeap->getBase(), mHeap->getSize(), mHeap->getFlags(), mHeap->getDevice());
         result.append(buffer);
     }
-    snprintf(buffer, 255, "  msec per frame(%f), channel count(%ld), frame count(%ld)\n",
-            mMsecsPerFrame, mChannelCount, mFrameCount);
+    snprintf(buffer, 255, "  msec per frame(%f), channel count(%d), format(%d), frame count(%ld)\n",
+            mMsecsPerFrame, mChannelCount, mFormat, mFrameCount);
     result.append(buffer);
     snprintf(buffer, 255, "  sample rate(%d), size(%d), error(%d), command complete(%s)\n",
             mSampleRate, mSize, mError, mCommandComplete?"true":"false");
@@ -257,8 +279,8 @@ status_t MediaPlayerService::AudioOutput::dump(int fd, const Vector<String16>& a
     snprintf(buffer, 255, "  stream type(%d), left - right volume(%f, %f)\n",
             mStreamType, mLeftVolume, mRightVolume);
     result.append(buffer);
-    snprintf(buffer, 255, "  msec per frame(%f), latency (%d), driver latency(%d)\n",
-            mMsecsPerFrame, mLatency, kDriverLatencyInMsecs);
+    snprintf(buffer, 255, "  msec per frame(%f), latency (%d)\n",
+            mMsecsPerFrame, mLatency);
     result.append(buffer);
     ::write(fd, result.string(), result.size());
     if (mTrack != 0) {
@@ -315,7 +337,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
         if (f) {
             while (!feof(f)) {
                 fgets(buffer, SIZE, f);
-                if (strstr(buffer, " /sdcard/") || 
+                if (strstr(buffer, " /sdcard/") ||
                     strstr(buffer, " /system/sounds/") ||
                     strstr(buffer, " /system/media/")) {
                     result.append("  ");
@@ -334,7 +356,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
         if (d) {
             struct dirent *ent;
             while((ent = readdir(d)) != NULL) {
-                if (strcmp(ent->d_name,".") && strcmp(ent->d_name,"..")) { 
+                if (strcmp(ent->d_name,".") && strcmp(ent->d_name,"..")) {
                     snprintf(buffer, SIZE, "/proc/%d/fd/%s", myTid(), ent->d_name);
                     struct stat s;
                     if (lstat(buffer, &s) == 0) {
@@ -350,7 +372,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
                                 } else {
                                     linkto[len] = 0;
                                 }
-                                if (strstr(linkto, "/sdcard/") == linkto || 
+                                if (strstr(linkto, "/sdcard/") == linkto ||
                                     strstr(linkto, "/system/sounds/") == linkto ||
                                     strstr(linkto, "/system/media/") == linkto) {
                                     result.append("  ");
@@ -683,20 +705,6 @@ status_t MediaPlayerService::Client::isPlaying(bool* state)
     return NO_ERROR;
 }
 
-status_t MediaPlayerService::Client::getVideoSize(int *w, int *h)
-{
-    sp<MediaPlayerBase> p = getPlayer();
-    if (p == 0) return UNKNOWN_ERROR;
-    status_t ret = p->getVideoWidth(w);
-    if (ret == NO_ERROR) ret = p->getVideoHeight(h);
-    if (ret == NO_ERROR) {
-        LOGV("[%d] getVideoWidth = (%d, %d)", mConnId, *w, *h);
-    } else {
-        LOGE("getVideoSize returned %d", ret);
-    }
-    return ret;
-}
-
 status_t MediaPlayerService::Client::getCurrentPosition(int *msec)
 {
     LOGV("getCurrentPosition");
@@ -812,7 +820,7 @@ int Antagonizer::callbackThread(void* user)
 
 static size_t kDefaultHeapSize = 1024 * 1024; // 1MB
 
-sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels)
+sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
 {
     LOGV("decode(%s)", url);
     sp<MemoryBase> mem;
@@ -856,14 +864,15 @@ sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, i
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
     *pNumChannels = cache->channelCount();
-    LOGV("return memory @ %p, sampleRate=%u, channelCount = %d", mem->pointer(), *pSampleRate, *pNumChannels);
+    *pFormat = cache->format();
+    LOGV("return memory @ %p, sampleRate=%u, channelCount = %d, format = %d", mem->pointer(), *pSampleRate, *pNumChannels, *pFormat);
 
 Exit:
     if (player != 0) player->reset();
     return mem;
 }
 
-sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels)
+sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
 {
     LOGV("decode(%d, %lld, %lld)", fd, offset, length);
     sp<MemoryBase> mem;
@@ -898,7 +907,8 @@ sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, u
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
     *pNumChannels = cache->channelCount();
-    LOGV("return memory @ %p, sampleRate=%u, channelCount = %d", mem->pointer(), *pSampleRate, *pNumChannels);
+    *pFormat = cache->format();
+    LOGV("return memory @ %p, sampleRate=%u, channelCount = %d, format = %d", mem->pointer(), *pSampleRate, *pNumChannels, *pFormat);
 
 Exit:
     if (player != 0) player->reset();
@@ -916,6 +926,7 @@ MediaPlayerService::AudioOutput::AudioOutput()
     mRightVolume = 1.0;
     mLatency = 0;
     mMsecsPerFrame = 0;
+    setMinBufferCount();
 }
 
 MediaPlayerService::AudioOutput::~AudioOutput()
@@ -923,10 +934,31 @@ MediaPlayerService::AudioOutput::~AudioOutput()
     close();
 }
 
+void MediaPlayerService::AudioOutput::setMinBufferCount()
+{
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("ro.kernel.qemu", value, 0)) {
+        mIsOnEmulator = true;
+        mMinBufferCount = 12;  // to prevent systematic buffer underrun for emulator
+    }
+}
+
+bool MediaPlayerService::AudioOutput::isOnEmulator()
+{
+    setMinBufferCount();
+    return mIsOnEmulator;
+}
+
+int MediaPlayerService::AudioOutput::getMinBufferCount()
+{
+    setMinBufferCount();
+    return mMinBufferCount;
+}
+
 ssize_t MediaPlayerService::AudioOutput::bufferSize() const
 {
     if (mTrack == 0) return NO_INIT;
-    return mTrack->frameCount() * mTrack->channelCount() * sizeof(int16_t);
+    return mTrack->frameCount() * frameSize();
 }
 
 ssize_t MediaPlayerService::AudioOutput::frameCount() const
@@ -944,7 +976,7 @@ ssize_t MediaPlayerService::AudioOutput::channelCount() const
 ssize_t MediaPlayerService::AudioOutput::frameSize() const
 {
     if (mTrack == 0) return NO_INIT;
-    return mTrack->channelCount() * sizeof(int16_t);
+    return mTrack->frameSize();
 }
 
 uint32_t MediaPlayerService::AudioOutput::latency () const
@@ -957,12 +989,29 @@ float MediaPlayerService::AudioOutput::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelCount, int bufferCount)
+status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
 {
-    LOGV("open(%u, %d, %d)", sampleRate, channelCount, bufferCount);
-    if (mTrack) close();
+    // Check argument "bufferCount" against the mininum buffer count
+    if (bufferCount < mMinBufferCount) {
+        LOGD("bufferCount (%d) is too small and increased to %d", bufferCount, mMinBufferCount);
+        bufferCount = mMinBufferCount;
 
-    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, AudioSystem::PCM_16_BIT, channelCount, bufferCount);
+    }
+    LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
+    if (mTrack) close();
+    int afSampleRate;
+    int afFrameCount;
+    int frameCount;
+
+    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+        return NO_INIT;
+    }
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+        return NO_INIT;
+    }
+
+    frameCount = (sampleRate*afFrameCount)/afSampleRate;
+    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount*bufferCount);
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
         LOGE("Unable to create audio track");
         delete t;
@@ -972,7 +1021,7 @@ status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelC
     LOGV("setVolume");
     t->setVolume(mLeftVolume, mRightVolume);
     mMsecsPerFrame = 1.e3 / (float) sampleRate;
-    mLatency = (mMsecsPerFrame * bufferCount * t->frameCount()) + kDriverLatencyInMsecs;
+    mLatency = t->latency() + kAudioVideoDelayMs;
     mTrack = t;
     return NO_ERROR;
 }
@@ -1031,7 +1080,7 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
 #undef LOG_TAG
 #define LOG_TAG "AudioCache"
 MediaPlayerService::AudioCache::AudioCache(const char* name) :
-    mChannelCount(0), mFrameCount(0), mSampleRate(0), mSize(0),
+    mChannelCount(0), mFrameCount(1024), mSampleRate(0), mSize(0),
     mError(NO_ERROR), mCommandComplete(false)
 {
     // create ashmem heap
@@ -1048,12 +1097,13 @@ float MediaPlayerService::AudioCache::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioCache::open(uint32_t sampleRate, int channelCount, int bufferCount)
+status_t MediaPlayerService::AudioCache::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
 {
-    LOGV("open(%u, %d, %d)", sampleRate, channelCount, bufferCount);
-   if (mHeap->getHeapID() < 0) return NO_INIT;
-   mSampleRate = sampleRate;
-   mChannelCount = channelCount;
+    LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
+    if (mHeap->getHeapID() < 0) return NO_INIT;
+    mSampleRate = sampleRate;
+    mChannelCount = (uint16_t)channelCount;
+    mFormat = (uint16_t)format;
     mMsecsPerFrame = 1.e3 / (float) sampleRate;
     return NO_ERROR;
 }
@@ -1067,6 +1117,10 @@ ssize_t MediaPlayerService::AudioCache::write(const void* buffer, size_t size)
     if (p == NULL) return NO_INIT;
     p += mSize;
     LOGV("memcpy(%p, %p, %u)", p, buffer, size);
+    if (mSize + size > mHeap->getSize()) {
+        LOGE("Heap size overflow! req size: %d, max size: %d", (mSize + size), mHeap->getSize());
+        size = mHeap->getSize() - mSize;
+    }
     memcpy(p, buffer, size);
     mSize += size;
     return size;

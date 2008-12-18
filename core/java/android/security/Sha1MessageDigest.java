@@ -17,8 +17,7 @@
 package android.security;
 
 /**
- * This is a temporary class to provide SHA-1 hash.
- * It's not meant to be correct, and eventually doesn't belong in java.security
+ * Provides the SHA-1 hash encyption.
  */
 public class Sha1MessageDigest extends MessageDigest
 {

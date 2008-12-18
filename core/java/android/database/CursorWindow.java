@@ -409,8 +409,13 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * change across a call to clear().
      */
     public void clear() {
-        mStartPos = 0;
-        native_clear();
+        acquireReference();
+        try {
+            mStartPos = 0;        
+            native_clear();
+        } finally {
+            releaseReference();
+        }
     }
 
     /** Clears out the native side of things */

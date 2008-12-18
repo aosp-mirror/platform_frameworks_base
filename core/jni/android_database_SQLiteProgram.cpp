@@ -172,7 +172,7 @@ static void native_bind_blob(JNIEnv* env, jobject object,
 
     if (err != SQLITE_OK) {
         char buf[32];
-        sprintf(buf, "handle %p", statement);
+        sprintf(buf, "statement %p", statement);
         throw_sqlite3_exception(env, GET_HANDLE(env, object), buf);
         return;
     }

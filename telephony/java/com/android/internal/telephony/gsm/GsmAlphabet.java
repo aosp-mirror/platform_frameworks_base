@@ -495,7 +495,7 @@ public class GsmAlphabet
     countGsmSeptets(char c)
     {
         try {
-            return countGsmSeptets(c, true);
+            return countGsmSeptets(c, false);
         } catch (EncodeException ex) {
             // This should never happen.
             return 0;
@@ -535,7 +535,7 @@ public class GsmAlphabet
     countGsmSeptets(String s)
     {
         try {
-            return countGsmSeptets(s, true);
+            return countGsmSeptets(s, false);
         } catch (EncodeException ex) {
             // this should never happen
             return 0;

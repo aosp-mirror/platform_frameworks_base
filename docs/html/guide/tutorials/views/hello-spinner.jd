@@ -1,4 +1,6 @@
 page.title=Hello, Spinner
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.Spinner} is a widget that allows the user to select an item from a group.
@@ -102,4 +104,3 @@ public void onCreate(Bundle savedInstanceState) {
 	<li>{@link android.widget.Spinner}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>

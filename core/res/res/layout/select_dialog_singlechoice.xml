@@ -24,5 +24,5 @@
     android:paddingLeft="12dip"
     android:paddingRight="7dip"
     android:checkMark="@android:drawable/btn_radio"
+    android:ellipsize="marquee"
 />
-

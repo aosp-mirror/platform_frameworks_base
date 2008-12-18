@@ -71,7 +71,9 @@ extern int register_android_hardware_Camera(JNIEnv *env);
 
 extern int register_android_hardware_SensorManager(JNIEnv *env);
 
+extern int register_android_media_AudioRecord(JNIEnv *env);
 extern int register_android_media_AudioSystem(JNIEnv *env);
+extern int register_android_media_AudioTrack(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
 
 extern int register_android_message_digest_sha1(JNIEnv *env);
@@ -114,7 +116,7 @@ extern int register_android_database_SQLiteStatement(JNIEnv* env);
 extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_pim_EventRecurrence(JNIEnv* env);
-extern int register_android_pim_Time(JNIEnv* env);
+extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_ParcelFileDescriptor(JNIEnv *env);
 extern int register_android_os_Power(JNIEnv *env);
@@ -142,6 +144,7 @@ extern int register_android_bluetooth_RfcommSocket(JNIEnv *env);
 extern int register_android_bluetooth_ScoSocket(JNIEnv *env);
 extern int register_android_server_BluetoothDeviceService(JNIEnv* env);
 extern int register_android_server_BluetoothEventLoop(JNIEnv *env);
+extern int register_android_server_BluetoothA2dpService(JNIEnv* env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv* env);
 extern int register_android_util_Base64(JNIEnv* env);
@@ -471,42 +474,21 @@ static void blockSigpipe()
 }
 
 /*
- * Read the persistent locale from file.
+ * Read the persistent locale.
  */
 static void readLocale(char* language, char* region)
 {
-    char path[512];
     char propLang[PROPERTY_VALUE_MAX], propRegn[PROPERTY_VALUE_MAX];
-    char *dataDir = getenv("ANDROID_DATA");
-    bool found = false;
-    if (dataDir && strlen(dataDir) < 500) {
-        strcpy(path, dataDir);
-    } else {
-        strcpy(path, "/data");
-    }
-    strcat(path, "/locale");
     
-    FILE* localeFile = fopen(path, "r");
-    if (localeFile) {
-        char line[10];
-        char *got = fgets(line, 10, localeFile);
-        /* Locale code is ll_rr */
-        if (got != NULL && strlen(line) >= 5) {
-            strncat(language, line, 2);
-            strncat(region, line + 3, 2);
-            found = true;
-        } 
-        fclose(localeFile);
-    }
-
-    if (!found) {
+    property_get("persist.sys.language", propLang, "");
+    property_get("persist.sys.country", propRegn, "");
+    if (*propLang == 0 && *propRegn == 0) {
         /* Set to ro properties, default is en_US */
         property_get("ro.product.locale.language", propLang, "en");
         property_get("ro.product.locale.region", propRegn, "US");
-        strncat(language, propLang, 2);
-        strncat(region, propRegn, 2);
     }
-    
+    strncat(language, propLang, 2);
+    strncat(region, propRegn, 2);
     //LOGD("language=%s region=%s\n", language, region);
 }
 
@@ -518,8 +500,9 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     JavaVMInitArgs initArgs;
     JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
-    char enableAssertBuf[4 + PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[PROPERTY_VALUE_MAX];
+    char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
+    char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     char* slashClassName = NULL;
     char* cp;
@@ -578,6 +561,9 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     strcpy(enableAssertBuf, "-ea:");
     property_get("dalvik.vm.enableassertions", enableAssertBuf+4, "");
 
+    strcpy(jniOptsBuf, "-Xjniopts:");
+    property_get("dalvik.vm.jniopts", jniOptsBuf+10, "");
+
     const char* rootDir = getenv("ANDROID_ROOT");
     if (rootDir == NULL) {
         rootDir = "/system";
@@ -609,20 +595,23 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     mOptions.add(opt);
     //options[curOpt++].optionString = "-verbose:class";
 
+#ifdef CUSTOM_RUNTIME_HEAP_MAX
+#define __make_max_heap_opt(val) #val
+#define _make_max_heap_opt(val) "-Xmx" __make_max_heap_opt(val)
+    opt.optionString = _make_max_heap_opt(CUSTOM_RUNTIME_HEAP_MAX);
+#undef __make_max_heap_opt
+#undef _make_max_heap_opt
+#else
     /* limit memory use to 16MB */
     opt.optionString = "-Xmx16m";
+#endif
     mOptions.add(opt);
 
-    /* enable Java "assert" statements in all non-system code */
-    //options[curOpt++].optionString = "-ea";
-
     /*
-     * Enable or disable bytecode verification.  We currently force optimization
-     * to be enabled when the verifier is off; this is a bad idea, but
-     * useful while we fiddle with the verifier.
+     * Enable or disable bytecode verification.
      *
-     * This should be coordinated with:
-     * //device/dalvik/libcore/android/src/main/native/dalvik_system_TouchDex.cpp
+     * We don't optimize classes that haven't been verified, but that only
+     * matters if we do "just-in-time" DEX optimization.
      */
     if (verifyJava) {
         opt.optionString = "-Xverify:all";
@@ -632,7 +621,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     } else {
         opt.optionString = "-Xverify:none";
         mOptions.add(opt);
-        //opt.optionString = "-Xdexopt:all";
         opt.optionString = "-Xdexopt:verified";
         mOptions.add(opt);
     }
@@ -695,6 +683,12 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         mOptions.add(opt);
     } else {
         LOGV("Assertions disabled\n");
+    }
+
+    if (jniOptsBuf[10] != '\0') {
+        LOGI("JNI options: '%s'\n", jniOptsBuf);
+        opt.optionString = jniOptsBuf;
+        mOptions.add(opt);
     }
 
     if (stackTraceFileBuf[0] != '\0') {
@@ -1008,7 +1002,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
     REG_JNI(register_android_util_FloatMath),
-    REG_JNI(register_android_pim_Time),
+    REG_JNI(register_android_text_format_Time),
     REG_JNI(register_android_pim_EventRecurrence),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
@@ -1076,7 +1070,9 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_hardware_Camera),
     REG_JNI(register_android_hardware_SensorManager),
+    REG_JNI(register_android_media_AudioRecord),
     REG_JNI(register_android_media_AudioSystem),
+    REG_JNI(register_android_media_AudioTrack),
     REG_JNI(register_android_media_ToneGenerator),
 
     REG_JNI(register_android_opengl_classes),
@@ -1087,6 +1083,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_bluetooth_ScoSocket),
     REG_JNI(register_android_server_BluetoothDeviceService),
     REG_JNI(register_android_server_BluetoothEventLoop),
+    REG_JNI(register_android_server_BluetoothA2dpService),
     REG_JNI(register_android_message_digest_sha1),
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
     REG_JNI(register_android_util_Base64),

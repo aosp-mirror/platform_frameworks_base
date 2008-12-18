@@ -18,30 +18,39 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The PixelInterleavedSampleModel class represents image data 
- * as represented as interleaved pixels and for which each sample of 
- * a pixel takes one data element of the DataBuffer.
+ * The PixelInterleavedSampleModel class represents image data as represented as
+ * interleaved pixels and for which each sample of a pixel takes one data
+ * element of the DataBuffer.
+ * 
+ * @since Android 1.0
  */
 public class PixelInterleavedSampleModel extends ComponentSampleModel {
 
     /**
-     * Instantiates a new PixelInterleavedSampleModel with the 
-     * specified parameters.
+     * Instantiates a new PixelInterleavedSampleModel with the specified
+     * parameters.
      * 
-     * @param dataType the data type of the samples.
-     * @param w the width of the image data.
-     * @param h the height of the image data.
-     * @param pixelStride the pixel stride of the image data.
-     * @param scanlineStride the scanline stride of the of the image data.
-     * @param bandOffsets the array of the band offsets.
+     * @param dataType
+     *            the data type of the samples.
+     * @param w
+     *            the width of the image data.
+     * @param h
+     *            the height of the image data.
+     * @param pixelStride
+     *            the pixel stride of the image data.
+     * @param scanlineStride
+     *            the scanline stride of the of the image data.
+     * @param bandOffsets
+     *            the array of the band offsets.
      */
-    public PixelInterleavedSampleModel(int dataType, int w, int h,
-            int pixelStride, int scanlineStride, int bandOffsets[]) {
+    public PixelInterleavedSampleModel(int dataType, int w, int h, int pixelStride,
+            int scanlineStride, int bandOffsets[]) {
 
         super(dataType, w, h, pixelStride, scanlineStride, bandOffsets);
 
@@ -59,7 +68,8 @@ public class PixelInterleavedSampleModel extends ComponentSampleModel {
         maxOffset -= minOffset;
 
         if (maxOffset > scanlineStride) {
-            // awt.241=Any offset between bands is greater than the Scanline stride
+            // awt.241=Any offset between bands is greater than the Scanline
+            // stride
             throw new IllegalArgumentException(Messages.getString("awt.241")); //$NON-NLS-1$
         }
 
@@ -69,7 +79,8 @@ public class PixelInterleavedSampleModel extends ComponentSampleModel {
         }
 
         if (pixelStride * w > scanlineStride) {
-            // awt.243=Product of Pixel stride and w is greater than Scanline stride
+            // awt.243=Product of Pixel stride and w is greater than Scanline
+            // stride
             throw new IllegalArgumentException(Messages.getString("awt.243")); //$NON-NLS-1$
         }
 
@@ -82,8 +93,8 @@ public class PixelInterleavedSampleModel extends ComponentSampleModel {
             newOffsets[i] = bandOffsets[bands[i]];
         }
 
-        return new PixelInterleavedSampleModel(dataType, width, height,
-                pixelStride, scanlineStride, newOffsets);
+        return new PixelInterleavedSampleModel(dataType, width, height, pixelStride,
+                scanlineStride, newOffsets);
     }
 
     @Override
@@ -106,8 +117,8 @@ public class PixelInterleavedSampleModel extends ComponentSampleModel {
             newOffsets = bandOffsets;
         }
 
-        return new PixelInterleavedSampleModel(dataType, w, h, pixelStride,
-                pixelStride * w, newOffsets);
+        return new PixelInterleavedSampleModel(dataType, w, h, pixelStride, pixelStride * w,
+                newOffsets);
     }
 
     @Override
@@ -121,4 +132,3 @@ public class PixelInterleavedSampleModel extends ComponentSampleModel {
     }
 
 }
-

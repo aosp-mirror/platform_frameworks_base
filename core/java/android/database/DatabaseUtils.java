@@ -241,6 +241,21 @@ public class DatabaseUtils {
     }
     
     /**
+     * Concatenates two SQL WHERE clauses, handling empty or null values.
+     * @hide
+     */
+    public static String concatenateWhere(String a, String b) {
+        if (TextUtils.isEmpty(a)) {
+            return b;
+        }
+        if (TextUtils.isEmpty(b)) {
+            return a;
+        }
+            
+        return "(" + a + ") AND (" + b + ")";
+    }
+    
+    /**
      * return the collation key 
      * @param name
      * @return the collation key

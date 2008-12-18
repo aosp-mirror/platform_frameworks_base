@@ -21,21 +21,16 @@ import com.android.internal.database.SortCursor;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -218,7 +213,7 @@ public class RingtoneManager {
     private Cursor mCursor;
 
     private int mType = TYPE_RINGTONE;
-
+    
     /**
      * If a column (item from this list) exists in the Cursor, its value must
      * be true (value of 1) for the row to be returned.
@@ -270,6 +265,27 @@ public class RingtoneManager {
         
         mType = type;
         setFilterColumnsList(type);
+    }
+
+    /**
+     * Infers the playback stream type based on what type of ringtones this
+     * manager is returning.
+     * 
+     * @return The stream type.
+     * @hide Pending API Council approval
+     */
+    public int inferStreamType() {
+        switch (mType) {
+            
+            case TYPE_ALARM:
+                return AudioManager.STREAM_ALARM;
+                
+            case TYPE_NOTIFICATION:
+                return AudioManager.STREAM_NOTIFICATION;
+                
+            default:
+                return AudioManager.STREAM_RING;
+        }
     }
     
     /**
@@ -361,7 +377,8 @@ public class RingtoneManager {
             mPreviousRingtone.stop();
         }
         
-        return mPreviousRingtone = getRingtone(mContext, getRingtoneUri(position));
+        mPreviousRingtone = getRingtone(mContext, getRingtoneUri(position), inferStreamType());
+        return mPreviousRingtone;
     }
 
     /**
@@ -556,10 +573,27 @@ public class RingtoneManager {
      * @return A {@link Ringtone} for the given URI, or null.
      */
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri) {
-        ContentResolver res = context.getContentResolver();
+        // Don't set the stream type
+        return getRingtone(context, ringtoneUri, -1);
+    }
+
+    /**
+     * Returns a {@link Ringtone} for a given sound URI on the given stream
+     * type. Normally, if you change the stream type on the returned
+     * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
+     * an optimized route to avoid that.
+     * 
+     * @param streamType The stream type for the ringtone, or -1 if it should
+     *            not be set (and the default used instead).
+     * @see #getRingtone(Context, Uri)
+     */
+    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType) {
 
         try {
             Ringtone r = new Ringtone(context);
+            if (streamType >= 0) {
+                r.setStreamType(streamType);
+            }
             r.open(ringtoneUri);
             return r;
         } catch (Exception ex) {
@@ -583,7 +617,6 @@ public class RingtoneManager {
         Log.e(TAG, "unable to find a usable ringtone");
         return null;
     }
-    
     
     /**
      * Gets the current default sound's {@link Uri}. This will give the actual

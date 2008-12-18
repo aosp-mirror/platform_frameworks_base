@@ -43,56 +43,73 @@ public:
     
 private:
     AutoDecoderCancel*  fNext;
+    AutoDecoderCancel*  fPrev;
     jobject             fJOptions;  // java options object
     SkImageDecoder*     fDecoder;
+    
+#ifdef SK_DEBUG
+    static void Validate();
+#else
+    static void Validate() {}
+#endif
 };
 
 static SkMutex  gAutoDecoderCancelMutex;
 static AutoDecoderCancel* gAutoDecoderCancel;
+#ifdef SK_DEBUG
+    static int gAutoDecoderCancelCount;
+#endif
 
 AutoDecoderCancel::AutoDecoderCancel(jobject joptions,
                                        SkImageDecoder* decoder) {
     fJOptions = joptions;
     fDecoder = decoder;
 
-    // only need to be in the list if we have options
     if (NULL != joptions) {
         SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
-        
+
+        // Add us as the head of the list
+        fPrev = NULL;
         fNext = gAutoDecoderCancel;
+        if (gAutoDecoderCancel) {
+            gAutoDecoderCancel->fPrev = this;
+        }
         gAutoDecoderCancel = this;
+        
+        SkDEBUGCODE(gAutoDecoderCancelCount += 1;)
+        Validate();
     }
 }
 
 AutoDecoderCancel::~AutoDecoderCancel() {
-    const jobject joptions = fJOptions;
-    
-    if (NULL != joptions) {
+    if (NULL != fJOptions) {
         SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
         
-        // remove us
-        AutoDecoderCancel* pair = gAutoDecoderCancel;
-        AutoDecoderCancel* prev = NULL;
-        while (pair != NULL) {
-            AutoDecoderCancel* next = pair->fNext;
-            if (pair->fJOptions == joptions) {
-                SkASSERT(pair->fDecoder == fDecoder);
-                if (prev) {
-                    prev->fNext = next;
-                } else {
-                    gAutoDecoderCancel = next;
-                }
-                return;
-            }
-            pair = next;
+        // take us out of the dllist
+        AutoDecoderCancel* prev = fPrev;
+        AutoDecoderCancel* next = fNext;
+        
+        if (prev) {
+            SkASSERT(prev->fNext == this);
+            prev->fNext = next;
+        } else {
+            SkASSERT(gAutoDecoderCancel == this);
+            gAutoDecoderCancel = next;
         }
-        SkDebugf("xxxxxxxxxxxxxxxxxxxxxxx not found in pair list %p %p\n",
-                 fJOptions, fDecoder);
+        if (next) {
+            SkASSERT(next->fPrev == this);
+            next->fPrev = prev;
+        }
+
+        SkDEBUGCODE(gAutoDecoderCancelCount -= 1;)
+        Validate();
     }
 }
 
 bool AutoDecoderCancel::RequestCancel(jobject joptions) {
     SkAutoMutexAcquire ac(gAutoDecoderCancelMutex);
+
+    Validate();
 
     AutoDecoderCancel* pair = gAutoDecoderCancel;
     while (pair != NULL) {
@@ -104,6 +121,37 @@ bool AutoDecoderCancel::RequestCancel(jobject joptions) {
     }
     return false;
 }
+
+#ifdef SK_DEBUG
+// can only call this inside a lock on gAutoDecoderCancelMutex 
+void AutoDecoderCancel::Validate() {
+    const int gCount = gAutoDecoderCancelCount;
+
+    if (gCount == 0) {
+        SkASSERT(gAutoDecoderCancel == NULL);
+    } else {
+        SkASSERT(gCount > 0);
+        
+        AutoDecoderCancel* curr = gAutoDecoderCancel;
+        SkASSERT(curr);
+        SkASSERT(curr->fPrev == NULL);
+
+        int count = 0;
+        while (curr) {
+            count += 1;
+            SkASSERT(count <= gCount);
+            if (curr->fPrev) {
+                SkASSERT(curr->fPrev->fNext == curr);
+            }
+            if (curr->fNext) {
+                SkASSERT(curr->fNext->fPrev == curr);
+            }
+            curr = curr->fNext;
+        }
+        SkASSERT(count == gCount);
+    }
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -132,6 +180,7 @@ public:
             // You have to copy the data because it is owned by the png reader
             Res_png_9patch* patchNew = (Res_png_9patch*) malloc(patchSize);
             memcpy(patchNew, patch, patchSize);
+            // this relies on deserialization being done in place
             Res_png_9patch::deserialize(patchNew);
             patchNew->fileToDevice();
             if (fPatchIsValid) {

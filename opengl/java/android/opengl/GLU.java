@@ -85,18 +85,17 @@ public class GLU {
         fy *= rlf;
         fz *= rlf;
 
-        // Normalize up
-        float rlup = 1.0f / Matrix.length(upX, upY, upZ);
-        upX *= rlup;
-        upY *= rlup;
-        upZ *= rlup;
-
         // compute s = f x up (x means "cross product")
-
         float sx = fy * upZ - fz * upY;
         float sy = fz * upX - fx * upZ;
         float sz = fx * upY - fy * upX;
-
+        
+        // and normalize s
+        float rls = 1.0f / Matrix.length(sx, sy, sz);
+        sx *= rls;
+        sy *= rls;
+        sz *= rls;
+        
         // compute u = s x f
         float ux = sy * fz - sz * fy;
         float uy = sz * fx - sx * fz;

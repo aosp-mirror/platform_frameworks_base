@@ -514,7 +514,7 @@ public class BluetoothDevice {
         try {
             return mService.getRemoteClass(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return DeviceClass.CLASS_UNKNOWN;
+        return BluetoothClass.ERROR;
     }
     public byte[] getRemoteFeatures(String address) {
         try {

@@ -139,6 +139,9 @@ public final class RingtonePickerActivity extends AlertActivity implements
         }
         
         mCursor = mRingtoneManager.getCursor();
+        
+        // The volume keys will control the stream that we are choosing a ringtone for
+        setVolumeControlStream(mRingtoneManager.inferStreamType());
 
         // Get the URI whose list item should have a checkmark
         mExistingUri = intent

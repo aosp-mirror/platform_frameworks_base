@@ -18,27 +18,36 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import java.util.Locale;
 
 /**
- * The IIOServiceProvider abstract class provides base functionality 
- * for imageio service provider interfaces (SPIs). 
+ * The IIOServiceProvider abstract class provides base functionality for ImageIO
+ * service provider interfaces (SPIs).
+ * 
+ * @since Android 1.0
  */
 public abstract class IIOServiceProvider implements RegisterableService {
 
-    /** The vendor name of this service provider. */
+    /**
+     * The vendor name of this service provider.
+     */
     protected String vendorName;
-    
-    /** The version of this service provider. */
+
+    /**
+     * The version of this service provider.
+     */
     protected String version;
 
     /**
      * Instantiates a new IIOServiceProvider.
      * 
-     * @param vendorName the vendor name of service provider.
-     * @param version the version of service provider.
+     * @param vendorName
+     *            the vendor name of service provider.
+     * @param version
+     *            the version of service provider.
      */
     public IIOServiceProvider(String vendorName, String version) {
         if (vendorName == null) {
@@ -85,12 +94,11 @@ public abstract class IIOServiceProvider implements RegisterableService {
     }
 
     /**
-     * Gets a description of this service provider.   
-     * The result string should be localized for the specified 
-     * Locale.
+     * Gets a description of this service provider. The result string should be
+     * localized for the specified Locale.
      * 
-     * @param locale the specified Locale.
-     * 
+     * @param locale
+     *            the specified Locale.
      * @return the description of this service provider.
      */
     public abstract String getDescription(Locale locale);

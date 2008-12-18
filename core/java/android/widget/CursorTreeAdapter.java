@@ -450,10 +450,9 @@ public abstract class CursorTreeAdapter extends BaseExpandableListAdapter implem
         }
         
         void changeCursor(Cursor cursor, boolean releaseCursors) {
-            if (mCursor != null) {
-                mCursor.unregisterContentObserver(mContentObserver);
-                mCursor.unregisterDataSetObserver(mDataSetObserver);
-            }
+            if (cursor == mCursor) return;
+
+            deactivate();
             mCursor = cursor;
             if (cursor != null) {
                 cursor.registerContentObserver(mContentObserver);

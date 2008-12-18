@@ -48,6 +48,7 @@ import android.view.KeyEvent;
  * <li><a href="#ActionKeys">Action Keys</a>
  * <li><a href="#SearchabilityMetadata">Searchability Metadata</a>
  * <li><a href="#PassingSearchContext">Passing Search Context</a>
+ * <li><a href="#ProtectingUserPrivacy">Protecting User Privacy</a>
  * </ol>
  * 
  * <a name="DeveloperGuide"></a>
@@ -578,7 +579,7 @@ import android.view.KeyEvent;
  * file.  Each element defines one of the keycodes you are interested in, 
  * defines the conditions under which they are sent, and provides details
  * on how to communicate the action key event back to your searchable activity.</li>
- * <li>In your intent receiver, if you wish, you can check for action keys by checking the 
+ * <li>In your broadcast receiver, if you wish, you can check for action keys by checking the 
  * extras field of the {@link android.content.Intent Intent}.</li>
  * </ul>
  * 
@@ -974,6 +975,36 @@ import android.view.KeyEvent;
  *     appData.get...();
  *     appData.get...();
  * }</pre>
+ * 
+ * <a name="ProtectingUserPrivacy"></a>
+ * <h3>Protecting User Privacy</h3>
+ * 
+ * <p>Many users consider their activities on the phone, including searches, to be private 
+ * information.  Applications that implement search should take steps to protect users' privacy
+ * wherever possible.  This section covers two areas of concern, but you should consider your search
+ * design carefully and take any additional steps necessary.
+ * 
+ * <p><b>Don't send personal information to servers, and if you do, don't log it.</b>
+ * "Personal information" is information that can personally identify your users, such as name, 
+ * email address or billing information, or other data which can be reasonably linked to such 
+ * information.  If your application implements search with the assistance of a server, try to 
+ * avoid sending personal information with your searches.  For example, if you are searching for 
+ * businesses near a zip code, you don't need to send the user ID as well - just send the zip code
+ * to the server.  If you do need to send personal information, you should take steps to avoid 
+ * logging it.  If you must log it, you should protect that data very carefully, and erase it as 
+ * soon as possible.
+ * 
+ * <p><b>Provide the user with a way to clear their search history.</b>  The Search Manager helps
+ * your application provide context-specific suggestions.  Sometimes these suggestions are based
+ * on previous searches, or other actions taken by the user in an earlier session.  A user may not
+ * wish for previous searches to be revealed to other users, for instance if they share their phone
+ * with a friend.  If your application provides suggestions that can reveal previous activities,
+ * you should implement a "Clear History" menu, preference, or button.  If you are using 
+ * {@link android.provider.SearchRecentSuggestions}, you can simply call its 
+ * {@link android.provider.SearchRecentSuggestions#clearHistory() clearHistory()} method from
+ * your "Clear History" UI.  If you are implementing your own form of recent suggestions, you'll 
+ * need to provide a similar a "clear history" API in your provider, and call it from your
+ * "Clear History" UI.
  */
 public class SearchManager 
         implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener
@@ -1008,6 +1039,16 @@ public class SearchManager
      * activity that launched the search.
      */
     public final static String APP_DATA = "app_data";
+
+    /**
+     * Intent app_data bundle key: Use this key with the bundle from
+     * {@link android.content.Intent#getBundleExtra
+     * content.Intent.getBundleExtra(APP_DATA)} to obtain the source identifier
+     * set by the activity that launched the search.
+     *
+     * @hide
+     */
+    public final static String SOURCE = "source";
     
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and

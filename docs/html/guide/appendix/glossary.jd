@@ -1,121 +1,293 @@
 page.title=Glossary
 @jd:body
-<style TYPE="text/css">
-dt{font-weight:bold}
-</style>
-<h1>Android Glossary</h1>
-<p>The following terms are used in these documents. </p>
-<dl>
-    <dt>.apk extension </dt>
-    <dd>The extension for an Android package file, which typically contains all of the files
-        related to a single Android application.  The file itself is a compressed collection
-        of an AndroidManifest.xml file, application code (.dex files), resource
-        files, and other files.  A project is compiled into a single .apk file.</dd>
-    <dt>.dex extension </dt>
-    <dd>Android programs are compiled into .dex (Dalvik Executable) files, which
+
+<p>The list below defines some of the basic terminology of the Android platform. </p>
+    <dl>
+    <dt id="apk">.apk file</dt> <dd>Android application package file. Each
+    Android application is compiled and packaged in a single file that
+    includes all of the application's code (.dex files), resources, assets,
+    and manifest file. The application package file can have any name but
+    <em>must</em> use the <code>.apk</code> extension. For example:
+    <code>myExampleAppname.apk</code>. For convenience, an application package
+    file is often referred to as an ".apk".
+    <p>Related: <a href="#application">Application</a>.</p>
+</dd>
+
+    <dt id="dex">.dex file </dt>
+    <dd>Compiled Android application code file. 
+       <p>Android programs are compiled into .dex (Dalvik Executable) files, which
         are in turn zipped into a single .apk file on the device. .dex files can
         be created by automatically translating compiled applications written in
         the Java programming language.</dd>
-    <dt>Action</dt>
+
+    <dt id="action">Action</dt>
     <dd>A description of something that an Intent sender wants done. An action is
         a string value assigned to an Intent. Action strings can be defined by Android
         or by a third-party developer. For example, android.intent.action.VIEW
         for a Web URL, or com.example.rumbler.SHAKE_PHONE for a custom application
-        to vibrate the phone. </dd>
-    <dt>Activity</dt>
-    <dd>A single screen in an application, with supporting Java code, derived from
-        the {@link android.app.Activity} class. </dd>
-    <dt>adb</dt>
-    <dd>Android Debug Bridge, a command-line debugging application shipped with the
-        SDK. It provides tools to browse the device, copy tools on the device, and
-        forward ports for debugging. See <a href="adb.html">Using adb</a> for more information. </dd>
-    <dt>Application</dt>
-    <dd>A collection of one or more activities, services, listeners, and intent receivers.
-        An application has a single manifest, and is compiled into a single .apk
-        file on the device. </dd>
-    <dt>Content Provider</dt>
-    <dd>A class built on {@link android.content.ContentProvider} that handles content
-        query strings of a specific format to return data in a specific format. 
-        See <a href="{@docRoot}devel/data/contentproviders.html">Reading
-        and writing data to a content provider</a> for information on using
-        content providers. </dd>
-    <dt>Content URI</dt>
-    <dd>A type of URI. See the URI entry. </dd>
-    <dt>Dalvik</dt>
-    <dd>The name of Android's virtual machine. The Dalvik VM is an interpreter-only
-        virtual machine that executes files in the Dalvik Executable (.dex) format,
-        a format that is optimized for efficient storage and memory-mappable execution.
-        The virtual machine is register-based, and it can run classes compiled by
-        a Java language compiler that have been transformed into its native format
-        using the included &quot;dx&quot; tool.
-        The VM runs on top of Posix-compliant operating systems, which it relies
-        on for underlying functionality (such as threading and low level memory management).
-        The Dalvik core class library is intended to provide a familiar
-        development base for those used to programming with Java Standard
-        Edition, but it is geared specifically to the needs of a small mobile
-        device.</dd>
-    <dt>DDMS</dt>
-    <dd>Dalvik Debug Monitor Service, a GUI debugging application shipped with the
-        SDK. It provides screen capture, log dump, and process examination capabilities.
-        See Using the <a href="{@docRoot}reference/ddms.html">Dalvik
-        Debug Monitor Server</a> to learn more about this
-        program. </dd>
-    <dt>Drawable</dt>
-    <dd>A compiled visual resource that can be used as a background, title, or other
-        part of the screen. It is compiled into an {@link android.graphics.drawable}
-        subclass. </dd>
-    <dt>Intent</dt>
-    <dd>A class ({@link android.content.Intent}) that contains several fields describing
-        what a caller would like to do. The caller sends this intent to Android's
-        intent resolver, which looks through the intent filters of all applications
-        to find the activity most suited to handle this intent. Intent fields include
-        the desired action, a category, a data string, the MIME type of the data, a handling
-        class, and other restrictions. </dd>
-    <dt>Intent Filter</dt>
-    <dd>Activities and intent receivers include one or more filters in their manifest
-        to describe what kinds of intents or messages they can handle or want to
-        receive. An intent filter lists a set of requirements, such as data type,
-        action requested, and URI format, that the Intent or message must fulfill.
-        For activities, Android searches for the activity with the most closely matching
-        valid match between the Intent and the activity filter. For messages, Android
-        will forward a message to all receivers with matching intent filters. </dd>
-    <dt></dt>
-    <dt>Intent Receiver </dt>
-    <dd>An application class that listens for messages broadcast by calling {@link
-        android.content.Context#sendBroadcast(android.content.Intent) Context.sendBroadcast()}.
-        For example code, see <a href="{@docRoot}kb/commontasks.html#broadcastreceivers">Listening
-        for and broadcasting global messages</a>.</dd>
-    <dt>Layout resource </dt>
-    <dd>An XML file that describes the layout of an Activity screen. </dd>
-    <dt>Manifest</dt>
-    <dd>An XML file associated with each Application that describes the various activies,
-        intent filters, services, and other items that it exposes. See <a href="{@docRoot}devel/bblocks-manifest.html">AndroidManifest.xml
-        File Details</a>.</dd>
-    <dt>Nine-patch / 9-patch / Ninepatch image</dt>
-    <dd>A resizeable bitmap resource that can be used for backgrounds or other images
-        on the device. See <a href="{@docRoot}reference/available-resources.html#ninepatch">Nine-Patch Stretchable
-        Image</a> for more information. </dd>
-    <dt>Query String</dt>
-    <dd>A type of URI. See the URI entry. </dd>
-    <dt>Resource</dt>
-    <dd>A user-supplied XML, bitmap, or other file, entered into an application build
-        process, which can later be loaded from code. Android can accept resources
-        of many types; see <a href="{@docRoot}devel/resources-i18n.html">Resources</a> for a full description.
-        Application-defined resources should be stored in the <code>res/</code> subfolders. </dd>
-    <dt>Service</dt>
-    <dd>A class that runs in the background to perform various persistent actions,
-    such as playing music or monitoring network activity. </dd>
-    <dt>Theme</dt>
-    <dd>A set of properties (text size, background color, and so on) bundled together
-        to define various default display settings. Android provides a few standard
-        themes, listed in {@link android.R.style} (starting with &quot;Theme_&quot;). </dd>
-    <dt>URIs</dt>
-    <dd>Android uses URI strings both for requesting data (e.g., a list of contacts)
-        and for requesting actions (e.g., opening a Web page in a browser). Both
-        are valid URI strings, but have different values. All requests for data must
-        start with the string &quot;content://&quot;. Action strings are valid URIs
-        that can be handled appropriately by applications on the device; for example,
-        a URI starting with &quot;http://&quot; will be handled by the browser. </dd>
-</dl>
-<p>&nbsp;</p>
+        to vibrate the phone. 
+    <p>Related: <a href="#intent">Intent</a>.</p>
+    </dd>
 
+    <dt id="activity">Activity</dt>
+    <dd>A single screen in an application, with supporting Java code, derived
+    from the {@link android.app.Activity} class. Most commonly, an activity is
+    visibly represented by a full screen window that can receive and handle UI
+    events and perform complex tasks, because of the Window it uses to render
+    its window. Though an Activity is typically full screen, it can also be
+    floating or transparent.</dd>
+
+    <dt id="adb">adb</dt>
+    <dd>Android Debug Bridge, a command-line debugging application included with the
+        SDK. It provides tools to browse the device, copy tools on the device, and
+        forward ports for debugging. If you are developing in Eclipse using the
+		ADT Plugin, adb is integrated into your development environment. See 
+		<a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>
+		for more information. </dd>
+
+    <dt id="application">Application</dt>
+    <dd>From a component perspective, an Android application consists of one
+    or more activities, services, listeners, and intent receivers. From a
+    source file perspective, an Android application consists of code,
+    resources, assets, and a single manifest. During compilation, these files
+    are packaged in a single file called an application package file (.apk).
+    <p>Related: <a href="#apk">.apk</a>, <a href="#activity">Activity</a></p></dd>
+
+    <dt id="canvas">Canvas</dt>
+    <dd>A drawing surface that handles compositing of the actual bits against
+    a Bitmap or Surface object. It has methods for standard computer drawing
+    of bitmaps, lines, circles, rectangles, text, and so on, and is bound to a
+    Bitmap or Surface. Canvas is the simplest, easiest way to draw 2D objects
+    on the screen. However, it does not support hardware acceleration, as
+    OpenGL ES does. The base class is {@link android.graphics.Canvas}.
+    <p>Related: <a href="#drawable">Drawable</a>, <a href="#opengles">OpenGL
+    ES</a>.</p></dd>
+
+    <dt id="contentprovider">Content Provider</dt>
+    <dd>A data-abstraction layer that you can use to safely expose your
+    application's data to other applications. A content provider is built on
+    the {@link android.content.ContentProvider} class, which handles content
+    query strings of a specific format to return data in a specific format.
+    See <a href="{@docRoot}guide/topics/providers/content-providers.html">
+	Content Providers</a> topic for more information.
+    <p>Related: <a href="#uri">URI Usage in Android</a></p></dd>
+
+    <dt id="dalvik">Dalvik</dt>
+    <dd>The Android platform's virtual machine. The Dalvik VM is an
+    interpreter-only virtual machine that executes files in the Dalvik
+    Executable (.dex) format, a format that is optimized for efficient storage
+    and memory-mappable execution. The virtual machine is register-based, and
+    it can run classes compiled by a Java language compiler that have been
+    transformed into its native format using the included &quot;dx&quot; tool.
+    The VM runs on top of Posix-compliant operating systems, which it relies
+    on for underlying functionality (such as threading and low level memory
+    management). The Dalvik core class library is intended to provide a
+    familiar development base for those used to programming with Java Standard
+    Edition, but it is geared specifically to the needs of a small mobile
+    device.</dd>
+
+    <dt id="ddms">DDMS</dt>
+    <dd>Dalvik Debug Monitor Service, a GUI debugging application included
+    with the SDK. It provides screen capture, log dump, and process
+    examination capabilities. If you are developing in Eclipse using the ADT
+    Plugin, DDMS is integrated into your development environment. See <a
+    href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor
+    Server</a> to learn more about the program.</dd>
+
+    <dt id="dialog">Dialog</dt> <dd> A floating window that that acts as a lightweight
+    form. A dialog can have button controls only and is intended to perform a
+    simple action (such as button choice) and perhaps return a value. A dialog
+    is not intended to persist in the history stack, contain complex layout,
+    or perform complex actions. Android provides a default simple dialog for
+    you with optional buttons, though you can define your own dialog layout.
+    The base class for dialogs is {@link android.app.Dialog Dialog}. 
+    <p>Related: <a href="#activity">Activity</a>.</p></dd>
+
+    <dt id="drawable">Drawable</dt>
+    <dd>A compiled visual resource that can be used as a background, title, or
+    other part of the screen. A drawable is typically loaded into another UI
+    element, for example as a background image. A drawable is not able to
+    receive events, but does assign various other properties such as "state"
+    and scheduling, to enable subclasses such as animation objects or image
+    libraries. Many drawable objects are loaded from drawable resource files
+    &mdash; xml or bitmap files that describe the image. Drawable resources
+    are compiled into subclasses of {@link android.graphics.drawable}. For
+    more information about drawables and other resources, see <a
+    href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. 
+    <p>Related: <a href="#resources">Resources</a>, <a href="#canvas">Canvas
+    </a></p></dd>
+
+    <dt id="intent">Intent</dt>
+    <dd>An message object that you can use to launch or communicate with other
+    applications/activities asynchronously. An Intent object is an instance of
+    {@link android.content.Intent}. It includes several criteria fields that you can
+    supply, to determine what application/activity receives the Intent and
+    what the receiver does when handling the Intent. Available criteria include
+    include the desired action, a category, a data string, the MIME type of
+    the data, a handling class, and others. An application sends
+    an Intent to the Android system, rather than sending it directly to
+    another application/activity. The application can send the Intent to a
+    single target application or it can send it as a broadcast, which can in
+    turn be handled by multiple applications sequentially. The Android system
+    is responsible for resolving the best-available receiver for each Intent,
+    based on the criteria supplied in the Intent and the Intent Filters
+    defined by other applications. For more information, see <a
+    href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+    Intent Filters</a>. 
+    <p>Related: <a href="#intentfilter">Intent Filter</a>, <a
+    href="#broadcastreceiver">Broadcast Receiver</a>.</p></dd>
+
+    <dt id="intentfilter">Intent Filter</dt>
+    <dd>A filter object that an application declares in its manifest file, to
+    tell the system what types of Intents each of its components is willing to
+    accept and with what criteria. Through an intent filter, an application
+    can express interest in specific data types, Intent actions, URI formats,
+    and so on. When resolving an Intent, the system evaluates all of the
+    available intent filters in all applications and passes the Intent to the
+    application/activity that best matches the Intent and criteria. For more
+    information, see <a
+    href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+    Intent Filters</a>. 
+    <p>Related: <a href="#intent">Intent</a>, <a
+    href="#broadcastreceiver">Broadcast Receiver</a>.</p></dd>
+
+    <dt id="broadcastreceiver">Broadcast Receiver </dt>
+    <dd>An application class that listens for Intents that are broadcast,
+    rather than being sent to a single target application/activity. The system
+    delivers a broadcast Intent to all interested broadcast receivers, which
+    handle the Intent sequentially. 
+    <p>Related: <a href="#intent">Intent</a>, <a href="#intentfilter">Intent 
+    Filter</a>.</p> </dd>
+	
+    <dt id="layoutresource">Layout Resource</dt>
+    <dd>An XML file that describes the layout of an Activity screen. 
+    <p>Related: <a href="#resources">Resources</a></p></dd>
+
+    <dt id="manifest">Manifest File</dt>
+    <dd>An XML file that each application must define, to describe the
+    application's package name, version, components (activities, intent
+    filters, services), imported libraries, and describes the various
+    activies, and so on. See <a
+    href="{@docRoot}guide/topics/manifest/manifest.html">The
+    AndroidManifest.xml File</a> for complete information.</dd>
+
+    <dt id="ninepatch">Nine-patch / 9-patch / Ninepatch image</dt>
+    <dd>A resizeable bitmap resource that can be used for backgrounds or other
+    images on the device. See <a
+    href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">
+    Nine-Patch Stretchable Image</a> for more information. 
+    <p>Related: <a href="#resources">Resources</a>.</p></dd>
+
+    <dt id="opengles">OpenGL ES</dt>
+    <dd> Android provides OpenGL ES libraries that you can use for fast,
+    complex 3D images. It is harder to use than a Canvas object, but
+    better for 3D objects. The {@link android.opengl} and 
+    {@link javax.microedition.khronos.opengles} packages expose 
+    OpenGL ES functionality. 
+    <p>Related: <a href="#canvas">Canvas</a>, <a href="#surface">Surface</a></p></dd>
+
+    <dt id="resources">Resources</dt>
+    <dd>Nonprogrammatic application components that are external to the
+    compiled application code, but which can be loaded from application code
+    using a well-known reference format. Android supports a variety of
+    resource types, but a typical application's resources would consist of UI
+    strings, UI layout components, graphics or other media files, and so on.
+    An application uses resources to efficiently support localization and
+    varied device profiles and states. For example, an application would
+    include a separate set of resources for each supported local or device
+    type, and it could include layout resources that are specific to the
+    current screen orientation (landscape or portrait). For more information
+    about resources, see <a
+    href="{@docRoot}guide/topics/resources/index.html"> Resources and
+    Assets</a>. The resources of an application are always stored in the
+    <code>res/*</code> subfolders of the project. </dd>
+
+    <dt id="service">Service</dt>
+    <dd>An object of class {@link android.app.Service} that runs in the
+    background (without any UI presence) to perform various persistent
+    actions, such as playing music or monitoring network activity. 
+    <p>Related: <a href="#activity">Activity</a></p></dd>
+
+    <dt id="surface">Surface</dt>
+    <dd>An object of type {@link android.view.Surface} representing a block of
+    memory that gets composited to the screen. A Surface holds a Canvas object
+    for drawing, and provides various helper methods to draw layers and resize
+    the surface. You should not use this class directly; use 
+    {@link android.view.SurfaceView} instead. 
+    <p>Related: <a href="#canvas">Canvas</a></p></dd>
+
+    <dt id="surfaceview">SurfaceView</dt>
+    <dd>A View object that wraps a Surface for drawing, and exposes methods to
+    specify its size and format dynamically. A SurfaceView provides a way to
+    draw independently of the UI thread for resource-intensive operations
+    (such as games or camera previews), but it uses extra memory as a result.
+    SurfaceView supports both Canvas and OpenGL ES graphics. The base class is
+    {@link android.view.SurfaceView}.
+    <p>Related: <a href="#canvas">Surface</a></p></dd>
+
+    <dt id="theme">Theme</dt>
+    <dd>A set of properties (text size, background color, and so on) bundled
+    together to define various default display settings. Android provides a
+    few standard themes, listed in {@link android.R.style} (starting with
+    &quot;Theme_&quot;). </dd>
+
+    <dt id="uri">URIs in Android</dt>
+    <dd>Android uses URI strings as the basis for requesting data in a content
+    provider (such as to retrieve a list of contacts) and for requesting
+    actions in an Intent (such as opening a Web page in a browser). The URI
+    scheme and format is specialized according to the type of use, and an
+    application can handle specific URI schemes and strings in any way it
+    wants. Some URI schemes are reserved by system components. For example,
+    requests for data from a content provider must use the
+    <code>content://</code>. In an Intent, a URI using an <code>http://</code>
+    scheme will be handled by the browser. </dd>
+
+    <dt id="view">View</dt>
+	<dd>An object that draws to a rectangular area on the screen and handles
+    click, keystroke, and other interaction events. A View is a base class for
+    most layout components of an Activity or Dialog screen (text boxes,
+    windows, and so on). It receives calls from its parent object (see
+    viewgroup, below)to draw itself, and informs its parent object about where
+    and how big it would like to be (which may or may not be respected by the
+    parent). For more information, see {@link android.view.View}. 
+    <p>Related: <a href="#viewgroup">Viewgroup</a>, <a href="#widget">Widget
+    </a></p></dd>
+
+    <dt id="viewgroup">Viewgroup</dt>
+    <dd> A container object that groups a set of child Views. The viewgroup is
+    responsible for deciding where child views are positioned and how large
+    they can be, as well as for calling each to draw itself when appropriate.
+    Some viewgroups are invisible and are for layout only, while others have
+    an intrinsic UI (for instance, a scrolling list box). Viewgroups are all
+    in the {@link android.widget widget} package, but extend 
+    {@link android.view.ViewGroup ViewGroup}. 
+    <p>Related: <a href="#view">View</a></p></dd>
+
+    <dt id="widget">Widget</dt>
+    <dd>One of a set of fully implemented View subclasses that render form
+    elements and other UI components, such as a text box or popup menu.
+    Because a widget is fully implemented, it handles measuring and drawing
+    itself and responding to screen events. Widgets are all in the 
+    {@link android.widget} package. </dd>
+
+ <!-- 
+    <dt id="panel">Panel</dt>
+    <dd> A panel is a concept not backed by a specific class. It is a View of
+    some sort that is tied in closely to a parent window, but can handle
+    clicks and perform simple functions related to its parent. A panel floats
+    in front of its parent, and is positioned relative to it. A common example
+    of a panel (implemented by Android) is the options menu available to every
+    screen. At present, there are no specific classes or methods for creating
+    a panel &mdash; it's more of a general idea. </dd>
+-->
+
+    <dt id="panel">Window</dt>
+    <dd>In an Android application, an object derived from the abstract class
+    {@link android.view.Window} that specifies the elements of a generic
+    window, such as the look and feel (title bar text, location and content of
+    menus, and so on). Dialog and Activity use an implementation of this class
+    to render a window. You do not need to implement this class or use windows
+    in your application. </dd>
+
+
+</dl>

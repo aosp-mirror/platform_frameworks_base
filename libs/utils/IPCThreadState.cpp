@@ -391,6 +391,29 @@ void IPCThreadState::joinThreadPool(bool isMain)
     status_t result;
     do {
         int32_t cmd;
+        
+        // When we've cleared the incoming command queue, process any pending derefs
+        if (mIn.dataPosition() >= mIn.dataSize()) {
+            size_t numPending = mPendingWeakDerefs.size();
+            if (numPending > 0) {
+                for (size_t i = 0; i < numPending; i++) {
+                    RefBase::weakref_type* refs = mPendingWeakDerefs[i];
+                    refs->decWeak(mProcess.get());
+                }
+                mPendingWeakDerefs.clear();
+            }
+
+            numPending = mPendingStrongDerefs.size();
+            if (numPending > 0) {
+                for (size_t i = 0; i < numPending; i++) {
+                    BBinder* obj = mPendingStrongDerefs[i];
+                    obj->decStrong(mProcess.get());
+                }
+                mPendingStrongDerefs.clear();
+            }
+        }
+
+        // now get the next command to be processed, waiting if necessary
         result = talkWithDriver();
         if (result >= NO_ERROR) {
             size_t IN = mIn.dataAvail();
@@ -832,7 +855,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             LOG_REMOTEREFS("BR_RELEASE from driver on %p", obj);
             obj->printRefs();
         }
-        obj->decStrong(mProcess.get());
+        mPendingStrongDerefs.push(obj);
         break;
         
     case BR_INCREFS:
@@ -853,7 +876,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
         //LOG_ASSERT(refs->refBase() == obj,
         //           "BR_DECREFS: object %p does not match cookie %p (expected %p)",
         //           refs, obj, refs->refBase());
-        refs->decWeak(mProcess.get());
+        mPendingWeakDerefs.push(refs);
         break;
         
     case BR_ATTEMPT_ACQUIRE:

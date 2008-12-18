@@ -256,6 +256,20 @@ public class LockPatternUtils {
     }
 
     /**
+     * @return Whether tactile feedback for the pattern is enabled.
+     */
+    public boolean isTactileFeedbackEnabled() {
+        return getBoolean(Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+    }
+
+    /**
+     * Set whether tactile feedback for the pattern is enabled.
+     */
+    public void setTactileFeedbackEnabled(boolean enabled) {
+        setBoolean(Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, enabled);
+    }
+
+    /**
      * Store the lockout deadline, meaning the user can't attempt his/her unlock
      * pattern until the deadline has passed.  Does not persist across reboots.
      * @param deadline The elapsed real time in millis in future.

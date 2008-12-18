@@ -61,6 +61,15 @@ jfieldID get_field(JNIEnv *env,
         (err)->name, (err)->message); \
         dbus_error_free((err)); }
 
+struct event_loop_native_data_t {
+    DBusConnection *conn;
+    /* These variables are set in waitForAndDispatchEventNative() and are
+       valid only within the scope of this function.  At any other time, they
+       are NULL. */
+    jobject me;
+    JNIEnv *env;
+};
+
 dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
                                         DBusConnection *conn,
                                         int timeout_ms,

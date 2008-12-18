@@ -57,8 +57,7 @@ public class ColorDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mState.mChangingConfigurations;
     }
 
     @Override

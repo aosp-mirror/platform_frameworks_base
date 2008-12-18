@@ -22,6 +22,12 @@ package java.awt.event;
 
 import java.util.EventListener;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public interface KeyListener extends EventListener {
 
     public void keyPressed(KeyEvent e);

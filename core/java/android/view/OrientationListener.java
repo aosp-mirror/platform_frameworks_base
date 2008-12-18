@@ -34,6 +34,7 @@ public abstract class OrientationListener implements SensorListener {
     private SensorManager mSensorManager;
     private int mOrientation = ORIENTATION_UNKNOWN;
     private boolean mEnabled = false;
+    private int mRate;
     
     /**
      * Returned from onOrientationChanged when the device orientation cannot be determined
@@ -50,6 +51,21 @@ public abstract class OrientationListener implements SensorListener {
      */
     public OrientationListener(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        mRate = SensorManager.SENSOR_DELAY_NORMAL;
+    }
+
+    /**
+     * Creates a new OrientationListener.
+     * 
+     * @param context for the OrientationListener.
+     * @param rate at which sensor events are processed (see also
+     * {@link android.hardware.SensorManager SensorManager}). Use the default
+     * value of {@link android.hardware.SensorManager#SENSOR_DELAY_NORMAL 
+     * SENSOR_DELAY_NORMAL} for simple screen orientation change detection.
+     */
+    public OrientationListener(Context context, int rate) {
+        mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        mRate = rate;
     }
 
     /**
@@ -59,7 +75,7 @@ public abstract class OrientationListener implements SensorListener {
     public void enable() {
         if (mEnabled == false) {
             if (localLOGV) Log.d(TAG, "OrientationListener enabled");
-            mSensorManager.registerListener(this, SensorManager.SENSOR_ACCELEROMETER);
+            mSensorManager.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, mRate);
             mEnabled = true;
         }
     }
@@ -106,7 +122,6 @@ public abstract class OrientationListener implements SensorListener {
 
     public void onAccuracyChanged(int sensor, int accuracy) {
         // TODO Auto-generated method stub
-        
     }
 
     /**

@@ -41,8 +41,6 @@ public:
     virtual status_t    stop();
     virtual status_t    pause();
     virtual bool        isPlaying();
-    virtual status_t    getVideoWidth(int *w);
-    virtual status_t    getVideoHeight(int *h);
     virtual status_t    seekTo(int msec);
     virtual status_t    getCurrentPosition(int *msec);
     virtual status_t    getDuration(int *msec);
@@ -54,11 +52,11 @@ public:
             void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }
 
 private:
-    static void         do_nothing(status_t s, void *cookie) { }
-    static void         run_init(status_t s, void *cookie);
-    static void         run_set_video_surface(status_t s, void *cookie);
-    static void         run_set_audio_output(status_t s, void *cookie);
-    static void         run_prepare(status_t s, void *cookie);
+    static void         do_nothing(status_t s, void *cookie, bool cancelled) { }
+    static void         run_init(status_t s, void *cookie, bool cancelled);
+    static void         run_set_video_surface(status_t s, void *cookie, bool cancelled);
+    static void         run_set_audio_output(status_t s, void *cookie, bool cancelled);
+    static void         run_prepare(status_t s, void *cookie, bool cancelled);
 
     PlayerDriver*               mPlayerDriver;
     char *                      mDataSourcePath;

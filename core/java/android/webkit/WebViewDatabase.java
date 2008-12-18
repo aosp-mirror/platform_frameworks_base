@@ -39,7 +39,7 @@ public class WebViewDatabase {
     // log tag
     protected static final String LOGTAG = "webviewdatabase";
 
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
     // 2 -> 3 Modified Cache table to allow cache of redirects
     // 3 -> 4 Added Oma-Downloads table
     // 4 -> 5 Modified Cache table to support persistent contentLength
@@ -47,6 +47,7 @@ public class WebViewDatabase {
     // 5 -> 6 Add INDEX for cache table
     // 6 -> 7 Change cache localPath from int to String
     // 7 -> 8 Move cache to its own db
+    // 8 -> 9 Store both scheme and host when storing passwords
     private static final int CACHE_DATABASE_VERSION = 1;
 
     private static WebViewDatabase mInstance = null;
@@ -172,7 +173,6 @@ public class WebViewDatabase {
                 mDatabase.beginTransaction();
                 try {
                     upgradeDatabase();
-                    bootstrapDatabase();
                     mDatabase.setTransactionSuccessful();
                 } finally {
                     mDatabase.endTransaction();
@@ -200,6 +200,10 @@ public class WebViewDatabase {
                 } finally {
                     mCacheDatabase.endTransaction();
                 }
+                // Erase the files from the file system in the 
+                // case that the database was updated and the 
+                // there were existing cache content
+                CacheManager.removeAllCacheFiles();
             }
 
             if (mCacheDatabase != null) {
@@ -237,24 +241,26 @@ public class WebViewDatabase {
         if (oldVersion != 0) {
             Log.i(LOGTAG, "Upgrading database from version "
                     + oldVersion + " to "
-                    + DATABASE_VERSION + ", which will destroy all old data");
+                    + DATABASE_VERSION + ", which will destroy old data");
+        }
+        boolean justPasswords = 8 == oldVersion && 9 == DATABASE_VERSION;
+        if (!justPasswords) {
+            mDatabase.execSQL("DROP TABLE IF EXISTS "
+                    + mTableNames[TABLE_COOKIES_ID]);
+            mDatabase.execSQL("DROP TABLE IF EXISTS cache");
+            mDatabase.execSQL("DROP TABLE IF EXISTS "
+                    + mTableNames[TABLE_FORMURL_ID]);
+            mDatabase.execSQL("DROP TABLE IF EXISTS "
+                    + mTableNames[TABLE_FORMDATA_ID]);
+            mDatabase.execSQL("DROP TABLE IF EXISTS "
+                    + mTableNames[TABLE_HTTPAUTH_ID]);
         }
         mDatabase.execSQL("DROP TABLE IF EXISTS "
-                + mTableNames[TABLE_COOKIES_ID]);
-        mDatabase.execSQL("DROP TABLE IF EXISTS cache");
-        mDatabase.execSQL("DROP TABLE IF EXISTS "
                 + mTableNames[TABLE_PASSWORD_ID]);
-        mDatabase.execSQL("DROP TABLE IF EXISTS "
-                + mTableNames[TABLE_FORMURL_ID]);
-        mDatabase.execSQL("DROP TABLE IF EXISTS "
-                + mTableNames[TABLE_FORMDATA_ID]);
-        mDatabase.execSQL("DROP TABLE IF EXISTS "
-                + mTableNames[TABLE_HTTPAUTH_ID]);
-        mDatabase.setVersion(DATABASE_VERSION);
-    }
 
-    private static void bootstrapDatabase() {
-        if (mDatabase != null) {
+        mDatabase.setVersion(DATABASE_VERSION);
+
+        if (!justPasswords) {
             // cookies
             mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_COOKIES_ID]
                     + " (" + ID_COL + " INTEGER PRIMARY KEY, "
@@ -264,14 +270,6 @@ public class WebViewDatabase {
                     + " INTEGER, " + COOKIES_SECURE_COL + " INTEGER" + ");");
             mDatabase.execSQL("CREATE INDEX cookiesIndex ON "
                     + mTableNames[TABLE_COOKIES_ID] + " (path)");
-
-            // password
-            mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_PASSWORD_ID]
-                    + " (" + ID_COL + " INTEGER PRIMARY KEY, "
-                    + PASSWORD_HOST_COL + " TEXT, " + PASSWORD_USERNAME_COL
-                    + " TEXT, " + PASSWORD_PASSWORD_COL + " TEXT," + " UNIQUE ("
-                    + PASSWORD_HOST_COL + ", " + PASSWORD_USERNAME_COL
-                    + ") ON CONFLICT REPLACE);");
 
             // formurl
             mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_FORMURL_ID]
@@ -295,6 +293,13 @@ public class WebViewDatabase {
                     + HTTPAUTH_HOST_COL + ", " + HTTPAUTH_REALM_COL + ", "
                     + HTTPAUTH_USERNAME_COL + ") ON CONFLICT REPLACE);");
         }
+        // passwords
+        mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_PASSWORD_ID]
+                + " (" + ID_COL + " INTEGER PRIMARY KEY, "
+                + PASSWORD_HOST_COL + " TEXT, " + PASSWORD_USERNAME_COL
+                + " TEXT, " + PASSWORD_PASSWORD_COL + " TEXT," + " UNIQUE ("
+                + PASSWORD_HOST_COL + ", " + PASSWORD_USERNAME_COL
+                + ") ON CONFLICT REPLACE);");
     }
 
     private static void upgradeCacheDatabase() {
@@ -639,10 +644,11 @@ public class WebViewDatabase {
         if (cursor.moveToFirst()) {
             int batchSize = 100;
             StringBuilder pathStr = new StringBuilder(20 + 16 * batchSize);
-            pathStr.append("DELETE FROM cache WHERE filepath = ?");
+            pathStr.append("DELETE FROM cache WHERE filepath IN (?");
             for (int i = 1; i < batchSize; i++) {
-                pathStr.append(" OR filepath = ?");
+                pathStr.append(", ?");
             }
+            pathStr.append(")");
             SQLiteStatement statement = mCacheDatabase.compileStatement(pathStr
                     .toString());
             // as bindString() uses 1-based index, initialize index to 1
@@ -658,6 +664,7 @@ public class WebViewDatabase {
                 pathList.add(filePath);
                 if (index++ == batchSize) {
                     statement.execute();
+                    statement.clearBindings();
                     index = 1;
                 }
             } while (cursor.moveToNext() && amount > 0);
@@ -679,19 +686,20 @@ public class WebViewDatabase {
     /**
      * Set password. Tuple (PASSWORD_HOST_COL, PASSWORD_USERNAME_COL) is unique.
      *
-     * @param host The host for the password
+     * @param schemePlusHost The scheme and host for the password
      * @param username The username for the password. If it is null, it means
      *            password can't be saved.
      * @param password The password
      */
-    void setUsernamePassword(String host, String username, String password) {
-        if (host == null || mDatabase == null) {
+    void setUsernamePassword(String schemePlusHost, String username,
+                String password) {
+        if (schemePlusHost == null || mDatabase == null) {
             return;
         }
 
         synchronized (mPasswordLock) {
             final ContentValues c = new ContentValues();
-            c.put(PASSWORD_HOST_COL, host);
+            c.put(PASSWORD_HOST_COL, schemePlusHost);
             c.put(PASSWORD_USERNAME_COL, username);
             c.put(PASSWORD_PASSWORD_COL, password);
             mDatabase.insert(mTableNames[TABLE_PASSWORD_ID], PASSWORD_HOST_COL,
@@ -702,12 +710,12 @@ public class WebViewDatabase {
     /**
      * Retrieve the username and password for a given host
      *
-     * @param host The host which passwords applies to
+     * @param schemePlusHost The scheme and host which passwords applies to
      * @return String[] if found, String[0] is username, which can be null and
      *         String[1] is password. Return null if it can't find anything.
      */
-    String[] getUsernamePassword(String host) {
-        if (host == null || mDatabase == null) {
+    String[] getUsernamePassword(String schemePlusHost) {
+        if (schemePlusHost == null || mDatabase == null) {
             return null;
         }
 
@@ -718,8 +726,8 @@ public class WebViewDatabase {
         synchronized (mPasswordLock) {
             String[] ret = null;
             Cursor cursor = mDatabase.query(mTableNames[TABLE_PASSWORD_ID],
-                    columns, selection, new String[] { host }, null, null,
-                    null);
+                    columns, selection, new String[] { schemePlusHost }, null,
+                    null, null);
             if (cursor.moveToFirst()) {
                 ret = new String[2];
                 ret[0] = cursor.getString(

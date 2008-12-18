@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.awt.Rectangle;
@@ -27,13 +28,18 @@ import java.awt.geom.Rectangle2D;
 import java.util.NoSuchElementException;
 
 import org.apache.harmony.awt.internal.nls.Messages;
+import org.apache.harmony.luni.util.NotImplementedException;
 
 /**
  * The Class Area provides a minimal implementation for a generic shape.
+ * 
+ * @since Android 1.0
  */
 public class Area implements Shape, Cloneable {
 
-    /** The source Shape object. */
+    /**
+     * The source Shape object.
+     */
     Shape s;
 
     /**
@@ -80,7 +86,8 @@ public class Area implements Shape, Cloneable {
     /**
      * Instantiates a new area with data given by the specified shape.
      * 
-     * @param s the shape that gives the data for this Area
+     * @param s
+     *            the shape that gives the data for this Area.
      */
     public Area(Shape s) {
         if (s == null) {
@@ -114,11 +121,11 @@ public class Area implements Shape, Cloneable {
     /**
      * Tests whether the object is equal to this Area.
      * 
-     * @param obj the object to compare
-     * 
-     * @return true, if successful
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @param obj
+     *            the object to compare.
+     * @return true, if successful.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public boolean equals(Area obj) throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -140,7 +147,7 @@ public class Area implements Shape, Cloneable {
     }
 
     public Rectangle2D getBounds2D() {
-        return s == null ? new Rectangle2D.Double(): s.getBounds2D();
+        return s == null ? new Rectangle2D.Double() : s.getBounds2D();
     }
 
     public PathIterator getPathIterator(AffineTransform t) {
@@ -154,32 +161,34 @@ public class Area implements Shape, Cloneable {
     /**
      * Adds the specified area to this area.
      * 
-     * @param area the area to add to this area
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @param area
+     *            the area to add to this area.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public void add(Area area) throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
     }
 
     /**
-     * Performs an exclusive or operation between this shape and the
-     * specified shape.
+     * Performs an exclusive or operation between this shape and the specified
+     * shape.
      * 
-     * @param area the area to XOR against this area
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @param area
+     *            the area to XOR against this area.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public void exclusiveOr(Area area) throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
     }
 
     /**
-     * Extracts a Rectangle2D from the source shape if the underlying shape
-     * data describes a rectangle.
+     * Extracts a Rectangle2D from the source shape if the underlying shape data
+     * describes a rectangle.
      * 
-     * @return a Rectangle2D object if the source shape is rectangle, 
-     * or null if shape is empty or not rectangle.
+     * @return a Rectangle2D object if the source shape is rectangle, or null if
+     *         shape is empty or not rectangle.
      */
     Rectangle2D extractRectangle() {
         if (s == null) {
@@ -189,7 +198,7 @@ public class Area implements Shape, Cloneable {
         int count = 0;
         PathIterator p = s.getPathIterator(null);
         float[] coords = new float[6];
-        while(!p.isDone()) {
+        while (!p.isDone()) {
             int type = p.currentSegment(coords);
             if (count > 12 || type == PathIterator.SEG_QUADTO || type == PathIterator.SEG_CUBICTO) {
                 return null;
@@ -198,21 +207,22 @@ public class Area implements Shape, Cloneable {
             points[count++] = coords[1];
             p.next();
         }
-        if (points[0] == points[6] && points[6] == points[8] && points[2] == points[4] &&
-            points[1] == points[3] && points[3] == points[9] && points[5] == points[7])
-        {
-            return new Rectangle2D.Float(points[0], points[1], points[2] - points[0], points[7] - points[1]);
+        if (points[0] == points[6] && points[6] == points[8] && points[2] == points[4]
+                && points[1] == points[3] && points[3] == points[9] && points[5] == points[7]) {
+            return new Rectangle2D.Float(points[0], points[1], points[2] - points[0], points[7]
+                    - points[1]);
         }
         return null;
     }
-    
+
     /**
-     * Reduces the size of this Area by intersecting it with the 
-     * specified Area if they are both rectangles.
+     * Reduces the size of this Area by intersecting it with the specified Area
+     * if they are both rectangles.
      * 
-     * @see java.awt.geom.Rectangle2D#intersect(Rectangle2D, Rectangle2D, Rectangle2D)
-     * 
-     * @param area the area
+     * @see java.awt.geom.Rectangle2D#intersect(Rectangle2D, Rectangle2D,
+     *      Rectangle2D)
+     * @param area
+     *            the area.
      */
     public void intersect(Area area) {
         Rectangle2D src1 = extractRectangle();
@@ -225,9 +235,10 @@ public class Area implements Shape, Cloneable {
     /**
      * Subtract the specified area from this area.
      * 
-     * @param area the area to subtract
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @param area
+     *            the area to subtract.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public void subtract(Area area) throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -236,9 +247,9 @@ public class Area implements Shape, Cloneable {
     /**
      * Checks if this Area is empty.
      * 
-     * @return true, if this Area is empty
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @return true, if this Area is empty.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public boolean isEmpty() throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -247,9 +258,9 @@ public class Area implements Shape, Cloneable {
     /**
      * Checks if this Area is polygonal.
      * 
-     * @return true, if this Area is polygonal
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @return true, if this Area is polygonal.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public boolean isPolygonal() throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -258,9 +269,9 @@ public class Area implements Shape, Cloneable {
     /**
      * Checks if this Area is rectangular.
      * 
-     * @return true, if this Area is rectangular
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @return true, if this Area is rectangular.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public boolean isRectangular() throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -269,9 +280,9 @@ public class Area implements Shape, Cloneable {
     /**
      * Checks if this Area is singular.
      * 
-     * @return true, if this Area is singular
-     * 
-     * @throws NotImplementedException if this method is not implemented
+     * @return true, if this Area is singular.
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public boolean isSingular() throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
@@ -280,30 +291,32 @@ public class Area implements Shape, Cloneable {
     /**
      * Resets the data of this Area.
      * 
-     * @throws NotImplementedException if this method is not implemented
+     * @throws NotImplementedException
+     *             if this method is not implemented.
      */
     public void reset() throws org.apache.harmony.luni.util.NotImplementedException {
         throw new RuntimeException("Not implemented"); //$NON-NLS-1$
     }
 
     /**
-     * Transforms the data of this Area according to the specified 
+     * Transforms the data of this Area according to the specified
      * AffineTransform.
      * 
-     * @param t the transform to use to transform the data
+     * @param t
+     *            the transform to use to transform the data.
      */
     public void transform(AffineTransform t) {
         s = t.createTransformedShape(s);
     }
 
     /**
-     * Creates a new Area that is the result of transforming the data 
-     * of this Area according to the specified AffineTransform.
+     * Creates a new Area that is the result of transforming the data of this
+     * Area according to the specified AffineTransform.
      * 
-     * @param t the transform to use to transform the data
-     * 
-     * @return the new Area that is the result of transforming the data 
-     * of this Area according to the specified AffineTransform.
+     * @param t
+     *            the transform to use to transform the data.
+     * @return the new Area that is the result of transforming the data of this
+     *         Area according to the specified AffineTransform.
      */
     public Area createTransformedArea(AffineTransform t) {
         return s == null ? new Area() : new Area(t.createTransformedShape(s));

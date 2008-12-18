@@ -36,7 +36,11 @@ interface IBluetoothHeadset {
     // returns true
     boolean connectHeadset(in String address, in IBluetoothHeadsetCallback callback);
 
+    void disconnectHeadset();
+
     boolean isConnected(in String address);
 
-    void disconnectHeadset();
+    boolean startVoiceRecognition();
+
+    boolean stopVoiceRecognition();
 }

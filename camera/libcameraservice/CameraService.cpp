@@ -1,6 +1,7 @@
 /*
 **
-** Copyright 2008, The Android Open Source Project
+** Copyright (C) 2008, The Android Open Source Project
+** Copyright (C) 2008 HTC Inc.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
 ** limitations under the License.
 */
 
-
+//#define LOG_NDEBUG 0
 #define LOG_TAG "CameraService"
 #include <utils/Log.h>
 
@@ -155,8 +156,20 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 {
     LOGD("Client E constructor");
     mHardware = openCameraHardware();
-    mHasFrameCallback = false;
+
+    // Callback is disabled by default
+    mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     LOGD("Client X constructor");
+}
+
+status_t CameraService::Client::connect(const sp<ICameraClient>& client)
+{
+    // remvoe old client
+    LOGD("connect (new client)");
+    Mutex::Autolock _l(mLock);
+    mCameraClient = client;
+    mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    return NO_ERROR;
 }
 
 #if HAVE_ANDROID_OS
@@ -170,7 +183,7 @@ static void *unregister_surface(void *arg)
 #endif
 
 CameraService::Client::~Client()
-{ 
+{
     // spin down hardware
     LOGD("Client E destructor");
     if (mSurface != 0) {
@@ -179,7 +192,7 @@ CameraService::Client::~Client()
         // We unregister the buffers in a different thread because binder does
         // not let us make sychronous transactions in a binder destructor (that
         // is, upon our reaching a refcount of zero.)
-        pthread_create(&thr, NULL, 
+        pthread_create(&thr, NULL,
                        unregister_surface,
                        mSurface.get());
         pthread_join(thr, NULL);
@@ -227,12 +240,12 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
     return NO_ERROR;
 }
 
-// tell the service whether to callback with each preview frame
-void CameraService::Client::setHasFrameCallback(bool installed)
+// set the frame callback flag to affect how the received frames from
+// preview are handled.
+void CameraService::Client::setFrameCallbackFlag(int frame_callback_flag)
 {
     Mutex::Autolock lock(mLock);
-    mHasFrameCallback = installed;
-    // If installed is false, mPreviewBuffer will be released in stopPreview().
+    mFrameCallbackFlag = frame_callback_flag;
 }
 
 // start preview mode, must call setPreviewDisplay first
@@ -250,24 +263,24 @@ status_t CameraService::Client::startPreview()
         LOGE("mHardware is NULL, returning.");
         return INVALID_OPERATION;
     }
-    
+
     if (mSurface == 0) {
         LOGE("setPreviewDisplay must be called before startPreview!");
         return INVALID_OPERATION;
     }
-    
+
     // XXX: This needs to be improved. remove all hardcoded stuff
-    
+
     int w, h;
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
-    
+
     mSurface->unregisterBuffers();
 
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
     debug_frame_cnt = 0;
 #endif
-    
+
     status_t ret = mHardware->startPreview(previewCallback,
                                            mCameraService.get());
     if (ret == NO_ERROR) {
@@ -277,7 +290,7 @@ status_t CameraService::Client::startPreview()
     }
     else LOGE("mHardware->startPreview() failed with status %d\n",
               ret);
-    
+
     return ret;
 }
 
@@ -295,7 +308,7 @@ void CameraService::Client::stopPreview()
 
     mHardware->stopPreview();
     LOGD("stopPreview(), hardware stopped OK");
-    
+
     if (mSurface != 0) {
         mSurface->unregisterBuffers();
     }
@@ -361,6 +374,7 @@ static void dump_to_file(const char *fname,
 // preview callback - frame buffer update
 void CameraService::Client::previewCallback(const sp<IMemory>& mem, void* user)
 {
+    LOGV("previewCallback()");
     sp<Client> client = getClientFromCookie(user);
     if (client == 0) {
         return;
@@ -395,7 +409,7 @@ void CameraService::Client::previewCallback(const sp<IMemory>& mem, void* user)
     client->postFrame(mem);
 
 #if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here, 
+    //**** if the client's refcount is 1, then we are about to destroy it here,
     // which is bad--print all refcounts.
     if (client->getStrongCount() == 1) {
         LOGE("++++++++++++++++ (PREVIEW) THIS WILL CAUSE A LOCKUP!");
@@ -431,7 +445,7 @@ status_t CameraService::Client::takePicture()
         LOGE("mHardware is NULL, returning.");
         return INVALID_OPERATION;
     }
-    
+
     if (mSurface != NULL)
         mSurface->unregisterBuffers();
 
@@ -495,7 +509,7 @@ void CameraService::Client::yuvPictureCallback(const sp<IMemory>& mem,
     client->postRaw(mem);
 
 #if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here, 
+    //**** if the client's refcount is 1, then we are about to destroy it here,
     // which is bad--print all refcounts.
     if (client->getStrongCount() == 1) {
         LOGE("++++++++++++++++ (RAW) THIS WILL CAUSE A LOCKUP!");
@@ -532,7 +546,7 @@ void CameraService::Client::jpegPictureCallback(const sp<IMemory>& mem, void *us
     client->postJpeg(mem);
 
 #if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here, 
+    //**** if the client's refcount is 1, then we are about to destroy it here,
     // which is bad--print all refcounts.
     if (client->getStrongCount() == 1) {
         LOGE("++++++++++++++++ (JPEG) THIS WILL CAUSE A LOCKUP!");
@@ -615,37 +629,74 @@ void CameraService::Client::postJpeg(const sp<IMemory>& mem)
     mCameraClient->jpegCallback(mem);
 }
 
+void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size)
+{
+    LOGV("copyFrameAndPostCopiedFrame");
+    // It is necessary to copy out of pmem before sending this to
+    // the callback. For efficiency, reuse the same MemoryHeapBase
+    // provided it's big enough. Don't allocate the memory or
+    // perform the copy if there's no callback.
+    if (mPreviewBuffer == 0) {
+        mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
+    } else if (size > mPreviewBuffer->virtualSize()) {
+        mPreviewBuffer.clear();
+        mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
+        if (mPreviewBuffer == 0) {
+            LOGE("failed to allocate space for preview buffer");
+            return;
+        }
+    }
+    memcpy(mPreviewBuffer->base(),
+           (uint8_t *)heap->base() + offset, size);
+
+    sp<MemoryBase> frame = new MemoryBase(mPreviewBuffer, 0, size);
+    if (frame == 0) {
+        LOGE("failed to allocate space for frame callback");
+        return;
+    }
+    mCameraClient->frameCallback(frame);
+}
+
 void CameraService::Client::postFrame(const sp<IMemory>& mem)
 {
+    LOGV("postFrame");
+    if (mem == 0) {
+        LOGW("mem is a null pointer");
+        return;
+    }
+
     ssize_t offset;
     size_t size;
     sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-
-    sp<MemoryBase> frame;
-
     {
         Mutex::Autolock surfaceLock(mSurfaceLock);
-        if (mSurface != NULL)
+        if (mSurface != NULL) {
             mSurface->postBuffer(offset);
-    }
-    
-    // It is necessary to copy out of pmem before sending this to the callback.
-    // For efficiency, reuse the same MemoryHeapBase provided it's big enough.
-    // Don't allocate the memory or perform the copy if there's no callback.
-    if (mHasFrameCallback) {
-        if (mPreviewBuffer == 0) {
-            mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
-        } else if (size > mPreviewBuffer->virtualSize()) {
-            mPreviewBuffer.clear();
-            mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
         }
-        memcpy(mPreviewBuffer->base(), (uint8_t *)heap->base() + offset, size);
-        frame = new MemoryBase(mPreviewBuffer, 0, size);
     }
-    
-    // Do not hold the client lock while calling back.
-    if (frame != 0) {
-        mCameraClient->frameCallback(frame);
+
+    // Is the callback enabled or not?
+    if (!(mFrameCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK)) {
+        // If the enable bit is off, the copy-out and one-shot bits are ignored
+        LOGV("frame callback is diabled");
+        return;
+    }
+
+    // Is the received frame copied out or not?
+    if (mFrameCallbackFlag & FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
+        LOGV("frame is copied out");
+        copyFrameAndPostCopiedFrame(heap, offset, size);
+    } else {
+        LOGV("frame is directly sent out without copying");
+        mCameraClient->frameCallback(mem);
+    }
+
+    // Is this is one-shot only?
+    if (mFrameCallbackFlag & FRAME_CALLBACK_FLAG_ONE_SHOT_MASK) {
+        LOGV("One-shot only, thus clear the bits and disable frame callback");
+        mFrameCallbackFlag &= ~(FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
+                                FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
+                                FRAME_CALLBACK_FLAG_ENABLE_MASK);
     }
 }
 
@@ -711,7 +762,7 @@ status_t CameraService::onTransact(
     }
 
     status_t err = BnCameraService::onTransact(code, data, reply, flags);
-    
+
     LOGD("+++ onTransact err %d code %d", err, code);
 
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {

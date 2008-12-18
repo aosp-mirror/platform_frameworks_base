@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import javax.imageio.stream.ImageInputStream;
@@ -27,18 +28,28 @@ import java.awt.image.RenderedImage;
 import java.io.IOException;
 
 /**
- * The ImageWriterSpi abstract class is a service provider 
- * interface (SPI) for ImageWriters.
+ * The ImageWriterSpi abstract class is a service provider interface (SPI) for
+ * ImageWriters.
+ * 
+ * @since Android 1.0
  */
 public abstract class ImageWriterSpi extends ImageReaderWriterSpi {
 
-    /** The STANDARD_OUTPUT_TYPE contains ImageInputStream.class. */
-    public static final Class[] STANDARD_OUTPUT_TYPE = new Class[] {ImageInputStream.class};
+    /**
+     * The STANDARD_OUTPUT_TYPE contains ImageInputStream.class.
+     */
+    public static final Class[] STANDARD_OUTPUT_TYPE = new Class[] {
+        ImageInputStream.class
+    };
 
-    /** The output types. */
+    /**
+     * The output types.
+     */
     protected Class[] outputTypes;
-    
-    /** The reader spi names. */
+
+    /**
+     * The reader SPI names.
+     */
     protected String[] readerSpiNames;
 
     /**
@@ -51,50 +62,62 @@ public abstract class ImageWriterSpi extends ImageReaderWriterSpi {
     /**
      * Instantiates a new ImageWriterSpi with the specified parameters.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
-     * @param names the format names.
-     * @param suffixes the array of strings representing the file suffixes. 
-     * @param MIMETypes the an array of strings representing MIME types.
-     * @param pluginClassName the plugin class name.
-     * @param outputTypes the output types.
-     * @param readerSpiNames the array of strings with class names of all 
-     * associated ImageReaders.
-     * @param supportsStandardStreamMetadataFormat the value indicating
-     * if stream metadata can be described by standard metadata format.
-     * @param nativeStreamMetadataFormatName the native stream metadata 
-     * format name, returned by getNativeStreamMetadataFormatName.
-     * @param nativeStreamMetadataFormatClassName the native stream 
-     * metadata format class name, returned by getNativeStreamMetadataFormat.
-     * @param extraStreamMetadataFormatNames the extra stream metadata 
-     * format names, returned by getExtraStreamMetadataFormatNames.
-     * @param extraStreamMetadataFormatClassNames the extra stream metadata 
-     * format class names, returned by getStreamMetadataFormat.
-     * @param supportsStandardImageMetadataFormat the value indicating
-     * if image metadata can be described by standard metadata format.
-     * @param nativeImageMetadataFormatName the native image metadata 
-     * format name, returned by getNativeImageMetadataFormatName.
-     * @param nativeImageMetadataFormatClassName the native image
-     * metadata format class name, returned by getNativeImageMetadataFormat.
-     * @param extraImageMetadataFormatNames the extra image metadata 
-     * format names, returned by getExtraImageMetadataFormatNames.
-     * @param extraImageMetadataFormatClassNames the extra image metadata 
-     * format class names, returned by getImageMetadataFormat.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
+     * @param names
+     *            the format names.
+     * @param suffixes
+     *            the array of strings representing the file suffixes.
+     * @param MIMETypes
+     *            the an array of strings representing MIME types.
+     * @param pluginClassName
+     *            the plug-in class name.
+     * @param outputTypes
+     *            the output types.
+     * @param readerSpiNames
+     *            the array of strings with class names of all associated
+     *            ImageReaders.
+     * @param supportsStandardStreamMetadataFormat
+     *            the value indicating if stream metadata can be described by
+     *            standard metadata format.
+     * @param nativeStreamMetadataFormatName
+     *            the native stream metadata format name, returned by
+     *            getNativeStreamMetadataFormatName.
+     * @param nativeStreamMetadataFormatClassName
+     *            the native stream metadata format class name, returned by
+     *            getNativeStreamMetadataFormat.
+     * @param extraStreamMetadataFormatNames
+     *            the extra stream metadata format names, returned by
+     *            getExtraStreamMetadataFormatNames.
+     * @param extraStreamMetadataFormatClassNames
+     *            the extra stream metadata format class names, returned by
+     *            getStreamMetadataFormat.
+     * @param supportsStandardImageMetadataFormat
+     *            the value indicating if image metadata can be described by
+     *            standard metadata format.
+     * @param nativeImageMetadataFormatName
+     *            the native image metadata format name, returned by
+     *            getNativeImageMetadataFormatName.
+     * @param nativeImageMetadataFormatClassName
+     *            the native image metadata format class name, returned by
+     *            getNativeImageMetadataFormat.
+     * @param extraImageMetadataFormatNames
+     *            the extra image metadata format names, returned by
+     *            getExtraImageMetadataFormatNames.
+     * @param extraImageMetadataFormatClassNames
+     *            the extra image metadata format class names, returned by
+     *            getImageMetadataFormat.
      */
-    public ImageWriterSpi(String vendorName, String version, String[] names,
-                             String[] suffixes, String[] MIMETypes,
-                             String pluginClassName,
-                             Class[] outputTypes, String[] readerSpiNames,
-                             boolean supportsStandardStreamMetadataFormat,
-                             String nativeStreamMetadataFormatName,
-                             String nativeStreamMetadataFormatClassName,
-                             String[] extraStreamMetadataFormatNames,
-                             String[] extraStreamMetadataFormatClassNames,
-                             boolean supportsStandardImageMetadataFormat,
-                             String nativeImageMetadataFormatName,
-                             String nativeImageMetadataFormatClassName,
-                             String[] extraImageMetadataFormatNames,
-                             String[] extraImageMetadataFormatClassNames) {
+    public ImageWriterSpi(String vendorName, String version, String[] names, String[] suffixes,
+            String[] MIMETypes, String pluginClassName, Class[] outputTypes,
+            String[] readerSpiNames, boolean supportsStandardStreamMetadataFormat,
+            String nativeStreamMetadataFormatName, String nativeStreamMetadataFormatClassName,
+            String[] extraStreamMetadataFormatNames, String[] extraStreamMetadataFormatClassNames,
+            boolean supportsStandardImageMetadataFormat, String nativeImageMetadataFormatName,
+            String nativeImageMetadataFormatClassName, String[] extraImageMetadataFormatNames,
+            String[] extraImageMetadataFormatClassNames) {
         super(vendorName, version, names, suffixes, MIMETypes, pluginClassName,
                 supportsStandardStreamMetadataFormat, nativeStreamMetadataFormatName,
                 nativeStreamMetadataFormatClassName, extraStreamMetadataFormatNames,
@@ -111,8 +134,8 @@ public abstract class ImageWriterSpi extends ImageReaderWriterSpi {
     }
 
     /**
-     * Returns true if the format of the writer's output is lossless. 
-     * The default implementation returns true.
+     * Returns true if the format of the writer's output is lossless. The
+     * default implementation returns true.
      * 
      * @return true, if a format is lossless, false otherwise.
      */
@@ -121,8 +144,8 @@ public abstract class ImageWriterSpi extends ImageReaderWriterSpi {
     }
 
     /**
-     * Gets an array of Class objects whose types 
-     * can be used as output for this writer.
+     * Gets an array of Class objects whose types can be used as output for this
+     * writer.
      * 
      * @return the output types.
      */
@@ -131,77 +154,72 @@ public abstract class ImageWriterSpi extends ImageReaderWriterSpi {
     }
 
     /**
-     * Checks whether or not the ImageWriter implementation associated 
-     * with this service provider can encode an image with 
-     * the specified type.
+     * Checks whether or not the ImageWriter implementation associated with this
+     * service provider can encode an image with the specified type.
      * 
-     * @param type the ImageTypeSpecifier.
-     * 
-     * @return true, if an image with the specified type can be
-     * encoded, false otherwise. 
+     * @param type
+     *            the ImageTypeSpecifier.
+     * @return true, if an image with the specified type can be encoded, false
+     *         otherwise.
      */
     public abstract boolean canEncodeImage(ImageTypeSpecifier type);
 
     /**
-     * Checks whether or not the ImageWriter implementation associated 
-     * with this service provider can encode the specified RenderedImage.
+     * Checks whether or not the ImageWriter implementation associated with this
+     * service provider can encode the specified RenderedImage.
      * 
-     * @param im the RenderedImage.
-     * 
-     * @return true, if RenderedImage can be encoded, 
-     * false otherwise. 
+     * @param im
+     *            the RenderedImage.
+     * @return true, if RenderedImage can be encoded, false otherwise.
      */
     public boolean canEncodeImage(RenderedImage im) {
         return canEncodeImage(ImageTypeSpecifier.createFromRenderedImage(im));
     }
 
     /**
-     * Returns an instance of the ImageWriter implementation for
-     * this service provider.
+     * Returns an instance of the ImageWriter implementation for this service
+     * provider.
      * 
      * @return the ImageWriter.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public ImageWriter createWriterInstance() throws IOException {
         return createWriterInstance(null);
     }
 
     /**
-     * Returns an instance of the ImageWriter implementation for
-     * this service provider.
+     * Returns an instance of the ImageWriter implementation for this service
+     * provider.
      * 
-     * @param extension the a plugin specific extension object, or null.
-     * 
+     * @param extension
+     *            the a plug-in specific extension object, or null.
      * @return the ImageWriter.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public abstract ImageWriter createWriterInstance(Object extension) throws IOException;
 
     /**
-     * Checks whether or not the specified ImageWriter object 
-     * is an instance of the ImageWriter associated with this 
-     * service provider or not.
+     * Checks whether or not the specified ImageWriter object is an instance of
+     * the ImageWriter associated with this service provider or not.
      * 
-     * @param writer the ImageWriter.
-     * 
-     * @return true, if the specified ImageWriter object 
-     * is an instance of the ImageWriter associated with this 
-     * service provider, false otherwise.
+     * @param writer
+     *            the ImageWriter.
+     * @return true, if the specified ImageWriter object is an instance of the
+     *         ImageWriter associated with this service provider, false
+     *         otherwise.
      */
     public boolean isOwnWriter(ImageWriter writer) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets an array of strings with names of the ImageReaderSpi 
-     * classes that support the internal metadata representation 
-     * used by the ImageWriter of this service provider, or null if 
-     * there are no such ImageReaders.
+     * Gets an array of strings with names of the ImageReaderSpi classes that
+     * support the internal metadata representation used by the ImageWriter of
+     * this service provider, or null if there are no such ImageReaders.
      * 
-     * @return an array of strings with names of the ImageWriterSpi 
-     * classes.
+     * @return the array of strings with names of the ImageWriterSpi classes.
      */
     public String[] getImageReaderSpiNames() {
         return readerSpiNames;

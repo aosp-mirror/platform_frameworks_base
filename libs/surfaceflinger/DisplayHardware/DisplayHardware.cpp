@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include <GLES/egl.h>
 
@@ -27,7 +28,9 @@
 #include <ui/EGLDisplaySurface.h>
 
 #include "DisplayHardware/DisplayHardware.h"
-#include "ui/BlitHardware.h"
+
+#include <hardware/copybit.h>
+#include <hardware/overlay.h>
 
 using namespace android;
 
@@ -91,19 +94,13 @@ DisplayHardware::~DisplayHardware()
     fini();
 }
 
-float DisplayHardware::getDpiX() const           { return mDpiX; }
-float DisplayHardware::getDpiY() const           { return mDpiY; }
-float DisplayHardware::getRefreshRate() const    { return mRefreshRate; }
-
-int DisplayHardware::getWidth() const {
-    return mWidth;
-}
-int DisplayHardware::getHeight() const {
-    return mHeight;
-}
-PixelFormat DisplayHardware::getFormat() const {
-    return mFormat;
-}
+float DisplayHardware::getDpiX() const          { return mDpiX; }
+float DisplayHardware::getDpiY() const          { return mDpiY; }
+float DisplayHardware::getDensity() const       { return mDensity; }
+float DisplayHardware::getRefreshRate() const   { return mRefreshRate; }
+int DisplayHardware::getWidth() const           { return mWidth; }
+int DisplayHardware::getHeight() const          { return mHeight; }
+PixelFormat DisplayHardware::getFormat() const  { return mFormat; }
 
 void DisplayHardware::init(uint32_t dpy)
 {
@@ -195,6 +192,12 @@ void DisplayHardware::init(uint32_t dpy)
         mDpiY = 25.4f * float(value)/EGL_DISPLAY_SCALING;
     }
     mRefreshRate = 60.f;    // TODO: get the real refresh rate 
+    
+    // compute a "density" automatically as a scale factor from 160 dpi
+    // TODO: this value should be calculated a compile time based on the
+    // board.
+    mDensity = floorf((mDpiX>mDpiY ? mDpiX : mDpiY)*0.1f + 0.5f) * (10.0f/160.0f);
+    LOGI("density = %f", mDensity);
 
     /*
      * Create our OpenGL ES context
@@ -237,8 +240,18 @@ void DisplayHardware::init(uint32_t dpy)
     mSurface = surface;
     mContext = context;
     mFormat  = GGL_PIXEL_FORMAT_RGB_565;
+    
+    hw_module_t const* module;
 
-    mBlitEngine = copybit_init();
+    mBlitEngine = NULL;
+    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+        copybit_open(module, &mBlitEngine);
+    }
+
+    mOverlayEngine = NULL;
+    if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
+        overlay_open(module, &mOverlayEngine);
+    }
 }
 
 /*
@@ -252,7 +265,8 @@ void DisplayHardware::fini()
 {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(mDisplay);
-    copybit_term(mBlitEngine);
+    copybit_close(mBlitEngine);
+    overlay_close(mOverlayEngine);
 }
 
 void DisplayHardware::releaseScreen() const

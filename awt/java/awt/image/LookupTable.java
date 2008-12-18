@@ -26,26 +26,33 @@ package java.awt.image;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * This abstract LookupTable class represents lookup table which
- * is defined with the number of components and offset value.
- * ByteLookupTable and ShortLookupTable classes are subclasses of
- * LookupTable which contains byte and short data tables as
- * an input arrays for bands or components of image.
+ * This abstract LookupTable class represents lookup table which is defined with
+ * the number of components and offset value. ByteLookupTable and
+ * ShortLookupTable classes are subclasses of LookupTable which contains byte
+ * and short data tables as an input arrays for bands or components of image.
+ * 
+ * @since Android 1.0
  */
 public abstract class LookupTable {
-    
-    /** The offset. */
+
+    /**
+     * The offset.
+     */
     private int offset;
-    
-    /** The num components. */
+
+    /**
+     * The num components.
+     */
     private int numComponents;
 
     /**
-     * Instantiates a new LookupTable with the specified offset value
-     * and number of components.
+     * Instantiates a new LookupTable with the specified offset value and number
+     * of components.
      * 
-     * @param offset the offset value.
-     * @param numComponents the number of components.
+     * @param offset
+     *            the offset value.
+     * @param numComponents
+     *            the number of components.
      */
     protected LookupTable(int offset, int numComponents) {
         if (offset < 0) {
@@ -80,14 +87,15 @@ public abstract class LookupTable {
     }
 
     /**
-     * Returns a int array which contains samples of the specified
-     * pixel which is translated with the lookup table of this 
-     * LookupTable. The resulted array is stored to the dst array.
+     * Returns an integer array which contains samples of the specified pixel which
+     * is translated with the lookup table of this LookupTable. The resulted
+     * array is stored to the dst array.
      * 
-     * @param src the source array.
-     * @param dst the destination array where the result can be stored.
-     * 
-     * @return the int array of translated samples of a pixel.
+     * @param src
+     *            the source array.
+     * @param dst
+     *            the destination array where the result can be stored.
+     * @return the integer array of translated samples of a pixel.
      */
     public abstract int[] lookupPixel(int[] src, int[] dst);
 }

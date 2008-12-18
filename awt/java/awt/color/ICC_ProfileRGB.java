@@ -23,38 +23,58 @@ package java.awt.color;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The ICC_ProfileRGB class represents profiles with RGB color space type and 
- * contains the redColorantTag, greenColorantTag, blueColorantTag, redTRCTag, 
+ * The ICC_ProfileRGB class represents profiles with RGB color space type and
+ * contains the redColorantTag, greenColorantTag, blueColorantTag, redTRCTag,
  * greenTRCTag, blueTRCTag, and mediaWhitePointTag tags.
+ * 
+ * @since Android 1.0
  */
 public class ICC_ProfileRGB extends ICC_Profile {
     
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 8505067385152579334L;
 
     /**
-     * Instantiates a new iC c_ profile rgb.
+     * Instantiates a new RGB ICC_Profile.
      * 
-     * @param profileHandle the profile handle
+     * @param profileHandle
+     *            the profile handle
      */
     ICC_ProfileRGB(long profileHandle) {
         super(profileHandle);
     }
 
-    /** The Constant REDCOMPONENT indicates the red component. */
+    /**
+     * The Constant REDCOMPONENT indicates the red component.
+     */
     public static final int REDCOMPONENT = 0;
 
-    /** The Constant GREENCOMPONENT indicates the green component. */
+    /**
+     * The Constant GREENCOMPONENT indicates the green component.
+     */
     public static final int GREENCOMPONENT = 1;
 
-    /** The Constant BLUECOMPONENT indicates the blue component. */
+    /**
+     * The Constant BLUECOMPONENT indicates the blue component.
+     */
     public static final int BLUECOMPONENT = 2;
 
     // awt.15E=Unknown component. Must be REDCOMPONENT, GREENCOMPONENT or BLUECOMPONENT.
-    /** The Constant UNKNOWN_COMPONENT_MSG. */
+    /**
+     * The Constant UNKNOWN_COMPONENT_MSG.
+     */
     private static final String UNKNOWN_COMPONENT_MSG = Messages
             .getString("awt.15E"); //$NON-NLS-1$
 
+    /**
+     * Gets the TRC.
+     * 
+     * @param component
+     *            the tag signature.
+     * @return the TRC value.
+     */
     @Override
     public short[] getTRC(int component) {
         switch (component) {
@@ -70,6 +90,13 @@ public class ICC_ProfileRGB extends ICC_Profile {
         throw new IllegalArgumentException(UNKNOWN_COMPONENT_MSG);
     }
 
+    /**
+     * Gets the gamma.
+     * 
+     * @param component
+     *            the tag signature.
+     * @return the gamma value.
+     */
     @Override
     public float getGamma(int component) {
         switch (component) {
@@ -86,11 +113,11 @@ public class ICC_ProfileRGB extends ICC_Profile {
     }
 
     /**
-     * Gets a float matrix which contains the X, Y, and Z components of 
-     * the profile's redColorantTag, greenColorantTag, and blueColorantTag.
+     * Gets a float matrix which contains the X, Y, and Z components of the
+     * profile's redColorantTag, greenColorantTag, and blueColorantTag.
      * 
-     * @return a float matrix which contains the X, Y, and Z components of 
-     * the profile's redColorantTag, greenColorantTag, and blueColorantTag.
+     * @return the float matrix which contains the X, Y, and Z components of the
+     *         profile's redColorantTag, greenColorantTag, and blueColorantTag.
      */
     public float[][] getMatrix() {
         float [][] m = new float[3][3]; // The matrix
@@ -114,6 +141,11 @@ public class ICC_ProfileRGB extends ICC_Profile {
         return m;
     }
 
+    /**
+     * Gets the media white point.
+     * 
+     * @return the media white point.
+     */
     @Override
     public float[] getMediaWhitePoint() {
         return super.getMediaWhitePoint();

@@ -31,29 +31,41 @@ namespace android {
 
 struct audio_track_cblk_t
 {
-    enum {
-        SEQUENCE_MASK   = 0xFFFFFF00,
-        BUFFER_MASK     = 0x000000FF
-    };
 
+    // The data members are grouped so that members accessed frequently and in the same context
+    // are in the same line of data cache.
                 Mutex       lock;
                 Condition   cv;
     volatile    uint32_t    user;
     volatile    uint32_t    server;
+                uint32_t    userBase;
+                uint32_t    serverBase;
+    void*       buffers;
+    uint32_t    frameCount;
+    // Cache line boundary
+    uint32_t    loopStart;
+    uint32_t    loopEnd;
+    int         loopCount;
     volatile    union {
                     uint16_t    volume[2];
                     uint32_t    volumeLR;
                 };
                 uint16_t    sampleRate;
-                uint16_t    reserved;
-
-                void*       buffers;
-                size_t      size;
-            
+                uint16_t    channels;
+                int16_t     flowControlFlag; // underrun (out) or overrrun (in) indication
+                uint8_t     out;        // out equals 1 for AudioTrack and 0 for AudioRecord
+                uint8_t     forceReady; 
+                // Padding ensuring that data buffer starts on a cache line boundary (32 bytes). 
+                // See AudioFlinger::TrackBase constructor
+                int32_t     Padding[4];
+                
                             audio_track_cblk_t();
-                uint32_t    stepUser(int bufferCount);
-                bool        stepServer(int bufferCount);
-                void*       buffer(int id) const;
+                uint32_t    stepUser(uint32_t frameCount);
+                bool        stepServer(uint32_t frameCount);
+                void*       buffer(uint32_t offset) const;
+                uint32_t    framesAvailable();
+                uint32_t    framesAvailable_l();
+                uint32_t    framesReady();
 };
 
 

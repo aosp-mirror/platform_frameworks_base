@@ -428,8 +428,12 @@ public final class BridgeContext extends Context {
      * Searches for, and returns a {@link IResourceValue} by its reference.
      * <p/>
      * The reference format can be:
-     * <pre>@[android:]resType/resName</pre>
-     * <pre>?[android:]resType/resName</pre>
+     * <pre>@resType/resName</pre>
+     * <pre>@android:resType/resName</pre>
+     * <pre>@resType/android:resName</pre>
+     * <pre>?resType/resName</pre>
+     * <pre>?android:resType/resName</pre>
+     * <pre>?resType/android:resName</pre>
      * Any other string format will return <code>null</code>.
      * <p/>
      * The actual format of a reference is <pre>@[namespace:]resType/resName</pre> but this method
@@ -478,6 +482,13 @@ public final class BridgeContext extends Context {
                 // it's just an item name.
                 referenceName = segments[0];
             }
+            
+            // now we look for android: in the referenceName in order to support format
+            // such as: ?attr/android:name
+            if (referenceName.startsWith(BridgeConstants.PREFIX_ANDROID)) {
+                frameworkOnly = true;
+                referenceName = referenceName.substring(BridgeConstants.PREFIX_ANDROID.length());
+            }
 
             // Now look for the item in the theme, starting with the current one.
             if (frameworkOnly) {
@@ -503,8 +514,15 @@ public final class BridgeContext extends Context {
                 reference = reference.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
             }
             
-            // at this point, value contains type/name (drawable/foo for instance)
+            // at this point, value contains type/[android:]name (drawable/foo for instance)
             String[] segments = reference.split("\\/");
+            
+            // now we look for android: in the resource name in order to support format
+            // such as: @drawable/android:name
+            if (segments[1].startsWith(BridgeConstants.PREFIX_ANDROID)) {
+                frameworkOnly = true;
+                segments[1] = segments[1].substring(BridgeConstants.PREFIX_ANDROID.length());
+            }
             
             return findResValue(segments[0], segments[1], frameworkOnly);
         }
@@ -518,8 +536,7 @@ public final class BridgeContext extends Context {
      * @param resType the type of the resource
      * @param resName  the name of the resource
      * @param frameworkOnly if <code>true</code>, the method does not search in the
-     * project resources.
-     * @return
+     * project resources
      */
     private IResourceValue findResValue(String resType, String resName, boolean frameworkOnly) {
         // map of IResouceValue for the given type
@@ -613,7 +630,6 @@ public final class BridgeContext extends Context {
      * there's a field com.android.internal.R.styleable.View_xyz and the field value is the index
      * that is used to reference the attribute later in the TypedArray.
      * 
-     * @param classNames The parent class name where to look, e.g. "com.android.internal.R"
      * @param attrs An attribute array reference given to obtainStyledAttributes.
      * @return A sorted map Attribute-Value to Attribute-Name for all attributes declared by the
      *         attribute array. Returns null if nothing is found.
@@ -669,7 +685,7 @@ public final class BridgeContext extends Context {
     /**
      * Searches for the attribute referenced by its internal id.
      * 
-     * @param attrs An attribute reference given to obtainStyledAttributes such as defStyle.
+     * @param attr An attribute reference given to obtainStyledAttributes such as defStyle.
      * @return The unique name of the attribute, if found, e.g. "buttonStyle". Returns null
      *         if nothing is found.
      */
@@ -963,6 +979,7 @@ public final class BridgeContext extends Context {
         
     }
 
+    @SuppressWarnings("unused")
     @Override
     public FileInputStream openFileInput(String arg0)
             throws FileNotFoundException {
@@ -970,6 +987,7 @@ public final class BridgeContext extends Context {
         return null;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public FileOutputStream openFileOutput(String arg0, int arg1)
             throws FileNotFoundException {
@@ -1053,12 +1071,14 @@ public final class BridgeContext extends Context {
         
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(Bitmap arg0) throws IOException {
         // TODO Auto-generated method stub
         
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(InputStream arg0) throws IOException {
         // TODO Auto-generated method stub

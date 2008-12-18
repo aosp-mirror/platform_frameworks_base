@@ -150,7 +150,12 @@ public class WifiMonitor {
 
                 String eventStr = WifiNative.waitForEvent();
 
-                if (Config.LOGD) Log.v(TAG, "Event [" + eventStr +"]");
+                if (Config.LOGD) {
+                    // Skip logging the common but mostly uninteresting scan-results event
+                    if (eventStr.indexOf(scanResultsEvent) == -1) {
+                        Log.v(TAG, "Event [" + eventStr +"]");
+                    }
+                }
                 if (eventStr == null) {
                     continue;
                 } else if (!eventStr.startsWith(eventPrefix)) {

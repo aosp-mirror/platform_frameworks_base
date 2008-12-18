@@ -313,18 +313,21 @@ public:
         NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
-        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);        
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
         size_t textLength = env->GetArrayLength(text);
-    
+        
         if ((index | count) < 0 || (size_t)(index + count) > textLength) {
-            doThrow(env, "ArrayIndexOutOfBoundsException");
+            doThrow(env, "java/lang/ArrayIndexOutOfBoundsException");
             return 0;
         }
 
-        jfloat width = SkScalarToFloat(paint->measureText(textArray + index, count << 1));
-        env->ReleaseCharArrayElements(text, textArray, 0);
-        return width;
+        const SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);        
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
+        // we double count, since measureText wants a byteLength
+        SkScalar width = paint->measureText(textArray + index, count << 1);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
+                                      JNI_ABORT);
+
+        return SkScalarToFloat(width);
     }
  
     static jfloat measureText_StringII(JNIEnv* env, jobject jpaint, jstring text, int start, int end) {
@@ -337,7 +340,7 @@ public:
         
         int count = end - start;
         if ((start | count) < 0 || (size_t)count > textLength) {
-            doThrow(env, "IndexOutOfBoundsException");
+            doThrow(env, "java/lang/IndexOutOfBoundsException");
             return 0;
         }
         
@@ -372,9 +375,10 @@ public:
     }
     
     static int getTextWidths___CII_F(JNIEnv* env, jobject clazz, SkPaint* paint, jcharArray text, int index, int count, jfloatArray widths) {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
         count = dotextwidths(env, paint, textArray + index, count, widths);
-        env->ReleaseCharArrayElements(text, textArray, 0);        
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
+                                      JNI_ABORT);        
         return count;
     }
  
@@ -386,9 +390,10 @@ public:
     }
     
     static void getTextPath___CIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
         paint->getTextPath(textArray + index, count << 1, SkFloatToScalar(x), SkFloatToScalar(y), path);
-        env->ReleaseCharArrayElements(text, textArray, 0);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
+                                      JNI_ABORT);
     }
  
     static void getTextPath__StringIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
@@ -451,10 +456,11 @@ public:
         }
 
         SkPaint*     paint = GraphicsJNI::getNativePaint(env, jpaint);
-        jchar* text = env->GetCharArrayElements(jtext, NULL);
+        const jchar* text = env->GetCharArrayElements(jtext, NULL);
         count = breakText(env, *paint, text + index, count, maxWidth,
                           jmeasuredWidth, tbd);
-        env->ReleaseCharArrayElements(jtext, text, 0);
+        env->ReleaseCharArrayElements(jtext, const_cast<jchar*>(text),
+                                      JNI_ABORT);
         return count;
     }
 
@@ -498,9 +504,10 @@ public:
     static void getCharArrayBounds(JNIEnv* env, jobject, const SkPaint* paint,
                         jcharArray text, int index, int count, jobject bounds)
     {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
         doTextBounds(env, textArray + index, count, bounds, *paint);
-        env->ReleaseCharArrayElements(text, textArray, 0);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
+                                      JNI_ABORT);
     }
     
 };

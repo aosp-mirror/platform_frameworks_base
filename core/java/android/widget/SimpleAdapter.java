@@ -115,10 +115,22 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
         View v;
         if (convertView == null) {
             v = mInflater.inflate(resource, parent, false);
+
+            final int[] to = mTo;
+            final int count = to.length;
+            final View[] holder = new View[count];
+
+            for (int i = 0; i < count; i++) {
+                holder[i] = v.findViewById(to[i]);
+            }
+
+            v.setTag(holder);
         } else {
             v = convertView;
         }
+
         bindView(position, v);
+
         return v;
     }
 
@@ -143,12 +155,14 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
             return;
         }
 
+        final ViewBinder binder = mViewBinder;
+        final View[] holder = (View[]) view.getTag();
         final String[] from = mFrom;
         final int[] to = mTo;
-        final int len = to.length;
+        final int count = to.length;
 
-        for (int i = 0; i < len; i++) {
-            final View v = view.findViewById(to[i]);
+        for (int i = 0; i < count; i++) {
+            final View v = holder[i];
             if (v != null) {
                 final Object data = dataSet.get(from[i]);
                 String text = data == null ? "" : data.toString();
@@ -157,8 +171,8 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
                 }
 
                 boolean bound = false;
-                if (mViewBinder != null) {
-                    bound = mViewBinder.setViewValue(v, data, text);
+                if (binder != null) {
+                    bound = binder.setViewValue(v, data, text);
                 }
 
                 if (!bound) {

@@ -42,4 +42,8 @@ public final class FallbackCheckinService extends ICheckinService.Stub {
         state.isEnabled = false;
         p.onResult(state);
     }
+    
+    public void getParentalControlState(IParentalControlCallback p, String requestingApp)
+            throws android.os.RemoteException {
+    }
 }

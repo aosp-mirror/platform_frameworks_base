@@ -25,6 +25,7 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -59,6 +60,29 @@ public class AlertDialog extends Dialog implements DialogInterface {
         setOnCancelListener(cancelListener);
         mAlert = new AlertController(context, this, getWindow());
     }
+
+    /**
+     * Gets one of the buttons used in the dialog.
+     * <p>
+     * If a button does not exist in the dialog, null will be returned.
+     * 
+     * @param whichButton The identifier of the button that should be returned.
+     *            For example, this can be
+     *            {@link DialogInterface#BUTTON_POSITIVE}.
+     * @return The button from the dialog, or null if a button does not exist.
+     */
+    public Button getButton(int whichButton) {
+        return mAlert.getButton(whichButton);
+    }
+    
+    /**
+     * Gets the list view used in the dialog.
+     *  
+     * @return The {@link ListView} from the dialog.
+     */
+    public ListView getListView() {
+        return mAlert.getListView();
+    }
     
     @Override
     public void setTitle(CharSequence title) {
@@ -83,44 +107,115 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public void setView(View view) {
         mAlert.setView(view);
     }
+    
+    /**
+     * Set the view to display in that dialog, specifying the spacing to appear around that 
+     * view.
+     *
+     * @param view The view to show in the content area of the dialog
+     * @param viewSpacingLeft Extra space to appear to the left of {@code view}
+     * @param viewSpacingTop Extra space to appear above {@code view}
+     * @param viewSpacingRight Extra space to appear to the right of {@code view}
+     * @param viewSpacingBottom Extra space to appear below {@code view}
+     */
+    public void setView(View view, int viewSpacingLeft, int viewSpacingTop, int viewSpacingRight,
+            int viewSpacingBottom) {
+        mAlert.setView(view, viewSpacingLeft, viewSpacingTop, viewSpacingRight, viewSpacingBottom);
+    }
 
+    /**
+     * Set a message to be sent when a button is pressed.
+     * 
+     * @param whichButton Which button to set the message for, can be one of
+     *            {@link DialogInterface#BUTTON_POSITIVE},
+     *            {@link DialogInterface#BUTTON_NEGATIVE}, or
+     *            {@link DialogInterface#BUTTON_NEUTRAL}
+     * @param text The text to display in positive button.
+     * @param msg The {@link Message} to be sent when clicked.
+     */
+    public void setButton(int whichButton, CharSequence text, Message msg) {
+        mAlert.setButton(whichButton, text, null, msg);
+    }
+    
+    /**
+     * Set a listener to be invoked when the positive button of the dialog is pressed.
+     * 
+     * @param whichButton Which button to set the listener on, can be one of
+     *            {@link DialogInterface#BUTTON_POSITIVE},
+     *            {@link DialogInterface#BUTTON_NEGATIVE}, or
+     *            {@link DialogInterface#BUTTON_NEUTRAL}
+     * @param text The text to display in positive button.
+     * @param listener The {@link DialogInterface.OnClickListener} to use.
+     */
+    public void setButton(int whichButton, CharSequence text, OnClickListener listener) {
+        mAlert.setButton(whichButton, text, listener, null);
+    }
+
+    /**
+     * @deprecated Use {@link #setButton(int, CharSequence, Message)} with
+     *             {@link DialogInterface#BUTTON_POSITIVE}.
+     */
+    @Deprecated
     public void setButton(CharSequence text, Message msg) {
-        mAlert.setButton(text, msg);
+        setButton(BUTTON_POSITIVE, text, msg);
     }
-
+        
+    /**
+     * @deprecated Use {@link #setButton(int, CharSequence, Message)} with
+     *             {@link DialogInterface#BUTTON_NEGATIVE}.
+     */
+    @Deprecated
     public void setButton2(CharSequence text, Message msg) {
-        mAlert.setButton2(text, msg);
+        setButton(BUTTON_NEGATIVE, text, msg);
     }
 
+    /**
+     * @deprecated Use {@link #setButton(int, CharSequence, Message)} with
+     *             {@link DialogInterface#BUTTON_NEUTRAL}.
+     */
+    @Deprecated
     public void setButton3(CharSequence text, Message msg) {
-        mAlert.setButton3(text, msg);
+        setButton(BUTTON_NEUTRAL, text, msg);
     }
 
     /**
      * Set a listener to be invoked when button 1 of the dialog is pressed.
+     * 
      * @param text The text to display in button 1.
      * @param listener The {@link DialogInterface.OnClickListener} to use.
+     * @deprecated Use
+     *             {@link #setButton(int, CharSequence, android.content.DialogInterface.OnClickListener)}
+     *             with {@link DialogInterface#BUTTON_POSITIVE}
      */
+    @Deprecated
     public void setButton(CharSequence text, final OnClickListener listener) {
-        mAlert.setButton(text, listener);
+        setButton(BUTTON_POSITIVE, text, listener);
     }
 
     /**
      * Set a listener to be invoked when button 2 of the dialog is pressed.
      * @param text The text to display in button 2.
      * @param listener The {@link DialogInterface.OnClickListener} to use.
+     * @deprecated Use
+     *             {@link #setButton(int, CharSequence, android.content.DialogInterface.OnClickListener)}
+     *             with {@link DialogInterface#BUTTON_NEGATIVE}
      */
+    @Deprecated
     public void setButton2(CharSequence text, final OnClickListener listener) {
-        mAlert.setButton2(text, listener);
+        setButton(BUTTON_NEGATIVE, text, listener);
     }
 
     /**
      * Set a listener to be invoked when button 3 of the dialog is pressed.
      * @param text The text to display in button 3.
      * @param listener The {@link DialogInterface.OnClickListener} to use.
+     * @deprecated Use
+     *             {@link #setButton(int, CharSequence, android.content.DialogInterface.OnClickListener)}
+     *             with {@link DialogInterface#BUTTON_POSITIVE}
      */
+    @Deprecated
     public void setButton3(CharSequence text, final OnClickListener listener) {
-        mAlert.setButton3(text, listener);
+        setButton(BUTTON_NEUTRAL, text, listener);
     }
 
     /**
@@ -170,6 +265,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the title using the given resource id.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setTitle(int titleId) {
             P.mTitle = P.mContext.getText(titleId);
@@ -178,6 +275,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the title displayed in the {@link Dialog}.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setTitle(CharSequence title) {
             P.mTitle = title;
@@ -192,6 +291,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * via the other methods.
          * 
          * @param customTitleView The custom view to use as the title.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setCustomTitle(View customTitleView) {
             P.mCustomTitleView = customTitleView;
@@ -200,6 +301,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the message to display using the given resource id.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setMessage(int messageId) {
             P.mMessage = P.mContext.getText(messageId);
@@ -208,6 +311,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the message to display.
+          *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setMessage(CharSequence message) {
             P.mMessage = message;
@@ -216,6 +321,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the resource id of the {@link Drawable} to be used in the title.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setIcon(int iconId) {
             P.mIconId = iconId;
@@ -224,6 +331,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Set the {@link Drawable} to be used in the title.
+          *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setIcon(Drawable icon) {
             P.mIcon = icon;
@@ -234,6 +343,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the positive button of the dialog is pressed.
          * @param textId The resource id of the text to display in the positive button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setPositiveButton(int textId, final OnClickListener listener) {
             P.mPositiveButtonText = P.mContext.getText(textId);
@@ -245,6 +356,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the positive button of the dialog is pressed.
          * @param text The text to display in the positive button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setPositiveButton(CharSequence text, final OnClickListener listener) {
             P.mPositiveButtonText = text;
@@ -256,6 +369,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the negative button of the dialog is pressed.
          * @param textId The resource id of the text to display in the negative button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setNegativeButton(int textId, final OnClickListener listener) {
             P.mNegativeButtonText = P.mContext.getText(textId);
@@ -267,6 +382,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the negative button of the dialog is pressed.
          * @param text The text to display in the negative button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setNegativeButton(CharSequence text, final OnClickListener listener) {
             P.mNegativeButtonText = text;
@@ -278,6 +395,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the neutral button of the dialog is pressed.
          * @param textId The resource id of the text to display in the neutral button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setNeutralButton(int textId, final OnClickListener listener) {
             P.mNeutralButtonText = P.mContext.getText(textId);
@@ -289,6 +408,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Set a listener to be invoked when the neutral button of the dialog is pressed.
          * @param text The text to display in the neutral button
          * @param listener The {@link DialogInterface.OnClickListener} to use.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setNeutralButton(CharSequence text, final OnClickListener listener) {
             P.mNeutralButtonText = text;
@@ -298,6 +419,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Sets whether the dialog is cancelable or not default is true.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setCancelable(boolean cancelable) {
             P.mCancelable = cancelable;
@@ -307,6 +430,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         /**
          * Sets the callback that will be called if the dialog is canceled.
          * @see #setCancelable(boolean)
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setOnCancelListener(OnCancelListener onCancelListener) {
             P.mOnCancelListener = onCancelListener;
@@ -315,6 +440,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         
         /**
          * Sets the callback that will be called if a key is dispatched to the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setOnKeyListener(OnKeyListener onKeyListener) {
             P.mOnKeyListener = onKeyListener;
@@ -324,6 +451,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         /**
          * Set a list of items to be displayed in the dialog as the content, you will be notified of the
          * selected item via the supplied listener. This should be an array type i.e. R.array.foo
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setItems(int itemsId, final OnClickListener listener) {
             P.mItems = P.mContext.getResources().getTextArray(itemsId);
@@ -334,6 +463,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
         /**
          * Set a list of items to be displayed in the dialog as the content, you will be notified of the
          * selected item via the supplied listener.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setItems(CharSequence[] items, final OnClickListener listener) {
             P.mItems = items;
@@ -348,6 +479,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * 
          * @param adapter The {@link ListAdapter} to supply the list of items
          * @param listener The listener that will be called when an item is clicked.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setAdapter(final ListAdapter adapter, final OnClickListener listener) {
             P.mAdapter = adapter;
@@ -364,6 +497,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener The listener that will be called when an item is clicked.
          * @param labelColumn The column name on the cursor containing the string to display
          *          in the label.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setCursor(final Cursor cursor, final OnClickListener listener,
                 String labelColumn) {
@@ -388,6 +523,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setMultiChoiceItems(int itemsId, boolean[] checkedItems, 
                 final OnMultiChoiceClickListener listener) {
@@ -412,6 +549,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setMultiChoiceItems(CharSequence[] items, boolean[] checkedItems, 
                 final OnMultiChoiceClickListener listener) {
@@ -438,6 +577,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setMultiChoiceItems(Cursor cursor, String isCheckedColumn, String labelColumn, 
                 final OnMultiChoiceClickListener listener) {
@@ -461,6 +602,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setSingleChoiceItems(int itemsId, int checkedItem, 
                 final OnClickListener listener) {
@@ -484,6 +627,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setSingleChoiceItems(Cursor cursor, int checkedItem, String labelColumn, 
                 final OnClickListener listener) {
@@ -506,6 +651,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setSingleChoiceItems(CharSequence[] items, int checkedItem, final OnClickListener listener) {
             P.mItems = items;
@@ -526,6 +673,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param listener notified when an item on the list is clicked. The dialog will not be
          *        dismissed when an item is clicked. It will only be dismissed if clicked on a
          *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setSingleChoiceItems(ListAdapter adapter, int checkedItem, final OnClickListener listener) {
             P.mAdapter = adapter;
@@ -540,6 +689,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * 
          * @param listener The listener to be invoked.
          * @see AdapterView#setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener)
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setOnItemSelectedListener(final AdapterView.OnItemSelectedListener listener) {
             P.mOnItemSelectedListener = listener;
@@ -549,9 +700,44 @@ public class AlertDialog extends Dialog implements DialogInterface {
         /**
          * Set a custom view to be the contents of the Dialog. If the supplied view is an instance
          * of a {@link ListView} the light background will be used.
+         *
+         * @param view The view to use as the contents of the Dialog.
+         * 
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setView(View view) {
             P.mView = view;
+            P.mViewSpacingSpecified = false;
+            return this;
+        }
+        
+        /**
+         * Set a custom view to be the contents of the Dialog, specifying the
+         * spacing to appear around that view. If the supplied view is an
+         * instance of a {@link ListView} the light background will be used.
+         * 
+         * @param view The view to use as the contents of the Dialog.
+         * @param viewSpacingLeft Spacing between the left edge of the view and
+         *        the dialog frame
+         * @param viewSpacingTop Spacing between the top edge of the view and
+         *        the dialog frame
+         * @param viewSpacingRight Spacing between the right edge of the view
+         *        and the dialog frame
+         * @param viewSpacingBottom Spacing between the bottom edge of the view
+         *        and the dialog frame
+         * @return This Builder object to allow for chaining of calls to set
+         *         methods
+         *         
+         * @hide pending API review
+         */
+        public Builder setView(View view, int viewSpacingLeft, int viewSpacingTop,
+                int viewSpacingRight, int viewSpacingBottom) {
+            P.mView = view;
+            P.mViewSpacingSpecified = true;
+            P.mViewSpacingLeft = viewSpacingLeft;
+            P.mViewSpacingTop = viewSpacingTop;
+            P.mViewSpacingRight = viewSpacingRight;
+            P.mViewSpacingBottom = viewSpacingBottom;
             return this;
         }
         
@@ -560,7 +746,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * contents is.
          * 
          * @param useInverseBackground Whether to use the inverse background
-         * @return This Builder object to allow for chaining of sets.
+         * 
+         * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder setInverseBackgroundForced(boolean useInverseBackground) {
             P.mForceInverseBackground = useInverseBackground;

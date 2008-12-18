@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import java.util.Arrays;
@@ -39,37 +40,41 @@ import org.apache.harmony.x.imageio.spi.RAFIOSSpi;
  */
 
 /**
- * The IIORegistry class registers service provider instances 
- * (SPI). Service provider instances are recognized by specific 
- * meta-information in the JAR files containing them. The JAR
- * files with SPI classes are loaded from the application class 
- * path. 
+ * The IIORegistry class registers service provider instances (SPI). Service
+ * provider instances are recognized by specific meta-information in the JAR
+ * files containing them. The JAR files with SPI classes are loaded from the
+ * application class path.
+ * 
+ * @since Android 1.0
  */
 public final class IIORegistry extends ServiceRegistry {
 
-    /** The instance. */
+    /**
+     * The instance.
+     */
     private static IIORegistry instance;
 
-    /** The Constant CATEGORIES. */
+    /**
+     * The Constant CATEGORIES.
+     */
     private static final Class[] CATEGORIES = new Class[] {
-        javax.imageio.spi.ImageWriterSpi.class,
-        javax.imageio.spi.ImageReaderSpi.class,
-        javax.imageio.spi.ImageInputStreamSpi.class,
-        //javax.imageio.spi.ImageTranscoderSpi.class,
-        javax.imageio.spi.ImageOutputStreamSpi.class
+            javax.imageio.spi.ImageWriterSpi.class, javax.imageio.spi.ImageReaderSpi.class,
+            javax.imageio.spi.ImageInputStreamSpi.class,
+            // javax.imageio.spi.ImageTranscoderSpi.class,
+            javax.imageio.spi.ImageOutputStreamSpi.class
     };
 
     /**
-     * Instantiates a new iIO registry.
+     * Instantiates a new IIO registry.
      */
     private IIORegistry() {
-        super(Arrays.<Class<?>>asList(CATEGORIES).iterator());
+        super(Arrays.<Class<?>> asList(CATEGORIES).iterator());
         registerBuiltinSpis();
         registerApplicationClasspathSpis();
     }
 
     /**
-     * Register builtin spis.
+     * Register built-in SPIs.
      */
     private void registerBuiltinSpis() {
         registerServiceProvider(new JPEGImageWriterSpi());
@@ -80,9 +85,9 @@ public final class IIORegistry extends ServiceRegistry {
         registerServiceProvider(new FileIISSpi());
         registerServiceProvider(new RAFIOSSpi());
         registerServiceProvider(new RAFIISSpi());
-        registerServiceProvider(new OutputStreamIOSSpi());        
+        registerServiceProvider(new OutputStreamIOSSpi());
         registerServiceProvider(new InputStreamIISSpi());
-        //-- TODO implement
+        // -- TODO implement
     }
 
     /**
@@ -91,7 +96,8 @@ public final class IIORegistry extends ServiceRegistry {
      * @return the default IIORegistry instance.
      */
     public static IIORegistry getDefaultInstance() {
-        // TODO implement own instance for each ThreadGroup (see also ThreadLocal)
+        // TODO implement own instance for each ThreadGroup (see also
+        // ThreadLocal)
         synchronized (IIORegistry.class) {
             if (instance == null) {
                 instance = new IIORegistry();
@@ -101,10 +107,9 @@ public final class IIORegistry extends ServiceRegistry {
     }
 
     /**
-     * Registers all service providers from the application class 
-     * path.
+     * Registers all service providers from the application class path.
      */
     public void registerApplicationClasspathSpis() {
-        //-- TODO implement for non-builtin plugins
+        // -- TODO implement for non-builtin plugins
     }
 }

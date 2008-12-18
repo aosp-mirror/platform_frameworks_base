@@ -28,11 +28,15 @@
 
 #include <cutils/log.h>
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
+
+#include <hardware/copybit.h>
 
 #include <ui/SurfaceComposerClient.h>
 #include <ui/DisplayInfo.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
+#include <ui/EGLDisplaySurface.h>
 
 #if HAVE_ANDROID_OS
 #include <linux/msm_mdp.h>
@@ -42,7 +46,6 @@
 
 #include <pixelflinger/format.h>
 
-#include <ui/EGLDisplaySurface.h>
 
 // ----------------------------------------------------------------------------
 
@@ -78,7 +81,12 @@ EGLDisplaySurface::EGLDisplaySurface()
     mBlitEngine = 0;
     egl_native_window_t::fd = mapFrameBuffer();
     if (egl_native_window_t::fd >= 0) {
-        mBlitEngine = copybit_init();
+        
+        hw_module_t const* module;
+        if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+            copybit_open(module, &mBlitEngine);
+        }
+        
         const float in2mm = 25.4f;
         float refreshRate = 1000000000000000LLU / (
                 float( mInfo.upper_margin + mInfo.lower_margin + mInfo.yres )
@@ -108,7 +116,7 @@ EGLDisplaySurface::EGLDisplaySurface()
 EGLDisplaySurface::~EGLDisplaySurface()
 {
     magic = 0;
-    copybit_term(mBlitEngine);
+    copybit_close(mBlitEngine);
     mBlitEngine = 0;
     close(egl_native_window_t::fd);
     munmap(mFb[0].data, mSize);
@@ -147,9 +155,6 @@ void EGLDisplaySurface::setSwapRectangle(int l, int t, int w, int h)
 
 uint32_t EGLDisplaySurface::swapBuffers()
 {
-    if (!(mFlags & PAGE_FLIP))
-        return 0;
-
 #define SHOW_FPS 0
 #if SHOW_FPS
     nsecs_t now = systemTime();
@@ -171,6 +176,11 @@ uint32_t EGLDisplaySurface::swapBuffers()
         }
     }
 #endif
+    /* If we can't do the page_flip, just copy the back buffer to the front */
+    if (!(mFlags & PAGE_FLIP)) {
+        memcpy(mFb[0].data, mFb[1].data, mInfo.xres*mInfo.yres*2);
+        return 0;
+    }
 
     // do the actual flip
     mIndex = 1 - mIndex;
@@ -192,7 +202,7 @@ uint32_t EGLDisplaySurface::swapBuffers()
      * with msm7k.
      */
     if (egl_native_window_t::memory_type == NATIVE_MEMORY_TYPE_GPU && oem[0] && mBlitEngine) {
-        copybit_t *copybit = mBlitEngine;
+        copybit_device_t *copybit = mBlitEngine;
         copybit_rect_t sdrect = { 0, 0,
                 egl_native_window_t::width, egl_native_window_t::height };
         copybit_image_t dst = {
@@ -273,6 +283,12 @@ void EGLDisplaySurface::copyFrontToBack(const Region& copyback)
     } else
 #endif
     {
+        /* no extra copy needed since we copied back to front instead of
+         * flipping */
+        if (!(mFlags & PAGE_FLIP)) {
+            return;
+        }
+
         Region::iterator iterator(copyback);
         if (iterator) {
             Rect r;
@@ -373,12 +389,11 @@ status_t EGLDisplaySurface::mapFrameBuffer()
         // bleagh, bad info from the driver
         refreshRate = 60*1000;  // 60 Hz
     }
-
     if (int(info.width) <= 0 || int(info.height) <= 0) {
         // the driver doesn't return that information
         // default to 160 dpi
-        info.width  = 51;
-        info.height = 38;
+        info.width  = ((info.xres * 25.4f)/160.0f + 0.5f);
+        info.height = ((info.yres * 25.4f)/160.0f + 0.5f);
     }
 
     float xdpi = (info.xres * 25.4f) / info.width;

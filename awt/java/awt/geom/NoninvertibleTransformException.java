@@ -18,26 +18,31 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 /**
- * The Class NoninvertibleTransformException is the exception that is thrown 
- * when an action requires inverting an {@link AffineTransform} that is 
- * not invertible (has determinant 0).
+ * The Class NoninvertibleTransformException is the exception that is thrown
+ * when an action requires inverting an {@link AffineTransform} that is not
+ * invertible (has determinant 0).
+ * 
+ * @since Android 1.0
  */
 public class NoninvertibleTransformException extends java.lang.Exception {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 6137225240503990466L;
 
     /**
-     * Instantiates a new noninvertible transform exception.
+     * Instantiates a new non-invertible transform exception.
      * 
-     * @param s the error message
+     * @param s
+     *            the error message.
      */
     public NoninvertibleTransformException(String s) {
         super(s);
     }
 
 }
-

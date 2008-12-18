@@ -26,7 +26,7 @@
 #include "AudioHardwareStub.h"
 #include "AudioHardwareGeneric.h"
 
-// #define DUMP_FLINGER_OUT        // if defined allows recording samples in a file
+//#define DUMP_FLINGER_OUT        // if defined allows recording samples in a file
 #ifdef DUMP_FLINGER_OUT
 #include "AudioDumpInterface.h"
 #endif
@@ -54,6 +54,7 @@ static const char* routeStrings[] =
     "SPEAKER ",
     "BLUETOOTH ",
     "HEADSET "
+    "BLUETOOTH_A2DP "
 };
 static const char* routeNone = "NONE";
 
@@ -115,24 +116,10 @@ AudioHardwareInterface* AudioHardwareInterface::create()
     // This code adds a record of buffers in a file to write calls made by AudioFlinger.
     // It replaces the current AudioHardwareInterface object by an intermediate one which
     // will record buffers in a file (after sending them to hardware) for testing purpose.
-    // This feature is enabled by defining symbol DUMP_FLINGER_OUT and setting environement
-    // "audioflinger.dump = 1". The output file is "tmp/FlingerOut.pcm". Pause are not recorded
-    // in the file.
+    // This feature is enabled by defining symbol DUMP_FLINGER_OUT.
+    // The output file is FLINGER_DUMP_NAME. Pause are not recorded in the file.
     
-    // read dump mode
-    property_get("audioflinger.dump", value, "0");
-    switch(value[0]) {
-    case '1':
-        LOGV("Dump mode");
-        hw = new AudioDumpInterface(hw);    // replace interface
-        return hw;
-        break;
-    case '0':
-    default:
-        LOGV("No Dump mode");
-        return hw;
-        break;
-    }
+    hw = new AudioDumpInterface(hw);    // replace interface
 #endif
     return hw;
 }
@@ -143,7 +130,7 @@ AudioStreamOut::~AudioStreamOut()
 
 AudioStreamIn::~AudioStreamIn() {}
 
-AudioHardwareInterface::AudioHardwareInterface()
+AudioHardwareBase::AudioHardwareBase()
 {
     // force a routing update on initialization
     memset(&mRoutes, 0, sizeof(mRoutes));
@@ -151,7 +138,7 @@ AudioHardwareInterface::AudioHardwareInterface()
 }
 
 // generics for audio routing - the real work is done in doRouting
-status_t AudioHardwareInterface::setRouting(int mode, uint32_t routes)
+status_t AudioHardwareBase::setRouting(int mode, uint32_t routes)
 {
 #if LOG_ROUTING_CALLS
     LOGD("setRouting: mode=%s, routes=[%s]", displayMode(mode), displayRoutes(routes));
@@ -173,7 +160,7 @@ status_t AudioHardwareInterface::setRouting(int mode, uint32_t routes)
     return doRouting();
 }
 
-status_t AudioHardwareInterface::getRouting(int mode, uint32_t* routes)
+status_t AudioHardwareBase::getRouting(int mode, uint32_t* routes)
 {
     if (mode == AudioSystem::MODE_CURRENT)
         mode = mMode;
@@ -187,7 +174,7 @@ status_t AudioHardwareInterface::getRouting(int mode, uint32_t* routes)
     return NO_ERROR;
 }
 
-status_t AudioHardwareInterface::setMode(int mode)
+status_t AudioHardwareBase::setMode(int mode)
 {
 #if LOG_ROUTING_CALLS
     LOGD("setMode(%s)", displayMode(mode));
@@ -204,25 +191,45 @@ status_t AudioHardwareInterface::setMode(int mode)
     return doRouting();
 }
 
-status_t AudioHardwareInterface::getMode(int* mode)
+status_t AudioHardwareBase::getMode(int* mode)
 {
     // Implement: set audio routing
     *mode = mMode;
     return NO_ERROR;
 }
 
-status_t AudioHardwareInterface::setParameter(const char* key, const char* value)
+status_t AudioHardwareBase::setParameter(const char* key, const char* value)
 {
     // default implementation is to ignore
     return NO_ERROR;
 }
 
-status_t AudioHardwareInterface::dumpState(int fd, const Vector<String16>& args)
+
+// default implementation
+size_t AudioHardwareBase::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+{
+    if (sampleRate != 8000) {
+        LOGW("getInputBufferSize bad sampling rate: %d", sampleRate);
+        return 0;
+    }
+    if (format != AudioSystem::PCM_16_BIT) {
+        LOGW("getInputBufferSize bad format: %d", format);
+        return 0;
+    }
+    if (channelCount != 1) {
+        LOGW("getInputBufferSize bad channel count: %d", channelCount);
+        return 0;
+    }
+
+    return 320;
+}
+
+status_t AudioHardwareBase::dumpState(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
-    snprintf(buffer, SIZE, "AudioHardwareInterface::dumpState\n");
+    snprintf(buffer, SIZE, "AudioHardwareBase::dumpState\n");
     result.append(buffer);
     snprintf(buffer, SIZE, "\tmMode: %d\n", mMode);
     result.append(buffer);

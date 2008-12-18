@@ -60,6 +60,8 @@
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
+        <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
+        
         <item name="textCheckMark">@android:drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_light</item>
 
@@ -104,6 +106,7 @@
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -149,6 +152,7 @@
         <item name="scrollViewStyle">@android:style/Widget.ScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
+        <item name="starStyleButtonless">@android:style/Widget.CompoundButton.StarButtonless</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
         <item name="webViewStyle">@android:style/Widget.WebView</item>
@@ -156,6 +160,7 @@
         <item name="spinnerDropDownItemStyle">@android:style/Widget.DropDownItem.Spinner</item>
         <item name="spinnerItemStyle">@android:style/Widget.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Widget.DropDownHint</item>
+        <item name="keyboardViewStyle">@android:style/Widget.KeyboardView</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -172,13 +177,13 @@
     
     <!-- Variant of the default (dark) theme with no title bar -->
     <style name="Theme.NoTitleBar">
-        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
     
     <!-- Variant of the default (dark) theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.NoTitleBar.Fullscreen">
-        <item name="windowFullscreen">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
     
     <!-- Theme for a light background with dark text on top.  Set your activity
@@ -216,13 +221,13 @@
     
     <!-- Variant of the light theme with no title bar -->
     <style name="Theme.Light.NoTitleBar">
-        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- Variant of the light theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.Light.NoTitleBar.Fullscreen">
-        <item name="windowFullscreen">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
     
     <!-- Special variation on the default theme that ensures the background is
@@ -230,41 +235,50 @@
          media players.   If you want the normal (dark background) theme
          do <em>not<em> use this, use {@link #Theme}. -->
     <style name="Theme.Black">
-        <item name="windowBackground">@android:color/black</item>
-        <item name="colorBackground">@android:color/black</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:colorBackground">@android:color/black</item>
     </style>
     
     <!-- Variant of the black theme with no title bar -->
     <style name="Theme.Black.NoTitleBar">
-        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- Variant of the black theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.Black.NoTitleBar.Fullscreen">
-        <item name="windowFullscreen">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
     
     <!-- Default theme for translucent activities, that is windows that allow you
          to see through them to the windows behind.  This sets up the translucent
          flag and appropriate animations for your windows.  -->
     <style name="Theme.Translucent">
-        <item name="windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
 
     <!-- Variant of the translucent theme with no title bar -->
     <style name="Theme.Translucent.NoTitleBar">
-        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- Variant of the translucent theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.Translucent.NoTitleBar.Fullscreen">
-        <item name="windowFullscreen">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
     
+    <!-- Default theme for activities that don't actually display a UI; that
+         is, they finish themselves before being resumed.  -->
+    <style name="Theme.NoDisplay">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">@null</item>
+    </style>
+
     <!-- Default theme for dialog windows and activities, which is used by the
          {@link android.app.Dialog} class.  This changes the window to be
          floating (not fill the entire screen), and puts a frame around its
@@ -277,6 +291,7 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@android:drawable/panel_separator</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
     </style>
 
     <!-- Default theme for alert dialog windows, which is used by the
@@ -289,6 +304,29 @@
         <item name="windowContentOverlay">@drawable/panel_separator</item>
     </style>
     
+    <!-- Default theme for dialog windows and activities, which is used by the
+         {@link android.app.Dialog} class.  This changes the window to be
+         floating (not fill the entire screen), and puts a frame around its
+         contents.  You can set this theme on an activity if you would like to
+         make an activity that looks like a Dialog. -->
+    <style name="Theme.InputMethod" parent="Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
+    </style>
+
+    <!-- Theme for the search input bar. -->
+    <style name="Theme.SearchBar" parent="Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.SearchBar</item>
+    </style>
+
     <!-- Menu Themes -->
     <eat-comment />
 
@@ -301,6 +339,7 @@
         <item name="android:verticalDivider">@android:drawable/divider_vertical_bright</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
         <item name="android:moreIcon">@android:drawable/ic_menu_more</item>
+        <item name="android:background">@null</item>
     </style>
 
     <style name="Theme.ExpandedMenu">
@@ -308,6 +347,7 @@
         <item name="android:itemTextAppearance">?android:attr/textAppearanceLargeInverse</item>
         <item name="android:listViewStyle">@android:style/Widget.ListView.Menu</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.OptionsPanel</item>
+        <item name="android:background">@null</item>
     </style>
 
     <!-- @hide -->

@@ -190,6 +190,11 @@ public class SearchRecentSuggestions {
     
     /**
      * Completely delete the history.  Use this call to implement a "clear history" UI.
+     * 
+     * Any application that implements search suggestions based on previous actions (such as
+     * recent queries, page/items viewed, etc.) should provide a way for the user to clear the
+     * history.  This gives the user a measure of privacy, if they do not wish for their recent
+     * searches to be replayed by other users of the device (via suggestions).
      */
     public void clearHistory() {
         ContentResolver cr = mContext.getContentResolver();

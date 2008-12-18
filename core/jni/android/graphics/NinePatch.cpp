@@ -21,13 +21,14 @@ public:
         if (env->GetArrayLength(obj) < (int)sizeof(Res_png_9patch)) {
             return false;
         }
-        jbyte* array = (jbyte*)env->GetPrimitiveArrayCritical(obj, 0);
-        if (array != NULL)
-        {
-            Res_png_9patch* chunk = (Res_png_9patch*)array;
-            int8_t numXDivs = chunk->numXDivs;
-            env->ReleasePrimitiveArrayCritical(obj, array, 0);
-            return array[0] != -1;
+        const jbyte* array = env->GetByteArrayElements(obj, 0);
+        if (array != NULL) {
+            const Res_png_9patch* chunk =
+                                reinterpret_cast<const Res_png_9patch*>(array);
+            int8_t wasDeserialized = chunk->wasDeserialized;
+            env->ReleaseByteArrayElements(obj, const_cast<jbyte*>(array),
+                                          JNI_ABORT);
+            return wasDeserialized != -1;
         }
         return false;
     }
@@ -46,17 +47,19 @@ public:
     static void draw(JNIEnv* env, SkCanvas* canvas, SkRect& bounds,
                       const SkBitmap* bitmap, jbyteArray chunkObj, const SkPaint* paint)
     {
-        jbyte* array = env->GetByteArrayElements(chunkObj, 0);
-        if (array != NULL)
-        {
+        const jbyte* array = env->GetByteArrayElements(chunkObj, 0);
+        if (array != NULL) {
             size_t chunkSize = env->GetArrayLength(chunkObj);
-            void* deserializedArray = alloca(chunkSize);
-            Res_png_9patch* chunk = (Res_png_9patch*) deserializedArray;
-            assert(chunkSize == ((Res_png_9patch*) array)->serializedSize());
+            // need to deserialize the chunk
+            void* storage = alloca(chunkSize);
+            Res_png_9patch* chunk = static_cast<Res_png_9patch*>(storage);
             memcpy(chunk, array, chunkSize);
+            assert(chunkSize == chunk->serializedSize());
+            // this relies on deserialization being done in place
             Res_png_9patch::deserialize(chunk);            
             NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
-            env->ReleaseByteArrayElements(chunkObj, array, 0);
+            env->ReleaseByteArrayElements(chunkObj, const_cast<jbyte*>(array),
+                                          JNI_ABORT);
         }
     } 
 
@@ -99,18 +102,20 @@ public:
         
         SkRect      bounds;
         GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
-        jbyte* array = (jbyte*)env->GetByteArrayElements(chunkObj, 0);
-        if (array != NULL)
-        {
+        const jbyte* array = (jbyte*)env->GetByteArrayElements(chunkObj, 0);
+        if (array != NULL) {
             size_t chunkSize = env->GetArrayLength(chunkObj);
-            void* deserializedArray = alloca(chunkSize);
-            Res_png_9patch* chunk = (Res_png_9patch*) deserializedArray;
-            assert(chunkSize == ((Res_png_9patch*) array)->serializedSize());
+            // need to deserialize the chunk
+            void* storage = alloca(chunkSize);
+            Res_png_9patch* chunk = static_cast<Res_png_9patch*>(storage);
             memcpy(chunk, array, chunkSize);
+            assert(chunkSize == chunk->serializedSize());
+            // this relies on deserialization being done in place
             Res_png_9patch::deserialize(chunk);
             SkRegion* region = NULL;
             NinePatch_Draw(NULL, bounds, *bitmap, *chunk, NULL, &region);
-            env->ReleaseByteArrayElements(chunkObj, array, 0);
+            env->ReleaseByteArrayElements(chunkObj, const_cast<jbyte*>(array),
+                                          JNI_ABORT);
             return (jint)region;
         }
         

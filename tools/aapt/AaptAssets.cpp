@@ -78,7 +78,7 @@ static bool isHidden(const char *root, const char *path)
         // Skip CVS but don't chatter about it.
         return true;
     } else if (strcasecmp(path, "thumbs.db") == 0
-               || strcasecmp(path, "picassa.ini") == 0) {
+               || strcasecmp(path, "picasa.ini") == 0) {
         // Skip suspected image indexes files.
         type = "index";
     } else if (path[strlen(path)-1] == '~') {
@@ -695,6 +695,9 @@ bool AaptGroupEntry::getKeysHiddenName(const char* name,
     } else if (strcmp(name, "keyshidden") == 0) {
         mask = out->MASK_KEYSHIDDEN;
         value = out->KEYSHIDDEN_YES;
+    } else if (strcmp(name, "keyssoft") == 0) {
+        mask = out->MASK_KEYSHIDDEN;
+        value = out->KEYSHIDDEN_SOFT;
     }
     
     if (mask != 0) {

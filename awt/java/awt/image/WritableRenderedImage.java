@@ -18,23 +18,27 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.Point;
 
 /**
- * The WriteableRenderedImage interface is interface for objects which
- * contains Raster data of one or several tiles. This interface provides
- * notification mehanism for obtaining tile's writing status.    
+ * The WriteableRenderedImage interface is interface for objects which contains
+ * Raster data of one or several tiles. This interface provides notification
+ * mechanism for obtaining tile's writing status.
+ * 
+ * @since Android 1.0
  */
 public interface WritableRenderedImage extends RenderedImage {
 
     /**
-     * Gets and checks out the writable tile for writing. 
+     * Gets and checks out the writable tile for writing.
      * 
-     * @param tileX the X index of the tile. 
-     * @param tileY the Y index of the tile.
-     * 
+     * @param tileX
+     *            the X index of the tile.
+     * @param tileY
+     *            the Y index of the tile.
      * @return the WritableRaster.
      */
     public WritableRaster getWritableTile(int tileX, int tileY);
@@ -42,60 +46,64 @@ public interface WritableRenderedImage extends RenderedImage {
     /**
      * Removes the registered TileObserver.
      * 
-     * @param to the TileObserver which is registered for this
-     * WritableRenderedImage.
+     * @param to
+     *            the TileObserver which is registered for this
+     *            WritableRenderedImage.
      */
     public void removeTileObserver(TileObserver to);
 
     /**
      * Adds the specified TileObserver to this WritableRenderedImage.
      * 
-     * @param to the TileObserver object to be added.
+     * @param to
+     *            the TileObserver object to be added.
      */
     public void addTileObserver(TileObserver to);
 
     /**
-     * Sets this image to the contents of the specified Raster.  
+     * Sets this image to the contents of the specified Raster.
      * 
-     * @param r the specified Raster.
+     * @param r
+     *            the specified Raster.
      */
     public void setData(Raster r);
 
     /**
-     * Gets the array of points wich represent indices of tiles which
-     * are check out for writing.
+     * Gets the array of points which represent indices of tiles which are check
+     * out for writing.
      * 
-     * @return the array of Points.
+     * @return the array of points.
      */
     public Point[] getWritableTileIndices();
 
     /**
      * Checks if the specified tile is writable or not.
      * 
-     * @param tileX the X index of tile. 
-     * @param tileY the Y index of tile.
-     * 
-     * @return true, if the specified tile is writable,
-     * false otherwise.
+     * @param tileX
+     *            the X index of tile.
+     * @param tileY
+     *            the Y index of tile.
+     * @return true, if the specified tile is writable, false otherwise.
      */
     public boolean isTileWritable(int tileX, int tileY);
 
     /**
-     * Release the specified writable tile. This method removes the writer 
-     * from the tile.
+     * Release the specified writable tile. This method removes the writer from
+     * the tile.
      * 
-     * @param tileX the X index of the tile. 
-     * @param tileY the Y index of the tile.
+     * @param tileX
+     *            the X index of the tile.
+     * @param tileY
+     *            the Y index of the tile.
      */
     public void releaseWritableTile(int tileX, int tileY);
 
     /**
      * Checks if there is a tile which is checked out for writing.
      * 
-     * @return true, if any tile is checked out for writing, false if there
-     * is no such tile.
+     * @return true, if any tile is checked out for writing, false if there is
+     *         no such tile.
      */
     public boolean hasTileWriters();
 
 }
-

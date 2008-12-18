@@ -40,6 +40,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1262,7 +1263,7 @@ public class Instrumentation {
      * @param activity The activity being paused.
      */
     public void callActivityOnPause(Activity activity) {
-        activity.onPause();
+        activity.performPause();
     }
     
     /*
@@ -1392,8 +1393,8 @@ public class Instrumentation {
      * if there was no Activity found to run the given Intent.
      * 
      * @param who The Context from which the activity is being started.
-     * @param whoThread The main thread of the Context from which the activity
-     *                  is being started.
+     * @param contextThread The main thread of the Context from which the activity
+     *                      is being started.
      * @param token Internal token identifying to the system who is starting 
      *              the activity; may be null.
      * @param target Which activity is perform the start (and thus receiving 
@@ -1416,8 +1417,9 @@ public class Instrumentation {
      * {@hide}
      */
     public ActivityResult execStartActivity(
-        Context who, IApplicationThread whoThread, IBinder token, Activity target,
+        Context who, IBinder contextThread, IBinder token, Activity target,
         Intent intent, int requestCode) {
+        IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
                 final int N = mActivityMonitors.size();

@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 /**
  * Abstract base class for a top-level window look and behavior policy.  An
@@ -106,6 +107,8 @@ public abstract class Window {
     private boolean mHaveWindowFormat = false;
     private int mDefaultWindowFormat = PixelFormat.OPAQUE;
 
+    private boolean mHasSoftInputMode = false;
+    
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
         new WindowManager.LayoutParams();
@@ -382,11 +385,7 @@ public abstract class Window {
                         && mAppName != null) {
                     wp.setTitle(mAppName);
                 }
-                if (wp.windowAnimations == 0) {
-                    wp.windowAnimations = getWindowStyle().getResourceId(
-                            com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-                }
-            }
+           }
             if (wp.packageName == null) {
                 wp.packageName = mContext.getPackageName();
             }
@@ -526,6 +525,26 @@ public abstract class Window {
     }
 
     /**
+     * Specify an explicit soft input mode to use for the window, as per
+     * {@link WindowManager.LayoutParams#softInputMode
+     * WindowManager.LayoutParams.softInputMode}.  Providing anything besides
+     * "unspecified" here will override the input mode the window would
+     * normally retrieve from its theme.
+     */
+    public void setSoftInputMode(int mode) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        if (mode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
+            attrs.softInputMode = mode;
+            mHasSoftInputMode = true;
+        } else {
+            mHasSoftInputMode = false;
+        }
+        if (mCallback != null) {
+            mCallback.onWindowAttributesChanged(attrs);
+        }
+    }
+    
+    /**
      * Convenience function to set the flag bits as specified in flags, as
      * per {@link #setFlags}.
      * @param flags The flag bits to be set.
@@ -572,14 +591,17 @@ public abstract class Window {
     }
 
     /**
-     * Specify custom window attributes.
+     * Specify custom window attributes.  <strong>PLEASE NOTE:</strong> the
+     * layout params you give here should generally be from values previously
+     * retrieved with {@link #getAttributes()}; you probably do not want to
+     * blindly create and apply your own, since this will blow away any values
+     * set by the framework that you are not interested in.
      *
      * @param a The new window attributes, which will completely override any
      *          current values.
      */
     public void setAttributes(WindowManager.LayoutParams a) {
         mWindowAttributes.copyFrom(a);
-        mForcedWindowFlags = 0xffffffff;
         if (mCallback != null) {
             mCallback.onWindowAttributesChanged(mWindowAttributes);
         }
@@ -601,6 +623,13 @@ public abstract class Window {
      */
     protected final int getForcedWindowFlags() {
         return mForcedWindowFlags;
+    }
+    
+    /**
+     * Has the app specified their own soft input mode?
+     */
+    protected final boolean hasSoftInputMode() {
+        return mHasSoftInputMode;
     }
     
     /**
@@ -926,8 +955,7 @@ public abstract class Window {
      * @see #setFormat
      * @see PixelFormat
      */
-    protected void setDefaultWindowFormat(int format)
-    {
+    protected void setDefaultWindowFormat(int format) {
         mDefaultWindowFormat = format;
         if (!mHaveWindowFormat) {
             final WindowManager.LayoutParams attrs = getAttributes();

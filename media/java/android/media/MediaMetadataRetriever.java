@@ -16,7 +16,14 @@
 
 package android.media;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 
 /**
  * MediaMetadataRetriever class provides a unified interface for retrieving
@@ -29,6 +36,10 @@ public class MediaMetadataRetriever
         System.loadLibrary("media_jni");
     }
 
+    // The field below is accessed by native methods
+    @SuppressWarnings("unused")
+    private int mNativeContext;
+ 
     public MediaMetadataRetriever() {
         native_setup();
     }
@@ -56,14 +67,104 @@ public class MediaMetadataRetriever
      *    For both frame capture and meta data retrieval
      */
     public native void setMode(int mode);
+    
+    /**
+     * @return the current mode of operation. A negative return value indicates
+     * some runtime error has occurred.
+     */
+    public native int getMode();
 
     /**
-     * Call this method before the rest. This method may be time-consuming.
+     * Sets the data source (file pathname) to use. Call this
+     * method before the rest of the methods in this class. This method may be
+     * time-consuming.
      * 
      * @param path The path of the input media file.
      * @throws IllegalArgumentException If the path is invalid.
      */
     public native void setDataSource(String path) throws IllegalArgumentException;
+    
+    /**
+     * Sets the data source (FileDescriptor) to use.  It is the caller's
+     * responsibility to close the file descriptor. It is safe to do so as soon
+     * as this call returns. Call this method before the rest of the methods in
+     * this class. This method may be time-consuming.
+     * 
+     * @param fd the FileDescriptor for the file you want to play
+     * @param offset the offset into the file where the data to be played starts,
+     * in bytes. It must be non-negative
+     * @param length the length in bytes of the data to be played. It must be
+     * non-negative.
+     * @throws IllegalArgumentException if the arguments are invalid
+     */
+    public native void setDataSource(FileDescriptor fd, long offset, long length)
+            throws IllegalArgumentException;
+    
+    /**
+     * Sets the data source (FileDescriptor) to use. It is the caller's
+     * responsibility to close the file descriptor. It is safe to do so as soon
+     * as this call returns. Call this method before the rest of the methods in
+     * this class. This method may be time-consuming.
+     * 
+     * @param fd the FileDescriptor for the file you want to play
+     * @throws IllegalArgumentException if the FileDescriptor is invalid
+     */
+    public void setDataSource(FileDescriptor fd)
+            throws IllegalArgumentException {
+        // intentionally less than LONG_MAX
+        setDataSource(fd, 0, 0x7ffffffffffffffL);
+    }
+    
+    /**
+     * Sets the data source as a content Uri. Call this method before 
+     * the rest of the methods in this class. This method may be time-consuming.
+     * 
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @throws IllegalArgumentException if the Uri is invalid
+     * @throws SecurityException if the Uri cannot be used due to lack of
+     * permission.
+     */
+    public void setDataSource(Context context, Uri uri)
+        throws IllegalArgumentException, SecurityException {
+        if (uri == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        String scheme = uri.getScheme();
+        if(scheme == null || scheme.equals("file")) {
+            setDataSource(uri.getPath());
+            return;
+        }
+
+        ParcelFileDescriptor fd = null;
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            try {
+                fd = resolver.openFileDescriptor(uri, "r");
+            } catch(FileNotFoundException e) {
+                throw new IllegalArgumentException();
+            }
+            if (fd == null) {
+                throw new IllegalArgumentException();
+            }
+            FileDescriptor descriptor = fd.getFileDescriptor();
+            if (!descriptor.valid()) {
+                throw new IllegalArgumentException();
+            }
+            setDataSource(descriptor);
+            return;
+        } catch (SecurityException ex) {
+        } finally {
+            try {
+                if (fd != null) {
+                    fd.close();
+                }
+            } catch(IOException ioEx) {
+            }
+        }
+        setDataSource(uri.toString());
+    }
 
     /**
      * Call this method after setDataSource(). This method retrieves the 
@@ -133,4 +234,9 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_YEAR            = 8;
     public static final int METADATA_KEY_DURATION        = 9;
     public static final int METADATA_KEY_NUM_TRACKS     = 10;
+    public static final int METADATA_KEY_IS_DRM_CRIPPLED= 11;
+    public static final int METADATA_KEY_CODEC          = 12;
+    public static final int METADATA_KEY_RATING         = 13;
+    public static final int METADATA_KEY_COMMENT        = 14;
+    public static final int METADATA_KEY_COPYRIGHT      = 15;
 }

@@ -18,7 +18,6 @@ package com.android.internal.telephony.gsm;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISMANUAL;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
@@ -45,8 +44,10 @@ import android.provider.Telephony.Intents;
 import android.telephony.gsm.GsmCellLocation;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
+import android.util.Config;
 import android.util.Log;
 import android.util.TimeUtils;
+import android.util.EventLog;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -130,6 +131,12 @@ final class ServiceStateTracker extends Handler
     // SIMRecords object may not be instantiated yet.
     private boolean mNeedToRegForSimLoaded;
 
+    // Started the recheck process after finding gprs should registerd but not
+    private boolean mStartedGprsRegCheck = false;
+    // Already sent the event-log for no gprs register
+    private boolean mReportedGprsNoReg = false;
+
+
     // Keep track of SPN display rules, so we only broadcast intent if something changes.
     private String curSpn = null;
     private String curPlmn = null;
@@ -142,6 +149,9 @@ final class ServiceStateTracker extends Handler
 
     // signal strength poll rate
     static final int POLL_PERIOD_MILLIS = 20 * 1000;
+
+    // waiting period before recheck gprs and voice registration
+    static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
     //***** Events
     
@@ -163,7 +173,11 @@ final class ServiceStateTracker extends Handler
     static final int EVENT_GET_PREFERRED_NETWORK_TYPE = 19;
     static final int EVENT_SET_PREFERRED_NETWORK_TYPE = 20;
     static final int EVENT_RESET_PREFERRED_NETWORK_TYPE = 21;
+    static final int EVENT_CHECK_REPORT_GPRS = 22;
 
+    // Event Log Tags
+    private static final int EVENT_LOG_CGREG_FAIL = 50107;
+    private static final int EVENT_DATA_STATE_RADIO_OFF = 50108;
 
   //***** Time Zones
 
@@ -460,7 +474,7 @@ final class ServiceStateTracker extends Handler
                 ar = (AsyncResult) msg.obj;
 
                 String nitzString = (String)((Object[])ar.result)[0];
-                int nitzReceiveTime = ((Integer)((Object[])ar.result)[1]).intValue();
+                long nitzReceiveTime = ((Long)((Object[])ar.result)[1]).longValue();
 
                 setTimeFromNITZString(nitzString, nitzReceiveTime);
                 break;
@@ -523,6 +537,23 @@ final class ServiceStateTracker extends Handler
                 cm.setPreferredNetworkType(toggledNetworkType, message);
                 break;
 
+            case EVENT_CHECK_REPORT_GPRS:
+                if (ss != null && !isGprsConsistant(gprsState, ss.getState())) {
+
+                    // Can't register data sevice while voice service is ok
+                    // i.e. CREG is ok while CGREG is not
+                    // possible a network or baseband side error
+                    int cid = -1;
+                    GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+                    if (loc != null) cid = loc.getCid();
+
+                    EventLog.List val = new EventLog.List(ss.getOperatorNumeric(), cid);
+                    EventLog.writeEvent(EVENT_LOG_CGREG_FAIL, val);
+                    mReportedGprsNoReg = true;
+                }
+                mStartedGprsRegCheck = false;
+                break;
+
         }
     }
 
@@ -561,6 +592,14 @@ final class ServiceStateTracker extends Handler
         ) {
             cm.setRadioPower(true, null);
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
+            DataConnectionTracker dcTracker = phone.mDataConnection;
+            if (! dcTracker.isDataConnectionAsDesired()) {
+
+                EventLog.List val = new EventLog.List(
+                        dcTracker.getStateInString(),
+                        (dcTracker.getAnyDataEnabled() ? 1 : 0) );
+                EventLog.writeEvent(EVENT_DATA_STATE_RADIO_OFF, val);
+            }
             // If it's on and available and we want it off..
             cm.setRadioPower(false, null);
         } // Otherwise, we're in the desired state
@@ -609,7 +648,7 @@ final class ServiceStateTracker extends Handler
             if (err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW &&
                     err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW) {
                 Log.e(LOG_TAG,
-                        "RIL implementation has returned an error where it must succeed",
+                        "RIL implementation has returned an error where it must succeed" +
                         ar.exception);
             }
         } else try {
@@ -882,8 +921,7 @@ final class ServiceStateTracker extends Handler
                         // need adjust time to reflect default timezone setting
                         long tzOffset;
                         tzOffset = zone.getOffset(System.currentTimeMillis());
-                        SystemClock.setCurrentTimeMillis(
-                                System.currentTimeMillis() - tzOffset);
+                        setAndBroadcastNetworkSetTime(System.currentTimeMillis() - tzOffset);
                     } else if (iso.equals("")){
                         // Country code not found.  This is likely a test network.
                         // Get a TimeZone based only on the NITZ parameters (best guess).
@@ -896,10 +934,8 @@ final class ServiceStateTracker extends Handler
                     mNeedFixZone = false;
 
                     if (zone != null) {
-                        Context context = phone.getContext();
                         if (getAutoTime()) {
-                            AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                            alarm.setTimeZone(zone.getID());
+                            setAndBroadcastNetworkSetTimeZone(zone.getID());
                         }
                         saveNitzTimeZone(zone.getID());
                     }
@@ -908,8 +944,6 @@ final class ServiceStateTracker extends Handler
 
             phone.setSystemProperty(PROPERTY_OPERATOR_ISROAMING,
                 ss.getRoaming() ? "true" : "false");
-            phone.setSystemProperty(PROPERTY_OPERATOR_ISMANUAL,
-                ss.getIsManualSelection() ? "true" : "false");
 
             updateSpnDisplay();
             phone.notifyServiceStateChanged(ss);
@@ -938,8 +972,35 @@ final class ServiceStateTracker extends Handler
         if (hasLocationChanged) {
             phone.notifyLocationChanged();
         }
+
+        if (! isGprsConsistant(gprsState, ss.getState())) {
+            if (!mStartedGprsRegCheck && !mReportedGprsNoReg) {
+                mStartedGprsRegCheck = true;
+
+                int check_period = Settings.Gservices.getInt(
+                        phone.getContext().getContentResolver(),
+                        Settings.Gservices.GPRS_REGISTER_CHECK_PERIOD_MS,
+                        DEFAULT_GPRS_CHECK_PERIOD_MILLIS);
+                sendMessageDelayed(obtainMessage(EVENT_CHECK_REPORT_GPRS),
+                        check_period);
+            }
+        } else {
+            mReportedGprsNoReg = false;
+        }
     }
- 
+
+    /**
+     * Check if GPRS got registred while voice is registered
+     *
+     * @param gprsState for GPRS registration state, i.e. CGREG in GSM
+     * @param serviceState for voice registration state, i.e. CREG in GSM
+     * @return false if device only register to voice but not gprs
+     */
+    private boolean isGprsConsistant (int gprsState, int serviceState) {
+        return !((serviceState == ServiceState.STATE_IN_SERVICE) &&
+                (gprsState != ServiceState.STATE_IN_SERVICE));
+    }
+
     /**
      * Returns a TimeZone object based only on parameters from the NITZ string.
      */
@@ -1162,13 +1223,14 @@ final class ServiceStateTracker extends Handler
      */
 
     private
-    void setTimeFromNITZString (String nitz, int nitzReceiveTime)
+    void setTimeFromNITZString (String nitz, long nitzReceiveTime)
     {
         // "yy/mm/dd,hh:mm:ss(+/-)tz"
         // tz is in number of quarter-hours
 
-        Log.i(LOG_TAG, "setTimeFromNITZString: " +
-            nitz + "," + nitzReceiveTime);
+        long start = SystemClock.elapsedRealtime();
+        Log.i(LOG_TAG, "NITZ: " + nitz + "," + nitzReceiveTime +
+                        " start=" + start + " delay=" + (start - nitzReceiveTime));
 
         try {
             /* NITZ time (hour:min:sec) will be in UTC but it supplies the timezone
@@ -1257,57 +1319,57 @@ final class ServiceStateTracker extends Handler
             }
 
             if (zone != null) {
-                Context context = phone.getContext();
                 if (getAutoTime()) {
-                    AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    alarm.setTimeZone(zone.getID());
+                    setAndBroadcastNetworkSetTimeZone(zone.getID());
                 }
                 saveNitzTimeZone(zone.getID());
             }
-
-            long millisSinceNitzReceived
-                    = System.currentTimeMillis() - (nitzReceiveTime * 1000L);
-
-            if (millisSinceNitzReceived < 0) {
-                // Sanity check: something is wrong
-                Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
-                                    + "backwards since NITZ time received, "
-                                    + nitz);
-                return;
-            }
-
-            if (millisSinceNitzReceived > (1000L * 1000L)) {
-                // If the time is this far off, something is wrong
-                Log.i(LOG_TAG, "NITZ: not setting time, more than 1000 seconds "
-                                + " have elapsed since time received, "
-                                + nitz);
-
-                return;
-            }
-
-            // Note: with range checks above, cast to int is safe
-            c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
-
+            
             String ignore = SystemProperties.get("gsm.ignore-nitz");
             if (ignore != null && ignore.equals("yes")) {
-                Log.i(LOG_TAG,
-                      "Not setting clock because gsm.ignore-nitz is set");
+                Log.i(LOG_TAG, "NITZ: Not setting clock because gsm.ignore-nitz is set");
                 return;
             }
 
             if (getAutoTime()) {
-                Log.i(LOG_TAG, "Setting time of day to " + c.getTime()
+                long millisSinceNitzReceived
+                        = SystemClock.elapsedRealtime() - nitzReceiveTime;
+        
+                if (millisSinceNitzReceived < 0) {
+                    // Sanity check: something is wrong
+                    Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
+                                        + "backwards since NITZ time was received, "
+                                        + nitz);
+                    return;
+                }
+        
+                if (millisSinceNitzReceived > Integer.MAX_VALUE) {
+                    // If the time is this far off, something is wrong > 24 days!
+                    Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
+                                    + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
+                                    + " days");
+                    return;
+                }
+        
+                // Note: with range checks above, cast to int is safe
+                c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
+        
+                Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
                     + " NITZ receive delay(ms): " + millisSinceNitzReceived
                     + " gained(ms): "
                     + (c.getTimeInMillis() - System.currentTimeMillis())
                     + " from " + nitz);
 
-                SystemClock.setCurrentTimeMillis(c.getTimeInMillis());
+                setAndBroadcastNetworkSetTime(c.getTimeInMillis());
             }
             SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
             saveNitzTime(c.getTimeInMillis());
+            if (Config.LOGV) {
+                long end = SystemClock.elapsedRealtime();
+                Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
+            }
         } catch (RuntimeException ex) {
-            Log.e(LOG_TAG, "Parsing NITZ time " + nitz, ex);
+            Log.e(LOG_TAG, "NITZ: Parsing NITZ time " + nitz, ex);
         }
     }
 
@@ -1319,26 +1381,44 @@ final class ServiceStateTracker extends Handler
             return true;
         }
     }
-    
+
     private void saveNitzTimeZone(String zoneId) {
         mSavedTimeZone = zoneId;
-        // Send out a sticky broadcast so the system can determine if 
-        // the timezone was set by the carrier...
+    }
+
+    private void saveNitzTime(long time) {
+        mSavedTime = time;
+        mSavedAtTime = SystemClock.elapsedRealtime();
+    }
+
+    /**
+     * Set the timezone and send out a sticky broadcast so the system can
+     * determine if the timezone was set by the carrier.
+     * 
+     * @param zoneId timezone set by carrier
+     */
+    private void setAndBroadcastNetworkSetTimeZone(String zoneId) {
+        AlarmManager alarm = 
+            (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
+        alarm.setTimeZone(zoneId);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE);
         intent.putExtra("time-zone", zoneId);
         phone.getContext().sendStickyBroadcast(intent);
     }
-    
-    private void saveNitzTime(long time) {
-        mSavedTime = time;
-        mSavedAtTime = SystemClock.elapsedRealtime();
-        // Send out a sticky broadcast so the system can determine if 
-        // the time was set by the carrier...
+
+    /**
+     * Set the time and Send out a sticky broadcast so the system can determine
+     * if the time was set by the carrier.
+     * 
+     * @param time time set by network
+     */ 
+    private void setAndBroadcastNetworkSetTime(long time) {
+        SystemClock.setCurrentTimeMillis(time);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIME);
         intent.putExtra("time", time);
         phone.getContext().sendStickyBroadcast(intent);
     }
-    
+
     private void revertToNitz() {
         if (Settings.System.getInt(phone.getContext().getContentResolver(),
                 Settings.System.AUTO_TIME, 0) == 0) {
@@ -1348,10 +1428,8 @@ final class ServiceStateTracker extends Handler
                 + "' mSavedTime=" + mSavedTime
                 + " mSavedAtTime=" + mSavedAtTime);
         if (mSavedTimeZone != null && mSavedTime != 0 && mSavedAtTime != 0) {
-            AlarmManager alarm = 
-                (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
-            alarm.setTimeZone(mSavedTimeZone);
-            SystemClock.setCurrentTimeMillis(mSavedTime 
+            setAndBroadcastNetworkSetTimeZone(mSavedTimeZone);
+            setAndBroadcastNetworkSetTime(mSavedTime
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
         }
     }

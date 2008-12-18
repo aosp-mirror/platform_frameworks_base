@@ -24,7 +24,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -461,7 +460,7 @@ public class PduComposer {
 
                 int version = mPduHeader.getOctet(field);
                 if (0 == version) {
-                    appendShortInteger(PduHeaders.MMS_VERSION_1_3);
+                    appendShortInteger(PduHeaders.CURRENT_MMS_VERSION);
                 } else {
                     appendShortInteger(version);
                 }
@@ -952,7 +951,7 @@ public class PduComposer {
                     appendQuotedString("<" + new String(contentId) + ">");
                 }
             }
-            
+
             // content-location
             byte[] contentLocation = part.getContentLocation();
             if (null != contentLocation) {

@@ -99,7 +99,7 @@ class LoadListener extends Handler implements EventHandler {
     // cache. It is needed if the cache returns a redirect
     private String mMethod;
     private Map<String, String> mRequestHeaders;
-    private String mPostData;
+    private byte[] mPostData;
     private boolean mIsHighPriority;
     // Flag to indicate that this load is synchronous.
     private boolean mSynchronous;
@@ -220,7 +220,8 @@ class LoadListener extends Handler implements EventHandler {
                  */
                 Message contMsg = obtainMessage(MSG_LOCATION_CHANGED);
                 Message stopMsg = obtainMessage(MSG_CONTENT_FINISHED);
-                //TODO, need to call mCallbackProxy and request UI.
+                mBrowserFrame.getCallbackProxy().onFormResubmission(
+                        stopMsg, contMsg);
                 break;
 
         }
@@ -286,15 +287,16 @@ class LoadListener extends Handler implements EventHandler {
                 if (newMimeType != null) {
                     mMimeType = newMimeType;
                 }
-            } else if (mMimeType.equalsIgnoreCase("text/vnd.wap.wml") || 
-                    mMimeType.
-                    equalsIgnoreCase("application/vnd.wap.xhtml+xml")) {
+            } else if (mMimeType.equalsIgnoreCase("text/vnd.wap.wml")) {
                 // As we don't support wml, render it as plain text
                 mMimeType = "text/plain";
             } else {
                 // XXX: Until the servers send us either correct xhtml or
                 // text/html, treat application/xhtml+xml as text/html.
-                if (mMimeType.equalsIgnoreCase("application/xhtml+xml")) {
+                // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
+                // subtypes are used interchangeably. So treat them the same.
+                if (mMimeType.equalsIgnoreCase("application/xhtml+xml") ||
+                        mMimeType.equals("application/vnd.wap.xhtml+xml")) {
                     mMimeType = "text/html";
                 }
             }
@@ -527,23 +529,21 @@ class LoadListener extends Handler implements EventHandler {
                 } else {
                     sendMessageInternal(obtainMessage(MSG_LOCATION_CHANGED));
                 }
-
-                break;
+                return;
 
             case HTTP_AUTH:
             case HTTP_PROXY_AUTH:
+                // According to rfc2616, the response for HTTP_AUTH must include
+                // WWW-Authenticate header field and the response for 
+                // HTTP_PROXY_AUTH must include Proxy-Authenticate header field.
                 if (mAuthHeader != null &&
                         (Network.getInstance(mContext).isValidProxySet() ||
                          !mAuthHeader.isProxy())) {
                     Network.getInstance(mContext).handleAuthRequest(this);
-                } else {
-                    final int stringId =
-                            com.android.internal.R.string.httpErrorUnsupportedAuthScheme;
-                    error(EventHandler.ERROR_UNSUPPORTED_AUTH_SCHEME,
-                            getContext().getText(stringId).toString());
+                    return;
                 }
-                break;
-                
+                break;  // use default
+
             case HTTP_NOT_MODIFIED:
                 // Server could send back NOT_MODIFIED even if we didn't
                 // ask for it, so make sure we have a valid CacheLoader
@@ -554,16 +554,18 @@ class LoadListener extends Handler implements EventHandler {
                     if (Config.LOGV) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
                     }
-                    break;
-                } // Fall through to default if there is no CacheLoader
+                    return;
+                }
+                break;  // use default
 
             case HTTP_NOT_FOUND:
                 // Not an error, the server can send back content.
             default:
-                sendMessageInternal(obtainMessage(MSG_CONTENT_FINISHED));
-                detachRequestHandle();
                 break;
         }
+
+        sendMessageInternal(obtainMessage(MSG_CONTENT_FINISHED));
+        detachRequestHandle();
     }
 
     /**
@@ -725,7 +727,7 @@ class LoadListener extends Handler implements EventHandler {
      * @param isHighPriority
      */
     void setRequestData(String method, Map<String, String> headers, 
-            String postData, boolean isHighPriority) {
+            byte[] postData, boolean isHighPriority) {
         mMethod = method;
         mRequestHeaders = headers;
         mPostData = postData;
@@ -878,37 +880,16 @@ class LoadListener extends Handler implements EventHandler {
         int statusCode = mStatusCode == HTTP_NOT_MODIFIED
                 ? HTTP_OK : mStatusCode;
         // pass content-type content-length and content-encoding
-        int nativeResponse = nativeCreateResponse(mUrl, statusCode, mStatusText,
+        final int nativeResponse = nativeCreateResponse(
+                mUrl, statusCode, mStatusText,
                 mMimeType, mContentLength, mEncoding,
                 mCacheResult == null ? 0 : mCacheResult.expires / 1000);
         if (mHeaders != null) {
-            // "content-disposition",
-            String value = mHeaders.getContentDisposition();
-            if (value != null) {
-                nativeSetResponseHeader(nativeResponse, 
-                        Headers.CONTENT_DISPOSITION, value);
-            }
-            
-            // location            
-            value = mHeaders.getLocation();
-            if (value != null) {
-                nativeSetResponseHeader(nativeResponse,
-                        Headers.LOCATION, value);
-            }
-            
-            // refresh (paypal.com are using this)
-            value = mHeaders.getRefresh();
-            if (value != null) {
-                nativeSetResponseHeader(nativeResponse,
-                        Headers.REFRESH, value);
-            }
-
-            // Content-Type
-            value = mHeaders.getContentType();
-            if (value != null) {
-                nativeSetResponseHeader(nativeResponse,
-                        Headers.CONTENT_TYPE, value);
-            }
+            mHeaders.getHeaders(new Headers.HeaderCallback() {
+                    public void header(String name, String value) {
+                        nativeSetResponseHeader(nativeResponse, name, value);
+                    }
+                });
         }
         return nativeResponse;
     }
@@ -1048,7 +1029,6 @@ class LoadListener extends Handler implements EventHandler {
                 cancel();
                 return;
             } else if (!URLUtil.isNetworkUrl(redirectTo)) {
-                cancel();
                 final String text = mContext
                         .getString(com.android.internal.R.string.open_permission_deny)
                         + "\n" + redirectTo;
@@ -1250,7 +1230,12 @@ class LoadListener extends Handler implements EventHandler {
      */
     void setUrl(String url) {
         if (url != null) {
-            mUrl = URLUtil.stripAnchor(url);
+            if (URLUtil.isDataUrl(url)) {
+             // Don't strip anchor as that is a valid part of the URL
+                mUrl = url;
+            } else {
+                mUrl = URLUtil.stripAnchor(url);
+            }
             mUri = null;
             if (URLUtil.isNetworkUrl(mUrl)) {
                 try {

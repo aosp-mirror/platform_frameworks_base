@@ -91,6 +91,10 @@ public class WifiNative {
 
     public native static boolean setPowerModeCommand(int mode);
 
+    public native static boolean setNumAllowedChannelsCommand(int numChannels);
+
+    public native static int getNumAllowedChannelsCommand();
+
     /**
      * Sets the bluetooth coexistence mode.
      * 

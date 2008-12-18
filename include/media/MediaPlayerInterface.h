@@ -26,6 +26,7 @@
 #include <utils/RefBase.h>
 
 #include <media/mediaplayer.h>
+#include <media/AudioSystem.h>
 
 namespace android {
 
@@ -36,6 +37,9 @@ enum player_type {
 };
 
 #define DEFAULT_AUDIOSINK_BUFFERCOUNT 4
+#define DEFAULT_AUDIOSINK_BUFFERSIZE 1200
+#define DEFAULT_AUDIOSINK_SAMPLERATE 44100
+
 
 // callback mechanism for passing messages to MediaPlayer object
 typedef void (*notify_callback_f)(void* cookie, int msg, int ext1, int ext2);
@@ -57,7 +61,7 @@ public:
         virtual ssize_t     frameSize() const = 0;
         virtual uint32_t    latency() const = 0;
         virtual float       msecsPerFrame() const = 0;
-        virtual status_t    open(uint32_t sampleRate, int channelCount, int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT) = 0;
+        virtual status_t    open(uint32_t sampleRate, int channelCount, int format=AudioSystem::PCM_16_BIT, int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT) = 0;
         virtual void        start() = 0;
         virtual ssize_t     write(const void* buffer, size_t size) = 0;
         virtual void        stop() = 0;
@@ -80,8 +84,6 @@ public:
     virtual status_t    stop() = 0;
     virtual status_t    pause() = 0;
     virtual bool        isPlaying() = 0;
-    virtual status_t    getVideoWidth(int *w) {return 0;}
-    virtual status_t    getVideoHeight(int *h) {return 0;}
     virtual status_t    seekTo(int msec) = 0;
     virtual status_t    getCurrentPosition(int *msec) = 0;
     virtual status_t    getDuration(int *msec) = 0;

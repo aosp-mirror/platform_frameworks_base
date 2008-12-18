@@ -242,6 +242,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 
             case MotionEvent.ACTION_MOVE:
                 trackTouchEvent(event);
+                attemptClaimDrag();
                 break;
                 
             case MotionEvent.ACTION_UP:
@@ -280,6 +281,16 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         
         setProgress((int) progress, true);
+    }
+
+    /**
+     * Tries to claim the user's drag motion, and requests disallowing any
+     * ancestors from stealing events in the drag.
+     */
+    private void attemptClaimDrag() {
+        if (mParent != null) {
+            mParent.requestDisallowInterceptTouchEvent(true);
+        }
     }
     
     /**

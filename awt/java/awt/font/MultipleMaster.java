@@ -18,38 +18,44 @@
  * @author Ilya S. Okomin
  * @version $Revision$
  */
+
 package java.awt.font;
 
 import java.awt.Font;
 
 /**
- * The MultipleMaster interface provides methods to manipulate MultipleMaster 
+ * The MultipleMaster interface provides methods to manipulate MultipleMaster
  * type fonts and retrieve graphical and design data from them.
+ * 
+ * @since Android 1.0
  */
 public interface MultipleMaster {
 
     /**
-     * Derives a new multiple master font based on the specified 
-     * parameters.
+     * Derives a new multiple master font based on the specified parameters.
      * 
-     * @param glyphWidths float array which represents width of each glyph
-     * in font space.
-     * @param avgStemWidth the average stem width in font space.
-     * @param typicalCapHeight the typical upper case char height.
-     * @param typicalXHeight the typical lower case char height.
-     * @param italicAngle the slope angle for italics.
-     * 
+     * @param glyphWidths
+     *            float array which represents width of each glyph in font
+     *            space.
+     * @param avgStemWidth
+     *            the average stem width in font space.
+     * @param typicalCapHeight
+     *            the typical upper case char height.
+     * @param typicalXHeight
+     *            the typical lower case char height.
+     * @param italicAngle
+     *            the slope angle for italics.
      * @return a MultipleMaster font.
      */
-    public Font deriveMMFont(float[] glyphWidths, float avgStemWidth,
-            float typicalCapHeight, float typicalXHeight, float italicAngle);
+    public Font deriveMMFont(float[] glyphWidths, float avgStemWidth, float typicalCapHeight,
+            float typicalXHeight, float italicAngle);
 
     /**
-     * Derives a new multiple master font based on the design axis values 
-     * contained in the specified array. 
+     * Derives a new multiple master font based on the design axis values
+     * contained in the specified array.
      * 
-     * @param axes an float array which contains axis values.
-     * 
+     * @param axes
+     *            an float array which contains axis values.
      * @return a MultipleMaster font.
      */
     public Font deriveMMFont(float[] axes);
@@ -62,25 +68,24 @@ public interface MultipleMaster {
     public float[] getDesignAxisDefaults();
 
     /**
-     * Gets the array of design axis names. 
+     * Gets the array of design axis names.
      * 
-     * @return the array of design axis names. 
+     * @return the array of design axis names.
      */
     public String[] getDesignAxisNames();
 
     /**
-     * Gets the array of design axis ranges. 
+     * Gets the array of design axis ranges.
      * 
      * @return the array of design axis ranges.
      */
     public float[] getDesignAxisRanges();
 
     /**
-     * Gets the number of multiple master design controls. 
+     * Gets the number of multiple master design controls.
      * 
      * @return the number of multiple master design controls.
      */
     public int getNumDesignAxes();
 
 }
-

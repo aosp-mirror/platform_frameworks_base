@@ -32,6 +32,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.Debug;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,6 +49,9 @@ import java.util.List;
  * "correct" states.
  */
 public class LockPatternView extends View {
+    // Vibrator pattern for creating a tactile bump
+    private static final long[] VIBE_PATTERN = {0, 1, 40, 41};
+
     private static final boolean PROFILE_DRAWING = false;
     private boolean mDrawingProfilingStarted = false;
 
@@ -88,6 +92,7 @@ public class LockPatternView extends View {
     private DisplayMode mPatternDisplayMode = DisplayMode.Correct;
     private boolean mInputEnabled = true;
     private boolean mInStealthMode = false;
+    private boolean mTactileFeedbackEnabled = true;
     private boolean mPatternInProgress = false;
 
     private float mDiameterFactor = 0.5f;
@@ -111,6 +116,8 @@ public class LockPatternView extends View {
     private int mBitmapWidth;
     private int mBitmapHeight;
    
+
+    private Vibrator vibe; // Vibrator for creating tactile feedback
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -219,6 +226,7 @@ public class LockPatternView extends View {
 
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        vibe = new Vibrator();
 
         setClickable(true);
 
@@ -257,6 +265,13 @@ public class LockPatternView extends View {
     }
 
     /**
+     * @return Whether the view has tactile feedback enabled.
+     */
+    public boolean isTactileFeedbackEnabled() {
+        return mTactileFeedbackEnabled;
+    }
+
+    /**
      * Set whether the view is in stealth mode.  If true, there will be no
      * visible feedback as the user enters the pattern.
      *
@@ -264,6 +279,16 @@ public class LockPatternView extends View {
      */
     public void setInStealthMode(boolean inStealthMode) {
         mInStealthMode = inStealthMode;
+    }
+
+    /**
+     * Set whether the view will use tactile feedback.  If true, there will be
+     * tactile feedback as the user enters the pattern.
+     *
+     * @param tactileFeedbackEnabled Whether tactile feedback is enabled
+     */
+    public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
+        mTactileFeedbackEnabled = tactileFeedbackEnabled;
     }
 
     /**
@@ -420,6 +445,9 @@ public class LockPatternView extends View {
                 addCellToPattern(fillInGapCell);
             }
             addCellToPattern(cell);
+            if (mTactileFeedbackEnabled){
+                vibe.vibrate(VIBE_PATTERN, -1); // Generate tactile feedback
+            }
             return cell;
         }
         return null;
@@ -900,7 +928,7 @@ public class LockPatternView extends View {
         return new SavedState(superState,
                 LockPatternUtils.patternToString(mPattern),
                 mPatternDisplayMode.ordinal(),
-                mInputEnabled, mInStealthMode);
+                mInputEnabled, mInStealthMode, mTactileFeedbackEnabled);
     }
 
     @Override
@@ -913,6 +941,7 @@ public class LockPatternView extends View {
         mPatternDisplayMode = DisplayMode.values()[ss.getDisplayMode()];
         mInputEnabled = ss.isInputEnabled();
         mInStealthMode = ss.isInStealthMode();
+        mTactileFeedbackEnabled = ss.isTactileFeedbackEnabled();
     }
 
     /**
@@ -924,17 +953,19 @@ public class LockPatternView extends View {
         private final int mDisplayMode;
         private final boolean mInputEnabled;
         private final boolean mInStealthMode;
+        private final boolean mTactileFeedbackEnabled;
 
         /**
          * Constructor called from {@link LockPatternView#onSaveInstanceState()}
          */
         private SavedState(Parcelable superState, String serializedPattern, int displayMode,
-                boolean inputEnabled, boolean inStealthMode) {
+                boolean inputEnabled, boolean inStealthMode, boolean tactileFeedbackEnabled) {
             super(superState);
             mSerializedPattern = serializedPattern;
             mDisplayMode = displayMode;
             mInputEnabled = inputEnabled;
             mInStealthMode = inStealthMode;
+            mTactileFeedbackEnabled = tactileFeedbackEnabled;
         }
 
         /**
@@ -946,6 +977,7 @@ public class LockPatternView extends View {
             mDisplayMode = in.readInt();
             mInputEnabled = (Boolean) in.readValue(null);
             mInStealthMode = (Boolean) in.readValue(null);
+            mTactileFeedbackEnabled = (Boolean) in.readValue(null);
         }
         
         public String getSerializedPattern() {
@@ -964,6 +996,10 @@ public class LockPatternView extends View {
             return mInStealthMode;
         }
 
+        public boolean isTactileFeedbackEnabled(){
+            return mTactileFeedbackEnabled;
+        }
+
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
@@ -971,6 +1007,7 @@ public class LockPatternView extends View {
             dest.writeInt(mDisplayMode);
             dest.writeValue(mInputEnabled);
             dest.writeValue(mInStealthMode);
+            dest.writeValue(mTactileFeedbackEnabled);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR =

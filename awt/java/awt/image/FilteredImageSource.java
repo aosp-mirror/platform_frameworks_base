@@ -18,32 +18,42 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.util.Hashtable;
 
-
 /**
- * The FilteredImageSource class is used for producing image data for a new 
- * filtered version of the original image using the specified filter object. 
+ * The FilteredImageSource class is used for producing image data for a new
+ * filtered version of the original image using the specified filter object.
+ * 
+ * @since Android 1.0
  */
 public class FilteredImageSource implements ImageProducer {
 
-    /** The source. */
+    /**
+     * The source.
+     */
     private final ImageProducer source;
-    
-    /** The filter. */
+
+    /**
+     * The filter.
+     */
     private final ImageFilter filter;
 
-    /** The cons table. */
+    /**
+     * The cons table.
+     */
     private final Hashtable<ImageConsumer, ImageConsumer> consTable = new Hashtable<ImageConsumer, ImageConsumer>();
 
     /**
-     * Instantiates a new FilteredImageSource object with 
-     * the specified ImageProducer and the ImageFilter objects.
+     * Instantiates a new FilteredImageSource object with the specified
+     * ImageProducer and the ImageFilter objects.
      * 
-     * @param orig the specified ImageProducer.
-     * @param imgf the specified ImageFilter.
+     * @param orig
+     *            the specified ImageProducer.
+     * @param imgf
+     *            the specified ImageFilter.
      */
     public FilteredImageSource(ImageProducer orig, ImageFilter imgf) {
         source = orig;
@@ -51,7 +61,7 @@ public class FilteredImageSource implements ImageProducer {
     }
 
     public synchronized boolean isConsumer(ImageConsumer ic) {
-        if(ic != null) {
+        if (ic != null) {
             return consTable.containsKey(ic);
         }
         return false;
@@ -64,14 +74,14 @@ public class FilteredImageSource implements ImageProducer {
     }
 
     public void requestTopDownLeftRightResend(ImageConsumer ic) {
-        if(ic != null && isConsumer(ic)){
-            ImageFilter fic = (ImageFilter) consTable.get(ic);
+        if (ic != null && isConsumer(ic)) {
+            ImageFilter fic = (ImageFilter)consTable.get(ic);
             fic.resendTopDownLeftRight(source);
         }
     }
 
     public synchronized void removeConsumer(ImageConsumer ic) {
-        if(ic != null && isConsumer(ic)){
+        if (ic != null && isConsumer(ic)) {
             ImageConsumer fic = consTable.get(ic);
             source.removeConsumer(fic);
             consTable.remove(ic);
@@ -79,7 +89,7 @@ public class FilteredImageSource implements ImageProducer {
     }
 
     public synchronized void addConsumer(ImageConsumer ic) {
-        if(ic != null && !isConsumer(ic)){
+        if (ic != null && !isConsumer(ic)) {
             ImageConsumer fic = filter.getFilterInstance(ic);
             source.addConsumer(fic);
             consTable.put(ic, fic);

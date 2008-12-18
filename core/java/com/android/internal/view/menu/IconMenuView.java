@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -57,6 +58,8 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     private int mRowHeight;
     /** Maximum number of rows to be shown */ 
     private int mMaxRows;
+    /** Maximum number of items to show in the icon menu. */
+    private int mMaxItems;
     /** Maximum number of items per row */
     private int mMaxItemsPerRow;
     /** Actual number of items (the 'More' view does not count as an item) shown */
@@ -76,15 +79,15 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     /** Set of vertical divider positions where the vertical divider will be drawn */
     private ArrayList<Rect> mVerticalDividerRects;
     
+    /** Icon for the 'More' button */
+    private Drawable mMoreIcon;
+    
     /** Item view for the 'More' button */
     private IconMenuItemView mMoreItemView;
     
     /** Background of each item (should contain the selected and focused states) */
     private Drawable mItemBackground;
 
-    /** Icon for the 'More' button */
-    private Drawable mMoreIcon;
-    
     /** Default animations for this menu */
     private int mAnimations;
     
@@ -108,6 +111,20 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
      * we broadcasted to children.
      */
     private boolean mLastChildrenCaptionMode;
+
+    /**
+     * The layout to use for menu items. Each index is the row number (0 is the
+     * top-most). Each value contains the number of items in that row.
+     * <p>
+     * The length of this array should not be used to get the number of rows in
+     * the current layout, instead use {@link #mLayoutNumRows}.
+     */
+    private int[] mLayout;
+
+    /**
+     * The number of rows in the current layout. 
+     */
+    private int mLayoutNumRows;
     
     /**
      * Instantiates the IconMenuView that is linked with the provided MenuBuilder.
@@ -119,6 +136,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.IconMenuView, 0, 0);
         mRowHeight = a.getDimensionPixelSize(com.android.internal.R.styleable.IconMenuView_rowHeight, 64);
         mMaxRows = a.getInt(com.android.internal.R.styleable.IconMenuView_maxRows, 2);
+        mMaxItems = a.getInt(com.android.internal.R.styleable.IconMenuView_maxItems, 6);
         mMaxItemsPerRow = a.getInt(com.android.internal.R.styleable.IconMenuView_maxItemsPerRow, 3);
         mMoreIcon = a.getDrawable(com.android.internal.R.styleable.IconMenuView_moreIcon);
         a.recycle();
@@ -144,6 +162,8 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
             if (mVerticalDividerWidth == -1) mVerticalDividerWidth = 1;
         }
         
+        mLayout = new int[mMaxRows];
+        
         // This view will be drawing the dividers        
         setWillNotDraw(false);
         
@@ -152,13 +172,106 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         // This is so our children can still be arrow-key focused
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
     }
-    
+
     /**
-     * Calculates the minimum number of rows needed to the items to be shown.
-     * @return the minimum number of rows
+     * Figures out the layout for the menu items.
+     * 
+     * @param width The available width for the icon menu.
      */
-    private int calculateNumberOfRows() {
-        return Math.min((int) Math.ceil(getChildCount() / (double) mMaxItemsPerRow), mMaxRows);
+    private void layoutItems(int width) {
+        int numItems = getChildCount();
+        
+        // Start with the least possible number of rows
+        int curNumRows =
+                Math.min((int) Math.ceil(numItems / (float) mMaxItemsPerRow), mMaxRows);
+        
+        /*
+         * Increase the number of rows until we find a configuration that fits
+         * all of the items' titles. Worst case, we use mMaxRows.
+         */
+        for (; curNumRows <= mMaxRows; curNumRows++) {
+            layoutItemsUsingGravity(curNumRows, numItems);
+            
+            if (curNumRows >= numItems) {
+                // Can't have more rows than items
+                break;
+            }
+            
+            if (doItemsFit()) {
+                // All the items fit, so this is a good configuration
+                break;
+            }
+        }
+    }
+
+    /**
+     * Figures out the layout for the menu items by equally distributing, and
+     * adding any excess items equally to lower rows.
+     * 
+     * @param numRows The total number of rows for the menu view
+     * @param numItems The total number of items (across all rows) contained in
+     *            the menu view
+     * @return int[] Where the value of index i contains the number of items for row i
+     */
+    private void layoutItemsUsingGravity(int numRows, int numItems) {
+        int numBaseItemsPerRow = numItems / numRows;
+        int numLeftoverItems = numItems % numRows;
+        /**
+         * The bottom rows will each get a leftover item. Rows (indexed at 0)
+         * that are >= this get a leftover item. Note: if there are 0 leftover
+         * items, no rows will get them since this value will be greater than
+         * the last row.
+         */
+        int rowsThatGetALeftoverItem = numRows - numLeftoverItems;
+        
+        int[] layout = mLayout;
+        for (int i = 0; i < numRows; i++) {
+            layout[i] = numBaseItemsPerRow;
+
+            // Fill the bottom rows with a leftover item each
+            if (i >= rowsThatGetALeftoverItem) {
+                layout[i]++;
+            }
+        }
+        
+        mLayoutNumRows = numRows;
+    }
+
+    /**
+     * Checks whether each item's title is fully visible using the current
+     * layout.
+     * 
+     * @return True if the items fit (each item's text is fully visible), false
+     *         otherwise.
+     */
+    private boolean doItemsFit() {
+        int itemPos = 0;
+        
+        int[] layout = mLayout;
+        int numRows = mLayoutNumRows;
+        for (int row = 0; row < numRows; row++) {
+            int numItemsOnRow = layout[row];
+
+            /*
+             * If there is only one item on this row, increasing the
+             * number of rows won't help.
+             */ 
+            if (numItemsOnRow == 1) {
+                itemPos++;
+                continue;
+            }
+            
+            for (int itemsOnRowCounter = numItemsOnRow; itemsOnRowCounter > 0;
+                    itemsOnRowCounter--) {
+                View child = getChildAt(itemPos++);
+                LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                if (lp.maxNumItemsOnRow < numItemsOnRow) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     }
 
     /**
@@ -166,7 +279,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
      * @param itemView The item's view to add
      */
     private void addItemView(IconMenuItemView itemView) {
-        ViewGroup.LayoutParams lp = itemView.getLayoutParams();
+        LayoutParams lp = (LayoutParams) itemView.getLayoutParams();
         
         if (lp == null) {
             // Default layout parameters
@@ -181,6 +294,9 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
 
         // This class is the invoker for all its item views 
         itemView.setItemInvoker(this);
+        
+        // Set the desired width of item
+        lp.desiredWidth = (int) Layout.getDesiredWidth(itemView.getText(), itemView.getPaint());
         
         addView(itemView, lp);
     }
@@ -228,7 +344,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         
         final ArrayList<MenuItemImpl> itemsToShow = mMenu.getVisibleItems();
         final int numItems = itemsToShow.size();
-        final int numItemsThatCanFit = mMaxItemsPerRow * mMaxRows;
+        final int numItemsThatCanFit = mMaxItems;
         // Minimum of the num that can fit and the num that we have
         final int minFitMinus1AndNumItems = Math.min(numItemsThatCanFit - 1, numItems);
         
@@ -263,30 +379,6 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     }
 
     /**
-     * Calculates the number of items that should go on each row of this menu view.
-     * @param numRows the total number of rows for the menu view
-     * @param numItems the total number of items (across all rows) contained in the menu view
-     * @return int[] where index i contains the number of items for row i
-     */
-    private int[] calculateNumberOfItemsPerRow(final int numRows, final int numItems) {
-        // TODO: get from theme?  or write a best-fit algorithm? either way, this hard-coding needs
-        // to be dropped (946635).  Right now, this is according to UI spec.
-        final int numItemsForRow[] = new int[numRows];
-        if (numRows == 2) {
-            if (numItems <= 5) {
-                numItemsForRow[0] = 2;
-                numItemsForRow[1] = numItems - 2;
-            } else {
-                numItemsForRow[0] = numItemsForRow[1] = mMaxItemsPerRow;
-            }
-        } else if (numRows == 1) {
-            numItemsForRow[0] = numItems;
-        }
-        
-        return numItemsForRow;
-    }
-    
-    /**
      * The positioning algorithm that gets called from onMeasure.  It
      * just computes positions for each child, and then stores them in the child's layout params.
      * @param menuWidth The width of this menu to assume for positioning
@@ -298,10 +390,9 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         if (mVerticalDivider != null) mVerticalDividerRects.clear();
 
         // Get the minimum number of rows needed
-        final int numRows = calculateNumberOfRows();
+        final int numRows = mLayoutNumRows;
         final int numRowsMinus1 = numRows - 1;
-        final int numItems = getChildCount();
-        final int numItemsForRow[] = calculateNumberOfItemsPerRow(numRows, numItems);
+        final int numItemsForRow[] = mLayout;
         
         // The item position across all rows
         int itemPos = 0;
@@ -382,13 +473,17 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
             updateChildren(false);
         }
         
+        int measuredWidth = resolveSize(Integer.MAX_VALUE, widthMeasureSpec);
+        calculateItemFittingMetadata(measuredWidth);
+        layoutItems(measuredWidth);
+        
         // Get the desired height of the icon menu view (last row of items does
         // not have a divider below)
-        final int desiredHeight = (mRowHeight + mHorizontalDividerHeight) * calculateNumberOfRows()
-                - mHorizontalDividerHeight;
+        final int desiredHeight = (mRowHeight + mHorizontalDividerHeight) *
+                mLayoutNumRows - mHorizontalDividerHeight;
         
         // Maximum possible width and desired height
-        setMeasuredDimension(resolveSize(Integer.MAX_VALUE, widthMeasureSpec),
+        setMeasuredDimension(measuredWidth,
                 resolveSize(desiredHeight, heightMeasureSpec));
 
         // Position the children
@@ -472,6 +567,32 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         return mAnimations;
     }
 
+    /**
+     * Returns the number of items per row.
+     * <p>
+     * This should only be used for testing.
+     * 
+     * @return The length of the array is the number of rows. A value at a
+     *         position is the number of items in that row.
+     * @hide
+     */
+    public int[] getLayout() {
+        return mLayout;
+    }
+    
+    /**
+     * Returns the number of rows in the layout.
+     * <p>
+     * This should only be used for testing.
+     * 
+     * @return The length of the array is the number of rows. A value at a
+     *         position is the number of items in that row.
+     * @hide
+     */
+    public int getLayoutNumRows() {
+        return mLayoutNumRows;
+    }
+    
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
 
@@ -496,6 +617,13 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         }
         
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        
+        requestFocus();
     }
 
     @Override
@@ -580,6 +708,31 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
             ((IconMenuItemView) getChildAt(i)).setCaptionMode(shortcut);
         }
     }
+
+    /**
+     * For each item, calculates the most dense row that fully shows the item's
+     * title.
+     * 
+     * @param width The available width of the icon menu.
+     */
+    private void calculateItemFittingMetadata(int width) {
+        int maxNumItemsPerRow = mMaxItemsPerRow;
+        int numItems = getChildCount();
+        for (int i = 0; i < numItems; i++) {
+            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
+            // Start with 1, since that case does not get covered in the loop below
+            lp.maxNumItemsOnRow = 1;
+            for (int curNumItemsPerRow = maxNumItemsPerRow; curNumItemsPerRow > 0;
+                    curNumItemsPerRow--) {
+                // Check whether this item can fit into a row containing curNumItemsPerRow
+                if (lp.desiredWidth < width / curNumItemsPerRow) {
+                    // It can, mark this value as the most dense row it can fit into
+                    lp.maxNumItemsOnRow = curNumItemsPerRow;
+                    break;
+                }
+            }
+        }
+    }
     
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -655,6 +808,8 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     public static class LayoutParams extends ViewGroup.MarginLayoutParams
     {
         int left, top, right, bottom;
+        int desiredWidth;
+        int maxNumItemsOnRow;
         
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

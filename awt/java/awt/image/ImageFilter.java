@@ -18,17 +18,22 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.util.Hashtable;
 
 /**
- * The ImageFilter class provides a filter for delivering image data 
- * from an ImageProducer to an ImageConsumer.
+ * The ImageFilter class provides a filter for delivering image data from an
+ * ImageProducer to an ImageConsumer.
+ * 
+ * @since Android 1.0
  */
 public class ImageFilter implements ImageConsumer, Cloneable {
 
-    /** The consumer. */
+    /**
+     * The consumer.
+     */
     protected ImageConsumer consumer;
 
     /**
@@ -39,16 +44,16 @@ public class ImageFilter implements ImageConsumer, Cloneable {
     }
 
     /**
-     * Gets an instance of an ImageFilter object which performs
-     * the filtering for the specified ImageConsumer.
-     *  
-     * @param ic the specified ImageConsumer.
+     * Gets an instance of an ImageFilter object which performs the filtering
+     * for the specified ImageConsumer.
      * 
-     * @return an ImageFilter used to perform the filtering for 
-     * the specified ImageConsumer.
+     * @param ic
+     *            the specified ImageConsumer.
+     * @return an ImageFilter used to perform the filtering for the specified
+     *         ImageConsumer.
      */
     public ImageFilter getFilterInstance(ImageConsumer ic) {
-        ImageFilter filter = (ImageFilter) clone();
+        ImageFilter filter = (ImageFilter)clone();
         filter.consumer = ic;
         return filter;
     }
@@ -59,14 +64,14 @@ public class ImageFilter implements ImageConsumer, Cloneable {
         if (props == null) {
             fprops = new Hashtable<Object, Object>();
         } else {
-            fprops = (Hashtable<Object, Object>) props.clone();
+            fprops = (Hashtable<Object, Object>)props.clone();
         }
         String propName = "Filters"; //$NON-NLS-1$
         String prop = "Null filter"; //$NON-NLS-1$
         Object o = fprops.get(propName);
         if (o != null) {
             if (o instanceof String) {
-                prop = (String) o + "; " + prop; //$NON-NLS-1$
+                prop = (String)o + "; " + prop; //$NON-NLS-1$
             } else {
                 prop = o.toString() + "; " + prop; //$NON-NLS-1$
             }
@@ -90,11 +95,11 @@ public class ImageFilter implements ImageConsumer, Cloneable {
     }
 
     /**
-     * Responds to a request for a Top-Down-Left-Right ordered 
-     * resend of the pixel data from an ImageConsumer. 
+     * Responds to a request for a Top-Down-Left-Right ordered resend of the
+     * pixel data from an ImageConsumer.
      * 
-     * @param ip the ImageProducer that provides this instance of 
-     * the filter.
+     * @param ip
+     *            the ImageProducer that provides this instance of the filter.
      */
     public void resendTopDownLeftRight(ImageProducer ip) {
         ip.requestTopDownLeftRightResend(this);

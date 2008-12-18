@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import java.io.File;
@@ -25,13 +26,16 @@ import java.io.IOException;
 import javax.imageio.stream.ImageInputStream;
 
 /**
- * The ImageInputStreamSpi abstract class is a service provider 
- * interface (SPI) for ImageInputStreams.  
+ * The ImageInputStreamSpi abstract class is a service provider interface (SPI)
+ * for ImageInputStreams.
+ * 
+ * @since Android 1.0
  */
-public abstract class ImageInputStreamSpi extends IIOServiceProvider implements
-        RegisterableService {
-    
-    /** The input class. */
+public abstract class ImageInputStreamSpi extends IIOServiceProvider implements RegisterableService {
+
+    /**
+     * The input class.
+     */
     protected Class<?> inputClass;
 
     /**
@@ -44,9 +48,12 @@ public abstract class ImageInputStreamSpi extends IIOServiceProvider implements
     /**
      * Instantiates a new ImageInputStreamSpi.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
-     * @param inputClass the input class.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
+     * @param inputClass
+     *            the input class.
      */
     public ImageInputStreamSpi(String vendorName, String version, Class<?> inputClass) {
         super(vendorName, version);
@@ -54,8 +61,8 @@ public abstract class ImageInputStreamSpi extends IIOServiceProvider implements
     }
 
     /**
-     * Gets an input Class object that represents class or 
-     * interface that must be implemented by an input source.
+     * Gets an input Class object that represents class or interface that must
+     * be implemented by an input source.
      * 
      * @return the input class.
      */
@@ -64,61 +71,59 @@ public abstract class ImageInputStreamSpi extends IIOServiceProvider implements
     }
 
     /**
-     * Returns true if the ImageInputStream can use a cache 
-     * file. If this method returns false, the value of the 
-     * useCache parameter of createInputStreamInstance will 
-     * be ignored. The default implementation returns false.
+     * Returns true if the ImageInputStream can use a cache file. If this method
+     * returns false, the value of the useCache parameter of
+     * createInputStreamInstance will be ignored. The default implementation
+     * returns false.
      * 
-     * @return true if the ImageInputStream can use a cache 
-     * file, false otherwise.
+     * @return true, if the ImageInputStream can use a cache file, false
+     *         otherwise.
      */
     public boolean canUseCacheFile() {
-        return false; //-- def
+        return false; // -- def
     }
 
     /**
-     * Returns true if the ImageInputStream implementation 
-     * requires the use of a cache file. The default implementation 
-     * returns false.
+     * Returns true if the ImageInputStream implementation requires the use of a
+     * cache file. The default implementation returns false.
      * 
-     * @return true if the ImageInputStream implementation 
-     * requires the use of a cache file, false otherwise.
+     * @return true, if the ImageInputStream implementation requires the use of
+     *         a cache file, false otherwise.
      */
     public boolean needsCacheFile() {
         return false; // def
     }
 
     /**
-     * Creates the ImageInputStream associated with this 
-     * service provider. The input object should
-     * be an instance of the class returned by th getInputClass 
-     * method. This method uses the specified directory
-     * for the cache file if the useCache parameter is true. 
+     * Creates the ImageInputStream associated with this service provider. The
+     * input object should be an instance of the class returned by the
+     * getInputClass method. This method uses the specified directory for the
+     * cache file if the useCache parameter is true.
      * 
-     * @param input the input Object.
-     * @param useCache the flag indicating if a cache file 
-     * is needed or not.
-     * @param cacheDir the cache directory.
-     * 
+     * @param input
+     *            the input Object.
+     * @param useCache
+     *            the flag indicating if a cache file is needed or not.
+     * @param cacheDir
+     *            the cache directory.
      * @return the ImageInputStream.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public abstract ImageInputStream createInputStreamInstance(Object input, boolean useCache,
             File cacheDir) throws IOException;
 
     /**
-     * Creates the ImageInputStream associated with this 
-     * service provider. The input object should
-     * be an instance of the class returned by getInputClass 
-     * method. This method uses the default system directory
-     * for the cache file, if it is needed. 
+     * Creates the ImageInputStream associated with this service provider. The
+     * input object should be an instance of the class returned by getInputClass
+     * method. This method uses the default system directory for the cache file,
+     * if it is needed.
      * 
-     * @param input the input Object.
-     * 
+     * @param input
+     *            the input Object.
      * @return the ImageInputStream.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public ImageInputStream createInputStreamInstance(Object input) throws IOException {
         return createInputStreamInstance(input, true, null);

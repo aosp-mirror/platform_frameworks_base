@@ -23,38 +23,52 @@ import javax.imageio.ImageWriteParam;
 import java.util.Locale;
 
 /**
- * The JPEGImageWriteParam class allows to set JPEG Huffman tables 
- * and quantization when using the JPEG writer plug-in.
+ * The JPEGImageWriteParam class allows to set JPEG Huffman tables and
+ * quantization when using the JPEG writer plug-in.
+ * 
+ * @since Android 1.0
  */
 public class JPEGImageWriteParam extends ImageWriteParam {
-    
-    /** The Constant COMP_QUALITY_VALUES. */
-    private static final float[] COMP_QUALITY_VALUES = {0.05f, 0.75f, 0.95f};
-    
-    /** The Constant COMP_QUALITY_DESCRIPTIONS. */
-    private static final String[] COMP_QUALITY_DESCRIPTIONS = {
-            "Minimum useful",
-            "Visually lossless",
-            "Maximum useful"
+
+    /**
+     * The Constant COMP_QUALITY_VALUES.
+     */
+    private static final float[] COMP_QUALITY_VALUES = {
+            0.05f, 0.75f, 0.95f
     };
 
-    /** The q tables. */
+    /**
+     * The Constant COMP_QUALITY_DESCRIPTIONS.
+     */
+    private static final String[] COMP_QUALITY_DESCRIPTIONS = {
+            "Minimum useful", "Visually lossless", "Maximum useful"
+    };
+
+    /**
+     * The q tables.
+     */
     private JPEGQTable[] qTables;
-    
-    /** The dc huffman tables. */
+
+    /**
+     * The dc huffman tables.
+     */
     private JPEGHuffmanTable[] dcHuffmanTables;
-    
-    /** The ac huffman tables. */
+
+    /**
+     * The ac huffman tables.
+     */
     private JPEGHuffmanTable[] acHuffmanTables;
 
-    /** The optimize huffman tables. */
+    /**
+     * The optimize huffman tables.
+     */
     private boolean optimizeHuffmanTables;
 
     /**
-     * Instantiates a new JPEGImageWriteParam object with 
-     * the specified Locale.
+     * Instantiates a new JPEGImageWriteParam object with the specified Locale.
      * 
-     * @param locale the Locale.
+     * @param locale
+     *            the Locale.
      */
     public JPEGImageWriteParam(Locale locale) {
         super(locale);
@@ -63,37 +77,38 @@ public class JPEGImageWriteParam extends ImageWriteParam {
         progressiveMode = ImageWriteParam.MODE_DISABLED;
 
         canWriteCompressed = true;
-        compressionTypes = new String[]{"JPEG"};
-        compressionType = compressionTypes[0]; 
+        compressionTypes = new String[] {
+            "JPEG"
+        };
+        compressionType = compressionTypes[0];
         compressionQuality = JPEGConsts.DEFAULT_JPEG_COMPRESSION_QUALITY;
     }
 
     /**
      * Returns true if tables are set, false otherwise.
      * 
-     * @return true if tables are set, false otherwise.
+     * @return true, if tables are set, false otherwise.
      */
     public boolean areTablesSet() {
         return qTables != null;
     }
 
     /**
-     * Sets the quantization and Huffman tables for using in 
-     * encoding streams.
+     * Sets the quantization and Huffman tables for using in encoding streams.
      * 
-     * @param qTables the quantization tables.
-     * @param DCHuffmanTables the standart DC Huffman tables.
-     * @param ACHuffmanTables the standart AC huffman tables.
+     * @param qTables
+     *            the quantization tables.
+     * @param DCHuffmanTables
+     *            the standart DC Huffman tables.
+     * @param ACHuffmanTables
+     *            the standart AC huffman tables.
      */
-    public void setEncodeTables(
-            JPEGQTable[] qTables,
-            JPEGHuffmanTable[] DCHuffmanTables,
-            JPEGHuffmanTable[] ACHuffmanTables
-    ) {
+    public void setEncodeTables(JPEGQTable[] qTables, JPEGHuffmanTable[] DCHuffmanTables,
+            JPEGHuffmanTable[] ACHuffmanTables) {
         if (qTables == null || DCHuffmanTables == null || ACHuffmanTables == null) {
             throw new IllegalArgumentException("Invalid JPEG table arrays");
         }
-        if(DCHuffmanTables.length != ACHuffmanTables.length) {
+        if (DCHuffmanTables.length != ACHuffmanTables.length) {
             throw new IllegalArgumentException("Invalid JPEG table arrays");
         }
         if (qTables.length > 4 || DCHuffmanTables.length > 4) {
@@ -155,21 +170,22 @@ public class JPEGImageWriteParam extends ImageWriteParam {
     }
 
     /**
-     * Sets the flag indicated that the writer will generate optimized 
-     * Huffman tables for the image as part of the writing process.
+     * Sets the flag indicated that the writer will generate optimized Huffman
+     * tables for the image as part of the writing process.
      * 
-     * @param optimize the flag of optimizing huffman tables.
+     * @param optimize
+     *            the flag of optimizing huffman tables.
      */
     public void setOptimizeHuffmanTables(boolean optimize) {
         optimizeHuffmanTables = optimize;
     }
 
     /**
-     * Returns true if the writer generates optimized Huffman tables,
-     * false otherwise.
+     * Returns true if the writer generates optimized Huffman tables, false
+     * otherwise.
      * 
-     * @return the true if the writer generates optimized Huffman tables,
-     * false otherwise.
+     * @return true, if the writer generates optimized Huffman tables, false
+     *         otherwise.
      */
     public boolean getOptimizeHuffmanTables() {
         return optimizeHuffmanTables;

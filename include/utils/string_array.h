@@ -111,6 +111,19 @@ public:
         return mArray[idx];
     }
 
+    //
+    // Set entry N to specified string.
+    // [should use operator[] here]
+    //
+    void setEntry(int idx, const char* str) {
+        if (idx < 0 || idx >= mCurrent)
+            return;
+        delete[] mArray[idx];
+        int len = strlen(str);
+        mArray[idx] = new char[len+1];
+        memcpy(mArray[idx], str, len+1);
+    }
+
 private:
     int     mMax;
     int     mCurrent;

@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.os.Handler;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Spanned;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
@@ -359,6 +360,12 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     
     private class NumberRangeKeyListener extends NumberKeyListener {
 
+        // XXX This doesn't allow for range limits when controlled by a
+        // soft input method!
+        public int getInputType() {
+            return InputType.TYPE_CLASS_NUMBER;
+        }
+        
         @Override
         protected char[] getAcceptedChars() {
             return DIGIT_CHARACTERS;
@@ -421,4 +428,10 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         return mStart;
     }
 
+    /**
+     * @return the current value.
+     */
+    public int getCurrent() {
+        return mCurrent;
+    }
 }

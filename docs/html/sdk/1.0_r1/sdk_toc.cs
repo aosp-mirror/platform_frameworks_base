@@ -1,1 +1,0 @@
-<ul>  <li><strong><a href="index.html">SDK 1.0</a></strong></li>    <ul>      <li><a href="installing.html">Installing</a></li>      <li><a href="upgrading.html">Upgrading</a></li>      <li><a href="terms.html">License Agreement</a></li>      <li><a href="RELEASENOTES.html">Release Notes</a></li>    </ul>  </li></ul>FIXME

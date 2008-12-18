@@ -16,6 +16,7 @@
 
 package android.net.http;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -279,6 +280,11 @@ class Request {
                         count = 0;
                     }
                 }
+            } catch (EOFException e) {
+                /* InflaterInputStream throws an EOFException when the
+                   server truncates gzipped content.  Handle this case
+                   as we do truncated non-gzipped content: no error */
+                if (HttpLog.LOGV) HttpLog.v( "readResponse() handling " + e);
             } catch(IOException e) {
                 // don't throw if we have a non-OK status code
                 if (statusCode == HttpStatus.SC_OK) {

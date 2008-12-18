@@ -34,6 +34,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public Locale locale;
 
+    /**
+     * Locale should persist on setting
+     * @hide pending API council approval
+     */
+    public boolean userSetLocale;
+
     public static final int TOUCHSCREEN_UNDEFINED = 0;
     public static final int TOUCHSCREEN_NOTOUCH = 1;
     public static final int TOUCHSCREEN_STYLUS = 2;
@@ -60,13 +66,29 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int KEYBOARDHIDDEN_UNDEFINED = 0;
     public static final int KEYBOARDHIDDEN_NO = 1;
     public static final int KEYBOARDHIDDEN_YES = 2;
+    /** Constant matching actual resource implementation. {@hide} */
+    public static final int KEYBOARDHIDDEN_SOFT = 3;
     
     /**
-     * A flag indicating whether the keyboard has been hidden.  This will
-     * be set on a device with a mechanism to hide the keyboard from the
-     * user, when that mechanism is closed.
+     * A flag indicating whether any keyboard is available.  Unlike
+     * {@link #hardKeyboardHidden}, this also takes into account a soft
+     * keyboard, so if the hard keyboard is hidden but there is soft
+     * keyboard available, it will be set to NO.  Value is one of:
+     * {@link #KEYBOARDHIDDEN_NO}, {@link #KEYBOARDHIDDEN_YES}.
      */
     public int keyboardHidden;
+    
+    public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0;
+    public static final int HARDKEYBOARDHIDDEN_NO = 1;
+    public static final int HARDKEYBOARDHIDDEN_YES = 2;
+    
+    /**
+     * A flag indicating whether the hard keyboard has been hidden.  This will
+     * be set on a device with a mechanism to hide the keyboard from the
+     * user, when that mechanism is closed.  One of:
+     * {@link #HARDKEYBOARDHIDDEN_NO}, {@link #HARDKEYBOARDHIDDEN_YES}.
+     */
+    public int hardKeyboardHidden;
     
     public static final int NAVIGATION_UNDEFINED = 0;
     public static final int NAVIGATION_NONAV = 1;
@@ -111,9 +133,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (o.locale != null) {
             locale = (Locale) o.locale.clone();
         }
+        userSetLocale = o.userSetLocale;
         touchscreen = o.touchscreen;
         keyboard = o.keyboard;
         keyboardHidden = o.keyboardHidden;
+        hardKeyboardHidden = o.hardKeyboardHidden;
         navigation = o.navigation;
         orientation = o.orientation;
     }
@@ -122,7 +146,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         return "{ scale=" + fontScale + " imsi=" + mcc + "/" + mnc
                 + " locale=" + locale
                 + " touch=" + touchscreen + " key=" + keyboard + "/"
-                + keyboardHidden
+                + keyboardHidden + "/" + hardKeyboardHidden
                 + " nav=" + navigation + " orien=" + orientation + " }";
     }
 
@@ -133,9 +157,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         fontScale = 1;
         mcc = mnc = 0;
         locale = Locale.getDefault();
+        userSetLocale = false;
         touchscreen = TOUCHSCREEN_UNDEFINED;
         keyboard = KEYBOARD_UNDEFINED;
         keyboardHidden = KEYBOARDHIDDEN_UNDEFINED;
+        hardKeyboardHidden = HARDKEYBOARDHIDDEN_UNDEFINED;
         navigation = NAVIGATION_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
     }
@@ -173,6 +199,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             locale = delta.locale != null
                     ? (Locale) delta.locale.clone() : null;
         }
+        if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
+        {
+            userSetLocale = true;
+            changed |= ActivityInfo.CONFIG_LOCALE;
+        }
         if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
                 && touchscreen != delta.touchscreen) {
             changed |= ActivityInfo.CONFIG_TOUCHSCREEN;
@@ -187,6 +218,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && keyboardHidden != delta.keyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
             keyboardHidden = delta.keyboardHidden;
+        }
+        if (delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED
+                && hardKeyboardHidden != delta.hardKeyboardHidden) {
+            changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
+            hardKeyboardHidden = delta.hardKeyboardHidden;
         }
         if (delta.navigation != NAVIGATION_UNDEFINED
                 && navigation != delta.navigation) {
@@ -252,6 +288,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && keyboardHidden != delta.keyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
+        if (delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED
+                && hardKeyboardHidden != delta.hardKeyboardHidden) {
+            changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
+        }
         if (delta.navigation != NAVIGATION_UNDEFINED
                 && navigation != delta.navigation) {
             changed |= ActivityInfo.CONFIG_NAVIGATION;
@@ -298,9 +338,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             dest.writeString(locale.getCountry());
             dest.writeString(locale.getVariant());
         }
+        if(userSetLocale) {
+            dest.writeInt(1);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeInt(touchscreen);
         dest.writeInt(keyboard);
         dest.writeInt(keyboardHidden);
+        dest.writeInt(hardKeyboardHidden);
         dest.writeInt(navigation);
         dest.writeInt(orientation);
     }
@@ -327,9 +373,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             locale = new Locale(source.readString(), source.readString(),
                     source.readString());
         }
+        userSetLocale = (source.readInt()==1);
         touchscreen = source.readInt();
         keyboard = source.readInt();
         keyboardHidden = source.readInt();
+        hardKeyboardHidden = source.readInt();
         navigation = source.readInt();
         orientation = source.readInt();
     }
@@ -356,6 +404,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.keyboardHidden - that.keyboardHidden;
         if (n != 0) return n;
+        n = this.hardKeyboardHidden - that.hardKeyboardHidden;
+        if (n != 0) return n;
         n = this.navigation - that.navigation;
         if (n != 0) return n;
         n = this.orientation - that.orientation;
@@ -380,7 +430,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int hashCode() {
         return ((int)this.fontScale) + this.mcc + this.mnc
                 + this.locale.hashCode() + this.touchscreen
-                + this.keyboard + this.keyboardHidden + this.navigation
-                + this.orientation;
+                + this.keyboard + this.keyboardHidden + this.hardKeyboardHidden
+                + this.navigation + this.orientation;
     }
 }

@@ -18,57 +18,62 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
-
 /**
- * The ImageProducer provides an interface for objects which produce
- * the image data. ImageProducer is used for reconstructing the 
- * image. Each image contains an ImageProducer. 
+ * The ImageProducer provides an interface for objects which produce the image
+ * data. ImageProducer is used for reconstructing the image. Each image contains
+ * an ImageProducer.
+ * 
+ * @since Android 1.0
  */
 public interface ImageProducer {
 
     /**
-     * Checks if the specified ImageConsumer is registered with this 
+     * Checks if the specified ImageConsumer is registered with this
      * ImageProvider or not.
      * 
-     * @param ic the ImageConsumer to be checked.
-     * 
-     * @return true, if the specified ImageConsumer is registered with this 
-     * ImageProvider, false otherwise.
+     * @param ic
+     *            the ImageConsumer to be checked.
+     * @return true, if the specified ImageConsumer is registered with this
+     *         ImageProvider, false otherwise.
      */
     public boolean isConsumer(ImageConsumer ic);
 
     /**
-     * Starts a reconstruction of the image data which will 
-     * be delivered to this consumer. This method addes the
-     * specified ImageConsumer before reconstructing the image.  
+     * Starts a reconstruction of the image data which will be delivered to this
+     * consumer. This method adds the specified ImageConsumer before
+     * reconstructing the image.
      * 
-     * @param ic the specified ImageConsumer.
+     * @param ic
+     *            the specified ImageConsumer.
      */
     public void startProduction(ImageConsumer ic);
 
     /**
-     * Requests the ImageProducer to resend the image data 
-     * in ImageConsumer.TOPDOWNLEFTRIGHT order.
+     * Requests the ImageProducer to resend the image data in
+     * ImageConsumer.TOPDOWNLEFTRIGHT order.
      * 
-     * @param ic the specified ImageConsumer.
+     * @param ic
+     *            the specified ImageConsumer.
      */
     public void requestTopDownLeftRightResend(ImageConsumer ic);
 
     /**
      * Deregisters the specified ImageConsumer.
      * 
-     * @param ic the specified ImageConsumer.
+     * @param ic
+     *            the specified ImageConsumer.
      */
     public void removeConsumer(ImageConsumer ic);
 
     /**
      * Adds the specified ImageConsumer object to this ImageProducer.
      * 
-     * @param ic the specified ImageConsumer.
+     * @param ic
+     *            the specified ImageConsumer.
      */
     public void addConsumer(ImageConsumer ic);
 
 }
-

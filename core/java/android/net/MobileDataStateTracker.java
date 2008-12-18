@@ -30,7 +30,6 @@ import com.android.internal.telephony.TelephonyIntents;
 import android.net.NetworkInfo.DetailedState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.Config;
 import android.text.TextUtils;
 
 import java.util.List;
@@ -71,7 +70,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * @param target a message handler for getting callbacks about state changes
      */
     public MobileDataStateTracker(Context context, Handler target) {
-        super(context, target, ConnectivityManager.TYPE_MOBILE);
+        super(context, target, ConnectivityManager.TYPE_MOBILE,
+              TelephonyManager.getDefault().getNetworkType(), "MOBILE",
+              TelephonyManager.getDefault().getNetworkTypeName());
         mPhoneService = null;
         mDnsServers = new ArrayList<String>();
     }
@@ -80,9 +81,10 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * Begin monitoring mobile data connectivity.
      */
     public void startMonitoring() {
-
-        IntentFilter filter = new IntentFilter(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+        IntentFilter filter =
+                new IntentFilter(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
+        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
 
         Intent intent = mContext.registerReceiver(new MobileDataStateReceiver(), filter);
         if (intent != null)
@@ -146,6 +148,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                     reason == null ? "" : "(" + reason + ")");
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             }
+            TelephonyManager tm = TelephonyManager.getDefault();
+            setRoamingStatus(tm.isNetworkRoaming());
+            setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
         }
     }
 
@@ -220,6 +225,15 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     public String[] getNameServers() {
         return getNameServerList(sDnsPropNames);
+    }
+
+    /**
+     * {@inheritDoc}
+     * The mobile data network subtype indicates what generation network technology is in effect,
+     * e.g., GPRS, EDGE, UMTS, etc.
+     */
+    public int getNetworkSubtype() {
+        return TelephonyManager.getDefault().getNetworkType();
     }
 
     /**
@@ -358,8 +372,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Tells the phone sub-system that the caller is finished is
-     * finished using the named feature. The only supported feature at
+     * Tells the phone sub-system that the caller is finished
+     * using the named feature. The only supported feature at
      * this time is {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
      * to specify that it wants to send and/or receive MMS data.
      * @param feature the name of the feature that is no longer needed

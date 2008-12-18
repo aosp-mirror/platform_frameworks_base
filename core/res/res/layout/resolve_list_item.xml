@@ -17,25 +17,37 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingLeft="14dip"
     android:paddingRight="15dip">
 
+
+    <!-- Activity icon when presenting dialog -->
     <ImageView android:id="@+id/icon"
         android:layout_width="@android:dimen/app_icon_size"
         android:layout_height="@android:dimen/app_icon_size"
-        android:layout_gravity="center_vertical"
+        android:layout_alignParentLeft="true"
         android:scaleType="fitCenter" />
 
+    <!-- Activity name -->
     <TextView android:id="@android:id/text1"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:minHeight="?android:attr/listPreferredItemHeight"
         android:textAppearance="?android:attr/textAppearanceLargeInverse"
-        android:gravity="center_vertical"
-        android:paddingLeft="14dip" />
-</LinearLayout>
+        android:layout_toRightOf="@id/icon"
+        android:paddingLeft="6dip" />
+
+    <!-- Extended activity info to distinguish between duplicate activity names -->
+    <TextView android:id="@android:id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+        android:layout_toRightOf="@id/icon"
+        android:layout_below="@id/text1"
+        android:paddingLeft="6dip" />
+</RelativeLayout>
 

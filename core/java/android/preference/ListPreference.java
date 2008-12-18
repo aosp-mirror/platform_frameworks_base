@@ -26,7 +26,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 
 /**
- * The {@link ListPreference} is a preference that displays a list of entries as
+ * A {@link Preference} that displays a list of entries as
  * a dialog.
  * <p>
  * This preference will store a string into the SharedPreferences. This string will be the value
@@ -192,8 +192,22 @@ public class ListPreference extends DialogPreference {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         mClickedDialogEntryIndex = which;
+
+                        /*
+                         * Clicking on an item simulates the positive button
+                         * click, and dismisses the dialog.
+                         */
+                        ListPreference.this.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+                        dialog.dismiss();
                     }
         });
+        
+        /*
+         * The typical interaction for list-based dialogs is to have
+         * click-on-an-item dismiss the dialog instead of the user having to
+         * press 'Ok'.
+         */
+        builder.setPositiveButton(null, null);
     }
 
     @Override

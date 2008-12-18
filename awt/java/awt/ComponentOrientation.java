@@ -18,44 +18,59 @@
  * @author Michael Danilov, Dmitry A. Durnev
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * The ComponentOrientation class specifies the language-sensitive orientation 
- * of component's elements or text. It is used to reflect the differences in this 
- * ordering between different writting systems. The ComponentOrientation class 
- * indicates the orientation of the elements/text in the horizontal direction
- * ("left to right" or "right to left") and in the vertical direction
+ * The ComponentOrientation class specifies the language-sensitive orientation
+ * of component's elements or text. It is used to reflect the differences in
+ * this ordering between different writing systems. The ComponentOrientation
+ * class indicates the orientation of the elements/text in the horizontal
+ * direction ("left to right" or "right to left") and in the vertical direction
  * ("top to bottom" or "bottom to top").
+ * 
+ * @since Android 1.0
  */
 public final class ComponentOrientation implements Serializable {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -4113291392143563828L;
 
-    /** 
+    /**
      * The Constant LEFT_TO_RIGHT indicates that items run left to right.
      */
     public static final ComponentOrientation LEFT_TO_RIGHT = new ComponentOrientation(true, true);
 
-    /** 
+    /**
      * The Constant RIGHT_TO_LEFT indicates that items run right to left.
      */
     public static final ComponentOrientation RIGHT_TO_LEFT = new ComponentOrientation(true, false);
 
-    /** The Constant UNKNOWN indicates that a component's orientation is not set. */
+    /**
+     * The Constant UNKNOWN indicates that a component's orientation is not set.
+     */
     public static final ComponentOrientation UNKNOWN = new ComponentOrientation(true, true);
 
-    /** The Constant rlLangs. */
-    private static final Set<String> rlLangs = new HashSet<String>(); //RIGHT_TO_LEFT languages
+    /**
+     * The Constant rlLangs.
+     */
+    private static final Set<String> rlLangs = new HashSet<String>(); // RIGHT_TO_LEFT
 
-    /** The horizontal. */
+    // languages
+
+    /**
+     * The horizontal.
+     */
     private final boolean horizontal;
 
-    /** The left2right. */
+    /**
+     * The left2right.
+     */
     private final boolean left2right;
 
     static {
@@ -68,10 +83,9 @@ public final class ComponentOrientation implements Serializable {
     /**
      * Gets the orientation for the given ResourceBundle's localization.
      * 
-     * @param bdl the ResourceBundle.
-     * 
+     * @param bdl
+     *            the ResourceBundle.
      * @return the ComponentOrientation.
-     * 
      * @deprecated Use getOrientation(java.util.Locale) method.
      */
     @Deprecated
@@ -79,12 +93,11 @@ public final class ComponentOrientation implements Serializable {
         Object obj = null;
         try {
             obj = bdl.getObject("Orientation"); //$NON-NLS-1$
-        }
-        catch (MissingResourceException mre) {
+        } catch (MissingResourceException mre) {
             obj = null;
         }
         if (obj instanceof ComponentOrientation) {
-            return (ComponentOrientation) obj;
+            return (ComponentOrientation)obj;
         }
         Locale locale = bdl.getLocale();
         if (locale == null) {
@@ -96,8 +109,8 @@ public final class ComponentOrientation implements Serializable {
     /**
      * Gets the orientation for the specified locale.
      * 
-     * @param locale the specified Locale.
-     * 
+     * @param locale
+     *            the specified Locale.
      * @return the ComponentOrientation.
      */
     public static ComponentOrientation getOrientation(Locale locale) {
@@ -108,8 +121,10 @@ public final class ComponentOrientation implements Serializable {
     /**
      * Instantiates a new component orientation.
      * 
-     * @param hor whether the items should be arranged horizontally
-     * @param l2r whether this orientation specifies a left-to-right flow
+     * @param hor
+     *            whether the items should be arranged horizontally.
+     * @param l2r
+     *            whether this orientation specifies a left-to-right flow.
      */
     private ComponentOrientation(boolean hor, boolean l2r) {
         horizontal = hor;
@@ -117,11 +132,10 @@ public final class ComponentOrientation implements Serializable {
     }
 
     /**
-     * Returns true if the text of the of writing systems arranged
-     * horizontally.
+     * Returns true if the text of the of writing systems arranged horizontally.
      * 
-     * @return true, if the text is written horizontally, false 
-     * for a vertical arrangement. 
+     * @return true, if the text is written horizontally, false for a vertical
+     *         arrangement.
      */
     public boolean isHorizontal() {
         return horizontal;
@@ -130,8 +144,8 @@ public final class ComponentOrientation implements Serializable {
     /**
      * Returns true if the text is arranged from left to right.
      * 
-     * @return true, for writing systems written from left to right; 
-     * false for right-to-left.
+     * @return true, for writing systems written from left to right; false for
+     *         right-to-left.
      */
     public boolean isLeftToRight() {
         return left2right;

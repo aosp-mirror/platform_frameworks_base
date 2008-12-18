@@ -107,7 +107,12 @@ public class AudioManager {
     public static final int STREAM_MUSIC = AudioSystem.STREAM_MUSIC;
     /** The audio stream for alarms */
     public static final int STREAM_ALARM = AudioSystem.STREAM_ALARM;
+    /** The audio stream for notifications */
+    public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** Number of audio streams */
+    /**
+     * @deprecated Use AudioSystem.getNumStreamTypes() instead
+     */
     public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
 
@@ -116,8 +121,9 @@ public class AudioManager {
         6,  // STREAM_VOICE_CALL
         8,  // STREAM_SYSTEM
         8,  // STREAM_RING
-        16,  // STREAM_MUSIC
-        8  // STREAM_ALARM
+        16, // STREAM_MUSIC
+        8,  // STREAM_ALARM
+        8   // STREAM_NOTIFICATION
     }; 
     
     /**  @hide Default volume index values for audio streams */
@@ -126,7 +132,8 @@ public class AudioManager {
         5,  // STREAM_SYSTEM
         5,  // STREAM_RING
         11, // STREAM_MUSIC
-        6   // STREAM_ALARM
+        6,  // STREAM_ALARM
+        5   // STREAM_NOTIFICATION
     }; 
     
     /**
@@ -617,7 +624,14 @@ public class AudioManager {
      *           headset; <var>false</var> to route audio to/from phone earpiece
      */
     public void setBluetoothScoOn(boolean on){
-        setRouting(MODE_IN_CALL, on ? ROUTE_BLUETOOTH : ROUTE_EARPIECE, ROUTE_ALL);
+        // Don't disable A2DP when turning off SCO.
+        // A2DP does not affect in-call routing.
+        setRouting(MODE_RINGTONE, 
+               on ? ROUTE_BLUETOOTH_SCO: ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
+        setRouting(MODE_NORMAL, 
+                on ? ROUTE_BLUETOOTH_SCO: ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
+        setRouting(MODE_IN_CALL, 
+                on ? ROUTE_BLUETOOTH_SCO: ROUTE_EARPIECE, ROUTE_ALL);
     }
 
     /**
@@ -627,7 +641,32 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothScoOn() {
-        return (getRouting(MODE_IN_CALL) & ROUTE_BLUETOOTH) == 0 ? false : true;
+        return (getRouting(MODE_IN_CALL) & ROUTE_BLUETOOTH_SCO) == 0 ? false : true;
+    }
+
+    /**
+     * Sets A2DP audio routing to the Bluetooth headset on or off.
+     *
+     * @param on set <var>true</var> to route A2DP audio to/from Bluetooth 
+     *           headset; <var>false</var> disable A2DP audio
+     */
+    public void setBluetoothA2dpOn(boolean on){
+        // the audio flinger chooses A2DP as a higher priority,
+        // so there is no need to disable other routes.
+        setRouting(MODE_RINGTONE, 
+               on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
+        setRouting(MODE_NORMAL, 
+                on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
+    }
+
+    /**
+     * Checks whether A2DP audio routing to the Bluetooth headset is on or off.
+     *
+     * @return true if A2DP audio is being routed to/from Bluetooth headset;
+     *         false if otherwise
+     */
+    public boolean isBluetoothA2dpOn() {
+        return (getRouting(MODE_NORMAL) & ROUTE_BLUETOOTH_A2DP) == 0 ? false : true;
     }
 
     /**
@@ -727,13 +766,21 @@ public class AudioManager {
      */        
     public static final int ROUTE_SPEAKER           = AudioSystem.ROUTE_SPEAKER;
     /**
-     * Routing audio output to bluetooth
+     * @deprecated use {@link #ROUTE_BLUETOOTH_SCO}
      */        
-    public static final int ROUTE_BLUETOOTH         = AudioSystem.ROUTE_BLUETOOTH;
+    @Deprecated public static final int ROUTE_BLUETOOTH = AudioSystem.ROUTE_BLUETOOTH_SCO;
+    /**
+     * Routing audio output to bluetooth SCO
+     */        
+    public static final int ROUTE_BLUETOOTH_SCO     = AudioSystem.ROUTE_BLUETOOTH_SCO;
     /**
      * Routing audio output to headset
      */        
     public static final int ROUTE_HEADSET           = AudioSystem.ROUTE_HEADSET;
+    /**
+     * Routing audio output to bluetooth A2DP
+     */        
+    public static final int ROUTE_BLUETOOTH_A2DP    = AudioSystem.ROUTE_BLUETOOTH_A2DP;
     /**
      * Used for mask parameter of {@link #setRouting(int,int,int)}.
      */        

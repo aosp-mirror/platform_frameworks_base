@@ -163,7 +163,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /**
      * Called by the system when the service is first created.  Do not call this method directly.
-     * If you override this method, be sure to call super.onCreate().
      */
     public void onCreate() {
     }
@@ -172,7 +171,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Called by the system every time a client explicitly starts the service by calling 
      * {@link android.content.Context#startService}, providing the arguments it supplied and a 
      * unique integer token representing the start request.  Do not call this method directly.
-     * If you override this method, be sure to call super.onStart().
      *  
      * @param intent The Intent supplied to {@link android.content.Context#startService}, 
      *                  as given.
@@ -189,7 +187,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * service should clean up an resources it holds (threads, registered
      * receivers, etc) at this point.  Upon return, there will be no more calls
      * in to this Service object and it is effectively dead.  Do not call this method directly.
-     * If you override this method, be sure to call super.onDestroy().
      */
     public void onDestroy() {
     }
@@ -375,4 +372,3 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private Application mApplication = null;
     private IActivityManager mActivityManager = null;
 }
-

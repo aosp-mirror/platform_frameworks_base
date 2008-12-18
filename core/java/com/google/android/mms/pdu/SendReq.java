@@ -29,7 +29,7 @@ public class SendReq extends MultimediaMessagePdu {
 
         try {
             setMessageType(PduHeaders.MESSAGE_TYPE_SEND_REQ);
-            setMmsVersion(PduHeaders.MMS_VERSION_1_3);
+            setMmsVersion(PduHeaders.CURRENT_MMS_VERSION);
             // FIXME: Content-type must be decided according to whether
             // SMIL part present.
             setContentType("application/vnd.wap.multipart.related".getBytes());

@@ -46,6 +46,13 @@ public class ViewConfiguration {
     private static final int LONG_PRESS_TIMEOUT = 500;
     
     /**
+     * Defines the duration in milliseconds a user needs to hold down the
+     * appropriate button to bring up the global actions dialog (power off,
+     * lock screen, etc).
+     */
+    private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 500;
+    
+    /**
      * Defines the duration in milliseconds we will wait to see if a touch event 
      * is a top or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
@@ -65,14 +72,6 @@ public class ViewConfiguration {
      */
     private static final int ZOOM_CONTROLS_TIMEOUT = 3000;
 
-    /**
-     * Defines the duration in milliseconds a user needs to hold down the
-     * appropriate button to bring up the global actions dialog (power off,
-     * lock screen, etc).
-     */
-    private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 1000;
-    
-    
     /**
      * Inset in pixels to look for touchable content when the user touches the edge of the screen
      */

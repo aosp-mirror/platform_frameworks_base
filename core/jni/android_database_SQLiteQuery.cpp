@@ -106,11 +106,12 @@ static int finish_program_and_get_row_count(sqlite3_stmt *statement) {
 }
 
 static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
-                               jint startPos, jint offsetParam)
+                               jint startPos, jint offsetParam, jint maxRead, jint lastPos)
 {
     int err;
     sqlite3_stmt * statement = GET_STATEMENT(env, object);
-    int numRows = 0;
+    int numRows = lastPos;
+    maxRead += lastPos;
     int numColumns;
     int retryCount;
     int boundParams;
@@ -168,7 +169,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
         }
     } 
     
-    while(true) {
+    while(startPos != 0 || numRows < maxRead) {
         err = sqlite3_step(statement);
         if (err == SQLITE_ROW) {
             LOG_WINDOW("\nStepped statement %p to row %d", statement, startPos + numRows);
@@ -274,6 +275,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
 
             if (i < numColumns) {
                 // Not all the fields fit in the window
+                // Unknown data error happened
                 break;
             }
 
@@ -305,8 +307,12 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
     LOG_WINDOW("Resetting statement %p after fetching %d rows in %d bytes\n\n\n\n", statement,
             numRows, window->size() - window->freeSpace());
 //    LOGI("Filled window with %d rows in %d bytes", numRows, window->size() - window->freeSpace());
-    sqlite3_reset(statement);
-    return startPos + numRows;
+    if (err == SQLITE_ROW) {
+        return -1;
+    } else {
+        sqlite3_reset(statement);
+        return startPos + numRows;
+    }
 }
 
 static jint native_column_count(JNIEnv* env, jobject object)
@@ -330,7 +336,7 @@ static jstring native_column_name(JNIEnv* env, jobject object, jint columnIndex)
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_fill_window", "(Landroid/database/CursorWindow;II)I", (void *)native_fill_window},
+    {"native_fill_window", "(Landroid/database/CursorWindow;IIII)I", (void *)native_fill_window},
     {"native_column_count", "()I", (void*)native_column_count},
     {"native_column_name", "(I)Ljava/lang/String;", (void *)native_column_name},
 };

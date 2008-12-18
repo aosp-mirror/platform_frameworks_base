@@ -18,20 +18,22 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 
 /**
- * The PaintContext interface determines the specific environment for
- * generating color patterns in device space for fill, draw, or stroke 
- * rendering operations using Graphics2D. This interface provides colors
- * through the Raster object associated with the specific ColorModel 
- * for Graphics2D rendering operations.
+ * The PaintContext interface determines the specific environment for generating
+ * color patterns in device space for fill, draw, or stroke rendering operations
+ * using Graphics2D. This interface provides colors through the Raster object
+ * associated with the specific ColorModel for Graphics2D rendering operations.
+ * 
+ * @since Android 1.0
  */
 public interface PaintContext {
-    
+
     /**
      * Releases the resources allocated for the operation.
      */
@@ -45,20 +47,23 @@ public interface PaintContext {
     ColorModel getColorModel();
 
     /**
-     * Gets the Raster which defines the colors of the specified rectangular 
+     * Gets the Raster which defines the colors of the specified rectangular
      * area for Graphics2D rendering operations.
      * 
-     * @param x the X coordinate of the device space area for which 
-     * colors are generated.
-     * @param y the Y coordinate of the device space area for which 
-     * colors are generated.
-     * @param w the width of the device space area for which 
-     * colors are generated.
-     * @param h the height of the device space area for which 
-     * colors are generated.
-     * 
-     * @return the Raster object which contains the colors of the specified 
-     * rectangular area for Graphics2D rendering operations.
+     * @param x
+     *            the X coordinate of the device space area for which colors are
+     *            generated.
+     * @param y
+     *            the Y coordinate of the device space area for which colors are
+     *            generated.
+     * @param w
+     *            the width of the device space area for which colors are
+     *            generated.
+     * @param h
+     *            the height of the device space area for which colors are
+     *            generated.
+     * @return the Raster object which contains the colors of the specified
+     *         rectangular area for Graphics2D rendering operations.
      */
     Raster getRaster(int x, int y, int w, int h);
 }

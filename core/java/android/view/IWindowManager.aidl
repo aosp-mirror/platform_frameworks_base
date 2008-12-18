@@ -17,6 +17,9 @@
 
 package android.view;
 
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodClient;
+
 import android.content.res.Configuration;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
@@ -42,8 +45,10 @@ interface IWindowManager
     boolean stopViewServer();            // Transaction #2
     boolean isViewServerRunning();       // Transaction #3
 
-    IWindowSession openSession(IBinder token);
-
+    IWindowSession openSession(in IInputMethodClient client,
+            in IInputContext inputContext);
+    boolean inputMethodClientHasFocus(IInputMethodClient client);
+    
     // These can only be called when injecting events to your own window,
     // or by holding the INJECT_EVENTS permission.
     boolean injectKeyEvent(in KeyEvent ev, boolean sync);
@@ -74,6 +79,8 @@ interface IWindowManager
     void moveAppToken(int index, IBinder token);
     void moveAppTokensToTop(in List<IBinder> tokens);
     void moveAppTokensToBottom(in List<IBinder> tokens);
+    void addWindowToken(IBinder token, int type);
+    void removeWindowToken(IBinder token);
 
     // these require DISABLE_KEYGUARD permission
     void disableKeyguard(IBinder token, String tag);

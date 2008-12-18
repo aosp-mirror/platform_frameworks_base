@@ -30,11 +30,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 /**
- * The {@link PreferenceScreen} class represents a top-level {@link Preference} that
- * is the root of a {@link Preference} hierarchy. A {@link PreferenceActivity}
+ * Represents a top-level {@link Preference} that
+ * is the root of a Preference hierarchy. A {@link PreferenceActivity}
  * points to an instance of this class to show the preferences. To instantiate
  * this class, use {@link PreferenceManager#createPreferenceScreen(Context)}.
- * <p>
+ * <ul>
  * This class can appear in two places:
  * <li> When a {@link PreferenceActivity} points to this, it is used as the root
  * and is not shown (only the contained preferences are shown).
@@ -45,24 +45,25 @@ import android.widget.ListView;
  * {@link Preference#getIntent()}). The children of this {@link PreferenceScreen}
  * are NOT shown in the screen that this {@link PreferenceScreen} is shown in.
  * Instead, a separate screen will be shown when this preference is clicked.
+ * </ul>
+ * <p>Here's an example XML layout of a PreferenceScreen:</p>
+ * <pre>
+&lt;PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:key="first_preferencescreen"&gt;
+    &lt;CheckBoxPreference
+            android:key="wifi enabled"
+            android:title="WiFi" /&gt;
+    &lt;PreferenceScreen
+            android:key="second_preferencescreen"
+            android:title="WiFi settings"&gt;
+        &lt;CheckBoxPreference
+                android:key="prefer wifi"
+                android:title="Prefer WiFi" /&gt;
+        ... other preferences here ...
+    &lt;/PreferenceScreen&gt;
+&lt;/PreferenceScreen&gt; </pre>
  * <p>
- * <code>
- &lt;PreferenceScreen
-         xmlns:android="http://schemas.android.com/apk/res/android"
-         android:key="first_preferencescreen"&gt;
-     &lt;CheckBoxPreference
-             android:key="wifi enabled"
-             android:title="WiFi" /&gt;
-     &lt;PreferenceScreen
-             android:key="second_preferencescreen"
-             android:title="WiFi settings"&gt;
-         &lt;CheckBoxPreference
-                 android:key="prefer wifi"
-                 android:title="Prefer WiFi" /&gt;
-         ... other preferences here ...
-     &lt;/PreferenceScreen&gt;
- &lt;/PreferenceScreen&gt;
- * </code>
  * In this example, the "first_preferencescreen" will be used as the root of the
  * hierarchy and given to a {@link PreferenceActivity}. The first screen will
  * show preferences "WiFi" (which can be used to quickly enable/disable WiFi)

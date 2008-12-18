@@ -28,66 +28,39 @@ public:
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
             env->ExceptionClear();
-            printf("------- reset threw an exception\n");
+            SkDebugf("------- reset threw an exception\n");
             return false;
         }
         return true;
     }
     
-	virtual size_t read(void* buffer, size_t size) {
+    size_t doRead(void* buffer, size_t size) {
         JNIEnv* env = fEnv;
-        
-        if (buffer == NULL && size == 0) {
-            jint avail = env->CallIntMethod(fJavaInputStream,
-                                            gInputStream_availableMethodID);
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
-                printf("------- available threw an exception\n");
-                avail = 0;
-            }
-            return avail;
-        }
-
         size_t bytesRead = 0;
-
-        if (buffer == NULL) { // skip
-            jlong skipped = env->CallLongMethod(fJavaInputStream,
-                                        gInputStream_skipMethodID, (jlong)size);
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
-                printf("------- available threw an exception\n");
-                return 0;
-            }
-            if (skipped < 0) {
-                return 0;
-            }
-            return (size_t)skipped;
-        }
-
         // read the bytes
         do {
             size_t requested = size;
             if (requested > fCapacity)
                 requested = fCapacity;
-
+            
             jint n = env->CallIntMethod(fJavaInputStream,
-                    gInputStream_readMethodID, fJavaByteArray, 0, requested);
+                                        gInputStream_readMethodID, fJavaByteArray, 0, requested);
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
-                printf("---- read threw an exception\n");
+                SkDebugf("---- read threw an exception\n");
                 return 0;
             }
-
+            
             if (n <= 0) {
                 break;  // eof
             }
-
-            jbyte* array = env->GetByteArrayElements(fJavaByteArray, NULL);
+            
+            const jbyte* array = env->GetByteArrayElements(fJavaByteArray,
+                                                           NULL);
             memcpy(buffer, array, n);
-            env->ReleaseByteArrayElements(fJavaByteArray, array, 0);
+            env->ReleaseByteArrayElements(fJavaByteArray,
+                                          const_cast<jbyte*>(array), JNI_ABORT);
             
             buffer = (void*)((char*)buffer + n);
             bytesRead += n;
@@ -96,6 +69,64 @@ public:
         } while (size != 0);
         
         return bytesRead;
+    }
+    
+    size_t doSkip(size_t size) {
+        JNIEnv* env = fEnv;
+        jlong skipped = env->CallLongMethod(fJavaInputStream,
+                                            gInputStream_skipMethodID, (jlong)size);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            SkDebugf("------- available threw an exception\n");
+            return 0;
+        }
+        if (skipped < 0) {
+            skipped = 0;
+        }
+        return (size_t)skipped;
+    }
+    
+    size_t doSize() {
+        JNIEnv* env = fEnv;
+        jint avail = env->CallIntMethod(fJavaInputStream,
+                                        gInputStream_availableMethodID);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            SkDebugf("------- available threw an exception\n");
+            avail = 0;
+        }
+        return avail;
+    }
+    
+	virtual size_t read(void* buffer, size_t size) {
+        JNIEnv* env = fEnv;
+        if (NULL == buffer) {
+            if (0 == size) {
+                return this->doSize();
+            } else {
+                /*  InputStream.skip(n) can return <=0 but still not be at EOF
+                    If we see that value, we need to call read(), which will
+                    block if waiting for more data, or return -1 at EOF
+                 */
+                size_t amountSkipped = 0;
+                do {
+                    size_t amount = this->doSkip(size);
+                    if (0 == amount) {
+                        char tmp;
+                        amount = this->doRead(&tmp, 1);
+                        if (0 == amount) {
+                            // if read returned 0, we're at EOF
+                            break;
+                        }
+                    }
+                    amountSkipped += amount;
+                } while (amountSkipped < size);
+                return amountSkipped;
+            }
+        }
+        return this->doRead(buffer, size);
     }
     
 private:
@@ -167,7 +198,7 @@ public:
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
-                printf("------- write threw an exception\n");
+                SkDebugf("------- write threw an exception\n");
                 return false;
             }
             

@@ -18,9 +18,9 @@ package android.text.method;
 
 import android.view.KeyEvent;
 import android.view.View;
-import android.os.Message;
-import android.util.Log;
+import android.text.InputType;
 import android.text.*;
+import android.text.method.TextKeyListener.Capitalize;
 import android.widget.TextView;
 
 public abstract class BaseKeyListener
@@ -99,6 +99,25 @@ implements KeyListener {
         return true;
     }
 
+    static int makeTextContentType(Capitalize caps, boolean autoText) {
+        int contentType = InputType.TYPE_CLASS_TEXT;
+        switch (caps) {
+            case CHARACTERS:
+                contentType |= InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS;
+                break;
+            case WORDS:
+                contentType |= InputType.TYPE_TEXT_FLAG_CAP_WORDS;
+                break;
+            case SENTENCES:
+                contentType |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+                break;
+        }
+        if (autoText) {
+            contentType |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+        }
+        return contentType;
+    }
+    
     public boolean onKeyDown(View view, Editable content,
                              int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_DEL) {

@@ -18,29 +18,32 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
- * The Stroke interface gives a pen style to be used by the 
- * Graphics2D interface. It provides a means for getting a stroked version 
- * of a shape, which is the version that is suitable for drawing via 
- * the Graphics2D interface. Stroking a shape gives the shape's outline
- * a width or drawing style. 
+ * The Stroke interface gives a pen style to be used by the Graphics2D
+ * interface. It provides a means for getting a stroked version of a shape,
+ * which is the version that is suitable for drawing via the Graphics2D
+ * interface. Stroking a shape gives the shape's outline a width or drawing
+ * style.
  * <p>
- * The Draw methods from Graphics2D interface should use the Stroke object for 
- * rendering the shape's outline. The stroke should be set by 
- * setStroke(java.awt.Stroke) method of the Graphics2D interface. 
+ * The Draw methods from Graphics2D interface should use the Stroke object for
+ * rendering the shape's outline. The stroke should be set by
+ * setStroke(java.awt.Stroke) method of the Graphics2D interface.
+ * 
  * @see java.awt.Graphics2D#setStroke(java.awt.Stroke)
+ * @since Android 1.0
  */
 public interface Stroke {
-    
+
     /**
-     * Creates the stroked shape, which is the version that is suitable for drawing via 
-     * the Graphics2D interface. Stroking a shape gives the shape's outline
-     * a width or drawing style.
+     * Creates the stroked shape, which is the version that is suitable for
+     * drawing via the Graphics2D interface. Stroking a shape gives the shape's
+     * outline a width or drawing style.
      * 
-     * @param p the original shape.
-     * 
+     * @param p
+     *            the original shape.
      * @return the stroked shape.
      */
     public Shape createStrokedShape(Shape p);

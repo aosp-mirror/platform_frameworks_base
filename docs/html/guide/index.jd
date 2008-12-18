@@ -1,4 +1,62 @@
-page.title=Android Developer Guide
+page.title=Get Started
 @jd:body
 
-FIXME
+<p>Welcome to the Android Developer Guide! The <strong>Dev Guide</strong> is your conceptual and practical
+introduction to developing applications for Android. With this guide, you're free to explore 
+which ever topics interest you, based on your goals and experience.</p>
+
+<p>If you're new to Android, you're probably wondering what it takes to 
+write a "Hello, World" application. So here it is:</p>
+
+<pre>
+package com.example.hello;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.TextView;
+
+public class HelloWorld extends Activity {
+
+   public void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       TextView tv = new TextView(this);
+       tv.setText(&quot;Hello, World&quot;);
+       setContentView(tv);
+   }
+
+}
+</pre>
+
+<p>That's the only code you need to write!</p>
+
+<h2 class="small-header">Not convinced?</h2>
+<p>If you're still shouting "Show me the code!" then take a look at
+more Android code in the <a href="{@docRoot}guide/tutorials/hello-world/index.html">Hello World Samples</a>.</p>
+
+<h2 class="small-header">Ready to start?</h2>
+<p>If you're already convinced you want to develop on Android,
+then we'll teach you how to build and run this "Hello, World" application in the
+<a href="{@docRoot}guide/tutorials/hello-world.html">Hello World Introduction</a>.</p>
+
+<h2 class="small-header">Ready for more?</h2>  
+<p>Once you've got your feet wet (or just want to skip to the heart of Android), the following
+sections of the Dev Guide will educate you on the Android ins, outs, idioms and techniques:</p>
+<ul>
+  <li><em>Android Basics</em>:
+    Learn more about what Android is, what it offers, and how your application fits in.</li>
+  <li><em>Framework Topics</em>: 
+    Become well versed in the practical matters of developing on Android &mdash; from drawing a UI, to storing data,
+    to drawing 3D graphics, and much more.</li>
+  <li><em>Developing</em>: 
+    Learn more about developing with IDEs, using Android develop/debug tools, and testing.</li>
+  <li><em>Publishing</em>: 
+    Learn how to get you application out there, for the world to enjoy!</li>
+  <li><em>Best Practices</em>: 
+    Get some recommendations on preferred techniques to write the best applications.</li>
+  <li><em>Tutorials</em>: 
+    Get help doing some of the basics, step by step.</li>
+  <li><em>Appendix</em>: 
+    Flotsam and jetsam. Find some of those spare nuggets of information.</li>
+</ul>
+
+<p>For more help, you should consider joining one or more of the Android discussion groups. See the <a href="{@docRoot}community/index.html">Community</a> for more information.</p>

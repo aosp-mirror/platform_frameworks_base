@@ -48,7 +48,7 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
 {
     // must only be called once.
     mDimmerDealer = flinger->getSurfaceHeapManager()
-            ->createHeap(NATIVE_MEMORY_TYPE_PMEM);
+            ->createHeap(ISurfaceComposer::eHardware);
     if (mDimmerDealer != 0) {
         mDimmerBitmap.init(mDimmerDealer);
         mDimmerBitmap.setBits(w, h, 1, PIXEL_FORMAT_RGB_565);
@@ -81,7 +81,7 @@ void LayerDim::onDraw(const Region& clip) const
             mDimmerBitmap.getBitmapSurface(&src);
             const copybit_rect_t& srect(drect);
 
-            copybit_t* copybit = mFlinger->getBlitEngine();
+            copybit_device_t* copybit = mFlinger->getBlitEngine();
             copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
             copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
             copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);

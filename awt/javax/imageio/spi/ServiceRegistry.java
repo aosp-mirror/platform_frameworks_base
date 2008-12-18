@@ -18,48 +18,53 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * The ServiceRegistry class provides ability to register, 
- * deregister, look up and obtain service provider instances (SPIs).
- * A service means a set of interfaces and classes, and a service 
- * provider is an implementation of a service. Service providers can 
- * be associated with one or more categories. Each category is defined 
- * by a class or interface. Only a single instance of a each class is 
- * allowed to be registered as a category. 
+ * The ServiceRegistry class provides ability to register, deregister, look up
+ * and obtain service provider instances (SPIs). A service means a set of
+ * interfaces and classes, and a service provider is an implementation of a
+ * service. Service providers can be associated with one or more categories.
+ * Each category is defined by a class or interface. Only a single instance of a
+ * each class is allowed to be registered as a category.
+ * 
+ * @since Android 1.0
  */
 public class ServiceRegistry {
 
-    /** The categories. */
+    /**
+     * The categories.
+     */
     CategoriesMap categories = new CategoriesMap(this);
 
     /**
      * Instantiates a new ServiceRegistry with the specified categories.
      * 
-     * @param categoriesIterator an Iterator of Class objects 
-     * for defining of categories.
+     * @param categoriesIterator
+     *            an Iterator of Class objects for defining of categories.
      */
     public ServiceRegistry(Iterator<Class<?>> categoriesIterator) {
         if (null == categoriesIterator) {
             throw new IllegalArgumentException("categories iterator should not be NULL");
         }
-        while(categoriesIterator.hasNext()) {
-            Class<?> c =  categoriesIterator.next();
+        while (categoriesIterator.hasNext()) {
+            Class<?> c = categoriesIterator.next();
             categories.addCategory(c);
         }
     }
 
     /**
-     * Looks up and instantiates the available providers of this service using 
+     * Looks up and instantiates the available providers of this service using
      * the specified class loader.
      * 
-     * @param providerClass the Class object of the provider to be looked up.
-     * @param loader the class loader to be used.
-     * 
+     * @param providerClass
+     *            the Class object of the provider to be looked up.
+     * @param loader
+     *            the class loader to be used.
      * @return the iterator of providers objects for this service.
      */
     public static <T> Iterator<T> lookupProviders(Class<T> providerClass, ClassLoader loader) {
@@ -67,11 +72,11 @@ public class ServiceRegistry {
     }
 
     /**
-     * Looks up and instantiates the available providers of this service using 
+     * Looks up and instantiates the available providers of this service using
      * the context class loader.
      * 
-     * @param providerClass the Class object of the provider to be looked up.
-     * 
+     * @param providerClass
+     *            the Class object of the provider to be looked up.
      * @return the iterator of providers objects for this service.
      */
     public static <T> Iterator<T> lookupProviders(Class<T> providerClass) {
@@ -79,14 +84,15 @@ public class ServiceRegistry {
     }
 
     /**
-     * Registers the specified service provider object in the
-     * specified categories.
+     * Registers the specified service provider object in the specified
+     * categories.
      * 
-     * @param provider the specified provider to be registered.
-     * @param category the category.
-     * 
-     * @return true if no provider of the same class is registered 
-     * in this category, false otherwise.
+     * @param provider
+     *            the specified provider to be registered.
+     * @param category
+     *            the category.
+     * @return true, if no provider of the same class is registered in this
+     *         category, false otherwise.
      */
     public <T> boolean registerServiceProvider(T provider, Class<T> category) {
         return categories.addProvider(provider, category);
@@ -95,7 +101,8 @@ public class ServiceRegistry {
     /**
      * Registers a list of service providers.
      * 
-     * @param providers the list of service providers.
+     * @param providers
+     *            the list of service providers.
      */
     public void registerServiceProviders(Iterator<?> providers) {
         for (Iterator<?> iterator = providers; iterator.hasNext();) {
@@ -104,67 +111,70 @@ public class ServiceRegistry {
     }
 
     /**
-     * Registers the specified service provider object in all
-     * categories.
+     * Registers the specified service provider object in all categories.
      * 
-     * @param provider the service provider.
+     * @param provider
+     *            the service provider.
      */
     public void registerServiceProvider(Object provider) {
         categories.addProvider(provider, null);
     }
 
     /**
-     * Deregisters the specifies service provider from the
-     * specified category.
+     * Deregisters the specifies service provider from the specified category.
      * 
-     * @param provider the service provider to be deregistered.
-     * @param category the specified category.
-     * 
-     * @return true if the provider was already registered 
-     * in the specified category, false otherwise.
+     * @param provider
+     *            the service provider to be deregistered.
+     * @param category
+     *            the specified category.
+     * @return true, if the provider was already registered in the specified
+     *         category, false otherwise.
      */
     public <T> boolean deregisterServiceProvider(T provider, Class<T> category) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Deregisters the specified service provider from all
-     * categories.
+     * Deregisters the specified service provider from all categories.
      * 
-     * @param provider the specified service provider.
+     * @param provider
+     *            the specified service provider.
      */
     public void deregisterServiceProvider(Object provider) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets an Iterator of registered service providers
-     * in the specified category which satisfy the specified Filter. 
-     * The useOrdering parameter indicates whether the iterator will 
-     * return all of the server provider objects in a set order. 
+     * Gets an Iterator of registered service providers in the specified
+     * category which satisfy the specified Filter. The useOrdering parameter
+     * indicates whether the iterator will return all of the server provider
+     * objects in a set order.
      * 
-     * @param category the specified category.
-     * @param filter the specified filter.
-     * @param useOrdering the flag indicating that providers are ordered
-     * in the returned Iterator.
-     * 
+     * @param category
+     *            the specified category.
+     * @param filter
+     *            the specified filter.
+     * @param useOrdering
+     *            the flag indicating that providers are ordered in the returned
+     *            Iterator.
      * @return the iterator of registered service providers.
      */
     @SuppressWarnings("unchecked")
     public <T> Iterator<T> getServiceProviders(Class<T> category, Filter filter, boolean useOrdering) {
-        return new FilteredIterator<T>(filter, (Iterator<T>)categories.getProviders(category, useOrdering));
+        return new FilteredIterator<T>(filter, (Iterator<T>)categories.getProviders(category,
+                useOrdering));
     }
 
     /**
-     * Gets an Iterator of all registered service providers
-     * in the specified category. The useOrdering parameter
-     * indicates whether the iterator will return all of the server 
-     * provider objects in a set order. 
+     * Gets an Iterator of all registered service providers in the specified
+     * category. The useOrdering parameter indicates whether the iterator will
+     * return all of the server provider objects in a set order.
      * 
-     * @param category the specified category.
-     * @param useOrdering the flag indicating that providers are ordered
-     * in the returned Iterator.
-     * 
+     * @param category
+     *            the specified category.
+     * @param useOrdering
+     *            the flag indicating that providers are ordered in the returned
+     *            Iterator.
      * @return the Iterator of service providers.
      */
     @SuppressWarnings("unchecked")
@@ -173,11 +183,11 @@ public class ServiceRegistry {
     }
 
     /**
-     * Gets the registered service provider object that has the 
-     * specified class type.
+     * Gets the registered service provider object that has the specified class
+     * type.
      * 
-     * @param providerClass the specified provider class.
-     * 
+     * @param providerClass
+     *            the specified provider class.
      * @return the service provider object.
      */
     public <T> T getServiceProviderByClass(Class<T> providerClass) {
@@ -185,28 +195,32 @@ public class ServiceRegistry {
     }
 
     /**
-     * Sets an ordering between two service provider objects 
-     * within the specified category. 
+     * Sets an ordering between two service provider objects within the
+     * specified category.
      * 
-     * @param category the specified category.
-     * @param firstProvider the first provider.
-     * @param secondProvider the second provider.
-     * 
-     * @return true if a previously unset order was set.
+     * @param category
+     *            the specified category.
+     * @param firstProvider
+     *            the first provider.
+     * @param secondProvider
+     *            the second provider.
+     * @return true, if a previously unset order was set.
      */
     public <T> boolean setOrdering(Class<T> category, T firstProvider, T secondProvider) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Unsets an ordering between two service provider objects 
-     * within the specified category.
+     * Unsets an ordering between two service provider objects within the
+     * specified category.
      * 
-     * @param category the specified category.
-     * @param firstProvider the first provider.
-     * @param secondProvider the second provider.
-     * 
-     * @return true if a previously unset order was removed.
+     * @param category
+     *            the specified category.
+     * @param firstProvider
+     *            the first provider.
+     * @param secondProvider
+     *            the second provider.
+     * @return true, if a previously unset order was removed.
      */
     public <T> boolean unsetOrdering(Class<T> category, T firstProvider, T secondProvider) {
         throw new UnsupportedOperationException("Not supported yet");
@@ -215,7 +229,8 @@ public class ServiceRegistry {
     /**
      * Deregisters all providers from the specified category.
      * 
-     * @param category the specified category.
+     * @param category
+     *            the specified category.
      */
     public void deregisterAll(Class<?> category) {
         throw new UnsupportedOperationException("Not supported yet");
@@ -229,32 +244,31 @@ public class ServiceRegistry {
     }
 
     /**
-     * Finalizes this object. 
+     * Finalizes this object.
      * 
-     * @throws Throwable throws if an error occurs during 
-     * finalization.
+     * @throws Throwable
+     *             if an error occurs during finalization.
      */
     @Override
     public void finalize() throws Throwable {
-        //TODO uncomment when deregisterAll is implemented
-        //deregisterAll();
+        // TODO uncomment when deregisterAll is implemented
+        // deregisterAll();
     }
 
     /**
      * Checks whether the specified provider has been already registered.
      * 
-     * @param provider the provider to be checked.
-     * 
+     * @param provider
+     *            the provider to be checked.
      * @return true, if the specified provider has been already registered,
-     * false otherwise.
+     *         false otherwise.
      */
     public boolean contains(Object provider) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets an iterator of Class objects representing the current 
-     * categories.
+     * Gets an iterator of Class objects representing the current categories.
      * 
      * @return the Iterator of Class objects.
      */
@@ -263,20 +277,22 @@ public class ServiceRegistry {
     }
 
     /**
-     * The ServiceRegistry.Filter interface is used by 
-     * ServiceRegistry.getServiceProviders to filter providers according
-     * to the specified criterion. 
+     * The ServiceRegistry.Filter interface is used by
+     * ServiceRegistry.getServiceProviders to filter providers according to the
+     * specified criterion.
+     * 
+     * @since Android 1.0
      */
     public static interface Filter {
-        
+
         /**
-         * Returns true if the specified provider satisfies the 
-         * criterion of this Filter.
+         * Returns true if the specified provider satisfies the criterion of
+         * this Filter.
          * 
-         * @param provider the provider.
-         * 
-         * @return true if the specified provider satisfies the 
-         * criterion of this Filter, false otherwise.
+         * @param provider
+         *            the provider.
+         * @return true, if the specified provider satisfies the criterion of
+         *         this Filter, false otherwise.
          */
         boolean filter(Object provider);
     }
@@ -285,30 +301,36 @@ public class ServiceRegistry {
      * The Class CategoriesMap.
      */
     private static class CategoriesMap {
-        
-        /** The categories. */
+
+        /**
+         * The categories.
+         */
         Map<Class<?>, ProvidersMap> categories = new HashMap<Class<?>, ProvidersMap>();
 
-        /** The registry. */
+        /**
+         * The registry.
+         */
         ServiceRegistry registry;
 
         /**
          * Instantiates a new categories map.
          * 
-         * @param registry the registry
+         * @param registry
+         *            the registry.
          */
         public CategoriesMap(ServiceRegistry registry) {
             this.registry = registry;
         }
 
-        //-- TODO: useOrdering
+        // -- TODO: useOrdering
         /**
          * Gets the providers.
          * 
-         * @param category the category
-         * @param useOrdering the use ordering
-         * 
-         * @return the providers
+         * @param category
+         *            the category.
+         * @param useOrdering
+         *            the use ordering.
+         * @return the providers.
          */
         Iterator<?> getProviders(Class<?> category, boolean useOrdering) {
             ProvidersMap providers = categories.get(category);
@@ -321,7 +343,7 @@ public class ServiceRegistry {
         /**
          * List.
          * 
-         * @return the iterator< class<?>>
+         * @return the iterator< class<?>>.
          */
         Iterator<Class<?>> list() {
             return categories.keySet().iterator();
@@ -330,7 +352,8 @@ public class ServiceRegistry {
         /**
          * Adds the category.
          * 
-         * @param category the category
+         * @param category
+         *            the category.
          */
         void addCategory(Class<?> category) {
             categories.put(category, new ProvidersMap());
@@ -341,10 +364,11 @@ public class ServiceRegistry {
          * <code>null</code> then the provider will be added to all categories
          * which the provider is assignable from.
          * 
-         * @param provider provider to add
-         * @param category category to add provider to
-         * 
-         * @return if there were such provider in some category
+         * @param provider
+         *            provider to add.
+         * @param category
+         *            category to add provider to.
+         * @return true, if there were such provider in some category.
          */
         boolean addProvider(Object provider, Class<?> category) {
             if (provider == null) {
@@ -355,11 +379,11 @@ public class ServiceRegistry {
             if (category == null) {
                 rt = findAndAdd(provider);
             } else {
-                rt  = addToNamed(provider, category);
+                rt = addToNamed(provider, category);
             }
 
             if (provider instanceof RegisterableService) {
-                ((RegisterableService) provider).onRegistration(registry, category);
+                ((RegisterableService)provider).onRegistration(registry, category);
             }
 
             return rt;
@@ -368,10 +392,11 @@ public class ServiceRegistry {
         /**
          * Adds the to named.
          * 
-         * @param provider the provider
-         * @param category the category
-         * 
-         * @return true, if successful
+         * @param provider
+         *            the provider.
+         * @param category
+         *            the category.
+         * @return true, if successful.
          */
         private boolean addToNamed(Object provider, Class<?> category) {
             Object obj = categories.get(category);
@@ -380,15 +405,15 @@ public class ServiceRegistry {
                 throw new IllegalArgumentException("Unknown category: " + category);
             }
 
-            return ((ProvidersMap) obj).addProvider(provider);
+            return ((ProvidersMap)obj).addProvider(provider);
         }
 
         /**
          * Find and add.
          * 
-         * @param provider the provider
-         * 
-         * @return true, if successful
+         * @param provider
+         *            the provider.
+         * @return true, if successful.
          */
         private boolean findAndAdd(Object provider) {
             boolean rt = false;
@@ -405,17 +430,19 @@ public class ServiceRegistry {
      * The Class ProvidersMap.
      */
     private static class ProvidersMap {
-        //-- TODO: providers ordering support
+        // -- TODO: providers ordering support
 
-        /** The providers. */
+        /**
+         * The providers.
+         */
         Map<Class<?>, Object> providers = new HashMap<Class<?>, Object>();
 
         /**
          * Adds the provider.
          * 
-         * @param provider the provider
-         * 
-         * @return true, if successful
+         * @param provider
+         *            the provider.
+         * @return true, if successful.
          */
         boolean addProvider(Object provider) {
             return providers.put(provider.getClass(), provider) != null;
@@ -424,19 +451,19 @@ public class ServiceRegistry {
         /**
          * Gets the provider classes.
          * 
-         * @return the provider classes
+         * @return the provider classes.
          */
         Iterator<Class<?>> getProviderClasses() {
             return providers.keySet().iterator();
         }
 
-        //-- TODO ordering
+        // -- TODO ordering
         /**
          * Gets the providers.
          * 
-         * @param userOrdering the user ordering
-         * 
-         * @return the providers
+         * @param userOrdering
+         *            the user ordering.
+         * @return the providers.
          */
         Iterator<?> getProviders(boolean userOrdering) {
             return providers.values().iterator();
@@ -448,20 +475,28 @@ public class ServiceRegistry {
      */
     private static class FilteredIterator<E> implements Iterator<E> {
 
-        /** The filter. */
+        /**
+         * The filter.
+         */
         private Filter filter;
-        
-        /** The backend. */
+
+        /**
+         * The backend.
+         */
         private Iterator<E> backend;
-        
-        /** The next obj. */
+
+        /**
+         * The next obj.
+         */
         private E nextObj;
 
         /**
          * Instantiates a new filtered iterator.
          * 
-         * @param filter the filter
-         * @param backend the backend
+         * @param filter
+         *            the filter.
+         * @param backend
+         *            the backend.
          */
         public FilteredIterator(Filter filter, Iterator<E> backend) {
             this.filter = filter;
@@ -472,7 +507,7 @@ public class ServiceRegistry {
         /**
          * Next.
          * 
-         * @return the e
+         * @return the e.
          */
         public E next() {
             if (nextObj == null) {
@@ -486,7 +521,7 @@ public class ServiceRegistry {
         /**
          * Checks for next.
          * 
-         * @return true, if successful
+         * @return true, if successful.
          */
         public boolean hasNext() {
             return nextObj != null;
@@ -500,7 +535,8 @@ public class ServiceRegistry {
         }
 
         /**
-         * Sets nextObj to a next provider matching the criterion given by the filter.
+         * Sets nextObj to a next provider matching the criterion given by the
+         * filter.
          */
         private void findNext() {
             nextObj = null;

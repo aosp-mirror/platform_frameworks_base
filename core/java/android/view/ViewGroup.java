@@ -73,7 +73,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private View mFocused;
 
     // The current transformation to apply on the child being drawn
-    private final Transformation mChildTransformation = new Transformation();
+    private Transformation mChildTransformation;
 
     // Target of Motion events
     private View mMotionTarget;
@@ -147,9 +147,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Any subclass overriding
      * {@link #getChildStaticTransformation(View, android.view.animation.Transformation)} should
      * set this flags in {@link #mGroupFlags}.
-     * 
-     * This flag needs to be removed until we can add a setter for it.  People
-     * can't be directly stuffing values in to mGroupFlags!!!
      * 
      * {@hide}
      */
@@ -466,27 +463,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Called when a child of this group wants a particular rectangle to be
-     * positioned onto the screen.  {@link ViewGroup}s overriding this can trust
-     * that:
-     * <ul>
-     *   <li>child will be a direct child of this group</li>
-     *   <li>rectangle will be in the child's coordinates</li>
-     * </ul>
-     *
-     * <p>{@link ViewGroup}s overriding this should uphold the contract:</p>
-     * <ul>
-     *   <li>nothing will change if the rectangle is already visible</li>
-     *   <li>the view port will be scrolled only just enough to make the
-     *       rectangle visible</li>
-     * <ul>
-     *
-     * @param child The direct child making the request.
-     * @param rectangle The rectangle in the child's coordinates the child
-     *        wishes to be on the screen.
-     * @param immediate True to forbid animated or delayed scrolling,
-     *        false otherwise
-     * @return Whether the group scrolled to handle the operation
+     * {@inheritDoc}
      */
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle, boolean immediate) {
         return false;
@@ -727,11 +704,37 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     @Override
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+            return super.dispatchKeyEventPreIme(event);
+        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+            return mFocused.dispatchKeyEventPreIme(event);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
             return super.dispatchKeyEvent(event);
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
             return mFocused.dispatchKeyEvent(event);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+            return super.dispatchKeyShortcutEvent(event);
+        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+            return mFocused.dispatchKeyShortcutEvent(event);
         }
         return false;
     }
@@ -1314,7 +1317,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int flags = mGroupFlags;
 
         if ((flags & FLAG_CLEAR_TRANSFORMATION) == FLAG_CLEAR_TRANSFORMATION) {
-            mChildTransformation.clear();
+            if (mChildTransformation != null) {
+                mChildTransformation.clear();
+            }
             mGroupFlags &= ~FLAG_CLEAR_TRANSFORMATION;
         }
 
@@ -1328,6 +1333,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.onAnimationStart();
             }
 
+            if (mChildTransformation == null) {
+                mChildTransformation = new Transformation();
+            }
             more = a.getTransformation(drawingTime, mChildTransformation);
             transformToApply = mChildTransformation;
 
@@ -1347,6 +1355,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
                 FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
+            if (mChildTransformation == null) {
+                mChildTransformation = new Transformation();
+            }
             final boolean hasTransform = getChildStaticTransformation(child, mChildTransformation);
             if (hasTransform) {
                 final int transformType = mChildTransformation.getTransformationType();
@@ -1507,7 +1518,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * When this property is set to true, this ViewGroup supports static transformations on
+     * children; this causes
+     * {@link #getChildStaticTransformation(View, android.view.animation.Transformation)} to be
+     * invoked when a child is drawn.
+     *
+     * Any subclass overriding
+     * {@link #getChildStaticTransformation(View, android.view.animation.Transformation)} should
+     * set this property to true.
+     *
+     * @param enabled True to enable static transformations on children, false otherwise.
+     *
+     * @see #FLAG_SUPPORT_STATIC_TRANSFORMATIONS
+     */
+    protected void setStaticTransformationsEnabled(boolean enabled) {
+        setBooleanFlag(FLAG_SUPPORT_STATIC_TRANSFORMATIONS, enabled);
+    }
+
+    /**
      * {@inheritDoc}
+     *
+     * @see #setStaticTransformationsEnabled(boolean) 
      */
     protected boolean getChildStaticTransformation(View child, Transformation t) {
         return false;
@@ -1969,7 +2000,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (view.getAnimation() != null) {
             addDisappearingView(view);
-        } else if (mAttachInfo != null) {
+        } else if (view.mAttachInfo != null) {
            view.dispatchDetachedFromWindow();
         }
 
@@ -2107,7 +2138,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         
         if (animate && child.getAnimation() != null) {
             addDisappearingView(child);
-        } else if (mAttachInfo != null) {
+        } else if (child.mAttachInfo != null) {
             child.dispatchDetachedFromWindow();
         }
 
@@ -2205,7 +2236,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Detaches all views from theparent. Detaching a view should be temporary and followed
+     * Detaches all views from the parent. Detaching a view should be temporary and followed
      * either by a call to {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
      * or a call to {@link #removeDetachedView(View, boolean)}. When a view is detached,
      * its parent is null and cannot be retrieved by a call to {@link #getChildAt(int)}.
@@ -2242,13 +2273,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         ViewParent parent = this;
 
-        final int[] location = mLocation;
-        location[CHILD_LEFT_INDEX] = child.mLeft;
-        location[CHILD_TOP_INDEX] = child.mTop;
-
-        do {
-            parent = parent.invalidateChildInParent(location, dirty);
-        } while (parent != null);
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            final int[] location = attachInfo.mInvalidateChildLocation;
+            location[CHILD_LEFT_INDEX] = child.mLeft;
+            location[CHILD_TOP_INDEX] = child.mTop;
+    
+            do {
+                parent = parent.invalidateChildInParent(location, dirty);
+            } while (parent != null);
+        }
     }
 
     /**
@@ -2917,7 +2951,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (disappearingChildren.contains(view)) {
                 disappearingChildren.remove(view);
 
-                if (mAttachInfo != null) {
+                if (view.mAttachInfo != null) {
                     view.dispatchDetachedFromWindow();
                 }
 

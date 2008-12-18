@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.ViewDebug;
 import android.widget.TextView;
 
 /**
@@ -176,6 +177,9 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
             
             // Set the compound drawables
             setCompoundDrawables(null, icon, null, null);
+            
+            // When there is an icon, make sure the text is at the bottom
+            setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
 
             /*
              * Request a layout to reposition the icon. The positioning of icon
@@ -185,13 +189,17 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
             requestLayout();
         } else {
             setCompoundDrawables(null, null, null, null);
+            
+            // When there is no icon, make sure the text is centered vertically
+            setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         }
     }
 
     public void setItemInvoker(ItemInvoker itemInvoker) {
         mItemInvoker = itemInvoker;
     }
-
+    
+    @ViewDebug.CapturedViewProperty(retrieveReturn = true)
     public MenuItemImpl getItemData() {
         return mItemData;
     }

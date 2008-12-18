@@ -32,6 +32,10 @@
         <attr name="disabledAlpha" format="float" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->
         <attr name="backgroundDimAmount" format="float" />
+        <!-- Control whether dimming behind the window is enabled.  The default
+             theme does not set this value, meaning it is based on whether the
+             window is floating. -->
+        <attr name="backgroundDimEnabled" format="boolean" />
 
         <!-- =========== -->
         <!-- Text styles -->
@@ -92,6 +96,12 @@
 
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
+        
+        <!-- A styled string, specifying the style to be used for showing
+             inline candidate text when composing with an input method.  The
+             text itself will be ignored, but the style spans will be applied
+             to the candidate text as it is edited. -->
+        <attr name="candidatesTextStyleSpans" format="reference|string" />
         
         <!-- Drawable to use for check marks -->
         <attr name="textCheckMark" format="reference" />
@@ -205,6 +215,52 @@
              {@link android.R.styleable#WindowAnimation}. -->
         <attr name="windowAnimationStyle" format="reference" />
     
+        <!-- Defines the default soft input state that this window would
+             like when it is displayed. -->
+        <attr name="windowSoftInputMode">
+            <!-- Not specified, use what the system thinks is best.  This
+                 is the default. -->
+            <flag name="stateUnspecified" value="0" />
+            <!-- Leave the soft input window as-is, in whatever state it
+                 last was. -->
+            <flag name="stateUnchanged" value="1" />
+            <!-- Don't display the soft input area, there is no reason to
+                 do so on this window. -->
+            <flag name="stateHidden" value="2" />
+            <!-- Make the soft input area visible when this window is
+                 first displayed. -->
+            <flag name="stateFirstVisible" value="3" />
+            <!-- The soft input area should always be displayed while in this
+                 window. -->
+            <flag name="stateVisible" value="4" />
+            
+            <!-- The window resize/pan adjustment has not been specified,
+                 the system will automatically select between resize and pan
+                 modes, depending
+                 on whether the content of the window has any layout views
+                 that can scroll their contents.  If there is such a view,
+                 then the window will be resized, with the assumption being
+                 that the resizeable area can be reduced to make room for
+                 the input UI. -->
+            <flag name="adjustUnspecified" value="0x00" />
+            <!-- Always resize the window: the content area of the window is
+                 reduced to make room for the soft input area. -->
+            <flag name="adjustResize" value="0x10" />
+            <!-- Don't resize the window to make room for the soft input area;
+                 instead pan the contents of the window as focus moves inside
+                 of it so that the user can see what they are typing.  This is
+                 generally less desireable than panning because the user may
+                 need to close the input area to get at and interact with
+                 parts of the window. -->
+            <flag name="adjustPan" value="0x20" />
+        </attr>
+
+        <!-- Flag allowing you to disable the preview animation for a window.
+             The default value is false; if set to true, the system can never
+             use the window's theme to show a preview of it before your
+             actual instance is shown to the user. -->
+        <attr name="windowDisablePreview" format="boolean" />
+        
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -284,6 +340,8 @@
         <attr name="spinnerStyle" format="reference" />
         <!-- Default Star style. -->
         <attr name="starStyle" format="reference" />
+        <!-- Buttonless Star style. -->
+        <attr name="starStyleButtonless" format="reference" />
         <!-- Default TabWidget style. -->
         <attr name="tabWidgetStyle" format="reference" />
         <!-- Default TextView style. -->
@@ -370,6 +428,111 @@
         <enum name="start" value="1" />
         <enum name="middle" value="2" />
         <enum name="end" value="3" />
+        <enum name="marquee" value="4" />
+    </attr>
+    <!-- The type of data being placed in a text field, used to help an
+         input method decide how to let the user enter text.  The constants
+         here correspond to those defined by
+         {@link android.text.InputType}.  Generally you can select
+         a single value, though some can be combined together as
+         indicated.  Setting this attribute to anything besides
+         <var>none</var> also implies that the text is editable. -->
+    <attr name="inputType">
+        <!-- There is no content type.  The text is not editable. -->
+        <flag name="none" value="0x00000000" />
+        <!-- Just plain old text.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_NORMAL}. -->
+        <flag name="text" value="0x00000001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             request captilization of all characters.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_CHARACTERS}. -->
+        <flag name="textCapCharacters" value="0x00001001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             request captilization of the first character of every word.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_WORDS}. -->
+        <flag name="textCapWords" value="0x00002001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             request captilization of the first character of every sentence.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_SENTENCES}. -->
+        <flag name="textCapSentences" value="0x00004001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             request auto-correction of texting being input.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_AUTO_CORRECT}. -->
+        <flag name="textAutoCorrect" value="0x00008001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             specify that this field will be doing its own auto-completion and
+             talking with the input method appropriately.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_AUTO_COMPLETE}. -->
+        <flag name="textAutoComplete" value="0x00010001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             allow multiple lines of text in the field.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_MULTI_LINE}. -->
+        <flag name="textMultiLine" value="0x00020001" />
+        <!-- Text that will be used as a URI.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
+        <flag name="textUri" value="0x00000011" />
+        <!-- Text that will be used as an e-mail address.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_EMAIL_ADDRESS}. -->
+        <flag name="textEmailAddress" value="0x00000021" />
+        <!-- Text that is being supplied as the subject of an e-mail.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_EMAIL_SUBJECT}. -->
+        <flag name="textEmailSubject" value="0x00000031" />
+        <!-- Text that is being supplied as the content of an e-mail.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_EMAIL_CONTENT}. -->
+        <flag name="textEmailContent" value="0x00000041" />
+        <!-- Text that is the name of a person.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_PERSON_NAME}. -->
+        <flag name="textPersonName" value="0x00000051" />
+        <!-- Text that is being supplied as a postal mailing address.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS}. -->
+        <flag name="textPostalAddress" value="0x00000061" />
+        <!-- Text that is a password.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_PASSWORD}. -->
+        <flag name="textPassword" value="0x00000071" />
+        <!-- Text that will be used for a web search.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_SEARCH}. -->
+        <flag name="textWebSearch" value="0x00000081" />
+        <!-- Text that is being supplied as text in a web form.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}. -->
+        <flag name="textWebEditText" value="0x00000091" />
+        <!-- A numeric only field.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_NUMBER}. -->
+        <flag name="number" value="0x00000002" />
+        <!-- Can be combined with <var>number</var> and its other options to
+             allow a signed number.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_NUMBER} |
+             {@link android.text.InputType#TYPE_NUMBER_FLAG_SIGNED}. -->
+        <flag name="numberSigned" value="0x00001002" />
+        <!-- Can be combined with <var>number</var> and its other options to
+             allow a decimal (fractional) number.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_NUMBER} |
+             {@link android.text.InputType#TYPE_NUMBER_FLAG_DECIMAL}. -->
+        <flag name="numberDecimal" value="0x00002002" />
+        <!-- For entering a phone number.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_PHONE}. -->
+        <flag name="phone" value="0x00000003" />
+        <!-- For entering a date and time.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_DATETIME} |
+             {@link android.text.InputType#TYPE_DATETIME_VARIATION_NORMAL}. -->
+        <flag name="datetime" value="0x00000004" />
+        <!-- For entering a date.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_DATETIME} |
+             {@link android.text.InputType#TYPE_DATETIME_VARIATION_DATE}. -->
+        <flag name="date" value="0x00000014" />
+        <!-- For entering a time.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_DATETIME} |
+             {@link android.text.InputType#TYPE_DATETIME_VARIATION_TIME}. -->
+        <flag name="time" value="0x00000024" />
     </attr>
 
     <!-- A coordinate in the X dimension. -->
@@ -400,6 +563,16 @@
         <flag name="center" value="0x11" />
         <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
         <flag name="fill" value="0x77" />
+        <!-- Additional option that can be set to have the top and/or bottom edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the vertical gravity: a top gravity will clip the bottom
+             edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+        <flag name="clip_vertical" value="0x80" />
+        <!-- Additional option that can be set to have the left and/or right edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the horizontal gravity: a left gravity will clip the right
+             edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+        <flag name="clip_horizontal" value="0x08" />
     </attr>
 
     <!-- Controls whether links such as urls and email addresses are
@@ -447,6 +620,16 @@
         <flag name="center" value="0x11" />
         <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
         <flag name="fill" value="0x77" />
+        <!-- Additional option that can be set to have the top and/or bottom edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the vertical gravity: a top gravity will clip the bottom
+             edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+        <flag name="clip_vertical" value="0x80" />
+        <!-- Additional option that can be set to have the left and/or right edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the horizontal gravity: a left gravity will clip the right
+             edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+        <flag name="clip_horizontal" value="0x08" />
     </attr>
 
     <!-- Standard orientation constant. -->
@@ -550,6 +733,12 @@
         <enum name="KEYCODE_MENU" value="82" />
         <enum name="KEYCODE_NOTIFICATION" value="83" />
         <enum name="KEYCODE_SEARCH" value="84" />
+        <enum name="KEYCODE_PLAYPAUSE" value="85" />
+        <enum name="KEYCODE_STOP" value="86" />
+        <enum name="KEYCODE_NEXTSONG" value="87" />
+        <enum name="KEYCODE_PREVIOUSSONG" value="88" />
+        <enum name="KEYCODE_REWIND" value="89" />
+        <enum name="KEYCODE_FORWARD" value="90" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -571,7 +760,11 @@
         <attr name="windowIsFloating" />
         <attr name="windowIsTranslucent" />
         <attr name="windowAnimationStyle" />
+        <attr name="windowSoftInputMode" />
+        <attr name="windowDisablePreview" />
         <attr name="textColor" />
+        <attr name="backgroundDimEnabled" />
+        <attr name="backgroundDimAmount" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -968,6 +1161,22 @@
         <attr name="layout_marginBottom" format="dimension"  />
     </declare-styleable>
 
+    <!-- Use <code>input-method</code> as the root tag of the XML resource that
+         describes an
+         {@link android.view.inputmethod.InputMethod} service, which is
+         referenced from its
+         {@link android.view.inputmethod.InputMethod#SERVICE_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="InputMethod">
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this input method. -->
+        <attr name="settingsActivity" format="string" />
+        <!-- Set to true in all of the configurations for which this input
+             method should be considered an option as the default. -->
+        <attr name="isDefault" format="boolean" />
+    </declare-styleable>
+    
     <!-- =============================== -->
     <!-- Widget package class attributes -->
     <!-- =============================== -->
@@ -1005,6 +1214,18 @@
         <!-- Indicates that this list will always be drawn on top of solid, single-color
              opaque background. This allows the list to optimize drawing. -->
         <attr name="cacheColorHint" format="color" />
+        <!-- Enables the fast scroll thumb that can be dragged to quickly scroll through 
+             the list. -->
+        <attr name="fastScrollEnabled" format="boolean" />
+        <!-- When set to true, the list will use a more refined calculation
+             method based on the pixels height of the items visible on screen. This
+             property is set to true by default but should be set to false if your adapter
+             will display items of varying heights. When this property is set to true and
+             your adapter displays items of varying heights, the scrollbar thumb will
+             change size as the user scrolls through the list. When set to fale, the list
+             will use only the number of items in the adapter and the number of items visible
+             on screen to determine the scrollbar's properties. -->
+        <attr name="smoothScrollbar" format="boolean" />
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
@@ -1067,6 +1288,16 @@
             <flag name="center" value="0x11" />
             <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
             <flag name="fill" value="0x77" />
+            <!-- Additional option that can be set to have the top and/or bottom edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the vertical gravity: a top gravity will clip the bottom
+                 edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+            <flag name="clip_vertical" value="0x80" />
+            <!-- Additional option that can be set to have the left and/or right edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the horizontal gravity: a left gravity will clip the right
+                 edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+            <flag name="clip_horizontal" value="0x08" />
         </attr>
         <!-- Determines whether to measure all children or just those in 
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
@@ -1108,6 +1339,7 @@
             <enum name="none" value="0"/>
             <enum name="spacingWidth" value="1" />
             <enum name="columnWidth" value="2" />
+            <enum name="spacingWidthUniform" value="3" />
         </attr>
         <attr name="columnWidth" format="dimension" />
         <attr name="numColumns" format="integer" min="0">
@@ -1204,6 +1436,12 @@
             <!-- The list allows multiple choices -->
             <enum name="multipleChoice" value="2" />
         </attr>
+        <!-- When set to false, the ListView will not draw the divider after each header view.
+             The default value is true. -->
+        <attr name="headerDividersEnabled" format="boolean" />
+        <!-- When set to false, the ListView will not draw the divider before each footer view.
+             The default value is true. -->
+        <attr name="footerDividersEnabled" format="boolean" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->
@@ -1228,6 +1466,8 @@
         <attr name="maxRows" format="integer" />
         <!-- Defines the maximum number of items per row. -->
         <attr name="maxItemsPerRow" format="integer" />
+        <!-- Defines the maximum number of items to show. -->
+        <attr name="maxItems" format="integer" />
         <!-- 'More' icon -->
         <attr name="moreIcon" format="reference" />
     </declare-styleable>
@@ -1407,21 +1647,25 @@
         <attr name="minEms" format="integer" min="0" />
         <!-- Makes the TextView be at least this many pixels wide -->
         <attr name="minWidth" />
-        <!-- Vertical gravity (top, center_vertical, bottom) when the text
-             is smaller than the view. -->
+        <!-- Specifies how to align the text by the view's x and/or y axis 
+             when the text is smaller than the view. -->
         <attr name="gravity" />
         <!-- Whether the text is allowed to be wider than the view (and
              therefore can be scrolled horizontally). -->
         <attr name="scrollHorizontally" format="boolean" />
         <!-- Whether the characters of the field are displayed as
-             password dots instead of themselves. -->
+             password dots instead of themselves.
+             {@deprecated Use inputType instead.} -->
         <attr name="password" format="boolean" />
         <!-- Constrains the text to a single horizontally scrolling line
              instead of letting it wrap onto multiple lines, and advances
              focus instead of inserting a newline when you press the
-             enter key. -->
+             enter key.  Note: for editable text views, it is better
+             to set this using the textMultiLine flag in inputType;
+             if both this and inputType are supplied, the input
+             type overrides the value here. -->
         <attr name="singleLine" format="boolean" />
-        <!-- Deprecated: use state_enabled instead. -->
+        <!-- {@deprecated Use state_enabled instead.} -->
         <attr name="enabled" format="boolean" />
         <!-- If the text is selectable, select it all when the view takes
              focus instead of moving the cursor to the start or end. -->
@@ -1446,7 +1690,8 @@
              to be found. -->
         <attr name="linksClickable" format="boolean" />
         <!-- If set, specifies that this TextView has a numeric input method.
-             The default is false. -->
+             The default is false.
+             {@deprecated Use inputType instead.} -->
         <attr name="numeric">
             <!-- Input is numeric. -->
             <flag name="integer" value="0x01" />
@@ -1462,15 +1707,17 @@
              The default is false. -->
         <attr name="digits" format="string" />
         <!-- If set, specifies that this TextView has a phone number input
-             method.
-             The default is false. -->
+             method. The default is false.
+             {@deprecated Use inputType instead.} -->
         <attr name="phoneNumber" format="boolean" />
         <!-- If set, specifies that this TextView should use the specified
-             input method (specified by fully-qualified class name). -->
+             input method (specified by fully-qualified class name).
+             {@deprecated Use inputType instead.} -->
         <attr name="inputMethod" format="string" />
         <!-- If set, specifies that this TextView has a textual input method
              and should automatically capitalize what the user types.
-             The default is "none". -->
+             The default is "none".
+             {@deprecated Use inputType instead.} -->
         <attr name="capitalize">
             <!-- Don't automatically capitalize anything. -->
             <enum name="none" value="0" />
@@ -1483,12 +1730,14 @@
         </attr>
         <!-- If set, specifies that this TextView has a textual input method
              and automatically corrects some common spelling errors.
-             The default is "false". -->
+             The default is "false".
+             {@deprecated Use inputType instead.} -->
         <attr name="autoText" format="boolean" />
         <!-- If set, specifies that this TextView has an input method.
              It will be a textual one unless it has otherwise been specified.
              For TextView, this is false by default.  For EditText, it is
-             true by default. -->
+             true by default.
+             {@deprecated Use inputType instead.} -->
         <attr name="editable" format="boolean" />
         <!-- If set, the text view will include its current complete text
              inside of its frozen icicle in addition to meta-data such as
@@ -1517,6 +1766,34 @@
         <attr name="lineSpacingExtra" format="dimension" />
         <!-- Extra spacing between lines of text, as a multiplier. -->
         <attr name="lineSpacingMultiplier" format="float" />
+        <!-- The number of times to repeat the marquee animation. Only applied if the 
+             TextView has marquee enabled. -->
+        <attr name="marqueeRepeatLimit" format="integer">
+            <!-- Indicates that marquee should repeat indefinitely  -->
+            <enum name="marquee_forever" value="-1" />
+        </attr>
+        <attr name="inputType" />
+        <!-- An addition content type description to supply to the input
+             method attached to the text view, which is private to the
+             implementation of the input method.  This simply fills in
+             the {@link android.view.inputmethod.EditorInfo#privateContentType
+             EditorInfo.privateContentType} field when the input
+             method is connected. -->
+        <attr name="editorPrivateContentType" format="string" />
+        <!-- Reference to an
+             {@link android.R.styleable#InputExtras &lt;input-extras&gt;}
+             XML resource containing additional data to
+             supply to an input method, which is private to the implementation
+             of the input method.  This simply fills in
+             the {@link android.view.inputmethod.EditorInfo#extras
+             EditorInfo.extras} field when the input
+             method is connected. -->
+        <attr name="editorExtras" format="reference" />
+    </declare-styleable>
+    <!-- An <code>input-extras</code> is a container for extra data to supply to
+         an input method.  Contains
+         one more more {@link #Extra <extra>} tags.  -->
+    <declare-styleable name="InputExtras">
     </declare-styleable>
     <declare-styleable name="AutoCompleteTextView">
         <!-- Defines the hint displayed in the drop down menu. -->
@@ -1527,7 +1804,12 @@
          completion suggestions are displayed in a drop down menu. -->
         <attr name="completionThreshold" format="integer" min="1" />
         <!-- Selector in a drop down list. -->
-        <attr name="dropDownSelector" format="reference|color" />        
+        <attr name="dropDownSelector" format="reference|color" />
+        <!-- Amount of pixels by which the drop down should be offset vertically. -->
+        <attr name="dropDownVerticalOffset" format="dimension" />
+        <!-- Amount of pixels by which the drop down should be offset horizontally. -->
+        <attr name="dropDownHorizontalOffset" format="dimension" />
+        <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
@@ -1568,7 +1850,7 @@
         </attr>
     </declare-styleable>
 
-    <!-- SlidingDrawer specific attributes. These attribtues are used to configure
+    <!-- SlidingDrawer specific attributes. These attributes are used to configure
          a SlidingDrawer from XML. -->
     <declare-styleable name="SlidingDrawer">
         <!-- Identifier for the child that represents the drawer's handle. -->
@@ -1581,6 +1863,10 @@
         <attr name="bottomOffset" format="dimension"  />
         <!-- Extra offset for the handle at the top of the SlidingDrawer. -->
         <attr name="topOffset" format="dimension"  />
+        <!-- Indicates whether the drawer can be opened/closed by a single tap
+             on the handle.  (If false, the user must drag or fling, or click
+             using the trackball, to open/close the drawer.)  Default is true. -->
+        <attr name="allowSingleTap" format="boolean" />
         <!-- Indicates whether the drawer should be opened/closed with an animation
              when the user clicks the handle. Default is true. -->
         <attr name="animateOnClick" format="boolean" />
@@ -1864,6 +2150,16 @@
             <flag name="center" value="0x11" />
             <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
             <flag name="fill" value="0x77" />
+            <!-- Additional option that can be set to have the top and/or bottom edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the vertical gravity: a top gravity will clip the bottom
+                 edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+            <flag name="clip_vertical" value="0x80" />
+            <!-- Additional option that can be set to have the left and/or right edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the horizontal gravity: a left gravity will clip the right
+                 edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+            <flag name="clip_horizontal" value="0x08" />
         </attr>
         <!-- Reference to a drawable resource to draw with the specified scale. -->
         <attr name="drawable" />
@@ -2175,7 +2471,7 @@
         <!-- If supplied, this string will be displayed as the text of the "Search" button.
           <i>Optional attribute.</i> -->
         <attr name="searchButtonText" format="string" />
-
+        
         <!-- Additional features are controlled by mode bits in this field.  Omitting
             this field, or setting to zero, provides default behavior.  <i>Optional attribute.</i> 
         -->
@@ -2522,5 +2818,101 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="KeyboardView">
+        <!-- Default KeyboardView style. -->
+        <attr name="keyboardViewStyle" format="reference" />
+
+        <!-- Image for the key. This image needs to be a StateListDrawable, with the following
+             possible states: normal, pressed, checkable, checkable+pressed, checkable+checked,
+             checkable+checked+pressed. -->
+        <attr name="keyBackground" format="reference" />
+
+        <!-- Size of the text for character keys. -->
+        <attr name="keyTextSize" format="dimension" />
+
+        <!-- Size of the text for custom keys with some text and no icon. -->
+        <attr name="labelTextSize" format="dimension" />
+
+        <!-- Color to use for the label in a key -->
+        <attr name="keyTextColor" format="color" />
+
+        <!-- Layout resource for key press feedback.-->
+        <attr name="keyPreviewLayout" format="reference" />
+
+        <!-- Vertical offset of the key press feedback from the key. -->
+        <attr name="keyPreviewOffset" format="dimension" />
+
+        <!-- Height of the key press feedback popup. -->
+        <attr name="keyPreviewHeight" format="dimension" />
+
+        <!-- Amount to offset the touch Y coordinate by, for bias correction. -->
+        <attr name="verticalCorrection" format="dimension" />
+
+        <!-- Layout resource for popup keyboards -->
+        <attr name="popupLayout" format="reference" />
+    </declare-styleable>
+    
+    <declare-styleable name="KeyboardViewPreviewState">
+        <!-- State for {@link android.inputmethodservice.KeyboardView KeyboardView} 
+                key preview background -->
+        <attr name="state_long_pressable" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="Keyboard">
+        <!-- Default width of a key, in pixels or percentage of display width -->
+        <attr name="keyWidth" format="dimension|fraction" />
+        <!-- Default height of a key, in pixels or percentage of display width -->
+        <attr name="keyHeight" format="dimension|fraction" />
+        <!-- Default horizontal gap between keys -->
+        <attr name="horizontalGap" format="dimension|fraction" />
+        <!-- Default vertical gap between rows of keys -->
+        <attr name="verticalGap" format="dimension|fraction" />
+    </declare-styleable>
+
+    <declare-styleable name="Keyboard_Row">
+        <!-- Row edge flags-->
+        <attr name="rowEdgeFlags">
+            <!-- Row is anchored to the top of the keyboard -->
+            <flag name="top" value="4" />
+            <!-- Row is anchored to the bottom of the keyboard -->
+            <flag name="bottom" value="8" />
+        </attr>
+        <!-- Mode of the keyboard. If the mode doesn't match the
+             requested keyboard mode, the row will be skipped -->
+        <attr name="keyboardMode" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="Keyboard_Key">
+        <!-- The unicode value or comma-separated values that this key outputs -->
+        <attr name="codes" format="integer|string" />
+        <!-- The XML keyboard layout of any popup keyboard -->
+        <attr name="popupKeyboard" format="reference" />
+        <!-- The characters to display in the popup keyboard -->
+        <attr name="popupCharacters" format="string" />
+        <!-- Key edge flags -->
+        <attr name="keyEdgeFlags">
+            <!-- Key is anchored to the left of the keyboard -->
+            <flag name="left" value="1" />
+            <!-- Key is anchored to the right of the keyboard -->
+            <flag name="right" value="2" />
+        </attr>
+        <!-- Whether this is a modifier key such as Alt or Shift -->
+        <attr name="isModifier" format="boolean" />
+        <!-- Whether this is a toggle key -->
+        <attr name="isSticky" format="boolean" />
+        <!-- Whether long-pressing on this key will make it repeat -->
+        <attr name="isRepeatable" format="boolean" />
+        <!-- The icon to show in the popup preview -->
+        <attr name="iconPreview" format="reference" />
+        <!-- The string of characters to output when this key is pressed -->
+        <attr name="keyOutputText" format="string" />
+        <!-- The label to display on the key -->
+        <attr name="keyLabel" format="string" />
+        <!-- The icon to display on the key instead of the label -->
+        <attr name="keyIcon" format="reference" />
+        <!-- Mode of the keyboard. If the mode doesn't match the
+             requested keyboard mode, the key will be skipped -->
+        <attr name="keyboardMode" />
+    </declare-styleable>
 </resources>
 

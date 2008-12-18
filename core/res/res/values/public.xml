@@ -19,17 +19,17 @@
      *************************************************************** -->
 <resources>
 
-    <!-- We don't want to publish private symbols in android.R as part of the
-         SDK.  Instead, put them here. -->
-    <private-symbols package="com.android.internal" />
+  <!-- We don't want to publish private symbols in android.R as part of the
+       SDK.  Instead, put them here. -->
+  <private-symbols package="com.android.internal" />
     
-    <!-- AndroidManifest.xml attributes. -->
-    <eat-comment />
+  <!-- AndroidManifest.xml attributes. -->
+  <eat-comment />
 
 <!-- ===============================================================
-     Resource set for version 1.0 of the platform.
+     Resources for version 1 of the platform.
      =============================================================== -->
-    <eat-comment />
+  <eat-comment />
 
   <public type="attr" name="theme" id="0x01010000" />
   <public type="attr" name="label" id="0x01010001" />
@@ -572,7 +572,7 @@
   <public type="attr" name="listChoiceIndicatorMultiple" id="0x0101021a" />    
   <public type="attr" name="versionCode" id="0x0101021b" />
   <public type="attr" name="versionName" id="0x0101021c" />
-
+  
   <public type="id" name="background" id="0x01020000" />
   <public type="id" name="checkbox" id="0x01020001" />
   <public type="id" name="content" id="0x01020002" />
@@ -601,7 +601,7 @@
   <public type="id" name="button1" id="0x01020019" />
   <public type="id" name="button2" id="0x0102001a" />
   <public type="id" name="button3" id="0x0102001b" />
-
+  
   <public type="style" name="Animation" id="0x01030000" />
   <public type="style" name="Animation.Activity" id="0x01030001" />
   <public type="style" name="Animation.Dialog" id="0x01030002" />
@@ -916,7 +916,7 @@
   <public type="layout" name="select_dialog_item" id="0x01090011" />
   <public type="layout" name="select_dialog_singlechoice" id="0x01090012" />
   <public type="layout" name="select_dialog_multichoice" id="0x01090013" />
-        
+  
   <public type="anim" name="fade_in" id="0x010a0000" />
   <public type="anim" name="fade_out" id="0x010a0001" />
   <public type="anim" name="slide_in_left" id="0x010a0002" />
@@ -925,5 +925,117 @@
   <public type="anim" name="accelerate_interpolator" id="0x010a0005" />
   <public type="anim" name="decelerate_interpolator" id="0x010a0006" />
 
+<!-- ===============================================================
+     Resources added in version 2 of the platform.
+     =============================================================== -->
+  <eat-comment />
+  
+  <public type="attr" name="marqueeRepeatLimit" id="0x0101021d" />
+  
+<!-- ===============================================================
+     Resources added in version 3 of the platform.
+     =============================================================== -->
+  <eat-comment />
 
+  <public type="attr" name="backgroundDimEnabled" id="0x0101021f" />
+  <public type="attr" name="inputType" id="0x01010220" />
+  <public type="attr" name="isDefault" id="0x01010221" />
+  <public type="attr" name="windowDisablePreview" id="0x01010222" />
+  <public type="attr" name="editorPrivateContentType" id="0x01010223" />
+  <public type="attr" name="editorExtras" id="0x01010224" />
+  <public type="attr" name="settingsActivity" id="0x01010225" />
+  <public type="attr" name="fastScrollEnabled" id="0x01010226" />
+  <public type="attr" name="reqTouchScreen" id="0x01010227" />
+  <public type="attr" name="reqKeyboardType" id="0x01010228" />
+  <public type="attr" name="reqHardKeyboard" id="0x01010229" />
+  <public type="attr" name="reqNavigation" id="0x0101022a" />
+  <public type="attr" name="windowSoftInputMode" id="0x0101022b" />
+  <public type="attr" name="starStyleButtonless" id="0x0101022c" />
+  <public type="attr" name="noHistory" id="0x0101022d" />
+  <public type="attr" name="headerDividersEnabled" id="0x0101022e" />
+  <public type="attr" name="footerDividersEnabled" id="0x0101022f" />
+  <public type="attr" name="candidatesTextStyleSpans" id="0x01010230" />
+  <public type="attr" name="smoothScrollbar" id="0x01010231" />
+  <public type="attr" name="reqFiveWayNav" id="0x01010232" />
+  <public type="attr" name="keyBackground" id="0x01010233" />
+  <public type="attr" name="keyTextSize" id="0x01010234" />
+  <public type="attr" name="labelTextSize" id="0x01010235" />
+  <public type="attr" name="keyTextColor" id="0x01010236" />
+  <public type="attr" name="keyPreviewLayout" id="0x01010237" />
+  <public type="attr" name="keyPreviewOffset" id="0x01010238" />
+  <public type="attr" name="keyPreviewHeight" id="0x01010239" />
+  <public type="attr" name="verticalCorrection" id="0x01010240" />
+  <public type="attr" name="popupLayout" id="0x01010241" />
+  <public type="attr" name="state_long_pressable" id="0x01010242" />
+  <public type="attr" name="keyWidth" id="0x01010243" />
+  <public type="attr" name="keyHeight" id="0x01010244" />
+  <public type="attr" name="horizontalGap" id="0x01010245" />
+  <public type="attr" name="verticalGap" id="0x01010246" />
+  <public type="attr" name="rowEdgeFlags" id="0x01010247" />
+  <public type="attr" name="codes" id="0x01010248" />
+  <public type="attr" name="popupKeyboard" id="0x01010249" />
+  <public type="attr" name="popupCharacters" id="0x0101024a" />
+  <public type="attr" name="keyEdgeFlags" id="0x0101024b" />
+  <public type="attr" name="isModifier" id="0x0101024c" />
+  <public type="attr" name="isSticky" id="0x0101024d" />
+  <public type="attr" name="isRepeatable" id="0x0101024e" />
+  <public type="attr" name="iconPreview" id="0x0101024f" />
+  <public type="attr" name="keyOutputText" id="0x01010250" />
+  <public type="attr" name="keyLabel" id="0x01010251" />
+  <public type="attr" name="keyIcon" id="0x01010252" />
+  <public type="attr" name="keyboardMode" id="0x01010253" />
+
+  <!-- The part of the UI shown by an
+       {@link android.inputmethodservice.InputMethodService} that contains the
+       views for interacting with the user in extraction mode. -->
+  <public type="id" name="extractArea" id="0x0102001c" />
+
+  <!-- The part of the UI shown by an
+       {@link android.inputmethodservice.InputMethodService} that contains the
+       views for displaying candidates for what the user has entered. -->
+  <public type="id" name="candidatesArea" id="0x0102001d" />
+
+  <!-- The part of the UI shown by an
+       {@link android.inputmethodservice.InputMethodService} that contains the
+       views for entering text using the screen. -->
+  <public type="id" name="inputArea" id="0x0102001e" />
+
+  <!-- Context menu ID for the "Select All" menu item to select all text
+       in a text view. -->
+  <public type="id" name="selectAll" id="0x0102001f" />
+  <!-- Context menu ID for the "Cut" menu item to copy and delete the currently
+       selected (or all) text in a text view to the clipboard. -->
+  <public type="id" name="cut" id="0x01020020" />
+  <!-- Context menu ID for the "Copy" menu item to copy the currently
+       selected (or all) text in a text view to the clipboard. -->
+  <public type="id" name="copy" id="0x01020021" />
+  <!-- Context menu ID for the "Paste" menu item to copy the current contents
+       of the clipboard into the text view. -->
+  <public type="id" name="paste" id="0x01020022" />
+  <!-- Context menu ID for the "Copy URL" menu item to copy the currently
+       selected URL from the text view to the clipboard. -->
+  <public type="id" name="copyUrl" id="0x01020023" />
+  <!-- Context menu ID for the "Input Method" menu item to being up the
+       input method picker dialog, allowing the user to switch to another
+       input method. -->
+  <public type="id" name="inputMethod" id="0x01020024" />
+  <!-- View ID of the text editor inside of an extracted text layout. -->
+  <public type="id" name="inputExtractEditText" id="0x01020025" />
+
+  <!-- View ID of the {@link android.inputmethodservice.KeyboardView} within
+        an input method's input area. -->
+  <public type="id" name="keyboardView" id="0x01020026" />
+  <!-- View ID of a {@link android.view.View} to close a popup keyboard -->
+  <public type="id" name="button_close" id="0x01020027" />
+
+  <public type="style" name="Theme.InputMethod" id="0x01030054" />
+  <public type="style" name="Theme.NoDisplay" id="0x01030055" />
+  <public type="style" name="Animation.InputMethod" id="0x01030056" />
+  <public type="style" name="Widget.KeyboardView" id="0x01030057" />
+  
+  <public type="drawable" name="ic_btn_search" id="0x0108009e" />
+  <public type="drawable" name="ic_dialog_menu_generic" id="0x010800a0" />
 </resources>
+
+
+

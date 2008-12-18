@@ -15,38 +15,43 @@
  *  limitations under the License.
  */
 
-
 package javax.imageio.stream;
 
 import java.io.*;
 
 /**
- * The FileCacheImageInputStream class is an implementation of
- * ImageInputStream which reads from its InputStream
- * and uses a temporary file as a cache. 
+ * The FileCacheImageInputStream class is an implementation of ImageInputStream
+ * which reads from its InputStream and uses a temporary file as a cache.
+ * 
+ * @since Android 1.0
  */
 public class FileCacheImageInputStream extends ImageInputStreamImpl {
-    
-    /** The is. */
-    private InputStream is;
-    
-    /** The file. */
-    private File file;
-    
-    /** The raf. */
-    private RandomAccessFile raf;
-
 
     /**
-     * Instantiates a new FileCacheImageInputStream from
-     * the specified InputStream and using the specified 
-     * File as its cache directory.
+     * The is.
+     */
+    private InputStream is;
+
+    /**
+     * The file.
+     */
+    private File file;
+
+    /**
+     * The raf.
+     */
+    private RandomAccessFile raf;
+
+    /**
+     * Instantiates a new FileCacheImageInputStream from the specified
+     * InputStream and using the specified File as its cache directory.
      * 
-     * @param stream the InputStream for reading.
-     * @param cacheDir the cache directory where the chache file
-     * will be created.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param stream
+     *            the InputStream for reading.
+     * @param cacheDir
+     *            the cache directory where the cache file will be created.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public FileCacheImageInputStream(InputStream stream, File cacheDir) throws IOException {
         if (stream == null) {
@@ -55,7 +60,8 @@ public class FileCacheImageInputStream extends ImageInputStreamImpl {
         is = stream;
 
         if (cacheDir == null || cacheDir.isDirectory()) {
-            file = File.createTempFile(FileCacheImageOutputStream.IIO_TEMP_FILE_PREFIX, null, cacheDir);
+            file = File.createTempFile(FileCacheImageOutputStream.IIO_TEMP_FILE_PREFIX, null,
+                    cacheDir);
             file.deleteOnExit();
         } else {
             throw new IllegalArgumentException("Not a directory!");

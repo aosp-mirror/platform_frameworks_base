@@ -1,4 +1,6 @@
 page.title=Declaring a UI in XML
+parent.title=Views and Layout
+parent.link=index.html
 @jd:body
 
 <p>You can create your application's user interface in two ways: 

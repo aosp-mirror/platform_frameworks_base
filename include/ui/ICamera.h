@@ -20,12 +20,14 @@
 #include <utils/RefBase.h>
 #include <utils/IInterface.h>
 #include <utils/Parcel.h>
-
 #include <ui/ISurface.h>
 #include <utils/IMemory.h>
 #include <utils/String8.h>
+#include <ui/Camera.h>
 
 namespace android {
+
+class ICameraClient;
 
 class ICamera: public IInterface
 {
@@ -34,11 +36,15 @@ public:
 
     virtual void            disconnect() = 0;
 
+    // connect new client with existing camera remote
+    virtual status_t        connect(const sp<ICameraClient>& client) = 0;
+
     // pass the buffered ISurface to the camera service
     virtual status_t        setPreviewDisplay(const sp<ISurface>& surface) = 0;
-    
-    // tell the service whether to callback with each preview frame
-    virtual void            setHasFrameCallback(bool installed) = 0;
+
+    // set the frame callback flag to affect how the received frames from
+    // preview are handled.
+    virtual void            setFrameCallbackFlag(int frame_callback_flag) = 0;
 
     // start preview mode, must call setPreviewDisplay first
     virtual status_t        startPreview() = 0;

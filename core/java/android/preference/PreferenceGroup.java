@@ -28,8 +28,8 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 
 /**
- * The {@link PreferenceGroup} class is a container for multiple
- * {@link Preference}s. It is a base class for {@link Preference} that are
+ * A container for multiple
+ * {@link Preference} objects. It is a base class for  Preference objects that are
  * parents, such as {@link PreferenceCategory} and {@link PreferenceScreen}.
  * 
  * @attr ref android.R.styleable#PreferenceGroup_orderingFromXml

@@ -1,0 +1,30 @@
+// Copyright 2006 The Android Open Source Project
+
+// All Rights Reserved.
+
+// This source file is automatically generated
+
+package com.google.android.gles_jni;
+
+import java.nio.Buffer;
+import javax.microedition.khronos.opengles.GL11;
+import android.graphics.Canvas;
+
+public class GL11Impl implements GL11 {
+
+    // Private accessors for native code
+
+    native private static void _nativeClassInit();
+    static {
+	_nativeClassInit();
+    }
+
+    Buffer _colorPointer = null;
+    Buffer _normalPointer = null;
+    Buffer _texCoordPointer = null;
+    Buffer _vertexPointer = null;
+
+    public GL11Impl() {
+    }
+
+

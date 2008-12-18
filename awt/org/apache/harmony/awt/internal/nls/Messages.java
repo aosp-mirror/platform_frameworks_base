@@ -71,7 +71,9 @@ public class Messages {
      * @return String the message for that key in the system message bundle.
      */
     static public String getString(String msg) {
+        // BEGIN android-changed
         return MsgHelp.getString(msg);
+        // END android-changed
     }
 
     /**
@@ -138,6 +140,12 @@ public class Messages {
      * @return String the message for that key in the system message bundle.
      */
     static public String getString(String msg, Object[] args) {
+        // BEGIN android-changed
         return MsgHelp.getString(msg, args);
+        // END android-changed
     }
+
+    // BEGIN android-note
+    // Duplicate code was dropped in favor of using MsgHelp.
+    // END android-note
 }

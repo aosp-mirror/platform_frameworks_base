@@ -55,18 +55,37 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     private int mDuration;
     private TransitionState mState;
 
+    /**
+     * Create a new transition drawable with the specified list of layers. At least
+     * 2 layers are required for this drawable to work properly.
+     */
+    public TransitionDrawable(Drawable[] layers) {
+        this(new TransitionState(null, null), layers);
+    }
+
+    /**
+     * Create a new transition drawable with no layer. To work correctly, at least 2
+     * layers must be added to this drawable.
+     *
+     * @see #TransitionDrawable(Drawable[])
+     */
     TransitionDrawable() {
         this(new TransitionState(null, null));
     }
-    
+
     private TransitionDrawable(TransitionState state) {
         super(state);
         mState = state;
     }
-    
+
+    private TransitionDrawable(TransitionState state, Drawable[] layers) {
+        super(layers, state);
+        mState = state;
+    }
+
     @Override
     LayerState createConstantState(LayerState state) {
-        return new TransitionState((TransitionState)state, this);
+        return new TransitionState((TransitionState) state, this);
     }
     
     /**
@@ -213,7 +232,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
         public Drawable newDrawable() {
             return new TransitionDrawable(this);
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;

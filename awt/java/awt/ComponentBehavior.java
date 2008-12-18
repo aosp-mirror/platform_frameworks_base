@@ -24,7 +24,7 @@ import org.apache.harmony.awt.wtk.NativeWindow;
 
 /**
  * The interface of the helper object that encapsulates the difference
- * between lightweight and heavyweight components. 
+ * between lightweight and heavyweight components.
  */
 interface ComponentBehavior {
 

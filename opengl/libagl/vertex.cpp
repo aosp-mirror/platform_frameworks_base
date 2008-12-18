@@ -99,7 +99,7 @@ void clipFrustumPerspective(ogles_context_t* c, vertex_t* v, uint32_t enables)
     c->arrays.cull &= clip;
 
     if (ggl_likely(!clip)) {
-        // if the vertice is clipped, we don't do the perspective
+        // if the vertex is clipped, we don't do the perspective
         // divide, since we don't need its window coordinates.
         perspective(c, v, enables);
     }

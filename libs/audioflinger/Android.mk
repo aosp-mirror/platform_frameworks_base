@@ -45,9 +45,12 @@ endif
 
 LOCAL_MODULE:= libaudioflinger
 
-ifeq ($(TARGET_ARCH),arm)  # not simulator
-  LOCAL_CFLAGS += -DWITH_BLUETOOTH
+ifeq ($(BOARD_HAVE_BLUETOOTH),true)
+  LOCAL_SRC_FILES += A2dpAudioInterface.cpp
+  LOCAL_SHARED_LIBRARIES += liba2dp
+  LOCAL_CFLAGS += -DWITH_BLUETOOTH -DWITH_A2DP
   LOCAL_C_INCLUDES += $(call include-path-for, bluez-libs)
+  LOCAL_C_INCLUDES += $(call include-path-for, bluez-utils)
 endif
 
 include $(BUILD_SHARED_LIBRARY)

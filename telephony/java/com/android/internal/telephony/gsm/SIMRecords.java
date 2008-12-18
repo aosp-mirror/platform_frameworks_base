@@ -16,14 +16,21 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.app.AlarmManager;
+import android.content.Context;
 import android.os.AsyncResult;
 import android.os.RegistrantList;
 import android.os.Registrant;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.telephony.gsm.SmsMessage;
 import android.util.Log;
 import java.util.ArrayList;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
+import java.util.Locale;
+import android.content.res.Configuration;
 
 import static com.android.internal.telephony.TelephonyProperties.*;
 import com.android.internal.telephony.SimCard;
@@ -149,6 +156,8 @@ public final class SIMRecords extends Handler implements SimConstants
     private static final int EVENT_SIM_REFRESH = 31;
     private static final int EVENT_GET_CFIS_DONE = 32;
 
+    private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
+
     //***** Constructor
 
     SIMRecords(GSMPhone phone)
@@ -199,7 +208,6 @@ public final class SIMRecords extends Handler implements SimConstants
 
         adnCache.reset();
 
-        phone.setSystemProperty(PROPERTY_LINE1_VOICE_MAIL_WAITING, null);
         phone.setSystemProperty(PROPERTY_SIM_OPERATOR_NUMERIC, null);
         phone.setSystemProperty(PROPERTY_SIM_OPERATOR_ALPHA, null);
         phone.setSystemProperty(PROPERTY_SIM_OPERATOR_ISO_COUNTRY, null);
@@ -309,7 +317,7 @@ public final class SIMRecords extends Handler implements SimConstants
             Message onComplete) {
         if (isVoiceMailFixed) {
             AsyncResult.forMessage((onComplete)).exception =
-                    new SimException("Voicemail number is fixed by operator");
+                    new SimVmFixedException("Voicemail number is fixed by operator");
             onComplete.sendToTarget();
             return;
         }
@@ -331,9 +339,9 @@ public final class SIMRecords extends Handler implements SimConstants
                     EF_EXT1, 1, null,
                     obtainMessage(EVENT_SET_CPHS_MAILBOX_DONE, onComplete));
 
-        } else {
+        }else {
             AsyncResult.forMessage((onComplete)).exception =
-                    new SimException("Update SIM voice mailbox error");
+                    new SimVmNotSupportedException("Update SIM voice mailbox error");
             onComplete.sendToTarget();
         }
     }
@@ -368,9 +376,6 @@ public final class SIMRecords extends Handler implements SimConstants
         }
 
         countVoiceMessages = countWaiting;
-
-        phone.setSystemProperty(PROPERTY_LINE1_VOICE_MAIL_WAITING, 
-                                (countVoiceMessages != 0) ? "true" : "false");
 
         phone.notifyMessageWaitingIndicator();
 
@@ -436,9 +441,6 @@ public final class SIMRecords extends Handler implements SimConstants
         if (line != 1) return; // only line 1 is supported
 
         callForwardingEnabled = enable;
-
-        phone.setSystemProperty(PROPERTY_LINE1_VOICE_CALL_FORWARDING,
-                (callForwardingEnabled ? "true" : "false"));
 
         phone.notifyCallForwardingIndicator();
 
@@ -528,6 +530,73 @@ public final class SIMRecords extends Handler implements SimConstants
         }
     }
 
+    /**
+     * If the timezone is not already set, set it based on the MCC of the SIM.
+     * @param mcc Mobile Country Code of the SIM
+     */
+    private void setTimezoneFromMccIfNeeded(int mcc) {
+        String timezone = SystemProperties.get(TIMEZONE_PROPERTY);
+        if (timezone == null || timezone.length() == 0) {
+            String zoneId = MccTable.defaultTimeZoneForMcc(mcc);
+            
+            if (zoneId != null && zoneId.length() > 0) {
+                // Set time zone based on MCC
+                AlarmManager alarm =
+                    (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
+                alarm.setTimeZone(zoneId);
+            }
+        }
+    }
+
+    /**
+     * If the locale is not already set, set it based on the MCC of the SIM.
+     * @param mcc Mobile Country Code of the SIM
+     */
+    private void setLocaleFromMccIfNeeded(int mcc) {
+        String language = SystemProperties.get("persist.sys.language");
+        String country = SystemProperties.get("persist.sys.country");
+        Log.d(LOG_TAG,"setLocaleFromMcc");
+        if((language == null || language.length() == 0) && (country == null || country.length() == 0)) {
+            try {
+                language = MccTable.defaultLanguageForMcc(mcc);
+                country = MccTable.countryCodeForMcc(mcc).toUpperCase();
+                // try to find a good match
+                String[] locales = phone.getContext().getAssets().getLocales();
+                final int N = locales.length;
+                String bestMatch = null;
+                for(int i = 0; i < N; i++) {
+                    Log.d(LOG_TAG," trying "+locales[i]);
+                    if(locales[i]!=null && locales[i].length() >= 2 &&
+                       locales[i].substring(0,2).equals(language)) {
+                        if(locales[i].length() >= 5 &&
+                           locales[i].substring(3,5).equals(country)) {
+                            bestMatch = locales[i];
+                            break;
+                        } else if(bestMatch == null) {
+                            bestMatch = locales[i];
+                        }
+                    }
+                }
+                Log.d(LOG_TAG," got bestmatch = "+bestMatch);
+                if(bestMatch != null) {
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    Configuration config = am.getConfiguration();
+
+                    if(bestMatch.length() >= 5) {
+                        config.locale = new Locale(bestMatch.substring(0,2),
+                                                   bestMatch.substring(3,5));
+                    } else {
+                        config.locale = new Locale(bestMatch.substring(0,2));
+                    }
+                    config.userSetLocale = true;
+                    am.updateConfiguration(config);
+               }
+           } catch (Exception e) {
+                // Intentionally left blank
+           }
+        }
+    }
+
     //***** Overridden from Handler
     public void handleMessage(Message msg)
     {
@@ -554,7 +623,7 @@ public final class SIMRecords extends Handler implements SimConstants
                 ar = (AsyncResult)msg.obj;
 
                 if (ar.exception != null) {
-                    Log.e(LOG_TAG, "Exception querying IMSI", ar.exception);
+                    Log.e(LOG_TAG, "Exception querying IMSI, Exception:" + ar.exception);
                     break;
                 } 
                 
@@ -571,6 +640,10 @@ public final class SIMRecords extends Handler implements SimConstants
                 phone.mSimCard.updateImsiConfiguration(imsi);
                 phone.mSimCard.broadcastSimStateChangedIntent(
                         SimCard.INTENT_VALUE_SIM_IMSI, null);
+
+                int mcc = Integer.parseInt(imsi.substring(0, 3));
+                setTimezoneFromMccIfNeeded(mcc);
+                setLocaleFromMccIfNeeded(mcc);
             break;
 
             case EVENT_GET_MBI_DONE:
@@ -716,8 +789,6 @@ public final class SIMRecords extends Handler implements SimConstants
                     countVoiceMessages = -1;
                 }
 
-                phone.setSystemProperty(PROPERTY_LINE1_VOICE_MAIL_WAITING, 
-                                        voiceMailWaiting ? "true" : "false");
                 phone.notifyMessageWaitingIndicator();
             break;
 
@@ -747,9 +818,6 @@ public final class SIMRecords extends Handler implements SimConstants
                         countVoiceMessages = 0;
                     }
 
-                    phone.setSystemProperty(PROPERTY_LINE1_VOICE_MAIL_WAITING, 
-                                            countVoiceMessages != 0 
-                                                ? "true" : "false");
                     phone.notifyMessageWaitingIndicator();
                 }
             break;
@@ -830,9 +898,6 @@ public final class SIMRecords extends Handler implements SimConstants
                 if (mEfCfis == null) {
                     callForwardingEnabled =
                         ((data[0] & CFF_LINE1_MASK) == CFF_UNCONDITIONAL_ACTIVE);
-
-                    phone.setSystemProperty(PROPERTY_LINE1_VOICE_CALL_FORWARDING,
-                            (callForwardingEnabled ? "true" : "false"));
 
                     phone.notifyCallForwardingIndicator();
                 }
@@ -1010,6 +1075,7 @@ public final class SIMRecords extends Handler implements SimConstants
             case EVENT_SIM_REFRESH:
                 isRecordLoadResponse = false;
                 ar = (AsyncResult)msg.obj;
+		if (DBG) log("Sim REFRESH with exception: " + ar.exception);
                 if (ar.exception == null) {
                     handleSimRefresh((int[])(ar.result));
                 }
@@ -1031,9 +1097,6 @@ public final class SIMRecords extends Handler implements SimConstants
                 
                 // Refer TS 51.011 Section 10.3.46 for the content description
                 callForwardingEnabled = ((data[1] & 0x01) != 0);
-
-                phone.setSystemProperty(PROPERTY_LINE1_VOICE_CALL_FORWARDING,
-                        (callForwardingEnabled ? "true" : "false"));
 
                 phone.notifyCallForwardingIndicator();
                 break;
@@ -1071,22 +1134,27 @@ public final class SIMRecords extends Handler implements SimConstants
         }
     }
 
-    private void handleSimRefresh(int[] result) {
+    private void handleSimRefresh(int[] result) { 
         if (result == null || result.length == 0) {
+	    if (DBG) log("handleSimRefresh without input");
             return;
         }
-        
+
         switch ((result[0])) {
             case CommandsInterface.SIM_REFRESH_FILE_UPDATED:
-                // result[1] contains the EFID of the updated file.
+ 		if (DBG) log("handleSimRefresh with SIM_REFRESH_FILE_UPDATED");
+		// result[1] contains the EFID of the updated file.
                 int efid = result[1];
                 handleFileUpdate(efid);
                 break;
             case CommandsInterface.SIM_REFRESH_INIT:
+		if (DBG) log("handleSimRefresh with SIM_REFRESH_INIT");
                 // need to reload all files (that we care about)
+                adnCache.reset();
                 fetchSimRecords();
                 break;
             case CommandsInterface.SIM_REFRESH_RESET:
+		if (DBG) log("handleSimRefresh with SIM_REFRESH_RESET");
                 phone.mCM.setRadioPower(false, null);
                 /* Note: no need to call setRadioPower(true).  Assuming the desired
                 * radio power state is still ON (as tracked by ServiceStateTracker),
@@ -1098,6 +1166,7 @@ public final class SIMRecords extends Handler implements SimConstants
                 break;
             default:
                 // unknown refresh operation
+		if (DBG) log("handleSimRefresh with unknown operation");
                 break;
         }
     }

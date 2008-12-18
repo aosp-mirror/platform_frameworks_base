@@ -635,15 +635,7 @@ public class MediaScanner
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
             } else if (isImage) {
-                File parentFile = new File(entry.mPath).getParentFile();
-                if (parentFile == null) {
-                    return null;
-                }
-                String path = parentFile.toString().toLowerCase();
-                String name = parentFile.getName().toLowerCase();
-                
-                values.put(Images.ImageColumns.BUCKET_ID, path.hashCode());
-                values.put(Images.ImageColumns.BUCKET_DISPLAY_NAME, name);
+                // nothing right now
             }
             
             Uri result = null;
@@ -1342,6 +1334,7 @@ public class MediaScanner
     
     private native void processDirectory(String path, String extensions, MediaScannerClient client);
     private native void processFile(String path, String mimeType, MediaScannerClient client);
+    public native void setLocale(String locale);
     
     public native byte[] extractAlbumArt(FileDescriptor fd);
 

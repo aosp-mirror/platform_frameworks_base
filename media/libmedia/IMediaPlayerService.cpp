@@ -21,6 +21,7 @@
 
 #include <utils/IMemory.h>
 #include <media/IMediaPlayerService.h>
+#include <media/IMediaRecorder.h>
 
 namespace android {
 
@@ -29,6 +30,8 @@ enum {
     CREATE_FD,
     DECODE_URL,
     DECODE_FD,
+    CREATE_MEDIA_RECORDER,
+    CREATE_METADATA_RETRIEVER,
 };
 
 class BpMediaPlayerService: public BpInterface<IMediaPlayerService>
@@ -37,6 +40,15 @@ public:
     BpMediaPlayerService(const sp<IBinder>& impl)
         : BpInterface<IMediaPlayerService>(impl)
     {
+    }
+
+    virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        data.writeInt32(pid);
+        remote()->transact(CREATE_METADATA_RETRIEVER, data, &reply);
+        return interface_cast<IMediaMetadataRetriever>(reply.readStrongBinder());
     }
 
     virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url)
@@ -48,6 +60,15 @@ public:
         data.writeCString(url);
         remote()->transact(CREATE_URL, data, &reply);
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());
+    }
+
+    virtual sp<IMediaRecorder> createMediaRecorder(pid_t pid)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        data.writeInt32(pid);
+        remote()->transact(CREATE_MEDIA_RECORDER, data, &reply);
+        return interface_cast<IMediaRecorder>(reply.readStrongBinder());
     }
 
     virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length)
@@ -63,7 +84,7 @@ public:
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels)
+    virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -71,10 +92,11 @@ public:
         remote()->transact(DECODE_URL, data, &reply);
         *pSampleRate = uint32_t(reply.readInt32());
         *pNumChannels = reply.readInt32();
+        *pFormat = reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels)
+    virtual sp<IMemory> decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -84,6 +106,7 @@ public:
         remote()->transact(DECODE_FD, data, &reply);
         *pSampleRate = uint32_t(reply.readInt32());
         *pNumChannels = reply.readInt32();
+        *pFormat = reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 };
@@ -127,9 +150,11 @@ status_t BnMediaPlayerService::onTransact(
             const char* url = data.readCString();
             uint32_t sampleRate;
             int numChannels;
-            sp<IMemory> player = decode(url, &sampleRate, &numChannels);
+            int format;
+            sp<IMemory> player = decode(url, &sampleRate, &numChannels, &format);
             reply->writeInt32(sampleRate);
             reply->writeInt32(numChannels);
+            reply->writeInt32(format);
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;
@@ -140,10 +165,26 @@ status_t BnMediaPlayerService::onTransact(
             int64_t length = data.readInt64();
             uint32_t sampleRate;
             int numChannels;
-            sp<IMemory> player = decode(fd, offset, length, &sampleRate, &numChannels);
+            int format;
+            sp<IMemory> player = decode(fd, offset, length, &sampleRate, &numChannels, &format);
             reply->writeInt32(sampleRate);
             reply->writeInt32(numChannels);
+            reply->writeInt32(format);
             reply->writeStrongBinder(player->asBinder());
+            return NO_ERROR;
+        } break;
+        case CREATE_MEDIA_RECORDER: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            pid_t pid = data.readInt32();
+            sp<IMediaRecorder> recorder = createMediaRecorder(pid);
+            reply->writeStrongBinder(recorder->asBinder());
+            return NO_ERROR;
+        } break;
+        case CREATE_METADATA_RETRIEVER: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            pid_t pid = data.readInt32();
+            sp<IMediaMetadataRetriever> retriever = createMetadataRetriever(pid);
+            reply->writeStrongBinder(retriever->asBinder());
             return NO_ERROR;
         } break;
         default:

@@ -1,4 +1,6 @@
 page.title=Hello, MapView 
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A MapView allows you to create your own map-viewing Activity. 
@@ -23,23 +25,29 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
     android:id="@+id/mainlayout"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+    android:layout_height="fill_parent" >
 
     &lt;com.google.android.maps.MapView
         android:id="@+id/mapview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:clickable="true"
-        android:apiKey="myapikey"
+        android:apiKey="INSERT YOUR KEY HERE"
     />
 
 &lt;RelativeLayout>
 </pre>
+      <p>Setting <code>clickable</code> is important. Otherwise, the map does not allow any user interaction.</p>
 
-      <p>The <code>android:apiKey</code> should actually contain a legitimate value that's 
-      associated to your application. For now, it's okay to just leave this as an
-      arbitrary string. But to run on 1.0 software, an authentic key will be needed.</p></li>
+      <p>The <code>android:apiKey</code> must contain an authentic Android Maps API key.
+      The API key is generated using the MD5 fingerprint of your application certificate. For the purposes of 
+      this exercise, you should use the fingerprint of your debug certificate (which cannot be used to release
+      your application for Android devices, but will work while developing). See how to 
+      <a href="{@docRoot}guide/topics/geo/mapkey.html#getdebugfingerprint">generate a fingerprint from your 
+      debug certificate</a>, then <a href="http://code.google.com/android/maps-api-signup.html">register the 
+      certificate</a> to retieve an API key.
+      Insert the API key as the value of the <code>apiKey</code> attribute. If you do not insert a valid
+      Maps API key, the application will still run, but no map tiles will load.</p></li>
 
    <li>Now open the HelloMapView.java file. For this Activity, we're going to extend the special sub-class of 
       Activity called MapActivity, so change the class declaration to extend 
@@ -47,7 +55,7 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
 
       <pre>public class HelloMapView extends MapActivity {</pre>
 
-   <li>The <code>isRouteDisplayed()</code> method is requires, so add it inside the class:
+   <li>The <code>isRouteDisplayed()</code> method is required, so add it inside the class:
 <pre>
 &#64;Override
 protected boolean isRouteDisplayed() {
@@ -117,7 +125,7 @@ class, which can manage a whole set of Overlay items for us.</p>
 <ol>   
   <li>Create a new Java class named HelloItemizedOverlay that implements ItemizedOverlay.
 
-      <p>Right-click the package name in the Eclipse Package Explorer, and select New > Class. Fill-in 
+      <p>When using Eclipse, right-click the package name in the Eclipse Package Explorer, and select New > Class. Fill-in 
       the Name field as <em>HelloItemizedOverlay</em>. For the Superclass, enter 
       <em>com.google.android.maps.ItemizedOverlay</em>. Click the checkbox for <em>Constructors from 
       superclass</em>. Click Finish.</p></li>
@@ -151,7 +159,12 @@ public void addOverlay(OverlayItem overlay) {
    <code>createItem(int)</code>. We must define this method to properly read from our ArrayList. Replace the 
    existing contents of the createItem method with a <code>get()</code> call to our ArrayList:
 
-      <pre>return mOverlays.get(i);</pre></li>
+<pre>
+&#64;Override
+protected OverlayItem createItem(int i) {
+  return mOverlays.get(i);
+}
+</pre></li>
 
    <li>We're also required to override the <code>size()</code> method. Replace the existing contents of the 
    method with a size request to our ArrayList:
@@ -185,14 +198,14 @@ HelloItemizedOverlay itemizedOverlay;</pre></li>
    new fields:
 
 <pre>
-mapoverlays = mapView.getOverlays();
-drawable = this.getResources().getDrawable(R.drawable.banana);
+mapOverlays = mapView.getOverlays();
+drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 itemizedoverlay = new HelloItemizedOverlay(drawable);</pre>
 
       <p>All overlay elements on a map are held by the MapView, so when we want to add some, we must 
       first retrieve the List with <code>getOverlays()</code> methods. We instantiate the Drawable, which will 
       be used as our map marker, by using our Context resources to get the Drawable we placed in 
-      the res/drawable/ directory. Our HelloItemizedOverlay takes the Drawable in order to set the 
+      the res/drawable/ directory (androidmarker.png). Our HelloItemizedOverlay takes the Drawable in order to set the 
       default marker.</p></li>
 
    <li>Now let's make our first OverlayItem by creating a GeoPoint
@@ -211,7 +224,7 @@ OverlayItem overlayitem = new OverlayItem(point, "", "");</pre>
 
 <pre>
 itemizedoverlay.addOverlay(overlayitem);
-mapoverlays.add(itemizedoverlay);</pre></li>
+mapOverlays.add(itemizedoverlay);</pre></li>
 
    <li>Run it!</li>
 </ol>
@@ -228,4 +241,3 @@ OverlayItem overlayitem2 = new OverlayItem(point2, "", "");
 </pre>
 <p>Run it again... We've sent a new droid to Tokyo. Sekai, konichiwa!</p>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>

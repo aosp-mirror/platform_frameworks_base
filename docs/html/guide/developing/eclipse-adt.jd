@@ -7,8 +7,7 @@ your application.  </p>
 
 <p>The sections below provide instructions assuming that you have installed the ADT plugin 
 in your Eclipse environment. If you haven't installed the ADT plugin, you should do that 
-before using the instructions below. See the <a href="{@docRoot}intro/installing.html#installingplugin">Installing the 
-Eclipse Plugin (ADT)</a> for more information.
+before using the instructions below. For complete information, see the installation documentation included in your SDK package. </p>
 
 <a name="creatingaproject" id="creatingaproject"></a>
 
@@ -73,7 +72,7 @@ Eclipse project for new or existing code. To create the project, follow these st
     <li>In the project type list on the left, locate the <strong> Android Application</strong> item and double-click it (or right-click &gt; <strong>New</strong>), to create a new launch configuration.</li>
     <li>Enter a name for your configuration.</li>
     <li>On the Android tab, browse for the project and Activity to start.</li>
-    <li>On the Target tab, set the desired screen and network properties, as well as any other <a href="{@docRoot}reference/emulator.html#startup-options">emulator startup options</a>.</li>
+    <li>On the Target tab, set the desired screen and network properties, as well as any other <a href="{@docRoot}guide/developing/tools/emulator.html#startup-options">emulator startup options</a>.</li>
     <li>You can set additional options on the Common tab as desired.</li>
 	<li>Press <strong>Apply</strong> to save the launch configuration, or press <strong>Run</strong> or <strong>Debug</strong> (as appropriate).</li>
 
@@ -143,4 +142,4 @@ From the Eclipse main menu, select <strong>Run</strong> &gt; <strong>Run</strong
 	
 		<h3>Running DDMS Manually</h3>
 
-		<p>Although the recommended way to debug is to use the ADT plugin, you can manually run DDMS and configure Eclipse to debug on port 8700. (<strong>Note: </strong>Be sure that you have first started <a href="{@docRoot}reference/ddms.html">DDMS</a>). </p>
+		<p>Although the recommended way to debug is to use the ADT plugin, you can manually run DDMS and configure Eclipse to debug on port 8700. (<strong>Note: </strong>Be sure that you have first started <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a>). </p>

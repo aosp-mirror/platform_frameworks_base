@@ -15,16 +15,32 @@
  */
 
 package com.android.internal.telephony.gsm;
-import com.android.internal.telephony.*;
-import android.os.*;
+
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
+import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_EDGE;
+import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_GPRS;
+import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_UMTS;
+import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_UNKNOWN;
 import android.os.AsyncResult;
-import android.util.Log;
-import android.provider.Checkin;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Registrant;
+import android.os.RegistrantList;
+import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
+import android.util.EventLog;
+import android.util.Log;
 
-import java.util.List;
+import com.android.internal.telephony.Call;
+import com.android.internal.telephony.CallStateException;
+import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.Phone;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@hide}
@@ -35,6 +51,9 @@ public final class CallTracker extends Handler
     private static final boolean REPEAT_POLLING = false;
 
     private static final boolean DBG_POLL = false;
+    
+    // Event Log Tags
+    private static final int EVENT_LOG_CALL_DROP = 50106;
     
     //***** Constants
 
@@ -165,7 +184,7 @@ public final class CallTracker extends Handler
             throw new CallStateException("cannot dial in current state");
         }
 
-        pendingMO = new GSMConnection(dialString, this, foregroundCall);
+        pendingMO = new GSMConnection(phone.getContext(), dialString, this, foregroundCall);
         hangupPendingMO = false;
 
         if (pendingMO.address == null || pendingMO.address.length() == 0
@@ -503,7 +522,7 @@ public final class CallTracker extends Handler
                         return;
                     }
                 } else {
-                    connections[i] = new GSMConnection(dc, this, i);
+                    connections[i] = new GSMConnection(phone.getContext(), dc, this, i);
 
                     // it's a ringing call
                     if (connections[i].getCall() == ringingCall) {
@@ -540,7 +559,7 @@ public final class CallTracker extends Handler
                 // we were tracking. Assume dropped call and new call
 
                 droppedDuringPoll.add(conn); 
-                connections[i] = new GSMConnection (dc, this, i);
+                connections[i] = new GSMConnection (phone.getContext(), dc, this, i);
 
                 if (connections[i].getCall() == ringingCall) {
                     newRinging = connections[i];
@@ -915,6 +934,22 @@ public final class CallTracker extends Handler
                             "Exception during getLastCallFailCause, assuming normal disconnect");
                 } else {
                     causeCode = ((int[])ar.result)[0];
+                }
+                // Log the causeCode if its not normal
+                if (causeCode == CallFailCause.NO_CIRCUIT_AVAIL ||                    
+                    causeCode == CallFailCause.TEMPORARY_FAILURE ||
+                    causeCode == CallFailCause.SWITCHING_CONGESTION ||
+                    causeCode == CallFailCause.CHANNEL_NOT_AVAIL ||
+                    causeCode == CallFailCause.QOS_NOT_AVAIL ||
+                    causeCode == CallFailCause.BEARER_NOT_AVAIL ||
+                    causeCode == CallFailCause.ERROR_UNSPECIFIED) {
+                    int cid = -1;
+                    GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+                    if (loc != null) cid = loc.getCid();
+                  
+                    EventLog.List val = new EventLog.List(causeCode, cid, 
+                        TelephonyManager.getDefault().getNetworkType());
+                    EventLog.writeEvent(EVENT_LOG_CALL_DROP, val);                   
                 }
                 
                 for (int i = 0, s =  droppedDuringPoll.size()

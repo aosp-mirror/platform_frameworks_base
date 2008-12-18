@@ -25,6 +25,12 @@ package java.awt.event;
 //import java.awt.Window;
 //import java.awt.Frame;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class WindowEvent extends ComponentEvent {
 
     private static final long serialVersionUID = -1567959133147912127L;

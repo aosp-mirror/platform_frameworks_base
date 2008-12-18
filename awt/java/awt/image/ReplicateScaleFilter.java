@@ -18,53 +18,69 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.util.Hashtable;
 
 import org.apache.harmony.awt.internal.nls.Messages;
 
-
 /**
- * The ReplicateScaleFilter class scales an source image 
- * by replicating rows and columns of pixels to scale up or 
- * omitting rows and columns of pixels to scale down.
+ * The ReplicateScaleFilter class scales an source image by replicating rows and
+ * columns of pixels to scale up or omitting rows and columns of pixels to scale
+ * down.
+ * 
+ * @since Android 1.0
  */
 public class ReplicateScaleFilter extends ImageFilter {
 
-    /** The width of a source image. */
+    /**
+     * The width of a source image.
+     */
     protected int srcWidth;
 
-    /** The height of a source image. */
+    /**
+     * The height of a source image.
+     */
     protected int srcHeight;
 
-    /** The width of a destination image. */
+    /**
+     * The width of a destination image.
+     */
     protected int destWidth;
 
-    /** The height of a destination image. */
+    /**
+     * The height of a destination image.
+     */
     protected int destHeight;
 
-    /** The int array of source rows. */
+    /**
+     * The integer array of source rows.
+     */
     protected int[] srcrows;
 
-    /** The int array of source columns. */
+    /**
+     * The integer array of source columns.
+     */
     protected int[] srccols;
 
-    /** 
-     * An Object (byte array with a destination width) provides 
-     * a row of pixel data to the ImageConsumer. 
+    /**
+     * An Object (byte array with a destination width) provides a row of pixel
+     * data to the ImageConsumer.
      */
     protected Object outpixbuf;
 
     /**
-     * Instantiates a new ReplicateScaleFilter that filters 
-     * the image with the specified width and height.
+     * Instantiates a new ReplicateScaleFilter that filters the image with the
+     * specified width and height.
      * 
-     * @param width the width of scaled image.
-     * @param height the height of scaled image.
+     * @param width
+     *            the width of scaled image.
+     * @param height
+     *            the height of scaled image.
      */
     public ReplicateScaleFilter(int width, int height) {
-        if(width == 0 || height == 0) {
+        if (width == 0 || height == 0) {
             // awt.234=Width or Height equals zero
             throw new IllegalArgumentException(Messages.getString("awt.234")); //$NON-NLS-1$
         }
@@ -77,40 +93,40 @@ public class ReplicateScaleFilter extends ImageFilter {
     @Override
     public void setProperties(Hashtable<?, ?> props) {
         Hashtable<Object, Object> fprops;
-        if(props == null) {
+        if (props == null) {
             fprops = new Hashtable<Object, Object>();
         } else {
-            fprops = (Hashtable<Object, Object>) props.clone();
+            fprops = (Hashtable<Object, Object>)props.clone();
         }
         String propName = "Rescale Filters"; //$NON-NLS-1$
-        String prop = "destWidth=" + destWidth + "; " +  //$NON-NLS-1$ //$NON-NLS-2$
-        "destHeight=" + destHeight; //$NON-NLS-1$
+        String prop = "destWidth=" + destWidth + "; " + //$NON-NLS-1$ //$NON-NLS-2$
+                "destHeight=" + destHeight; //$NON-NLS-1$
         Object o = fprops.get(propName);
-        if(o != null){
-            if(o instanceof String){
+        if (o != null) {
+            if (o instanceof String) {
                 prop = (String)o + "; " + prop; //$NON-NLS-1$
-            }else{
-                prop =  o.toString() + "; " + prop; //$NON-NLS-1$
+            } else {
+                prop = o.toString() + "; " + prop; //$NON-NLS-1$
             }
         }
         fprops.put(propName, prop);
         consumer.setProperties(fprops);
-     }
+    }
 
     // setPixels methods produce pixels according to Java API Spacification
 
     @Override
-    public void setPixels(int x, int y, int w, int h, 
-            ColorModel model, int[] pixels, int off, int scansize) {
-        
-        if(srccols == null) {
+    public void setPixels(int x, int y, int w, int h, ColorModel model, int[] pixels, int off,
+            int scansize) {
+
+        if (srccols == null) {
             initArrays();
         }
         int buff[];
-        if(outpixbuf == null || !(outpixbuf instanceof int[])){
+        if (outpixbuf == null || !(outpixbuf instanceof int[])) {
             buff = new int[destWidth];
             outpixbuf = buff;
-        }else{
+        } else {
             buff = (int[])outpixbuf;
         }
 
@@ -121,32 +137,31 @@ public class ReplicateScaleFilter extends ImageFilter {
 
         int sx, sy, dx, dy;
         dy = dstY;
-        while((dy < destHeight) && ((sy = srcrows[dy]) < y + h)){
+        while ((dy < destHeight) && ((sy = srcrows[dy]) < y + h)) {
             dx = dstX;
             int srcOff = off + (sy - y) * scansize;
-            while((dx < destWidth) && ((sx = srccols[dx]) < x + w)){
+            while ((dx < destWidth) && ((sx = srccols[dx]) < x + w)) {
                 buff[dx] = pixels[srcOff + (sx - x)];
                 dx++;
             }
 
-            consumer.setPixels(dstX, dy, dx - dstX, 1, model, buff, 
-                    dstX, destWidth);
+            consumer.setPixels(dstX, dy, dx - dstX, 1, model, buff, dstX, destWidth);
             dy++;
         }
     }
 
     @Override
-    public void setPixels(int x, int y, int w, int h, 
-            ColorModel model, byte[] pixels, int off, int scansize) {
-        
-        if(srccols == null) {
+    public void setPixels(int x, int y, int w, int h, ColorModel model, byte[] pixels, int off,
+            int scansize) {
+
+        if (srccols == null) {
             initArrays();
         }
         byte buff[];
-        if(outpixbuf == null || !(outpixbuf instanceof byte[])){
+        if (outpixbuf == null || !(outpixbuf instanceof byte[])) {
             buff = new byte[destWidth];
             outpixbuf = buff;
-        }else{
+        } else {
             buff = (byte[])outpixbuf;
         }
 
@@ -157,16 +172,15 @@ public class ReplicateScaleFilter extends ImageFilter {
 
         int sx, sy, dx, dy;
         dy = dstY;
-        while((dy < destHeight) && ((sy = srcrows[dy]) < y + h)){
+        while ((dy < destHeight) && ((sy = srcrows[dy]) < y + h)) {
             dx = dstX;
             int srcOff = off + (sy - y) * scansize;
-            while((dx < destWidth) && ((sx = srccols[dx]) < x + w)){
+            while ((dx < destWidth) && ((sx = srccols[dx]) < x + w)) {
                 buff[dx] = pixels[srcOff + (sx - x)];
                 dx++;
             }
 
-            consumer.setPixels(dstX, dy, dx - dstX, 1, model, buff, 
-                    dstX, destWidth);
+            consumer.setPixels(dstX, dy, dx - dstX, 1, model, buff, dstX, destWidth);
             dy++;
         }
     }
@@ -176,12 +190,12 @@ public class ReplicateScaleFilter extends ImageFilter {
         srcWidth = w;
         srcHeight = h;
 
-        if(destWidth < 0 && destHeight < 0){
+        if (destWidth < 0 && destHeight < 0) {
             destWidth = srcWidth;
             destHeight = srcHeight;
-        }else if(destWidth < 0){
+        } else if (destWidth < 0) {
             destWidth = destHeight * srcWidth / srcHeight;
-        }else if(destHeight < 0){
+        } else if (destHeight < 0) {
             destHeight = destWidth * srcHeight / srcWidth;
         }
         consumer.setDimensions(destWidth, destHeight);
@@ -190,24 +204,22 @@ public class ReplicateScaleFilter extends ImageFilter {
     /**
      * Initialization of srccols and srcrows arrays.
      */
-    private void initArrays(){
+    private void initArrays() {
         if ((destWidth < 0) || (destHeight < 0)) {
             throw new IndexOutOfBoundsException();
         }
-        
+
         srccols = new int[destWidth];
         int ca = srcWidth >>> 1;
-        for(int i = 0; i < destWidth; i++){
+        for (int i = 0; i < destWidth; i++) {
             srccols[i] = (i * srcWidth + ca) / destWidth;
         }
 
         srcrows = new int[destHeight];
         int ra = srcHeight >>> 1;
-        for(int i = 0; i < destHeight; i++){
+        for (int i = 0; i < destHeight; i++) {
             srcrows[i] = (i * srcHeight + ra) / destHeight;
         }
     }
 
 }
-
-

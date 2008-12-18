@@ -212,9 +212,9 @@ public interface CommandsInterface
      *
      * AsyncResult.result is an Object[]
      * ((Object[])AsyncResult.result)[0] is a String containing the NITZ time string
-     * ((Object[])AsyncResult.result)[0] is an Integer containing 
-     *                                   the UNIX time_t returned by time() when
-     *                                   this NITZ time was posted.
+     * ((Object[])AsyncResult.result)[1] is a Long containing the milliseconds since boot as
+     *                                   returned by elapsedRealtime() when this NITZ time
+     *                                   was posted.
      *
      * Please note that the delivery of this message may be delayed several
      * seconds on system startup

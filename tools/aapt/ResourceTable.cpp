@@ -638,6 +638,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 string16("string");
     const String16 drawable16("drawable");
     const String16 color16("color");
+    const String16 bool16("bool");
     const String16 integer16("integer");
     const String16 dimen16("dimen");
     const String16 style16("style");
@@ -671,6 +672,10 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 many16("many");
     const String16 quantityMany16("^many");
 
+    // useful attribute names and special values
+    const String16 name16("name");
+    const String16 translatable16("translatable");
+    const String16 false16("false");
 
     const String16 myPackage(assets->getPackage());
 
@@ -950,6 +955,45 @@ status_t compileResourceFile(Bundle* bundle,
                 }
                 curIsStyled = true;
             } else if (strcmp16(block.getElementName(&len), string16.string()) == 0) {
+                // Note the existence and locale of every string we process
+                char rawLocale[16];
+                curParams.getLocale(rawLocale);
+                String8 locale(rawLocale);
+                String16 name;
+                String16 translatable;
+
+                size_t n = block.getAttributeCount();
+                for (size_t i = 0; i < n; i++) {
+                    size_t length;
+                    const uint16_t* attr = block.getAttributeName(i, &length);
+                    if (strcmp16(attr, name16.string()) == 0) {
+                        name.setTo(block.getAttributeStringValue(i, &length));
+                    } else if (strcmp16(attr, translatable16.string()) == 0) {
+                        translatable.setTo(block.getAttributeStringValue(i, &length));
+                    }
+                }
+                
+                if (name.size() > 0) {
+                    if (translatable == false16) {
+                        // Untranslatable strings must only exist in the default [empty] locale
+                        if (locale.size() > 0) {
+                            fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
+                                    " in locale '%s'\n", String8(name).string(),
+                                    bundle->getResourceSourceDir(),
+                                    locale.string());
+                            // hasErrors = localHasErrors = true;
+                        } else {
+                            // Intentionally empty block:
+                            //
+                            // Don't add untranslatable strings to the localization table; that
+                            // way if we later see localizations of them, they'll be flagged as
+                            // having no default translation.
+                        }
+                    } else {
+                        outTable->addLocalization(name, locale);
+                    }
+                }
+
                 curTag = &string16;
                 curType = string16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
@@ -963,6 +1007,10 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &color16;
                 curType = color16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_COLOR;
+            } else if (strcmp16(block.getElementName(&len), bool16.string()) == 0) {
+                curTag = &bool16;
+                curType = bool16;
+                curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_BOOLEAN;
             } else if (strcmp16(block.getElementName(&len), integer16.string()) == 0) {
                 curTag = &integer16;
                 curType = integer16;
@@ -1553,17 +1601,26 @@ inline uint32_t ResourceTable::getResId(const sp<Package>& p,
 
 uint32_t ResourceTable::getResId(const String16& package,
                                  const String16& type,
-                                 const String16& name) const
+                                 const String16& name,
+                                 bool onlyPublic) const
 {
     sp<Package> p = mPackages.valueFor(package);
     if (p == NULL) return 0;
 
     // First look for this in the included resources...
+    uint32_t specFlags = 0;
     uint32_t rid = mAssets->getIncludedResources()
         .identifierForName(name.string(), name.size(),
                            type.string(), type.size(),
-                           package.string(), package.size());
+                           package.string(), package.size(),
+                           &specFlags);
     if (rid != 0) {
+        if (onlyPublic) {
+            if ((specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+                return 0;
+            }
+        }
+        
         if (Res_INTERNALID(rid)) {
             return rid;
         }
@@ -1584,7 +1641,8 @@ uint32_t ResourceTable::getResId(const String16& package,
 uint32_t ResourceTable::getResId(const String16& ref,
                                  const String16* defType,
                                  const String16* defPackage,
-                                 const char** outErrorMsg) const
+                                 const char** outErrorMsg,
+                                 bool onlyPublic) const
 {
     String16 package, type, name;
     if (!ResTable::expandResourceRef(
@@ -1603,7 +1661,7 @@ uint32_t ResourceTable::getResId(const String16& ref,
                      String8(name).string()));
         return 0;
     }
-    uint32_t res = getResId(package, type, name);
+    uint32_t res = getResId(package, type, name, onlyPublic);
     NOISY(printf("Expanded resource: p=%s, t=%s, n=%s, res=%d\n",
                  String8(package).string(), String8(type).string(),
                  String8(name).string(), res));
@@ -2036,6 +2094,93 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
 }
 
 
+void
+ResourceTable::addLocalization(const String16& name, const String8& locale)
+{
+    mLocalizations[name].insert(locale);
+}
+
+
+/*!
+ * Flag various sorts of localization problems.  '+' indicates checks already implemented;
+ * '-' indicates checks that will be implemented in the future.
+ *
+ * + A localized string for which no default-locale version exists => warning
+ * + A string for which no version in an explicitly-requested locale exists => warning
+ * + A localized translation of an translateable="false" string => warning
+ * - A localized string not provided in every locale used by the table
+ */
+status_t
+ResourceTable::validateLocalizations(void)
+{
+    status_t err = NO_ERROR;
+    const String8 defaultLocale;
+
+    // For all strings...
+    for (map<String16, set<String8> >::iterator nameIter = mLocalizations.begin();
+         nameIter != mLocalizations.end();
+         nameIter++) {
+        const set<String8>& configSet = nameIter->second;   // naming convenience
+
+        // Look for strings with no default localization
+        if (configSet.count(defaultLocale) == 0) {
+            fprintf(stdout, "aapt: warning: string '%s' has no default translation in %s; found:",
+                    String8(nameIter->first).string(), mBundle->getResourceSourceDir());
+            for (set<String8>::iterator locales = configSet.begin();
+                 locales != configSet.end();
+                 locales++) {
+                fprintf(stdout, " %s", (*locales).string());
+            }
+            fprintf(stdout, "\n");
+            // !!! TODO: throw an error here in some circumstances
+        }
+
+        // Check that all requested localizations are present for this string
+        if (mBundle->getConfigurations() != NULL && mBundle->getRequireLocalization()) {
+            const char* allConfigs = mBundle->getConfigurations();
+            const char* start = allConfigs;
+            const char* comma;
+            
+            do {
+                String8 config;
+                comma = strchr(start, ',');
+                if (comma != NULL) {
+                    config.setTo(start, comma - start);
+                    start = comma + 1;
+                } else {
+                    config.setTo(start);
+                }
+
+                // don't bother with the pseudolocale "zz_ZZ"
+                if (config != "zz_ZZ") {
+                    if (configSet.find(config) == configSet.end()) {
+                        // okay, no specific localization found.  it's possible that we are
+                        // requiring a specific regional localization [e.g. de_DE] but there is an
+                        // available string in the generic language localization [e.g. de];
+                        // consider that string to have fulfilled the localization requirement.
+                        String8 region(config.string(), 2);
+                        if (configSet.find(region) == configSet.end()) {
+                            // TODO: force an error if there is no default to fall back to
+                            if (configSet.count(defaultLocale) == 0) {
+                                fprintf(stdout, "aapt: warning: "
+                                        "*** string '%s' has no default or required localization "
+                                        "for '%s' in %s\n",
+                                        String8(nameIter->first).string(),
+                                        config.string(),
+                                        mBundle->getResourceSourceDir());
+                                //err = UNKNOWN_ERROR;
+                            }
+                        }
+                    }
+                }
+           } while (comma != NULL);
+        }
+    }
+
+    return err;
+}
+
+
 status_t
 ResourceFilter::parse(const char* arg)
 {
@@ -2187,6 +2332,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 }
                 const size_t N = c->getEntries().size();
                 for (size_t ei=0; ei<N; ei++) {
+                    ConfigDescription config = c->getEntries().keyAt(ei);
+                    if (!filter.match(config)) {
+                        continue;
+                    }
                     sp<Entry> e = c->getEntries().valueAt(ei);
                     if (e == NULL) {
                         continue;

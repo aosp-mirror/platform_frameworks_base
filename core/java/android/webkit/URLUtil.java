@@ -145,6 +145,7 @@ public final class URLUtil {
     /**
      * @return True iff the url is an proxy url to allow cookieless network 
      * requests from a file url.
+     * @deprecated Cookieless proxy is no longer supported.
      */
     public static boolean isCookielessProxyUrl(String url) {
         return (null != url) && url.startsWith(PROXY_BASE);

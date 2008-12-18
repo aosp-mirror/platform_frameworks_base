@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 
@@ -183,6 +184,7 @@ public final class MenuItemImpl implements MenuItem {
         return mGroup;
     }
 
+    @ViewDebug.CapturedViewProperty
     public int getItemId() {
         return mId;
     }
@@ -353,6 +355,7 @@ public final class MenuItemImpl implements MenuItem {
         subMenu.setHeaderTitle(getTitle());
     }
     
+    @ViewDebug.CapturedViewProperty
     public CharSequence getTitle() {
         return mTitle;
     }

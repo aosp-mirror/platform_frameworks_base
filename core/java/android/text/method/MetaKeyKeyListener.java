@@ -221,6 +221,12 @@ public abstract class MetaKeyKeyListener {
             content.setSpan(what, 0, 0, RELEASED);
     }
 
+    public void clearMetaKeyState(View view, Editable content, int states) {
+        if ((states&META_SHIFT_ON) != 0) resetLock(content, CAP);
+        if ((states&META_ALT_ON) != 0) resetLock(content, ALT);
+        if ((states&META_SYM_ON) != 0) resetLock(content, SYM);
+    }
+    
     /**
      * The meta key has been pressed but has not yet been used.
      */

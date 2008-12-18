@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,15 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Container class for STK menu (SET UP MENU, SELECT ITEM) parameters. 
+ *
+ */
 public class Menu implements Parcelable {
     public List<Item> items;
-    public String title;
     public List<TextAttribute> titleAttrs;
+    public PresentationType presentationType;
+    public String title;
     public Bitmap titleIcon;
     public int defaultItem;
     public boolean softKeyPreferred;
@@ -36,28 +41,22 @@ public class Menu implements Parcelable {
 
     public Menu() {
         // Create an empty list.
-        this.items = new ArrayList<Item>();
-        this.title = null;
-        this.titleAttrs = null;
-        this.defaultItem = 0;
-        this.softKeyPreferred = false;
-        this.helpAvailable = false;
-        this.titleIconSelfExplanatory = false;
-        this.titleIcon = null;
-    }
-
-    public Menu(List<Item> items, String title, List<TextAttribute> titleAttrs,
-            boolean softKeyPreferred, boolean helpAvailable, int defaultItem) {
-        this.items = items;
-        this.title = title;
-        this.titleAttrs = titleAttrs;
-        this.defaultItem = defaultItem;
-        this.softKeyPreferred = softKeyPreferred;
-        this.helpAvailable = helpAvailable;
+        items = new ArrayList<Item>();
+        title = null;
+        titleAttrs = null;
+        defaultItem = 0;
+        softKeyPreferred = false;
+        helpAvailable = false;
+        titleIconSelfExplanatory = false;
+        itemsIconSelfExplanatory = false;
+        titleIcon = null;
+        // set default style to be navigation menu.
+        presentationType = PresentationType.NAVIGATION_OPTIONS;
     }
 
     private Menu(Parcel in) {
         title = in.readString();
+        titleIcon = in.readParcelable(null);
         // rebuild items list.
         items = new ArrayList<Item>();
         int size = in.readInt();
@@ -68,6 +67,9 @@ public class Menu implements Parcelable {
         defaultItem = in.readInt();
         softKeyPreferred = in.readInt() == 1 ? true : false;
         helpAvailable = in.readInt() == 1 ? true : false;
+        titleIconSelfExplanatory = in.readInt() == 1 ? true : false;
+        itemsIconSelfExplanatory = in.readInt() == 1 ? true : false;
+        presentationType = PresentationType.values()[in.readInt()];
     }
 
     public int describeContents() {
@@ -76,6 +78,7 @@ public class Menu implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
+        dest.writeParcelable(titleIcon, flags);
         // write items list to the parcel.
         int size = items.size();
         dest.writeInt(size);
@@ -85,6 +88,9 @@ public class Menu implements Parcelable {
         dest.writeInt(defaultItem);
         dest.writeInt(softKeyPreferred ? 1 : 0);
         dest.writeInt(helpAvailable ? 1 : 0);
+        dest.writeInt(titleIconSelfExplanatory ? 1 : 0);
+        dest.writeInt(itemsIconSelfExplanatory ? 1 : 0);
+        dest.writeInt(presentationType.ordinal());
     }
 
     public static final Parcelable.Creator<Menu> CREATOR = new Parcelable.Creator<Menu>() {

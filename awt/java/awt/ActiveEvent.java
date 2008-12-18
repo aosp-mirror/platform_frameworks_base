@@ -18,18 +18,21 @@
  * @author Michael Danilov
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
- * This interface defines events that know how to dispatch themselves. 
- * Such event can be placed upon the event queue and its dispatch method 
- * will be called when the event is dispatched.
+ * This interface defines events that know how to dispatch themselves. Such
+ * event can be placed upon the event queue and its dispatch method will be
+ * called when the event is dispatched.
+ * 
+ * @since Android 1.0
  */
 public interface ActiveEvent {
 
     /**
-     * Dispatches the event to the listeners of the event's source, 
-     * or does whatever it is this event is supposed to do.
+     * Dispatches the event to the listeners of the event's source, or does
+     * whatever it is this event is supposed to do.
      */
     public void dispatch();
 

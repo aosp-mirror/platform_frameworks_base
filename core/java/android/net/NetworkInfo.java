@@ -99,24 +99,38 @@ public class NetworkInfo implements Parcelable {
     }
     
     private int mNetworkType;
+    private int mSubtype;
+    private String mTypeName;
+    private String mSubtypeName;
     private State mState;
     private DetailedState mDetailedState;
     private String mReason;
     private String mExtraInfo;
     private boolean mIsFailover;
+    private boolean mIsRoaming;
     /**
      * Indicates whether network connectivity is possible:
      */
     private boolean mIsAvailable;
 
-    public NetworkInfo(int type) {
+    /**
+     * TODO This is going away as soon as API council review happens.
+     * @param type network type
+     */
+    public NetworkInfo(int type) {}
+
+    NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)) {
             throw new IllegalArgumentException("Invalid network type: " + type);
         }
-        this.mNetworkType = type;
+        mNetworkType = type;
+        mSubtype = subtype;
+        mTypeName = typeName;
+        mSubtypeName = subtypeName;
         setDetailedState(DetailedState.IDLE, null, null);
         mState = State.UNKNOWN;
         mIsAvailable = true;
+        mIsRoaming = false;
     }
 
     /**
@@ -126,6 +140,41 @@ public class NetworkInfo implements Parcelable {
      */
     public int getType() {
         return mNetworkType;
+    }
+
+    /**
+     * Return a network-type-specific integer describing the subtype
+     * of the network.
+     * @return the network subtype
+     *
+     * @hide pending API council review
+     */
+    public int getSubtype() {
+        return mSubtype;
+    }
+
+    void setSubtype(int subtype, String subtypeName) {
+        mSubtype = subtype;
+        mSubtypeName = subtypeName;
+    }
+
+    /**
+     * Return a human-readable name describe the type of the network,
+     * for example "WIFI" or "MOBILE".
+     * @return the name of the network type
+     */
+    public String getTypeName() {
+        return mTypeName;
+    }
+
+    /**
+     * Return a human-readable name describing the subtype of the network.
+     * @return the name of the network subtype
+     * 
+     * @hide pending API council review
+     */
+    public String getSubtypeName() {
+        return mSubtypeName;
     }
 
     /**
@@ -170,7 +219,7 @@ public class NetworkInfo implements Parcelable {
      * Sets if the network is available, ie, if the connectivity is possible.
      * @param isAvailable the new availability value.
      *
-     * {@hide}
+     * @hide
      */
     public void setIsAvailable(boolean isAvailable) {
         mIsAvailable = isAvailable;
@@ -187,9 +236,30 @@ public class NetworkInfo implements Parcelable {
         return mIsFailover;
     }
 
-    /** {@hide} */
+    /**
+     * Set the failover boolean.
+     * @param isFailover {@code true} to mark the current connection attempt
+     * as a failover.
+     * @hide
+     */
     public void setFailover(boolean isFailover) {
         mIsFailover = isFailover;
+    }
+
+    /**
+     * Indicates whether the device is currently roaming on this network.
+     * When {@code true}, it suggests that use of data on this network
+     * may incur extra costs.
+     * @return {@code true} if roaming is in effect, {@code false} otherwise.
+     *
+     * @hide pending API council
+     */
+    public boolean isRoaming() {
+        return mIsRoaming;
+    }
+
+    void setRoaming(boolean isRoaming) {
+        mIsRoaming = isRoaming;
     }
 
     /**
@@ -215,8 +285,6 @@ public class NetworkInfo implements Parcelable {
      * if one was supplied. May be {@code null}.
      * @param extraInfo an optional {@code String} providing addditional network state
      * information passed up from the lower networking layers.
-     *
-     * {@hide}
      */
     void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
         this.mDetailedState = detailedState;
@@ -247,52 +315,59 @@ public class NetworkInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("NetworkInfo: ");
-        builder.append("type: ").append(getTypeName()).append(", state: ").append(mState).
-                append("/").append(mDetailedState).
+        builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
+                append("], state: ").append(mState).append("/").append(mDetailedState).
                 append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
                 append(", extra: ").append(mExtraInfo == null ? "(none)" : mExtraInfo).
+                append(", roaming: ").append(mIsRoaming).
                 append(", failover: ").append(mIsFailover).
                 append(", isAvailable: ").append(mIsAvailable);
         return builder.toString();
     }
 
-    public String getTypeName() {
-        switch (mNetworkType) {
-            case ConnectivityManager.TYPE_WIFI:
-                return "WIFI";
-            case ConnectivityManager.TYPE_MOBILE:
-                return "MOBILE";
-            default:
-                return "<invalid>";
-        }
-    }
-
-    /** Implement the Parcelable interface {@hide} */
+    /**
+     * Implement the Parcelable interface
+     * @hide
+     */
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /**
+     * Implement the Parcelable interface.
+     * @hide
+     */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mNetworkType);
+        dest.writeInt(mSubtype);
+        dest.writeString(mTypeName);
+        dest.writeString(mSubtypeName);
         dest.writeString(mState.name());
         dest.writeString(mDetailedState.name());
         dest.writeInt(mIsFailover ? 1 : 0);
         dest.writeInt(mIsAvailable ? 1 : 0);
+        dest.writeInt(mIsRoaming ? 1 : 0);
         dest.writeString(mReason);
         dest.writeString(mExtraInfo);
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /**
+     * Implement the Parcelable interface.
+     * @hide
+     */
     public static final Creator<NetworkInfo> CREATOR =
         new Creator<NetworkInfo>() {
             public NetworkInfo createFromParcel(Parcel in) {
                 int netType = in.readInt();
-                NetworkInfo netInfo = new NetworkInfo(netType);
+                int subtype = in.readInt();
+                String typeName = in.readString();
+                String subtypeName = in.readString();
+                NetworkInfo netInfo = new NetworkInfo(netType, subtype, typeName, subtypeName);
                 netInfo.mState = State.valueOf(in.readString());
                 netInfo.mDetailedState = DetailedState.valueOf(in.readString());
                 netInfo.mIsFailover = in.readInt() != 0;
                 netInfo.mIsAvailable = in.readInt() != 0;
+                netInfo.mIsRoaming = in.readInt() != 0;
                 netInfo.mReason = in.readString();
                 netInfo.mExtraInfo = in.readString();
                 return netInfo;
