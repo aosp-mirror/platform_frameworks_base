@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.policy.IPolicy;
 import com.android.internal.policy.impl.PhoneLayoutInflater;
@@ -30,6 +31,29 @@ import com.android.internal.policy.impl.PhoneWindowManager;
 // Simple implementation of the policy interface that spawns the right
 // set of objects
 public class Policy implements IPolicy {
+    private static final String TAG = "PhonePolicy";
+
+    private static final String[] preload_classes = {
+        "com.android.internal.policy.impl.PhoneLayoutInflater",
+        "com.android.internal.policy.impl.PhoneWindow",
+        "com.android.internal.policy.impl.PhoneWindow$1",
+        "com.android.internal.policy.impl.PhoneWindow$ContextMenuCallback",
+        "com.android.internal.policy.impl.PhoneWindow$DecorView",
+        "com.android.internal.policy.impl.PhoneWindow$PanelFeatureState",
+        "com.android.internal.policy.impl.PhoneWindow$PanelFeatureState$SavedState",
+    };
+
+    static {
+        // For performance reasons, preload some policy specific classes when
+        // the policy gets loaded.
+        for (String s : preload_classes) {
+            try {
+                Class.forName(s);
+            } catch (ClassNotFoundException ex) {
+                Log.e(TAG, "Could not preload class for phone policy: " + s);
+            }
+        }
+    }
 
     public PhoneWindow makeNewWindow(Context context) {
         return new PhoneWindow(context);

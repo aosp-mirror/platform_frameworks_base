@@ -16,9 +16,14 @@
 
 package com.android.internal.policy.impl;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.os.CountDownTimer;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,6 +89,8 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     };
 
     private Button mForgotPatternButton;
+
+    private ServiceConnection mServiceConnection;
 
 
     enum FooterMode {
@@ -177,6 +184,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // stealth mode will be the same for the life of this screen
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled());
 
+        // vibrate mode will be the same for the life of this screen
+        mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
+
         // assume normal footer mode for now
         updateFooter(FooterMode.Normal);
 
@@ -237,6 +247,10 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mLockPatternView.enableInput();
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
+        
+        // show "forgot pattern?" button if we have an alternate authentication method
+        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist() 
+                ? View.VISIBLE : View.INVISIBLE);
 
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline();

@@ -20,7 +20,7 @@ import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.content.Context;
-import android.pim.DateFormat;
+import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -299,7 +299,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 mHeaderSimOk1.setVisibility(View.VISIBLE);
                 mHeaderSimOk1.setText(plmn);
             } else {
-                mHeaderSimOk2.setVisibility(View.GONE);
+                mHeaderSimOk1.setVisibility(View.GONE);
             }
 
             if (spn != null) {

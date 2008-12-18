@@ -16,9 +16,15 @@
 
 package com.android.internal.policy.impl;
 
+import android.accounts.AccountsServiceConstants;
+import android.accounts.IAccountsService;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import com.android.internal.telephony.SimCard;
 import android.text.TextUtils;
@@ -51,6 +57,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private View mUnlockScreen;
 
     private boolean mScreenOn = false;
+    private boolean mHasAccount = false; // assume they don't have an account until we know better
+
 
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
@@ -114,6 +122,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      */
     private final LockPatternUtils mLockPatternUtils;
 
+    /**
+     * Used to fetch accounts from GLS.
+     */
+    private ServiceConnection mServiceConnection;
 
     /**
      * @return Whether we are stuck on the lock screen because the sim is
@@ -137,7 +149,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             KeyguardUpdateMonitor updateMonitor,
             LockPatternUtils lockPatternUtils) {
         super(context);
-
+        
+        asyncCheckForAccount();
+        
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
 
@@ -145,6 +159,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mLockPatternUtils = lockPatternUtils;
 
         mMode = getInitialMode();
+        
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
             public void goToLockScreen() {
@@ -210,16 +225,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (failedAttempts ==
-                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+                if (mHasAccount && failedAttempts ==
+                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET 
+                                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     showAlmostAtAccountLoginDialog();
-                } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
+                } else if (mHasAccount && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                     mLockPatternUtils.setPermanentlyLocked(true);
                     updateScreen(mMode);
                 } else if ((failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)
                         == 0) {
                     showTimeoutDialog();
                 }
+            }
+            
+            public boolean doesFallbackUnlockScreenExist() {
+                return mHasAccount;
             }
         };
 
@@ -239,6 +259,36 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mUnlockScreenMode = unlockMode;
         addView(mUnlockScreen);
         updateScreen(mMode);
+    }
+
+    /** 
+     * Asynchronously checks for at least one account. This will set mHasAccount
+     * to true if an account is found.
+     */
+    private void asyncCheckForAccount() {
+        
+        mServiceConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                try {
+                    IAccountsService accountsService = IAccountsService.Stub.asInterface(service);
+                    String accounts[] = accountsService.getAccounts();
+                    mHasAccount = (accounts.length > 0);
+                } catch (RemoteException e) {
+                    // Not much we can do here...
+                    Log.e(TAG, "Gls died while attempting to get accounts: " + e);
+                } finally {
+                    getContext().unbindService(mServiceConnection);
+                    mServiceConnection = null;
+                }
+            }
+
+            public void onServiceDisconnected(ComponentName className) {
+                // nothing to do here
+            }
+        };
+        boolean status = getContext().bindService(AccountsServiceConstants.SERVICE_INTENT,
+                mServiceConnection, Context.BIND_AUTO_CREATE);
+        if (!status) Log.e(TAG, "Failed to bind to GLS while checking for account");
     }
 
     @Override

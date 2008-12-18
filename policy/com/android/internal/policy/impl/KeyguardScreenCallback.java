@@ -58,4 +58,9 @@ public interface KeyguardScreenCallback extends KeyguardViewCallback {
      */
     void reportFailedPatternAttempt();
 
+    /**
+     * Report whether we there's another way to unlock the device.
+     * @return true 
+     */
+    boolean doesFallbackUnlockScreenExist();
 }
