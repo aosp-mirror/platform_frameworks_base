@@ -19,7 +19,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingLeft="14dip"
+    android:paddingRight="15dip">
     
     <CheckBox
         android:id="@+id/alwaysUse"
@@ -30,22 +32,12 @@
         android:clickable="true" />
     
     <TextView 
-        android:id="@+id/useDefaultText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:paddingLeft="6dip"
-        android:layout_toRightOf="@id/alwaysUse"
-        android:text="@string/alwaysUse" />
-
-    <TextView 
         android:id="@+id/clearDefaultHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:paddingLeft="6dip"
+        android:paddingLeft="36dip"
         android:visibility="gone"
-        android:layout_below="@id/useDefaultText"
-        android:layout_toRightOf="@id/alwaysUse"
+        android:layout_below="@id/alwaysUse"
         android:text="@string/clearDefaultHintMsg" />
 </RelativeLayout>

@@ -1,9 +1,7 @@
 page.title=Building Custom Views
+parent.title=Views and Layout
+parent.link=index.html
 @jd:body
-
-<p>Android comes with a solid collection of Views that you can use
-to construct your applications, for example:</p>
-
 
 <p>Android offers a sophisticated and powerful componentized model for building your UI, based on the fundamental building block classes {@link android.view.View} and {@link android.view.ViewGroup}. To start with, the platform includes a variety of prebuilt View and ViewGroup subclasses &mdash; called widgets and layouts, respectively &mdash; that you can use to construct your UI. The widgets and layouts are fully implemented and handle all of their own measuring and drawing, so you can use them right away. You can make new types of UI elements simply by nesting and grouping the widgets and layouts. Using widgets and layouts is the recommended approach to building a UI for your applications.</p>
 
@@ -20,9 +18,9 @@ to construct your applications, for example:</p>
 {@link android.widget.TextSwitcher TextSwitcher}. </p>
 
 <p>Among the layouts available are {@link android.widget.LinearLayout LinearLayout}, 
-{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.AbsoluteLayout AbsoluteLayout},and others. For more examples, see <a href="layout">Common Layout Objects</a>.</p>
+{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.AbsoluteLayout AbsoluteLayout}, and others. For more examples, see <a href="layout">Common Layout Objects</a>.</p>
 
-<p>If none of the prebuilt widgets or layouts meets your needs, you can also create your own View subclass, such as a layout group or compound control. If you only need to make small adjustments to an existing widget or layout, you can simply subclass the widget or layout and override 
+<p>If none of the prebuilt widgets or layouts meets your needs, you can also create your own View subclass, such as a layout group or compound control. If you only need to make small adjustments to an existing widget or layout, you can simply subclass the widget or layout and override its methods.
 </p>
 
 <p>Creating your own View subclasses gives you precise control over the appearance and function of a screen element. To give an idea of the control you get with custom views, here are some examples of what you could do with them:</p>
@@ -42,8 +40,8 @@ to construct your applications, for example:</p>
   </li>
   <li>
     You could override the way that an EditText component is rendered on the screen
-    (the Notepad tutorial uses this to good effect, to create a lined-notepad
-    page).
+    (the <a href="{@docRoot}guide/samples/NotePad/">Notepad sample</a> uses this to good effect, 
+    to create a lined-notepad page).
   </li>
   <li>
     You could capture other events like key presses and handle them in some custom
@@ -52,19 +50,16 @@ to construct your applications, for example:</p>
 </ul>
 <p>
 The sections below explain how to create custom Views and use them in your application. 
-</p>
+For detailed reference information, see the {@link android.view.View} class. </p>
 
-<p>For detailed information, see {android.view.View}. </p>
-
-
-<h2 style="clear:right;">Contents</h2>
-<dl>
-<dt><a href="#basic">The Basic Approach</a></dt>
-<dt><a href="#custom">Fully Customized Views</a></dt>
-<dt><a href="#customexample">Customized View Example</a></dt>
-<dt><a href="#compound">Compound Controls</a></dt>
-<dt><a href="#tweaking">Modifying an Existing Component Type</a></dt>
-</dl>
+<p>This document covers the following:</p>
+<ol class="toc">
+  <li><a href="#basic">The Basic Approach</a></li>
+  <li><a href="#custom">Fully Customized Views</a></li>
+  <li><a href="#customexample">Customized View Example</a></li> 
+  <li><a href="#compound">Compound Controls</a></li>
+  <li><a href="#tweaking">Modifying an Existing Component Type</a></li>
+</ol>
 
 <a name="basic"></a> 
 <h2>The Basic Approach
@@ -98,7 +93,7 @@ View components:</p>
     functionality.
   </li>
 </ol>  
-<p class="note">
+<p class="note"><strong>Tip:</strong>
     Extension classes can be defined as inner classes inside the activities
     that use them. This is useful because it controls access to them but
     isn't necessary (perhaps you want to create a new public View for
@@ -201,7 +196,116 @@ result will be an exception at measurement time.</p>
     thrown.
   </li>
 </ol>
- 
+
+<p>
+Here's a summary of some of the other standard methods that the framework calls on views:
+</p>
+<table border="2" width="85%" align="center" cellpadding="5">
+       <thead>
+           <tr><th>Category</th> <th>Methods</th> <th>Description</th></tr>
+       </thead>
+       
+       <tbody>
+       <tr>
+           <td rowspan="2">Creation</td>
+           <td>Constructors</td>
+           <td>There is a form of the constructor that are called when the view
+           is created from code and a form that is called when the view is
+           inflated from a layout file. The second form should parse and apply
+           any attributes defined in the layout file.
+           </td>
+       </tr>
+       <tr>
+           <td><code>{@link android.view.View#onFinishInflate()}</code></td>
+           <td>Called after a view and all of its children has been inflated
+           from XML.</td>
+       </tr>
+       
+       <tr>
+           <td rowspan="3">Layout</td>
+           <td><code>{@link  android.view.View#onMeasure}</code></td>
+           <td>Called to determine the size requirements for this view and all
+           of its children.
+           </td>
+       </tr>
+       <tr>
+           <td><code>{@link  android.view.View#onLayout}</code></td>
+           <td>Called when this view should assign a size and position to all
+           of its children.
+           </td>
+       </tr>
+       <tr>
+           <td><code>{@link  android.view.View#onSizeChanged}</code></td>
+           <td>Called when the size of this view has changed.
+           </td>
+       </tr>
+       
+       <tr>
+           <td>Drawing</td>
+           <td><code>{@link  android.view.View#onDraw}</code></td>
+           <td>Called when the view should render its content.
+           </td>
+       </tr>
+  
+       <tr>
+           <td rowspan="4">Event processing</td>
+           <td><code>{@link  android.view.View#onKeyDown}</code></td>
+           <td>Called when a new key event occurs.
+           </td>
+       </tr>
+       <tr>
+           <td><code>{@link  android.view.View#onKeyUp}</code></td>
+           <td>Called when a key up event occurs.
+           </td>
+       </tr>   
+       <tr>
+           <td><code>{@link  android.view.View#onTrackballEvent}</code></td>
+           <td>Called when a trackball motion event occurs.
+           </td>
+       </tr>  
+       <tr>
+           <td><code>{@link  android.view.View#onTouchEvent}</code></td>
+           <td>Called when a touch screen motion event occurs.
+           </td>
+       </tr>  
+       
+       <tr>
+           <td rowspan="2">Focus</td>
+           <td><code>{@link  android.view.View#onFocusChanged}</code></td>
+           <td>Called when the view gains or loses focus.
+           </td>
+       </tr>
+       
+       <tr>
+           <td><code>{@link  android.view.View#onWindowFocusChanged}</code></td>
+           <td>Called when the window containing the view gains or loses focus.
+           </td>
+       </tr>
+       
+       <tr>
+           <td rowspan="3">Attaching</td>
+           <td><code>{@link  android.view.View#onAttachedToWindow()}</code></td>
+           <td>Called when the view is attached to a window.
+           </td>
+       </tr>
+  
+       <tr>
+           <td><code>{@link  android.view.View#onDetachedFromWindow}</code></td>
+           <td>Called when the view is detached from its window.
+           </td>
+       </tr>     
+  
+       <tr>
+           <td><code>{@link  android.view.View#onWindowVisibilityChanged}</code></td>
+           <td>Called when the visibility of the window containing the view
+           has changed.
+           </td>
+       </tr>     
+       </tbody>
+       
+   </table>
+
+
 <a name="customexample"></a>
 <h3>A Custom View Example</h3>
 <p>The CustomView sample in the 

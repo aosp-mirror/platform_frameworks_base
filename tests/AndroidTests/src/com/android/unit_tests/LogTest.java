@@ -1,0 +1,152 @@
+package com.android.unit_tests;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
+
+import android.os.SystemProperties;
+import android.test.PerformanceTestCase;
+import android.test.suitebuilder.annotation.Suppress;
+import android.util.Log;
+
+//This is an empty TestCase.
+@Suppress
+public class LogTest extends TestCase {
+    private static final String PROPERTY_TAG = "log.tag.LogTest";
+    private static final String LOG_TAG = "LogTest";
+
+
+    // TODO: remove this test once we uncomment out the following test.
+    public void testLogTestDummy() {
+      return;
+    }
+
+
+    /* TODO: This test is commented out because we will not be able to set properities. Fix the test.
+    public void testIsLoggable() {
+        // First clear any SystemProperty setting for our test key.
+        SystemProperties.set(PROPERTY_TAG, null);
+        
+        String value = SystemProperties.get(PROPERTY_TAG);
+        Assert.assertTrue(value == null || value.length() == 0);
+        
+        // Check to make sure that all levels expect for INFO, WARN, ERROR, and ASSERT are loggable. 
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be VERBOSE for this tag.
+        SystemProperties.set(PROPERTY_TAG, "VERBOSE");
+        
+        // Test to make sure all log levels >= VERBOSE are loggable.
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be DEBUG for this tag.
+        SystemProperties.set(PROPERTY_TAG, "DEBUG");
+        
+        // Test to make sure all log levels >= DEBUG are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be INFO for this tag.
+        SystemProperties.set(PROPERTY_TAG, "INFO");
+        
+        // Test to make sure all log levels >= INFO are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be WARN for this tag.
+        SystemProperties.set(PROPERTY_TAG, "WARN");
+        
+        // Test to make sure all log levels >= WARN are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be ERROR for this tag.
+        SystemProperties.set(PROPERTY_TAG, "ERROR");
+        
+        // Test to make sure all log levels >= ERROR are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be ASSERT for this tag.
+        SystemProperties.set(PROPERTY_TAG, "ASSERT");
+        
+        // Test to make sure all log levels >= ASSERT are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertTrue(Log.isLoggable(LOG_TAG, Log.ASSERT));
+        
+        // Set the log level to be SUPPRESS for this tag.
+        SystemProperties.set(PROPERTY_TAG, "SUPPRESS");
+        
+        // Test to make sure all log levels >= ASSERT are loggable.
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.VERBOSE));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.DEBUG));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.INFO));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.WARN));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.ERROR));
+        Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.ASSERT));
+    }
+    */
+    
+    public static class PerformanceTest extends TestCase implements PerformanceTestCase {
+        private static final int ITERATIONS = 1000;
+
+        @Override
+        public void setUp() {
+            SystemProperties.set(LOG_TAG, "VERBOSE");
+        }
+        
+        public boolean isPerformanceOnly() {
+            return true;
+        }
+        
+        public int startPerformance(PerformanceTestCase.Intermediates intermediates) {
+            intermediates.setInternalIterations(ITERATIONS * 10);
+            return 0;
+        }
+
+        public void testIsLoggable() {
+            boolean canLog = false;
+            for (int i = ITERATIONS - 1; i >= 0; i--) {
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+                canLog = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+            }
+        }
+    }
+}

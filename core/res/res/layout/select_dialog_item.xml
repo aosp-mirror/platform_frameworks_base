@@ -32,4 +32,5 @@
     android:gravity="center_vertical"
     android:paddingLeft="14dip"
     android:paddingRight="15dip"
+    android:ellipsize="marquee"
 />

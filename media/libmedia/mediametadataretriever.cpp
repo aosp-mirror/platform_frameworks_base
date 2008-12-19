@@ -15,168 +15,174 @@
 ** limitations under the License.
 */
 
-#include <media/mediametadataretriever.h>
-
-#ifdef LOG_TAG
-#undef LOG_TAG
+//#define LOG_NDEBUG 0
 #define LOG_TAG "MediaMetadataRetriever"
-#endif
 
+#include <utils/IServiceManager.h>
+#include <utils/IPCThreadState.h>
+#include <media/mediametadataretriever.h>
+#include <media/IMediaPlayerService.h>
 #include <utils/Log.h>
 #include <dlfcn.h>
 
 namespace android {
 
-// Factory class function in shared libpvplayer.so
-typedef MediaMetadataRetrieverImpl* (*createRetriever_f)();
+// client singleton for binder interface to service
+Mutex MediaMetadataRetriever::sServiceLock;
+sp<IMediaPlayerService> MediaMetadataRetriever::sService;
+sp<MediaMetadataRetriever::DeathNotifier> MediaMetadataRetriever::sDeathNotifier;
 
-MediaMetadataRetrieverImpl *MediaMetadataRetriever::mRetriever = NULL;
-void                       *MediaMetadataRetriever::mLibHandler = NULL;
-
-void MediaMetadataRetriever::create()
+const sp<IMediaPlayerService>& MediaMetadataRetriever::getService()
 {
-    // Load libpvplayer library once and only once.
-    if (!mLibHandler) {
-        mLibHandler = dlopen("libopencoreplayer.so", RTLD_NOW);
-        if (!mLibHandler) {
-            LOGE("setDataSource: dlopen failed on libopencoreplayer.so");
-            return;
+    Mutex::Autolock lock(sServiceLock);
+    if (sService.get() == 0) {
+        sp<IServiceManager> sm = defaultServiceManager();
+        sp<IBinder> binder;
+        do {
+            binder = sm->getService(String16("media.player"));
+            if (binder != 0) {
+                break;
+            }
+            LOGW("MediaPlayerService not published, waiting...");
+            usleep(500000); // 0.5 s
+        } while(true);
+        if (sDeathNotifier == NULL) {
+            sDeathNotifier = new DeathNotifier();
         }
+        binder->linkToDeath(sDeathNotifier);
+        sService = interface_cast<IMediaPlayerService>(binder);
     }
-    
-    // Each time create a new MediaMetadataRetrieverImpl object.
-    if (mRetriever) {
-        delete mRetriever;
-    }
-    createRetriever_f createRetriever = reinterpret_cast<createRetriever_f>(dlsym(mLibHandler, "createRetriever"));
-    if (!createRetriever) {
-        LOGE("setDataSource: dlsym failed on createRetriever in libpvplayer.so");
+    LOGE_IF(sService == 0, "no MediaPlayerService!?");
+    return sService;
+}
+
+MediaMetadataRetriever::MediaMetadataRetriever()
+{
+    LOGV("constructor");
+    const sp<IMediaPlayerService>& service(getService());
+    if (service == 0) {
+        LOGE("failed to obtain MediaMetadataRetrieverService");
         return;
     }
-    mRetriever = createRetriever();
-    if (!mRetriever) {
-        LOGE("setDataSource: createRetriever failed in libpvplayer.so");
+    sp<IMediaMetadataRetriever> retriever(service->createMetadataRetriever(getpid()));
+    if (retriever == 0) {
+        LOGE("failed to create IMediaMetadataRetriever object from server");
+    }
+    mRetriever = retriever;
+}
+
+MediaMetadataRetriever::~MediaMetadataRetriever()
+{
+    LOGV("destructor");
+    disconnect();
+    IPCThreadState::self()->flushCommands();
+}
+
+void MediaMetadataRetriever::disconnect()
+{
+    LOGV("disconnect");
+    sp<IMediaMetadataRetriever> retriever;
+    {
+        Mutex::Autolock _l(mLock);
+        retriever = mRetriever;
+        mRetriever.clear();
+    }
+    if (retriever != 0) {
+        retriever->disconnect();
     }
 }
 
 status_t MediaMetadataRetriever::setDataSource(const char* srcUrl)
 {
+    LOGV("setDataSource");
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
+        return INVALID_OPERATION;
+    }
     if (srcUrl == NULL) {
+        LOGE("data source is a null pointer");
         return UNKNOWN_ERROR;
     }
-    
-    if (mRetriever) {
-        return mRetriever->setDataSource(srcUrl);
+    LOGV("data source (%s)", srcUrl);
+    return mRetriever->setDataSource(srcUrl);
+}
+
+status_t MediaMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)
+{
+    LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
+        return INVALID_OPERATION;
     }
-    return UNKNOWN_ERROR;
+    if (fd < 0 || offset < 0 || length < 0) {
+        LOGE("Invalid negative argument");
+        return UNKNOWN_ERROR;
+    }
+    return mRetriever->setDataSource(fd, offset, length);
+}
+
+status_t MediaMetadataRetriever::setMode(int mode)
+{
+    LOGV("setMode(%d)", mode);
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
+        return INVALID_OPERATION;
+    }
+    return mRetriever->setMode(mode);
+}
+
+status_t MediaMetadataRetriever::getMode(int* mode)
+{
+    LOGV("getMode");
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
+        return INVALID_OPERATION;
+    }
+    return mRetriever->getMode(mode);
+}
+
+sp<IMemory> MediaMetadataRetriever::captureFrame()
+{
+    LOGV("captureFrame");
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
+        return NULL;
+    }
+    return mRetriever->captureFrame();
 }
 
 const char* MediaMetadataRetriever::extractMetadata(int keyCode)
 {
-    if (mRetriever) {
-        return mRetriever->extractMetadata(keyCode);
-    }
-    return NULL;
-}
-
-MediaAlbumArt* MediaMetadataRetriever::extractAlbumArt()
-{
-    if (mRetriever) {
-        return mRetriever->extractAlbumArt();
-    }
-    return NULL;
-}
-
-SkBitmap* MediaMetadataRetriever::captureFrame()
-{
-    if (mRetriever) {
-        return mRetriever->captureFrame();
-    }
-    return NULL;
-}
-
-void MediaMetadataRetriever::setMode(int mode)
-{
-    if (mRetriever) {
-        mRetriever->setMode(mode);
-    }
-}
-
-void MediaMetadataRetriever::release()
-{
-    if (!mLibHandler) {
-        dlclose(mLibHandler);
-        mLibHandler = NULL;
-    }
-    if (!mRetriever) {
-        delete mRetriever;
-        mRetriever = NULL;
-    }
-}
-
-void MediaAlbumArt::clearData() {
-    if (data != NULL) {
-        delete []data;
-        data = NULL;
-    }
-    length = 0;
-}
-
-
-MediaAlbumArt::MediaAlbumArt(const char* url)
-{
-    length = 0;
-    data = NULL;
-    FILE *in = fopen(url, "r");
-    if (!in) {
-        LOGE("extractExternalAlbumArt: Failed to open external album art url: %s.", url);
-        return;
-    }
-    fseek(in, 0, SEEK_END);
-    length = ftell(in);  // Allocating buffer of size equals to the external file size.
-    if (length == 0 || (data = new char[length]) == NULL) {
-        if (length == 0) {
-            LOGE("extractExternalAlbumArt: External album art url: %s has a size of 0.", url);
-        } else if (data == NULL) {
-            LOGE("extractExternalAlbumArt: No enough memory for storing the retrieved album art.");
-            length = 0;
-        }
-        fclose(in);
-        return;
-    }
-    rewind(in);
-    if (fread(data, 1, length, in) != length) {  // Read failed.
-        length = 0;
-        delete []data;
-        data = NULL;
-        LOGE("extractExternalAlbumArt: Failed to retrieve the contents of an external album art.");
-    }
-    fclose(in);
-}
-
-status_t MediaAlbumArt::setData(unsigned int len, const char* buf) {
-    clearData();
-    length = len;
-    data = copyData(len, buf);
-    return (data != NULL)? OK: UNKNOWN_ERROR;
-}
-
-char* MediaAlbumArt::copyData(unsigned int len, const char* buf) {
-    if (len == 0 || !buf) {
-        if (len == 0) {
-            LOGE("copyData: Length is 0.");
-        } else if (!buf) {
-            LOGE("copyData: buf is NULL pointer");
-        }
+    LOGV("extractMetadata(%d)", keyCode);
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
         return NULL;
     }
-    char* copy = new char[len];
-    if (!copy) {
-        LOGE("copyData: No enough memory to copy out the data.");
+    return mRetriever->extractMetadata(keyCode);
+}
+
+sp<IMemory> MediaMetadataRetriever::extractAlbumArt()
+{
+    LOGV("extractAlbumArt");
+    if (mRetriever == 0) {
+        LOGE("retriever is not initialized");
         return NULL;
     }
-    memcpy(copy, buf, len);
-    return copy;
+    return mRetriever->extractAlbumArt();
+}
+
+void MediaMetadataRetriever::DeathNotifier::binderDied(const wp<IBinder>& who) {
+    Mutex::Autolock lock(MediaMetadataRetriever::sServiceLock);
+    MediaMetadataRetriever::sService.clear();
+    LOGW("MediaMetadataRetriever server died!");
+}
+
+MediaMetadataRetriever::DeathNotifier::~DeathNotifier()
+{
+    Mutex::Autolock lock(sServiceLock);
+    if (sService != 0) {
+        sService->asBinder()->unlinkToDeath(this);
+    }
 }
 
 }; // namespace android

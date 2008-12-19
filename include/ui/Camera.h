@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008 HTC Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +22,39 @@
 
 namespace android {
 
+/*
+ * A set of bit masks for specifying how the received frames from preview are
+ * handled before the frame callback call.
+ *
+ * The least significant 3 bits of an "int" value are used for this purpose:
+ *
+ * ..... 0 0 0
+ *       ^ ^ ^
+ *       | | |---------> determine whether the callback is enabled or not
+ *       | |-----------> determine whether the callback is one-shot or not
+ *       |-------------> determine whether the frame is copied out or not
+ *
+ * For instance,
+ * 1. 0x00 disables the callback. In this case, copy out and one shot bits
+ *    are ignored.
+ * 2. 0x01 enables a callback without copying out the recievied frames. A
+ *    typical use case is the Camcorder application to avoid making costly
+ *    frame copies.
+ * 3. 0x05 is enabling a callback with frame copied out repeatedly. A typical
+ *    use case is the Camera application.
+ * 4. 0x07 is enabling a callback with frame copied out only once. A typical use
+ *    case is the Barcode scanner application.
+ */
+#define FRAME_CALLBACK_FLAG_ENABLE_MASK              0x01
+#define FRAME_CALLBACK_FLAG_ONE_SHOT_MASK            0x02
+#define FRAME_CALLBACK_FLAG_COPY_OUT_MASK            0x04
+
+// Typical use cases
+#define FRAME_CALLBACK_FLAG_NOOP                     0x00
+#define FRAME_CALLBACK_FLAG_CAMCORDER                0x01
+#define FRAME_CALLBACK_FLAG_CAMERA                   0x05
+#define FRAME_CALLBACK_FLAG_BARCODE_SCANNER          0x07
+
 class ICameraService;
 class ICamera;
 class Surface;
@@ -35,15 +69,21 @@ typedef void (*error_callback)(status_t err, void *cookie);
 class Camera : public BnCameraClient, public IBinder::DeathRecipient
 {
 public:
+            // construct a camera client from an existing remote
+            Camera(const sp<ICamera>& camera);
+
     static  sp<Camera>  connect();
                         ~Camera();
+            void        init();
 
+            status_t    reconnect();
             void        disconnect();
 
             status_t    getStatus() { return mStatus; }
 
             // pass the buffered ISurface to the camera service
             status_t    setPreviewDisplay(const sp<Surface>& surface);
+            status_t    setPreviewDisplay(const sp<ISurface>& surface);
 
             // start preview mode, must call setPreviewDisplay first
             status_t    startPreview();
@@ -66,7 +106,11 @@ public:
             void        setShutterCallback(shutter_callback cb, void *cookie);
             void        setRawCallback(frame_callback cb, void *cookie);
             void        setJpegCallback(frame_callback cb, void *cookie);
-            void        setFrameCallback(frame_callback cb, void *cookie);
+
+            void        setFrameCallback(frame_callback cb,
+                            void *cookie,
+                            int frame_callback_flag = FRAME_CALLBACK_FLAG_NOOP);
+
             void        setErrorCallback(error_callback cb, void *cookie);
             void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
     // ICameraClient interface
@@ -77,7 +121,8 @@ public:
     virtual void        errorCallback(status_t error);
     virtual void        autoFocusCallback(bool focused);
 
-    
+    sp<ICamera>         remote();
+
 private:
                         Camera();
                         virtual void binderDied(const wp<IBinder>& who);
@@ -85,14 +130,14 @@ private:
             class DeathNotifier: public IBinder::DeathRecipient
             {
             public:
-                DeathNotifier() {      
+                DeathNotifier() {
                 }
-                
+
                 virtual void binderDied(const wp<IBinder>& who);
             };
-        
+
             static sp<DeathNotifier> mDeathNotifier;
-        
+
             // helper function to obtain camera service handle
             static const sp<ICameraService>& getCameraService();
 
@@ -111,12 +156,12 @@ private:
             void                *mErrorCallbackCookie;
             autofocus_callback  mAutoFocusCallback;
             void                *mAutoFocusCallbackCookie;
-            
+
             friend class DeathNotifier;
 
             static  Mutex               mLock;
             static  sp<ICameraService>  mCameraService;
-            
+
 };
 
 }; // namespace android

@@ -24,6 +24,12 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 //???AWT: import java.awt.Container;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class HierarchyEvent extends AWTEvent {
 
     private static final long serialVersionUID = -5337576970038043990L;

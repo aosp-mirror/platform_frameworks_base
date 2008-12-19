@@ -262,7 +262,7 @@ public class ProgressDialog extends AlertDialog {
     }
 
     public void setIndeterminate(boolean indeterminate) {
-        if (mHasStarted && (isIndeterminate() != indeterminate)) {
+        if (mProgress != null) {
             mProgress.setIndeterminate(indeterminate);
         } else {
             mIndeterminate = indeterminate;

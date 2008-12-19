@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.pim.DateFormat;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;

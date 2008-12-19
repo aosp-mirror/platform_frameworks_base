@@ -60,9 +60,11 @@ void AudioResamplerCubic::resampleStereo16(int32_t* out, size_t outFrameCount,
     uint32_t phaseIncrement = mPhaseIncrement;
     size_t outputIndex = 0;
     size_t outputSampleCount = outFrameCount * 2;
-    
+    size_t inFrameCount = (outFrameCount*mInSampleRate)/mSampleRate;
+
     // fetch first buffer
-    if (mBuffer.raw == NULL) {
+    if (mBuffer.frameCount == 0) {
+        mBuffer.frameCount = inFrameCount;
         provider->getNextBuffer(&mBuffer);
         if (mBuffer.raw == NULL)
             return;
@@ -79,7 +81,7 @@ void AudioResamplerCubic::resampleStereo16(int32_t* out, size_t outFrameCount,
         out[outputIndex++] += vl * interp(&left, x);
         out[outputIndex++] += vr * interp(&right, x);
         // out[outputIndex++] += vr * in[inputIndex*2];
-        
+
         // increment phase
         phaseFraction += phaseIncrement;
         uint32_t indexIncrement = (phaseFraction >> kNumPhaseBits);
@@ -92,6 +94,7 @@ void AudioResamplerCubic::resampleStereo16(int32_t* out, size_t outFrameCount,
             if (inputIndex == mBuffer.frameCount) {
                 inputIndex = 0;
                 provider->releaseBuffer(&mBuffer);
+                mBuffer.frameCount = inFrameCount;
                 provider->getNextBuffer(&mBuffer);
                 if (mBuffer.raw == NULL)
                     goto save_state;  // ugly, but efficient
@@ -122,9 +125,11 @@ void AudioResamplerCubic::resampleMono16(int32_t* out, size_t outFrameCount,
     uint32_t phaseIncrement = mPhaseIncrement;
     size_t outputIndex = 0;
     size_t outputSampleCount = outFrameCount * 2;
-    
+    size_t inFrameCount = (outFrameCount*mInSampleRate)/mSampleRate;
+
     // fetch first buffer
-    if (mBuffer.raw == NULL) {
+    if (mBuffer.frameCount == 0) {
+        mBuffer.frameCount = inFrameCount;
         provider->getNextBuffer(&mBuffer);
         if (mBuffer.raw == NULL)
             return;
@@ -141,7 +146,7 @@ void AudioResamplerCubic::resampleMono16(int32_t* out, size_t outFrameCount,
         sample = interp(&left, x);
         out[outputIndex++] += vl * sample;
         out[outputIndex++] += vr * sample;
-        
+
         // increment phase
         phaseFraction += phaseIncrement;
         uint32_t indexIncrement = (phaseFraction >> kNumPhaseBits);
@@ -154,6 +159,7 @@ void AudioResamplerCubic::resampleMono16(int32_t* out, size_t outFrameCount,
             if (inputIndex == mBuffer.frameCount) {
                 inputIndex = 0;
                 provider->releaseBuffer(&mBuffer);
+                mBuffer.frameCount = inFrameCount;
                 provider->getNextBuffer(&mBuffer);
                 if (mBuffer.raw == NULL)
                     goto save_state;  // ugly, but efficient

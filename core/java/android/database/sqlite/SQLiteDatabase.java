@@ -54,6 +54,69 @@ public class SQLiteDatabase extends SQLiteClosable {
     private final static String TAG = "Database";
 
     /**
+     * Algorithms used in ON CONFLICT clause
+     * http://www.sqlite.org/lang_conflict.html
+     * @hide
+     */
+    public enum ConflictAlgorithm {
+        /**
+         *  When a constraint violation occurs, an immediate ROLLBACK occurs, 
+         * thus ending the current transaction, and the command aborts with a 
+         * return code of SQLITE_CONSTRAINT. If no transaction is active 
+         * (other than the implied transaction that is created on every command)
+         *  then this algorithm works the same as ABORT.
+         */
+        ROLLBACK("ROLLBACK"),
+        
+        /**
+         * When a constraint violation occurs,no ROLLBACK is executed 
+         * so changes from prior commands within the same transaction 
+         * are preserved. This is the default behavior.
+         */
+        ABORT("ABORT"),
+        
+        /**
+         * When a constraint violation occurs, the command aborts with a return 
+         * code SQLITE_CONSTRAINT. But any changes to the database that 
+         * the command made prior to encountering the constraint violation 
+         * are preserved and are not backed out.
+         */
+        FAIL("FAIL"),
+        
+        /**
+         * When a constraint violation occurs, the one row that contains 
+         * the constraint violation is not inserted or changed. 
+         * But the command continues executing normally. Other rows before and 
+         * after the row that contained the constraint violation continue to be 
+         * inserted or updated normally. No error is returned.
+         */
+        IGNORE("IGNORE"),
+        
+        /**
+         * When a UNIQUE constraint violation occurs, the pre-existing rows that
+         * are causing the constraint violation are removed prior to inserting 
+         * or updating the current row. Thus the insert or update always occurs.
+         * The command continues executing normally. No error is returned. 
+         * If a NOT NULL constraint violation occurs, the NULL value is replaced
+         * by the default value for that column. If the column has no default 
+         * value, then the ABORT algorithm is used. If a CHECK constraint 
+         * violation occurs then the IGNORE algorithm is used. When this conflict 
+         * resolution strategy deletes rows in order to satisfy a constraint, 
+         * it does not invoke delete triggers on those rows.
+         *  This behavior might change in a future release.
+         */
+        REPLACE("REPLACE");
+        
+        private final String mValue;
+        ConflictAlgorithm(String value) {
+            mValue = value;
+        }
+        public String value() {
+            return mValue;
+        }
+    }
+    
+    /**
      * Maximum Length Of A LIKE Or GLOB Pattern
      * The pattern matching algorithm used in the default LIKE and GLOB implementation
      * of SQLite can exhibit O(N^2) performance (where N is the number of characters in
@@ -437,8 +500,26 @@ public class SQLiteDatabase extends SQLiteClosable {
      * successful so far. Do not call setTransactionSuccessful before calling this. When this
      * returns a new transaction will have been created but not marked as successful.
      * @return true if the transaction was yielded
+     * @deprecated if the db is locked more than once (becuase of nested transactions) then the lock
+     *   will not be yielded. Use yieldIfContendedSafely instead.
      */
     public boolean yieldIfContended() {
+        return yieldIfContendedHelper(false /* do not check yielding */);
+    }
+
+    /**
+     * Temporarily end the transaction to let other threads run. The transaction is assumed to be
+     * successful so far. Do not call setTransactionSuccessful before calling this. When this
+     * returns a new transaction will have been created but not marked as successful. This assumes
+     * that there are no nested transactions (beginTransaction has only been called once) and will
+     * through an exception if that is not the case.
+     * @return true if the transaction was yielded
+     */
+    public boolean yieldIfContendedSafely() {
+        return yieldIfContendedHelper(true /* check yielding */);
+    }
+
+    private boolean yieldIfContendedHelper(boolean checkFullyYielded) {
         if (mLock.getQueueLength() == 0) {
             // Reset the lock acquire time since we know that the thread was willing to yield
             // the lock at this time.
@@ -448,6 +529,12 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         setTransactionSuccessful();
         endTransaction();
+        if (checkFullyYielded) {
+            if (this.isDbLockedByCurrentThread()) {
+                throw new IllegalStateException(
+                        "Db locked more than once. yielfIfContended cannot yield");
+            }
+        }
         beginTransaction();
         return true;
     }
@@ -1031,6 +1118,28 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Runs the provided SQL and returns a cursor over the result set.
+     * The cursor will read an initial set of rows and the return to the caller. 
+     * It will continue to read in batches and send data changed notifications 
+     * when the later batches are ready.
+     * @param sql the SQL query. The SQL string must not be ; terminated
+     * @param selectionArgs You may include ?s in where clause in the query,
+     *     which will be replaced by the values from selectionArgs. The
+     *     values will be bound as Strings.
+     * @param initialRead set the initial count of items to read from the cursor
+     * @param maxRead set the count of items to read on each iteration after the first
+     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @hide pending API council approval
+     */
+    public Cursor rawQuery(String sql, String[] selectionArgs, 
+            int initialRead, int maxRead) {
+        SQLiteCursor c = (SQLiteCursor)rawQueryWithFactory(
+                null, sql, selectionArgs, null);
+        c.setLoadStyle(initialRead, maxRead);
+        return c;
+    }
+    
+    /**
      * Convenience method for inserting a row into the database.
      *
      * @param table the table to insert the row into
@@ -1044,7 +1153,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insert(String table, String nullColumnHack, ContentValues values) {
         try {
-            return insertOrReplace(table, nullColumnHack, values, false);
+            return insertWithOnConflict(table, nullColumnHack, values, null);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + values, e);
             return -1;
@@ -1066,7 +1175,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertOrThrow(String table, String nullColumnHack, ContentValues values)
             throws SQLException {
-        return insertOrReplace(table, nullColumnHack, values, false) ;
+        return insertWithOnConflict(table, nullColumnHack, values, null);
     }
 
     /**
@@ -1082,7 +1191,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long replace(String table, String nullColumnHack, ContentValues initialValues) {
         try {
-            return insertOrReplace(table, nullColumnHack, initialValues, true);
+            return insertWithOnConflict(table, nullColumnHack, initialValues, 
+                    ConflictAlgorithm.REPLACE);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + initialValues, e);
             return -1;
@@ -1103,22 +1213,38 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long replaceOrThrow(String table, String nullColumnHack,
             ContentValues initialValues) throws SQLException {
-        return insertOrReplace(table, nullColumnHack, initialValues, true);
+        return insertWithOnConflict(table, nullColumnHack, initialValues, 
+                ConflictAlgorithm.REPLACE);
     }
 
-    private long insertOrReplace(String table, String nullColumnHack,
-            ContentValues initialValues, boolean allowReplace) {
+    /**
+     * General method for inserting a row into the database.
+     *
+     * @param table the table to insert the row into
+     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
+     *            so if initialValues is empty this column will explicitly be
+     *            assigned a NULL value
+     * @param initialValues this map contains the initial column values for the
+     *            row. The keys should be the column names and the values the
+     *            column values
+     * @param algorithm  {@link ConflictAlgorithm} for insert conflict resolver
+     * @return the row ID of the newly inserted row, or -1 if an error occurred
+     * @hide
+     */
+    public long insertWithOnConflict(String table, String nullColumnHack,
+            ContentValues initialValues, ConflictAlgorithm algorithm) {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
 
         // Measurements show most sql lengths <= 152
         StringBuilder sql = new StringBuilder(152);
-        sql.append("INSERT ");
-        if (allowReplace) {
-            sql.append("OR REPLACE ");
+        sql.append("INSERT");
+        if (algorithm != null) {
+            sql.append(" OR ");
+            sql.append(algorithm.value());
         }
-        sql.append("INTO ");
+        sql.append(" INTO ");
         sql.append(table);
         // Measurements show most values lengths < 40
         StringBuilder values = new StringBuilder(40);
@@ -1241,6 +1367,23 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the number of rows affected
      */
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
+        return updateWithOnConflict(table, values, whereClause, whereArgs, null);
+    }
+    
+    /**
+     * Convenience method for updating rows in the database.
+     *
+     * @param table the table to update in
+     * @param values a map from column names to new column values. null is a
+     *            valid value that will be translated to NULL.
+     * @param whereClause the optional WHERE clause to apply when updating.
+     *            Passing null will update all rows.
+     * @param algorithm  {@link ConflictAlgorithm} for update conflict resolver
+     * @return the number of rows affected
+     * @hide
+     */
+    public int updateWithOnConflict(String table, ContentValues values, 
+            String whereClause, String[] whereArgs, ConflictAlgorithm algorithm) {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
@@ -1251,6 +1394,11 @@ public class SQLiteDatabase extends SQLiteClosable {
 
         StringBuilder sql = new StringBuilder(120);
         sql.append("UPDATE ");
+        if (algorithm != null) {
+            sql.append(" OR ");
+            sql.append(algorithm.value());
+        }
+        
         sql.append(table);
         sql.append(" SET ");
 

@@ -23,7 +23,6 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -78,6 +77,18 @@ public class Ringtone {
      */
     public void setStreamType(int streamType) {
         mStreamType = streamType;
+        
+        if (mAudio != null) {
+            /*
+             * The stream type has to be set before the media player is
+             * prepared. Re-initialize it.
+             */
+            try {
+                openMediaPlayer();
+            } catch (IOException e) {
+                Log.w(TAG, "Couldn't set the stream type", e);
+            }
+        }
     }
 
     /**

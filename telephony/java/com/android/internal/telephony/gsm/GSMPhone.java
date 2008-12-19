@@ -16,29 +16,58 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.content.*;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_BASEBAND_VERSION;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_ACTION_DISABLE;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_ACTION_ENABLE;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_ACTION_ERASURE;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_ACTION_REGISTRATION;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_ALL;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_ALL_CONDITIONAL;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_BUSY;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_NOT_REACHABLE;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_NO_REPLY;
+import static com.android.internal.telephony.gsm.CommandsInterface.CF_REASON_UNCONDITIONAL;
+import static com.android.internal.telephony.gsm.CommandsInterface.SERVICE_CLASS_VOICE;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.SQLException;
-import android.os.*;
+import android.net.Uri;
+import android.os.AsyncResult;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Registrant;
+import android.os.RegistrantList;
+import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
-import com.android.internal.telephony.*;
-import com.android.internal.telephony.gsm.stk.Service;
-import static com.android.internal.telephony.gsm.CommandsInterface.*;
-
-import com.android.internal.telephony.test.SimulatedRadioControl;
+import android.telephony.CellLocation;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
-import static com.android.internal.telephony.TelephonyProperties.*;
-import android.net.Uri;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.CellLocation;
-import android.telephony.ServiceState;
+
+import com.android.internal.telephony.Call;
+import com.android.internal.telephony.CallStateException;
+import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.MmiCode;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneBase;
+import com.android.internal.telephony.PhoneNotifier;
+import com.android.internal.telephony.PhoneSubInfo;
+import com.android.internal.telephony.SimCard;
+import com.android.internal.telephony.gsm.SimException;
+import com.android.internal.telephony.gsm.stk.Service;
+import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@hide}
@@ -58,7 +87,10 @@ public class GSMPhone extends PhoneBase {
     public static final String CIPHERING_KEY = "ciphering_key";
     // Key used to read/write current CLIR setting
     public static final String CLIR_KEY = "clir_key";
-
+    // Key used to read/write voice mail number
+    public static final String VM_NUMBER = "vm_number_key";
+    // Key used to read/write the SIM IMSI used for storing the voice mail
+    public static final String VM_SIM_IMSI = "vm_sim_imsi_key";
 
     //***** Instance Variables
 
@@ -91,6 +123,7 @@ public class GSMPhone extends PhoneBase {
 
     private String mImei;
     private String mImeiSv;
+    private String mVmNumber;
 
     //***** Event Constants
 
@@ -115,6 +148,7 @@ public class GSMPhone extends PhoneBase {
     static final int EVENT_SET_NETWORK_AUTOMATIC_COMPLETE = 16;
     static final int EVENT_SET_CLIR_COMPLETE = 17;
     static final int EVENT_REGISTERED_TO_NETWORK = 18;
+    static final int EVENT_SET_VM_NUMBER_DONE = 19;
 
     //***** Constructors
 
@@ -275,11 +309,13 @@ public class GSMPhone extends PhoneBase {
             break;
 
             case CONNECTED:
+            case DISCONNECTING:
                 if ( mCT.state != Phone.State.IDLE
-                        && !mSST.isConcurrentVoiceAndData())
+                        && !mSST.isConcurrentVoiceAndData()) {
                     ret = DataState.SUSPENDED;
-                else
+                } else {
                     ret = DataState.CONNECTED;
+                }
             break;
 
             case INITING:
@@ -731,8 +767,10 @@ public class GSMPhone extends PhoneBase {
         if (handleInCallMmiCommands(newDialString)) {
             return null;
         }
-        
-        GsmMmiCode mmi = GsmMmiCode.newFromDialString(newDialString, this);
+
+        // Only look at the Network portion for mmi
+        String networkPortion = PhoneNumberUtils.extractNetworkPortion(newDialString);
+        GsmMmiCode mmi = GsmMmiCode.newFromDialString(networkPortion, this);
         if (LOCAL_DEBUG) Log.d(LOG_TAG,
                                "dialing w/ mmi '" + mmi + "'...");
 
@@ -802,11 +840,36 @@ public class GSMPhone extends PhoneBase {
         mSST.setRadioPower(power);
     }
 
-
-    public String getVoiceMailNumber() {
-        return mSIMRecords.getVoiceMailNumber();
+    private void storeVoiceMailNumber(String number) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(VM_NUMBER, number);        
+        editor.commit();
+        setVmSimImsi(getSubscriberId());
     }
 
+    public String getVoiceMailNumber() {
+        // Read from the SIM. If its null, try reading from the shared preference area.
+        String number = mSIMRecords.getVoiceMailNumber();        
+        if (TextUtils.isEmpty(number)) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+            number = sp.getString(VM_NUMBER, null);
+        }        
+        return number;
+    }
+    
+    private String getVmSimImsi() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sp.getString(VM_SIM_IMSI, null);
+    }
+
+    private void setVmSimImsi(String imsi) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(VM_SIM_IMSI, imsi);
+        editor.commit();
+    }
+    
     public String getVoiceMailAlphaTag() {
         String ret;
 
@@ -860,7 +923,11 @@ public class GSMPhone extends PhoneBase {
     public void setVoiceMailNumber(String alphaTag,
                             String voiceMailNumber,
                             Message onComplete) {
-        mSIMRecords.setVoiceMailNumber(alphaTag, voiceMailNumber, onComplete);
+        
+        Message resp;        
+        mVmNumber = voiceMailNumber;
+        resp = h.obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
+        mSIMRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
     
     private boolean isValidCommandInterfaceCFReason (int commandInterfaceCFReason) {
@@ -1301,6 +1368,13 @@ public class GSMPhone extends PhoneBase {
                     } catch (SQLException e) {
                         Log.e(LOG_TAG, "Can't store current operator", e);
                     }
+                    // Check if this is a different SIM than the previous one. If so unset the
+                    // voice mail number.
+                    String imsi = getVmSimImsi();
+                    if (imsi != null && !getSubscriberId().equals(imsi)) {                        
+                        storeVoiceMailNumber(null);
+                        setVmSimImsi(null);
+                    }
 
                 break;
 
@@ -1380,7 +1454,21 @@ public class GSMPhone extends PhoneBase {
                         onComplete.sendToTarget();
                     }
                     break;
+                    
+                case EVENT_SET_VM_NUMBER_DONE:
+                    ar = (AsyncResult)msg.obj;
+                    if (SimVmNotSupportedException.class.isInstance(ar.exception)) {
+                        storeVoiceMailNumber(mVmNumber);
+                        ar.exception = null;
+                    }
+                    onComplete = (Message) ar.userObj;
+                    if (onComplete != null) {
+                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                        onComplete.sendToTarget();
+                    }
+                    break;
 
+                    
                 case EVENT_GET_CALL_FORWARD_DONE:
                     ar = (AsyncResult)msg.obj;
                     if (ar.exception == null) {

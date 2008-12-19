@@ -68,7 +68,7 @@ public class Main {
                         "android.view.SurfaceView",             "android.view._Original_SurfaceView",
                     },
                     new String[] { // methods deleted from their return type.
-                    "android.graphics.Paint", // class to delete method from
+                        "android.graphics.Paint", // class to delete method from
                         "android.graphics.Paint$Align", // list of type identifying methods to delete
                         "android.graphics.Paint$Style",
                         "android.graphics.Paint$Join",

@@ -16,27 +16,25 @@
 
 package com.android.internal.telephony.test;
 
-import com.android.internal.os.HandlerThread;
+
 import android.os.AsyncResult;
-import android.os.HandlerInterface;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
-import com.android.internal.telephony.ATParseEx;
+import android.util.Log;
+
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.gsm.BaseCommands;
 import com.android.internal.telephony.gsm.BaseCommands;
 import com.android.internal.telephony.gsm.CallFailCause;
 import com.android.internal.telephony.gsm.CommandException;
 import com.android.internal.telephony.gsm.CommandsInterface;
-import com.android.internal.telephony.gsm.DriverCall;
 import com.android.internal.telephony.gsm.PDPContextState;
-import com.android.internal.telephony.gsm.stk.CtlvCommandDetails;
-import com.android.internal.telephony.gsm.stk.ResultCode;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
-import android.util.Log;
+
 import java.util.ArrayList;
 
 public final class SimulatedCommands extends BaseCommands
-        implements CommandsInterface, HandlerInterface, SimulatedRadioControl
+        implements CommandsInterface, SimulatedRadioControl
 {
     private final static String LOG_TAG = "SIM";
 
@@ -64,7 +62,7 @@ public final class SimulatedCommands extends BaseCommands
     //***** Instance Variables
     
     SimulatedGsmCallState simulatedCallState;
-    HandlerThread handlerThread;
+    HandlerThread mHandlerThread;
     SimLockState mSimLockedState;
     boolean mSimLockEnabled;
     int mPinUnlockAttempts;
@@ -88,15 +86,12 @@ public final class SimulatedCommands extends BaseCommands
     public
     SimulatedCommands() {
         super(null);  // Don't log statistics
-        handlerThread
-            = new HandlerThread(this,
-                new Runnable() {
-                    public void run() {
-                        simulatedCallState = new SimulatedGsmCallState();
-                    }
-                },
-                "SimulatedCommands");
-
+        mHandlerThread = new HandlerThread("SimulatedCommands");
+        mHandlerThread.start();
+        Looper looper = mHandlerThread.getLooper();
+        
+        simulatedCallState = new SimulatedGsmCallState(looper);
+        
         setRadioState(RadioState.RADIO_OFF);
         mSimLockedState = INITIAL_LOCK_STATE;
         mSimLockEnabled = (mSimLockedState != SimLockState.NONE);
@@ -1274,7 +1269,10 @@ public final class SimulatedCommands extends BaseCommands
     shutdown()
     {
         setRadioState(RadioState.RADIO_UNAVAILABLE);
-        handlerThread.getHandler().getLooper().quit();
+        Looper looper = mHandlerThread.getLooper();
+        if (looper != null) {
+            looper.quit();
+        }
     }
 
     /** hangup all */
@@ -1311,14 +1309,6 @@ public final class SimulatedCommands extends BaseCommands
         } else {
             Log.e("GSM", "SimulatedCommands.resumeResponses < 0");
         }
-    }
-
-    //***** HandlerInterface implementation
-
-    public void
-    handleMessage(Message msg)
-    {
-
     }
 
     //***** Private Methods

@@ -1,0 +1,250 @@
+page.title=Publishing Your Applications
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Publishing quickview</h2>
+
+<ul>
+<li>You can publish your application using a hosted service such as Android Market or through a web server.</li>
+<li>Before you publish, make sure you have prepared your application properly.</li>
+<li>Android Market makes it easy for users of Android-powered devices to see and download your application.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#overview">Publishing on Android Market</a>
+    <ol>
+    <li><a href="#marketupgrade">Publishing Upgrades on Android Market</a>
+    <li><a href="#marketintent">Using Intents to Launch the Market Application</a></li>
+    </ol></li>
+
+<li><span style="color:ccc">Publishing on Other Hosted Services</a></li>
+<li><span style="color:ccc">Publishing through a Web Server</a></li>
+
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a></li>
+</ol>
+
+<div id="qv-extra">
+  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
+  <div id="qv-sub-rule">
+    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;">
+    <p style="color:#669999;">Interested in publishing your app on Android Market?</p>
+    <a id="publish-link" href="http://market.android.com/publish">Go to Android Market &raquo;</a>
+  </div>
+</div>
+
+</div>
+</div>
+
+<p>Publishing an application means testing it, packaging it appropriately, and making 
+it available to users of Android-powered mobile devices for download or sideload.</p>
+
+<p>If you've followed the steps outlined in 
+<a href="{@docRoot}guide/publishing/preparing.html">Preparing to
+Publish Your Applications</a>, the result of the process is a compiled .apk that
+is signed with your release private key. Inside the .apk, the application is
+properly versioned and any MapView elements reference a Maps API Key that you
+obtained by registering the MD5 fingerprint of the same certificate used to sign
+the .apk. Your application is now ready for publishing. </p>
+
+<p>The sections below provide information about publishing your Android
+application to mobile device users.</p>
+
+<h2 id="market">Publishing on Android Market</h2>
+
+<p>Android Market is a hosted service that makes it easy for users to find and
+download Android applications to their Android-powered devices, and makes it 
+easy for developers to publish their applications to Android users.</p>
+
+<p>To publish your application on Android Market, you first need to register
+with the service using your Google account and agree to the terms of service.
+Once you are registered, you can upload your application to the service whenever
+you want, as many times as you want, and then publish it when you are ready.
+Once published, users can see your application, download it, and rate it using
+the Market application installed on their Android-powered devices. </p>
+
+<p>To register as an Android Market developer and get started with publishing,
+visit the Android Market: </p>
+
+<p style="margin-left:3em;"><a
+href="http://market.android.com/publish">http://market.android.com/publish</a>
+</p>
+
+<p>If you plan to publish your application on Android Market, you must make sure
+that it meets the requirements listed below, which are enforced by the Market
+server when you upload the application.</p>
+
+<div class="special">
+<p>Requirements enforced by the Android Market server</p>
+<ol>
+<li>Your application must be signed with a cryptographic private key whose
+validity period ends after <span style="color:red">22 October 2033</span>. </li>
+<li>Your application must define both an <code>android:versionCode</code> and an
+<code>android:versionName</code> attribute in the <code>&lt;manifest&gt;</code>
+element of its manifest. The server uses the <code>android:versionCode</code> as
+the basis for identifying the application internally and handling upgrades, and
+it displays the <code>android:versionName</code> to users as the application's
+version.</li>
+<li>Your application must define both an <code>android:icon</code> and an
+<code>android:label</code> attribute in the <code>&lt;application&gt;</code>
+element of its manifest.</li>
+</ol>
+</div>
+
+<h3 id="marketupgrade">Publishing Upgrades on Android Market</h3>
+
+<p>The beta version of Android Market does not support notifying your users when
+you publish a new version of your application. This capability will be
+added soon, but currently the user must independently initiate download of an
+upgraded application. When you publish an upgrade, you can assist users by
+notifying them that the upgrade is available and giving them a way to download
+the upgraded application from Android Market.</p>
+
+<p>Here is a suggested way of tracking installed application versions and
+notifying users that an upgrade is available:</p>
+
+<ol>
+<li>Have your app occasionally check in with a web-service that you're
+running. This web service should return two values: the latest available
+version number for the application (corresponding to
+<code>android:versionCode</code>) and a URI string that your application
+can later send in an Intent, to launch Market and search for the
+upgraded application for the user. 
+
+<p>The URI that your web service returns should be properly formatted to 
+search Android Market for your upgraded application. See 
+<a href="#marketintent">Using Intents to Launch the Market Application</a> 
+for more information. The URI should specify the upgraded 
+application's package name as the query parameter, since the package name
+is guaranteed to be unique on Android Market. The URI format for the 
+package name search is: </p>
+
+<p><code>http://market.android.com/search?q=pname:&lt;package&gt;</code> or 
+<br><code>market://search?q=pname:&lt;package&gt;</code></p>
+
+</li>
+<li>Your application can then compare its own version number against
+that retrieved.  If the retrieved value is greater, your application can
+show a dialog informing the user that a new version is available. The
+dialog can offer buttons to begin the download or cancel. </li> <li>If
+the user clicks the button to begin the download, your application can
+call startActivity() using the ACTION_VIEW Intent, passing the URI
+received from your web service. The Intent launches the Market
+application on the device and initiates an immediate search on the
+Android Market site, based on the query parameters in the URI. When the
+result is displayed, the user can view the details of the upgraded
+application and begin the download. 
+
+<p>Note that, because the URI string is received from your web 
+service and not hard-coded into your application, you can easily change
+the Market launch behaviors whenever needed, without 
+having to change your application. </p></li></ol>
+
+<p>For more information about URIs you can pass to the Market application at
+launch, see <a href="#marketintent">Using Intents to Launch the Market
+Application</a>, below.</p>
+
+<h3 id="marketintent">Using Intents to Launch the Market Application on 
+a Device</h3>
+
+<p>Android-powered devices include a preinstalled Market application that gives
+users access to the Android Market site. From Market, users can
+browse or search available applications, read ratings and reviews, and
+download/install applications.</p>
+
+<p>You can launch the Market application from another Android
+application by sending an Intent to the system. You might want to do
+this, for example, to help the user locate and download an upgrade to an
+installed application, or to let the user know about related
+applications that are available for download. </p>
+
+<p>To launch Market, you send an ACTION_VIEW Intent, passing a Market-handled
+URI string as the Intent data. In most cases, your application would call
+startActivity() to send the ACTION_VIEW Intent with the Market-handled URI.</p>
+
+<p>The URI that you supply with the Intent lets the system route the intent
+properly and also expresses the type of action that you want Market to perform
+after launch. Currently, you can have Market initiate a search for applications
+on Android Market, based on query parameters that you provide. For example, you
+can specify URIs to search for applications by:</p>
+
+<ul>
+<li>Package name</li>
+<li>Developer name</li>
+<li>String match across application name, developer name, and
+description, or </li>
+<li>Any combination of the above</li>
+</ul>
+
+<p>Note that the URI queries return results from the public metadata supplied by
+developers in their Android Market profiles or application publishing
+information, but not from the developer's private account or from the
+certificate used to sign the application. </p>
+
+<p>The table below provides a list of URIs and actions currently
+supported by the Market application.</p>
+
+<table>
+<tr>
+<th>For this Result</th>
+<th>Pass this URI with the ACTION_VIEW Intent</th>
+<th>Comments</th>
+</tr>
+
+<!--
+<tr>
+<td>Display the details screen for a specific application, as identified 
+by its Market appID string.</td>
+<td><code>http://market.android.com/details?id=&lt;appMarketAppIdString&gt;</code> 
+or<br>
+<code>market://details?id=&lt;appMarketUidString&gt;</code></td>
+<td>Note that Market appID is specific to an application 
+<em>and</em> its version. That is, an appID query loads the details page 
+for a specific version of an application.</td>
+</tr>
+-->
+<tr>
+<td>Search for an application by its fully qualified Java package name and
+display the result.</td>
+<td><code>http://market.android.com/search?q=pname:&lt;package&gt;</code> or<br>
+<code>market://search?q=pname:&lt;package&gt;</code></td>
+<td>Searches only the Java package name of applications. Returns only exact
+matches.</td>
+</tr>
+
+<tr>
+<td>Search for applications by developer name and display the results.</td>
+<td><code>http://market.android.com/search?q=pub:"&lt;Developer&nbsp;Name&gt;"</code>
+or<br> <code>market://search?q=pub:"&lt;Developer Name&gt;"</code></td>
+<td>Searches only the "Developer Name" fields of Market public profiles. 
+Returns exact matches only. </td>
+</tr>
+
+<tr>
+<td>Search for applications by substring and display the results.</td>
+<td><code>http://market.android.com/search?q=&lt;substring&gt;</code> or
+<br><code>market://search?q=&lt;substring&gt;</code></td>
+<td>Searches all public fields (application title, developer name, and
+application description) for all applications. Returns exact and partial 
+matches.</td>
+</tr>
+
+<tr>
+<td>Search using multiple query parameters and display the results.</td>
+<td>Example:<p><code>http://market.android.com/search?q=world pname:com.android.hello pub:Android</code></p></td>
+<td>Returns a list of applications meeting all the supplied parameters. </td>
+</tr>
+</table>
+
+<p>Note that these URIs work only when passed as intent data &mdash; you 
+can't currently load the URIs in a web browser, either on a desktop machine or 
+on the device. </p>

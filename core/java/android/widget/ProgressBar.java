@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Shader;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ClipDrawable;
@@ -40,6 +41,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.RemoteViews.RemoteView;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 
 import com.android.internal.R;
@@ -427,7 +430,7 @@ public class ProgressBar extends View {
     Drawable getCurrentDrawable() {
         return mCurrentDrawable;
     }
-    
+
     @Override
     protected boolean verifyDrawable(Drawable who) {
         return who == mProgressDrawable || who == mIndeterminateDrawable
@@ -700,7 +703,7 @@ public class ProgressBar extends View {
         mAnimation = null;
         mTransformation = null;
         if (mIndeterminateDrawable instanceof AnimationDrawable) {
-            ((AnimationDrawable)mIndeterminateDrawable).stop();
+            ((AnimationDrawable) mIndeterminateDrawable).stop();
             mShouldStartAnimationDrawable = false;
         }
     }
@@ -754,17 +757,31 @@ public class ProgressBar extends View {
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (!mInDrawing) {
-            super.invalidateDrawable(dr);
+            if (dr == mProgressDrawable || dr == mIndeterminateDrawable) {
+                final Rect dirty = dr.getBounds();
+                final int scrollX = mScrollX + mPaddingLeft;
+                final int scrollY = mScrollY + mPaddingRight;
+
+                invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                        dirty.right + scrollX, dirty.bottom + scrollY);
+            } else {
+                super.invalidateDrawable(dr);
+            }
         }
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Drawable d = mCurrentDrawable;
-        if (d != null) {
-            // onDraw will translate the canvas so we draw starting at 0,0
-            d.setBounds(0, 0, w - mPaddingRight - mPaddingLeft, 
-                    h - mPaddingBottom - mPaddingTop);
+        // onDraw will translate the canvas so we draw starting at 0,0
+        int right = w - mPaddingRight - mPaddingLeft;
+        int bottom = h - mPaddingBottom - mPaddingTop;
+
+        if (mIndeterminateDrawable != null) {
+            mIndeterminateDrawable.setBounds(0, 0, right, bottom);
+        }
+        
+        if (mProgressDrawable != null) {
+            mProgressDrawable.setBounds(0, 0, right, bottom);
         }
     }
 
@@ -795,8 +812,9 @@ public class ProgressBar extends View {
             }
             d.draw(canvas);
             canvas.restore();
-            if (mShouldStartAnimationDrawable && mCurrentDrawable instanceof AnimationDrawable) {
-                ((AnimationDrawable)mCurrentDrawable).start();
+            if (mShouldStartAnimationDrawable && d instanceof AnimationDrawable) {
+                ((AnimationDrawable) d).start();
+                mShouldStartAnimationDrawable = false;
             }
         }
     }
@@ -816,5 +834,65 @@ public class ProgressBar extends View {
 
         setMeasuredDimension(resolveSize(dw, widthMeasureSpec),
                 resolveSize(dh, heightMeasureSpec));
+    }
+    
+    static class SavedState extends BaseSavedState {
+        int progress;
+        int secondaryProgress;
+        
+        /**
+         * Constructor called from {@link ProgressBar#onSaveInstanceState()}
+         */
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+        
+        /**
+         * Constructor called from {@link #CREATOR}
+         */
+        private SavedState(Parcel in) {
+            super(in);
+            progress = in.readInt();
+            secondaryProgress = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(progress);
+            out.writeInt(secondaryProgress);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        // Force our ancestor class to save its state
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        
+        ss.progress = mProgress;
+        ss.secondaryProgress = mSecondaryProgress;
+        
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        
+        setProgress(ss.progress);
+        setSecondaryProgress(ss.secondaryProgress);
     }
 }

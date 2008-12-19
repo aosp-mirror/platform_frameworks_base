@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.server.am.BatteryStats;
+import com.android.server.am.BatteryStatsService;
 
 import android.app.ActivityManagerNative;
 import android.content.Context;
@@ -27,7 +27,6 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UEventObserver;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -90,9 +89,9 @@ class BatteryService extends Binder {
     
     public BatteryService(Context context) {
         mContext = context;
-        mBatteryStats = BatteryStats.getService();
+        mBatteryStats = BatteryStatsService.getService();
 
-        mUEventObserver.startObserving("DEVPATH=/class/power_supply");
+        mUEventObserver.startObserving("SUBSYSTEM=power_supply");
 
         // set initial status
         update();
@@ -101,6 +100,28 @@ class BatteryService extends Binder {
     final boolean isPowered() {
         // assume we are powered if battery state is unknown so the "stay on while plugged in" option will work.
         return (mAcOnline || mUsbOnline || mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN);
+    }
+
+    final boolean isPowered(int plugTypeSet) {
+        // assume we are powered if battery state is unknown so
+        // the "stay on while plugged in" option will work.
+        if (mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+            return true;
+        }
+        if (plugTypeSet == 0) {
+            return false;
+        }
+        int plugTypeBit = 0;
+        if (mAcOnline) {
+            plugTypeBit = BatteryManager.BATTERY_PLUGGED_AC;
+        } else if (mUsbOnline) {
+            plugTypeBit = BatteryManager.BATTERY_PLUGGED_USB;
+        }
+        return (plugTypeSet & plugTypeBit) != 0;
+    }
+
+    final int getPlugType() {
+        return mPlugType;
     }
 
     private UEventObserver mUEventObserver = new UEventObserver() {

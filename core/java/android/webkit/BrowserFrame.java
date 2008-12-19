@@ -26,10 +26,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Config;
 import android.util.Log;
+import android.util.TypedValue;
 
 import junit.framework.Assert;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,9 +52,7 @@ class BrowserFrame extends Handler {
     private final WebViewDatabase mDatabase;
     private final WebViewCore mWebViewCore;
     private boolean mLoadInitFromJava;
-    private String mCurrentUrl;
     private int mLoadType;
-    private String mCompletedUrl;
     private boolean mFirstLayoutDone = true;
     private boolean mCommitted = true;
 
@@ -114,9 +112,7 @@ class BrowserFrame extends Handler {
             CookieSyncManager.createInstance(context);
         }
         AssetManager am = context.getAssets();
-        nativeCreateFrame(am, proxy.getBackForwardList());
-        // Create a native FrameView and attach it to the native frame.
-        nativeCreateView(w);
+        nativeCreateFrame(w, am, proxy.getBackForwardList());
 
         mSettings = settings;
         mContext = context;
@@ -142,11 +138,7 @@ class BrowserFrame extends Handler {
             stringByEvaluatingJavaScriptFromString(
                     url.substring("javascript:".length()));
         } else {
-            if (!nativeLoadUrl(url)) {
-                reportError(android.net.http.EventHandler.ERROR_BAD_URL,
-                        mContext.getString(com.android.internal.R.string.httpErrorBadUrl),
-                        url);
-            }
+            nativeLoadUrl(url);
         }
         mLoadInitFromJava = false;
     }
@@ -186,6 +178,17 @@ class BrowserFrame extends Handler {
     }
 
     /**
+     * Go back or forward the number of steps given.
+     * @param steps A negative or positive number indicating the direction
+     *              and number of steps to move.
+     */
+    public void goBackOrForward(int steps) {
+        mLoadInitFromJava = true;
+        nativeGoBackOrForward(steps);
+        mLoadInitFromJava = false;
+    }
+
+    /**
      * native callback
      * Report an error to an activity.
      * @param errorCode The HTTP error code.
@@ -216,34 +219,12 @@ class BrowserFrame extends Handler {
         return mLoadType;
     }
 
-    /* package */String currentUrl() {
-        return mCurrentUrl;
-    }
-
-    /* package */void didFirstLayout(String url) {
-        // this is common case
-        if (url.equals(mCurrentUrl)) {
-            if (!mFirstLayoutDone) {
-                mFirstLayoutDone = true;
-                // ensure {@link WebViewCore#webkitDraw} is called as we were
-                // blocking the update in {@link #loadStarted}
-                mWebViewCore.contentInvalidate();
-            }
-        } else if (url.equals(mCompletedUrl)) {
-            /*
-             * FIXME: when loading http://www.google.com/m, 
-             * mCurrentUrl will be http://www.google.com/m, 
-             * mCompletedUrl will be http://www.google.com/m#search 
-             * and url will be http://www.google.com/m#search. 
-             * This is probably a bug in WebKit. If url matches mCompletedUrl, 
-             * also set mFirstLayoutDone to be true and update.
-             */
-            if (!mFirstLayoutDone) {
-                mFirstLayoutDone = true;
-                // ensure {@link WebViewCore#webkitDraw} is called as we were
-                // blocking the update in {@link #loadStarted}
-                mWebViewCore.contentInvalidate();
-            }
+    /* package */void didFirstLayout() {
+        if (!mFirstLayoutDone) {
+            mFirstLayoutDone = true;
+            // ensure {@link WebViewCore#webkitDraw} is called as we were
+            // blocking the update in {@link #loadStarted}
+            mWebViewCore.contentDraw();
         }
         mWebViewCore.mEndScaleZoom = true;
     }
@@ -258,8 +239,6 @@ class BrowserFrame extends Handler {
         mIsMainFrame = isMainFrame;
 
         if (isMainFrame || loadType == FRAME_LOADTYPE_STANDARD) {
-            mCurrentUrl = url;
-            mCompletedUrl = null;
             mLoadType = loadType;
 
             if (isMainFrame) {
@@ -310,7 +289,6 @@ class BrowserFrame extends Handler {
         // mIsMainFrame and isMainFrame are better be equal!!!
 
         if (isMainFrame || loadType == FRAME_LOADTYPE_STANDARD) {
-            mCompletedUrl = url;
             if (isMainFrame) {
                 mCallbackProxy.switchOutDrawHistory();
                 mCallbackProxy.onPageFinished(url);
@@ -355,8 +333,8 @@ class BrowserFrame extends Handler {
                     WebAddress uri = new WebAddress(
                             mCallbackProxy.getBackForwardList().getCurrentItem()
                             .getUrl());
-                    String host = uri.mHost;
-                    String[] up = mDatabase.getUsernamePassword(host);
+                    String schemePlusHost = uri.mScheme + uri.mHost;
+                    String[] up = mDatabase.getUsernamePassword(schemePlusHost);
                     if (up != null && up[0] != null) {
                         setUsernamePassword(up[0], up[1]);
                     }
@@ -441,7 +419,13 @@ class BrowserFrame extends Handler {
         if (mLoadInitFromJava == true) {
             return false;
         }
-        return mCallbackProxy.shouldOverrideUrlLoading(url);
+        if (mCallbackProxy.shouldOverrideUrlLoading(url)) {
+            // if the url is hijacked, reset the state of the BrowserFrame
+            didFirstLayout();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void addJavascriptInterface(Object obj, String interfaceName) {
@@ -462,7 +446,7 @@ class BrowserFrame extends Handler {
      * @param method The http method.
      * @param headers The http headers.
      * @param postData If the method is "POST" postData is sent as the request
-     *                 body.
+     *                 body. Is null when empty.
      * @param cacheMode The cache mode to use when loading this resource.
      * @param isHighPriority True if this resource needs to be put at the front
      *                       of the network queue.
@@ -473,7 +457,7 @@ class BrowserFrame extends Handler {
                                               String url,
                                               String method,
                                               HashMap headers,
-                                              String postData,
+                                              byte[] postData,
                                               int cacheMode,
                                               boolean isHighPriority,
                                               boolean synchronous) {
@@ -497,41 +481,47 @@ class BrowserFrame extends Handler {
                     }
                     WebAddress uri = new WebAddress(mCallbackProxy
                             .getBackForwardList().getCurrentItem().getUrl());
-                    String host = uri.mHost;
+                    String schemePlusHost = uri.mScheme + uri.mHost;
                     String[] ret = getUsernamePassword();
-                    if (ret != null && postData != null && ret[0].length() > 0
-                            && ret[1].length() > 0
-                            && postData.contains(URLEncoder.encode(ret[0]))
-                            && postData.contains(URLEncoder.encode(ret[1]))) {
-                        String[] saved = mDatabase.getUsernamePassword(host);
-                        if (saved != null) {
-                            // null username implies that user has chosen not to
-                            // save password
-                            if (saved[0] != null) {
-                                // non-null username implies that user has
-                                // chosen to save password, so update the 
-                                // recorded password
-                                mDatabase.setUsernamePassword(host, ret[0],
-                                        ret[1]);
+                    // Has the user entered a username/password pair and is
+                    // there some POST data
+                    if (ret != null && postData != null && 
+                            ret[0].length() > 0 && ret[1].length() > 0) {
+                        // Check to see if the username & password appear in
+                        // the post data (there could be another form on the
+                        // page and that was posted instead.
+                        String postString = new String(postData);
+                        if (postString.contains(URLEncoder.encode(ret[0])) &&
+                                postString.contains(URLEncoder.encode(ret[1]))) {
+                            String[] saved = mDatabase.getUsernamePassword(
+                                    schemePlusHost);
+                            if (saved != null) {
+                                // null username implies that user has chosen not to
+                                // save password
+                                if (saved[0] != null) {
+                                    // non-null username implies that user has
+                                    // chosen to save password, so update the 
+                                    // recorded password
+                                    mDatabase.setUsernamePassword(
+                                            schemePlusHost, ret[0], ret[1]);
+                                }
+                            } else {
+                                // CallbackProxy will handle creating the resume
+                                // message
+                                mCallbackProxy.onSavePassword(schemePlusHost, ret[0], 
+                                        ret[1], null);
                             }
-                        } else {
-                            // CallbackProxy will handle creating the resume
-                            // message
-                            mCallbackProxy.onSavePassword(host, ret[0], ret[1],
-                                    null);
                         }
                     }
                 } catch (ParseException ex) {
                     // if it is bad uri, don't save its password
                 }
-            }
-            if (postData == null) {
-                postData = "";
+                
             }
         }
 
         // is this resource the main-frame top-level page?
-        boolean isMainFramePage = mIsMainFrame && url.equals(mCurrentUrl);
+        boolean isMainFramePage = mIsMainFrame;
 
         if (Config.LOGV) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
@@ -561,8 +551,8 @@ class BrowserFrame extends Handler {
             CacheManager.endCacheTransaction();
         }
 
-        FrameLoader loader = new FrameLoader(loadListener,
-                mSettings.getUserAgentString(), method, isHighPriority);
+        FrameLoader loader = new FrameLoader(loadListener, mSettings,
+                method, isHighPriority);
         loader.setHeaders(headers);
         loader.setPostData(postData);
         loader.setCacheMode(cacheMode); // Set the load mode to the mode used
@@ -666,36 +656,51 @@ class BrowserFrame extends Handler {
         return mSettings.getUserAgentString();
     }
 
+    // these ids need to be in sync with enum RAW_RES_ID in WebFrame
+    private static final int NODOMAIN = 1;
+    private static final int LOADERROR = 2;
+
+    String getRawResFilename(int id) {
+        int resid;
+        switch (id) {
+            case NODOMAIN:
+                resid = com.android.internal.R.raw.nodomain;
+                break;
+
+            case LOADERROR:
+                resid = com.android.internal.R.raw.loaderror;
+                break;
+
+            default:
+                Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
+                return new String();
+        }
+        TypedValue value = new TypedValue();
+        mContext.getResources().getValue(resid, value, true);
+        return value.string.toString();
+    }
+
     //==========================================================================
     // native functions
     //==========================================================================
 
     /**
-     * Create a new native frame.
+     * Create a new native frame for a given WebView
+     * @param w     A WebView that the frame draws into.
      * @param am    AssetManager to use to get assets.
      * @param list  The native side will add and remove items from this list as
      *              the native list changes.
      */
-    private native void nativeCreateFrame(AssetManager am,
+    private native void nativeCreateFrame(WebViewCore w, AssetManager am,
             WebBackForwardList list);
 
-    /**
-     * Create a native view attached to a WebView.
-     * @param w A WebView that the frame draws into.
-     */
-    private native void nativeCreateView(WebViewCore w);
-
-    private native void nativeCallPolicyFunction(int policyFunction,
-            int decision);
     /**
      * Destroy the native frame.
      */
     public native void nativeDestroyFrame();
 
-    /**
-     * Detach the view from the frame.
-     */
-    private native void nativeDetachView();
+    private native void nativeCallPolicyFunction(int policyFunction,
+            int decision);
 
     /**
      * Reload the current main frame.
@@ -707,7 +712,7 @@ class BrowserFrame extends Handler {
      * @param steps A negative or positive number indicating the direction
      *              and number of steps to move.
      */
-    public native void goBackOrForward(int steps);
+    private native void nativeGoBackOrForward(int steps);
 
     /**
      * stringByEvaluatingJavaScriptFromString will execute the
@@ -738,7 +743,7 @@ class BrowserFrame extends Handler {
     /**
      * Returns false if the url is bad.
      */
-    private native boolean nativeLoadUrl(String url);
+    private native void nativeLoadUrl(String url);
 
     private native void nativeLoadData(String baseUrl, String data,
             String mimeType, String encoding, String failUrl);

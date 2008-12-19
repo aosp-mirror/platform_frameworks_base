@@ -31,8 +31,8 @@ generate code to marshall the parameters.</p>
     <li><strong><a href="#aidlsyntax">Create your .aidl file</a> </strong>- This
         file defines an interface (<em>YourInterface</em>.aidl) that defines the
         methods and fields available to a client. </li>
-    <li><strong>Add the .aidl file to your makefile</strong> - (the <a href="{@docRoot}intro/installing.html#developingwitheclipse">Eclipse
-            plugin</a> manages this for you). Android includes the compiler, called
+    <li><strong>Add the .aidl file to your makefile</strong> - (the ADT Plugin for Eclipse
+            manages this for you). Android includes the compiler, called
             AIDL, in the <code>tools/</code> directory. </li>
     <li><strong><a href="#implementtheinterface">Implement your interface methods</a></strong> -
         The AIDL compiler creates an interface in the Java programming language from your AIDL interface.
@@ -161,7 +161,8 @@ private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){
     interface to clients. </p>
 <pre>public class RemoteService extends Service {
 ...
-{@include development/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.java exposing_a_service}
+{@include development/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.java
+    exposing_a_service}
 }</pre>
 
 <a name="parcelable"></a>
@@ -265,7 +266,7 @@ to a Parcel.</p>
 other processes.  In this case, the rect will read four numbers from the parcel,
 but it is up to you to ensure that these are within the acceptable range of
 values for whatever the caller is trying to do.  See
-<a href="{@docRoot}devel/security.html">Security and Permissions in Android</a> for more
+<a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> for more
 on how to keep your application secure from malware.</p>
 
 <h2>Calling an IPC Method <a name="calling"></a></h2>

@@ -14,6 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package javax.imageio.metadata;
 
 import java.util.ArrayList;
@@ -22,73 +23,90 @@ import org.apache.harmony.x.imageio.metadata.IIOMetadataUtils;
 import org.w3c.dom.Node;
 
 /**
- * The Class IIOMetadata represents the metadata (bundled with an image)
- * as a Dom-type tree.
+ * The class IIOMetadata represents the metadata (bundled with an image) as a
+ * Dom-type tree.
+ * 
+ * @since Android 1.0
  */
 public abstract class IIOMetadata {
 
-    /** Whether the standard metadata format is supported. */
+    /**
+     * Whether the standard metadata format is supported.
+     */
     protected boolean standardFormatSupported;
-    
-    /** The native metadata format name. */
+
+    /**
+     * The native metadata format name.
+     */
     protected String nativeMetadataFormatName;
-    
-    /** The native metadata format class name. */
+
+    /**
+     * The native metadata format class name.
+     */
     protected String nativeMetadataFormatClassName;
-    
-    /** The extra metadata format names. */
+
+    /**
+     * The extra metadata format names.
+     */
     protected String[] extraMetadataFormatNames;
-    
-    /** The extra metadata format class names. */
+
+    /**
+     * The extra metadata format class names.
+     */
     protected String[] extraMetadataFormatClassNames;
-    
-    /** The default controller. */
+
+    /**
+     * The default controller.
+     */
     protected IIOMetadataController defaultController;
-    
-    /** The controller. */
+
+    /**
+     * The controller.
+     */
     protected IIOMetadataController controller;
 
     /**
      * Instantiates a new IIOMetadata with no data set.
      */
-    protected IIOMetadata() {}
+    protected IIOMetadata() {
+    }
 
     /**
      * Instantiates a new IIOMetadata with the specified data parameters.
      * 
-     * @param standardMetadataFormatSupported whether the standard metadata format is supported
-     * @param nativeMetadataFormatName the native metadata format name
-     * @param nativeMetadataFormatClassName the native metadata format class name
-     * @param extraMetadataFormatNames the extra metadata format names
-     * @param extraMetadataFormatClassNames the extra metadata format class names
+     * @param standardMetadataFormatSupported
+     *            whether the standard metadata format is supported.
+     * @param nativeMetadataFormatName
+     *            the native metadata format name.
+     * @param nativeMetadataFormatClassName
+     *            the native metadata format class name.
+     * @param extraMetadataFormatNames
+     *            the extra metadata format names.
+     * @param extraMetadataFormatClassNames
+     *            the extra metadata format class names.
      */
-    protected IIOMetadata(boolean standardMetadataFormatSupported,
-                          String nativeMetadataFormatName,
-                          String nativeMetadataFormatClassName,
-                          String[] extraMetadataFormatNames,
-                          String[] extraMetadataFormatClassNames) {
+    protected IIOMetadata(boolean standardMetadataFormatSupported, String nativeMetadataFormatName,
+            String nativeMetadataFormatClassName, String[] extraMetadataFormatNames,
+            String[] extraMetadataFormatClassNames) {
         standardFormatSupported = standardMetadataFormatSupported;
         this.nativeMetadataFormatName = nativeMetadataFormatName;
         this.nativeMetadataFormatClassName = nativeMetadataFormatClassName;
         if (extraMetadataFormatNames == null) {
             if (extraMetadataFormatClassNames != null) {
                 throw new IllegalArgumentException(
-                        "extraMetadataFormatNames == null && extraMetadataFormatClassNames != null!"
-                );
+                        "extraMetadataFormatNames == null && extraMetadataFormatClassNames != null!");
             }
         } else {
             if (extraMetadataFormatClassNames == null) {
                 throw new IllegalArgumentException(
-                        "extraMetadataFormatNames != null && extraMetadataFormatClassNames == null!"
-                );
+                        "extraMetadataFormatNames != null && extraMetadataFormatClassNames == null!");
             }
             if (extraMetadataFormatNames.length == 0) {
                 throw new IllegalArgumentException("extraMetadataFormatNames.length == 0!");
             }
             if (extraMetadataFormatClassNames.length != extraMetadataFormatNames.length) {
                 throw new IllegalArgumentException(
-                        "extraMetadataFormatClassNames.length != extraMetadataFormatNames.length!"
-                );
+                        "extraMetadataFormatClassNames.length != extraMetadataFormatNames.length!");
             }
             this.extraMetadataFormatNames = extraMetadataFormatNames.clone();
             this.extraMetadataFormatClassNames = extraMetadataFormatClassNames.clone();
@@ -98,30 +116,32 @@ public abstract class IIOMetadata {
     /**
      * Gets the metadata as tree-type document.
      * 
-     * @param formatName the format name
-     * 
-     * @return the node in tree format
+     * @param formatName
+     *            the format name.
+     * @return the node in tree format.
      */
     public abstract Node getAsTree(String formatName);
-    
+
     /**
      * Checks if the metadata is read only.
      * 
      * @return true, if the metadata is read only.
      */
     public abstract boolean isReadOnly();
-    
+
     /**
      * Merges the specified tree with this metadata tree.
      * 
-     * @param formatName the format of the specified tree
-     * @param root the root node of the metadata tree
-     * 
-     * @throws IIOInvalidTreeException if the specified tree
-     * is incompatible with the this metadata tree.
+     * @param formatName
+     *            the format of the specified tree.
+     * @param root
+     *            the root node of the metadata tree.
+     * @throws IIOInvalidTreeException
+     *             if the specified tree is incompatible with the this metadata
+     *             tree.
      */
     public abstract void mergeTree(String formatName, Node root) throws IIOInvalidTreeException;
-    
+
     /**
      * Resets the controller.
      */
@@ -130,7 +150,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the controller associated with this metadata document.
      * 
-     * @return the controller
+     * @return the controller.
      */
     public IIOMetadataController getController() {
         return controller;
@@ -139,7 +159,7 @@ public abstract class IIOMetadata {
     /**
      * Checks whether this metadata has a controller.
      * 
-     * @return true, if this metadata has a controller
+     * @return true, if this metadata has a controller.
      */
     public boolean hasController() {
         return getController() != null;
@@ -148,7 +168,7 @@ public abstract class IIOMetadata {
     /**
      * Activate the controller.
      * 
-     * @return true, if successful
+     * @return true, if successful.
      */
     public boolean activateController() {
         if (!hasController()) {
@@ -160,7 +180,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the default controller.
      * 
-     * @return the default controller
+     * @return the default controller.
      */
     public IIOMetadataController getDefaultController() {
         return defaultController;
@@ -169,7 +189,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the extra metadata format names.
      * 
-     * @return the extra metadata format names
+     * @return the extra metadata format names.
      */
     public String[] getExtraMetadataFormatNames() {
         return extraMetadataFormatNames == null ? null : extraMetadataFormatNames.clone();
@@ -178,23 +198,20 @@ public abstract class IIOMetadata {
     /**
      * Gets the metadata format.
      * 
-     * @param formatName the format name
-     * 
-     * @return the metadata format
+     * @param formatName
+     *            the format name.
+     * @return the metadata format.
      */
     public IIOMetadataFormat getMetadataFormat(String formatName) {
-        return IIOMetadataUtils.instantiateMetadataFormat(
-                formatName,
-                standardFormatSupported,
-                nativeMetadataFormatName, nativeMetadataFormatClassName,
-                extraMetadataFormatNames, extraMetadataFormatClassNames
-        );
+        return IIOMetadataUtils.instantiateMetadataFormat(formatName, standardFormatSupported,
+                nativeMetadataFormatName, nativeMetadataFormatClassName, extraMetadataFormatNames,
+                extraMetadataFormatClassNames);
     }
 
     /**
      * Gets the native metadata format name.
      * 
-     * @return the native metadata format name
+     * @return the native metadata format name.
      */
     public String getNativeMetadataFormatName() {
         return nativeMetadataFormatName;
@@ -203,7 +220,7 @@ public abstract class IIOMetadata {
     /**
      * Checks if the standard metadata format is supported.
      * 
-     * @return true, if the standard metadata format is supported
+     * @return true, if the standard metadata format is supported.
      */
     public boolean isStandardMetadataFormatSupported() {
         return standardFormatSupported;
@@ -212,7 +229,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the metadata format names.
      * 
-     * @return the metadata format names
+     * @return the metadata format names.
      */
     public String[] getMetadataFormatNames() {
         ArrayList<String> res = new ArrayList<String>();
@@ -239,7 +256,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard chroma node.
      * 
-     * @return the standard chroma node
+     * @return the standard chroma node.
      */
     protected IIOMetadataNode getStandardChromaNode() {
         return null;
@@ -248,7 +265,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard compression node.
      * 
-     * @return the standard compression node
+     * @return the standard compression node.
      */
     protected IIOMetadataNode getStandardCompressionNode() {
         return null;
@@ -257,7 +274,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard data node.
      * 
-     * @return the standard data node
+     * @return the standard data node.
      */
     protected IIOMetadataNode getStandardDataNode() {
         return null;
@@ -266,7 +283,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard dimension node.
      * 
-     * @return the standard dimension node
+     * @return the standard dimension node.
      */
     protected IIOMetadataNode getStandardDimensionNode() {
         return null;
@@ -275,7 +292,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard document node.
      * 
-     * @return the standard document node
+     * @return the standard document node.
      */
     protected IIOMetadataNode getStandardDocumentNode() {
         return null;
@@ -284,7 +301,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard text node.
      * 
-     * @return the standard text node
+     * @return the standard text node.
      */
     protected IIOMetadataNode getStandardTextNode() {
         return null;
@@ -293,7 +310,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard tile node.
      * 
-     * @return the standard tile node
+     * @return the standard tile node.
      */
     protected IIOMetadataNode getStandardTileNode() {
         return null;
@@ -302,7 +319,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the standard transparency node.
      * 
-     * @return the standard transparency node
+     * @return the standard transparency node.
      */
     protected IIOMetadataNode getStandardTransparencyNode() {
         return null;
@@ -311,7 +328,7 @@ public abstract class IIOMetadata {
     /**
      * Gets the metadata as a tree in standard format.
      * 
-     * @return the metadata as a tree in standard format
+     * @return the metadata as a tree in standard format.
      */
     protected final IIOMetadataNode getStandardTree() {
         // Create root node
@@ -342,14 +359,15 @@ public abstract class IIOMetadata {
         if ((node = getStandardTransparencyNode()) != null) {
             root.appendChild(node);
         }
-        
+
         return root;
     }
 
     /**
      * Sets the controller.
      * 
-     * @param controller the new controller
+     * @param controller
+     *            the new controller.
      */
     public void setController(IIOMetadataController controller) {
         this.controller = controller;
@@ -358,11 +376,13 @@ public abstract class IIOMetadata {
     /**
      * Sets the from tree.
      * 
-     * @param formatName the name of the metatdata format of the from tree
-     * @param root the root node of the from tree
-     * 
-     * @throws IIOInvalidTreeException if the tree or its format is not compatible with 
-     * this metadata.
+     * @param formatName
+     *            the name of the metatdata format of the from tree.
+     * @param root
+     *            the root node of the from tree.
+     * @throws IIOInvalidTreeException
+     *             if the tree or its format is not compatible with this
+     *             metadata.
      */
     public void setFromTree(String formatName, Node root) throws IIOInvalidTreeException {
         reset();

@@ -43,12 +43,16 @@ class audio_track_cblk_t;
 class AudioMixer;
 class AudioBuffer;
 
+
 // ----------------------------------------------------------------------------
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
+
 // ----------------------------------------------------------------------------
+
+static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
 class AudioFlinger : public BnAudioFlinger, protected Thread
 {
@@ -69,13 +73,16 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags);
+                                int frameCount,
+                                uint32_t flags,
+                                const sp<IMemory>& sharedBuffer,
+                                status_t *status);
 
     virtual     uint32_t    sampleRate() const;
     virtual     int         channelCount() const;
     virtual     int         format() const;
     virtual     size_t      frameCount() const;
+    virtual     size_t      latency() const;
 
     virtual     status_t    setMasterVolume(float value);
     virtual     status_t    setMasterMute(bool muted);
@@ -128,8 +135,9 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags);
+                                int frameCount,
+                                uint32_t flags,
+                                status_t *status);
 
     virtual     status_t    onTransact(
                                 uint32_t code,
@@ -141,12 +149,15 @@ private:
                             AudioFlinger();
     virtual                 ~AudioFlinger();
     
+    void                    setOutput(AudioStreamOut* output);
+    size_t                  getOutputFrameCount(AudioStreamOut* output);
+
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
     status_t dumpClients(int fd, const Vector<String16>& args);
     status_t dumpTracks(int fd, const Vector<String16>& args);
     status_t dumpInternals(int fd, const Vector<String16>& args);
-    
+
     // --- Client ---
     class Client : public RefBase {
     public:
@@ -183,17 +194,17 @@ private:
         };
 
         enum track_flags {
-            STEPSERVER_FAILED = 0x01   //  StepServer could not acquire cblk->lock mutex 
+            STEPSERVER_FAILED = 0x01   //  StepServer could not acquire cblk->lock mutex
         };
-        
+
                             TrackBase(  const sp<AudioFlinger>& audioFlinger,
                                     const sp<Client>& client,
                                     int streamType,
                                     uint32_t sampleRate,
                                     int format,
                                     int channelCount,
-                                    int bufferCount,
-                                    int bufferSize);
+                                    int frameCount,
+                                    const sp<IMemory>& sharedBuffer);
                             ~TrackBase();
 
         virtual status_t    start() = 0;
@@ -203,6 +214,7 @@ private:
     protected:
         friend class AudioFlinger;
         friend class RecordHandle;
+        friend class AudioRecordThread;
 
                             TrackBase(const TrackBase&);
                             TrackBase& operator = (const TrackBase&);
@@ -222,19 +234,11 @@ private:
             return mFormat;
         }
 
-        int channelCount() const {
-            return mChannelCount;
-        }
-
-        int bufferCount() const {
-            return mBufferCount;
-        }
+        int channelCount() const ;
 
         int sampleRate() const;
 
-        void* getBuffer(int n) const {
-            return (char*)mBuffers + n * mBufferSize;
-        }
+        void* getBuffer(uint32_t offset, uint32_t frames) const;
 
         int name() const {
             return mName;
@@ -256,16 +260,15 @@ private:
         sp<IMemory>         mCblkMemory;
         audio_track_cblk_t* mCblk;
         int                 mStreamType;
-        uint8_t             mFormat;
-        uint8_t             mChannelCount;
-        uint8_t             mBufferCount;
-        uint8_t             mFlags;
-        void*               mBuffers;
-        size_t              mBufferSize;
+        void*               mBuffer;
+        void*               mBufferEnd;
+        uint32_t            mFrameCount;
         int                 mName;
         // we don't really need a lock for these
         int                 mState;
         int                 mClientTid;
+        uint8_t             mFormat;
+        uint8_t             mFlags;
     };
 
     // playback track
@@ -277,8 +280,8 @@ private:
                                     uint32_t sampleRate,
                                     int format,
                                     int channelCount,
-                                    int bufferCount,
-                                    int bufferSize);
+                                    int frameCount,
+                                    const sp<IMemory>& sharedBuffer);
                             ~Track();
 
                 void        dump(char* buffer, size_t size);
@@ -312,7 +315,7 @@ private:
             return mState == PAUSED;
         }
 
-        bool isReady(uint32_t u, int32_t s) const;
+        bool isReady() const;
 
         void setPaused() { mState = PAUSED; }
         void reset();
@@ -324,6 +327,8 @@ private:
         enum {FS_FILLING, FS_FILLED, FS_ACTIVE};
         mutable uint8_t     mFillingUpStatus;
         int8_t              mRetryCount;
+        sp<IMemory>         mSharedBuffer;
+        bool                mResetDone;
     };  // end of Track
 
     friend class AudioBuffer;
@@ -366,8 +371,8 @@ private:
                 void        remove_track_l(wp<Track> track, int name);
                 void        destroyTrack(const sp<Track>& track);
 
-                AudioMixer& audioMixer() {
-                    return *mAudioMixer;
+                AudioMixer* audioMixer() {
+                    return mAudioMixer;
                 }
 
     // record track
@@ -379,8 +384,7 @@ private:
                                     uint32_t sampleRate,
                                     int format,
                                     int channelCount,
-                                    int bufferCount,
-                                    int bufferSize);
+                                    int frameCount);
                             ~RecordTrack();
 
         virtual status_t    start();
@@ -419,43 +423,34 @@ private:
     class AudioRecordThread : public Thread
     {
     public:
-        AudioRecordThread(const sp<AudioFlinger>& audioFlinger);
+        AudioRecordThread(AudioHardwareInterface* audioHardware);
         virtual             ~AudioRecordThread();
         virtual bool        threadLoop();
         virtual status_t    readyToRun() { return NO_ERROR; }
         virtual void        onFirstRef() {}
 
-                status_t    open(const sp<RecordTrack>& recordTrack, AudioStreamIn *input);
-                status_t    start();
-                void        stop();
-                status_t    close();
+                status_t    start(RecordTrack* recordTrack);
+                void        stop(RecordTrack* recordTrack);
                 void        exit();
-                
-                bool        isOpen() { return bool(mRecordTrack != NULL); }
 
     private:
                 AudioRecordThread();
-                sp<AudioFlinger>                    mAudioFlinger;
-                wp<RecordTrack>                     mRecordTrack;
-                AudioStreamIn*                      mInput;
+                AudioHardwareInterface              *mAudioHardware;
+                sp<RecordTrack>                     mRecordTrack;
                 Mutex                               mLock;
                 Condition                           mWaitWorkCV;
-                AudioBufferProvider::Buffer         mBuffer;
                 volatile bool                       mActive;
+                status_t                            mStartStatus;
     };
 
     friend class AudioRecordThread;
 
-                sp<AudioRecordThread> audioRecordThread();
-                void        endRecord();
-                status_t    startRecord();
-                void        stopRecord();
-                void        exitRecord();
-                
-                AudioHardwareInterface* audioHardware() { return mAudioHardware; }
+                status_t    startRecord(RecordTrack* recordTrack);
+                void        stopRecord(RecordTrack* recordTrack);
 
     mutable     Mutex                                       mHardwareLock;
     mutable     Mutex                                       mLock;
+    mutable     Mutex                                       mOutputLock;
     mutable     Condition                                   mWaitWorkCV;
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;
                 SortedVector< wp<Track> >                   mActiveTracks;
@@ -465,15 +460,19 @@ private:
                 bool                                mMasterMute;
                 stream_type_t                       mStreamTypes[AudioTrack::NUM_STREAM_TYPES];
 
+                AudioMixer*                         mHardwareAudioMixer;
+                AudioMixer*                         mA2dpAudioMixer;
                 AudioMixer*                         mAudioMixer;
                 AudioHardwareInterface*             mAudioHardware;
+                AudioHardwareInterface*             mA2dpAudioInterface;
+                AudioStreamOut*                     mHardwareOutput;
+                AudioStreamOut*                     mA2dpOutput;
                 AudioStreamOut*                     mOutput;
                 sp<AudioRecordThread>               mAudioRecordThread;
                 uint32_t                            mSampleRate;
                 size_t                              mFrameCount;
                 int                                 mChannelCount;
                 int                                 mFormat;
-                int                                 mMixBufferSize;
                 int16_t*                            mMixBuffer;
     mutable     int                                 mHardwareStatus;
                 nsecs_t                             mLastWriteTime;

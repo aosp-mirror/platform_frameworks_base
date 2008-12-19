@@ -1116,8 +1116,8 @@ void validate_arrays(ogles_context_t* c, GLenum mode)
     if (enables & GGL_ENABLE_TMUS) { // needs texture transforms
         want |= transform_state_t::TEXTURE;
     }
-    if (c->clipPlanes.enable) { // needs eye coords
-        want |= transform_state_t::MODELVIEW;
+    if (c->clipPlanes.enable || (enables & GGL_ENABLE_FOG)) { 
+        want |= transform_state_t::MODELVIEW; // needs eye coords
     }
     ogles_validate_transform(c, want);
 

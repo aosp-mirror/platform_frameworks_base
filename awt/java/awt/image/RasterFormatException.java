@@ -18,28 +18,31 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
-
 /**
- * The RasterFormatException class represents the exception 
- * that is thrown when there's an invalid layout
- * in the Raster.
+ * The RasterFormatException class represents the exception that is thrown when
+ * there's an invalid layout in the Raster.
+ * 
+ * @since Android 1.0
  */
 public class RasterFormatException extends RuntimeException {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 96598996116164315L;
 
     /**
-     * Instantiates a new RasterFormatException with the 
-     * specified detail message.
+     * Instantiates a new RasterFormatException with the specified detail
+     * message.
      * 
-     * @param s the detail message.
+     * @param s
+     *            the detail message.
      */
     public RasterFormatException(String s) {
         super(s);
     }
 
 }
-

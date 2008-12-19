@@ -40,6 +40,7 @@ import android.util.Log;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 /**
@@ -100,6 +101,20 @@ public final class Settings {
             "android.settings.WIRELESS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow entering/exiting airplane mode.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_AIRPLANE_MODE_SETTINGS =
+            "android.settings.AIRPLANE_MODE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of security and
      * location privacy.
      * <p>
@@ -116,6 +131,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of Wi-Fi.
+
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -123,10 +139,26 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WIFI_SETTINGS =
             "android.settings.WIFI_SETTINGS";
+    
+    /**
+     * Activity Action: Show settings to allow configuration of a static IP
+     * address for Wi-Fi.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_IP_SETTINGS =
+            "android.settings.WIFI_IP_SETTINGS";
 
     /**
      * Activity Action: Show settings to allow configuration of Bluetooth.
@@ -213,7 +245,50 @@ public final class Settings {
             "android.settings.APPLICATION_SETTINGS";
 
     /**
-     * Activity Action: Show settings to allow configuration of sync settings.
+     * Activity Action: Show settings to allow configuration of application
+     * development-related settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_DEVELOPMENT_SETTINGS =
+            "android.settings.APPLICATION_DEVELOPMENT_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of quick launch shortcuts.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_QUICK_LAUNCH_SETTINGS =
+            "android.settings.QUICK_LAUNCH_SETTINGS";
+    
+    /**
+     * Activity Action: Show settings to manage installed applications.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS =
+            "android.settings.MANAGE_APPLICATIONS_SETTINGS";
+    
+    /**
+     * Activity Action: Show settings for system update functionality.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -225,8 +300,77 @@ public final class Settings {
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SYSTEM_UPDATE_SETTINGS =
+            "android.settings.SYSTEM_UPDATE_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of sync settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SYNC_SETTINGS =
             "android.settings.SYNC_SETTINGS";
+    
+    /**
+     * Activity Action: Show settings for selecting the network operator.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NETWORK_OPERATOR_SETTINGS =
+            "android.settings.NETWORK_OPERATOR_SETTINGS";
+
+    /**
+     * Activity Action: Show settings for selection of 2G/3G.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DATA_ROAMING_SETTINGS =
+            "android.settings.DATA_ROAMING_SETTINGS";
+
+    /**
+     * Activity Action: Show settings for internal storage.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INTERNAL_STORAGE_SETTINGS =
+            "android.settings.INTERNAL_STORAGE_SETTINGS";
+    /**
+     * Activity Action: Show settings for memory card storage.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEMORY_CARD_SETTINGS =
+            "android.settings.MEMORY_CARD_SETTINGS";
     
     // End of Intent actions for Settings
 
@@ -246,8 +390,6 @@ public final class Settings {
 
     /**
      * Common base for tables of name/value settings.
-     *
-     * 
      */
     public static class NameValueTable implements BaseColumns {
         public static final String NAME = "name";
@@ -296,7 +438,7 @@ public final class Settings {
                 try {
                     c = cr.query(mUri, new String[] { Settings.NameValueTable.VALUE },
                             Settings.NameValueTable.NAME + "=?", new String[]{name}, null);
-                    if (c.moveToNext()) value = c.getString(0);
+                    if (c != null && c.moveToNext()) value = c.getString(0);
                     mValues.put(name, value);
                 } catch (SQLException e) {
                     // SQL error: return null, but don't cache it.
@@ -320,6 +462,41 @@ public final class Settings {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
         private static volatile NameValueCache mNameValueCache = null;
+        
+        private static final HashSet<String> MOVED_TO_SECURE;
+        static {
+            MOVED_TO_SECURE = new HashSet<String>(30);
+            MOVED_TO_SECURE.add(Secure.ADB_ENABLED);
+            MOVED_TO_SECURE.add(Secure.ANDROID_ID);
+            MOVED_TO_SECURE.add(Secure.BLUETOOTH_ON);
+            MOVED_TO_SECURE.add(Secure.DATA_ROAMING);
+            MOVED_TO_SECURE.add(Secure.DEVICE_PROVISIONED);
+            MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
+            MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
+            MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
+            MOVED_TO_SECURE.add(Secure.LOGGING_ID);
+            MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_ENABLED);
+            MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_LAST_UPDATE);
+            MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_REDIRECT_URL);
+            MOVED_TO_SECURE.add(Secure.SETTINGS_CLASSNAME);
+            MOVED_TO_SECURE.add(Secure.USB_MASS_STORAGE_ENABLED);
+            MOVED_TO_SECURE.add(Secure.USE_GOOGLE_MAIL);
+            MOVED_TO_SECURE.add(Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON);
+            MOVED_TO_SECURE.add(Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY);
+            MOVED_TO_SECURE.add(Secure.WIFI_NUM_OPEN_NETWORKS_KEPT);
+            MOVED_TO_SECURE.add(Secure.WIFI_ON);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_AP_COUNT);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_MAX_AP_CHECKS);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_ON);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_COUNT);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_DELAY_MS);
+            MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS);
+        }
 
         /**
          * Look up a name in the database.
@@ -328,6 +505,11 @@ public final class Settings {
          * @return the corresponding value, or null if not present
          */
         public synchronized static String getString(ContentResolver resolver, String name) {
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
+                        + " to android.provider.Settings.Secure, returning read-only value.");
+                return Secure.getString(resolver, name);
+            }
             if (mNameValueCache == null) {
                 mNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI);
             }
@@ -341,8 +523,12 @@ public final class Settings {
          * @param value to associate with the name
          * @return true if the value was set, false on database errors
          */
-        public static boolean putString(ContentResolver resolver,
-                String name, String value) {
+        public static boolean putString(ContentResolver resolver, String name, String value) {
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
+                        + " to android.provider.Settings.Secure, value is unchanged.");
+                return false;
+            }
             return putString(resolver, CONTENT_URI, name, value);
         }
 
@@ -353,6 +539,11 @@ public final class Settings {
          * @return the corresponding content URI, or null if not present
          */
         public static Uri getUriFor(String name) {
+            if (MOVED_TO_SECURE.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
+                    + " to android.provider.Settings.Secure, returning Secure URI.");
+                return Secure.getUriFor(Secure.CONTENT_URI, name);
+            }
             return getUriFor(CONTENT_URI, name);
         }
 
@@ -422,6 +613,75 @@ public final class Settings {
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
             return putString(cr, name, Integer.toString(value));
+        }
+
+        /**
+         * Convenience function for retrieving a single system settings value
+         * as a {@code long}.  Note that internally setting values are always
+         * stored as strings; this function converts the string to a {@code long}
+         * for you.  The default value will be returned if the setting is
+         * not defined or not a {@code long}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         * @param def Value to return if the setting is not defined.
+         *
+         * @return The setting's current value, or 'def' if it is not defined
+         * or not a valid {@code long}.
+         */
+        public static long getLong(ContentResolver cr, String name, long def) {
+            String valString = getString(cr, name);
+            long value;
+            try {
+                value = valString != null ? Long.parseLong(valString) : def;
+            } catch (NumberFormatException e) {
+                value = def;
+            }
+            return value;
+        }
+
+        /**
+         * Convenience function for retrieving a single system settings value
+         * as a {@code long}.  Note that internally setting values are always
+         * stored as strings; this function converts the string to a {@code long}
+         * for you.
+         * <p>
+         * This version does not take a default value.  If the setting has not
+         * been set, or the string value is not a number,
+         * it throws {@link SettingNotFoundException}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         *
+         * @return The setting's current value.
+         * @throws SettingNotFoundException Thrown if a setting by the given
+         * name can't be found or the setting value is not an integer.
+         */
+        public static long getLong(ContentResolver cr, String name)
+                throws SettingNotFoundException {
+            String valString = getString(cr, name);
+            try {
+                return Long.parseLong(valString);
+            } catch (NumberFormatException e) {
+                throw new SettingNotFoundException(name);
+            }
+        }
+
+        /**
+         * Convenience function for updating a single settings value as a long
+         * integer. This will either create a new entry in the table if the
+         * given name does not exist, or modify the value of the existing row
+         * with that name.  Note that internally setting values are always
+         * stored as strings, so this function converts the given value to a
+         * string before storing it.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to modify.
+         * @param value The new value for the setting.
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putLong(ContentResolver cr, String name, long value) {
+            return putString(cr, name, Long.toString(value));
         }
 
         /**
@@ -536,7 +796,13 @@ public final class Settings {
 
         /**
          * Whether we keep the device on while the device is plugged in.
-         * 0=no  1=yes
+         * Supported values are:
+         * <ul>
+         * <li>{@code 0} to never stay on while plugged in</li>
+         * <li>{@link BatteryManager#BATTERY_PLUGGED_AC} to stay on for AC charger</li>
+         * <li>{@link BatteryManager#BATTERY_PLUGGED_USB} to stay on for USB charger</li>
+         * </ul>
+         * These values can be OR-ed together.
          */
         public static final String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
 
@@ -580,103 +846,14 @@ public final class Settings {
         public static final String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
 
         /**
-         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
+         * The interval in milliseconds after which Wi-Fi is considered idle.
+         * When idle, it is possible for the device to be switched from Wi-Fi to
+         * the mobile data network.
+         * 
+         * @hide pending API Council approval
          */
-        public static final String WIFI_ON = "wifi_on";
+        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
 
-        /**
-         * Whether to notify the user of open networks.
-         * <p>
-         * If not connected and the scan results have an open network, we will
-         * put this notification up. If we attempt to connect to a network or
-         * the open network(s) disappear, we remove the notification. When we
-         * show the notification, we will not show it again for
-         * {@link #WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
-         */
-        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
-                "wifi_networks_available_notification_on";
-
-        /**
-         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
-         * Connecting to a network will reset the timer.
-         */
-        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
-                "wifi_networks_available_repeat_delay";
-
-        /**
-         * When the number of open networks exceeds this number, the
-         * least-recently-used excess networks will be removed.
-         */
-        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
-
-        /**
-         * Whether the Wi-Fi watchdog is enabled.
-         */
-        public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
-
-        /**
-         * The number of access points required for a network in order for the
-         * watchdog to monitor it.
-         */
-        public static final String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
-
-        /**
-         * The number of initial pings to perform that *may* be ignored if they
-         * fail. Again, if these fail, they will *not* be used in packet loss
-         * calculation. For example, one network always seemed to time out for
-         * the first couple pings, so this is set to 3 by default.
-         */
-        public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT = "wifi_watchdog_initial_ignored_ping_count";
-        
-        /**
-         * The number of pings to test if an access point is a good connection.
-         */
-        public static final String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
-        
-        /**
-         * The timeout per ping.
-         */
-        public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
-
-        /**
-         * The delay between pings.
-         */
-        public static final String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
-
-        /**
-         * The acceptable packet loss percentage (range 0 - 100) before trying
-         * another AP on the same network.
-         */
-        public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
-                "wifi_watchdog_acceptable_packet_loss_percentage";
-
-        /**
-         * The maximum number of access points (per network) to attempt to test.
-         * If this number is reached, the watchdog will no longer monitor the
-         * initial connection state for the network. This is a safeguard for
-         * networks containing multiple APs whose DNS does not respond to pings.
-         */
-        public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
-
-        /**
-         * Whether the Wi-Fi watchdog is enabled for background checking even
-         * after it thinks the user has connected to a good access point.
-         */
-        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
-                "wifi_watchdog_background_check_enabled";
-
-        /**
-         * The timeout for a background ping
-         */
-        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
-                "wifi_watchdog_background_check_timeout_ms";
-        
-        /**
-         * The delay between background checks.
-         */
-        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
-                "wifi_watchdog_background_check_delay_ms";
-        
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
@@ -720,16 +897,11 @@ public final class Settings {
         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
 
         /**
-         * User preference for which network(s) should be used. Only the
-         * connectivity service should touch this.
+         * The number of radio channels that are allowed in the local
+         * 802.11 regulatory domain.
+         * @hide
          */
-        public static final String NETWORK_PREFERENCE = "network_preference";
-
-        /**
-         * Whether bluetooth is enabled/disabled
-         * 0=disabled. 1=enabled.
-         */
-        public static final String BLUETOOTH_ON = "bluetooth_on";
+        public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
 
         /**
          * Determines whether remote devices may discover and/or connect to
@@ -756,14 +928,15 @@ public final class Settings {
         public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
 
         /**
-         * Whether the device has been provisioned (0 = false, 1 = true)
-         */
-        public static final String DEVICE_PROVISIONED = "device_provisioned";
-
-        /**
          * Whether lock pattern is visible as user enters (0 = false, 1 = true)
          */
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
+
+        /**
+         * Whether lock pattern will vibrate as user enters (0 = false, 1 = true)
+         */
+        public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
+            "lock_pattern_tactile_feedback_enabled";
 
 
         /**
@@ -771,16 +944,6 @@ public final class Settings {
          * if there is no alarm set.
          */
         public static final String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
-
-        /**
-         * Comma-separated list of location providers that activities may access.
-         */
-        public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
-
-        /**
-         * Whether or not data roaming is enabled. (0 = false, 1 = true)
-         */
-        public static final String DATA_ROAMING = "data_roaming";
 
         /**
          * Scaling factor for fonts, float.
@@ -884,10 +1047,33 @@ public final class Settings {
         public static final String VOLUME_ALARM = "volume_alarm";
 
         /**
+         * Notification volume. This is used internally, changing this
+         * value will not change the volume. See AudioManager.
+         */
+        public static final String VOLUME_NOTIFICATION = "volume_notification";
+
+        /**
+         * Whether the notifications should use the ring volume (value of 1) or
+         * a separate notification volume (value of 0). In most cases, users
+         * will have this enabled so the notification and ringer volumes will be
+         * the same. However, power users can disable this and use the separate
+         * notification volume control.
+         * <p>
+         * Note: This is a one-off setting that will be removed in the future
+         * when there is profile support. For this reason, it is kept hidden
+         * from the public APIs.
+         * 
+         * @hide
+         */
+        public static final String NOTIFICATIONS_USE_RING_VOLUME = 
+            "notifications_use_ring_volume";
+        
+        /**
          * The mapping of stream type (integer) to its setting.
          */
         public static final String[] VOLUME_SETTINGS = {
-            VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC, VOLUME_ALARM
+            VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC,
+            VOLUME_ALARM, VOLUME_NOTIFICATION
         };
 
         /**
@@ -949,16 +1135,11 @@ public final class Settings {
          * feature converts two spaces to a "." and space.
          */
         public static final String TEXT_AUTO_PUNCTUATE = "auto_punctuate";
-
+        
         /**
          * Setting to showing password characters in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_SHOW_PASSWORD = "show_password";
-        /**
-         * USB Mass Storage Enabled
-         */
-        public static final String USB_MASS_STORAGE_ENABLED =
-                "usb_mass_storage_enabled";
 
         public static final String SHOW_GTALK_SERVICE_STATUS =
                 "SHOW_GTALK_SERVICE_STATUS";
@@ -967,11 +1148,6 @@ public final class Settings {
          * Name of activity to use for wallpaper on the home screen.
          */
         public static final String WALLPAPER_ACTIVITY = "wallpaper_activity";
-
-        /**
-         * Host name and port for a user-selected proxy.
-         */
-        public static final String HTTP_PROXY = "http_proxy";
 
         /**
          * Value to specify if the user prefers the date, time and time zone
@@ -995,13 +1171,6 @@ public final class Settings {
         public static final String DATE_FORMAT = "date_format";
 
         /**
-         * Settings classname to launch when Settings is clicked from All
-         * Applications.  Needed because of user testing between the old
-         * and new Settings apps. TODO: 881807
-         */
-        public static final String SETTINGS_CLASSNAME = "settings_classname";
-
-        /**
          * Whether the setup wizard has been run before (on first boot), or if
          * it still needs to be run.
          *
@@ -1009,35 +1178,6 @@ public final class Settings {
          * 0 = it has not been run in the past
          */
         public static final String SETUP_WIZARD_HAS_RUN = "setup_wizard_has_run";
-
-        /**
-         * The Android ID (a unique 64-bit value) as a hex string.
-         * Identical to that obtained by calling
-         * GoogleLoginService.getAndroidId(); it is also placed here
-         * so you can get it without binding to a service.
-         */
-        public static final String ANDROID_ID = "android_id";
-
-        /**
-         * The Logging ID (a unique 64-bit value) as a hex string.
-         * Used as a pseudonymous identifier for logging.
-         */
-        public static final String LOGGING_ID = "logging_id";
-
-        /**
-         * If this setting is set (to anything), then all references
-         * to Gmail on the device must change to Google Mail.
-         */
-        public static final String USE_GOOGLE_MAIL = "use_google_mail";
-
-        /**
-         * Whether the package installer should allow installation of apps downloaded from
-         * sources other than the Android Market (vending machine).
-         *
-         * 1 = allow installing from other sources
-         * 0 = only allow installing from the Android Market
-         */
-        public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
 
         /**
          * Scaling factor for normal window animations. Setting to 0 will disable window
@@ -1051,19 +1191,13 @@ public final class Settings {
          */
         public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
 
-        public static final String PARENTAL_CONTROL_ENABLED =
-            "parental_control_enabled";
-
-        public static final String PARENTAL_CONTROL_REDIRECT_URL =
-            "parental_control_redirect_url";
-
-        public static final String PARENTAL_CONTROL_LAST_UPDATE =
-          "parental_control_last_update";
-
         /**
-         * Whether ADB is enabled.
+         * Control whether the accelerometer will be used to change screen
+         * orientation.  If 0, it will not be used unless explicitly requested
+         * by the application; if 1, it will be used by default unless explicitly
+         * disabled by the application.
          */
-        public static final String ADB_ENABLED = "adb_enabled";
+        public static final String ACCELEROMETER_ROTATION = "accelerometer_rotation";
 
         /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
@@ -1076,17 +1210,752 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
+        
+        // Settings moved to Settings.Secure
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
+         * instead
+         */
+        @Deprecated
+        public static final String ADB_ENABLED = Secure.ADB_ENABLED;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#ANDROID_ID} instead
+         */
+        @Deprecated
+        public static final String ANDROID_ID = Secure.ANDROID_ID;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#BLUETOOTH_ON} instead
+         */
+        @Deprecated
+        public static final String BLUETOOTH_ON = Secure.BLUETOOTH_ON;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#DATA_ROAMING} instead
+         */
+        @Deprecated
+        public static final String DATA_ROAMING = Secure.DATA_ROAMING;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#DEVICE_PROVISIONED} instead
+         */
+        @Deprecated
+        public static final String DEVICE_PROVISIONED = Secure.DEVICE_PROVISIONED;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#HTTP_PROXY} instead
+         */
+        @Deprecated
+        public static final String HTTP_PROXY = Secure.HTTP_PROXY;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS} instead
+         */
+        @Deprecated
+        public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
+        
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
+         * instead
+         */
+        @Deprecated
+        public static final String LOCATION_PROVIDERS_ALLOWED = Secure.LOCATION_PROVIDERS_ALLOWED;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#LOGGING_ID} instead
+         */
+        @Deprecated
+        public static final String LOGGING_ID = Secure.LOGGING_ID;
+        
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#NETWORK_PREFERENCE} instead
+         */
+        @Deprecated
+        public static final String NETWORK_PREFERENCE = Secure.NETWORK_PREFERENCE;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#PARENTAL_CONTROL_ENABLED}
+         * instead
+         */
+        @Deprecated
+        public static final String PARENTAL_CONTROL_ENABLED = Secure.PARENTAL_CONTROL_ENABLED;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#PARENTAL_CONTROL_LAST_UPDATE}
+         * instead
+         */
+        @Deprecated
+        public static final String PARENTAL_CONTROL_LAST_UPDATE = Secure.PARENTAL_CONTROL_LAST_UPDATE;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#PARENTAL_CONTROL_REDIRECT_URL}
+         * instead
+         */
+        @Deprecated
+        public static final String PARENTAL_CONTROL_REDIRECT_URL =
+            Secure.PARENTAL_CONTROL_REDIRECT_URL;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#SETTINGS_CLASSNAME} instead
+         */
+        @Deprecated
+        public static final String SETTINGS_CLASSNAME = Secure.SETTINGS_CLASSNAME;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#USB_MASS_STORAGE_ENABLED} instead
+         */
+        @Deprecated
+        public static final String USB_MASS_STORAGE_ENABLED = Secure.USB_MASS_STORAGE_ENABLED;
+        
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#USE_GOOGLE_MAIL} instead
+         */
+        @Deprecated
+        public static final String USE_GOOGLE_MAIL = Secure.USE_GOOGLE_MAIL;
+
+//       /**
+//         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}
+//         * instead
+//         */
+        @Deprecated
+        public static final String WIFI_MAX_DHCP_RETRY_COUNT = Secure.WIFI_MAX_DHCP_RETRY_COUNT;
+
+//        /**
+//         * @deprecated Use
+//         * {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}
+//         * instead
+//         */
+        @Deprecated
+        public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
+                Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON} instead
+         */
+        @Deprecated
+        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
+            Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} instead
+         */
+        @Deprecated
+        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
+            Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
+        
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_NUM_OPEN_NETWORKS_KEPT}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = Secure.WIFI_NUM_OPEN_NETWORKS_KEPT;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_ON} instead
+         */
+        @Deprecated
+        public static final String WIFI_ON = Secure.WIFI_ON;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
+                Secure.WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_AP_COUNT} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_AP_COUNT = Secure.WIFI_WATCHDOG_AP_COUNT;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
+                Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS;
+        
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
+                Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
+                Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS;
+
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT =
+            Secure.WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_MAX_AP_CHECKS}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = Secure.WIFI_WATCHDOG_MAX_AP_CHECKS;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_ON} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_ON = Secure.WIFI_WATCHDOG_ON;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_PING_COUNT} instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_PING_COUNT = Secure.WIFI_WATCHDOG_PING_COUNT;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_PING_DELAY_MS}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_PING_DELAY_MS = Secure.WIFI_WATCHDOG_PING_DELAY_MS;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_WATCHDOG_PING_TIMEOUT_MS}
+         * instead
+         */
+        @Deprecated
+        public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS =
+            Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS;
     }
 
+    /**
+     * Secure system settings, containing system preferences that applications
+     * can read but are not allowed to write.  These are for preferences that
+     * the user must explicitly modify through the system UI or specialized
+     * APIs for those values, not modified directly by applications.
+     */
+    public static final class Secure extends NameValueTable {
+        public static final String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
 
+        private static volatile NameValueCache mNameValueCache = null;
+
+        /**
+         * Look up a name in the database.
+         * @param resolver to access the database with
+         * @param name to look up in the table
+         * @return the corresponding value, or null if not present
+         */
+        public synchronized static String getString(ContentResolver resolver, String name) {
+            if (mNameValueCache == null) {
+                mNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI);
+            }
+            return mNameValueCache.getString(resolver, name);
+        }
+
+        /**
+         * Store a name/value pair into the database.
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putString(ContentResolver resolver,
+                String name, String value) {
+            return putString(resolver, CONTENT_URI, name, value);
+        }
+
+        /**
+         * Construct the content URI for a particular name/value pair,
+         * useful for monitoring changes with a ContentObserver.
+         * @param name to look up in the table
+         * @return the corresponding content URI, or null if not present
+         */
+        public static Uri getUriFor(String name) {
+            return getUriFor(CONTENT_URI, name);
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as an integer.  Note that internally setting values are always
+         * stored as strings; this function converts the string to an integer
+         * for you.  The default value will be returned if the setting is
+         * not defined or not an integer.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         * @param def Value to return if the setting is not defined.
+         *
+         * @return The setting's current value, or 'def' if it is not defined
+         * or not a valid integer.
+         */
+        public static int getInt(ContentResolver cr, String name, int def) {
+            String v = getString(cr, name);
+            try {
+                return v != null ? Integer.parseInt(v) : def;
+            } catch (NumberFormatException e) {
+                return def;
+            }
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as an integer.  Note that internally setting values are always
+         * stored as strings; this function converts the string to an integer
+         * for you.
+         * <p>
+         * This version does not take a default value.  If the setting has not
+         * been set, or the string value is not a number,
+         * it throws {@link SettingNotFoundException}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         *
+         * @throws SettingNotFoundException Thrown if a setting by the given
+         * name can't be found or the setting value is not an integer.
+         *
+         * @return The setting's current value.
+         */
+        public static int getInt(ContentResolver cr, String name)
+                throws SettingNotFoundException {
+            String v = getString(cr, name);
+            try {
+                return Integer.parseInt(v);
+            } catch (NumberFormatException e) {
+                throw new SettingNotFoundException(name);
+            }
+        }
+
+        /**
+         * Convenience function for updating a single settings value as an
+         * integer. This will either create a new entry in the table if the
+         * given name does not exist, or modify the value of the existing row
+         * with that name.  Note that internally setting values are always
+         * stored as strings, so this function converts the given value to a
+         * string before storing it.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to modify.
+         * @param value The new value for the setting.
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putInt(ContentResolver cr, String name, int value) {
+            return putString(cr, name, Integer.toString(value));
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as a {@code long}.  Note that internally setting values are always
+         * stored as strings; this function converts the string to a {@code long}
+         * for you.  The default value will be returned if the setting is
+         * not defined or not a {@code long}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         * @param def Value to return if the setting is not defined.
+         *
+         * @return The setting's current value, or 'def' if it is not defined
+         * or not a valid {@code long}.
+         */
+        public static long getLong(ContentResolver cr, String name, long def) {
+            String valString = getString(cr, name);
+            long value;
+            try {
+                value = valString != null ? Long.parseLong(valString) : def;
+            } catch (NumberFormatException e) {
+                value = def;
+            }
+            return value;
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as a {@code long}.  Note that internally setting values are always
+         * stored as strings; this function converts the string to a {@code long}
+         * for you.
+         * <p>
+         * This version does not take a default value.  If the setting has not
+         * been set, or the string value is not a number,
+         * it throws {@link SettingNotFoundException}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         *
+         * @return The setting's current value.
+         * @throws SettingNotFoundException Thrown if a setting by the given
+         * name can't be found or the setting value is not an integer.
+         */
+        public static long getLong(ContentResolver cr, String name)
+                throws SettingNotFoundException {
+            String valString = getString(cr, name);
+            try {
+                return Long.parseLong(valString);
+            } catch (NumberFormatException e) {
+                throw new SettingNotFoundException(name);
+            }
+        }
+
+        /**
+         * Convenience function for updating a secure settings value as a long
+         * integer. This will either create a new entry in the table if the
+         * given name does not exist, or modify the value of the existing row
+         * with that name.  Note that internally setting values are always
+         * stored as strings, so this function converts the given value to a
+         * string before storing it.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to modify.
+         * @param value The new value for the setting.
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putLong(ContentResolver cr, String name, long value) {
+            return putString(cr, name, Long.toString(value));
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as a floating point number.  Note that internally setting values are
+         * always stored as strings; this function converts the string to an
+         * float for you. The default value will be returned if the setting
+         * is not defined or not a valid float.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         * @param def Value to return if the setting is not defined.
+         *
+         * @return The setting's current value, or 'def' if it is not defined
+         * or not a valid float.
+         */
+        public static float getFloat(ContentResolver cr, String name, float def) {
+            String v = getString(cr, name);
+            try {
+                return v != null ? Float.parseFloat(v) : def;
+            } catch (NumberFormatException e) {
+                return def;
+            }
+        }
+
+        /**
+         * Convenience function for retrieving a single secure settings value
+         * as a float.  Note that internally setting values are always
+         * stored as strings; this function converts the string to a float
+         * for you.
+         * <p>
+         * This version does not take a default value.  If the setting has not
+         * been set, or the string value is not a number,
+         * it throws {@link SettingNotFoundException}.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         *
+         * @throws SettingNotFoundException Thrown if a setting by the given
+         * name can't be found or the setting value is not a float.
+         *
+         * @return The setting's current value.
+         */
+        public static float getFloat(ContentResolver cr, String name)
+                throws SettingNotFoundException {
+            String v = getString(cr, name);
+            try {
+                return Float.parseFloat(v);
+            } catch (NumberFormatException e) {
+                throw new SettingNotFoundException(name);
+            }
+        }
+
+        /**
+         * Convenience function for updating a single settings value as a
+         * floating point number. This will either create a new entry in the
+         * table if the given name does not exist, or modify the value of the
+         * existing row with that name.  Note that internally setting values
+         * are always stored as strings, so this function converts the given
+         * value to a string before storing it.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to modify.
+         * @param value The new value for the setting.
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putFloat(ContentResolver cr, String name, float value) {
+            return putString(cr, name, Float.toString(value));
+        }
+
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://" + AUTHORITY + "/secure");
+        
+        /**
+         * Whether ADB is enabled.
+         */
+        public static final String ADB_ENABLED = "adb_enabled";
+    
+        /**
+         * Setting to allow mock locations and location provider status to be injected into the
+         * LocationManager service for testing purposes during application development.  These
+         * locations and status values  override actual location and status information generated
+         * by network, gps, or other location providers.
+         */
+        public static final String ALLOW_MOCK_LOCATION = "mock_location";
+    
+        /**
+         * The Android ID (a unique 64-bit value) as a hex string.
+         * Identical to that obtained by calling
+         * GoogleLoginService.getAndroidId(); it is also placed here
+         * so you can get it without binding to a service.
+         */
+        public static final String ANDROID_ID = "android_id";
+    
+        /**
+         * Whether bluetooth is enabled/disabled
+         * 0=disabled. 1=enabled.
+         */
+        public static final String BLUETOOTH_ON = "bluetooth_on";
+    
+        /**
+         * Whether or not data roaming is enabled. (0 = false, 1 = true)
+         */
+        public static final String DATA_ROAMING = "data_roaming";
+    
+        /**
+         * Setting to record the input method used by default, holding the ID
+         * of the desired method.
+         */
+        public static final String DEFAULT_INPUT_METHOD = "default_input_method";
+    
+        /**
+         * Whether the device has been provisioned (0 = false, 1 = true)
+         */
+        public static final String DEVICE_PROVISIONED = "device_provisioned";
+    
+        /**
+         * List of input methods that are currently enabled.  This is a string
+         * containing the IDs of all enabled input methods, each ID separated
+         * by ':'.
+         */
+        public static final String ENABLED_INPUT_METHODS = "enabled_input_methods";
+    
+        /**
+         * Host name and port for a user-selected proxy.
+         */
+        public static final String HTTP_PROXY = "http_proxy";
+    
+        /**
+         * Whether the package installer should allow installation of apps downloaded from
+         * sources other than the Android Market (vending machine).
+         *
+         * 1 = allow installing from other sources
+         * 0 = only allow installing from the Android Market
+         */
+        public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
+    
+        /**
+         * Comma-separated list of location providers that activities may access.
+         */
+        public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+    
+        /**
+         * The Logging ID (a unique 64-bit value) as a hex string.
+         * Used as a pseudonymous identifier for logging.
+         */
+        public static final String LOGGING_ID = "logging_id";
+    
+        /**
+         * User preference for which network(s) should be used. Only the
+         * connectivity service should touch this.
+         */
+        public static final String NETWORK_PREFERENCE = "network_preference";
+    
+        /** 
+         */
+        public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
+    
+        /** 
+         */
+        public static final String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
+    
+        /** 
+         */
+        public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
+    
+        /**
+         * Settings classname to launch when Settings is clicked from All
+         * Applications.  Needed because of user testing between the old
+         * and new Settings apps.
+         */
+        // TODO: 881807
+        public static final String SETTINGS_CLASSNAME = "settings_classname";
+    
+        /**
+         * USB Mass Storage Enabled
+         */
+        public static final String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
+    
+        /**
+         * If this setting is set (to anything), then all references
+         * to Gmail on the device must change to Google Mail.
+         */
+        public static final String USE_GOOGLE_MAIL = "use_google_mail";
+    
+        /**
+         * Whether to notify the user of open networks.
+         * <p>
+         * If not connected and the scan results have an open network, we will
+         * put this notification up. If we attempt to connect to a network or
+         * the open network(s) disappear, we remove the notification. When we
+         * show the notification, we will not show it again for
+         * {@link android.provider.Settings.Secure#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
+         */
+        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
+                "wifi_networks_available_notification_on";
+    
+        /**
+         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
+         * Connecting to a network will reset the timer.
+         */
+        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
+                "wifi_networks_available_repeat_delay";
+    
+        /**
+         * The number of radio channels that are allowed in the local
+         * 802.11 regulatory domain.
+         * @hide
+         */
+        public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
+    
+        /**
+         * When the number of open networks exceeds this number, the
+         * least-recently-used excess networks will be removed.
+         */
+        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
+    
+        /**
+         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
+         */
+        public static final String WIFI_ON = "wifi_on";
+    
+        /**
+         * The acceptable packet loss percentage (range 0 - 100) before trying
+         * another AP on the same network.
+         */
+        public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
+                "wifi_watchdog_acceptable_packet_loss_percentage";
+    
+        /**
+         * The number of access points required for a network in order for the
+         * watchdog to monitor it.
+         */
+        public static final String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
+    
+        /**
+         * The delay between background checks.
+         */
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
+                "wifi_watchdog_background_check_delay_ms";
+    
+        /**
+         * Whether the Wi-Fi watchdog is enabled for background checking even
+         * after it thinks the user has connected to a good access point.
+         */
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
+                "wifi_watchdog_background_check_enabled";
+    
+        /**
+         * The timeout for a background ping
+         */
+        public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
+                "wifi_watchdog_background_check_timeout_ms";
+    
+        /**
+         * The number of initial pings to perform that *may* be ignored if they
+         * fail. Again, if these fail, they will *not* be used in packet loss
+         * calculation. For example, one network always seemed to time out for
+         * the first couple pings, so this is set to 3 by default.
+         */
+        public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT =
+            "wifi_watchdog_initial_ignored_ping_count";
+    
+        /**
+         * The maximum number of access points (per network) to attempt to test.
+         * If this number is reached, the watchdog will no longer monitor the
+         * initial connection state for the network. This is a safeguard for
+         * networks containing multiple APs whose DNS does not respond to pings.
+         */
+        public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
+    
+        /**
+         * Whether the Wi-Fi watchdog is enabled.
+         */
+        public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
+    
+        /**
+         * The number of pings to test if an access point is a good connection.
+         */
+        public static final String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
+    
+        /**
+         * The delay between pings.
+         */
+        public static final String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
+    
+        /**
+         * The timeout per ping.
+         */
+        public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
+    
+        /**
+         * The maximum number of times we will retry a connection to an access
+         * point for which we have failed in acquiring an IP address from DHCP.
+         * A value of N means that we will make N+1 connection attempts in all.
+         * 
+         * @hide pending API Council approval
+         */
+        public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
+    
+        /**
+         * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile
+         * data connectivity to be established after a disconnect from Wi-Fi.
+         * 
+         * @hide pending API Council approval
+         */
+        public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
+            "wifi_mobile_data_transition_wakelock_timeout_ms";
+    }
+    
     /**
      * Gservices settings, containing the network names for Google's
      * various services. This table holds simple name/addr pairs.
      * Addresses can be accessed through the getString() method.
+     *
+     * TODO: This should move to partner/google/... somewhere.
+     *
      * @hide
      */
     public static final class Gservices extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_gservices_version";
+
+        /**
+         * Intent action broadcast when the Gservices table is updated by the server.
+         * This is broadcast once after settings change (so many values may have been updated).
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String CHANGED_ACTION =
+            "com.google.gservices.intent.action.GSERVICES_CHANGED";
 
         private static volatile NameValueCache mNameValueCache = null;
         private static final Object mNameValueCacheLock = new Object();
@@ -1173,132 +2042,6 @@ public final class Settings {
                 = "mms_x_wap_profile_url";
 
         /**
-         * YouTube - "most viewed" url
-         */
-        public static final String YOUTUBE_MOST_VIEWED_URL
-                = "youtube_most_viewed_url";
-
-        /**
-         * YouTube - "most recent" url
-         */
-        public static final String YOUTUBE_MOST_RECENT_URL
-                = "youtube_most_recent_url";
-
-        /**
-         * YouTube - "top favorites" url
-         */
-        public static final String YOUTUBE_TOP_FAVORITES_URL
-                = "youtube_top_favorites_url";
-
-        /**
-         * YouTube - "most discussed" url
-         */
-        public static final String YOUTUBE_MOST_DISCUSSED_URL
-                = "youtube_most_discussed_url";
-
-        /**
-         * YouTube - "most responded" url
-         */
-        public static final String YOUTUBE_MOST_RESPONDED_URL
-                = "youtube_most_responded_url";
-
-        /**
-         * YouTube - "most linked" url
-         */
-        public static final String YOUTUBE_MOST_LINKED_URL
-                = "youtube_most_linked_url";
-
-        /**
-         * YouTube - "top rated" url
-         */
-        public static final String YOUTUBE_TOP_RATED_URL
-                = "youtube_top_rated_url";
-
-        /**
-         * YouTube - "recently featured" url
-         */
-        public static final String YOUTUBE_RECENTLY_FEATURED_URL
-                = "youtube_recently_featured_url";
-
-        /**
-         * YouTube - my uploaded videos
-         */
-        public static final String YOUTUBE_MY_VIDEOS_URL
-                = "youtube_my_videos_url";
-
-        /**
-         * YouTube - "my favorite" videos url
-         */
-        public static final String YOUTUBE_MY_FAVORITES_URL
-                = "youtube_my_favorites_url";
-
-        /**
-         * YouTube - "by author" videos url -- used for My videos
-         */
-        public static final String YOUTUBE_BY_AUTHOR_URL
-                = "youtube_by_author_url";
-
-        /**
-         * YouTube - save a video to favorite videos url
-         */
-        public static final String YOUTUBE_SAVE_TO_FAVORITES_URL
-                = "youtube_save_to_favorites_url";
-
-        /**
-         * YouTube - "mobile" videos url
-         */
-        public static final String YOUTUBE_MOBILE_VIDEOS_URL
-                = "youtube_mobile_videos_url";
-
-        /**
-         * YouTube - search videos url
-         */
-        public static final String YOUTUBE_SEARCH_URL
-                = "youtube_search_url";
-
-        /**
-         * YouTube - category search videos url
-         */
-        public static final String YOUTUBE_CATEGORY_SEARCH_URL
-                = "youtube_category_search_url";
-
-        /**
-         * YouTube - url to get the list of categories
-         */
-        public static final String YOUTUBE_CATEGORY_LIST_URL
-                = "youtube_category_list_url";
-
-        /**
-         * YouTube - related videos url
-         */
-        public static final String YOUTUBE_RELATED_VIDEOS_URL
-                = "youtube_related_videos_url";
-
-        /**
-         * YouTube - individual video url
-         */
-        public static final String YOUTUBE_INDIVIDUAL_VIDEO_URL
-                = "youtube_individual_video_url";
-
-        /**
-         * YouTube - user's playlist url
-         */
-        public static final String YOUTUBE_MY_PLAYLISTS_URL
-                = "youtube_my_playlists_url";
-
-        /**
-         * YouTube - user's subscriptions url
-         */
-        public static final String YOUTUBE_MY_SUBSCRIPTIONS_URL
-                = "youtube_my_subscriptions_url";
-
-        /**
-         * YouTube - the url we use to contact YouTube to get a device id
-         */
-        public static final String YOUTUBE_REGISTER_DEVICE_URL
-                = "youtube_register_device_url";
-
-        /**
          * YouTube - the flag to indicate whether to use proxy
          */
         public static final String YOUTUBE_USE_PROXY
@@ -1325,7 +2068,8 @@ public final class Settings {
          * seconds.  This allows for throttling of logs when the device is
          * running for large amounts of time.
          */
-        public static final String MEMCHECK_LOG_REALTIME_INTERVAL = "memcheck_log_realtime_interval";
+        public static final String MEMCHECK_LOG_REALTIME_INTERVAL =
+                "memcheck_log_realtime_interval";
 
         /**
          * Boolean indicating whether rebooting due to system memory checks
@@ -1423,7 +2167,7 @@ public final class Settings {
          * the device is idle within the window.
          */
         public static final String REBOOT_WINDOW = "reboot_window";
-        
+
         /**
          * The minimum version of the server that is required in order for the device to accept
          * the server's recommendations about the initial sync settings to use. When this is unset,
@@ -1444,6 +2188,12 @@ public final class Settings {
          * by GoogleHttpClient.
          */
         public static final String GMAIL_TIMEOUT_MS = "gmail_timeout_ms";
+
+        /**
+         * Controls whether Gmail will request an expedited sync when a message is sent. Value must
+         * be an integer where non-zero means true. Defaults to 1.
+         */
+        public static final String GMAIL_SEND_IMMEDIATELY = "gmail_send_immediately";
 
         /**
          * Hostname of the GTalk server.
@@ -1667,7 +2417,28 @@ public final class Settings {
          */
         public static final String SETTINGS_CONTRIBUTORS_PRETTY_URL =
                 "settings_contributors_pretty_url";
-
+        
+        /**
+         * URL that points to the Terms Of Service for the device.
+         * <p>
+         * This should be a pretty http URL. 
+         */
+        public static final String SETUP_GOOGLE_TOS_URL = "setup_google_tos_url";
+        
+        /**
+         * URL that points to the Android privacy policy for the device.
+         * <p>
+         * This should be a pretty http URL.
+         */
+        public static final String SETUP_ANDROID_PRIVACY_URL = "setup_android_privacy_url";
+        
+        /**
+         * URL that points to the Google privacy policy for the device.
+         * <p>
+         * This should be a pretty http URL. 
+         */
+        public static final String SETUP_GOOGLE_PRIVACY_URL = "setup_google_privacy_url";
+        
         /**
          * Request an MSISDN token for various Google services.
          */
@@ -1684,6 +2455,12 @@ public final class Settings {
         public static final String PARENTAL_CONTROL_CHECK_ENABLED =
                 "parental_control_check_enabled";
 
+        /**
+         * The list of applications we need to block if parental control is
+         * enabled.
+         */
+        public static final String PARENTAL_CONTROL_APPS_LIST =
+                "parental_control_apps_list";
 
         /**
          * Duration in which parental control status is valid.
@@ -1712,7 +2489,7 @@ public final class Settings {
          */
         public static final String DISK_FREE_CHANGE_REPORTING_THRESHOLD =
                 "disk_free_change_reporting_threshold";
-        
+
         /**
          * Prefix for new Google services published by the checkin
          * server.
@@ -1726,22 +2503,37 @@ public final class Settings {
          */
         public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
                 "sync_max_retry_delay_in_seconds";
-        
+
         /**
          * Minimum percentage of free storage on the device that is used to determine if
-         * the device is running low on storage. 
+         * the device is running low on storage.
          * Say this value is set to 10, the device is considered running low on storage
          * if 90% or more of the device storage is filled up.
          */
-        public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE = 
+        public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
                 "sys_storage_threshold_percentage";
-        
+
         /**
-         * The interval in minutes after which the amount of free storage left on the 
+         * The interval in minutes after which the amount of free storage left on the
          * device is logged to the event log
          */
-        public static final String SYS_FREE_STORAGE_LOG_INTERVAL = 
+        public static final String SYS_FREE_STORAGE_LOG_INTERVAL =
                 "sys_free_storage_log_interval";
+
+        /**
+         * The interval in milliseconds at which to check the number of SMS sent
+         * out without asking for use permit, to limit the un-authorized SMS
+         * usage.
+         */
+        public static final String SMS_OUTGOING_CEHCK_INTERVAL_MS =
+                "sms_outgoing_check_interval_ms";
+
+        /**
+         * The number of outgoing SMS sent without asking for user permit
+         * (of {@link #SMS_OUTGOING_CEHCK_INTERVAL_MS}
+         */
+        public static final String SMS_OUTGOING_CEHCK_MAX_COUNT =
+                "sms_outgoing_check_max_count";
 
         /**
          * The interval in milliseconds at which to check packet counts on the
@@ -1757,22 +2549,22 @@ public final class Settings {
          * connection problems.
          */
         public static final String PDP_WATCHDOG_LONG_POLL_INTERVAL_MS =
-            "pdp_watchdog_long_poll_interval_ms";
-        
+                "pdp_watchdog_long_poll_interval_ms";
+
         /**
          * The interval in milliseconds at which to check packet counts on the
          * mobile data interface after {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT}
          * outgoing packets has been reached without incoming packets.
          */
-        public static final String PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS = 
+        public static final String PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS =
                 "pdp_watchdog_error_poll_interval_ms";
 
         /**
          * The number of outgoing packets sent without seeing an incoming packet
-         * that triggers a countdown (of {@link #PDP_WATCHDOG_ERROR_POLL_COUNT} 
+         * that triggers a countdown (of {@link #PDP_WATCHDOG_ERROR_POLL_COUNT}
          * device is logged to the event log
          */
-        public static final String PDP_WATCHDOG_TRIGGER_PACKET_COUNT = 
+        public static final String PDP_WATCHDOG_TRIGGER_PACKET_COUNT =
                 "pdp_watchdog_trigger_packet_count";
 
         /**
@@ -1780,50 +2572,44 @@ public final class Settings {
          * after hitting {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT} before
          * attempting data connection recovery.
          */
-        public static final String PDP_WATCHDOG_ERROR_POLL_COUNT = 
+        public static final String PDP_WATCHDOG_ERROR_POLL_COUNT =
                 "pdp_watchdog_error_poll_count";
 
         /**
          * The number of failed PDP reset attempts before moving to something more
          * drastic: re-registering to the network.
          */
-        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT = 
+        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT =
                 "pdp_watchdog_max_pdp_reset_fail_count";
 
         /**
          * Address to ping as a last sanity check before attempting any recovery.
          * Unset or set to "0.0.0.0" to skip this check.
          */
-        public static final String PDP_WATCHDOG_PING_ADDRESS = 
-                "pdp_watchdog_ping_address";
+        public static final String PDP_WATCHDOG_PING_ADDRESS = "pdp_watchdog_ping_address";
 
         /**
          * The "-w deadline" parameter for the ping, ie, the max time in
          * seconds to spend pinging.
          */
-        public static final String PDP_WATCHDOG_PING_DEADLINE = 
-                "pdp_watchdog_ping_deadline";
+        public static final String PDP_WATCHDOG_PING_DEADLINE = "pdp_watchdog_ping_deadline";
 
         /**
-         * The interval in milliseconds after which Wi-Fi is considered idle.
-         * When idle, it is possible for the device to be switched from Wi-Fi to
-         * the mobile data network.
+         * The interval in milliseconds at which to check gprs registration
+         * after the first registration mismatch of gprs and voice service,
+         * to detect possible data network registration problems.
+         *
          */
-        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
+        public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
+                "gprs_register_check_period_ms";
 
         /**
-         * The interval in milliseconds at which we forcefully release the
-         * transition-to-mobile-data wake lock.
+         * Screen timeout in milliseconds corresponding to the
+         * PowerManager's POKE_LOCK_SHORT_TIMEOUT flag (i.e. the fastest
+         * possible screen timeout behavior.)
          */
-        public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
-                "wifi_mobile_data_transition_wakelock_timeout_ms";
-
-        /**
-         * The maximum number of times we will retry a connection to an access
-         * point for which we have failed in acquiring an IP address from DHCP.
-         * A value of N means that we will make N+1 connection attempts in all.
-         */
-        public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
+        public static final String SHORT_KEYLIGHT_DELAY_MS =
+                "short_keylight_delay_ms";
 
         /**
          * @deprecated

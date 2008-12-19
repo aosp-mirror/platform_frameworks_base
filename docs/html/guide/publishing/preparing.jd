@@ -1,0 +1,252 @@
+page.title=Preparing to Publish: A Checklist
+@jd:body
+
+<!--
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href=""></a></li>
+</ol>
+
+</div>
+</div>
+-->
+
+<p>Publishing an application means testing it, packaging it appropriately, and 
+making it available to users of Android-powered mobile devices.</p>
+
+<p>If you plan to publish your application for installation on Android-powered devices,
+there are several things you need to do, to get your application ready. This document 
+the significant checkpoints for preparing your application for a successful release. </p>
+
+<p>If you will publish your application on Android Market, please also see <a
+href="{@docRoot}guide/publishing/publishing.html#market">Publishing on Android Market</a> 
+for specific preparation requirements for your application. </p>
+
+<p>For general information about the ways that you can publish an applications, 
+see the <a href="{@docRoot}guide/publishing/publishing.html">Publishing Your 
+Applications</a> document. </p>
+
+<div class="special">
+
+<p>Before you consider your application ready for release:</p>
+
+<ol>
+<li>Test your application extensively on an actual device </li>
+<li>Consider adding an End User License Agreement in your application</li>
+<li>Specify an icon and label in the application's manifest</li>
+<li>Turn off logging and debugging and clean up data/files</li>
+</ol>
+
+<p>Before you do the final compile of your application:</p>
+
+<ol start="5">
+<li>Version your application</li>
+<li>Obtain a suitable cryptographic key</li>
+<li>Register for a Maps API Key, if your application is using MapView elements</li>
+</ol>
+
+<p><em>Compile your application...</em></p>
+<p>After compiling your application:</p>
+<ol start="8">
+<li>Sign your application</li>
+<li>Test your compiled application</li>
+</ol>
+</div>
+
+<h2 id="releaseready">Before you consider your application ready for release</h2>
+
+<h3 id="test">1. Test your application extensively on an actual device</h3>
+
+<p>It's important to test your application as extensively as possible, in as
+many areas as possible. To help you do that, Android provides a variety of
+testing classes and tools. You can use 
+{@link android.app.Instrumentation Instrumentation} to run JUnit and other 
+test cases, and you can use testing
+tools such as the <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application
+Exerciser Monkey</a>. </p>
+
+<ul>
+<li>To ensure that your application will run properly for users, you should make
+every effort to obtain one or more physical mobile device(s) of the type on
+which you expect the application to run. You should then test your application
+on the actual device, under realistic network conditions. Testing  your
+application on a physical device is very important, because it enables you to
+verify that your user interface elements are sized correctly (especially for
+touch-screen UI) and that your application's performance and battery efficiency
+are acceptable.</li>
+
+<li>If you can not obtain a mobile device of the type you are targeting for your
+application, you can use emulator options such as <code>-dpi</code>,
+<code>-device</code>, <code>-scale</code>, <code>-netspeed</code>,
+<code>-netdelay</code>, <code>-cpu-delay</code> and others to model the
+emulator's screen, network performance, and other attributes to match the target
+device to the greatest extent possible. You can then test your application's UI
+and performance. However, we strongly recommend that you test your application
+on an actual target device before publishing it. </li>
+
+<li>If you are targeting the <a href="http://www.t-mobileg1.com/">T-Mobile
+G1</a> device for your application, make sure that your UI handles screen
+orientation changes. </li>
+</ul>
+
+<h3 id="eula">2. Consider adding an End User License Agreement in your 
+application</h4>
+
+<p>To protect your person, organization, and intellectual property, you may want
+to provide an End User License Agreement (EULA) with your application. 
+
+<h3 id="iconlabel">3. Specify an icon and label in the application's manifest</h4>
+
+<p>The icon and label that you specify in an application's manifest are
+important because they are displayed to users as your application's icon and
+name. They are displayed on the device's Home screen, as well as in Manage
+Applications, My Downloads, and elsewhere. Additionally, publishing services may
+display the icon and label to users. </p>
+
+<p>To specify an icon and label, you define the attributes
+<code>android:icon</code> and <code>android:label</code> in the 
+<code>&lt;application&gt;</code> element of the manifest. </p>
+
+<p>As regards the design of your icon, you should try to make it match as much
+as possible the style used by the built-in Android applications.</p>
+
+<h3 id="logging">4. Turn off logging and debugging and clean up data/files</h4>
+
+<p>For release, you should make sure that debug facilities are turned off and
+that debug and other unnecessary data/files are removed from your application
+project.</p>
+<ul>
+<li>Remove the <code>android:debuggable="true"</code> attribute from the
+<code>&lt;application&gt;</code> element of the manifest.</li>
+<li>Remove log files, backup files, and other unnecessary files from the
+application project.</li>
+<li>Check for private or proprietary data and remove it as necessary.</li>
+<li>Deactivate any calls to {@link android.util.Log} methods in the source
+code.</li>
+</ul>
+
+<h2 id="finalcompile">Before you do the final compile of your application</h3>
+
+<h3 id="versionapp">5. Version Your Application</h4>
+
+<p>Before you compile your application, you must make sure that you have defined
+a version number for your application, specifying an appropriate value for both
+the <code>android:versionCode</code> and <code>android:versionName</code>
+attributes of the <code>&lt;manifest&gt;</code> element in the application's
+manifest file. Carefully consider your version numbering plans in the context of
+your overall application upgrade strategy. </p>
+
+<p>If you have previously released a version of your application, you must make
+sure to increment the version number of the current application. You must
+increment both the <code>android:versionCode</code> and
+<code>android:versionName</code> attributes of the <code>&lt;manifest&gt;</code>
+element in the application's manifest file, using appropriate values. </p>
+
+<p>For detailed information about how to define version information for your
+application, see <a href="{@docRoot}guide/publishing/versioning.html">Versioning Your Applications</a>.</p>
+
+<h3 id="cryptokey">6. Obtain a suitable cryptographic key</h4>
+
+<p>If you have read and followed all of the preparation steps up to this point,
+your application is compiled and ready for signing. Inside the .apk, the
+application is properly versioned, and you've cleaned out extra files and
+private data, as described above. </p>
+
+<p>Before you sign your application, you need to make sure that you have a
+suitable private key. For complete information about how to obtain (or generate)
+a private key, see <a href="#cert">Obtaining a Private Key</a>.</p>
+
+<p>Once you have obtained (or generated) a suitable private key, you will use it
+to:</p>
+
+<ul>
+<li>Register for a Maps API Key (see below), if your application uses MapView
+elements.</li>
+<li>Sign your application for release</li>
+</ul>
+
+
+<h3 id="mapsApiKey">7. Register for a Maps API Key, if your application is using
+MapView elements</h3>
+
+<div class="sidebox" style="margin-bottom:.5em;"><p>For complete information
+about getting a Maps API Key, see <a
+href="{@docRoot}guide/developing/mapkey.html">Obtaining a Maps API
+Key</a>.<br></p></div>
+
+<p>If your application uses one or more 
+{@link-fixme com.google.android.maps.MapView Mapview} elements, you will need to 
+register your application with the Google
+Maps service and obtain a Maps API Key, before your MapView(s) will be able to
+retrieve data from Google Maps. To do so, you supply an MD5 fingerprint of your
+signer certificate to the Maps service. </p>
+
+<p>During development, you can get a temporary Maps API Key by registering the
+debug key generated by the SDK tools. However, before publishing your
+application, you must register for a new Maps API Key that is based on your
+private key. </p>
+
+<p>If your application uses MapView elements, the important points to understand
+are:</p>
+
+<ol>
+<li>You <em>must</em> obtain the Maps API Key before you compile your
+application for release, because you must add the Key to a special attribute in
+each MapView element &mdash; <code>android:apiKey</code> &mdash; in your
+application's layout files. If you are instantiating MapView objects directly
+from code, you must pass the Maps API Key as a parameter in the constructor.
+</li>
+<li>The Maps API Key referenced by your application's MapView elements must be
+registered (in Google Maps) to the certificate used to sign the application.
+This is particularly important when publishing your application &mdash; your
+MapView elements must reference a Key that is registered to the release
+certificate that you will use to sign your application.  </li>
+<li>If you previously got a temporary Maps API Key by registering the debug
+certificate generated by the SDK tools, you <em>must</em> remember to obtain a
+new Maps API Key by registering your release certificate. You must then remember
+to change the MapView elements to reference the new Key, rather than the Key
+associated with the debug certificate. If you do not do so, your MapView
+elements will not have permission to download Maps data. </li>
+<li>If you change the private key that you will use to sign your application,
+you <em>must</em> remember to obtain a new Maps API Key from the Google Maps
+service. If you do not get a new Maps API Key and apply it to all MapView
+elements, any MapView elements referencing the old Key will not have permission
+to download Maps data. </li>
+</ol>
+
+<p>For more information about signing and your private key, see <a
+href="#signing">Signing Your Applications</a>.</p>
+
+
+<h2 id="compile">Compile Your Application</h3>
+
+<p>When you've prepared your application as described in the previous sections,
+you can compile your application for release. </p>
+
+<h2 id="post-compile">After Compiling Your Application</h3>
+
+<h3 id="signapp">8. Sign Your Application</h4>
+
+<p>Sign your application using your private key. Signing your application
+correctly is critically important. Please see <a href="#signing">Signing Your
+Applications</a> for complete information. </p>
+
+<h3 id="testapp">9. Test Your Compiled and Signed Application</h4>
+
+<p>Before you release your compiled application, you should thoroughly test it
+on the target mobile device (and target network, if possible). In particular,
+you should make sure that any MapView elements in your UI are receiving maps
+data properly. If they are not, go back to <a href="#mapsApiKey">Register for a
+Maps API Key</a> and correct the problem. You should also ensure that the
+application works correctly with any server-side services and data that you are
+providing or are relying on and that the application handles any authentication
+requirements correctly.  </p>
+
+<p>After testing, you are now ready to publish your application to mobile device
+users.</p>
+
+

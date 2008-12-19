@@ -39,48 +39,42 @@ typedef void (*jpeg_callback)(const sp<IMemory>& mem, void* user);
 typedef void (*autofocus_callback)(bool focused, void* user);
 
 /**
- * This defines the interface to the camera hardware abstraction
- * layer. It supports setting and getting parameters, live
- * previewing and taking pictures. It is a referenced counted
- * interface with RefBase as its base class.
+ * CameraHardwareInterface.h defines the interface to the
+ * camera hardware abstraction layer, used for setting and getting
+ * parameters, live previewing, and taking pictures.
  *
- * The openCameraHardware function is used to
- * retrieve a strong pointer to the instance of this interface
- * and may be called multiple times.
+ * It is a referenced counted interface with RefBase as its base class.
+ * CameraService calls openCameraHardware() to retrieve a strong pointer to the
+ * instance of this interface and may be called multiple times. The
+ * following steps describe a typical sequence:
  *
- * After calling openCameraHardware the getParameters and
- * setParameters are used to initialize the camera instance.
+ *   -# After CameraService calls openCameraHardware(), getParameters() and
+ *      setParameters() are used to initialize the camera instance.
+ *      CameraService calls getPreviewHeap() to establish access to the
+ *      preview heap so it can be registered with SurfaceFlinger for
+ *      efficient display updating while in preview mode.
+ *   -# startPreview() is called, which is passed a preview_callback()
+ *      function and a user parameter. The camera instance then periodically
+ *      calls preview_callback() each time a new preview frame is available.
+ *      The callback routine has two parameters: the first is a pointer to
+ *      the IMemory containing the frame and the second a user parameter. If
+ *      the preview_callback code needs to use this memory after returning,
+ *      it must copy the data.
  *
- * Then getPreviewHeap is called to get access to the preview
- * heap so it can be registered with the SurfaceFlinger for efficient
- * display updating while in the preview mode.
+ * Prior to taking a picture, CameraService calls autofocus() with
+ * autofocus_callback() and a user parameter. When auto focusing has
+ * completed, the camera instance calls autofocus_callback(), which informs
+ * the application whether focusing was successful. The camera instance
+ * only calls autofocus_callback() once and it is up to the application to
+ * call autoFocus() again if refocusing is desired.
  *
- * Next startPreview is called which is passed a preview_callback
- * function and a user parameter. The camera instance then
- * periodically calls preview_callback each time a new
- * preview frame is available. The call back routine has
- * two parameters, the first is a pointer to the the IMemory containing
- * the frame and the other is the user parameter. If the preview_callback
- * code needs to use this memory after returning it must copy
- * the data.
- *
- * Prior to taking a picture the autoFocus method is usually called with a
- * autofocus_callback and a user parameter. When auto focusing
- * has completed the camera instance calls autofocus_callback which
- * informs the application if focusing was successful or not.
- * The camera instance only calls the autofocus_callback once and it
- * is up to the application to call autoFocus again if refocusing is desired.
- *
- * The method takePicture is called to request that the camera instance take a
- * picture. This method has three callbacks: shutter_callback, raw_callback,
- * and jpeg_callback. As soon as the shutter snaps and it is safe to move the
- * camera, shutter_callback is called.  Typically, you would want to play the
- * shutter sound at this moment. Later, when the raw image is available the
- * raw_callback is called with a pointer to the IMemory containing the raw
- * image.  Finally, when the encoded jpeg image is available the jpeg_callback
- * will be called with a pointer to the IMemory containing the jpeg image.  As
- * with the preview_callback the memory must be copied if it's needed after
- * returning.
+ * CameraService calls takePicture() to request the camera instance take a
+ * picture. This method has two callbacks: raw_callback() and jpeg_callback().
+ * When the raw image is available, raw_callback() is called with a pointer
+ * to the IMemory containing the raw image. When the jpeg image is available,
+ * jpeg_callback() is called with a pointer to the IMemory containing the
+ * jpeg image. As with preview_callback(), the memory must be copied if it's
+ * needed after returning.
  */
 class CameraHardwareInterface : public virtual RefBase {
 public:
@@ -104,7 +98,7 @@ public:
     /**
      * Start auto focus, the callback routine is called
      * once when focusing is complete. autoFocus() will
-     * be called agained if another auto focus is needed.
+     * be called again if another auto focus is needed.
      */
     virtual status_t    autoFocus(autofocus_callback,
                                   void* user) = 0;

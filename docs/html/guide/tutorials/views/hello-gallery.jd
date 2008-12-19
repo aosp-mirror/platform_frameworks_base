@@ -1,4 +1,6 @@
 page.title=Hello, Gallery
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.Gallery} is a View commonly used to display items in a horizontally scrolling list
@@ -129,5 +131,5 @@ exactly match the ImageView dimensions.</p>
 	<li>{@link android.widget.ImageView}</li>
 	<li>{@link android.widget.Toast}</li>
 </ul>
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
+
 

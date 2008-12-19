@@ -16,15 +16,15 @@
 
 package com.android.internal.telephony;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  *
@@ -40,7 +40,6 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
     private static final boolean DBG = false;
 
     public static final String INTENT_KEY_ASU = "asu";
-    public static final String INTENT_KEY_NUM = "incoming_number";
 
     private static final int NOTIF_PHONE    = 1 << 0;
     private static final int NOTIF_SERVICE  = 1 << 1;
@@ -49,7 +48,6 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
     private static final int NOTIF_MAX      = 1 << 5;
 
     Phone.State mPhoneState = Phone.State.IDLE;
-    String mIncomingNumber;
     ServiceState mServiceState = new ServiceState();
     int mAsu  = -1;
     private Context mContext;
@@ -141,7 +139,7 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
     public void notifyPhoneCallState(int eventWhat) {
         mWants |= NOTIF_PHONE;
         mPhoneStateEventWhat = eventWhat;
-        mFilter.addAction(TelephonyIntents.ACTION_PHONE_STATE_CHANGED);
+        mFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
     }
 
     public boolean getNotifyPhoneCallState() {
@@ -189,11 +187,10 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
                     Message message = Message.obtain(mTarget, mAsuEventWhat);
                     mTarget.sendMessage(message);
                 }
-            } else if (TelephonyIntents.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+            } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 if (DBG) Log.d(LOG_TAG, "onReceiveIntent: ACTION_PHONE_STATE_CHANGED, state="
                                + intent.getStringExtra(Phone.STATE_KEY));
                 String phoneState = intent.getStringExtra(Phone.STATE_KEY);
-                mIncomingNumber = intent.getStringExtra(INTENT_KEY_NUM);
                 mPhoneState = (Phone.State) Enum.valueOf(
                         Phone.State.class, phoneState);
 

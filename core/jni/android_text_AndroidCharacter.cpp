@@ -43,7 +43,7 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, j
     }
 
     if (env->GetArrayLength(srcArray) < count || env->GetArrayLength(destArray) < count) {
-        jniThrowException(env, "java/lang/ArrayIndexException", NULL);
+        jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
         goto DIRECTION_END;
     }
 
@@ -81,7 +81,7 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
     }
 
     if (start > start + count || env->GetArrayLength(charArray) < count) {
-        jniThrowException(env, "java/lang/ArrayIndexException", NULL);
+        jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
         goto MIRROR_END;
     }
 

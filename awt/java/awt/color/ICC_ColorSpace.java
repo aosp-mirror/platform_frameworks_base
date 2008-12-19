@@ -28,19 +28,24 @@ import org.apache.harmony.awt.internal.nls.Messages;
 import java.io.*;
 
 /**
- * ICC_ColorSpace class implements ColorSpace abstract class and 
- * represents device independent and device dependent color spaces.
- * This color space is based on the International Color Consortium 
- * Specification (ICC) File Format for Color Profiles: 
- * <a href="http://www.color.org">http://www.color.org</a>
+ * This class implements the abstract class ColorSpace and represents device
+ * independent and device dependent color spaces. This color space is based on
+ * the International Color Consortium Specification (ICC) File Format for Color
+ * Profiles: <a href="http://www.color.org">http://www.color.org</a>
+ * 
+ * @since Android 1.0
  */
 public class ICC_ColorSpace extends ColorSpace {
     
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 3455889114070431483L;
 
     // Need to keep compatibility with serialized form
-    /** The Constant serialPersistentFields. */
+    /**
+     * The Constant serialPersistentFields.
+     */
     private static final ObjectStreamField[]
       serialPersistentFields = {
         new ObjectStreamField("thisProfile", ICC_Profile.class), //$NON-NLS-1$
@@ -53,63 +58,94 @@ public class ICC_ColorSpace extends ColorSpace {
 
 
    /**
-    * According to ICC specification (from http://www.color.org)
-    * "For the CIEXYZ encoding, each component (X, Y, and Z)
-    * is encoded as a u1Fixed15Number".
-    * This means that max value for this encoding is 1 + (32767/32768)
-    */
+     * According to ICC specification (from http://www.color.org) "For the
+     * CIEXYZ encoding, each component (X, Y, and Z) is encoded as a
+     * u1Fixed15Number". This means that max value for this encoding is 1 +
+     * (32767/32768)
+     */
     private static final float MAX_XYZ = 1f + (32767f/32768f);
     
-    /** The Constant MAX_SHORT. */
+    /**
+     * The Constant MAX_SHORT.
+     */
     private static final float MAX_SHORT = 65535f;
     
-    /** The Constant INV_MAX_SHORT. */
+    /**
+     * The Constant INV_MAX_SHORT.
+     */
     private static final float INV_MAX_SHORT = 1f/MAX_SHORT;
     
-    /** The Constant SHORT2XYZ_FACTOR. */
+    /**
+     * The Constant SHORT2XYZ_FACTOR.
+     */
     private static final float SHORT2XYZ_FACTOR = MAX_XYZ/MAX_SHORT;
     
-    /** The Constant XYZ2SHORT_FACTOR. */
+    /**
+     * The Constant XYZ2SHORT_FACTOR.
+     */
     private static final float XYZ2SHORT_FACTOR = MAX_SHORT/MAX_XYZ;
 
-    /** The profile. */
+    /**
+     * The profile.
+     */
     private ICC_Profile profile = null;
     
-    /** The min values. */
+    /**
+     * The min values.
+     */
     private float minValues[] = null;
     
-    /** The max values. */
+    /**
+     * The max values.
+     */
     private float maxValues[] = null;
 
     // cache transforms here - performance gain
-    /** The to rgb transform. */
+    /**
+     * The to rgb transform.
+     */
     private ICC_Transform toRGBTransform = null;
     
-    /** The from rgb transform. */
+    /**
+     * The from rgb transform.
+     */
     private ICC_Transform fromRGBTransform = null;
     
-    /** The to xyz transform. */
+    /**
+     * The to xyz transform.
+     */
     private ICC_Transform toXYZTransform = null;
     
-    /** The from xyz transform. */
+    /**
+     * The from xyz transform.
+     */
     private ICC_Transform fromXYZTransform = null;
 
-    /** The converter. */
+    /**
+     * The converter.
+     */
     private final ColorConverter converter = new ColorConverter();
     
-    /** The scaler. */
+    /**
+     * The scaler.
+     */
     private final ColorScaler scaler = new ColorScaler();
     
-    /** The scaling data loaded. */
+    /**
+     * The scaling data loaded.
+     */
     private boolean scalingDataLoaded = false;
 
-    /** The resolved deserialized inst. */
+    /**
+     * The resolved deserialized inst.
+     */
     private ICC_ColorSpace resolvedDeserializedInst;
 
     /**
      * Instantiates a new ICC color space from an ICC_Profile object.
      * 
-     * @param pf the ICC_Profile object.
+     * @param pf
+     *            the ICC_Profile object.
      */
     public ICC_ColorSpace(ICC_Profile pf) {
         super(pf.getColorSpaceType(), pf.getNumComponents());
@@ -132,7 +168,7 @@ public class ICC_ColorSpace extends ColorSpace {
     }
 
     /**
-     * Returns the ICC_Profile for this ICC_ColorSpace.
+     * Gets the ICC_Profile for this ICC_ColorSpace.
      * 
      * @return the ICC_Profile for this ICC_ColorSpace.
      */
@@ -144,6 +180,14 @@ public class ICC_ColorSpace extends ColorSpace {
         return profile;
     }
 
+    /**
+     * Performs the transformation of a color from this ColorSpace into the RGB
+     * color space.
+     * 
+     * @param colorvalue
+     *            the color value in this ColorSpace.
+     * @return the float array with color components in the RGB color space.
+     */
     @Override
     public float[] toRGB(float[] colorvalue) {
         if (toRGBTransform == null) {
@@ -174,6 +218,15 @@ public class ICC_ColorSpace extends ColorSpace {
         return res;
     }
 
+    /**
+     * Performs the transformation of a color from this ColorSpace into the
+     * CS_CIEXYZ color space.
+     * 
+     * @param colorvalue
+     *            the color value in this ColorSpace.
+     * @return the float array with color components in the CS_CIEXYZ color
+     *         space.
+     */
     @Override
     public float[] toCIEXYZ(float[] colorvalue) {
         if (toXYZTransform == null) {
@@ -212,6 +265,14 @@ public class ICC_ColorSpace extends ColorSpace {
         return res;
     }
 
+    /**
+     * Performs the transformation of a color from the RGB color space into this
+     * ColorSpace.
+     * 
+     * @param rgbvalue
+     *            the float array representing a color in the RGB color space.
+     * @return the float array with the transformed color components.
+     */
     @Override
     public float[] fromRGB(float[] rgbvalue) {
         if (fromRGBTransform == null) {
@@ -241,6 +302,15 @@ public class ICC_ColorSpace extends ColorSpace {
         return res;
     }
 
+    /**
+     * Performs the transformation of a color from the CS_CIEXYZ color space
+     * into this ColorSpace.
+     * 
+     * @param xyzvalue
+     *            the float array representing a color in the CS_CIEXYZ color
+     *            space.
+     * @return the float array with the transformed color components.
+     */
     @Override
     public float[] fromCIEXYZ(float[] xyzvalue) {
         if (fromXYZTransform == null) {
@@ -279,6 +349,14 @@ public class ICC_ColorSpace extends ColorSpace {
         return res;
     }
 
+    /**
+     * Gets the minimum normalized color component value for the specified
+     * component.
+     * 
+     * @param component
+     *            the component to determine the minimum value.
+     * @return the minimum normalized value of the component.
+     */
     @Override
     public float getMinValue(int component) {
         if ((component < 0) || (component > this.getNumComponents() - 1)) {
@@ -289,6 +367,14 @@ public class ICC_ColorSpace extends ColorSpace {
         return minValues[component];
     }
 
+    /**
+     * Gets the maximum normalized color component value for the specified
+     * component.
+     * 
+     * @param component
+     *            the component to determine the maximum value.
+     * @return the maximum normalized value of the component.
+     */
     @Override
     public float getMaxValue(int component) {
         if ((component < 0) || (component > this.getNumComponents() - 1)) {
@@ -334,9 +420,10 @@ public class ICC_ColorSpace extends ColorSpace {
     /**
      * Write object.
      * 
-     * @param out the out
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param out
+     *            the out
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
         ObjectOutputStream.PutField fields = out.putFields();
@@ -354,10 +441,12 @@ public class ICC_ColorSpace extends ColorSpace {
     /**
      * Read object.
      * 
-     * @param in the in
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException the class not found exception
+     * @param in
+     *            the in
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException
+     *             the class not found exception
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         ObjectInputStream.GetField fields = in.readFields();
@@ -369,8 +458,8 @@ public class ICC_ColorSpace extends ColorSpace {
      * Read resolve.
      * 
      * @return the object
-     * 
-     * @throws ObjectStreamException the object stream exception
+     * @throws ObjectStreamException
+     *             the object stream exception
      */
     Object readResolve() throws ObjectStreamException {
         return resolvedDeserializedInst;

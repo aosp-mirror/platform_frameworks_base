@@ -18,35 +18,41 @@
  * @author Michael Danilov
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.event.ItemListener;
 
 /**
  * The ItemSelectable interface represents a set of items which can be selected.
+ * 
+ * @since Android 1.0
  */
 public interface ItemSelectable {
 
     /**
-     * Adds an ItemListener for receiving item events when the state of an item 
-     * is changed by the user. 
+     * Adds an ItemListener for receiving item events when the state of an item
+     * is changed by the user.
      * 
-     * @param l the ItemListener.
+     * @param l
+     *            the ItemListener.
      */
     public void addItemListener(ItemListener l);
 
     /**
-     * Gets an array of the selected objects or null if there is no selected object.
-     * 
-     * @return an array of the selected objects or null if there is no selected 
+     * Gets an array of the selected objects or null if there is no selected
      * object.
+     * 
+     * @return an array of the selected objects or null if there is no selected
+     *         object.
      */
     public Object[] getSelectedObjects();
 
     /**
      * Removes the specified ItemListener.
      * 
-     * @param l the ItemListener which will be removed.
+     * @param l
+     *            the ItemListener which will be removed.
      */
     public void removeItemListener(ItemListener l);
 

@@ -28,22 +28,23 @@
 #include <utils/IPCThreadState.h>
 
 #include <media/mediaplayer.h>
-#include <libsonivox/eas.h>
+#include <media/AudioTrack.h>
 
 #include <utils/MemoryBase.h>
 
 namespace android {
 
 // client singleton for binder interface to service
-Mutex MediaPlayer::mServiceLock;
-sp<IMediaPlayerService> MediaPlayer::mMediaPlayerService;
-sp<MediaPlayer::DeathNotifier> MediaPlayer::mDeathNotifier;
+Mutex MediaPlayer::sServiceLock;
+sp<IMediaPlayerService> MediaPlayer::sMediaPlayerService;
+sp<MediaPlayer::DeathNotifier> MediaPlayer::sDeathNotifier;
+SortedVector< wp<MediaPlayer> > MediaPlayer::sObitRecipients;
 
 // establish binder interface to service
 const sp<IMediaPlayerService>& MediaPlayer::getMediaPlayerService()
 {
-    Mutex::Autolock _l(mServiceLock);
-    if (mMediaPlayerService.get() == 0) {
+    Mutex::Autolock _l(sServiceLock);
+    if (sMediaPlayerService.get() == 0) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder;
         do {
@@ -53,14 +54,26 @@ const sp<IMediaPlayerService>& MediaPlayer::getMediaPlayerService()
             LOGW("MediaPlayerService not published, waiting...");
             usleep(500000); // 0.5 s
         } while(true);
-        if (mDeathNotifier == NULL) {
-            mDeathNotifier = new DeathNotifier();
+        if (sDeathNotifier == NULL) {
+            sDeathNotifier = new DeathNotifier();
         }
-        binder->linkToDeath(mDeathNotifier);
-        mMediaPlayerService = interface_cast<IMediaPlayerService>(binder);
+        binder->linkToDeath(sDeathNotifier);
+        sMediaPlayerService = interface_cast<IMediaPlayerService>(binder);
     }
-    LOGE_IF(mMediaPlayerService==0, "no MediaPlayerService!?");
-    return mMediaPlayerService;
+    LOGE_IF(sMediaPlayerService==0, "no MediaPlayerService!?");
+    return sMediaPlayerService;
+}
+
+void MediaPlayer::addObitRecipient(const wp<MediaPlayer>& recipient)
+{
+    Mutex::Autolock _l(sServiceLock);
+    sObitRecipients.add(recipient);
+}
+
+void MediaPlayer::removeObitRecipient(const wp<MediaPlayer>& recipient)
+{
+    Mutex::Autolock _l(sServiceLock);
+    sObitRecipients.remove(recipient);
 }
 
 MediaPlayer::MediaPlayer()
@@ -77,11 +90,18 @@ MediaPlayer::MediaPlayer()
     mPrepareStatus = NO_ERROR;
     mLoop = false;
     mLeftVolume = mRightVolume = 1.0;
+    mVideoWidth = mVideoHeight = 0;
+}
+
+void MediaPlayer::onFirstRef()
+{
+    addObitRecipient(this);
 }
 
 MediaPlayer::~MediaPlayer()
 {
     LOGV("destructor");
+    removeObitRecipient(this);
     disconnect();
     IPCThreadState::self()->flushCommands();
 }
@@ -98,7 +118,6 @@ void MediaPlayer::disconnect()
 
     if (p != 0) {
         p->disconnect();
-        p->asBinder()->unlinkToDeath(this);
     }
 }
 
@@ -108,6 +127,7 @@ void MediaPlayer::clear_l()
     mDuration = -1;
     mCurrentPosition = -1;
     mSeekPosition = -1;
+    mVideoWidth = mVideoHeight = 0;
 }
 
 status_t MediaPlayer::setListener(const sp<MediaPlayerListener>& listener)
@@ -136,7 +156,6 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
         mPlayer = player;
         if (player != 0) {
             mCurrentState = MEDIA_PLAYER_INITIALIZED;
-            player->asBinder()->linkToDeath(this);
             err = NO_ERROR;
         } else {
             LOGE("Unable to to create media player");
@@ -145,8 +164,8 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
 
     if (p != 0) {
         p->disconnect();
-        p->asBinder()->unlinkToDeath(this);
     }
+
     return err;
 }
 
@@ -307,22 +326,18 @@ status_t MediaPlayer::getVideoWidth(int *w)
 {
     LOGV("getVideoWidth");
     Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-        int h;
-        return mPlayer->getVideoSize(w, &h);
-    }
-    return INVALID_OPERATION;
+    if (mPlayer == 0) return INVALID_OPERATION;
+    *w = mVideoWidth;
+    return NO_ERROR;
 }
 
 status_t MediaPlayer::getVideoHeight(int *h)
 {
     LOGV("getVideoHeight");
     Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-        int w;
-        return mPlayer->getVideoSize(&w, h);
-    }
-    return INVALID_OPERATION;
+    if (mPlayer == 0) return INVALID_OPERATION;
+    *h = mVideoHeight;
+    return NO_ERROR;
 }
 
 status_t MediaPlayer::getCurrentPosition(int *msec)
@@ -405,6 +420,7 @@ status_t MediaPlayer::reset()
     if (mPlayer != 0) {
         status_t ret = mPlayer->reset();
         if (ret != NO_ERROR) {
+            LOGE("reset() failed with return code (%d)", ret);
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
             ret = UNKNOWN_ERROR;
         } else {
@@ -443,6 +459,16 @@ status_t MediaPlayer::setLooping(int loop)
     return OK;
 }
 
+bool MediaPlayer::isLooping() {
+    LOGV("isLooping");
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) {
+        return mLoop;
+    }
+    LOGV("isLooping: no active player");
+    return false;
+}
+
 status_t MediaPlayer::setVolume(float leftVolume, float rightVolume)
 {
     LOGV("MediaPlayer::setVolume(%f, %f)", leftVolume, rightVolume);
@@ -466,6 +492,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     mLock.lock();
     if (mPlayer == 0) {
         LOGV("notify(%d, %d, %d) callback on disconnected mediaplayer", msg, ext1, ext2);
+        mLock.unlock();   // release the lock when done.
         return;
     }
 
@@ -489,7 +516,8 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         }
         break;
     case MEDIA_ERROR:
-        LOGV("error (%d, %d)", ext1, ext2);
+        // Always log errors
+        LOGE("error (%d, %d)", ext1, ext2);
         mCurrentState = MEDIA_PLAYER_STATE_ERROR;
         if (mPrepareSync)
         {
@@ -515,6 +543,11 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     case MEDIA_BUFFERING_UPDATE:
         LOGV("buffering %d", ext1);
         break;
+    case MEDIA_SET_VIDEO_SIZE:
+        LOGV("New video size %d x %d", ext1, ext2);
+        mVideoWidth = ext1;
+        mVideoHeight = ext2;
+        break;
     default:
         LOGV("unrecognized message: (%d, %d, %d)", msg, ext1, ext2);
         break;
@@ -532,32 +565,45 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     }
 }
 
-void MediaPlayer::binderDied(const wp<IBinder>& who) {
-    LOGW("IMediaplayer died");
-    notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
-}
-
 void MediaPlayer::DeathNotifier::binderDied(const wp<IBinder>& who) {
-    Mutex::Autolock _l(MediaPlayer::mServiceLock);
-    MediaPlayer::mMediaPlayerService.clear();
     LOGW("MediaPlayer server died!");
+
+    // Need to do this with the lock held
+    SortedVector< wp<MediaPlayer> > list;
+    {
+        Mutex::Autolock _l(MediaPlayer::sServiceLock);
+        MediaPlayer::sMediaPlayerService.clear();
+        list = sObitRecipients;
+    }
+
+    // Notify application when media server dies.
+    // Don't hold the static lock during callback in case app
+    // makes a call that needs the lock.
+    size_t count = list.size();
+    for (size_t iter = 0; iter < count; ++iter) {
+        sp<MediaPlayer> player = list[iter].promote();
+        if ((player != 0) && (player->mPlayer != 0)) {
+            player->notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
+        }
+    }
 }
 
 MediaPlayer::DeathNotifier::~DeathNotifier()
 {
-    Mutex::Autolock _l(mServiceLock);
-    if (mMediaPlayerService != 0) {
-        mMediaPlayerService->asBinder()->unlinkToDeath(this);
+    Mutex::Autolock _l(sServiceLock);
+    sObitRecipients.clear();
+    if (sMediaPlayerService != 0) {
+        sMediaPlayerService->asBinder()->unlinkToDeath(this);
     }
 }
 
-/*static*/ sp<IMemory> MediaPlayer::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels)
+/*static*/ sp<IMemory> MediaPlayer::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
 {
     LOGV("decode(%s)", url);
     sp<IMemory> p;
     const sp<IMediaPlayerService>& service = getMediaPlayerService();
     if (service != 0) {
-        p = mMediaPlayerService->decode(url, pSampleRate, pNumChannels);
+        p = sMediaPlayerService->decode(url, pSampleRate, pNumChannels, pFormat);
     } else {
         LOGE("Unable to locate media service");
     }
@@ -565,13 +611,13 @@ MediaPlayer::DeathNotifier::~DeathNotifier()
 
 }
 
-/*static*/ sp<IMemory> MediaPlayer::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels)
+/*static*/ sp<IMemory> MediaPlayer::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
 {
     LOGV("decode(%d, %lld, %lld)", fd, offset, length);
     sp<IMemory> p;
     const sp<IMediaPlayerService>& service = getMediaPlayerService();
     if (service != 0) {
-        p = mMediaPlayerService->decode(fd, offset, length, pSampleRate, pNumChannels);
+        p = sMediaPlayerService->decode(fd, offset, length, pSampleRate, pNumChannels, pFormat);
     } else {
         LOGE("Unable to locate media service");
     }

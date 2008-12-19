@@ -18,7 +18,7 @@ package android.text.method;
 
 import android.view.KeyEvent;
 import android.view.KeyCharacterMap.KeyData;
-import android.util.SparseIntArray;
+import android.text.InputType;
 import android.text.Spannable;
 
 /**
@@ -40,6 +40,10 @@ public class DialerKeyListener extends NumberKeyListener
         return sInstance;
     }
 
+    public int getInputType() {
+        return InputType.TYPE_CLASS_PHONE;
+    }
+    
     /**
      * Overrides the superclass's lookup method to prefer the number field
      * from the KeyEvent.

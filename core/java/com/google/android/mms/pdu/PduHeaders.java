@@ -150,12 +150,13 @@ public class PduHeaders {
     /**
      * X-Mms-MMS-Version field types.
      */
-    // Current version is 1.3.
     public static final int MMS_VERSION_1_3                 = ((1 << 4) | 3);
-
     public static final int MMS_VERSION_1_2                 = ((1 << 4) | 2);
     public static final int MMS_VERSION_1_1                 = ((1 << 4) | 1);
     public static final int MMS_VERSION_1_0                 = ((1 << 4) | 0);
+
+    // Current version is 1.2.
+    public static final int CURRENT_MMS_VERSION             = MMS_VERSION_1_2;
 
     /**
      *  From field type components.
@@ -475,7 +476,7 @@ public class PduHeaders {
                 break;
             case MMS_VERSION:
                 if ((value < MMS_VERSION_1_0)|| (value > MMS_VERSION_1_3)) {
-                    value = MMS_VERSION_1_3; //1.3 is the default version.
+                    value = CURRENT_MMS_VERSION; // Current version is the default value.
                 }
                 break;
             case MESSAGE_TYPE:

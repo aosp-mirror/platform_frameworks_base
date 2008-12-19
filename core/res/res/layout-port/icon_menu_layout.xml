@@ -19,5 +19,6 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:rowHeight="65dip"
-    android:maxRows="2"
+    android:maxItems="6"
+    android:maxRows="3"
     android:maxItemsPerRow="3" />

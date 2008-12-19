@@ -37,8 +37,10 @@ public class BatteryManager {
     public static final int BATTERY_HEALTH_OVER_VOLTAGE = 5;
     public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
 
-    // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent
+    // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
+    // These must be powers of 2.
+    /** Power source is an AC charger. */
     public static final int BATTERY_PLUGGED_AC = 1;
+    /** Power source is a USB port. */
     public static final int BATTERY_PLUGGED_USB = 2;
-
 }

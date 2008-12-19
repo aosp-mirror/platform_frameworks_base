@@ -37,6 +37,8 @@
 
 #include <GLES/eglnatives.h>
 
+#include "GPUHardware/GPUHardware.h"
+#include "SurfaceFlinger.h"
 #include "VRamHeap.h"
 
 #if HAVE_ANDROID_OS
@@ -59,8 +61,9 @@ int SurfaceHeapManager::global_pmem_heap = 0;
 
 // ---------------------------------------------------------------------------
 
-SurfaceHeapManager::SurfaceHeapManager(size_t clientHeapSize)
-    : mClientHeapSize(clientHeapSize)
+SurfaceHeapManager::SurfaceHeapManager(const sp<SurfaceFlinger>& flinger, 
+        size_t clientHeapSize)
+    : mFlinger(flinger), mClientHeapSize(clientHeapSize)
 {
     SurfaceHeapManager::global_pmem_heap = 1;
 }
@@ -81,25 +84,53 @@ void SurfaceHeapManager::onFirstRef()
     }
 }
 
-sp<MemoryDealer> SurfaceHeapManager::createHeap(int type)
+sp<MemoryDealer> SurfaceHeapManager::createHeap(
+        uint32_t flags,
+        pid_t client_pid,
+        const sp<MemoryDealer>& defaultAllocator)
 {
-    if (!global_pmem_heap && type==NATIVE_MEMORY_TYPE_PMEM)
-        type = NATIVE_MEMORY_TYPE_HEAP;
-
-    const sp<PMemHeap>& heap(mPMemHeap);
     sp<MemoryDealer> dealer; 
-    switch (type) {
-    case NATIVE_MEMORY_TYPE_HEAP:
-        dealer = new MemoryDealer(mClientHeapSize, 0, "SFNativeHeap");
-        break;
 
-    case NATIVE_MEMORY_TYPE_PMEM:
-        if (heap != 0) {
-            dealer = new MemoryDealer( 
-                    heap->createClientHeap(),
-                    heap->getAllocator());
+    if (flags & ISurfaceComposer::eGPU) {
+        // don't grant GPU memory if GPU is disabled
+        char value[PROPERTY_VALUE_MAX];
+        property_get("debug.egl.hw", value, "1");
+        if (atoi(value) == 0) {
+            flags &= ~ISurfaceComposer::eGPU;
         }
-        break;
+    }
+
+    if (flags & ISurfaceComposer::eGPU) {
+        // FIXME: this is msm7201A specific, where gpu surfaces may not be secure
+        if (!(flags & ISurfaceComposer::eSecure)) {
+            // if GPU doesn't work, we try eHardware
+            flags |= ISurfaceComposer::eHardware;
+            // asked for GPU memory, try that first
+            dealer = mFlinger->getGPU()->request(client_pid);
+        }
+    }
+
+    if (dealer == NULL) {
+        if (defaultAllocator != NULL)
+            // if a default allocator is given, use that
+            dealer = defaultAllocator;
+    }
+    
+    if (dealer == NULL) {
+        // always try h/w accelerated memory first
+        if (global_pmem_heap) {
+            const sp<PMemHeap>& heap(mPMemHeap);
+            if (dealer == NULL && heap != NULL) {
+                dealer = new MemoryDealer( 
+                        heap->createClientHeap(),
+                        heap->getAllocator());
+            }
+        }
+    }
+
+    if (dealer == NULL) {
+        // return the ashmem allocator (software rendering)
+        dealer = new MemoryDealer(mClientHeapSize, 0, "SFNativeHeap");
     }
     return dealer;
 }
@@ -122,22 +153,8 @@ sp<SimpleBestFitAllocator> SurfaceHeapManager::getAllocator(int type) const
 
 // ---------------------------------------------------------------------------
 
-PMemHeapInterface::PMemHeapInterface(int fd, size_t size)
-    : MemoryHeapBase(fd, size) {
-}
-PMemHeapInterface::PMemHeapInterface(const char* device, size_t size)
-    : MemoryHeapBase(device, size) {
-}
-PMemHeapInterface::PMemHeapInterface(size_t size, uint32_t flags, char const * name)
-    : MemoryHeapBase(size, flags, name) {
-}
-PMemHeapInterface::~PMemHeapInterface() {
-}
-
-// ---------------------------------------------------------------------------
-
 PMemHeap::PMemHeap(const char* const device, size_t size, size_t reserved)
-    : PMemHeapInterface(device, size)
+    : MemoryHeapBase(device, size)
 {
     //LOGD("%s, %p, mFD=%d", __PRETTY_FUNCTION__, this, heapID());
     if (base() != MAP_FAILED) {

@@ -20,6 +20,7 @@
  * Created on 23.11.2005
  *
  */
+
 package java.awt.image;
 
 import java.awt.Image;
@@ -40,41 +41,43 @@ import org.apache.harmony.awt.internal.nls.Messages;
 /**
  * This class not part of public API. It useful for receiving package private
  * data from other packages.
+ * 
+ * @since Android 1.0
  */
 class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
-    static void init(){
+    static void init() {
         inst = new AwtImageBackdoorAccessorImpl();
     }
 
     @Override
     public Surface getImageSurface(Image image) {
-        if (image instanceof BufferedImage){
+        if (image instanceof BufferedImage) {
             return ((BufferedImage)image).getImageSurface();
-        } else if (image instanceof GLVolatileImage){
+        } else if (image instanceof GLVolatileImage) {
             return ((GLVolatileImage)image).getImageSurface();
         }
         return null;
     }
 
     @Override
-    public boolean isGrayPallete(IndexColorModel icm){
+    public boolean isGrayPallete(IndexColorModel icm) {
         return icm.isGrayPallete();
     }
 
     @Override
     public Object getData(DataBuffer db) {
-        if (db instanceof DataBufferByte){
+        if (db instanceof DataBufferByte) {
             return ((DataBufferByte)db).getData();
-        } else if (db instanceof DataBufferUShort){
+        } else if (db instanceof DataBufferUShort) {
             return ((DataBufferUShort)db).getData();
-        } else if (db instanceof DataBufferShort){
+        } else if (db instanceof DataBufferShort) {
             return ((DataBufferShort)db).getData();
-        } else if (db instanceof DataBufferInt){
+        } else if (db instanceof DataBufferInt) {
             return ((DataBufferInt)db).getData();
-        } else if (db instanceof DataBufferFloat){
+        } else if (db instanceof DataBufferFloat) {
             return ((DataBufferFloat)db).getData();
-        } else if (db instanceof DataBufferDouble){
+        } else if (db instanceof DataBufferDouble) {
             return ((DataBufferDouble)db).getData();
         } else {
             // awt.235=Wrong Data Buffer type : {0}
@@ -85,7 +88,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public int[] getDataInt(DataBuffer db) {
-        if (db instanceof DataBufferInt){
+        if (db instanceof DataBufferInt) {
             return ((DataBufferInt)db).getData();
         }
         return null;
@@ -93,7 +96,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public byte[] getDataByte(DataBuffer db) {
-        if (db instanceof DataBufferByte){
+        if (db instanceof DataBufferByte) {
             return ((DataBufferByte)db).getData();
         }
         return null;
@@ -101,7 +104,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public short[] getDataShort(DataBuffer db) {
-        if (db instanceof DataBufferShort){
+        if (db instanceof DataBufferShort) {
             return ((DataBufferShort)db).getData();
         }
         return null;
@@ -109,7 +112,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public short[] getDataUShort(DataBuffer db) {
-        if (db instanceof DataBufferUShort){
+        if (db instanceof DataBufferUShort) {
             return ((DataBufferUShort)db).getData();
         }
         return null;
@@ -117,7 +120,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public double[] getDataDouble(DataBuffer db) {
-        if (db instanceof DataBufferDouble){
+        if (db instanceof DataBufferDouble) {
             return ((DataBufferDouble)db).getData();
         }
         return null;
@@ -125,7 +128,7 @@ class AwtImageBackdoorAccessorImpl extends AwtImageBackdoorAccessor {
 
     @Override
     public float[] getDataFloat(DataBuffer db) {
-        if (db instanceof DataBufferFloat){
+        if (db instanceof DataBufferFloat) {
             return ((DataBufferFloat)db).getData();
         }
         return null;

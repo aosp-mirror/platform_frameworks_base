@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Calendar;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
 
@@ -145,7 +146,7 @@ public class RecurrenceSet {
         long[] dates = new long[n];
         for (int i = 0; i<n; ++i) {
             // The timezone is updated to UTC if the time string specified 'Z'.
-            time.parse2445(rawDates[i]);
+            time.parse(rawDates[i]);
             dates[i] = time.toMillis(false /* use isDst */);
             time.timezone = tz;
         }
@@ -173,7 +174,7 @@ public class RecurrenceSet {
         // NOTE: the timezone may be null, if this is a floating time.
         String tzid = tzidParam == null ? null : tzidParam.value;
         Time start = new Time(tzidParam == null ? Time.TIMEZONE_UTC : tzid);
-        boolean inUtc = start.parse2445(dtstart);
+        boolean inUtc = start.parse(dtstart);
         boolean allDay = start.allDay;
 
         if (inUtc) {
@@ -350,7 +351,7 @@ public class RecurrenceSet {
                 ? start.timezone : endTzidParameter.value;
 
         Time end = new Time(endTzid);
-        end.parse2445(dtendProperty.getValue());
+        end.parse(dtendProperty.getValue());
         long durationMillis = end.toMillis(false /* use isDst */) 
                 - start.toMillis(false /* use isDst */);
         long durationSeconds = (durationMillis / 1000);

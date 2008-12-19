@@ -145,11 +145,13 @@ void LayerBlur::onDraw(const Region& clip) const
             mRefreshCache = false;
             mAutoRefreshPending = false;
             
-            uint16_t* const pixels = (uint16_t*)malloc(w*h*2);
+            // allocate enough memory for 4-bytes (2 pixels) aligned data
+            const int32_t s = (w + 1) & ~1;
+            uint16_t* const pixels = (uint16_t*)malloc(s*h*2);
 
-            // this reads the frame-buffer, so a h/w GL would have to
+            // This reads the frame-buffer, so a h/w GL would have to
             // finish() its rendering first. we don't want to do that
-            // too often.
+            // too often. Read data is 4-bytes aligned.
             glReadPixels(X, Y, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
             
             // blur that texture.
@@ -157,7 +159,7 @@ void LayerBlur::onDraw(const Region& clip) const
             bl.version = sizeof(GGLSurface);
             bl.width = w;
             bl.height = h;
-            bl.stride = w;
+            bl.stride = s;
             bl.format = GGL_PIXEL_FORMAT_RGB_565;
             bl.data = (GGLubyte*)pixels;            
             blurFilter(&bl, 8, 2);

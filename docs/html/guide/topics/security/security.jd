@@ -1,7 +1,27 @@
 page.title=Security and Permissions
 @jd:body
 
-<p>Android is a multi-process system, where each application (and parts of the
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#arch">Security Architecture</a></li>
+<li><a href="#signing">Application Signing</a></li>
+<li><a href="#userid">User IDs and File Access</a></li>
+<li><a href="#permissions">Using Permissions</a></li>
+<li><a href="#declaring">Declaring and Enforcing Permissions</a>
+	<ol>
+	<li><a href="#manifest">...in AndroidManifest.xml</a></li>
+	<li><a href="#broadcasts">...when Sending Broadcasts</a></li>
+	<li><a href="#enforcement">Other Permission Enforcement</a></li>
+	</ol></li>
+<li><a href="#uri">URI Permissions</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android is a multi-process system, in which each application (and parts of the
 system) runs in its own process.  Most security between applications and
 the system is enforced at the process level through standard Linux facilities,
 such as user and group IDs that are assigned to applications.
@@ -9,23 +29,6 @@ Additional finer-grained security features are provided
 through a "permission" mechanism that enforces restrictions on the specific
 operations that a particular process can perform, and per-URI permissions
 for granting ad-hoc access to specific pieces of data.</p>
-
-<p>This document covers these topics: </p>
-
-<ul>
-<li><a href="#arch">Security Architecture</a></li>
-<li><a href="#signing">Application Signing</a></li>
-<li><a href="#userid">User IDs and File Access</a></li>
-<li><a href="#permissions">Using Permissions</a></li>
-<li><a href="#declaring">Declaring and Enforcing Permissions</a>
-	<ul>
-	<li><a href="#manifest">Enforcing Permissions in AndroidManifest.xml</a></li>
-	<li><a href="#broadcasts">Enforcing Permissions when Sending Broadcasts</a></li>
-	<li><a href="#enforcement">Other Permission Enforcement</a></li>
-	</ul></li>
-<li>><a href="#uri">URI Permissions</a></li>
-</ul>
-
 
 <a name="arch"></a>
 <h2>Security Architecture</h2>

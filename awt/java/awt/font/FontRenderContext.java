@@ -23,23 +23,30 @@ package java.awt.font;
 import java.awt.geom.AffineTransform;
 
 /**
- * The FontRenderContext class contains the information 
- * about text measurement. Anti-aliasing and fractional-metrics
- * modes are defined by an application and affect the size of
- * a character.
+ * The FontRenderContext class contains the information about text measurement.
+ * Anti-aliasing and fractional-metrics modes are defined by an application and
+ * affect the size of a character.
+ * 
+ * @since Android 1.0
  */
 public class FontRenderContext {
 
     // Affine transform of this mode
-    /** The transform. */
+    /**
+     * The transform.
+     */
     private AffineTransform transform;
 
     // Is the anti-aliased mode used
-    /** The anti aliased. */
+    /**
+     * The anti aliased.
+     */
     private boolean fAntiAliased;
 
     // Is the fractional metrics used
-    /** The fractional metrics. */
+    /**
+     * The fractional metrics.
+     */
     private boolean fFractionalMetrics;
 
 
@@ -47,9 +54,12 @@ public class FontRenderContext {
      * Instantiates a new FontRenderContext object with the specified
      * AffineTransform, anti-aliasing and fractional metrics flags.
      * 
-     * @param trans the AffineTransform.
-     * @param antiAliased the anti-aliasing flag.
-     * @param usesFractionalMetrics the fractional metrics flag.
+     * @param trans
+     *            the AffineTransform.
+     * @param antiAliased
+     *            the anti-aliasing flag.
+     * @param usesFractionalMetrics
+     *            the fractional metrics flag.
      */
     public FontRenderContext(AffineTransform trans, boolean antiAliased, 
             boolean usesFractionalMetrics) {
@@ -67,12 +77,12 @@ public class FontRenderContext {
     }
 
     /**
-     * Compares the specified Object with current FontRenderContext object. 
+     * Compares the specified Object with current FontRenderContext object.
      * 
-     * @param obj the Object to be compared.
-     * 
+     * @param obj
+     *            the Object to be compared.
      * @return true, if the specified Object is equal to current
-     * FontRenderContext object.
+     *         FontRenderContext object.
      */
     @Override
     public boolean equals(Object obj) {
@@ -92,11 +102,11 @@ public class FontRenderContext {
     }
 
     /**
-     * Gets the transform which is used for scaling typographical points 
-     * to pixels in this FontRenderContext.
+     * Gets the transform which is used for scaling typographical points to
+     * pixels in this FontRenderContext.
      * 
-     * @return the AffineTransform which is used for scaling typographical 
-     * points to pixels in this FontRenderContext.
+     * @return the AffineTransform which is used for scaling typographical
+     *         points to pixels in this FontRenderContext.
      */
     public AffineTransform getTransform() {
         if (transform != null){
@@ -106,13 +116,13 @@ public class FontRenderContext {
     }
 
     /**
-     * Compares the specified FontRenderContext object with current 
+     * Compares the specified FontRenderContext object with current
      * FontRenderContext.
      * 
-     * @param frc the FontRenderContext object to be compared.
-     * 
-     * @return true, if the specified FontRenderContext object is
-     * equal to current FontRenderContext.
+     * @param frc
+     *            the FontRenderContext object to be compared.
+     * @return true, if the specified FontRenderContext object is equal to
+     *         current FontRenderContext.
      */
     public boolean equals(FontRenderContext frc) {
         if (this == frc){
@@ -132,11 +142,11 @@ public class FontRenderContext {
     }
 
     /**
-     * Returns true if the text fractional metrics are used in 
-     * this FontRenderContext.
+     * Returns true if the text fractional metrics are used in this
+     * FontRenderContext.
      * 
-     * @return true, if the text fractional metrics are used in 
-     * this FontRenderContext, false otherwise.
+     * @return true, if the text fractional metrics are used in this
+     *         FontRenderContext, false otherwise.
      */
     public boolean usesFractionalMetrics() {
         return this.fFractionalMetrics;
@@ -146,7 +156,7 @@ public class FontRenderContext {
      * Returns true if anti-aliasing is used in this FontRenderContext.
      * 
      * @return true, if is anti-aliasing is used in this FontRenderContext,
-     * false otherwise.
+     *         false otherwise.
      */
     public boolean isAntiAliased() {
         return this.fAntiAliased;

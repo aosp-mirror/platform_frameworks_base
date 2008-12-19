@@ -10,26 +10,6 @@ package com.android.internal.telephony;
 public class TelephonyIntents {
 
     /**
-     * <p>Broadcast Action: The phone state has changed. The intent will have the following
-     * extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> - A string version of the phone name.</li>
-     *   <li><em>state</em> - A string version of the new phone state.</li>
-     * </ul>
-     * 
-     * <p class="note">
-     * You can <em>not</em> receive this through components declared
-     * in manifests, only by exlicitly registering for it with
-     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
-     * android.content.IntentFilter) Context.registerReceiver()}.
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     */
-    public static final String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
-
-
-    /**
      * Broadcast Action: The phone service state has changed. The intent will have the following
      * extra values:</p>
      * <ul>

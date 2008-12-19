@@ -435,9 +435,8 @@ public final class BridgeResources extends Resources {
     }
 
     /**
-     * Builds and throws a {@link NotFoundException} based on a resource id and a resource type.
+     * Builds and throws a {@link Resources.NotFoundException} based on a resource id and a resource type.
      * @param id the id of the resource
-     * @param resType the type of the resource.
      * @throws NotFoundException
      */
     private void throwException(int id) throws NotFoundException {

@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.Transparency;
@@ -27,44 +28,57 @@ import java.util.Arrays;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class PackedColorModel represents a color model where the 
- * components are just the red, green, and blue bands, plus an alpha
- * band if alpha is supported.
+ * The class PackedColorModel represents a color model where the components are
+ * just the red, green, and blue bands, plus an alpha band if alpha is
+ * supported.
+ * 
+ * @since Android 1.0
  */
 public abstract class PackedColorModel extends ColorModel {
 
-    /** The component masks. */
+    /**
+     * The component masks.
+     */
     int componentMasks[];
 
-    /** The offsets. */
+    /**
+     * The offsets.
+     */
     int offsets[];
 
-    /** The scales. */
+    /**
+     * The scales.
+     */
     float scales[];
 
     /**
      * Instantiates a new packed color model.
      * 
-     * @param space the color space
-     * @param bits the array of component masks
-     * @param colorMaskArray the array that gives the bitmask corresponding
-     * to each color band (red, green, and blue)
-     * @param alphaMask the bitmask corresponding to the alpha band
-     * @param isAlphaPremultiplied whether the alpha is premultiplied in this color model
-     * @param trans the transparency strategy, @see java.awt.Transparency
-     * @param transferType the transfer type (primitive java type 
-     * to use for the components)
-     * 
-     * @throws IllegalArgumentException if the number of bits in the combined 
-     * bitmasks for the color bands is less than one or greater than 32
+     * @param space
+     *            the color space.
+     * @param bits
+     *            the array of component masks.
+     * @param colorMaskArray
+     *            the array that gives the bitmask corresponding to each color
+     *            band (red, green, and blue).
+     * @param alphaMask
+     *            the bitmask corresponding to the alpha band.
+     * @param isAlphaPremultiplied
+     *            whether the alpha is pre-multiplied in this color model.
+     * @param trans
+     *            the transparency strategy, @see java.awt.Transparency.
+     * @param transferType
+     *            the transfer type (primitive java type to use for the
+     *            components).
+     * @throws IllegalArgumentException
+     *             if the number of bits in the combined bitmasks for the color
+     *             bands is less than one or greater than 32.
      */
-    public PackedColorModel(ColorSpace space, int bits, int colorMaskArray[],
-            int alphaMask, boolean isAlphaPremultiplied, int trans,
-            int transferType) {
+    public PackedColorModel(ColorSpace space, int bits, int colorMaskArray[], int alphaMask,
+            boolean isAlphaPremultiplied, int trans, int transferType) {
 
-        super(bits, createBits(colorMaskArray, alphaMask), space,
-                (alphaMask == 0 ? false : true), isAlphaPremultiplied, trans,
-                validateTransferType(transferType));
+        super(bits, createBits(colorMaskArray, alphaMask), space, (alphaMask == 0 ? false : true),
+                isAlphaPremultiplied, trans, validateTransferType(transferType));
 
         if (pixel_bits < 1 || pixel_bits > 32) {
             // awt.236=The bits is less than 1 or greater than 32
@@ -89,27 +103,34 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Instantiates a new packed color model.
      * 
-     * @param space the color space
-     * @param bits the array of component masks
-     * @param rmask the bitmask corresponding to the red band
-     * @param gmask the bitmask corresponding to the green band
-     * @param bmask the bitmask corresponding to the blue band
-     * @param amask the bitmask corresponding to the alpha band
-     * @param isAlphaPremultiplied whether the alpha is premultiplied in this color model
-     * @param trans the transparency strategy, @see java.awt.Transparency
-     * @param transferType the transfer type (primitive java type 
-     * to use for the components)
-     * 
-     * @throws IllegalArgumentException if the number of bits in the combined 
-     * bitmasks for the color bands is less than one or greater than 32
+     * @param space
+     *            the color space.
+     * @param bits
+     *            the array of component masks.
+     * @param rmask
+     *            the bitmask corresponding to the red band.
+     * @param gmask
+     *            the bitmask corresponding to the green band.
+     * @param bmask
+     *            the bitmask corresponding to the blue band.
+     * @param amask
+     *            the bitmask corresponding to the alpha band.
+     * @param isAlphaPremultiplied
+     *            whether the alpha is pre-multiplied in this color model.
+     * @param trans
+     *            the transparency strategy, @see java.awt.Transparency.
+     * @param transferType
+     *            the transfer type (primitive java type to use for the
+     *            components).
+     * @throws IllegalArgumentException
+     *             if the number of bits in the combined bitmasks for the color
+     *             bands is less than one or greater than 32.
      */
-    public PackedColorModel(ColorSpace space, int bits, int rmask, int gmask,
-            int bmask, int amask, boolean isAlphaPremultiplied, int trans,
-            int transferType) {
+    public PackedColorModel(ColorSpace space, int bits, int rmask, int gmask, int bmask, int amask,
+            boolean isAlphaPremultiplied, int trans, int transferType) {
 
-        super(bits, createBits(rmask, gmask, bmask, amask), space,
-                (amask == 0 ? false : true), isAlphaPremultiplied, trans,
-                validateTransferType(transferType));
+        super(bits, createBits(rmask, gmask, bmask, amask), space, (amask == 0 ? false : true),
+                isAlphaPremultiplied, trans, validateTransferType(transferType));
 
         if (pixel_bits < 1 || pixel_bits > 32) {
             // awt.236=The bits is less than 1 or greater than 32
@@ -123,7 +144,8 @@ public abstract class PackedColorModel extends ColorModel {
 
         for (int i = 0; i < numColorComponents; i++) {
             if (cs.getMinValue(i) != 0.0f || cs.getMaxValue(i) != 1.0f) {
-                // awt.23A=The min/max normalized component values are not 0.0/1.0
+                // awt.23A=The min/max normalized component values are not
+                // 0.0/1.0
                 throw new IllegalArgumentException(Messages.getString("awt.23A")); //$NON-NLS-1$
             }
         }
@@ -144,7 +166,7 @@ public abstract class PackedColorModel extends ColorModel {
 
     @Override
     public WritableRaster getAlphaRaster(WritableRaster raster) {
-        if(!hasAlpha) {
+        if (!hasAlpha) {
             return null;
         }
 
@@ -165,18 +187,16 @@ public abstract class PackedColorModel extends ColorModel {
         if (!(obj instanceof PackedColorModel)) {
             return false;
         }
-        PackedColorModel cm = (PackedColorModel) obj;
+        PackedColorModel cm = (PackedColorModel)obj;
 
-        return (pixel_bits == cm.getPixelSize() &&
-                transferType == cm.getTransferType() &&
-                cs.getType() == cm.getColorSpace().getType() &&
-                hasAlpha == cm.hasAlpha() &&
-                isAlphaPremultiplied == cm.isAlphaPremultiplied() &&
-                transparency == cm.getTransparency() &&
-                numColorComponents == cm.getNumColorComponents()&&
-                numComponents == cm.getNumComponents() &&
-                Arrays.equals(bits, cm.getComponentSize()) &&
-                Arrays.equals(componentMasks, cm.getMasks()));
+        return (pixel_bits == cm.getPixelSize() && transferType == cm.getTransferType()
+                && cs.getType() == cm.getColorSpace().getType() && hasAlpha == cm.hasAlpha()
+                && isAlphaPremultiplied == cm.isAlphaPremultiplied()
+                && transparency == cm.getTransparency()
+                && numColorComponents == cm.getNumColorComponents()
+                && numComponents == cm.getNumComponents()
+                && Arrays.equals(bits, cm.getComponentSize()) && Arrays.equals(componentMasks, cm
+                .getMasks()));
     }
 
     @Override
@@ -187,25 +207,23 @@ public abstract class PackedColorModel extends ColorModel {
         if (!(sm instanceof SinglePixelPackedSampleModel)) {
             return false;
         }
-        SinglePixelPackedSampleModel esm = (SinglePixelPackedSampleModel) sm;
+        SinglePixelPackedSampleModel esm = (SinglePixelPackedSampleModel)sm;
 
-        return ((esm.getNumBands() == numComponents) &&
-                (esm.getTransferType() == transferType) &&
-                Arrays.equals(esm.getBitMasks(), componentMasks));
+        return ((esm.getNumBands() == numComponents) && (esm.getTransferType() == transferType) && Arrays
+                .equals(esm.getBitMasks(), componentMasks));
     }
 
     @Override
     public SampleModel createCompatibleSampleModel(int w, int h) {
-        return new SinglePixelPackedSampleModel(transferType, w, h,
-                componentMasks);
+        return new SinglePixelPackedSampleModel(transferType, w, h, componentMasks);
     }
 
     /**
      * Gets the bitmask corresponding to the specified color component.
      * 
-     * @param index the index of the desired color
-     * 
-     * @return the mask
+     * @param index
+     *            the index of the desired color.
+     * @return the mask.
      */
     public final int getMask(int index) {
         return componentMasks[index];
@@ -214,7 +232,7 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Gets the bitmasks of the components.
      * 
-     * @return the masks
+     * @return the masks.
      */
     public final int[] getMasks() {
         return (componentMasks.clone());
@@ -223,10 +241,11 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Creates the bits.
      * 
-     * @param colorMaskArray the color mask array
-     * @param alphaMask the alpha mask
-     * 
-     * @return the int[]
+     * @param colorMaskArray
+     *            the color mask array.
+     * @param alphaMask
+     *            the alpha mask.
+     * @return the int[].
      */
     private static int[] createBits(int colorMaskArray[], int alphaMask) {
         int bits[];
@@ -262,15 +281,17 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Creates the bits.
      * 
-     * @param rmask the rmask
-     * @param gmask the gmask
-     * @param bmask the bmask
-     * @param amask the amask
-     * 
-     * @return the int[]
+     * @param rmask
+     *            the rmask.
+     * @param gmask
+     *            the gmask.
+     * @param bmask
+     *            the bmask.
+     * @param amask
+     *            the amask.
+     * @return the int[].
      */
-    private static int[] createBits(int rmask, int gmask, int bmask,
-            int amask) {
+    private static int[] createBits(int rmask, int gmask, int bmask, int amask) {
 
         int numComp;
         if (amask == 0) {
@@ -312,9 +333,9 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Count comp bits.
      * 
-     * @param compMask the comp mask
-     * 
-     * @return the int
+     * @param compMask
+     *            the comp mask.
+     * @return the int.
      */
     private static int countCompBits(int compMask) {
         int bits = 0;
@@ -340,20 +361,19 @@ public abstract class PackedColorModel extends ColorModel {
     /**
      * Validate transfer type.
      * 
-     * @param transferType the transfer type
-     * 
-     * @return the int
+     * @param transferType
+     *            the transfer type.
+     * @return the int.
      */
     private static int validateTransferType(int transferType) {
-        if (transferType != DataBuffer.TYPE_BYTE &&
-                transferType != DataBuffer.TYPE_USHORT &&
-                transferType != DataBuffer.TYPE_INT) {
+        if (transferType != DataBuffer.TYPE_BYTE && transferType != DataBuffer.TYPE_USHORT
+                && transferType != DataBuffer.TYPE_INT) {
             // awt.240=The transferType not is one of DataBuffer.TYPE_BYTE,
-            //          DataBuffer.TYPE_USHORT or DataBuffer.TYPE_INT
+            // DataBuffer.TYPE_USHORT or DataBuffer.TYPE_INT
             throw new IllegalArgumentException(Messages.getString("awt.240")); //$NON-NLS-1$
         }
         return transferType;
-}
+    }
 
     /**
      * Parses the components.
@@ -380,4 +400,3 @@ public abstract class PackedColorModel extends ColorModel {
     }
 
 }
-

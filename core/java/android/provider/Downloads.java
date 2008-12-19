@@ -29,6 +29,29 @@ import android.net.Uri;
 // this API is hidden.
 public final class Downloads implements BaseColumns {
     private Downloads() {}
+
+    /**
+     * The permission to access the download manager
+     */
+    public static final String PERMISSION_ACCESS = "android.permission.ACCESS_DOWNLOAD_MANAGER";
+
+    /**
+     * The permission to access the download manager's advanced functions
+     */
+    public static final String PERMISSION_ACCESS_ADVANCED =
+            "android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED";
+
+    /**
+     * The permission to directly access the download manager's cache directory
+     */
+    public static final String PERMISSION_CACHE = "android.permission.ACCESS_CACHE_FILESYSTEM";
+
+    /**
+     * The permission to send broadcasts on download completion
+     */
+    public static final String PERMISSION_SEND_INTENTS =
+            "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
+
     /**
      * The content:// URI for the data table in the provider
      */
@@ -64,21 +87,11 @@ public final class Downloads implements BaseColumns {
     public static final String URI = "uri";
 
     /**
-     * The name of the column containing the HTTP method to use for this
-     * download. See the METHOD_* constants for a list of legal values.
-     * <P>Type: INTEGER</P>
-     * <P>Owner can Init/Read</P>
-     */
-    public static final String METHOD = "method";
-
-    /**
-     * The name of the column containing the entity to be sent with the
-     * request of this download. Only use for methods that support sending
-     * entities, i.e. POST.
+     * The name of the column containing application-specific data.
      * <P>Type: TEXT</P>
-     * <P>Owner can Init</P>
+     * <P>Owner can Init/Read/Write</P>
      */
-    public static final String ENTITY = "entity";
+    public static final String APP_DATA = "entity";
 
     /**
      * The name of the column containing the flags that indicates whether
@@ -89,7 +102,7 @@ public final class Downloads implements BaseColumns {
      * a byte-range request without an ETag, or when it can't determine
      * whether a download fully completed).
      * <P>Type: BOOLEAN</P>
-     * <P>Owner can Init/Read</P>
+     * <P>Owner can Init</P>
      */
     public static final String NO_INTEGRITY = "no_integrity";
 
@@ -98,7 +111,7 @@ public final class Downloads implements BaseColumns {
      * application recommends. When possible, the download manager will attempt
      * to use this filename, or a variation, as the actual name for the file.
      * <P>Type: TEXT</P>
-     * <P>Owner can Init/Read</P>
+     * <P>Owner can Init</P>
      */
     public static final String FILENAME_HINT = "hint";
 
@@ -107,15 +120,13 @@ public final class Downloads implements BaseColumns {
      * was actually stored.
      * <P>Type: TEXT</P>
      * <P>Owner can Read</P>
-     * <P>UI can Read</P>
      */
-    public static final String FILENAME = "_data";
+    public static final String _DATA = "_data";
 
     /**
      * The name of the column containing the MIME type of the downloaded data.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
-     * <P>UI can Read</P>
      */
     public static final String MIMETYPE = "mimetype";
 
@@ -123,29 +134,9 @@ public final class Downloads implements BaseColumns {
      * The name of the column containing the flag that controls the destination
      * of the download. See the DESTINATION_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
-     * <P>Owner can Init/Read</P>
-     * <P>UI can Read</P>
+     * <P>Owner can Init</P>
      */
     public static final String DESTINATION = "destination";
-
-    /**
-     * The name of the column containing the flags that controls whether
-     * the download must be saved with the filename used for OTA updates.
-     * Must be used with INTERNAL, and the initiating application must hold the
-     * android.permission.DOWNLOAD_OTA_UPDATE permission.
-     * <P>Type: BOOLEAN</P>
-     * <P>Owner can Init/Read</P>
-     * <P>UI can Read</P>
-     */
-    public static final String OTA_UPDATE = "otaupdate";
-
-    /**
-     * The name of the columns containing the flag that controls whether
-     * files with private/inernal/system MIME types can be downloaded.
-     * <P>Type: BOOLEAN</P>
-     * <P>Owner can Init/Read</P>
-     */
-    public static final String NO_SYSTEM_FILES = "no_system";
 
     /**
      * The name of the column containing the flags that controls whether the
@@ -153,21 +144,15 @@ public final class Downloads implements BaseColumns {
      * a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Init/Read/Write</P>
-     * <P>UI can Read/Write (only for entries that are visible)</P>
      */
     public static final String VISIBILITY = "visibility";
 
     /**
-     * The name of the column containing the command associated with the
-     * download. After a download is initiated, this is the only column that
-     * applications can modify. See the CONTROL_* constants for a list of legal
-     * values. Note: doesn't do anything in 1.0. The API will be hooked up
-     * in a future version, and is provided here as an indication of things
-     * to come.
+     * The name of the column containing the current control state  of the download.
+     * Applications can write to this to control (pause/resume) the download.
+     * the CONTROL_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
-     * <P>Owner can Init/Read/Write</P>
-     * <P>UI can Init/Read/Write</P>
-     * @hide
+     * <P>Owner can Read</P>
      */
     public static final String CONTROL = "control";
 
@@ -177,7 +162,6 @@ public final class Downloads implements BaseColumns {
      * the STATUS_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
-     * <P>UI can Read</P>
      */
     public static final String STATUS = "status";
 
@@ -187,16 +171,8 @@ public final class Downloads implements BaseColumns {
      * value.
      * <P>Type: BIGINT</P>
      * <P>Owner can Read</P>
-     * <P>UI can Read</P>
      */
     public static final String LAST_MODIFICATION = "lastmod";
-
-    /**
-     * The name of the column containing the number of consecutive connections
-     * that have failed.
-     * <P>Type: INTEGER</P>
-     */
-    public static final String FAILED_CONNECTIONS = "numfailed";
 
     /**
      * The name of the column containing the package name of the application
@@ -204,7 +180,6 @@ public final class Downloads implements BaseColumns {
      * notifications to a component in this package when the download completes.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
-     * <P>UI can Read</P>
      */
     public static final String NOTIFICATION_PACKAGE = "notificationpackage";
 
@@ -215,13 +190,14 @@ public final class Downloads implements BaseColumns {
      * Intent.setClassName(String,String).
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
-     * <P>UI can Read</P>
      */
     public static final String NOTIFICATION_CLASS = "notificationclass";
 
     /**
      * If extras are specified when requesting a download they will be provided in the intent that
      * is sent to the specified class and package when a download has finished.
+     * <P>Type: TEXT</P>
+     * <P>Owner can Init</P>
      */
     public static final String NOTIFICATION_EXTRAS = "notificationextras";
 
@@ -255,7 +231,6 @@ public final class Downloads implements BaseColumns {
      * downloaded.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
-     * <P>UI can Read</P>
      */
     public static final String TOTAL_BYTES = "total_bytes";
 
@@ -264,33 +239,18 @@ public final class Downloads implements BaseColumns {
      * has been downloaded so far.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
-     * <P>UI can Read</P>
      */
     public static final String CURRENT_BYTES = "current_bytes";
-
-    /**
-     * The name of the column containing the entity tag for the response.
-     * <P>Type: TEXT</P>
-     * @hide
-     */
-    public static final String ETAG = "etag";
-
-    /**
-     * The name of the column containing the UID of the application that
-     * initiated the download.
-     * <P>Type: INTEGER</P>
-     * @hide
-     */
-    public static final String UID = "uid";
 
     /**
      * The name of the column where the initiating application can provide the
      * UID of another application that is allowed to access this download. If
      * multiple applications share the same UID, all those applications will be
      * allowed to access this download. This column can be updated after the
-     * download is initiated.
+     * download is initiated. This requires the permission
+     * android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED.
      * <P>Type: INTEGER</P>
-     * <P>Owner can Init/Read/Write</P>
+     * <P>Owner can Init</P>
      */
     public static final String OTHER_UID = "otheruid";
 
@@ -300,7 +260,6 @@ public final class Downloads implements BaseColumns {
      * list of downloads.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read/Write</P>
-     * <P>UI can Read</P>
      */
     public static final String TITLE = "title";
 
@@ -310,17 +269,8 @@ public final class Downloads implements BaseColumns {
      * user in the list of downloads.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read/Write</P>
-     * <P>UI can Read</P>
      */
     public static final String DESCRIPTION = "description";
-
-    /**
-     * The name of the column where the download manager indicates whether the
-     * media scanner was notified about this download.
-     * <P>Type: BOOLEAN</P>
-     * @hide
-     */
-    public static final String MEDIA_SCANNED = "scanned";
 
     /*
      * Lists the destinations that an application can specify for a download.
@@ -343,7 +293,8 @@ public final class Downloads implements BaseColumns {
      * download private files that are used and deleted soon after they
      * get downloaded. All file types are allowed, and only the initiating
      * application can access the file (indirectly through a content
-     * provider).
+     * provider). This requires the
+     * android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED permission.
      */
     public static final int DESTINATION_CACHE_PARTITION = 1;
 
@@ -357,40 +308,21 @@ public final class Downloads implements BaseColumns {
     public static final int DESTINATION_CACHE_PARTITION_PURGEABLE = 2;
 
     /**
-     * This download will be saved to the download manager's cache
-     * on the shared data partition. Use CACHE_PARTITION_PURGEABLE instead.
+     * This download will be saved to the download manager's private
+     * partition, as with DESTINATION_CACHE_PARTITION, but the download
+     * will not proceed if the user is on a roaming data connection.
      */
-    public static final int DESTINATION_DATA_CACHE = 3;
-
-    /* (not javadoc)
-     * This download will be saved to a file specified by the initiating
-     * applications.
-     * @hide
-     */
-    //public static final int DESTINATION_PROVIDER = 4;
-
-    /*
-     * Lists the commands that an application can set to control an ongoing
-     * download. Note: those aren't working.
-     */
+    public static final int DESTINATION_CACHE_PARTITION_NOROAMING = 3;
 
     /**
-     * This download can run
-     * @hide
+     * This download is allowed to run.
      */
     public static final int CONTROL_RUN = 0;
 
     /**
-     * This download must pause (might be restarted)
-     * @hide
+     * This download must pause at the first opportunity.
      */
-    public static final int CONTROL_PAUSE = 1;
-
-    /**
-     * This download must abort (will never be restarted)
-     * @hide
-     */
-    public static final int CONTROL_STOP = 2;
+    public static final int CONTROL_PAUSED = 1;
 
     /*
      * Lists the states that the download manager can set on a download
@@ -490,11 +422,6 @@ public final class Downloads implements BaseColumns {
     public static final int STATUS_BAD_REQUEST = 400;
 
     /**
-     * The server returned an auth error.
-     */
-    public static final int STATUS_NOT_AUTHORIZED = 401;
-
-    /**
      * This download can't be performed because the content type cannot be
      * handled.
      */
@@ -522,11 +449,6 @@ public final class Downloads implements BaseColumns {
      * This download was canceled
      */
     public static final int STATUS_CANCELED = 490;
-    /**
-     * @hide
-     * Alternate spelling
-     */
-    public static final int STATUS_CANCELLED = 490;
 
     /**
      * This download has completed with an error.
@@ -534,11 +456,6 @@ public final class Downloads implements BaseColumns {
      * the future. Use isStatusError() to capture the entire category.
      */
     public static final int STATUS_UNKNOWN_ERROR = 491;
-    /**
-     * @hide
-     * Legacy name - use STATUS_UNKNOWN_ERROR
-     */
-    public static final int STATUS_ERROR = 491;
 
     /**
      * This download couldn't be completed because of a storage issue.
@@ -548,54 +465,40 @@ public final class Downloads implements BaseColumns {
 
     /**
      * This download couldn't be completed because of an HTTP
-     * redirect code.
+     * redirect response that the download manager couldn't
+     * handle.
      */
     public static final int STATUS_UNHANDLED_REDIRECT = 493;
+
+    /**
+     * This download couldn't be completed because there were
+     * too many redirects.
+     */
+    public static final int STATUS_TOO_MANY_REDIRECTS = 494;
 
     /**
      * This download couldn't be completed because of an
      * unspecified unhandled HTTP code.
      */
-    public static final int STATUS_UNHANDLED_HTTP_CODE = 494;
+    public static final int STATUS_UNHANDLED_HTTP_CODE = 495;
 
     /**
      * This download couldn't be completed because of an
      * error receiving or processing data at the HTTP level.
      */
-    public static final int STATUS_HTTP_DATA_ERROR = 495;
+    public static final int STATUS_HTTP_DATA_ERROR = 496;
 
     /**
-     * This download couldn't be completed because of an
-     * HttpException while setting up the request.
+     * This download is visible and shows in the notifications while
+     * in progress and after completion.
      */
-    public static final int STATUS_HTTP_EXCEPTION = 496;
-
-    /*
-     * Lists the HTTP methods that the download manager can use.
-     */
-
-    /**
-     * GET
-     */
-    public static final int METHOD_GET = 0;
-
-    /**
-     * POST
-     */
-    public static final int METHOD_POST = 1;
+    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 0;
 
     /**
      * This download is visible but only shows in the notifications
-     * while it's running (a separate download UI would still show it
-     * after completion).
+     * while it's in progress.
      */
-    public static final int VISIBILITY_VISIBLE = 0;
-
-    /**
-     * This download is visible and shows in the notifications after
-     * completion.
-     */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
+    public static final int VISIBILITY_VISIBLE = 1;
 
     /**
      * This download doesn't show in the UI or in the notifications.

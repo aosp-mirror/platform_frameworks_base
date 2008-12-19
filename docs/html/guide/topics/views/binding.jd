@@ -1,7 +1,27 @@
 page.title=Binding to Data with AdapterView
+parent.title=Views and Layout
+parent.link=index.html
 @jd:body
 
-<p>Some types of ViewGroup objects have a UI that is visible on the screen &mdash; {@link android.widget.AdapterView AdapterView} is one such object. AdapterView is a ViewGroup subclass whose child Views are determined by an {@link android.widget.Adapter Adapter} that binds to data of some type. AdapterView is useful whenever you need to display stored data (versus resource strings or drawables) in your layout.</p>
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#FillingTheLayout">Filling the Layout with Data</a></li>
+    <li><a href="#HandlingUserSelections">Handling User Selections</a></li>
+  </ol>
+  
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/tutorials/views/hello-spinner.html">Hello Spinner tutorial</a></li>
+    <li><a href="{@docRoot}guide/tutorials/views/hello-listview.html">Hello ListView tutorial</a></li>
+    <li><a href="{@docRoot}guide/tutorials/views/hello-gridview.html">Hello GridView tutorial</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The {@link android.widget.AdapterView} is a ViewGroup subclass whose child Views are determined by an {@link android.widget.Adapter Adapter} that 
+binds to data of some type. AdapterView is useful whenever you need to display stored data (as opposed to resource strings or drawables) in your layout.</p>
 
 <p>{@link android.widget.Gallery Gallery}, {@link android.widget.ListView ListView}, and  {@link android.widget.Spinner Spinner} are examples of AdapterView subclasses that you can use to bind to a specific type of data and display it in a certain way. </p>
 
@@ -14,15 +34,18 @@ page.title=Binding to Data with AdapterView
     </li>
 </ul>
 
-<p>The sections below describe how the AdapterView fulfills those responsibilities.</p>
 
-<h3>
-    Filling the layout with data
-</h3>
-
-<p>This is typically done by binding the class to an {@link
-android.widget.Adapter} that gets its data from somewhere &mdash; either a list that
-the code supplies, or query results from the device's database. </p>
+<h2 id="FillingTheLayout">Filling the Layout with Data</h2>
+<p>Inserting data into the layout is typically done by binding the AdapterView class to an {@link
+android.widget.Adapter}, which retireves data from an external source (perhaps a list that
+the code supplies or query results from the device's database). </p>
+<p>The following code sample does the following:</p>
+<ol>
+  <li>Creates a {@link android.widget.Spinner Spinner} with an existing View and binds it to a new ArrayAdapter
+that reads an array of colors from the local resources.</li>
+  <li>Creates another Spinner object from a View and binds it to a new SimpleCursorAdapter that will read 
+people's names from the device contacts (see {@link android.provider.Contacts.People}).</li>
+</ol>
 
 <pre>
 // Get a Spinner and bind it to an ArrayAdapter that 
@@ -57,10 +80,10 @@ s2.setAdapter(adapter2);
 
 <p>Note that it is necessary to have the People._ID column in projection used with CursorAdapter
 or else you will get an exception.</p>
-<h3>
-    Handling user selections
-</h3>
-<p> This is done by setting the class's {@link
+
+
+<h2 id="HandlingUserSelections">Handling User Selections</h2>
+<p>You handle the user's selecction by setting the class's {@link
 android.widget.AdapterView.OnItemClickListener} member to a listener and
 catching the selection changes. </p>
 <pre>
@@ -78,3 +101,10 @@ private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
 mHistoryView = (ListView)findViewById(R.id.history);
 mHistoryView.setOnItemClickListener(mMessageClickedHandler); 
 </pre>
+
+<div class="special">
+<p>For more discussion on how to create different AdapterViews, read the following tutorials:
+<a href="{@docRoot}guide/tutorials/views/hello-spinner.html">Hello Spinner</a>,
+<a href="{@docRoot}guide/tutorials/views/hello-listview.html">Hello ListView</a>, and
+<a href="{@docRoot}guide/tutorials/views/hello-gridview.html">Hello GridView</a>.
+</div>

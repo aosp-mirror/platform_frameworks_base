@@ -28,35 +28,36 @@ import android.util.Log;
  * The Android Bluetooth API is not finalized, and *will* change. Use at your
  * own risk.
  *
- * Public API for controlling the Bluetooth Headset Service.
+ * Public API for controlling the Bluetooth Headset Service. This includes both
+ * Bluetooth Headset and Handsfree (v1.5) profiles. The Headset service will
+ * attempt a handsfree connection first, and fall back to headset.
  *
  * BluetoothHeadset is a proxy object for controlling the Bluetooth Headset
- * Service.
+ * Service via IPC.
  *
  * Creating a BluetoothHeadset object will create a binding with the
  * BluetoothHeadset service. Users of this object should call close() when they
  * are finished with the BluetoothHeadset, so that this proxy object can unbind
  * from the service.
  *
- * BlueoothHeadset objects are not guarenteed to be connected to the
- * BluetoothHeadsetService at all times. Calls on this object while not
- * connected to the service will result in default error return values. Even
- * after object construction, there is a short delay (~10ms) before this proxy
- * object is actually connected to the Service.
+ * This BluetoothHeadset object is not immediately bound to the
+ * BluetoothHeadset service. Use the ServiceListener interface to obtain a
+ * notification when it is bound, this is especially important if you wish to
+ * immediately call methods on BluetootHeadset after construction.
  *
  * Android only supports one connected Bluetooth Headset at a time.
- *
- * Note that in this context, Headset includes both Bluetooth Headset's and
- * Handsfree devices.
  *
  * @hide
  */
 public class BluetoothHeadset {
 
-    private final static String TAG = "BluetoothHeadset";
+    private static final String TAG = "BluetoothHeadset";
+    private static final boolean DBG = false;
 
-    private final Context mContext;
     private IBluetoothHeadset mService;
+    private final Context mContext;
+    private final ServiceListener mServiceListener;
+    private ConnectHeadsetCallback mConnectHeadsetCallback;
 
     /** There was an error trying to obtain the state */
     public static final int STATE_ERROR        = -1;
@@ -72,25 +73,44 @@ public class BluetoothHeadset {
     /** Connection cancelled before completetion. */
     public static final int RESULT_CANCELLED = 2;
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mService = IBluetoothHeadset.Stub.asInterface(service);
-            Log.i(TAG, "Proxy object is now connected to Bluetooth Headset Service");
-        }
-        public void onServiceDisconnected(ComponentName className) {
-            mService = null;
-        }
-    };
+    /**
+     * An interface for notifying BluetoothHeadset IPC clients when they have
+     * been connected to the BluetoothHeadset service.
+     */
+    public interface ServiceListener {
+        /**
+         * Called to notify the client when this proxy object has been
+         * connected to the BluetoothHeadset service. Clients must wait for
+         * this callback before making IPC calls on the BluetoothHeadset
+         * service.
+         */
+        public void onServiceConnected();
+
+        /**
+         * Called to notify the client that this proxy object has been
+         * disconnected from the BluetoothHeadset service. Clients must not
+         * make IPC calls on the BluetoothHeadset service after this callback.
+         * This callback will currently only occur if the application hosting
+         * the BluetoothHeadset service, but may be called more often in future.
+         */
+        public void onServiceDisconnected();
+    }
+
+    /**
+     * Interface for connectHeadset() callback.
+     * This callback can occur in the Binder thread.
+     */
+    public interface ConnectHeadsetCallback {
+        public void onConnectHeadsetResult(String address, int resultCode);
+    }
 
     /**
      * Create a BluetoothHeadset proxy object.
-     * Remeber to call close() when you are done with this object, so that it
-     * can unbind from the BluetoothHeadsetService.
      */
-    public BluetoothHeadset(Context context) {
+    public BluetoothHeadset(Context context, ServiceListener l) {
         mContext = context;
-        if (!context.bindService(
-                new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
+        mServiceListener = l;
+        if (!context.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
             Log.e(TAG, "Could not bind to Bluetooth Headset Service");
         }
     }
@@ -126,6 +146,9 @@ public class BluetoothHeadset {
             try {
                 return mService.getState();
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return BluetoothHeadset.STATE_ERROR;
     }
@@ -141,6 +164,9 @@ public class BluetoothHeadset {
             try {
                 return mService.getHeadsetAddress();
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return null;
     }
@@ -150,20 +176,29 @@ public class BluetoothHeadset {
      * This call does not block. Fails if a headset is already connecting
      * or connected.
      * Will connect to the last connected headset if address is null.
+     * onConnectHeadsetResult() of your ConnectHeadsetCallback will be called
+     * on completition.
      * @param address The Bluetooth Address to connect to, or null to connect
      *                to the last connected headset.
-     * @param callback A callback with onCreateBondingResult() defined, or
-     *                 null.
+     * @param callback Callback on result. Not called if false is returned. Can
+     *                be null.
+     *                to the last connected headset.
      * @return        False if there was a problem initiating the connection
      *                procedure, and your callback will not be used. True if
      *                the connection procedure was initiated, in which case
      *                your callback is guarenteed to be called.
      */
-    public boolean connectHeadset(String address, IBluetoothHeadsetCallback callback) {
+    public boolean connectHeadset(String address, ConnectHeadsetCallback callback) {
         if (mService != null) {
             try {
-                return mService.connectHeadset(address, callback);
+                if (mService.connectHeadset(address, mHeadsetCallback)) {
+                    mConnectHeadsetCallback = callback;
+                    return true;
+                }
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return false;
     }
@@ -178,6 +213,9 @@ public class BluetoothHeadset {
             try {
                 return mService.isConnected(address);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return false;
     }
@@ -191,8 +229,72 @@ public class BluetoothHeadset {
         if (mService != null) {
             try {
                 mService.disconnectHeadset();
+                return true;
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return false;
     }
+
+    /**
+     * Start BT Voice Recognition mode, and set up Bluetooth audio path.
+     * Returns false if there is no headset connected, or if the
+     * connected headset does not support voice recognition, or on
+     * error.
+     */
+    public boolean startVoiceRecognition() {
+        if (mService != null) {
+            try {
+                return mService.startVoiceRecognition();
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Stop BT Voice Recognition mode, and shut down Bluetooth audio path.
+     * Returns false if there is no headset connected, or the connected
+     * headset is not in voice recognition mode, or on error.
+     */
+    public boolean stopVoiceRecognition() {
+        if (mService != null) {
+            try {
+                return mService.stopVoiceRecognition();
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            if (DBG) Log.d(TAG, "Proxy object connected");
+            mService = IBluetoothHeadset.Stub.asInterface(service);
+            if (mServiceListener != null) {
+                mServiceListener.onServiceConnected();
+            }
+        }
+        public void onServiceDisconnected(ComponentName className) {
+            if (DBG) Log.d(TAG, "Proxy object disconnected");
+            mService = null;
+            if (mServiceListener != null) {
+                mServiceListener.onServiceDisconnected();
+            }
+        }
+    };
+
+    private IBluetoothHeadsetCallback mHeadsetCallback = new IBluetoothHeadsetCallback.Stub() {
+        public void onConnectHeadsetResult(String address, int resultCode) {
+            if (mConnectHeadsetCallback != null) {
+                mConnectHeadsetCallback.onConnectHeadsetResult(address, resultCode);
+            }
+        }
+    };
 }

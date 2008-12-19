@@ -18,6 +18,7 @@ package android.hardware;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.io.IOException;
 
 import android.util.Log;
 import android.view.Surface;
@@ -98,13 +99,28 @@ public class Camera {
     }
 
     /**
+     * Reconnect to the camera after passing it to MediaRecorder. To save
+     * setup/teardown time, a client of Camara can pass an initialized Camera
+     * object to a MediaRecorder to use for video recording. Once the 
+     * MediaRecorder is done with the Camera, this method can be used to
+     * re-establish a connection with the camera hardware.
+     *
+     * @throws IOException if the method fails.
+     *
+     * FIXME: Unhide after approval
+     * @hide
+     */
+    public native final void reconnect() throws IOException;
+    
+    /**
      * Sets the SurfaceHolder to be used for a picture preview. If the surface
      * changed since the last call, the screen will blank. Nothing happens
      * if the same surface is re-set.
      * 
      * @param holder the SurfaceHolder upon which to place the picture preview
+     * @throws IOException if the method fails.
      */
-    public final void setPreviewDisplay(SurfaceHolder holder) {
+    public final void setPreviewDisplay(SurfaceHolder holder) throws IOException {
         setPreviewDisplay(holder.getSurface());
     }
 
@@ -263,10 +279,19 @@ public class Camera {
     };
 
     /**
-     * Registers a callback to be invoked when a picture is taken.
+     * Triggers an asynchronous image capture. The camera service
+     * will initiate a series of callbacks to the application as the
+     * image capture progresses. The shutter callback occurs after
+     * the image is captured. This can be used to trigger a sound
+     * to let the user know that image has been captured. The raw
+     * callback occurs when the raw image data is available. The jpeg
+     * callback occurs when the compressed image is available. If the
+     * application does not need a particular callback, a null can be
+     * passed instead of a callback method.
      * 
-     * @param raw  the callback to run for raw images, may be null
-     * @param jpeg the callback to run for jpeg images, may be null
+     * @param shutter   callback after the image is captured, may be null
+     * @param raw       callback with raw image data, may be null
+     * @param jpeg      callback with jpeg image data, may be null
      */
     public final void takePicture(ShutterCallback shutter, PictureCallback raw,
             PictureCallback jpeg) {

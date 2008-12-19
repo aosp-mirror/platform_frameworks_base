@@ -48,7 +48,7 @@ public:
         void*       base;
         uint32_t    reserved[2];
     };
-    
+
     bool        isValid() const { return this && mToken>=0 && mClient!=0; }
     SurfaceID   ID() const      { return mToken; }
 
@@ -59,18 +59,17 @@ public:
 
     void*       heapBase(int i) const;
     uint32_t    getFlags() const { return mFlags; }
-    int         getMemoryType() const { return mMemoryType; }
-    
+
     // setSwapRectangle() is mainly used by EGL
     void        setSwapRectangle(const Rect& r);
     const Rect& swapRectangle() const;
     status_t    nextBuffer(SurfaceInfo* info);
-    
+
     sp<Surface>         dup() const;
     static sp<Surface>  readFromParcel(Parcel* parcel);
     static status_t     writeToParcel(const sp<Surface>& surface, Parcel* parcel);
     static bool         isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs);
-    
+
     status_t    setLayer(int32_t layer);
     status_t    setPosition(int32_t x, int32_t y);
     status_t    setSize(uint32_t w, uint32_t h);
@@ -83,13 +82,14 @@ public:
     status_t    setAlpha(float alpha=1.0f);
     status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setFreezeTint(uint32_t tint);
-    
+
     uint32_t    getIdentity() const { return mIdentity; }
 private:
     friend class SurfaceComposerClient;
 
-    // camera needs access to the ISurface binder interface for preview
+    // camera and camcorder need access to the ISurface binder interface for preview
     friend class Camera;
+    friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
     const sp<ISurface>& getISurface() const { return mSurface; }
@@ -98,19 +98,19 @@ private:
     Surface& operator = (Surface& rhs);
     Surface(const Surface& rhs);
 
-    Surface(const sp<SurfaceComposerClient>& client, 
+    Surface(const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
             const ISurfaceFlingerClient::surface_data_t& data,
             uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
             bool owner = true);
-    
+
     Surface(Surface const* rhs);
 
     ~Surface();
 
     Region dirtyRegion() const;
     void setDirtyRegion(const Region& region) const;
-    
+
     // this locks protects calls to lockSurface() / unlockSurface()
     // and is called by SurfaceComposerClient.
     Mutex& getLock() const { return mSurfaceLock; }
@@ -118,7 +118,6 @@ private:
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
     sp<IMemoryHeap>             mHeap[2];
-    int                         mMemoryType;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;

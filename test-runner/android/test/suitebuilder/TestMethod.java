@@ -26,8 +26,6 @@ import java.lang.reflect.Method;
 /**
  * Represents a test to be run. Can be constructed without instantiating the TestCase or even
  * loading the class.
- * 
- * {@hide} Not needed for 1.0 SDK.
  */
 public class TestMethod {
 
@@ -36,9 +34,17 @@ public class TestMethod {
     private final Class<? extends TestCase> enclosingClass;
 
     public TestMethod(Method method, Class<? extends TestCase> enclosingClass) {
+        this(method.getName(), enclosingClass);
+    }
+
+    public TestMethod(String methodName, Class<? extends TestCase> enclosingClass) {
         this.enclosingClass = enclosingClass;
         this.enclosingClassname = enclosingClass.getName();
-        this.testMethodName = method.getName();
+        this.testMethodName = methodName;
+    }
+    
+    public TestMethod(TestCase testCase) {
+        this(testCase.getName(), testCase.getClass());
     }
 
     public String getName() {
@@ -53,7 +59,7 @@ public class TestMethod {
         try {
             return getEnclosingClass().getMethod(getName()).getAnnotation(annotationClass);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 

@@ -23,7 +23,13 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 public class ParentalControl {
-    
+    /**
+     * Strings to identify your app. To enable parental control checking for
+     * new apps, please add it here, and configure GServices accordingly.
+     */
+    public static final String VENDING = "vending";
+    public static final String YOUTUBE = "youtube";
+
     /**
      * This interface is supplied to getParentalControlState and is callback upon with
      * the state of parental control.
@@ -36,28 +42,29 @@ public class ParentalControl {
          */
         void onResult(ParentalControlState state);
     }
-    
+
     private static class RemoteCallback extends IParentalControlCallback.Stub {
         private Callback mCallback;
-        
+
         public RemoteCallback(Callback callback) {
             mCallback = callback;
         }
-        
+
         public void onResult(ParentalControlState state) {
             if (mCallback != null) {
                 mCallback.onResult(state);
             }
         }
     };
-    
-    public static void getParentalControlState(Callback callback) {
+
+    public static void getParentalControlState(Callback callback,
+                                               String requestingApp) {
         ICheckinService service =
           ICheckinService.Stub.asInterface(ServiceManager.getService("checkin"));
-        
+
         RemoteCallback remoteCallback = new RemoteCallback(callback);
         try {
-            service.getParentalControlState(remoteCallback);
+            service.getParentalControlState(remoteCallback, requestingApp);
         } catch (RemoteException e) {
             // This should never happen.
             Log.e("ParentalControl", "Failed to talk to the checkin service.");

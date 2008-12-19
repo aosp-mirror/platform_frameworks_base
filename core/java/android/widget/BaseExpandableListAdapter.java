@@ -71,7 +71,7 @@ public abstract class BaseExpandableListAdapter implements ExpandableListAdapter
      * <p>
      * Base implementation returns a long:
      * <li> bit 0: Whether this ID points to a child (unset) or group (set), so for this method
-     *             this bit will be 0.
+     *             this bit will be 1.
      * <li> bit 1-31: Lower 31 bits of the groupId
      * <li> bit 32-63: Lower 32 bits of the childId.
      * <p> 
@@ -86,7 +86,7 @@ public abstract class BaseExpandableListAdapter implements ExpandableListAdapter
      * <p>
      * Base implementation returns a long:
      * <li> bit 0: Whether this ID points to a child (unset) or group (set), so for this method
-     *             this bit will be 1.
+     *             this bit will be 0.
      * <li> bit 1-31: Lower 31 bits of the groupId
      * <li> bit 32-63: Lower 32 bits of the childId.
      * <p> 

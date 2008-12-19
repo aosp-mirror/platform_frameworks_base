@@ -39,5 +39,6 @@ interface ICheckinService {
      * Determine if the device is under parental control. Return null if
      * we are unable to check the parental control status.
      */
-    void getParentalControlState(IParentalControlCallback p);
+    void getParentalControlState(IParentalControlCallback p,
+                                 String requestingApp);
 }

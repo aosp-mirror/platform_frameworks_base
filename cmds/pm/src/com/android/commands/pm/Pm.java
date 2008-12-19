@@ -16,14 +16,15 @@
 
 package com.android.commands.pm;
 
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
+import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.res.AssetManager;
@@ -33,8 +34,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -47,6 +49,9 @@ public final class Pm {
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
+    
+    private static final String PM_NOT_RUNNING_ERR = 
+        "Error: Could not access the Package Manager.  Is the system running?";
     
     public static void main(String[] args) {
         new Pm().run(args);
@@ -61,8 +66,7 @@ public final class Pm {
 
         mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
         if (mPm == null) {
-            System.err.println("Error Type 1: Could not access the Package Manager!");
-            showUsage();
+            System.err.println(PM_NOT_RUNNING_ERR);
             return;
         }
 
@@ -114,6 +118,11 @@ public final class Pm {
     
     /**
      * Execute the list sub-command.
+     * 
+     * pm list [package | packages]
+     * pm list permission-groups
+     * pm list permissions
+     * pm list instrumentation
      */
     private void runList() {
         String type = nextArg();
@@ -128,6 +137,8 @@ public final class Pm {
             runListPermissionGroups();
         } else if ("permissions".equals(type)) {
             runListPermissions();
+        } else if ("instrumentation".equals(type)) {
+            runListInstrumentation();
         } else {
             System.err.println("Error: unknown list type '" + type + "'");
             showUsage();
@@ -173,6 +184,67 @@ public final class Pm {
                 System.out.println(info.packageName);
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+    
+    /**
+     * Lists all of the installed instrumentation, or all for a given package
+     * 
+     * pm list instrumentation [package] [-f]
+     */
+    private void runListInstrumentation() {
+        int flags = 0;      // flags != 0 is only used to request meta-data
+        boolean showPackage = false;
+        String targetPackage = null;
+
+        try {
+            String opt;
+            while ((opt=nextArg()) != null) {
+                if (opt.equals("-f")) {
+                    showPackage = true;
+                } else if (opt.charAt(0) != '-') {
+                    targetPackage = opt;
+                } else {
+                    System.err.println("Error: Unknown option: " + opt);
+                    showUsage();
+                    return;
+                }
+            }
+        } catch (RuntimeException ex) {
+            System.err.println("Error: " + ex.toString());
+            showUsage();
+            return;
+        }
+
+        try {
+            List<InstrumentationInfo> list = mPm.queryInstrumentation(targetPackage, flags);
+
+            // Sort by target package
+            Collections.sort(list, new Comparator<InstrumentationInfo>() {
+                public int compare(InstrumentationInfo o1, InstrumentationInfo o2) {
+                    return o1.targetPackage.compareTo(o2.targetPackage);
+                }
+            });
+
+            int count = (list != null) ? list.size() : 0;
+            for (int p = 0; p < count; p++) {
+                InstrumentationInfo ii = list.get(p);
+                System.out.print("instrumentation:");
+                if (showPackage) {
+                    System.out.print(ii.sourceDir);
+                    System.out.print("=");
+                }
+                ComponentName cn = new ComponentName(ii.packageName, ii.name);
+                System.out.print(cn.flattenToShortString());
+                System.out.print(" (target=");
+                System.out.print(ii.targetPackage);
+                System.out.println(")");
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
     
@@ -190,6 +262,8 @@ public final class Pm {
                 System.out.println(pgi.name);
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
     
@@ -274,6 +348,8 @@ public final class Pm {
                         -10000, 10000);
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
     
@@ -472,6 +548,9 @@ public final class Pm {
         case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY:
             s = "INSTALL_PARSE_FAILED_MANIFEST_EMPTY";
             break;
+        case PackageManager.INSTALL_FAILED_OLDER_SDK:
+            s = "INSTALL_FAILED_OLDER_SDK";
+            break;
         default:
             s = Integer.toString(result);
         break;
@@ -523,6 +602,8 @@ public final class Pm {
                 }
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
     
@@ -575,6 +656,8 @@ public final class Pm {
                 }
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
         return obs.result;
     }
@@ -591,6 +674,8 @@ public final class Pm {
                 System.out.println(info.applicationInfo.sourceDir);
             }
         } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
     
@@ -606,7 +691,8 @@ public final class Pm {
             mResourceCache.put(pii.packageName, res);
             return res;
         } catch (RemoteException e) {
-            System.err.println("Package manager gone!");
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
             return null;
         }
     }
@@ -662,6 +748,7 @@ public final class Pm {
         System.err.println("       pm list packages [-f]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
+        System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");        
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
@@ -679,6 +766,10 @@ public final class Pm {
         System.err.println("the -s option for a short summary.  Use");
         System.err.println("the -d option to only list dangerous permissions.  Use");
         System.err.println("the -u option to list only the permissions users will see.");
+        System.err.println("");
+        System.err.println("The list instrumentation command prints all instrumentations,");
+        System.err.println("or only those that target a specified package.  Use the -f option");
+        System.err.println("to see their associated file.");
         System.err.println("");
         System.err.println("The path command prints the path to the .apk of a package.");
         System.err.println("");

@@ -73,9 +73,22 @@ public final class PendingIntent implements Parcelable {
      * {@link #getService}: if the described PendingIntent already exists,
      * the current one is canceled before generating a new one.  You can use
      * this to retrieve a new PendingIntent when you are only changing the
-     * extra data in the Intent.
+     * extra data in the Intent; by canceling the previous pending intent,
+     * this ensures that only entities given the new data will be able to
+     * launch it.  If this assurance is not an issue, consider
+     * {@link #FLAG_UPDATE_CURRENT}.
      */
     public static final int FLAG_CANCEL_CURRENT = 1<<28;
+    /**
+     * Flag for use with {@link #getActivity}, {@link #getBroadcast}, and
+     * {@link #getService}: if the described PendingIntent already exists,
+     * then keep it but its replace its extra data with what is in this new
+     * Intent.  This can be used if you are creating intents where only the
+     * extras change, and don't care that any entities that received your
+     * previous PendingIntent will be able to launch it with your new
+     * extras even if they are not explicitly given to it.
+     */
+    public static final int FLAG_UPDATE_CURRENT = 1<<27;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -161,7 +174,8 @@ public final class PendingIntent implements Parcelable {
      * not used).
      * @param intent Intent of the activity to be launched.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
-     * {@link #FLAG_CANCEL_CURRENT}, or any of the flags as supported by
+     * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
+     * or any of the flags as supported by
      * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
      * of the intent that can be supplied when the actual send happens.
      *
@@ -195,7 +209,8 @@ public final class PendingIntent implements Parcelable {
      * not used).
      * @param intent The Intent to be broadcast.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
-     * {@link #FLAG_CANCEL_CURRENT}, or any of the flags as supported by
+     * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
+     * or any of the flags as supported by
      * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
      * of the intent that can be supplied when the actual send happens.
      *
@@ -230,7 +245,8 @@ public final class PendingIntent implements Parcelable {
      * not used).
      * @param intent An Intent describing the service to be started.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
-     * {@link #FLAG_CANCEL_CURRENT}, or any of the flags as supported by
+     * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
+     * or any of the flags as supported by
      * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
      * of the intent that can be supplied when the actual send happens.
      *

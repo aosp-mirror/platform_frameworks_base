@@ -48,9 +48,10 @@ public:
     enum audio_routes {
         ROUTE_EARPIECE       = (1 << 0),
         ROUTE_SPEAKER        = (1 << 1),
-        ROUTE_BLUETOOTH      = (1 << 2),
+        ROUTE_BLUETOOTH_SCO  = (1 << 2),
         ROUTE_HEADSET        = (1 << 3),
-        ROUTE_ALL       = (ROUTE_EARPIECE | ROUTE_SPEAKER | ROUTE_BLUETOOTH | ROUTE_HEADSET)
+        ROUTE_BLUETOOTH_A2DP = (1 << 4),
+        ROUTE_ALL       = 0xFFFFFFFF
     };
 
     /* These are static methods to control the system-wide AudioFlinger
@@ -95,6 +96,10 @@ public:
     static float linearToLog(int volume);
     static int logToLinear(float volume);
 
+    static status_t getOutputSamplingRate(int* samplingRate);
+    static status_t getOutputFrameCount(int* frameCount);
+    static status_t getOutputLatency(uint32_t* latency);
+
     // ----------------------------------------------------------------------------
 
 private:
@@ -115,6 +120,9 @@ private:
     static Mutex gLock;
     static sp<IAudioFlinger> gAudioFlinger;
     static audio_error_callback gAudioErrorCallback;
+    static int gOutSamplingRate;
+    static int gOutFrameCount;
+    static uint32_t gOutLatency;
 };
 
 };  // namespace android

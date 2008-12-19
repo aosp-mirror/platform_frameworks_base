@@ -38,9 +38,20 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class MemoryHeapPmem;
+MemoryHeapPmem::MemoryPmem::MemoryPmem(const sp<MemoryHeapPmem>& heap)
+    : BnMemory(), mClientHeap(heap)
+{
+}
 
-class SubRegionMemory : public BnMemory {
+MemoryHeapPmem::MemoryPmem::~MemoryPmem() {
+    if (mClientHeap != NULL) {
+        mClientHeap->remove(this);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+class SubRegionMemory : public MemoryHeapPmem::MemoryPmem {
 public:
     SubRegionMemory(const sp<MemoryHeapPmem>& heap, ssize_t offset, size_t size);
     virtual ~SubRegionMemory();
@@ -50,15 +61,14 @@ private:
     void revoke();
     size_t              mSize;
     ssize_t             mOffset;
-    sp<MemoryHeapPmem>  mClientHeap;
 };
 
 SubRegionMemory::SubRegionMemory(const sp<MemoryHeapPmem>& heap,
         ssize_t offset, size_t size)
-    : mSize(size), mOffset(offset), mClientHeap(heap)
+    : MemoryHeapPmem::MemoryPmem(heap), mSize(size), mOffset(offset)
 {
 #ifndef NDEBUG
-    void* const start_ptr = (void*)(intptr_t(mClientHeap->base()) + offset);
+    void* const start_ptr = (void*)(intptr_t(getHeap()->base()) + offset);
     memset(start_ptr, 0xda, size);
 #endif
 
@@ -80,7 +90,7 @@ sp<IMemoryHeap> SubRegionMemory::getMemory(ssize_t* offset, size_t* size) const
 {
     if (offset) *offset = mOffset;
     if (size)   *size = mSize;
-    return mClientHeap;
+    return getHeap();
 }
 
 SubRegionMemory::~SubRegionMemory()
@@ -98,8 +108,9 @@ void SubRegionMemory::revoke()
     // promote() it.
     
 #if HAVE_ANDROID_OS
-    if (mClientHeap != NULL) {
-        int our_fd = mClientHeap->heapID();
+    if (mSize != NULL) {
+        const sp<MemoryHeapPmem>& heap(getHeap());
+        int our_fd = heap->heapID();
         struct pmem_region sub;
         sub.offset = mOffset;
         sub.len = mSize;
@@ -107,7 +118,7 @@ void SubRegionMemory::revoke()
         LOGE_IF(err<0, "PMEM_UNMAP failed (%s), "
                 "mFD=%d, sub.offset=%lu, sub.size=%lu",
                 strerror(errno), our_fd, sub.offset, sub.len);
-        mClientHeap.clear();
+        mSize = 0;
     }
 #endif
 }
@@ -157,14 +168,20 @@ MemoryHeapPmem::~MemoryHeapPmem()
 
 sp<IMemory> MemoryHeapPmem::mapMemory(size_t offset, size_t size)
 {
-    sp<SubRegionMemory> memory;
-    if (heapID() > 0) 
-        memory = new SubRegionMemory(this, offset, size);
-
+    sp<MemoryPmem> memory = createMemory(offset, size);
     if (memory != 0) {
         Mutex::Autolock _l(mLock);
         mAllocations.add(memory);
     }
+    return memory;
+}
+
+sp<MemoryHeapPmem::MemoryPmem> MemoryHeapPmem::createMemory(
+        size_t offset, size_t size)
+{
+    sp<SubRegionMemory> memory;
+    if (heapID() > 0) 
+        memory = new SubRegionMemory(this, offset, size);
     return memory;
 }
 
@@ -206,20 +223,25 @@ status_t MemoryHeapPmem::unslap()
 
 void MemoryHeapPmem::revoke()
 {
-    Vector< wp<SubRegionMemory> > allocations;
+    SortedVector< wp<MemoryPmem> > allocations;
 
     { // scope for lock
         Mutex::Autolock _l(mLock);
         allocations = mAllocations;
-        mAllocations.clear();
     }
     
     ssize_t count = allocations.size();
     for (ssize_t i=0 ; i<count ; i++) {
-        sp<SubRegionMemory> memory(allocations[i].promote());
+        sp<MemoryPmem> memory(allocations[i].promote());
         if (memory != 0)
             memory->revoke();
     }
+}
+
+void MemoryHeapPmem::remove(const wp<MemoryPmem>& memory)
+{
+    Mutex::Autolock _l(mLock);
+    mAllocations.remove(memory);
 }
 
 // ---------------------------------------------------------------------------

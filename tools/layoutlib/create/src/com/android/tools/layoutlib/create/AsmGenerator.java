@@ -187,7 +187,7 @@ public class AsmGenerator {
         
         for (Entry<String, ClassReader> entry : mDeps.entrySet()) {
             ClassReader cr = entry.getValue();
-            byte[] b = transform(cr, false /* stubNativesOnly */);
+            byte[] b = transform(cr, true /* stubNativesOnly */);
             String name = classNameToEntryPath(transformName(cr.getClassName()));
             all.put(name, b);
         }

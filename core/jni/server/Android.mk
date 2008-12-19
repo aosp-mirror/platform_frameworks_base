@@ -21,9 +21,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libui
 
+ifeq ($(TARGET_SIMULATOR),true)
 ifeq ($(TARGET_OS),linux)
 ifeq ($(TARGET_ARCH),x86)
 LOCAL_LDLIBS += -lpthread -ldl -lrt
+endif
 endif
 endif
 

@@ -129,7 +129,7 @@ status_t EGLTextureObject::setSurface(GGLSurface const* s)
     // so for now, we just loose it.
     memset(crop_rect, 0, sizeof(crop_rect));
 
-    // it would be nice id we could keep the generate_mipmap flag
+    // it would be nice if we could keep the generate_mipmap flag,
     // we would have to generate them right now though.
     generate_mipmap = GL_FALSE;
 
@@ -286,7 +286,7 @@ sp<EGLTextureObject> EGLSurfaceManager::replaceTexture(GLuint name)
 
 void EGLSurfaceManager::deleteTextures(GLsizei n, const GLuint *tokens)
 {
-    // free all texures
+    // free all textures
     Mutex::Autolock _l(mLock);
     for (GLsizei i=0 ; i<n ; i++) {
         const GLuint t(*tokens++);

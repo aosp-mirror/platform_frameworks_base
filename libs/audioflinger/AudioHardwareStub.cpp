@@ -2,16 +2,16 @@
 **
 ** Copyright 2007, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -47,20 +47,28 @@ status_t AudioHardwareStub::standby()
 }
 
 AudioStreamOut* AudioHardwareStub::openOutputStream(
-        int format, int channelCount, uint32_t sampleRate)
+        int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
     AudioStreamOutStub* out = new AudioStreamOutStub();
-    if (out->set(format, channelCount, sampleRate) == NO_ERROR)
+    status_t lStatus = out->set(format, channelCount, sampleRate);
+    if (status) {
+        *status = lStatus;
+    }
+    if (lStatus == NO_ERROR)
         return out;
     delete out;
     return 0;
 }
 
 AudioStreamIn* AudioHardwareStub::openInputStream(
-        int format, int channelCount, uint32_t sampleRate)
+        int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
     AudioStreamInStub* in = new AudioStreamInStub();
-    if (in->set(format, channelCount, sampleRate) == NO_ERROR)
+    status_t lStatus = in->set(format, channelCount, sampleRate);
+    if (status) {
+        *status = lStatus;
+    }
+    if (lStatus == NO_ERROR)
         return in;
     delete in;
     return 0;
@@ -102,7 +110,7 @@ status_t AudioStreamOutStub::set(int format, int channels, uint32_t rate)
     if (format == 0) format = AudioSystem::PCM_16_BIT;
     if (channels == 0) channels = channelCount();
     if (rate == 0) rate = sampleRate();
-    
+
     if ((format == AudioSystem::PCM_16_BIT) &&
             (channels == channelCount()) &&
             (rate == sampleRate()))
@@ -129,7 +137,7 @@ status_t AudioStreamOutStub::dump(int fd, const Vector<String16>& args)
     snprintf(buffer, SIZE, "\tformat: %d\n", format());
     result.append(buffer);
     ::write(fd, result.string(), result.size());
-    return NO_ERROR; 
+    return NO_ERROR;
 }
 
 // ----------------------------------------------------------------------------

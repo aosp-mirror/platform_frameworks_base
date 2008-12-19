@@ -22,8 +22,11 @@ copy_from :=                \
     DroidSerif-Bold.ttf     \
     DroidSerif-Italic.ttf   \
     DroidSerif-BoldItalic.ttf   \
-    DroidSansMono.ttf       \
-    DroidSansFallback.ttf
+    DroidSansMono.ttf
+
+ifneq ($(NO_FALLBACK_FONT),true)
+    copy_from += DroidSansFallback.ttf
+endif
 
 copy_to := $(addprefix $(TARGET_OUT)/fonts/,$(copy_from))
 

@@ -35,6 +35,7 @@ static jclass bufferClass;
 static jclass OOMEClass;
 static jclass UOEClass;
 static jclass IAEClass;
+static jclass AIOOBEClass;
 static jmethodID getBasePointerID;
 static jmethodID getBaseArrayID;
 static jmethodID getBaseArrayOffsetID;
@@ -78,10 +79,13 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
          _env->FindClass("java/lang/OutOfMemoryError");
     jclass UOEClassLocal =
          _env->FindClass("java/lang/UnsupportedOperationException");
+    jclass AIOOBEClassLocal =
+         _env->FindClass("java/lang/ArrayIndexOutOfBoundsException");
 
     IAEClass = (jclass) _env->NewGlobalRef(IAEClassLocal);
     OOMEClass = (jclass) _env->NewGlobalRef(OOMEClassLocal);
     UOEClass = (jclass) _env->NewGlobalRef(UOEClassLocal);
+    AIOOBEClass = (jclass) _env->NewGlobalRef(AIOOBEClassLocal);
 }
 
 static void *
@@ -526,12 +530,18 @@ android_glDrawElements__IIILjava_nio_Buffer_2
     GLvoid *indices = (GLvoid *) 0;
 
     indices = (GLvoid *)getPointer(_env, indices_buf, &_array, &_remaining);
+    if (_remaining < count) {
+        _env->ThrowNew(AIOOBEClass, "remaining() < count");
+        goto exit;
+    }
     glDrawElements(
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
         (GLvoid *)indices
     );
+
+exit:
     if (_array) {
         releasePointer(_env, _array, indices, JNI_FALSE);
     }
@@ -1647,20 +1657,8 @@ exit:
 jstring
 android_glGetString
   (JNIEnv *_env, jobject _this, jint name) {
-    const GLubyte * chars = glGetString((GLenum)name);
-
-    int len = strlen((const char *)chars);
-    jchar * wchars = (jchar *)malloc(len * sizeof(jchar));
-    if (wchars == (jchar*) 0) {
-        _env->ThrowNew(OOMEClass, "No space for glGetString output");
-        return (jstring) 0;
-    }
-    // Copy bytes -> chars, including trailing '\0'
-    for (int i = 0; i <= len; i++) {
-        wchars[i] = (jchar) chars[i];
-    }
-    jstring output = _env->NewString(wchars, (jsize) len);
-    free(wchars);
+    const char * chars = (const char *)glGetString((GLenum)name);
+    jstring output = _env->NewStringUTF(chars);
     return output;
 }
 /* void glHint ( GLenum target, GLenum mode ) */

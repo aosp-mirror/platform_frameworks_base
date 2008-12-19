@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import com.android.internal.telephony.CallerInfo;
 import com.google.android.mms.util.SqliteWrapper;
 
 import android.annotation.SdkConstant;
@@ -27,8 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.TelephonyManager;
 import android.telephony.gsm.SmsMessage;
 import android.text.TextUtils;
 import android.text.util.Regex;
@@ -261,49 +258,6 @@ public final class Telephony {
                     || (messageType == MESSAGE_TYPE_OUTBOX)
                     || (messageType == MESSAGE_TYPE_SENT)
                     || (messageType == MESSAGE_TYPE_QUEUED);
-        }
-
-        /**
-         * Returns true if the address is an email address
-         *
-         * @param address the input address to be tested
-         * @return true if address is an email address
-         */
-        public static boolean isEmailAddress(String address) {
-            /*
-             * The '@' char isn't a valid char in phone numbers. However, in SMS
-             * messages sent by carrier, the originating-address can contain
-             * non-dialable alphanumeric chars. For the purpose of thread id
-             * grouping, we don't care about those. We only care about the
-             * legitmate/dialable phone numbers (which we use the special phone
-             * number comparison) and email addresses (which we do straight up
-             * string comparison).
-             */
-            return (address != null) && (address.indexOf('@') != -1);
-        }
-
-        /**
-         * Formats an address for displaying, doing a phone number lookup in the
-         * Address Book, etc.
-         *
-         * @param context the context to use
-         * @param address the address to format
-         * @return a nicely formatted version of the sender to display
-         */
-        public static String getDisplayAddress(Context context, String address) {
-            String result;
-            int index;
-            if (isEmailAddress(address)) {
-                index = address.indexOf('@');
-                if (index != -1) {
-                    result = address.substring(0, index);
-                } else {
-                    result = address;
-                }
-            } else {
-                result = CallerInfo.getCallerId(context, address);
-            }
-            return result;
         }
 
         /**
@@ -1166,7 +1120,7 @@ public final class Telephony {
          * name-addr       =       [display-name] angle-addr
          * angle-addr      =       [CFWS] "<" addr-spec ">" [CFWS]
          */
-        private static final Pattern NAME_ADDR_EMAIL_PATTERN =
+        public static final Pattern NAME_ADDR_EMAIL_PATTERN =
                 Pattern.compile("\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*");
 
         /**
@@ -1174,7 +1128,7 @@ public final class Telephony {
          *                         DQUOTE *([FWS] qcontent) [FWS] DQUOTE
          *                         [CFWS]
          */
-        private static final Pattern QUOTED_STRING_PATTERN =
+        public static final Pattern QUOTED_STRING_PATTERN =
                 Pattern.compile("\\s*\"([^\"]*)\"\\s*");
 
         public static final Cursor query(
@@ -1229,81 +1183,6 @@ public final class Telephony {
             String s = extractAddrSpec(address);
             Matcher match = Regex.EMAIL_ADDRESS_PATTERN.matcher(s);
             return match.matches();
-        }
-
-        /**
-         * Formats an address for displaying, doing a phone number lookup in the
-         * Address Book, etc.
-         *
-         * @param context the context to use
-         * @param address the address to format
-         * @return a nicely formatted version of the sender to display
-         */
-        public static String getDisplayAddress(Context context, String address) {
-            if (address == null) {
-                return "";
-            }
-
-            String localNumber = TelephonyManager.getDefault().getLine1Number();
-            String[] values = address.split(";");
-            String result = "";
-            for (int i = 0; i < values.length; i++) {
-                if (values[i].length() > 0) {
-                    if (PhoneNumberUtils.compare(values[i], localNumber)) {
-                        result = result + ";"
-                                    + context.getString(com.android.internal.R.string.me);
-                    } else if (isEmailAddress(values[i])) {
-                        result = result + ";" + getDisplayName(context, values[i]);
-                    } else {
-                        result = result + ";" + CallerInfo.getCallerId(context, values[i]);
-                    }
-                }
-            }
-
-            if (result.length() > 0) {
-                // Skip the first ';'
-                return result.substring(1);
-            }
-            return result;
-        }
-
-        private static String getEmailDisplayName(String displayString) {
-            Matcher match = QUOTED_STRING_PATTERN.matcher(displayString);
-            if (match.matches()) {
-                return match.group(1);
-            }
-
-            return displayString;
-        }
-
-        private static String getDisplayName(Context context, String email) {
-            Matcher match = NAME_ADDR_EMAIL_PATTERN.matcher(email);
-            if (match.matches()) {
-                // email has display name
-                return getEmailDisplayName(match.group(1));
-            }
-
-            Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
-                    Contacts.ContactMethods.CONTENT_EMAIL_URI,
-                    new String[] { Contacts.ContactMethods.NAME },
-                    Contacts.ContactMethods.DATA + " = \'" + email + "\'",
-                    null, null);
-
-            if (cursor != null) {
-                try {
-                    int columnIndex = cursor.getColumnIndexOrThrow(
-                            Contacts.ContactMethods.NAME);
-                    while (cursor.moveToNext()) {
-                        String name = cursor.getString(columnIndex);
-                        if (!TextUtils.isEmpty(name)) {
-                            return name;
-                        }
-                    }
-                } finally {
-                    cursor.close();
-                }
-            }
-            return email;
         }
 
         /**
@@ -1647,6 +1526,7 @@ public final class Telephony {
 
         public static final String TYPE = "type";
 
+        public static final String CURRENT = "current";
     }
 
     public static final class Intents {

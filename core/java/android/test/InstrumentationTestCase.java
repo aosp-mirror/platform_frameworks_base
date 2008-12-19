@@ -31,8 +31,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * A test case that has access to {@link Instrumentation}.  See
- * <code>InstrumentationTestRunner</code>.
+ * A test case that has access to {@link Instrumentation}.
  */
 public class InstrumentationTestCase extends TestCase {
 
@@ -57,7 +56,13 @@ public class InstrumentationTestCase extends TestCase {
     }
 
     /**
-     * Utility method for launching an activity.
+     * Utility method for launching an activity.  
+     * 
+     * <p>The {@link Intent} used to launch the Activity is:
+     *  action = {@link Intent#ACTION_MAIN}
+     *  extras = null, unless a custom bundle is provided here
+     * All other fields are null or empty.
+     *
      * @param pkg The package hosting the activity to be launched.
      * @param activityCls The activity class to launch.
      * @param extras Optional extra stuff to pass to the activity.
@@ -69,20 +74,61 @@ public class InstrumentationTestCase extends TestCase {
             Class<T> activityCls,
             Bundle extras) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setClassName(pkg, activityCls.getName());
         if (extras != null) {
             intent.putExtras(extras);
         }
+        return launchActivityWithIntent(pkg, activityCls, intent);
+    }
+
+    /**
+     * Utility method for launching an activity with a specific Intent.
+     * @param pkg The package hosting the activity to be launched.
+     * @param activityCls The activity class to launch.
+     * @param intent The intent to launch with
+     * @return The activity, or null if non launched.
+     */
+    @SuppressWarnings("unchecked")
+    public final <T extends Activity> T launchActivityWithIntent(
+            String pkg,
+            Class<T> activityCls,
+            Intent intent) {
+        intent.setClassName(pkg, activityCls.getName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         T activity = (T) getInstrumentation().startActivitySync(intent);
         getInstrumentation().waitForIdleSync();
         return activity;
+    }
+    
+    /**
+     * Helper for running portions of a test on the UI thread.
+     * 
+     * Note, in most cases it is simpler to annotate the test method with 
+     * {@link android.test.UiThreadTest}, which will run the entire test method on the UI thread.
+     * Use this method if you need to switch in and out of the UI thread to perform your test.
+     * 
+     * @param r runnable containing test code in the {@link Runnable#run()} method
+     */
+    public void runTestOnUiThread(final Runnable r) throws Throwable {
+        final Throwable[] exceptions = new Throwable[1];
+        getInstrumentation().runOnMainSync(new Runnable() {
+            public void run() {
+                try {
+                    r.run();
+                } catch (Throwable throwable) {
+                    exceptions[0] = throwable;
+                }
+            }
+        });
+        if (exceptions[0] != null) {
+            throw exceptions[0];
+        }
     }
 
     /**
      * Runs the current unit test. If the unit test is annotated with
      * {@link android.test.UiThreadTest}, the test is run on the UI thread.
      */
+    @Override
     protected void runTest() throws Throwable {
         String fName = getName();
         assertNotNull(fName);

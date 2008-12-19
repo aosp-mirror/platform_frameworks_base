@@ -907,7 +907,8 @@ extends Layout
 
             mLineDirections[j] = linedirs;
 
-            if (ellipsize != null) {
+            // If ellipsize is in marquee mode, do not apply ellipsis on the first line
+            if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
                 calculateEllipsis(start, end, widths, widstart, widoff,
                                   ellipsiswidth, ellipsize, j,
                                   textwidth, paint);
@@ -950,7 +951,7 @@ extends Layout
 
             ellipsisStart = 0;
             ellipsisCount = i;
-        } else if (where == TextUtils.TruncateAt.END) {
+        } else if (where == TextUtils.TruncateAt.END || where == TextUtils.TruncateAt.MARQUEE) {
             float sum = 0;
             int i;
 

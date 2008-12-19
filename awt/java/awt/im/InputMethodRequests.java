@@ -24,6 +24,12 @@ import java.awt.Rectangle;
 import java.awt.font.TextHitInfo;
 import java.text.AttributedCharacterIterator;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public interface InputMethodRequests {
 
     public AttributedCharacterIterator cancelLatestCommittedText(AttributedCharacterIterator.Attribute[] attributes);

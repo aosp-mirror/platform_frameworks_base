@@ -78,9 +78,16 @@ public final class Rect implements Parcelable {
     }
 
     public String toString() {
-        return "Rect(" + left + ", " + top + ", " + right + ", " + bottom + ")";
+        return "Rect(" + left + ", " + top + " - " + right + ", " + bottom + ")";
     }
 
+    /**
+     * Return a string representation of the rectangle in a compact form.
+     */
+    public String toShortString() {
+        return "[" + left + "," + top + "][" + right + "," + bottom + "]";
+    }
+    
     /**
      * Returns true if the rectangle is empty (left >= right or top >= bottom)
      */

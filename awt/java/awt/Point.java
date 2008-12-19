@@ -18,28 +18,37 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 /**
- * The Point class represents a point location with coordinates X, Y in 
- * current coordinate system.
+ * The Point class represents a point location with coordinates X, Y in current
+ * coordinate system.
+ * 
+ * @since Android 1.0
  */
 public class Point extends Point2D implements Serializable {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -5276940640259749850L;
 
-    /** The X coordinate of Point. */
+    /**
+     * The X coordinate of Point.
+     */
     public int x;
-    
-    /** The Y coordinate of Point. */
+
+    /**
+     * The Y coordinate of Point.
+     */
     public int y;
 
     /**
-     * Instantiates a new point with (0, O) coordinates, the origin of 
+     * Instantiates a new point with (0, O) coordinates, the origin of
      * coordinate system.
      */
     public Point() {
@@ -49,18 +58,20 @@ public class Point extends Point2D implements Serializable {
     /**
      * Instantiates a new point with (x, y) coordinates.
      * 
-     * @param x the X coordinate of Point.
-     * @param y the Y coordinate of Point.
+     * @param x
+     *            the X coordinate of Point.
+     * @param y
+     *            the Y coordinate of Point.
      */
     public Point(int x, int y) {
         setLocation(x, y);
     }
 
     /**
-     * Instantiates a new point, giving it the same locaion as
-     * the parameter p.
+     * Instantiates a new point, giving it the same location as the parameter p.
      * 
-     * @param p the Point object giving the coordinates of the new point.
+     * @param p
+     *            the Point object giving the coordinates of the new point.
      */
     public Point(Point p) {
         setLocation(p.x, p.y);
@@ -69,12 +80,10 @@ public class Point extends Point2D implements Serializable {
     /**
      * Compares current Point with the specified object.
      * 
-     * @param obj the Object to be compared.
-     * 
-     * @return true, if the Object being compared is a Point 
-     * whose coordinates are equal to the coordinates of this 
-     * Point, otherwise false.
-     * 
+     * @param obj
+     *            the Object to be compared.
+     * @return true, if the Object being compared is a Point whose coordinates
+     *         are equal to the coordinates of this Point, false otherwise.
      * @see java.awt.geom.Point2D#equals(Object)
      */
     @Override
@@ -103,7 +112,6 @@ public class Point extends Point2D implements Serializable {
      * Gets X coordinate of Point as a double.
      * 
      * @return X coordinate of the point as a double.
-     * 
      * @see java.awt.geom.Point2D#getX()
      */
     @Override
@@ -115,7 +123,6 @@ public class Point extends Point2D implements Serializable {
      * Gets Y coordinate of Point as a double.
      * 
      * @return Y coordinate of the point as a double.
-     * 
      * @see java.awt.geom.Point2D#getY()
      */
     @Override
@@ -135,7 +142,8 @@ public class Point extends Point2D implements Serializable {
     /**
      * Sets the location of the Point to the same coordinates as p.
      * 
-     * @param p the Point that gives the new location.
+     * @param p
+     *            the Point that gives the new location.
      */
     public void setLocation(Point p) {
         setLocation(p.x, p.y);
@@ -144,8 +152,10 @@ public class Point extends Point2D implements Serializable {
     /**
      * Sets the location of the Point to the coordinates X, Y.
      * 
-     * @param x the X coordinate of the Point's new location.
-     * @param y the Y coordinate of the Point's new location.
+     * @param x
+     *            the X coordinate of the Point's new location.
+     * @param y
+     *            the Y coordinate of the Point's new location.
      */
     public void setLocation(int x, int y) {
         this.x = x;
@@ -155,36 +165,43 @@ public class Point extends Point2D implements Serializable {
     /**
      * Sets the location of Point to the specified double coordinates.
      * 
-     * @param x the X the Point's new location.
-     * @param y the Y the Point's new location.
-     *  
+     * @param x
+     *            the X the Point's new location.
+     * @param y
+     *            the Y the Point's new location.
      * @see java.awt.geom.Point2D#setLocation(double, double)
      */
     @Override
     public void setLocation(double x, double y) {
-        x = x < Integer.MIN_VALUE ? Integer.MIN_VALUE : x > Integer.MAX_VALUE ? Integer.MAX_VALUE : x;
-        y = y < Integer.MIN_VALUE ? Integer.MIN_VALUE : y > Integer.MAX_VALUE ? Integer.MAX_VALUE : y;
+        x = x < Integer.MIN_VALUE ? Integer.MIN_VALUE : x > Integer.MAX_VALUE ? Integer.MAX_VALUE
+                : x;
+        y = y < Integer.MIN_VALUE ? Integer.MIN_VALUE : y > Integer.MAX_VALUE ? Integer.MAX_VALUE
+                : y;
         setLocation((int)Math.round(x), (int)Math.round(y));
     }
 
     /**
      * Moves the Point to the specified (x, y) location.
      * 
-     * @param x the X coordinate of the new location.
-     * @param y the Y coordinate of the new location. 
+     * @param x
+     *            the X coordinate of the new location.
+     * @param y
+     *            the Y coordinate of the new location.
      */
     public void move(int x, int y) {
         setLocation(x, y);
     }
 
     /**
-     * Translates current Point moving it from the position (x, y) 
-     * to the new position given by (x+dx, x+dy) coordinates.
+     * Translates current Point moving it from the position (x, y) to the new
+     * position given by (x+dx, x+dy) coordinates.
      * 
-     * @param dx the horizontal delta - the Point is moved to this distance along
-     * X axis.
-     * @param dy the vertical delta - the Point is moved to this distance along
-     * Y axis.
+     * @param dx
+     *            the horizontal delta - the Point is moved to this distance
+     *            along X axis.
+     * @param dy
+     *            the vertical delta - the Point is moved to this distance along
+     *            Y axis.
      */
     public void translate(int dx, int dy) {
         x += dx;
@@ -192,4 +209,3 @@ public class Point extends Point2D implements Serializable {
     }
 
 }
-

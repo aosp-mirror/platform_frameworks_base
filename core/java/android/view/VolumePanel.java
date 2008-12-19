@@ -19,10 +19,15 @@ package android.view;
 import android.media.ToneGenerator;
 import android.media.AudioManager;
 import android.media.AudioService;
+import android.media.AudioSystem;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 import android.widget.ImageView;
@@ -69,46 +74,47 @@ public class VolumePanel extends Handler
     private static final int MSG_STOP_SOUNDS = 3;
     private static final int MSG_VIBRATE = 4;
     
-    private final String RINGTONE_VOLUME_TEXT;
-    private final String MUSIC_VOLUME_TEXT;
-    private final String INCALL_VOLUME_TEXT;
-    private final String ALARM_VOLUME_TEXT;
-    private final String UNKNOWN_VOLUME_TEXT;
+    private static final int RINGTONE_VOLUME_TEXT = com.android.internal.R.string.volume_ringtone;
+    private static final int MUSIC_VOLUME_TEXT = com.android.internal.R.string.volume_music;
+    private static final int INCALL_VOLUME_TEXT = com.android.internal.R.string.volume_call;
+    private static final int ALARM_VOLUME_TEXT = com.android.internal.R.string.volume_alarm;
+    private static final int UNKNOWN_VOLUME_TEXT = com.android.internal.R.string.volume_unknown;
+    private static final int NOTIFICATION_VOLUME_TEXT =
+            com.android.internal.R.string.volume_notification; 
     
     protected Context mContext;
+    private AudioManager mAudioManager;
     protected AudioService mAudioService;
     
-    private Toast mToast;
-    private View mView;
-    private TextView mMessage;
-    private ImageView mOtherStreamIcon;
-    private ImageView mRingerStreamIcon;
-    private ProgressBar mLevel;
+    private final Toast mToast;
+    private final View mView;
+    private final TextView mMessage;
+    private final TextView mAdditionalMessage;
+    private final ImageView mSmallStreamIcon;
+    private final ImageView mLargeStreamIcon;
+    private final ProgressBar mLevel;
 
     // Synchronize when accessing this
     private ToneGenerator mToneGenerators[];
     private Vibrator mVibrator;
-    
+
     public VolumePanel(Context context, AudioService volumeService) {
         mContext = context;
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mAudioService = volumeService;
         mToast = new Toast(context);
-    
-        RINGTONE_VOLUME_TEXT = context.getString(com.android.internal.R.string.volume_ringtone);
-        MUSIC_VOLUME_TEXT = context.getString(com.android.internal.R.string.volume_music);
-        INCALL_VOLUME_TEXT = context.getString(com.android.internal.R.string.volume_call);
-        ALARM_VOLUME_TEXT = context.getString(com.android.internal.R.string.volume_alarm);
-        UNKNOWN_VOLUME_TEXT = context.getString(com.android.internal.R.string.volume_unknown);
-        
+
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = mView = inflater.inflate(com.android.internal.R.layout.volume_adjust, null);
         mMessage = (TextView) view.findViewById(com.android.internal.R.id.message);
-        mOtherStreamIcon = (ImageView) view.findViewById(com.android.internal.R.id.other_stream_icon);
-        mRingerStreamIcon = (ImageView) view.findViewById(com.android.internal.R.id.ringer_stream_icon);
+        mAdditionalMessage =
+                (TextView) view.findViewById(com.android.internal.R.id.additional_message);
+        mSmallStreamIcon = (ImageView) view.findViewById(com.android.internal.R.id.other_stream_icon);
+        mLargeStreamIcon = (ImageView) view.findViewById(com.android.internal.R.id.ringer_stream_icon);
         mLevel = (ProgressBar) view.findViewById(com.android.internal.R.id.level);
 
-        mToneGenerators = new ToneGenerator[AudioManager.NUM_STREAMS];
+        mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = new Vibrator();
     }
     
@@ -148,12 +154,16 @@ public class VolumePanel extends Handler
 
     protected void onShowVolumeChanged(int streamType, int flags) {
         int index = mAudioService.getStreamVolume(streamType);
-        String message = UNKNOWN_VOLUME_TEXT;
+        int message = UNKNOWN_VOLUME_TEXT;
+        int additionalMessage = 0;
         
         if (LOGD) {
             Log.d(TAG, "onShowVolumeChanged(streamType: " + streamType
                     + ", flags: " + flags + "), index: " + index);
         }
+
+        // get max volume for progress bar
+        int max = mAudioService.getStreamMaxVolume(streamType);
 
         switch (streamType) {
             
@@ -165,32 +175,60 @@ public class VolumePanel extends Handler
                 
             case AudioManager.STREAM_MUSIC: {
                 message = MUSIC_VOLUME_TEXT;
-                setOtherIcon(index);
+                if (mAudioManager.isBluetoothA2dpOn()) {
+                    additionalMessage =
+                        com.android.internal.R.string.volume_music_hint_playing_through_bluetooth;
+                    setLargeIcon(com.android.internal.R.drawable.ic_volume_bluetooth_ad2p);
+                } else {
+                    setSmallIcon(index);
+                }
                 break;
             }
                 
             case AudioManager.STREAM_VOICE_CALL: {
-                message = INCALL_VOLUME_TEXT;
                 /*
-                 * For in-call voice call volume, there is no inaudible volume
-                 * level, so never show the mute icon
+                 * For in-call voice call volume, there is no inaudible volume.
+                 * Rescale the UI control so the progress bar doesn't go all
+                 * the way to zero and don't show the mute icon.
                  */
-                setOtherIcon(index == 0 ? 1 : index);
+                index++;
+                max++;
+                message = INCALL_VOLUME_TEXT;
+                if (mAudioManager.isBluetoothScoOn()) {
+                    additionalMessage =
+                        com.android.internal.R.string.volume_call_hint_playing_through_bluetooth;
+                    setLargeIcon(com.android.internal.R.drawable.ic_volume_bluetooth_in_call);
+                } else {
+                    setSmallIcon(index);
+                }
                 break;
             }
 
             case AudioManager.STREAM_ALARM: {
                 message = ALARM_VOLUME_TEXT;
-                setOtherIcon(index);
+                setSmallIcon(index);
+                break;
+            }
+            
+            case AudioManager.STREAM_NOTIFICATION: {
+                message = NOTIFICATION_VOLUME_TEXT;
+                setSmallIcon(index);
                 break;
             }
         }
 
-        if (!mMessage.getText().equals(message)) {
-            mMessage.setText(message);
+        String messageString = Resources.getSystem().getString(message);
+        if (!mMessage.getText().equals(messageString)) {
+            mMessage.setText(messageString);
         }
 
-        int max = mAudioService.getStreamMaxVolume(streamType);
+        if (additionalMessage == 0) {
+            mAdditionalMessage.setVisibility(View.GONE);
+        } else {
+            mAdditionalMessage.setVisibility(View.VISIBLE);
+            mAdditionalMessage.setText(Resources.getSystem().getString(additionalMessage));
+        }
+        
         if (max != mLevel.getMax()) {
             mLevel.setMax(max);
         }
@@ -230,7 +268,8 @@ public class VolumePanel extends Handler
     protected void onStopSounds() {
         
         synchronized (this) {
-            for (int i = AudioManager.NUM_STREAMS - 1; i >= 0; i--) {
+            int numStreamTypes = AudioSystem.getNumStreamTypes();
+            for (int i = numStreamTypes - 1; i >= 0; i--) {
                 ToneGenerator toneGen = mToneGenerators[i];
                 if (toneGen != null) {
                     toneGen.stopTone();
@@ -261,19 +300,41 @@ public class VolumePanel extends Handler
             }
         }
     }
-    
-    private void setOtherIcon(int index) {
-        mRingerStreamIcon.setVisibility(View.GONE);
-        mOtherStreamIcon.setVisibility(View.VISIBLE);
+
+    /**
+     * Makes the small icon visible, and hides the large icon.
+     * 
+     * @param index The volume index, where 0 means muted.
+     */
+    private void setSmallIcon(int index) {
+        mLargeStreamIcon.setVisibility(View.GONE);
+        mSmallStreamIcon.setVisibility(View.VISIBLE);
         
-        mOtherStreamIcon.setImageResource(index == 0
+        mSmallStreamIcon.setImageResource(index == 0
                 ? com.android.internal.R.drawable.ic_volume_off_small
                 : com.android.internal.R.drawable.ic_volume_small);
     }
 
+    /**
+     * Makes the large image view visible with the given icon.
+     * 
+     * @param resId The icon to display.
+     */
+    private void setLargeIcon(int resId) {
+        mSmallStreamIcon.setVisibility(View.GONE);
+        mLargeStreamIcon.setVisibility(View.VISIBLE);
+        mLargeStreamIcon.setImageResource(resId);
+    }
+
+    /**
+     * Makes the ringer icon visible with an icon that is chosen
+     * based on the current ringer mode.
+     * 
+     * @param index
+     */
     private void setRingerIcon(int index) {
-        mOtherStreamIcon.setVisibility(View.GONE);
-        mRingerStreamIcon.setVisibility(View.VISIBLE);
+        mSmallStreamIcon.setVisibility(View.GONE);
+        mLargeStreamIcon.setVisibility(View.VISIBLE);
 
         int ringerMode = mAudioService.getRingerMode();
         int icon;
@@ -287,14 +348,14 @@ public class VolumePanel extends Handler
         } else {
             icon = com.android.internal.R.drawable.ic_volume;
         }
-        mRingerStreamIcon.setImageResource(icon);
+        mLargeStreamIcon.setImageResource(icon);
     }
     
     protected void onFreeResources() {
         // We'll keep the views, just ditch the cached drawable and hence
         // bitmaps
-        mOtherStreamIcon.setImageDrawable(null);
-        mRingerStreamIcon.setImageDrawable(null);
+        mSmallStreamIcon.setImageDrawable(null);
+        mLargeStreamIcon.setImageDrawable(null);
         
         synchronized (this) {
             for (int i = mToneGenerators.length - 1; i >= 0; i--) {

@@ -30,7 +30,7 @@ import org.apache.http.util.CharArrayBuffer;
 
 /**
  * Manages received headers
- * 
+ *
  * {@hide}
  */
 public final class Headers {
@@ -42,16 +42,16 @@ public final class Headers {
      */
     public final static int CONN_CLOSE = 1;
     /**
-     * indicate HTTP 1.1 connection keep alive 
+     * indicate HTTP 1.1 connection keep alive
      */
     public final static int CONN_KEEP_ALIVE = 2;
-    
+
     // initial values.
     public final static int NO_CONN_TYPE = 0;
     public final static long NO_TRANSFER_ENCODING = 0;
     public final static long NO_CONTENT_LENGTH = -1;
 
-    // header string
+    // header strings
     public final static String TRANSFER_ENCODING = "transfer-encoding";
     public final static String CONTENT_LEN = "content-length";
     public final static String CONTENT_TYPE = "content-type";
@@ -93,24 +93,60 @@ public final class Headers {
     private final static int HASH_PRAGMA = -980228804;
     private final static int HASH_REFRESH = 1085444827;
 
+    // keep any headers that require direct access in a presized
+    // string array
+    private final static int IDX_TRANSFER_ENCODING = 0;
+    private final static int IDX_CONTENT_LEN = 1;
+    private final static int IDX_CONTENT_TYPE = 2;
+    private final static int IDX_CONTENT_ENCODING = 3;
+    private final static int IDX_CONN_DIRECTIVE = 4;
+    private final static int IDX_LOCATION = 5;
+    private final static int IDX_PROXY_CONNECTION = 6;
+    private final static int IDX_WWW_AUTHENTICATE = 7;
+    private final static int IDX_PROXY_AUTHENTICATE = 8;
+    private final static int IDX_CONTENT_DISPOSITION = 9;
+    private final static int IDX_ACCEPT_RANGES = 10;
+    private final static int IDX_EXPIRES = 11;
+    private final static int IDX_CACHE_CONTROL = 12;
+    private final static int IDX_LAST_MODIFIED = 13;
+    private final static int IDX_ETAG = 14;
+    private final static int IDX_SET_COOKIE = 15;
+    private final static int IDX_PRAGMA = 16;
+    private final static int IDX_REFRESH = 17;
+
+    private final static int HEADER_COUNT = 18;
+
+    /* parsed values */
     private long transferEncoding;
     private long contentLength; // Content length of the incoming data
     private int connectionType;
-
-    private String contentType;
-    private String contentEncoding;
-    private String location;
-    private String wwwAuthenticate;
-    private String proxyAuthenticate;
-    private String contentDisposition;
-    private String acceptRanges;
-    private String expires;
-    private String cacheControl;
-    private String lastModified;
-    private String etag;
-    private String pragma;
-    private String refresh;
     private ArrayList<String> cookies = new ArrayList<String>(2);
+
+    private String[] mHeaders = new String[HEADER_COUNT];
+    private final static String[] sHeaderNames = {
+        TRANSFER_ENCODING,
+        CONTENT_LEN,
+        CONTENT_TYPE,
+        CONTENT_ENCODING,
+        CONN_DIRECTIVE,
+        LOCATION,
+        PROXY_CONNECTION,
+        WWW_AUTHENTICATE,
+        PROXY_AUTHENTICATE,
+        CONTENT_DISPOSITION,
+        ACCEPT_RANGES,
+        EXPIRES,
+        CACHE_CONTROL,
+        LAST_MODIFIED,
+        ETAG,
+        SET_COOKIE,
+        PRAGMA,
+        REFRESH
+    };
+
+    // Catch-all for headers not explicitly handled
+    private ArrayList<String> mExtraHeaderNames = new ArrayList<String>(4);
+    private ArrayList<String> mExtraHeaderValues = new ArrayList<String>(4);
 
     public Headers() {
         transferEncoding = NO_TRANSFER_ENCODING;
@@ -129,23 +165,22 @@ public final class Headers {
         }
         pos++;
 
+        String val = buffer.substringTrimmed(pos, buffer.length());
         if (HttpLog.LOGV) {
-            String val = buffer.substringTrimmed(pos, buffer.length());
             HttpLog.v("hdr " + buffer.length() + " " + buffer);
         }
 
         switch (name.hashCode()) {
         case HASH_TRANSFER_ENCODING:
             if (name.equals(TRANSFER_ENCODING)) {
-                // headers.transferEncoding =
+                mHeaders[IDX_TRANSFER_ENCODING] = val;
                 HeaderElement[] encodings = BasicHeaderValueParser.DEFAULT
-                        .parseElements(buffer, new ParserCursor(pos, 
+                        .parseElements(buffer, new ParserCursor(pos,
                                 buffer.length()));
                 // The chunked encoding must be the last one applied RFC2616,
                 // 14.41
                 int len = encodings.length;
-                if (HTTP.IDENTITY_CODING.equalsIgnoreCase(buffer
-                        .substringTrimmed(pos, buffer.length()))) {
+                if (HTTP.IDENTITY_CODING.equalsIgnoreCase(val)) {
                     transferEncoding = ContentLengthStrategy.IDENTITY;
                 } else if ((len > 0)
                         && (HTTP.CHUNK_CODING
@@ -158,9 +193,9 @@ public final class Headers {
             break;
         case HASH_CONTENT_LEN:
             if (name.equals(CONTENT_LEN)) {
+                mHeaders[IDX_CONTENT_LEN] = val;
                 try {
-                    contentLength = Long.parseLong(buffer.substringTrimmed(pos,
-                            buffer.length()));
+                    contentLength = Long.parseLong(val);
                 } catch (NumberFormatException e) {
                     if (Config.LOGV) {
                         Log.v(LOGTAG, "Headers.headers(): error parsing"
@@ -171,88 +206,90 @@ public final class Headers {
             break;
         case HASH_CONTENT_TYPE:
             if (name.equals(CONTENT_TYPE)) {
-                contentType = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_CONTENT_TYPE] = val;
             }
             break;
         case HASH_CONTENT_ENCODING:
             if (name.equals(CONTENT_ENCODING)) {
-                contentEncoding = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_CONTENT_ENCODING] = val;
             }
             break;
         case HASH_CONN_DIRECTIVE:
             if (name.equals(CONN_DIRECTIVE)) {
+                mHeaders[IDX_CONN_DIRECTIVE] = val;
                 setConnectionType(buffer, pos);
             }
             break;
         case HASH_LOCATION:
             if (name.equals(LOCATION)) {
-                location = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_LOCATION] = val;
             }
             break;
         case HASH_PROXY_CONNECTION:
             if (name.equals(PROXY_CONNECTION)) {
+                mHeaders[IDX_PROXY_CONNECTION] = val;
                 setConnectionType(buffer, pos);
             }
             break;
         case HASH_WWW_AUTHENTICATE:
             if (name.equals(WWW_AUTHENTICATE)) {
-                wwwAuthenticate = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_WWW_AUTHENTICATE] = val;
             }
             break;
         case HASH_PROXY_AUTHENTICATE:
             if (name.equals(PROXY_AUTHENTICATE)) {
-                proxyAuthenticate = buffer.substringTrimmed(pos, buffer
-                        .length());
+                mHeaders[IDX_PROXY_AUTHENTICATE] = val;
             }
             break;
         case HASH_CONTENT_DISPOSITION:
             if (name.equals(CONTENT_DISPOSITION)) {
-                contentDisposition = buffer.substringTrimmed(pos, buffer
-                        .length());
+                mHeaders[IDX_CONTENT_DISPOSITION] = val;
             }
             break;
         case HASH_ACCEPT_RANGES:
             if (name.equals(ACCEPT_RANGES)) {
-                acceptRanges = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_ACCEPT_RANGES] = val;
             }
             break;
         case HASH_EXPIRES:
             if (name.equals(EXPIRES)) {
-                expires = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_EXPIRES] = val;
             }
             break;
         case HASH_CACHE_CONTROL:
             if (name.equals(CACHE_CONTROL)) {
-                cacheControl = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_CACHE_CONTROL] = val;
             }
             break;
         case HASH_LAST_MODIFIED:
             if (name.equals(LAST_MODIFIED)) {
-                lastModified = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_LAST_MODIFIED] = val;
             }
             break;
         case HASH_ETAG:
             if (name.equals(ETAG)) {
-                etag = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_ETAG] = val;
             }
             break;
         case HASH_SET_COOKIE:
             if (name.equals(SET_COOKIE)) {
-                cookies.add(buffer.substringTrimmed(pos, buffer.length()));
+                mHeaders[IDX_SET_COOKIE] = val;
+                cookies.add(val);
             }
             break;
         case HASH_PRAGMA:
             if (name.equals(PRAGMA)) {
-                pragma = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_PRAGMA] = val;
             }
             break;
         case HASH_REFRESH:
             if (name.equals(REFRESH)) {
-                refresh = buffer.substringTrimmed(pos, buffer.length());
+                mHeaders[IDX_REFRESH] = val;
             }
             break;
         default:
-            // ignore
+            mExtraHeaderNames.add(name);
+            mExtraHeaderValues.add(val);
         }
     }
 
@@ -268,6 +305,136 @@ public final class Headers {
         return connectionType;
     }
 
+    public String getContentType() {
+        return mHeaders[IDX_CONTENT_TYPE];
+    }
+
+    public String getContentEncoding() {
+        return mHeaders[IDX_CONTENT_ENCODING];
+    }
+
+    public String getLocation() {
+        return mHeaders[IDX_LOCATION];
+    }
+
+    public String getWwwAuthenticate() {
+        return mHeaders[IDX_WWW_AUTHENTICATE];
+    }
+
+    public String getProxyAuthenticate() {
+        return mHeaders[IDX_PROXY_AUTHENTICATE];
+    }
+
+    public String getContentDisposition() {
+        return mHeaders[IDX_CONTENT_DISPOSITION];
+    }
+
+    public String getAcceptRanges() {
+        return mHeaders[IDX_ACCEPT_RANGES];
+    }
+
+    public String getExpires() {
+        return mHeaders[IDX_EXPIRES];
+    }
+
+    public String getCacheControl() {
+        return mHeaders[IDX_CACHE_CONTROL];
+    }
+
+    public String getLastModified() {
+        return mHeaders[IDX_LAST_MODIFIED];
+    }
+
+    public String getEtag() {
+        return mHeaders[IDX_ETAG];
+    }
+
+    public ArrayList<String> getSetCookie() {
+        return this.cookies;
+    }
+
+    public String getPragma() {
+        return mHeaders[IDX_PRAGMA];
+    }
+
+    public String getRefresh() {
+        return mHeaders[IDX_REFRESH];
+    }
+
+    public void setContentLength(long value) {
+        this.contentLength = value;
+    }
+
+    public void setContentType(String value) {
+        mHeaders[IDX_CONTENT_TYPE] = value;
+    }
+
+    public void setContentEncoding(String value) {
+        mHeaders[IDX_CONTENT_ENCODING] = value;
+    }
+
+    public void setLocation(String value) {
+        mHeaders[IDX_LOCATION] = value;
+    }
+
+    public void setWwwAuthenticate(String value) {
+        mHeaders[IDX_WWW_AUTHENTICATE] = value;
+    }
+
+    public void setProxyAuthenticate(String value) {
+        mHeaders[IDX_PROXY_AUTHENTICATE] = value;
+    }
+
+    public void setContentDisposition(String value) {
+        mHeaders[IDX_CONTENT_DISPOSITION] = value;
+    }
+
+    public void setAcceptRanges(String value) {
+        mHeaders[IDX_ACCEPT_RANGES] = value;
+    }
+
+    public void setExpires(String value) {
+        mHeaders[IDX_EXPIRES] = value;
+    }
+
+    public void setCacheControl(String value) {
+        mHeaders[IDX_CACHE_CONTROL] = value;
+    }
+
+    public void setLastModified(String value) {
+        mHeaders[IDX_LAST_MODIFIED] = value;
+    }
+
+    public void setEtag(String value) {
+        mHeaders[IDX_ETAG] = value;
+    }
+
+    public interface HeaderCallback {
+        public void header(String name, String value);
+    }
+
+    /**
+     * Reports all non-null headers to the callback
+     */
+    public void getHeaders(HeaderCallback hcb) {
+        for (int i = 0; i < HEADER_COUNT; i++) {
+            String h = mHeaders[i];
+            if (h != null) {
+                hcb.header(sHeaderNames[i], h);
+            }
+        }
+        int extraLen = mExtraHeaderNames.size();
+        for (int i = 0; i < extraLen; i++) {
+            if (Config.LOGV) {
+                HttpLog.v("Headers.getHeaders() extra: " + i + " " +
+                          mExtraHeaderNames.get(i) + " " + mExtraHeaderValues.get(i));
+            }
+            hcb.header(mExtraHeaderNames.get(i),
+                       mExtraHeaderValues.get(i));
+        }
+
+    }
+
     private void setConnectionType(CharArrayBuffer buffer, int pos) {
         if (CharArrayBuffers.containsIgnoreCaseTrimmed(
                 buffer, pos, HTTP.CONN_CLOSE)) {
@@ -276,109 +443,5 @@ public final class Headers {
                 buffer, pos, HTTP.CONN_KEEP_ALIVE)) {
             connectionType = CONN_KEEP_ALIVE;
         }
-    }
-
-    public String getContentType() {
-        return this.contentType;
-    }
-
-    public String getContentEncoding() {
-        return this.contentEncoding;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public String getWwwAuthenticate() {
-        return this.wwwAuthenticate;
-    }
-
-    public String getProxyAuthenticate() {
-        return this.proxyAuthenticate;
-    }
-
-    public String getContentDisposition() {
-        return this.contentDisposition;
-    }
-
-    public String getAcceptRanges() {
-        return this.acceptRanges;
-    }
-
-    public String getExpires() {
-        return this.expires;
-    }
-
-    public String getCacheControl() {
-        return this.cacheControl;
-    }
-
-    public String getLastModified() {
-        return this.lastModified;
-    }
-
-    public String getEtag() {
-        return this.etag;
-    }
-
-    public ArrayList<String> getSetCookie() {
-        return this.cookies;
-    }
-    
-    public String getPragma() {
-        return this.pragma;
-    }
-    
-    public String getRefresh() {
-        return this.refresh;
-    }
-
-    public void setContentLength(long value) {
-        this.contentLength = value;
-    }
-
-    public void setContentType(String value) {
-        this.contentType = value;
-    }
-
-    public void setContentEncoding(String value) {
-        this.contentEncoding = value;
-    }
-
-    public void setLocation(String value) {
-        this.location = value;
-    }
-
-    public void setWwwAuthenticate(String value) {
-        this.wwwAuthenticate = value;
-    }
-
-    public void setProxyAuthenticate(String value) {
-        this.proxyAuthenticate = value;
-    }
-
-    public void setContentDisposition(String value) {
-        this.contentDisposition = value;
-    }
-
-    public void setAcceptRanges(String value) {
-        this.acceptRanges = value;
-    }
-
-    public void setExpires(String value) {
-        this.expires = value;
-    }
-
-    public void setCacheControl(String value) {
-        this.cacheControl = value;
-    }
-
-    public void setLastModified(String value) {
-        this.lastModified = value;
-    }
-
-    public void setEtag(String value) {
-        this.etag = value;
     }
 }

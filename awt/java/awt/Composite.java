@@ -18,30 +18,34 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.image.ColorModel;
 
 /**
- * The Composite interface allows the methods to compose a draw primitive 
- * on the graphics area. The classes implementing this interface provides 
- * the rules and a method to create the context for a particular operation.
+ * The Composite interface allows the methods to compose a draw primitive on the
+ * graphics area. The classes implementing this interface provides the rules and
+ * a method to create the context for a particular operation.
+ * 
+ * @since Android 1.0
  */
 public interface Composite {
 
     /**
-     * Creates a CompositeContext which defines the encapsulated and 
-     * optimized environment for a compositing operation. Several contexts 
-     * can exist for a single Composite object.
+     * Creates a CompositeContext which defines the encapsulated and optimized
+     * environment for a compositing operation. Several contexts can exist for a
+     * single Composite object.
      * 
-     * @param srcColorModel the source's ColorModel.
-     * @param dstColorModel the destination's ColorModel.
-     * @param hints the RenderingHints.
-     * 
+     * @param srcColorModel
+     *            the source's ColorModel.
+     * @param dstColorModel
+     *            the destination's ColorModel.
+     * @param hints
+     *            the RenderingHints.
      * @return the CompositeContext object.
      */
-    public CompositeContext createContext(ColorModel srcColorModel,
-            ColorModel dstColorModel, RenderingHints hints);
+    public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel,
+            RenderingHints hints);
 
 }
-

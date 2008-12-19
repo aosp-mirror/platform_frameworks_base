@@ -18,103 +18,141 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio;
 
 import java.util.Locale;
 import java.awt.*;
 
 /**
- * The ImageWriteParam class provides information to an ImageWriter 
- * about how an image is to be encoded.
+ * The ImageWriteParam class provides information to an ImageWriter about how an
+ * image is to be encoded.
+ * 
+ * @since Android 1.0
  */
 public class ImageWriteParam extends IIOParam {
 
-    /** 
-     * The Constant MODE_DISABLED indicates that 
-     * stream is not tiled, progressive, or compressed.
+    /**
+     * The Constant MODE_DISABLED indicates that stream is not tiled,
+     * progressive, or compressed.
      */
     public static final int MODE_DISABLED = 0;
-    
-    /** 
-     * The Constant MODE_DEFAULT indicates that the stream will be tiled, 
-     * progressive, or compressed according to the plug-in's default. 
+
+    /**
+     * The Constant MODE_DEFAULT indicates that the stream will be tiled,
+     * progressive, or compressed according to the plug-in's default.
      */
     public static final int MODE_DEFAULT = 1;
-    
-    /** 
+
+    /**
      * The Constant MODE_EXPLICIT indicates that the stream will be tiled,
-     * progressive, or compressed according to current settings
-     * which are defined by set methods. 
+     * progressive, or compressed according to current settings which are
+     * defined by set methods.
      */
     public static final int MODE_EXPLICIT = 2;
-    
-    /** 
-     * The Constant MODE_COPY_FROM_METADATA indicates that the stream
-     * will be tiled, progressive, or compressed according to
-     * stream or image metadata. 
+
+    /**
+     * The Constant MODE_COPY_FROM_METADATA indicates that the stream will be
+     * tiled, progressive, or compressed according to stream or image metadata.
      */
     public static final int MODE_COPY_FROM_METADATA = 3;
-    
-    /** Whether the ImageWriter can write tiles. */
+
+    /**
+     * Whether the ImageWriter can write tiles.
+     */
     protected boolean canWriteTiles = false;
-    
-    /** The tiling mode. */
+
+    /**
+     * The tiling mode.
+     */
     protected int tilingMode = MODE_COPY_FROM_METADATA;
-    
-    /** The preferred tile sizes. */
+
+    /**
+     * The preferred tile sizes.
+     */
     protected Dimension[] preferredTileSizes = null;
-    
-    /** The tiling set. */
+
+    /**
+     * The tiling set.
+     */
     protected boolean tilingSet = false;
-    
-    /** The tile width. */
+
+    /**
+     * The tile width.
+     */
     protected int tileWidth = 0;
-    
-    /** The tile height. */
+
+    /**
+     * The tile height.
+     */
     protected int tileHeight = 0;
-    
-    /** Whether the ImageWriter can offset tiles. */
+
+    /**
+     * Whether the ImageWriter can offset tiles.
+     */
     protected boolean canOffsetTiles = false;
-    
-    /** The tile grid x offset. */
+
+    /**
+     * The tile grid x offset.
+     */
     protected int tileGridXOffset = 0;
-    
-    /** The tile grid y offset. */
+
+    /**
+     * The tile grid y offset.
+     */
     protected int tileGridYOffset = 0;
-    
-    /** Whether the ImageWriter can write in progressive mode. */
+
+    /**
+     * Whether the ImageWriter can write in progressive mode.
+     */
     protected boolean canWriteProgressive = false;
-    
-    /** The progressive mode. */
+
+    /**
+     * The progressive mode.
+     */
     protected int progressiveMode = MODE_COPY_FROM_METADATA;
-    
-    /** Whether the ImageWriter can write in compressed mode. */
+
+    /**
+     * Whether the ImageWriter can write in compressed mode.
+     */
     protected boolean canWriteCompressed = false;
-    
-    /** The compression mode. */
+
+    /**
+     * The compression mode.
+     */
     protected int compressionMode = MODE_COPY_FROM_METADATA;
-    
-    /** The compression types. */
+
+    /**
+     * The compression types.
+     */
     protected String[] compressionTypes = null;
-    
-    /** The compression type. */
+
+    /**
+     * The compression type.
+     */
     protected String compressionType = null;
-    
-    /** The compression quality. */
+
+    /**
+     * The compression quality.
+     */
     protected float compressionQuality = 1.0f;
-    
-    /** The locale. */
+
+    /**
+     * The locale.
+     */
     protected Locale locale = null;
 
     /**
      * Instantiates a new ImageWriteParam.
      */
-    protected ImageWriteParam() {}
+    protected ImageWriteParam() {
+    }
 
     /**
      * Instantiates a new ImageWriteParam with the specified Locale.
      * 
-     * @param locale the Locale.
+     * @param locale
+     *            the Locale.
      */
     public ImageWriteParam(Locale locale) {
         this.locale = locale;
@@ -122,7 +160,7 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets the mode for writing the stream in a progressive sequence. 
+     * Gets the mode for writing the stream in a progressive sequence.
      * 
      * @return the current progressive mode.
      */
@@ -134,24 +172,24 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Returns true if images can be written using 
-     * increasing quality passes by progressive.  
+     * Returns true if images can be written using increasing quality passes by
+     * progressive.
      * 
-     * @return true if images can be written using 
-     * increasing quality passes by progressive, false otherwise.
+     * @return true if images can be written using increasing quality passes by
+     *         progressive, false otherwise.
      */
     public boolean canWriteProgressive() {
         return canWriteProgressive;
     }
 
     /**
-     * Sets the progressive mode which defines whether the stream 
-     * contains a progressive sequence of increasing quality
-     * during writing. The progressive mode should be one of
-     * the following values: MODE_DISABLED, MODE_DEFAULT, or
-     * MODE_COPY_FROM_METADATA.
+     * Sets the progressive mode which defines whether the stream contains a
+     * progressive sequence of increasing quality during writing. The
+     * progressive mode should be one of the following values: MODE_DISABLED,
+     * MODE_DEFAULT, or MODE_COPY_FROM_METADATA.
      * 
-     * @param mode the new progressive mode.
+     * @param mode
+     *            the new progressive mode.
      */
     public void setProgressiveMode(int mode) {
         if (canWriteProgressive()) {
@@ -164,22 +202,21 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Returns true if the writer can use tiles with non zero 
-     * grid offsets while writing. 
+     * Returns true if the writer can use tiles with non zero grid offsets while
+     * writing.
      * 
-     * @return true if the writer can use tiles with non zero 
-     * grid offsets while writing, false otherwise.
+     * @return true, if the writer can use tiles with non zero grid offsets
+     *         while writing, false otherwise.
      */
     public boolean canOffsetTiles() {
         return canOffsetTiles;
     }
 
     /**
-     * Returns true if this writer can write images with 
-     * compression.  
+     * Returns true if this writer can write images with compression.
      * 
-     * @return true, true if this writer can write images with 
-     * compression, false otherwise.
+     * @return true, if this writer can write images with compression, false
+     *         otherwise.
      */
     public boolean canWriteCompressed() {
         return canWriteCompressed;
@@ -188,7 +225,7 @@ public class ImageWriteParam extends IIOParam {
     /**
      * Returns true if the writer can write tiles.
      * 
-     * @return true if the writer can write tiles, false otherwise.
+     * @return true, if the writer can write tiles, false otherwise.
      */
     public boolean canWriteTiles() {
         return canWriteTiles;
@@ -247,8 +284,7 @@ public class ImageWriteParam extends IIOParam {
     /**
      * Gets the current compression type, or returns null.
      * 
-     * @return the current compression type, or returns null 
-     * if it is not set.
+     * @return the current compression type, or returns null if it is not set.
      */
     public String getCompressionType() {
         checkWriteCompressed();
@@ -257,14 +293,12 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets a bit rate which represents an estimate of the number of bits 
-     * of output data for each bit of input image data with the specified 
-     * quality.
+     * Gets a bit rate which represents an estimate of the number of bits of
+     * output data for each bit of input image data with the specified quality.
      * 
-     * @param quality the quality.
-     * 
-     * @return an estimate of the bit rate, or -1.0F if there is no 
-     * estimate. 
+     * @param quality
+     *            the quality.
+     * @return an estimate of the bit rate, or -1.0F if there is no estimate.
      */
     public float getBitRate(float quality) {
         checkWriteCompressed();
@@ -301,8 +335,7 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets an array of floats which decribe 
-     * compression quality levels. 
+     * Gets an array of floats which describes compression quality levels.
      * 
      * @return the array of compression quality values.
      */
@@ -323,7 +356,7 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets the current compression type using the current Locale. 
+     * Gets the current compression type using the current Locale.
      * 
      * @return the current compression type using the current Locale.
      */
@@ -377,8 +410,8 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets an array of Dimensions giving the sizes of the tiles as 
-     * they are encoded in the output file or stream. 
+     * Gets an array of Dimensions giving the sizes of the tiles as they are
+     * encoded in the output file or stream.
      * 
      * @return the preferred tile sizes.
      */
@@ -420,11 +453,10 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets the tile height in an image as it is written to the 
-     * output stream.
+     * Gets the tile height in an image as it is written to the output stream.
      * 
-     * @return the tile height in an image as it is written to the 
-     * output stream.
+     * @return the tile height in an image as it is written to the output
+     *         stream.
      */
     public int getTileHeight() {
         checkTiling();
@@ -434,11 +466,9 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Gets the tile width in an image as it is written to the 
-     * output stream.
+     * Gets the tile width in an image as it is written to the output stream.
      * 
-     * @return the tile width in an image as it is written to the 
-     * output stream.
+     * @return the tile width in an image as it is written to the output stream.
      */
     public int getTileWidth() {
         checkTiling();
@@ -448,11 +478,10 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Checks if the current compression type has lossless 
-     * compression or not. 
+     * Checks if the current compression type has lossless compression or not.
      * 
-     * @return true, if the current compression type has lossless 
-     * compression, false otherwise.
+     * @return true, if the current compression type has lossless compression,
+     *         false otherwise.
      */
     public boolean isCompressionLossless() {
         checkWriteCompressed();
@@ -472,12 +501,12 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Sets the compression mode to the specified value.
-     * The specified mode can be one of the predefined
-     * constants: MODE_DEFAULT, MODE_DISABLED, MODE_EXPLICIT, 
-     * or MODE_COPY_FROM_METADATA.
-     *  
-     * @param mode the new compression mode to be set.
+     * Sets the compression mode to the specified value. The specified mode can
+     * be one of the predefined constants: MODE_DEFAULT, MODE_DISABLED,
+     * MODE_EXPLICIT, or MODE_COPY_FROM_METADATA.
+     * 
+     * @param mode
+     *            the new compression mode to be set.
      */
     public void setCompressionMode(int mode) {
         checkWriteCompressed();
@@ -502,8 +531,8 @@ public class ImageWriteParam extends IIOParam {
     /**
      * Sets the compression quality. The value should be between 0 and 1.
      * 
-     * @param quality the new compression quality, 
-     * float value between 0 and 1. 
+     * @param quality
+     *            the new compression quality, float value between 0 and 1.
      */
     public void setCompressionQuality(float quality) {
         checkWriteCompressed();
@@ -516,11 +545,11 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Sets the compression type. The specified string
-     * should be one of the values returned 
-     * by getCompressionTypes method.
+     * Sets the compression type. The specified string should be one of the
+     * values returned by getCompressionTypes method.
      * 
-     * @param compressionType the new compression type.
+     * @param compressionType
+     *            the new compression type.
      */
     public void setCompressionType(String compressionType) {
         checkWriteCompressed();
@@ -547,13 +576,17 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Sets the instruction that tiling should be performed for 
-     * the image in the output stream with the specified parameters. 
+     * Sets the instruction that tiling should be performed for the image in the
+     * output stream with the specified parameters.
      * 
-     * @param tileWidth the tile's width.
-     * @param tileHeight the tile's height.
-     * @param tileGridXOffset the tile grid's x offset.
-     * @param tileGridYOffset the tile grid's y offset.
+     * @param tileWidth
+     *            the tile's width.
+     * @param tileHeight
+     *            the tile's height.
+     * @param tileGridXOffset
+     *            the tile grid's x offset.
+     * @param tileGridYOffset
+     *            the tile grid's y offset.
      */
     public void setTiling(int tileWidth, int tileHeight, int tileGridXOffset, int tileGridYOffset) {
         checkTiling();
@@ -563,19 +596,17 @@ public class ImageWriteParam extends IIOParam {
             throw new UnsupportedOperationException("Can't offset tiles!");
         }
 
-        if (tileWidth <=0 || tileHeight <= 0) {
+        if (tileWidth <= 0 || tileHeight <= 0) {
             throw new IllegalArgumentException("tile dimensions are non-positive!");
         }
 
         Dimension preferredTileSizes[] = getPreferredTileSizes();
         if (preferredTileSizes != null) {
-            for (int i = 0; i < preferredTileSizes.length; i+=2) {
+            for (int i = 0; i < preferredTileSizes.length; i += 2) {
                 Dimension minSize = preferredTileSizes[i];
-                Dimension maxSize = preferredTileSizes[i+1];
-                if (
-                        tileWidth < minSize.width || tileWidth > maxSize.width ||
-                        tileHeight < minSize.height || tileHeight > maxSize.height
-                ) {
+                Dimension maxSize = preferredTileSizes[i + 1];
+                if (tileWidth < minSize.width || tileWidth > maxSize.width
+                        || tileHeight < minSize.height || tileHeight > maxSize.height) {
                     throw new IllegalArgumentException("Illegal tile size!");
                 }
             }
@@ -603,11 +634,12 @@ public class ImageWriteParam extends IIOParam {
     }
 
     /**
-     * Sets the tiling mode. The specified mode should be one of the 
-     * following values: MODE_DISABLED, MODE_DEFAULT, MODE_EXPLICIT,
-     * or MODE_COPY_FROM_METADATA.
+     * Sets the tiling mode. The specified mode should be one of the following
+     * values: MODE_DISABLED, MODE_DEFAULT, MODE_EXPLICIT, or
+     * MODE_COPY_FROM_METADATA.
      * 
-     * @param mode the new tiling mode.
+     * @param mode
+     *            the new tiling mode.
      */
     public void setTilingMode(int mode) {
         checkTiling();
@@ -630,4 +662,3 @@ public class ImageWriteParam extends IIOParam {
         }
     }
 }
-

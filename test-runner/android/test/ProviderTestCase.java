@@ -11,9 +11,12 @@ import android.database.DatabaseUtils;
  * If you would like to test a single content provider with an
  * {@link InstrumentationTestCase}, this provides some of the boiler plate in {@link #setUp} and
  * {@link #tearDown}.
+ *
+ * @deprecated this class extends InstrumentationTestCase but should extend AndroidTestCase. Use
+ * ProviderTestCase2, which corrects this problem, instead.
  */
 public abstract class ProviderTestCase<T extends ContentProvider>
-        extends InstrumentationTestCase {
+       extends InstrumentationTestCase {
 
     Class<T> mProviderClass;
     String mProviderAuthority;
@@ -66,18 +69,17 @@ public abstract class ProviderTestCase<T extends ContentProvider>
             String databaseName, int databaseVersion, String sql)
             throws IllegalAccessException, InstantiationException {
         final String filenamePrefix = "test.";
-        MockContentResolver mockContentResolver = new MockContentResolver();
+        MockContentResolver resolver = new MockContentResolver();
         RenamingDelegatingContext targetContextWrapper = new RenamingDelegatingContext(
                 new MockContext(), // The context that most methods are delegated to
                 targetContext, // The context that file methods are delegated to
                 filenamePrefix);
         Context context = new IsolatedContext(
-                mockContentResolver, targetContextWrapper);
+                resolver, targetContextWrapper);
         DatabaseUtils.createDbFromSqlStatements(context, databaseName, databaseVersion, sql);
 
         T provider = providerClass.newInstance();
         provider.attachInfo(context, null);
-        MockContentResolver resolver = new MockContentResolver();
         resolver.addProvider(authority, provider);
 
         return resolver;

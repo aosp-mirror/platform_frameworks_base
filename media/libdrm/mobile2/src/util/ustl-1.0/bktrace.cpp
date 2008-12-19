@@ -10,7 +10,7 @@
 #include "sostream.h"
 #include "mistream.h"
 #include "uassert.h"
-#if linux && __GNUC__
+#if linux && __GNUC__ && !defined(HAVE_ANDROID_OS)
     #include <execinfo.h>
 #else
     static inline int backtrace (void**, int)			{ return (0); }

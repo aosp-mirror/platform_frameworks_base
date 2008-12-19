@@ -27,7 +27,7 @@ import android.widget.Checkable;
 import android.widget.TextView;
 
 /**
- * The {@link CheckBoxPreference} is a preference that provides checkbox widget
+ * A {@link Preference} that provides checkbox widget
  * functionality.
  * <p>
  * This preference will store a boolean into the SharedPreferences.

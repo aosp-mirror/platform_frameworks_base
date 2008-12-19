@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -184,7 +185,8 @@ public class ExpandableListView extends ListView {
     
     /** Drawable to be used as a divider when it is adjacent to any children */
     private Drawable mChildDivider;
-    
+    private boolean mClipChildDivider;
+
     public ExpandableListView(Context context) {
         this(context, null);
     }
@@ -245,7 +247,7 @@ public class ExpandableListView extends ListView {
 
         final int myB = mBottom; 
         
-        PositionMetadata pos;
+        PositionMetadata pos = null;
         View item;
         Drawable indicator; 
         int t, b;
@@ -297,28 +299,27 @@ public class ExpandableListView extends ListView {
                 lastItemType = pos.position.type; 
             }
 
-            if (indicatorRect.left == indicatorRect.right) {
-                // The left and right bounds are the same, so nothing will be drawn
-                continue;
-            }
-
-            // Use item's full height + the divider height
-            if (mStackFromBottom) {
-                // See ListView#dispatchDraw
-                indicatorRect.top = t - mDividerHeight;
-                indicatorRect.bottom = b;
-            } else {
-                indicatorRect.top = t;
-                indicatorRect.bottom = b + mDividerHeight;
+            if (indicatorRect.left != indicatorRect.right) {
+                // Use item's full height + the divider height
+                if (mStackFromBottom) {
+                    // See ListView#dispatchDraw
+                    indicatorRect.top = t - mDividerHeight;
+                    indicatorRect.bottom = b;
+                } else {
+                    indicatorRect.top = t;
+                    indicatorRect.bottom = b + mDividerHeight;
+                }
+                
+                // Get the indicator (with its state set to the item's state)
+                indicator = getIndicator(pos);
+                if (indicator != null) {
+                    // Draw the indicator
+                    indicator.setBounds(indicatorRect);
+                    indicator.draw(canvas);
+                }
             }
             
-            // Get the indicator (with its state set to the item's state)
-            indicator = getIndicator(pos);
-            if (indicator == null) continue;
-            
-            // Draw the indicator
-            indicator.setBounds(indicatorRect);
-            indicator.draw(canvas);
+            pos.recycle();
         }
 
         if (clipToPadding) {
@@ -376,6 +377,7 @@ public class ExpandableListView extends ListView {
      */
     public void setChildDivider(Drawable childDivider) {
         mChildDivider = childDivider;
+        mClipChildDivider = childDivider != null && childDivider instanceof ColorDrawable;
     }
 
     @Override
@@ -387,14 +389,25 @@ public class ExpandableListView extends ListView {
         if (flatListPosition >= 0) {
             PositionMetadata pos = mConnector.getUnflattenedPos(flatListPosition);
             // If this item is a child, or it is a non-empty group that is expanded
-            if ((pos.position.type == ExpandableListPosition.CHILD)
-                    || (pos.isExpanded() &&
-                            pos.groupMetadata.lastChildFlPos != pos.groupMetadata.flPos)) {
+            if ((pos.position.type == ExpandableListPosition.CHILD) || (pos.isExpanded() &&
+                    pos.groupMetadata.lastChildFlPos != pos.groupMetadata.flPos)) {
                 // These are the cases where we draw the child divider
-                mChildDivider.setBounds(bounds);
-                mChildDivider.draw(canvas);
+                final Drawable divider = mChildDivider;
+                final boolean clip = mClipChildDivider;
+                if (!clip) {
+                    divider.setBounds(bounds);
+                } else {
+                    canvas.save();
+                    canvas.clipRect(bounds);
+                }
+                divider.draw(canvas);
+                if (clip) {
+                    canvas.restore();
+                }
+                pos.recycle();
                 return;
             }
+            pos.recycle();
         }
         
         // Otherwise draw the default divider
@@ -495,6 +508,7 @@ public class ExpandableListView extends ListView {
         
         id = getChildOrGroupId(posMetadata.position);
         
+        boolean returnValue;
         if (posMetadata.position.type == ExpandableListPosition.GROUP) {
             /* It's a group, so handle collapsing/expanding */
             
@@ -513,6 +527,7 @@ public class ExpandableListView extends ListView {
                 if (mOnGroupClickListener != null) {
                     if (mOnGroupClickListener.onGroupClick(this, v,
                             posMetadata.position.groupPos, id)) {
+                        posMetadata.recycle();
                         return true;
                     }
                 }
@@ -527,7 +542,7 @@ public class ExpandableListView extends ListView {
                 }
             }
             
-            return true;
+            returnValue = true;
         } else {
             /* It's a child, so pass on event */
             if (mOnChildClickListener != null) {
@@ -536,8 +551,12 @@ public class ExpandableListView extends ListView {
                         posMetadata.position.childPos, id);
             }
             
-            return false;
+            returnValue = false;
         }
+        
+        posMetadata.recycle();
+        
+        return returnValue;
     }
 
     /**
@@ -676,7 +695,10 @@ public class ExpandableListView extends ListView {
      *         in packed position representation.
      */
     public long getExpandableListPosition(int flatListPosition) {
-        return mConnector.getUnflattenedPos(flatListPosition).position.getPackedPosition();
+        PositionMetadata pm = mConnector.getUnflattenedPos(flatListPosition);
+        long packedPos = pm.position.getPackedPosition();
+        pm.recycle();
+        return packedPos;
     }
     
     /**
@@ -691,8 +713,11 @@ public class ExpandableListView extends ListView {
      * @return The flat list position for the given child or group.
      */
     public int getFlatListPosition(long packedPosition) {
-        return mConnector.getFlattenedPos(ExpandableListPosition.obtainPosition(packedPosition)).
-            position.flatListPos;
+        PositionMetadata pm = mConnector.getFlattenedPos(ExpandableListPosition
+                .obtainPosition(packedPosition));
+        int retValue = pm.position.flatListPos;
+        pm.recycle();
+        return retValue;
     }
 
     /**
@@ -737,8 +762,11 @@ public class ExpandableListView extends ListView {
      */
     public void setSelectedGroup(int groupPosition) {
         ExpandableListPosition elGroupPos = ExpandableListPosition
-                .obtainGroupPosition(groupPosition); 
-        super.setSelection(mConnector.getFlattenedPos(elGroupPos).position.flatListPos);
+                .obtainGroupPosition(groupPosition);
+        PositionMetadata pm = mConnector.getFlattenedPos(elGroupPos);
+        elGroupPos.recycle();
+        super.setSelection(pm.position.flatListPos);
+        pm.recycle();
     }
     
     /**
@@ -774,6 +802,9 @@ public class ExpandableListView extends ListView {
         }
         
         super.setSelection(flatChildPos.position.flatListPos);
+        
+        elChildPos.recycle();
+        flatChildPos.recycle();
         
         return true;
     }
@@ -883,11 +914,15 @@ public class ExpandableListView extends ListView {
 
     @Override
     ContextMenuInfo createContextMenuInfo(View view, int flatListPosition, long id) {
-        ExpandableListPosition pos = mConnector.getUnflattenedPos(flatListPosition).position;
+        PositionMetadata pm = mConnector.getUnflattenedPos(flatListPosition);
+        ExpandableListPosition pos = pm.position;
+        pm.recycle();
         
         id = getChildOrGroupId(pos);
+        long packedPosition = pos.getPackedPosition();
+        pos.recycle();
         
-        return new ExpandableListContextMenuInfo(view, pos.getPackedPosition(), id);
+        return new ExpandableListContextMenuInfo(view, packedPosition, id);
     }
 
     /**

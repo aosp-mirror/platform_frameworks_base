@@ -30,7 +30,6 @@ import android.os.HandlerThread;
 import android.os.SystemProperties;
 import android.os.Looper;
 import android.provider.Settings;
-import android.provider.Settings.Gservices;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -124,10 +123,10 @@ public class WifiStateTracker extends NetworkStateTracker {
      * for which we have failed in acquiring an IP address from DHCP. A value of
      * N means that we will make N+1 connection attempts in all.
      * <p>
-     * See {@link Gservices#WIFI_MAX_DHCP_RETRY_COUNT}. This is the default
-     * value if a Gservices value is not present.
+     * See {@link Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}. This is the default
+     * value if a Settings value is not present.
      */
-    private int mMaxReconnectAttempts = 2;
+    private static final int DEFAULT_MAX_DHCP_RETRIES = 2;
 
     private static final int DRIVER_POWER_MODE_AUTO = 0;
     private static final int DRIVER_POWER_MODE_ACTIVE = 1;
@@ -159,7 +158,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     private WifiManager mWM;
     private boolean mHaveIPAddress;
     private boolean mObtainingIPAddress;
-    private boolean mExplicitlyDisabled;
+    private boolean mTornDownByConnMgr;
     private boolean mDisconnectPending;
     private DhcpHandler mDhcpTarget;
     private DhcpInfo mDhcpInfo;
@@ -222,7 +221,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     /**
      * Observes the static IP address settings.
      */
-    private StaticIpSettingObserver mStaticIpSettingObserver;
+    private SettingsObserver mSettingsObserver;
     
     private boolean mIsScanModeActive;
     private boolean mIsScanModeSetDueToAHiddenNetwork;
@@ -230,13 +229,9 @@ public class WifiStateTracker extends NetworkStateTracker {
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
 
-    private int[] mSavedConfiguration;
-
     private Runnable mReleaseWakeLockCallback;
 
     private static String[] sDnsPropNames;
-
-    private Context mContext;
 
     /**
      * A structure for supplying information about a supplicant state
@@ -270,17 +265,13 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     public WifiStateTracker(Context context, Handler target) {
-        super(context, target, ConnectivityManager.TYPE_WIFI);
+        super(context, target, ConnectivityManager.TYPE_WIFI, 0, "WIFI", "");
         
-        mMaxReconnectAttempts = Gservices.getInt(context.getContentResolver(),
-                Gservices.WIFI_MAX_DHCP_RETRY_COUNT, mMaxReconnectAttempts);
-        
-        mContext = context;
         mWifiInfo = new WifiInfo();
         mWifiMonitor = new WifiMonitor(this);
         mHaveIPAddress = false;
         mObtainingIPAddress = false;
-        setExplicitlyDisabled(false);
+        setTornDownByConnMgr(false);
         mDisconnectPending = false;
         mScanResults = new ArrayList<ScanResult>();
         // Allocate DHCP info object once, and fill it in on each request
@@ -288,12 +279,12 @@ public class WifiStateTracker extends NetworkStateTracker {
         mIsScanModeSetDueToAHiddenNetwork = false;
 
         // Setting is in seconds
-        NOTIFICATION_REPEAT_DELAY_MS = Settings.System.getInt(context.getContentResolver(), 
-                Settings.System.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
+        NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(), 
+                Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
         mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
         mNotificationEnabledSettingObserver.register();
 
-        mStaticIpSettingObserver = new StaticIpSettingObserver(new Handler());
+        mSettingsObserver = new SettingsObserver(new Handler());
 
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         sDnsPropNames = new String[] {
@@ -327,12 +318,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Helper method: sets the explicitly-disabled state and keeps the
+     * Helper method: sets the boolean indicating that the connection
+     * manager asked the network to be torn down (and so only the connection
+     * manager can set it up again).
      * network info updated.
-     * @param explicitlyDisabled {@code true} if explicitly disabled.
+     * @param flag {@code true} if explicitly disabled.
      */
-    private void setExplicitlyDisabled(boolean explicitlyDisabled) {
-        mExplicitlyDisabled = explicitlyDisabled;
+    private void setTornDownByConnMgr(boolean flag) {
+        mTornDownByConnMgr = flag;
         updateNetworkInfo();
     }
 
@@ -367,7 +360,11 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     /**
      * Wi-Fi is considered available as long as we have a connection to the
-     * supplicant daemon and there is at least one enabled network.
+     * supplicant daemon and there is at least one enabled network. If a teardown
+     * was explicitly requested, then Wi-Fi can be restarted with a reconnect
+     * request, so it is considered available. If the driver has been stopped
+     * for any reason other than a teardown request, Wi-Fi is considered
+     * unavailable.
      * @return {@code true} if Wi-Fi connections are possible
      */
     public boolean isAvailable() {
@@ -377,7 +374,16 @@ public class WifiStateTracker extends NetworkStateTracker {
          */
         SupplicantState suppState = mWifiInfo.getSupplicantState();
         return suppState != SupplicantState.UNINITIALIZED &&
-            (suppState != SupplicantState.INACTIVE || mExplicitlyDisabled);
+                suppState != SupplicantState.INACTIVE &&
+                (mTornDownByConnMgr || !mDriverIsStopped);
+    }
+
+    /**
+     * {@inheritDoc}
+     * There are currently no defined Wi-Fi subtypes.
+     */
+    public int getNetworkSubtype() {
+        return 0;
     }
 
     /**
@@ -402,7 +408,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * may be incorrect (i.e., caused authentication to fail).
      */
     void notifyPasswordKeyMayBeIncorrect() {
-        Message.obtain(this, EVENT_PASSWORD_KEY_MAY_BE_INCORRECT).sendToTarget();
+        sendEmptyMessage(EVENT_PASSWORD_KEY_MAY_BE_INCORRECT);
     }
 
     /**
@@ -410,12 +416,13 @@ public class WifiStateTracker extends NetworkStateTracker {
      * daemon has been established.
      */
     void notifySupplicantConnection() {
-        Message.obtain(this, EVENT_SUPPLICANT_CONNECTION).sendToTarget();
+        sendEmptyMessage(EVENT_SUPPLICANT_CONNECTION);
     }
 
     /**
      * Send the tracker a notification that the state of the supplicant
      * has changed.
+     * @param networkId the configured network on which the state change occurred
      * @param newState the new {@code SupplicantState}
      */
     void notifyStateChange(int networkId, SupplicantState newState) {
@@ -428,6 +435,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     /**
      * Send the tracker a notification that the state of Wifi connectivity
      * has changed.
+     * @param networkId the configured network on which the state change occurred
      * @param newState the new network state
      * @param BSSID when the new state is {@link DetailedState#CONNECTED
      * NetworkInfo.DetailedState.CONNECTED},
@@ -450,7 +458,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         synchronized (this) {
             WifiNative.setScanResultHandlingCommand(SUPPL_SCAN_HANDLING_NORMAL);
         }
-        Message.obtain(this, EVENT_SCAN_RESULTS_AVAILABLE).sendToTarget();
+        sendEmptyMessage(EVENT_SCAN_RESULTS_AVAILABLE);
     }
 
     /**
@@ -458,7 +466,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * the supplicant daemon.
      */
     void notifySupplicantLost() {
-        Message.obtain(this, EVENT_SUPPLICANT_DISCONNECT).sendToTarget();
+        sendEmptyMessage(EVENT_SUPPLICANT_DISCONNECT);
     }
 
     /**
@@ -473,8 +481,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         msg.sendToTarget();
         
         // Send a driver stopped message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, Boolean.valueOf(false))
-                .sendToTarget();
+        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 0, 0).sendToTarget();
     }
 
     /**
@@ -485,8 +492,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         setDriverStopped(false);
 
         // Send a driver started message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, Boolean.valueOf(true))
-                .sendToTarget();
+        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 1, 0).sendToTarget();
     }
     
     /**
@@ -495,9 +501,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     private synchronized void setPollTimer () {
         if (!hasMessages(EVENT_POLL_INTERVAL)) {
-            sendMessageDelayed(
-                Message.obtain(this, EVENT_POLL_INTERVAL),
-                POLL_STATUS_INTERVAL_MSECS);
+            sendEmptyMessageDelayed(EVENT_POLL_INTERVAL, POLL_STATUS_INTERVAL_MSECS);
         }
     }
 
@@ -507,6 +511,56 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private synchronized boolean isDriverStopped() {
         return mDriverIsStopped;
+    }
+
+    /**
+     * Set the number of allowed radio frequency channels from the system
+     * setting value, if any.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * the number of channels is invalid.
+     */
+    public boolean setNumAllowedChannels() {
+        try {
+            return setNumAllowedChannels(
+                    Settings.Secure.getInt(mContext.getContentResolver(),
+                                           Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
+        } catch (Settings.SettingNotFoundException e) {
+            // if setting doesn't exist, stick with the driver default
+        }
+        return true;
+    }
+
+    /**
+     * Set the number of radio frequency channels that are allowed to be used
+     * in the current regulatory domain.
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * {@code numChannels} is outside the valid range.
+     */
+    public synchronized boolean setNumAllowedChannels(int numChannels) {
+        return WifiNative.setNumAllowedChannelsCommand(numChannels);
+    }
+
+    /**
+     * Start the Wi-Fi driver, if it is in the stopped state. If
+     * the driver has been stopped as a result of a teardown request
+     * by the connectivity manager, then only the connectivity
+     * manager can restart it.
+     */
+    public synchronized void startDriver() {
+        if (mDriverIsStopped && !mTornDownByConnMgr) {
+            WifiNative.startDriverCommand();
+        }
+    }
+
+    /**
+     * Stop the Wi-Fi driver, if it is not already in the stopped state.
+     */
+    public synchronized void stopDriver() {
+        if (!mDriverIsStopped) {
+            WifiNative.stopDriverCommand();
+        }
     }
 
     @Override
@@ -582,8 +636,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                 if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant established, state=" +
                     supplState);
                 // Wi-Fi supplicant connection state changed:
-                // [31- 1] Reserved for future use
-                // [ 0- 0] Connected to supplicant (1) or disconnected from supplicant (0)   
+                // [31- 2] Reserved for future use
+                // [ 1- 0] Connected to supplicant (1), disconnected from supplicant (0) ,
+                //         or supplicant died (2)
                 EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, 1);
                 /*
                  * The COMPLETED state change from the supplicant may have occurred
@@ -606,13 +661,24 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:
-                if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant lost");
+                int wifiState = mWM.getWifiState();
+                boolean died = wifiState != WifiManager.WIFI_STATE_DISABLED &&
+                        wifiState != WifiManager.WIFI_STATE_DISABLING;
+                if (died) {
+                    if (LOCAL_LOGD) Log.v(TAG, "Supplicant died unexpectedly");
+                } else {
+                    if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant lost");
+                }
                 // Wi-Fi supplicant connection state changed:
-                // [31- 1] Reserved for future use
-                // [ 0- 0] Connected to supplicant (1) or disconnected from supplicant (0)   
-                EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, 0);
+                // [31- 2] Reserved for future use
+                // [ 1- 0] Connected to supplicant (1), disconnected from supplicant (0) ,
+                //         or supplicant died (2)
+                EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, died ? 2 : 0);
                 synchronized (this) {
                     WifiNative.closeSupplicantConnection();
+                }
+                if (died) {
+                    resetInterface();
                 }
                 // When supplicant dies, kill the DHCP thread
                 if (mDhcpTarget != null) {
@@ -706,6 +772,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
                     intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)newState);
                     if (failedToAuthenticate) {
+                        if (LOCAL_LOGD) Log.d(TAG, "Failed to authenticate, disabling network " + networkId);
                         wifiManagerDisableNetwork(networkId);
                         intent.putExtra(
                             WifiManager.EXTRA_SUPPLICANT_ERROR,
@@ -838,7 +905,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * TODO: network ID may have changed since we stored it.
                  */
                 if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    if (++mReconnectCount > mMaxReconnectAttempts) {
+                    if (++mReconnectCount > getMaxDhcpRetries()) {
                         mWM.disableNetwork(mLastNetworkId);
                     }
                     WifiNative.reconnectCommand();
@@ -861,11 +928,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                 mLastSignalLevel = -1; // force update of signal strength
                 if (mNetworkInfo.getDetailedState() != DetailedState.CONNECTED) {
                     setDetailedState(DetailedState.CONNECTED);
-                    intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-                    intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-                    mContext.sendStickyBroadcast(intent);
+                    sendNetworkStateChangeBroadcast();
                 } else {
-                    Message.obtain(mTarget, EVENT_CONFIGURATION_CHANGED).sendToTarget();
+                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
                 }
                 if (LOCAL_LOGD) Log.v(TAG, "IP configuration: " + mDhcpInfo);
                 // Wi-Fi interface configuration state changed:
@@ -892,7 +957,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
                 
             case EVENT_DRIVER_STATE_CHANGED:
-                boolean driverStarted = Boolean.TRUE.equals(msg.obj);
+                boolean driverStarted = msg.arg1 != 0;
                 
                 // Wi-Fi driver state changed:
                 // [31- 1] Reserved for future use
@@ -901,7 +966,13 @@ public class WifiStateTracker extends NetworkStateTracker {
                 EventLog.writeEvent(EVENTLOG_DRIVER_STATE_CHANGED, eventLogParam);
                 
                 if (driverStarted) {
-                    synchronized (this) { 
+                    /**
+                     * Set the number of allowed radio channels according
+                     * to the system setting, since it gets reset by the
+                     * driver upon changing to the STARTED state.
+                     */
+                    setNumAllowedChannels();
+                    synchronized (this) {
                         // In some situations, supplicant needs to be kickstarted to
                         // start the background scanning
                         WifiNative.scanCommand();
@@ -948,7 +1019,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (!mUseStaticIp) {
             if (!mHaveIPAddress && !mObtainingIPAddress) {
                 mObtainingIPAddress = true;
-                mDhcpTarget.obtainMessage(EVENT_DHCP_START).sendToTarget();
+                mDhcpTarget.sendEmptyMessage(EVENT_DHCP_START);
             }
         } else {
             int event;
@@ -961,7 +1032,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 event = EVENT_INTERFACE_CONFIGURATION_FAILED;
                 if (LOCAL_LOGD) Log.v(TAG, "Static IP configuration failed");
             }
-            Message.obtain(this, event).sendToTarget();
+            sendEmptyMessage(event);
         }
     }
 
@@ -1051,14 +1122,16 @@ public class WifiStateTracker extends NetworkStateTracker {
     public WifiInfo requestConnectionInfo() {
         requestConnectionStatus(mWifiInfo);
         requestPolledInfo(mWifiInfo);
-
+/*
         WifiInfo info = mWifiInfo;
-        if (false) Log.v(TAG, "Status from supplicant: NID=" + info.getNetworkId() +
+
+        Log.v(TAG, "Status from supplicant: NID=" + info.getNetworkId() +
             " SSID=" + (info.getSSID() == null ? "<none>" : info.getSSID()) +
             " BSSID=" + (info.getBSSID() == null ? "<none>" : info.getBSSID()) +
             " WPA_STATE=" + (info.getSupplicantState() == null ? "<none>" : info.getSupplicantState()) +
             " RSSI=" + info.getRssi());
-        
+*/
+
         return mWifiInfo;
     }
 
@@ -1111,14 +1184,14 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     /**
      * Get the dynamic information that is not reported via events.
+     * @param info the object into which the information should be captured.
      */
     private synchronized void requestPolledInfo(WifiInfo info)
     {
-        int newSignalLevel;
         int newRssi = WifiNative.getRssiCommand();
         if (newRssi != -1 && -200 < newRssi && newRssi < 100) { // screen out invalid values
             info.setRssi(newRssi);
-            /**
+            /*
              * Rather then sending the raw RSSI out every time it
              * changes, we precalculate the signal level that would
              * be displayed in the status bar, and only send the
@@ -1131,14 +1204,13 @@ public class WifiStateTracker extends NetworkStateTracker {
             // TODO: The "3" below needs to be a symbol somewhere, but
             // it's actually the size of an array of icons that's private
             // to StatusBar Policy.
-            newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
             if (newSignalLevel != mLastSignalLevel) {
                 sendRssiChangeBroadcast(newRssi);
             }
             mLastSignalLevel = newSignalLevel;
         } else {
             info.setRssi(-200);
-            newSignalLevel = mLastSignalLevel;
         }
         int newLinkSpeed = WifiNative.getLinkSpeedCommand();
         if (newLinkSpeed != -1) {
@@ -1161,107 +1233,32 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Disable Wi-Fi connectivity. We do this by going through
-     * all the configured Wi-Fi networks and disabling them, so
-     * that the supplicant will not attempt to connect to any
-     * network. We save the disabled/enabled state of the
-     * original list, so that
-     * {@link android.net.NetworkStateTracker#reconnect()} can
-     * restore it.
+     * Disable Wi-Fi connectivity by stopping the driver.
      */
     public synchronized boolean teardown() {
-        
         // Take down any open network notifications
         setNotificationVisible(false, 0, false, 0);
         
-        if (!mNetworkInfo.isConnectedOrConnecting())
-            return false;
-
-        List<WifiConfiguration> networks = mWM.getConfiguredNetworks();
-
-        if (networks == null || networks.size() == 0) {
-            return false;
+        if (!mTornDownByConnMgr) {
+            boolean result = WifiNative.stopDriverCommand();
+            setTornDownByConnMgr(result);
+            return result;
+        } else {
+            return true;
         }
-
-        /*
-         * Save the network status in a simple array, whose size is equal
-         * to the largest network ID in the configuration list. The list
-         * is always sorted in network ID order, so we only need to look
-         * at the last element to determine the required size of the
-         * array. The network IDs are not necessarily contiguous, so the
-         * saved configuration may have gaps, indicated by placing
-         * nulls in those positions.
-         */
-        int largest = networks.get(networks.size()-1).networkId;
-        mSavedConfiguration = new int[largest+1];
-        for (int i = 0; i < mSavedConfiguration.length; i++)
-            mSavedConfiguration[i] = -1;
-        for (WifiConfiguration conf : networks) {
-            mSavedConfiguration[conf.networkId] = conf.status;
-        }
-        /*
-         * Now disable the networks. We first disable all but the currently
-         * connected network. If we disabled that network before disabling
-         * all the others, the supplicant would try to connect to one of
-         * the other enabled networks, and we don't want that to happen.
-         */
-        int currentNetwork = -1;
-        for (WifiConfiguration conf : networks) {
-            if (conf.status == WifiConfiguration.Status.CURRENT)
-                currentNetwork = conf.networkId;
-            else if (conf.status == WifiConfiguration.Status.ENABLED) {
-                mWM.disableNetwork(conf.networkId);
-            }
-        }
-        if (currentNetwork != -1)
-            mWM.disableNetwork(currentNetwork);
-        setExplicitlyDisabled(true);
-        return true;
     }
 
     /**
-     * Reenable Wi-Fi connectivity, by iterating through the list of saved
-     * network statuses, and reenabling each network that had been enabled
-     * before {@link #teardown()} was called. The network that had been
-     * active at the time of the teardown() might not be the one chosen
-     * by the supplicant to connect to after being re-enabled.
+     * Reenable Wi-Fi connectivity by restarting the driver.
      */
     public synchronized boolean reconnect() {
-        /*
-         * If there's no saved configuration, there must not have been
-         * a teardown(). Just tell the supplicant to try to reconnect.
-         */
-        setExplicitlyDisabled(false);
-        if (mSavedConfiguration == null) {
-            return mWM.reconnect();
+        if (mTornDownByConnMgr) {
+            boolean result = WifiNative.startDriverCommand();
+            setTornDownByConnMgr(!result);
+            return result;
+        } else {
+            return true;
         }
-
-        List<WifiConfiguration> networks = mWM.getConfiguredNetworks();
-
-        if (networks == null || networks.size() == 0) {
-            return false;
-        }
-
-        /*
-         * We know that the IDs of existing networks never change, even when
-         * networks are added or removed. So there's no danger that we're
-         * enabling a network different than the one that was disabled in
-         * teardown().
-         */
-        for (WifiConfiguration conf : networks) {
-            if (conf.networkId >= 0 && conf.networkId < mSavedConfiguration.length) {
-                int status = mSavedConfiguration[conf.networkId];
-                if (status != conf.status) {
-                    if (status == WifiConfiguration.Status.ENABLED || status == WifiConfiguration.Status.CURRENT)
-                        mWM.enableNetwork(conf.networkId, false);
-                    else
-                        // this case shouldn't occur
-                        mWM.disableNetwork(conf.networkId);
-                }
-            }
-        }
-        mSavedConfiguration = null;
-        return true;
     }
 
     public boolean setRadio(boolean turnOn) {
@@ -1334,7 +1331,13 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * {@hide}
+     * Display or don't display a notification that there are open Wi-Fi networks.
+     * @param visible {@code true} if notification should be visible, {@code false} otherwise
+     * @param numNetworks the number networks seen
+     * @param force {@code true} to force notification to be shown/not-shown,
+     * even if it is already shown/not-shown.
+     * @param delay time in milliseconds after which the notification should be made
+     * visible or invisible.
      */
     public void setNotificationVisible(boolean visible, int numNetworks, boolean force, int delay) {
         
@@ -1349,7 +1352,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             return;
         }
 
-        Message message = null;
+        Message message;
         if (visible) {
             
             // Not enough time has passed to show the notification again
@@ -1424,15 +1427,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 append(", obtainingIpAddress=").append(mObtainingIPAddress).
                 append(", scanModeActive=").append(mIsScanModeActive).append(LS).
                 append("lastSignalLevel=").append(mLastSignalLevel).
-                append(", explicitlyDisabled=").append(mExplicitlyDisabled);
-        if (mSavedConfiguration != null) {
-            sb.append(LS);
-            sb.append("Saved network configurations:").append(LS);
-            for (int i = 0; i < mSavedConfiguration.length; i++) {
-                int cs = mSavedConfiguration[i];
-                sb.append("  ").append(i).append(": ").append(cs).append(LS);
-            }
-        }
+                append(", explicitlyDisabled=").append(mTornDownByConnMgr);
         return sb.toString();
     }
 
@@ -1464,7 +1459,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             super(looper);
             mTarget = target;
             
-            mBluetoothHeadset = new BluetoothHeadset(mContext);
+            mBluetoothHeadset = new BluetoothHeadset(mContext, null);
         }
 
         public void handleMessage(Message msg) {
@@ -1530,7 +1525,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     
                     synchronized (this) {
                         if (!mCancelCallback) {
-                            Message.obtain(mTarget, event).sendToTarget();
+                            mTarget.sendEmptyMessage(event);
                         }
                     }
                     break;
@@ -1622,8 +1617,14 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
-    private class StaticIpSettingObserver extends ContentObserver {
-        public StaticIpSettingObserver(Handler handler) {
+    private int getMaxDhcpRetries() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                                      Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT,
+                                      DEFAULT_MAX_DHCP_RETRIES);
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
             super(handler);
             ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(Settings.System.getUriFor(
@@ -1643,10 +1644,6 @@ public class WifiStateTracker extends NetworkStateTracker {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
 
-            if (mWifiInfo.getSupplicantState() == SupplicantState.UNINITIALIZED) {
-                return;
-            }
-
             boolean wasStaticIp = mUseStaticIp;
             int oIp, oGw, oMsk, oDns1, oDns2;
             oIp = oGw = oMsk = oDns1 = oDns2 = 0;
@@ -1658,6 +1655,11 @@ public class WifiStateTracker extends NetworkStateTracker {
                 oDns2 = mDhcpInfo.dns2;
             }
             checkUseStaticIp();
+
+            if (mWifiInfo.getSupplicantState() == SupplicantState.UNINITIALIZED) {
+                return;
+            }
+
             boolean changed =
                 (wasStaticIp != mUseStaticIp) ||
                     (wasStaticIp && (
@@ -1671,7 +1673,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 resetInterface();
                 configureInterface();
                 if (mUseStaticIp) {
-                    mTarget.obtainMessage(EVENT_CONFIGURATION_CHANGED).sendToTarget();
+                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
                 }
             }
         }
@@ -1685,15 +1687,16 @@ public class WifiStateTracker extends NetworkStateTracker {
 
         public void register() {
             ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Settings.System.getUriFor(Settings.System.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON), true, this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON), true, this);
             mNotificationEnabled = getValue();
         }
-        
+
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
 
-            mNotificationEnabled = getValue(); 
+            mNotificationEnabled = getValue();
             if (!mNotificationEnabled) {
                 // Remove any notification that may be showing
                 setNotificationVisible(false, 0, true, 0);
@@ -1701,10 +1704,10 @@ public class WifiStateTracker extends NetworkStateTracker {
 
             resetNotificationTimer();
         }
-        
+
         private boolean getValue() {
-            return Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;            
+            return Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
         }
     }
 }

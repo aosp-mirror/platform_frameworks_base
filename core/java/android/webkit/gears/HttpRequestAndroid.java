@@ -163,7 +163,20 @@ public final class HttpRequestAndroid {
     // Setup the connection. This doesn't go to the wire yet - it
     // doesn't block.
     try {
-      connection = (HttpURLConnection) new URL(url).openConnection();
+      URL url_object = new URL(url);
+      // Check that the protocol is indeed HTTP(S).
+      String protocol = url_object.getProtocol();
+      if (protocol == null) {
+        log("null protocol for URL " + url);
+        return false;
+      }
+      protocol = protocol.toLowerCase();
+      if (!"http".equals(protocol) && !"https".equals(protocol)) {
+        log("Url has wrong protocol: " + url);
+        return false;
+      }
+
+      connection = (HttpURLConnection) url_object.openConnection();
       connection.setRequestMethod(method);
       // Manually follow redirects.
       connection.setInstanceFollowRedirects(false);
@@ -197,11 +210,13 @@ public final class HttpRequestAndroid {
       log("interrupt() called but no child thread");
       return;
     }
-    if (inBlockingOperation) {
-      log("Interrupting blocking operation");
-      childThread.interrupt();
-    } else {
-      log("Nothing to interrupt");
+    synchronized (this) {
+      if (inBlockingOperation) {
+        log("Interrupting blocking operation");
+        childThread.interrupt();
+      } else {
+        log("Nothing to interrupt");
+      }
     }
   }
 
@@ -472,7 +487,7 @@ public final class HttpRequestAndroid {
     String encoding = cacheResult.getEncoding();
     // Encoding may not be specified. No default.
     String contentType = mimeType;
-    if (encoding != null) {
+    if (encoding != null && encoding.length() > 0) {
       contentType += "; charset=" + encoding;
     }
     setResponseHeader(KEY_CONTENT_TYPE, contentType);

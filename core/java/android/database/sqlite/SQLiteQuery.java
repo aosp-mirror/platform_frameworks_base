@@ -40,9 +40,8 @@ public class SQLiteQuery extends SQLiteProgram {
      * Create a persistent query object.
      * 
      * @param db The database that this query object is associated with
-     * @param query The SQL string for this query. It must include "INDEX -1
-     *            OFFSET ?" at the end
-     * @param offsetIndex The 1-based index to the OFFSET parameter
+     * @param query The SQL string for this query. 
+     * @param offsetIndex The 1-based index to the OFFSET parameter, 
      */
     /* package */ SQLiteQuery(SQLiteDatabase db, String query, int offsetIndex, String[] bindArgs) {
         super(db, query);
@@ -59,24 +58,28 @@ public class SQLiteQuery extends SQLiteProgram {
      * @param startPos The position to start reading rows from
      * @return number of total rows in the query
      */
-    /* package */ int fillWindow(CursorWindow window, int startPos) {
-        if (startPos < 0) {
-            throw new IllegalArgumentException("startPos should > 0");
-        }
-        window.setStartPosition(startPos);
+    /* package */ int fillWindow(CursorWindow window,  
+            int maxRead, int lastPos) {
         mDatabase.lock();
         try {
             acquireReference();
-            window.acquireReference();
-            return native_fill_window(window, startPos, mOffsetIndex);
-        } catch (IllegalStateException e){
-            // simply ignore it
-            return 0;
-        } catch (SQLiteDatabaseCorruptException e) {
-            mDatabase.onCorruption();
-            throw e;
+            try {
+                window.acquireReference();
+                // if the start pos is not equal to 0, then most likely window is 
+                // too small for the data set, loading by another thread
+                // is not safe in this situation. the native code will ignore maxRead
+                return native_fill_window(window, window.getStartPosition(), mOffsetIndex, 
+                        maxRead, lastPos);
+            } catch (IllegalStateException e){
+                // simply ignore it
+                return 0;
+            } catch (SQLiteDatabaseCorruptException e) {
+                mDatabase.onCorruption();
+                throw e;
+            } finally {
+                window.releaseReference();                
+            }
         } finally {
-            window.releaseReference();
             releaseReference();
             mDatabase.unlock();
         }
@@ -113,7 +116,13 @@ public class SQLiteQuery extends SQLiteProgram {
             releaseReference();
         }
     }
-
+    
+    /** {@hide pending API Council approval} */
+    @Override
+    public String toString() {
+        return "SQLiteQuery: " + mQuery;
+    }
+    
     @Override
     public void close() {
         super.close();
@@ -124,11 +133,6 @@ public class SQLiteQuery extends SQLiteProgram {
      * Called by SQLiteCursor when it is requeried.
      */
     /* package */ void requery() {
-        boolean oldMClosed = mClosed;
-        if (mClosed) {
-            mClosed = false;
-            compile(mQuery, false);
-        }
         if (mBindArgs != null) {
             int len = mBindArgs.length;
             try {
@@ -136,8 +140,7 @@ public class SQLiteQuery extends SQLiteProgram {
                     super.bindString(i + 1, mBindArgs[i]);
                 }
             } catch (SQLiteMisuseException e) {
-                StringBuilder errMsg = new StringBuilder
-                    ("old mClosed " + oldMClosed + " mQuery " + mQuery);
+                StringBuilder errMsg = new StringBuilder("mQuery " + mQuery);
                 for (int i = 0; i < len; i++) {
                     errMsg.append(" ");
                     errMsg.append(mBindArgs[i]);
@@ -174,7 +177,8 @@ public class SQLiteQuery extends SQLiteProgram {
         if (!mClosed) super.bindString(index, value);
     }
 
-    private final native int native_fill_window(CursorWindow window, int startPos, int offsetParam);
+    private final native int native_fill_window(CursorWindow window, 
+            int startPos, int offsetParam, int maxRead, int lastPos);
 
     private final native int native_column_count();
 

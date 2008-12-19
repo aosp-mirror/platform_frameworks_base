@@ -94,6 +94,8 @@ public:
     void addPackageInclude(const char* file) { mPackageIncludes.add(file); }
     const android::Vector<const char*>& getJarFiles() const { return mJarFiles; }
     void addJarFile(const char* file) { mJarFiles.add(file); }
+    const android::Vector<const char*>& getNoCompressExtensions() const { return mNoCompressExtensions; }
+    void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
 
     /*
      * Set and get the file specification.
@@ -144,6 +146,7 @@ private:
     android::String8 mConfigurations;
     android::Vector<const char*> mPackageIncludes;
     android::Vector<const char*> mJarFiles;
+    android::Vector<const char*> mNoCompressExtensions;
 
     /* file specification */
     int         mArgc;

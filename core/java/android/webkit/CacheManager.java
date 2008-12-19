@@ -62,8 +62,18 @@ public final class CacheManager {
     // Reference count the enable/disable transaction
     private static int mRefCount;
 
+    // trimCacheIfNeeded() is called when a page is fully loaded. But JavaScript
+    // can load the content, e.g. in a slideshow, continuously, so we need to
+    // trim the cache on a timer base too. endCacheTransaction() is called on a 
+    // timer base. We share the same timer with less frequent update.
+    private static int mTrimCacheCount = 0;
+    private static final int TRIM_CACHE_INTERVAL = 5;
+
     private static WebViewDatabase mDataBase;
     private static File mBaseDir;
+    
+    // Flag to clear the cache when the CacheManager is initialized
+    private static boolean mClearCacheOnInit = false;
 
     public static class CacheResult {
         // these fields are saved to the database
@@ -145,16 +155,37 @@ public final class CacheManager {
     static void init(Context context) {
         mDataBase = WebViewDatabase.getInstance(context);
         mBaseDir = new File(context.getCacheDir(), "webviewCache");
+        if (createCacheDirectory() && mClearCacheOnInit) {
+            removeAllCacheFiles();
+            mClearCacheOnInit = false;
+        }
+    }
+    
+    /**
+     * Create the cache directory if it does not already exist.
+     * 
+     * @return true if the cache directory didn't exist and was created.
+     */
+    static private boolean createCacheDirectory() {
         if (!mBaseDir.exists()) {
             if(!mBaseDir.mkdirs()) {
                 Log.w(LOGTAG, "Unable to create webviewCache directory");
-                return;
+                return false;
             }
             FileUtils.setPermissions(
                     mBaseDir.toString(),
                     FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
                     -1, -1);
+            // If we did create the directory, we need to flush 
+            // the cache database. The directory could be recreated
+            // because the system flushed all the data/cache directories
+            // to free up disk space.
+            WebViewCore.endCacheTransaction();
+            mDataBase.clearCache();
+            WebViewCore.startCacheTransaction();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -224,7 +255,12 @@ public final class CacheManager {
     // only called from WebCore thread
     // make sure to call startCacheTransaction/endCacheTransaction in pair
     public static boolean endCacheTransaction() {
-        return mDataBase.endCacheTransaction();
+        boolean ret = mDataBase.endCacheTransaction();
+        if (++mTrimCacheCount >= TRIM_CACHE_INTERVAL) {
+            mTrimCacheCount = 0;
+            trimCacheIfNeeded();
+        }
+        return ret;
     }
 
     /**
@@ -319,7 +355,20 @@ public final class CacheManager {
             try {
                 ret.outStream = new FileOutputStream(ret.outFile);
             } catch (FileNotFoundException e) {
-                return null;
+                // This can happen with the system did a purge and our
+                // subdirectory has gone, so lets try to create it again
+                if (createCacheDirectory()) {
+                    try {
+                        ret.outStream = new FileOutputStream(ret.outFile);
+                    } catch  (FileNotFoundException e2) {
+                        // We failed to create the file again, so there
+                        // is something else wrong. Return null.
+                        return null;
+                    }
+                } else {
+                    // Failed to create cache directory
+                    return null;
+                }
             }
             ret.mimeType = mimeType;
         }
@@ -371,14 +420,25 @@ public final class CacheManager {
      */
     // only called from WebCore thread
     static boolean removeAllCacheFiles() {
+        // Note, this is called before init() when the database is
+        // created or upgraded.
+        if (mBaseDir == null) {
+            // Init() has not been called yet, so just flag that
+            // we need to clear the cache when init() is called.
+            mClearCacheOnInit = true;
+            return true;
+        }
         // delete cache in a separate thread to not block UI.
         final Runnable clearCache = new Runnable() {
             public void run() {
                 // delete all cache files
                 try {
                     String[] files = mBaseDir.list();
-                    for (int i = 0; i < files.length; i++) {
-                        new File(mBaseDir, files[i]).delete();
+                    // if mBaseDir doesn't exist, files can be null.
+                    if (files != null) {
+                        for (int i = 0; i < files.length; i++) {
+                            new File(mBaseDir, files[i]).delete();
+                        }
                     }
                 } catch (SecurityException e) {
                     // Ignore SecurityExceptions.

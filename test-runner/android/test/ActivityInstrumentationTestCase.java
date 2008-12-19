@@ -27,7 +27,12 @@ import java.lang.reflect.Field;
  * automatically here by {@link #setUp} and {@link #tearDown}.
  * 
  * <p>If you prefer an isolated unit test, see {@link android.test.ActivityUnitTestCase}.
+ * 
+ * @deprecated new tests should be written using 
+ * {@link android.test.ActivityInstrumentationTestCase2}, which provides more options for
+ * configuring the Activity under test
  */
+@Deprecated
 public abstract class ActivityInstrumentationTestCase<T extends Activity> 
         extends ActivityTestCase {
     String mPackage;

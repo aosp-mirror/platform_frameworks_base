@@ -18,22 +18,28 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio;
 
 import java.io.IOException;
 
 /**
  * The IIOException class indicates errors in reading/writing operations.
+ * 
+ * @since Android 1.0
  */
 public class IIOException extends IOException {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -3216210718638985251L;
 
     /**
      * Instantiates a new IIOException.
      * 
-     * @param message the detailed message.
+     * @param message
+     *            the detailed message.
      */
     public IIOException(String message) {
         super(message);
@@ -42,8 +48,10 @@ public class IIOException extends IOException {
     /**
      * Instantiates a new IIOException.
      * 
-     * @param message the detailed message.
-     * @param cause the cause of this exception.
+     * @param message
+     *            the detailed message.
+     * @param cause
+     *            the cause of this exception.
      */
     public IIOException(String message, Throwable cause) {
         super(message);

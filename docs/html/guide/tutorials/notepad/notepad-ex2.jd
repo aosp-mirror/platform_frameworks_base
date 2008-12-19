@@ -14,12 +14,12 @@ demonstrates:</em></p>
 </ul>
 
 <div style="float:right;white-space:nowrap">
-	[<a href="tutorial-ex1.html">Exercise 1</a>]
+	[<a href="notepad-ex1.html">Exercise 1</a>]
 	<span style="color:#BBB;">
-		[<a href="tutorial-ex2.html" style="color:#DDD;">Exercise 2</a>]
+		[<a href="notepad-ex2.html" style="color:#DDD;">Exercise 2</a>]
 	</span>
-	[<a href="tutorial-ex3.html">Exercise 3</a>]
-	[<a href="tutorial-extra-credit.html">Extra Credit</a>]
+	[<a href="notepad-ex3.html">Exercise 3</a>]
+	[<a href="notepad-extra-credit.html">Extra Credit</a>]
 </div>
 
 <h2>Step 1</h2>
@@ -122,7 +122,7 @@ public boolean onMenuItemSelected(int featureId, MenuItem item) {
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">In this example our Intent uses a class name specifically.
      As well as 
-     <a href="{@docRoot}kb/commontasks.html#intentexamples">starting intents</a> in 
+     <a href="{@docRoot}guide/appendix/faq/commontasks.html#intentexamples">starting intents</a> in 
     classes we already know about, be they in our own application or another 
     application, we can also create Intents without knowing exactly which 
     application will handle it.</p>
@@ -295,11 +295,11 @@ case ACTIVITY_EDIT:
     in real Android applications.</p>
     <p style="padding-left:.5em;font-size:12px;margin:0; padding:.0em .5em .5em 1em;">Creating a
     good UI is part art and part science, and the rest is work. Mastering <a
-    href="{@docRoot}devel/implementing-ui.html">Android layout</a> is an essential part of creating
+    href="{@docRoot}guide/topics/views/declaring-layout.html">Android layout</a> is an essential part of creating
     a good looking Android application.</p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">Take a look at the 
-    <a href="{@docRoot}reference/view-gallery.html">View Gallery</a>
+    <a href="{@docRoot}guide/tutorials/views/index.html">Hello Views</a>
     for some example layouts and how to use them. The ApiDemos sample project is also a
     great resource from which to learn how to create different layouts.</p>
   </div>
@@ -459,7 +459,7 @@ confirmButton.setOnClickListener(new View.OnClickListener() {
   </ol>
 <h2>Step 10</h2>
 
-<p>Fill in the body of the <code>onClick()</code> method in our listener.</p>
+<p>Fill in the body of the <code>onClick()</code> method of the <code>OnClickListener</code> created in the last step.</p>
     
     <p>This is the code that will be run when the user clicks on the
     confirm button. We want this to grab the title and body text from the edit
@@ -570,7 +570,7 @@ protected void onCreate(Bundle savedInstanceState) {
     receive, and more. </p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">For more information, see the reference document 
-    <a href="{@docRoot}devel/bblocks-manifest.html">AndroidManifest.xml</a></p>
+    <a href="{@docRoot}guide/topics/manifest/manifest.html">AndroidManifest.xml</a></p>
   </div>  
 
 <p>Finally, the new Activity has to be defined in the manifest file:</p>
@@ -632,9 +632,9 @@ your changes have been lost. In the next exercise we will fix these
 problems.</p>
 
 <p>
-Once you are ready, move on to <a href="tutorial-ex3.html">Tutorial
+Once you are ready, move on to <a href="notepad-ex3.html">Tutorial
 Exercise 3</a> where you will fix the problems with the back button and lost
 edits by introducing a proper life cycle into the NoteEdit Activity.</p>
 
-<p><a href="tutorial.html">Back to the Tutorial main page...</a>.</p>
+<p><a href="index.html">Back to the Tutorial main page...</a>.</p>
 

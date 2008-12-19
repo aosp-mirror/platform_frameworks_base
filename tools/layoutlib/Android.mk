@@ -35,11 +35,6 @@ built_core_dep := \
 built_core_classes := \
 	$(call intermediates-dir-for,JAVA_LIBRARIES,core)/classes.jar
 
-built_policy_dep := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,android.policy)/javalib.jar
-built_policy_classes := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,android.policy)/classes.jar
-
 built_layoutlib_create_jar := $(call intermediates-dir-for, \
 			JAVA_LIBRARIES,layoutlib_create,HOST)/javalib.jar
 
@@ -56,7 +51,6 @@ include $(BUILD_SYSTEM)/base_rules.mk
 
 $(LOCAL_BUILT_MODULE): $(built_core_dep) \
                        $(built_framework_dep) \
-                       $(built_policy_dep) \
                        $(built_layoutlib_create_jar)
 	@echo "host layoutlib_create: $@"
 	@mkdir -p $(dir $@)
@@ -64,8 +58,7 @@ $(LOCAL_BUILT_MODULE): $(built_core_dep) \
 	$(hide) java -jar $(built_layoutlib_create_jar) \
 	             $@ \
 	             $(built_core_classes) \
-	             $(built_framework_classes) \
-	             $(built_policy_classes)
+	             $(built_framework_classes)
 
 
 #

@@ -1,4 +1,6 @@
 page.title=Hello, TableLayout
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.TableLayout} is a ViewGroup that 
@@ -112,8 +114,5 @@ public void onCreate(Bundle savedInstanceState) {
   <li>{@link android.widget.TableRow}</li>
   <li>{@link android.widget.TextView}</li>
 </ul>
-
-
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
 
 

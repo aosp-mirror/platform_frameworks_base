@@ -23,11 +23,17 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
 
@@ -55,7 +61,7 @@ import com.android.internal.R;
  *         super.onCreate(icicle);
  *         setContentView(R.layout.countries);
  *
- *         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+ *         ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;String&gt;(this,
  *                 android.R.layout.simple_dropdown_item_1line, COUNTRIES);
  *         AutoCompleteTextView textView = (AutoCompleteTextView)
  *                 findViewById(R.id.countries_list);
@@ -74,6 +80,9 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownSelector
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
+    static final boolean DEBUG = false;
+    static final String TAG = "AutoCompleteTextView";
+
     private static final int HINT_VIEW_ID = 0x17;
 
     private CharSequence mHintText;
@@ -85,6 +94,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private PopupWindow mPopup;
     private DropDownListView mDropDownList;
+    private int mDropDownVerticalOffset;
+    private int mDropDownHorizontalOffset;
 
     private Drawable mDropDownListHighlight;
 
@@ -94,7 +105,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private final DropDownItemClickListener mDropDownItemClickListener =
             new DropDownItemClickListener();
 
-    private boolean mTextChanged;
+    private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
+    private boolean mOpenBefore;
+
+    private Validator mValidator = null;
+
+    private AutoCompleteTextView.ListSelectorHider mHideSelector;
 
     public AutoCompleteTextView(Context context) {
         this(context, null);
@@ -107,7 +123,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mPopup = new PopupWindow(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
+        mPopup = new PopupWindow(context, attrs,
+                com.android.internal.R.attr.autoCompleteTextViewStyle);
 
         TypedArray a =
             context.obtainStyledAttributes(
@@ -120,13 +137,34 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         mDropDownListHighlight = a.getDrawable(
                 R.styleable.AutoCompleteTextView_dropDownSelector);
+        mDropDownVerticalOffset = (int)
+                a.getDimension(R.styleable.AutoCompleteTextView_dropDownVerticalOffset, 0.0f);
+        mDropDownHorizontalOffset = (int)
+                a.getDimension(R.styleable.AutoCompleteTextView_dropDownHorizontalOffset, 0.0f);
 
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
                 R.layout.simple_dropdown_hint);
 
+        // A little trickiness for backwards compatibility: if the app
+        // didn't specify an explicit content type, then we will fill in the
+        // auto complete flag for them.
+        int contentType = a.getInt(
+                R.styleable.AutoCompleteTextView_inputType,
+                EditorInfo.TYPE_NULL);
+        if (contentType == EditorInfo.TYPE_NULL) {
+            contentType = getInputType();
+            if ((contentType&EditorInfo.TYPE_MASK_CLASS)
+                    == EditorInfo.TYPE_CLASS_TEXT) {
+                contentType |= EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+                setRawInputType(contentType);
+            }
+        }
+
         a.recycle();
 
         setFocusable(true);
+
+        addTextChangedListener(new MyWatcher());
     }
 
     /**
@@ -209,7 +247,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * in the drop down list.</p>
      *
      * @return the item click listener
+     *
+     * @deprecated Use {@link #getOnItemClickListener()} intead
      */
+    @Deprecated
     public AdapterView.OnItemClickListener getItemClickListener() {
         return mItemClickListener;
     }
@@ -219,8 +260,31 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * item in the drop down list.</p>
      *
      * @return the item selected listener
+     *
+     * @deprecated Use {@link #getOnItemSelectedListener()} intead
      */
+    @Deprecated
     public AdapterView.OnItemSelectedListener getItemSelectedListener() {
+        return mItemSelectedListener;
+    }
+
+    /**
+     * <p>Returns the listener that is notified whenever the user clicks an item
+     * in the drop down list.</p>
+     *
+     * @return the item click listener
+     */
+    public AdapterView.OnItemClickListener getOnItemClickListener() {
+        return mItemClickListener;
+    }
+
+    /**
+     * <p>Returns the listener that is notified whenever the user selects an
+     * item in the drop down list.</p>
+     *
+     * @return the item selected listener
+     */
+    public AdapterView.OnItemSelectedListener getOnItemSelectedListener() {
         return mItemSelectedListener;
     }
 
@@ -258,6 +322,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     @Override
+    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (isPopupShowing()) {
+            // special case for the back key, we do not even try to send it
+            // to the drop down list but instead, consume it immediately
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                dismissDropDown();
+                return true;
+            }
+        }
+        return super.onKeyPreIme(keyCode, event);
+    }
+
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (isPopupShowing()) {
             boolean consumed = mDropDownList.onKeyUp(keyCode, event);
@@ -280,18 +357,41 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // when the drop down is shown, we drive it directly
         if (isPopupShowing()) {
-            // special case for the back key, we do not even try to send it
-            // to the drop down list but instead, consume it immediately
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                dismissDropDown();
-                return true;
-
             // the key events are forwarded to the list in the drop down view
             // note that ListView handles space but we don't want that to happen
-            } else if (keyCode != KeyEvent.KEYCODE_SPACE) {
-                boolean consumed = mDropDownList.onKeyDown(keyCode, event);
-
+            if (keyCode != KeyEvent.KEYCODE_SPACE) {
+                int curIndex = mDropDownList.getSelectedItemPosition();
+                boolean consumed;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= 0) {
+                    // When the selection is at the top, we block the key
+                    // event to prevent focus from moving.
+                    mDropDownList.hideSelector();
+                    mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+                    mPopup.update();
+                    return true;
+                }
+                consumed = mDropDownList.onKeyDown(keyCode, event);
+                if (DEBUG) Log.v(TAG, "Key down: code=" + keyCode + " list consumed="
+                        + consumed);
                 if (consumed) {
+                    // If it handled the key event, then the user is
+                    // navigating in the list, so we should put it in front.
+                    mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+                    // Here's a little trick we need to do to make sure that
+                    // the list view is actually showing its focus indicator,
+                    // by ensuring it has focus and getting its window out
+                    // of touch mode.
+                    mDropDownList.requestFocusFromTouch();
+                    if (false) {
+                        // Update whether the pop-up is in front of or behind
+                        // the input method, depending on whether the user has
+                        // moved down in it.
+                        mPopup.setInputMethodMode(curIndex > 0
+                                ? PopupWindow.INPUT_METHOD_NOT_NEEDED
+                                : PopupWindow.INPUT_METHOD_NEEDED);
+                    }
+                    mPopup.update();
+
                     switch (keyCode) {
                         // avoid passing the focus from the text view to the
                         // next component
@@ -301,22 +401,14 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         case KeyEvent.KEYCODE_DPAD_UP:
                             return true;
                     }
-                } else{
-                    int index = mDropDownList.getSelectedItemPosition();
-                    switch (keyCode) {
-                        case KeyEvent.KEYCODE_DPAD_UP:
-                            if (index == 0) {
-                                return true;
-                            }
-                            break;
+                } else {
+                    if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                         // when the selection is at the bottom, we block the
                         // event to avoid going to the next focusable widget
-                        case KeyEvent.KEYCODE_DPAD_DOWN:
-                            Adapter adapter = mDropDownList.getAdapter();
-                            if (index == adapter.getCount() - 1) {
-                                return true;
-                            }
-                            break;
+                        Adapter adapter = mDropDownList.getAdapter();
+                        if (curIndex == adapter.getCount() - 1) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -327,37 +419,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // when text is changed, inserted or deleted, we attempt to show
-        // the drop down
-        boolean openBefore = isPopupShowing();
-        mTextChanged = false;
-
+        mLastKeyCode = keyCode;
         boolean handled = super.onKeyDown(keyCode, event);
-
-        // if the list was open before the keystroke, but closed afterwards,
-        // then something in the keystroke processing (an input filter perhaps)
-        // called performCompletion() and we shouldn't do any more processing.
-        if (openBefore && !isPopupShowing()) {
-            return handled;
-        }
-
-        if (mTextChanged) { // would have been set in onTextChanged()
-            // the drop down is shown only when a minimum number of characters
-            // was typed in the text view
-            if (enoughToFilter()) {
-                if (mFilter != null) {
-                    performFiltering(getText(), keyCode);
-                }
-            } else {
-                // drop down is automatically dismissed when enough characters
-                // are deleted from the text view
-                dismissDropDown();
-                if (mFilter != null) {
-                    mFilter.filter(null);
-                }
-            }
-            return true;
-        }
+        mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
 
         return handled;
     }
@@ -369,14 +433,58 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * triggered.
      */
     public boolean enoughToFilter() {
+        if (DEBUG) Log.v(TAG, "Enough to filter: len=" + getText().length()
+                + " threshold=" + mThreshold);
         return getText().length() >= mThreshold;
     }
 
-    @Override
-    protected void onTextChanged(CharSequence text, int start, int before,
-                                 int after) {
-        super.onTextChanged(text, start, before, after);
-        mTextChanged = true;
+    /**
+     * This is used to watch for edits to the text view.  Note that we call
+     * to methods on the auto complete text view class so that we can access
+     * private vars without going through thunks.
+     */
+    private class MyWatcher implements TextWatcher {
+        public void afterTextChanged(Editable s) {
+            doAfterTextChanged();
+        }
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            doBeforeTextChanged();
+        }
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+    }
+
+    void doBeforeTextChanged() {
+        // when text is changed, inserted or deleted, we attempt to show
+        // the drop down
+        mOpenBefore = isPopupShowing();
+        if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
+    }
+
+    void doAfterTextChanged() {
+        // if the list was open before the keystroke, but closed afterwards,
+        // then something in the keystroke processing (an input filter perhaps)
+        // called performCompletion() and we shouldn't do any more processing.
+        if (DEBUG) Log.v(TAG, "after text changed: openBefore=" + mOpenBefore
+                + " open=" + isPopupShowing());
+        if (mOpenBefore && !isPopupShowing()) {
+            return;
+        }
+
+        // the drop down is shown only when a minimum number of characters
+        // was typed in the text view
+        if (enoughToFilter()) {
+            if (mFilter != null) {
+                performFiltering(getText(), mLastKeyCode);
+            }
+        } else {
+            // drop down is automatically dismissed when enough characters
+            // are deleted from the text view
+            dismissDropDown();
+            if (mFilter != null) {
+                mFilter.filter(null);
+            }
+        }
     }
 
     /**
@@ -407,7 +515,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <code>text</code>.</p>
      *
      * @param text the filtering pattern
-     * @param keyCode the last character inserted in the edit box
+     * @param keyCode the last character inserted in the edit box; beware that
+     * this will be null when text is being added through a soft input method.
      */
     @SuppressWarnings({ "UnusedDeclaration" })
     protected void performFiltering(CharSequence text, int keyCode) {
@@ -421,6 +530,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public void performCompletion() {
         performCompletion(null, -1, -1);
+    }
+
+    @Override public void onCommitCompletion(CompletionInfo completion) {
+        if (isPopupShowing()) {
+            replaceText(completion.getText());
+            if (mItemClickListener != null) {
+                final DropDownListView list = mDropDownList;
+                // Note that we don't have a View here, so we will need to
+                // supply null.  Hopefully no existing apps crash...
+                mItemClickListener.onItemClick(list, null, completion.getPosition(),
+                        completion.getId());
+            }
+        }
     }
 
     private void performCompletion(View selectedView, int position, long id) {
@@ -464,7 +586,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     public void onFilterComplete(int count) {
         /*
-         * This checks enoughToFilter() again because filtering requests    
+         * This checks enoughToFilter() again because filtering requests
          * are asynchronous, so the result may come back after enough text
          * has since been deleted to make it no longer appropriate
          * to filter.
@@ -497,22 +619,32 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        dismissDropDown();
+        super.onDetachedFromWindow();
+    }
+
     /**
      * <p>Closes the drop down if present on screen.</p>
      */
     public void dismissDropDown() {
-        mPopup.dismiss();
-        if (mDropDownList != null) {
-            // start next time with no selection
-            mDropDownList.hideSelector();
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null) {
+            imm.displayCompletions(this, null);
         }
+        mPopup.dismiss();
+        mPopup.setContentView(null);
+        mDropDownList = null;
     }
 
     @Override
     protected boolean setFrame(int l, int t, int r, int b) {
         boolean result = super.setFrame(l, t, r, b);
 
-        mPopup.update(this, getMeasuredWidth(), -1);
+        if (mPopup.isShowing()) {
+            mPopup.update(this, getMeasuredWidth() - mPaddingLeft - mPaddingRight, -1);
+        }
 
         return result;
     }
@@ -523,11 +655,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public void showDropDown() {
         int height = buildDropDown();
         if (mPopup.isShowing()) {
-            mPopup.update(this, getMeasuredWidth() - mPaddingLeft - mPaddingRight, height);
+            mPopup.update(this, mDropDownHorizontalOffset, mDropDownVerticalOffset,
+                    getMeasuredWidth() - mPaddingLeft - mPaddingRight, height);
         } else {
-            mPopup.setHeight(height);
+            mPopup.setWindowLayoutMode(0, ViewGroup.LayoutParams.WRAP_CONTENT);
             mPopup.setWidth(getMeasuredWidth() - mPaddingLeft - mPaddingRight);
-            mPopup.showAsDropDown(this);
+            mPopup.setHeight(height);
+            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+            mPopup.setOutsideTouchable(true);
+            mPopup.setTouchInterceptor(new PopupTouchIntercepter());
+            mPopup.showAsDropDown(this, mDropDownHorizontalOffset, mDropDownVerticalOffset);
+            mDropDownList.hideSelector();
+            mDropDownList.setSelection(0);
+            mDropDownList.requestFocus();
+            post(mHideSelector);
         }
     }
 
@@ -541,14 +682,34 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         ViewGroup dropDownView;
         int otherHeights = 0;
 
+        if (mAdapter != null) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                int N = mAdapter.getCount();
+                if (N > 20) N = 20;
+                CompletionInfo[] completions = new CompletionInfo[N];
+                for (int i=0; i<N; i++) {
+                    Object item = mAdapter.getItem(i);
+                    long id = mAdapter.getItemId(i);
+                    completions[i] = new CompletionInfo(id, i,
+                            convertSelectionToString(item));
+                }
+                imm.displayCompletions(this, completions);
+            }
+        }
+
         if (mDropDownList == null) {
             Context context = getContext();
+
+            mHideSelector = new ListSelectorHider();
 
             mDropDownList = new DropDownListView(context);
             mDropDownList.setSelector(mDropDownListHighlight);
             mDropDownList.setAdapter(mAdapter);
             mDropDownList.setVerticalFadingEdgeEnabled(true);
             mDropDownList.setOnItemClickListener(mDropDownItemClickListener);
+            mDropDownList.setFocusable(true);
+            mDropDownList.setFocusableInTouchMode(true);
 
             if (mItemSelectedListener != null) {
                 mDropDownList.setOnItemSelectedListener(mItemSelectedListener);
@@ -614,6 +775,73 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
+    /**
+     * Sets the validator used to perform text validation.
+     *
+     * @param validator The validator used to validate the text entered in this widget.
+     *
+     * @see #getValidator()
+     * @see #performValidation()
+     */
+    public void setValidator(Validator validator) {
+        mValidator = validator;
+    }
+
+    /**
+     * Returns the Validator set with {@link #setValidator},
+     * or <code>null</code> if it was not set.
+     *
+     * @see #setValidator(android.widget.AutoCompleteTextView.Validator)
+     * @see #performValidation()
+     */
+    public Validator getValidator() {
+        return mValidator;
+    }
+
+    /**
+     * If a validator was set on this view and the current string is not valid,
+     * ask the validator to fix it.
+     *
+     * @see #getValidator()
+     * @see #setValidator(android.widget.AutoCompleteTextView.Validator)
+     */
+    public void performValidation() {
+        if (mValidator == null) return;
+
+        CharSequence text = getText();
+
+        if (!TextUtils.isEmpty(text) && !mValidator.isValid(text)) {
+            setText(mValidator.fixText(text));
+        }
+    }
+
+    /**
+     * Returns the Filter obtained from {@link Filterable#getFilter},
+     * or <code>null</code> if {@link #setAdapter} was not called with
+     * a Filterable.
+     */
+    protected Filter getFilter() {
+        return mFilter;
+    }
+
+    private class ListSelectorHider implements Runnable {
+        public void run() {
+            if (mDropDownList != null) {
+                mDropDownList.hideSelector();
+            }
+        }
+    }
+
+    private class PopupTouchIntercepter implements OnTouchListener {
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+                mPopup.update();
+            }
+            return false;
+        }
+    }
+    
     private class DropDownItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView parent, View v, int position, long id) {
             performCompletion(v, position, id);
@@ -701,6 +929,21 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         public boolean hasFocus() {
             return true;
         }
+        
+        protected int[] onCreateDrawableState(int extraSpace) {
+            int[] res = super.onCreateDrawableState(extraSpace);
+            if (false) {
+                StringBuilder sb = new StringBuilder("Created drawable state: [");
+                for (int i=0; i<res.length; i++) {
+                    if (i > 0) sb.append(", ");
+                    sb.append("0x");
+                    sb.append(Integer.toHexString(res[i]));
+                }
+                sb.append("]");
+                Log.i(TAG, sb.toString());
+            }
+            return res;
+        }
     }
 
     /**
@@ -709,54 +952,26 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * this View with an incorrect value in it, all we can do is try to fix it ourselves
      * when this happens.
      */
-    static public interface Validator {
+    public interface Validator {
         /**
-         * @return true if the text currently in the text editor is valid.
+         * Validates the specified text.
+         *
+         * @return true If the text currently in the text editor is valid.
+         *
+         * @see #fixText(CharSequence)
          */
         boolean isValid(CharSequence text);
 
         /**
-         * @param invalidText a string that doesn't pass validation:
-         * isValid(invalidText) returns false
-         * @return a string based on invalidText such as invoking isValid() on it returns true.
+         * Corrects the specified text to make it valid.
+         *
+         * @param invalidText A string that doesn't pass validation: isValid(invalidText)
+         *        returns false
+         *
+         * @return A string based on invalidText such as invoking isValid() on it returns true.
+         *
+         * @see #isValid(CharSequence)
          */
         CharSequence fixText(CharSequence invalidText);
-    }
-
-    private Validator mValidator = null;
-    
-    public void setValidator(Validator validator) {
-        mValidator = validator;
-    }
-
-    /**
-     * Returns the Validator set with {@link #setValidator},
-     * or <code>null</code> if it was not set.
-     */
-    public Validator getValidator() {
-        return mValidator;
-    }
-    
-    /**
-     * If a validator was set on this view and the current string is not valid,
-     * ask the validator to fix it. 
-     */
-    public void performValidation() {
-        if (mValidator == null) return;
-
-        CharSequence text = getText();
-        
-        if (!TextUtils.isEmpty(text) && !mValidator.isValid(text)) {
-            setText(mValidator.fixText(text));
-        }
-    }
-
-    /**
-     * Returns the Filter obtained from {@link Filterable#getFilter},
-     * or <code>null</code> if {@link #setAdapter} was not called with
-     * a Filterable.
-     */
-    protected Filter getFilter() {
-        return mFilter;
     }
 }

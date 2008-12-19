@@ -16,11 +16,14 @@
 
 package android.app;
 
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -48,10 +51,12 @@ import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -62,6 +67,7 @@ import android.widget.WrapperListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -100,7 +106,7 @@ public class SearchDialog extends Dialog {
     private TextView mBadgeLabel;
     private LinearLayout mSearchEditLayout;
     private EditText mSearchTextField;
-    private Button mGoButton;
+    private ImageButton mGoButton;
     private ListView mSuggestionsList;
 
     private ViewTreeObserver mViewTreeObserver = null;
@@ -130,14 +136,14 @@ public class SearchDialog extends Dialog {
     private String mSuggestionAction = null;
     private Uri mSuggestionData = null;
     private String mSuggestionQuery = null;
-
+    
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
      * @param context Application Context we can use for system acess
      */
     public SearchDialog(Context context) {
-        super(context, com.android.internal.R.style.Theme_Translucent);
+        super(context, com.android.internal.R.style.Theme_SearchBar);
     }
 
     /**
@@ -149,21 +155,15 @@ public class SearchDialog extends Dialog {
         super.onCreate(savedInstanceState);
 
         Window theWindow = getWindow();
-        theWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        theWindow.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         theWindow.setGravity(Gravity.TOP|Gravity.FILL_HORIZONTAL);
 
         setContentView(com.android.internal.R.layout.search_bar);
 
-        // Note:  theWindow.setBackgroundDrawable(null) does not work here - you get blackness
-        theWindow.setBackgroundDrawableResource(android.R.color.transparent);
-
         theWindow.setLayout(ViewGroup.LayoutParams.FILL_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         WindowManager.LayoutParams lp = theWindow.getAttributes();
-        lp.dimAmount = 0.5f;
         lp.setTitle("Search Dialog");
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
         theWindow.setAttributes(lp);
 
         // get the view elements for local access
@@ -171,14 +171,14 @@ public class SearchDialog extends Dialog {
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
         mSearchEditLayout = (LinearLayout)findViewById(com.android.internal.R.id.search_edit_frame);
         mSearchTextField = (EditText) findViewById(com.android.internal.R.id.search_src_text);
-        mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
+        mGoButton = (ImageButton) findViewById(com.android.internal.R.id.search_go_btn);
         mSuggestionsList = (ListView) findViewById(com.android.internal.R.id.search_suggest_list);
         
         // attach listeners
         mSearchTextField.addTextChangedListener(mTextWatcher);
         mSearchTextField.setOnKeyListener(mTextKeyListener);
         mGoButton.setOnClickListener(mGoButtonClickListener);
-        mGoButton.setOnKeyListener(mGoButtonKeyListener);
+        mGoButton.setOnKeyListener(mButtonsKeyListener);
         mSuggestionsList.setOnItemClickListener(mSuggestionsListItemClickListener);
         mSuggestionsList.setOnKeyListener(mSuggestionsKeyListener);
         mSuggestionsList.setOnFocusChangeListener(mSuggestFocusListener);
@@ -241,6 +241,7 @@ public class SearchDialog extends Dialog {
         if (mSuggestionsList != null) {
             mSuggestionsList.setVisibility(View.GONE);      // prevent any flicker if was visible
         }
+        
         super.show();
 
         setupSearchableInfo();
@@ -266,6 +267,17 @@ public class SearchDialog extends Dialog {
             initialQuery = "";     // This forces the preload to happen, triggering suggestions
         }
         mSearchTextField.setText(initialQuery);
+        
+        // If it is not for global search, that means the search dialog is 
+        // launched to input a web address. 
+        if (!globalSearch) {
+            mSearchTextField.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
+                    | EditorInfo.TYPE_TEXT_VARIATION_URI);
+        } else {
+            mSearchTextField.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
+                    | EditorInfo.TYPE_TEXT_VARIATION_NORMAL);
+        }
+        
         if (selectInitialQuery) {
             mSearchTextField.selectAll();
         } else {
@@ -424,7 +436,6 @@ public class SearchDialog extends Dialog {
     public void onConfigurationChanged(Configuration newConfig) {
         if (isShowing()) {
             // Redraw (resources may have changed)
-            updateSearchButton();
             updateSearchBadge();
             updateQueryHint();
         } 
@@ -439,7 +450,6 @@ public class SearchDialog extends Dialog {
             mActivityContext = mSearchable.getActivityContext(getContext());
             mProviderContext = mSearchable.getProviderContext(getContext(), mActivityContext);
             
-            updateSearchButton();
             updateSearchBadge();
             updateQueryHint();
         }
@@ -456,18 +466,6 @@ public class SearchDialog extends Dialog {
      */
     public void onPackageListChange() {
         cancel();
-    }
-    
-    /**
-     * Update the text in the search button
-     */
-    private void updateSearchButton() {
-        int textId = mSearchable.getSearchButtonText();
-        if (textId == 0) {
-            textId = com.android.internal.R.string.search_go;
-        }
-        String goText = mActivityContext.getResources().getString(textId);
-        mGoButton.setText(goText);
     }
     
     /**
@@ -1031,9 +1029,10 @@ public class SearchDialog extends Dialog {
     }
 
     /**
-     * React to typing in the GO button by refocusing to EditText.  Continue typing the query.
+     * React to typing in the GO search button by refocusing to EditText. 
+     * Continue typing the query.
      */
-    View.OnKeyListener mGoButtonKeyListener = new View.OnKeyListener() {
+    View.OnKeyListener mButtonsKeyListener = new View.OnKeyListener() {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             // also guard against possible race conditions (late arrival after dismiss)
             if (mSearchable != null) {
@@ -1054,7 +1053,7 @@ public class SearchDialog extends Dialog {
             }
         }
     };
-
+    
     /**
      * React to the user typing "enter" or other hardwired keys while typing in the search box.
      * This handles these special keys while the edit box has focus.

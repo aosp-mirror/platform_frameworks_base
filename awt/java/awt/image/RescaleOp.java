@@ -32,33 +32,43 @@ import org.apache.harmony.awt.gl.AwtImageBackdoorAccessor;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class RescaleOp performs rescaling of the source image data
- * by multiplying the pixel values with a scale factor 
- * and then adding an offset.
+ * The Class RescaleOp performs rescaling of the source image data by
+ * multiplying the pixel values with a scale factor and then adding an offset.
+ * 
+ * @since Android 1.0
  */
 public class RescaleOp implements BufferedImageOp, RasterOp {
-    
-    /** The scale factors. */
+
+    /**
+     * The scale factors.
+     */
     private float scaleFactors[];
-    
-    /** The offsets. */
+
+    /**
+     * The offsets.
+     */
     private float offsets[];
-    
-    /** The hints. */
+
+    /**
+     * The hints.
+     */
     private RenderingHints hints;
 
     static {
         // TODO
-        //System.loadLibrary("imageops");
+        // System.loadLibrary("imageops");
     }
 
     /**
-     * Instantiates a new RescaleOp object with the specified 
-     * scale factors and offsets.
+     * Instantiates a new RescaleOp object with the specified scale factors and
+     * offsets.
      * 
-     * @param scaleFactors the array of scale factor values.
-     * @param offsets the array of offset values.
-     * @param hints the RenderingHints or null.
+     * @param scaleFactors
+     *            the array of scale factor values.
+     * @param offsets
+     *            the array of offset values.
+     * @param hints
+     *            the RenderingHints or null.
      */
     public RescaleOp(float[] scaleFactors, float[] offsets, RenderingHints hints) {
         int numFactors = Math.min(scaleFactors.length, offsets.length);
@@ -73,12 +83,15 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
     }
 
     /**
-     * Instantiates a new RescaleOp object with the specified 
-     * scale factor and offset.
+     * Instantiates a new RescaleOp object with the specified scale factor and
+     * offset.
      * 
-     * @param scaleFactor the scale factor.
-     * @param offset the offset.
-     * @param hints the RenderingHints or null.
+     * @param scaleFactor
+     *            the scale factor.
+     * @param offset
+     *            the offset.
+     * @param hints
+     *            the RenderingHints or null.
      */
     public RescaleOp(float scaleFactor, float offset, RenderingHints hints) {
         scaleFactors = new float[1];
@@ -106,9 +119,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
     /**
      * Gets the scale factors of this RescaleOp.
      * 
-     * @param scaleFactors the desired scale factors array will be copied 
-     * to this array.
-     * 
+     * @param scaleFactors
+     *            the desired scale factors array will be copied to this array.
      * @return the scale factors array.
      */
     public final float[] getScaleFactors(float[] scaleFactors) {
@@ -124,8 +136,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
     /**
      * Gets the offsets array of this RescaleOp.
      * 
-     * @param offsets the desired offsets array will be copied to this array.
-     * 
+     * @param offsets
+     *            the desired offsets array will be copied to this array.
      * @return the offsets array of this RescaleOp.
      */
     public final float[] getOffsets(float[] offsets) {
@@ -168,17 +180,11 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             dstCM = ColorModel.getRGBdefault();
         }
 
-        WritableRaster r =
-                dstCM.isCompatibleSampleModel(src.getSampleModel()) ?
-                src.getRaster().createCompatibleWritableRaster(src.getWidth(), src.getHeight()) :
-                dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight());
+        WritableRaster r = dstCM.isCompatibleSampleModel(src.getSampleModel()) ? src.getRaster()
+                .createCompatibleWritableRaster(src.getWidth(), src.getHeight()) : dstCM
+                .createCompatibleWritableRaster(src.getWidth(), src.getHeight());
 
-        return new BufferedImage(
-                dstCM,
-                r,
-                dstCM.isAlphaPremultiplied(),
-                null
-        );
+        return new BufferedImage(dstCM, r, dstCM.isAlphaPremultiplied(), null);
     }
 
     public final WritableRaster filter(Raster src, WritableRaster dst) {
@@ -186,26 +192,25 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             dst = createCompatibleDestRaster(src);
         } else {
             if (src.getNumBands() != dst.getNumBands()) {
-                // awt.21D=Number of src bands ({0}) does not match number of dst bands ({1})
+                // awt.21D=Number of src bands ({0}) does not match number of
+                // dst bands ({1})
                 throw new IllegalArgumentException(Messages.getString("awt.21D", //$NON-NLS-1$
                         src.getNumBands(), dst.getNumBands()));
             }
         }
 
-        if (
-                this.scaleFactors.length != 1 &&
-                this.scaleFactors.length != src.getNumBands()
-        ) {
-            // awt.21E=Number of scaling constants is not equal to the number of bands
+        if (this.scaleFactors.length != 1 && this.scaleFactors.length != src.getNumBands()) {
+            // awt.21E=Number of scaling constants is not equal to the number of
+            // bands
             throw new IllegalArgumentException(Messages.getString("awt.21E")); //$NON-NLS-1$
         }
 
         // TODO
-        //if (ippFilter(src, dst, BufferedImage.TYPE_CUSTOM, false) != 0)
-            if (slowFilter(src, dst, false) != 0) {
-                // awt.21F=Unable to transform source
-                throw new ImagingOpException (Messages.getString("awt.21F")); //$NON-NLS-1$
-            }
+        // if (ippFilter(src, dst, BufferedImage.TYPE_CUSTOM, false) != 0)
+        if (slowFilter(src, dst, false) != 0) {
+            // awt.21F=Unable to transform source
+            throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
+        }
 
         return dst;
     }
@@ -213,11 +218,13 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
     /**
      * Slow filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * @param skipAlpha the skip alpha
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @return the int.
      */
     private final int slowFilter(Raster src, WritableRaster dst, boolean skipAlpha) {
         SampleModel sm = src.getSampleModel();
@@ -235,7 +242,7 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         int[] masks = new int[numBands];
         int[] sampleSizes = sm.getSampleSize();
 
-        for (int i=0; i < numBands; i++){
+        for (int i = 0; i < numBands; i++) {
             maxValues[i] = (1 << sampleSizes[i]) - 1;
             masks[i] = ~(maxValues[i]);
         }
@@ -247,8 +254,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         // Cycle over pixels to be calculated
         if (skipAlpha) { // Always suppose that alpha channel is the last band
             if (scaleFactors.length > 1) {
-                for (int i = 0; i < pixels.length; ){
-                    for (int bandIdx = 0; bandIdx < numBands-1; bandIdx++, i++){
+                for (int i = 0; i < pixels.length;) {
+                    for (int bandIdx = 0; bandIdx < numBands - 1; bandIdx++, i++) {
                         pixels[i] = pixels[i] * scaleFactors[bandIdx] + offsets[bandIdx];
                         // Check for overflow now
                         if (((int)pixels[i] & masks[bandIdx]) != 0) {
@@ -263,8 +270,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
                     i++;
                 }
             } else {
-                for (int i = 0; i < pixels.length; ){
-                    for (int bandIdx = 0; bandIdx < numBands-1; bandIdx++, i++){
+                for (int i = 0; i < pixels.length;) {
+                    for (int bandIdx = 0; bandIdx < numBands - 1; bandIdx++, i++) {
                         pixels[i] = pixels[i] * scaleFactors[0] + offsets[0];
                         // Check for overflow now
                         if (((int)pixels[i] & masks[bandIdx]) != 0) {
@@ -281,8 +288,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             }
         } else {
             if (scaleFactors.length > 1) {
-                for (int i = 0; i < pixels.length; ){
-                    for (int bandIdx = 0; bandIdx < numBands; bandIdx++, i++){
+                for (int i = 0; i < pixels.length;) {
+                    for (int bandIdx = 0; bandIdx < numBands; bandIdx++, i++) {
                         pixels[i] = pixels[i] * scaleFactors[bandIdx] + offsets[bandIdx];
                         // Check for overflow now
                         if (((int)pixels[i] & masks[bandIdx]) != 0) {
@@ -295,8 +302,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
                     }
                 }
             } else {
-                for (int i = 0; i < pixels.length; ){
-                    for (int bandIdx = 0; bandIdx < numBands; bandIdx++, i++){
+                for (int i = 0; i < pixels.length;) {
+                    for (int bandIdx = 0; bandIdx < numBands; bandIdx++, i++) {
                         pixels[i] = pixels[i] * scaleFactors[0] + offsets[0];
                         // Check for overflow now
                         if (((int)pixels[i] & masks[bandIdx]) != 0) {
@@ -328,18 +335,20 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         int nComponents = srcCM.getNumComponents();
         boolean skipAlpha;
         if (srcCM.hasAlpha()) {
-            if (scaleFactors.length == 1 || scaleFactors.length == nComponents-1) {
+            if (scaleFactors.length == 1 || scaleFactors.length == nComponents - 1) {
                 skipAlpha = true;
             } else if (scaleFactors.length == nComponents) {
                 skipAlpha = false;
             } else {
-                // awt.21E=Number of scaling constants is not equal to the number of bands
+                // awt.21E=Number of scaling constants is not equal to the
+                // number of bands
                 throw new IllegalArgumentException(Messages.getString("awt.21E")); //$NON-NLS-1$
             }
         } else if (scaleFactors.length == 1 || scaleFactors.length == nComponents) {
             skipAlpha = false;
         } else {
-            // awt.21E=Number of scaling constants is not equal to the number of bands
+            // awt.21E=Number of scaling constants is not equal to the number of
+            // bands
             throw new IllegalArgumentException(Messages.getString("awt.21E")); //$NON-NLS-1$
         }
 
@@ -348,24 +357,22 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             finalDst = dst;
             dst = createCompatibleDestImage(src, srcCM);
         } else if (!srcCM.equals(dst.getColorModel())) {
-            // Treat BufferedImage.TYPE_INT_RGB and BufferedImage.TYPE_INT_ARGB as same
-            if (
-                    !((src.getType() == BufferedImage.TYPE_INT_RGB ||
-                       src.getType() == BufferedImage.TYPE_INT_ARGB) &&
-                      (dst.getType() == BufferedImage.TYPE_INT_RGB ||
-                       dst.getType() == BufferedImage.TYPE_INT_ARGB))
-            ) {
+            // Treat BufferedImage.TYPE_INT_RGB and BufferedImage.TYPE_INT_ARGB
+            // as same
+            if (!((src.getType() == BufferedImage.TYPE_INT_RGB || src.getType() == BufferedImage.TYPE_INT_ARGB) && (dst
+                    .getType() == BufferedImage.TYPE_INT_RGB || dst.getType() == BufferedImage.TYPE_INT_ARGB))) {
                 finalDst = dst;
                 dst = createCompatibleDestImage(src, srcCM);
             }
         }
 
         // TODO
-        //if (ippFilter(src.getRaster(), dst.getRaster(), src.getType(), skipAlpha) != 0)
-            if (slowFilter(src.getRaster(), dst.getRaster(), skipAlpha) != 0) {
-                // awt.21F=Unable to transform source
-                throw new ImagingOpException (Messages.getString("awt.21F")); //$NON-NLS-1$
-            }
+        // if (ippFilter(src.getRaster(), dst.getRaster(), src.getType(),
+        // skipAlpha) != 0)
+        if (slowFilter(src.getRaster(), dst.getRaster(), skipAlpha) != 0) {
+            // awt.21F=Unable to transform source
+            throw new ImagingOpException(Messages.getString("awt.21F")); //$NON-NLS-1$
+        }
 
         if (finalDst != null) {
             Graphics2D g = finalDst.createGraphics();
@@ -378,21 +385,26 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         return finalDst;
     }
 
-    // Don't forget to pass allocated arrays for levels and values, size should be numBands*4
+    // Don't forget to pass allocated arrays for levels and values, size should
+    // be numBands*4
     /**
      * Creates the levels.
      * 
-     * @param sm the sm
-     * @param numBands the num bands
-     * @param skipAlpha the skip alpha
-     * @param levels the levels
-     * @param values the values
-     * @param channelsOrder the channels order
+     * @param sm
+     *            the sm.
+     * @param numBands
+     *            the num bands.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @param levels
+     *            the levels.
+     * @param values
+     *            the values.
+     * @param channelsOrder
+     *            the channels order.
      */
-    private final void createLevels(
-            SampleModel sm, int numBands, boolean skipAlpha,
-            int levels[], int values[], int channelsOrder[]
-    ) {
+    private final void createLevels(SampleModel sm, int numBands, boolean skipAlpha, int levels[],
+            int values[], int channelsOrder[]) {
         // Suppose same sample size for all channels, otherwise use slow filter
         int maxValue = (1 << sm.getSampleSize(0)) - 1;
 
@@ -411,17 +423,17 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         }
 
         if (skipAlpha) {
-            extScaleFactors[numBands-1] = 1;
-            extOffsets[numBands-1] = 0;
+            extScaleFactors[numBands - 1] = 1;
+            extOffsets[numBands - 1] = 0;
         }
 
         // Create a levels
-        for (int i=0; i<numBands; i++) {
+        for (int i = 0; i < numBands; i++) {
             if (extScaleFactors[i] == 0) {
-                levels[i*4] = 0;
-                levels[i*4+1] = 0;
-                levels[i*4+2] = maxValue+1;
-                levels[i*4+3] = maxValue+1;
+                levels[i * 4] = 0;
+                levels[i * 4 + 1] = 0;
+                levels[i * 4 + 2] = maxValue + 1;
+                levels[i * 4 + 3] = maxValue + 1;
             }
 
             float minLevel = -extOffsets[i] / extScaleFactors[i];
@@ -429,33 +441,33 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
 
             if (minLevel < 0) {
                 minLevel = 0;
-            } else if (minLevel > maxValue){
+            } else if (minLevel > maxValue) {
                 minLevel = maxValue;
             }
 
             if (maxLevel < 0) {
                 maxLevel = 0;
-            } else if (maxLevel > maxValue){
+            } else if (maxLevel > maxValue) {
                 maxLevel = maxValue;
             }
 
-            levels[i*4] = 0;
+            levels[i * 4] = 0;
             if (minLevel > maxLevel) {
-                levels[i*4+1] = (int) maxLevel;
-                levels[i*4+2] = (int) minLevel;
+                levels[i * 4 + 1] = (int)maxLevel;
+                levels[i * 4 + 2] = (int)minLevel;
             } else {
-                levels[i*4+1] = (int) minLevel;
-                levels[i*4+2] = (int) maxLevel;
+                levels[i * 4 + 1] = (int)minLevel;
+                levels[i * 4 + 2] = (int)maxLevel;
             }
-            levels[i*4+3] = maxValue+1;
+            levels[i * 4 + 3] = maxValue + 1;
 
             // Fill values
-            for (int k=0; k<4; k++) {
-                int idx = i*4+k;
-                values[idx] = (int) (extScaleFactors[i] * levels[idx] + extOffsets[i]);
+            for (int k = 0; k < 4; k++) {
+                int idx = i * 4 + k;
+                values[idx] = (int)(extScaleFactors[i] * levels[idx] + extOffsets[i]);
                 if (values[idx] < 0) {
                     values[idx] = 0;
-                } else if (values[idx] > maxValue){
+                } else if (values[idx] > maxValue) {
                     values[idx] = maxValue;
                 }
             }
@@ -463,14 +475,14 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
 
         // Reorder data if channels are stored in different order
         if (channelsOrder != null) {
-            int len = numBands*4;
+            int len = numBands * 4;
             int savedLevels[] = new int[len];
             int savedValues[] = new int[len];
             System.arraycopy(levels, 0, savedLevels, 0, len);
             System.arraycopy(values, 0, savedValues, 0, len);
             for (int i = 0; i < channelsOrder.length; i++) {
-                System.arraycopy(savedLevels, i*4, levels, channelsOrder[i]*4, 4);
-                System.arraycopy(savedValues, i*4, values, channelsOrder[i]*4, 4);
+                System.arraycopy(savedLevels, i * 4, levels, channelsOrder[i] * 4, 4);
+                System.arraycopy(savedValues, i * 4, values, channelsOrder[i] * 4, 4);
             }
         }
     }
@@ -479,18 +491,18 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
     /**
      * Ipp filter.
      * 
-     * @param src the src
-     * @param dst the dst
-     * @param imageType the image type
-     * @param skipAlpha the skip alpha
-     * 
-     * @return the int
+     * @param src
+     *            the src.
+     * @param dst
+     *            the dst.
+     * @param imageType
+     *            the image type.
+     * @param skipAlpha
+     *            the skip alpha.
+     * @return the int.
      */
     @SuppressWarnings("unused")
-    private final int ippFilter(
-            Raster src, WritableRaster dst,
-            int imageType, boolean skipAlpha
-    ) {
+    private final int ippFilter(Raster src, WritableRaster dst, int imageType, boolean skipAlpha) {
         int res;
 
         int srcStride, dstStride;
@@ -503,9 +515,11 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_INT_ARGB_PRE:
             case BufferedImage.TYPE_INT_RGB: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
-                channelsOrder = new int[] {2, 1, 0, 3};
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
+                channelsOrder = new int[] {
+                        2, 1, 0, 3
+                };
                 break;
             }
 
@@ -513,8 +527,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             case BufferedImage.TYPE_4BYTE_ABGR_PRE:
             case BufferedImage.TYPE_INT_BGR: {
                 channels = 4;
-                srcStride = src.getWidth()*4;
-                dstStride = dst.getWidth()*4;
+                srcStride = src.getWidth() * 4;
+                dstStride = dst.getWidth() * 4;
                 break;
             }
 
@@ -527,9 +541,11 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
 
             case BufferedImage.TYPE_3BYTE_BGR: {
                 channels = 3;
-                srcStride = src.getWidth()*3;
-                dstStride = dst.getWidth()*3;
-                channelsOrder = new int[] {2, 1, 0};
+                srcStride = src.getWidth() * 3;
+                dstStride = dst.getWidth() * 3;
+                channelsOrder = new int[] {
+                        2, 1, 0
+                };
                 break;
             }
 
@@ -544,55 +560,46 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
                 SampleModel srcSM = src.getSampleModel();
                 SampleModel dstSM = dst.getSampleModel();
 
-                if (
-                        srcSM instanceof PixelInterleavedSampleModel &&
-                        dstSM instanceof PixelInterleavedSampleModel
-                ) {
+                if (srcSM instanceof PixelInterleavedSampleModel
+                        && dstSM instanceof PixelInterleavedSampleModel) {
                     // Check PixelInterleavedSampleModel
-                    if (
-                            srcSM.getDataType() != DataBuffer.TYPE_BYTE ||
-                            dstSM.getDataType() != DataBuffer.TYPE_BYTE
-                    ) {
+                    if (srcSM.getDataType() != DataBuffer.TYPE_BYTE
+                            || dstSM.getDataType() != DataBuffer.TYPE_BYTE) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
-                    channels = srcSM.getNumBands(); // Have IPP functions for 1, 3 and 4 channels
+                    channels = srcSM.getNumBands(); // Have IPP functions for 1,
+                    // 3 and 4 channels
                     if (!(channels == 1 || channels == 3 || channels == 4)) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
-                    srcStride = ((ComponentSampleModel) srcSM).getScanlineStride();
-                    dstStride = ((ComponentSampleModel) dstSM).getScanlineStride();
+                    srcStride = ((ComponentSampleModel)srcSM).getScanlineStride();
+                    dstStride = ((ComponentSampleModel)dstSM).getScanlineStride();
 
-                    channelsOrder = ((ComponentSampleModel) srcSM).getBandOffsets();
-                } else if (
-                        srcSM instanceof SinglePixelPackedSampleModel &&
-                        dstSM instanceof SinglePixelPackedSampleModel
-                ) {
+                    channelsOrder = ((ComponentSampleModel)srcSM).getBandOffsets();
+                } else if (srcSM instanceof SinglePixelPackedSampleModel
+                        && dstSM instanceof SinglePixelPackedSampleModel) {
                     // Check SinglePixelPackedSampleModel
-                    SinglePixelPackedSampleModel sppsm1 = (SinglePixelPackedSampleModel) srcSM;
-                    SinglePixelPackedSampleModel sppsm2 = (SinglePixelPackedSampleModel) dstSM;
+                    SinglePixelPackedSampleModel sppsm1 = (SinglePixelPackedSampleModel)srcSM;
+                    SinglePixelPackedSampleModel sppsm2 = (SinglePixelPackedSampleModel)dstSM;
 
                     channels = sppsm1.getNumBands();
 
-                     // TYPE_INT_RGB, TYPE_INT_ARGB...
-                    if (
-                            sppsm1.getDataType() != DataBuffer.TYPE_INT ||
-                            sppsm2.getDataType() != DataBuffer.TYPE_INT ||
-                            !(channels == 3 || channels == 4)
-                    ) {
+                    // TYPE_INT_RGB, TYPE_INT_ARGB...
+                    if (sppsm1.getDataType() != DataBuffer.TYPE_INT
+                            || sppsm2.getDataType() != DataBuffer.TYPE_INT
+                            || !(channels == 3 || channels == 4)) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
                     // Check compatibility of sample models
-                    if (
-                            !Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets()) ||
-                            !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())
-                    ) {
+                    if (!Arrays.equals(sppsm1.getBitOffsets(), sppsm2.getBitOffsets())
+                            || !Arrays.equals(sppsm1.getBitMasks(), sppsm2.getBitMasks())) {
                         return slowFilter(src, dst, skipAlpha);
                     }
 
-                    for (int i=0; i<channels; i++) {
+                    for (int i = 0; i < channels; i++) {
                         if (sppsm1.getSampleSize(i) != 8) {
                             return slowFilter(src, dst, skipAlpha);
                         }
@@ -600,11 +607,12 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
 
                     channelsOrder = new int[channels];
                     int bitOffsets[] = sppsm1.getBitOffsets();
-                    for (int i=0; i<channels; i++) {
+                    for (int i = 0; i < channels; i++) {
                         channelsOrder[i] = bitOffsets[i] / 8;
                     }
 
-                    if (channels == 3) { // Don't skip channel now, could be optimized
+                    if (channels == 3) { // Don't skip channel now, could be
+                        // optimized
                         channels = 4;
                     }
 
@@ -616,12 +624,9 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
 
                 // Fill offsets if there's a child raster
                 if (src.getParent() != null || dst.getParent() != null) {
-                    if (
-                            src.getSampleModelTranslateX() != 0 ||
-                            src.getSampleModelTranslateY() != 0 ||
-                            dst.getSampleModelTranslateX() != 0 ||
-                            dst.getSampleModelTranslateY() != 0
-                    ) {
+                    if (src.getSampleModelTranslateX() != 0 || src.getSampleModelTranslateY() != 0
+                            || dst.getSampleModelTranslateX() != 0
+                            || dst.getSampleModelTranslateY() != 0) {
                         offsets = new int[4];
                         offsets[0] = -src.getSampleModelTranslateX() + src.getMinX();
                         offsets[1] = -src.getSampleModelTranslateY() + src.getMinY();
@@ -632,8 +637,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             }
         }
 
-        int levels[] = new int[4*channels];
-        int values[] = new int[4*channels];
+        int levels[] = new int[4 * channels];
+        int values[] = new int[4 * channels];
 
         createLevels(src.getSampleModel(), channels, skipAlpha, levels, values, channelsOrder);
 
@@ -646,13 +651,8 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             return -1; // Unknown data buffer type
         }
 
-        res = LookupOp.ippLUT(
-            srcData, src.getWidth(), src.getHeight(), srcStride,
-            dstData, dst.getWidth(), dst.getHeight(), dstStride,
-            levels, values,
-            channels, offsets,
-            true
-        );
+        res = LookupOp.ippLUT(srcData, src.getWidth(), src.getHeight(), srcStride, dstData, dst
+                .getWidth(), dst.getHeight(), dstStride, levels, values, channels, offsets, true);
 
         return res;
     }

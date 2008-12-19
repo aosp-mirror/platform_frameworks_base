@@ -22,4 +22,5 @@
     style="?android:attr/spinnerDropDownItemStyle"
     android:singleLine="true"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight" />
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:ellipsize="marquee" />

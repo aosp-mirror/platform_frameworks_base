@@ -16,19 +16,18 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.io.FileDescriptor;
@@ -40,9 +39,6 @@ import com.android.internal.telephony.DefaultPhoneNotifier;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneStateIntentReceiver;
 import com.android.internal.telephony.TelephonyIntents;
-
-import static android.Manifest.permission.READ_PHONE_STATE;
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 
 /**
@@ -408,21 +404,23 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Bundle data = new Bundle();
         state.fillInNotifierBundle(data);
         intent.putExtras(data);
-        broadcastStickyIntent(intent);
+        mContext.sendStickyBroadcast(intent);
     }
 
     private void broadcastSignalStrengthChanged(int asu) {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED);
         intent.putExtra(PhoneStateIntentReceiver.INTENT_KEY_ASU, asu);
-        broadcastStickyIntent(intent);
+        mContext.sendStickyBroadcast(intent);
     }
 
     private void broadcastCallStateChanged(int state, String incomingNumber) {
-        Intent intent = new Intent(TelephonyIntents.ACTION_PHONE_STATE_CHANGED);
+        Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         intent.putExtra(Phone.STATE_KEY,
                 DefaultPhoneNotifier.convertCallState(state).toString());
-        intent.putExtra(PhoneStateIntentReceiver.INTENT_KEY_NUM, incomingNumber);
-        broadcastStickyIntent(intent);
+        if (!TextUtils.isEmpty(incomingNumber)) {
+            intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
+        }
+        mContext.sendBroadcast(intent, android.Manifest.permission.READ_PHONE_STATE);
     }
 
     private void broadcastDataConnectionStateChanged(int state, boolean isDataConnectivityPossible,
@@ -437,16 +435,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
         intent.putExtra(Phone.DATA_IFACE_NAME_KEY, interfaceName);
-        broadcastStickyIntent(intent);
+        mContext.sendStickyBroadcast(intent);
     }
 
     private void broadcastDataConnectionFailed(String reason) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.putExtra(Phone.FAILURE_REASON_KEY, reason);
-        broadcastStickyIntent(intent);
-    }
-
-    private static void broadcastStickyIntent(Intent intent) {
-        ActivityManagerNative.broadcastStickyIntent(intent, null);
+        mContext.sendStickyBroadcast(intent);
     }
 }

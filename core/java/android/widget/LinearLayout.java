@@ -952,12 +952,13 @@ public class LinearLayout extends ViewGroup {
         if (majorGravity != Gravity.TOP) {
            switch (majorGravity) {
                case Gravity.BOTTOM:
-                   childTop = mBottom - mTop - mPaddingBottom - mTotalLength;
+                   // mTotalLength contains the padding already, we add the top
+                   // padding to compensate
+                   childTop = mBottom - mTop + mPaddingTop - mTotalLength;
                    break;
 
                case Gravity.CENTER_VERTICAL:
-                   childTop += ((mBottom - mTop - mPaddingTop - mPaddingBottom) -
-                           mTotalLength) / 2;
+                   childTop += ((mBottom - mTop)  - mTotalLength) / 2;
                    break;
            }
            
@@ -1039,12 +1040,13 @@ public class LinearLayout extends ViewGroup {
         if (majorGravity != Gravity.LEFT) {
             switch (majorGravity) {
                 case Gravity.RIGHT:
-                    childLeft = mRight - mLeft - mPaddingRight - mTotalLength;
+                    // mTotalLength contains the padding already, we add the left
+                    // padding to compensate
+                    childLeft = mRight - mLeft + mPaddingLeft - mTotalLength;
                     break;
 
                 case Gravity.CENTER_HORIZONTAL:
-                    childLeft += ((mRight - mLeft - mPaddingLeft - mPaddingRight) -
-                            mTotalLength) / 2;
+                    childLeft += ((mRight - mLeft) - mTotalLength) / 2;
                     break;
             }
        }

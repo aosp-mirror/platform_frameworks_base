@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -36,6 +37,7 @@ import android.view.ViewParent;
 import android.view.SoundEffectConstants;
 
 import com.google.android.collect.Lists;
+import com.android.internal.R;
 
 import java.util.ArrayList;
 
@@ -57,6 +59,8 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ListView_divider
  * @attr ref android.R.styleable#ListView_dividerHeight
  * @attr ref android.R.styleable#ListView_choiceMode
+ * @attr ref android.R.styleable#ListView_headerDividersEnabled
+ * @attr ref android.R.styleable#ListView_footerDividersEnabled
  */
 public class ListView extends AbsListView {
     /**
@@ -92,10 +96,16 @@ public class ListView extends AbsListView {
      */
     private static final int MIN_SCROLL_PREVIEW_PIXELS = 2;
 
-    // TODO: document
-    class FixedViewInfo {
+    /**
+     * A class that represents a fixed view in a list, for example a header at the top
+     * or a footer at the bottom.
+     */
+    public class FixedViewInfo {
+        /** The view to add to the list */
         public View view;
+        /** The data backing the view. This is returned from {@link ListAdapter#getItem(int)}. */
         public Object data;
+        /** <code>true</code> if the fixed view should be selectable in the list */
         public boolean isSelectable;
     }
 
@@ -104,6 +114,9 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
+    private boolean mClipDivider;
+    private boolean mHeaderDividersEnabled;
+    private boolean mFooterDividersEnabled;
 
     private boolean mAreAllItemsSelectable = true;
 
@@ -137,8 +150,8 @@ public class ListView extends AbsListView {
     public ListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        TypedArray a =
-            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.ListView, defStyle, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.ListView, defStyle, 0);
 
         CharSequence[] entries = a.getTextArray(
                 com.android.internal.R.styleable.ListView_entries);
@@ -149,18 +162,19 @@ public class ListView extends AbsListView {
 
         final Drawable d = a.getDrawable(com.android.internal.R.styleable.ListView_divider);
         if (d != null) {
-
             // If a divider is specified use its intrinsic height for divider height
             setDivider(d);
-        } else {
-
-            // Else use the height specified, zero being the default
-            final int dividerHeight = a.getDimensionPixelSize(
-                    com.android.internal.R.styleable.ListView_dividerHeight, 0);
-            if (dividerHeight != 0) {
-                setDividerHeight(dividerHeight);
-            }
         }
+
+        // Use the height specified, zero being the default
+        final int dividerHeight = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.ListView_dividerHeight, 0);
+        if (dividerHeight != 0) {
+            setDividerHeight(dividerHeight);
+        }
+
+        mHeaderDividersEnabled = a.getBoolean(R.styleable.ListView_headerDividersEnabled, true);
+        mFooterDividersEnabled = a.getBoolean(R.styleable.ListView_footerDividersEnabled, true);
 
         a.recycle();
     }
@@ -198,8 +212,7 @@ public class ListView extends AbsListView {
                     // We only are looking to see if we are too low, not too high
                     delta = 0;
                 }
-            }
-            else {
+            } else {
                 // we are too high, slide all views down to align with bottom
                 child = getChildAt(childCount - 1);
                 delta = child.getBottom() - (getHeight() - mListPadding.bottom);
@@ -1989,6 +2002,7 @@ public class ListView extends AbsListView {
                 }
 
                 setSelectionInt(position);
+                invokeOnItemScrollListener();
                 invalidate();
 
                 return true;
@@ -2014,6 +2028,7 @@ public class ListView extends AbsListView {
                 if (position >= 0) {
                     mLayoutMode = LAYOUT_FORCE_TOP;
                     setSelectionInt(position);
+                    invokeOnItemScrollListener();
                 }
                 moved = true;
             }
@@ -2023,6 +2038,7 @@ public class ListView extends AbsListView {
                 if (position >= 0) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
                     setSelectionInt(position);
+                    invokeOnItemScrollListener();
                 }
                 moved = true;
             }
@@ -2739,36 +2755,46 @@ public class ListView extends AbsListView {
             bounds.right = mRight - mLeft - mPaddingRight;
 
             final int count = getChildCount();
-            int i;
+            final int headerCount = mHeaderViewInfos.size();
+            final int footerLimit = mItemCount - mFooterViewInfos.size() - 1;
+            final boolean headerDividers = mHeaderDividersEnabled;
+            final boolean footerDividers = mFooterDividersEnabled;
+            final int first = mFirstPosition;
 
-            if (mStackFromBottom) {
-                int top;
-                int listTop = mListPadding.top;
+            if (!mStackFromBottom) {
+                int bottom;
+                int listBottom = mBottom - mTop - mListPadding.bottom;
 
-                for (i = 0; i < count; ++i) {
-                    View child = getChildAt(i);
-                    top = child.getTop();
-                    if (top > listTop) {
-                        bounds.top = top - dividerHeight;
-                        bounds.bottom = top;
-                        // Give the method the child ABOVE the divider, so we
-                        // subtract one from our child
-                        // position. Give -1 when there is no child above the
-                        // divider.
-                        drawDivider(canvas, bounds, i - 1);
+                for (int i = 0; i < count; i++) {
+                    if ((headerDividers || first + i >= headerCount) &&
+                            (footerDividers || first + i < footerLimit)) {
+                        View child = getChildAt(i);
+                        bottom = child.getBottom();
+                        if (bottom < listBottom) {
+                            bounds.top = bottom;
+                            bounds.bottom = bottom + dividerHeight;
+                            drawDivider(canvas, bounds, i);
+                        }
                     }
                 }
             } else {
-                int bottom;
-                int listBottom = getHeight() - mListPadding.bottom;
+                int top;
+                int listTop = mListPadding.top;
 
-                for (i = 0; i < count; ++i) {
-                    View child = getChildAt(i);
-                    bottom = child.getBottom();
-                    if (bottom < listBottom) {
-                        bounds.top = bottom;
-                        bounds.bottom = bottom + dividerHeight;
-                        drawDivider(canvas, bounds, i);
+                for (int i = 0; i < count; i++) {
+                    if ((headerDividers || first + i >= headerCount) &&
+                            (footerDividers || first + i < footerLimit)) {
+                        View child = getChildAt(i);
+                        top = child.getTop();
+                        if (top > listTop) {
+                            bounds.top = top - dividerHeight;
+                            bounds.bottom = top;
+                            // Give the method the child ABOVE the divider, so we
+                            // subtract one from our child
+                            // position. Give -1 when there is no child above the
+                            // divider.
+                            drawDivider(canvas, bounds, i - 1);
+                        }
                     }
                 }
             }
@@ -2789,8 +2815,21 @@ public class ListView extends AbsListView {
      */
     void drawDivider(Canvas canvas, Rect bounds, int childIndex) {
         // This widget draws the same divider for all children
-        mDivider.setBounds(bounds);
-        mDivider.draw(canvas);
+        final Drawable divider = mDivider;
+        final boolean clipDivider = mClipDivider;
+
+        if (!clipDivider) {
+            divider.setBounds(bounds);
+        } else {
+            canvas.save();
+            canvas.clipRect(bounds);
+        }
+
+        divider.draw(canvas);
+
+        if (clipDivider) {
+            canvas.restore();
+        }
     }
 
     /**
@@ -2811,8 +2850,10 @@ public class ListView extends AbsListView {
     public void setDivider(Drawable divider) {
         if (divider != null) {
             mDividerHeight = divider.getIntrinsicHeight();
+            mClipDivider = divider instanceof ColorDrawable;
         } else {
             mDividerHeight = 0;
+            mClipDivider = false;
         }
         mDivider = divider;
         requestLayoutIfNecessary();
@@ -2834,6 +2875,32 @@ public class ListView extends AbsListView {
     public void setDividerHeight(int height) {
         mDividerHeight = height;
         requestLayoutIfNecessary();
+    }
+
+    /**
+     * Enables or disables the drawing of the divider for header views.
+     *
+     * @param headerDividersEnabled True to draw the headers, false otherwise.
+     *
+     * @see #setFooterDividersEnabled(boolean)
+     * @see #addHeaderView(android.view.View)
+     */
+    public void setHeaderDividersEnabled(boolean headerDividersEnabled) {
+        mHeaderDividersEnabled = headerDividersEnabled;
+        invalidate();
+    }
+
+    /**
+     * Enables or disables the drawing of the divider for footer views.
+     *
+     * @param footerDividersEnabled True to draw the footers, false otherwise.
+     *
+     * @see #setHeaderDividersEnabled(boolean)
+     * @see #addFooterView(android.view.View)
+     */
+    public void setFooterDividersEnabled(boolean footerDividersEnabled) {
+        mFooterDividersEnabled = footerDividersEnabled;
+        invalidate();
     }
 
     @Override

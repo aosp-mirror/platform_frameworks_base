@@ -96,8 +96,6 @@ public final class Checkin {
             SYSTEM_SERVICE_LOOPING,
             SYSTEM_TOMBSTONE,
             TEST,
-            NETWORK_RX_MOBILE,
-            NETWORK_TX_MOBILE,
         }
     }
 

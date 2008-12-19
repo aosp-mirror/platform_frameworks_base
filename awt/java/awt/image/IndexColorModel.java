@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.Transparency;
@@ -27,64 +28,92 @@ import java.math.BigInteger;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class IndexColorModel represents a color model in which the 
- * color values of the pixels are read from a palette.
+ * The Class IndexColorModel represents a color model in which the color values
+ * of the pixels are read from a palette.
+ * 
+ * @since Android 1.0
  */
 public class IndexColorModel extends ColorModel {
 
-    /** The color map. */
-    private int colorMap[];        // Color Map  
+    /**
+     * The color map.
+     */
+    private int colorMap[]; // Color Map
 
-    /** The map size. */
-    private int mapSize;           // Color Map size
+    /**
+     * The map size.
+     */
+    private int mapSize; // Color Map size
 
-    /** The transparent index. */
-    private int transparentIndex;  // Index of fully transparent pixel
+    /**
+     * The transparent index.
+     */
+    private int transparentIndex; // Index of fully transparent pixel
 
-    /** The gray palette. */
-    private boolean grayPalette;   // Color Model has Color Map with Gray Pallete
+    /**
+     * The gray palette.
+     */
+    private boolean grayPalette; // Color Model has Color Map with Gray Pallete
 
-    /** The valid bits. */
-    private BigInteger validBits;  // Specify valid Color Map values
+    /**
+     * The valid bits.
+     */
+    private BigInteger validBits; // Specify valid Color Map values
 
-    /** The Constant CACHESIZE. */
-    private static final int CACHESIZE = 20; // Cache size. Cache used for 
-                                             // improving performace of selection
-                                             // nearest color in Color Map
+    /**
+     * The Constant CACHESIZE.
+     */
+    private static final int CACHESIZE = 20; // Cache size. Cache used for
 
-    /** The cachetable. */
-    private final int cachetable[] = new int[CACHESIZE * 2]; // Cache table - used for 
-                               // storing RGB values and that appropriate indices 
-                               // in the Color Map 
-                    
+    // improving performace of selection
+    // nearest color in Color Map
 
-    /** The next insert idx. */
-    private int nextInsertIdx = 0;  // Next index for insertion into Cache table
+    /**
+     * The cachetable.
+     */
+    private final int cachetable[] = new int[CACHESIZE * 2]; // Cache table -
 
-    /** The total inserted. */
-    private int totalInserted = 0;  // Number of inserted values into Cache table
+    // used for
+
+    // storing RGB values and that appropriate indices
+    // in the Color Map
+
+    /**
+     * The next insert idx.
+     */
+    private int nextInsertIdx = 0; // Next index for insertion into Cache table
+
+    /**
+     * The total inserted.
+     */
+    private int totalInserted = 0; // Number of inserted values into Cache table
 
     /**
      * Instantiates a new index color model.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param cmap the array that gives the color mapping
-     * @param start the start index of the color mapping data within the cmap array
-     * @param transferType the transfer type (primitive java type 
-     * to use for the components)
-     * @param validBits a list of which bits represent valid colormap 
-     * values, or null if all are valid
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param cmap
+     *            the array that gives the color mapping.
+     * @param start
+     *            the start index of the color mapping data within the cmap
+     *            array.
+     * @param transferType
+     *            the transfer type (primitive java type to use for the
+     *            components).
+     * @param validBits
+     *            a list of which bits represent valid colormap values, or null
+     *            if all are valid.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
      */
-    public IndexColorModel(int bits, int size, int cmap[], int start,
-            int transferType, BigInteger validBits) {
+    public IndexColorModel(int bits, int size, int cmap[], int start, int transferType,
+            BigInteger validBits) {
 
-        super(bits, IndexColorModel.createBits(true),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB), true, false,
-                Transparency.OPAQUE, validateTransferType(transferType));
+        super(bits, IndexColorModel.createBits(true), ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                true, false, Transparency.OPAQUE, validateTransferType(transferType));
 
         if (size < 1) {
             // awt.264=Size of the color map is less than 1
@@ -122,8 +151,7 @@ public class IndexColorModel extends ColorModel {
                 if (transparency == Transparency.OPAQUE) {
                     transparency = Transparency.BITMASK;
                 }
-            } else if (alpha != alphaMask &&
-                    transparency != Transparency.TRANSLUCENT) {
+            } else if (alpha != alphaMask && transparency != Transparency.TRANSLUCENT) {
                 transparency = Transparency.TRANSLUCENT;
             }
 
@@ -135,25 +163,31 @@ public class IndexColorModel extends ColorModel {
     /**
      * Instantiates a new index color model.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param cmap the array that gives the color mapping
-     * @param start the start index of the color mapping data within the cmap array
-     * @param hasalpha whether this color model uses alpha
-     * @param trans the transparency supported, @see java.awt.Transparency
-     * @param transferType the transfer type (primitive java type 
-     * to use for the components)
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param cmap
+     *            the array that gives the color mapping.
+     * @param start
+     *            the start index of the color mapping data within the cmap
+     *            array.
+     * @param hasalpha
+     *            whether this color model uses alpha.
+     * @param trans
+     *            the transparency supported, @see java.awt.Transparency.
+     * @param transferType
+     *            the transfer type (primitive java type to use for the
+     *            components).
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
      */
-    public IndexColorModel(int bits, int size, int cmap[], int start,
-            boolean hasalpha, int trans, int transferType) {
+    public IndexColorModel(int bits, int size, int cmap[], int start, boolean hasalpha, int trans,
+            int transferType) {
 
-        super(bits, IndexColorModel.createBits(hasalpha || (trans >= 0)),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                (hasalpha || (trans >= 0)), false, Transparency.OPAQUE,
-                validateTransferType(transferType));
+        super(bits, IndexColorModel.createBits(hasalpha || (trans >= 0)), ColorSpace
+                .getInstance(ColorSpace.CS_sRGB), (hasalpha || (trans >= 0)), false,
+                Transparency.OPAQUE, validateTransferType(transferType));
 
         if (size < 1) {
             // awt.264=Size of the color map is less than 1
@@ -192,8 +226,7 @@ public class IndexColorModel extends ColorModel {
                     if (transparency == Transparency.OPAQUE) {
                         transparency = Transparency.BITMASK;
                     }
-                } else if (alpha != 0
-                        && transparency != Transparency.TRANSLUCENT) {
+                } else if (alpha != 0 && transparency != Transparency.TRANSLUCENT) {
                     transparency = Transparency.TRANSLUCENT;
                 }
             } else {
@@ -205,55 +238,70 @@ public class IndexColorModel extends ColorModel {
     }
 
     /**
-     * Instantiates a new index color model by building the color map 
-     * from arrays of red, green, blue, and alpha values.
+     * Instantiates a new index color model by building the color map from
+     * arrays of red, green, blue, and alpha values.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param r the array giving the red components of the entries in the color map
-     * @param g the array giving the green components of the entries in the color map
-     * @param b the array giving the blue components of the entries in the color map
-     * @param a the array giving the alpha components of the entries in the color map
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
-     * @throws ArrayIndexOutOfBoundsException if the size of one of the 
-     * component arrays is less than the size of the color map
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param r
+     *            the array giving the red components of the entries in the
+     *            color map.
+     * @param g
+     *            the array giving the green components of the entries in the
+     *            color map.
+     * @param b
+     *            the array giving the blue components of the entries in the
+     *            color map.
+     * @param a
+     *            the array giving the alpha components of the entries in the
+     *            color map.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of one of the component arrays is less than the
+     *             size of the color map.
      */
-    public IndexColorModel(int bits, int size, byte r[], byte g[], byte b[],
-            byte a[]) {
+    public IndexColorModel(int bits, int size, byte r[], byte g[], byte b[], byte a[]) {
 
-        super(bits, IndexColorModel.createBits(true),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB), true, false,
-                Transparency.OPAQUE,
-                validateTransferType(ColorModel.getTransferType(bits)));
+        super(bits, IndexColorModel.createBits(true), ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                true, false, Transparency.OPAQUE, validateTransferType(ColorModel
+                        .getTransferType(bits)));
 
         createColorMap(size, r, g, b, a, -1);
         checkPalette();
     }
 
     /**
-     * Instantiates a new index color model by building the color map 
-     * from arrays of red, green, and blue values.
+     * Instantiates a new index color model by building the color map from
+     * arrays of red, green, and blue values.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param r the array giving the red components of the entries in the color map
-     * @param g the array giving the green components of the entries in the color map
-     * @param b the array giving the blue components of the entries in the color map
-     * @param trans the transparency supported, @see java.awt.Transparency
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
-     * @throws ArrayIndexOutOfBoundsException if the size of one of the 
-     * component arrays is less than the size of the color map
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param r
+     *            the array giving the red components of the entries in the
+     *            color map.
+     * @param g
+     *            the array giving the green components of the entries in the
+     *            color map.
+     * @param b
+     *            the array giving the blue components of the entries in the
+     *            color map.
+     * @param trans
+     *            the transparency supported, @see java.awt.Transparency.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of one of the component arrays is less than the
+     *             size of the color map.
      */
-    public IndexColorModel(int bits, int size, byte r[], byte g[], byte b[],
-            int trans) {
+    public IndexColorModel(int bits, int size, byte r[], byte g[], byte b[], int trans) {
 
-        super(bits, IndexColorModel.createBits((trans >= 0)),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB), (trans >= 0), false,
-                Transparency.OPAQUE,
+        super(bits, IndexColorModel.createBits((trans >= 0)), ColorSpace
+                .getInstance(ColorSpace.CS_sRGB), (trans >= 0), false, Transparency.OPAQUE,
                 validateTransferType(ColorModel.getTransferType(bits)));
 
         createColorMap(size, r, g, b, null, trans);
@@ -261,25 +309,32 @@ public class IndexColorModel extends ColorModel {
     }
 
     /**
-     * Instantiates a new index color model by building the color map 
-     * from arrays of red, green, and blue values.
+     * Instantiates a new index color model by building the color map from
+     * arrays of red, green, and blue values.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param r the array giving the red components of the entries in the color map
-     * @param g the array giving the green components of the entries in the color map
-     * @param b the array giving the blue components of the entries in the color map
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
-     * @throws ArrayIndexOutOfBoundsException if the size of one of the 
-     * component arrays is less than the size of the color map
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param r
+     *            the array giving the red components of the entries in the
+     *            color map.
+     * @param g
+     *            the array giving the green components of the entries in the
+     *            color map.
+     * @param b
+     *            the array giving the blue components of the entries in the
+     *            color map.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of one of the component arrays is less than the
+     *             size of the color map.
      */
     public IndexColorModel(int bits, int size, byte r[], byte g[], byte b[]) {
-        super(bits, IndexColorModel.createBits(false),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false,
-                Transparency.OPAQUE,
-                validateTransferType(ColorModel.getTransferType(bits)));
+        super(bits, IndexColorModel.createBits(false), ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                false, false, Transparency.OPAQUE, validateTransferType(ColorModel
+                        .getTransferType(bits)));
 
         createColorMap(size, r, g, b, null, -1);
         checkPalette();
@@ -288,23 +343,27 @@ public class IndexColorModel extends ColorModel {
     /**
      * Instantiates a new index color model.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param cmap the array that gives the color mapping
-     * @param start the start index of the color mapping data within the cmap array
-     * @param hasalpha whether this color model uses alpha
-     * @param trans the transparency supported, @see java.awt.Transparency
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param cmap
+     *            the array that gives the color mapping.
+     * @param start
+     *            the start index of the color mapping data within the cmap
+     *            array.
+     * @param hasalpha
+     *            whether this color model uses alpha.
+     * @param trans
+     *            the transparency supported, @see java.awt.Transparency.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
      */
-    public IndexColorModel(int bits, int size, byte cmap[], int start,
-            boolean hasalpha, int trans) {
+    public IndexColorModel(int bits, int size, byte cmap[], int start, boolean hasalpha, int trans) {
 
-        super(bits, IndexColorModel.createBits(hasalpha || (trans >= 0)),
-                ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                (hasalpha || (trans >= 0)), false, Transparency.OPAQUE,
-                validateTransferType(ColorModel.getTransferType(bits)));
+        super(bits, IndexColorModel.createBits(hasalpha || (trans >= 0)), ColorSpace
+                .getInstance(ColorSpace.CS_sRGB), (hasalpha || (trans >= 0)), false,
+                Transparency.OPAQUE, validateTransferType(ColorModel.getTransferType(bits)));
 
         if (size < 1) {
             // awt.264=Size of the color map is less than 1
@@ -319,13 +378,13 @@ public class IndexColorModel extends ColorModel {
         int alpha = 0xff000000;
 
         for (int i = 0; i < mapSize; i++) {
-            colorMap[i] = (cmap[start++] & 0xff) << 16 |
-                   (cmap[start++] & 0xff) << 8 | (cmap[start++] & 0xff);
+            colorMap[i] = (cmap[start++] & 0xff) << 16 | (cmap[start++] & 0xff) << 8
+                    | (cmap[start++] & 0xff);
             if (trans == i) {
                 if (transparency == Transparency.OPAQUE) {
                     transparency = Transparency.BITMASK;
                 }
-                if(hasalpha) {
+                if (hasalpha) {
                     start++;
                 }
                 continue;
@@ -340,8 +399,7 @@ public class IndexColorModel extends ColorModel {
                         }
                     }
                 } else {
-                    if (alpha != 0xff &&
-                           transparency != Transparency.TRANSLUCENT) {
+                    if (alpha != 0xff && transparency != Transparency.TRANSLUCENT) {
                         transparency = Transparency.TRANSLUCENT;
                     }
                 }
@@ -360,25 +418,29 @@ public class IndexColorModel extends ColorModel {
     /**
      * Instantiates a new index color model.
      * 
-     * @param bits the array of component masks
-     * @param size the size of the color map
-     * @param cmap the array that gives the color mapping
-     * @param start the start index of the color mapping data within the cmap array
-     * @param hasalpha whether this color model uses alpha
-     * 
-     * @throws IllegalArgumentException if the size of the color map is
-     * less than one
+     * @param bits
+     *            the array of component masks.
+     * @param size
+     *            the size of the color map.
+     * @param cmap
+     *            the array that gives the color mapping.
+     * @param start
+     *            the start index of the color mapping data within the cmap
+     *            array.
+     * @param hasalpha
+     *            whether this color model uses alpha.
+     * @throws IllegalArgumentException
+     *             if the size of the color map is less than one.
      */
-    public IndexColorModel(int bits, int size, byte cmap[], int start,
-            boolean hasalpha) {
+    public IndexColorModel(int bits, int size, byte cmap[], int start, boolean hasalpha) {
 
         this(bits, size, cmap, start, hasalpha, -1);
     }
 
     @Override
     public Object getDataElements(int[] components, int offset, Object pixel) {
-        int rgb = (components[offset] << 16) | (components[offset + 1]) << 8 |
-               components[offset + 2];
+        int rgb = (components[offset] << 16) | (components[offset + 1]) << 8
+                | components[offset + 2];
         if (hasAlpha) {
             rgb |= components[offset + 3] << 24;
         } else {
@@ -419,7 +481,7 @@ public class IndexColorModel extends ColorModel {
             }
         } else if (alpha == 0 && transparentIndex > -1) {
             pixIdx = transparentIndex;
-        } else  {
+        } else {
             int minAlphaError = 255;
             int minError = 195075; // 255^2 + 255^2 + 255^2
             int alphaError;
@@ -470,19 +532,19 @@ public class IndexColorModel extends ColorModel {
     /**
      * Converts an image from indexed to RGB format.
      * 
-     * @param raster the raster containing the source image
-     * @param forceARGB whether to use the default RGB color model
-     * 
-     * @return the buffered image
-     * 
-     * @throws IllegalArgumentException if the raster is not compatible with 
-     * this color model
+     * @param raster
+     *            the raster containing the source image.
+     * @param forceARGB
+     *            whether to use the default RGB color model.
+     * @return the buffered image.
+     * @throws IllegalArgumentException
+     *             if the raster is not compatible with this color model.
      */
-    public BufferedImage convertToIntDiscrete(Raster raster,
-            boolean forceARGB) {
+    public BufferedImage convertToIntDiscrete(Raster raster, boolean forceARGB) {
 
         if (!isCompatibleRaster(raster)) {
-            // awt.265=The raster argument is not compatible with this IndexColorModel
+            // awt.265=The raster argument is not compatible with this
+            // IndexColorModel
             throw new IllegalArgumentException(Messages.getString("awt.265")); //$NON-NLS-1$
         }
 
@@ -490,8 +552,7 @@ public class IndexColorModel extends ColorModel {
         if (forceARGB || transparency == Transparency.TRANSLUCENT) {
             model = ColorModel.getRGBdefault();
         } else if (transparency == Transparency.BITMASK) {
-            model = new DirectColorModel(25, 0x00ff0000, 0x0000ff00,
-                    0x000000ff, 0x01000000);
+            model = new DirectColorModel(25, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x01000000);
         } else {
             model = new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);
         }
@@ -510,7 +571,7 @@ public class IndexColorModel extends ColorModel {
         for (int i = 0; i < h; i++, minY++) {
             obj = raster.getDataElements(minX, minY, w, 1, obj);
             if (obj instanceof byte[]) {
-                byte ba[] = (byte[]) obj;
+                byte ba[] = (byte[])obj;
                 if (pixels == null) {
                     pixels = new int[ba.length];
                 }
@@ -518,7 +579,7 @@ public class IndexColorModel extends ColorModel {
                     pixels[j] = colorMap[ba[j] & 0xff];
                 }
             } else if (obj instanceof short[]) {
-                short sa[] = (short[]) obj;
+                short sa[] = (short[])obj;
                 if (pixels == null) {
                     pixels = new int[sa.length];
                 }
@@ -527,7 +588,7 @@ public class IndexColorModel extends ColorModel {
                 }
             }
             if (obj instanceof int[]) {
-                int ia[] = (int[]) obj;
+                int ia[] = (int[])obj;
                 if (pixels == null) {
                     pixels = new int[ia.length];
                 }
@@ -545,7 +606,7 @@ public class IndexColorModel extends ColorModel {
     /**
      * Gets the valid pixels.
      * 
-     * @return the valid pixels
+     * @return the valid pixels.
      */
     public BigInteger getValidPixels() {
         return validBits;
@@ -553,14 +614,15 @@ public class IndexColorModel extends ColorModel {
 
     @Override
     public String toString() {
-        // The output format based on 1.5 release behaviour. 
+        // The output format based on 1.5 release behaviour.
         // It could be reveled such way:
-        // BufferedImage bi = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
+        // BufferedImage bi = new BufferedImage(1, 1,
+        // BufferedImage.TYPE_BYTE_INDEXED);
         // ColorModel cm = bi.getColorModel();
         // System.out.println(cm.toString());
         String str = "IndexColorModel: #pixel_bits = " + pixel_bits + //$NON-NLS-1$
-               " numComponents = " + numComponents + " color space = " + cs + //$NON-NLS-1$ //$NON-NLS-2$
-               " transparency = "; //$NON-NLS-1$
+                " numComponents = " + numComponents + " color space = " + cs + //$NON-NLS-1$ //$NON-NLS-2$
+                " transparency = "; //$NON-NLS-1$
 
         if (transparency == Transparency.OPAQUE) {
             str = str + "Transparency.OPAQUE"; //$NON-NLS-1$
@@ -571,7 +633,7 @@ public class IndexColorModel extends ColorModel {
         }
 
         str = str + " transIndex = " + transparentIndex + " has alpha = " + //$NON-NLS-1$ //$NON-NLS-2$
-               hasAlpha + " isAlphaPre = " + isAlphaPremultiplied; //$NON-NLS-1$
+                hasAlpha + " isAlphaPre = " + isAlphaPremultiplied; //$NON-NLS-1$
 
         return str;
     }
@@ -580,13 +642,13 @@ public class IndexColorModel extends ColorModel {
     public int[] getComponents(Object pixel, int components[], int offset) {
         int pixIdx = -1;
         if (pixel instanceof byte[]) {
-            byte ba[] = (byte[]) pixel;
+            byte ba[] = (byte[])pixel;
             pixIdx = ba[0] & 0xff;
         } else if (pixel instanceof short[]) {
-            short sa[] = (short[]) pixel;
+            short sa[] = (short[])pixel;
             pixIdx = sa[0] & 0xffff;
         } else if (pixel instanceof int[]) {
-            int ia[] = (int[]) pixel;
+            int ia[] = (int[])pixel;
             pixIdx = ia[0];
         } else {
             // awt.219=This transferType is not supported by this color model
@@ -600,14 +662,11 @@ public class IndexColorModel extends ColorModel {
     public WritableRaster createCompatibleWritableRaster(int w, int h) {
         WritableRaster raster;
         if (pixel_bits == 1 || pixel_bits == 2 || pixel_bits == 4) {
-            raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, w, h, 1,
-                    pixel_bits, null);
+            raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE, w, h, 1, pixel_bits, null);
         } else if (pixel_bits <= 8) {
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, w, h,
-                    1, null);
+            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, w, h, 1, null);
         } else if (pixel_bits <= 16) {
-            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_USHORT, w,
-                    h, 1, null);
+            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_USHORT, w, h, 1, null);
         } else {
             // awt.266=The number of bits in a pixel is greater than 16
             throw new UnsupportedOperationException(Messages.getString("awt.266")); //$NON-NLS-1$
@@ -622,8 +681,7 @@ public class IndexColorModel extends ColorModel {
             return false;
         }
 
-        if (!(sm instanceof MultiPixelPackedSampleModel)
-                && !(sm instanceof ComponentSampleModel)) {
+        if (!(sm instanceof MultiPixelPackedSampleModel) && !(sm instanceof ComponentSampleModel)) {
             return false;
         }
 
@@ -640,48 +698,45 @@ public class IndexColorModel extends ColorModel {
     @Override
     public SampleModel createCompatibleSampleModel(int w, int h) {
         if (pixel_bits == 1 || pixel_bits == 2 || pixel_bits == 4) {
-            return new MultiPixelPackedSampleModel(DataBuffer.TYPE_BYTE, w, h,
-                    pixel_bits);
+            return new MultiPixelPackedSampleModel(DataBuffer.TYPE_BYTE, w, h, pixel_bits);
         }
         int bandOffsets[] = new int[1];
         bandOffsets[0] = 0;
-        return new ComponentSampleModel(transferType, w, h, 1, w,
-                bandOffsets);
+        return new ComponentSampleModel(transferType, w, h, 1, w, bandOffsets);
 
     }
 
     @Override
     public boolean isCompatibleRaster(Raster raster) {
         int sampleSize = raster.getSampleModel().getSampleSize(0);
-        return (raster.getTransferType() == transferType &&
-               raster.getNumBands() == 1 && (1 << sampleSize) >= mapSize);
+        return (raster.getTransferType() == transferType && raster.getNumBands() == 1 && (1 << sampleSize) >= mapSize);
     }
 
     @Override
     public int getDataElement(int components[], int offset) {
         int rgb = (components[offset] << 16) | (components[offset + 1]) << 8
                 | components[offset + 2];
-        
+
         if (hasAlpha) {
             rgb |= components[offset + 3] << 24;
         } else {
             rgb |= 0xff000000;
         }
- 
+
         int pixel;
 
         switch (transferType) {
-        case DataBuffer.TYPE_BYTE:
-            byte ba[] = (byte[]) getDataElements(rgb, null);
-            pixel = ba[0] & 0xff;
-            break;
-        case DataBuffer.TYPE_USHORT:
-            short sa[] = (short[]) getDataElements(rgb, null);
-            pixel = sa[0] & 0xffff;
-            break;
-        default:
-            // awt.267=The transferType is invalid
-            throw new UnsupportedOperationException(Messages.getString("awt.267")); //$NON-NLS-1$
+            case DataBuffer.TYPE_BYTE:
+                byte ba[] = (byte[])getDataElements(rgb, null);
+                pixel = ba[0] & 0xff;
+                break;
+            case DataBuffer.TYPE_USHORT:
+                short sa[] = (short[])getDataElements(rgb, null);
+                pixel = sa[0] & 0xffff;
+                break;
+            default:
+                // awt.267=The transferType is invalid
+                throw new UnsupportedOperationException(Messages.getString("awt.267")); //$NON-NLS-1$
         }
 
         return pixel;
@@ -690,7 +745,8 @@ public class IndexColorModel extends ColorModel {
     /**
      * Gets the color map.
      * 
-     * @param rgb the destination array where the color map is written
+     * @param rgb
+     *            the destination array where the color map is written.
      */
     public final void getRGBs(int rgb[]) {
         System.arraycopy(colorMap, 0, rgb, 0, mapSize);
@@ -699,44 +755,48 @@ public class IndexColorModel extends ColorModel {
     /**
      * Gets the red component of the color map.
      * 
-     * @param r the destination array
+     * @param r
+     *            the destination array.
      */
     public final void getReds(byte r[]) {
         for (int i = 0; i < mapSize; i++) {
-            r[i] = (byte) (colorMap[i] >> 16);
+            r[i] = (byte)(colorMap[i] >> 16);
         }
     }
 
     /**
      * Gets the green component of the color map.
      * 
-     * @param g the destination array
+     * @param g
+     *            the destination array.
      */
     public final void getGreens(byte g[]) {
         for (int i = 0; i < mapSize; i++) {
-            g[i] = (byte) (colorMap[i] >> 8);
+            g[i] = (byte)(colorMap[i] >> 8);
         }
     }
 
     /**
      * Gets the blue component of the color map.
      * 
-     * @param b the destination array
+     * @param b
+     *            the destination array.
      */
     public final void getBlues(byte b[]) {
         for (int i = 0; i < mapSize; i++) {
-            b[i] = (byte) colorMap[i];
+            b[i] = (byte)colorMap[i];
         }
     }
 
     /**
      * Gets the alpha component of the color map.
      * 
-     * @param a the destination array
+     * @param a
+     *            the destination array.
      */
     public final void getAlphas(byte a[]) {
         for (int i = 0; i < mapSize; i++) {
-            a[i] = (byte) (colorMap[i] >> 24);
+            a[i] = (byte)(colorMap[i] >> 24);
         }
     }
 
@@ -759,9 +819,9 @@ public class IndexColorModel extends ColorModel {
     /**
      * Checks if the specified pixel is valid for this color model.
      * 
-     * @param pixel the pixel
-     * 
-     * @return true, if the pixel is valid
+     * @param pixel
+     *            the pixel.
+     * @return true, if the pixel is valid.
      */
     public boolean isValid(int pixel) {
         if (validBits == null) {
@@ -803,7 +863,7 @@ public class IndexColorModel extends ColorModel {
     /**
      * Checks if this color model validates pixels.
      * 
-     * @return true, if all pixels are valid, otherwise false
+     * @return true, if all pixels are valid, otherwise false.
      */
     public boolean isValid() {
         return (validBits == null);
@@ -818,7 +878,7 @@ public class IndexColorModel extends ColorModel {
     /**
      * Gets the index that represents the transparent pixel.
      * 
-     * @return the index that represents the transparent pixel
+     * @return the index that represents the transparent pixel.
      */
     public final int getTransparentPixel() {
         return transparentIndex;
@@ -832,7 +892,7 @@ public class IndexColorModel extends ColorModel {
     /**
      * Gets the size of the color map.
      * 
-     * @return the map size
+     * @return the map size.
      */
     public final int getMapSize() {
         return mapSize;
@@ -841,15 +901,20 @@ public class IndexColorModel extends ColorModel {
     /**
      * Creates the color map.
      * 
-     * @param size the size
-     * @param r the r
-     * @param g the g
-     * @param b the b
-     * @param a the a
-     * @param trans the trans
+     * @param size
+     *            the size.
+     * @param r
+     *            the r.
+     * @param g
+     *            the g.
+     * @param b
+     *            the b.
+     * @param a
+     *            the a.
+     * @param trans
+     *            the trans.
      */
-    private void createColorMap(int size, byte r[], byte g[], byte b[],
-            byte a[], int trans) {
+    private void createColorMap(int size, byte r[], byte g[], byte b[], byte a[], int trans) {
         if (size < 1) {
             // awt.264=Size of the color map is less than 1
             throw new IllegalArgumentException(Messages.getString("awt.264")); //$NON-NLS-1$
@@ -867,8 +932,7 @@ public class IndexColorModel extends ColorModel {
         int alpha = 0;
 
         for (int i = 0; i < mapSize; i++) {
-            colorMap[i] = ((r[i] & 0xff) << 16) | ((g[i] & 0xff) << 8) |
-                   (b[i] & 0xff);
+            colorMap[i] = ((r[i] & 0xff) << 16) | ((g[i] & 0xff) << 8) | (b[i] & 0xff);
 
             if (trans == i) {
                 continue;
@@ -900,7 +964,7 @@ public class IndexColorModel extends ColorModel {
     }
 
     /**
-     * This method checking, if Color Map has Gray Palette.
+     * This method checking, if Color Map has Gray palette.
      */
     private void checkPalette() {
         grayPalette = false;
@@ -911,8 +975,7 @@ public class IndexColorModel extends ColorModel {
 
         for (int i = 0; i < mapSize; i++) {
             rgb = colorMap[i];
-            if (((rgb >> 16) & 0xff) != ((rgb >> 8) & 0xff) ||
-                   ((rgb >> 8) & 0xff) != (rgb & 0xff)) {
+            if (((rgb >> 16) & 0xff) != ((rgb >> 8) & 0xff) || ((rgb >> 8) & 0xff) != (rgb & 0xff)) {
                 return;
             }
         }
@@ -922,40 +985,39 @@ public class IndexColorModel extends ColorModel {
     /**
      * Construction an array pixel representation.
      * 
-     * @param colorMapIdx - index into Color Map
-     * @param pixel - pixel
-     * 
-     * @return - an array pixel representation
+     * @param colorMapIdx
+     *            the index into Color Map.
+     * @param pixel
+     *            the pixel
+     * @return the pixel representation array.
      */
     private Object createDataObject(int colorMapIdx, Object pixel) {
         if (pixel == null) {
             switch (transferType) {
-            case DataBuffer.TYPE_BYTE:
-                byte[] ba = new byte[1];
-                ba[0] = (byte) colorMapIdx;
-                pixel = ba;
-                break;
-            case DataBuffer.TYPE_USHORT:
-                short[] sa = new short[1];
-                sa[0] = (short) colorMapIdx;
-                pixel = sa;
-                break;
-            default:
-                // awt.267=The transferType is invalid
-                throw new UnsupportedOperationException(Messages.getString("awt.267")); //$NON-NLS-1$
+                case DataBuffer.TYPE_BYTE:
+                    byte[] ba = new byte[1];
+                    ba[0] = (byte)colorMapIdx;
+                    pixel = ba;
+                    break;
+                case DataBuffer.TYPE_USHORT:
+                    short[] sa = new short[1];
+                    sa[0] = (short)colorMapIdx;
+                    pixel = sa;
+                    break;
+                default:
+                    // awt.267=The transferType is invalid
+                    throw new UnsupportedOperationException(Messages.getString("awt.267")); //$NON-NLS-1$
             }
-        } else if (pixel instanceof byte[]
-                && transferType == DataBuffer.TYPE_BYTE) {
-            byte ba[] = (byte[]) pixel;
-            ba[0] = (byte) colorMapIdx;
+        } else if (pixel instanceof byte[] && transferType == DataBuffer.TYPE_BYTE) {
+            byte ba[] = (byte[])pixel;
+            ba[0] = (byte)colorMapIdx;
             pixel = ba;
-        } else if (pixel instanceof short[]&&
-                transferType == DataBuffer.TYPE_USHORT) {
-            short[] sa = (short[]) pixel;
-            sa[0] = (short) colorMapIdx;
+        } else if (pixel instanceof short[] && transferType == DataBuffer.TYPE_USHORT) {
+            short[] sa = (short[])pixel;
+            sa[0] = (short)colorMapIdx;
             pixel = sa;
         } else if (pixel instanceof int[]) {
-            int ia[] = (int[]) pixel;
+            int ia[] = (int[])pixel;
             ia[0] = colorMapIdx;
             pixel = ia;
         } else {
@@ -968,9 +1030,9 @@ public class IndexColorModel extends ColorModel {
     /**
      * Creates the bits.
      * 
-     * @param hasAlpha the has alpha
-     * 
-     * @return the int[]
+     * @param hasAlpha
+     *            the has alpha.
+     * @return the int[].
      */
     private static int[] createBits(boolean hasAlpha) {
 
@@ -993,28 +1055,26 @@ public class IndexColorModel extends ColorModel {
     /**
      * Validate transfer type.
      * 
-     * @param transferType the transfer type
-     * 
-     * @return the int
+     * @param transferType
+     *            the transfer type.
+     * @return the int.
      */
     private static int validateTransferType(int transferType) {
-        if (transferType != DataBuffer.TYPE_BYTE &&
-               transferType != DataBuffer.TYPE_USHORT) {
-            // awt.269=The transferType is not one of DataBuffer.TYPE_BYTE or DataBuffer.TYPE_USHORT
+        if (transferType != DataBuffer.TYPE_BYTE && transferType != DataBuffer.TYPE_USHORT) {
+            // awt.269=The transferType is not one of DataBuffer.TYPE_BYTE or
+            // DataBuffer.TYPE_USHORT
             throw new IllegalArgumentException(Messages.getString("awt.269")); //$NON-NLS-1$
         }
         return transferType;
     }
 
     /**
-     * Checks if is gray pallete.
+     * Checks if is gray palette.
      * 
-     * @return true, if is gray pallete
+     * @return true, if is gray palette.
      */
-    boolean isGrayPallete(){
+    boolean isGrayPallete() {
         return grayPalette;
     }
 
 }
-
-

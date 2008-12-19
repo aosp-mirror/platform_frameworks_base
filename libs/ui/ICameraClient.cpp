@@ -15,9 +15,11 @@
 ** limitations under the License.
 */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ICameraClient"
+#include <utils/Log.h>
 #include <stdint.h>
 #include <sys/types.h>
-
 #include <ui/ICameraClient.h>
 
 namespace android {
@@ -42,6 +44,7 @@ public:
     // callback to let the app know the shutter has closed, ideal for playing the shutter sound
     void shutterCallback()
     {
+        LOGV("shutterCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         remote()->transact(SHUTTER_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
@@ -50,6 +53,7 @@ public:
     // callback from camera service to app with picture data
     void rawCallback(const sp<IMemory>& picture)
     {
+        LOGV("rawCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeStrongBinder(picture->asBinder());
@@ -59,6 +63,7 @@ public:
     // callback from camera service to app with picture data
     void jpegCallback(const sp<IMemory>& picture)
     {
+        LOGV("jpegCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeStrongBinder(picture->asBinder());
@@ -68,6 +73,7 @@ public:
     // callback from camera service to app with video frame data
     void frameCallback(const sp<IMemory>& frame)
     {
+        LOGV("frameCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeStrongBinder(frame->asBinder());
@@ -77,6 +83,7 @@ public:
     // callback from camera service to app to report error
     void errorCallback(status_t error)
     {
+        LOGV("errorCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt32(error);
@@ -86,6 +93,7 @@ public:
     // callback from camera service to app to report autofocus completion
     void autoFocusCallback(bool focused)
     {
+        LOGV("autoFocusCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt32(focused);
@@ -108,35 +116,41 @@ status_t BnCameraClient::onTransact(
 {
     switch(code) {
         case SHUTTER_CALLBACK: {
+            LOGV("SHUTTER_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             shutterCallback();
             return NO_ERROR;
         } break;
         case RAW_CALLBACK: {
+            LOGV("RAW_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             sp<IMemory> picture = interface_cast<IMemory>(data.readStrongBinder());
             rawCallback(picture);
             return NO_ERROR;
         } break;
         case JPEG_CALLBACK: {
+            LOGV("JPEG_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             sp<IMemory> picture = interface_cast<IMemory>(data.readStrongBinder());
             jpegCallback(picture);
             return NO_ERROR;
         } break;
         case FRAME_CALLBACK: {
+            LOGV("FRAME_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             sp<IMemory> frame = interface_cast<IMemory>(data.readStrongBinder());
             frameCallback(frame);
             return NO_ERROR;
         } break;
         case ERROR_CALLBACK: {
+            LOGV("ERROR_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             status_t error = data.readInt32();
             errorCallback(error);
             return NO_ERROR;
         } break;
         case AUTOFOCUS_CALLBACK: {
+            LOGV("AUTOFOCUS_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             bool focused = (bool)data.readInt32();
             autoFocusCallback(focused);

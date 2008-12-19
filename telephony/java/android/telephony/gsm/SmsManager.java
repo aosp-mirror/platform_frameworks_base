@@ -104,11 +104,12 @@ public final class SmsManager {
         int limit;
         
         if (messageCount > 1) {
-            limit = (encodingType == SmsMessage.ENCODING_7BIT)?
-                SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER: SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;            
+            limit = (encodingType == SmsMessage.ENCODING_7BIT) ?
+                    SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER :
+                        SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;            
         } else {
-            limit = (encodingType == SmsMessage.ENCODING_7BIT)?
-                SmsMessage.MAX_USER_DATA_SEPTETS: SmsMessage.MAX_USER_DATA_BYTES;            
+            limit = (encodingType == SmsMessage.ENCODING_7BIT) ?
+                SmsMessage.MAX_USER_DATA_SEPTETS : SmsMessage.MAX_USER_DATA_BYTES;            
         }
 
         try {
@@ -117,8 +118,7 @@ public final class SmsManager {
                 result.add(text.substring(start, end));
                 start = end;
             }
-        }
-        catch (EncodeException e) {
+        } catch (EncodeException e) {
             // ignore it.
         }
         return result;

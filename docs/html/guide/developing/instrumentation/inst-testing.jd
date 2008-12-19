@@ -205,32 +205,3 @@ function debugtest {
 </pre>
 
 
-<p><span class="lh2"><a name="androidFooter"></a></span>
-
-        </div>
-      </div>
-      <!-- end gc-pagecontent -->
-    </div>
-    <!-- end gooey wrapper -->
-  </div>
-  <!-- end codesearchresults -->
-  <div id="gc-footer" dir="ltr">
-    <div class="text"> &copy;2008 Google<!-- - <a href="/">Code Home</a> - <a href="http://www.google.com/accounts/TOS">Site Terms of Service</a> - <a href="http://www.google.com/privacy.html">Privacy Policy</a> - <a href="/more">Site Directory</a> --></div>
-  </div>
-  <!-- end gc-footer -->
-</div>
-<!-- end gc-containter -->
-<script src="http://www.google-analytics.com/ga.js" type="text/javascript">
-</script>
-<script type="text/javascript">
-  try {
-    var pageTracker = _gat._getTracker("UA-18071-1");
-    pageTracker._setAllowAnchor(true);
-    pageTracker._initData();
-    pageTracker._trackPageview(); 
-  } catch(e) {}
-</script>
-<div id="jd-build-id"> v0.3 - 9 June 2008</div>
-</div></div></div></body>
-</html>
-

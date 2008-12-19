@@ -82,7 +82,7 @@ public:
         data.writeInt32(format);
         data.writeInt32(flags);
         remote()->transact(CREATE_SURFACE, data, &reply);
-        params->readFromParcel(data);
+        params->readFromParcel(reply);
         return interface_cast<ISurface>(reply.readStrongBinder());
     }
                                     
@@ -191,7 +191,6 @@ status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& par
 {
     token = parcel.readInt32();
     identity  = parcel.readInt32();
-    type = parcel.readInt32();
     heap[0] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
     heap[1] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
     return NO_ERROR;
@@ -201,7 +200,6 @@ status_t ISurfaceFlingerClient::surface_data_t::writeToParcel(Parcel* parcel) co
 {
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
-    parcel->writeInt32(type);
     parcel->writeStrongBinder(heap[0]!=0 ? heap[0]->asBinder() : NULL);
     parcel->writeStrongBinder(heap[1]!=0 ? heap[1]->asBinder() : NULL);
     return NO_ERROR;

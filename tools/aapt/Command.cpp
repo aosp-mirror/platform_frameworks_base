@@ -586,6 +586,18 @@ int doDump(Bundle* bundle)
                            activityIcon.string());
                 }
             }
+            printf("locales:");
+            Vector<String8> locales;
+            res.getLocales(&locales);
+            const size_t N = locales.size();
+            for (size_t i=0; i<N; i++) {
+                const char* localeStr =  locales[i].string();
+                if (localeStr == NULL || strlen(localeStr) == 0) {
+                    localeStr = "--_--";
+                }
+                printf(" '%s'", localeStr);
+            }
+            printf("\n");
         } else if (strcmp("configurations", option) == 0) {
             Vector<ResTable_config> configs;
             res.getConfigurations(&configs);

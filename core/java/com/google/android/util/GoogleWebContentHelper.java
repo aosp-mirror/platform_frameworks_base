@@ -22,6 +22,7 @@ import android.net.http.SslError;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,10 +82,26 @@ public class GoogleWebContentHelper {
      */
     public GoogleWebContentHelper setUrlsFromGservices(String secureSetting, String prettySetting) {
         ContentResolver contentResolver = mContext.getContentResolver();
-        mSecureUrl = fillUrl(Settings.Gservices.getString(contentResolver, secureSetting));
-        mPrettyUrl = fillUrl(Settings.Gservices.getString(contentResolver, prettySetting));
+        mSecureUrl = fillUrl(Settings.Gservices.getString(contentResolver, secureSetting),
+                mContext);
+        mPrettyUrl = fillUrl(Settings.Gservices.getString(contentResolver, prettySetting), 
+                mContext);
         return this;
     }
+    
+    /**
+     * Fetch directly from provided urls.
+     * 
+     * @param secureUrl The HTTPS URL.
+     * @param prettyUrl The pretty URL.
+     * @return This {@link GoogleWebContentHelper} so methods can be chained.
+     */
+    public GoogleWebContentHelper setUrls(String secureUrl, String prettyUrl) {
+        mSecureUrl = fillUrl(secureUrl, mContext);
+        mPrettyUrl = fillUrl(prettyUrl, mContext);
+        return this;
+    }
+    
 
     /**
      * Sets the message that will be shown if we are unable to load the page.
@@ -113,6 +130,22 @@ public class GoogleWebContentHelper {
         mWebView.loadUrl(mSecureUrl);
         return this;
     }
+    
+    /**
+     * Helper to handle the back key. Returns true if the back key was handled, 
+     * otherwise returns false.
+     * @param event the key event sent to {@link Activity#dispatchKeyEvent()}
+     */
+    public boolean handleKey(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK 
+                && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (mWebView.canGoBack()) {
+                mWebView.goBack();
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Returns the layout containing the web view, progress bar, and text view.
@@ -138,12 +171,23 @@ public class GoogleWebContentHelper {
      * @param url The URL in Formatter style for the extra info to be filled in.
      * @return The filled URL.
      */
-    private static String fillUrl(String url) {
+    private static String fillUrl(String url, Context context) {
         
         if (TextUtils.isEmpty(url)) {
             return "";
         }
-        
+
+        /* We add another layer of indirection here to allow mcc's to fill
+         * in Locales for TOS.  TODO - REMOVE when needed locales supported
+         * natively (when not shipping devices to country X without support
+         * for their locale).
+         */
+        String localeReplacement = context.
+                getString(com.android.internal.R.string.locale_replacement);
+        if (localeReplacement != null && localeReplacement.length() != 0) {
+            url = String.format(url, localeReplacement);
+        }
+
         Locale locale = Locale.getDefault();
         String tmp = locale.getLanguage() + "_" + locale.getCountry().toLowerCase();
         return String.format(url, tmp);

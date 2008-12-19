@@ -182,6 +182,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         try {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
+            mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mIsPrepared = false;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
@@ -220,6 +221,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         }
     }
     
+    MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+        new MediaPlayer.OnVideoSizeChangedListener() {
+            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                mVideoWidth = mp.getVideoWidth();
+                mVideoHeight = mp.getVideoHeight();
+                if (mVideoWidth != 0 && mVideoHeight != 0) {
+                    getHolder().setFixedSize(mVideoWidth, mVideoHeight);
+                }
+            }
+    };
+    
     MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             // briefly show the mediacontroller
@@ -241,26 +253,32 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                     // start the video here instead of in the callback.
                     if (mSeekWhenPrepared != 0) {
                         mMediaPlayer.seekTo(mSeekWhenPrepared);
+                        mSeekWhenPrepared = 0;
                     }
                     if (mStartWhenPrepared) {
                         mMediaPlayer.start();
+                        mStartWhenPrepared = false;
                         if (mMediaController != null) {
                             mMediaController.show();
                         }
-                   } else if (!isPlaying() && (mSeekWhenPrepared != 0 || getCurrentPosition() > 0)) {
+                    } else if (!isPlaying() &&
+                            (mSeekWhenPrepared != 0 || getCurrentPosition() > 0)) {
                        if (mMediaController != null) {
-                           mMediaController.show(0);   // show the media controls when we're paused into a video and make 'em stick.
+                           // Show the media controls when we're paused into a video and make 'em stick.
+                           mMediaController.show(0);
                        }
                    }
                 }
             } else {
-                Log.d("VideoView", "Couldn't get video size after prepare(): " +
-                        mVideoWidth + "/" + mVideoHeight);
-                // The file was probably truncated or corrupt. Start anyway, so
-                // that we play whatever short snippet is there and then get
-                // the "playback completed" event.
+                // We don't know the video size yet, but should start anyway.
+                // The video size might be reported to us later.
+                if (mSeekWhenPrepared != 0) {
+                    mMediaPlayer.seekTo(mSeekWhenPrepared);
+                    mSeekWhenPrepared = 0;
+                }
                 if (mStartWhenPrepared) {
                     mMediaPlayer.start();
+                    mStartWhenPrepared = false;
                 }
             }
         }
@@ -370,9 +388,10 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         {
             mSurfaceWidth = w;
             mSurfaceHeight = h;
-            if (mIsPrepared && mVideoWidth == w && mVideoHeight == h) {
+            if (mMediaPlayer != null && mIsPrepared && mVideoWidth == w && mVideoHeight == h) {
                 if (mSeekWhenPrepared != 0) {
                     mMediaPlayer.seekTo(mSeekWhenPrepared);
+                    mSeekWhenPrepared = 0;
                 }
                 mMediaPlayer.start();
                 if (mMediaController != null) {

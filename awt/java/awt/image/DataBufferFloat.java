@@ -18,25 +18,32 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 /**
- * The Class DataBufferFloat is the subclass of DataBuffer
- * for the case where the underlying data is float.
+ * The Class DataBufferFloat is the subclass of DataBuffer for the case where
+ * the underlying data is float.
+ * 
+ * @since Android 1.0
  */
 public final class DataBufferFloat extends DataBuffer {
 
-    /** The data. */
+    /**
+     * The data.
+     */
     float data[][];
 
     /**
      * Instantiates a new data buffer of type float.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param offsets the starting indices for reading the 
-     * data from the internal data arrays
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param offsets
+     *            the starting indices for reading the data from the internal
+     *            data arrays.
      */
     public DataBufferFloat(float dataArrays[][], int size, int offsets[]) {
         super(TYPE_FLOAT, size, dataArrays.length, offsets);
@@ -46,9 +53,10 @@ public final class DataBufferFloat extends DataBuffer {
     /**
      * Instantiates a new data buffer of type float.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
      */
     public DataBufferFloat(float dataArrays[][], int size) {
         super(TYPE_FLOAT, size, dataArrays.length);
@@ -56,12 +64,15 @@ public final class DataBufferFloat extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type float
-     * with a single underlying array of data.
+     * Instantiates a new data buffer of type float with a single underlying
+     * array of data.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
-     * @param offset the starting index to use when reading the data
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
+     * @param offset
+     *            the starting index to use when reading the data.
      */
     public DataBufferFloat(float dataArray[], int size, int offset) {
         super(TYPE_FLOAT, size, 1, offset);
@@ -70,12 +81,13 @@ public final class DataBufferFloat extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type float
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new data buffer of type float with a single underlying
+     * array of data starting at index 0.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferFloat(float dataArray[], int size) {
         super(TYPE_FLOAT, size);
@@ -84,12 +96,13 @@ public final class DataBufferFloat extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type float
-     * with offsets equal to zero.
+     * Instantiates a new empty data buffer of type float with offsets equal to
+     * zero.
      * 
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param numBanks the number of data arrays to create
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param numBanks
+     *            the number of data arrays to create.
      */
     public DataBufferFloat(int size, int numBanks) {
         super(TYPE_FLOAT, size, numBanks);
@@ -101,11 +114,11 @@ public final class DataBufferFloat extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type float
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new empty data buffer of type float with a single
+     * underlying array of data starting at index 0.
      * 
-     * @param size the length (number of elements) to use 
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferFloat(int size) {
         super(TYPE_FLOAT, size);
@@ -127,7 +140,7 @@ public final class DataBufferFloat extends DataBuffer {
 
     @Override
     public void setElemDouble(int bank, int i, double val) {
-        data[bank][offsets[bank] + i] = (float) val;
+        data[bank][offsets[bank] + i] = (float)val;
         notifyChanged();
     }
 
@@ -139,7 +152,7 @@ public final class DataBufferFloat extends DataBuffer {
 
     @Override
     public int getElem(int bank, int i) {
-        return (int) (data[bank][offsets[bank] + i]);
+        return (int)(data[bank][offsets[bank] + i]);
     }
 
     @Override
@@ -160,16 +173,16 @@ public final class DataBufferFloat extends DataBuffer {
 
     @Override
     public void setElemDouble(int i, double val) {
-        data[0][offset + i] = (float) val;
+        data[0][offset + i] = (float)val;
         notifyChanged();
     }
 
     /**
      * Gets the data of the specified internal data array.
      * 
-     * @param bank the index of the desired array
-     * 
-     * @return the data
+     * @param bank
+     *            the index of the desired array.
+     * @return the data.
      */
     public float[] getData(int bank) {
         notifyTaken();
@@ -178,7 +191,7 @@ public final class DataBufferFloat extends DataBuffer {
 
     @Override
     public int getElem(int i) {
-        return (int) (data[0][offset + i]);
+        return (int)(data[0][offset + i]);
     }
 
     @Override
@@ -194,7 +207,7 @@ public final class DataBufferFloat extends DataBuffer {
     /**
      * Gets the bank data.
      * 
-     * @return the bank data
+     * @return the bank data.
      */
     public float[][] getBankData() {
         notifyTaken();
@@ -204,11 +217,10 @@ public final class DataBufferFloat extends DataBuffer {
     /**
      * Gets the data of the first data array.
      * 
-     * @return the data
+     * @return the data.
      */
     public float[] getData() {
         notifyTaken();
         return data[0];
     }
 }
-

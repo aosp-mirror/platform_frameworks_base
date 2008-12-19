@@ -18,72 +18,93 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The MultiPixelPackedSampleModel class represents image data with one
- * band. This class packs multiple pixels with one sample in one data 
- * element and supports the following data types: DataBuffer.TYPE_BYTE, 
- * DataBuffer.TYPE_USHORT, or DataBuffer.TYPE_INT. 
+ * The MultiPixelPackedSampleModel class represents image data with one band.
+ * This class packs multiple pixels with one sample in one data element and
+ * supports the following data types: DataBuffer.TYPE_BYTE,
+ * DataBuffer.TYPE_USHORT, or DataBuffer.TYPE_INT.
+ * 
+ * @since Android 1.0
  */
 public class MultiPixelPackedSampleModel extends SampleModel {
 
-    /** The pixel bit stride. */
+    /**
+     * The pixel bit stride.
+     */
     private int pixelBitStride;
 
-    /** The scanline stride. */
+    /**
+     * The scanline stride.
+     */
     private int scanlineStride;
 
-    /** The data bit offset. */
+    /**
+     * The data bit offset.
+     */
     private int dataBitOffset;
 
-    /** The bit mask. */
+    /**
+     * The bit mask.
+     */
     private int bitMask;
 
-    /** The data element size. */
+    /**
+     * The data element size.
+     */
     private int dataElementSize;
 
-    /** The pixels per data element. */
+    /**
+     * The pixels per data element.
+     */
     private int pixelsPerDataElement;
 
     /**
      * Instantiates a new MultiPixelPackedSampleModel with the specified
      * parameters.
      * 
-     * @param dataType the data type of the samples.
-     * @param w the width of the image data.
-     * @param h the height of the image data.
-     * @param numberOfBits the number of bits per pixel.
-     * @param scanlineStride the scanline stride of the of the image data.
-     * @param dataBitOffset the array of the band offsets.
+     * @param dataType
+     *            the data type of the samples.
+     * @param w
+     *            the width of the image data.
+     * @param h
+     *            the height of the image data.
+     * @param numberOfBits
+     *            the number of bits per pixel.
+     * @param scanlineStride
+     *            the scanline stride of the of the image data.
+     * @param dataBitOffset
+     *            the array of the band offsets.
      */
-    public MultiPixelPackedSampleModel(int dataType, int w, int h,
-            int numberOfBits, int scanlineStride, int dataBitOffset) {
+    public MultiPixelPackedSampleModel(int dataType, int w, int h, int numberOfBits,
+            int scanlineStride, int dataBitOffset) {
 
         super(dataType, w, h, 1);
-        if (dataType != DataBuffer.TYPE_BYTE &&
-               dataType != DataBuffer.TYPE_USHORT &&
-               dataType != DataBuffer.TYPE_INT) {
+        if (dataType != DataBuffer.TYPE_BYTE && dataType != DataBuffer.TYPE_USHORT
+                && dataType != DataBuffer.TYPE_INT) {
             // awt.61=Unsupported data type: {0}
             throw new IllegalArgumentException(Messages.getString("awt.61", //$NON-NLS-1$
                     dataType));
         }
 
         this.scanlineStride = scanlineStride;
-        if(numberOfBits == 0) {
+        if (numberOfBits == 0) {
             // awt.20C=Number of Bits equals to zero
             throw new RasterFormatException(Messages.getString("awt.20C")); //$NON-NLS-1$
         }
         this.pixelBitStride = numberOfBits;
         this.dataElementSize = DataBuffer.getDataTypeSize(dataType);
-        if(dataElementSize % pixelBitStride != 0) {
-            // awt.20D=The number of bits per pixel is not a power of 2 or pixels span data element boundaries
+        if (dataElementSize % pixelBitStride != 0) {
+            // awt.20D=The number of bits per pixel is not a power of 2 or
+            // pixels span data element boundaries
             throw new RasterFormatException(Messages.getString("awt.20D")); //$NON-NLS-1$
         }
 
-        if(dataBitOffset % numberOfBits != 0) {
+        if (dataBitOffset % numberOfBits != 0) {
             // awt.20E=Data Bit offset is not a multiple of pixel bit stride
             throw new RasterFormatException(Messages.getString("awt.20E")); //$NON-NLS-1$
         }
@@ -97,17 +118,20 @@ public class MultiPixelPackedSampleModel extends SampleModel {
      * Instantiates a new MultiPixelPackedSampleModel with the specified
      * parameters.
      * 
-     * @param dataType the data type of the samples.
-     * @param w the width of the image data.
-     * @param h the height of the image data.
-     * @param numberOfBits the number of bits per pixel.
+     * @param dataType
+     *            the data type of the samples.
+     * @param w
+     *            the width of the image data.
+     * @param h
+     *            the height of the image data.
+     * @param numberOfBits
+     *            the number of bits per pixel.
      */
-    public MultiPixelPackedSampleModel(int dataType, int w, int h,
-            int numberOfBits) {
+    public MultiPixelPackedSampleModel(int dataType, int w, int h, int numberOfBits) {
 
-        this(dataType, w, h, numberOfBits, (numberOfBits * w +
-               DataBuffer.getDataTypeSize(dataType) - 1) /
-               DataBuffer.getDataTypeSize(dataType), 0);
+        this(dataType, w, h, numberOfBits,
+                (numberOfBits * w + DataBuffer.getDataTypeSize(dataType) - 1)
+                        / DataBuffer.getDataTypeSize(dataType), 0);
     }
 
     @Override
@@ -117,36 +141,36 @@ public class MultiPixelPackedSampleModel extends SampleModel {
             throw new ArrayIndexOutOfBoundsException(Messages.getString("awt.63")); //$NON-NLS-1$
         }
         switch (getTransferType()) {
-        case DataBuffer.TYPE_BYTE:
-            byte bdata[];
-            if (obj == null) {
-                bdata = new byte[1];
-            } else {
-                bdata = (byte[]) obj;
-            }
-            bdata[0] = (byte) getSample(x, y, 0, data);
-            obj = bdata;
-            break;
-        case DataBuffer.TYPE_USHORT:
-            short sdata[];
-            if (obj == null) {
-                sdata = new short[1];
-            } else {
-                sdata = (short[]) obj;
-            }
-            sdata[0] = (short) getSample(x, y, 0, data);
-            obj = sdata;
-            break;
-        case DataBuffer.TYPE_INT:
-            int idata[];
-            if (obj == null) {
-                idata = new int[1];
-            } else {
-                idata = (int[]) obj;
-            }
-            idata[0] = getSample(x, y, 0, data);
-            obj = idata;
-            break;
+            case DataBuffer.TYPE_BYTE:
+                byte bdata[];
+                if (obj == null) {
+                    bdata = new byte[1];
+                } else {
+                    bdata = (byte[])obj;
+                }
+                bdata[0] = (byte)getSample(x, y, 0, data);
+                obj = bdata;
+                break;
+            case DataBuffer.TYPE_USHORT:
+                short sdata[];
+                if (obj == null) {
+                    sdata = new short[1];
+                } else {
+                    sdata = (short[])obj;
+                }
+                sdata[0] = (short)getSample(x, y, 0, data);
+                obj = sdata;
+                break;
+            case DataBuffer.TYPE_INT:
+                int idata[];
+                if (obj == null) {
+                    idata = new int[1];
+                } else {
+                    idata = (int[])obj;
+                }
+                idata[0] = getSample(x, y, 0, data);
+                obj = idata;
+                break;
         }
 
         return obj;
@@ -158,14 +182,14 @@ public class MultiPixelPackedSampleModel extends SampleModel {
     }
 
     /**
-     * Compares this MultiPixelPackedSampleModel object with 
-     * the specified object.
+     * Compares this MultiPixelPackedSampleModel object with the specified
+     * object.
      * 
-     * @param o the Object to be compared.
-     * 
-     * @return true, if the object is a MultiPixelPackedSampleModel 
-     * with the same data parameter values as this MultiPixelPackedSampleModel,
-     * false otherwise.
+     * @param o
+     *            the Object to be compared.
+     * @return true, if the object is a MultiPixelPackedSampleModel with the
+     *         same data parameter values as this MultiPixelPackedSampleModel,
+     *         false otherwise.
      */
     @Override
     public boolean equals(Object o) {
@@ -173,17 +197,14 @@ public class MultiPixelPackedSampleModel extends SampleModel {
             return false;
         }
 
-        MultiPixelPackedSampleModel model = (MultiPixelPackedSampleModel) o;
-        return this.width == model.width &&
-               this.height == model.height &&
-               this.numBands == model.numBands &&
-               this.dataType == model.dataType &&
-               this.pixelBitStride == model.pixelBitStride &&
-               this.bitMask == model.bitMask &&
-               this.pixelsPerDataElement == model.pixelsPerDataElement &&
-               this.dataElementSize == model.dataElementSize &&
-               this.dataBitOffset == model.dataBitOffset &&
-               this.scanlineStride == model.scanlineStride;
+        MultiPixelPackedSampleModel model = (MultiPixelPackedSampleModel)o;
+        return this.width == model.width && this.height == model.height
+                && this.numBands == model.numBands && this.dataType == model.dataType
+                && this.pixelBitStride == model.pixelBitStride && this.bitMask == model.bitMask
+                && this.pixelsPerDataElement == model.pixelsPerDataElement
+                && this.dataElementSize == model.dataElementSize
+                && this.dataBitOffset == model.dataBitOffset
+                && this.scanlineStride == model.scanlineStride;
     }
 
     @Override
@@ -231,8 +252,7 @@ public class MultiPixelPackedSampleModel extends SampleModel {
 
         int bitnum = dataBitOffset + x * pixelBitStride;
         int elem = data.getElem(y * scanlineStride + bitnum / dataElementSize);
-        int shift = dataElementSize - (bitnum & (dataElementSize - 1)) -
-                pixelBitStride;
+        int shift = dataElementSize - (bitnum & (dataElementSize - 1)) - pixelBitStride;
 
         return (elem >> shift) & bitMask;
     }
@@ -253,15 +273,15 @@ public class MultiPixelPackedSampleModel extends SampleModel {
         int size = scanlineStride * height;
 
         switch (dataType) {
-        case DataBuffer.TYPE_BYTE:
-            dataBuffer = new DataBufferByte(size + (dataBitOffset + 7) / 8);
-            break;
-        case DataBuffer.TYPE_USHORT:
-            dataBuffer = new DataBufferUShort(size + (dataBitOffset + 15) / 16);
-            break;
-        case DataBuffer.TYPE_INT:
-            dataBuffer = new DataBufferInt(size + (dataBitOffset + 31) / 32);
-            break;
+            case DataBuffer.TYPE_BYTE:
+                dataBuffer = new DataBufferByte(size + (dataBitOffset + 7) / 8);
+                break;
+            case DataBuffer.TYPE_USHORT:
+                dataBuffer = new DataBufferUShort(size + (dataBitOffset + 15) / 16);
+                break;
+            case DataBuffer.TYPE_INT:
+                dataBuffer = new DataBufferInt(size + (dataBitOffset + 31) / 32);
+                break;
         }
         return dataBuffer;
     }
@@ -269,14 +289,14 @@ public class MultiPixelPackedSampleModel extends SampleModel {
     /**
      * Gets the offset of the specified pixel in the data array.
      * 
-     * @param x the X coordinate of the specified pixel.
-     * @param y the Y coordinate of the specified pixel.
-     * 
+     * @param x
+     *            the X coordinate of the specified pixel.
+     * @param y
+     *            the Y coordinate of the specified pixel.
      * @return the offset of the specified pixel.
      */
     public int getOffset(int x, int y) {
-        return y * scanlineStride + (x * pixelBitStride + dataBitOffset) /
-               dataElementSize;
+        return y * scanlineStride + (x * pixelBitStride + dataBitOffset) / dataElementSize;
     }
 
     @Override
@@ -285,11 +305,11 @@ public class MultiPixelPackedSampleModel extends SampleModel {
     }
 
     /**
-     * Gets the bit offset in the data element which 
-     * is stored for the specified pixel of a scanline.
+     * Gets the bit offset in the data element which is stored for the specified
+     * pixel of a scanline.
      * 
-     * @param x the pixel.
-     * 
+     * @param x
+     *            the pixel.
      * @return the bit offset of the pixel in the data element.
      */
     public int getBitOffset(int x) {
@@ -298,7 +318,9 @@ public class MultiPixelPackedSampleModel extends SampleModel {
 
     @Override
     public int[] getSampleSize() {
-        int sampleSizes[] = { pixelBitStride };
+        int sampleSizes[] = {
+            pixelBitStride
+        };
         return sampleSizes;
     }
 
@@ -396,54 +418,58 @@ public class MultiPixelPackedSampleModel extends SampleModel {
     }
 
     /**
-     * This method is used by other methods of this class. The behaviour of
-     * this method depends on the method which has been invoke this one. The
-     * argument methodId is used to choose valid behaviour in a particular case.
-     * If methodId is equal to 1 it means that this method has been invoked by
-     * the setDataElements() method, 2 - means setPixel(), and setSample() in
-     * any other cases.
+     * This method is used by other methods of this class. The behavior of this
+     * method depends on the method which has been invoke this one. The argument
+     * methodId is used to choose valid behavior in a particular case. If
+     * methodId is equal to 1 it means that this method has been invoked by the
+     * setDataElements() method, 2 - means setPixel(), and setSample() in any
+     * other cases.
      * 
-     * @param x the x
-     * @param y the y
-     * @param obj the obj
-     * @param data the data
-     * @param methodId the method id
-     * @param s the s
+     * @param x
+     *            the x.
+     * @param y
+     *            the y.
+     * @param obj
+     *            the obj.
+     * @param data
+     *            the data.
+     * @param methodId
+     *            the method id.
+     * @param s
+     *            the s.
      */
-    private void setSample(final int x, final int y, final Object obj,
-            final DataBuffer data, final int methodId, int s) {
+    private void setSample(final int x, final int y, final Object obj, final DataBuffer data,
+            final int methodId, int s) {
         if ((x < 0) || (y < 0) || (x >= this.width) || (y >= this.height)) {
             // awt.63=Coordinates are not in bounds
-            throw new ArrayIndexOutOfBoundsException(Messages
-                    .getString("awt.63")); //$NON-NLS-1$
+            throw new ArrayIndexOutOfBoundsException(Messages.getString("awt.63")); //$NON-NLS-1$
         }
 
         final int bitnum = dataBitOffset + x * pixelBitStride;
         final int idx = y * scanlineStride + bitnum / dataElementSize;
-        final int shift = dataElementSize - (bitnum & (dataElementSize - 1))
-                - pixelBitStride;
+        final int shift = dataElementSize - (bitnum & (dataElementSize - 1)) - pixelBitStride;
         final int mask = ~(bitMask << shift);
         int elem = data.getElem(idx);
 
         switch (methodId) {
-        case 1: {                        // Invoked from setDataElements()
-            switch (getTransferType()) {
-            case DataBuffer.TYPE_BYTE:
-                s = ((byte[]) obj)[0] & 0xff;
-                break;
-            case DataBuffer.TYPE_USHORT:
-                s = ((short[]) obj)[0] & 0xffff;
-                break;
-            case DataBuffer.TYPE_INT:
-                s = ((int[]) obj)[0];
+            case 1: { // Invoked from setDataElements()
+                switch (getTransferType()) {
+                    case DataBuffer.TYPE_BYTE:
+                        s = ((byte[])obj)[0] & 0xff;
+                        break;
+                    case DataBuffer.TYPE_USHORT:
+                        s = ((short[])obj)[0] & 0xffff;
+                        break;
+                    case DataBuffer.TYPE_INT:
+                        s = ((int[])obj)[0];
+                        break;
+                }
                 break;
             }
-            break;
-        }
-        case 2: {                        // Invoked from setPixel()
-            s = ((int[]) obj)[0];
-            break;
-        }
+            case 2: { // Invoked from setPixel()
+                s = ((int[])obj)[0];
+                break;
+            }
         }
 
         elem &= mask;
@@ -451,4 +477,3 @@ public class MultiPixelPackedSampleModel extends SampleModel {
         data.setElem(idx, elem);
     }
 }
-

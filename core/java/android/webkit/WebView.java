@@ -56,6 +56,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebViewCore.EventHub;
 import android.widget.AbsoluteLayout;
 import android.widget.AdapterView;
@@ -94,6 +95,12 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
+    // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
+    // the screen all-the-time. Good for profiling our drawing code
+    static private final boolean AUTO_REDRAW_HACK = false;
+    // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
+    private boolean mAutoRedraw;
+
     // keep debugging parameters near the top of the file
     static final String LOGTAG = "webview";
     static final boolean DEBUG = false;
@@ -112,7 +119,8 @@ public class WebView extends AbsoluteLayout
                     (com.android.internal.R.id.zoomMagnify);
         }
         
-        public void show(boolean canZoomOut) {
+        public void show(boolean showZoom, boolean canZoomOut) {
+            mZoomControls.setVisibility(showZoom ? View.VISIBLE : View.GONE);
             mZoomMagnify.setVisibility(canZoomOut ? View.VISIBLE : View.GONE);
             fade(View.VISIBLE, 0.0f, 1.0f);
         }
@@ -211,6 +219,17 @@ public class WebView extends AbsoluteLayout
     private long mLastTouchTime;
 
     /**
+     * Time of the last time sending touch event to WebViewCore
+     */
+    private long mLastSentTouchTime;
+
+    /**
+     * The minimum elapsed time before sending another ACTION_MOVE event to
+     * WebViewCore
+     */
+    private static final int TOUCH_SENT_INTERVAL = 100;
+
+    /**
      * Helper class to get velocity for fling
      */
     VelocityTracker mVelocityTracker;
@@ -226,6 +245,7 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_SHORTPRESS_MODE = 5;
     private static final int TOUCH_DOUBLECLICK_MODE = 6;
     private static final int TOUCH_DONE_MODE = 7;
+    private static final int TOUCH_SELECT_MODE = 8;
     // touch mode values specific to scale+scroll
     private static final int FIRST_SCROLL_ZOOM = 9;
     private static final int SCROLL_ZOOM_ANIMATION_IN = 9;
@@ -233,6 +253,9 @@ public class WebView extends AbsoluteLayout
     private static final int SCROLL_ZOOM_OUT = 11;
     private static final int LAST_SCROLL_ZOOM = 11;
     // end of touch mode values specific to scale+scroll
+
+    // Whether to forward the touch events to WebCore
+    private boolean mForwardTouchEvents = false;
 
     // If updateTextEntry gets called while we are out of focus, use this 
     // variable to remember to do it next time we gain focus.
@@ -337,7 +360,9 @@ public class WebView extends AbsoluteLayout
     static final int NOTIFY_FOCUS_SET_MSG_ID        = 20;
     static final int MARK_NODE_INVALID_ID           = 21;
     static final int UPDATE_CLIPBOARD               = 22;
-    static final int LONG_PRESS_TRACKBALL           = 24;
+    static final int LONG_PRESS_ENTER               = 23;
+    static final int PREVENT_TOUCH_ID               = 24;
+    static final int WEBCORE_NEED_TOUCH_EVENTS      = 25;
 
     // width which view is considered to be fully zoomed out
     static final int ZOOM_OUT_WIDTH = 1024;
@@ -524,23 +549,23 @@ public class WebView extends AbsoluteLayout
         setVerticalScrollBarEnabled(true);
     }
 
-    /* package */ boolean onSavePassword(String host, String username,
+    /* package */ boolean onSavePassword(String schemePlusHost, String username,
             String password, final Message resumeMsg) {
        boolean rVal = false;
        if (resumeMsg == null) {
            // null resumeMsg implies saving password silently
-           mDatabase.setUsernamePassword(host, username, password);
+           mDatabase.setUsernamePassword(schemePlusHost, username, password);
        } else {
             final Message remember = mPrivateHandler.obtainMessage(
                     REMEMBER_PASSWORD);
-            remember.getData().putString("host", host);
+            remember.getData().putString("host", schemePlusHost);
             remember.getData().putString("username", username);
             remember.getData().putString("password", password);
             remember.obj = resumeMsg;
 
             final Message neverRemember = mPrivateHandler.obtainMessage(
                     NEVER_REMEMBER_PASSWORD);
-            neverRemember.getData().putString("host", host);
+            neverRemember.getData().putString("host", schemePlusHost);
             neverRemember.getData().putString("username", username);
             neverRemember.getData().putString("password", password);
             neverRemember.obj = resumeMsg;
@@ -749,14 +774,36 @@ public class WebView extends AbsoluteLayout
     public static void disablePlatformNotifications() {
         Network.disablePlatformNotifications();
     }
+    
+    /**
+     * Inform WebView of the network state. This is used to set
+     * the javascript property window.navigator.isOnline and
+     * generates the online/offline event as specified in HTML5, sec. 5.7.7
+     * @param networkUp boolean indicating if network is available
+     * 
+     * @hide pending API Council approval
+     */
+    public void setNetworkAvailable(boolean networkUp) {
+        BrowserFrame.sJavaBridge.setNetworkOnLine(networkUp);
+    }
 
     /**
-     * Save the state of this WebView used in Activity.onSaveInstanceState.
+     * Save the state of this WebView used in 
+     * {@link android.app.Activity#onSaveInstanceState}. Please note that this
+     * method no longer stores the display data for this WebView. The previous
+     * behavior could potentially leak files if {@link #restoreState} was never
+     * called. See {@link #savePicture} and {@link #restorePicture} for saving
+     * and restoring the display data.
      * @param outState The Bundle to store the WebView state.
      * @return The same copy of the back/forward list used to save the state. If
      *         saveState fails, the returned list will be null.
+     * @see #savePicture
+     * @see #restorePicture
      */
     public WebBackForwardList saveState(Bundle outState) {
+        if (outState == null) {
+            return null;
+        }
         // We grab a copy of the back/forward list because a client of WebView
         // may have invalidated the history list by calling clearHistory.
         WebBackForwardList list = copyBackForwardList();
@@ -782,29 +829,6 @@ public class WebView extends AbsoluteLayout
                 return null;
             }
             history.add(data);
-            if (i == currentIndex) {
-                Picture p = capturePicture();
-                String path = mContext.getDir("thumbnails", 0).getPath()
-                        + File.separatorChar + hashCode() + "_pic.save";
-                File f = new File(path);
-                try {
-                    final FileOutputStream out = new FileOutputStream(f);
-                    p.writeToStream(out);
-                    out.close();
-                } catch (FileNotFoundException e){
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
-                }
-                if (f.length() > 0) {
-                    outState.putString("picture", path);
-                    outState.putInt("scrollX", mScrollX);
-                    outState.putInt("scrollY", mScrollY);
-                    outState.putFloat("scale", mActualScale);
-                }
-            }
         }
         outState.putSerializable("history", history);
         if (mCertificate != null) {
@@ -815,16 +839,103 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Save the current display data to the Bundle given. Used in conjunction
+     * with {@link #saveState}.
+     * @param b A Bundle to store the display data.
+     * @param dest The file to store the serialized picture data. Will be
+     *             overwritten with this WebView's picture data.
+     * @return True if the picture was successfully saved.
+     */
+    public boolean savePicture(Bundle b, File dest) {
+        if (dest == null || b == null) {
+            return false;
+        }
+        final Picture p = capturePicture();
+        try {
+            final FileOutputStream out = new FileOutputStream(dest);
+            p.writeToStream(out);
+            out.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        if (dest.length() > 0) {
+            b.putInt("scrollX", mScrollX);
+            b.putInt("scrollY", mScrollY);
+            b.putFloat("scale", mActualScale);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Restore the display data that was save in {@link #savePicture}. Used in
+     * conjunction with {@link #restoreState}.
+     * @param b A Bundle containing the saved display data.
+     * @param src The file where the picture data was stored.
+     * @return True if the picture was successfully restored.
+     */
+    public boolean restorePicture(Bundle b, File src) {
+        if (src == null || b == null) {
+            return false;
+        }
+        if (src.exists()) {
+            Picture p = null;
+            try {
+                final FileInputStream in = new FileInputStream(src);
+                p = Picture.createFromStream(in);
+                in.close();
+            } catch (FileNotFoundException e){
+                e.printStackTrace();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (p != null) {
+                int sx = b.getInt("scrollX", 0);
+                int sy = b.getInt("scrollY", 0);
+                float scale = b.getFloat("scale", 1.0f);
+                mDrawHistory = true;
+                mHistoryPicture = p;
+                mScrollX = sx;
+                mScrollY = sy;
+                mHistoryWidth = Math.round(p.getWidth() * scale);
+                mHistoryHeight = Math.round(p.getHeight() * scale);
+                // as getWidth() / getHeight() of the view are not
+                // available yet, set up mActualScale, so that when
+                // onSizeChanged() is called, the rest will be set
+                // correctly
+                mActualScale = scale;
+                invalidate();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Restore the state of this WebView from the given map used in
-     * Activity.onThaw. This method should be called to restore the state of
-     * the WebView before using the object. If it is called after the WebView
-     * has had a chance to build state (load pages, create a back/forward list,
-     * etc.) there may be undesirable side-effects.
+     * {@link android.app.Activity#onRestoreInstanceState}. This method should 
+     * be called to restore the state of the WebView before using the object. If 
+     * it is called after the WebView has had a chance to build state (load 
+     * pages, create a back/forward list, etc.) there may be undesirable 
+     * side-effects. Please note that this method no longer restores the
+     * display data for this WebView. See {@link #savePicture} and {@link
+     * #restorePicture} for saving and restoring the display data.
      * @param inState The incoming Bundle of state.
      * @return The restored back/forward list or null if restoreState failed.
+     * @see #savePicture
+     * @see #restorePicture
      */
     public WebBackForwardList restoreState(Bundle inState) {
         WebBackForwardList returnList = null;
+        if (inState == null) {
+            return returnList;
+        }
         if (inState.containsKey("index") && inState.containsKey("history")) {
             mCertificate = SslCertificate.restoreState(
                 inState.getBundle("certificate"));
@@ -852,42 +963,6 @@ public class WebView extends AbsoluteLayout
                     }
                     WebHistoryItem item = new WebHistoryItem(data);
                     list.addHistoryItem(item);
-                }
-                if (inState.containsKey("picture")) {
-                    String path = inState.getString("picture");
-                    File f = new File(path);
-                    if (f.exists()) {
-                        Picture p = null;
-                        try {
-                            final FileInputStream in = new FileInputStream(f);
-                            p = Picture.createFromStream(in);
-                            in.close();
-                            f.delete();
-                        } catch (FileNotFoundException e){
-                            e.printStackTrace();
-                        } catch (RuntimeException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        if (p != null) {
-                            int sx = inState.getInt("scrollX", 0);
-                            int sy = inState.getInt("scrollY", 0);
-                            float scale = inState.getFloat("scale", 1.0f);
-                            mDrawHistory = true;
-                            mHistoryPicture = p;
-                            mScrollX = sx;
-                            mScrollY = sy;
-                            mHistoryWidth = Math.round(p.getWidth() * scale);
-                            mHistoryHeight = Math.round(p.getHeight() * scale);
-                            // as getWidth() / getHeight() of the view are not
-                            // available yet, set up mActualScale, so that when
-                            // onSizeChanged() is called, the rest will be set
-                            // correctly
-                            mActualScale = scale;
-                            invalidate();
-                        }
-                    }
                 }
                 // Grab the most recent copy to return to the caller.
                 returnList = copyBackForwardList();
@@ -929,14 +1004,22 @@ public class WebView extends AbsoluteLayout
      * Load the given data into the WebView, use the provided URL as the base
      * URL for the content. The base URL is the URL that represents the page
      * that is loaded through this interface. As such, it is used for the
-     * history entry and to resolve any relative URLs.
-     * The failUrl is used if browser fails to load the data provided. If it 
-     * is empty or null, and the load fails, then no history entry is created.
+     * history entry and to resolve any relative URLs. The failUrl is used if
+     * browser fails to load the data provided. If it is empty or null, and the
+     * load fails, then no history entry is created.
+     * <p>
+     * Note for post 1.0. Due to the change in the WebKit, the access to asset
+     * files through "file:///android_asset/" for the sub resources is more
+     * restricted. If you provide null or empty string as baseUrl, you won't be
+     * able to access asset files. If the baseUrl is anything other than
+     * http(s)/ftp(s)/about/javascript as scheme, you can access asset files for
+     * sub resources.
+     * 
      * @param baseUrl Url to resolve relative paths with, if null defaults to
-     *        "about:blank"
+     *            "about:blank"
      * @param data A String of data in the given encoding.
      * @param mimeType The MIMEType of the data. i.e. text/html. If null,
-     *        defaults to "text/html"
+     *            defaults to "text/html"
      * @param encoding The encoding of the data. i.e. utf-8, us-ascii
      * @param failUrl URL to use if the content fails to load or null.
      */
@@ -1133,7 +1216,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        mWebViewCore.clearContentPicture();
+        mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
     
     /**
@@ -1197,7 +1280,7 @@ public class WebView extends AbsoluteLayout
         clearTextEntry();
         ExtendedZoomControls zoomControls = (ExtendedZoomControls) 
                 getZoomControls();
-        zoomControls.show(canZoomScrollOut());
+        zoomControls.show(true, canZoomScrollOut());
         zoomControls.requestFocus();
         mPrivateHandler.removeCallbacks(mZoomControlRunnable);
         mPrivateHandler.postDelayed(mZoomControlRunnable,
@@ -1206,11 +1289,15 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Return a HitTestResult based on the current focus node. If a HTML::a tag
-     * is found, the HitTestResult type is set to ANCHOR_TYPE and the url has to
-     * be retrieved through {@link #requestFocusNodeHref} asynchronously. If a
-     * HTML::img tag is found, the HitTestResult type is set to IMAGE_TYPE and
-     * the url has to be retrieved through {@link #requestFocusNodeHref}
-     * asynchronously. If a phone number is found, the HitTestResult type is set
+     * is found and the anchor has a non-javascript url, the HitTestResult type
+     * is set to SRC_ANCHOR_TYPE and the url is set in the "extra" field. If the
+     * anchor does not have a url or if it is a javascript url, the type will
+     * be UNKNOWN_TYPE and the url has to be retrieved through
+     * {@link #requestFocusNodeHref} asynchronously. If a HTML::img tag is
+     * found, the HitTestResult type is set to IMAGE_TYPE and the url is set in
+     * the "extra" field. A type of
+     * SRC_IMAGE_ANCHOR_TYPE indicates an anchor with a url that has an image as
+     * a child node. If a phone number is found, the HitTestResult type is set
      * to PHONE_TYPE and the phone number is set in the "extra" field of
      * HitTestResult. If a map address is found, the HitTestResult type is set
      * to GEO_TYPE and the address is set in the "extra" field of HitTestResult.
@@ -1227,42 +1314,38 @@ public class WebView extends AbsoluteLayout
 
         if (nativeUpdateFocusNode()) {
             FocusNode node = mFocusNode;
-            if (node.mIsAnchor && node.mText == null) {
-                result.setType(HitTestResult.ANCHOR_TYPE);
-            } else if (node.mIsTextField || node.mIsTextArea) {
+            if (node.mIsTextField || node.mIsTextArea) {
                 result.setType(HitTestResult.EDIT_TEXT_TYPE);
-            } else {
+            } else if (node.mText != null) {
                 String text = node.mText;
-                if (text != null) {
-                    if (text.startsWith(SCHEME_TEL)) {
-                        result.setType(HitTestResult.PHONE_TYPE);
-                        result.setExtra(text.substring(SCHEME_TEL.length()));
-                    } else if (text.startsWith(SCHEME_MAILTO)) {
-                        result.setType(HitTestResult.EMAIL_TYPE);
-                        result.setExtra(text.substring(SCHEME_MAILTO.length()));
-                    } else if (text.startsWith(SCHEME_GEO)) {
-                        result.setType(HitTestResult.GEO_TYPE);
-                        result.setExtra(URLDecoder.decode(text
-                                .substring(SCHEME_GEO.length())));
-                    }
+                if (text.startsWith(SCHEME_TEL)) {
+                    result.setType(HitTestResult.PHONE_TYPE);
+                    result.setExtra(text.substring(SCHEME_TEL.length()));
+                } else if (text.startsWith(SCHEME_MAILTO)) {
+                    result.setType(HitTestResult.EMAIL_TYPE);
+                    result.setExtra(text.substring(SCHEME_MAILTO.length()));
+                } else if (text.startsWith(SCHEME_GEO)) {
+                    result.setType(HitTestResult.GEO_TYPE);
+                    result.setExtra(URLDecoder.decode(text
+                            .substring(SCHEME_GEO.length())));
+                } else if (node.mIsAnchor) {
+                    result.setType(HitTestResult.SRC_ANCHOR_TYPE);
+                    result.setExtra(text);
                 }
             }
         }
         int type = result.getType();
         if (type == HitTestResult.UNKNOWN_TYPE
-                || type == HitTestResult.ANCHOR_TYPE) {
+                || type == HitTestResult.SRC_ANCHOR_TYPE) {
             // Now check to see if it is an image.
             int contentX = viewToContent((int) mLastTouchX + mScrollX);
             int contentY = viewToContent((int) mLastTouchY + mScrollY);
-            if (nativeIsImage(contentX, contentY)) {
+            String text = nativeImageURI(contentX, contentY);
+            if (text != null) {
                 result.setType(type == HitTestResult.UNKNOWN_TYPE ? 
                         HitTestResult.IMAGE_TYPE : 
-                        HitTestResult.IMAGE_ANCHOR_TYPE);
-            }
-            if (nativeHasSrcUrl()) {
-                result.setType(result.getType() == HitTestResult.ANCHOR_TYPE ? 
-                        HitTestResult.SRC_ANCHOR_TYPE : 
                         HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
+                result.setExtra(text);
             }
         }
         return result;
@@ -1284,12 +1367,15 @@ public class WebView extends AbsoluteLayout
         if (nativeUpdateFocusNode()) {
             FocusNode node = mFocusNode;
             if (node.mIsAnchor) {
+                // NOTE: We may already have the url of the anchor stored in
+                // node.mText but it may be out of date or the caller may want
+                // to know about javascript urls.
                 mWebViewCore.sendMessage(EventHub.REQUEST_FOCUS_HREF,
                         node.mFramePointer, node.mNodePointer, hrefMsg);
             }
         }
     }
-
+    
     /**
      * Request the url of the image last touched by the user. msg will be sent
      * to its target with a String representing the url as its object.
@@ -1298,13 +1384,13 @@ public class WebView extends AbsoluteLayout
      *            as the data member with "url" as key. The result can be null.
      */
     public void requestImageRef(Message msg) {
-        if (msg == null || mNativeClass == 0) {
-            return;
-        }
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        mWebViewCore.sendMessage(EventHub.REQUEST_IMAGE_HREF, contentX,
-                contentY, msg);
+        String ref = nativeImageURI(contentX, contentY);
+        Bundle data = msg.getData();
+        data.putString("url", ref);
+        msg.setData(data);
+        msg.sendToTarget();
     }
 
     private static int pinLoc(int x, int viewMax, int docMax) {
@@ -1338,6 +1424,25 @@ public class WebView extends AbsoluteLayout
 
     private int contentToView(int x) {
         return Math.round(x * mActualScale);
+    }
+
+    // Called by JNI to invalidate the View, given rectangle coordinates in
+    // content space
+    private void viewInvalidate(int l, int t, int r, int b) {
+        invalidate(contentToView(l), contentToView(t), contentToView(r),
+                contentToView(b));
+    }
+
+    // Called by JNI to invalidate the View after a delay, given rectangle
+    // coordinates in content space
+    private void viewInvalidateDelayed(long delay, int l, int t, int r, int b) {
+        postInvalidateDelayed(delay, contentToView(l), contentToView(t),
+                contentToView(r), contentToView(b));
+    }
+
+    private Rect contentToView(Rect x) {
+        return new Rect(contentToView(x.left), contentToView(x.top)
+                , contentToView(x.right), contentToView(x.bottom));
     }
 
     /* call from webcoreview.draw(), so we're still executing in the UI thread
@@ -1420,14 +1525,28 @@ public class WebView extends AbsoluteLayout
 
     // Used to avoid sending many visible rect messages.
     private Rect mLastVisibleRectSent;
+    private Rect mLastGlobalRect;
 
     private Rect sendOurVisibleRect() {
         Rect rect = new Rect();
         calcOurContentVisibleRect(rect);
+        if (mFindIsUp) {
+            rect.bottom -= viewToContent(FIND_HEIGHT);
+        }
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
-            mWebViewCore.sendMessage(EventHub.SET_VISIBLE_RECT, rect);
+            mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
+                                     rect.left, rect.top);
             mLastVisibleRectSent = rect;
+        }
+        Rect globalRect = new Rect();
+        if (getGlobalVisibleRect(globalRect)
+                && !globalRect.equals(mLastGlobalRect)) {
+            // TODO: the global offset is only used by windowRect()
+            // in ChromeClientAndroid ; other clients such as touch
+            // and mouse events could return view + screen relative points.
+            mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, globalRect);
+            mLastGlobalRect = globalRect;
         }
         return rect;
     }
@@ -1488,12 +1607,19 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    // Make sure this stays in sync with the actual height of the FindDialog.
+    private static final int FIND_HEIGHT = 79;
+
     @Override
     protected int computeVerticalScrollRange() {
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
-            return contentToView(mContentHeight);
+            int height = contentToView(mContentHeight);
+            if (mFindIsUp) {
+                height += FIND_HEIGHT;
+            }
+            return height;
         }
     }
 
@@ -1506,6 +1632,21 @@ public class WebView extends AbsoluteLayout
     public String getUrl() {
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getUrl() : null;
+    }
+    
+    /**
+     * Get the original url for the current page. This is not always the same 
+     * as the url passed to WebViewClient.onPageStarted because although the 
+     * load for that url has begun, the current page may not have changed.
+     * Also, there may have been redirects resulting in a different url to that
+     * originally requested.
+     * @return The url that was originally requested for the current page.
+     * 
+     * @hide pending API Council approval
+     */
+    public String getOriginalUrl() {
+        WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
+        return h != null ? h.getOriginalUrl() : null;
     }
 
     /**
@@ -1612,82 +1753,35 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * Making the find methods private since we are disabling for 1.0
+     * Highlight and scroll to the next occurance of String in findAll.
+     * Wraps the page infinitely, and scrolls.  Must be called after 
+     * calling findAll.
      *
-     * Find and highlight the next occurance of the String find, beginning with
-     * the current selection. Wraps the page infinitely, and scrolls. When
-     * WebCore determines whether it has found it, the response message is sent
-     * to its target with true(1) or false(0) as arg1 depending on whether the
-     * text was found.
-     * @param find String to find.
-     * @param response A Message object that will be dispatched with the result
-     *                 as the arg1 member. A result of 1 means the search
-     *                 succeeded.
+     * @param forward Direction to search.
      */
-    private void findNext(String find, Message response) {
-        if (response == null) {
-            return;
-        }
-        Message m = Message.obtain(null, EventHub.FIND, 1, 0, response);
-        m.getData().putString("find", find);
-        mWebViewCore.sendMessage(m);
+    public void findNext(boolean forward) {
+        nativeFindNext(forward);
     }
 
     /*
-     * Making the find methods private since we are disabling for 1.0
-     *
-     * Find and highlight the previous occurance of the String find, beginning
-     * with the current selection.
-     * @param find String to find.
-     * @param response A Message object that will be dispatched with the result
-     *                 as the arg1 member. A result of 1 means the search
-     *                 succeeded.
-     */
-    private void findPrevious(String find, Message response) {
-        if (response == null) {
-            return;
-        }
-        Message m = Message.obtain(null, EventHub.FIND, -1, 0, response);
-        m.getData().putString("find", find);
-        mWebViewCore.sendMessage(m);
-    }
-
-    /*
-     * Making the find methods private since we are disabling for 1.0
-     *
-     * Find and highlight the first occurance of find, beginning with the start
-     * of the page.
-     * @param find String to find.
-     * @param response A Message object that will be dispatched with the result
-     *                 as the arg1 member. A result of 1 means the search
-     *                 succeeded.
-     */
-    private void findFirst(String find, Message response) {
-        if (response == null) {
-            return;
-        }
-        Message m = Message.obtain(null, EventHub.FIND, 0, 0, response);
-        m.getData().putString("find", find);
-        mWebViewCore.sendMessage(m);
-    }
-
-    /*
-     * Making the find methods private since we are disabling for 1.0
-     *
      * Find all instances of find on the page and highlight them.
      * @param find  String to find.
-     * @param response A Message object that will be dispatched with the result
-     *                 as the arg1 member.  The result will be the number of
-     *                 matches to the String find.
+     * @return int  The number of occurances of the String "find"
+     *              that were found.
      */
-    private void findAll(String find, Message response) {
-        if (response == null) {
-            return;
-        }
-        Message m = Message.obtain(null, EventHub.FIND_ALL, 0, 0, response);
-        m.getData().putString("find", find);
-        mWebViewCore.sendMessage(m);
+    public int findAll(String find) {
+        mFindIsUp = true;
+        int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
+        invalidate();
+        return result;
     }
+
+    // Used to know whether the find dialog is open.  Affects whether
+    // or not we draw the highlights for matches.
+    private boolean mFindIsUp;
+
+    private native int nativeFindAll(String findLower, String findUpper);
+    private native void nativeFindNext(boolean forward);
     
     /**
      * Return the first substring consisting of the address of a physical 
@@ -1714,12 +1808,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * Making the find methods private since we are disabling for 1.0
-     *
      * Clear the highlighting surrounding text matches created by findAll.
      */
-    private void clearMatches() {
-        mWebViewCore.sendMessage(EventHub.CLEAR_MATCHES);
+    public void clearMatches() {
+        mFindIsUp = false;
+        nativeSetFindIsDown();
+        // Now that the dialog has been removed, ensure that we scroll to a
+        // location that is not beyond the end of the page.
+        pinScrollTo(mScrollX, mScrollY, false);
+        invalidate();
     }
 
     /**
@@ -2023,10 +2120,21 @@ public class WebView extends AbsoluteLayout
             nativeRecomputeFocus();
             // Update the buttons in the picture, so when we draw the picture
             // to the screen, they are in the correct state.
-            nativeRecordButtons();
+            // Tell the native side if user is a) touching the screen,
+            // b) pressing the trackball down, or c) pressing the enter key
+            // If the focus is a button, we need to draw it in the pressed
+            // state.
+            // If mNativeClass is 0, we should not reach here, so we do not
+            // need to check it again.
+            nativeRecordButtons(mTouchMode == TOUCH_SHORTPRESS_START_MODE
+                    || mTrackballDown || mGotEnterDown, false);
             drawCoreAndFocusRing(canvas, mBackgroundColor, mDrawFocusRing);
         }
         canvas.restoreToCount(sc);
+        
+        if (AUTO_REDRAW_HACK && mAutoRedraw) {
+            invalidate();
+        }
     }
 
     @Override
@@ -2097,7 +2205,12 @@ public class WebView extends AbsoluteLayout
 
         if (mNativeClass == 0) return;
         if (mShiftIsPressed) {
-            nativeDrawSelection(canvas, mSelectX, mSelectY, mExtendSelection);
+            if (mTouchSelection) {
+                nativeDrawSelectionRegion(canvas);
+            } else {
+                nativeDrawSelection(canvas, mSelectX, mSelectY, 
+                        mExtendSelection);
+            }
         } else if (drawFocus) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
@@ -2111,7 +2224,14 @@ public class WebView extends AbsoluteLayout
             }
             nativeDrawFocusRing(canvas);
         }
+        // When the FindDialog is up, only draw the matches if we are not in
+        // the process of scrolling them into view.
+        if (mFindIsUp && !animateScroll) {
+            nativeDrawMatches(canvas);
+        }
     }
+
+    private native void nativeDrawMatches(Canvas canvas);
     
     private float scrollZoomGridScale(float invScale) {
         float griddedInvScale = (int) (invScale * SCROLL_ZOOM_GRID) 
@@ -2163,17 +2283,38 @@ public class WebView extends AbsoluteLayout
         Rect scrollFrame = new Rect();
         scrollFrame.set(mZoomScrollX, mZoomScrollY, 
                 mZoomScrollX + width, mZoomScrollY + height);
-        if (mContentWidth == width) {
-            float offsetX = (width * halfScale - width) / 2;
+        if (mContentWidth * mZoomScrollLimit < width) {
+            float scale = zoomFrameScaleX(width, halfScale, 1.0f);
+            float offsetX = (width * scale - width) * 0.5f;
             scrollFrame.left -= offsetX;
             scrollFrame.right += offsetX;
         }
-        if (mContentHeight == height) {
-            float offsetY = (height * halfScale - height) / 2;
+        if (mContentHeight * mZoomScrollLimit < height) {
+            float scale = zoomFrameScaleY(height, halfScale, 1.0f);
+            float offsetY = (height * scale - height) * 0.5f;
             scrollFrame.top -= offsetY;
             scrollFrame.bottom += offsetY;
         }
         return scrollFrame;
+    }
+    
+    private float zoomFrameScaleX(int width, float halfScale, float noScale) {
+        // mContentWidth > width > mContentWidth * mZoomScrollLimit
+        if (mContentWidth <= width) {
+            return halfScale;
+        }
+        float part = (width - mContentWidth * mZoomScrollLimit)  
+                / (width * (1 - mZoomScrollLimit));
+        return halfScale * part + noScale * (1.0f - part);
+    }
+    
+    private float zoomFrameScaleY(int height, float halfScale, float noScale) {
+        if (mContentHeight <= height) {
+            return halfScale;
+        }
+        float part = (height - mContentHeight * mZoomScrollLimit)  
+                / (height * (1 - mZoomScrollLimit));
+        return halfScale * part + noScale * (1.0f - part);
     }
     
     private float scrollZoomMagScale(float invScale) {
@@ -2252,8 +2393,14 @@ public class WebView extends AbsoluteLayout
         }
         int sc = canvas.save();
         canvas.clipRect(scrollFrame);
-        float halfX = maxX > 0 ? (float) mZoomScrollX / maxX : 0.5f;
-        float halfY = maxY > 0 ? (float) mZoomScrollY / maxY : 0.5f;
+        float halfX = (float) mZoomScrollX / maxX;
+        if (mContentWidth * mZoomScrollLimit < width) {
+            halfX = zoomFrameScaleX(width, 0.5f, halfX);
+        }
+        float halfY = (float) mZoomScrollY / maxY;
+        if (mContentHeight * mZoomScrollLimit < height) {
+            halfY = zoomFrameScaleY(height, 0.5f, halfY);
+        }
         canvas.scale(halfScale, halfScale, mZoomScrollX + width * halfX
                 , mZoomScrollY + height * halfY);
         if (LOGV_ENABLED) {
@@ -2350,7 +2497,10 @@ public class WebView extends AbsoluteLayout
     }
     
     private void zoomScrollOut() {
-        if (canZoomScrollOut() == false) return;
+        if (canZoomScrollOut() == false) {
+            mTouchMode = TOUCH_DONE_MODE;
+            return;
+        }
         startZoomScrollOut();
         mTouchMode = SCROLL_ZOOM_ANIMATION_OUT;
         invalidate();
@@ -2377,8 +2527,8 @@ public class WebView extends AbsoluteLayout
                         + " mZoomScrollLimit=" + mZoomScrollLimit + " x=" + x); 
             }
             x += maxScreenX * mLastScrollX / maxZoomX - mLastTouchX;
-            x = Math.max(0, Math.min(maxScreenX, x));
-            mZoomScrollX = (int) (x * maxZoomX / maxScreenX);
+            x *= Math.max(maxZoomX / maxScreenX, mZoomScrollInvLimit);
+            mZoomScrollX = Math.max(0, Math.min(maxZoomX, (int) x));
         }
         int maxZoomY = mContentHeight - height;
         if (maxZoomY > 0) {
@@ -2390,8 +2540,8 @@ public class WebView extends AbsoluteLayout
                         + " mZoomScrollLimit=" + mZoomScrollLimit + " y=" + y); 
             }
             y += maxScreenY * mLastScrollY / maxZoomY - mLastTouchY;
-            y = Math.max(0, Math.min(maxScreenY, y));
-            mZoomScrollY = (int) (y * maxZoomY / maxScreenY);
+            y *= Math.max(maxZoomY / maxScreenY, mZoomScrollInvLimit);
+            mZoomScrollY = Math.max(0, Math.min(maxZoomY, (int) y));
         }
         if (oldX != mZoomScrollX || oldY != mZoomScrollY) {
             invalidate();
@@ -2540,6 +2690,13 @@ public class WebView extends AbsoluteLayout
                 new WebViewCore.FocusData(mFocusData));
     }
 
+    // Called by JNI when a touch event puts a textfield into focus.
+    private void displaySoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mTextEntry);
+    }
+
     // Used to register the global focus change listener one time to avoid
     // multiple references to WebView
     private boolean mGlobalFocusChangeListenerAdded;
@@ -2663,7 +2820,8 @@ public class WebView extends AbsoluteLayout
             ArrayList<String> pastEntries = mDatabase.getFormData(mUrl, mName);
             if (pastEntries.size() > 0) {
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        mContext, com.android.internal.R.layout.simple_list_item_1,
+                        mContext, com.android.internal.R.layout
+                        .search_dropdown_item_1line,
                         pastEntries);
                 ((HashMap) mUpdateMessage.obj).put("adapter", adapter);
                 mUpdateMessage.sendToTarget();
@@ -2679,152 +2837,166 @@ public class WebView extends AbsoluteLayout
         mTextEntry.setRect(x, y, width, height);
     }
 
-    // These variables are used to determine long press with the enter key, or
+    // This is used to determine long press with the enter key, or
     // a center key.  Does not affect long press with the trackball/touch.
-    private long mDownTime = 0;
-    private boolean mGotDown = false;
+    private boolean mGotEnterDown = false;
 
     // Enable copy/paste with trackball here.
     // This should be left disabled until the framework can guarantee
     // delivering matching key-up and key-down events for the shift key
-    private static final boolean ENABLE_COPY_PASTE = false;
+    private static final boolean ENABLE_COPY_PASTE = true;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
+        if (LOGV_ENABLED) {
+            Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
+                    + ", " + event);
+        }
+
+        if (mNativeClass == 0) {
             return false;
         }
-        if (keyCode != KeyEvent.KEYCODE_DPAD_CENTER && 
-                keyCode != KeyEvent.KEYCODE_ENTER) {
-            mGotDown = false;
+
+        // do this hack up front, so it always works, regardless of touch-mode
+        if (AUTO_REDRAW_HACK && (keyCode == KeyEvent.KEYCODE_CALL)) {
+            mAutoRedraw = !mAutoRedraw;
+            if (mAutoRedraw) {
+                invalidate();
+            }
+            return true;
         }
-        if (mAltIsPressed == false && (keyCode == KeyEvent.KEYCODE_ALT_LEFT 
-                || keyCode == KeyEvent.KEYCODE_ALT_RIGHT)) {
-            mAltIsPressed = true;
+
+        // Bubble up the key event if
+        // 1. it is a system key; or
+        // 2. the host application wants to handle it; or
+        // 3. webview is in scroll-zoom state;
+        if (event.isSystem()
+                || mCallbackProxy.uiOverrideKeyEvent(event)
+                || (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM)) {
+            return false;
         }
+
         if (ENABLE_COPY_PASTE && mShiftIsPressed == false 
                 && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
             mExtendSelection = false;
             mShiftIsPressed = true;
-            if (mNativeClass != 0 && nativeUpdateFocusNode()) {
+            if (nativeUpdateFocusNode()) {
                 FocusNode node = mFocusNode;
-                mSelectX = node.mBounds.left;
-                mSelectY = node.mBounds.top;
+                mSelectX = contentToView(node.mBounds.left);
+                mSelectY = contentToView(node.mBounds.top);
             } else {
-                mSelectX = mScrollX + SELECT_CURSOR_OFFSET;
-                mSelectY = mScrollY + SELECT_CURSOR_OFFSET;
+                mSelectX = mScrollX + (int) mLastTouchX;
+                mSelectY = mScrollY + (int) mLastTouchY;
             }
        }
-       if (keyCode == KeyEvent.KEYCODE_CALL) {
-            if (mNativeClass != 0 && nativeUpdateFocusNode()) {
-                FocusNode node = mFocusNode;
-                String text = node.mText;
-                if (!node.mIsTextField && !node.mIsTextArea && text != null &&
-                        text.startsWith(SCHEME_TEL)) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL,
-                            Uri.parse(text));
-                    getContext().startActivity(intent);
-                    return true;
-                }
+
+        if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
+                && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+            // always handle the navigation keys in the UI thread
+            switchOutDrawHistory();
+            if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
+                playSoundEffect(keyCodeToSoundsEffect(keyCode));
+                return true;
             }
+            // Bubble up the key event as WebView doesn't handle it
             return false;
         }
 
-        if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                || keyCode == KeyEvent.KEYCODE_ENTER) {
+            switchOutDrawHistory();
+            if (event.getRepeatCount() == 0) {
+                mGotEnterDown = true;
+                mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                        .obtainMessage(LONG_PRESS_ENTER), LONG_PRESS_TIMEOUT);
+                nativeRecordButtons(true, true);
+                // FIXME, currently in webcore keydown it doesn't do anything.
+                // In keyup, it calls both keydown and keyup, we should fix it.
+                mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
+                        EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+                return true;
+            }
+            // Bubble up the key event as WebView doesn't handle it
             return false;
         }
-        if (LOGV_ENABLED) {
-            Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
-                    + ", " + event);
-        }
-        boolean isArrowKey = keyCode == KeyEvent.KEYCODE_DPAD_UP ||
-                keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
-                keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
-                keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
-        if (isArrowKey && event.getEventTime() - mTrackballLastTime 
-                <= TRACKBALL_KEY_TIMEOUT) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "ignore arrow");
-            return false;
-        }
-        boolean weHandledTheKey = false;
 
-        if (event.getMetaState() == 0) {
+        if (getSettings().getNavDump()) {
             switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    // TODO: alternatively we can do panning as touch does
-                    switchOutDrawHistory();
-                    weHandledTheKey = navHandledKey(keyCode, 1, false
-                            , event.getEventTime());
-                    if (weHandledTheKey) {
-                        playSoundEffect(keyCodeToSoundsEffect(keyCode));
-                    }
+                case KeyEvent.KEYCODE_4:
+                    // "/data/data/com.android.browser/displayTree.txt"
+                    nativeDumpDisplayTree(getUrl());
                     break;
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER:
-                    if (event.getRepeatCount() == 0) {
-                        switchOutDrawHistory();
-                        mDownTime = event.getEventTime();
-                        mGotDown = true;
-                        return true;
-                    } 
-                    if (mGotDown && event.getEventTime() - mDownTime > 
-                            ViewConfiguration.getLongPressTimeout()) {
-                        performLongClick();
-                        mGotDown = false;
-                        return true;
-                    }
+                case KeyEvent.KEYCODE_5:
+                case KeyEvent.KEYCODE_6:
+                    // 5: dump the dom tree to the file
+                    // "/data/data/com.android.browser/domTree.txt"
+                    // 6: dump the dom tree to the adb log
+                    mWebViewCore.sendMessage(EventHub.DUMP_DOMTREE,
+                            (keyCode == KeyEvent.KEYCODE_5) ? 1 : 0, 0);
+                    break;
+                case KeyEvent.KEYCODE_7:
+                case KeyEvent.KEYCODE_8:
+                    // 7: dump the render tree to the file
+                    // "/data/data/com.android.browser/renderTree.txt"
+                    // 8: dump the render tree to the adb log
+                    mWebViewCore.sendMessage(EventHub.DUMP_RENDERTREE,
+                            (keyCode == KeyEvent.KEYCODE_7) ? 1 : 0, 0);
                     break;
                 case KeyEvent.KEYCODE_9:
-                    if (mNativeClass != 0 && getSettings().getNavDump()) {
-                        debugDump();
-                    }
-                    break;
-                default:
+                    debugDump();
                     break;
             }
         }
 
-        // suppress sending arrow keys to webkit
-        if (!weHandledTheKey && !isArrowKey) {
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode, 0, event);
+        if (nativeFocusNodeWantsKeyEvents()) {
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
+                                 EventHub.KEYEVENT_FOCUS_NODE_TYPE, event);
+            // return true as DOM handles the key
+            return true;
+        } else if (false) { // reserved to check the meta tag
+            // pass the key to DOM
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
+                                 EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+            // return true as DOM handles the key
+            return true;
         }
 
-        return weHandledTheKey;
+        // Bubble up the key event as WebView doesn't handle it
+        return false;
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (mExtendSelection) {
-                // copy region so core operates on copy without touching orig.
-                Region selection = new Region(nativeGetSelection());
-                if (selection.isEmpty() == false) {
-                    Toast.makeText(mContext
-                            , com.android.internal.R.string.text_copied
-                            , Toast.LENGTH_SHORT).show();
-                    mWebViewCore.sendMessage(EventHub.GET_SELECTION, selection);
-                }
-            }
-            mShiftIsPressed = false;
-            return true;
-        }
         if (LOGV_ENABLED) {
-            Log.v(LOGTAG, "MT keyUp at" + System.currentTimeMillis()
+            Log.v(LOGTAG, "keyUp at " + System.currentTimeMillis()
                     + ", " + event);
         }
-        if (keyCode == KeyEvent.KEYCODE_ALT_LEFT 
-                || keyCode == KeyEvent.KEYCODE_ALT_RIGHT) {
-            mAltIsPressed = false;
+
+        if (mNativeClass == 0) {
+            return false;
         }
+
+        // special CALL handling when focus node's href is "tel:XXX"
+        if (keyCode == KeyEvent.KEYCODE_CALL && nativeUpdateFocusNode()) {
+            FocusNode node = mFocusNode;
+            String text = node.mText;
+            if (!node.mIsTextField && !node.mIsTextArea && text != null
+                    && text.startsWith(SCHEME_TEL)) {
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(text));
+                getContext().startActivity(intent);
+                return true;
+            }
+        }
+
+        // Bubble up the key event if
+        // 1. it is a system key; or
+        // 2. the host application wants to handle it;
         if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
             return false;
         }
 
+        // special handling in scroll_zoom state
         if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
             if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode
                     && mTouchMode != SCROLL_ZOOM_ANIMATION_IN) {
@@ -2835,64 +3007,112 @@ public class WebView extends AbsoluteLayout
             }
             return false;
         }
-        Rect visibleRect = sendOurVisibleRect();
-        // Note that sendOurVisibleRect calls viewToContent, so the coordinates
-        // should be in content coordinates.
-        boolean nodeOnScreen = false;
-        boolean isTextField = false;
-        boolean isTextArea = false;
-        FocusNode node = null;
-        if (mNativeClass != 0 && nativeUpdateFocusNode()) {
-            node = mFocusNode;
-            isTextField = node.mIsTextField;
-            isTextArea = node.mIsTextArea;
-            nodeOnScreen = Rect.intersects(node.mBounds, visibleRect);
+
+        if (ENABLE_COPY_PASTE && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
+                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
+            if (commitCopy()) {
+                return true;
+            }
         }
 
-        if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-            if (mShiftIsPressed) {
-                return false;
-            }
-            if (getSettings().supportZoom()) {
-                if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
-                    zoomScrollOut();
-                } else {
-                    if (LOGV_ENABLED) Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
-                    mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                            .obtainMessage(SWITCH_TO_ENTER), TAP_TIMEOUT);
-                    mTouchMode = TOUCH_DOUBLECLICK_MODE;
-                }
-                return true;
-            } else {
-                keyCode = KeyEvent.KEYCODE_ENTER;
-            }
-        }
-        if (KeyEvent.KEYCODE_ENTER == keyCode) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "KEYCODE_ENTER == keyCode");
-            if (!nodeOnScreen) {
-                return false;
-            }
-            if (node != null && !isTextField && !isTextArea) {
-                nativeSetFollowedLink(true);
-                mWebViewCore.sendMessage(EventHub.SET_FINAL_FOCUS, 
-                        EventHub.BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP, 0,
-                        new WebViewCore.FocusData(mFocusData));
-                if (mCallbackProxy.uiOverrideUrlLoading(node.mText)) {
-                    return true;
-                }
-                playSoundEffect(SoundEffectConstants.CLICK);
-            }
-        }
-        if (!nodeOnScreen) {
-            // FIXME: Want to give Callback a chance to handle it, and
-            // possibly pass down to javascript.
+        if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
+                && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+            // always handle the navigation keys in the UI thread
+            // Bubble up the key event as WebView doesn't handle it
             return false;
         }
-        if (LOGV_ENABLED) Log.v(LOGTAG, "onKeyUp send EventHub.KEY_UP");
-        mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode, 0, event);
-        return true;
+
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                || keyCode == KeyEvent.KEYCODE_ENTER) {
+            // remove the long press message first
+            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
+            mGotEnterDown = false;
+
+            if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+                if (mShiftIsPressed) {
+                    return false;
+                }
+                if (getSettings().supportZoom()) {
+                    if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
+                        zoomScrollOut();
+                    } else {
+                        if (LOGV_ENABLED) {
+                            Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
+                        }
+                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                                .obtainMessage(SWITCH_TO_ENTER), TAP_TIMEOUT);
+                        mTouchMode = TOUCH_DOUBLECLICK_MODE;
+                    }
+                    return true;
+                }
+            }
+
+            Rect visibleRect = sendOurVisibleRect();
+            // Note that sendOurVisibleRect calls viewToContent, so the
+            // coordinates should be in content coordinates.
+            boolean nodeOnScreen = false;
+            boolean isTextField = false;
+            boolean isTextArea = false;
+            FocusNode node = null;
+            if (nativeUpdateFocusNode()) {
+                node = mFocusNode;
+                isTextField = node.mIsTextField;
+                isTextArea = node.mIsTextArea;
+                nodeOnScreen = Rect.intersects(node.mBounds, visibleRect);
+            }
+            if (nodeOnScreen && !isTextField && !isTextArea) {
+                nativeSetFollowedLink(true);
+                mWebViewCore.sendMessage(EventHub.SET_FINAL_FOCUS,
+                        EventHub.BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP, 0,
+                        new WebViewCore.FocusData(mFocusData));
+                playSoundEffect(SoundEffectConstants.CLICK);
+                if (!mCallbackProxy.uiOverrideUrlLoading(node.mText)) {
+                    mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
+                            EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+                }
+                return true;
+            }
+            // Bubble up the key event as WebView doesn't handle it
+            return false;
+        }
+
+        if (nativeFocusNodeWantsKeyEvents()) {
+            mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
+                    EventHub.KEYEVENT_FOCUS_NODE_TYPE, event);
+            // return true as DOM handles the key
+            return true;
+        } else if (false) { // reserved to check the meta tag
+            // pass the key to DOM
+            mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
+                    EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+            // return true as DOM handles the key
+            return true;
+        }
+
+        // Bubble up the key event as WebView doesn't handle it
+        return false;
     }
-    
+
+    private boolean commitCopy() {
+        boolean copiedSomething = false;
+        if (mExtendSelection) {
+            // copy region so core operates on copy without touching orig.
+            Region selection = new Region(nativeGetSelection());
+            if (selection.isEmpty() == false) {
+                Toast.makeText(mContext
+                        , com.android.internal.R.string.text_copied
+                        , Toast.LENGTH_SHORT).show();
+                mWebViewCore.sendMessage(EventHub.GET_SELECTION, selection);
+                copiedSomething = true;
+            }
+        }
+        mShiftIsPressed = false;
+        if (mTouchMode == TOUCH_SELECT_MODE) {
+            mTouchMode = TOUCH_INIT_MODE;
+        }
+        return copiedSomething;
+    }
+
     // Set this as a hierarchy change listener so we can know when this view
     // is removed and still have access to our parent.
     @Override
@@ -2962,6 +3182,7 @@ public class WebView extends AbsoluteLayout
             // we regain focus.
             mDrawFocusRing = false;
             mGotKeyDown = false;
+            mShiftIsPressed = false;
             if (inEditingMode()) {
                 clearTextEntry();
                 mNeedsUpdateTextEntry = true;
@@ -3055,8 +3276,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mNativeClass == 0 || !isClickable() || !isLongClickable() || 
-                !hasFocus()) {
+        if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
             return false;
         }
 
@@ -3069,6 +3289,32 @@ public class WebView extends AbsoluteLayout
         float x = ev.getX();
         float y = ev.getY();
         long eventTime = ev.getEventTime();
+
+        // Due to the touch screen edge effect, a touch closer to the edge
+        // always snapped to the edge. As getViewWidth() can be different from
+        // getWidth() due to the scrollbar, adjusting the point to match
+        // getViewWidth(). Same applied to the height.
+        if (x > getViewWidth() - 1) {
+            x = getViewWidth() - 1;
+        }
+        if (y > getViewHeight() - 1) {
+            y = getViewHeight() - 1;
+        }
+
+        // pass the touch events from UI thread to WebCore thread
+        if (mForwardTouchEvents && mTouchMode != SCROLL_ZOOM_OUT
+                && mTouchMode != SCROLL_ZOOM_ANIMATION_IN
+                && mTouchMode != SCROLL_ZOOM_ANIMATION_OUT
+                && (action != MotionEvent.ACTION_MOVE || 
+                        eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
+            WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+            ted.mAction = action;
+            ted.mX = viewToContent((int) x + mScrollX);
+            ted.mY = viewToContent((int) y + mScrollY);;
+            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+            mLastSentTouchTime = eventTime;
+        }
+
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN
@@ -3083,6 +3329,16 @@ public class WebView extends AbsoluteLayout
                     mScroller.abortAnimation();
                     mTouchMode = TOUCH_DRAG_START_MODE;
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
+                } else if (mShiftIsPressed) {
+                    mSelectX = mScrollX + (int) x;
+                    mSelectY = mScrollY + (int) y;
+                    mTouchMode = TOUCH_SELECT_MODE;
+                    if (LOGV_ENABLED) {
+                        Log.v(LOGTAG, "select=" + mSelectX + "," + mSelectY);
+                    }
+                    nativeMoveSelection(viewToContent(mSelectX)
+                            , viewToContent(mSelectY), false);
+                    mTouchSelection = mExtendSelection = true;
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                 }
@@ -3116,6 +3372,17 @@ public class WebView extends AbsoluteLayout
                 int deltaY = (int) (mLastTouchY - y);
 
                 if (mTouchMode != TOUCH_DRAG_MODE) {
+                    if (mTouchMode == TOUCH_SELECT_MODE) {
+                        mSelectX = mScrollX + (int) x;
+                        mSelectY = mScrollY + (int) y;
+                        if (LOGV_ENABLED) {
+                            Log.v(LOGTAG, "xtend=" + mSelectX + "," + mSelectY);
+                        }
+                        nativeMoveSelection(viewToContent(mSelectX)
+                                , viewToContent(mSelectY), true);
+                        invalidate();
+                        break;
+                    }
                     if ((deltaX * deltaX + deltaY * deltaY)
                             < TOUCH_SLOP_SQUARE) {
                         break;
@@ -3214,11 +3481,13 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                if (mZoomControls != null && mMinZoomScale < mMaxZoomScale) {
+                boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
+                boolean showMagnify = canZoomScrollOut();
+                if (mZoomControls != null && (showPlusMinus || showMagnify)) {
                     if (mZoomControls.getVisibility() == View.VISIBLE) {
                         mPrivateHandler.removeCallbacks(mZoomControlRunnable);
                     } else {
-                        mZoomControls.show(canZoomScrollOut());
+                        mZoomControls.show(showPlusMinus, showMagnify);
                     }
                     mPrivateHandler.postDelayed(mZoomControlRunnable,
                             ZOOM_CONTROLS_TIMEOUT);
@@ -3243,6 +3512,10 @@ public class WebView extends AbsoluteLayout
                             mTouchMode = TOUCH_DONE_MODE;
                             doShortPress();
                         }
+                        break;
+                    case TOUCH_SELECT_MODE:
+                        commitCopy();
+                        mTouchSelection = mExtendSelection = false;
                         break;
                     case SCROLL_ZOOM_ANIMATION_IN:
                     case SCROLL_ZOOM_ANIMATION_OUT:
@@ -3349,6 +3622,7 @@ public class WebView extends AbsoluteLayout
     private int mTrackballXMove = 0;
     private int mTrackballYMove = 0;
     private boolean mExtendSelection = false;
+    private boolean mTouchSelection = false;
     private static final int TRACKBALL_KEY_TIMEOUT = 1000;
     private static final int TRACKBALL_TIMEOUT = 200;
     private static final int TRACKBALL_WAIT = 100;
@@ -3359,7 +3633,6 @@ public class WebView extends AbsoluteLayout
     private int mSelectX = 0;
     private int mSelectY = 0;
     private boolean mShiftIsPressed = false;
-    private boolean mAltIsPressed = false;
     private boolean mTrackballDown = false;
     private long mTrackballUpTime = 0;
     private long mLastFocusTime = 0;
@@ -3386,17 +3659,18 @@ public class WebView extends AbsoluteLayout
     @Override
     public boolean onTrackballEvent(MotionEvent ev) {
         long time = ev.getEventTime();
-        if (mAltIsPressed) {
+        if ((ev.getMetaState() & KeyEvent.META_ALT_ON) != 0) {
             if (ev.getY() > 0) pageDown(true);
             if (ev.getY() < 0) pageUp(true);
             return true;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mPrivateHandler.removeMessages(SWITCH_TO_ENTER);
-            mPrivateHandler.sendMessageDelayed(
-                    mPrivateHandler.obtainMessage(LONG_PRESS_TRACKBALL), 1000);
             mTrackTrackball = true;
             mTrackballDown = true;
+            if (mNativeClass != 0) {
+                nativeRecordButtons(true, true);
+            }
             if (time - mLastFocusTime <= TRACKBALL_TIMEOUT
                     && !mLastFocusBounds.equals(nativeGetFocusRingBounds())) {
                 nativeSelectBestAt(mLastFocusBounds);
@@ -3408,7 +3682,8 @@ public class WebView extends AbsoluteLayout
             }
             return false; // let common code in onKeyDown at it
         } else if (mTrackTrackball) {
-            mPrivateHandler.removeMessages(LONG_PRESS_TRACKBALL);
+            // LONG_PRESS_ENTER is set in common onKeyDown
+            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
             mTrackTrackball = false;
         } 
         if (ev.getAction() == MotionEvent.ACTION_UP) {
@@ -3823,13 +4098,7 @@ public class WebView extends AbsoluteLayout
             return;
         }
         switchOutDrawHistory();
-        // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContent((int) mLastTouchX + mScrollX);
-        int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        int contentSize = ViewConfiguration.getTouchSlop();
-        nativeMotionUp(contentX, contentY, contentSize, true);
-
-        // call uiOverride next to check whether it is a special node,
+        // call uiOverride to check whether it is a special node,
         // phone/email/address, which are not handled by WebKit
         if (nativeUpdateFocusNode()) {
             FocusNode node = mFocusNode;
@@ -3840,6 +4109,11 @@ public class WebView extends AbsoluteLayout
             }
             playSoundEffect(SoundEffectConstants.CLICK);
         }
+        // mLastTouchX and mLastTouchY are the point in the current viewport
+        int contentX = viewToContent((int) mLastTouchX + mScrollX);
+        int contentY = viewToContent((int) mLastTouchY + mScrollY);
+        int contentSize = ViewConfiguration.getTouchSlop();
+        nativeMotionUp(contentX, contentY, contentSize, true);
     }
 
     @Override
@@ -3907,6 +4181,8 @@ public class WebView extends AbsoluteLayout
                     mHeightCanMeasure = false;
                 }
             }
+        } else {
+            mHeightCanMeasure = false;
         }
         if (mNativeClass != 0) {
             nativeSetHeightCanMeasure(mHeightCanMeasure);
@@ -3915,6 +4191,8 @@ public class WebView extends AbsoluteLayout
         if (widthMode == MeasureSpec.UNSPECIFIED) {
             mWidthCanMeasure = true;
             measuredWidth = contentWidth;
+        } else {
+            mWidthCanMeasure = false;
         }
 
         synchronized (this) {
@@ -4076,10 +4354,14 @@ public class WebView extends AbsoluteLayout
                     break;
                 case NEW_PICTURE_MSG_ID:
                     // called for new content
-                    final Point viewSize = (Point) msg.obj;
+                    final WebViewCore.DrawData draw = 
+                            (WebViewCore.DrawData) msg.obj;
+                    final Point viewSize = draw.mViewPoint;
                     if (mZoomScale > 0) {
-                        if (Math.abs(mZoomScale * viewSize.x -
-                                getViewWidth()) < 1) {
+                        // use the same logic in sendViewSizeZoom() to make sure
+                        // the mZoomScale has matched the viewSize so that we
+                        // can clear mZoomScale
+                        if (Math.round(getViewWidth() / mZoomScale) == viewSize.x) {
                             mZoomScale = 0;
                             mWebViewCore.sendMessage(EventHub.SET_SNAP_ANCHOR,
                                     0, 0);
@@ -4091,8 +4373,14 @@ public class WebView extends AbsoluteLayout
                     // received in the fixed dimension.
                     final boolean updateLayout = viewSize.x == mLastWidthSent
                             && viewSize.y == mLastHeightSent;
-                    recordNewContentSize(msg.arg1, msg.arg2, updateLayout);
-                    invalidate();
+                    recordNewContentSize(draw.mWidthHeight.x, 
+                            draw.mWidthHeight.y, updateLayout);
+                    if (LOGV_ENABLED) {
+                        Rect b = draw.mInvalRegion.getBounds();
+                        Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
+                                b.left+","+b.top+","+b.right+","+b.bottom+"}");
+                    }
+                    invalidate(contentToView(draw.mInvalRegion.getBounds()));
                     if (mPictureListener != null) {
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
@@ -4156,6 +4444,7 @@ public class WebView extends AbsoluteLayout
                     }
                     int initialScale = msg.arg1;
                     int viewportWidth = msg.arg2;
+                    // by default starting a new page with 100% zoom scale.
                     float scale = 1.0f;
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
@@ -4165,10 +4454,15 @@ public class WebView extends AbsoluteLayout
                             // to 0
                             mLastWidthSent = 0;
                         }
-                        // by default starting a new page with 100% zoom scale.
-                        scale = initialScale == 0 ? (viewportWidth > 0 ? 
-                                ((float) width / viewportWidth) : 1.0f)
-                                : initialScale / 100.0f;
+                        if (initialScale == 0) {
+                            // if viewportWidth is defined and it is smaller
+                            // than the view width, zoom in to fill the view
+                            if (viewportWidth > 0 && viewportWidth < width) {
+                                scale = (float) width / viewportWidth;
+                            }
+                        } else {
+                            scale = initialScale / 100.0f;
+                        }
                     }
                     setNewZoomScale(scale, false);
                     break;
@@ -4213,10 +4507,32 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.resumeUpdate(mWebViewCore);
                     break;
 
-                case LONG_PRESS_TRACKBALL:
+                case LONG_PRESS_ENTER:
+                    // as this is shared by keydown and trackballdown, reset all
+                    // the states
+                    mGotEnterDown = false;
                     mTrackTrackball = false;
                     mTrackballDown = false;
-                    performLongClick();
+                    // LONG_PRESS_ENTER is sent as a delayed message. If we
+                    // switch to windows overview, the WebView will be
+                    // temporarily removed from the view system. In that case,
+                    // do nothing.
+                    if (getParent() != null) {
+                        performLongClick();
+                    }
+                    break;
+
+                case WEBCORE_NEED_TOUCH_EVENTS:
+                    mForwardTouchEvents = (msg.arg1 != 0);
+                    break;
+
+                case PREVENT_TOUCH_ID:
+                // update may have already been paused by touch; restore since
+                // this effectively aborts touch and skips logic in touch up
+                    if (mTouchMode == TOUCH_DRAG_MODE) {
+                        WebViewCore.resumeUpdate(mWebViewCore);
+                    }
+                    mTouchMode = TOUCH_DONE_MODE;
                     break;
 
                 default:
@@ -4514,10 +4830,7 @@ public class WebView extends AbsoluteLayout
         }
         Rect contentFocus = nativeGetFocusRingBounds();
         if (contentFocus.isEmpty()) return keyHandled;
-        Rect viewFocus = new Rect(contentToView(contentFocus.left)
-                , contentToView(contentFocus.top)
-                , contentToView(contentFocus.right)
-                , contentToView(contentFocus.bottom));
+        Rect viewFocus = contentToView(contentFocus);
         Rect visRect = new Rect();
         calcOurVisibleRect(visRect);
         Rect outset = new Rect(visRect);
@@ -4559,7 +4872,7 @@ public class WebView extends AbsoluteLayout
 
     public void debugDump() {
         nativeDebugDump();
-        mWebViewCore.sendMessage(EventHub.DUMP_WEBKIT);
+        mWebViewCore.sendMessage(EventHub.DUMP_NAVTREE);
     }
     
     /**
@@ -4583,6 +4896,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDrawFocusRing(Canvas content);
     private native void     nativeDrawSelection(Canvas content
             , int x, int y, boolean extendSelection);
+    private native void     nativeDrawSelectionRegion(Canvas content);
     private native boolean  nativeUpdateFocusNode();
     private native Rect     nativeGetFocusRingBounds();
     private native Rect     nativeGetNavBounds();
@@ -4593,17 +4907,27 @@ public class WebView extends AbsoluteLayout
             boolean noScroll);
     private native void     nativeNotifyFocusSet(boolean inEditingMode);
     private native void     nativeRecomputeFocus();
-    private native void     nativeRecordButtons();
+    // Like many other of our native methods, you must make sure that
+    // mNativeClass is not null before calling this method.
+    private native void     nativeRecordButtons(boolean pressed,
+            boolean invalidate);
     private native void     nativeResetFocus();
     private native void     nativeResetNavClipBounds();
     private native void     nativeSelectBestAt(Rect rect);
+    private native void     nativeSetFindIsDown();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetNavBounds(Rect rect);
     private native void     nativeSetNavClipBounds(Rect rect);
-    private native boolean  nativeHasSrcUrl();
-    private native boolean  nativeIsImage(int x, int y);
+    private native String   nativeImageURI(int x, int y);
+    /**
+     * Returns true if the native focus nodes says it wants to handle key events
+     * (ala plugins). This can only be called if mNativeClass is non-zero!
+     */
+    private native boolean  nativeFocusNodeWantsKeyEvents();
     private native void     nativeMoveSelection(int x, int y
             , boolean extendSelection);
     private native Region   nativeGetSelection();
+
+    private native void nativeDumpDisplayTree(String urlOrNull);
 }

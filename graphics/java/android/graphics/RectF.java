@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.FloatMath;
 import com.android.internal.util.FastMath;
 
@@ -26,7 +28,7 @@ import com.android.internal.util.FastMath;
  * the rectangle's width and height. Note: most methods do not check to see that
  * the coordinates are sorted correctly (i.e. left <= right and top <= bottom).
  */
-public class RectF {
+public class RectF implements Parcelable {
     public float left;
     public float top;
     public float right;
@@ -474,5 +476,55 @@ public class RectF {
             top = bottom;
             bottom = temp;
         }
+    }
+
+    /**
+     * Parcelable interface methods
+     */
+    public int describeContents() {
+        return 0;
+    }
+    
+    /**
+     * Write this rectangle to the specified parcel. To restore a rectangle from
+     * a parcel, use readFromParcel()
+     * @param out The parcel to write the rectangle's coordinates into
+     */
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeFloat(left);
+        out.writeFloat(top);
+        out.writeFloat(right);
+        out.writeFloat(bottom);
+    }
+    
+    public static final Parcelable.Creator<RectF> CREATOR = new Parcelable.Creator<RectF>() {
+        /**
+         * Return a new rectangle from the data in the specified parcel.
+         */
+        public RectF createFromParcel(Parcel in) {
+            RectF r = new RectF();
+            r.readFromParcel(in);
+            return r;
+        }
+        
+        /**
+         * Return an array of rectangles of the specified size.
+         */
+        public RectF[] newArray(int size) {
+            return new RectF[size];
+        }
+    };
+    
+    /**
+     * Set the rectangle's coordinates from the data stored in the specified
+     * parcel. To write a rectangle to a parcel, call writeToParcel().
+     *
+     * @param in The parcel to read the rectangle's coordinates from
+     */
+    public void readFromParcel(Parcel in) {
+        left = in.readFloat();
+        top = in.readFloat();
+        right = in.readFloat();
+        bottom = in.readFloat();
     }
 }

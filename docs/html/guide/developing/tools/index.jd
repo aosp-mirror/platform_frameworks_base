@@ -1,7 +1,7 @@
 page.title=Tools Overview
 @jd:body
 
-<img src="{@docRoot}images/android_icon_125.png" alt="android_robot" align="right" width="125" height="137"">
+<img src="{@docRoot}assets/images/android_wrench.png" alt="" align="right">
 
 <p>The Android SDK includes a variety of custom tools that help you develop mobile 
 applications on the Android platform. The most important of these are the Android 
@@ -10,51 +10,29 @@ includes a variety of other tools for debugging, packaging, and installing your
 applications on the emulator. </p>
 
 <dl>
-	<dt><a href="{@docRoot}emulator.html">Android Emulator</a></dt>
+    <dt><a href="emulator.html">Android Emulator</a></dt>
     <dd>A virtual mobile device that runs on your computer. You use the emulator to design, 
     debug, and test your applications in an actual Android run-time environment. </dd>
     
-  <dt><a href="{@docRoot}hierarchy-viewer.html">Hierarchy Viewer</a>
-    <sup class="new">New!</sup></dt></dt>
-    <dd>The Hierarchy Viewer tool allows you to debug and optimize your user interface.
-    It provides a visual representation of your layout's hierarchy of Views and a magnified inspector
-    of the current display with a pixel grid, so you can get your layout just right.
-    </dd>
-    
-  <dt><a href="{@docRoot}draw9patch.html">Draw 9-patch</a>
-    <sup class="new">New!</sup></dt>
-    <dd>The Draw 9-patch tool allows you to easily create a 
-    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor. It also previews stretched 
-     versions of the image, and highlights the area in which content is allowed.
-    </dd>
+  <dt><a href="adt.html">Android Development Tools Plugin</a> (for the Eclipse IDE)</dt>
+          <dd>The ADT plugin adds powerful extensions to the Eclipse integrated environment, 
+          making creating and debugging your Android applications easier and faster. If you 
+          use Eclipse, the ADT plugin gives you an incredible boost in developing Android 
+          applications.</dd>
 
-	<dt>Android 
-	Development Tools Plugin</a> for the Eclipse IDE</dt>
-		<dd>The ADT plugin adds powerful extensions to the Eclipse integrated environment, 
-		making creating and debugging your Android applications easier and faster. If you 
-		use Eclipse, the ADT plugin gives you an incredible boost in developing Android 
-		applications:
-		</dd>
-		
-		<ul>
-		<li>It gives you access to other Android development tools from inside 
-		the Eclipse IDE. For example, ADT lets you access the many capabilities of the 
-		DDMS tool &mdash; taking screenshots, managing port-forwarding, setting breakpoints, 
-		and viewing thread and process information &mdash; directly from Eclipse.  
-		<li>It provides a New Project Wizard, which helps you quickly create and set up 
-		all of the basic files you'll need for a new Android application.</li>
-		<li>It automates and simplifies the process of building your Android application.</li>
-		<li>It provides an Android code editor that helps you write valid XML for your 
-		Android manifest and resource files.</li>
-		</ul>
+	  <dt><a href="hierarchy-viewer.html">Hierarchy Viewer</a></dt>
+	    <dd>The Hierarchy Viewer tool allows you to debug and optimize your user interface.
+	    It provides a visual representation of your layout's hierarchy of Views and a magnified inspector
+	    of the current display with a pixel grid, so you can get your layout just right.
+	    </dd>
 
-    <p>For more information about the ADT plugin, including
-        installation instructions, see <em>Installing the ADT Plugin for
-        Eclipse</em> in your SDK package. For a usage example with screenshots, see the <a
-        href="{@docRoot}tutorials/hello-android.html" title="Hello
-	      Android">Hello Android</a> tutorial.</p>
+	  <dt><a href="draw9patch.html">Draw 9-patch</a></dt>
+	    <dd>The Draw 9-patch tool allows you to easily create a 
+	    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor. It also previews stretched 
+	     versions of the image, and highlights the area in which content is allowed.
+	    </dd>
 
-  <dt><a href="{@docRoot}ddms.html" >Dalvik Debug Monitor 
+  <dt><a href="ddms.html" >Dalvik Debug Monitor 
       Service</a> (ddms)</dt>
 	    <dd>Integrated with Dalvik, the Android platform's custom VM, this tool 
 	    lets you manage processes on an emulator or device and assists in debugging. 
@@ -62,49 +40,49 @@ applications on the emulator. </p>
 	    generate trace data, view heap and thread information, take screenshots 
 	    of the emulator or device, and more. </dd>
 			
-	<dt><a href="{@docRoot}adb.html" >Android Debug Bridge</a> (adb)</dt>
-			<dd>The adb tool lets you install your application's .apk files on an 
-			emulator or device and access the emulator or device from a command line. 
-			You can also use it to link a standard debugger to application code running 
-			on an Android emulator or device.</dd>
+  <dt><a href="adb.html" >Android Debug Bridge</a> (adb)</dt>
+                  <dd>The adb tool lets you install your application's .apk files on an 
+                  emulator or device and access the emulator or device from a command line. 
+                  You can also use it to link a standard debugger to application code running 
+                  on an Android emulator or device.</dd>
 
-	<dt><a href="{@docRoot}aapt.html" >Android Asset 
-		Packaging Tool</a> (aapt)</dt>
-			<dd>The aapt tool lets you create .apk files containing the binaries and 
-			resources of Android applications.</dd>
+  <dt><a href="aapt.html">Android Asset 
+          Packaging Tool</a> (aapt)</dt>
+                  <dd>The aapt tool lets you create .apk files containing the binaries and 
+                  resources of Android applications.</dd>
 
-	<dt><a href="{@docRoot}aidl.html" >Android Interface 
-	Description Language</a> (aidl)</dt>
-		  <dd>Lets you generate code for an interprocess interface, such as what
-		  a service might use.</dd>
+  <dt><a href="aidl.html" >Android Interface 
+  Description Language</a> (aidl)</dt>
+            <dd>Lets you generate code for an interprocess interface, such as what
+            a service might use.</dd>
 
-  <dt><a href="{@docRoot}adb.html#sqlite">sqlite3</a></dt>
+  <dt><a href="adb.html#sqlite">sqlite3</a></dt>
       <dd>Included as a convenience, this tool lets you access the SQLite data 
       files created and used by Android applications.</dd>
 
-	<dt><a href="{@docRoot}traceview.html" >Traceview</a></dt>
-		  <dd> This tool produces graphical analysis views of trace log data that you 
-		  can generate from your Android application. </dd>
+  <dt><a href="traceview.html" >Traceview</a></dt>
+            <dd> This tool produces graphical analysis views of trace log data that you 
+            can generate from your Android application. </dd>
 
-	<dt><a href="{@docRoot}othertools.html#mksdcard">mksdcard</a></dt>
-		  <dd>Helps you create a disk image that you can use with the emulator, 
-			    to simulate the presence of an external storage card (such as an SD card).</dd>
+  <dt><a href="othertools.html#mksdcard">mksdcard</a></dt>
+            <dd>Helps you create a disk image that you can use with the emulator, 
+                      to simulate the presence of an external storage card (such as an SD card).</dd>
 
-	<dt><a href="{@docRoot}othertools.html#dx">dx</a></dt>
-			<dd>The dx tool rewrites .class bytecode into Android bytecode 
-						(stored in .dex files.)</dd>
+  <dt><a href="othertools.html#dx">dx</a></dt>
+                  <dd>The dx tool rewrites .class bytecode into Android bytecode 
+                                          (stored in .dex files.)</dd>
 
-  <dt><a href="{@docRoot}monkey.html" >UI/Application 
+  <dt><a href="monkey.html">UI/Application 
   Exerciser Monkey</a></dt>
       <dd>The Monkey is a program that runs on your emulator or device and generates pseudo-random
       streams of user events such as clicks, touches, or gestures, as well as a number of system-
       level events.  You can use the Monkey to stress-test applications that you are developing,
       in a random yet repeatable manner.</dd>
 
-	<dt><a  href="{@docRoot}othertools.html#activitycreator">activitycreator</a></dt>
-		  <dd>A script that generates <a
-			      href="http://ant.apache.org/" title="Ant">Ant</a> build files that 
-			      you can use to compile your Android applications. If you are developing 
-			      on Eclipse with the ADT plugin, you won't need to use this script. </dd>
+  <dt><a  href="othertools.html#activitycreator">activitycreator</a></dt>
+            <dd>A script that generates <a
+                        href="http://ant.apache.org/" title="Ant">Ant</a> build files that 
+                        you can use to compile your Android applications. If you are developing 
+                        on Eclipse with the ADT plugin, you won't need to use this script. </dd>
 </dl>
 

@@ -27,49 +27,72 @@ import org.apache.harmony.awt.gl.AwtImageBackdoorAccessor;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The BufferedImageFilter class provides filtering operations to 
- * the BufferedImage objects using operators which implement
- * BufferedImageOp interface.
+ * The BufferedImageFilter class provides filtering operations to the
+ * BufferedImage objects using operators which implement BufferedImageOp
+ * interface.
+ * 
+ * @since Android 1.0
  */
 public class BufferedImageFilter extends ImageFilter implements Cloneable {
-    
-    /** The Constant accessor. */
+
+    /**
+     * The Constant accessor.
+     */
     private static final AwtImageBackdoorAccessor accessor = AwtImageBackdoorAccessor.getInstance();
 
-    /** The op. */
+    /**
+     * The op.
+     */
     private BufferedImageOp op;
 
-    /** The raster. */
+    /**
+     * The raster.
+     */
     private WritableRaster raster;
 
-    /** The i data. */
+    /**
+     * The i data.
+     */
     private int iData[];
-    
-    /** The b data. */
+
+    /**
+     * The b data.
+     */
     private byte bData[];
 
-    /** The width. */
+    /**
+     * The width.
+     */
     private int width;
-    
-    /** The height. */
+
+    /**
+     * The height.
+     */
     private int height;
 
-    /** The cm. */
+    /**
+     * The cm.
+     */
     private ColorModel cm;
 
-    /** The forced rgb. */
+    /**
+     * The forced rgb.
+     */
     private boolean forcedRGB = false;
-    
-    /** The transfer type. */
+
+    /**
+     * The transfer type.
+     */
     private int transferType = DataBuffer.TYPE_UNDEFINED;
 
     /**
-     * Instantiates a new BufferedImageFilter with the specified
-     * BufferedImageOp operator.
+     * Instantiates a new BufferedImageFilter with the specified BufferedImageOp
+     * operator.
      * 
-     * @param op the specified BufferedImageOp operator.
-     * 
-     * @throws NullPointerException if BufferedImageOp is null.
+     * @param op
+     *            the specified BufferedImageOp operator.
+     * @throws NullPointerException
+     *             if BufferedImageOp is null.
      */
     public BufferedImageFilter(BufferedImageOp op) {
         if (op == null) {
@@ -79,11 +102,11 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
     }
 
     /**
-     * Gets the BufferedImageOp operator associated with this 
+     * Gets the BufferedImageOp operator associated with this
      * BufferedImageFilter object.
      * 
-     * @return the BufferedImageOp associated with this 
-     * BufferedImageFilter object.
+     * @return the BufferedImageOp associated with this BufferedImageFilter
+     *         object.
      */
     public BufferedImageOp getBufferedImageOp() {
         return op;
@@ -110,22 +133,14 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
     }
 
     @Override
-    public void setPixels(
-            int x, int y, int
-            w, int h,
-            ColorModel model, byte[] pixels,
-            int off, int scansize
-    ) {
+    public void setPixels(int x, int y, int w, int h, ColorModel model, byte[] pixels, int off,
+            int scansize) {
         setPixels(x, y, w, h, model, pixels, off, scansize, true);
     }
 
     @Override
-    public void setPixels(
-            int x, int y,
-            int w, int h,
-            ColorModel model, int[] pixels,
-            int off, int scansize
-    ) {
+    public void setPixels(int x, int y, int w, int h, ColorModel model, int[] pixels, int off,
+            int scansize) {
         setPixels(x, y, w, h, model, pixels, off, scansize, false);
     }
 
@@ -163,22 +178,27 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
     /**
      * Sets the pixels.
      * 
-     * @param x the x
-     * @param y the y
-     * @param w the w
-     * @param h the h
-     * @param model the model
-     * @param pixels the pixels
-     * @param off the off
-     * @param scansize the scansize
-     * @param isByteData the is byte data
+     * @param x
+     *            the x.
+     * @param y
+     *            the y.
+     * @param w
+     *            the w.
+     * @param h
+     *            the h.
+     * @param model
+     *            the model.
+     * @param pixels
+     *            the pixels.
+     * @param off
+     *            the off.
+     * @param scansize
+     *            the scansize.
+     * @param isByteData
+     *            the is byte data.
      */
-    private void setPixels(
-            int x, int y,
-            int w, int h,
-            ColorModel model, Object pixels,
-            int off, int scansize, boolean isByteData
-    ) {
+    private void setPixels(int x, int y, int w, int h, ColorModel model, Object pixels, int off,
+            int scansize, boolean isByteData) {
         // Check bounds
         // Need to copy only the pixels that will fit into the destination area
         if (x < 0) {
@@ -216,23 +236,24 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
 
         boolean canArraycopy;
         // Process pixels
-        switch(transferType) {
+        switch (transferType) {
             case DataBuffer.TYPE_UNDEFINED: {
                 if (isByteData) {
                     transferType = DataBuffer.TYPE_BYTE;
                     createRaster(transferType);
-                    //bData = new byte[width*height];
+                    // bData = new byte[width*height];
                     canArraycopy = !forcedRGB;
                     break;
                 }
                 transferType = DataBuffer.TYPE_INT;
                 createRaster(transferType);
-                //iData = new int[width*height];
+                // iData = new int[width*height];
                 canArraycopy = !forcedRGB || model.equals(ColorModel.getRGBdefault());
                 break;
             } // And proceed to copy the pixels
             case DataBuffer.TYPE_INT: {
-                if (isByteData) { // There are int data already but the new data are bytes
+                if (isByteData) { // There are int data already but the new data
+                    // are bytes
                     forceRGB();
                     canArraycopy = false;
                     break;
@@ -250,7 +271,8 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
                 // RGB conversion
                 canArraycopy = false;
                 break;
-            } default: {
+            }
+            default: {
                 throw new IllegalStateException(Messages.getString("awt.06")); //$NON-NLS-1$
             }
         }
@@ -260,7 +282,7 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
         int dstOffset = x + y * width;
 
         if (canArraycopy) {
-            Object dstArray = isByteData ? (Object) bData : (Object) iData;
+            Object dstArray = isByteData ? (Object)bData : (Object)iData;
             for (; off < maxOffset; off += scansize, dstOffset += width) {
                 System.arraycopy(pixels, off, dstArray, dstOffset, w);
             }
@@ -271,11 +293,8 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
                 int dstPos = dstOffset;
                 int maxDstPos = dstOffset + w;
                 for (; dstPos < maxDstPos; dstPos++, srcPos++) {
-                    iData[dstPos] = model.getRGB(
-                            isByteData ?
-                            ((byte[])pixels)[srcPos] :
-                            ((int[])pixels)[srcPos]
-                    );
+                    iData[dstPos] = model.getRGB(isByteData ? ((byte[])pixels)[srcPos]
+                            : ((int[])pixels)[srcPos]);
                 }
             }
         }
@@ -287,22 +306,24 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
     private void forceRGB() {
         if (!forcedRGB) {
             forcedRGB = true;
-            int size = width*height;
+            int size = width * height;
             int rgbData[] = new int[size];
 
             if (bData != null) {
-                for (int i=0; i<size; i++) {
+                for (int i = 0; i < size; i++) {
                     rgbData[i] = cm.getRGB(bData[i]);
                 }
             } else if (iData != null) {
-                for (int i=0; i<size; i++) {
+                for (int i = 0; i < size; i++) {
                     rgbData[i] = cm.getRGB(iData[i]);
                 }
             }
 
             cm = ColorModel.getRGBdefault();
             DataBufferInt db = new DataBufferInt(rgbData, size);
-            int masks[] = new int[] {0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000};
+            int masks[] = new int[] {
+                    0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
+            };
             raster = Raster.createPackedRaster(db, width, height, width, masks, null);
             iData = accessor.getDataInt(db);
             bData = null;
@@ -327,11 +348,12 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
     /**
      * Creates the raster.
      * 
-     * @param dataType the data type
+     * @param dataType
+     *            the data type.
      */
     private void createRaster(int dataType) {
         boolean createdValidBuffer = false;
-        try{
+        try {
             raster = cm.createCompatibleWritableRaster(width, height);
             int rasterType = raster.getDataBuffer().getDataType();
             if (rasterType == dataType) {
@@ -354,13 +376,13 @@ public class BufferedImageFilter extends ImageFilter implements Cloneable {
                         createdValidBuffer = false;
                 }
 
-                if(cm == ColorModel.getRGBdefault()){
+                if (cm == ColorModel.getRGBdefault()) {
                     forcedRGB = true;
                 }
             } else {
                 createdValidBuffer = false;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             createdValidBuffer = false;
         }
 

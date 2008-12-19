@@ -1,45 +1,71 @@
 page.title=Available Resource Types
+parent.title=Resources and Assets
+parent.link=index.html
 @jd:body
 
-<p>This page describes the different types of resources that you can
-externalize from your code and package with your application. They fall into
-the following groups:</p>
-<ul>
-    <li><a href="#simplevalues">Simple Values</a></li>
-    <li><a href="#drawables">Drawables</a></li>
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+    <li>{@link android.content.res.AssetManager}</li>
+  </ol>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#simplevalues">Simple Values</a>
+      <ol>
+          <li><a href="#colorvals">Color Values</a></li>
+          <li><a href="#stringresources">Strings and Styled Text</a></li>
+          <li><a href="#dimension">Dimension Values</a></li>
+      </ol>
+    </li>
+    <li><a href="#drawables">Drawables</a>
+      <ol>
+          <li><a href="#imagefileresources">Bitmap Files</a></li>
+          <li><a href="#colordrawableresources">Color Drawables</a></li>
+          <li><a href="#ninepatch">Nine-Patch (Stretchable) Images</a></li>
+      </ol>
+    </li>
     <li><a href="#animation">Animation</a></li>
-    <li><a href="#layoutresources">Layout</a></li>
+    <li><a href="#layoutresources">Layout</a>
+      <ol>
+          <li><a href="#customresources">Custom Layout Resources</a>
+      </ol>
+    </li>
     <li><a href="#stylesandthemes">Styles and Themes</a></li>
-</ul>
+  </ol>
+
+</div>
+</div>
+
+<p>This page describes the different types of resources that you can
+externalize from your code and package with your application. </p>
+
 
 <p>For more details on how to use resources in your application, please see the
-    <a href="{@docRoot}devel/resources-i18n.html">Resources and i18n</a>
+    <a href="resources-i18n.html">Resources and Internationalization</a>
     documentation.</p>
 
-<a name="simplevalues" id="simplevalues"></a>
-<h2>Simple Values</h2>
+
+<h2 id="simplevalues">Simple Values</h2>
 
 <p>All simple resource values can be expressed as a string, using various
 formats to unambiguously indicate the type of resource being created.  For
 this reason, these values can be defined both as standard resources
-(under res/values), as well as direct values supplied for
+(under res/values/), as well as direct values supplied for
 mappings in <a href="#stylesandthemes">styles and themes</a>, and attributes in
 XML files such as <a href="#layoutresources">layouts</a>.</p>
 
-<ul>
-    <li><a href="#colorvals">Colors</a></li>
-    <li><a href="#stringresources">Strings and Styled Text</a></li>
-    <li><a href="#dimension">Dimensions</a></li>
-</ul>
 
 
-<a name="colorvals" id="colorvals"></a>
-<h3>Color Values</h3>
+<h3 id="colorvals">Color Values</h3>
 <p>
     A color value specifies an RGB value with an alpha channel, which can
-    be used in various places such as specifying a solid color for a Drawable
+    be used in various places such as specifying a solid color for a {@link android.graphics.drawable.Drawable}
     or the color to use for text.  A color value always begins with
-    a '#' character and then is followed by the alpha-red-green-blue information
+    a pound (#) character and then followed by the Alpha-Red-Green-Blue information
     in one of the following formats:
 </p>
 <ul>
@@ -128,8 +154,9 @@ int color = getResources.getColor(R.color.opaque_red);
           android:text="Some Text"/&gt;
 </pre>
 
-<a name="stringresources" id="stringresources"></a>
-<h3>Strings and Styled Text</h3>
+
+
+<h3 id="stringresources">Strings and Styled Text</h3>
 <p>
     Strings, with optional <a href="#styledtext">simple formatting</a>, can be 
 stored and retrieved as resources. You can add formatting to your string by 
@@ -227,8 +254,8 @@ tv.setText(str);
           android:text="@string/simple_welcome_message"/&gt; 
 </pre>
 
-<a name="styledtext" id="styledtext"></a>
-<h4>Using Styled Text as a Format String</h4>
+
+<h4 id="styledtext">Using Styled Text as a Format String</h4>
 <p>
 Sometimes you may want to create a styled text resource that is also used as a 
 format string. This cannot be done directly because there is no way of passing 
@@ -268,8 +295,8 @@ CharSequence styledResults = Html.fromHtml(resultsText);
 </li>
 </ol>
 
-<a name="dimension" id="dimension"></a>
-<h3>Dimension Values</h3>
+
+<h3 id="dimension"Dimension Values</h3>
 <p>You can create common dimensions to use for various screen elements by
 defining dimension values in XML. A dimension resource is a number followed by
 a unit of measurement. For example: 10px, 2in, 5sp. Here are the units of
@@ -376,22 +403,17 @@ float dimen = Resources.getDimen(R.dimen.one_pixel);
           android:textSize="@dimen/sixteen_sp"/&gt;
 </pre>
 
-<a name="drawables" id="drawables"></a>
-<h2>Drawables</h2>
+
+<h2 id="drawables">Drawables</h2>
 
 <p>A {@link android.graphics.drawable.Drawable} is a type of resource that
 you retrieve with {@link android.content.res.Resources#getDrawable
 Resources.getDrawable()} and use to draw to the screen.  There are a
 number of drawable resources that can be created.</p>
 
-<ul>
-    <li><a href="#imagefileresources">Bitmap Drawables</a></li>
-    <li><a href="#colordrawableresources">Color Drawables</a></li>
-    <li><a href="#ninepatch">Nine Patch (Stretchable) Drawables</a></li>
-</ul>
 
-<a name="imagefileresources" id="imagefileresources"></a>
-<h3>Bitmap files</h3>
+
+<h3 id="imagefileresources">Bitmap Files</h3>
 <p>Android supports bitmap resource files in a few different formats: png
 (preferred), jpg (acceptable), gif (discouraged). The bitmap file itself is
 compiled and referenced by the file name without the extension (so
@@ -417,46 +439,11 @@ res/drawable/my_picture.png would be referenced as R.drawable.my_picture).</p>
         <strong>XML</strong> <code>@[<em>package</em>:]drawable/<em>some_file</em></code>
     </li>
 </ul>
-<p>
-    <strong>Example Code Use</strong>
-</p>
-<p>
-    The following Java snippet demonstrates loading an {@link android.widget.ImageView ImageView} object with a single bitmap from a list of bitmap resources. ImageView is a basic display rectangle for graphics (animations or still images).
-</p>
-<pre>
-// Load an array with BitmapDrawable resources.
-private Integer[] mThumbIds = {
-   R.drawable.sample_thumb_0,
-   R.drawable.sample_thumb_1,
-   R.drawable.sample_thumb_2,
-   R.drawable.sample_thumb_3,
-   R.drawable.sample_thumb_4
-};
 
-// Load and return a view with an image.
-public View getView(int position, ViewGroup parent)
-{
-   ImageView i = new ImageView(mContext);
-   i.setImageResource(mThumbIds[position]);
-   i.setAdjustViewBounds(true);
-   i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-   i.setBackground(android.R.drawable.picture_frame);
-   return i;
-}
-</pre>
-<p>
-    This XML example demonstrates loading a bitmap file (chat_icon.png) in an ImageView.
-</p>
-<pre>
-&lt;ImageView id="@+id/icon"
-   android:layout_width="wrap_content"
-   android:layout_height="wrap_content"
-   android:tint="#FF000000"
-   android:src="@drawable/chat_icon"/&gt;
-</pre>
+<p>For more discussion and examples using drawable resources, see the discussion in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#drawable-resource#drawables">2D Graphics</a>.</p>
 
-<a name="colordrawableresources" id="colordrawableresources"></a>
-<h3>Color Drawables</h3>
+
+<h3 id="colordrawableresources">Color Drawables</h3>
 <p>You can create a {@link android.graphics.drawable.PaintDrawable} object that is a rectangle of color,
 with optionally rounded corners. This element can be defined in any of the
 files inside res/values/.</p>
@@ -465,7 +452,7 @@ version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root
 <code>&lt;resources&gt;</code> element containing one or more
 <code>&lt;drawable&gt;</code> tags.</p>
 <p>
-    <strong>Resource source file location</strong>: res/values/colors.xml (File name is arbitrary; standard practice is to put the PaintDrawable items in the file along with the <a href="{@docRoot}devel/resources-i18n.html#numericcolorresources">numeric color values</a>.)
+    <strong>Resource source file location</strong>: res/values/colors.xml (File name is arbitrary; standard practice is to put the PaintDrawable items in the file along with the <a href="resources-i18n.html#numericcolorresources">numeric color values</a>.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.graphics.drawable.PaintDrawable}.
@@ -536,8 +523,8 @@ tv.setBackground(redDrawable);
           android:background="@drawable/solid_red"/&gt;
 </pre>
 
-<a name="ninepatch" id="ninepatch"></a>
-<h3>Nine-Patch Stretchable Image</h3>
+
+<h3 id="ninepatch">Nine-Patch (stretchable) Images</h3>
 <p>
     Android supports a stretchable bitmap image, called a 
     {@link android.graphics.NinePatch} graphic. This is a PNG image in which 
@@ -547,40 +534,7 @@ tv.setBackground(redDrawable);
     of a stretchable image is the button backgrounds that Android uses; buttons 
     must stretch to accommodate strings of various lengths.
 </p>
-<p>
-    A NinePatch drawing is a standard PNG image that includes a 1 pixel wide 
-    border. This border is used to define the stretchable and static areas of 
-    the screen. You indicate a stretchable section by drawing one or more 1 pixel 
-    wide black lines in the left or top part of this border. You can have as 
-    many stretchable sections as you want. The relative size of the stretchable 
-    sections stays the same, so the largest sections always remain the largest.
-</p>
-<p>
-    You can also define an optional drawable section of the image (effectively, 
-    the padding lines) by drawing a line on the right and bottom lines. If you 
-    do not draw these lines, the first top and left lines will be used.
-</p>
-<p>
-    If a View object sets this graphic as a background and then specifies the 
-    View object's text, it will stretch itself so that all the text fits inside 
-    the area designated by the right and bottom lines (if included). If the 
-    padding lines are not included, Android uses the left and top lines to 
-    define the writeable area.
-</p>
-<p>The <a href="{@docRoot}reference/draw9patch.html">Draw 9-patch</a> tool offers 
-   an extremely handy way to create your NinePatch images, using a 
-   WYSIWYG graphics editor.
-</p>
-<p>
-    Here is a sample NinePatch file used to define a button.
-</p>
-<p>
-    <img src="{@docRoot}images/ninepatch_raw.png" alt="Raw ninepatch file 
-    showing the definition lines">
-</p>
-<p>
-    This ninepatch uses one single stretchable area, and it also defines a drawable area.
-</p>
+
 <p>
     <strong>Source file format:</strong> PNG &mdash; one resource per file
 </p>
@@ -601,44 +555,16 @@ tv.setBackground(redDrawable);
         <strong>XML</strong> <code>@[<em>package</em>:]drawable.<em>some_file</em></code>
     </li>
 </ul>
-<p>
-    <strong>Example XML Code</strong>
-</p>
-<p>
-    Note that the width and height are set to "wrap_content" to make the button fit neatly around the text.
-</p>
-<pre>
-&lt;Button id="@+id/tiny"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
-        android:text="Tiny"
-        android:textSize="8sp"
-        android:background="@drawable/my_button_background"/&gt;
 
-&lt;Button id="@+id/big"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:text="Biiiiiiig text!"
-        android:textSize="30sp"
-        android:background="@drawable/my_button_background"/&gt;
-</pre>
-<p>
-    Here are the two buttons based on this XML and the NinePatch graphic shown above. Notice how the width and height of the button varies with the text, and the background image stretches to accommodate it.
-</p>
-<p>
-    <img src="{@docRoot}images/ninepatch_examples.png" alt="Two buttons based on the NinePatch button background">
-</p>
 
-<a name="animation" id="animation"></a>
-<h2>Animation</h2>
-<a name="tweenedanimation" id="tweenedanimation"></a>
-<h3>
-    Tweened Animation
-</h3>
+<p>For more information and examples using NinePatch drawables, see the discussion
+in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a>.</p>
+
+
+
+<h2 id="animation">Animation</h2>
+
+<h3 id="tweenedanimation">Tweened Animation</h3>
 <p>
     Android can perform simple animation on a graphic, or a series of graphics. These include rotations, fading, moving, and stretching.
 </p>
@@ -666,7 +592,7 @@ tv.setBackground(redDrawable);
     <strong>Syntax</strong>
 </p>
 <p>
-    The file must have a single root element: this will be either a single <code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>, <code>&lt;rotate&gt;</code>, interpolator element, or <code>&lt;set&gt;</code> element that holds groups of these elements (which may include another <code>&lt;set&gt;</code>). By default, all elements are applied simultaneously. To have them occur sequentially, you must specify the <code>startOffset</code> attribute, as shown in the example code.
+    The file must have a single root element: this will be either a single <code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>, <code>&lt;rotate&gt;</code>, interpolator element, or <code>&lt;set&gt;</code> element that holds groups of these elements (which may include another <code>&lt;set&gt;</code>). By default, all elements are applied simultaneously. To have them occur sequentially, you must specify the <code>startOffset</code> attribute.
 </p>
 <pre>
 &lt;set android:shareInterpolator=boolean&gt;  // Only required if multiple tags are used.
@@ -677,15 +603,15 @@ tv.setBackground(redDrawable);
           android:fromYScale=float
           android:toYScale=float
           android:pivotX=string
-          android:pivotY=string&gt;    |
+          android:pivotY=string &gt;    |
    &lt;translate android:fromX=string
               android:toX=string
               android:fromY=string
-              android:toY=string&gt;   |
+              android:toY=string &gt;   |
    &lt;rotate android:fromDegrees=float
            android:toDegrees=float
            android:pivotX=string
-           android:pivotY=string /&gt; |
+           android:pivotY=string &gt; |
    &lt;<em>interpolator tag</em>&gt;
    &lt;set&gt;
 &lt;/set&gt;
@@ -828,71 +754,41 @@ Supports the following attributes in any of the following three formats: values 
         You can optionally set an interpolator for each element to determine how quickly or slowly it performs its effect over time. For example, slow at the beginning and faster at the end for EaseInInterpolator, and the reverse for EaseOutInterpolator. A list of interpolators is given in {@link android.R.anim}. To specify these, use the syntax @android:anim/<em>interpolatorName</em>.
     </dd>
 </dl>
-<p>
-    <strong>Example XML Declaration</strong>
-</p>
-<p>
-    The following XML from the ApiDemos application is used to stretch, then simultaneously spin and rotate a block of text.
-</p>
-<pre>
-&lt;set android:shareInterpolator="false"&gt;
-   &lt;scale
-          android:interpolator="&#64;android:anim/ease_in_out_interpolator"
-          android:fromXScale="1.0"
-          android:toXScale="1.4"
-          android:fromYScale="1.0"
-          android:toYScale="0.6"
-          android:pivotX="50%"
-          android:pivotY="50%"
-          android:fillAfter="false"
-          android:duration="700" /&gt;
-   &lt;set android:interpolator="&#64;android:anim/ease_in_interpolator"&gt;
-      &lt;scale
-             android:fromXScale="1.4" 
-             android:toXScale="0.0"
-             android:fromYScale="0.6"
-             android:toYScale="0.0" 
-             android:pivotX="50%" 
-             android:pivotY="50%" 
-             android:startOffset="700"
-             android:duration="400" 
-             android:fillBefore="false" /&gt;
-      &lt;rotate 
-             android:fromDegrees="0" 
-             android:toDegrees="-45"
-             android:toYScale="0.0" 
-             android:pivotX="50%" 
-             android:pivotY="50%"
-             android:startOffset="700"
-             android:duration="400" /&gt;
-   &lt;/set&gt;
-&lt;/set&gt;
-</pre>
-<p>
-    The following Java code loads animations called res/anim/hyperspace_in.xml and res/anim/hyperspace_out.xml into a {@link android.widget.ViewFlipper}.
-</p>
-<pre>
-mFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.hyperspace_in));
-mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.hyperspace_out)); 
-</pre>
 
-<a name="layoutresources" id="layoutresources"></a>
-<h2>Layout</h2>
-<p>
-    Android lets you specify screen layouts using XML elements inside an XML file, similar to designing screen layout for a webpage in an HTML file. Each file contains a whole screen or a part of a screen, and is compiled into a View resource that can be passed in to {@link android.app.Activity#setContentView(int) Activity.setContentView} or used as a reference by other layout resource elements. Files are saved in the res/layout/ folder of your project, and compiled by the Android resource compiler aapt.
-</p>
-<p>
-    Every layout XML file must evaluate to a single root element. First we'll describe how to use the standard XML tags understood by Android as it is shipped, and then we'll give a little information on how you can define your own custom XML elements for custom View objects. See <a href="{@docRoot}devel/implementing-ui.html">Implementing a User Interface</a> for details about the visual elements that make up a screen.
-</p>
-<p>
-    The root element must have the Android namespace "http://schemas.android.com/apk/res/android" defined in the root element
-</p>
-<p>
-    <strong>Source file format:</strong> XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root element of one of the supported XML layout elements.
-</p>
-<p>
-    <strong>Resource file location</strong>: res/layout/<em>some_file</em>.xml.
-</p>
+<p>For animation code samples, see the discussion in the 
+<a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a> topic.</p>
+
+
+<h2 id="layoutresources">Layout</h2>
+<p>Android lets you specify screen layouts using XML elements inside an XML
+file, similar to designing screen layout for a webpage in an HTML file. Each
+file contains a whole screen or a part of a screen, and is compiled into a
+View resource that can be passed in to 
+{@link android.app.Activity#setContentView(int) Activity.setContentView} or used as a
+reference by other layout resource elements. Files are saved in the
+<code>res/layout/</code> folder of your project, and compiled by the Android resource
+compiler, aapt. </p> 
+
+<p> Every layout XML file must evaluate to a single root
+element. First we'll describe how to use the standard XML tags understood by
+Android as it is shipped, and then we'll give a little information on how you
+can define your own custom XML elements for custom View objects.
+
+<p> The root element must have
+the Android namespace "http://schemas.android.com/apk/res/android" defined in
+the root element.</p>
+
+<p>For a complete discussion on creating layouts, see the 
+<a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> topic.</p>
+
+<p> <strong>Source file format:</strong> XML file
+requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code>
+declaration, and a root element of one of the supported XML layout elements.
+</p> 
+
+
+<p><strong>Resource file location</strong>:
+res/layout/<em>some_file</em>.xml.</p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.view.View} (or subclass) resource.
 </p>
@@ -977,7 +873,7 @@ mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.hyperspace_ou
         <strong>Attributes exposed by all the superclasses of that element.</strong> For example, the TextView class extends the View class, so the <code>&lt;TextView&gt;</code> element supports all the attributes that the <code>&lt;View&gt;</code> element exposes &mdash; a long list, including <code>View_paddingBottom</code> and <code>View_scrollbars</code>. These too are used without the class name: <code>&lt;TextView android:paddingBottom="20" android:scrollbars="horizontal" /&gt;</code>.
     </li>
     <li>
-        <strong>Attributes of the object's {@link android.view.ViewGroup.LayoutParams} subclass.</strong> All View objects support a LayoutParams member (see <a href="{@docRoot}devel/ui/layout.html">LayoutParams in Implementing a UI</a>). To set properties on an element's LayoutParams member, the attribute to use is "android:layout_<em>layoutParamsProperty</em>". For example: <code>android:layout_gravity</code> for an object wrapped by a <code>&lt;LinearLayout&gt;</code> element. Remember that each LayoutParams subclass also supports inherited attributes. Attributes exposed by each subclass are given in the format <em>someLayoutParamsSubclass</em>_Layout_layout_<em>someproperty</em>. This defines an attribute "android:layout_<em>someproperty</em>". Here is an example of how Android documentation lists the properties of the {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams} class:
+        <strong>Attributes of the object's {@link android.view.ViewGroup.LayoutParams} subclass.</strong> All View objects support a LayoutParams member (see <a href="{@docRoot}guide/topics/views/layout.html">LayoutParams in Implementing a UI</a>). To set properties on an element's LayoutParams member, the attribute to use is "android:layout_<em>layoutParamsProperty</em>". For example: <code>android:layout_gravity</code> for an object wrapped by a <code>&lt;LinearLayout&gt;</code> element. Remember that each LayoutParams subclass also supports inherited attributes. Attributes exposed by each subclass are given in the format <em>someLayoutParamsSubclass</em>_Layout_layout_<em>someproperty</em>. This defines an attribute "android:layout_<em>someproperty</em>". Here is an example of how Android documentation lists the properties of the {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams} class:
     </li>
 </ul>
 <ul>
@@ -1037,8 +933,12 @@ setContentView(R.layout.main_screen);
 <p>
     However, layout elements can also represent repeating elements used as templates.
 </p>
-<a name="customresources" id="customresources"></a>
-<h3>Custom Layout Resources</h3>
+
+<p>Also see <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> for more information on layouts.</p>
+
+
+
+<h3 id="customresources">Custom Layout Resources</h3>
 <p>
     You can define custom elements to use in layout resources. These custom elements can then be used the same as any Android layout elements: that is, you can use them and specify their attributes in other resources. The ApiDemos sample application has an example of creating a custom layout XML tag, LabelView. To create a custom element, you will need the following files:
 </p>
@@ -1066,8 +966,9 @@ setContentView(R.layout.main_screen);
     <strong>Resource reference name:</strong> R.styleable.<em>some_file</em> (Java).
 </p>
 
-<a name="stylesandthemes" id="stylesandthemes"></a>
-<h2>Styles and Themes</h2>
+
+
+<h2 id="stylesandthemes">Styles and Themes</h2>
 <p>
     A <em>style</em> is one or more attributes applied to a single element (for example, 10 point red Arial font, applied to a TextView). A style is applied as an attribute to an element in a layout XML file.
 </p>
@@ -1075,8 +976,12 @@ setContentView(R.layout.main_screen);
     A <em>theme</em> is one or more attributes applied to a whole screen &mdash; for example, you might apply the stock Android Theme.dialog theme to an activity designed to be a floating dialog box. A theme is assigned as an attribute to an Activity in the manifest file.
 </p>
 <p>
-    Both styles and themes are defined in a &lt;style&gt; block containing one or more string or numerical values (typically color values), or references to other resources (drawables and so on). These elements support inheritance, so you could have MyBaseTheme, MyBaseTheme.Fancy, MyBaseTheme.Small, and so on.
+    Both styles and themes are defined in a <code>&lt;style&gt;</code> block containing one or more string or numerical values (typically color values), or references to other resources (drawables and so on). These elements support inheritance, so you could have MyBaseTheme, MyBaseTheme.Fancy, MyBaseTheme.Small, and so on.
 </p>
+
+<p>For a complete discussion on styles and themes, read 
+<a href="{@docRoot}guide/topics/views/themes.html">Applying Styles and Themes</a>.</p>
+
 <p>
     <strong>Source file format:</strong> XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root <code>&lt;resources&gt;</code> element containing one or more <code>&lt;style&gt;</code> tags.
 </p>
@@ -1127,85 +1032,6 @@ setContentView(R.layout.main_screen);
         A value to use in this theme. It can be a standard string, a hex color value, or a reference to any other resource type.
     </dd>
 </dl>
-<p>
-    <strong>Example: Declaring a Style in XML</strong>
-</p>
-<pre>
-&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;resources&gt;
-    &lt;style name="SpecialText"&gt;
-        &lt;item name="android:textSize"&gt;18sp&lt;/item&gt;
-        &lt;item name="android:textColor"&gt;#008&lt;/item&gt;
-    &lt;/style&gt;
-&lt;/resources&gt;
-</pre>
-<p>
-    <strong>Example: Referencing a Declared Style from an XML Resource</strong>
-</p>
-<p>
-    The following layout XML file applies the previously defined style to a single text box.
-</p>
-<pre>
-&lt;!-- MainPageLayout.xml --&gt;
-&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_height="fill_parent"
-              android:layout_width="fill_parent"
-              android:orientation="vertical"
-              android:scrollbars="vertical"
-              id="main_frame"&gt;
-    &lt;EditText id="@+id/text1"
-              style="@style/SpecialText"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:text="Hello, World!" /&gt;
-&lt;/LinearLayout&gt;
-</pre>
 
-
-<p>
-    <strong>Example XML Declaration of a Theme</strong>
-</p>
-<p>
-    The following example defines a theme, "ThemeNew," which creates new theme items, 
-    refers to some previously defined theme items (values beginning with '@'), 
-    and refers to package resources (values beginning with '?').
-</p>
-<pre>
-&lt;style name="ThemeNew"&gt;
-   &lt;item name="windowFrame"&gt;@drawable/screen_frame&lt;/item&gt;
-   &lt;item name="windowBackground"&gt;@drawable/screen_background_white&lt;/item&gt;
-   &lt;item name="panelForegroundColor"&gt;#FF000000&lt;/item&gt;
-   &lt;item name="panelBackgroundColor"&gt;#FFFFFFFF&lt;/item&gt;
-   &lt;item name="panelTextColor"&gt;?panelForegroundColor&lt;/item&gt;
-   &lt;item name="panelTextSize"&gt;14&lt;/item&gt;
-   &lt;item name="menuItemTextColor"&gt;?panelTextColor&lt;/item&gt;
-   &lt;item name="menuItemTextSize"&gt;?panelTextSize&lt;/item&gt;
-&lt;/style&gt;
-</pre>
-<p>
-    Notice that, to reference a value from the currently loaded theme, we use 
-    a question-mark (?) instead of the at-symbol (@), in the reference string. 
-    You must refer to such a specific <code>&lt;item&gt;</code> by its name in 
-    the currently loaded theme. This can be used in XML resources only. 
-</p>
-
-<p>
-    <strong>Example Code Use of a Theme</strong>
-</p>
-<p>
-    The following Java snippet demonstrates loading a style set (i.e., a theme).
-</p>
-<pre>
-setTheme(R.style.ThemeNew);
-</pre>
-<p>
-    The following XML applies an Android theme to a whole file (in this case, the Android dialog theme, to make the screen a floating dialog screen).
-</p>
-<pre>
-&lt;!-- AndroidManifest.xml --&gt;
-&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.example.codelab.rssexample"&gt;
-       &lt;activity class="AddRssItem" android:label="@string/add_item_label" android:theme="@android:style/Theme.Dialog"/&gt;
-&lt;/manifest&gt;
-</pre>
+<p>For examples of how to declare and apply styles and themes, read 
+<a href="{@docRoot}guide/topics/views/themes.html">Applying Styles and Themes</a>.</p>

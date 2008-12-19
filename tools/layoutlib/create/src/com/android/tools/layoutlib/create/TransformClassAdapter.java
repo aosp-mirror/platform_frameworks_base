@@ -130,17 +130,19 @@ class TransformClassAdapter extends ClassAdapter {
             (mStubAll ||
              (access & Opcodes.ACC_NATIVE) != 0) ||
              mStubMethods.contains(methodSignature)) {
+            
+            boolean isStatic = (access & Opcodes.ACC_STATIC) != 0;
+            boolean isNative = (access & Opcodes.ACC_NATIVE) != 0;
 
             // remove abstract, final and native
             access = access & ~(Opcodes.ACC_ABSTRACT | Opcodes.ACC_FINAL | Opcodes.ACC_NATIVE);
             
-            boolean isStatic = (access & Opcodes.ACC_STATIC) != 0;
-            
             String invokeSignature = methodSignature + desc;
-            mLog.debug("  Stub: %s", invokeSignature);
+            mLog.debug("  Stub: %s (%s)", invokeSignature, isNative ? "native" : "");
             
             MethodVisitor mw = super.visitMethod(access, name, desc, signature, exceptions);
-            return new StubMethodAdapter(mw, name, returnType(desc), invokeSignature, isStatic);
+            return new StubMethodAdapter(mw, name, returnType(desc), invokeSignature,
+                    isStatic, isNative);
 
         } else {
             mLog.debug("  Keep: %s %s", name, desc);

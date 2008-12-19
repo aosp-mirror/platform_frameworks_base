@@ -139,6 +139,14 @@ LOCAL_SHARED_LIBRARIES := \
 	liblog \
 	libcutils
 
+ifneq ($(TARGET_SIMULATOR),true)
+ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
+# This is needed on x86 to bring in dl_iterate_phdr for CallStack.cpp
+LOCAL_SHARED_LIBRARIES += \
+	libdl
+endif # linux-x86
+endif # sim
+
 LOCAL_MODULE:= libutils
 
 #LOCAL_CFLAGS+=

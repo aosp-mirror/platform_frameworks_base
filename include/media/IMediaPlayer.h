@@ -38,7 +38,6 @@ public:
     virtual status_t        stop() = 0;
     virtual status_t        pause() = 0;
     virtual status_t        isPlaying(bool* state) = 0;
-    virtual status_t        getVideoSize(int* w, int* h) = 0;
     virtual status_t        seekTo(int msec) = 0;
     virtual status_t        getCurrentPosition(int* msec) = 0;
     virtual status_t        getDuration(int* msec) = 0;

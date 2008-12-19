@@ -1,4 +1,6 @@
 page.title=Hello, WebView 
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.webkit.WebView} allows you to create your own web browser Activity. In this tutorial, 
@@ -110,7 +112,6 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 <li>{@link android.view.KeyEvent}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
       
 
 

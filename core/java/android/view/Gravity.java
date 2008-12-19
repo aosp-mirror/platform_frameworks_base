@@ -23,7 +23,7 @@ import android.graphics.Rect;
  */
 public class Gravity
 {
-    /** Contstant indicating that no gravity has been set **/
+    /** Constant indicating that no gravity has been set **/
     public static final int NO_GRAVITY = 0x0000;
     
     /** Raw bit indicating the gravity for an axis has been specified. */
@@ -33,6 +33,9 @@ public class Gravity
     public static final int AXIS_PULL_BEFORE = 0x0002;
     /** Raw bit controlling how the right/bottom edge is placed. */
     public static final int AXIS_PULL_AFTER = 0x0004;
+    /** Raw bit controlling whether the right/bottom edge is clipped to its
+     * container, based on the gravity direction being applied. */
+    public static final int AXIS_CLIP = 0x0008;
 
     /** Bits defining the horizontal axis. */
     public static final int AXIS_X_SHIFT = 0;
@@ -66,10 +69,18 @@ public class Gravity
      *  and horizontal axis, not changing its size. */
     public static final int CENTER = CENTER_VERTICAL|CENTER_HORIZONTAL;
 
-    /** Grow the horizontal and vertical size of the obejct if needed so it
+    /** Grow the horizontal and vertical size of the object if needed so it
      *  completely fills its container. */
     public static final int FILL = FILL_VERTICAL|FILL_HORIZONTAL;
 
+    /** Flag to clip the edges of the object to its container along the
+     *  vertical axis. */
+    public static final int CLIP_VERTICAL = AXIS_CLIP<<AXIS_Y_SHIFT;
+    
+    /** Flag to clip the edges of the object to its container along the
+     *  horizontal axis. */
+    public static final int CLIP_HORIZONTAL = AXIS_CLIP<<AXIS_X_SHIFT;
+    
     /**
      * Binary mask to get the horizontal gravity of a gravity.
      */
@@ -81,6 +92,20 @@ public class Gravity
     public static final int VERTICAL_GRAVITY_MASK = (AXIS_SPECIFIED |
             AXIS_PULL_BEFORE | AXIS_PULL_AFTER) << AXIS_Y_SHIFT;
 
+    /** Special constant to enable clipping to an overall display along the
+     *  vertical dimension.  This is not applied by default by
+     *  {@link #apply(int, int, int, Rect, int, int, Rect)}; you must do so
+     *  yourself by calling {@link #applyDisplay}.
+     */
+    public static final int DISPLAY_CLIP_VERTICAL = 0x10000000;
+    
+    /** Special constant to enable clipping to an overall display along the
+     *  horizontal dimension.  This is not applied by default by
+     *  {@link #apply(int, int, int, Rect, int, int, Rect)}; you must do so
+     *  yourself by calling {@link #applyDisplay}.
+     */
+    public static final int DISPLAY_CLIP_HORIZONTAL = 0x01000000;
+    
     /**
      * Apply a gravity constant to an object.
      * 
@@ -122,27 +147,143 @@ public class Gravity
      */
     public static void apply(int gravity, int w, int h, Rect container,
                              int xAdj, int yAdj, Rect outRect) {
-        if ((gravity&((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_X_SHIFT))
-             == ((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_X_SHIFT)) {
-            outRect.left = container.left;
-            outRect.right = container.right;
-        } else {
-            outRect.left = applyMovement(
-                gravity>>AXIS_X_SHIFT, w, container.left, container.right, xAdj);
-            outRect.right = outRect.left + w;
+        switch (gravity&((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_X_SHIFT)) {
+            case 0:
+                outRect.left = container.left
+                        + ((container.right - container.left - w)/2) + xAdj;
+                outRect.right = outRect.left + w;
+                if ((gravity&(AXIS_CLIP<<AXIS_X_SHIFT))
+                        == (AXIS_CLIP<<AXIS_X_SHIFT)) {
+                    if (outRect.left < container.left) {
+                        outRect.left = container.left;
+                    }
+                    if (outRect.right > container.right) {
+                        outRect.right = container.right;
+                    }
+                }
+                break;
+            case AXIS_PULL_BEFORE<<AXIS_X_SHIFT:
+                outRect.left = container.left + xAdj;
+                outRect.right = outRect.left + w;
+                if ((gravity&(AXIS_CLIP<<AXIS_X_SHIFT))
+                        == (AXIS_CLIP<<AXIS_X_SHIFT)) {
+                    if (outRect.right > container.right) {
+                        outRect.right = container.right;
+                    }
+                }
+                break;
+            case AXIS_PULL_AFTER<<AXIS_X_SHIFT:
+                outRect.right = container.right - xAdj;
+                outRect.left = outRect.right - w;
+                if ((gravity&(AXIS_CLIP<<AXIS_X_SHIFT))
+                        == (AXIS_CLIP<<AXIS_X_SHIFT)) {
+                    if (outRect.left < container.left) {
+                        outRect.left = container.left;
+                    }
+                }
+                break;
+            default:
+                outRect.left = container.left + xAdj;
+                outRect.right = container.right + xAdj;
+                break;
         }
-
-        if ((gravity&((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_Y_SHIFT))
-             == ((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_Y_SHIFT)) {
-            outRect.top = container.top;
-            outRect.bottom = container.bottom;
-        } else {
-            outRect.top = applyMovement(
-                gravity>>AXIS_Y_SHIFT, h, container.top, container.bottom, yAdj);
-            outRect.bottom = outRect.top + h;
+        
+        switch (gravity&((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_Y_SHIFT)) {
+            case 0:
+                outRect.top = container.top
+                        + ((container.bottom - container.top - h)/2) + yAdj;
+                outRect.bottom = outRect.top + h;
+                if ((gravity&(AXIS_CLIP<<AXIS_Y_SHIFT))
+                        == (AXIS_CLIP<<AXIS_Y_SHIFT)) {
+                    if (outRect.top < container.top) {
+                        outRect.top = container.top;
+                    }
+                    if (outRect.bottom > container.bottom) {
+                        outRect.bottom = container.bottom;
+                    }
+                }
+                break;
+            case AXIS_PULL_BEFORE<<AXIS_Y_SHIFT:
+                outRect.top = container.top + yAdj;
+                outRect.bottom = outRect.top + h;
+                if ((gravity&(AXIS_CLIP<<AXIS_Y_SHIFT))
+                        == (AXIS_CLIP<<AXIS_Y_SHIFT)) {
+                    if (outRect.bottom > container.bottom) {
+                        outRect.bottom = container.bottom;
+                    }
+                }
+                break;
+            case AXIS_PULL_AFTER<<AXIS_Y_SHIFT:
+                outRect.bottom = container.bottom - yAdj;
+                outRect.top = outRect.bottom - h;
+                if ((gravity&(AXIS_CLIP<<AXIS_Y_SHIFT))
+                        == (AXIS_CLIP<<AXIS_Y_SHIFT)) {
+                    if (outRect.top < container.top) {
+                        outRect.top = container.top;
+                    }
+                }
+                break;
+            default:
+                outRect.top = container.top + yAdj;
+                outRect.bottom = container.bottom + yAdj;
+                break;
         }
     }
 
+    /**
+     * Apply addition gravity behavior based on the overall "display" that an
+     * object exists in.  This can be used after
+     * {@link #apply(int, int, int, Rect, int, int, Rect)} to place the object
+     * within a visible display.  By default this moves or clips the object
+     * to be visible in the display; the gravity flags
+     * {@link #DISPLAY_CLIP_HORIZONTAL} and {@link #DISPLAY_CLIP_VERTICAL}
+     * can be used to change this behavior.
+     * 
+     * @param gravity Gravity constants to modify the placement within the
+     * display.
+     * @param display The rectangle of the display in which the object is
+     * being placed.
+     * @param inoutObj Supplies the current object position; returns with it
+     * modified if needed to fit in the display.
+     */
+    public static void applyDisplay(int gravity, Rect display, Rect inoutObj) {
+        if ((gravity&DISPLAY_CLIP_VERTICAL) != 0) {
+            if (inoutObj.top < display.top) inoutObj.top = display.top;
+            if (inoutObj.bottom > display.bottom) inoutObj.bottom = display.bottom;
+        } else {
+            int off = 0;
+            if (inoutObj.top < display.top) off = display.top-inoutObj.top;
+            else if (inoutObj.bottom > display.bottom) off = display.bottom-inoutObj.bottom;
+            if (off != 0) {
+                if (inoutObj.height() > (display.bottom-display.top)) {
+                    inoutObj.top = display.top;
+                    inoutObj.bottom = display.bottom;
+                } else {
+                    inoutObj.top += off;
+                    inoutObj.bottom += off;
+                }
+            }
+        }
+        
+        if ((gravity&DISPLAY_CLIP_HORIZONTAL) != 0) {
+            if (inoutObj.left < display.left) inoutObj.left = display.left;
+            if (inoutObj.right > display.right) inoutObj.right = display.right;
+        } else {
+            int off = 0;
+            if (inoutObj.left < display.left) off = display.left-inoutObj.left;
+            else if (inoutObj.right > display.right) off = display.right-inoutObj.right;
+            if (off != 0) {
+                if (inoutObj.width() > (display.right-display.left)) {
+                    inoutObj.left = display.left;
+                    inoutObj.right = display.right;
+                } else {
+                    inoutObj.left += off;
+                    inoutObj.right += off;
+                }
+            }
+        }
+    }
+    
     /**
      * <p>Indicate whether the supplied gravity has a vertical pull.</p>
      *
@@ -162,18 +303,4 @@ public class Gravity
     public static boolean isHorizontal(int gravity) {
         return gravity > 0 && (gravity & HORIZONTAL_GRAVITY_MASK) != 0;
     }
-
-    private static int applyMovement(int mode, int size,
-            int start, int end, int adj) {
-        if ((mode & AXIS_PULL_BEFORE) != 0) {
-            return start + adj;
-        }
-
-        if ((mode & AXIS_PULL_AFTER) != 0) {
-            return end - size - adj;
-        }
-
-        return start + ((end - start - size)/2) + adj;
-    }
 }
-

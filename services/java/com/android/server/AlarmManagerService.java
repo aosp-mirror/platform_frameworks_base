@@ -73,6 +73,17 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private final ArrayList<Alarm> mElapsedRealtimeWakeupAlarms = new ArrayList<Alarm>();
     private final ArrayList<Alarm> mElapsedRealtimeAlarms = new ArrayList<Alarm>();
     
+    // slots corresponding with the inexact-repeat interval buckets,
+    // ordered from shortest to longest
+    private static final long sInexactSlotIntervals[] = {
+        AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+        AlarmManager.INTERVAL_HALF_HOUR,
+        AlarmManager.INTERVAL_HOUR,
+        AlarmManager.INTERVAL_HALF_DAY,
+        AlarmManager.INTERVAL_DAY
+    };
+    private long mInexactDeliveryTimes[] = { 0, 0, 0, 0, 0};
+    
     private int mDescriptor;
     private int mBroadcastRefCount = 0;
     private PowerManager.WakeLock mWakeLock;
@@ -162,6 +173,67 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
     
+    public void setInexactRepeating(int type, long triggerAtTime, long interval, 
+            PendingIntent operation) {
+        if (operation == null) {
+            Log.w(TAG, "setInexactRepeating ignored because there is no intent");
+            return;
+        }
+
+        // find the slot in the delivery-times array that we will use
+        int intervalSlot;
+        for (intervalSlot = 0; intervalSlot < sInexactSlotIntervals.length; intervalSlot++) {
+            if (sInexactSlotIntervals[intervalSlot] == interval) {
+                break;
+            }
+        }
+        
+        // Non-bucket intervals just fall back to the less-efficient
+        // unbucketed recurring alarm implementation
+        if (intervalSlot >= sInexactSlotIntervals.length) {
+            setRepeating(type, triggerAtTime, interval, operation);
+            return;
+        }
+
+        // Align bucketed alarm deliveries by trying to match
+        // the shortest-interval bucket already scheduled
+        long bucketTime = 0;
+        for (int slot = 0; slot < mInexactDeliveryTimes.length; slot++) {
+            if (mInexactDeliveryTimes[slot] > 0) {
+                bucketTime = mInexactDeliveryTimes[slot];
+                break;
+            }
+        }
+        
+        if (bucketTime == 0) {
+            // If nothing is scheduled yet, just start at the requested time
+            bucketTime = triggerAtTime;
+        } else {
+            // Align the new alarm with the existing bucketed sequence.  To achieve
+            // alignment, we slide the start time around by min{interval, slot interval}
+            long adjustment = (interval <= sInexactSlotIntervals[intervalSlot])
+                    ? interval : sInexactSlotIntervals[intervalSlot];
+
+            // The bucket may have started in the past; adjust
+            while (bucketTime < triggerAtTime) {
+                bucketTime += adjustment;
+            }
+
+            // Or the bucket may be set to start more than an interval beyond
+            // our requested trigger time; pull it back to meet our needs
+            while (bucketTime > triggerAtTime + adjustment) {
+                bucketTime -= adjustment;
+            }
+        }
+
+        // Remember where this bucket started (reducing the amount of later 
+        // fixup required) and set the alarm with the new, bucketed start time.
+        if (localLOGV) Log.v(TAG, "setInexactRepeating: interval=" + interval
+                + " bucketTime=" + bucketTime);
+        mInexactDeliveryTimes[intervalSlot] = bucketTime;
+        setRepeating(type, bucketTime, interval, operation);
+    }
+
     public void setTimeZone(String tz) {
         mContext.enforceCallingOrSelfPermission(
                 "android.permission.SET_TIME_ZONE",
@@ -171,15 +243,28 @@ class AlarmManagerService extends IAlarmManager.Stub {
         TimeZone zone = TimeZone.getTimeZone(tz);
         // Prevent reentrant calls from stepping on each other when writing
         // the time zone property
+        boolean timeZoneWasChanged = false;
         synchronized (this) {
-            SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
+            String current = SystemProperties.get(TIMEZONE_PROPERTY);
+            if (current == null || !current.equals(zone.getID())) {
+                if (localLOGV) Log.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
+                timeZoneWasChanged = true; 
+                SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
+                
+                // Update the kernel timezone information
+                // Kernel tracks time offsets as 'minutes west of GMT'
+                int gmtOffset = (zone.getRawOffset() + zone.getDSTSavings()) / 60000;
+                setKernelTimezone(mDescriptor, -(gmtOffset));
+            }
         }
-        
+
         TimeZone.setDefault(null);
         
-        Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        intent.putExtra("time-zone", zone.getID());
-        mContext.sendBroadcast(intent);
+        if (timeZoneWasChanged) {
+            Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+            intent.putExtra("time-zone", zone.getID());
+            mContext.sendBroadcast(intent);
+        }
     }
     
     public void remove(PendingIntent operation) {
@@ -359,7 +444,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private native void close(int fd);
     private native void set(int fd, int type, long nanoseconds);
     private native int waitForAlarm(int fd);
-   
+    private native int setKernelTimezone(int fd, int minuteswest);
+
     private void triggerAlarmsLocked(ArrayList<Alarm> alarmList,
                                      ArrayList<Alarm> triggerList,
                                      long now)
@@ -581,6 +667,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         public ClockReceiver() {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_TIME_TICK);
+            filter.addAction(Intent.ACTION_DATE_CHANGED);
             mContext.registerReceiver(this, filter);
         }
         
@@ -589,6 +676,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
             if (intent.getAction().equals(Intent.ACTION_TIME_TICK)) {
             	scheduleTimeTickEvent();
             } else if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
+                // Since the kernel does not keep track of DST, we need to
+                // reset the TZ information at the beginning of each day
+                // based off of the current Zone gmt offset + userspace tracked
+                // daylight savings information.
+                TimeZone zone = TimeZone.getTimeZone(SystemProperties.get(TIMEZONE_PROPERTY));
+                int gmtOffset = (zone.getRawOffset() + zone.getDSTSavings()) / 60000;
+
+                setKernelTimezone(mDescriptor, -(gmtOffset));
             	scheduleDateChangedEvent();
             }
         }

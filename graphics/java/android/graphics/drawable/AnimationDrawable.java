@@ -23,7 +23,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 
@@ -65,6 +64,9 @@ import android.util.AttributeSet;
  * </pre>
  */
 public class AnimationDrawable extends DrawableContainer implements Runnable {
+    private final AnimationState mAnimationState;
+    private int mCurFrame = -1;
+
     public AnimationDrawable() {
         this(null);
     }
@@ -187,7 +189,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
         if (next >= N) {
             next = 0;
         }
-        setFrame(next, unschedule, !mAnimationState.mOneShot || next < (N-1));
+        setFrame(next, unschedule, !mAnimationState.mOneShot || next < (N - 1));
     }
 
     private void setFrame(int frame, boolean unschedule, boolean animate) {
@@ -200,14 +202,12 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
             unscheduleSelf(this);
         }
         if (animate) {
-            scheduleSelf(this, SystemClock.uptimeMillis()
-                         + mAnimationState.mDurations[frame]);
+            scheduleSelf(this, SystemClock.uptimeMillis() + mAnimationState.mDurations[frame]);
         }
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser,
-            AttributeSet attrs)
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         
         TypedArray a = r.obtainAttributes(attrs,
@@ -228,9 +228,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
 
         final int innerDepth = parser.getDepth()+1;
         int depth;
-        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-               && ((depth=parser.getDepth()) >= innerDepth
-                       || type != XmlPullParser.END_TAG)) {
+        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT &&
+                ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
@@ -239,9 +238,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
                 continue;
             }
             
-            a = r.obtainAttributes(attrs,
-                    com.android.internal.R.styleable.AnimationDrawableItem);
-            
+            a = r.obtainAttributes(attrs, com.android.internal.R.styleable.AnimationDrawableItem);
             int duration = a.getInt(
                     com.android.internal.R.styleable.AnimationDrawableItem_duration, -1);
             if (duration < 0) {
@@ -259,12 +256,12 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
                 dr = r.getDrawable(drawableRes);
             } else {
                 while ((type=parser.next()) == XmlPullParser.TEXT) {
+                    // Empty
                 }
                 if (type != XmlPullParser.START_TAG) {
-                    throw new XmlPullParserException(
-                            parser.getPositionDescription()
-                            + ": <item> tag requires a 'drawable' attribute or "
-                            + "child tag defining a drawable");
+                    throw new XmlPullParserException(parser.getPositionDescription() +
+                            ": <item> tag requires a 'drawable' attribute or child tag" +
+                            " defining a drawable");
                 }
                 dr = Drawable.createFromXmlInner(r, parser, attrs);
             }
@@ -278,10 +275,11 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
         setFrame(0, true, false);
     }
 
-    private final static class AnimationState extends DrawableContainerState
-    {
-        AnimationState(AnimationState orig, AnimationDrawable owner)
-        {
+    private final static class AnimationState extends DrawableContainerState {
+        private int[] mDurations;
+        private boolean mOneShot;
+
+        AnimationState(AnimationState orig, AnimationDrawable owner) {
             super(orig, owner);
 
             if (orig != null) {
@@ -294,28 +292,24 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
         }
 
         @Override
-        public Drawable newDrawable()
-        {
+        public Drawable newDrawable() {
             return new AnimationDrawable(this);
         }
 
-        public void addFrame(Drawable dr, int dur)
-        {
+        public void addFrame(Drawable dr, int dur) {
+            // Do not combine the following. The array index must be evaluated before 
+            // the array is accessed because super.addChild(dr) has a side effect on mDurations.
             int pos = super.addChild(dr);
             mDurations[pos] = dur;
         }
 
         @Override
-        public void growArray(int oldSize, int newSize)
-        {
+        public void growArray(int oldSize, int newSize) {
             super.growArray(oldSize, newSize);
             int[] newDurations = new int[newSize];
             System.arraycopy(mDurations, 0, newDurations, 0, oldSize);
             mDurations = newDurations;
         }
-
-        private int[]       mDurations;
-        private boolean     mOneShot;
     }
 
     private AnimationDrawable(AnimationState state) {
@@ -326,9 +320,5 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
             setFrame(0, true, false);
         }
     }
-
-    private final AnimationState mAnimationState;
-
-    private int mCurFrame = -1;
 }
 

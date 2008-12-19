@@ -33,7 +33,7 @@ typedef struct egl_native_pixmap_t*     NativePixmapType;
 typedef void*                           NativeDisplayType;
 
 /* 
- * This a conveniance function to create a NativeWindowType surface
+ * This a convenience function to create a NativeWindowType surface
  * that maps to the whole screen
  * This function is actually implemented in libui.so
  */
@@ -50,6 +50,7 @@ enum native_pixel_format_t
 {
     NATIVE_PIXEL_FORMAT_RGBA_8888   = 1,
     NATIVE_PIXEL_FORMAT_RGB_565     = 4,
+    NATIVE_PIXEL_FORMAT_BGRA_8888   = 5,
     NATIVE_PIXEL_FORMAT_RGBA_5551   = 6,
     NATIVE_PIXEL_FORMAT_RGBA_4444   = 7,
     NATIVE_PIXEL_FORMAT_YCbCr_422_SP= 0x10,

@@ -260,7 +260,7 @@ public class ZygoteInit {
 
                 int count = 0;
                 String line;
-                boolean gotMissingClass = false;
+                String missingClasses = null;
                 while ((line = br.readLine()) != null) {
                     // Skip comments and blank lines.
                     line = line.trim();
@@ -285,14 +285,19 @@ public class ZygoteInit {
                         count++;
                     } catch (ClassNotFoundException e) {
                         Log.e(TAG, "Class not found for preloading: " + line);
-                        gotMissingClass = true;
+                        if (missingClasses == null) {
+                            missingClasses = line;
+                        } else {
+                            missingClasses += " " + line;
+                        }
                     }
                 }
 
-                if (gotMissingClass &&
+                if (missingClasses != null &&
                         "1".equals(SystemProperties.get("persist.service.adb.enable"))) {
                     throw new IllegalStateException(
-                            "Missing class(es) for preloading, update preloaded-classes");
+                            "Missing class(es) for preloading, update preloaded-classes ["
+                            + missingClasses + "]");
                 }
 
                 Log.i(TAG, "...preloaded " + count + " classes in "
@@ -425,7 +430,7 @@ public class ZygoteInit {
             "--setuid=1000",
             "--setgid=1000",
             "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,3001,3002,3003",
-            "--capabilities=88161312,88161312",
+            "--capabilities=121715744,121715744",
             "--runtime-init",
             "--nice-name=system_server",
             "com.android.server.SystemServer",
@@ -442,13 +447,14 @@ public class ZygoteInit {
              * indicate it should be debuggable or the ro.debuggable system property
              * is set to "1"
              */
-            boolean debuggableBuild = "1".equals(SystemProperties.get("ro.debuggable"));
-            boolean enableDebugger = parsedArgs.enableDebugger || debuggableBuild;
+            int debugFlags = parsedArgs.debugFlags;
+            if ("1".equals(SystemProperties.get("ro.debuggable")))
+                debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
 
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, enableDebugger, null);
+                    parsedArgs.gids, debugFlags, null);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex);
         } 

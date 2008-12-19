@@ -16,6 +16,19 @@
 
 package android.test;
 
+import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
+import android.app.Activity;
+import android.app.Instrumentation;
+import android.os.Bundle;
+import android.os.Debug;
+import android.os.Looper;
+import android.test.suitebuilder.TestMethod;
+import android.test.suitebuilder.TestPredicates;
+import android.test.suitebuilder.TestSuiteBuilder;
+import android.util.Log;
+
+import com.android.internal.util.Predicate;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -25,18 +38,12 @@ import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
 
-import android.app.Activity;
-import android.app.Instrumentation;
-import android.content.Context;
-import android.os.Bundle;
-import android.os.Debug;
-import android.os.Looper;
-import android.test.suitebuilder.InstrumentationTestSuiteBuilder;
-import android.test.suitebuilder.TestSuiteBuilder;
-import android.test.suitebuilder.UnitTestSuiteBuilder;
-
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
@@ -69,10 +76,16 @@ import java.io.PrintStream;
  * <b>Running all tests:</b> adb shell am instrument -w
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
- * <b>Running unit tests:</b> adb shell am instrument -w -e unit true
+ * <b>Running all small tests:</b> adb shell am instrument -w
+ * -e size small
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
- * <b>Running instrumentation tests:</b> adb shell am instrument -w -e func true
+ * <b>Running all medium tests:</b> adb shell am instrument -w
+ * -e size medium
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * <b>Running all large tests:</b> adb shell am instrument -w
+ * -e size large
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
  * <b>Running a single testcase:</b> adb shell am instrument -w
@@ -83,8 +96,30 @@ import java.io.PrintStream;
  * -e class com.android.foo.FooTest#testFoo
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
+ * <b>Running multiple tests:</b> adb shell am instrument -w
+ * -e class com.android.foo.FooTest,com.android.foo.TooTest
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * <b>Including performance tests:</b> adb shell am instrument -w
+ * -e perf true
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
  * <b>To debug your tests, set a break point in your code and pass:</b>
  * -e debug true
+ * <p/>
+ * <b>To run in 'log only' mode</b>
+ * -e log true
+ * This option will load and iterate through all test classes and methods, but will bypass actual 
+ * test execution. Useful for quickly obtaining info on the tests to be executed by an 
+ * instrumentation command.
+ * <p/>
+ * <b>To generate EMMA code coverage:</b>
+ * -e coverage true
+ * Note: this requires an emma instrumented build. By default, the code coverage results file 
+ * will be saved as /sdcard/coverage.ec, unless overridden by coverageFile flag (see below)
+ * <p/>
+ * <b> To specify EMMA code coverage results file path:</b>
+ * -e coverageFile /sdcard/myFile.ec
  * <br/>
  * in addition to the other arguments.
  */
@@ -108,17 +143,36 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     /** @hide */
     public static final String ARGUMENT_TEST_CLASS = "class";
     /** @hide */
-    public static final String ARGUMENT_UNIT_CLASS = "unit";
-    /** @hide */
-    public static final String ARGUMENT_FUNC_CLASS = "func";
-    /** @hide */
     public static final String ARGUMENT_TEST_PACKAGE = "package";
+    /** @hide */
+    public static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
+    /** @hide */
+    public static final String ARGUMENT_INCLUDE_PERF = "perf";
+
+    private static final String SMALL_SUITE = "small";
+    private static final String MEDIUM_SUITE = "medium";  
+    private static final String LARGE_SUITE = "large";
+    
+    private static final String ARGUMENT_LOG_ONLY = "log";
+
+   
+    /**
+     * This constant defines the maximum allowed runtime (in ms) for a test included in the "small" suite. 
+     * It is used to make an educated guess at what suite an unlabeled test belongs.
+     */
+    private static final float SMALL_SUITE_MAX_RUNTIME = 100;
+    
+    /**
+     * This constant defines the maximum allowed runtime (in ms) for a test included in the "medium" suite. 
+     * It is used to make an educated guess at what suite an unlabeled test belongs.
+     */
+    private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
     
     /**
      * The following keys are used in the status bundle to provide structured reports to 
      * an IInstrumentationWatcher. 
      */
- 
+
     /**
      * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER}, 
      * identifies InstrumentationTestRunner as the source of the report.  This is sent with all
@@ -150,6 +204,16 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     public static final String REPORT_KEY_NAME_TEST = "test";
     /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * reports the run time in seconds of the current test.
+     */
+    private static final String REPORT_KEY_RUN_TIME = "runtime";
+    /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * reports the guessed suite assignment for the current test.
+     */
+    private static final String REPORT_KEY_SUITE_ASSIGNMENT = "suiteassignment";
+    /**
      * The test is starting.
      */
     public static final int REPORT_VALUE_RESULT_START = 1;
@@ -172,14 +236,19 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     public static final String REPORT_KEY_STACK = "stack";
 
+    private static final String DEFAULT_COVERAGE_FILE_PATH = "/sdcard/coverage.ec";
+    
+    private static final String LOG_TAG = "InstrumentationTestRunner";
+
     private final Bundle mResults = new Bundle();
     private AndroidTestRunner mTestRunner;
     private boolean mDebug;
     private boolean mJustCount;
+    private boolean mSuiteAssignmentMode;
     private int mTestCount;
-    private boolean mBundleOutput;
-    private boolean mDatabaseOutput;
     private String mPackageOfTests;
+    private boolean mCoverage;
+    private String mCoverageFilePath;
 
     @Override
     public void onCreate(Bundle arguments) {
@@ -190,90 +259,95 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                 {getTargetContext().getPackageCodePath(), getContext().getPackageCodePath()};
         ClassPathPackageInfoSource.setApkPaths(apkPaths);
 
-        boolean useUnitTestSuite = false;
-        boolean useFunctionalTestSuite = false;
-
-        String testClassName = null;
-        Test test = null;
+        Predicate<TestMethod> testSizePredicate = null;
+        boolean includePerformance = false;
+        String testClassesArg = null;
+        boolean logOnly = false;
 
         if (arguments != null) {
             // Test class name passed as an argument should override any meta-data declaration.
-            testClassName = arguments.getString(ARGUMENT_TEST_CLASS);
+            testClassesArg = arguments.getString(ARGUMENT_TEST_CLASS);
             mDebug = getBooleanArgument(arguments, "debug");
             mJustCount = getBooleanArgument(arguments, "count");
-            mBundleOutput = getBooleanArgument(arguments, "bundle");
-            mDatabaseOutput = getBooleanArgument(arguments, "database");
-            useUnitTestSuite = getBooleanArgument(arguments, ARGUMENT_UNIT_CLASS);
-            useFunctionalTestSuite = getBooleanArgument(arguments, ARGUMENT_FUNC_CLASS);
+            mSuiteAssignmentMode = getBooleanArgument(arguments, "suiteAssignment");
             mPackageOfTests = arguments.getString(ARGUMENT_TEST_PACKAGE);
+            testSizePredicate = getSizePredicateFromArg(
+                    arguments.getString(ARGUMENT_TEST_SIZE_PREDICATE));
+            includePerformance = getBooleanArgument(arguments, ARGUMENT_INCLUDE_PERF);
+            logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
+            mCoverage = getBooleanArgument(arguments, "coverage");
+            mCoverageFilePath = arguments.getString("coverageFile");
+        }
+        
+        TestSuiteBuilder testSuiteBuilder = new TestSuiteBuilder(getClass().getName(),
+                getTargetContext().getClassLoader());
+        
+        if (testSizePredicate != null) {
+            testSuiteBuilder.addRequirements(testSizePredicate);
+        }
+        if (!includePerformance) {
+            testSuiteBuilder.addRequirements(REJECT_PERFORMANCE);
         }
 
-        if (testClassName == null) {
+        if (testClassesArg == null) {
+            TestSuite testSuite = null;
             if (mPackageOfTests != null) {
-                test = createPackageTestSuite(
-                        getTargetContext(), useUnitTestSuite,
-                        useFunctionalTestSuite, mPackageOfTests);
+                testSuiteBuilder.includePackages(mPackageOfTests);
             } else {
-                test = getTestSuite();
+                testSuite = getTestSuite();
+                testSuiteBuilder.addTestSuite(testSuite);
             }
 
-            if (test == null) {
-                test = createDefaultTestSuite(getTargetContext(), useUnitTestSuite,
-                        useFunctionalTestSuite);
+            if (testSuite == null) {
+                testSuiteBuilder.includePackages(getTargetContext().getPackageName());
             }
-            mTestCount = test.countTestCases();
+        } else {
+            parseTestClasses(testClassesArg, testSuiteBuilder);
         }
 
         mTestRunner = getAndroidTestRunner();
         mTestRunner.setContext(getTargetContext());
         mTestRunner.setInstrumentaiton(this);
-        mTestRunner.addTestListener(new TestPrinter("TestRunner", false));
-        if (mDatabaseOutput) {
-            mTestRunner.addTestListener(new TestRecorder());
-        }
-
-        if (testClassName != null) {
-            int methodSeparatorIndex = testClassName.indexOf('#');
-            String testMethodName = null;
-
-            if (methodSeparatorIndex > 0) {
-                testMethodName = testClassName.substring(methodSeparatorIndex + 1);
-                testClassName = testClassName.substring(0, methodSeparatorIndex);
-            }
-            mTestRunner.setTestClassName(testClassName, testMethodName);
-            mTestCount = mTestRunner.getTestCases().size();
+        mTestRunner.setSkipExecution(logOnly);
+        mTestRunner.setTest(testSuiteBuilder.build());
+        mTestCount = mTestRunner.getTestCases().size();
+        if (mSuiteAssignmentMode) {
+            mTestRunner.addTestListener(new SuiteAssignmentPrinter());
         } else {
-            mTestRunner.setTest(test);
-        }
-        // add this now that we know the count
-        if (!mBundleOutput) {
+            mTestRunner.addTestListener(new TestPrinter("TestRunner", false));
             mTestRunner.addTestListener(new WatcherResultPrinter(mTestCount));
         }
-
         start();
     }
 
-    private TestSuite createDefaultTestSuite(Context context, boolean useUnitTestSuite,
-            boolean useFunctionalTestSuite) {
-        return createPackageTestSuite(context, useUnitTestSuite, useFunctionalTestSuite, context.getPackageName());
+    /**
+     * Parses and loads the specified set of test classes 
+     * @param testClassArg - comma-separated list of test classes and methods
+     * @param testSuiteBuilder - builder to add tests to
+     */
+    private void parseTestClasses(String testClassArg, TestSuiteBuilder testSuiteBuilder) {
+        String[] testClasses = testClassArg.split(",");
+        for (String testClass : testClasses) {
+            parseTestClass(testClass, testSuiteBuilder);
+        }
     }
 
-    private TestSuite createPackageTestSuite(Context context, boolean useUnitTestSuite,
-            boolean useFunctionalTestSuite, String packageName) {
-        TestSuiteBuilder testSuiteBuilder = null;
+    /**
+     * Parse and load the given test class and, optionally, method
+     * @param testClassName - full package name of test class and optionally method to add. Expected
+     *   format: com.android.TestClass#testMethod
+     * @param testSuiteBuilder - builder to add tests to
+     */
+    private void parseTestClass(String testClassName, TestSuiteBuilder testSuiteBuilder) {
+        int methodSeparatorIndex = testClassName.indexOf('#');
+        String testMethodName = null;
 
-        if (useUnitTestSuite) {
-            testSuiteBuilder = new UnitTestSuiteBuilder(getClass().getName(),
-                    context.getClassLoader());
-        } else if (useFunctionalTestSuite) {
-            testSuiteBuilder = new InstrumentationTestSuiteBuilder(getClass().getName(),
-                    context.getClassLoader());
-        } else {
-            testSuiteBuilder = new TestSuiteBuilder(getClass().getName(),
-                    context.getClassLoader());
+        if (methodSeparatorIndex > 0) {
+            testMethodName = testClassName.substring(methodSeparatorIndex + 1);
+            testClassName = testClassName.substring(0, methodSeparatorIndex);
         }
-
-        return testSuiteBuilder.includePackages(packageName).build();
+        testSuiteBuilder.addTestClassByName(testClassName, testMethodName, 
+                getTargetContext());
     }
 
     protected AndroidTestRunner getAndroidTestRunner() {
@@ -284,7 +358,23 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         String tagString = arguments.getString(tag);
         return tagString != null && Boolean.parseBoolean(tagString);
     }
-
+    
+    /*
+     * Returns the size predicate object, corresponding to the "size" argument value.
+     */
+    private Predicate<TestMethod> getSizePredicateFromArg(String sizeArg) {
+     
+        if (SMALL_SUITE.equals(sizeArg)) {
+            return TestPredicates.SELECT_SMALL;
+        } else if (MEDIUM_SUITE.equals(sizeArg)) {
+            return TestPredicates.SELECT_MEDIUM;
+        } else if (LARGE_SUITE.equals(sizeArg)) {
+            return TestPredicates.SELECT_LARGE;
+        } else {
+            return null;
+        }
+    }
+  
     @Override
     public void onStart() {
         Looper.prepare();
@@ -303,25 +393,24 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             try {
                 StringResultPrinter resultPrinter = new StringResultPrinter(writer);
     
-                if (mBundleOutput) {
-                    mTestRunner.addTestListener(new BundleTestListener(mResults));
-                } else {
-                    mTestRunner.addTestListener(resultPrinter);
-                }
-    
+                mTestRunner.addTestListener(resultPrinter);
+                
                 long startTime = System.currentTimeMillis();
                 mTestRunner.runTest();
                 long runTime = System.currentTimeMillis() - startTime;
     
                 resultPrinter.print(mTestRunner.getTestResult(), runTime);
             } finally {
-                if (!mBundleOutput) {
-                    mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
-                            String.format("\nTest results for %s=%s", 
-                                    mTestRunner.getTestClassName(), 
-                                    byteArrayOutputStream.toString()));
+                mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
+                        String.format("\nTest results for %s=%s", 
+                        mTestRunner.getTestClassName(), 
+                        byteArrayOutputStream.toString()));
+
+                if (mCoverage) {
+                    generateCoverageReport();
                 }
                 writer.close();
+                
                 finish(Activity.RESULT_OK, mResults);
             }
         }
@@ -344,6 +433,51 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     public ClassLoader getLoader() {
         return null;
     }
+    
+    private void generateCoverageReport() {
+        // use reflection to call emma dump coverage method, to avoid
+        // always statically compiling against emma jar
+        java.io.File coverageFile = new java.io.File(getCoverageFilePath());
+        try {
+            Class emmaRTClass = Class.forName("com.vladium.emma.rt.RT");
+            Method dumpCoverageMethod = emmaRTClass.getMethod("dumpCoverageData", 
+                    coverageFile.getClass(), boolean.class, boolean.class);
+            
+            dumpCoverageMethod.invoke(null, coverageFile, false, false);
+
+        } catch (ClassNotFoundException e) {
+            reportEmmaError("Is emma jar on classpath?", e);
+        } catch (SecurityException e) {
+            reportEmmaError(e);
+        } catch (NoSuchMethodException e) {
+            reportEmmaError(e);
+        } catch (IllegalArgumentException e) {
+            reportEmmaError(e);
+        } catch (IllegalAccessException e) {
+            reportEmmaError(e);
+        } catch (InvocationTargetException e) {
+            reportEmmaError(e);
+        }
+    }
+
+    private String getCoverageFilePath() {
+        if (mCoverageFilePath == null) {
+            return DEFAULT_COVERAGE_FILE_PATH;
+        }
+        else {
+            return mCoverageFilePath;
+        }
+    }
+
+    private void reportEmmaError(Exception e) {
+        reportEmmaError("", e); 
+    }
+
+    private void reportEmmaError(String hint, Exception e) {
+        String msg = "Failed to generate emma coverage. " + hint;
+        Log.e(LOG_TAG, msg, e);
+        mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT, "\nError: " + msg);
+    }
 
     // TODO kill this, use status() and prettyprint model for better output
     private class StringResultPrinter extends ResultPrinter {
@@ -354,11 +488,81 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
         synchronized void print(TestResult result, long runTime) {
             printHeader(runTime);
-            if (mBundleOutput) {
-              printErrors(result);
-              printFailures(result);
-            }
             printFooter(result);
+        }
+    }
+    
+    /**
+     * This class sends status reports back to the IInstrumentationWatcher about 
+     * which suite each test belongs.
+     */
+    private class SuiteAssignmentPrinter implements TestListener
+    {
+        
+        private Bundle mTestResult;
+        private long mStartTime;
+        private long mEndTime;
+        private boolean mTimingValid;
+        
+        public SuiteAssignmentPrinter() {
+        }
+        
+        /**
+         * send a status for the start of a each test, so long tests can be seen as "running"
+         */
+        public void startTest(Test test) {
+            mTimingValid = true;
+            mStartTime = System.currentTimeMillis(); 
+        }
+        
+        /**
+         * @see junit.framework.TestListener#addError(Test, Throwable)
+         */
+        public void addError(Test test, Throwable t) {
+            mTimingValid = false;
+        }
+
+        /**
+         * @see junit.framework.TestListener#addFailure(Test, AssertionFailedError)
+         */
+        public void addFailure(Test test, AssertionFailedError t) {
+            mTimingValid = false;
+        }
+
+        /**
+         * @see junit.framework.TestListener#endTest(Test)
+         */
+        public void endTest(Test test) {
+            float runTime;
+            String assignmentSuite;
+            mEndTime = System.currentTimeMillis();
+            mTestResult = new Bundle();
+
+            if (!mTimingValid || mStartTime < 0) {
+                assignmentSuite = "NA";
+                runTime = -1;
+            } else {
+                runTime = mEndTime - mStartTime;
+                if (runTime < SMALL_SUITE_MAX_RUNTIME 
+                        && !InstrumentationTestCase.class.isAssignableFrom(test.getClass())) {
+                    assignmentSuite = SMALL_SUITE;
+                } else if (runTime < MEDIUM_SUITE_MAX_RUNTIME) {
+                    assignmentSuite = MEDIUM_SUITE;
+                } else {
+                    assignmentSuite = LARGE_SUITE;
+                }
+            }
+            // Clear mStartTime so that we can verify that it gets set next time.
+            mStartTime = -1;
+
+            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
+                    test.getClass().getName() + "#" + ((TestCase) test).getName() 
+                    + "\nin " + assignmentSuite + " suite\nrunTime: "
+                    + String.valueOf(runTime) + "\n");
+            mTestResult.putFloat(REPORT_KEY_RUN_TIME, runTime);
+            mTestResult.putString(REPORT_KEY_SUITE_ASSIGNMENT, assignmentSuite);
+
+            sendStatus(0, mTestResult);
         }
     }
     
@@ -437,6 +641,5 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         // TODO report the end of the cycle
         // TODO report runtime for each test
     }
-    
-
 }
+

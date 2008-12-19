@@ -88,6 +88,11 @@ jint android_os_Process_myPid(JNIEnv* env, jobject clazz)
     return getpid();
 }
 
+jint android_os_Process_myUid(JNIEnv* env, jobject clazz)
+{
+    return getuid();
+}
+
 jint android_os_Process_myTid(JNIEnv* env, jobject clazz)
 {
 #ifdef HAVE_GETTID
@@ -707,6 +712,7 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 static const JNINativeMethod methods[] = {
     {"myPid",       "()I", (void*)android_os_Process_myPid},
     {"myTid",       "()I", (void*)android_os_Process_myTid},
+    {"myUid",       "()I", (void*)android_os_Process_myUid},
     {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
     {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},

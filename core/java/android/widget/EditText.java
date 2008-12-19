@@ -19,7 +19,6 @@ package android.widget;
 import android.text.*;
 import android.text.method.*;
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.AttributeSet;
 
 
@@ -98,5 +97,14 @@ public class EditText extends TextView {
      */
     public void extendSelection(int index) {
         Selection.extendSelection(getText(), index);
+    }
+
+    @Override
+    public void setEllipsize(TextUtils.TruncateAt ellipsis) {
+        if (ellipsis == TextUtils.TruncateAt.MARQUEE) {
+            throw new IllegalArgumentException("EditText cannot use the ellipsize mode "
+                    + "TextUtils.TruncateAt.MARQUEE");
+        }
+        super.setEllipsize(ellipsis);
     }
 }

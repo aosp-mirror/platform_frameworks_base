@@ -25,9 +25,10 @@
 #include <media/IMediaPlayerService.h>
 #include <media/MediaPlayerInterface.h>
 
-class SkBitmap;
-
 namespace android {
+
+class IMediaRecorder;
+class IMediaMetadataRetriever;
 
 #define CALLBACK_ANTAGONIZER 0
 #if CALLBACK_ANTAGONIZER
@@ -68,7 +69,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual ssize_t         frameSize() const;
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
-        virtual status_t        open(uint32_t sampleRate, int channelCount, int bufferCount=4);
+        virtual status_t        open(uint32_t sampleRate, int channelCount, int format, int bufferCount=4);
         virtual void            start();
         virtual ssize_t         write(const void* buffer, size_t size);
         virtual void            stop();
@@ -78,14 +79,24 @@ class MediaPlayerService : public BnMediaPlayerService
                 void            setAudioStreamType(int streamType) { mStreamType = streamType; }
                 void            setVolume(float left, float right);
         virtual status_t        dump(int fd, const Vector<String16>& args) const;
+
+        static bool             isOnEmulator();
+        static int              getMinBufferCount();
     private:
+        static void             setMinBufferCount();
+
         AudioTrack*             mTrack;
         int                     mStreamType;
         float                   mLeftVolume;
         float                   mRightVolume;
         float                   mMsecsPerFrame;
         uint32_t                mLatency;
-        static const uint32_t   kDriverLatencyInMsecs;
+
+        // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
+        static const uint32_t   kAudioVideoDelayMs;
+        static bool             mIsOnEmulator;
+        static int              mMinBufferCount;  // 12 for emulator; otherwise 4
+
     };
 
     class AudioCache : public MediaPlayerBase::AudioSink
@@ -96,13 +107,13 @@ class MediaPlayerService : public BnMediaPlayerService
 
         virtual bool            ready() const { return (mChannelCount > 0) && (mHeap->getHeapID() > 0); }
         virtual bool            realtime() const { return false; }
-        virtual ssize_t         bufferSize() const { return 4096; }
+        virtual ssize_t         bufferSize() const { return frameSize() * mFrameCount; }
         virtual ssize_t         frameCount() const { return mFrameCount; }
-        virtual ssize_t         channelCount() const { return mChannelCount; }
-        virtual ssize_t         frameSize() const { return ssize_t(mChannelCount * sizeof(int16_t)); }
+        virtual ssize_t         channelCount() const { return (ssize_t)mChannelCount; }
+        virtual ssize_t         frameSize() const { return ssize_t(mChannelCount * ((mFormat == AudioSystem::PCM_16_BIT)?sizeof(int16_t):sizeof(u_int8_t))); }
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
-        virtual status_t        open(uint32_t sampleRate, int channelCount, int bufferCount=1);
+        virtual status_t        open(uint32_t sampleRate, int channelCount, int format, int bufferCount=1);
         virtual void            start() {}
         virtual ssize_t         write(const void* buffer, size_t size);
         virtual void            stop() {}
@@ -112,6 +123,7 @@ class MediaPlayerService : public BnMediaPlayerService
                 void            setAudioStreamType(int streamType) {}
                 void            setVolume(float left, float right) {}
                 uint32_t        sampleRate() const { return mSampleRate; }
+                uint32_t        format() const { return (uint32_t)mFormat; }
                 size_t          size() const { return mSize; }
                 status_t        wait();
 
@@ -127,7 +139,8 @@ class MediaPlayerService : public BnMediaPlayerService
         Condition           mSignal;
         sp<MemoryHeapBase>  mHeap;
         float               mMsecsPerFrame;
-        ssize_t             mChannelCount;
+        uint16_t            mChannelCount;
+        uint16_t			mFormat;
         ssize_t             mFrameCount;
         uint32_t            mSampleRate;
         uint32_t            mSize;
@@ -139,10 +152,14 @@ public:
     static  void                instantiate();
 
     // IMediaPlayerService interface
+    virtual sp<IMediaRecorder>  createMediaRecorder(pid_t pid);
+    virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid);
+
+    // House keeping for media player clients
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url);
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length);
-    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels);
-    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels);
+    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
+    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
 
     virtual status_t            dump(int fd, const Vector<String16>& args);
 
@@ -160,7 +177,6 @@ private:
         virtual status_t        stop();
         virtual status_t        pause();
         virtual status_t        isPlaying(bool* state);
-        virtual status_t        getVideoSize(int* w, int* h);
         virtual status_t        seekTo(int msec);
         virtual status_t        getCurrentPosition(int* msec);
         virtual status_t        getDuration(int* msec);

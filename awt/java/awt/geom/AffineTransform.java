@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.awt.Shape;
@@ -28,76 +29,118 @@ import org.apache.harmony.awt.internal.nls.Messages;
 import org.apache.harmony.misc.HashCode;
 
 /**
- * The Class AffineTransform represents a linear transformation 
- * (rotation, scaling, or shear) followed by a translation that 
- * acts on a coordinate space. It preserves colinearity of points 
- * and ratios of distances between collinear points: so if A, B, 
- * and C are on a line, then after the space has been transformed 
- * via the affine transform, the images of the three points will 
- * still be on a line, and the ratio of the distance from A to B
- * with the distance from B to C will be the same as the corresponding
- * ratio in the image space.
+ * The Class AffineTransform represents a linear transformation (rotation,
+ * scaling, or shear) followed by a translation that acts on a coordinate space.
+ * It preserves collinearity of points and ratios of distances between collinear
+ * points: so if A, B, and C are on a line, then after the space has been
+ * transformed via the affine transform, the images of the three points will
+ * still be on a line, and the ratio of the distance from A to B with the
+ * distance from B to C will be the same as the corresponding ratio in the image
+ * space.
+ * 
+ * @since Android 1.0
  */
 public class AffineTransform implements Cloneable, Serializable {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 1330973210523860834L;
 
-    /** The Constant TYPE_IDENTITY. */
+    /**
+     * The Constant TYPE_IDENTITY.
+     */
     public static final int TYPE_IDENTITY = 0;
-    
-    /** The Constant TYPE_TRANSLATION. */
+
+    /**
+     * The Constant TYPE_TRANSLATION.
+     */
     public static final int TYPE_TRANSLATION = 1;
-    
-    /** The Constant TYPE_UNIFORM_SCALE. */
+
+    /**
+     * The Constant TYPE_UNIFORM_SCALE.
+     */
     public static final int TYPE_UNIFORM_SCALE = 2;
-    
-    /** The Constant TYPE_GENERAL_SCALE. */
+
+    /**
+     * The Constant TYPE_GENERAL_SCALE.
+     */
     public static final int TYPE_GENERAL_SCALE = 4;
-    
-    /** The Constant TYPE_QUADRANT_ROTATION. */
+
+    /**
+     * The Constant TYPE_QUADRANT_ROTATION.
+     */
     public static final int TYPE_QUADRANT_ROTATION = 8;
-    
-    /** The Constant TYPE_GENERAL_ROTATION. */
+
+    /**
+     * The Constant TYPE_GENERAL_ROTATION.
+     */
     public static final int TYPE_GENERAL_ROTATION = 16;
-    
-    /** The Constant TYPE_GENERAL_TRANSFORM. */
+
+    /**
+     * The Constant TYPE_GENERAL_TRANSFORM.
+     */
     public static final int TYPE_GENERAL_TRANSFORM = 32;
-    
-    /** The Constant TYPE_FLIP. */
+
+    /**
+     * The Constant TYPE_FLIP.
+     */
     public static final int TYPE_FLIP = 64;
-    
-    /** The Constant TYPE_MASK_SCALE. */
+
+    /**
+     * The Constant TYPE_MASK_SCALE.
+     */
     public static final int TYPE_MASK_SCALE = TYPE_UNIFORM_SCALE | TYPE_GENERAL_SCALE;
-    
-    /** The Constant TYPE_MASK_ROTATION. */
+
+    /**
+     * The Constant TYPE_MASK_ROTATION.
+     */
     public static final int TYPE_MASK_ROTATION = TYPE_QUADRANT_ROTATION | TYPE_GENERAL_ROTATION;
 
-    /** The <code>TYPE_UNKNOWN</code> is an initial type value. */
+    /**
+     * The <code>TYPE_UNKNOWN</code> is an initial type value.
+     */
     static final int TYPE_UNKNOWN = -1;
-    
-    /** The min value equivalent to zero. If absolute value less then ZERO it considered as zero. */
+
+    /**
+     * The min value equivalent to zero. If absolute value less then ZERO it
+     * considered as zero.
+     */
     static final double ZERO = 1E-10;
-   
-    /** The values of transformation matrix. */
+
+    /**
+     * The values of transformation matrix.
+     */
     double m00;
-    
-    /** The m10. */
+
+    /**
+     * The m10.
+     */
     double m10;
-    
-    /** The m01. */
+
+    /**
+     * The m01.
+     */
     double m01;
-    
-    /** The m11. */
+
+    /**
+     * The m11.
+     */
     double m11;
-    
-    /** The m02. */
+
+    /**
+     * The m02.
+     */
     double m02;
-    
-    /** The m12. */
+
+    /**
+     * The m12.
+     */
     double m12;
 
-    /** The transformation <code>type</code>. */
+    /**
+     * The transformation <code>type</code>.
+     */
     transient int type;
 
     /**
@@ -111,10 +154,11 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Instantiates a new affine transform that has the same data as
-     * the given AffineTransform.
+     * Instantiates a new affine transform that has the same data as the given
+     * AffineTransform.
      * 
-     * @param t the transform to copy.
+     * @param t
+     *            the transform to copy.
      */
     public AffineTransform(AffineTransform t) {
         this.type = t.type;
@@ -128,15 +172,21 @@ public class AffineTransform implements Cloneable, Serializable {
 
     /**
      * Instantiates a new affine transform by specifying the values of the 2x3
-     * transformation matrix as floats. The type is set to the default
-     * type: <code>TYPE_UNKNOWN</code>
+     * transformation matrix as floats. The type is set to the default type:
+     * <code>TYPE_UNKNOWN</code>
      * 
-     * @param m00 the m00 entry in the transformation matrix.
-     * @param m10 the m10 entry in the transformation matrix.
-     * @param m01 the m01 entry in the transformation matrix.
-     * @param m11 the m11 entry in the transformation matrix.
-     * @param m02 the m02 entry in the transformation matrix.
-     * @param m12 the m12 entry in the transformation matrix.
+     * @param m00
+     *            the m00 entry in the transformation matrix.
+     * @param m10
+     *            the m10 entry in the transformation matrix.
+     * @param m01
+     *            the m01 entry in the transformation matrix.
+     * @param m11
+     *            the m11 entry in the transformation matrix.
+     * @param m02
+     *            the m02 entry in the transformation matrix.
+     * @param m12
+     *            the m12 entry in the transformation matrix.
      */
     public AffineTransform(float m00, float m10, float m01, float m11, float m02, float m12) {
         this.type = TYPE_UNKNOWN;
@@ -150,15 +200,21 @@ public class AffineTransform implements Cloneable, Serializable {
 
     /**
      * Instantiates a new affine transform by specifying the values of the 2x3
-     * transformation matrix as doubles. The type is set to the default
-     * type: <code>TYPE_UNKNOWN</code>
+     * transformation matrix as doubles. The type is set to the default type:
+     * <code>TYPE_UNKNOWN</code>
      * 
-     * @param m00 the m00 entry in the transformation matrix.
-     * @param m10 the m10 entry in the transformation matrix.
-     * @param m01 the m01 entry in the transformation matrix.
-     * @param m11 the m11 entry in the transformation matrix.
-     * @param m02 the m02 entry in the transformation matrix.
-     * @param m12 the m12 entry in the transformation matrix.
+     * @param m00
+     *            the m00 entry in the transformation matrix.
+     * @param m10
+     *            the m10 entry in the transformation matrix.
+     * @param m01
+     *            the m01 entry in the transformation matrix.
+     * @param m11
+     *            the m11 entry in the transformation matrix.
+     * @param m02
+     *            the m02 entry in the transformation matrix.
+     * @param m12
+     *            the m12 entry in the transformation matrix.
      */
     public AffineTransform(double m00, double m10, double m01, double m11, double m02, double m12) {
         this.type = TYPE_UNKNOWN;
@@ -171,20 +227,20 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Instantiates a new affine transform by reading the values of the 
-     * transformation matrix from an array of floats. The mapping from the
-     * array to the matrix starts with <code>matrix[0]</code> giving the 
-     * top-left entry of the matrix and 
-     * proceeds with the usual left-to-right and top-down ordering.
+     * Instantiates a new affine transform by reading the values of the
+     * transformation matrix from an array of floats. The mapping from the array
+     * to the matrix starts with <code>matrix[0]</code> giving the top-left
+     * entry of the matrix and proceeds with the usual left-to-right and
+     * top-down ordering.
      * <p>
-     * If the array has only four entries, then the two entries of the 
-     * last row of the transformation matrix default to zero.
+     * If the array has only four entries, then the two entries of the last row
+     * of the transformation matrix default to zero.
      * 
-     * @param matrix the array of four or six floats giving the values 
-     * of the matrix.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if the size of the array
-     * is 0, 1, 2, 3, or 5.
+     * @param matrix
+     *            the array of four or six floats giving the values of the
+     *            matrix.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of the array is 0, 1, 2, 3, or 5.
      */
     public AffineTransform(float[] matrix) {
         this.type = TYPE_UNKNOWN;
@@ -199,20 +255,20 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Instantiates a new affine transform by reading the values of the 
+     * Instantiates a new affine transform by reading the values of the
      * transformation matrix from an array of doubles. The mapping from the
-     * array to the matrix starts with <code>matrix[0]</code> giving the 
-     * top-left entry of the matrix and 
-     * proceeds with the usual left-to-right and top-down ordering.
+     * array to the matrix starts with <code>matrix[0]</code> giving the
+     * top-left entry of the matrix and proceeds with the usual left-to-right
+     * and top-down ordering.
      * <p>
-     * If the array has only four entries, then the two entries of the 
-     * last row of the transformation matrix default to zero.
+     * If the array has only four entries, then the two entries of the last row
+     * of the transformation matrix default to zero.
      * 
-     * @param matrix the array of four or six doubles giving the values 
-     * of the matrix.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if the size of the array
-     * is 0, 1, 2, 3, or 5.
+     * @param matrix
+     *            the array of four or six doubles giving the values of the
+     *            matrix.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of the array is 0, 1, 2, 3, or 5.
      */
     public AffineTransform(double[] matrix) {
         this.type = TYPE_UNKNOWN;
@@ -226,27 +282,26 @@ public class AffineTransform implements Cloneable, Serializable {
         }
     }
 
-
     /**
      * Returns type of the affine transformation.
      * <p>
-     * The type is computed as follows: Label the entries of the 
-     * transformation matrix as three rows (m00, m01), (m10, m11), and
-     * (m02, m12). Then if the original basis vectors are (1, 0) and (0, 1), 
-     * the new basis vectors after transformation are given by (m00, m01) 
-     * and (m10, m11), and the translation vector is (m02, m12).
+     * The type is computed as follows: Label the entries of the transformation
+     * matrix as three rows (m00, m01), (m10, m11), and (m02, m12). Then if the
+     * original basis vectors are (1, 0) and (0, 1), the new basis vectors after
+     * transformation are given by (m00, m01) and (m10, m11), and the
+     * translation vector is (m02, m12).
      * <p>
-     * The types are classified as follows: <br/> 
-     *   TYPE_IDENTITY - no change<br/>
-     *   TYPE_TRANSLATION - The translation vector isn't zero<br/>
-     *   TYPE_UNIFORM_SCALE - The new basis vectors have equal length<br/>
-     *   TYPE_GENERAL_SCALE - The new basis vectors dont' have equal length<br/>
-     *   TYPE_FLIP - The new basis vector orientation differs from the original one<br/>
-     *   TYPE_QUADRANT_ROTATION - The new basis is a rotation of the original by 90, 180, 270, or 360 degrees<br/>   
-     *   TYPE_GENERAL_ROTATION - The new basis is a rotation of the original by an arbitrary angle<br/>
-     *   TYPE_GENERAL_TRANSFORM - The transformation can't be inverted.<br/>
-     *   <p>
-     * Note that multiple types are possible, thus the types can be combined 
+     * The types are classified as follows: <br/> TYPE_IDENTITY - no change<br/>
+     * TYPE_TRANSLATION - The translation vector isn't zero<br/>
+     * TYPE_UNIFORM_SCALE - The new basis vectors have equal length<br/>
+     * TYPE_GENERAL_SCALE - The new basis vectors dont' have equal length<br/>
+     * TYPE_FLIP - The new basis vector orientation differs from the original
+     * one<br/> TYPE_QUADRANT_ROTATION - The new basis is a rotation of the
+     * original by 90, 180, 270, or 360 degrees<br/> TYPE_GENERAL_ROTATION - The
+     * new basis is a rotation of the original by an arbitrary angle<br/>
+     * TYPE_GENERAL_TRANSFORM - The transformation can't be inverted.<br/>
+     * <p>
+     * Note that multiple types are possible, thus the types can be combined
      * using bitwise combinations.
      * 
      * @return the type of the Affine Transform.
@@ -265,11 +320,10 @@ public class AffineTransform implements Cloneable, Serializable {
 
         if (m02 != 0.0 || m12 != 0.0) {
             type |= TYPE_TRANSLATION;
-        } else
-            if (m00 == 1.0 && m11 == 1.0 && m01 == 0.0 && m10 == 0.0) {
-                type = TYPE_IDENTITY;
-                return type;
-            }
+        } else if (m00 == 1.0 && m11 == 1.0 && m01 == 0.0 && m10 == 0.0) {
+            type = TYPE_IDENTITY;
+            return type;
+        }
 
         if (m00 * m11 - m01 * m10 < 0.0) {
             type |= TYPE_FLIP;
@@ -279,26 +333,22 @@ public class AffineTransform implements Cloneable, Serializable {
         double dy = m01 * m01 + m11 * m11;
         if (dx != dy) {
             type |= TYPE_GENERAL_SCALE;
-        } else
-            if (dx != 1.0) {
-                type |= TYPE_UNIFORM_SCALE;
-            }
+        } else if (dx != 1.0) {
+            type |= TYPE_UNIFORM_SCALE;
+        }
 
-        if ((m00 == 0.0 && m11 == 0.0) ||
-            (m10 == 0.0 && m01 == 0.0 && (m00 < 0.0 || m11 < 0.0)))
-        {
+        if ((m00 == 0.0 && m11 == 0.0) || (m10 == 0.0 && m01 == 0.0 && (m00 < 0.0 || m11 < 0.0))) {
             type |= TYPE_QUADRANT_ROTATION;
-        } else
-            if (m01 != 0.0 || m10 != 0.0) {
-                type |= TYPE_GENERAL_ROTATION;
-            }
+        } else if (m01 != 0.0 || m10 != 0.0) {
+            type |= TYPE_GENERAL_ROTATION;
+        }
 
         return type;
     }
 
     /**
-     * Gets the scale x entry of the transformation matrix
-     * (the upper left matrix entry).
+     * Gets the scale x entry of the transformation matrix (the upper left
+     * matrix entry).
      * 
      * @return the scale x value.
      */
@@ -307,8 +357,8 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the scale y entry of the transformation matrix
-     * (the lower right entry of the linear transformation).
+     * Gets the scale y entry of the transformation matrix (the lower right
+     * entry of the linear transformation).
      * 
      * @return the scale y value.
      */
@@ -317,8 +367,8 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the shear x entry of the transformation matrix
-     * (the upper right entry of the linear transformation).
+     * Gets the shear x entry of the transformation matrix (the upper right
+     * entry of the linear transformation).
      * 
      * @return the shear x value.
      */
@@ -327,8 +377,8 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the shear y entry of the transformation matrix
-     * (the lower left entry of the linear transformation).
+     * Gets the shear y entry of the transformation matrix (the lower left entry
+     * of the linear transformation).
      * 
      * @return the shear y value.
      */
@@ -364,15 +414,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Writes the values of the transformation matrix into the given 
-     * array of doubles. If the array has length 4, only the linear
-     * transformation part will be written into it. If it has length 
-     * greater than 4, the translation vector will be included as well.
+     * Writes the values of the transformation matrix into the given array of
+     * doubles. If the array has length 4, only the linear transformation part
+     * will be written into it. If it has length greater than 4, the translation
+     * vector will be included as well.
      * 
-     * @param matrix the array to fill with the values of the matrix.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if the size of the array
-     * is 0, 1, 2, 3, or 5.
+     * @param matrix
+     *            the array to fill with the values of the matrix.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if the size of the array is 0, 1, 2, 3, or 5.
      */
     public void getMatrix(double[] matrix) {
         matrix[0] = m00;
@@ -397,12 +447,18 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Sets the transform in terms of a list of double values.
      * 
-     * @param m00 the m00 coordinate of the transformation matrix.
-     * @param m10 the m10 coordinate of the transformation matrix.
-     * @param m01 the m01 coordinate of the transformation matrix.
-     * @param m11 the m11 coordinate of the transformation matrix.
-     * @param m02 the m02 coordinate of the transformation matrix.
-     * @param m12 the m12 coordinate of the transformation matrix.
+     * @param m00
+     *            the m00 coordinate of the transformation matrix.
+     * @param m10
+     *            the m10 coordinate of the transformation matrix.
+     * @param m01
+     *            the m01 coordinate of the transformation matrix.
+     * @param m11
+     *            the m11 coordinate of the transformation matrix.
+     * @param m02
+     *            the m02 coordinate of the transformation matrix.
+     * @param m12
+     *            the m12 coordinate of the transformation matrix.
      */
     public void setTransform(double m00, double m10, double m01, double m11, double m02, double m12) {
         this.type = TYPE_UNKNOWN;
@@ -415,10 +471,11 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transform's data to match the data of the transform 
-     * sent as a parameter.
+     * Sets the transform's data to match the data of the transform sent as a
+     * parameter.
      * 
-     * @param t the transform that gives the new values.
+     * @param t
+     *            the transform that gives the new values.
      */
     public void setTransform(AffineTransform t) {
         type = t.type;
@@ -435,15 +492,16 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transformation to a translation alone.
-     * Sets the linear part of the transformation to identity 
-     * and the translation vector to the values sent as parameters.
-     * Sets the type to <code>TYPE_IDENTITY</code>
-     * if the resulting AffineTransformation is the identity 
-     * transformation, otherwise sets it to <code>TYPE_TRANSLATION</code>.
+     * Sets the transformation to a translation alone. Sets the linear part of
+     * the transformation to identity and the translation vector to the values
+     * sent as parameters. Sets the type to <code>TYPE_IDENTITY</code> if the
+     * resulting AffineTransformation is the identity transformation, otherwise
+     * sets it to <code>TYPE_TRANSLATION</code>.
      * 
-     * @param mx the distance to translate in the x direction.
-     * @param my the distance to translate in the y direction.
+     * @param mx
+     *            the distance to translate in the x direction.
+     * @param my
+     *            the distance to translate in the y direction.
      */
     public void setToTranslation(double mx, double my) {
         m00 = m11 = 1.0;
@@ -458,14 +516,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transformation to being a scale alone, eliminating 
-     * rotation, shear, and translation elements.
-     * Sets the type to <code>TYPE_IDENTITY</code>
-     * if the resulting AffineTransformation is the identity 
-     * transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
+     * Sets the transformation to being a scale alone, eliminating rotation,
+     * shear, and translation elements. Sets the type to
+     * <code>TYPE_IDENTITY</code> if the resulting AffineTransformation is the
+     * identity transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
      * 
-     * @param scx the scaling factor in the x direction.
-     * @param scy the scaling factor in the y direction.
+     * @param scx
+     *            the scaling factor in the x direction.
+     * @param scy
+     *            the scaling factor in the y direction.
      */
     public void setToScale(double scx, double scy) {
         m00 = scx;
@@ -479,14 +538,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transformation to being a shear alone, eliminating 
-     * rotation, scaling, and translation elements.
-     * Sets the type to <code>TYPE_IDENTITY</code>
-     * if the resulting AffineTransformation is the identity 
-     * transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
+     * Sets the transformation to being a shear alone, eliminating rotation,
+     * scaling, and translation elements. Sets the type to
+     * <code>TYPE_IDENTITY</code> if the resulting AffineTransformation is the
+     * identity transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
      * 
-     * @param shx the shearing factor in the x direction.
-     * @param shy the shearing factor in the y direction.
+     * @param shx
+     *            the shearing factor in the x direction.
+     * @param shy
+     *            the shearing factor in the y direction.
      */
     public void setToShear(double shx, double shy) {
         m00 = m11 = 1.0;
@@ -501,13 +561,13 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transformation to being a rotation alone, eliminating 
-     * shearing, scaling, and translation elements.
-     * Sets the type to <code>TYPE_IDENTITY</code>
-     * if the resulting AffineTransformation is the identity 
-     * transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
+     * Sets the transformation to being a rotation alone, eliminating shearing,
+     * scaling, and translation elements. Sets the type to
+     * <code>TYPE_IDENTITY</code> if the resulting AffineTransformation is the
+     * identity transformation, otherwise sets it to <code>TYPE_UNKNOWN</code>.
      * 
-     * @param angle the angle of rotation in radians.
+     * @param angle
+     *            the angle of rotation in radians.
      */
     public void setToRotation(double angle) {
         double sin = Math.sin(angle);
@@ -515,11 +575,10 @@ public class AffineTransform implements Cloneable, Serializable {
         if (Math.abs(cos) < ZERO) {
             cos = 0.0;
             sin = sin > 0.0 ? 1.0 : -1.0;
-        } else
-            if (Math.abs(sin) < ZERO) {
-                sin = 0.0;
-                cos = cos > 0.0 ? 1.0 : -1.0;
-            }
+        } else if (Math.abs(sin) < ZERO) {
+            sin = 0.0;
+            cos = cos > 0.0 ? 1.0 : -1.0;
+        }
         m00 = m11 = cos;
         m01 = -sin;
         m10 = sin;
@@ -528,13 +587,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the transformation to being a rotation followed by a 
-     * translation. 
+     * Sets the transformation to being a rotation followed by a translation.
      * Sets the type to <code>TYPE_UNKNOWN</code>.
      * 
-     * @param angle the angle of rotation in radians.
-     * @param px the distance to translate in the x direction.
-     * @param py the distance to translate in the y direction.
+     * @param angle
+     *            the angle of rotation in radians.
+     * @param px
+     *            the distance to translate in the x direction.
+     * @param py
+     *            the distance to translate in the y direction.
      */
     public void setToRotation(double angle, double px, double py) {
         setToRotation(angle);
@@ -544,15 +605,16 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new AffineTransformation that is a translation alone
-     * with the translation vector given by the values sent as parameters.
-     * The new transformation's type is <code>TYPE_IDENTITY</code>
-     * if the AffineTransformation is the identity 
-     * transformation, otherwise it's <code>TYPE_TRANSLATION</code>.
+     * Creates a new AffineTransformation that is a translation alone with the
+     * translation vector given by the values sent as parameters. The new
+     * transformation's type is <code>TYPE_IDENTITY</code> if the
+     * AffineTransformation is the identity transformation, otherwise it's
+     * <code>TYPE_TRANSLATION</code>.
      * 
-     * @param mx the distance to translate in the x direction.
-     * @param my the distance to translate in the y direction.
-
+     * @param mx
+     *            the distance to translate in the x direction.
+     * @param my
+     *            the distance to translate in the y direction.
      * @return the new AffineTransformation.
      */
     public static AffineTransform getTranslateInstance(double mx, double my) {
@@ -562,14 +624,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new AffineTransformation that is a scale alone.
-     * The new transformation's type is <code>TYPE_IDENTITY</code>
-     * if the AffineTransformation is the identity 
-     * transformation, otherwise it's <code>TYPE_UNKNOWN</code>.
+     * Creates a new AffineTransformation that is a scale alone. The new
+     * transformation's type is <code>TYPE_IDENTITY</code> if the
+     * AffineTransformation is the identity transformation, otherwise it's
+     * <code>TYPE_UNKNOWN</code>.
      * 
-     * @param scx the scaling factor in the x direction.
-     * @param scY the scaling factor in the y direction.
-     * 
+     * @param scx
+     *            the scaling factor in the x direction.
+     * @param scY
+     *            the scaling factor in the y direction.
      * @return the new AffineTransformation.
      */
     public static AffineTransform getScaleInstance(double scx, double scY) {
@@ -579,14 +642,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new AffineTransformation that is a shear alone.
-     * The new transformation's type is <code>TYPE_IDENTITY</code>
-     * if the AffineTransformation is the identity 
-     * transformation, otherwise it's <code>TYPE_UNKNOWN</code>.
+     * Creates a new AffineTransformation that is a shear alone. The new
+     * transformation's type is <code>TYPE_IDENTITY</code> if the
+     * AffineTransformation is the identity transformation, otherwise it's
+     * <code>TYPE_UNKNOWN</code>.
      * 
-     * @param shx the shearing factor in the x direction.
-     * @param shy the shearing factor in the y direction.
-     * 
+     * @param shx
+     *            the shearing factor in the x direction.
+     * @param shy
+     *            the shearing factor in the y direction.
      * @return the new AffineTransformation.
      */
     public static AffineTransform getShearInstance(double shx, double shy) {
@@ -596,13 +660,13 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new AffineTransformation that is a rotation alone.
-     * The new transformation's type is <code>TYPE_IDENTITY</code>
-     * if the AffineTransformation is the identity 
-     * transformation, otherwise it's <code>TYPE_UNKNOWN</code>.
+     * Creates a new AffineTransformation that is a rotation alone. The new
+     * transformation's type is <code>TYPE_IDENTITY</code> if the
+     * AffineTransformation is the identity transformation, otherwise it's
+     * <code>TYPE_UNKNOWN</code>.
      * 
-     * @param angle the angle of rotation in radians.
-     * 
+     * @param angle
+     *            the angle of rotation in radians.
      * @return the new AffineTransformation.
      */
     public static AffineTransform getRotateInstance(double angle) {
@@ -612,14 +676,15 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new AffineTransformation that is a rotation followed by a 
-     * translation. 
-     * Sets the type to <code>TYPE_UNKNOWN</code>.
+     * Creates a new AffineTransformation that is a rotation followed by a
+     * translation. Sets the type to <code>TYPE_UNKNOWN</code>.
      * 
-     * @param angle the angle of rotation in radians.
-     * @param x the distance to translate in the x direction.
-     * @param y the distance to translate in the y direction.
-     * 
+     * @param angle
+     *            the angle of rotation in radians.
+     * @param x
+     *            the distance to translate in the x direction.
+     * @param y
+     *            the distance to translate in the y direction.
      * @return the new AffineTransformation.
      */
     public static AffineTransform getRotateInstance(double angle, double x, double y) {
@@ -631,8 +696,10 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Applies a translation to this AffineTransformation.
      * 
-     * @param mx the distance to translate in the x direction.
-     * @param my the distance to translate in the y direction.
+     * @param mx
+     *            the distance to translate in the x direction.
+     * @param my
+     *            the distance to translate in the y direction.
      */
     public void translate(double mx, double my) {
         concatenate(AffineTransform.getTranslateInstance(mx, my));
@@ -641,8 +708,10 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Applies a scaling transformation to this AffineTransformation.
      * 
-     * @param scx the scaling factor in the x direction.
-     * @param scy the scaling factor in the y direction.
+     * @param scx
+     *            the scaling factor in the x direction.
+     * @param scy
+     *            the scaling factor in the y direction.
      */
     public void scale(double scx, double scy) {
         concatenate(AffineTransform.getScaleInstance(scx, scy));
@@ -651,8 +720,10 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Applies a shearing transformation to this AffineTransformation.
      * 
-     * @param shx the shearing factor in the x direction.
-     * @param shy the shearing factor in the y direction.
+     * @param shx
+     *            the shearing factor in the x direction.
+     * @param shy
+     *            the shearing factor in the y direction.
      */
     public void shear(double shx, double shy) {
         concatenate(AffineTransform.getShearInstance(shx, shy));
@@ -661,19 +732,23 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Applies a rotation transformation to this AffineTransformation.
      * 
-     * @param angle the angle of rotation in radians.
+     * @param angle
+     *            the angle of rotation in radians.
      */
     public void rotate(double angle) {
         concatenate(AffineTransform.getRotateInstance(angle));
     }
 
     /**
-     * Applies a rotation and translation transformation to this 
+     * Applies a rotation and translation transformation to this
      * AffineTransformation.
      * 
-     * @param angle the angle of rotation in radians.
-     * @param px the distance to translate in the x direction.
-     * @param py the distance to translate in the y direction.
+     * @param angle
+     *            the angle of rotation in radians.
+     * @param px
+     *            the distance to translate in the x direction.
+     * @param py
+     *            the distance to translate in the y direction.
      */
     public void rotate(double angle, double px, double py) {
         concatenate(AffineTransform.getRotateInstance(angle, px, py));
@@ -682,36 +757,40 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Multiplies the matrix representations of two AffineTransform objects.
      * 
-     * @param t1 - the AffineTransform object is a multiplicand
-     * @param t2 - the AffineTransform object is a multiplier
-     * 
-     * @return an AffineTransform object that is the result of t1 multiplied by the matrix t2.
+     * @param t1
+     *            - the AffineTransform object is a multiplicand
+     * @param t2
+     *            - the AffineTransform object is a multiplier
+     * @return an AffineTransform object that is the result of t1 multiplied by
+     *         the matrix t2.
      */
     AffineTransform multiply(AffineTransform t1, AffineTransform t2) {
-        return new AffineTransform(
-                t1.m00 * t2.m00 + t1.m10 * t2.m01,          // m00
-                t1.m00 * t2.m10 + t1.m10 * t2.m11,          // m01
-                t1.m01 * t2.m00 + t1.m11 * t2.m01,          // m10
-                t1.m01 * t2.m10 + t1.m11 * t2.m11,          // m11
+        return new AffineTransform(t1.m00 * t2.m00 + t1.m10 * t2.m01, // m00
+                t1.m00 * t2.m10 + t1.m10 * t2.m11, // m01
+                t1.m01 * t2.m00 + t1.m11 * t2.m01, // m10
+                t1.m01 * t2.m10 + t1.m11 * t2.m11, // m11
                 t1.m02 * t2.m00 + t1.m12 * t2.m01 + t2.m02, // m02
                 t1.m02 * t2.m10 + t1.m12 * t2.m11 + t2.m12);// m12
     }
 
     /**
-     * Applies the given AffineTransform to this AffineTransform
-     * via matrix multiplication.
+     * Applies the given AffineTransform to this AffineTransform via matrix
+     * multiplication.
      * 
-     * @param t the AffineTransform to apply to this AffineTransform.
+     * @param t
+     *            the AffineTransform to apply to this AffineTransform.
      */
     public void concatenate(AffineTransform t) {
         setTransform(multiply(t, this));
     }
 
     /**
-     * Changes the current AffineTransform the one obtained by 
-     * taking the transform t and applying this AffineTransform to it.
+     * Changes the current AffineTransform the one obtained by taking the
+     * transform t and applying this AffineTransform to it.
      * 
-     * @param t the AffineTransform that this AffineTransform is multiplied by.
+     * @param t
+     *            the AffineTransform that this AffineTransform is multiplied
+     *            by.
      */
     public void preConcatenate(AffineTransform t) {
         setTransform(multiply(this, t));
@@ -721,9 +800,9 @@ public class AffineTransform implements Cloneable, Serializable {
      * Creates an AffineTransform that is the inverse of this transform.
      * 
      * @return the affine transform that is the inverse of this AffineTransform.
-     * 
-     * @throws NoninvertibleTransformException if this AffineTransform cannot be 
-     * inverted (the determinant of the linear transformation part is zero).
+     * @throws NoninvertibleTransformException
+     *             if this AffineTransform cannot be inverted (the determinant
+     *             of the linear transformation part is zero).
      */
     public AffineTransform createInverse() throws NoninvertibleTransformException {
         double det = getDeterminant();
@@ -731,25 +810,26 @@ public class AffineTransform implements Cloneable, Serializable {
             // awt.204=Determinant is zero
             throw new NoninvertibleTransformException(Messages.getString("awt.204")); //$NON-NLS-1$
         }
-        return new AffineTransform(
-                 m11 / det, // m00
+        return new AffineTransform(m11 / det, // m00
                 -m10 / det, // m10
                 -m01 / det, // m01
-                 m00 / det, // m11
+                m00 / det, // m11
                 (m01 * m12 - m11 * m02) / det, // m02
-                (m10 * m02 - m00 * m12) / det  // m12
+                (m10 * m02 - m00 * m12) / det // m12
         );
     }
 
     /**
      * Apply the current AffineTransform to the point.
      * 
-     * @param src the original point.
-     * @param dst Point2D object to be filled with the destination
-     * coordinates (where the original point is sent by this AffineTransform). May be null.
-     * 
-     * @return the point in the AffineTransform's image space where the
-     * original point is sent.
+     * @param src
+     *            the original point.
+     * @param dst
+     *            Point2D object to be filled with the destination coordinates
+     *            (where the original point is sent by this AffineTransform).
+     *            May be null.
+     * @return the point in the AffineTransform's image space where the original
+     *         point is sent.
      */
     public Point2D transform(Point2D src, Point2D dst) {
         if (dst == null) {
@@ -770,25 +850,29 @@ public class AffineTransform implements Cloneable, Serializable {
     /**
      * Applies this AffineTransform to an array of points.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length > src.length</code> or
-     * <code>dstOff + length > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length > src.length</code> or
+     *             <code>dstOff + length > dst.length</code>.
      */
     public void transform(Point2D[] src, int srcOff, Point2D[] dst, int dstOff, int length) {
         while (--length >= 0) {
-            Point2D srcPoint = src[srcOff++]; 
+            Point2D srcPoint = src[srcOff++];
             double x = srcPoint.getX();
             double y = srcPoint.getY();
-            Point2D dstPoint = dst[dstOff]; 
+            Point2D dstPoint = dst[dstOff];
             if (dstPoint == null) {
                 if (srcPoint instanceof Point2D.Double) {
                     dstPoint = new Point2D.Double();
@@ -800,27 +884,31 @@ public class AffineTransform implements Cloneable, Serializable {
             dst[dstOff++] = dstPoint;
         }
     }
-    
+
     /**
-     * Applies this AffineTransform to a set of points given 
-     * as an array of double values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
+     * Applies this AffineTransform to a set of points given as an array of
+     * double values where every two values in the array give the coordinates of
+     * a point; the even-indexed values giving the x coordinates and the
+     * odd-indexed values giving the y coordinates.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
      */
-     public void transform(double[] src, int srcOff, double[] dst, int dstOff, int length) {
+    public void transform(double[] src, int srcOff, double[] dst, int dstOff, int length) {
         int step = 2;
         if (src == dst && srcOff < dstOff && dstOff < srcOff + length * 2) {
             srcOff = srcOff + length * 2 - 2;
@@ -838,23 +926,27 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Applies this AffineTransform to a set of points given 
-     * as an array of float values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
+     * Applies this AffineTransform to a set of points given as an array of
+     * float values where every two values in the array give the coordinates of
+     * a point; the even-indexed values giving the x coordinates and the
+     * odd-indexed values giving the y coordinates.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
      */
     public void transform(float[] src, int srcOff, float[] dst, int dstOff, int length) {
         int step = 2;
@@ -872,26 +964,30 @@ public class AffineTransform implements Cloneable, Serializable {
             dstOff += step;
         }
     }
-    
+
     /**
-     * Applies this AffineTransform to a set of points given 
-     * as an array of float values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
-     * The destination coordinates are given as values of type <code>double</code>.
+     * Applies this AffineTransform to a set of points given as an array of
+     * float values where every two values in the array give the coordinates of
+     * a point; the even-indexed values giving the x coordinates and the
+     * odd-indexed values giving the y coordinates. The destination coordinates
+     * are given as values of type <code>double</code>.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
      */
     public void transform(float[] src, int srcOff, double[] dst, int dstOff, int length) {
         while (--length >= 0) {
@@ -903,24 +999,28 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Applies this AffineTransform to a set of points given 
-     * as an array of double values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
-     * The destination coordinates are given as values of type <code>float</code>.
+     * Applies this AffineTransform to a set of points given as an array of
+     * double values where every two values in the array give the coordinates of
+     * a point; the even-indexed values giving the x coordinates and the
+     * odd-indexed values giving the y coordinates. The destination coordinates
+     * are given as values of type <code>float</code>.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
      */
     public void transform(double[] src, int srcOff, float[] dst, int dstOff, int length) {
         while (--length >= 0) {
@@ -932,15 +1032,16 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Transforms the point according to the linear transformation
-     * part of this AffineTransformation (without applying the translation).
+     * Transforms the point according to the linear transformation part of this
+     * AffineTransformation (without applying the translation).
      * 
-     * @param src the original point.
-     * @param dst the point object where the result of the delta transform
-     * is written.
-     * 
-     * @return the result of applying the delta transform (linear part 
-     * only) to the original point.
+     * @param src
+     *            the original point.
+     * @param dst
+     *            the point object where the result of the delta transform is
+     *            written.
+     * @return the result of applying the delta transform (linear part only) to
+     *         the original point.
      */
     // TODO: is this right? if dst is null, we check what it's an
     // instance of? Shouldn't it be src instanceof Point2D.Double?
@@ -961,24 +1062,28 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Applies the linear transformation part of this AffineTransform 
-     * (ignoring the translation part) to a set of points given 
-     * as an array of double values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
+     * Applies the linear transformation part of this AffineTransform (ignoring
+     * the translation part) to a set of points given as an array of double
+     * values where every two values in the array give the coordinates of a
+     * point; the even-indexed values giving the x coordinates and the
+     * odd-indexed values giving the y coordinates.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the delta transformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the delta transformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
      */
     public void deltaTransform(double[] src, int srcOff, double[] dst, int dstOff, int length) {
         while (--length >= 0) {
@@ -990,19 +1095,21 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Transforms the point according to the inverse of this AffineTransformation.
+     * Transforms the point according to the inverse of this
+     * AffineTransformation.
      * 
-     * @param src the original point.
-     * @param dst the point object where the result of the inverse transform
-     * is written (may be null).
-     * 
-     * @return the result of applying the inverse transform.
-     * Inverse transform.
-     * 
-     * @throws NoninvertibleTransformException if this AffineTransform cannot be 
-     * inverted (the determinant of the linear transformation part is zero).
+     * @param src
+     *            the original point.
+     * @param dst
+     *            the point object where the result of the inverse transform is
+     *            written (may be null).
+     * @return the result of applying the inverse transform. Inverse transform.
+     * @throws NoninvertibleTransformException
+     *             if this AffineTransform cannot be inverted (the determinant
+     *             of the linear transformation part is zero).
      */
-    public Point2D inverseTransform(Point2D src, Point2D dst) throws NoninvertibleTransformException {
+    public Point2D inverseTransform(Point2D src, Point2D dst)
+            throws NoninvertibleTransformException {
         double det = getDeterminant();
         if (Math.abs(det) < ZERO) {
             // awt.204=Determinant is zero
@@ -1025,29 +1132,33 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Applies the inverse of this AffineTransform to a set of points given 
-     * as an array of double values where every two values in the array 
-     * give the coordinates of a point; the even-indexed values giving the
-     * x coordinates and the odd-indexed values giving the y coordinates.
+     * Applies the inverse of this AffineTransform to a set of points given as
+     * an array of double values where every two values in the array give the
+     * coordinates of a point; the even-indexed values giving the x coordinates
+     * and the odd-indexed values giving the y coordinates.
      * 
-     * @param src the array of points to be transformed.
-     * @param srcOff the offset in the source point array of the first point
-     * to be transformed.
-     * @param dst the point array where the images of the points (after 
-     * applying the inverse of the AffineTransformation) should be placed.
-     * @param dstOff the offset in the destination array where the new 
-     * values should be written.
-     * @param length the number of points to transform.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if 
-     * <code>srcOff + length*2 > src.length</code> or
-     * <code>dstOff + length*2 > dst.length</code>.
-     * @throws NoninvertibleTransformException if this AffineTransform cannot be 
-     * inverted (the determinant of the linear transformation part is zero).
+     * @param src
+     *            the array of points to be transformed.
+     * @param srcOff
+     *            the offset in the source point array of the first point to be
+     *            transformed.
+     * @param dst
+     *            the point array where the images of the points (after applying
+     *            the inverse of the AffineTransformation) should be placed.
+     * @param dstOff
+     *            the offset in the destination array where the new values
+     *            should be written.
+     * @param length
+     *            the number of points to transform.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if <code>srcOff + length*2 > src.length</code> or
+     *             <code>dstOff + length*2 > dst.length</code>.
+     * @throws NoninvertibleTransformException
+     *             if this AffineTransform cannot be inverted (the determinant
+     *             of the linear transformation part is zero).
      */
     public void inverseTransform(double[] src, int srcOff, double[] dst, int dstOff, int length)
-        throws NoninvertibleTransformException
-    {
+            throws NoninvertibleTransformException {
         double det = getDeterminant();
         if (Math.abs(det) < ZERO) {
             // awt.204=Determinant is zero
@@ -1063,13 +1174,13 @@ public class AffineTransform implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a new shape whose data is given by applying this 
-     * AffineTransform to the specified shape.
+     * Creates a new shape whose data is given by applying this AffineTransform
+     * to the specified shape.
      * 
-     * @param src the original shape whose data is to be transformed.
-     * 
-     * @return the new shape found by applying this AffineTransform to 
-     * the original shape.
+     * @param src
+     *            the original shape whose data is to be transformed.
+     * @return the new shape found by applying this AffineTransform to the
+     *         original shape.
      */
     public Shape createTransformedShape(Shape src) {
         if (src == null) {
@@ -1086,9 +1197,7 @@ public class AffineTransform implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return
-            getClass().getName() +
-            "[[" + m00 + ", " + m01 + ", " + m02 + "], [" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return getClass().getName() + "[[" + m00 + ", " + m01 + ", " + m02 + "], [" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                 + m10 + ", " + m11 + ", " + m12 + "]]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
@@ -1120,39 +1229,39 @@ public class AffineTransform implements Cloneable, Serializable {
         }
         if (obj instanceof AffineTransform) {
             AffineTransform t = (AffineTransform)obj;
-            return
-                m00 == t.m00 && m01 == t.m01 &&
-                m02 == t.m02 && m10 == t.m10 &&
-                m11 == t.m11 && m12 == t.m12;
+            return m00 == t.m00 && m01 == t.m01 && m02 == t.m02 && m10 == t.m10 && m11 == t.m11
+                    && m12 == t.m12;
         }
         return false;
     }
 
-    
     /**
      * Writes the AffineTrassform object to the output steam.
      * 
-     * @param stream - the output stream
-     * 
-     * @throws IOException - if there are I/O errors while writing to the output strem
+     * @param stream
+     *            - the output stream.
+     * @throws IOException
+     *             - if there are I/O errors while writing to the output stream.
      */
     private void writeObject(java.io.ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
     }
 
-    
     /**
      * Read the AffineTransform object from the input stream.
      * 
-     * @param stream - the input steam
-     * 
-     * @throws IOException - if there are I/O errors while reading from the input strem
-     * @throws ClassNotFoundException - if class could not be found
+     * @param stream
+     *            - the input stream.
+     * @throws IOException
+     *             - if there are I/O errors while reading from the input
+     *             stream.
+     * @throws ClassNotFoundException
+     *             - if class could not be found.
      */
-    private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
         stream.defaultReadObject();
         type = TYPE_UNKNOWN;
     }
 
 }
-

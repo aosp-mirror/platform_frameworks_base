@@ -22,9 +22,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.util.Config;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.Window;
 
 import java.util.ArrayList;
@@ -114,13 +111,21 @@ public class LocalActivityManager {
         }
         
         if (r.curState == INITIALIZING) {
+            // Get the lastNonConfigurationInstance for the activity
+            HashMap<String,Object> lastNonConfigurationInstances =
+                mParent.getLastNonConfigurationChildInstances();
+            Object instance = null;
+            if (lastNonConfigurationInstances != null) {
+                instance = lastNonConfigurationInstances.get(r.id);
+            }
+            
             // We need to have always created the activity.
             if (localLOGV) Log.v(TAG, r.id + ": starting " + r.intent);
             if (r.activityInfo == null) {
                 r.activityInfo = mActivityThread.resolveActivityInfo(r.intent);
             }
             r.activity = mActivityThread.startActivityNow(
-                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState);
+                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState, instance);
             if (r.activity == null) {
                 return;
             }
@@ -288,7 +293,6 @@ public class LocalActivityManager {
             // It's a brand new world.
             mActivities.put(id, r);
             mActivityArray.add(r);
-            
         } else if (r.activityInfo != null) {
             // If the new activity is the same as the current one, then
             // we may be able to reuse it.
@@ -567,6 +571,32 @@ public class LocalActivityManager {
             LocalActivityRecord r = mActivityArray.get(i);
             moveToState(r, CREATED);
         }
+    }
+    
+    /**
+     * Call onRetainNonConfigurationInstance on each child activity and store the
+     * results in a HashMap by id.  Only construct the HashMap if there is a non-null
+     * object to store.  Note that this does not support nested ActivityGroups.
+     * 
+     * {@hide}
+     */
+    public HashMap<String,Object> dispatchRetainNonConfigurationInstance() {
+        HashMap<String,Object> instanceMap = null;
+        
+        final int N = mActivityArray.size();
+        for (int i=0; i<N; i++) {
+            LocalActivityRecord r = mActivityArray.get(i);
+            if ((r != null) && (r.activity != null)) {
+                Object instance = r.activity.onRetainNonConfigurationInstance();
+                if (instance != null) {
+                    if (instanceMap == null) {
+                        instanceMap = new HashMap<String,Object>();
+                    }
+                    instanceMap.put(r.id, instance);
+                }
+            }
+        }
+        return instanceMap;
     }
 
     /**

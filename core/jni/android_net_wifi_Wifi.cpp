@@ -343,6 +343,32 @@ static jboolean android_net_wifi_setPowerModeCommand(JNIEnv* env, jobject clazz,
     return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
 }
 
+static jboolean android_net_wifi_setNumAllowedChannelsCommand(JNIEnv* env, jobject clazz, jint numChannels)
+{
+    char cmdstr[256];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER SCAN-CHANNELS %u", numChannels);
+    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
+
+    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
+}
+
+static jint android_net_wifi_getNumAllowedChannelsCommand(JNIEnv* env, jobject clazz)
+{
+    char reply[256];
+    int numChannels;
+
+    if (doCommand("DRIVER SCAN-CHANNELS", reply, sizeof(reply)) != 0) {
+        return -1;
+    }
+    // reply comes back in the form "Scan-Channels = X" where X is the
+    // number of channels
+    if (sscanf(reply, "%*s = %u", &numChannels) == 1)
+        return numChannels;
+    else
+        return -1;
+}
+
 static jboolean android_net_wifi_setBluetoothCoexistenceModeCommand(JNIEnv* env, jobject clazz, jint mode)
 {
     char cmdstr[256];
@@ -382,7 +408,7 @@ static jboolean android_net_wifi_addToBlacklistCommand(JNIEnv* env, jobject claz
 
     const char *bssidStr = env->GetStringUTFChars(bssid, &isCopy);
 
-    int cmdTooLong = snprintf(cmdstr, sizeof(cmdstr), "BLACKLIST %s", bssidStr) >= sizeof(cmdstr);
+    int cmdTooLong = snprintf(cmdstr, sizeof(cmdstr), "BLACKLIST %s", bssidStr) >= (int)sizeof(cmdstr);
 
     env->ReleaseStringUTFChars(bssid, bssidStr);
 
@@ -453,6 +479,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "startDriverCommand", "()Z", (void*) android_net_wifi_startDriverCommand },
     { "stopDriverCommand", "()Z", (void*) android_net_wifi_stopDriverCommand },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
+    { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
+    { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceModeCommand },
     { "getRssiCommand", "()I", (void*) android_net_wifi_getRssiCommand },

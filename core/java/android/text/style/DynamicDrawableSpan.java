@@ -16,11 +16,12 @@
 
 package android.text.style;
 
-import java.lang.ref.WeakReference;
-
-import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+
+import java.lang.ref.WeakReference;
 
 /**
  *
@@ -35,48 +36,51 @@ extends ReplacementSpan
      */
     public abstract Drawable getDrawable();
 
+    @Override
     public int getSize(Paint paint, CharSequence text,
                          int start, int end,
                          Paint.FontMetricsInt fm) {
-        Drawable b = getCachedDrawable();
+        Drawable d = getCachedDrawable();
+        Rect rect = d.getBounds();
 
         if (fm != null) {
-            fm.ascent = -b.getIntrinsicHeight();
-            fm.descent = 0;
+            fm.ascent = -rect.bottom; 
+            fm.descent = 0; 
 
             fm.top = fm.ascent;
             fm.bottom = 0;
         }
 
-        return b.getIntrinsicWidth();
+        return rect.right;
     }
 
+    @Override
     public void draw(Canvas canvas, CharSequence text,
                      int start, int end, float x, 
                      int top, int y, int bottom, Paint paint) {
         Drawable b = getCachedDrawable();
         canvas.save();
         
-        canvas.translate(x, bottom-b.getIntrinsicHeight());;
+        canvas.translate(x, bottom - b.getBounds().bottom);
         b.draw(canvas);
         canvas.restore();
     }
 
     private Drawable getCachedDrawable() {
-        WeakReference wr = mDrawableRef;
-        Drawable b = null;
+        WeakReference<Drawable> wr = mDrawableRef;
+        Drawable d = null;
 
         if (wr != null)
-            b = (Drawable) wr.get();
+            d = wr.get();
 
-        if (b == null) {
-            b = getDrawable();
-            mDrawableRef = new WeakReference(b);
+        if (d == null) {
+            d = getDrawable();
+            mDrawableRef = new WeakReference<Drawable>(d);
         }
 
-        return b;
+        return d;
     }
 
-    private WeakReference mDrawableRef;
+    private WeakReference<Drawable> mDrawableRef;
 }
 

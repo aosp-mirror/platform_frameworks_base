@@ -120,12 +120,19 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_ALLOW_TASK_REPARENTING = 0x0040;
     /**
+     * Bit in {@link #flags} indicating that, when the user navigates away
+     * from an activity, it should be finished.
+     * Set from the
+     * {@link android.R.attr#noHistory} attribute.
+     */
+    public static final int FLAG_NO_HISTORY = 0x0080;
+    /**
      * Options that have been set in the activity declaration in the
      * manifest: {@link #FLAG_MULTIPROCESS},
      * {@link #FLAG_FINISH_ON_TASK_LAUNCH}, {@link #FLAG_CLEAR_TASK_ON_LAUNCH},
      * {@link #FLAG_ALWAYS_RETAIN_TASK_STATE},
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
-     * {@link #FLAG_ALLOW_TASK_REPARENTING}.
+     * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY}.
      */
     public int flags;
 
@@ -247,6 +254,16 @@ public class ActivityInfo extends ComponentInfo
      */
     public int configChanges;
     
+    /**
+     * The desired soft input mode for this activity's main window.
+     * Set from the {@link android.R.attr#windowSoftInputMode} attribute
+     * in the activity's manifest.  May be any of the same values allowed
+     * for {@link android.view.WindowManager.LayoutParams#softInputMode
+     * WindowManager.LayoutParams.softInputMode}.  If 0 (unspecified),
+     * the mode from the theme will be used.
+     */
+    public int softInputMode;
+    
     public ActivityInfo() {
     }
 
@@ -260,6 +277,7 @@ public class ActivityInfo extends ComponentInfo
         flags = orig.flags;
         screenOrientation = orig.screenOrientation;
         configChanges = orig.configChanges;
+        softInputMode = orig.softInputMode;
     }
     
     /**
@@ -280,9 +298,10 @@ public class ActivityInfo extends ComponentInfo
                 + " targetActivity=" + targetActivity);
         pw.println(prefix + "launchMode=" + launchMode
                 + " flags=0x" + Integer.toHexString(flags)
-                + " theme=0x" + Integer.toHexString(theme)
-                + " orien=" + screenOrientation
-                + " configChanges=0x" + Integer.toHexString(configChanges));
+                + " theme=0x" + Integer.toHexString(theme));
+        pw.println(prefix + "screenOrientation=" + screenOrientation
+                + " configChanges=0x" + Integer.toHexString(configChanges)
+                + " softInputMode=0x" + Integer.toHexString(softInputMode));
         super.dumpBack(pw, prefix);
     }
     
@@ -306,6 +325,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(flags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
+        dest.writeInt(softInputMode);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -328,5 +348,6 @@ public class ActivityInfo extends ComponentInfo
         flags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();
+        softInputMode = source.readInt();
     }
 }

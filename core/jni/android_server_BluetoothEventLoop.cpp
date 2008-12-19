@@ -39,6 +39,7 @@ namespace android {
 static jfieldID field_mNativeData;
 
 static jmethodID method_onModeChanged;
+static jmethodID method_onNameChanged;
 static jmethodID method_onDiscoveryStarted;
 static jmethodID method_onDiscoveryCompleted;
 static jmethodID method_onRemoteDeviceFound;
@@ -60,17 +61,10 @@ static jmethodID method_onGetRemoteServiceChannelResult;
 static jmethodID method_onPasskeyAgentRequest;
 static jmethodID method_onPasskeyAgentCancel;
 
-struct native_data_t {
-    DBusConnection *conn;
-    /* These variables are set in waitForAndDispatchEventNative() and are
-       valid only within the scope of this function.  At any other time, they
-       are NULL. */
-    jobject me;
-    JNIEnv *env;
-};
+typedef event_loop_native_data_t native_data_t;
 
 // Only valid during waitForAndDispatchEventNative()
-static native_data_t *event_loop_nat;
+native_data_t *event_loop_nat;
 
 static inline native_data_t * get_native_data(JNIEnv *env, jobject object) {
     return (native_data_t *)(env->GetIntField(object,
@@ -83,6 +77,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 
 #ifdef HAVE_BLUETOOTH
     method_onModeChanged = env->GetMethodID(clazz, "onModeChanged", "(Ljava/lang/String;)V");
+    method_onNameChanged = env->GetMethodID(clazz, "onNameChanged", "(Ljava/lang/String;)V");
     method_onDiscoveryStarted = env->GetMethodID(clazz, "onDiscoveryStarted", "()V");
     method_onDiscoveryCompleted = env->GetMethodID(clazz, "onDiscoveryCompleted", "()V");
     method_onRemoteDeviceFound = env->GetMethodID(clazz, "onRemoteDeviceFound", "(Ljava/lang/String;IS)V");
@@ -142,8 +137,6 @@ static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
 }
 
 #ifdef HAVE_BLUETOOTH
-static jboolean add_adapter_event_match(JNIEnv *env, native_data_t *nat);
-static void remove_adapter_event_match(JNIEnv *env, native_data_t *nat);
 static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                       void *data);
 static DBusHandlerResult passkey_agent_event_filter(DBusConnection *conn,
@@ -160,15 +153,46 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
     LOGV(__FUNCTION__);
     dbus_threads_init_default();
     native_data_t *nat = get_native_data(env, object);
+    DBusError err;
+    dbus_error_init(&err);
+
     if (nat != NULL && nat->conn != NULL) {
+        // Add a filter for all incoming messages
         if (!dbus_connection_add_filter(nat->conn, event_filter, nat, NULL)){
             return JNI_FALSE;
         }
 
-        if (add_adapter_event_match(env, nat) != JNI_TRUE) {
+        // Set which messages will be processed by this dbus connection
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Adapter'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Manager'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Device'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Sink'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
             return JNI_FALSE;
         }
 
+        // Add an object handler for passkey agent method calls
         const char *path = "/android/bluetooth/PasskeyAgent";
         if (!dbus_connection_register_object_path(nat->conn, path,
                                                   &passkey_agent_vtable, NULL)) {
@@ -176,9 +200,6 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
                  __FUNCTION__, path);
             return JNI_FALSE;
         }
-
-        DBusError err;
-        dbus_error_init(&err);
 
         // RegisterDefaultPasskeyAgent() will fail until hcid is up, so keep
         // trying for 10 seconds.
@@ -219,6 +240,9 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
     native_data_t *nat = get_native_data(env, object);
     if (nat != NULL && nat->conn != NULL) {
 
+        DBusError err;
+        dbus_error_init(&err);
+
         const char *path = "/android/bluetooth/PasskeyAgent";
         DBusMessage *reply =
             dbus_func_args(env, nat->conn, BLUEZ_DBUS_BASE_PATH,
@@ -227,50 +251,40 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
                            DBUS_TYPE_INVALID);
         if (reply) dbus_message_unref(reply);
 
-        DBusError err;
-        dbus_error_init(&err);
-        (void)dbus_connection_remove_filter(nat->conn,
-                                            event_filter,
-                                            nat);
-
         dbus_connection_unregister_object_path(nat->conn, path);
 
-        remove_adapter_event_match(env, nat);
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Sink'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Device'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='org.bluez.audio.Manager'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Adapter'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+
+        dbus_connection_remove_filter(nat->conn, event_filter, nat);
     }
 #endif
 }
 
 #ifdef HAVE_BLUETOOTH
-static const char *const adapter_event_match =
-    "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Adapter'";
-
-static jboolean add_adapter_event_match(JNIEnv *env, native_data_t *nat) {
-    if (nat == NULL || nat->conn == NULL) {
-        LOGE("%s: Not connected to d-bus!", __FUNCTION__);
-        return JNI_FALSE;
-    }
-    DBusError err;
-    dbus_error_init(&err);
-    dbus_bus_add_match(nat->conn, adapter_event_match, &err);
-    if (dbus_error_is_set(&err)) {
-        LOG_AND_FREE_DBUS_ERROR(&err);
-        return JNI_FALSE;
-    }
-    return JNI_TRUE;
-}
-
-static void remove_adapter_event_match(JNIEnv *env, native_data_t *nat) {
-    if (nat->conn == NULL) {
-        LOGE("%s: Not connected to d-bus!", __FUNCTION__);
-        return;
-    }
-    DBusError err;
-    dbus_error_init(&err);
-    dbus_bus_remove_match(nat->conn, adapter_event_match, &err);
-    if (dbus_error_is_set(&err)) {
-        LOG_AND_FREE_DBUS_ERROR(&err);
-    }
-}
+extern DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env);
 
 // Called by dbus during WaitForAndDispatchEventNative()
 static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
@@ -288,8 +302,9 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
 
-    LOGV("%s: Received signal %s:%s", __FUNCTION__,
-         dbus_message_get_interface(msg), dbus_message_get_member(msg));
+    LOGV("%s: Received signal %s:%s from %s", __FUNCTION__,
+         dbus_message_get_interface(msg), dbus_message_get_member(msg),
+         dbus_message_get_path(msg));
 
     if (dbus_message_is_signal(msg,
                                "org.bluez.Adapter",
@@ -471,11 +486,35 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                 env->NewStringUTF(c_address));
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         return DBUS_HANDLER_RESULT_HANDLED;
-    } else {
-        LOGV("... ignored");
+    } else if (dbus_message_is_signal(msg,
+                                      "org.bluez.Adapter",
+                                      "ModeChanged")) {
+        char *c_mode;
+        if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_mode,
+                                  DBUS_TYPE_INVALID)) {
+            LOGV("... mode = %s", c_mode);
+            env->CallVoidMethod(nat->me,
+                                method_onModeChanged,
+                                env->NewStringUTF(c_mode));
+        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        return DBUS_HANDLER_RESULT_HANDLED;
+    } else if (dbus_message_is_signal(msg,
+                                      "org.bluez.Adapter",
+                                      "NameChanged")) {
+        char *c_name;
+        if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_name,
+                                  DBUS_TYPE_INVALID)) {
+            LOGV("... name = %s", c_name);
+            env->CallVoidMethod(nat->me,
+                                method_onNameChanged,
+                                env->NewStringUTF(c_name));
+        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        return DBUS_HANDLER_RESULT_HANDLED;
     }
 
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    return a2dp_event_filter(msg, env);
 }
 
 // Called by dbus during WaitForAndDispatchEventNative()
@@ -557,9 +596,9 @@ static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
         nat->me = object;
         nat->env = env;
         event_loop_nat = nat;
-        ret = dbus_connection_read_write_dispatch(nat->conn,
-                                                  timeout_ms) == TRUE ?
-            JNI_TRUE : JNI_FALSE;
+        ret = dbus_connection_read_write_dispatch_greedy(nat->conn,
+                                                         timeout_ms) == TRUE ?
+              JNI_TRUE : JNI_FALSE;
         event_loop_nat = NULL;
         nat->me = NULL;
         nat->env = NULL;
@@ -604,7 +643,7 @@ void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user) {
     JNIEnv *env = event_loop_nat->env;
     jint channel = -2;
 
-    LOGV("... address = %s", context->address);
+    LOGV("... address = %s", address);
 
     if (dbus_set_error_from_message(&err, msg) ||
         !dbus_message_get_args(msg, &err,

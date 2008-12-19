@@ -1,14 +1,45 @@
 page.title=Android Debug Bridge
 @jd:body
 
-<p>Android Debug Bridge (adb) is a versatile tool that lets you manage the state of a device or <a href="{@docRoot}reference/emulator.html">emulator</a>. </p>
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>ADB quickview</h2>
+  <ul>
+<li>Manage the state of an emulator or device</li>
+<li>Run shell commands on a device</li>
+<li>Manage port forwarding on an emulator or device</li>
+<li>Copy files to/from an emulator or device</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+<li><a href="#issuingcommands">Issuing ADB Commands</a></li>
+<li><a href="#devicestatus">Querying for Emulator/Device Instances</a></li>
+<li><a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a></li>
+<li><a href="#move">Installing an Application</a></li>
+<li><a href="#forwardports">Forwarding Ports</a></li>
+<li><a href="#copyfiles">Copying Files to or from an Emulator/Device Instance</a></li>
+<li><a href="#commandsummary">Listing of adb Commands </a></li>
+<li><a href="#shellcommands">Issuing Shell Commands</a></li>
+<li><a href="#logcat">Enabling logcat Logging</a></li>
+<li><a href="#stopping">Stopping the adb Server</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="emulator.html">Emulator</a></li>
+  </ol>
+
+</div>
+</div>
+
+<!-- 
+<p>Android Debug Bridge (adb) is a versatile tool that </a>. </p>
 
 <p>Some of ways you can use adb include:</p>
 
 <ul>
-<li>Run shell commands on a device</li>
-<li>Manage port forwarding on an emulator or device</li>
-<li>Copy files to/from an emulator or device</li>
+
 </ul>
 <p>The sections below introduce adb and describe many of its common uses. </p>
 
@@ -39,8 +70,8 @@ page.title=Android Debug Bridge
 <a name="overview"></a>
 
 <h2>Overview</h2>
-
-<p>The adb tool is a client-server program that includes three components: </p>
+-->
+<p>Android Debug Bridge (adb) is a versatile tool lets you manage the state of an emulator instance or Android-powered device. It is a client-server program that includes three components: </p>
 
 <ul>
   <li>A client, which runs on your development machine. You can invoke a client from a shell by issuing an adb command. Other Android tools such as the ADT plugin and DDMS also create adb clients. </li>
@@ -138,7 +169,7 @@ emulator-5558&nbsp;&nbsp;device</pre>
 
 <pre>adb install &lt;path_to_apk&gt;</pre>
 
-<p>For more information about how to create an .apk file that you can install on an emulator/device instance, see <a href="{@docRoot}reference/aapt.html">Android Asset Packaging Tool</a> (aapt). </p>
+<p>For more information about how to create an .apk file that you can install on an emulator/device instance, see <a href="{@docRoot}guide/developing/tools/aapt.html">Android Asset Packaging Tool</a> (aapt). </p>
 
 <p>Note that, if you are using the Eclipse IDE and have the ADT plugin installed, you do not need to use adb (or aapt) directly to install your application on the emulator/device. Instead, the ADT plugin handles the packaging and installation of the application for you. </p>
 
@@ -409,7 +440,7 @@ application and send 500 pseudo-random events to it.</p>
 <pre>$ adb shell monkey -v -p your.package.name 500</pre>
 
 <p>For more information about command options for Monkey, see the complete 
-<a href="{@docRoot}reference/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
+<a href="{@docRoot}guide/developing/tools/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
 
 
 <a name="othershellcommands"></a>
@@ -432,7 +463,7 @@ application and send 500 pseudo-random events to it.</p>
 <tr>
 <td><code>dumpsys</code></td>
 <td>Dumps system data to the screen.</td>
-<td rowspan=4">The <a href="{@docRoot}reference/ddms.html">Dalvik Debug Monitor Service</a> (DDMS) tool offers integrated debug environment that you may find easier to use.</td>
+<td rowspan=4">The <a href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor Service</a> (DDMS) tool offers integrated debug environment that you may find easier to use.</td>
 </tr>
 
 <tr>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2008 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.unit_tests"
+        android:sharedUserId="com.android.uid.test">
+    <permission android:name="com.android.unit_tests.permission.TEST_GRANTED"
+        android:protectionLevel="normal"
+            android:label="@string/permlab_testGranted"
+            android:description="@string/permdesc_testGranted">
+        <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+        <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+        <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+        <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+        <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+        <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
+    </permission>
+    <permission android:name="com.android.unit_tests.permission.TEST_DENIED"
+        android:protectionLevel="normal"
+            android:label="@string/permlab_testDenied"
+            android:description="@string/permdesc_testDenied" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+    <uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_GSERVICES" />
+
+    <uses-permission android:name="com.android.unit_tests.permission.TEST_GRANTED" />
+
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />
+    <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
+    <!-- InstrumentationTestRunner for AndroidTests -->
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+                     android:targetPackage="com.android.unit_tests"
+                     android:label="Tests for AndroidTests (unit tests collection)"/>
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+
+        <!-- Activity-level metadata -->
+        <meta-data android:name="com.android.unit_tests.isApp" android:value="true" />
+        <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+        <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+        <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+        <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+        <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+        <meta-data android:name="com.android.unit_tests.reference"
+                   android:resource="@xml/metadata_app" />
+
+        <activity android:name="AndroidPerformanceTests" android:label="Android Performance Tests">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.UNIT_TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Application components used for activity tests -->
+
+        <activity android:name=".activity.TestedActivity"
+                android:process=":remoteActivity">
+        </activity>
+        <activity android:name=".activity.LocalActivity" android:multiprocess="true">
+            <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+            <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+            <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+            <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+            <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+            <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
+        </activity>
+        <activity android:name=".activity.TestedScreen"
+                android:process=":remoteScreen">
+        </activity>
+        <activity android:name=".activity.LocalScreen" android:multiprocess="true">
+        </activity>
+        <activity android:name=".activity.ClearTop" android:multiprocess="true"
+                android:launchMode="singleTop">
+        </activity>
+        <activity android:name=".activity.LocalDialog" android:multiprocess="true"
+                android:theme="@android:style/Theme.Dialog">
+        </activity>
+        <activity android:name=".activity.SubActivityScreen">
+        </activity>
+        <activity android:name=".activity.RemoteSubActivityScreen"
+                android:process=":remoteActivity">
+        </activity>
+        <activity android:name=".activity.LaunchpadActivity" android:multiprocess="true">
+        </activity>
+        <activity android:name=".activity.LaunchpadTabActivity" android:multiprocess="true">
+        </activity>
+
+        <receiver android:name=".activity.AbortReceiver">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_ABORT" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.LocalReceiver">
+            <intent-filter android:priority="-1">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_ABORT" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_ALL" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_REPEAT" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_LOCAL" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_FAIL_REGISTER" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_FAIL_BIND" />
+            </intent-filter>
+            <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+            <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+            <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+            <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+            <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+            <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
+        </receiver>
+        <receiver android:name=".activity.ResultReceiver">
+            <intent-filter>
+                <action android:name="com.android.unit_tests.activity.BROADCAST_RESULT" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.LocalGrantedReceiver"
+                android:permission="com.android.unit_tests.permission.TEST_GRANTED">
+            <intent-filter android:priority="-1">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_LOCAL_GRANTED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.LocalDeniedReceiver"
+                android:permission="com.android.unit_tests.permission.TEST_DENIED">
+            <intent-filter android:priority="-1">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_LOCAL_DENIED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.RemoteReceiver"
+                android:process=":remoteReceiver">
+            <intent-filter android:priority="2">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_ABORT" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_ALL" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_REPEAT" />
+                <action android:name="com.android.unit_tests.activity.BROADCAST_REMOTE" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.RemoteGrantedReceiver"
+                android:permission="com.android.unit_tests.permission.TEST_GRANTED">
+            <intent-filter android:priority="2">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_REMOTE_GRANTED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".activity.RemoteDeniedReceiver"
+                android:permission="com.android.unit_tests.permission.TEST_DENIED">
+            <intent-filter android:priority="2">
+                <action android:name="com.android.unit_tests.activity.BROADCAST_REMOTE_DENIED" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".activity.LocalService">
+            <intent-filter>
+                <action android:name="com.android.unit_tests.activity.SERVICE_LOCAL" />
+            </intent-filter>
+            <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+            <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+            <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+            <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+            <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+            <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
+        </service>
+        <service android:name=".activity.LocalDeniedService"
+                android:permission="com.android.unit_tests.permission.TEST_DENIED">
+            <intent-filter>
+                <action android:name="com.android.unit_tests.activity.SERVICE_LOCAL_DENIED" />
+            </intent-filter>
+        </service>
+        <service android:name=".activity.LocalGrantedService"
+                android:permission="com.android.unit_tests.permission.TEST_GRANTED">
+            <intent-filter>
+                <action android:name="com.android.unit_tests.activity.SERVICE_LOCAL_GRANTED" />
+            </intent-filter>
+        </service>
+
+        <provider android:name=".activity.LocalProvider"
+                android:authorities="com.android.unit_tests.LocalProvider">
+            <meta-data android:name="com.android.unit_tests.string" android:value="foo" />
+            <meta-data android:name="com.android.unit_tests.boolean" android:value="true" />
+            <meta-data android:name="com.android.unit_tests.integer" android:value="100" />
+            <meta-data android:name="com.android.unit_tests.color" android:value="#ff000000" />
+            <meta-data android:name="com.android.unit_tests.float" android:value="100.1" />
+            <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
+        </provider>
+
+        <!-- Application components used for os tests -->
+
+        <service android:name=".os.MessengerService"
+                android:process=":messengerService">
+        </service>
+
+        <!-- Application components used for search manager tests -->
+        <!-- TODO: Removed temporarily - need to be replaced using mocks -->
+
+        <!-- Used to test IPC. -->
+        <service android:name=".binder.BinderTestService"
+                 android:process="binder.BinderTestService" />
+        <service android:name=".binder.BinderPerformanceService"
+                 android:process="binder.BinderPerformanceService" />
+        <service android:name=".binder.BinderVsMessagingService"
+                 android:process="binder.BinderVsMessagingService" />
+    </application>
+</manifest>

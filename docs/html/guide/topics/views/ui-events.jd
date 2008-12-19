@@ -1,13 +1,37 @@
 page.title=Handling UI Events
+parent.title=Views and Layout
+parent.link=index.html
 @jd:body
 
-<p>Many Android classes declare callback methods for handling relevant UI events such as keypresses, touch events, focus changes, and so on. For example, {@link android.app.Activity Activity} provides the methods onKeyDown() and onKeyUp() and {@link android.widget.TextView TextView} provides onFocusChanged(). </p>
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#TouchMode">Touch Mode</a></li>
+    <li><a href="#Scrolling">Scrolling</a></li>
+    <li><a href="#EventCycle">Event Cycle</a></li>
+  </ol>
 
-<p>In most cases, you can handle events just by overriding the appropriate handler methods. When an event is received, the Android system calls your handler method with the event data.</p>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/tutorials/views/hello-formstuff.html">Hello Form Stuff tutorial</a></li>
+  </ol>
+</div>
+</div>
 
-<p>However, some classes do not declare handler methods for specific events. For example, {@link android.widget.Button Button} does not declare an onClick() handler method. To handle such events, you need to create an anonymous class to act as a listener for the event, then register the listener with the target class object. The example below shows how to set up a handler for click events in a Button object. </p>
+<p>Many Android classes declare callback methods for handling relevant UI events such as keypresses, 
+touch events, focus changes, and so on. For example, {@link android.app.Activity Activity} provides 
+the methods <code>onKeyDown()</code> and <code>onKeyUp()</code> and {@link android.widget.TextView TextView} 
+provides <code>onFocusChanged()</code>. </p>
 
+<p>In most cases, you can handle events just by overriding the appropriate handler methods. 
+When an event is received, the Android system calls your handler method with the event data.</p>
 
+<p>However, some classes do not declare handler methods for specific events. For example, 
+{@link android.widget.Button} does not declare an <code>onClick()</code> handler method. So, to handle a click event, 
+you need to create an anonymous class to act as a listener for the event, then register the listener with the 
+target class object (via the appropriate <code>set...Listener()</code> method). The example below shows how to set 
+up a handler for click events in a Button object. </p>
 
 </p>
 <pre>public class ExampleSendResult extends Activity
@@ -16,7 +40,7 @@ page.title=Handling UI Events
     {
         ...
 
-        // Listen for button clicks.
+        // Capture our button from layout and listen for clicks.
         Button button = (Button)findViewById(R.id.corky);
         button.setOnClickListener(mCorkyListener);
     }
@@ -26,6 +50,64 @@ page.title=Handling UI Events
     {
         public void onClick(View v)
         {
-          //handle click event...
+          //do something when the button is clicked
         }
-    };</pre>
+    };
+}
+</pre>
+
+
+<h2 id="TouchMode">Touch Mode</h2>
+   <p>
+   When a user is navigating a user interface via directional keys such as a D-pad, it is
+   necessary to give focus to actionable items such as buttons so the user can see
+   what will take input.  If the device has touch capabilities, however, and the user
+   begins interacting with the interface by touching it, it is no longer necessary to
+   always highlight, or give focus to, a particular view.  Thus, there is a mode
+   for interaction named "touch mode."
+   </p>
+   <p>
+   For a touch-capable device, once the user touches the screen, the device
+   will enter touch mode.  From this point onward, only views for which
+   {@link android.view.View#isFocusableInTouchMode} is true will be focusable, such as text editing widgets.
+   Other views that are touchable, like buttons, will not take focus when touched; they will
+   simply fire their on-click listeners when pressed.
+   </p>
+   <p>
+   Any time a user hits a directional key, such as a D-pad direction, the view device will
+   exit touch mode, and find a view to take focus, so that the user may resume interacting
+   with the user interface without touching the screen.
+   </p>
+   <p>
+   The touch mode state is maintained across {@link android.app.Activity}s. To query the current state, you can call
+   {@link android.view.View#isInTouchMode} to see whether the device is currently in touch mode.
+   </p>
+  
+
+<h2 id="Scrolling">Scrolling</h2>
+   <p>
+   The framework provides basic support for views that wish to internally
+   scroll their content. This includes keeping track of the X and Y scroll
+   offset as well as mechanisms for drawing scrollbars. See
+   {@link android.view.View#scrollBy(int, int)}, {@link android.view.View#scrollTo(int, int)} for more details.
+   </p>
+
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a view is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate view. The view
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the view's bounds may need
+    to be changed, the view will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the view's appearance
+    may need to be changed, the view will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire view tree is single threaded. You must always be on
+   the UI thread when calling any method on any view.
+   If you are doing work on other threads and want to update the state of a view
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>

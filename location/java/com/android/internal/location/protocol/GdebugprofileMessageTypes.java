@@ -29,7 +29,9 @@ public class GdebugprofileMessageTypes {
       .addElement(ProtoBufType.OPTIONAL | ProtoBufType.TYPE_BOOL,
           GDebugProfile.ACTUAL_REQUEST, ProtoBuf.TRUE)
       .addElement(ProtoBufType.REPEATED | ProtoBufType.TYPE_MESSAGE,
-          GDebugProfile.CACHE_LOCATION, GlocationMessageTypes.GDEVICE_LOCATION);
+          GDebugProfile.CACHE_LOCATION, GlocationMessageTypes.GDEVICE_LOCATION)
+      .addElement(ProtoBufType.OPTIONAL | ProtoBufType.TYPE_BOOL,
+          GDebugProfile.DEVICE_RESTART, ProtoBuf.FALSE);
 
   }
 }

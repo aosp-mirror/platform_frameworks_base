@@ -109,37 +109,23 @@ public interface WindowManagerPolicy {
          * getFrame() if so desired.  Must be called with the window manager
          * lock held.
          * 
-         * @param parentLeft The left edge of the parent container this window
-         * is in, used for computing its position.
-         * @param parentTop The top edge of the parent container this window
-         * is in, used for computing its position.
-         * @param parentRight The right edge of the parent container this window
-         * is in, used for computing its position.
-         * @param parentBottom The bottom edge of the parent container this window
-         * is in, used for computing its position.
-         * @param displayLeft The left edge of the available display, used
-         * for constraining the overall dimensions of the window.
-         * @param displayTop The left edge of the available display, used
-         * for constraining the overall dimensions of the window.
-         * @param displayRight The right edge of the available display, used
-         * for constraining the overall dimensions of the window.
-         * @param displayBottom The bottom edge of the available display, used
-         * for constraining the overall dimensions of the window.
+         * @param parentFrame The frame of the parent container this window
+         * is in, used for computing its basic position.
+         * @param displayFrame The frame of the overall display in which this
+         * window can appear, used for constraining the overall dimensions
+         * of the window.
+         * @param contentFrame The frame within the display in which we would
+         * like active content to appear.  This will cause windows behind to
+         * be resized to match the given content frame.
+         * @param visibleFrame The frame within the display that the window
+         * is actually visible, used for computing its visible insets to be
+         * given to windows behind.
+         * This can be used as a hint for scrolling (avoiding resizing)
+         * the window to make certain that parts of its content
+         * are visible.
          */
-        public void computeFrameLw(int parentLeft, int parentRight, int parentBottom,
-                int parentHeight, int displayLeft, int displayTop,
-                int displayRight, int displayBottom);
-
-        /**
-         * Set the window's frame to an exact value.  Must be called with the
-         * window manager lock held.
-         * 
-         * @param left Left edge of the window.
-         * @param top Top edge of the window.
-         * @param right Right edge (exclusive) of the window.
-         * @param bottom Bottom edge (exclusive) of the window.
-         */
-        public void setFrameLw(int left, int top, int right, int bottom);
+        public void computeFrameLw(Rect parentFrame, Rect displayFrame,
+                Rect contentFrame, Rect visibleFrame);
 
         /**
          * Retrieve the current frame of the window.  Must be called with the
@@ -150,6 +136,66 @@ public interface WindowManagerPolicy {
         public Rect getFrameLw();
 
         /**
+         * Retrieve the frame of the display that this window was last
+         * laid out in.  Must be called with the
+         * window manager lock held.
+         * 
+         * @return Rect The rectangle holding the display frame.
+         */
+        public Rect getDisplayFrameLw();
+
+        /**
+         * Retrieve the frame of the content area that this window was last
+         * laid out in.  This is the area in which the content of the window
+         * should be placed.  It will be smaller than the display frame to
+         * account for screen decorations such as a status bar or soft
+         * keyboard.  Must be called with the
+         * window manager lock held.
+         * 
+         * @return Rect The rectangle holding the content frame.
+         */
+        public Rect getContentFrameLw();
+
+        /**
+         * Retrieve the frame of the visible area that this window was last
+         * laid out in.  This is the area of the screen in which the window
+         * will actually be fully visible.  It will be smaller than the
+         * content frame to account for transient UI elements blocking it
+         * such as an input method's candidates UI.  Must be called with the
+         * window manager lock held.
+         * 
+         * @return Rect The rectangle holding the visible frame.
+         */
+        public Rect getVisibleFrameLw();
+
+        /**
+         * Returns true if this window is waiting to receive its given
+         * internal insets from the client app, and so should not impact the
+         * layout of other windows.
+         */
+        public boolean getGivenInsetsPendingLw();
+        
+        /**
+         * Retrieve the insets given by this window's client for the content
+         * area of windows behind it.  Must be called with the
+         * window manager lock held.
+         * 
+         * @return Rect The left, top, right, and bottom insets, relative
+         * to the window's frame, of the actual contents.
+         */
+        public Rect getGivenContentInsetsLw();
+
+        /**
+         * Retrieve the insets given by this window's client for the visible
+         * area of windows behind it.  Must be called with the
+         * window manager lock held.
+         * 
+         * @return Rect The left, top, right, and bottom insets, relative
+         * to the window's frame, of the actual visible area.
+         */
+        public Rect getGivenVisibleInsetsLw();
+
+        /**
          * Retrieve the current LayoutParams of the window.
          * 
          * @return WindowManager.LayoutParams The window's internal LayoutParams
@@ -157,6 +203,11 @@ public interface WindowManagerPolicy {
          */
         public WindowManager.LayoutParams getAttrs();
 
+        /**
+         * Get the layer at which this window's surface will be Z-ordered.
+         */
+        public int getSurfaceLayer();
+        
         /**
          * Return the token for the application (actually activity) that owns 
          * this window.  May return null for system windows. 
@@ -240,18 +291,6 @@ public interface WindowManagerPolicy {
          * lock held.
          */
         public void showLw();
-
-        /**
-         * Sets insets on the window that represent the area within the window that is covered
-         * by system windows (e.g. status bar).  Must be called with the window
-         * manager lock held.
-         * 
-         * @param l
-         * @param t
-         * @param r
-         * @param b
-         */
-        public void setCoveredInsetsLw(int l, int t, int r, int b);
     }
 
     /** No transition happening. */
@@ -506,14 +545,15 @@ public interface WindowManagerPolicy {
 
     
     /**
-     * Return the insets for the areas covered by system windows. These values are computed on the
-     * mose recent layout, so they are not guaranteed to be correct.
+     * Return the insets for the areas covered by system windows. These values
+     * are computed on the most recent layout, so they are not guaranteed to
+     * be correct.
      * 
      * @param attrs The LayoutParams of the window.
-     * @param coveredInset The areas covered by system windows, expressed as positive insets
+     * @param contentInset The areas covered by system windows, expressed as positive insets
      * 
      */
-    public void getCoveredInsetHintLw(WindowManager.LayoutParams attrs, Rect coveredInset);
+    public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset);
     
     /**
      * Called when layout of the windows is finished.  After this function has

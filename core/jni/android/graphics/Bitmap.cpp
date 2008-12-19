@@ -3,6 +3,7 @@
 #include "SkColorPriv.h"
 #include "GraphicsJNI.h"
 #include "SkDither.h"
+#include "SkUnPreMultiply.h"
 
 #include "Parcel.h"
 #include "android_util_Binder.h"
@@ -84,7 +85,7 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
         return false;
     }
     
-    jint* array = env->GetIntArrayElements(srcColors, NULL);
+    const jint* array = env->GetIntArrayElements(srcColors, NULL);
     const SkColor* src = (const SkColor*)array + srcOffset;
     
     // reset to to actual choice from caller
@@ -96,7 +97,8 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
         dst = (char*)dst + dstBitmap.rowBytes();
     }
     
-    env->ReleaseIntArrayElements(srcColors, array, 0);
+    env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array),
+                                 JNI_ABORT);
     return true;
 }
 
@@ -105,35 +107,12 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
 typedef void (*ToColorProc)(SkColor dst[], const void* src, int width,
                             SkColorTable*);
 
-static inline SkColor pmcolorToColor(SkPMColor c) {
-    if (0 == c) {
-        return 0;
-    }
-
-    unsigned a = SkGetPackedA32(c);
-    unsigned r = SkGetPackedR32(c);
-    unsigned g = SkGetPackedG32(c);
-    unsigned b = SkGetPackedB32(c);
-
-    if (a < 255) {
-        SkFixed scale = SK_Fixed1 / a;
-        r = SkFixedRound(r * scale);
-        g = SkFixedRound(g * scale);
-        b = SkFixedRound(b * scale);
-        SkASSERT(r <= 0xFF);
-        SkASSERT(g <= 0xFF);
-        SkASSERT(b <= 0xFF);
-    }
-
-    return SkColorSetARGB(a, r, g, b);
-}
-
 static void ToColor_S32_Alpha(SkColor dst[], const void* src, int width,
                               SkColorTable*) {
     SkASSERT(width > 0);
     const SkPMColor* s = (const SkPMColor*)src;
     do {
-        *dst++ = pmcolorToColor(*s++);
+        *dst++ = SkUnPreMultiply::PMColorToColor(*s++);
     } while (--width != 0);
 }
 
@@ -153,7 +132,7 @@ static void ToColor_S4444_Alpha(SkColor dst[], const void* src, int width,
     SkASSERT(width > 0);
     const SkPMColor16* s = (const SkPMColor16*)src;
     do {
-        *dst++ = pmcolorToColor(SkPixel4444ToPixel32(*s++));
+        *dst++ = SkUnPreMultiply::PMColorToColor(SkPixel4444ToPixel32(*s++));
     } while (--width != 0);
 }
 
@@ -185,7 +164,7 @@ static void ToColor_SI8_Alpha(SkColor dst[], const void* src, int width,
     const uint8_t* s = (const uint8_t*)src;
     const SkPMColor* colors = ctable->lockColors();
     do {
-        *dst++ = pmcolorToColor(colors[*s++]);
+        *dst++ = SkUnPreMultiply::PMColorToColor(colors[*s++]);
     } while (--width != 0);
     ctable->unlockColors(false);
 }
@@ -567,7 +546,16 @@ static JNINativeMethod gBitmapMethods[] = {
 int register_android_graphics_Bitmap(JNIEnv* env);
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
+#if 1
     return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
                                 gBitmapMethods, SK_ARRAY_COUNT(gBitmapMethods));
+#else
+    short n = 0;
+    int limit = (char*)env - (char*)0;
+    for (int i = 0; i < limit; i++) {
+        n += i*i;
+    }
+    return n;
+#endif
 }
 

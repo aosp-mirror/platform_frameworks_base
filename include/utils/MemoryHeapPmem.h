@@ -23,7 +23,7 @@
 #include <utils/MemoryDealer.h>
 #include <utils/MemoryHeapBase.h>
 #include <utils/IMemory.h>
-#include <utils/Vector.h>
+#include <utils/SortedVector.h>
 
 namespace android {
 
@@ -31,11 +31,21 @@ class MemoryHeapBase;
 
 // ---------------------------------------------------------------------------
 
-class SubRegionMemory;
-
 class MemoryHeapPmem : public HeapInterface, public MemoryHeapBase
 {
 public:
+    class MemoryPmem : public BnMemory {
+    public:
+        MemoryPmem(const sp<MemoryHeapPmem>& heap);
+        ~MemoryPmem();
+    protected:
+        const sp<MemoryHeapPmem>&  getHeap() const { return mClientHeap; }
+    private:
+        friend class MemoryHeapPmem;
+        virtual void revoke() = 0;
+        sp<MemoryHeapPmem>  mClientHeap;
+    };
+    
     MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap,
                 uint32_t flags = IMemoryHeap::MAP_ONCE);
     ~MemoryHeapPmem();
@@ -51,11 +61,16 @@ public:
     
     /* revoke all allocations made by this heap */
     virtual void revoke();
-    
+
+private:
+    /* use this to create your own IMemory for mapMemory */
+    virtual sp<MemoryPmem> createMemory(size_t offset, size_t size);
+    void remove(const wp<MemoryPmem>& memory);
+
 private:
     sp<MemoryHeapBase>              mParentHeap;
     mutable Mutex                   mLock;
-    Vector< wp<SubRegionMemory> >   mAllocations;
+    SortedVector< wp<MemoryPmem> >  mAllocations;
 };
 
 

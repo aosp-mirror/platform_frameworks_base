@@ -58,6 +58,8 @@ import java.util.List;
  * @attr ref android.R.styleable#AbsListView_textFilterEnabled
  * @attr ref android.R.styleable#AbsListView_transcriptMode
  * @attr ref android.R.styleable#AbsListView_cacheColorHint
+ * @attr ref android.R.styleable#AbsListView_fastScrollEnabled
+ * @attr ref android.R.styleable#AbsListView_smoothScrollbar
  */
 public abstract class AbsListView extends AdapterView<ListAdapter> implements TextWatcher,
         ViewTreeObserver.OnGlobalLayoutListener, Filter.FilterListener,
@@ -116,6 +118,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Indicates the view is in the process of being flung
      */
     static final int TOUCH_MODE_FLING = 4;
+    
+    /**
+     * Indicates that the user is currently dragging the fast scroll thumb
+     */
+    static final int TOUCH_MODE_FAST_SCROLL = 5;
 
     /**
      * Regular layout - usually an unsolicited layout from the view system
@@ -304,6 +311,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * bitmap cache after scrolling.
      */
     boolean mScrollingCacheEnabled;
+    
+    /**
+     * Whether or not to enable the fast scroll feature on this list
+     */
+    boolean mFastScrollEnabled;
 
     /**
      * Optional callback to notify client when scroll position has changed
@@ -319,6 +331,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Used with type filter window
      */
     EditText mTextFilter;
+
+    /**
+     * Indicates whether to use pixels-based or position-based scrollbar
+     * properties.
+     */
+    private boolean mSmoothScrollbarEnabled = true;
 
     /**
      * Indicates that this view supports filtering
@@ -399,6 +417,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    /**
+     * Helper object that renders and controls the fast scroll thumb.
+     */
+    private FastScroller mFastScroller;
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -493,8 +516,81 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         int color = a.getColor(R.styleable.AbsListView_cacheColorHint, 0);
         setCacheColorHint(color);
+        
+        boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
+        setFastScrollEnabled(enableFastScroll);
 
+        boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
+        setSmoothScrollbarEnabled(smoothScrollbar);
+        
         a.recycle();
+    }
+
+    /**
+     * Enables fast scrolling by letting the user quickly scroll through lists by 
+     * dragging the fast scroll thumb. The adapter attached to the list may want 
+     * to implement {@link SectionIndexer} if it wishes to display alphabet preview and
+     * jump between sections of the list. 
+     * @see SectionIndexer
+     * @see #isFastScrollEnabled()
+     * @param enabled whether or not to enable fast scrolling
+     */
+    public void setFastScrollEnabled(boolean enabled) {
+        mFastScrollEnabled = enabled;
+        if (enabled) {
+            if (mFastScroller == null) {
+                mFastScroller = new FastScroller(getContext(), this);
+            }
+        } else {
+            if (mFastScroller != null) {
+                mFastScroller.stop();
+                mFastScroller = null;
+            }
+        }
+    }
+    
+    /**
+     * Returns the current state of the fast scroll feature.
+     * @see #setFastScrollEnabled(boolean)
+     * @return true if fast scroll is enabled, false otherwise
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isFastScrollEnabled() {
+        return mFastScrollEnabled;
+    }
+
+    /**
+     * When smooth scrollbar is enabled, the position and size of the scrollbar thumb
+     * is computed based on the number of visible pixels in the visible items. This
+     * however assumes that all list items have the same height. If you use a list in
+     * which items have different heights, the scrollbar will change appearance as the
+     * user scrolls through the list. To avoid this issue, you need to disable this
+     * property.
+     *
+     * When smooth scrollbar is disabled, the position and size of the scrollbar thumb
+     * is based solely on the number of items in the adapter and the position of the
+     * visible items inside the adapter. This provides a stable scrollbar as the user
+     * navigates through a list of items with varying heights. 
+     *
+     * @param enabled Whether or not to enable smooth scrollbar.
+     *
+     * @see #setSmoothScrollbarEnabled(boolean) 
+     * @attr ref android.R.styleable#AbsListView_smoothScrollbar
+     */
+    public void setSmoothScrollbarEnabled(boolean enabled) {
+        mSmoothScrollbarEnabled = enabled;
+    }
+
+    /**
+     * Returns the current state of the fast scroll feature.
+     *
+     * @return True if smooth scrollbar is enabled is enabled, false otherwise.
+     *
+     * @see #setSmoothScrollbarEnabled(boolean)
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isSmoothScrollbarEnabled() {
+        return mSmoothScrollbarEnabled;
     }
 
     /**
@@ -511,6 +607,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Notify our scroll listener (if there is one) of a change in scroll state
      */
     void invokeOnItemScrollListener() {
+        if (mFastScroller != null) {
+            mFastScroller.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
+        }
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
         }
@@ -525,6 +624,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setScrollingCacheEnabled(boolean)
      * @see View#setDrawingCacheEnabled(boolean)
      */
+    @ViewDebug.ExportedProperty
     public boolean isScrollingCacheEnabled() {
         return mScrollingCacheEnabled;
     }
@@ -571,6 +671,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setTextFilterEnabled(boolean)
      * @see Filterable
      */
+    @ViewDebug.ExportedProperty
     public boolean isTextFilterEnabled() {
         return mTextFilterEnabled;
     }
@@ -595,10 +696,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
         setScrollingCacheEnabled(true);
+        setScrollContainer(true);
     }
 
     private void useDefaultSelector() {
-        setSelector(getResources().getDrawable(com.android.internal.R.drawable.list_selector_background));
+        setSelector(getResources().getDrawable(
+                com.android.internal.R.drawable.list_selector_background));
     }
 
     /**
@@ -607,6 +710,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @return true if the content is stacked from the bottom edge, false otherwise
      */
+    @ViewDebug.ExportedProperty
     public boolean isStackFromBottom() {
         return mStackFromBottom;
     }
@@ -843,35 +947,54 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected int computeVerticalScrollExtent() {
         final int count = getChildCount();
         if (count > 0) {
-            int extent = count * 100;
+            if (mSmoothScrollbarEnabled) {
+                int extent = count * 100;
 
-            View view = getChildAt(0);
-            final int top = view.getTop();
-            int height = view.getHeight();
-            if (height > 0) {
-                extent += (top * 100) / height;
+                View view = getChildAt(0);
+                final int top = view.getTop();
+                int height = view.getHeight();
+                if (height > 0) {
+                    extent += (top * 100) / height;
+                }
+
+                view = getChildAt(count - 1);
+                final int bottom = view.getBottom();
+                height = view.getHeight();
+                if (height > 0) {
+                    extent -= ((bottom - getHeight()) * 100) / height;
+                }
+
+                return extent;
+            } else {
+                return 1;
             }
-
-            view = getChildAt(count - 1);
-            final int bottom = view.getBottom();
-            height = view.getHeight();
-            if (height > 0) {
-                extent -= ((bottom - getHeight()) * 100) / height;
-            }
-
-            return extent;
         }
         return 0;
     }
 
     @Override
     protected int computeVerticalScrollOffset() {
-        if (mFirstPosition >= 0 && getChildCount() > 0) {
-            final View view = getChildAt(0);
-            final int top = view.getTop();
-            int height = view.getHeight();
-            if (height > 0) {
-                return Math.max(mFirstPosition * 100 - (top * 100) / height, 0);
+        final int firstPosition = mFirstPosition;
+        final int childCount = getChildCount();
+        if (firstPosition >= 0 && childCount > 0) {
+            if (mSmoothScrollbarEnabled) {
+                final View view = getChildAt(0);
+                final int top = view.getTop();
+                int height = view.getHeight();
+                if (height > 0) {
+                    return Math.max(firstPosition * 100 - (top * 100) / height, 0);
+                }
+            } else {
+                int index;
+                final int count = mItemCount;
+                if (firstPosition == 0) {
+                    index = 0;
+                } else if (firstPosition + childCount == count) {
+                    index = count;
+                } else {
+                    index = firstPosition + childCount / 2;
+                }
+                return (int) (firstPosition + childCount * (index / (float) count));
             }
         }
         return 0;
@@ -879,7 +1002,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     protected int computeVerticalScrollRange() {
-        return Math.max(mItemCount * 100, 0);
+        return mSmoothScrollbarEnabled ? Math.max(mItemCount * 100, 0) : mItemCount;
     }
 
     @Override
@@ -1139,6 +1262,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (getChildCount() > 0) {
             mDataChanged = true;
             rememberSyncState();
+        }
+        if (mFastScroller != null) {
+            mFastScroller.onSizeChanged(w, h, oldw, oldh);
         }
     }
 
@@ -1669,6 +1795,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        
+        if (mFastScroller != null) {
+            boolean intercepted = mFastScroller.onTouchEvent(ev);
+            if (intercepted) {
+                return true;
+            }            
+        }
         final int action = ev.getAction();
         final int x = (int) ev.getX();
         final int y = (int) ev.getY();
@@ -1684,28 +1817,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
             int motionPosition = pointToPosition(x, y);
-            if ((mTouchMode != TOUCH_MODE_FLING) && (motionPosition >= 0)
-                    && (getAdapter().isEnabled(motionPosition))) {
-                // User clicked on an actual view (and was not stopping a fling). It might be a
-                // click or a scroll. Assume it is a click until proven otherwise
-                mTouchMode = TOUCH_MODE_DOWN;
-                // FIXME Debounce
-                if (mPendingCheckForTap == null) {
-                    mPendingCheckForTap = new CheckForTap();
+            if (!mDataChanged) {
+                if ((mTouchMode != TOUCH_MODE_FLING) && (motionPosition >= 0)
+                        && (getAdapter().isEnabled(motionPosition))) {
+                    // User clicked on an actual view (and was not stopping a fling). It might be a
+                    // click or a scroll. Assume it is a click until proven otherwise
+                    mTouchMode = TOUCH_MODE_DOWN;
+                    // FIXME Debounce
+                    if (mPendingCheckForTap == null) {
+                        mPendingCheckForTap = new CheckForTap();
+                    }
+                    postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
+                } else {
+                    if (ev.getEdgeFlags() != 0 && motionPosition < 0) {
+                        // If we couldn't find a view to click on, but the down event was touching
+                        // the edge, we will bail out and try again. This allows the edge correcting
+                        // code in ViewRoot to try to find a nearby view to select
+                        return false;
+                    }
+                    // User clicked on whitespace, or stopped a fling. It is a scroll.
+                    createScrollingCache();
+                    mTouchMode = TOUCH_MODE_SCROLL;
+                    motionPosition = findMotionRow(y);
+                    reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
-                postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
-            } else {
-                if (ev.getEdgeFlags() != 0 && motionPosition < 0) {
-                    // If we couldn't find a view to click on, but the down event was touching
-                    // the edge, we will bail out and try again. This allows the edge correcting
-                    // code in ViewRoot to try to find a nearby view to select
-                    return false;
-                }
-                // User clicked on whitespace, or stopped a fling. It is a scroll.
-                createScrollingCache();
-                mTouchMode = TOUCH_MODE_SCROLL;
-                motionPosition = findMotionRow(y);
-                reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
             }
 
             if (motionPosition >= 0) {
@@ -1897,6 +2032,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         return true;
     }
+    
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        if (mFastScroller != null) {
+            mFastScroller.draw(canvas);
+        }
+    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -1904,6 +2047,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int x = (int) ev.getX();
         int y = (int) ev.getY();
         View v;
+        
+        if (mFastScroller != null) {
+            boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
+            if (intercepted) {
+                return true;
+            }
+        }
+        
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
             int motionPosition = findMotionRow(y);
@@ -1965,7 +2116,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
-    private void reportScrollStateChange(int newState) {
+    /**
+     * Fires an "on scroll state changed" event to the registered
+     * {@link android.widget.AbsListView.OnScrollListener}, if any. The state change
+     * is fired only if the specified state is different from the previously known state.
+     *
+     * @param newState The new scroll state.
+     */
+    void reportScrollStateChange(int newState) {
         if (newState != mLastScrollState) {
             if (mOnScrollListener != null) {
                 mOnScrollListener.onScrollStateChanged(this, newState);
@@ -2013,10 +2171,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         private void endFling() {
             mTouchMode = TOUCH_MODE_REST;
-            if (mOnScrollListener != null) {
-                mOnScrollListener.onScrollStateChanged(AbsListView.this,
-                        OnScrollListener.SCROLL_STATE_IDLE);
-            }
+            reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             clearScrollingCache();
         }
 
@@ -2411,7 +2566,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (selectedPos >= 0) {
             mLayoutMode = LAYOUT_SPECIFIC;
             setSelectionInt(selectedPos);
+            invokeOnItemScrollListener();
         }
+        reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
 
         return selectedPos >= 0;
     }
@@ -2547,7 +2704,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Make sure we have a window before showing the popup
         if (getWindowVisibility() == View.VISIBLE) {
             int screenHeight = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
-            final int[] xy = mLocation;
+            final int[] xy = new int[2];
             getLocationOnScreen(xy);
             int bottomGap = screenHeight - xy[1] - getHeight() + 20;
             mPopup.showAtLocation(this, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL,
@@ -2689,6 +2846,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     com.android.internal.R.layout.typing_filter, null);
             mTextFilter.addTextChangedListener(this);
             p.setFocusable(false);
+            p.setTouchable(false);
             p.setContentView(mTextFilter);
             p.setWidth(LayoutParams.WRAP_CONTENT);
             p.setHeight(LayoutParams.WRAP_CONTENT);

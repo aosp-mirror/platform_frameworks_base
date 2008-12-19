@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio;
 
 import java.awt.Dimension;
@@ -40,34 +41,49 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageWriterSpi;
 
 /**
- * The ImageWriter class is an abstract class for encoding images.
- * ImageWriter objects are instantiated by the service provider 
- * interface, ImageWriterSpi class, for the specific format. 
- * ImageWriterSpi class should be registered with the IIORegistry, 
- * which uses them for format recognition and presentation of available 
- * format readers and writers.
+ * The ImageWriter class is an abstract class for encoding images. ImageWriter
+ * objects are instantiated by the service provider interface, ImageWriterSpi
+ * class, for the specific format. ImageWriterSpi class should be registered
+ * with the IIORegistry, which uses them for format recognition and presentation
+ * of available format readers and writers.
+ * 
+ * @since Android 1.0
  */
 public abstract class ImageWriter implements ImageTranscoder {
 
-    /** The available locales. */
+    /**
+     * The available locales.
+     */
     protected Locale[] availableLocales;
-    
-    /** The locale. */
+
+    /**
+     * The locale.
+     */
     protected Locale locale;
-    
-    /** The originating provider. */
+
+    /**
+     * The originating provider.
+     */
     protected ImageWriterSpi originatingProvider;
-    
-    /** The output. */
+
+    /**
+     * The output.
+     */
     protected Object output;
-    
-    /** The progress listeners. */
+
+    /**
+     * The progress listeners.
+     */
     protected List<IIOWriteProgressListener> progressListeners;
-    
-    /** The warning listeners. */
+
+    /**
+     * The warning listeners.
+     */
     protected List<IIOWriteWarningListener> warningListeners;
-    
-    /** The warning locales. */
+
+    /**
+     * The warning locales.
+     */
     protected List<Locale> warningLocales;
 
     // Indicates that abort operation is requested
@@ -78,22 +94,21 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Instantiates a new ImageWriter.
      * 
-     * @param originatingProvider the ImageWriterSpi which 
-     * instanties this ImageWriter.
+     * @param originatingProvider
+     *            the ImageWriterSpi which instantiates this ImageWriter.
      */
     protected ImageWriter(ImageWriterSpi originatingProvider) {
         this.originatingProvider = originatingProvider;
     }
 
     public abstract IIOMetadata convertStreamMetadata(IIOMetadata iioMetadata,
-                                             ImageWriteParam imageWriteParam);
+            ImageWriteParam imageWriteParam);
 
     public abstract IIOMetadata convertImageMetadata(IIOMetadata iioMetadata,
-                                            ImageTypeSpecifier imageTypeSpecifier,
-                                            ImageWriteParam imageWriteParam);
+            ImageTypeSpecifier imageTypeSpecifier, ImageWriteParam imageWriteParam);
 
     /**
-     * Gets the ImageWriterSpi which instantiated this ImageWriter. 
+     * Gets the ImageWriterSpi which instantiated this ImageWriter.
      * 
      * @return the ImageWriterSpi.
      */
@@ -102,10 +117,11 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes the start of an image read by calling their imageStarted
-     * method of registered IIOWriteProgressListeners.
+     * Processes the start of an image read by calling their imageStarted method
+     * of registered IIOWriteProgressListeners.
      * 
-     * @param imageIndex the image index.
+     * @param imageIndex
+     *            the image index.
      */
     protected void processImageStarted(int imageIndex) {
         if (null != progressListeners) {
@@ -116,10 +132,11 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes the current percentage of image completion by calling 
+     * Processes the current percentage of image completion by calling
      * imageProgress method of registered IIOWriteProgressListener.
      * 
-     * @param percentageDone the percentage done.
+     * @param percentageDone
+     *            the percentage done.
      */
     protected void processImageProgress(float percentageDone) {
         if (null != progressListeners) {
@@ -130,8 +147,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes image completion by calling imageComplete method
-     * of registered IIOWriteProgressListeners. 
+     * Processes image completion by calling imageComplete method of registered
+     * IIOWriteProgressListeners.
      */
     protected void processImageComplete() {
         if (null != progressListeners) {
@@ -142,11 +159,13 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes a warning message by calling warningOccurred method
-     * of registered IIOWriteWarningListeners.
+     * Processes a warning message by calling warningOccurred method of
+     * registered IIOWriteWarningListeners.
      * 
-     * @param imageIndex the image index.
-     * @param warning the warning.
+     * @param imageIndex
+     *            the image index.
+     * @param warning
+     *            the warning.
      */
     protected void processWarningOccurred(int imageIndex, String warning) {
         if (null == warning) {
@@ -160,13 +179,15 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes a warning message by calling warningOccurred method
-     * of registered IIOWriteWarningListeners with string from 
-     * ResourceBundle.
+     * Processes a warning message by calling warningOccurred method of
+     * registered IIOWriteWarningListeners with string from ResourceBundle.
      * 
-     * @param imageIndex the image index.
-     * @param bundle the name of ResourceBundle.
-     * @param key the keyword.
+     * @param imageIndex
+     *            the image index.
+     * @param bundle
+     *            the name of ResourceBundle.
+     * @param key
+     *            the keyword.
      */
     protected void processWarningOccurred(int imageIndex, String bundle, String key) {
         if (warningListeners != null) { // Don't check the parameters
@@ -180,17 +201,18 @@ public abstract class ImageWriter implements ImageTranscoder {
             throw new IllegalArgumentException("keyword == null!");
         }
 
-        // Get the context class loader and try to locate the bundle with it first
-        ClassLoader contextClassloader = AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
+        // Get the context class loader and try to locate the bundle with it
+        // first
+        ClassLoader contextClassloader = AccessController
+                .doPrivileged(new PrivilegedAction<ClassLoader>() {
                     public ClassLoader run() {
                         return Thread.currentThread().getContextClassLoader();
                     }
-        });
+                });
 
         // Iterate through both listeners and locales
         int n = warningListeners.size();
-        for (int i=0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             IIOWriteWarningListener listener = warningListeners.get(i);
             Locale locale = warningLocales.get(i);
 
@@ -218,10 +240,11 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Sets the specified Object to the output of this ImageWriter. 
+     * Sets the specified Object to the output of this ImageWriter.
      * 
-     * @param output the Object which represents destination, it can 
-     * be ImageOutputStream or other objects.
+     * @param output
+     *            the Object which represents destination, it can be
+     *            ImageOutputStream or other objects.
      */
     public void setOutput(Object output) {
         if (output != null) {
@@ -244,26 +267,26 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Writes a completed image stream that contains the specified image, 
+     * Writes a completed image stream that contains the specified image,
      * default metadata, and thumbnails to the output.
      * 
-     * @param image the specified image to be written.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred
-     * during writting.
+     * @param image
+     *            the specified image to be written.
+     * @throws IOException
+     *             if an I/O exception has occurred during writing.
      */
     public void write(IIOImage image) throws IOException {
         write(null, image, null);
     }
 
     /**
-     * Writes a completed image stream that contains the specified 
-     * rendered image, default metadata, and thumbnails to the output.
+     * Writes a completed image stream that contains the specified rendered
+     * image, default metadata, and thumbnails to the output.
      * 
-     * @param image the specified RenderedImage to be written.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred
-     * during writting.
+     * @param image
+     *            the specified RenderedImage to be written.
+     * @throws IOException
+     *             if an I/O exception has occurred during writing.
      */
     public void write(RenderedImage image) throws IOException {
         write(null, new IIOImage(image, null, null), null);
@@ -273,16 +296,18 @@ public abstract class ImageWriter implements ImageTranscoder {
      * Writes a completed image stream that contains the specified image,
      * metadata and thumbnails to the output.
      * 
-     * @param streamMetadata the stream metadata, or null.
-     * @param image the specified image to be written, if
-     * canWriteRaster() method returns false, then Image must contain 
-     * only RenderedImage.
-     * @param param the ImageWriteParam, or null.
-     * 
-     * @throws IOException - if an error occurs during writing.
+     * @param streamMetadata
+     *            the stream metadata, or null.
+     * @param image
+     *            the specified image to be written, if canWriteRaster() method
+     *            returns false, then Image must contain only RenderedImage.
+     * @param param
+     *            the ImageWriteParam, or null.
+     * @throws IOException
+     *             if an error occurs during writing.
      */
-    public abstract void write(IIOMetadata streamMetadata,
-                               IIOImage image, ImageWriteParam param) throws IOException;
+    public abstract void write(IIOMetadata streamMetadata, IIOImage image, ImageWriteParam param)
+            throws IOException;
 
     /**
      * Disposes of any resources.
@@ -292,26 +317,26 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Requests an abort operation for current writing operation. 
+     * Requests an abort operation for current writing operation.
      */
     public synchronized void abort() {
         aborted = true;
     }
 
     /**
-     * Checks whether or not a request to abort the current write operation 
-     * has been made successfully.
+     * Checks whether or not a request to abort the current write operation has
+     * been made successfully.
      * 
-     * @return true, if the request to abort the current write operation 
-     * has been made successfully, false otherwise.
+     * @return true, if the request to abort the current write operation has
+     *         been made successfully, false otherwise.
      */
     protected synchronized boolean abortRequested() {
         return aborted;
     }
 
     /**
-     * Clears all previous abort request, and abortRequested returns false
-     * after calling this method.
+     * Clears all previous abort request, and abortRequested returns false after
+     * calling this method.
      */
     protected synchronized void clearAbortRequest() {
         aborted = false;
@@ -320,7 +345,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Adds the IIOWriteProgressListener listener.
      * 
-     * @param listener the IIOWriteProgressListener listener.
+     * @param listener
+     *            the IIOWriteProgressListener listener.
      */
     public void addIIOWriteProgressListener(IIOWriteProgressListener listener) {
         if (listener == null) {
@@ -337,7 +363,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Adds the IIOWriteWarningListener.
      * 
-     * @param listener the IIOWriteWarningListener listener.
+     * @param listener
+     *            the IIOWriteWarningListener listener.
      */
     public void addIIOWriteWarningListener(IIOWriteWarningListener listener) {
         if (listener == null) {
@@ -356,8 +383,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Gets the output object that was set by setOutput method.
      * 
-     * @return the output object such as ImageOutputStream, or null if
-     * it is not set.
+     * @return the output object such as ImageOutputStream, or null if it is not
+     *         set.
      */
     public Object getOutput() {
         return output;
@@ -366,7 +393,7 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Check output return false.
      * 
-     * @return true, if successful
+     * @return true, if successful.
      */
     private final boolean checkOutputReturnFalse() {
         if (getOutput() == null) {
@@ -385,124 +412,122 @@ public abstract class ImageWriter implements ImageTranscoder {
         throw new UnsupportedOperationException("Unsupported write variant!");
     }
 
-
     /**
-     * Returns true if a new empty image can be inserted at 
-     * the specified index. 
+     * Returns true if a new empty image can be inserted at the specified index.
      * 
-     * @param imageIndex the specified index of image.
-     * 
-     * @return true if a new empty image can be inserted at 
-     * the specified index, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the specified index of image.
+     * @return true if a new empty image can be inserted at the specified index,
+     *         false otherwise.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     public boolean canInsertEmpty(int imageIndex) throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if a new image can be inserted at the specified index. 
+     * Returns true if a new image can be inserted at the specified index.
      * 
-     * @param imageIndex the specified index of image.
-     * 
-     * @return true if a new image can be inserted at the specified index, 
-     * false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the specified index of image.
+     * @return true if a new image can be inserted at the specified index, false
+     *         otherwise.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     public boolean canInsertImage(int imageIndex) throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returnes true if the image with the specified index can be removed.
+     * Returns true if the image with the specified index can be removed.
      * 
-     * @param imageIndex the specified index of image.
-     * 
-     * @return true if the image with the specified index can be removed,
-     * false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the specified index of image.
+     * @return true if the image with the specified index can be removed, false
+     *         otherwise.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     public boolean canRemoveImage(int imageIndex) throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if metadata of the image with the specified index
-     * can be replaced.
+     * Returns true if metadata of the image with the specified index can be
+     * replaced.
      * 
-     * @param imageIndex the specified image index.
-     * 
-     * @return true if metadata of the image with the specified index
-     * can be replaced, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the specified image index.
+     * @return true if metadata of the image with the specified index can be
+     *         replaced, false otherwise.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public boolean canReplaceImageMetadata(int imageIndex) throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if pixels of the image with the specified index 
-     * can be replaced by the replacePixels  methods.
+     * Returns true if pixels of the image with the specified index can be
+     * replaced by the replacePixels methods.
      * 
-     * @param imageIndex the image's index.
-     * 
-     * @return true if pixels of the image with the specified index 
-     * can be replaced by the replacePixels  methods, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image's index.
+     * @return true if pixels of the image with the specified index can be
+     *         replaced by the replacePixels methods, false otherwise.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     public boolean canReplacePixels(int imageIndex) throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if the stream metadata presented in the output
-     * can be removed.
+     * Returns true if the stream metadata presented in the output can be
+     * removed.
      * 
-     * @return true if the stream metadata presented in the output
-     * can be removed, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @return true if the stream metadata presented in the output can be
+     *         removed, false otherwise.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public boolean canReplaceStreamMetadata() throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if the writing of a complete image stream which
-     * contains a single image is supported with undefined pixel 
-     * values and associated metadata and thumbnails to the output. 
+     * Returns true if the writing of a complete image stream which contains a
+     * single image is supported with undefined pixel values and associated
+     * metadata and thumbnails to the output.
      * 
-     * @return true if the writing of a complete image stream which
-     * contains a single image is supported, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @return true if the writing of a complete image stream which contains a
+     *         single image is supported, false otherwise.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public boolean canWriteEmpty() throws IOException {
         return checkOutputReturnFalse();
     }
 
     /**
-     * Returns true if the methods which taken an IIOImageParameter 
-     * can deal with a Raster source image.
+     * Returns true if the methods which taken an IIOImageParameter can deal
+     * with a Raster source image.
      * 
-     * @return true if the methods which taken an IIOImageParameter 
-     * can deal with a Raster source image, false otherwise.
+     * @return true if the methods which taken an IIOImageParameter can deal
+     *         with a Raster source image, false otherwise.
      */
     public boolean canWriteRasters() {
         return false;
     }
 
     /**
-     * Returns true if the writer can add an image to stream that
-     * already contains header information.
+     * Returns true if the writer can add an image to stream that already
+     * contains header information.
      * 
-     * @return if the writer can add an image to stream that
-     * already contains header information, false otherwise.
+     * @return if the writer can add an image to stream that already contains
+     *         header information, false otherwise.
      */
     public boolean canWriteSequence() {
         return false;
@@ -511,16 +536,18 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Ends the insertion of a new image.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void endInsertEmpty() throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Ends the repalce pixels operation.
+     * Ends the replace pixels operation.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void endReplacePixels() throws IOException {
         unsupportedOperation();
@@ -529,7 +556,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Ends an empty write operation.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void endWriteEmpty() throws IOException {
         unsupportedOperation();
@@ -538,7 +566,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Ends the sequence of write operations.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void endWriteSequence() throws IOException {
         unsupportedOperation();
@@ -558,25 +587,24 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Gets an IIOMetadata object that contains default values 
-     * for encoding an image with the specified type. 
+     * Gets an IIOMetadata object that contains default values for encoding an
+     * image with the specified type.
      * 
-     * @param imageType the ImageTypeSpecifier.
-     * @param param the ImageWriteParam.
-     * 
+     * @param imageType
+     *            the ImageTypeSpecifier.
+     * @param param
+     *            the ImageWriteParam.
      * @return the IIOMetadata object.
      */
-    public abstract IIOMetadata getDefaultImageMetadata(
-            ImageTypeSpecifier imageType,
-            ImageWriteParam param
-    );
+    public abstract IIOMetadata getDefaultImageMetadata(ImageTypeSpecifier imageType,
+            ImageWriteParam param);
 
     /**
-     * Gets an IIOMetadata object that contains default values 
-     * for encoding a stream of images.
+     * Gets an IIOMetadata object that contains default values for encoding a
+     * stream of images.
      * 
-     * @param param the ImageWriteParam.
-     * 
+     * @param param
+     *            the ImageWriteParam.
      * @return the IIOMetadata object.
      */
     public abstract IIOMetadata getDefaultStreamMetadata(ImageWriteParam param);
@@ -591,9 +619,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Gets the default write param.
-     * Gets a new ImageWriteParam object for this ImageWriter with the
-     * current Locale.
+     * Gets the default write param. Gets a new ImageWriteParam object for this
+     * ImageWriter with the current Locale.
      * 
      * @return a new ImageWriteParam object for this ImageWriter.
      */
@@ -602,124 +629,131 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Gets the number of thumbnails suported by the format 
-     * being written with supported image type, image write 
-     * parameters, stream, and image metadata objects.
+     * Gets the number of thumbnails supported by the format being written with
+     * supported image type, image write parameters, stream, and image metadata
+     * objects.
      * 
-     * @param imageType the ImageTypeSpecifier.
-     * @param param the image's parameters.
-     * @param streamMetadata the stream metadata.
-     * @param imageMetadata the image metadata.
-     * 
-     * @return the number of thumbnails supported
+     * @param imageType
+     *            the ImageTypeSpecifier.
+     * @param param
+     *            the image's parameters.
+     * @param streamMetadata
+     *            the stream metadata.
+     * @param imageMetadata
+     *            the image metadata.
+     * @return the number of thumbnails supported.
      */
-    public int getNumThumbnailsSupported(
-            ImageTypeSpecifier imageType,
-            ImageWriteParam param,
-            IIOMetadata streamMetadata,
-            IIOMetadata imageMetadata
-    ) {
+    public int getNumThumbnailsSupported(ImageTypeSpecifier imageType, ImageWriteParam param,
+            IIOMetadata streamMetadata, IIOMetadata imageMetadata) {
         return 0;
     }
 
     /**
-     * Gets the preferred thumbnail sizes.
-     * Gets an array of Dimensions with the sizes for thumbnail images 
-     * as they are encoded in the output file or stream. 
+     * Gets the preferred thumbnail sizes. Gets an array of Dimensions with the
+     * sizes for thumbnail images as they are encoded in the output file or
+     * stream.
      * 
-     * @param imageType the ImageTypeSpecifier.
-     * @param param the ImageWriteParam.
-     * @param streamMetadata the stream metadata.
-     * @param imageMetadata the image metadata.
-     * 
-     * @return the preferred thumbnail sizes
+     * @param imageType
+     *            the ImageTypeSpecifier.
+     * @param param
+     *            the ImageWriteParam.
+     * @param streamMetadata
+     *            the stream metadata.
+     * @param imageMetadata
+     *            the image metadata.
+     * @return the preferred thumbnail sizes.
      */
-    public Dimension[] getPreferredThumbnailSizes(
-            ImageTypeSpecifier imageType,
-            ImageWriteParam param,
-            IIOMetadata streamMetadata,
-            IIOMetadata imageMetadata
-    ) {
+    public Dimension[] getPreferredThumbnailSizes(ImageTypeSpecifier imageType,
+            ImageWriteParam param, IIOMetadata streamMetadata, IIOMetadata imageMetadata) {
         return null;
     }
 
     /**
-     * Prepares insertion of an empty image by requesting the insertion of 
-     * a new image into an existing image stream.
+     * Prepares insertion of an empty image by requesting the insertion of a new
+     * image into an existing image stream.
      * 
-     * @param imageIndex the image index.
-     * @param imageType the image type.
-     * @param width the width of the image.
-     * @param height the height of the image.
-     * @param imageMetadata the image metadata, or null.
-     * @param thumbnails the array thumbnails for this image, or null.
-     * @param param the ImageWriteParam, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image index.
+     * @param imageType
+     *            the image type.
+     * @param width
+     *            the width of the image.
+     * @param height
+     *            the height of the image.
+     * @param imageMetadata
+     *            the image metadata, or null.
+     * @param thumbnails
+     *            the array thumbnails for this image, or null.
+     * @param param
+     *            the ImageWriteParam, or null.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public void prepareInsertEmpty(
-            int imageIndex, ImageTypeSpecifier imageType,
-            int width, int height,
-            IIOMetadata imageMetadata, List<? extends BufferedImage> thumbnails,
-            ImageWriteParam param
-    ) throws IOException {
+    public void prepareInsertEmpty(int imageIndex, ImageTypeSpecifier imageType, int width,
+            int height, IIOMetadata imageMetadata, List<? extends BufferedImage> thumbnails,
+            ImageWriteParam param) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Prepares the writer to call the replacePixels method for the
-     * specified region. 
+     * Prepares the writer to call the replacePixels method for the specified
+     * region.
      * 
-     * @param imageIndex the image's index.
-     * @param region the specified region.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image's index.
+     * @param region
+     *            the specified region.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void prepareReplacePixels(int imageIndex, Rectangle region) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Prepares the writer for writing an empty image by beginning the 
-     * process of writing a complete image stream that contains a single image 
-     * with undefined pixel values, metadata and thumbnails, 
-     * to the output. 
+     * Prepares the writer for writing an empty image by beginning the process
+     * of writing a complete image stream that contains a single image with
+     * undefined pixel values, metadata and thumbnails, to the output.
      * 
-     * @param streamMetadata the stream metadata.
-     * @param imageType the image type.
-     * @param width the width of the image.
-     * @param height the height of the image.
-     * @param imageMetadata the image's metadata, or null.
-     * @param thumbnails the image's thumbnails, or null.
-     * @param param the image's parameters, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param streamMetadata
+     *            the stream metadata.
+     * @param imageType
+     *            the image type.
+     * @param width
+     *            the width of the image.
+     * @param height
+     *            the height of the image.
+     * @param imageMetadata
+     *            the image's metadata, or null.
+     * @param thumbnails
+     *            the image's thumbnails, or null.
+     * @param param
+     *            the image's parameters, or null.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public void prepareWriteEmpty(
-            IIOMetadata streamMetadata, ImageTypeSpecifier imageType,
-            int width, int height,
-            IIOMetadata imageMetadata, List<? extends BufferedImage> thumbnails,
-            ImageWriteParam param
-    ) throws IOException {
+    public void prepareWriteEmpty(IIOMetadata streamMetadata, ImageTypeSpecifier imageType,
+            int width, int height, IIOMetadata imageMetadata,
+            List<? extends BufferedImage> thumbnails, ImageWriteParam param) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Prepares a stream to accept calls of writeToSequence method 
-     * using the metadata object. 
+     * Prepares a stream to accept calls of writeToSequence method using the
+     * metadata object.
      * 
-     * @param streamMetadata the stream metadata.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param streamMetadata
+     *            the stream metadata.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void prepareWriteSequence(IIOMetadata streamMetadata) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Processes the completion of a thumbnail read 
-     * by calling their thumbnailComplete method 
-     * of registered IIOWriteProgressListeners. 
+     * Processes the completion of a thumbnail read by calling their
+     * thumbnailComplete method of registered IIOWriteProgressListeners.
      */
     protected void processThumbnailComplete() {
         if (progressListeners != null) {
@@ -730,11 +764,11 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes the current percentage of thumbnail completion 
-     * by calling their thumbnailProgress method of registered 
-     * IIOWriteProgressListeners.
+     * Processes the current percentage of thumbnail completion by calling their
+     * thumbnailProgress method of registered IIOWriteProgressListeners.
      * 
-     * @param percentageDone the percentage done.
+     * @param percentageDone
+     *            the percentage done.
      */
     protected void processThumbnailProgress(float percentageDone) {
         if (progressListeners != null) {
@@ -745,11 +779,13 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes the start of a thumbnail read by calling 
-     * thumbnailStarted method of registered IIOWriteProgressListeners. 
+     * Processes the start of a thumbnail read by calling thumbnailStarted
+     * method of registered IIOWriteProgressListeners.
      * 
-     * @param imageIndex the image index.
-     * @param thumbnailIndex the thumbnail index.
+     * @param imageIndex
+     *            the image index.
+     * @param thumbnailIndex
+     *            the thumbnail index.
      */
     protected void processThumbnailStarted(int imageIndex, int thumbnailIndex) {
         if (progressListeners != null) {
@@ -760,7 +796,7 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Processes that the writing has been aborted by calling writeAborted 
+     * Processes that the writing has been aborted by calling writeAborted
      * method of registered IIOWriteProgressListeners.
      */
     protected void processWriteAborted() {
@@ -789,8 +825,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Removes the specified IIOWriteProgressListener listener.
      * 
-     * @param listener the registered IIOWriteProgressListener 
-     * to be removed.
+     * @param listener
+     *            the registered IIOWriteProgressListener to be removed.
      */
     public void removeIIOWriteProgressListener(IIOWriteProgressListener listener) {
         if (progressListeners != null && listener != null) {
@@ -803,8 +839,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Removes the specified IIOWriteWarningListener listener.
      * 
-     * @param listener the registered IIOWriteWarningListener listener
-     * to be removed.
+     * @param listener
+     *            the registered IIOWriteWarningListener listener to be removed.
      */
     public void removeIIOWriteWarningListener(IIOWriteWarningListener listener) {
         if (warningListeners == null || listener == null) {
@@ -826,9 +862,10 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Removes the image with the specified index from the stream.
      * 
-     * @param imageIndex the image's index.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image's index.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void removeImage(int imageIndex) throws IOException {
         unsupportedOperation();
@@ -837,36 +874,42 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Replaces image metadata of the image with specified index.
      * 
-     * @param imageIndex the image's index.
-     * @param imageMetadata the image metadata.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image's index.
+     * @param imageMetadata
+     *            the image metadata.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void replaceImageMetadata(int imageIndex, IIOMetadata imageMetadata) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Replaces a part of an image presented in the output
-     * with the specified RenderedImage.
+     * Replaces a part of an image presented in the output with the specified
+     * RenderedImage.
      * 
-     * @param image the RenderedImage.
-     * @param param the ImageWriteParam.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param image
+     *            the RenderedImage.
+     * @param param
+     *            the ImageWriteParam.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void replacePixels(RenderedImage image, ImageWriteParam param) throws IOException {
         unsupportedOperation();
     }
 
     /**
-     * Replaces a part of an image presented in the output
-     * with the specified Raster.
+     * Replaces a part of an image presented in the output with the specified
+     * Raster.
      * 
-     * @param raster the Raster.
-     * @param param the ImageWriteParam.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param raster
+     *            the Raster.
+     * @param param
+     *            the ImageWriteParam.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void replacePixels(Raster raster, ImageWriteParam param) throws IOException {
         unsupportedOperation();
@@ -875,9 +918,10 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Replaces the stream metadata of the output with new IIOMetadata.
      * 
-     * @param streamMetadata the new stream metadata.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param streamMetadata
+     *            the new stream metadata.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public void replaceStreamMetadata(IIOMetadata streamMetadata) throws IOException {
         unsupportedOperation();
@@ -886,7 +930,8 @@ public abstract class ImageWriter implements ImageTranscoder {
     /**
      * Sets the locale of this ImageWriter.
      * 
-     * @param locale the new locale.
+     * @param locale
+     *            the new locale.
      */
     public void setLocale(Locale locale) {
         if (locale == null) {
@@ -924,26 +969,31 @@ public abstract class ImageWriter implements ImageTranscoder {
     }
 
     /**
-     * Inserts image into existing output stream. 
+     * Inserts image into existing output stream.
      * 
-     * @param imageIndex the image index where an image will be written.
-     * @param image the specified image to be written.
-     * @param param the ImageWriteParam, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param imageIndex
+     *            the image index where an image will be written.
+     * @param image
+     *            the specified image to be written.
+     * @param param
+     *            the ImageWriteParam, or null.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    public void writeInsert(int imageIndex, IIOImage image, ImageWriteParam param) throws IOException {
+    public void writeInsert(int imageIndex, IIOImage image, ImageWriteParam param)
+            throws IOException {
         unsupportedOperation();
     }
 
     /**
      * Writes the specified image to the sequence.
      * 
-     * @param image the image to be written.
-     * @param param the ImageWriteParam, or null.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred 
-     * during writting.
+     * @param image
+     *            the image to be written.
+     * @param param
+     *            the ImageWriteParam, or null.
+     * @throws IOException
+     *             if an I/O exception has occurred during writing.
      */
     public void writeToSequence(IIOImage image, ImageWriteParam param) throws IOException {
         unsupportedOperation();

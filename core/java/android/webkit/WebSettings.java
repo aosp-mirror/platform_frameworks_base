@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import java.lang.SecurityException;
+import android.content.pm.PackageManager;
 
 import java.util.Locale;
 
@@ -111,6 +113,7 @@ public class WebSettings {
     // retrieve the values. After setXXX, postSync() needs to be called.
     // XXX: The default values need to match those in WebSettings.cpp
     private LayoutAlgorithm mLayoutAlgorithm = LayoutAlgorithm.NARROW_COLUMNS;
+    private Context         mContext;
     private TextSize        mTextSize = TextSize.NORMAL;
     private String          mStandardFontFamily = "sans-serif";
     private String          mFixedFontFamily = "monospace";
@@ -119,7 +122,9 @@ public class WebSettings {
     private String          mCursiveFontFamily = "cursive";
     private String          mFantasyFontFamily = "fantasy";
     private String          mDefaultTextEncoding = "Latin-1";
-    private String          mUserAgent = ANDROID_USERAGENT;
+    private String          mUserAgent;
+    private boolean         mUseDefaultUserAgent;
+    private String          mAcceptLanguage;
     private String          mPluginsPath = "";
     private int             mMinimumFontSize = 8;
     private int             mMinimumLogicalFontSize = 8;
@@ -127,12 +132,14 @@ public class WebSettings {
     private int             mDefaultFixedFontSize = 13;
     private boolean         mLoadsImagesAutomatically = true;
     private boolean         mBlockNetworkImage = false;
+    private boolean         mBlockNetworkLoads = false;
     private boolean         mJavaScriptEnabled = false;
     private boolean         mPluginsEnabled = false;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
     private boolean         mSupportMultipleWindows = false;
+    private boolean         mShrinksStandaloneImagesToFit = false;
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
     // native WebCore code.
@@ -144,6 +151,7 @@ public class WebSettings {
     private boolean         mNeedInitialFocus = true;
     private boolean         mNavDump = false;
     private boolean         mSupportZoom = true;
+    private boolean         mAllowFileAccess = true;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -212,57 +220,112 @@ public class WebSettings {
 
     // User agent strings.
     private static final String DESKTOP_USERAGENT =
-            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en) AppleWebKit/522+ " +
-            "(KHTML, like Gecko) Safari/419.3";
-    private static final String IPHONE_USERAGENT = "Mozilla/5.0 (iPhone; U; " +
-            "CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) " +
-            "Version/3.0 Mobile/1A543 Safari/419.3";
-    private static String ANDROID_USERAGENT;
-
+            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en)"
+            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
+            + " Safari/525.20.1";
+    private static final String IPHONE_USERAGENT = 
+            "Mozilla/5.0 (iPhone; U; CPU iPhone 2_1 like Mac OS X; en)"
+            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
+            + " Mobile/5F136 Safari/525.20.1";
+    private static Locale sLocale;
+    private static Object sLockForLocaleSettings;
+    
     /**
      * Package constructor to prevent clients from creating a new settings
      * instance.
      */
-    WebSettings(Context context) {
-        if (ANDROID_USERAGENT == null) {
-            StringBuffer arg = new StringBuffer();
-            // Add version
-            final String version = Build.VERSION.RELEASE;
-            if (version.length() > 0) {
-                arg.append(version);
-            } else {
-                // default to "1.0"
-                arg.append("1.0");
-            }
-            arg.append("; ");
-            // Initialize the mobile user agent with the default locale.
-            final Locale l = Locale.getDefault();
-            final String language = l.getLanguage();
-            if (language != null) {
-                arg.append(language.toLowerCase());
-                final String country = l.getCountry();
-                if (country != null) {
-                    arg.append("-");
-                    arg.append(country.toLowerCase());
-                }
-            } else {
-                // default to "en"
-                arg.append("en");
-            }
-            // Add device name
-            final String device = Build.DEVICE;
-            if (device.length() > 0) {
-                arg.append("; ");
-                arg.append(device);
-            }
-            final String base = context.getResources().getText(
-                    com.android.internal.R.string.web_user_agent).toString();
-            ANDROID_USERAGENT = String.format(base, arg);
-            mUserAgent = ANDROID_USERAGENT;
-        }
+    WebSettings(Context context) {   
         mEventHandler = new EventHandler();
+        mContext = context;
+
+        if (sLockForLocaleSettings == null) {
+            sLockForLocaleSettings = new Object();
+            sLocale = Locale.getDefault();
+        }
+        mAcceptLanguage = getCurrentAcceptLanguage();
+        mUserAgent = getCurrentUserAgent();
+        mUseDefaultUserAgent = true;
+
+        verifyNetworkAccess();
     }
 
+    /**
+     * Looks at sLocale and returns current AcceptLanguage String.
+     * @return Current AcceptLanguage String.
+     */
+    private String getCurrentAcceptLanguage() {
+        Locale locale;
+        synchronized(sLockForLocaleSettings) {
+            locale = sLocale;
+        }
+        StringBuffer buffer = new StringBuffer();
+        final String language = locale.getLanguage();
+        if (language != null) {
+            buffer.append(language);
+            final String country = locale.getCountry();
+            if (country != null) {
+                buffer.append("-");
+                buffer.append(country);
+            }
+        }
+        if (!locale.equals(Locale.US)) {
+            buffer.append(", ");
+            java.util.Locale us = Locale.US;
+            if (us.getLanguage() != null) {
+                buffer.append(us.getLanguage());
+                final String country = us.getCountry();
+                if (country != null) {
+                    buffer.append("-");
+                    buffer.append(country);
+                }
+            }
+        }
+
+        return buffer.toString();
+    }
+    
+    /**
+     * Looks at sLocale and mContext and returns current UserAgent String.
+     * @return Current UserAgent String.
+     */
+    private synchronized String getCurrentUserAgent() {
+        Locale locale;
+        synchronized(sLockForLocaleSettings) {
+            locale = sLocale;
+        }
+        StringBuffer buffer = new StringBuffer();
+        // Add version
+        final String version = Build.VERSION.RELEASE;
+        if (version.length() > 0) {
+            buffer.append(version);
+        } else {
+            // default to "1.0"
+            buffer.append("1.0");
+        }  
+        buffer.append("; ");
+        final String language = locale.getLanguage();
+        if (language != null) {
+            buffer.append(language.toLowerCase());
+            final String country = locale.getCountry();
+            if (country != null) {
+                buffer.append("-");
+                buffer.append(country.toLowerCase());
+            }
+        } else {
+            // default to "en"
+            buffer.append("en");
+        }
+        
+        final String device = Build.DEVICE;
+        if (device.length() > 0) {
+            buffer.append("; ");
+            buffer.append(device);
+        }
+        final String base = mContext.getResources().getText(
+                com.android.internal.R.string.web_user_agent).toString();
+        return String.format(base, buffer);
+    }
+    
     /**
      * Enables dumping the pages navigation cache to a text file.
      */
@@ -289,6 +352,21 @@ public class WebSettings {
      */
     public boolean supportZoom() {
         return mSupportZoom;
+    }
+
+    /**
+     * Enable or disable file access within WebView. File access is enabled by
+     * default.
+     */
+    public void setAllowFileAccess(boolean allow) {
+        mAllowFileAccess = allow;
+    }
+
+    /**
+     * Returns true if this WebView supports file access.
+     */
+    public boolean getAllowFileAccess() {
+        return mAllowFileAccess;
     }
 
     /**
@@ -377,34 +455,48 @@ public class WebSettings {
      * Tell the WebView about user-agent string.
      * @param ua 0 if the WebView should use an Android user-agent string,
      *           1 if the WebView should use a desktop user-agent string.
-     *           2 if the WebView should use an iPhone user-agent string.
+     *
+     * @deprecated Please use setUserAgentString instead.
      */
+    @Deprecated
     public synchronized void setUserAgent(int ua) {
-        if (ua == 0 && !ANDROID_USERAGENT.equals(mUserAgent)) {
-            mUserAgent = ANDROID_USERAGENT;
-            postSync();
-        } else if (ua == 1 && !DESKTOP_USERAGENT.equals(mUserAgent)) {
-            mUserAgent = DESKTOP_USERAGENT;
-            postSync();
-        } else if (ua == 2 && !IPHONE_USERAGENT.equals(mUserAgent)) {
-            mUserAgent = IPHONE_USERAGENT;
-            postSync();
+        String uaString = null;
+        if (ua == 1) {
+            if (DESKTOP_USERAGENT.equals(mUserAgent)) {
+                return; // do nothing
+            } else {
+                uaString = DESKTOP_USERAGENT;
+            }
+        } else if (ua == 2) {
+            if (IPHONE_USERAGENT.equals(mUserAgent)) {
+                return; // do nothing
+            } else {
+                uaString = IPHONE_USERAGENT;
+            }
+        } else if (ua != 0) {
+            return; // do nothing
         }
+        setUserAgentString(uaString);
     }
 
     /**
      * Return user-agent as int
      * @return int  0 if the WebView is using an Android user-agent string.
      *              1 if the WebView is using a desktop user-agent string.
-     *              2 if the WebView is using an iPhone user-agent string.
+     *             -1 if the WebView is using user defined user-agent string.
+     *
+     * @deprecated Please use getUserAgentString instead.
      */
+    @Deprecated
     public synchronized int getUserAgent() {
         if (DESKTOP_USERAGENT.equals(mUserAgent)) {
             return 1;
         } else if (IPHONE_USERAGENT.equals(mUserAgent)) {
             return 2;
+        } else if (mUseDefaultUserAgent) {
+            return 0;
         }
-        return 0;
+        return -1;
     }
 
     /**
@@ -706,6 +798,40 @@ public class WebSettings {
     public synchronized boolean getBlockNetworkImage() {
         return mBlockNetworkImage;
     }
+    
+    /**
+     * @hide
+     * Tell the WebView to block all network load requests. 
+     * @param flag True if the WebView should block all network loads
+     */
+    public synchronized void setBlockNetworkLoads(boolean flag) {
+        if (mBlockNetworkLoads != flag) {
+            mBlockNetworkLoads = flag;
+            verifyNetworkAccess();
+        }
+    }
+
+    /**
+     * @hide
+     * Return true if the WebView will block all network loads.
+     * @return True if the WebView blocks all network loads.
+     */
+    public synchronized boolean getBlockNetworkLoads() {
+        return mBlockNetworkLoads;
+    }
+    
+    
+    private void verifyNetworkAccess() {
+        if (!mBlockNetworkLoads) {
+            if (mContext.checkPermission("android.permission.INTERNET", 
+                    android.os.Process.myPid(), 0) != 
+                        PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException
+                        ("Permission denied - " +
+                                "application missing INTERNET permission");
+            }
+        }
+    }
 
     /**
      * Tell the WebView to enable javascript execution.
@@ -806,11 +932,69 @@ public class WebSettings {
         return mDefaultTextEncoding;
     }
 
-    /* Package api to grab the user agent string. */
-    /*package*/ synchronized String getUserAgentString() {
+    /**
+     * Set the WebView's user-agent string. If the string "ua" is null or empty,
+     * it will use the system default user-agent string.
+     */
+    public synchronized void setUserAgentString(String ua) {
+        if (ua == null || ua.length() == 0) {
+            synchronized(sLockForLocaleSettings) {
+                Locale currentLocale = Locale.getDefault(); 
+                if (!sLocale.equals(currentLocale)) {
+                    sLocale = currentLocale;
+                    mAcceptLanguage = getCurrentAcceptLanguage();
+                }
+            }
+            ua = getCurrentUserAgent();
+            mUseDefaultUserAgent = true;
+        } else  {
+            mUseDefaultUserAgent = false;
+        }
+
+        if (!ua.equals(mUserAgent)) {
+            mUserAgent = ua;
+            postSync();
+        }
+    }
+
+    /**
+     * Return the WebView's user-agent string.
+     */
+    public synchronized String getUserAgentString() {
+        if (DESKTOP_USERAGENT.equals(mUserAgent) ||
+                IPHONE_USERAGENT.equals(mUserAgent) ||
+                !mUseDefaultUserAgent) {
+            return mUserAgent;
+        }
+
+        boolean doPostSync = false;
+        synchronized(sLockForLocaleSettings) {
+            Locale currentLocale = Locale.getDefault();
+            if (!sLocale.equals(currentLocale)) {
+                sLocale = currentLocale;
+                mUserAgent = getCurrentUserAgent();
+                mAcceptLanguage = getCurrentAcceptLanguage();
+                doPostSync = true;
+            }
+        }
+        if (doPostSync) {
+            postSync();
+        }
         return mUserAgent;
     }
 
+    /* package api to grab the Accept Language string. */
+    /*package*/ synchronized String getAcceptLanguage() {
+        synchronized(sLockForLocaleSettings) {
+            Locale currentLocale = Locale.getDefault();
+            if (!sLocale.equals(currentLocale)) {
+                sLocale = currentLocale;
+                mAcceptLanguage = getCurrentAcceptLanguage();
+            }
+        }
+        return mAcceptLanguage;
+    }
+    
     /**
      * Tell the WebView whether it needs to set a node to have focus when
      * {@link WebView#requestFocus(int, android.graphics.Rect)} is called.
@@ -863,6 +1047,20 @@ public class WebSettings {
     public int getCacheMode() {
         return mOverrideCacheMode;
     }
+    
+    /**
+     * If set, webkit alternately shrinks and expands images viewed outside
+     * of an HTML page to fit the screen. This conflicts with attempts by
+     * the UI to zoom in and out of an image, so it is set false by default.
+     * @param shrink Set true to let webkit shrink the standalone image to fit.
+     * {@hide}
+     */
+    public void setShrinksStandaloneImagesToFit(boolean shrink) {
+        if (mShrinksStandaloneImagesToFit != shrink) {
+            mShrinksStandaloneImagesToFit = shrink;
+            postSync();
+        }
+     }
 
     /**
      * Transfer messages from the queue to the new WebCoreThread. Called from

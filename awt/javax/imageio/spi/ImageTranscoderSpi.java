@@ -18,16 +18,18 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import javax.imageio.ImageTranscoder;
 
 /**
- * The ImageTranscoderSpi class is a service provider interface (SPI) 
- * for ImageTranscoders.
+ * The ImageTranscoderSpi class is a service provider interface (SPI) for
+ * ImageTranscoders.
+ * 
+ * @since Android 1.0
  */
-public abstract class ImageTranscoderSpi extends IIOServiceProvider
-        implements RegisterableService {
+public abstract class ImageTranscoderSpi extends IIOServiceProvider implements RegisterableService {
 
     /**
      * Instantiates a new ImageTranscoderSpi.
@@ -36,37 +38,37 @@ public abstract class ImageTranscoderSpi extends IIOServiceProvider
     }
 
     /**
-     * Instantiates a new ImageTranscoderSpi with the specified
-     * vendor name and version.
+     * Instantiates a new ImageTranscoderSpi with the specified vendor name and
+     * version.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
      */
     public ImageTranscoderSpi(String vendorName, String version) {
         super(vendorName, version);
     }
 
     /**
-     * Gets the class name of an ImageReaderSpi that 
-     * produces IIOMetadata objects that can be used as 
-     * input to this transcoder.
+     * Gets the class name of an ImageReaderSpi that produces IIOMetadata
+     * objects that can be used as input to this transcoder.
      * 
      * @return the class name of an ImageReaderSpi.
      */
     public abstract String getReaderServiceProviderName();
 
     /**
-     * Gets the class name of an ImageWriterSpi that 
-     * produces IIOMetadata objects that can be used as 
-     * input to this transcoder.
+     * Gets the class name of an ImageWriterSpi that produces IIOMetadata
+     * objects that can be used as input to this transcoder.
      * 
      * @return the class name of an ImageWriterSpi.
      */
     public abstract String getWriterServiceProviderName();
 
     /**
-     * Creates an instance of the ImageTranscoder associated 
-     * with this service provider.
+     * Creates an instance of the ImageTranscoder associated with this service
+     * provider.
      * 
      * @return the ImageTranscoder instance.
      */

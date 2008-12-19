@@ -34,7 +34,7 @@ import android.view.View;
 import android.widget.TextView;
 
 /**
- * The {@link DialogPreference} class is a base class for preferences that are
+ * A base class for {@link Preference} objects that are
  * dialog-based. These preferences will, when clicked, open a dialog showing the
  * actual preference controls.
  * 
@@ -356,7 +356,7 @@ public abstract class DialogPreference extends Preference implements
         getPreferenceManager().unregisterOnActivityDestroyListener(this);
         
         mDialog = null;
-        onDialogClosed(mWhichButtonClicked == DialogInterface.BUTTON1);
+        onDialogClosed(mWhichButtonClicked == DialogInterface.BUTTON_POSITIVE);
     }
 
     /**
@@ -367,6 +367,15 @@ public abstract class DialogPreference extends Preference implements
      *            the negative button was clicked or the dialog was canceled (false).
      */
     protected void onDialogClosed(boolean positiveResult) {
+    }
+
+    /**
+     * Gets the dialog that is shown by this preference.
+     * 
+     * @return The dialog, or null if a dialog is not being shown.
+     */
+    public Dialog getDialog() {
+        return mDialog;
     }
 
     /**

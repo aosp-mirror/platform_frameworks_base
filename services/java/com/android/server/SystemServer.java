@@ -33,11 +33,13 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.provider.Contacts.People;
 import android.server.BluetoothDeviceService;
+import android.server.BluetoothA2dpService;
 import android.server.checkin.FallbackCheckinService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
 
+import dalvik.system.TouchDex;
 import dalvik.system.VMRuntime;
 
 import com.android.server.am.ActivityManagerService;
@@ -45,7 +47,6 @@ import com.android.server.status.StatusBarService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
@@ -61,9 +62,9 @@ class ServerThread extends Thread {
         }
         @Override
         public void onChange(boolean selfChange) {
-            boolean enableAdb = (Settings.System.getInt(mContentResolver,
-                    Settings.System.ADB_ENABLED, 0) > 0);
-            // setting this system property will start or stop adbd
+            boolean enableAdb = (Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ADB_ENABLED, 0) > 0);
+            // setting this secure property will start or stop adbd
            SystemProperties.set("persist.service.adb.enable", enableAdb ? "1" : "0");
         }
     }
@@ -83,12 +84,13 @@ class ServerThread extends Thread {
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
-        
+
         PowerManagerService power = null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
         BluetoothDeviceService bluetooth = null;
+        BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
 
         // Critical services...
@@ -96,7 +98,7 @@ class ServerThread extends Thread {
             Log.i(TAG, "Starting Power Manager.");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
-            
+
             Log.i(TAG, "Starting Activity Manager.");
             context = ActivityManagerService.main(factoryTest);
 
@@ -104,43 +106,44 @@ class ServerThread extends Thread {
             ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));
 
             AttributeCache.init(context);
-            
+
             Log.i(TAG, "Starting Package Manager.");
             pm = PackageManagerService.main(context,
                     factoryTest != SystemServer.FACTORY_TEST_OFF);
 
             ActivityManagerService.setSystemProcess();
-            
+
             mContentResolver = context.getContentResolver();
-            
+
             Log.i(TAG, "Starting Content Manager.");
             ContentService.main(context,
                     factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
-            
+
             Log.i(TAG, "Starting System Content Providers.");
             ActivityManagerService.installSystemProviders();
-            
+
             Log.i(TAG, "Starting Battery Service.");
             BatteryService battery = new BatteryService(context);
             ServiceManager.addService("battery", battery);
 
-            // only initialize the power service after we have started the 
+            // only initialize the power service after we have started the
             // content providers and the batter service.
             power.init(context, ActivityManagerService.getDefault(), battery);
-            
+
             Log.i(TAG, "Starting Alarm Manager.");
             AlarmManagerService alarm = new AlarmManagerService(context);
             ServiceManager.addService(Context.ALARM_SERVICE, alarm);
 
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
-            
+
             // Sensor Service is needed by Window Manager, so this goes first
             Log.i(TAG, "Starting Sensor Service.");
             ServiceManager.addService(Context.SENSOR_SERVICE, new SensorService(context));
 
             Log.i(TAG, "Starting Window Manager.");
-            wm = WindowManagerService.main(context, power);
+            wm = WindowManagerService.main(context, power,
+                    factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
 
             ((ActivityManagerService)ServiceManager.getService("activity"))
@@ -160,9 +163,12 @@ class ServerThread extends Thread {
                 bluetooth = new BluetoothDeviceService(context);
                 bluetooth.init();
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, bluetooth);
+                bluetoothA2dp = new BluetoothA2dpService(context);
+                ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
+                                          bluetoothA2dp);
 
-                int bluetoothOn = Settings.System.getInt(mContentResolver,
-                                                         Settings.System.BLUETOOTH_ON, 0);
+                int bluetoothOn = Settings.Secure.getInt(mContentResolver,
+                    Settings.Secure.BLUETOOTH_ON, 0);
                 if (bluetoothOn > 0) {
                     bluetooth.enable(null);
                 }
@@ -172,8 +178,10 @@ class ServerThread extends Thread {
             Log.e("System", "Failure starting core service", e);
         }
 
+        StatusBarService statusBar = null;
+        InputMethodManagerService imm = null;
+        
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            StatusBarService statusBar = null;
             try {
                 Log.i(TAG, "Starting Status Bar Service.");
                 statusBar = new StatusBarService(context);
@@ -182,7 +190,22 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting StatusBarService", e);
             }
-    
+
+            try {
+                Log.i(TAG, "Starting Clipboard Service.");
+                ServiceManager.addService("clipboard", new ClipboardService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Clipboard Service", e);
+            }
+
+            try {
+                Log.i(TAG, "Starting Input Method Service.");
+                imm = new InputMethodManagerService(context, statusBar);
+                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Input Manager Service", e);
+            }
+            
             try {
                 Log.i(TAG, "Starting Hardware Service.");
                 ServiceManager.addService("hardware", new HardwareService(context));
@@ -199,7 +222,7 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Starting Connectivity Service.");
-                ServiceManager.addService(Context.CONNECTIVITY_SERVICE, 
+                ServiceManager.addService(Context.CONNECTIVITY_SERVICE,
                         ConnectivityService.getInstance(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Connectivity Service", e);
@@ -217,25 +240,25 @@ class ServerThread extends Thread {
                 // MountService must start after NotificationManagerService
                 Log.i(TAG, "Starting Mount Service.");
                 ServiceManager.addService("mount", new MountService(context));
-
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Mount Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting DeviceMemoryMonitor service");
-                ServiceManager.addService("devicememorymonitor", new DeviceMemoryMonitorService(context));
+                Log.i(TAG, "Starting DeviceStorageMonitor service");
+                ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
+                        new DeviceStorageMonitorService(context));
             } catch (Throwable e) {
-                Log.e(TAG, "Failure starting DeviceMemoryMonitor service", e);
+                Log.e(TAG, "Failure starting DeviceStorageMonitor service", e);
             }
-    
+
             try {
                 Log.i(TAG, "Starting Location Manager.");
                 ServiceManager.addService(Context.LOCATION_SERVICE, new LocationManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Location Manager", e);
             }
-            
+
             try {
                 Log.i(TAG, "Starting Search Service.");
                 ServiceManager.addService( Context.SEARCH_SERVICE, new SearchManagerService(context) );
@@ -243,18 +266,11 @@ class ServerThread extends Thread {
                 Log.e(TAG, "Failure starting Search Service", e);
             }
 
-            try {
-                Log.i(TAG, "Starting Clipboard Service.");
-                ServiceManager.addService("clipboard", new ClipboardService(context));
-            } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Clipboard Service", e);
-            }
-    
             if (INCLUDE_DEMO) {
                 Log.i(TAG, "Installing demo data...");
                 (new DemoThread(context)).start();
             }
-            
+
             try {
                 Log.i(TAG, "Starting Checkin Service");
                 addService(context, "checkin", "com.google.android.server.checkin.CheckinService",
@@ -276,7 +292,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Volume Service", e);
             }
-            
+
             try {
                 Log.i(TAG, "Starting HeadsetObserver");
                 // Listen for wired headset changes
@@ -286,30 +302,36 @@ class ServerThread extends Thread {
             }
         }
 
-        // make sure the ADB_ENABLED setting value matches the system property value
-        Settings.System.putInt(mContentResolver, Settings.System.ADB_ENABLED,
+        // make sure the ADB_ENABLED setting value matches the secure property value
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED,
                 "1".equals(SystemProperties.get("persist.service.adb.enable")) ? 1 : 0);
 
         // register observer to listen for settings changes
-        mContentResolver.registerContentObserver(Settings.System.getUriFor(Settings.System.ADB_ENABLED),
+        mContentResolver.registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.ADB_ENABLED),
                 false, new AdbSettingsObserver());
 
         // It is now time to start up the app processes...
+        if (statusBar != null) {
+            statusBar.systemReady();
+        }
+        if (imm != null) {
+            imm.systemReady();
+        }
         wm.systemReady();
         power.systemReady();
         try {
             pm.systemReady();
         } catch (RemoteException e) {
         }
-        
+
         // After making the following code, third party code may be running...
         try {
             ActivityManagerNative.getDefault().systemReady();
         } catch (RemoteException e) {
         }
-        
+
         Watchdog.getInstance().start();
-        
+
         Looper.loop();
         Log.d(TAG, "System ServerThread is exiting!");
     }

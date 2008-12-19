@@ -18,6 +18,7 @@
  * @author Sergey I. Salishev
  * @version $Revision: 1.2 $
  */
+
 package javax.imageio.metadata;
 
 /* 
@@ -26,20 +27,20 @@ package javax.imageio.metadata;
  */
 
 /**
- * The IIOMetadataController interface provides a method for 
- * implementing objects to activate the controller without 
- * defining how the controller obtains values.
+ * The IIOMetadataController interface provides a method for implementing
+ * objects to activate the controller without defining how the controller
+ * obtains values.
+ * 
+ * @since Android 1.0
  */
 public interface IIOMetadataController {
 
     /**
      * Activates a controller.
      * 
-     * @param metadata the metadata to be modified.
-     * 
-     * @return true if the IIOMetadata has been modified, 
-     * false otherwise.
+     * @param metadata
+     *            the metadata to be modified.
+     * @return true, if the IIOMetadata has been modified, false otherwise.
      */
     public boolean activate(IIOMetadata metadata);
 }
-

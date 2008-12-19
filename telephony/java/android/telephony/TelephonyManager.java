@@ -16,20 +16,19 @@
 
 package android.telephony;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.SystemProperties;
-import android.os.ServiceManager;
-
 import com.android.internal.telephony.*;
-import android.telephony.CellLocation;
-import android.telephony.ServiceState;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SdkConstant;
+import android.content.Context;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemProperties;
+
 
 /**
  * Provides access to information about the telephony services on
@@ -72,6 +71,93 @@ public class TelephonyManager {
     public static TelephonyManager getDefault() {
         return sInstance;
     }
+
+
+    //
+    // Broadcast Intent actions
+    //
+
+    /**
+     * Broadcast intent action indicating that the call state (cellular)
+     * on the device has changed.
+     *
+     * <p>
+     * The {@link #EXTRA_STATE} extra indicates the new call state.
+     * If the new state is RINGING, a second extra
+     * {@link #EXTRA_INCOMING_NUMBER} provides the incoming phone number as
+     * a String.
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">
+     * This was a {@link android.content.Context#sendStickyBroadcast sticky}
+     * broadcast in version 1.0, but it is no longer sticky.
+     * Instead, use {@link #getCallState} to synchronously query the current call state.
+     *
+     * @see #EXTRA_STATE
+     * @see #EXTRA_INCOMING_NUMBER
+     * @see #getCallState
+     * 
+     * @hide pending API Council approval
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PHONE_STATE_CHANGED =
+            "android.intent.action.PHONE_STATE";
+
+    /**
+     * The lookup key used with the {@link #ACTION_PHONE_STATE_CHANGED} broadcast
+     * for a String containing the new call state.
+     *
+     * @see #EXTRA_STATE_IDLE
+     * @see #EXTRA_STATE_RINGING
+     * @see #EXTRA_STATE_OFFHOOK
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getStringExtra(String)}.
+     * 
+     * @hide pending API Council approval
+     */
+    public static final String EXTRA_STATE = Phone.STATE_KEY;
+
+    /**
+     * Value used with {@link #EXTRA_STATE} corresponding to
+     * {@link #CALL_STATE_IDLE}.
+     * 
+     * @hide pending API Council approval
+     */
+    public static final String EXTRA_STATE_IDLE = Phone.State.IDLE.toString();
+
+    /**
+     * Value used with {@link #EXTRA_STATE} corresponding to
+     * {@link #CALL_STATE_RINGING}.
+     * 
+     * @hide pending API Council approval
+     */
+    public static final String EXTRA_STATE_RINGING = Phone.State.RINGING.toString();
+
+    /**
+     * Value used with {@link #EXTRA_STATE} corresponding to
+     * {@link #CALL_STATE_OFFHOOK}.
+     * 
+     * @hide pending API Council approval
+     */
+    public static final String EXTRA_STATE_OFFHOOK = Phone.State.OFFHOOK.toString();
+
+    /**
+     * The lookup key used with the {@link #ACTION_PHONE_STATE_CHANGED} broadcast
+     * for a String containing the incoming phone number.
+     * Only valid when the new call state is RINGING.
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getStringExtra(String)}.
+     * 
+     * @hide pending API Council approval
+     */
+    public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
+
 
     //
     //
@@ -157,6 +243,26 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the neighboring cell information of the device.
+     * 
+     * @return List of NeighboringCellInfo or null if info unavailable.
+     * 
+     * <p>Requires Permission: 
+     * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
+     */
+    public List<NeighboringCellInfo> getNeighboringCellInfo() {
+       try {
+           ITelephony tel = getITelephony(); 
+           if (tel != null) {
+               return tel.getNeighboringCellInfo();
+           }
+       } catch (RemoteException ex) {
+       }
+       return null;
+       
+    }
+    
+    /**
      * No phone module
      */
     public static final int PHONE_TYPE_NONE = 0;
@@ -233,6 +339,7 @@ public class TelephonyManager {
     /**
      * Returns a constant indicating the radio technology (network type) 
      * currently in use on the device.
+     * @return the network type
      *
      * @see #NETWORK_TYPE_UNKNOWN
      * @see #NETWORK_TYPE_GPRS
@@ -252,6 +359,26 @@ public class TelephonyManager {
         }
         else {
             return NETWORK_TYPE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Returns a string representation of the radio technology (network type)
+     * currently in use on the device.
+     * @return the name of the radio technology
+     *
+     * @hide pending API council review
+     */
+    public String getNetworkTypeName() {
+        switch (getNetworkType()) {
+            case NETWORK_TYPE_GPRS:
+                return "GPRS";
+            case NETWORK_TYPE_EDGE:
+                return "EDGE";
+            case NETWORK_TYPE_UMTS:
+                return "UMTS";
+            default:
+                return "UNKNOWN";
         }
     }
 
@@ -562,62 +689,3 @@ public class TelephonyManager {
         }
     }
 }
-
-/*
- * These have not been implemented since they're not used anywhere in the system
- * and it's impossible to tell if they're working or not.  The comments in SystemProperties
- * were wrong in at least one case, so I don't trust them.  They claimed that
- * PROPERTY_OPERATOR_ISROAMING was "1" if it was true, but it's actually set to "true."
- */
-
-
-    /* Set to '1' if voice mail is waiting, otherwise false */
-    /*
-    public boolean isVoiceMailWaiting() {
-        return "1".equals(
-                SystemProperties.get(TelephonyProperties.PROPERTY_LINE1_VOICE_MAIL_WAITING));
-    }
-    */
-
-    /* Set to 'true' if unconditional voice call forwarding is enabled
-     *  Availablity: only if configured in SIM; SIM state must be "READY"
-     */
-    /*
-    public boolean isCallForwarding() {
-        SystemProperties.get(TelephonyProperties.PROPERTY_LINE1_VOICE_CALL_FORWARDING);
-    }
-    */
-
-    /* '1' if the current network is the result of a manual network selection.
-     *  Availability: when registered to a network
-     */
-    /*
-    public boolean isNetworkManual() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISMANUAL);
-    }
-    */
-
-
-/*
- * These have not been implemented because they're not public IMHO. -joeo
- */
-
-    /* 
-     * Baseband version 
-     * Availability: property is available any time radio is on
-     */
-    /*
-    public String getBasebandVersion() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
-    }
-    */
-
-    /*
-     * Radio Interface Layer (RIL) library implementation.
-     */
-    /*
-    public String getRilLibrary() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_RIL_IMPL);
-    }
-    */
-

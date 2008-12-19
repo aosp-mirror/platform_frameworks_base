@@ -69,7 +69,7 @@ public class Linkify {
     public static final int PHONE_NUMBERS = 0x04;
 
     /**
-     *  Bit field indicating that phone numbers should be matched in methods that
+     *  Bit field indicating that street addresses should be matched in methods that
      *  take an options mask
      */
     public static final int MAP_ADDRESSES = 0x08;
@@ -78,8 +78,7 @@ public class Linkify {
      *  Bit mask indicating that all available patterns should be matched in
      *  methods that take an options mask
      */
-    public static final int ALL = WEB_URLS | EMAIL_ADDRESSES | PHONE_NUMBERS
-        | MAP_ADDRESSES;
+    public static final int ALL = WEB_URLS | EMAIL_ADDRESSES | PHONE_NUMBERS | MAP_ADDRESSES;
 
     /**
      * Don't treat anything with fewer than this many digits as a
@@ -109,8 +108,7 @@ public class Linkify {
      *  Filters out URL matches that don't have enough digits to be a
      *  phone number.
      */
-    public static final MatchFilter sPhoneNumberMatchFilter =
-            new MatchFilter() {
+    public static final MatchFilter sPhoneNumberMatchFilter = new MatchFilter() {
         public final boolean acceptMatch(CharSequence s, int start, int end) {
             int digitCount = 0;
 
@@ -133,8 +131,7 @@ public class Linkify {
      *  &apos;+1 (919) 555-1212&apos;
      *  becomes &apos;+19195551212&apos;
      */
-    public static final TransformFilter sPhoneNumberTransformFilter =
-            new TransformFilter() {
+    public static final TransformFilter sPhoneNumberTransformFilter = new TransformFilter() {
         public final String transformUrl(final Matcher match, String url) {
             return Regex.digitsAndPlusOnly(match);
         }
@@ -300,8 +297,7 @@ public class Linkify {
      *                      prepended to the url of links that do not have
      *                      a scheme specified in the link text
      */
-    public static final void addLinks(TextView text, Pattern pattern,
-            String scheme) {
+    public static final void addLinks(TextView text, Pattern pattern, String scheme) {
         addLinks(text, pattern, scheme, null, null);
     }
 
@@ -341,8 +337,7 @@ public class Linkify {
      *                      prepended to the url of links that do not have
      *                      a scheme specified in the link text
      */
-    public static final boolean addLinks(Spannable text, Pattern pattern,
-            String scheme) {
+    public static final boolean addLinks(Spannable text, Pattern pattern, String scheme) {
         return addLinks(text, pattern, scheme, null, null);
     }
 
@@ -388,8 +383,7 @@ public class Linkify {
         return hasMatches;
     }
 
-    private static final void applyLink(String url, int start, int end,
-            Spannable text) {
+    private static final void applyLink(String url, int start, int end, Spannable text) {
         URLSpan span = new URLSpan(url);
 
         text.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -402,13 +396,22 @@ public class Linkify {
         }
 
         boolean hasPrefix = false;
+        
         for (int i = 0; i < prefixes.length; i++) {
             if (url.regionMatches(true, 0, prefixes[i], 0,
                                   prefixes[i].length())) {
                 hasPrefix = true;
+
+                // Fix capitalization if necessary
+                if (!url.regionMatches(false, 0, prefixes[i], 0,
+                                       prefixes[i].length())) {
+                    url = prefixes[i] + url.substring(prefixes[i].length());
+                }
+
                 break;
             }
         }
+
         if (!hasPrefix) {
             url = prefixes[0] + url;
         }
@@ -438,30 +441,35 @@ public class Linkify {
         }
     }
 
-    private static final void gatherMapLinks(ArrayList<LinkSpec> links,
-            Spannable s) {
+    private static final void gatherMapLinks(ArrayList<LinkSpec> links, Spannable s) {
         String string = s.toString();
         String address;
         int base = 0;
+
         while ((address = WebView.findAddress(string)) != null) {
             int start = string.indexOf(address);
+
             if (start < 0) {
                 break;
             }
+
             LinkSpec spec = new LinkSpec();
             int length = address.length();
             int end = start + length;
+            
             spec.start = base + start;
             spec.end = base + end;
             string = string.substring(end);
             base += end;
 
             String encodedAddress = null;
+
             try {
                 encodedAddress = URLEncoder.encode(address,"UTF-8");
             } catch (UnsupportedEncodingException e) {
                 continue;
             }
+
             spec.url = "geo:0,0?q=" + encodedAddress;
             links.add(spec);
         }

@@ -101,11 +101,9 @@ public class TableLayout extends LinearLayout {
     public TableLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        TypedArray a =
-                context.obtainStyledAttributes(attrs, R.styleable.TableLayout);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TableLayout);
 
-        String stretchedColumns =
-                a.getString(R.styleable.TableLayout_stretchColumns);
+        String stretchedColumns = a.getString(R.styleable.TableLayout_stretchColumns);
         if (stretchedColumns != null) {
             if (stretchedColumns.charAt(0) == '*') {
                 mStretchAllColumns = true;
@@ -114,8 +112,7 @@ public class TableLayout extends LinearLayout {
             }
         }
 
-        String shrinkedColumns =
-                a.getString(R.styleable.TableLayout_shrinkColumns);
+        String shrinkedColumns = a.getString(R.styleable.TableLayout_shrinkColumns);
         if (shrinkedColumns != null) {
             if (shrinkedColumns.charAt(0) == '*') {
                 mShrinkAllColumns = true;
@@ -124,8 +121,7 @@ public class TableLayout extends LinearLayout {
             }
         }
 
-        String collapsedColumns =
-                a.getString(R.styleable.TableLayout_collapseColumns);
+        String collapsedColumns = a.getString(R.styleable.TableLayout_collapseColumns);
         if (collapsedColumns != null) {
             mCollapsedColumns = parseColumns(collapsedColumns);
         }
@@ -356,7 +352,7 @@ public class TableLayout extends LinearLayout {
      * @return true if the column is shrinkable, false otherwise. Default is false.
      */
     public boolean isColumnShrinkable(int columnIndex) {
-        return mShrinkAllColumns || mStretchableColumns.get(columnIndex);
+        return mShrinkAllColumns || mShrinkableColumns.get(columnIndex);
     }
 
     /**

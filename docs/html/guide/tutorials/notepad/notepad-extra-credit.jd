@@ -11,11 +11,11 @@ in Exercise 3. This exercise demonstrates:</em></p>
 
 <div style="float:right;white-space:nowrap">
 
-	[<a href="tutorial-ex1.html">Exercise 1</a>]
-	[<a href="tutorial-ex2.html">Exercise 2</a>]
-	[<a href="tutorial-ex3.html">Exercise 3</a>]
+	[<a href="notepad-ex1.html">Exercise 1</a>]
+	[<a href="notepad-ex2.html">Exercise 2</a>]
+	[<a href="notepad-ex3.html">Exercise 3</a>]
 	<span style="color:#BBB;">
-		[<a href="tutorial-extra-credit.html" style="color:#BBB;">Extra Credit</a>]
+		[<a href="notepad-extra-credit.html" style="color:#BBB;">Extra Credit</a>]
 	</span>
 </div>
 
@@ -63,8 +63,8 @@ when.</p>
 
 <p>The Android Eclipse plugin not only offers excellent debugging support for
 your application development, but also superb profiling support. You can also
-try using <a href="{@docRoot}reference/traceview.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
+try using <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
 find the bottlenecks and fix them.</p>
-<p><a href="{@docRoot}intro/tutorial.html">Back to the Tutorial main
+<p><a href="index.html">Back to the Tutorial main
 page...</a></p>
 

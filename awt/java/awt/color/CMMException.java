@@ -21,18 +21,22 @@
 package java.awt.color;
 
 /**
- * The CMMException is thrown as soon as a native CMM error
- * occures.
+ * The CMMException is thrown as soon as a native CMM error occurs.
+ * 
+ * @since Android 1.0
  */
 public class CMMException extends java.lang.RuntimeException {
     
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 5775558044142994965L;
 
     /**
      * Instantiates a new CMM exception with detail message.
      * 
-     * @param s the String - detail message.
+     * @param s
+     *            the detail message of the exception.
      */
     public CMMException (String s) {
         super (s);

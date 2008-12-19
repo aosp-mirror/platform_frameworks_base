@@ -17,6 +17,8 @@
 package com.android.internal.telephony;
 
 import android.os.Bundle;
+import java.util.List;
+import android.telephony.NeighboringCellInfo;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the 
@@ -43,10 +45,26 @@ interface ITelephony {
 
     /**
      * If there is currently a call in progress, show the call screen.
-     * Returns true if the call screen was shown.
+     * The DTMF dialpad may or may not be visible initially, depending on
+     * whether it was up when the user last exited the InCallScreen.
+     *
+     * @return true if the call screen was shown.
      */
     boolean showCallScreen();
-    
+
+    /**
+     * Variation of showCallScreen() that also specifies whether the
+     * DTMF dialpad should be initially visible when the InCallScreen
+     * comes up.
+     *
+     * @param showDialpad if true, make the dialpad visible initially,
+     *                    otherwise hide the dialpad initially.
+     * @return true if the call screen was shown.
+     *
+     * @see showCallScreen
+     */
+    boolean showCallScreenWithDialpad(boolean showDialpad);
+
     /**
      * End call or go to the Home screen
      *
@@ -156,6 +174,11 @@ interface ITelephony {
     boolean isDataConnectivityPossible();
 
     Bundle getCellLocation();
+
+    /**
+     * Returns the neighboring cell information of the device.
+     */
+    List<NeighboringCellInfo> getNeighboringCellInfo();
 
      int getCallState();
      int getDataActivity();

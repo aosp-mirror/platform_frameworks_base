@@ -327,7 +327,7 @@ public abstract class BroadcastReceiver {
      * current broadcast; only works with broadcasts sent through
      * {@link Context#sendOrderedBroadcast(Intent, String)
      * Context.sendOrderedBroadcast}.  This will prevent
-     * any other intent receivers from receiving the broadcast. It will still
+     * any other broadcast receivers from receiving the broadcast. It will still
      * call {@link #onReceive} of the BroadcastReceiver that the caller of 
      * {@link Context#sendOrderedBroadcast(Intent, String)
      * Context.sendOrderedBroadcast} passed in.

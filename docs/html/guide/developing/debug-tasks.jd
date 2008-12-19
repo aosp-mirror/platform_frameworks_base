@@ -3,12 +3,12 @@ page.title=Debugging
 
 <p>Android has a fairly extensive set of tools to help you debug your programs: </p>
 <ul>
-    <li><a href="{@docRoot}reference/ddms.html"><strong>DDMS</strong></a> - A graphical program that
+    <li><a href="{@docRoot}guide/developing/tools/ddms.html"><strong>DDMS</strong></a> - A graphical program that
         supports port forwarding (so you can set up breakpoints in your code in your
         IDE), screen captures on the emulator, thread and stack information,
         and many other features. You can also run logcat to retrieve your Log messages.
         See the linked topic for more information. </li>
-    <li><strong><a href="{@docRoot}reference/ddms.html#logcat">logcat</a></strong> - Dumps a log of system
+    <li><strong><a href="{@docRoot}guide/developing/tools/ddms.html#logcat">logcat</a></strong> - Dumps a log of system
         messages. The messages include a stack trace when the emulator throws an error,
         as well as Log messages. To run logcat, see the linked topic.
         
@@ -32,19 +32,19 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
                 <code>Log.i(&quot;MyActivity&quot;, &quot;MyClass.getView()
                 &mdash; Requesting item number &quot; + position)</code>
         <p>You can use logcat to read these messages</p></li>
-    <li><strong><a href="{@docRoot}reference/traceview.html">Traceview</a> </strong>- Android can save
+    <li><strong><a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> </strong>- Android can save
         a log of method calls and times to a logging file that you can view in a
         graphical reader called Traceview. See the linked topic for more information. </li>
 </ul>
 <ul>
-    <li><a href="#developingwitheclipse"><strong>Eclipse plugin</strong></a> - The Eclipse
-        Android plugin incorporates a number of these tools (ADB, DDMS, logcat output,
+    <li><a href="#developingwitheclipse"><strong>Eclipse plugin</strong></a> - The ADT Plugin
+        for Eclipse integrates a number of these tools (ADB, DDMS, logcat output,
     and other functionality). See the linked topic for more information. </li>
     <li><strong>Debug and Test Device Settings</strong> - Android exposes several settings
         that expose useful information such as CPU usage and frame rate. See <a href="#additionaldebugging">Debug
         and Test Settings on the Emulator</a> below. </li>
 </ul>
-<p>Also, see the <a href="{@docRoot}kb/troubleshooting.html">Troubleshooting</a> section
+<p>Also, see the <a href="{@docRoot}guide/appendix/faq/troubleshooting.html">Troubleshooting</a> section
     of the doc to figure out why your application isn't appearing on the emulator,
     or why it's not starting. </p>
 
@@ -99,7 +99,7 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
 
 <a name="toptips" id="toptips"></a>
 
-<div class="sidebox">
+
 <h2>Top Debugging Tips</h2>
 <!--
 <ul>
@@ -131,12 +131,12 @@ configurations on the emulator</a>.
 
 <dt>Getting system state information from the emulator (dumpstate)<a name="dumpstate" id="dumpstate"></a> </dt>
 <dd>You can access dumpstate information from the Dalvik Debug Monitor Service
-tool. See <a href="{@docRoot}reference/adb.html#dumpsys">dumpsys and
+tool. See <a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
 <dt>Getting application state information from the emulator (dumpsys)<a name="dumpsys" id="dumpsys"></a></dt>
 <dd>You can access dumpsys information from the Dalvik Debug Monitor Service
-tool. See <a href="{@docRoot}reference/adb.html#dumpsys">dumpsys and
+tool. See <a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
 <dt>Getting wireless connectivity information <a name="radioinfo" id="radioinfo"></a></dt>
@@ -147,7 +147,7 @@ radio state&quot;.</dd>
 <dt>Logging Trace Data<a name="loggingdata" id="loggingdata"></a></dt>
 <dd>You can log method calls and other tracing data in an activity by calling
 android.os.Debug.startMethodTracing(). See <a
-href="{@docRoot}reference/traceview.html">Running the Traceview Debugging
+href="{@docRoot}guide/developing/tools/traceview.html">Running the Traceview Debugging
 Program</a> for details. </dd>
 
 <dt>Logging Radio Data<a name="logradio" id="logradio"></a></dt>
@@ -163,7 +163,7 @@ logcat -b radio
 <dt>Running adb<a name="adb" id="adb"></a></dt>
 <dd>Android ships with a tool called adb that provides various capabilities, including
 moving and syncing files to the emulator, forwarding ports, and running a UNIX
-shell on the emulator. See <a href="{@docRoot}reference/adb.html">Using adb</a> for details.</dd>
+shell on the emulator. See <a href="{@docRoot}guide/developing/tools/adb.html">Using adb</a> for details.</dd>
 
 <dt>Getting screen captures from the emulator<a name="screencaps" id="screencaps"></a></dt>
 <dd> Dalvik Debug Monitor Server (DDMS) can capture screenshots from the emulator.</dd>
@@ -176,5 +176,20 @@ shell on the emulator. See <a href="{@docRoot}reference/adb.html">Using adb</a> 
 <dd>Android provides debug helper classes such as {@link android.util.Log
     util.Log} and {@link android.os.Debug} for your convenience. </dd>
 </dl>
-<a name="building"></a>
-</div>
+
+<h2 id="ide-debug-port">Configuring your IDE to attach to the debugging port</h2>
+
+<p>DDMS will assign a specific debugging port to every virtual machine that it
+    finds on the emulator. You must either attach your IDE to that
+    port (listed on the Info tab for that VM), or you can use a default port 8700
+    to connect to whatever application is currently selected on the list of discovered
+    virtual machines.</p>
+<p>Your IDE should attach to your application running on the emulator, showing you
+    its threads and allowing you to suspend them, inspect their state, and set breakpoints.
+    If you selected &quot;Wait for debugger&quot; in the Development settings panel
+    the application will run when Eclipse connects, so you will need to set any breakpoints
+    you want before connecting.</p>
+<p>Changing either the application being debugged or the &quot;Wait for debugger&quot;
+    option causes the system to kill the selected application if it is currently
+        running. You can use this to kill your application if it is in a bad state
+        by simply going to the settings and toggling the checkbox.</p>

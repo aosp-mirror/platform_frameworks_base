@@ -32,5 +32,6 @@ public interface GDebugProfile {
   static final int TRIGGER = 1;
   static final int ACTUAL_REQUEST = 2;
   static final int CACHE_LOCATION = 3;
+  static final int DEVICE_RESTART = 4;
 }
 

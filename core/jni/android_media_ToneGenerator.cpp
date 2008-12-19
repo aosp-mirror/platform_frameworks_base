@@ -87,7 +87,7 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
 
     if (lpToneGen == NULL) {
         LOGE("ToneGenerator creation failed \n");
-        jniThrowException(env, "java/lang/OutOfMemoryException", NULL);
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
     LOGV("ToneGenerator lpToneGen: %x\n", (unsigned int)lpToneGen);

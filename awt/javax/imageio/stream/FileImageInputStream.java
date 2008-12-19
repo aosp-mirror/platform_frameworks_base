@@ -15,7 +15,6 @@
  *  limitations under the License.
  */
 
-
 package javax.imageio.stream;
 
 import java.io.IOException;
@@ -24,24 +23,31 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
- * The FileImageInputStream class implements ImageInputStream 
- * and obtains its input data from a File or RandomAccessFile. 
+ * The FileImageInputStream class implements ImageInputStream and obtains its
+ * input data from a File or RandomAccessFile.
+ * 
+ * @since Android 1.0
  */
 public class FileImageInputStream extends ImageInputStreamImpl {
-    
-    /** The raf. */
+
+    /**
+     * The raf.
+     */
     RandomAccessFile raf;
 
     /**
      * Instantiates a new FileImageInputStream from the specified File.
      * 
-     * @param f the File of input data.
-     * 
-     * @throws FileNotFoundException if the specified file 
-     * doesn't exist.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param f
+     *            the File of input data.
+     * @throws FileNotFoundException
+     *             if the specified file doesn't exist.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
-    @SuppressWarnings({"DuplicateThrows"})
+    @SuppressWarnings( {
+        "DuplicateThrows"
+    })
     public FileImageInputStream(File f) throws FileNotFoundException, IOException {
         if (f == null) {
             throw new IllegalArgumentException("f == null!");
@@ -51,10 +57,11 @@ public class FileImageInputStream extends ImageInputStreamImpl {
     }
 
     /**
-     * Instantiates a new FileImageInputStream from the specified 
+     * Instantiates a new FileImageInputStream from the specified
      * RandomAccessFile.
      * 
-     * @param raf the RandomAccessFile of input data.
+     * @param raf
+     *            the RandomAccessFile of input data.
      */
     public FileImageInputStream(RandomAccessFile raf) {
         if (raf == null) {
@@ -91,7 +98,7 @@ public class FileImageInputStream extends ImageInputStreamImpl {
     public long length() {
         try {
             return raf.length();
-        } catch(IOException e) {
+        } catch (IOException e) {
             return -1L;
         }
     }

@@ -45,15 +45,24 @@ public class Paint extends _Original_Paint {
             new AffineTransform(), true, true);
     private java.awt.FontMetrics mMetrics;
 
-    public static final int ANTI_ALIAS_FLAG     = _Original_Paint.ANTI_ALIAS_FLAG;
-    public static final int FILTER_BITMAP_FLAG  = _Original_Paint.FILTER_BITMAP_FLAG;
-    public static final int DITHER_FLAG         = _Original_Paint.DITHER_FLAG;
-    public static final int UNDERLINE_TEXT_FLAG = _Original_Paint.UNDERLINE_TEXT_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int ANTI_ALIAS_FLAG       = _Original_Paint.ANTI_ALIAS_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int FILTER_BITMAP_FLAG    = _Original_Paint.FILTER_BITMAP_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int DITHER_FLAG           = _Original_Paint.DITHER_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int UNDERLINE_TEXT_FLAG   = _Original_Paint.UNDERLINE_TEXT_FLAG;
+    @SuppressWarnings("hiding")
     public static final int STRIKE_THRU_TEXT_FLAG = _Original_Paint.STRIKE_THRU_TEXT_FLAG;
-    public static final int FAKE_BOLD_TEXT_FLAG = _Original_Paint.FAKE_BOLD_TEXT_FLAG;
-    public static final int LINEAR_TEXT_FLAG    = _Original_Paint.LINEAR_TEXT_FLAG;
-    public static final int SUBPIXEL_TEXT_FLAG  = _Original_Paint.SUBPIXEL_TEXT_FLAG;
-    public static final int DEV_KERN_TEXT_FLAG  = _Original_Paint.DEV_KERN_TEXT_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int FAKE_BOLD_TEXT_FLAG   = _Original_Paint.FAKE_BOLD_TEXT_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int LINEAR_TEXT_FLAG      = _Original_Paint.LINEAR_TEXT_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int SUBPIXEL_TEXT_FLAG    = _Original_Paint.SUBPIXEL_TEXT_FLAG;
+    @SuppressWarnings("hiding")
+    public static final int DEV_KERN_TEXT_FLAG    = _Original_Paint.DEV_KERN_TEXT_FLAG;
 
     public static class FontMetrics extends _Original_Paint.FontMetrics {
     } 

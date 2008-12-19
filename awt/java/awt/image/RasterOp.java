@@ -18,6 +18,7 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt.image;
 
 import java.awt.RenderingHints;
@@ -25,20 +26,22 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * The RasterOp interface provides methods for performing transformations
- * from source data to destination data for Raster objects. The source and 
- * destination objects should contain the appropriate number of bands for 
- * the particular classes which implement this interface.
+ * The RasterOp interface provides methods for performing transformations from
+ * source data to destination data for Raster objects. The source and
+ * destination objects should contain the appropriate number of bands for the
+ * particular classes which implement this interface.
+ * 
+ * @since Android 1.0
  */
 public interface RasterOp {
-    
+
     /**
-     * Creates a destination WritableRaster with the specified Raster;
-     * this destination image data is empty and has the correct size 
-     * and number of bands.   
+     * Creates a destination WritableRaster with the specified Raster; this
+     * destination image data is empty and has the correct size and number of
+     * bands.
      * 
-     * @param src the source Raster.
-     * 
+     * @param src
+     *            the source Raster.
      * @return the WritableRaster.
      */
     public WritableRaster createCompatibleDestRaster(Raster src);
@@ -47,9 +50,10 @@ public interface RasterOp {
      * Performs a filter operation on the source Raster and stores the resulting
      * image data to the destination WritableRaster.
      * 
-     * @param src the source Raster.
-     * @param dst the destination WritableRaster, where the result is stored.
-     * 
+     * @param src
+     *            the source Raster.
+     * @param dst
+     *            the destination WritableRaster, where the result is stored.
      * @return the filtered WritableRaster.
      */
     public WritableRaster filter(Raster src, WritableRaster dst);
@@ -57,19 +61,20 @@ public interface RasterOp {
     /**
      * Gets the bounds of the filtered Raster.
      * 
-     * @param src the source Raster to be filtered.
-     * 
+     * @param src
+     *            the source Raster to be filtered.
      * @return the rectangle bounds of the filtered Raster.
      */
     public Rectangle2D getBounds2D(Raster src);
 
     /**
-     * Gets the point of the destination image which corresponds
-     * to the specified point in the source raster.
+     * Gets the point of the destination image which corresponds to the
+     * specified point in the source raster.
      * 
-     * @param srcPoint the point of the source raster.
-     * @param dstPoint the point where the result will be stored.
-     * 
+     * @param srcPoint
+     *            the point of the source raster.
+     * @param dstPoint
+     *            the point where the result will be stored.
      * @return the destination point.
      */
     public Point2D getPoint2D(Point2D srcPoint, Point2D dstPoint);

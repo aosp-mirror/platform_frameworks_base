@@ -40,6 +40,33 @@ public class CallerInfo {
     public static final String UNKNOWN_NUMBER = "-1";
     public static final String PRIVATE_NUMBER = "-2";
 
+    /**
+     * Please note that, any one of these member variables can be null,
+     * and any accesses to them should be prepared to handle such a case.
+     *
+     * Also, it is implied that phoneNumber is more often populated than
+     * name is, (think of calls being dialed/received using numbers where
+     * names are not known to the device), so phoneNumber should serve as
+     * a dependable fallback when name is unavailable.
+     *
+     * One other detail here is that this CallerInfo object reflects
+     * information found on a connection, it is an OUTPUT that serves
+     * mainly to display information to the user.  In no way is this object
+     * used as input to make a connection, so we can choose to display
+     * whatever human-readable text makes sense to the user for a
+     * connection.  This is especially relevant for the phone number field,
+     * since it is the one field that is most likely exposed to the user.
+     *
+     * As an example:
+     *   1. User dials "911"
+     *   2. Device recognizes that this is an emergency number
+     *   3. We use the "Emergency Number" string instead of "911" in the
+     *     phoneNumber field.
+     *
+     * What we're really doing here is treating phoneNumber as an essential
+     * field here, NOT name.  We're NOT always guaranteed to have a name
+     * for a connection, but the number should be displayable.
+     */
     public String name;
     public String phoneNumber;
     public String phoneLabel;
@@ -192,6 +219,9 @@ public class CallerInfo {
             // shortcut and skip the query.
             if (PhoneNumberUtils.isEmergencyNumber(number)) {
                 CallerInfo ci = new CallerInfo();
+
+                // Note we're setting the phone number here (refer to javadoc
+                // comments at the top of CallerInfo class). 
                 ci.phoneNumber = context.getString(
                         com.android.internal.R.string.emergency_call_dialog_number_for_display);
                 return ci;
@@ -200,7 +230,10 @@ public class CallerInfo {
                     if (!sSkipVmCheck && PhoneNumberUtils.compare(number,
                                 TelephonyManager.getDefault().getVoiceMailNumber())) {
                         CallerInfo ci = new CallerInfo();
-                        ci.name = TelephonyManager.getDefault().getVoiceMailAlphaTag();
+
+                        // Note we're setting the phone number here (refer to javadoc
+                        // comments at the top of CallerInfo class). 
+                        ci.phoneNumber = TelephonyManager.getDefault().getVoiceMailAlphaTag();
                         // TODO: FIND ANOTHER ICON
                         //info.photoResource = android.R.drawable.badge_voicemail;
                         return ci;
@@ -214,7 +247,8 @@ public class CallerInfo {
             }
         }
 
-        Uri contactUri = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL, number); 
+        Uri contactUri = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL,
+                                              Uri.encode(number)); 
         
         CallerInfo info = getCallerInfo(context, contactUri);
 

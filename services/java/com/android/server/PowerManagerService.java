@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.server.am.BatteryStats;
+import com.android.server.am.BatteryStatsService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -74,10 +75,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                                         | PowerManager.FULL_WAKE_LOCK;
 
     //                       time since last state:               time since last event:
-    private static final int SHORT_KEYLIGHT_DELAY = 6000;       // t+6 sec
+    // The short keylight delay comes from Gservices; this is the default.
+    private static final int SHORT_KEYLIGHT_DELAY_DEFAULT = 6000; // t+6 sec
     private static final int MEDIUM_KEYLIGHT_DELAY = 15000;       // t+15 sec
     private static final int LONG_KEYLIGHT_DELAY = 6000;        // t+6 sec
     private static final int LONG_DIM_TIME = 7000;              // t+N-5 sec
+
+    // Cached Gservices settings; see updateGservicesValues()
+    private int mShortKeylightDelay = SHORT_KEYLIGHT_DELAY_DEFAULT;
 
     // flags for setPowerState
     private static final int SCREEN_ON_BIT          = 0x00000001;
@@ -129,7 +134,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private final int MY_UID;
 
     private boolean mDoneBooting = false;
-    private boolean mStayOnWhilePluggedIn;
+    private int mStayOnConditions = 0;
     private int mNotificationQueue = -1;
     private int mNotificationWhy;
     private int mPartialCount = 0;
@@ -163,7 +168,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             = new BrightnessState(Power.KEYBOARD_LIGHT);
     private final BrightnessState mButtonBrightness
             = new BrightnessState(Power.BUTTON_LIGHT);
-    private ContentResolver mContentResolver;
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
@@ -285,10 +289,20 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
 
-    public void setStayOnSetting(boolean val) {
+    /**
+     * Set the setting that determines whether the device stays on when plugged in.
+     * The argument is a bit string, with each bit specifying a power source that,
+     * when the device is connected to that source, causes the device to stay on.
+     * See {@link android.os.BatteryManager} for the list of power sources that
+     * can be specified. Current values include {@link android.os.BatteryManager#BATTERY_PLUGGED_AC}
+     * and {@link android.os.BatteryManager#BATTERY_PLUGGED_USB}
+     * @param val an {@code int} containing the bits that specify which power sources
+     * should cause the device to stay on.
+     */
+    public void setStayOnSetting(int val) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS, null);
         Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.STAY_ON_WHILE_PLUGGED_IN, val ? 1 : 0);
+                Settings.System.STAY_ON_WHILE_PLUGGED_IN, val);
     }
 
     private class SettingsObserver implements Observer {
@@ -299,7 +313,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         public void update(Observable o, Object arg) {
             synchronized (mLocks) {
                 // STAY_ON_WHILE_PLUGGED_IN
-                mStayOnWhilePluggedIn = getInt(STAY_ON_WHILE_PLUGGED_IN) != 0;
+                mStayOnConditions = getInt(STAY_ON_WHILE_PLUGGED_IN);
                 updateWakeLockLocked();
 
                 // SCREEN_OFF_TIMEOUT
@@ -337,7 +351,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     void init(Context context, IActivityManager activity, BatteryService battery) {
         mContext = context;
         mActivityService = activity;
-        mBatteryStats = BatteryStats.getService();
+        mBatteryStats = BatteryStatsService.getService();
         mBatteryService = battery;
 
         mHandlerThread = new HandlerThread("PowerManagerService") {
@@ -376,10 +390,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         mScreenOffIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
         ContentResolver resolver = mContext.getContentResolver();
-        mContentResolver = resolver;
-
-
-        Cursor settingsCursor = mContentResolver.query(Settings.System.CONTENT_URI, null,
+        Cursor settingsCursor = resolver.query(Settings.System.CONTENT_URI, null,
                 "(" + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
@@ -396,6 +407,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         mContext.registerReceiver(new BatteryReceiver(), filter);
+
+        // Listen for Gservices changes
+        IntentFilter gservicesChangedFilter =
+                new IntentFilter(Settings.Gservices.CHANGED_ACTION);
+        mContext.registerReceiver(new GservicesChangedReceiver(), gservicesChangedFilter);
+        // And explicitly do the initial update of our cached settings
+        updateGservicesValues();
 
         // turn everything on
         setPowerState(ALL_BRIGHT);
@@ -444,7 +462,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
 
     private void updateWakeLockLocked() {
-        if (mStayOnWhilePluggedIn && mBatteryService.isPowered()) {
+        if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
             // keep the device on if we're plugged in and mStayOnWhilePluggedIn is set.
             mStayOnWhilePluggedInScreenDimLock.acquire();
             mStayOnWhilePluggedInPartialLock.acquire();
@@ -758,7 +776,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         pw.println("  mNextTimeout=" + mNextTimeout + " now=" + now
                 + " " + ((mNextTimeout-now)/1000) + "s from now");
         pw.println("  mDimScreen=" + mDimScreen
-                + " mStayOnWhilePluggedIn=" + mStayOnWhilePluggedIn);
+                + " mStayOnConditions=" + mStayOnConditions);
         pw.println("  mOffBecauseOfUser=" + mOffBecauseOfUser
                 + " mUserState=" + mUserState);
         pw.println("  mNotificationQueue=" + mNotificationQueue
@@ -1209,7 +1227,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             // was dim
                             steps = (int)(ANIM_STEPS*ratio);
                         }
-                        if (mStayOnWhilePluggedIn && mBatteryService.isPowered()) {
+                        if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
                             // If the "stay on while plugged in" option is
                             // turned on, then the screen will often not
                             // automatically turn off while plugged in.  To
@@ -1362,7 +1380,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     
     private int getPreferredBrightness() {
         try {
-            final int brightness = Settings.System.getInt(mContentResolver, SCREEN_BRIGHTNESS);
+            final int brightness = Settings.System.getInt(mContext.getContentResolver(),
+                                                          SCREEN_BRIGHTNESS);
              // Don't let applications turn the screen all the way off
             return Math.max(brightness, Power.BRIGHTNESS_DIM);
         } catch (SettingNotFoundException snfe) {
@@ -1519,7 +1538,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
      * */
     private void setScreenOffTimeoutsLocked() {
         if ((mPokey & POKE_LOCK_SHORT_TIMEOUT) != 0) {
-            mKeylightDelay = SHORT_KEYLIGHT_DELAY;
+            mKeylightDelay = mShortKeylightDelay;  // Configurable via Gservices
             mDimDelay = -1;
             mScreenOffDelay = 0;
         } else if ((mPokey & POKE_LOCK_MEDIUM_TIMEOUT) != 0) {
@@ -1550,6 +1569,31 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             Log.d(TAG, "setScreenOffTimeouts mKeylightDelay=" + mKeylightDelay
                     + " mDimDelay=" + mDimDelay + " mScreenOffDelay=" + mScreenOffDelay
                     + " mDimScreen=" + mDimScreen);
+        }
+    }
+
+    /**
+     * Refreshes cached Gservices settings.  Called once on startup, and
+     * on subsequent Settings.Gservices.CHANGED_ACTION broadcasts (see
+     * GservicesChangedReceiver).
+     */
+    private void updateGservicesValues() {
+        mShortKeylightDelay = Settings.Gservices.getInt(
+                mContext.getContentResolver(),
+                Settings.Gservices.SHORT_KEYLIGHT_DELAY_MS,
+                SHORT_KEYLIGHT_DELAY_DEFAULT);
+        // Log.i(TAG, "updateGservicesValues(): mShortKeylightDelay now " + mShortKeylightDelay);
+    }
+
+    /**
+     * Receiver for the Gservices.CHANGED_ACTION broadcast intent,
+     * which tells us we need to refresh our cached Gservices settings.
+     */
+    private class GservicesChangedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Log.i(TAG, "GservicesChangedReceiver.onReceive(): " + intent);
+            updateGservicesValues();
         }
     }
 

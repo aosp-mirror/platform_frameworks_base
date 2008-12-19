@@ -16,7 +16,7 @@
 
 
 #ifndef HAVE_WINSOCK
-#define SOCKETLOG
+//#define SOCKETLOG
 #endif
 
 #ifdef SOCKETLOG

@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.geom.Dimension2D;
@@ -26,26 +27,36 @@ import java.io.Serializable;
 import org.apache.harmony.misc.HashCode;
 
 /**
- * The Dimension represents the size (width and height) of a component.
- * The width and height values can be negative, but in that case the 
- * behavior of some methods is unexpected. 
+ * The Dimension represents the size (width and height) of a component. The
+ * width and height values can be negative, but in that case the behavior of
+ * some methods is unexpected.
+ * 
+ * @since Android 1.0
  */
 public class Dimension extends Dimension2D implements Serializable {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 4723952579491349524L;
 
-    /** The width dimension. */
+    /**
+     * The width dimension.
+     */
     public int width;
-    
-    /** The height dimension. */
+
+    /**
+     * The height dimension.
+     */
     public int height;
 
     /**
-     * Instantiates a new Dimension with the same data as the specified Dimension.
+     * Instantiates a new Dimension with the same data as the specified
+     * Dimension.
      * 
-     * @param d the Dimension to copy the data from when creating the 
-     * new Dimension object.
+     * @param d
+     *            the Dimension to copy the data from when creating the new
+     *            Dimension object.
      */
     public Dimension(Dimension d) {
         this(d.width, d.height);
@@ -61,8 +72,10 @@ public class Dimension extends Dimension2D implements Serializable {
     /**
      * Instantiates a new Dimension with the specified width and height.
      * 
-     * @param width the width of the new Dimension.
-     * @param height the height of the new Dimension.
+     * @param width
+     *            the width of the new Dimension.
+     * @param height
+     *            the height of the new Dimension.
      */
     public Dimension(int width, int height) {
         setSize(width, height);
@@ -84,10 +97,10 @@ public class Dimension extends Dimension2D implements Serializable {
     /**
      * Compares this Dimension object with the specified object.
      * 
-     * @param obj the Object to be compared.
-     * 
-     * @return true, if the specified Object is a Dimension with 
-     * the same width and height data as this Dimension. 
+     * @param obj
+     *            the Object to be compared.
+     * @return true, if the specified Object is a Dimension with the same width
+     *         and height data as this Dimension.
      */
     @Override
     public boolean equals(Object obj) {
@@ -108,16 +121,20 @@ public class Dimension extends Dimension2D implements Serializable {
      */
     @Override
     public String toString() {
-        // The output format based on 1.5 release behaviour. It could be obtained in the following way
+        // The output format based on 1.5 release behaviour. It could be
+        // obtained in the following way
         // System.out.println(new Dimension().toString())
         return getClass().getName() + "[width=" + width + ",height=" + height + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     /**
-     * Sets the size of this Dimension object with the specified width and height.
+     * Sets the size of this Dimension object with the specified width and
+     * height.
      * 
-     * @param width the width of the Dimension.
-     * @param height the height of the Dimension.
+     * @param width
+     *            the width of the Dimension.
+     * @param height
+     *            the height of the Dimension.
      */
     public void setSize(int width, int height) {
         this.width = width;
@@ -125,22 +142,24 @@ public class Dimension extends Dimension2D implements Serializable {
     }
 
     /**
-     * Sets the size of this Dimension object by copying the 
-     * data from the specified Dimension object.
+     * Sets the size of this Dimension object by copying the data from the
+     * specified Dimension object.
      * 
-     * @param d the Dimension that gives the new size values.
+     * @param d
+     *            the Dimension that gives the new size values.
      */
     public void setSize(Dimension d) {
         setSize(d.width, d.height);
     }
 
     /**
-     * Sets the size of this Dimension object with the specified double width 
+     * Sets the size of this Dimension object with the specified double width
      * and height.
      * 
-     * @param width the width of the Dimension.
-     * @param height the height of the Dimension.
-     * 
+     * @param width
+     *            the width of the Dimension.
+     * @param height
+     *            the height of the Dimension.
      * @see java.awt.geom.Dimension2D#setSize(double, double)
      */
     @Override
@@ -161,7 +180,6 @@ public class Dimension extends Dimension2D implements Serializable {
      * Gets the height of the Dimension.
      * 
      * @return the height of the Dimension.
-     * 
      * @see java.awt.geom.Dimension2D#getHeight()
      */
     @Override
@@ -173,7 +191,6 @@ public class Dimension extends Dimension2D implements Serializable {
      * Gets the width of the Dimension.
      * 
      * @return the width of the Dimension.
-     * 
      * @see java.awt.geom.Dimension2D#getWidth()
      */
     @Override
@@ -182,4 +199,3 @@ public class Dimension extends Dimension2D implements Serializable {
     }
 
 }
-

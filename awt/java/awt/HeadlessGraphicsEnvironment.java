@@ -14,6 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package java.awt;
 
 import java.awt.GraphicsDevice;
@@ -23,30 +24,32 @@ import org.apache.harmony.awt.gl.CommonGraphicsEnvironment;
 
 /**
  * The HeadlessGraphicsEnvironment class is the CommonGraphicsEnvironment
- * implementation to use in the case where the environment lacks display, 
+ * implementation to use in the case where the environment lacks display,
  * keyboard, and mouse support.
+ * 
+ * @since Android 1.0
  */
 public class HeadlessGraphicsEnvironment extends CommonGraphicsEnvironment {
-    
+
     /**
-     * Returns whether or not a display, keyboard, and mouse are supported 
-     * in this graphics environment.
+     * Returns whether or not a display, keyboard, and mouse are supported in
+     * this graphics environment.
      * 
-     * @return true, if HeadlessException will be thrown from areas of 
-     * the graphics environment that are dependent on a display, keyboard, 
-     * or mouse; false otherwise.
+     * @return true, if HeadlessException will be thrown from areas of the
+     *         graphics environment that are dependent on a display, keyboard,
+     *         or mouse, false otherwise.
      */
     @Override
     public boolean isHeadlessInstance() {
         return true;
     }
-    
+
     /**
      * Gets the default screen device as GraphicDevice object.
      * 
      * @return the GraphicDevice object which represents default screen device.
-     * 
-     * @throws HeadlessException if isHeadless() returns true.
+     * @throws HeadlessException
+     *             if isHeadless() returns true.
      */
     @Override
     public GraphicsDevice getDefaultScreenDevice() throws HeadlessException {
@@ -56,10 +59,10 @@ public class HeadlessGraphicsEnvironment extends CommonGraphicsEnvironment {
     /**
      * Gets an array of all available screen devices.
      * 
-     * @return the array of GraphicsDevice objects which represents 
-     * all available screen devices.
-     * 
-     * @throws HeadlessException if isHeadless() returns true.
+     * @return the array of GraphicsDevice objects which represents all
+     *         available screen devices.
+     * @throws HeadlessException
+     *             if isHeadless() returns true.
      */
     @Override
     public GraphicsDevice[] getScreenDevices() throws HeadlessException {

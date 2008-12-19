@@ -20,18 +20,26 @@ package javax.imageio.plugins.jpeg;
 import javax.imageio.ImageReadParam;
 
 /**
- * The JPEGImageReadParam class provides functionality to set Huffman tables 
- * and quantization tables when using the JPEG reader plug-in.
+ * The JPEGImageReadParam class provides functionality to set Huffman tables and
+ * quantization tables when using the JPEG reader plug-in.
+ * 
+ * @since Android 1.0
  */
 public class JPEGImageReadParam extends ImageReadParam {
-    
-    /** The q tables. */
+
+    /**
+     * The q tables.
+     */
     private JPEGQTable qTables[];
-    
-    /** The dc huffman tables. */
+
+    /**
+     * The dc huffman tables.
+     */
     private JPEGHuffmanTable dcHuffmanTables[];
-    
-    /** The ac huffman tables. */
+
+    /**
+     * The ac huffman tables.
+     */
     private JPEGHuffmanTable acHuffmanTables[];
 
     /**
@@ -43,29 +51,28 @@ public class JPEGImageReadParam extends ImageReadParam {
     /**
      * Returns true if tables are set, false otherwise.
      * 
-     * @return true if tables are set, false otherwise.
+     * @return true, if tables are set, false otherwise.
      */
     public boolean areTablesSet() {
         return qTables != null;
     }
 
     /**
-     * Sets the quantization and Huffman tables for using in 
-     * decoding streams.
+     * Sets the quantization and Huffman tables for using in decoding streams.
      * 
-     * @param qTables the quantization tables.
-     * @param DCHuffmanTables the standart DC Huffman tables.
-     * @param ACHuffmanTables the standart AC huffman tables.
+     * @param qTables
+     *            the quantization tables.
+     * @param DCHuffmanTables
+     *            the standart DC Huffman tables.
+     * @param ACHuffmanTables
+     *            the standart AC huffman tables.
      */
-    public void setDecodeTables(
-            JPEGQTable[] qTables,
-            JPEGHuffmanTable[] DCHuffmanTables,
-            JPEGHuffmanTable[] ACHuffmanTables
-    ) {
+    public void setDecodeTables(JPEGQTable[] qTables, JPEGHuffmanTable[] DCHuffmanTables,
+            JPEGHuffmanTable[] ACHuffmanTables) {
         if (qTables == null || DCHuffmanTables == null || ACHuffmanTables == null) {
             throw new IllegalArgumentException("Invalid JPEG table arrays");
         }
-        if(DCHuffmanTables.length != ACHuffmanTables.length) {
+        if (DCHuffmanTables.length != ACHuffmanTables.length) {
             throw new IllegalArgumentException("Invalid JPEG table arrays");
         }
         if (qTables.length > 4 || DCHuffmanTables.length > 4) {
@@ -112,5 +119,5 @@ public class JPEGImageReadParam extends ImageReadParam {
      */
     public JPEGHuffmanTable[] getACHuffmanTables() {
         return acHuffmanTables == null ? null : acHuffmanTables.clone();
-    }    
+    }
 }

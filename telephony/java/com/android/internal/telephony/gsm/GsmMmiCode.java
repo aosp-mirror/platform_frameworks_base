@@ -197,7 +197,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode
             ret = new GsmMmiCode(phone);
             ret.dialingNumber = dialString;
         }
-        
+
         return ret;
     }
 
@@ -621,21 +621,21 @@ public final class GsmMmiCode  extends Handler implements MmiCode
                         throw new RuntimeException ("invalid action");
                     }
 
-                    int isSettingUnconditionalVoice = (
-                    (reason == CommandsInterface.CF_REASON_UNCONDITIONAL) &&
-                    ((serviceClass & CommandsInterface.SERVICE_CLASS_VOICE) != 0)
-                    ) ? 1 : 0;
+                    int isSettingUnconditionalVoice =
+                        ((reason == CommandsInterface.CF_REASON_UNCONDITIONAL) &&
+                                (((serviceClass & CommandsInterface.SERVICE_CLASS_VOICE) != 0) ||
+                                 (serviceClass == CommandsInterface.SERVICE_CLASS_NONE))) ? 1 : 0;
 
                     int isEnableDesired =
-                            ((cfAction == CommandsInterface.CF_ACTION_ENABLE)
-                              || (cfAction == CommandsInterface.CF_ACTION_REGISTRATION)) ? 1 : 0;
+                        ((cfAction == CommandsInterface.CF_ACTION_ENABLE) ||
+                                (cfAction == CommandsInterface.CF_ACTION_REGISTRATION)) ? 1 : 0;
 
-                    phone.mCM.setCallForward(cfAction, reason,
-                                serviceClass, dialingNumber, time, 
-                                obtainMessage(EVENT_SET_CFF_COMPLETE,
-                                        isSettingUnconditionalVoice,
-                                        isEnableDesired,
-                                        this));
+                    Log.d(LOG_TAG, "is CF setCallForward");
+                    phone.mCM.setCallForward(cfAction, reason, serviceClass,
+                            dialingNumber, time, obtainMessage(
+                                    EVENT_SET_CFF_COMPLETE,
+                                    isSettingUnconditionalVoice,
+                                    isEnableDesired, this));
                 }
             } else if (isServiceCodeCallBarring(sc)) {
                 // sia = password
@@ -711,6 +711,10 @@ public final class GsmMmiCode  extends Handler implements MmiCode
                     } else if (pinLen < 4 || pinLen > 8 ) {
                         // invalid length
                         handlePasswordError(com.android.internal.R.string.invalidPin);
+                    } else if (sc.equals(SC_PIN) &&
+                               phone.mSimCard.getState() == SimCard.State.PUK_REQUIRED ) {
+                        // Sim is puk-locked
+                        handlePasswordError(com.android.internal.R.string.needPuk);
                     } else {
                         // pre-checks OK
                         if (sc.equals(SC_PIN)) {

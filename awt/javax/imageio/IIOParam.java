@@ -18,56 +18,80 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio;
 
 import java.awt.*;
 
 /**
- * The IIOParam abstract class is superclass for     
- * ImageReadParam and ImageWriteParam classes and provides 
- * methods and variables which they share.
+ * The IIOParam abstract class is superclass for ImageReadParam and
+ * ImageWriteParam classes and provides methods and variables which they share.
+ * 
+ * @since Android 1.0
  */
 public abstract class IIOParam {
-    
-    /** The source region. */
+
+    /**
+     * The source region.
+     */
     protected Rectangle sourceRegion;
-    
-    /** The source x subsampling. */
+
+    /**
+     * The source x subsampling.
+     */
     protected int sourceXSubsampling = 1;
-    
-    /** The source y subsampling. */
+
+    /**
+     * The source y subsampling.
+     */
     protected int sourceYSubsampling = 1;
-    
-    /** The subsampling x offset. */
+
+    /**
+     * The subsampling x offset.
+     */
     protected int subsamplingXOffset;
-    
-    /** The subsampling y offset. */
+
+    /**
+     * The subsampling y offset.
+     */
     protected int subsamplingYOffset;
-    
-    /** The source bands. */
+
+    /**
+     * The source bands.
+     */
     protected int[] sourceBands;
-    
-    /** The destination type. */
+
+    /**
+     * The destination type.
+     */
     protected ImageTypeSpecifier destinationType;
-    
-    /** The destination offset. */
+
+    /**
+     * The destination offset.
+     */
     protected Point destinationOffset = new Point(0, 0);
-    
-    /** The default controller. */
+
+    /**
+     * The default controller.
+     */
     protected IIOParamController defaultController;
-    
-    /** The controller. */
+
+    /**
+     * The controller.
+     */
     protected IIOParamController controller;
 
     /**
      * Instantiates a new IIOParam.
      */
-    protected IIOParam() {}
+    protected IIOParam() {
+    }
 
     /**
      * Sets the source region as a Rectangle object.
      * 
-     * @param sourceRegion the Rectangle which specifies the source region.
+     * @param sourceRegion
+     *            the Rectangle which specifies the source region.
      */
     public void setSourceRegion(Rectangle sourceRegion) {
         if (sourceRegion != null) {
@@ -91,8 +115,8 @@ public abstract class IIOParam {
             if (sourceRegion.height <= subsamplingYOffset) {
                 throw new IllegalArgumentException("height <= subsamplingXOffset");
             }
-            //-- clone it to avoid unexpected modifications
-            this.sourceRegion = (Rectangle) sourceRegion.clone();
+            // -- clone it to avoid unexpected modifications
+            this.sourceRegion = (Rectangle)sourceRegion.clone();
         } else {
             this.sourceRegion = null;
         }
@@ -107,24 +131,26 @@ public abstract class IIOParam {
         if (sourceRegion == null) {
             return null;
         }
-        //-- clone it to avoid unexpected modifications
-        return (Rectangle) sourceRegion.clone();
+        // -- clone it to avoid unexpected modifications
+        return (Rectangle)sourceRegion.clone();
     }
 
     /**
-     * Sets the source subsampling. The sourceXSubsampling and 
-     * sourceYSubsampling parameters specify the number of rows 
-     * and columns to advance after every source pixel.
+     * Sets the source subsampling. The sourceXSubsampling and
+     * sourceYSubsampling parameters specify the number of rows and columns to
+     * advance after every source pixel.
      * 
-     * @param sourceXSubsampling the source X subsampling.
-     * @param sourceYSubsampling the source Y subsampling.
-     * @param subsamplingXOffset the subsampling X offset.
-     * @param subsamplingYOffset the subsampling Y offset.
+     * @param sourceXSubsampling
+     *            the source X subsampling.
+     * @param sourceYSubsampling
+     *            the source Y subsampling.
+     * @param subsamplingXOffset
+     *            the subsampling X offset.
+     * @param subsamplingYOffset
+     *            the subsampling Y offset.
      */
-    public void setSourceSubsampling(int sourceXSubsampling,
-                                 int sourceYSubsampling,
-                                 int subsamplingXOffset,
-                                 int subsamplingYOffset) {
+    public void setSourceSubsampling(int sourceXSubsampling, int sourceYSubsampling,
+            int subsamplingXOffset, int subsamplingYOffset) {
 
         if (sourceXSubsampling <= 0) {
             throw new IllegalArgumentException("sourceXSubsampling <= 0");
@@ -141,10 +167,10 @@ public abstract class IIOParam {
             throw new IllegalArgumentException("subsamplingYOffset is wrong");
         }
 
-        //-- does region contain pixels
+        // -- does region contain pixels
         if (sourceRegion != null) {
-            if (sourceRegion.width <= subsamplingXOffset ||
-                    sourceRegion.height <= subsamplingYOffset) {
+            if (sourceRegion.width <= subsamplingXOffset
+                    || sourceRegion.height <= subsamplingYOffset) {
                 throw new IllegalArgumentException("there are no pixels in region");
             }
         }
@@ -156,8 +182,8 @@ public abstract class IIOParam {
     }
 
     /**
-     * Gets the source X subsampling - the number of source 
-     * columns to advance for each pixel.
+     * Gets the source X subsampling - the number of source columns to advance
+     * for each pixel.
      * 
      * @return the source X subsampling.
      */
@@ -166,8 +192,8 @@ public abstract class IIOParam {
     }
 
     /**
-     * Gets the source Y subsampling - the number of source 
-     * rows to advance for each pixel.
+     * Gets the source Y subsampling - the number of source rows to advance for
+     * each pixel.
      * 
      * @return the source Y subsampling.
      */
@@ -196,7 +222,8 @@ public abstract class IIOParam {
     /**
      * Sets the indices of the source bands.
      * 
-     * @param sourceBands the indices of the source bands.
+     * @param sourceBands
+     *            the indices of the source bands.
      */
     public void setSourceBands(int[] sourceBands) {
         // TODO implement
@@ -216,7 +243,8 @@ public abstract class IIOParam {
     /**
      * Sets the specified ImageTypeSpecifier for the destination image.
      * 
-     * @param destinationType the ImageTypeSpecifier.
+     * @param destinationType
+     *            the ImageTypeSpecifier.
      */
     public void setDestinationType(ImageTypeSpecifier destinationType) {
         // TODO implement
@@ -225,7 +253,7 @@ public abstract class IIOParam {
 
     /**
      * Gets the type of the destination image as an ImageTypeSpecifier. .
-     *  
+     * 
      * @return the ImageTypeSpecifier.
      */
     public ImageTypeSpecifier getDestinationType() {
@@ -234,18 +262,19 @@ public abstract class IIOParam {
     }
 
     /**
-     * Sets the offset in the destination image where 
-     * the decoded pixels are placed as a result of reading, 
-     * or specified an area to be written while writing operation.
+     * Sets the offset in the destination image where the decoded pixels are
+     * placed as a result of reading, or specified an area to be written while
+     * writing operation.
      * 
-     * @param destinationOffset the destination offset.
+     * @param destinationOffset
+     *            the destination offset.
      */
     public void setDestinationOffset(Point destinationOffset) {
         if (destinationOffset == null) {
             throw new IllegalArgumentException("destinationOffset == null!");
         }
-        
-        this.destinationOffset = (Point) destinationOffset.clone();
+
+        this.destinationOffset = (Point)destinationOffset.clone();
     }
 
     /**
@@ -254,14 +283,15 @@ public abstract class IIOParam {
      * @return the offset in the destination image.
      */
     public Point getDestinationOffset() {
-        return (Point) destinationOffset.clone();        
+        return (Point)destinationOffset.clone();
     }
 
     /**
-     * Sets the IIOParamController to this IIOParam object for
-     * providing settings to this IIOParam.
+     * Sets the IIOParamController to this IIOParam object for providing
+     * settings to this IIOParam.
      * 
-     * @param controller the new IIOParamController.
+     * @param controller
+     *            the new IIOParamController.
      */
     public void setController(IIOParamController controller) {
         // TODO implement
@@ -269,11 +299,9 @@ public abstract class IIOParam {
     }
 
     /**
-     * Gets the current IIOParamController controller 
-     * for this IIOParam.
+     * Gets the current IIOParamController controller for this IIOParam.
      * 
-     * @return the current IIOParamController controller 
-     * for this IIOParam.
+     * @return the current IIOParamController controller for this IIOParam.
      */
     public IIOParamController getController() {
         // TODO implement
@@ -281,11 +309,10 @@ public abstract class IIOParam {
     }
 
     /**
-     * Gets the default IIOParamController controller 
-     * for this IIOParam.
+     * Gets the default IIOParamController controller for this IIOParam.
      * 
-     * @return the default IIOParamController controller 
-     * for this IIOParam, or null.
+     * @return the default IIOParamController controller for this IIOParam, or
+     *         null.
      */
     public IIOParamController getDefaultController() {
         // TODO implement
@@ -293,11 +320,10 @@ public abstract class IIOParam {
     }
 
     /**
-     * Returns true if IIOParamController is installed for 
-     * this IIOParam. 
+     * Returns true if IIOParamController is installed for this IIOParam.
      * 
-     * @return true if IIOParamController is installed for 
-     * this IIOParam, false otherwise.
+     * @return true, if IIOParamController is installed for this IIOParam, false
+     *         otherwise.
      */
     public boolean hasController() {
         // TODO implement

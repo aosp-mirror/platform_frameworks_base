@@ -133,7 +133,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
     }
 
     /* Remove the item at the given index. Called by JNI only. */
-    private void removeHistoryItem(int index) {
+    private synchronized void removeHistoryItem(int index) {
         // XXX: This is a special case. Since the callback is only triggered
         // when removing the first item, we can assert that the index is 0.
         // This lets us change the current index without having to query the

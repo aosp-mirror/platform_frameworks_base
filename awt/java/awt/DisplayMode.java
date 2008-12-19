@@ -18,41 +18,60 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
- * The DisplayMode class containes the bit depth, height, width and 
- * refresh rate of a GraphicsDevice.
+ * The DisplayMode class contains the bit depth, height, width and refresh rate
+ * of a GraphicsDevice.
+ * 
+ * @since Android 1.0
  */
 public final class DisplayMode {
-    
-    /** The width. */
+
+    /**
+     * The width.
+     */
     private final int width;
 
-    /** The height. */
+    /**
+     * The height.
+     */
     private final int height;
 
-    /** The bit depth. */
+    /**
+     * The bit depth.
+     */
     private final int bitDepth;
 
-    /** The refresh rate. */
+    /**
+     * The refresh rate.
+     */
     private final int refreshRate;
 
-   /** The Constant Value BIT_DEPTH_MULTI indicates the bit depth */
+    /**
+     * The Constant Value BIT_DEPTH_MULTI indicates the bit depth
+     */
 
     public static final int BIT_DEPTH_MULTI = -1;
 
-    /** The Constant REFRESH_RATE_UNKNOWN indicates the refresh rate. */
+    /**
+     * The Constant REFRESH_RATE_UNKNOWN indicates the refresh rate.
+     */
     public static final int REFRESH_RATE_UNKNOWN = 0;
 
-   /**
-    * Creates a new DisplayMode object with the specified parameters.
-    *  
-    * @param width the width of the display.
-    * @param height the height of the display.
-    * @param bitDepth the bit depth of the display.
-    * @param refreshRate the refresh rate of the display.
-    */
+    /**
+     * Creates a new DisplayMode object with the specified parameters.
+     * 
+     * @param width
+     *            the width of the display.
+     * @param height
+     *            the height of the display.
+     * @param bitDepth
+     *            the bit depth of the display.
+     * @param refreshRate
+     *            the refresh rate of the display.
+     */
 
     public DisplayMode(int width, int height, int bitDepth, int refreshRate) {
         this.width = width;
@@ -61,15 +80,14 @@ public final class DisplayMode {
         this.refreshRate = refreshRate;
     }
 
-
-   /**
-    * Compares if this DisplayMode is equal to the specified object or not.
-    * 
-    * @param dm the Object to be compared.
-    * 
-    * @return true, if the specified object is a DisplayMode with the same
-    * data values as this DisplayMode, false otherwise.
-    */
+    /**
+     * Compares if this DisplayMode is equal to the specified object or not.
+     * 
+     * @param dm
+     *            the Object to be compared.
+     * @return true, if the specified object is a DisplayMode with the same data
+     *         values as this DisplayMode, false otherwise.
+     */
 
     @Override
     public boolean equals(Object dm) {
@@ -80,13 +98,13 @@ public final class DisplayMode {
     }
 
     /**
-    * Compares if this DisplayMode is equal to the specified DisplayMode object
-    * or not.
-    * 
-    * @param dm the DisplayMode to be compared.
-    * 
-    * @return true, if all of the data values of this DisplayMode are equal 
-    * to the values of the specified DisplayMode object, false otherwise.
+     * Compares if this DisplayMode is equal to the specified DisplayMode object
+     * or not.
+     * 
+     * @param dm
+     *            the DisplayMode to be compared.
+     * @return true, if all of the data values of this DisplayMode are equal to
+     *         the values of the specified DisplayMode object, false otherwise.
      */
     public boolean equals(DisplayMode dm) {
         if (dm == null) {
@@ -108,8 +126,8 @@ public final class DisplayMode {
     }
 
     /**
-     * Gets the bit depth of the DisplayMode, returns BIT_DEPTH_MULTI value
-     * if multiple bit depths are supported in this display mode.
+     * Gets the bit depth of the DisplayMode, returns BIT_DEPTH_MULTI value if
+     * multiple bit depths are supported in this display mode.
      * 
      * @return the bit depth of the DisplayMode.
      */

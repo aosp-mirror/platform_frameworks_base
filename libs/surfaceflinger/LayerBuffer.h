@@ -33,6 +33,7 @@ namespace android {
 
 class MemoryDealer;
 class Region;
+class Overlay;
 
 class LayerBuffer : public LayerBaseClient
 {
@@ -56,6 +57,7 @@ public:
             PixelFormat format, const sp<IMemoryHeap>& heap);
     void postBuffer(ssize_t offset);
     void unregisterBuffers();
+    sp<Overlay> createOverlay(uint32_t w, uint32_t h, int32_t format);
     void invalidate();
     void invalidateLocked();
 
@@ -107,7 +109,9 @@ private:
                 PixelFormat format, const sp<IMemoryHeap>& heap);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        void disown();
+        virtual sp<Overlay> createOverlay(
+                uint32_t w, uint32_t h, int32_t format);
+       void disown();
     private:
         LayerBuffer* getOwner() const {
             Mutex::Autolock _l(mLock);

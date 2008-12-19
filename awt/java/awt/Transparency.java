@@ -18,34 +18,40 @@
  * @author Pavel Dolgov
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
  * The Transparency interface defines transparency's general modes.
+ * 
+ * @since Android 1.0
  */
 public interface Transparency {
 
-    /** The Constant OPAQUE represents completely opaque data,
-     * all pixels have an alpha value of 1.0. 
+    /**
+     * The Constant OPAQUE represents completely opaque data, all pixels have an
+     * alpha value of 1.0.
      */
     public static final int OPAQUE = 1;
 
-    /** The Constant BITMASK represents data which can be either 
-     * completely opaque, with an alpha value of 1.0, or completely 
-     * transparent, with an alpha value of 0.0.
+    /**
+     * The Constant BITMASK represents data which can be either completely
+     * opaque, with an alpha value of 1.0, or completely transparent, with an
+     * alpha value of 0.0.
      */
     public static final int BITMASK = 2;
 
-    /** The Constant TRANSLUCENT represents data which alpha value
-     * can vary between and including 0.0 and 1.0. */
+    /**
+     * The Constant TRANSLUCENT represents data which alpha value can vary
+     * between and including 0.0 and 1.0.
+     */
     public static final int TRANSLUCENT = 3;
 
     /**
      * Gets the transparency mode.
      * 
-     * @return the transparency mode: OPAQUE, BITMASK or TRANSLUCENT.  
+     * @return the transparency mode: OPAQUE, BITMASK or TRANSLUCENT.
      */
     public int getTransparency();
 
 }
-

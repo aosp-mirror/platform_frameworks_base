@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import org.apache.harmony.x.imageio.metadata.IIOMetadataUtils;
@@ -25,97 +26,138 @@ import org.apache.harmony.x.imageio.metadata.IIOMetadataUtils;
 import javax.imageio.metadata.IIOMetadataFormat;
 
 /**
- * The ImageReaderWriterSpi class is a superclass for the 
- * ImageReaderSpi and ImageWriterSpi SPIs.
+ * The ImageReaderWriterSpi class is a superclass for the ImageReaderSpi and
+ * ImageWriterSpi SPIs.
+ * 
+ * @since Android 1.0
  */
-public abstract class ImageReaderWriterSpi extends IIOServiceProvider
-        implements RegisterableService {
+public abstract class ImageReaderWriterSpi extends IIOServiceProvider implements
+        RegisterableService {
 
-    /** The names. */
+    /**
+     * The names.
+     */
     protected String[] names;
-    
-    /** The suffixes. */
+
+    /**
+     * The suffixes.
+     */
     protected String[] suffixes;
-    
-    /** The MIME types. */
+
+    /**
+     * The MIME types.
+     */
     protected String[] MIMETypes;
-    
-    /** The plugin class name. */
+
+    /**
+     * The plug-in class name.
+     */
     protected String pluginClassName;
-    
-    /** Whether the reader/writer supports standard stream metadata format. */
+
+    /**
+     * Whether the reader/writer supports standard stream metadata format.
+     */
     protected boolean supportsStandardStreamMetadataFormat;
-    
-    /** The native stream metadata format name. */
+
+    /**
+     * The native stream metadata format name.
+     */
     protected String nativeStreamMetadataFormatName;
-    
-    /** The native stream metadata format class name. */
+
+    /**
+     * The native stream metadata format class name.
+     */
     protected String nativeStreamMetadataFormatClassName;
-    
-    /** The extra stream metadata format names. */
+
+    /**
+     * The extra stream metadata format names.
+     */
     protected String[] extraStreamMetadataFormatNames;
-    
-    /** The extra stream metadata format class names. */
+
+    /**
+     * The extra stream metadata format class names.
+     */
     protected String[] extraStreamMetadataFormatClassNames;
-    
-    /** Whether the reader/writer supports standard image metadata format. */
+
+    /**
+     * Whether the reader/writer supports standard image metadata format.
+     */
     protected boolean supportsStandardImageMetadataFormat;
-    
-    /** The native image metadata format name. */
+
+    /**
+     * The native image metadata format name.
+     */
     protected String nativeImageMetadataFormatName;
-    
-    /** The native image metadata format class name. */
+
+    /**
+     * The native image metadata format class name.
+     */
     protected String nativeImageMetadataFormatClassName;
-    
-    /** The extra image metadata format names. */
+
+    /**
+     * The extra image metadata format names.
+     */
     protected String[] extraImageMetadataFormatNames;
-    
-    /** The extra image metadata format class names. */
+
+    /**
+     * The extra image metadata format class names.
+     */
     protected String[] extraImageMetadataFormatClassNames;
 
     /**
      * Instantiates a new ImageReaderWriterSpi.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
-     * @param names the format names.
-     * @param suffixes the array of strings representing the file suffixes. 
-     * @param MIMETypes the an array of strings representing MIME types.
-     * @param pluginClassName the plugin class name.
-     * @param supportsStandardStreamMetadataFormat the value indicating
-     * if stream metadata can be described by standart metadata format.
-     * @param nativeStreamMetadataFormatName the native stream metadata 
-     * format name, returned by getNativeStreamMetadataFormatName.
-     * @param nativeStreamMetadataFormatClassName the native stream 
-     * metadata format class name, returned by getNativeStreamMetadataFormat.
-     * @param extraStreamMetadataFormatNames the extra stream metadata 
-     * format names, returned by getExtraStreamMetadataFormatNames.
-     * @param extraStreamMetadataFormatClassNames the extra stream metadata 
-     * format class names, returned by getStreamMetadataFormat.
-     * @param supportsStandardImageMetadataFormat the value indicating
-     * if image metadata can be described by standard metadata format.
-     * @param nativeImageMetadataFormatName the native image metadata 
-     * format name, returned by getNativeImageMetadataFormatName.
-     * @param nativeImageMetadataFormatClassName the native image
-     * metadata format class name, returned by getNativeImageMetadataFormat.
-     * @param extraImageMetadataFormatNames the extra image metadata 
-     * format names, returned by getExtraImageMetadataFormatNames.
-     * @param extraImageMetadataFormatClassNames the extra image metadata 
-     * format class names, returned by getImageMetadataFormat.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
+     * @param names
+     *            the format names.
+     * @param suffixes
+     *            the array of strings representing the file suffixes.
+     * @param MIMETypes
+     *            the an array of strings representing MIME types.
+     * @param pluginClassName
+     *            the plug-in class name.
+     * @param supportsStandardStreamMetadataFormat
+     *            the value indicating if stream metadata can be described by
+     *            standard metadata format.
+     * @param nativeStreamMetadataFormatName
+     *            the native stream metadata format name, returned by
+     *            getNativeStreamMetadataFormatName.
+     * @param nativeStreamMetadataFormatClassName
+     *            the native stream metadata format class name, returned by
+     *            getNativeStreamMetadataFormat.
+     * @param extraStreamMetadataFormatNames
+     *            the extra stream metadata format names, returned by
+     *            getExtraStreamMetadataFormatNames.
+     * @param extraStreamMetadataFormatClassNames
+     *            the extra stream metadata format class names, returned by
+     *            getStreamMetadataFormat.
+     * @param supportsStandardImageMetadataFormat
+     *            the value indicating if image metadata can be described by
+     *            standard metadata format.
+     * @param nativeImageMetadataFormatName
+     *            the native image metadata format name, returned by
+     *            getNativeImageMetadataFormatName.
+     * @param nativeImageMetadataFormatClassName
+     *            the native image metadata format class name, returned by
+     *            getNativeImageMetadataFormat.
+     * @param extraImageMetadataFormatNames
+     *            the extra image metadata format names, returned by
+     *            getExtraImageMetadataFormatNames.
+     * @param extraImageMetadataFormatClassNames
+     *            the extra image metadata format class names, returned by
+     *            getImageMetadataFormat.
      */
     public ImageReaderWriterSpi(String vendorName, String version, String[] names,
-                                String[] suffixes, String[] MIMETypes,
-                                String pluginClassName,
-                                boolean supportsStandardStreamMetadataFormat,
-                                String nativeStreamMetadataFormatName,
-                                String nativeStreamMetadataFormatClassName,
-                                String[] extraStreamMetadataFormatNames,
-                                String[] extraStreamMetadataFormatClassNames,
-                                boolean supportsStandardImageMetadataFormat,
-                                String nativeImageMetadataFormatName,
-                                String nativeImageMetadataFormatClassName,
-                                String[] extraImageMetadataFormatNames,
-                                String[] extraImageMetadataFormatClassNames) {
+            String[] suffixes, String[] MIMETypes, String pluginClassName,
+            boolean supportsStandardStreamMetadataFormat, String nativeStreamMetadataFormatName,
+            String nativeStreamMetadataFormatClassName, String[] extraStreamMetadataFormatNames,
+            String[] extraStreamMetadataFormatClassNames,
+            boolean supportsStandardImageMetadataFormat, String nativeImageMetadataFormatName,
+            String nativeImageMetadataFormatClassName, String[] extraImageMetadataFormatNames,
+            String[] extraImageMetadataFormatClassNames) {
         super(vendorName, version);
 
         if (names == null || names.length == 0) {
@@ -137,60 +179,54 @@ public abstract class ImageReaderWriterSpi extends IIOServiceProvider
         this.nativeStreamMetadataFormatName = nativeStreamMetadataFormatName;
         this.nativeStreamMetadataFormatClassName = nativeStreamMetadataFormatClassName;
 
-        this.extraStreamMetadataFormatNames =
-                extraStreamMetadataFormatNames == null ?
-                null : extraStreamMetadataFormatNames.clone();
+        this.extraStreamMetadataFormatNames = extraStreamMetadataFormatNames == null ? null
+                : extraStreamMetadataFormatNames.clone();
 
-        this.extraStreamMetadataFormatClassNames =
-                extraStreamMetadataFormatClassNames == null ?
-                null : extraStreamMetadataFormatClassNames.clone();
+        this.extraStreamMetadataFormatClassNames = extraStreamMetadataFormatClassNames == null ? null
+                : extraStreamMetadataFormatClassNames.clone();
 
         this.supportsStandardImageMetadataFormat = supportsStandardImageMetadataFormat;
         this.nativeImageMetadataFormatName = nativeImageMetadataFormatName;
         this.nativeImageMetadataFormatClassName = nativeImageMetadataFormatClassName;
 
-        this.extraImageMetadataFormatNames =
-                extraImageMetadataFormatNames == null ?
-                null : extraImageMetadataFormatNames.clone();
+        this.extraImageMetadataFormatNames = extraImageMetadataFormatNames == null ? null
+                : extraImageMetadataFormatNames.clone();
 
-        this.extraImageMetadataFormatClassNames =
-                extraImageMetadataFormatClassNames == null ?
-                null : extraImageMetadataFormatClassNames.clone();
+        this.extraImageMetadataFormatClassNames = extraImageMetadataFormatClassNames == null ? null
+                : extraImageMetadataFormatClassNames.clone();
     }
 
     /**
      * Instantiates a new ImageReaderWriterSpi.
      */
-    public ImageReaderWriterSpi() {}
+    public ImageReaderWriterSpi() {
+    }
 
     /**
-     * Gets an array of strings representing names of the formats 
-     * that can be used by the ImageReader 
-     * or ImageWriter implementation associated with this service 
-     * provider. 
+     * Gets an array of strings representing names of the formats that can be
+     * used by the ImageReader or ImageWriter implementation associated with
+     * this service provider.
      * 
-     * @return an array of supported format names.
+     * @return the array of supported format names.
      */
     public String[] getFormatNames() {
         return names.clone();
     }
 
     /**
-     * Gets an array of strings representing file suffixes 
-     * associated with the formats that can be used by the 
-     * ImageReader or ImageWriter implementation of this
-     * service provider.
+     * Gets an array of strings representing file suffixes associated with the
+     * formats that can be used by the ImageReader or ImageWriter implementation
+     * of this service provider.
      * 
-     * @return an array of file suffixes.
+     * @return the array of file suffixes.
      */
     public String[] getFileSuffixes() {
         return suffixes == null ? null : suffixes.clone();
     }
 
     /**
-     * Gets an array of strings with the names of 
-     * additional formats of the image metadata objects 
-     * produced or consumed by this plug-in.
+     * Gets an array of strings with the names of additional formats of the
+     * image metadata objects produced or consumed by this plug-in.
      * 
      * @return the array of extra image metadata format names.
      */
@@ -199,52 +235,49 @@ public abstract class ImageReaderWriterSpi extends IIOServiceProvider
     }
 
     /**
-     * Gets an array of strings with the names of 
-     * additional formats of the stream metadata objects 
-     * produced or consumed by this plug-in.
+     * Gets an array of strings with the names of additional formats of the
+     * stream metadata objects produced or consumed by this plug-in.
      * 
      * @return the array of extra stream metadata format names.
      */
     public String[] getExtraStreamMetadataFormatNames() {
-        return extraStreamMetadataFormatNames == null ? null : extraStreamMetadataFormatNames.clone();
+        return extraStreamMetadataFormatNames == null ? null : extraStreamMetadataFormatNames
+                .clone();
     }
 
     /**
-     * Gets an IIOMetadataFormat object for the specified image 
-     * metadata format name. 
+     * Gets an IIOMetadataFormat object for the specified image metadata format
+     * name.
      * 
-     * @param formatName the format name.
-     * 
+     * @param formatName
+     *            the format name.
      * @return the IIOMetadataFormat, or null.
      */
     public IIOMetadataFormat getImageMetadataFormat(String formatName) {
-        return IIOMetadataUtils.instantiateMetadataFormat(
-                formatName, supportsStandardImageMetadataFormat,
-                nativeImageMetadataFormatName, nativeImageMetadataFormatClassName,
-                extraImageMetadataFormatNames, extraImageMetadataFormatClassNames
-        );
+        return IIOMetadataUtils.instantiateMetadataFormat(formatName,
+                supportsStandardImageMetadataFormat, nativeImageMetadataFormatName,
+                nativeImageMetadataFormatClassName, extraImageMetadataFormatNames,
+                extraImageMetadataFormatClassNames);
     }
 
     /**
-     * Gets an IIOMetadataFormat object for the specified stream 
-     * metadata format name. 
+     * Gets an IIOMetadataFormat object for the specified stream metadata format
+     * name.
      * 
-     * @param formatName the format name.
-     * 
+     * @param formatName
+     *            the format name.
      * @return the IIOMetadataFormat, or null.
      */
     public IIOMetadataFormat getStreamMetadataFormat(String formatName) {
-        return IIOMetadataUtils.instantiateMetadataFormat(
-                formatName, supportsStandardStreamMetadataFormat,
-                nativeStreamMetadataFormatName, nativeStreamMetadataFormatClassName,
-                extraStreamMetadataFormatNames, extraStreamMetadataFormatClassNames
-        );
+        return IIOMetadataUtils.instantiateMetadataFormat(formatName,
+                supportsStandardStreamMetadataFormat, nativeStreamMetadataFormatName,
+                nativeStreamMetadataFormatClassName, extraStreamMetadataFormatNames,
+                extraStreamMetadataFormatClassNames);
     }
 
     /**
-     * Gets an array of strings representing the MIME types 
-     * of the formats that are supported by the 
-     * ImageReader or ImageWriter implementation of this 
+     * Gets an array of strings representing the MIME types of the formats that
+     * are supported by the ImageReader or ImageWriter implementation of this
      * service provider.
      * 
      * @return the array MIME types.
@@ -254,32 +287,30 @@ public abstract class ImageReaderWriterSpi extends IIOServiceProvider
     }
 
     /**
-     * Gets the name of the native image metadata format for 
-     * this reader/writer, which allows for lossless encoding
-     * or decoding of the image metadata with the format.
+     * Gets the name of the native image metadata format for this reader/writer,
+     * which allows for lossless encoding or decoding of the image metadata with
+     * the format.
      * 
-     * @return the string with native image metadata format name, 
-     * or null.
+     * @return the string with native image metadata format name, or null.
      */
     public String getNativeImageMetadataFormatName() {
         return nativeImageMetadataFormatName;
     }
 
     /**
-     * Gets the name of the native stream metadata format for 
-     * this reader/writer, which allows for lossless encoding
-     * or decoding of the stream metadata with the format.
+     * Gets the name of the native stream metadata format for this
+     * reader/writer, which allows for lossless encoding or decoding of the
+     * stream metadata with the format.
      * 
-     * @return the string with native stream metadata format name, 
-     * or null.
+     * @return the string with native stream metadata format name, or null.
      */
     public String getNativeStreamMetadataFormatName() {
         return nativeStreamMetadataFormatName;
     }
 
     /**
-     * Gets the class name of the ImageReader 
-     * or ImageWriter associated with this service provider.
+     * Gets the class name of the ImageReader or ImageWriter associated with
+     * this service provider.
      * 
      * @return the class name.
      */
@@ -288,26 +319,24 @@ public abstract class ImageReaderWriterSpi extends IIOServiceProvider
     }
 
     /**
-     * Checks if the standard metadata format is supported 
-     * by the getAsTree and setFromTree methods for the 
-     * image metadata objects produced or consumed by this 
-     * reader or writer.
+     * Checks if the standard metadata format is supported by the getAsTree and
+     * setFromTree methods for the image metadata objects produced or consumed
+     * by this reader or writer.
      * 
-     * @return true, if standard image metadata format is 
-     * supported, false otherwise.
+     * @return true, if standard image metadata format is supported, false
+     *         otherwise.
      */
     public boolean isStandardImageMetadataFormatSupported() {
         return supportsStandardImageMetadataFormat;
     }
 
     /**
-     * Checks if the standard metadata format is supported 
-     * by the getAsTree and setFromTree methods for the 
-     * stream metadata objects produced or consumed by this 
-     * reader or writer.
+     * Checks if the standard metadata format is supported by the getAsTree and
+     * setFromTree methods for the stream metadata objects produced or consumed
+     * by this reader or writer.
      * 
-     * @return true, if standard stream metadata format is 
-     * supported, false otherwise.
+     * @return true, if standard stream metadata format is supported, false
+     *         otherwise.
      */
     public boolean isStandardStreamMetadataFormatSupported() {
         return supportsStandardStreamMetadataFormat;

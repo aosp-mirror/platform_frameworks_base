@@ -46,8 +46,10 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags) = 0;
+                                int frameCount,
+                                uint32_t flags,
+                                const sp<IMemory>& sharedBuffer,
+                                status_t *status) = 0;
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
@@ -55,8 +57,9 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags) = 0;
+                                int frameCount,
+                                uint32_t flags,
+                                status_t *status) = 0;
 
     /* query the audio hardware state. This state never changes,
      * and therefore can be cached.
@@ -65,6 +68,7 @@ public:
     virtual     int         channelCount() const = 0;
     virtual     int         format() const = 0;
     virtual     size_t      frameCount() const = 0;
+    virtual     uint32_t    latency() const = 0;
 
     /* set/get the audio hardware state. This will probably be used by
      * the preference panel, mostly.

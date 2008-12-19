@@ -18,9 +18,15 @@
 #ifndef MEDIAMETADATARETRIEVER_H
 #define MEDIAMETADATARETRIEVER_H
 
-#include <graphics/SkBitmap.h>      // for SkBitmap
+#include <utils/Errors.h>  // for status_t
+#include <utils/threads.h>
+#include <utils/IMemory.h>
+#include <media/IMediaMetadataRetriever.h>
 
 namespace android {
+
+class IMediaPlayerService;
+class IMediaMetadataRetriever;
 
 // Keep these in synch with the constants defined in MediaMetadataRetriever.java
 // class.
@@ -38,62 +44,45 @@ enum {
     METADATA_KEY_NUM_TRACKS      = 10,
     METADATA_KEY_IS_DRM_CRIPPLED = 11,
     METADATA_KEY_CODEC           = 12,
+    METADATA_KEY_RATING          = 13,
+    METADATA_KEY_COMMENT         = 14,
+    METADATA_KEY_COPYRIGHT       = 15,
     // Add more here...
 };
 
-// A utility class that holds the size and actual data in album art.
-class MediaAlbumArt {
-public:
-    MediaAlbumArt(): length(0), data(NULL) {}
-    MediaAlbumArt(const MediaAlbumArt& copy) { 
-        // Don't be caught by uninitialized variables!!
-        length = 0; 
-        data = NULL; 
-        setData(copy.length, copy.data);
-    }
-    MediaAlbumArt(const char* url);
-    ~MediaAlbumArt() { clearData(); }
 
-    void clearData();
-    status_t setData(unsigned int len, const char* buf);
-    char *getData() const { return copyData(length, data); }
-    unsigned int getLength() const { return length; }
-    
-private:
-    // Disable copy assignment operator!
-    MediaAlbumArt& operator=(const MediaAlbumArt& rhs);
-    static char* copyData(unsigned int len, const char* buf);
-    
-    unsigned int length;    // Number of bytes in data.
-    char *data;             // Actual binary data.
-};
-
-class MediaMetadataRetrieverImpl
+class MediaMetadataRetriever: public RefBase
 {
 public:
-    virtual ~MediaMetadataRetrieverImpl() {};
-    virtual status_t setDataSource(const char* dataSourceUrl) = 0;
-    virtual SkBitmap *captureFrame() = 0;
-    virtual const char* extractMetadata(int keyCode) = 0;
-    virtual MediaAlbumArt* extractAlbumArt() = 0;
-    virtual void setMode(int mode) = 0;
-};
-
-class MediaMetadataRetriever
-{
-public:
-    static status_t setDataSource(const char* dataSourceUrl);
-    static SkBitmap *captureFrame();
-    static const char* extractMetadata(int keyCode);
-    static MediaAlbumArt* extractAlbumArt();
-    static void setMode(int mode);
-    static void release();
-    static void create();
+    MediaMetadataRetriever();
+    ~MediaMetadataRetriever();
+    void disconnect();
+    status_t setDataSource(const char* dataSourceUrl);
+    status_t setDataSource(int fd, int64_t offset, int64_t length);
+    status_t setMode(int mode);
+    status_t getMode(int* mode);
+    sp<IMemory> captureFrame();
+    sp<IMemory> extractAlbumArt();
+    const char* extractMetadata(int keyCode);
 
 private:
-    MediaMetadataRetriever() {}
-    static MediaMetadataRetrieverImpl *mRetriever;
-    static void                       *mLibHandler;
+    static const sp<IMediaPlayerService>& getService();
+
+    class DeathNotifier: public IBinder::DeathRecipient
+    {
+    public:
+        DeathNotifier() {}
+        virtual ~DeathNotifier();
+        virtual void binderDied(const wp<IBinder>& who);
+    };
+
+    static sp<DeathNotifier>                  sDeathNotifier;
+    static Mutex                              sServiceLock;
+    static sp<IMediaPlayerService>            sService;
+
+    Mutex                                     mLock;
+    sp<IMediaMetadataRetriever>               mRetriever;
+
 };
 
 }; // namespace android

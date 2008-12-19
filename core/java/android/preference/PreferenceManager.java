@@ -35,7 +35,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * The {@link PreferenceManager} is used to help create preference hierarchies
+ * Used to help create {@link Preference} hierarchies
  * from activities or XML.
  * <p>
  * In most cases, clients should use
@@ -643,17 +643,23 @@ public class PreferenceManager {
      * event.
      */
     void dispatchActivityDestroy() {
-        List<OnActivityDestroyListener> list;
+        List<OnActivityDestroyListener> list = null;
         
         synchronized (this) {
-            if (mActivityDestroyListeners == null) return;
-            list = new ArrayList<OnActivityDestroyListener>(mActivityDestroyListeners);
+            if (mActivityDestroyListeners != null) {
+                list = new ArrayList<OnActivityDestroyListener>(mActivityDestroyListeners);
+            }
         }
 
-        final int N = list.size();
-        for (int i = 0; i < N; i++) {
-            list.get(i).onActivityDestroy();
+        if (list != null) {
+            final int N = list.size();
+            for (int i = 0; i < N; i++) {
+                list.get(i).onActivityDestroy();
+            }
         }
+
+        // Dismiss any PreferenceScreens still showing
+        dismissAllScreens();
     }
     
     /**
@@ -697,10 +703,13 @@ public class PreferenceManager {
      * @param intent The new Intent.
      */
     void dispatchNewIntent(Intent intent) {
+        dismissAllScreens();
+    }
 
+    private void dismissAllScreens() {
         // Remove any of the previously shown preferences screens
         ArrayList<DialogInterface> screensToDismiss;
-        
+
         synchronized (this) {
             
             if (mPreferencesScreens == null) {
@@ -715,7 +724,7 @@ public class PreferenceManager {
             screensToDismiss.get(i).dismiss();
         }
     }
-
+    
     /**
      * Sets the callback to be invoked when a {@link Preference} in the
      * hierarchy rooted at this {@link PreferenceManager} is clicked.

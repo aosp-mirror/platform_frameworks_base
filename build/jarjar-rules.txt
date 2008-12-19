@@ -1,0 +1,2 @@
+rule org.apache.commons com.android.internal.apache.commons
+

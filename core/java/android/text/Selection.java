@@ -417,10 +417,13 @@ public class Selection {
         }
     }
 
+    private static final class START { };
+    private static final class END { };
+    
     /*
      * Public constants
      */
 
-    public static final Object SELECTION_START = new Object();
-    public static final Object SELECTION_END = new Object();
+    public static final Object SELECTION_START = new START();
+    public static final Object SELECTION_END = new END();
 }

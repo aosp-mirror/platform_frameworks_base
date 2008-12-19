@@ -25,9 +25,9 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.pim.DateFormat;
-import android.pim.DateUtils;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.widget.RemoteViews;
 
 /**

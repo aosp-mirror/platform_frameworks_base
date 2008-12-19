@@ -18,16 +18,21 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 /**
- * The Class IllegalPathStateException indicates errors where the 
- * current state of a path object is imcompatible with the desired 
- * action, such as performing non-trivial actions on an empty path.
+ * The Class IllegalPathStateException indicates errors where the current state
+ * of a path object is incompatible with the desired action, such as performing
+ * non-trivial actions on an empty path.
+ * 
+ * @since Android 1.0
  */
 public class IllegalPathStateException extends RuntimeException {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -5158084205220481094L;
 
     /**
@@ -37,14 +42,14 @@ public class IllegalPathStateException extends RuntimeException {
     }
 
     /**
-     * Instantiates a new illegal path state exception with the 
-     * specified detail message.
+     * Instantiates a new illegal path state exception with the specified detail
+     * message.
      * 
-     * @param s the details of the error
+     * @param s
+     *            the details of the error.
      */
     public IllegalPathStateException(String s) {
         super(s);
     }
 
 }
-

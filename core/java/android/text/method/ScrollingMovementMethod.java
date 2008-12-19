@@ -171,32 +171,14 @@ implements MovementMethod
         return false;
     }
 
+    public boolean onTrackballEvent(TextView widget, Spannable text,
+            MotionEvent event) {
+        return false;
+    }
+    
     public boolean onTouchEvent(TextView widget, Spannable buffer,
                                  MotionEvent event) {
         return Touch.onTouchEvent(widget, buffer, event);
-    }
-
-    public boolean onTrackballEvent(TextView widget, Spannable buffer,
-                                    MotionEvent event) {
-        boolean handled = false;
-        int x = (int) event.getX();
-        int y = (int) event.getY();
-
-        for (; y < 0; y++) {
-            handled |= up(widget, buffer);
-        }
-        for (; y > 0; y--) {
-            handled |= down(widget, buffer);
-        }
-
-        for (; x < 0; x++) {
-            handled |= left(widget, buffer);
-        }
-        for (; x > 0; x--) {
-            handled |= right(widget, buffer);
-        }
-
-        return handled;
     }
 
     public void initialize(TextView widget, Spannable text) { }

@@ -50,7 +50,12 @@ public class MockContentResolver extends ContentResolver {
     /** @hide */
     @Override
     protected IContentProvider acquireProvider(Context context, String name) {
-        return mProviders.get(name).getIContentProvider();
+        final ContentProvider provider = mProviders.get(name);
+        if (provider != null) {
+            return provider.getIContentProvider();
+        } else {
+            return null;
+        }
     }
 
     /** @hide */

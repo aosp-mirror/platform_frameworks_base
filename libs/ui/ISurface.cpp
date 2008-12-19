@@ -22,6 +22,7 @@
 #include <utils/IMemory.h>
 
 #include <ui/ISurface.h>
+#include <ui/Overlay.h>
 
 
 namespace android {
@@ -30,6 +31,7 @@ enum {
     REGISTER_BUFFERS = IBinder::FIRST_CALL_TRANSACTION,
     UNREGISTER_BUFFERS,
     POST_BUFFER, // one-way transaction
+    CREATE_OVERLAY,
 };
 
 class BpSurface : public BpInterface<ISurface>
@@ -70,6 +72,18 @@ public:
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
         remote()->transact(UNREGISTER_BUFFERS, data, &reply);
     }
+
+    virtual sp<Overlay> createOverlay(
+             uint32_t w, uint32_t h, int32_t format)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        data.writeInt32(w);
+        data.writeInt32(h);
+        data.writeInt32(format);
+        remote()->transact(CREATE_OVERLAY, data, &reply);
+        return Overlay::readFromParcel(reply);
+    }
 };
 
 IMPLEMENT_META_INTERFACE(Surface, "android.ui.ISurface");
@@ -108,6 +122,14 @@ status_t BnSurface::onTransact(
             ssize_t offset = data.readInt32();
             postBuffer(offset);
             return NO_ERROR;
+        } break;
+        case CREATE_OVERLAY: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            int w = data.readInt32();
+            int h = data.readInt32();
+            int f = data.readInt32();
+            sp<Overlay> o = createOverlay(w, h, w);
+            return Overlay::writeToParcel(reply, o);
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

@@ -1,0 +1,28 @@
+page.title=Obtaining a MapView API Key
+@jd:body
+
+<p>{@link-fixme com.google.android.maps.MapView} is a very useful class that lets you easily integrate Google Maps into your application. It provides built-in map downloading, rendering, and caching, as well as a variety of display options and controls. It provides a wrapper around the Google Maps API that lets your application request and manipulate Google Maps data through class methods, and it lets you work with Maps data as you would other types of Views. </p>
+
+<p>Because MapView gives you access to Google Maps data, you need to register your application with the Google Maps service and agree to the applicable Terms of Service, before your MapView will be able to obtain data from Google Maps. This will apply whether you are developing your application on the emulator or preparing your application for deployment to mobile devices. </p>
+
+<p>Registering your application is simple, and has two parts: </p>
+
+<ol>
+<li>Registering a public key fingerprint from the certificate that you will use to sign the .apk. The registration service then provides you a Maps API Key that is associated with your application's signer certificate. </li>
+<li>Adding the Maps API Key to a special attribute of the MapView element &mdash; <code>android:apiKey</code>. You can use the same Maps API Key for any MapView in any application, provided that the application's .apk is signed with the certificate whose fingerprint you registered with the service. </li>
+</ol>
+
+<p>Once you have registered your application as described above, your MapView will be able to retrieve data from the Google Maps servers. </p>
+
+<div class="special">
+<p>The MapView registration service is not yet active and Google Maps is not yet enforcing the Maps API Key requirement. The registration service will be activated soon, so that MapViews in any application deployed to a mobile device will require registration and a valid Maps API Key.</p>
+
+<p>As soon as the registration service becomes available, this page (<a href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.google.com/android/toolbox/apis/mapkey.html</a>) will be updated with details about how and where to register and how to add your Maps API Key to your application. </p>
+
+<p>In the meantime, you can continue developing your MapView without registration, provided that you:</p>
+<ol type="a">
+<li>Add the attribute "android:apiKey" to the MapView element in your layout XML, with any value. Or</li>
+<li>Include an arbitrary string in the <code>apikey</code> parameter of the MapView constructor, if creating the MapView programmatically. </li>
+</ol>
+
+<p>When the Maps API Key checking is activated in the service, any MapViews that do not have a properly registered apiKey will stop working.  The map data (tile images) of the MapView will never load (even if the device is on the network). In this case, go to the page linked above and read about how to register your certificate fingerprint and obtain a Maps API Key. </p>

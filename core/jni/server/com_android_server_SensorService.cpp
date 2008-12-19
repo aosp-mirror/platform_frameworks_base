@@ -23,7 +23,6 @@
 
 namespace android {
 
-
 static struct file_descriptor_offsets_t
 {
     jclass mClass;
@@ -41,16 +40,26 @@ static struct parcel_file_descriptor_offsets_t
  * The method below are not thread-safe and not intended to be 
  */
 
+static sensors_control_device_t* sSensorDevice = 0;
+
 static jint
 android_init(JNIEnv *env, jclass clazz)
 {
-    return sensors_control_init();
+    sensors_module_t* module;
+    if (hw_get_module(SENSORS_HARDWARE_MODULE_ID, (const hw_module_t**)&module) == 0) {
+        if (sensors_control_open(&module->common, &sSensorDevice) == 0) {
+            const struct sensor_t* list;
+            int count = module->get_sensors_list(module, &list);
+            return count;
+        }
+    }
+    return 0;
 }
 
 static jobject
 android_open(JNIEnv *env, jclass clazz)
 {
-    int fd = sensors_control_open();
+    int fd = sSensorDevice->open_data_source(sSensorDevice);
     // new FileDescriptor()
     jobject filedescriptor = env->NewObject(
             gFileDescriptorOffsets.mClass, 
@@ -70,20 +79,29 @@ android_open(JNIEnv *env, jclass clazz)
 static jboolean
 android_activate(JNIEnv *env, jclass clazz, jint sensor, jboolean activate)
 {
-    uint32_t active = sensors_control_activate(activate ? sensor : 0, sensor);
-    return (activate && !active) ? false : true;
+    int active = sSensorDevice->activate(sSensorDevice, sensor, activate);
+    return (active<0) ? false : true;
 }
 
 static jint
 android_set_delay(JNIEnv *env, jclass clazz, jint ms)
 {
-    return sensors_control_delay(ms);
+    return sSensorDevice->set_delay(sSensorDevice, ms);
 }
+
+static jint
+android_data_wake(JNIEnv *env, jclass clazz)
+{
+    int res = sSensorDevice->wake(sSensorDevice);
+    return res;
+}
+
 
 static JNINativeMethod gMethods[] = {
     {"_sensors_control_init",     "()I",   (void*) android_init },
     {"_sensors_control_open",     "()Landroid/os/ParcelFileDescriptor;",  (void*) android_open },
     {"_sensors_control_activate", "(IZ)Z", (void*) android_activate },
+    {"_sensors_control_wake",     "()I", (void*) android_data_wake },
     {"_sensors_control_set_delay","(I)I", (void*) android_set_delay },
 };
 

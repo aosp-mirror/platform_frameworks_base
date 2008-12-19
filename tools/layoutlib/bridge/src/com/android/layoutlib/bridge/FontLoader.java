@@ -40,7 +40,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 /**
- * Implementation of the {@link IFontLoader} to provide {@link Font} object to the layout lib.
+ * Provides {@link Font} object to the layout lib.
+ * <p/>
  * The fonts are loaded from the SDK directory. Family/style mapping is done by parsing the
  * fonts.xml file located alongside the ttf files.
  */
@@ -247,6 +248,7 @@ public final class FontLoader {
         /* (non-Javadoc)
          * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
          */
+        @SuppressWarnings("unused")
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             if (mFontInfo != null) {
@@ -257,6 +259,7 @@ public final class FontLoader {
         /* (non-Javadoc)
          * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
          */
+        @SuppressWarnings("unused")
         @Override
         public void endElement(String uri, String localName, String name) throws SAXException {
             if (localName.equals(NODE_LEVEL[mDepth-1])) {

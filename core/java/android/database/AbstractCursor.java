@@ -21,6 +21,10 @@ import android.net.Uri;
 import android.util.Config;
 import android.util.Log;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 
 import java.lang.ref.WeakReference;
 import java.lang.UnsupportedOperationException;
@@ -457,9 +461,24 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             mContentObservable.unregisterObserver(observer);
         }
     }
-
+    
+    /**
+     * @hide pending API council approval
+     */
+    protected void notifyDataSetChange() {
+        mDataSetObservable.notifyChanged();
+    }
+    
+    /**
+     * @hide pending API council approval
+     */
+    protected DataSetObservable getDataSetObservable() {
+        return mDataSetObservable;
+        
+    }
     public void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);
+        
     }
 
     public void unregisterDataSetObserver(DataSetObserver observer) {

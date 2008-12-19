@@ -85,10 +85,10 @@ Time::switchTimezone(const char* timezone)
 }
 
 String8 
-Time::format(const char *format) const
+Time::format(const char *format, const struct strftime_locale *locale) const
 {
     char buf[257];
-    int n = strftime(buf, 257, format, &(this->t));
+    int n = strftime_tz(buf, 257, format, &(this->t), locale);
     if (n > 0) {
         return String8(buf);
     } else {

@@ -271,6 +271,7 @@ public class MediaController extends FrameLayout {
             p.y = anchorpos[1] + mAnchor.getHeight() - p.height;
             p.format = PixelFormat.TRANSLUCENT;
             p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+            p.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             p.token = null;
             p.windowAnimations = 0; // android.R.style.DropDownAnimationDown;
             mWindowManager.addView(mDecor, p);
@@ -387,6 +388,7 @@ public class MediaController extends FrameLayout {
         int keyCode = event.getKeyCode();
         if (event.getRepeatCount() == 0 && event.isDown() && (
                 keyCode ==  KeyEvent.KEYCODE_HEADSETHOOK ||
+                keyCode ==  KeyEvent.KEYCODE_PLAYPAUSE ||
                 keyCode ==  KeyEvent.KEYCODE_SPACE)) {
             doPauseResume();
             show(sDefaultTimeout);

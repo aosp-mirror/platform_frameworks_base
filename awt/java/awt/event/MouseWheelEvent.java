@@ -22,6 +22,12 @@ package java.awt.event;
 
 import java.awt.Component;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class MouseWheelEvent extends MouseEvent {
 
     private static final long serialVersionUID = -9187413581993563929L;

@@ -36,6 +36,7 @@
 #include <GLES/egl.h>
 
 #include <pixelflinger/format.h>
+#include <pixelflinger/pixelflinger.h>
 
 #include "context.h"
 #include "state.h"
@@ -57,7 +58,7 @@ static pthread_key_t gEGLErrorKey = -1;
 #ifndef HAVE_ANDROID_OS
 namespace gl {
 pthread_key_t gGLKey = -1;
-}; // namspace gl
+}; // namespace gl
 #endif
 
 template<typename T>
@@ -156,7 +157,7 @@ protected:
 egl_surface_t::egl_surface_t(EGLDisplay dpy,
         EGLConfig config,
         int32_t depthFormat)
-    : magic(0x31415265), dpy(dpy), config(config), ctx(0)
+    : magic(MAGIC), dpy(dpy), config(config), ctx(0)
 {
     depth.version = sizeof(GGLSurface);
     depth.data = 0;
@@ -240,7 +241,7 @@ EGLBoolean egl_window_surface_t::swapBuffers()
 {
     uint32_t flags = nativeWindow->swapBuffers(nativeWindow);
     if (flags & EGL_NATIVES_FLAG_SIZE_CHANGED) {
-        // TODO: we probaly should reset the swap rect here
+        // TODO: we probably should reset the swap rect here
         // if the window size has changed
         //    window->setSwapRectangle(Rect(info.w, info.h));
         if (depth.data) {
@@ -402,12 +403,13 @@ egl_pbuffer_surface_t::egl_pbuffer_surface_t(EGLDisplay dpy,
 {
     size_t size = w*h;
     switch (f) {
-    case GGL_PIXEL_FORMAT_RGB_565:      size *= 2; break;
-    case GGL_PIXEL_FORMAT_RGBA_8888:    size *= 4; break;
-    default:
-        LOGE("incompatible pixel format for pbuffer (format=%d)", f);
-        pbuffer.data = 0;
-        break;
+        case GGL_PIXEL_FORMAT_A_8:          size *= 1; break;
+        case GGL_PIXEL_FORMAT_RGB_565:      size *= 2; break;
+        case GGL_PIXEL_FORMAT_RGBA_8888:    size *= 4; break;
+        default:
+            LOGE("incompatible pixel format for pbuffer (format=%d)", f);
+            pbuffer.data = 0;
+            break;
     }
     pbuffer.version = sizeof(GGLSurface);
     pbuffer.width   = w;
@@ -488,28 +490,28 @@ struct extention_map_t {
 };
 
 static const extention_map_t gExtentionMap[] = {
-    { "eglSwapRectangleANDROID",            (void(*)())&eglSwapRectangleANDROID },
-    { "glDrawTexsOES",                      (void(*)())&glDrawTexsOES },
-    { "glDrawTexiOES",                      (void(*)())&glDrawTexiOES },
-    { "glDrawTexfOES",                      (void(*)())&glDrawTexfOES },
-    { "glDrawTexxOES",                      (void(*)())&glDrawTexxOES },
-    { "glDrawTexsvOES",                     (void(*)())&glDrawTexsvOES },
-    { "glDrawTexivOES",                     (void(*)())&glDrawTexivOES },
-    { "glDrawTexfvOES",                     (void(*)())&glDrawTexfvOES },
-    { "glDrawTexxvOES",                     (void(*)())&glDrawTexxvOES },
-    { "glQueryMatrixxOES",                  (void(*)())&glQueryMatrixxOES },
-    { "glClipPlanef",                       (void(*)())&glClipPlanef },
-    { "glClipPlanex",                       (void(*)())&glClipPlanex },
-    { "glBindBuffer",                       (void(*)())&glBindBuffer },
-    { "glBufferData",                       (void(*)())&glBufferData },
-    { "glBufferSubData",                    (void(*)())&glBufferSubData },
-    { "glDeleteBuffers",                    (void(*)())&glDeleteBuffers },
-    { "glGenBuffers",                       (void(*)())&glGenBuffers },
+    { "eglSwapRectangleANDROID",    (void(*)())&eglSwapRectangleANDROID },
+    { "glDrawTexsOES",              (void(*)())&glDrawTexsOES },
+    { "glDrawTexiOES",              (void(*)())&glDrawTexiOES },
+    { "glDrawTexfOES",              (void(*)())&glDrawTexfOES },
+    { "glDrawTexxOES",              (void(*)())&glDrawTexxOES },
+    { "glDrawTexsvOES",             (void(*)())&glDrawTexsvOES },
+    { "glDrawTexivOES",             (void(*)())&glDrawTexivOES },
+    { "glDrawTexfvOES",             (void(*)())&glDrawTexfvOES },
+    { "glDrawTexxvOES",             (void(*)())&glDrawTexxvOES },
+    { "glQueryMatrixxOES",          (void(*)())&glQueryMatrixxOES },
+    { "glClipPlanef",               (void(*)())&glClipPlanef },
+    { "glClipPlanex",               (void(*)())&glClipPlanex },
+    { "glBindBuffer",               (void(*)())&glBindBuffer },
+    { "glBufferData",               (void(*)())&glBufferData },
+    { "glBufferSubData",            (void(*)())&glBufferSubData },
+    { "glDeleteBuffers",            (void(*)())&glDeleteBuffers },
+    { "glGenBuffers",               (void(*)())&glGenBuffers },
 };
 
 /* 
  * In the lists below, attributes names MUST be sorted.
- * Additinnaly, all configs must be sorted according to
+ * Additionally, all configs must be sorted according to
  * the EGL specification.
  */
 
@@ -517,9 +519,10 @@ static config_pair_t const config_base_attribute_list[] = {
         { EGL_STENCIL_SIZE,               0                                 },
         { EGL_CONFIG_CAVEAT,              EGL_SLOW_CONFIG                   },
         { EGL_LEVEL,                      0                                 },
-        { EGL_MAX_PBUFFER_HEIGHT,         0                                 },
-        { EGL_MAX_PBUFFER_PIXELS,         0                                 },
-        { EGL_MAX_PBUFFER_WIDTH,          0                                 },
+        { EGL_MAX_PBUFFER_HEIGHT,         GGL_MAX_VIEWPORT_DIMS             },
+        { EGL_MAX_PBUFFER_PIXELS,         
+                GGL_MAX_VIEWPORT_DIMS*GGL_MAX_VIEWPORT_DIMS                 },
+        { EGL_MAX_PBUFFER_WIDTH,          GGL_MAX_VIEWPORT_DIMS             },
         { EGL_NATIVE_RENDERABLE,          EGL_TRUE                          },
         { EGL_NATIVE_VISUAL_ID,           0                                 },
         { EGL_NATIVE_VISUAL_TYPE,         GGL_PIXEL_FORMAT_RGB_565          },
@@ -536,49 +539,72 @@ static config_pair_t const config_base_attribute_list[] = {
 };
 
 // These configs can override the base attribute list
+// NOTE: when adding a config here, don't forget to update eglCreate*Surface()
 
 static config_pair_t const config_0_attribute_list[] = {
-        { EGL_BUFFER_SIZE,        16 },
-        { EGL_ALPHA_SIZE,          0 },
-        { EGL_BLUE_SIZE,           5 },
-        { EGL_GREEN_SIZE,          6 },
-        { EGL_RED_SIZE,            5 },
-        { EGL_DEPTH_SIZE,          0 },
-        { EGL_CONFIG_ID,           0 },
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT | EGL_PIXMAP_BIT },
+        { EGL_BUFFER_SIZE,     16 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        5 },
+        { EGL_GREEN_SIZE,       6 },
+        { EGL_RED_SIZE,         5 },
+        { EGL_DEPTH_SIZE,       0 },
+        { EGL_CONFIG_ID,        0 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
 static config_pair_t const config_1_attribute_list[] = {
-        { EGL_BUFFER_SIZE,        16 },
-        { EGL_ALPHA_SIZE,          0 },
-        { EGL_BLUE_SIZE,           5 },
-        { EGL_GREEN_SIZE,          6 },
-        { EGL_RED_SIZE,            5 },
-        { EGL_DEPTH_SIZE,         16 },
-        { EGL_CONFIG_ID,           1 },
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT | EGL_PIXMAP_BIT },
+        { EGL_BUFFER_SIZE,     16 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        5 },
+        { EGL_GREEN_SIZE,       6 },
+        { EGL_RED_SIZE,         5 },
+        { EGL_DEPTH_SIZE,      16 },
+        { EGL_CONFIG_ID,        1 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
 static config_pair_t const config_2_attribute_list[] = {
-        { EGL_BUFFER_SIZE,        32 },
-        { EGL_ALPHA_SIZE,          8 },
-        { EGL_BLUE_SIZE,           8 },
-        { EGL_GREEN_SIZE,          8 },
-        { EGL_RED_SIZE,            8 },
-        { EGL_DEPTH_SIZE,          0 },
-        { EGL_CONFIG_ID,           2 },
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT | EGL_PIXMAP_BIT },
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       8 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,       0 },
+        { EGL_CONFIG_ID,        2 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
 static config_pair_t const config_3_attribute_list[] = {
-        { EGL_BUFFER_SIZE,        32 },
-        { EGL_ALPHA_SIZE,          8 },
-        { EGL_BLUE_SIZE,           8 },
-        { EGL_GREEN_SIZE,          8 },
-        { EGL_RED_SIZE,            8 },
-        { EGL_DEPTH_SIZE,         16 },
-        { EGL_CONFIG_ID,           3 },
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT | EGL_PIXMAP_BIT },
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       8 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,      16 },
+        { EGL_CONFIG_ID,        3 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+static config_pair_t const config_4_attribute_list[] = {
+        { EGL_BUFFER_SIZE,      8 },
+        { EGL_ALPHA_SIZE,       8 },
+        { EGL_BLUE_SIZE,        0 },
+        { EGL_GREEN_SIZE,       0 },
+        { EGL_RED_SIZE,         0 },
+        { EGL_DEPTH_SIZE,       0 },
+        { EGL_CONFIG_ID,        4 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+static config_pair_t const config_5_attribute_list[] = {
+        { EGL_BUFFER_SIZE,      8 },
+        { EGL_ALPHA_SIZE,       8 },
+        { EGL_BLUE_SIZE,        0 },
+        { EGL_GREEN_SIZE,       0 },
+        { EGL_RED_SIZE,         0 },
+        { EGL_DEPTH_SIZE,      16 },
+        { EGL_CONFIG_ID,        5 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
 static configs_t const gConfigs[] = {
@@ -586,6 +612,8 @@ static configs_t const gConfigs[] = {
         { config_1_attribute_list, NELEM(config_1_attribute_list) },
         { config_2_attribute_list, NELEM(config_2_attribute_list) },
         { config_3_attribute_list, NELEM(config_3_attribute_list) },
+        { config_4_attribute_list, NELEM(config_4_attribute_list) },
+        { config_5_attribute_list, NELEM(config_5_attribute_list) },
 };
 
 static config_management_t const gConfigManagement[] = {
@@ -669,7 +697,7 @@ static int isAttributeMatching(int i, EGLint attr, EGLint val)
                 return 1;
             }
         } else {
-            // attribute nont found. this should NEVER happen.
+            // attribute not found. this should NEVER happen.
         }
     } else {
         // error, this attribute doesn't exist
@@ -779,11 +807,19 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
         pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888; 
         depthFormat = GGL_PIXEL_FORMAT_Z_16;
         break;
+    case 4:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
+        depthFormat = 0;
+        break;
+    case 5:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
     default:
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
-    // XXX: we don't have access to the pixelFormat here just yet.
+    // FIXME: we don't have access to the pixelFormat here just yet.
     // (it's possible that the surface is not fully initialized)
     // maybe this should be done after the page-flip
     //if (EGLint(info.format) != pixelFormat)
@@ -840,6 +876,14 @@ static EGLSurface createPixmapSurface(EGLDisplay dpy, EGLConfig config,
         pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888; 
         depthFormat = GGL_PIXEL_FORMAT_Z_16;
         break;
+    case 4:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
+        depthFormat = 0;
+        break;
+    case 5:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
     default:
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
@@ -894,6 +938,14 @@ static EGLSurface createPbufferSurface(EGLDisplay dpy, EGLConfig config,
         break;
     case 3:
         pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888; 
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 4:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
+        depthFormat = 0;
+        break;
+    case 5:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8; 
         depthFormat = GGL_PIXEL_FORMAT_Z_16;
         break;
     default:
@@ -979,7 +1031,7 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
     EGLBoolean res = EGL_TRUE;
     egl_display_t& d = egl_display_t::get_display(dpy);
     if (android_atomic_dec(&d.initialized) == 1) {
-        // TODO: destroy all resources (surfaces, contextes, etc...)
+        // TODO: destroy all resources (surfaces, contexts, etc...)
         //pthread_mutex_lock(&gInitMutex);
         //pthread_mutex_unlock(&gInitMutex);
     }
@@ -1105,11 +1157,7 @@ EGLSurface eglCreatePixmapSurface(  EGLDisplay dpy, EGLConfig config,
 EGLSurface eglCreatePbufferSurface( EGLDisplay dpy, EGLConfig config,
                                     const EGLint *attrib_list)
 {
-    // none of our configs support pbuffers
-    // (in fact it's working but since we can't use them as 
-    // textures yet, it's not useful at all)
-    //createPbufferSurface(dpy, config, attrib_list);
-    return EGL_NO_SURFACE;
+    return createPbufferSurface(dpy, config, attrib_list);
 }
                                     
 EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface eglSurface)
@@ -1231,6 +1279,13 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
     }
 
     EGLContext current_ctx = EGL_NO_CONTEXT;
+    
+    if ((read == EGL_NO_SURFACE && draw == EGL_NO_SURFACE) && (ctx != EGL_NO_CONTEXT))
+        return setError(EGL_BAD_MATCH, EGL_FALSE);
+
+    if ((read != EGL_NO_SURFACE || draw != EGL_NO_SURFACE) && (ctx == EGL_NO_CONTEXT))
+        return setError(EGL_BAD_MATCH, EGL_FALSE);
+
     if (ctx == EGL_NO_CONTEXT) {
         // if we're detaching, we need the current context
         current_ctx = (EGLContext)getGlThreadSpecific();
@@ -1486,7 +1541,7 @@ EGLSurface eglCreatePbufferFromClientBuffer(
 }
 
 // ----------------------------------------------------------------------------
-// Android extentions
+// Android extensions
 // ----------------------------------------------------------------------------
 
 void (*eglGetProcAddress (const char *procname))()

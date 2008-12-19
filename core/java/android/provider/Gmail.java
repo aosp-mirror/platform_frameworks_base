@@ -72,6 +72,7 @@ public final class Gmail {
     public static final String LABEL_STARRED = "^t";
     public static final String LABEL_CHAT = "^b"; // 'b' for 'buzz'
     public static final String LABEL_VOICEMAIL = "^vm";
+    public static final String LABEL_IGNORED = "^g";
     public static final String LABEL_ALL = "^all";
     // These constants (starting with "^^") are only used locally and are not understood by the
     // server.
@@ -142,6 +143,8 @@ public final class Gmail {
     public static final String RESPOND_INPUT_COMMAND = "command";
     public static final String COMMAND_RETRY = "retry";
     public static final String COMMAND_ACTIVATE = "activate";
+    public static final String COMMAND_SET_VISIBLE = "setVisible";
+    public static final String SET_VISIBLE_PARAM_VISIBLE = "visible";
     public static final String RESPOND_OUTPUT_COMMAND_RESPONSE = "commandResponse";
     public static final String COMMAND_RESPONSE_OK =  "ok";
     public static final String COMMAND_RESPONSE_UNKNOWN =  "unknownCommand";
@@ -210,7 +213,8 @@ public final class Gmail {
             Gmail.LABEL_UNREAD,
             Gmail.LABEL_TRASH,
             Gmail.LABEL_SPAM,
-            Gmail.LABEL_STARRED);
+            Gmail.LABEL_STARRED,
+            Gmail.LABEL_IGNORED);
 
     /**
      * Returns whether the label is user-settable. For example, labels such as LABEL_DRAFT should
@@ -337,6 +341,8 @@ public final class Gmail {
         public static final String LABEL_IDS = "labelIds";
         public static final String JOINED_ATTACHMENT_INFOS = "joinedAttachmentInfos";
         public static final String ERROR = "error";
+        // TODO: add a method for accessing this
+        public static final String REF_MESSAGE_ID = "refMessageId";
 
         // Fake columns used only for saving or sending messages.
         public static final String FAKE_SAVE = "save";
@@ -773,7 +779,8 @@ public final class Gmail {
         priorityToLength.clear();
 
         int maxFoundPriority = Integer.MIN_VALUE;
-        String numMessagesFragment = "";
+        int numMessages = 0;
+        int numDrafts = 0;
         CharSequence draftsFragment = "";
         CharSequence sendingFragment = "";
         CharSequence sendFailedFragment = "";
@@ -799,10 +806,10 @@ public final class Gmail {
             } else if (Gmail.SENDER_LIST_TOKEN_ELIDED.equals(fragment0)) {
                 // ignore
             } else if (Gmail.SENDER_LIST_TOKEN_NUM_MESSAGES.equals(fragment0)) {
-                numMessagesFragment = " (" + fragments[i++] + ")";
+                numMessages = Integer.valueOf(fragments[i++]);
             } else if (Gmail.SENDER_LIST_TOKEN_NUM_DRAFTS.equals(fragment0)) {
                 String numDraftsString = fragments[i++];
-                int numDrafts = Integer.parseInt(numDraftsString);
+                numDrafts = Integer.parseInt(numDraftsString);
                 draftsFragment = numDrafts == 1 ? draftString :
                         draftPluralString + " (" + numDraftsString + ")";
             } else if (Gmail.SENDER_LIST_TOKEN_LITERAL.equals(fragment0)) {
@@ -821,6 +828,8 @@ public final class Gmail {
                 maxFoundPriority = Math.max(maxFoundPriority, priority);
             }
         }
+        String numMessagesFragment =
+                (numMessages != 0) ? " (" + Integer.toString(numMessages + numDrafts) + ")" : "";
 
         // Don't allocate fixedFragment unless we need it
         SpannableStringBuilder fixedFragment = null;
@@ -1242,6 +1251,7 @@ public final class Gmail {
         private long mLabelIdStarred;
         private long mLabelIdChat;
         private long mLabelIdVoicemail;
+        private long mLabelIdIgnored;
         private long mLabelIdVoicemailInbox;
         private long mLabelIdCached;
         private long mLabelIdOutbox;
@@ -1313,6 +1323,8 @@ public final class Gmail {
                     mLabelIdStarred = labelId;
                 } else if (LABEL_CHAT.equals(canonicalName)) {
                     mLabelIdChat = labelId;
+                } else if (LABEL_IGNORED.equals(canonicalName)) {
+                    mLabelIdIgnored = labelId;
                 } else if (LABEL_VOICEMAIL.equals(canonicalName)) {
                     mLabelIdVoicemail = labelId;
                 } else if (LABEL_VOICEMAIL_INBOX.equals(canonicalName)) {
@@ -1330,6 +1342,7 @@ public final class Gmail {
                     && mLabelIdSpam != 0
                     && mLabelIdStarred != 0
                     && mLabelIdChat != 0
+                    && mLabelIdIgnored != 0
                     && mLabelIdVoicemail != 0;
             }
         }
@@ -1372,6 +1385,11 @@ public final class Gmail {
         public long getLabelIdChat() {
             checkLabelsSynced();
             return mLabelIdChat;
+        }
+
+        public long getLabelIdIgnored() {
+            checkLabelsSynced();
+            return mLabelIdIgnored;
         }
 
         public long getLabelIdVoicemail() {
@@ -2237,9 +2255,28 @@ public final class Gmail {
         }
 
         /**
-         * Gets the conversation id. This must be immutable. (For example, with
-         * GMail this should be the original conversation id rather than the
-         * default notion of converation id.)
+         * Tells the cursor whether its contents are visible to the user. The cursor will
+         * automatically broadcast intents to remove any matching new-mail notifications when this
+         * cursor's results become visible and, if they are visible, when the cursor is requeried.
+         *
+         * Note that contents shown in an activity that is resumed but not focused
+         * (onWindowFocusChanged/hasWindowFocus) then results shown in that activity do not count
+         * as visible. (This happens when the activity is behind the lock screen or a dialog.)
+         *
+         * @param visible whether the contents of this cursor are visible to the user.
+         */
+        public void setContentsVisibleToUser(boolean visible) {
+            Bundle input = new Bundle();
+            input.putString(RESPOND_INPUT_COMMAND, COMMAND_SET_VISIBLE);
+            input.putBoolean(SET_VISIBLE_PARAM_VISIBLE, visible);
+            Bundle output = mCursor.respond(input);
+            String response = output.getString(RESPOND_OUTPUT_COMMAND_RESPONSE);
+            assert COMMAND_RESPONSE_OK.equals(response);
+        }
+
+        /**
+         * Gets the conversation id. This is immutable. (The server calls it the original
+         * conversation id.)
          *
          * @return the conversation id
          */

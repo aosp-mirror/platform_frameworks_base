@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.util.NoSuchElementException;
@@ -25,29 +26,41 @@ import java.util.NoSuchElementException;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class Ellipse2D describes an ellipse defined by a rectangular
- * area in which it is inscribed.
+ * The Class Ellipse2D describes an ellipse defined by a rectangular area in
+ * which it is inscribed.
+ * 
+ * @since Android 1.0
  */
 public abstract class Ellipse2D extends RectangularShape {
 
     /**
-     * The Class Float is the subclass of Ellipse2D that has all 
-     * of its data values stored with float-level precision.
+     * The Class Float is the subclass of Ellipse2D that has all of its data
+     * values stored with float-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Float extends Ellipse2D {
 
-        /** The x coordinate of the upper left corner of the ellipse's
-         * bounding rectangle. */
+        /**
+         * The x coordinate of the upper left corner of the ellipse's bounding
+         * rectangle.
+         */
         public float x;
-        
-        /** The y coordinate of the upper left corner of the ellipse's
-         * bounding rectangle. */
+
+        /**
+         * The y coordinate of the upper left corner of the ellipse's bounding
+         * rectangle.
+         */
         public float y;
-        
-        /** The width of the ellipse's bounding rectangle. */
+
+        /**
+         * The width of the ellipse's bounding rectangle.
+         */
         public float width;
-        
-        /** The height of the ellipse's bounding rectangle. */
+
+        /**
+         * The height of the ellipse's bounding rectangle.
+         */
         public float height;
 
         /**
@@ -59,12 +72,16 @@ public abstract class Ellipse2D extends RectangularShape {
         /**
          * Instantiates a new float-valued Ellipse2D with the specified data.
          * 
-         * @param x the x coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param y the y coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param width the width of the ellipse's bounding rectangle
-         * @param height the height of the ellipse's bounding rectangle
+         * @param x
+         *            the x coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param y
+         *            the y coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param width
+         *            the width of the ellipse's bounding rectangle.
+         * @param height
+         *            the height of the ellipse's bounding rectangle.
          */
         public Float(float x, float y, float width, float height) {
             setFrame(x, y, width, height);
@@ -98,12 +115,16 @@ public abstract class Ellipse2D extends RectangularShape {
         /**
          * Sets the data of the ellipse's bounding rectangle.
          * 
-         * @param x the x coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param y the y coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param width the width of the ellipse's bounding rectangle
-         * @param height the height of the ellipse's bounding rectangle
+         * @param x
+         *            the x coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param y
+         *            the y coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param width
+         *            the width of the ellipse's bounding rectangle.
+         * @param height
+         *            the height of the ellipse's bounding rectangle.
          */
         public void setFrame(float x, float y, float width, float height) {
             this.x = x;
@@ -126,23 +147,33 @@ public abstract class Ellipse2D extends RectangularShape {
     }
 
     /**
-     * The Class Double is the subclass of Ellipse2D that has all 
-     * of its data values stored with double-level precision.
+     * The Class Double is the subclass of Ellipse2D that has all of its data
+     * values stored with double-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Double extends Ellipse2D {
 
-        /** The x coordinate of the upper left corner of the ellipse's
-         * bounding rectangle. */
+        /**
+         * The x coordinate of the upper left corner of the ellipse's bounding
+         * rectangle.
+         */
         public double x;
-        
-        /** The y coordinate of the upper left corner of the ellipse's
-         * bounding rectangle. */
+
+        /**
+         * The y coordinate of the upper left corner of the ellipse's bounding
+         * rectangle.
+         */
         public double y;
-        
-        /** The width of the ellipse's bounding rectangle. */
+
+        /**
+         * The width of the ellipse's bounding rectangle.
+         */
         public double width;
-        
-        /** The height of the ellipse's bounding rectangle. */
+
+        /**
+         * The height of the ellipse's bounding rectangle.
+         */
         public double height;
 
         /**
@@ -152,15 +183,18 @@ public abstract class Ellipse2D extends RectangularShape {
         }
 
         /**
-         * Instantiates a new double-valued Ellipse2D with the specified
-         * data.
+         * Instantiates a new double-valued Ellipse2D with the specified data.
          * 
-         * @param x the x coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param y the y coordinate of the upper left corner of the ellipse's
-         * bounding rectangle
-         * @param width the width of the ellipse's bounding rectangle
-         * @param height the height of the ellipse's bounding rectangle
+         * @param x
+         *            the x coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param y
+         *            the y coordinate of the upper left corner of the ellipse's
+         *            bounding rectangle.
+         * @param width
+         *            the width of the ellipse's bounding rectangle.
+         * @param height
+         *            the height of the ellipse's bounding rectangle.
          */
         public Double(double x, double y, double width, double height) {
             setFrame(x, y, width, height);
@@ -205,7 +239,7 @@ public abstract class Ellipse2D extends RectangularShape {
     }
 
     /*
-     * Ellipse2D path iterator 
+     * Ellipse2D path iterator
      */
     /**
      * The subclass of PathIterator to traverse an Ellipse2D.
@@ -213,46 +247,72 @@ public abstract class Ellipse2D extends RectangularShape {
     class Iterator implements PathIterator {
 
         /*
-         * Ellipse is subdivided into four quarters by x and y axis. Each part approximated by
-         * cubic Bezier curve. Arc in first quarter is started in (a, 0) and finished in (0, b) points.
-         * Control points for cubic curve wiil be (a, 0), (a, m), (n, b) and (0, b) where n and m are
-         * calculated based on requirement Bezier curve in point 0.5 should lay on the arc.
+         * Ellipse is subdivided into four quarters by x and y axis. Each part
+         * approximated by cubic Bezier curve. Arc in first quarter is started
+         * in (a, 0) and finished in (0, b) points. Control points for cubic
+         * curve wiil be (a, 0), (a, m), (n, b) and (0, b) where n and m are
+         * calculated based on requirement Bezier curve in point 0.5 should lay
+         * on the arc.
          */
 
-        /** The coefficient to calculate control points of Bezier curves. */
+        /**
+         * The coefficient to calculate control points of Bezier curves.
+         */
         final double u = 2.0 / 3.0 * (Math.sqrt(2.0) - 1.0);
 
-        /** The points coordinates calculation table. */
+        /**
+         * The points coordinates calculation table.
+         */
         final double points[][] = {
-                { 1.0, 0.5 + u, 0.5 + u, 1.0, 0.5, 1.0 },
-                { 0.5 - u, 1.0, 0.0, 0.5 + u, 0.0, 0.5 },
-                { 0.0, 0.5 - u, 0.5 - u, 0.0, 0.5, 0.0 },
-                { 0.5 + u, 0.0, 1.0, 0.5 - u, 1.0, 0.5 }
+                {
+                        1.0, 0.5 + u, 0.5 + u, 1.0, 0.5, 1.0
+                }, {
+                        0.5 - u, 1.0, 0.0, 0.5 + u, 0.0, 0.5
+                }, {
+                        0.0, 0.5 - u, 0.5 - u, 0.0, 0.5, 0.0
+                }, {
+                        0.5 + u, 0.0, 1.0, 0.5 - u, 1.0, 0.5
+                }
         };
 
-        /** The x coordinate of left-upper corner of the ellipse bounds. */
+        /**
+         * The x coordinate of left-upper corner of the ellipse bounds.
+         */
         double x;
-        
-        /** The y coordinate of left-upper corner of the ellipse bounds. */
+
+        /**
+         * The y coordinate of left-upper corner of the ellipse bounds.
+         */
         double y;
-        
-        /** The width of the ellipse bounds. */
+
+        /**
+         * The width of the ellipse bounds.
+         */
         double width;
-        
-        /** The height of the ellipse bounds. */
+
+        /**
+         * The height of the ellipse bounds.
+         */
         double height;
 
-        /** The path iterator transformation. */
+        /**
+         * The path iterator transformation.
+         */
         AffineTransform t;
 
-        /** The current segmenet index. */
+        /**
+         * The current segment index.
+         */
         int index;
 
         /**
-         * Constructs a new Ellipse2D.Iterator for given ellipse and transformation
+         * Constructs a new Ellipse2D.Iterator for given ellipse and
+         * transformation
          * 
-         * @param e - the source Ellipse2D object
-         * @param t the t
+         * @param e
+         *            the source Ellipse2D object.
+         * @param t
+         *            the affine transformation object.
          */
         Iterator(Ellipse2D e, AffineTransform t) {
             this.x = e.getX();
@@ -389,15 +449,10 @@ public abstract class Ellipse2D extends RectangularShape {
         double rx2 = rx + rw;
         double ry2 = ry + rh;
 
-        return
-            contains(rx1, ry1) &&
-            contains(rx2, ry1) &&
-            contains(rx2, ry2) &&
-            contains(rx1, ry2);
+        return contains(rx1, ry1) && contains(rx2, ry1) && contains(rx2, ry2) && contains(rx1, ry2);
     }
 
     public PathIterator getPathIterator(AffineTransform at) {
         return new Iterator(this, at);
     }
 }
-

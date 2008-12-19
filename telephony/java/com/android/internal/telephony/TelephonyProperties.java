@@ -53,11 +53,7 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_OPERATOR_ISROAMING = "gsm.operator.isroaming";
 
-    /** '1' if the current network is the result of a manual network selection.
-     *  Availability: when registered to a network
-     */
-    static final String PROPERTY_OPERATOR_ISMANUAL = "gsm.operator.ismanual";
-    /** The ISO country code equivilent of the current registered operator's
+    /** The ISO country code equivalent of the current registered operator's
      *  MCC (Mobile Country Code)
      *  Availability: when registered to a network
      */
@@ -69,14 +65,6 @@ public interface TelephonyProperties
      * <code>"PUK_REQUIRED"</code> <code>"NETWORK_LOCKED"</code> or <code>"READY"</code>
      */
     static String PROPERTY_SIM_STATE = "gsm.sim.state";
-
-    /** Set to '1' if voice mail is waiting, otherwise false */
-    static String PROPERTY_LINE1_VOICE_MAIL_WAITING = "gsm.sim.voice-mail.waiting";
-
-    /** Set to 'true' if unconditional voice call forwarding is enabled
-     *  Availablity: only if configured in SIM; SIM state must be "READY"
-     */
-    static String PROPERTY_LINE1_VOICE_CALL_FORWARDING = "gsm.sim.line1.cff";
 
     /** The MCC+MNC (mobile country code+mobile network code) of the
      *  provider of the SIM. 5 or 6 decimal digits.

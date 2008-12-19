@@ -140,7 +140,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * The position within the adapter's data set of the item to select
      * during the next layout.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty    
     int mNextSelectedPosition = INVALID_POSITION;
 
     /**
@@ -151,7 +151,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The position within the adapter's data set of the currently selected item.
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty    
     int mSelectedPosition = INVALID_POSITION;
 
     /**
@@ -520,6 +520,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *
      * @return int Position (starting at 0), or {@link #INVALID_POSITION} if there is nothing selected.
      */
+    @ViewDebug.CapturedViewProperty
     public int getSelectedItemPosition() {
         return mNextSelectedPosition;
     }
@@ -528,6 +529,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @return The id corresponding to the currently selected item, or {@link #INVALID_ROW_ID}
      * if nothing is selected.
      */
+    @ViewDebug.CapturedViewProperty
     public long getSelectedItemId() {
         return mNextSelectedRowId;
     }
@@ -557,6 +559,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *         AdapterView. (This is the number of data items, which may be
      *         larger than the number of visible view.)
      */
+    @ViewDebug.CapturedViewProperty
     public int getCount() {
         return mItemCount;
     }

@@ -1,16 +1,45 @@
 page.title=Data Storage
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Storage quickview</h2>
+  <ul>
+    <li>Fast, lightweight storage through system preferences</li>
+    <li>File storage to device internal or removable flash</li>
+    <li>Arbitrary and structured storage in databases</li>
+    <li>Support for network-based storage</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#pref">Preferences</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#db">Databases</a></li>
+    <li><a href="#netw">Network</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="#pref">Content Providers and Content Resolvers</a></li>
+  </ol>
+
+</div>
+</div>
+
 <p>
 A typical desktop operating system provides a common file system that any
 application can use to store files that can be read by other
 applications (perhaps with some access control settings).  Android uses a
 different system:  On Android, all application data (including files) are
 private to that application.  
+</p>
 
 <p>
 However, Android also provides a standard way for an application to expose 
-its private data to other applications &mdash; through a content providers.
+its private data to other applications &mdash; through content providers.
 A content provider is an 
 optional component of an application that exposes read/write access to the 
 application's data, subject to whatever restrictions it might impose.  
@@ -19,23 +48,19 @@ data, and a standard mechanism for reading the returned data.  Android supplies
 a number of content providers for standard data types, such as image, audio, 
 and video files and personal contact information.  For more information on 
 using content providers, see a separate document,
-<a href="{@docRoot}devel/data/contentproviders.html">Content Providers</a>.
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
+</p>
  
 <p>
 Whether or not you want to export your application's data to others,
 you need a way to store it.  Android provides the following four mechanisms
-for storing and retrieving data:
+for storing and retrieving data: <a href="#pref">Preferences</a>,
+<a href="#files">Files</a>, <a href="#db">Databases</a>, and <a href="#netw">Network</a>.
+</p>
 
-<dl>
-<dd><a href="#pref">Preferences</a>
-<dd><a href="#files">Files</a>
-<dd><a href="#db">Databases</a>
-<dd><a href="#netw">Network</a>
-</dl>
 
-<dl>
-<dt><a name="pref"></a><b>Preferences</b></dt>
-<dd>A lightweight mechanism to store and retrieve key-value pairs of primitive 
+<h2 id="pref">Preferences</h2>
+<p>Preferences is a lightweight mechanism to store and retrieve key-value pairs of primitive 
 data types.  It is typically used to store application preferences, such as a 
 default greeting or a text font to be loaded whenever the application is started. Call 
 <code>{@link android.content.Context#getSharedPreferences(java.lang.String,int)
@@ -44,11 +69,13 @@ your set of preferences if you want to share them with other components in the s
 application, or use <code>{@link android.app.Activity#getPreferences(int) 
 Activity.getPreferences()}</code> with no name to keep them private to the calling
 activity.  You cannot share preferences across applications (except by using a 
-content provider). 
+content provider).
+</p>
 
 <p>
 Here is an example of setting user preferences for silent keypress mode for a 
 calculator:
+</p>
 
 <pre>
 import android.app.Activity;
@@ -84,12 +111,13 @@ public static final String PREFS_NAME = "MyPrefsFile";
       editor.commit();
     }
 }
-</pre></dd>
+</pre>
 
-<p>
-<dt><a name="files"></a><b>Files</b></dt>
-<dd>You can store files directly on the mobile device or on a removable 
+
+<h2 id="files">Files</h2>
+<p>You can store files directly on the mobile device or on a removable 
 storage medium.  By default, other applications cannot access these files.
+</p>
 
 <p>
 To read data from a file, call {@link android.content.Context#openFileInput 
@@ -100,6 +128,7 @@ Context.openFileOutput()} with the name and path.  It returns a {@link
 java.io.FileOutputStream} object.  Calling these methods with name and path 
 strings from another application will not work; you can only access local 
 files.
+</p>
 
 <p>
 If you have a static file to package with your application at compile time, 
@@ -108,11 +137,12 @@ and then open it with {@link
 android.content.res.Resources#openRawResource(int) Resources.openRawResource
 (R.raw.<em>myDataFile</em>)}.  It returns an {@link java.io.InputStream}
 object that you can use to read from the file.
-</dd>
+</p>
 
-<dt><a name="db"></a><b>Databases</b></dt>
-<dd>The Android API contains support for creating and using SQLite databases. 
+<h2 id="db">Databases</h2>
+<p>The Android API contains support for creating and using SQLite databases. 
 Each database is private to the application that creates it.
+</p>
 
 <p>
 The {@link android.database.sqlite.SQLiteDatabase} object represents a database
@@ -120,6 +150,7 @@ and has methods for interacting with it &mdash; making queries and managing the
 data.  To create the database, call <code>{@link 
 android.database.sqlite.SQLiteDatabase#create SQLiteDatabase.create()}</code> 
 and also subclass {@link android.database.sqlite.SQLiteOpenHelper}.  
+</p>
 
 <p>
 As part of its support for the SQLite database system, Android exposes 
@@ -128,16 +159,19 @@ wrapped into useful objects.  For example, Android defines a data type
 for contact information; it consists of many fields including a first and last 
 name (strings), an address and phone numbers (also strings), a photo (bitmap
 image), and much other information describing a person. 
+</p>
 
 <p>
 Android ships with the sqlite3 database tool, which enables you to browse
 table contents, run SQL commands, and perform other useful functions on SQLite
-databases.  See <a href="{@docRoot}reference/adb.html#sqlite">Examine databases 
+databases.  See <a href="{@docRoot}guide/developing/tools/adb.html#sqlite">Examine databases 
 (sqlite3)</a> to learn how to run this program.
+</p>
 
 <p>
 All databases, SQLite and others, are stored on the device in 
 <code>/data/data/<em>package_name</em>/databases</code>.
+</p>
 
 <p>
 Discussion of how many tables to create, what fields they contain, and how
@@ -146,21 +180,20 @@ impose any limitations beyond the standard SQLite concepts.  We do recommend
 including an autoincrement value key field that can be used as a unique ID to
 quickly find a record.  This is not required for private data, but if you
 implement a content provider, you must include such a unique ID field.  See the
-<a href="{@docRoot}devel/data/contentproviders.html">Content Providers</a>
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
 document for more information on this field and the NotePadProvider class 
 in the NotePad sample code for an example of creating and populating a 
 new database.  Any databases you create will be accessible by name to any other 
-class in the application, but not outside the application.</p>
-</dd>
+class in the application, but not outside the application.
+</p>
 
-<dt><a name="netw"></a><b>Network</b></dt>
-<dd>You can also use the network to store and retrieve data (when it's available).
-To do network operations, use the classes in the following packages:
-<dl>
-    <dd><code>{@link java.net java.net.*}</code></dd>
-    <dd><code>{@link android.net android.net.*}</code></dd>
-</dl>
-</dd>
 
-</dl>
+<h2 id="netw">Network</h2>
+<p>You can also use the network to store and retrieve data (when it's available).
+To do network operations, use the classes in the following packages:</p>
+
+<ul class="no-style">
+  <li><code>{@link java.net java.net.*}</code></li>
+  <li><code>{@link android.net android.net.*}</code></li>
+</ul>
 

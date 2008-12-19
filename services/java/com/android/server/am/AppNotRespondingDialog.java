@@ -44,7 +44,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                 ? activity.info.loadLabel(context.getPackageManager())
                 : null;
         CharSequence name2 = null;
-        if (app.uniquePackage != null &&
+        if ((app.pkgList.size() == 1) &&
                 (name2=context.getPackageManager().getApplicationLabel(app.info)) != null) {
             if (name1 != null) {
                 resid = com.android.internal.R.string.anr_activity_application;

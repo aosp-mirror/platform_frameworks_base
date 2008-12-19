@@ -1,0 +1,11 @@
+page.title=The Android SDK
+@jd:body
+
+<p>FIXME</p>
+
+<p>The downloadable Android SDK includes the Android API libraries, sample code, documentation,
+and a collection of Android development tools, like the emulator and debugger.</p>
+
+<p>The SDK supports developing on Linux, Mac OS X, and Windows (XP and Vista).</p>
+
+<p>The Java Development Kit is required.</p>

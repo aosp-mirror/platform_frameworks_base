@@ -25,7 +25,7 @@ concern.)</p>
 
 <div class="sidebox" style="margin-top:1em;border:0;">
 <div style="border:0;background-color:#fff;padding:15px;padding-right:2em;margin:0;">
-<img src="/android/images/anr.png" width="240" height="320" alt="Screenshot of ANR dialog box">
+<img src="{@docRoot}images/anr.png" width="240" height="320" alt="Screenshot of ANR dialog box">
 <p style="margin-top:.5em;padding:.5em;">An ANR dialog displayed to the user.</p>
 </div>
 </div>

@@ -58,23 +58,23 @@ to be replaced by the user.</p>
 <p>Underlying all applications is a set of services and systems, including:
 <ul>
     <li>A rich and extensible set of <a
-    href="{@docRoot}reference/view-gallery.html">Views</a> that can be used to
+    href="{@docRoot}guide/tutorials/views/index.html">Views</a> that can be used to
     build an application, including lists, grids, text boxes, buttons, and even
     an embeddable web browser</li>
-    <li><a href="{@docRoot}devel/data/contentproviders.html">Content
+    <li><a href="{@docRoot}guide/topics/providers/content-providers.html">Content
     Providers</a> that enable applications to access data from other
-    applications (such as Contacts), or to share their own data</li>
-    <li>A <a href="{@docRoot}devel/resources-i18n.html">Resource Manager</a>,
-    providing access to non-code resources such as localized strings, graphics,
-    and layout files</li>
+    applications (such as Contacts), or to share their own data</li> <li>A <a
+    href="{@docRoot}guide/topics/resources/resources-i18n.html">Resource
+    Manager</a>, providing access to non-code resources such as localized
+    strings, graphics, and layout files</li>
     <li>A {@link android.app.NotificationManager Notification Manager} that enables
     all applications to display custom alerts in the status bar</li>
     <li>An {@link android.app.Activity Activity Manager} that manages the
-    life cycle of applications and provides a common navigation backstack</li>
+    lifecycle of applications and provides a common navigation backstack</li>
 </ul>
 
-<p>For more details and a walkthrough of an application, see <a
-href="{@docRoot}intro/tutorial.html">Writing an Android Application</a>.</p>
+<p>For more details and a walkthrough of an application, see the <a
+href="{@docRoot}guide/tutorials/notepad/index.html">Notepad Tutorial</a>.</p>
     
 <a name="libraries" id="libraries"></a>
 <h2>Libraries</h2>

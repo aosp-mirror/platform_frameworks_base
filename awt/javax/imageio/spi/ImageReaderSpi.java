@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.spi;
 
 import javax.imageio.stream.ImageInputStream;
@@ -25,20 +26,28 @@ import javax.imageio.ImageReader;
 import java.io.IOException;
 
 /**
- * The ImageReaderSpi abstract class is a service provider 
- * interface (SPI) for ImageReaders.
+ * The ImageReaderSpi abstract class is a service provider interface (SPI) for
+ * ImageReaders.
+ * 
+ * @since Android 1.0
  */
 public abstract class ImageReaderSpi extends ImageReaderWriterSpi {
 
-    /** 
-     * The STANDARD_INPUT_TYPE contains ImageInputStream.class. 
+    /**
+     * The STANDARD_INPUT_TYPE contains ImageInputStream.class.
      */
-    public static final Class[] STANDARD_INPUT_TYPE = new Class[] {ImageInputStream.class};
+    public static final Class[] STANDARD_INPUT_TYPE = new Class[] {
+        ImageInputStream.class
+    };
 
-    /** The input types. */
+    /**
+     * The input types.
+     */
     protected Class[] inputTypes;
-    
-    /** The writer SPI names. */
+
+    /**
+     * The writer SPI names.
+     */
     protected String[] writerSpiNames;
 
     /**
@@ -51,49 +60,62 @@ public abstract class ImageReaderSpi extends ImageReaderWriterSpi {
     /**
      * Instantiates a new ImageReaderSpi.
      * 
-     * @param vendorName the vendor name.
-     * @param version the version.
-     * @param names the format names.
-     * @param suffixes the array of strings representing the file suffixes. 
-     * @param MIMETypes the an array of strings representing MIME types.
-     * @param pluginClassName the plugin class name.
-     * @param inputTypes the input types.
-     * @param writerSpiNames the array of strings with class names of all 
-     * associated ImageWriters.
-     * @param supportsStandardStreamMetadataFormat the value indicating
-     * if stream metadata can be described by standart metadata format.
-     * @param nativeStreamMetadataFormatName the native stream metadata 
-     * format name, returned by getNativeStreamMetadataFormatName.
-     * @param nativeStreamMetadataFormatClassName the native stream 
-     * metadata format class name, returned by getNativeStreamMetadataFormat.
-     * @param extraStreamMetadataFormatNames the extra stream metadata 
-     * format names, returned by getExtraStreamMetadataFormatNames.
-     * @param extraStreamMetadataFormatClassNames the extra stream metadata 
-     * format class names, returned by getStreamMetadataFormat.
-     * @param supportsStandardImageMetadataFormat the value indicating
-     * if image metadata can be described by standart metadata format.
-     * @param nativeImageMetadataFormatName the native image metadata 
-     * format name, returned by getNativeImageMetadataFormatName.
-     * @param nativeImageMetadataFormatClassName the native image
-     * metadata format class name, returned by getNativeImageMetadataFormat.
-     * @param extraImageMetadataFormatNames the extra image metadata 
-     * format names, returned by getExtraImageMetadataFormatNames.
-     * @param extraImageMetadataFormatClassNames the extra image metadata 
-     * format class names, returned by getImageMetadataFormat.
+     * @param vendorName
+     *            the vendor name.
+     * @param version
+     *            the version.
+     * @param names
+     *            the format names.
+     * @param suffixes
+     *            the array of strings representing the file suffixes.
+     * @param MIMETypes
+     *            the an array of strings representing MIME types.
+     * @param pluginClassName
+     *            the plug-in class name.
+     * @param inputTypes
+     *            the input types.
+     * @param writerSpiNames
+     *            the array of strings with class names of all associated
+     *            ImageWriters.
+     * @param supportsStandardStreamMetadataFormat
+     *            the value indicating if stream metadata can be described by
+     *            standard metadata format.
+     * @param nativeStreamMetadataFormatName
+     *            the native stream metadata format name, returned by
+     *            getNativeStreamMetadataFormatName.
+     * @param nativeStreamMetadataFormatClassName
+     *            the native stream metadata format class name, returned by
+     *            getNativeStreamMetadataFormat.
+     * @param extraStreamMetadataFormatNames
+     *            the extra stream metadata format names, returned by
+     *            getExtraStreamMetadataFormatNames.
+     * @param extraStreamMetadataFormatClassNames
+     *            the extra stream metadata format class names, returned by
+     *            getStreamMetadataFormat.
+     * @param supportsStandardImageMetadataFormat
+     *            the value indicating if image metadata can be described by
+     *            standard metadata format.
+     * @param nativeImageMetadataFormatName
+     *            the native image metadata format name, returned by
+     *            getNativeImageMetadataFormatName.
+     * @param nativeImageMetadataFormatClassName
+     *            the native image metadata format class name, returned by
+     *            getNativeImageMetadataFormat.
+     * @param extraImageMetadataFormatNames
+     *            the extra image metadata format names, returned by
+     *            getExtraImageMetadataFormatNames.
+     * @param extraImageMetadataFormatClassNames
+     *            the extra image metadata format class names, returned by
+     *            getImageMetadataFormat.
      */
     public ImageReaderSpi(String vendorName, String version, String[] names, String[] suffixes,
-                             String[] MIMETypes, String pluginClassName,
-                             Class[] inputTypes, String[] writerSpiNames,
-                             boolean supportsStandardStreamMetadataFormat,
-                             String nativeStreamMetadataFormatName,
-                             String nativeStreamMetadataFormatClassName,
-                             String[] extraStreamMetadataFormatNames,
-                             String[] extraStreamMetadataFormatClassNames,
-                             boolean supportsStandardImageMetadataFormat,
-                             String nativeImageMetadataFormatName,
-                             String nativeImageMetadataFormatClassName,
-                             String[] extraImageMetadataFormatNames,
-                             String[] extraImageMetadataFormatClassNames) {
+            String[] MIMETypes, String pluginClassName, Class[] inputTypes,
+            String[] writerSpiNames, boolean supportsStandardStreamMetadataFormat,
+            String nativeStreamMetadataFormatName, String nativeStreamMetadataFormatClassName,
+            String[] extraStreamMetadataFormatNames, String[] extraStreamMetadataFormatClassNames,
+            boolean supportsStandardImageMetadataFormat, String nativeImageMetadataFormatName,
+            String nativeImageMetadataFormatClassName, String[] extraImageMetadataFormatNames,
+            String[] extraImageMetadataFormatClassNames) {
         super(vendorName, version, names, suffixes, MIMETypes, pluginClassName,
                 supportsStandardStreamMetadataFormat, nativeStreamMetadataFormatName,
                 nativeStreamMetadataFormatClassName, extraStreamMetadataFormatNames,
@@ -109,8 +131,8 @@ public abstract class ImageReaderSpi extends ImageReaderWriterSpi {
     }
 
     /**
-     * Gets an array of Class objects whose types can be used 
-     * as input for this reader.
+     * Gets an array of Class objects whose types can be used as input for this
+     * reader.
      * 
      * @return the input types.
      */
@@ -119,66 +141,62 @@ public abstract class ImageReaderSpi extends ImageReaderWriterSpi {
     }
 
     /**
-     * Returns true if the format of source object is
-     * supported by this reader.
+     * Returns true if the format of source object is supported by this reader.
      * 
-     * @param source the source object to be decoded 
-     * (for example an ImageInputStream).
-     * 
-     * @return true if the format of source object is
-     * supported by this reader, false otherwise.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param source
+     *            the source object to be decoded (for example an
+     *            ImageInputStream).
+     * @return true, if the format of source object is supported by this reader,
+     *         false otherwise.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public abstract boolean canDecodeInput(Object source) throws IOException;
 
     /**
-     * Returns an instance of the ImageReader implementation for
-     * this service provider.
+     * Returns an instance of the ImageReader implementation for this service
+     * provider.
      * 
      * @return the ImageReader.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public ImageReader createReaderInstance() throws IOException {
         return createReaderInstance(null);
     }
 
     /**
-     * Returns an instance of the ImageReader implementation for
-     * this service provider.
+     * Returns an instance of the ImageReader implementation for this service
+     * provider.
      * 
-     * @param extension the a plugin specific extension object, or null.
-     * 
+     * @param extension
+     *            the a plug-in specific extension object, or null.
      * @return the ImageReader.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public abstract ImageReader createReaderInstance(Object extension) throws IOException;
 
     /**
-     * Checks whether or not the specified ImageReader object 
-     * is an instance of the ImageReader associated with this 
-     * service provider or not.
+     * Checks whether or not the specified ImageReader object is an instance of
+     * the ImageReader associated with this service provider or not.
      * 
-     * @param reader the ImageReader.
-     * 
-     * @return true, if the specified ImageReader object 
-     * is an instance of the ImageReader associated with this 
-     * service provider, false otherwise.
+     * @param reader
+     *            the ImageReader.
+     * @return true, if the specified ImageReader object is an instance of the
+     *         ImageReader associated with this service provider, false
+     *         otherwise.
      */
     public boolean isOwnReader(ImageReader reader) {
         throw new UnsupportedOperationException("Not supported yet");
     }
 
     /**
-     * Gets an array of strings with names of the ImageWriterSpi 
-     * classes that support the internal metadata representation 
-     * used by the ImageReader of this service provider, or null if 
-     * there are no such ImageWriters.
+     * Gets an array of strings with names of the ImageWriterSpi classes that
+     * support the internal metadata representation used by the ImageReader of
+     * this service provider, or null if there are no such ImageWriters.
      * 
-     * @return an array of strings with names of the ImageWriterSpi 
-     * classes.
+     * @return the array of strings with names of the ImageWriterSpi classes.
      */
     public String[] getImageWriterSpiNames() {
         throw new UnsupportedOperationException("Not supported yet");

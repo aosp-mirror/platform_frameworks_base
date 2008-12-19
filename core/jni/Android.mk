@@ -11,6 +11,10 @@ else
 	LOCAL_CFLAGS += -DPACKED=""
 endif
 
+ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
+  LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
+endif
+
 LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
 	AndroidRuntime.cpp \
@@ -45,7 +49,7 @@ LOCAL_SRC_FILES:= \
 	android_net_wifi_Wifi.cpp \
 	android_nio_utils.cpp \
 	android_pim_EventRecurrence.cpp \
-	android_pim_Time.cpp \
+	android_text_format_Time.cpp \
 	android_security_Md5MessageDigest.cpp \
 	android_util_AssetManager.cpp \
 	android_util_Binder.cpp \
@@ -84,7 +88,9 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Shader.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Xfermode.cpp \
+	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
+	android_media_AudioTrack.cpp \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
 	android_hardware_SensorManager.cpp \
@@ -100,6 +106,7 @@ LOCAL_SRC_FILES:= \
 	android_bluetooth_ScoSocket.cpp \
 	android_server_BluetoothDeviceService.cpp \
 	android_server_BluetoothEventLoop.cpp \
+	android_server_BluetoothA2dpService.cpp \
 	android_message_digest_sha1.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	android_location_GpsLocationProvider.cpp \
@@ -109,7 +116,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
 	$(LOCAL_PATH)/android/graphics \
-	$(call include-path-for, corecg graphics) \
+	$(call include-path-for, bluedroid corecg graphics) \
 	$(call include-path-for, libhardware)/hardware \
 	$(LOCAL_PATH)/../../include/ui \
 	$(LOCAL_PATH)/../../include/utils \
@@ -128,6 +135,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libnetutils \
 	libui \
+	libskiagl \
 	libsgl \
 	libcorecg \
 	libsqlite \
@@ -152,15 +160,15 @@ LOCAL_CFLAGS += -DHAVE_BLUETOOTH
 LOCAL_SHARED_LIBRARIES += libbluedroid libdbus
 endif
 
-ifeq ($(TARGET_ARCH),arm)
+ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += \
 	libdl
 endif
 
 LOCAL_LDLIBS += -lpthread -ldl
 
-ifeq ($(TARGET_OS),linux)
-ifeq ($(TARGET_ARCH),x86)
+ifeq ($(TARGET_SIMULATOR),true)
+ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
 LOCAL_LDLIBS += -lrt
 endif
 endif

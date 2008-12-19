@@ -25,8 +25,8 @@
 #include <private/utils/futex_synchro.h>
 
 
-// This futex glue code is need on desktop linux, but is part of klibc on ARM
-#if !defined(__arm__)
+// This futex glue code is need on desktop linux, but is already part of bionic.
+#if !defined(HAVE_FUTEX_WRAPPERS)
 
 #include <sys/syscall.h>
 typedef unsigned int u32;
@@ -76,7 +76,7 @@ int __atomic_cmpxchg(int old, int _new, volatile int *ptr);
 int __atomic_swap(int _new, volatile int *ptr);
 int __atomic_dec(volatile int *ptr);
 
-#endif // !defined(__arm__)
+#endif // !defined(HAVE_FUTEX_WRAPPERS)
 
 
 // lock states

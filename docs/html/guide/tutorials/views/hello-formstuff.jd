@@ -1,4 +1,6 @@
 page.title=Hello, Form Stuff
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>This page introduces a variety of widgets, like image buttons,
@@ -258,4 +260,3 @@ use <code>setChecked(true)</code> or <code>toggle()</code>. </p>
 	<li>{@link android.widget.ToggleButton}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>

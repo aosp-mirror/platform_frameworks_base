@@ -25,9 +25,10 @@ page.title=Android Application Framework FAQ
 <h2>Do all the Activities and Services of an application run in a
 single process?</h2>
 
-<p>All Activities and Services in an application run in a single
-process by default. The <a href="{@docRoot}reference/android/R.styleable.html#AndroidManifestActivity_process">android:process</a> attribute can be used to
-explicitly place a component (Activity/Service) in another process.</p>
+<p>All Activities and Services in an application run in a single process by
+default. If needed, you can declare an <code>android:process</code> attribute
+in your manifest file, to explicitly place a component (Activity/Service) in
+another process.</p>
 
 <!-- ------------------------------------------------------------------ -->
 
@@ -58,8 +59,8 @@ application?</h2>
 <p>To share primitive data between Activities/Services in an
 application, use Intent.putExtras(). For passing primitive data that
 needs to persist use the 
-<a href="{@docRoot}devel/data/preferences.html">Application
-Preferences</a>.</p>
+<a href="{@docRoot}guide/topics/data/data-storage.html#preferences">
+Preferences</a> storage mechanism.</p>
 
 <h3>Non-Persistent Objects</h3>
 
@@ -118,10 +119,11 @@ following approaches are recommended:
 </ul>
 </p>
 
-<p>If the shared data needs to be retained across points where the
-application process can be killed, then place that data in persistent
-storage like Application Preferences, SQLite DB, Files or ContentProviders. Please refer
-to the <a href="{@docRoot}devel/data.html">Storing, Retrieving and Exposing Data</a> for further details on how to use these components.</p>
+<p>If the shared data needs to be retained across points where the application
+process can be killed, then place that data in persistent storage like
+Application Preferences, SQLite DB, Files or ContentProviders. Please refer to
+the <a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>
+for further details on how to use these components.</p>
 
 
 <!-- ------------------------------------------------------------------ -->
@@ -143,13 +145,14 @@ call.</p>
 <h2>If an Activity starts a remote service, is there any way for the
 Service to pass a message back to the Activity?</h2>
 
-<p>The remote service can define a callback interface and register
-it with the clients to callback into the clients. The 
-<a href="{@docRoot}reference/android/os/RemoteCallbackList.html">RemoteCallbackList</a> provides methods to register and
-unregister clients with the service, and send and receive messages.</p>
+<p>The remote service can define a callback interface and register it with the
+clients to callback into the clients. The 
+{@link android.os.RemoteCallbackList RemoteCallbackList} class provides methods to
+register and unregister clients with the service, and send and receive
+messages.</p>
 
-<p>The sample code for remote service callbacks is given in 
-<a href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">ApiDemos/RemoteService</a></p>
+<p>The sample code for remote service callbacks is given in <a
+href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">ApiDemos/RemoteService</a></p>
 
 <!-- ------------------------------------------------------------------ -->
 
@@ -157,9 +160,8 @@ unregister clients with the service, and send and receive messages.</p>
 
 <h2>How to avoid getting the Application not responding dialog?</h2>
 
-<p>Please check the <a href="{@docRoot}toolbox/responsiveness.html">Application
-Responsiveness</a> section to design your application for
-better responsiveness:</p>
+<p>Please read the <a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a> 
+document.</p>
 
 
 <!-- ------------------------------------------------------------------ -->

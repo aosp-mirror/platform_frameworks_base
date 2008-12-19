@@ -47,8 +47,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.BatteryManager;
 import android.provider.Settings;
-import android.provider.Settings.Gservices;
 import android.util.Log;
 import android.text.TextUtils;
 
@@ -72,7 +72,7 @@ import java.io.PrintWriter;
 public class WifiService extends IWifiManager.Stub {
     private static final String TAG = "WifiService";
     private static final boolean DBG = false;
-    private static final Pattern scanResultPattern = Pattern.compile("\t{1,}");
+    private static final Pattern scanResultPattern = Pattern.compile("\t+");
     private final WifiStateTracker mWifiStateTracker;
 
     private Context mContext;
@@ -81,15 +81,16 @@ public class WifiService extends IWifiManager.Stub {
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
     private static final int IDLE_REQUEST = 0;
+    private boolean mScreenOff;
     private boolean mDeviceIdle;
-    private boolean mChargerAttached;
-    private final LockList mLocks = new LockList();
+    private int mPluggedType;
 
+    private final LockList mLocks = new LockList();
     /**
-     * See {@link Gservices#WIFI_IDLE_MS}. This is the default value if a
-     * Gservices value is not present.
+     * See {@link Settings.System#WIFI_IDLE_MS}. This is the default value if a
+     * Settings.System value is not present.
      */
-    private long mIdleMillis = 2 * 60 * 1000; /* 2 minutes */
+    private static final long DEFAULT_IDLE_MILLIS = 2 * 60 * 1000; /* 2 minutes */
 
     private static final String WAKELOCK_TAG = "WifiService";
 
@@ -99,10 +100,11 @@ public class WifiService extends IWifiManager.Stub {
      * observed to take about 5 seconds under normal circumstances. This
      * provides a bit of extra margin.
      * <p>
-     * See {@link Gservices#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}.
-     * This is the default value if a Gservices value is not present.
+     * See {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}.
+     * This is the default value if a Settings.System value is not present.
      */
-    private int mWakelockTimeout = 8000;
+    private static final int DEFAULT_WAKELOCK_TIMEOUT = 8000;
+
     // Wake lock used by driver-stop operation
     private static PowerManager.WakeLock mDriverStopWakeLock;
     // Wake lock used by other operations
@@ -151,6 +153,12 @@ public class WifiService extends IWifiManager.Stub {
     private char[] mScanResultBuffer;
     private boolean mNeedReconfig;
 
+    /**
+     * Number of allowed radio frequency channels in various regulatory domains.
+     * This list is sufficient for 802.11b/g networks (2.4GHz range).
+     */
+    private static int[] sValidRegulatoryChannelCounts = new int[] {11, 13, 14};
+
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
 
@@ -164,11 +172,6 @@ public class WifiService extends IWifiManager.Stub {
         mIsHiddenNetworkPresent = new HashMap<Integer, Boolean>();
         mNumHiddenNetworkPresent = 0;
 
-        ContentResolver contentResolver = context.getContentResolver();
-        mIdleMillis = Gservices.getLong(contentResolver, Gservices.WIFI_IDLE_MS, mIdleMillis);
-        mWakelockTimeout = Gservices.getInt(contentResolver,
-                Gservices.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS, mWakelockTimeout);
-        
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
             SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
                 /*
@@ -214,7 +217,7 @@ public class WifiService extends IWifiManager.Stub {
         Log.d(TAG, "WifiService starting up with Wi-Fi " +
             (wifiEnabled ? "enabled" : "disabled"));
         registerForBroadcasts();
-        setWifiEnabledBlocking(wifiEnabled);
+        setWifiEnabledBlocking(wifiEnabled, false);
     }
 
     /**
@@ -369,16 +372,16 @@ public class WifiService extends IWifiManager.Stub {
     private boolean getPersistedWifiEnabled() {
         final ContentResolver cr = mContext.getContentResolver();
         try {
-            return Settings.System.getInt(cr, Settings.System.WIFI_ON) == 1;
+            return Settings.Secure.getInt(cr, Settings.Secure.WIFI_ON) == 1;
         } catch (Settings.SettingNotFoundException e) {
-            Settings.System.putInt(cr, Settings.System.WIFI_ON, 0);
+            Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, 0);
             return false;
         }
     }
 
     private void persistWifiEnabled(boolean enabled) {
         final ContentResolver cr = mContext.getContentResolver();
-        Settings.System.putInt(cr, Settings.System.WIFI_ON, enabled ? 1 : 0);
+        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, enabled ? 1 : 0);
     }
 
     NetworkStateTracker getNetworkStateTracker() {
@@ -433,9 +436,7 @@ public class WifiService extends IWifiManager.Stub {
          */
         synchronized (mWifiHandler) {
             mWakeLock.acquire();
-
-            mWifiHandler.obtainMessage(
-                enable ? MESSAGE_ENABLE_WIFI : MESSAGE_DISABLE_WIFI).sendToTarget();
+            sendEnableMessage(enable, true);
         }
 
         return true;
@@ -444,10 +445,11 @@ public class WifiService extends IWifiManager.Stub {
     /**
      * Enables/disables Wi-Fi synchronously.
      * @param enable {@code true} to turn Wi-Fi on, {@code false} to turn it off.
+     * @param persist {@code true} if the setting should be persisted.
      * @return {@code true} if the operation succeeds (or if the existing state
      *         is the same as the requested state)
      */
-    private boolean setWifiEnabledBlocking(boolean enable) {
+    private boolean setWifiEnabledBlocking(boolean enable, boolean persist) {
         final int eventualWifiState = enable ? WIFI_STATE_ENABLED : WIFI_STATE_DISABLED;
 
         if (mWifiState == eventualWifiState) {
@@ -501,13 +503,17 @@ public class WifiService extends IWifiManager.Stub {
 
         // Success!
 
-        persistWifiEnabled(enable);
+        if (persist) {
+            persistWifiEnabled(enable);
+        }
         updateWifiState(eventualWifiState);
 
         /*
-         * Initiliaze the hidden networs state if the Wi-Fi is being turned on.
+         * Initialize the hidden networks state and the number of allowed
+         * radio channels if Wi-Fi is being turned on.
          */
         if (enable) {
+            mWifiStateTracker.setNumAllowedChannels();
             initializeHiddenNetworksState();
         }
 
@@ -799,7 +805,7 @@ public class WifiService extends IWifiManager.Stub {
          */
         int netId = config.networkId;
         boolean newNetwork = netId == -1;
-        boolean doReconfig = false;
+        boolean doReconfig;
         int currentPriority;
         // networkId of -1 means we want to create a new network
         if (newNetwork) {
@@ -1350,6 +1356,78 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
+     * Set the number of radio frequency channels that are allowed to be used
+     * in the current regulatory domain. This method should be used only
+     * if the correct number of channels cannot be determined automatically
+     * for some reason. If the operation is successful, the new value is
+     * persisted as a System setting.
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * {@code numChannels} is outside the valid range.
+     */
+    public boolean setNumAllowedChannels(int numChannels) {
+        enforceChangePermission();
+        /*
+         * Validate the argument. We'd like to let the Wi-Fi driver do this,
+         * but if Wi-Fi isn't currently enabled, that's not possible, and
+         * we want to persist the setting anyway,so that it will take
+         * effect when Wi-Fi does become enabled.
+         */
+        boolean found = false;
+        for (int validChan : sValidRegulatoryChannelCounts) {
+            if (validChan == numChannels) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                               Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                               numChannels);
+        mWifiStateTracker.setNumAllowedChannels(numChannels);
+        return true;
+    }
+
+    /**
+     * Return the number of frequency channels that are allowed
+     * to be used in the current regulatory domain.
+     * @return the number of allowed channels, or {@code -1} if an error occurs
+     */
+    public int getNumAllowedChannels() {
+        int numChannels;
+
+        enforceAccessPermission();
+        synchronized (mWifiStateTracker) {
+            /*
+             * If we can't get the value from the driver (e.g., because
+             * Wi-Fi is not currently enabled), get the value from
+             * Settings.
+             */
+            numChannels = WifiNative.getNumAllowedChannelsCommand();
+            if (numChannels < 0) {
+                numChannels = Settings.Secure.getInt(mContext.getContentResolver(),
+                                                     Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                                                     -1);
+            }
+        }
+        return numChannels;
+    }
+
+    /**
+     * Return the list of valid values for the number of allowed radio channels
+     * for various regulatory domains.
+     * @return the list of channel counts
+     */
+    public int[] getValidChannelCounts() {
+        enforceAccessPermission();
+        return sValidRegulatoryChannelCounts;
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
@@ -1364,28 +1442,82 @@ public class WifiService extends IWifiManager.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
+            long idleMillis = Settings.System.getLong(mContext.getContentResolver(),
+                                                  Settings.System.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
+            int stayAwakeConditions =
+                    Settings.System.getInt(mContext.getContentResolver(),
+                                           Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 /* do nothing, we'll check isAirplaneModeOn later. */
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
+                mScreenOff = false;
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                long triggerTime = System.currentTimeMillis() + mIdleMillis;
-                mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                mScreenOff = true;
+                /*
+                 * Set a timer to put Wi-Fi to sleep, but only if the screen is off
+                 * AND the "stay on while plugged in" setting doesn't match the
+                 * current power conditions (i.e, not plugged in, plugged in to USB,
+                 * or plugged in to AC).
+                 */
+                if (!shouldStayAwake(stayAwakeConditions, mPluggedType)) {
+                    long triggerTime = System.currentTimeMillis() + idleMillis;
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                }
                 /* we can return now -- there's nothing to do until we get the idle intent back */
                 return;
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
                 mDeviceIdle = true;
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                int plugged = intent.getIntExtra("plugged", 0);
-                mChargerAttached = (plugged != 0);
+                /*
+                 * Set a timer to put Wi-Fi to sleep, but only if the screen is off
+                 * AND we are transitioning from a state in which the device was supposed
+                 * to stay awake and a state in which it is not supposed to stay awake.
+                 * If "stay awake" state is not changing, we do nothing, to avoid resetting
+                 * the already-set timer.
+                 */
+                int pluggedType = intent.getIntExtra("plugged", 0);
+                if (mScreenOff && shouldStayAwake(stayAwakeConditions, mPluggedType) &&
+                        !shouldStayAwake(stayAwakeConditions, pluggedType)) {
+                    long triggerTime = System.currentTimeMillis() + idleMillis;
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    mPluggedType = pluggedType;
+                    return;
+                }
+                mPluggedType = pluggedType;
             } else {
                 return;
             }
 
             updateWifiState();
         }
+
+        /**
+         * Determine whether the bit value corresponding to {@code pluggedType} is set in
+         * the bit string {@code stayAwakeConditions}. Because a {@code pluggedType} value
+         * of {@code 0} isn't really a plugged type, but rather an indication that the
+         * device isn't plugged in at all, there is no bit value corresponding to a
+         * {@code pluggedType} value of {@code 0}. That is why we shift by
+         * {@code pluggedType&nbsp;&mdash;&nbsp;1} instead of by {@code pluggedType}.
+         * @param stayAwakeConditions a bit string specifying which "plugged types" should
+         * keep the device (and hence Wi-Fi) awake.
+         * @param pluggedType the type of plug (USB, AC, or none) for which the check is
+         * being made
+         * @return {@code true} if {@code pluggedType} indicates that the device is
+         * supposed to stay awake, {@code false} otherwise.
+         */
+        private boolean shouldStayAwake(int stayAwakeConditions, int pluggedType) {
+            return (stayAwakeConditions & pluggedType) != 0;
+        }
     };
+
+    private void sendEnableMessage(boolean enable, boolean persist) {
+        Message msg = Message.obtain(mWifiHandler,
+                                     (enable ? MESSAGE_ENABLE_WIFI : MESSAGE_DISABLE_WIFI),
+                                     (persist ? 1 : 0), 0);
+        msg.sendToTarget();
+    }
 
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
@@ -1399,17 +1531,22 @@ public class WifiService extends IWifiManager.Stub {
             if (wifiShouldBeEnabled) {
                 if (wifiShouldBeStarted) {
                     mWakeLock.acquire();
-                    mWifiHandler.obtainMessage(MESSAGE_ENABLE_WIFI).sendToTarget();
+                    sendEnableMessage(true, false);
                     mWakeLock.acquire();
-                    mWifiHandler.obtainMessage(MESSAGE_START_WIFI).sendToTarget();
+                    mWifiHandler.sendEmptyMessage(MESSAGE_START_WIFI);
                 } else {
+                    int wakeLockTimeout =
+                            Settings.Secure.getInt(
+                                    mContext.getContentResolver(),
+                                    Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
+                                    DEFAULT_WAKELOCK_TIMEOUT);
                     mDriverStopWakeLock.acquire();
-                    mWifiHandler.obtainMessage(MESSAGE_STOP_WIFI).sendToTarget();
-                    mWifiHandler.sendEmptyMessageDelayed(MESSAGE_RELEASE_WAKELOCK, mWakelockTimeout);
+                    mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
+                    mWifiHandler.sendEmptyMessageDelayed(MESSAGE_RELEASE_WAKELOCK, wakeLockTimeout);
                 }
             } else {
                 mWakeLock.acquire();
-                mWifiHandler.obtainMessage(MESSAGE_DISABLE_WIFI).sendToTarget();
+                sendEnableMessage(false, false);
             }
         }
     }
@@ -1454,24 +1591,24 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
 
                 case MESSAGE_ENABLE_WIFI: {
-                    setWifiEnabledBlocking(true);
+                    setWifiEnabledBlocking(true, msg.arg1 == 1);
                     /* fall through */
                 }
 
                 case MESSAGE_START_WIFI: {
-                    WifiNative.startDriverCommand();
+                    mWifiStateTracker.startDriver();
                     mWakeLock.release();
                     break;
                 }
 
                 case MESSAGE_DISABLE_WIFI: {
-                    setWifiEnabledBlocking(false);
+                    setWifiEnabledBlocking(false, msg.arg1 == 1);
                     mWakeLock.release();
                     break;
                 }
 
                 case MESSAGE_STOP_WIFI: {
-                    WifiNative.stopDriverCommand();
+                    mWifiStateTracker.stopDriver();
                     // don't release wakelock
                     break;
                 }
@@ -1487,7 +1624,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
     }
-    
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
@@ -1498,6 +1635,9 @@ public class WifiService extends IWifiManager.Stub {
             return;
         }
         pw.println("Wi-Fi is " + stateName(mWifiState));
+        pw.println("stay-awake conditions: " +
+                Settings.System.getInt(mContext.getContentResolver(),
+                                       Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));
         pw.println();
 
         pw.println("Latest scan results:");

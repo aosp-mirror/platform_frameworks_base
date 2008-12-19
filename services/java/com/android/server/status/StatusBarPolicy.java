@@ -22,6 +22,7 @@ import com.android.internal.telephony.SimCard;
 import com.android.internal.telephony.TelephonyIntents;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
@@ -39,11 +40,11 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.pim.DateFormat;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -154,6 +155,8 @@ public class StatusBarPolicy {
     // bluetooth device status
     private IBinder mBluetoothIcon;
     private IconData mBluetoothData;
+    private int mBluetoothHeadsetState;
+    private int mBluetoothA2dpState;
 
     // wifi
     private static final int[] sWifiSignalImages = new int[] {
@@ -196,6 +199,9 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
                 updateClock();
             }
+            else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                updateClock();
+            }
             else if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
                 mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
@@ -212,7 +218,8 @@ public class StatusBarPolicy {
             }
             else if (action.equals(BluetoothIntent.ENABLED_ACTION) ||
                     action.equals(BluetoothIntent.DISABLED_ACTION) ||
-                    action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ) {
+                    action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
+                    action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
                 updateBluetooth(intent);
             }
             else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION) ||
@@ -315,6 +322,7 @@ public class StatusBarPolicy {
         // Register for Intent broadcasts for...
         filter.addAction(Intent.ACTION_TIME_TICK);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
@@ -324,7 +332,9 @@ public class StatusBarPolicy {
         filter.addAction(BluetoothIntent.ENABLED_ACTION);
         filter.addAction(BluetoothIntent.DISABLED_ACTION);
         filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
+        filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
@@ -652,7 +662,11 @@ public class StatusBarPolicy {
             return;
         }
 
-        if (-1 == asu)      asu = 0;
+        // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
+        // asu = 0 (-113dB or less) is very weak
+        // signal, its better to show 0 bars to the user in such cases.
+        // asu = 99 is a special case, where the signal strength is unknown.
+        if (asu <= 0 || asu == 99) asu = 0;
         else if (asu >= 16) asu = 4;
         else if (asu >= 8)  asu = 3;
         else if (asu >= 4)  asu = 2;
@@ -753,10 +767,13 @@ public class StatusBarPolicy {
     }
 
     private final void updateBluetooth(Intent intent) {
-        boolean visible;
+        boolean visible = false;
         if (intent == null) {  // Initialize
-            visible = ((BluetoothDevice)
-                mContext.getSystemService(Context.BLUETOOTH_SERVICE)).isEnabled();
+            BluetoothDevice bluetooth =
+                (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+            if (bluetooth != null) {
+                visible = bluetooth.isEnabled();
+            }
             mService.setIconVisibility(mBluetoothIcon, visible);
             return;
         }
@@ -770,13 +787,20 @@ public class StatusBarPolicy {
             visible = true;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             visible = true;
-            int state = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
-                                           BluetoothHeadset.STATE_ERROR);
-            if (state == BluetoothHeadset.STATE_CONNECTED) {
-                iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
-            }
+            mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
+                    BluetoothHeadset.STATE_ERROR);
+        } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+            visible = true;
+            mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
+                    BluetoothA2dp.STATE_DISCONNECTED);
         } else {
             return;
+        }
+        
+        if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED ||
+                mBluetoothA2dpState == BluetoothA2dp.STATE_CONNECTED ||
+                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING) {
+            iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
         }
 
         mBluetoothData.iconId = iconId;
@@ -796,8 +820,14 @@ public class StatusBarPolicy {
                 mService.setIconVisibility(mWifiIcon, false);
             }
             
+        } else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+            final boolean enabled = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED,
+                                                           false);
+            if (!enabled) {
+                mService.setIconVisibility(mWifiIcon, false);
+            }
         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            
+
             final NetworkInfo networkInfo = (NetworkInfo) 
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             

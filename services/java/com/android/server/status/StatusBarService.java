@@ -147,10 +147,11 @@ public class StatusBarService extends IStatusBar.Stub
     final Context mContext;
     final Display mDisplay;
     StatusBarView mStatusBarView;
+    int mPixelFormat;
     H mHandler = new H();
     ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
     NotificationCallbacks mNotificationCallbacks;
-
+    
     // All accesses to mIconMap and mNotificationData are syncronized on those objects,
     // but this is only so dump() can work correctly.  Modifying these outside of the UI
     // thread will not work, there are places in the code that unlock and reaquire between
@@ -181,7 +182,7 @@ public class StatusBarService extends IStatusBar.Stub
     View mNoNotificationsTitle;
     TextView mSpnLabel;
     TextView mPlmnLabel;
-    View mClearButton;
+    TextView mClearButton;
     CloseDragHandle mCloseView;
     int[] mCloseLocation = new int[2];
     boolean mExpanded;
@@ -252,10 +253,10 @@ public class StatusBarService extends IStatusBar.Stub
         sb.mService = this;
 
         // figure out which pixel-format to use for the status bar.
-        int pixelFormat = PixelFormat.TRANSLUCENT;
+        mPixelFormat = PixelFormat.TRANSLUCENT;
         Drawable bg = sb.getBackground();
         if (bg != null) {
-            pixelFormat = bg.getOpacity();
+            mPixelFormat = bg.getOpacity();
         }
 
         mStatusBarView = sb;
@@ -273,7 +274,7 @@ public class StatusBarService extends IStatusBar.Stub
         mLatestTitle = expanded.findViewById(R.id.latestTitle);
         mLatestItems = (LinearLayout)expanded.findViewById(R.id.latestItems);
         mNoNotificationsTitle = expanded.findViewById(R.id.noNotificationsTitle);
-        mClearButton = expanded.findViewById(R.id.clear_all_button);
+        mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mSpnLabel = (TextView)expanded.findViewById(R.id.spnLabel);
         mPlmnLabel = (TextView)expanded.findViewById(R.id.plmnLabel);
@@ -293,18 +294,6 @@ public class StatusBarService extends IStatusBar.Stub
         mTrackingView.mService = this;
         mCloseView = (CloseDragHandle)mTrackingView.findViewById(R.id.close);
         mCloseView.mService = this;
-
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                25,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
-                pixelFormat);
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.setTitle("StatusBar");
-
-        WindowManagerImpl.getDefault().addView(sb, lp);
 
         // add the more icon for the notifications
         IconData moreData = IconData.makeIcon(null, context.getPackageName(),
@@ -326,11 +315,26 @@ public class StatusBarService extends IStatusBar.Stub
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 
+    public void systemReady() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.FILL_PARENT,
+                25,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
+                mPixelFormat);
+        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        lp.setTitle("StatusBar");
+
+        WindowManagerImpl.getDefault().addView(mStatusBarView, lp);
+    }
+    
     // ================================================================================
     // From IStatusBar
     // ================================================================================
@@ -665,7 +669,12 @@ public class StatusBarService extends IStatusBar.Stub
                 notification.data = n;
                 updateNotificationView(notification, oldData);
             }
-            if (n.tickerText != null
+            // Show the ticker if one is requested, and the text is different
+            // than the currently displayed ticker.  Also don't do this
+            // until status bar window is attached to the window manager,
+            // because...  well, what's the point otherwise?  And trying to
+            // run a ticker without being attached will crash!
+            if (n.tickerText != null && mStatusBarView.getWindowToken() != null
                     && (oldData == null
                         || oldData.tickerText == null
                         || !CharSequences.equals(oldData.tickerText, n.tickerText))) {
@@ -788,6 +797,14 @@ public class StatusBarService extends IStatusBar.Stub
         }
     }
 
+    View.OnFocusChangeListener mFocusChangeListener = new View.OnFocusChangeListener() {
+        public void onFocusChange(View v, boolean hasFocus) {
+            // Because 'v' is a ViewGroup, all its children will be (un)selected
+            // too, which allows marqueeing to work.
+            v.setSelected(hasFocus);
+        }
+    };
+    
     View makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
         NotificationData n = notification.data;
         RemoteViews remoteViews = n.contentView;
@@ -803,6 +820,7 @@ public class StatusBarService extends IStatusBar.Stub
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
         if (contentIntent != null) {
             content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.id));
@@ -862,18 +880,19 @@ public class StatusBarService extends IStatusBar.Stub
             mNotificationData.update(notification);
             try {
                 n.contentView.reapply(mContext, notification.contentView);
+
+                // update the contentIntent
+                ViewGroup content = (ViewGroup)notification.view.findViewById(
+                        com.android.internal.R.id.content);
+                PendingIntent contentIntent = n.contentIntent;
+                if (contentIntent != null) {
+                    content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.id));
+                }
             }
             catch (RuntimeException e) {
-                Log.e(TAG, "couldn't reapply views for package "
-                        + n.contentView.getPackage(), e);
-            }
-
-            // update the contentIntent
-            ViewGroup content = (ViewGroup)notification.view.findViewById(
-                    com.android.internal.R.id.content);
-            PendingIntent contentIntent = n.contentIntent;
-            if (contentIntent != null) {
-                content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.id));
+                // It failed to add cleanly.  Log, and remove the view from the panel.
+                Log.w(TAG, "couldn't reapply views for package " + n.contentView.getPackage(), e);
+                removeNotificationView(notification);
             }
         } else {
             mNotificationData.update(notification);
@@ -1426,7 +1445,8 @@ public class StatusBarService extends IStatusBar.Stub
                 ViewGroup.LayoutParams.FILL_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 pixelFormat);
 //        lp.token = mStatusBarView.getWindowToken();
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
@@ -1629,6 +1649,9 @@ public class StatusBarService extends IStatusBar.Stub
                         intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
                         intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
             }
+            else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                updateResources();
+            }
         }
     };
 
@@ -1657,6 +1680,18 @@ public class StatusBarService extends IStatusBar.Stub
             mSpnLabel.setText("");
             mSpnLabel.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Reload some of our resources when the configuration changes.
+     * 
+     * We don't reload everything when the configuration changes -- we probably
+     * should, but getting that smooth is tough.  Someday we'll fix that.  In the
+     * meantime, just update the things that we know change.
+     */
+    void updateResources() {
+        mClearButton.setText(mContext.getText(R.string.status_bar_clear_all_button));
+        Log.d(TAG, "updateResources");
     }
 
     //

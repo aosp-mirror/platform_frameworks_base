@@ -18,44 +18,49 @@
  * @author Dmitry A. Durnev
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.io.Serializable;
 
 import org.apache.harmony.misc.HashCode;
 
-
 /**
- * The Insets class represents the borders of a container. 
- * This class describes the space that a container should leave at each edge:
- * the top, the bottom, the right side, and the left side. 
- * The space can be filled with a border, a blank space, or a title.
+ * The Insets class represents the borders of a container. This class describes
+ * the space that a container should leave at each edge: the top, the bottom,
+ * the right side, and the left side. The space can be filled with a border, a
+ * blank space, or a title.
+ * 
+ * @since Android 1.0
  */
 public class Insets implements Cloneable, Serializable {
 
-    /** The Constant serialVersionUID. */
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -2272572637695466749L;
 
     /**
-     * The top inset indicates the size of the space added to the 
-     * top of the rectangle.
+     * The top inset indicates the size of the space added to the top of the
+     * rectangle.
      */
     public int top;
 
-    /** 
-     * The left inset indicates the size of the space added to the 
-     * left side of the rectangle.
+    /**
+     * The left inset indicates the size of the space added to the left side of
+     * the rectangle.
      */
     public int left;
 
-    /** 
-     * The bottom inset indicates the size of the space subtracted from 
-     * the bottom of the rectangle.
+    /**
+     * The bottom inset indicates the size of the space subtracted from the
+     * bottom of the rectangle.
      */
     public int bottom;
 
-    /** The right inset indicates the size of the space subtracted from 
-     * the right side of the rectangle. 
+    /**
+     * The right inset indicates the size of the space subtracted from the right
+     * side of the rectangle.
      */
     public int right;
 
@@ -63,10 +68,14 @@ public class Insets implements Cloneable, Serializable {
      * Instantiates a new Inset object with the specified top, left, bottom,
      * right parameters.
      * 
-     * @param top the top inset.
-     * @param left the left inset.
-     * @param bottom the bottom inset.
-     * @param right the right inset.
+     * @param top
+     *            the top inset.
+     * @param left
+     *            the left inset.
+     * @param bottom
+     *            the bottom inset.
+     * @param right
+     *            the right inset.
      */
     public Insets(int top, int left, int bottom, int right) {
         setValues(top, left, bottom, right);
@@ -100,10 +109,10 @@ public class Insets implements Cloneable, Serializable {
     /**
      * Checks if this Insets object is equal to the specified object.
      * 
-     * @param o the Object to be compared.
-     * 
-     * @return true, if the object is an Insets object whose data values
-     * are equal to those of this object, false otherwise.
+     * @param o
+     *            the Object to be compared.
+     * @return true, if the object is an Insets object whose data values are
+     *         equal to those of this object, false otherwise.
      */
     @Override
     public boolean equals(Object o) {
@@ -111,9 +120,8 @@ public class Insets implements Cloneable, Serializable {
             return true;
         }
         if (o instanceof Insets) {
-            Insets i = (Insets) o;
-            return ((i.left == left) && (i.bottom == bottom) &&
-                    (i.right == right) && (i.top == top));
+            Insets i = (Insets)o;
+            return ((i.left == left) && (i.bottom == bottom) && (i.right == right) && (i.top == top));
         }
         return false;
     }
@@ -125,23 +133,26 @@ public class Insets implements Cloneable, Serializable {
      */
     @Override
     public String toString() {
-        /* The format is based on 1.5 release behavior 
-         * which can be revealed by the following code:
-         * System.out.println(new Insets(1, 2, 3, 4));
+        /*
+         * The format is based on 1.5 release behavior which can be revealed by
+         * the following code: System.out.println(new Insets(1, 2, 3, 4));
          */
 
-        return (getClass().getName() +
-                "[left=" + left + ",top=" + top + //$NON-NLS-1$ //$NON-NLS-2$
-                ",right=" + right + ",bottom="  + bottom + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return (getClass().getName() + "[left=" + left + ",top=" + top + //$NON-NLS-1$ //$NON-NLS-2$
+                ",right=" + right + ",bottom=" + bottom + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     /**
      * Sets top, left, bottom, and right insets to the specified values.
      * 
-     * @param top the top inset.
-     * @param left the left inset.
-     * @param bottom the bottom inset.
-     * @param right the right inset.
+     * @param top
+     *            the top inset.
+     * @param left
+     *            the left inset.
+     * @param bottom
+     *            the bottom inset.
+     * @param right
+     *            the right inset.
      */
     public void set(int top, int left, int bottom, int right) {
         setValues(top, left, bottom, right);
@@ -150,10 +161,14 @@ public class Insets implements Cloneable, Serializable {
     /**
      * Sets the values.
      * 
-     * @param top the top
-     * @param left the left
-     * @param bottom the bottom
-     * @param right the right
+     * @param top
+     *            the top.
+     * @param left
+     *            the left.
+     * @param bottom
+     *            the bottom.
+     * @param right
+     *            the right.
      */
     private void setValues(int top, int left, int bottom, int right) {
         this.top = top;
@@ -162,4 +177,3 @@ public class Insets implements Cloneable, Serializable {
         this.right = right;
     }
 }
-

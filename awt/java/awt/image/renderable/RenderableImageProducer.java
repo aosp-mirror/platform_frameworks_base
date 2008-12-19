@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image.renderable;
 
 import java.awt.image.ColorModel;
@@ -28,25 +29,35 @@ import java.awt.image.RenderedImage;
 import java.util.Vector;
 
 /**
- * The Class RenderableImageProducer provides the implementation for 
- * the image rendering.
+ * The Class RenderableImageProducer provides the implementation for the image
+ * rendering.
+ * 
+ * @since Android 1.0
  */
 public class RenderableImageProducer implements ImageProducer, Runnable {
 
-    /** The rbl. */
+    /**
+     * The rbl.
+     */
     RenderableImage rbl;
-    
-    /** The rc. */
+
+    /**
+     * The rc.
+     */
     RenderContext rc;
-    
-    /** The consumers. */
+
+    /**
+     * The consumers.
+     */
     Vector<ImageConsumer> consumers = new Vector<ImageConsumer>();
 
     /**
      * Instantiates a new renderable image producer.
      * 
-     * @param rdblImage the rdbl image
-     * @param rc the rc
+     * @param rdblImage
+     *            the rdbl image.
+     * @param rc
+     *            the rc.
      */
     public RenderableImageProducer(RenderableImage rdblImage, RenderContext rc) {
         this.rbl = rdblImage;
@@ -56,7 +67,8 @@ public class RenderableImageProducer implements ImageProducer, Runnable {
     /**
      * Sets the render context.
      * 
-     * @param rc the new render context
+     * @param rc
+     *            the new render context.
      */
     public synchronized void setRenderContext(RenderContext rc) {
         this.rc = rc;
@@ -72,16 +84,17 @@ public class RenderableImageProducer implements ImageProducer, Runnable {
         t.start();
     }
 
-    public void requestTopDownLeftRightResend(ImageConsumer ic) {}
+    public void requestTopDownLeftRightResend(ImageConsumer ic) {
+    }
 
     public synchronized void removeConsumer(ImageConsumer ic) {
-        if(ic != null) {
+        if (ic != null) {
             consumers.removeElement(ic);
         }
     }
 
     public synchronized void addConsumer(ImageConsumer ic) {
-        if(ic != null && !consumers.contains(ic)){
+        if (ic != null && !consumers.contains(ic)) {
             consumers.addElement(ic);
         }
     }
@@ -90,19 +103,19 @@ public class RenderableImageProducer implements ImageProducer, Runnable {
      * Creates the rendered image in a new thread.
      */
     public void run() {
-        if(rbl == null) {
+        if (rbl == null) {
             return;
         }
 
         RenderedImage rd;
-        if(rc != null) {
+        if (rc != null) {
             rd = rbl.createRendering(rc);
         } else {
             rd = rbl.createDefaultRendering();
         }
 
         ColorModel cm = rd.getColorModel();
-        if(cm == null) {
+        if (cm == null) {
             cm = ColorModel.getRGBdefault();
         }
 
@@ -112,17 +125,15 @@ public class RenderableImageProducer implements ImageProducer, Runnable {
 
         for (ImageConsumer c : consumers) {
             c.setDimensions(w, h);
-            c.setHints(ImageConsumer.TOPDOWNLEFTRIGHT |
-                    ImageConsumer.COMPLETESCANLINES |
-                    ImageConsumer.SINGLEFRAME |
-                    ImageConsumer.SINGLEPASS);
+            c.setHints(ImageConsumer.TOPDOWNLEFTRIGHT | ImageConsumer.COMPLETESCANLINES
+                    | ImageConsumer.SINGLEFRAME | ImageConsumer.SINGLEPASS);
         }
 
         int scanLine[] = new int[w];
         int pixel[] = null;
 
-        for(int y = 0; y < h; y++){
-            for(int x = 0; x < w; x++){
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
                 pixel = r.getPixel(x, y, pixel);
                 scanLine[x] = cm.getDataElement(pixel, 0);
             }
@@ -138,4 +149,3 @@ public class RenderableImageProducer implements ImageProducer, Runnable {
     }
 
 }
-

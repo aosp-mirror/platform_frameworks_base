@@ -27,16 +27,19 @@ namespace android {
 
 class PMemHeap;
 class MemoryHeapPmem;
+class SurfaceFlinger; 
 
 // ---------------------------------------------------------------------------
 
 class SurfaceHeapManager  : public RefBase
 {
 public:
-    SurfaceHeapManager(size_t clientHeapSize);
+    SurfaceHeapManager(const sp<SurfaceFlinger>& flinger, size_t clientHeapSize);
     virtual ~SurfaceHeapManager();
     virtual void onFirstRef();
-    sp<MemoryDealer> createHeap(int type);
+    /* use ISurfaceComposer flags eGPU|eHArdware|eSecure */
+    sp<MemoryDealer> createHeap(uint32_t flags=0, pid_t client_pid = 0,
+            const sp<MemoryDealer>& defaultAllocator = 0);
     
     // used for debugging only...
     sp<SimpleBestFitAllocator> getAllocator(int type) const;
@@ -44,6 +47,7 @@ public:
 private:
     sp<PMemHeap> getHeap(int type) const;
 
+    sp<SurfaceFlinger> mFlinger;
     mutable Mutex   mLock;
     size_t          mClientHeapSize;
     sp<PMemHeap>    mPMemHeap;
@@ -52,19 +56,7 @@ private:
 
 // ---------------------------------------------------------------------------
 
-class PMemHeapInterface : public MemoryHeapBase
-{
-public:
-    PMemHeapInterface(int fd, size_t size);
-    PMemHeapInterface(const char* device, size_t size = 0);
-    PMemHeapInterface(size_t size, uint32_t flags = 0, char const * name = NULL);
-    virtual ~PMemHeapInterface();
-    virtual sp<MemoryHeapPmem> createClientHeap() = 0;
-};
-
-// ---------------------------------------------------------------------------
-
-class PMemHeap : public PMemHeapInterface
+class PMemHeap : public MemoryHeapBase
 {
 public:
                 PMemHeap(const char* const vram,

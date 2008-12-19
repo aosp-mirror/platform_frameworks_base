@@ -16,6 +16,10 @@
 
 package android.content.res;
 
+import com.google.android.collect.Lists;
+
+import com.android.internal.util.ArrayUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -29,8 +33,6 @@ import android.os.Parcelable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-
-import com.android.internal.util.ArrayUtils;
 
 /**
  *

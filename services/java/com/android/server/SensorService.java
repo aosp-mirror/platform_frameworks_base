@@ -16,23 +16,19 @@
 
 package com.android.server;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.ISensorService;
-import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
-import com.android.internal.R;
 
 import java.util.ArrayList;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.server.am.BatteryStatsService;
 
 
 /**
@@ -43,46 +39,50 @@ import java.util.ArrayList;
  */
 
 class SensorService extends ISensorService.Stub {
-    private static final int SENSOR_NOTIFICATION_ACCURACY_LEVEL = 1;
-    private static final String TAG = SensorService.class.getSimpleName();
+    static final String TAG = SensorService.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     private static final int SENSOR_DISABLE = -1;
-    private NotificationManager mNotificationManager;
-    private int mCompassAccuracy = -1;
-    private final Context mContext;
+    
+    /**
+     * Battery statistics to be updated when sensors are enabled and diabled.
+     */
+    final IBatteryStats mBatteryStats = BatteryStatsService.getService();
 
     private final class Listener implements IBinder.DeathRecipient {
-        final IBinder mListener;
+        final IBinder mToken;
 
         int mSensors = 0;
         int mDelay = 0x7FFFFFFF;
         
-        Listener(IBinder listener) {
-            mListener = listener;
+        Listener(IBinder token) {
+            mToken = token;
         }
         
         void addSensor(int sensor, int delay) {
-            mSensors |= sensor;
+            mSensors |= (1<<sensor);
             if (mDelay > delay)
             	mDelay = delay;
         }
         
         void removeSensor(int sensor) {
-            mSensors &= ~sensor;
+            mSensors &= ~(1<<sensor);
         }
 
         boolean hasSensor(int sensor) {
-            return ((mSensors & sensor) != 0);
+            return ((mSensors & (1<<sensor)) != 0);
         }
 
         public void binderDied() {
             if (localLOGV) Log.d(TAG, "sensor listener died");
-
             synchronized(mListeners) {
                 mListeners.remove(this);
-                for (int sensor = SensorManager.SENSOR_MAX; sensor > 0; sensor >>>= 1) {
+                mToken.unlinkToDeath(this, 0);
+                // go through the lists of sensors used by the listener that 
+                // died and deactivate them.
+                for (int sensor=0 ; sensor<32 && mSensors!=0 ; sensor++) {
                     if (hasSensor(sensor)) {
+                        removeSensor(sensor);
                         try {
                             deactivateIfUnused(sensor);
                         } catch (RemoteException e) {
@@ -95,60 +95,31 @@ class SensorService extends ISensorService.Stub {
         }
     }
 
+    @SuppressWarnings("unused")
     public SensorService(Context context) {
         if (localLOGV) Log.d(TAG, "SensorService startup");
         _sensors_control_init();
-        mNotificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mContext = context;
     }
     
     public ParcelFileDescriptor getDataChanel() throws RemoteException {
         return _sensors_control_open();
     }
     
-    public void reportAccuracy(int sensor, int value) {
-        if ((sensor & (SensorManager.SENSOR_ORIENTATION|SensorManager.SENSOR_ORIENTATION_RAW)) != 0) {
-            synchronized (mNotificationManager) {
-                if (value != mCompassAccuracy) {
-                    Log.d(TAG, "Compass needs calibration, accuracy=" + value);
-                    if (!SystemProperties.getBoolean("debug.sensors.notification", false)) {
-                        // don't show the sensors notification by default
-                        return;
-                    }
-                    mCompassAccuracy = value;
-                    if (value == -1) {
-                        mNotificationManager.cancel(0);
-                    } else {
-                        if (value <= SENSOR_NOTIFICATION_ACCURACY_LEVEL) {
-                            long token = Binder.clearCallingIdentity();
-                            try {
-                                CharSequence banner = mContext.getString(R.string.compass_accuracy_banner);
-                                CharSequence title = mContext.getString(R.string.compass_accuracy_notificaction_title);
-                                CharSequence body = mContext.getString(R.string.compass_accuracy_notificaction_body);
-                                Notification n = new Notification(R.drawable.stat_notify_calibrate_compass,
-                                        banner, System.currentTimeMillis());
-                                Intent bogusIntent = new Intent(mContext, SensorService.class);
-                                PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, bogusIntent,
-                                        PendingIntent.FLAG_CANCEL_CURRENT|PendingIntent.FLAG_ONE_SHOT);
-                                n.setLatestEventInfo(mContext, title, body, contentIntent);
-                                mNotificationManager.notify(0, n);
-                            } finally {
-                                Binder.restoreCallingIdentity(token);
-                            }
-                        } else {
-                            mNotificationManager.cancel(0);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean enableSensor(IBinder listener, int sensor, int enable)
+    public boolean enableSensor(IBinder binder, int sensor, int enable)
              throws RemoteException {
         if (localLOGV) Log.d(TAG, "enableSensor " + sensor + " " + enable);
+        
+        // Inform battery statistics service of status change
+        int uid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        if (enable == SENSOR_DISABLE) {
+            mBatteryStats.noteStopSensor(uid, sensor);
+        } else {
+            mBatteryStats.noteStartSensor(uid, sensor);
+        }
+        Binder.restoreCallingIdentity(identity);
 
-        if (listener == null) throw new NullPointerException("listener is null in enableSensor");
+        if (binder == null) throw new NullPointerException("listener is null in enableSensor");
 
         synchronized(mListeners) {
             if (enable!=SENSOR_DISABLE && !_sensors_control_activate(sensor, true)) {
@@ -156,22 +127,18 @@ class SensorService extends ISensorService.Stub {
                 return false;
             }
                     
-            IBinder binder = listener;
             Listener l = null;
-            
             int minDelay = enable;
-            int size = mListeners.size();
-            for (int i = 0; i < size ; i++) {
-                Listener test = mListeners.get(i);
-                if (binder.equals(test.mListener)) {
-                    l = test;
+            for (Listener listener : mListeners) {
+                if (binder == listener.mToken) {
+                    l = listener;
                 }
-                if (minDelay > test.mDelay)
-                	minDelay = test.mDelay;
+                if (minDelay > listener.mDelay)
+                    minDelay = listener.mDelay;
             }
             
             if (l == null && enable!=SENSOR_DISABLE) {
-                l = new Listener(listener);
+                l = new Listener(binder);
                 binder.linkToDeath(l, 0);
                 mListeners.add(l);
                 mListeners.notify();
@@ -182,7 +149,7 @@ class SensorService extends ISensorService.Stub {
             }
             
             if (minDelay >= 0) {
-            	_sensors_control_set_delay(minDelay);
+                _sensors_control_set_delay(minDelay);
             }
             
             if (enable != SENSOR_DISABLE) {
@@ -196,24 +163,28 @@ class SensorService extends ISensorService.Stub {
                     mListeners.notify();
                 }
             }
+            
+            if (mListeners.size() == 0) {
+                _sensors_control_wake();
+            }
         }        
         return true;
     }
 
-    private void deactivateIfUnused(int sensor) throws RemoteException {
+    void deactivateIfUnused(int sensor) throws RemoteException {
         int size = mListeners.size();
-        for (int i = 0; i < size ; i++) {
+        for (int i=0 ; i<size ; i++) {
             if (mListeners.get(i).hasSensor(sensor))
                 return;
         }
         _sensors_control_activate(sensor, false);
-        reportAccuracy(sensor, -1);
     }
 
-    private ArrayList<Listener> mListeners = new ArrayList<Listener>();
+    ArrayList<Listener> mListeners = new ArrayList<Listener>();
 
     private static native int _sensors_control_init();
     private static native ParcelFileDescriptor _sensors_control_open();
     private static native boolean _sensors_control_activate(int sensor, boolean activate);
     private static native int _sensors_control_set_delay(int ms);
+    private static native int _sensors_control_wake();
 }

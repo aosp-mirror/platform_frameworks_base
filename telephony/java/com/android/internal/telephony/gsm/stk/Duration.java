@@ -16,13 +16,16 @@
 
 package com.android.internal.telephony.gsm.stk;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 
 /**
  * Class for representing "Duration" object for STK.
  *
  * {@hide}
  */
-public class Duration {
+public class Duration implements Parcelable {
     public int timeInterval;
     public TimeUnit timeUnit;
 
@@ -49,4 +52,28 @@ public class Duration {
         this.timeInterval = timeInterval;
         this.timeUnit = timeUnit;
     }
+
+    private Duration(Parcel in) {
+        timeInterval = in.readInt();
+        timeUnit = TimeUnit.values()[in.readInt()];
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(timeInterval);
+        dest.writeInt(timeUnit.ordinal());
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Duration> CREATOR = new Parcelable.Creator<Duration>() {
+        public Duration createFromParcel(Parcel in) {
+            return new Duration(in);
+        }
+
+        public Duration[] newArray(int size) {
+            return new Duration[size];
+        }
+    };
 }

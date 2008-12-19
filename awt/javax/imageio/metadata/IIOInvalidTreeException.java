@@ -21,21 +21,26 @@ import org.w3c.dom.Node;
 import javax.imageio.IIOException;
 
 /**
- * The IIOInvalidTreeException provides notification about
- * fails of IIOMetadataNodes tree parsing by IIOMetadata object. 
+ * The IIOInvalidTreeException provides notification about fails of
+ * IIOMetadataNodes tree parsing by IIOMetadata object.
+ * 
+ * @since Android 1.0
  */
 public class IIOInvalidTreeException extends IIOException {
-    
-    /** The offending node. */
+
+    /**
+     * The offending node.
+     */
     protected Node offendingNode = null;
 
     /**
-     * Instantiates an IIOInvalidTreeException with the
-     * specified detailed message and specified offending
-     * Node.
+     * Instantiates an IIOInvalidTreeException with the specified detailed
+     * message and specified offending Node.
      * 
-     * @param message the detailed message.
-     * @param offendingNode the offending node.
+     * @param message
+     *            the detailed message.
+     * @param offendingNode
+     *            the offending node.
      */
     public IIOInvalidTreeException(String message, Node offendingNode) {
         super(message);
@@ -43,13 +48,15 @@ public class IIOInvalidTreeException extends IIOException {
     }
 
     /**
-     * Instantiates a new IIOInvalidTreeException with the
-     * specified detailed message and specified offending
-     * Node.
+     * Instantiates a new IIOInvalidTreeException with the specified detailed
+     * message and specified offending Node.
      * 
-     * @param message the detailed message.
-     * @param cause the cause of this exception.
-     * @param offendingNode the offending node
+     * @param message
+     *            the detailed message.
+     * @param cause
+     *            the cause of this exception.
+     * @param offendingNode
+     *            the offending node.
      */
     public IIOInvalidTreeException(String message, Throwable cause, Node offendingNode) {
         super(message, cause);

@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.graphics.Rect;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -42,7 +43,8 @@ oneway interface IWindow {
      */
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
-    void resized(int w, int h, boolean reportDraw);
+    void resized(int w, int h, in Rect coveredInsets, in Rect visibleInsets,
+            boolean reportDraw);
     void dispatchKey(in KeyEvent event);
     void dispatchPointer(in MotionEvent event, long eventTime);
     void dispatchTrackball(in MotionEvent event, long eventTime);

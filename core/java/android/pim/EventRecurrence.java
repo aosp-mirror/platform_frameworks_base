@@ -18,6 +18,7 @@ package android.pim;
 
 import android.content.res.Resources;
 import android.text.TextUtils;
+import android.text.format.Time;
 
 import java.util.Calendar;
 

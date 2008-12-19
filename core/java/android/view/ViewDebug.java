@@ -19,6 +19,7 @@ package android.view;
 import android.util.Log;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.os.Environment;
 
 import java.io.File;
 import java.io.BufferedWriter;
@@ -60,7 +61,19 @@ public class ViewDebug {
      * check that this value is set to true as not to affect performance.
      */
     public static final boolean TRACE_RECYCLER = false;
-
+    
+    /**
+     * The system property of dynamic switch for capturing view information
+     * when it is set, we dump interested fields and methods for the view on focus
+     */    
+    static final String SYSTEM_PROPERTY_CAPTURE_VIEW = "debug.captureview";
+        
+    /**
+     * The system property of dynamic switch for capturing event information
+     * when it is set, we log key events, touch/motion and trackball events
+     */    
+    static final String SYSTEM_PROPERTY_CAPTURE_EVENT = "debug.captureevent";
+    
     /**
      * This annotation can be used to mark fields and methods to be dumped by
      * the view server. Only non-void methods with no arguments can be annotated
@@ -143,6 +156,29 @@ public class ViewDebug {
          */
         String to();
     }
+    
+    /**
+     * This annotation can be used to mark fields and methods to be dumped when
+     * the view is captured. Methods with this annotation must have no arguments
+     * and must return <some type of data>.
+     * 
+     * @hide pending API Council approval
+     */
+    @Target({ ElementType.FIELD, ElementType.METHOD })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface CapturedViewProperty {
+        /**
+         * When retrieveReturn is true, we need to retrieve second level methods 
+         * e.g., we need myView.getFirstLevelMethod().getSecondLevelMethod()
+         * we will set retrieveReturn = true on the annotation of 
+         * myView.getFirstLevelMethod()
+         * @return true if we need the second level methods 
+         */
+        boolean retrieveReturn() default false;        
+    }
+        
+    private static HashMap<Class<?>, Method[]> mCapturedViewMethodsForClasses = null;
+    private static HashMap<Class<?>, Field[]> mCapturedViewFieldsForClasses = null;
 
     // Maximum delay in ms after which we stop trying to capture a View's drawing
     private static final int CAPTURE_TIMEOUT = 4000;
@@ -154,7 +190,7 @@ public class ViewDebug {
 
     private static HashMap<Class<?>, Field[]> sFieldsForClasses;
     private static HashMap<Class<?>, Method[]> sMethodsForClasses;
-
+        
     /**
      * Defines the type of hierarhcy trace to output to the hierarchy traces file.
      */
@@ -250,8 +286,8 @@ public class ViewDebug {
 
     /**
      * Starts tracing the view recycler of the specified view. The trace is identified by a prefix,
-     * used to build the traces files names: <code>/tmp/view-recycler/PREFIX.traces</code> and
-     * <code>/tmp/view-recycler/PREFIX.recycler</code>.
+     * used to build the traces files names: <code>/EXTERNAL/view-recycler/PREFIX.traces</code> and
+     * <code>/EXTERNAL/view-recycler/PREFIX.recycler</code>.
      *
      * Only one view recycler can be traced at the same time. After calling this method, any
      * other invocation will result in a <code>IllegalStateException</code> unless
@@ -287,10 +323,10 @@ public class ViewDebug {
     /**
      * Stops the current view recycer tracing.
      *
-     * Calling this method creates the file <code>/tmp/view-recycler/PREFIX.traces</code>
+     * Calling this method creates the file <code>/EXTERNAL/view-recycler/PREFIX.traces</code>
      * containing all the traces (or method calls) relative to the specified view's recycler.
      *
-     * Calling this method creates the file <code>/tmp/view-recycler/PREFIX.recycler</code>
+     * Calling this method creates the file <code>/EXTERNAL/view-recycler/PREFIX.recycler</code>
      * containing all of the views used by the recycler of the view supplied to
      * {@link #startRecyclerTracing(String, View)}.
      *
@@ -310,7 +346,7 @@ public class ViewDebug {
                 " stopRecyclerTracing()!");
         }
 
-        File recyclerDump = new File("/tmp/view-recycler/");
+        File recyclerDump = new File(Environment.getExternalStorageDirectory(), "view-recycler/");
         recyclerDump.mkdirs();
 
         recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".recycler");
@@ -329,7 +365,7 @@ public class ViewDebug {
             return;
         }
 
-        recyclerDump = new File("/tmp/view-recycler/");
+        recyclerDump = new File(Environment.getExternalStorageDirectory(), "view-recycler/");
         recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".traces");
         try {
             final FileOutputStream file = new FileOutputStream(recyclerDump);
@@ -384,14 +420,14 @@ public class ViewDebug {
 
     /**
      * Starts tracing the view hierarchy of the specified view. The trace is identified by a prefix,
-     * used to build the traces files names: <code>/tmp/view-hierarchy/PREFIX.traces</code> and
-     * <code>/tmp/view-hierarchy/PREFIX.tree</code>.
+     * used to build the traces files names: <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code> and
+     * <code>/EXTERNAL/view-hierarchy/PREFIX.tree</code>.
      *
      * Only one view hierarchy can be traced at the same time. After calling this method, any
      * other invocation will result in a <code>IllegalStateException</code> unless
      * {@link #stopHierarchyTracing()} is invoked before.
      *
-     * Calling this method creates the file <code>/tmp/view-hierarchy/PREFIX.traces</code>
+     * Calling this method creates the file <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code>
      * containing all the traces (or method calls) relative to the specified view's hierarchy.
      *
      * This method will return immediately if TRACE_HIERARCHY is false.
@@ -413,7 +449,7 @@ public class ViewDebug {
                 " a new trace!");
         }
 
-        File hierarchyDump = new File("/tmp/view-hierarchy/");
+        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "view-hierarchy/");
         hierarchyDump.mkdirs();
 
         hierarchyDump = new File(hierarchyDump, prefix + ".traces");
@@ -431,10 +467,11 @@ public class ViewDebug {
 
     /**
      * Stops the current view hierarchy tracing. This method closes the file
-     * <code>/tmp/view-hierarchy/PREFIX.traces</code>. 
+     * <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code>.
      *
-     * Calling this method creates the file <code>/tmp/view-hierarchy/PREFIX.tree</code> containing
-     * the view hierarchy of the view supplied to {@link #startHierarchyTracing(String, View)}.
+     * Calling this method creates the file <code>/EXTERNAL/view-hierarchy/PREFIX.tree</code>
+     * containing the view hierarchy of the view supplied to
+     * {@link #startHierarchyTracing(String, View)}.
      *
      * This method will return immediately if TRACE_HIERARCHY is false.
      *
@@ -459,7 +496,7 @@ public class ViewDebug {
         }
         sHierarchyTraces = null;
 
-        File hierarchyDump = new File("/tmp/view-hierarchy/");
+        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "view-hierarchy/");
         hierarchyDump.mkdirs();
         hierarchyDump = new File(hierarchyDump, sHierarchyTracePrefix + ".tree");
 
@@ -484,7 +521,7 @@ public class ViewDebug {
 
         sHierarhcyRoot = null;
     }
-
+    
     static void dispatchCommand(View view, String command, String parameters,
             OutputStream clientStream) throws IOException {
 
@@ -714,10 +751,10 @@ public class ViewDebug {
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
         methods = klass.getDeclaredMethods();
-
+        
         int count = methods.length;
         for (int i = 0; i < count; i++) {
-            final Method method = methods[i];
+            final Method method = methods[i];            
             if (method.getParameterTypes().length == 0 &&
                         method.isAnnotationPresent(ExportedProperty.class) &&
                         method.getReturnType() != Void.class) {
@@ -746,7 +783,7 @@ public class ViewDebug {
             klass = klass.getSuperclass();
         } while (klass != Object.class);
     }
-
+    
     private static void exportMethods(Object view, BufferedWriter out, Class<?> klass,
             String prefix) throws IOException {
 
@@ -767,8 +804,12 @@ public class ViewDebug {
                         final Resources resources = ((View) view).getContext().getResources();
                         final int id = (Integer) methodValue;
                         if (id >= 0) {
-                            methodValue = resources.getResourceTypeName(id) + '/' +
-                                    resources.getResourceEntryName(id);
+                            try {
+                                methodValue = resources.getResourceTypeName(id) + '/' +
+                                        resources.getResourceEntryName(id);
+                            } catch (Resources.NotFoundException e) {
+                                methodValue = "UNKNOWN";
+                            }
                         } else {
                             methodValue = "NO_ID";
                         }
@@ -839,8 +880,12 @@ public class ViewDebug {
                         final Resources resources = ((View) view).getContext().getResources();
                         final int id = field.getInt(view);
                         if (id >= 0) {
-                            fieldValue = resources.getResourceTypeName(id) + '/' +
-                                    resources.getResourceEntryName(id);
+                            try {
+                                fieldValue = resources.getResourceTypeName(id) + '/' +
+                                        resources.getResourceEntryName(id);
+                            } catch (Resources.NotFoundException e) {
+                                fieldValue = "UNKNOWN";
+                            }
                         } else {
                             fieldValue = "NO_ID";
                         }
@@ -923,5 +968,161 @@ public class ViewDebug {
             return false;
         }
         return true;
+    }
+
+    private static Field[] capturedViewGetPropertyFields(Class<?> klass) {
+        if (mCapturedViewFieldsForClasses == null) {
+            mCapturedViewFieldsForClasses = new HashMap<Class<?>, Field[]>();
+        }
+        final HashMap<Class<?>, Field[]> map = mCapturedViewFieldsForClasses;
+
+        Field[] fields = map.get(klass);
+        if (fields != null) {
+            return fields;
+        }
+
+        final ArrayList<Field> foundFields = new ArrayList<Field>();
+        fields = klass.getFields();
+
+        int count = fields.length;
+        for (int i = 0; i < count; i++) {
+            final Field field = fields[i];
+            if (field.isAnnotationPresent(CapturedViewProperty.class)) {
+                field.setAccessible(true);
+                foundFields.add(field);
+            }
+        }
+
+        fields = foundFields.toArray(new Field[foundFields.size()]);
+        map.put(klass, fields);
+
+        return fields;
+    }
+
+    private static Method[] capturedViewGetPropertyMethods(Class<?> klass) {
+        if (mCapturedViewMethodsForClasses == null) {
+            mCapturedViewMethodsForClasses = new HashMap<Class<?>, Method[]>();
+        }
+        final HashMap<Class<?>, Method[]> map = mCapturedViewMethodsForClasses;
+
+        Method[] methods = map.get(klass);
+        if (methods != null) {
+            return methods;
+        }
+
+        final ArrayList<Method> foundMethods = new ArrayList<Method>();
+        methods = klass.getMethods();
+        
+        int count = methods.length;
+        for (int i = 0; i < count; i++) {
+            final Method method = methods[i];            
+            if (method.getParameterTypes().length == 0 &&
+                    method.isAnnotationPresent(CapturedViewProperty.class) &&
+                    method.getReturnType() != Void.class) {
+                method.setAccessible(true);
+                foundMethods.add(method);
+            }
+        }
+
+        methods = foundMethods.toArray(new Method[foundMethods.size()]);
+        map.put(klass, methods);
+
+        return methods;
+    }
+              
+    private static String capturedViewExportMethods(Object obj, Class<?> klass, 
+            String prefix) {
+
+        if (obj == null) {
+            return "null";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        final Method[] methods = capturedViewGetPropertyMethods(klass);
+
+        int count = methods.length;
+        for (int i = 0; i < count; i++) {
+            final Method method = methods[i];
+            try {
+                Object methodValue = method.invoke(obj, (Object[]) null);
+                final Class<?> returnType = method.getReturnType();
+                
+                CapturedViewProperty property = method.getAnnotation(CapturedViewProperty.class);
+                if (property.retrieveReturn()) {
+                    //we are interested in the second level data only
+                    sb.append(capturedViewExportMethods(methodValue, returnType, method.getName() + "#"));
+                } else {                    
+                    sb.append(prefix);
+                    sb.append(method.getName());
+                    sb.append("()=");
+                    
+                    if (methodValue != null) {
+                        final String value = methodValue.toString().replace("\n", "\\n");                        
+                        sb.append(value);                        
+                    } else {
+                        sb.append("null");
+                    }
+                    sb.append("; ");
+                }
+              } catch (IllegalAccessException e) {
+                  //Exception IllegalAccess, it is OK here 
+                  //we simply ignore this method
+              } catch (InvocationTargetException e) {
+                  //Exception InvocationTarget, it is OK here 
+                  //we simply ignore this method
+              }              
+        }        
+        return sb.toString();
+    }
+
+    private static String capturedViewExportFields(Object obj, Class<?> klass, String prefix) {
+        
+        if (obj == null) {
+            return "null";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        final Field[] fields = capturedViewGetPropertyFields(klass);
+
+        int count = fields.length;
+        for (int i = 0; i < count; i++) {
+            final Field field = fields[i];
+            try {
+                Object fieldValue = field.get(obj);
+
+                sb.append(prefix);
+                sb.append(field.getName());
+                sb.append("=");
+
+                if (fieldValue != null) {
+                    final String value = fieldValue.toString().replace("\n", "\\n");
+                    sb.append(value);
+                } else {
+                    sb.append("null");
+                }
+                sb.append(' ');
+            } catch (IllegalAccessException e) {
+                //Exception IllegalAccess, it is OK here 
+                //we simply ignore this field
+            }
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * dump view info for id based instrument test generation 
+     * (and possibly further data analysis). The results are dumped
+     * to the log. 
+     * @param tag for log
+     * @param view for dump
+     * 
+     * @hide pending API Council approval
+     */
+    public static void dumpCapturedView(String tag, Object view) {        
+        Class<?> klass = view.getClass();
+        StringBuilder sb = new StringBuilder(klass.getName() + ": ");
+        sb.append(capturedViewExportFields(view, klass, ""));
+        sb.append(capturedViewExportMethods(view, klass, ""));        
+        Log.d(tag, sb.toString());        
     }
 }

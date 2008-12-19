@@ -98,7 +98,7 @@ public class LocationCache {
         mCellCentroid.reset();
         mWifiCentroid.reset();
 
-        if (cellState != null) {
+        if (cellState != null && cellState.isValid()) {
             String primaryCellKey = getCellCacheKey(cellState.getMcc(), cellState.getMnc(),
                 cellState.getLac(), cellState.getCid());
             Record record = mCellCache.lookup(primaryCellKey);
@@ -173,20 +173,44 @@ public class LocationCache {
             Log.d(TAG, "cellAccuracy:" + cellAccuracy+ ", wifiAccuracy:" + wifiAccuracy);
         }
 
-        if (mCellCentroid.getNumber() != 0 && cellAccuracy <= MAX_ACCURACY_ALLOWED &&
-            (mWifiCentroid.getNumber() == 0 || cellConfidence >= wifiConfidence ||
-                cellAccuracy < wifiAccuracy)) {
+        if ((mCellCentroid.getNumber() == 0 || cellAccuracy > MAX_ACCURACY_ALLOWED) &&
+            (mWifiCentroid.getNumber() == 0 || wifiAccuracy > MAX_ACCURACY_ALLOWED)) {
+          // Return invalid location if neither location is valid
+          result.setAccuracy(-1);
+
+          // don't make server request
+          return true;
+        }
+
+        float[] distance = new float[1];
+        Location.distanceBetween(mCellCentroid.getCentroidLat(), mCellCentroid.getCentroidLng(),
+                                 mWifiCentroid.getCentroidLat(), mWifiCentroid.getCentroidLng(),
+                                 distance);
+
+        boolean consistent = distance[0] <= (cellAccuracy + wifiAccuracy);
+
+        boolean useCell = true;
+
+        if (consistent) {
+            // If consistent locations, use one with greater accuracy
+            useCell = (cellAccuracy <= wifiAccuracy);
+        } else {
+            // If inconsistent locations, use one with greater confidence
+            useCell = (cellConfidence >= wifiConfidence);
+        }
+
+        if (useCell) {
             // Use cell results
             result.setAccuracy(cellAccuracy);
             result.setLatitude(mCellCentroid.getCentroidLat());
             result.setLongitude(mCellCentroid.getCentroidLng());
             result.setTime(now);
-            
+
             Bundle extras = result.getExtras() == null ? new Bundle() : result.getExtras();
             extras.putString(EXTRA_KEY_LOCATION_TYPE, EXTRA_VALUE_LOCATION_TYPE_CELL);
             result.setExtras(extras);
 
-        } else if (mWifiCentroid.getNumber() != 0 && wifiAccuracy <= MAX_ACCURACY_ALLOWED) {
+        } else {
             // Use wifi results
             result.setAccuracy(wifiAccuracy);
             result.setLatitude(mWifiCentroid.getCentroidLat());
@@ -197,9 +221,6 @@ public class LocationCache {
             extras.putString(EXTRA_KEY_LOCATION_TYPE, EXTRA_VALUE_LOCATION_TYPE_WIFI);
             result.setExtras(extras);
 
-        } else {
-            // Return invalid location
-            result.setAccuracy(-1);
         }
 
         // don't make a server request
@@ -459,7 +480,7 @@ public class LocationCache {
         double mLatSum = 0;
         double mLngSum = 0;
         int mNumber = 0;
-        int mConfidenceSum = 0;
+        int mConfidence = 0;
 
         double mCentroidLat = 0;
         double mCentroidLng = 0;
@@ -478,7 +499,7 @@ public class LocationCache {
             mLatSum = 0;
             mLngSum = 0;
             mNumber = 0;
-            mConfidenceSum = 0;
+            mConfidence = 0;
 
             mCentroidLat = 0;
             mCentroidLng = 0;
@@ -494,7 +515,9 @@ public class LocationCache {
             if (mNumber < MAX_SIZE && accuracy <= MAX_ACCURACY_ALLOWED) {
                 mLatSum += lat;
                 mLngSum += lng;
-                mConfidenceSum += confidence;
+                if (confidence > mConfidence) {
+                  mConfidence = confidence;
+                }
 
                 mLats[mNumber] = lat;
                 mLngs[mNumber] = lng;
@@ -522,11 +545,7 @@ public class LocationCache {
         }
 
         public int getConfidence() {
-            if (mNumber != 0) {
-                return mConfidenceSum/mNumber;
-            } else {
-                return 0;
-            }
+            return mConfidence;
         }
 
         public int getAccuracy() {

@@ -47,8 +47,9 @@ import java.util.List;
 public class LocationManager {
     private static final String TAG = "LocationManager";
     private ILocationManager mService;
-    private HashMap<GpsStatusListener, GpsStatusListenerTransport> mGpsStatusListeners =
-            new HashMap<GpsStatusListener, GpsStatusListenerTransport>();
+    private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
+            new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
+    private final GpsStatus mGpsStatus = new GpsStatus();
 
     /**
      * Name of the network location provider.  This provider determines location based on
@@ -81,6 +82,24 @@ public class LocationManager {
      * a proximity alert is entering (true) or exiting (false)..
      */
     public static final String KEY_PROXIMITY_ENTERING = "entering";
+
+    /**
+     * Key used for a Bundle extra holding an Integer status value
+     * when a status change is broadcast using a PendingIntent.
+     */
+    public static final String KEY_STATUS_CHANGED = "status";
+
+    /**
+     * Key used for a Bundle extra holding an Boolean status value
+     * when a provider enabled/disabled event is broadcast using a PendingIntent.
+     */
+    public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
+
+    /**
+     * Key used for a Bundle extra holding a Location value
+     * when a location change is broadcast using a PendingIntent.
+     */
+    public static final String KEY_LOCATION_CHANGED = "location";
 
     /** @hide -- does this belong here? */
     public static final String PROVIDER_DIR = "/data/location";
@@ -180,7 +199,7 @@ public class LocationManager {
     /**
      * @hide - hide this constructor because it has a parameter
      * of type ILocationManager, which is a system private class. The
-     * right way to create an instance of this class is using the 
+     * right way to create an instance of this class is using the
      * factory Context.getSystemService.
      */
     public LocationManager(ILocationManager service) {
@@ -686,14 +705,84 @@ public class LocationManager {
                 ListenerTransport transport = mListeners.get(listener);
                 if (transport == null) {
                     transport = new ListenerTransport(listener, looper);
-                    mListeners.put(listener, transport);
                 }
                 mListeners.put(listener, transport);
-                mService.requestLocationUpdates(provider, minTime, minDistance,
-                    transport);
+                mService.requestLocationUpdates(provider, minTime, minDistance, transport);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: DeadObjectException", ex);
+        }
+    }
+
+    /**
+     * Registers the current activity to be notified periodically by
+     * the named provider.  Periodically, the supplied PendingIntent will
+     * be broadcast with the current Location or with status updates.
+     *
+     * <p> Location updates are sent with a key of KEY_LOCATION_CHANGED and a Location value.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * <p> The frequency of notification or new locations may be controlled using the
+     * minTime and minDistance parameters. If minTime is greater than 0,
+     * the LocationManager could potentially rest for minTime milliseconds
+     * between location updates to conserve power. If minDistance is greater than 0,
+     * a location will only be broadcast if the device moves by minDistance meters.
+     * To obtain notifications as frequently as possible, set both parameters to 0.
+     *
+     * <p> Background services should be careful about setting a sufficiently high
+     * minTime so that the device doesn't consume too much power by keeping the
+     * GPS or wireless radios on all the time. In particular, values under 60000ms
+     * are not recommended.
+     *
+     * <p> In case the provider is disabled by the user, updates will stop,
+     * and an intent will be sent with an extra with key KEY_PROVIDER_ENABLED and a boolean value
+     * of false.  If the provider is re-enabled, an intent will be sent with an
+     * extra with key KEY_PROVIDER_ENABLED and a boolean value of true and location updates will
+     * start again.
+     *
+     * <p> If the provider's status changes, an intent will be sent with an extra with key
+     * KEY_STATUS_CHANGED and an integer value indicating the new status.  Any extras associated
+     * with the status update will be sent as well.
+     *
+     * @param provider the name of the provider with which to register
+     * @param minTime the minimum time interval for notifications, in
+     * milliseconds. This field is only used as a hint to conserve power, and actual
+     * time between location updates may be greater or lesser than this value.
+     * @param minDistance the minimum distance interval for notifications,
+     * in meters
+     * @param intent a {#link PendingIntet} to be sent for each location update
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if intent is null
+     * @throws SecurityException if no suitable permission is present for the provider.
+     */
+    public void requestLocationUpdates(String provider,
+            long minTime, float minDistance, PendingIntent intent) {
+        if (provider == null) {
+            throw new IllegalArgumentException("provider==null");
+        }
+        if (intent == null) {
+            throw new IllegalArgumentException("intent==null");
+        }
+        _requestLocationUpdates(provider, minTime, minDistance, intent);
+    }
+
+    private void _requestLocationUpdates(String provider,
+            long minTime, float minDistance, PendingIntent intent) {
+        if (minTime < 0L) {
+            minTime = 0L;
+        }
+        if (minDistance < 0.0f) {
+            minDistance = 0.0f;
+        }
+
+        try {
+            mService.requestLocationUpdatesPI(provider, minTime, minDistance, intent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "requestLocationUpdates: RemoteException", ex);
         }
     }
 
@@ -719,6 +808,28 @@ public class LocationManager {
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "removeUpdates: DeadObjectException", ex);
+        }
+    }
+
+    /**
+     * Removes any current registration for location updates of the current activity
+     * with the given PendingIntent.  Following this call, updates will no longer
+     * occur for this intent.
+     *
+     * @param intent {#link PendingIntent} object that no longer needs location updates
+     * @throws IllegalArgumentException if intent is null
+     */
+    public void removeUpdates(PendingIntent intent) {
+        if (intent == null) {
+            throw new IllegalArgumentException("intent==null");
+        }
+        if (Config.LOGD) {
+            Log.d(TAG, "removeUpdates: intent = " + intent);
+        }
+        try {
+            mService.removeUpdatesPI(intent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "removeUpdates: RemoteException", ex);
         }
     }
 
@@ -865,9 +976,9 @@ public class LocationManager {
      * @param accuracy
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled
      * @throws IllegalArgumentException if a provider with the given name already exists
-     *
-     * {@hide}
      */
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
@@ -887,9 +998,9 @@ public class LocationManager {
      * @param provider the provider name
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void removeTestProvider(String provider) {
         try {
@@ -907,9 +1018,9 @@ public class LocationManager {
      * @param loc the mock location
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void setTestProviderLocation(String provider, Location loc) {
         try {
@@ -925,9 +1036,9 @@ public class LocationManager {
      * @param provider the provider name
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void clearTestProviderLocation(String provider) {
         try {
@@ -945,9 +1056,9 @@ public class LocationManager {
      * @param enabled the mock enabled value
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void setTestProviderEnabled(String provider, boolean enabled) {
         try {
@@ -963,9 +1074,9 @@ public class LocationManager {
      * @param provider the provider name
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void clearTestProviderEnabled(String provider) {
         try {
@@ -986,9 +1097,9 @@ public class LocationManager {
      * @param updateTime the mock update time
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         try {
@@ -1004,9 +1115,9 @@ public class LocationManager {
      * @param provider the provider name
      *
      * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
+     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
+     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * {@hide}
      */
     public void clearTestProviderStatus(String provider) {
         try {
@@ -1021,102 +1132,65 @@ public class LocationManager {
     // This class is used to send GPS status events to the client's main thread.
     private class GpsStatusListenerTransport extends IGpsStatusListener.Stub {
 
-        private GpsStatusListener mListener;
-        private int mTTFF;
-        private int mSvCount;
-        private int[] mPrns;
-        private float[] mSnrs;
-        private float[] mElevations;
-        private float[] mAzimuths;
-        private int mEphemerisMask;
-        private int mAlmanacMask;
-        private int mUsedInFixMask;
+        private final GpsStatus.Listener mListener;
 
-        private static final int GPS_STARTED = 0;
-        private static final int GPS_STOPPED = 1;
-        private static final int GPS_FIRST_FIX = 2;
-        private static final int GPS_SV_STATUS = 3;
-
-        GpsStatusListenerTransport(GpsStatusListener listener) {
+        GpsStatusListenerTransport(GpsStatus.Listener listener) {
             mListener = listener;
         }
 
         public void onGpsStarted() {
             Message msg = Message.obtain();
-            msg.what = GPS_STARTED;
+            msg.what = GpsStatus.GPS_EVENT_STARTED;
             mGpsHandler.sendMessage(msg);
         }
 
         public void onGpsStopped() {
             Message msg = Message.obtain();
-            msg.what = GPS_STOPPED;
+            msg.what = GpsStatus.GPS_EVENT_STOPPED;
             mGpsHandler.sendMessage(msg);
         }
 
         public void onFirstFix(int ttff) {
-            mTTFF = ttff;
+            mGpsStatus.setTimeToFirstFix(ttff);
             Message msg = Message.obtain();
-            msg.what = GPS_FIRST_FIX;
+            msg.what = GpsStatus.GPS_EVENT_FIRST_FIX;
             mGpsHandler.sendMessage(msg);
         }
 
         public void onSvStatusChanged(int svCount, int[] prns, float[] snrs,
                 float[] elevations, float[] azimuths, int ephemerisMask,
                 int almanacMask, int usedInFixMask) {
-            // synchronize here to ensure SV count matches data in the arrays
-            synchronized(this) {
-                mSvCount = svCount;
-                mPrns = prns;
-                mSnrs = snrs;
-                mElevations = elevations;
-                mAzimuths = azimuths;
-                mEphemerisMask = ephemerisMask;
-                mAlmanacMask = almanacMask;
-                mUsedInFixMask = usedInFixMask;
-            }
+            mGpsStatus.setStatus(svCount, prns, snrs, elevations, azimuths,
+                    ephemerisMask, almanacMask, usedInFixMask);
 
             Message msg = Message.obtain();
-            msg.what = GPS_SV_STATUS;
+            msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;
             // remove any SV status messages already in the queue
-            mGpsHandler.removeMessages(GPS_SV_STATUS);
+            mGpsHandler.removeMessages(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
             mGpsHandler.sendMessage(msg);
         }
 
         private final Handler mGpsHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case GPS_STARTED:
-                        mListener.onGpsStarted();
-                        break;
-                    case GPS_STOPPED:
-                        mListener.onGpsStopped();
-                        break;
-                    case GPS_FIRST_FIX:
-                        mListener.onFirstFix(mTTFF);
-                        break;
-                    case GPS_SV_STATUS:
-                        // synchronize here to ensure SV count matches data in the arrays
-                        synchronized(this) {
-                            mListener.onSvStatusChanged(mSvCount, mPrns, mSnrs, mElevations,
-                                    mAzimuths, mEphemerisMask, mAlmanacMask, mUsedInFixMask);
-                        break;
-                    }
+                // synchronize on mGpsStatus to ensure the data is copied atomically.
+                synchronized(mGpsStatus) {
+                    mListener.onGpsStatusChanged(msg.what);
                 }
             }
         };
     }
 
     /**
-     * Registers a GPS status listener.
+     * Adds a GPS status listener.
      *
-     * @param listener GPS status listener object to register.
+     * @param listener GPS status listener object to register
      *
-     * @return true if the listener was successfully registered.
-     *
-     * {@hide}
+     * @return true if the listener was successfully added
+     * 
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
-    public boolean registerGpsStatusListener(GpsStatusListener listener) {
+    public boolean addGpsStatusListener(GpsStatus.Listener listener) {
         boolean result;
 
         if (mGpsStatusListeners.get(listener) != null) {
@@ -1138,13 +1212,11 @@ public class LocationManager {
     }
 
     /**
-     * Unegisters a GPS status listener.
+     * Removes a GPS status listener.
      *
-     * @param listener GPS status listener object to unregister.
-     *
-     * {@hide}
+     * @param listener GPS status listener object to remove
      */
-    public void unregisterGpsStatusListener(GpsStatusListener listener) {
+    public void removeGpsStatusListener(GpsStatus.Listener listener) {
         try {
             GpsStatusListenerTransport transport = mGpsStatusListeners.remove(listener);
             if (transport != null) {
@@ -1154,7 +1226,26 @@ public class LocationManager {
             Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
         }
     }
-    
+
+     /**
+     * Retrieves information about the current status of the GPS engine.
+     * This should only be called from the {@link GpsStatus.Listener#onGpsStatusChanged}
+     * callback to ensure that the data is copied atomically.
+     *
+     * The caller may either pass in a {@link GpsStatus} object to set with the latest
+     * status information, or pass null to create a new {@link GpsStatus} object.
+     *
+     * @param status object containing GPS status details, or null.
+     * @return status object containing updated GPS status.
+     */
+    public GpsStatus getGpsStatus(GpsStatus status) {
+        if (status == null) {
+            status = new GpsStatus();
+       }
+       status.setStatus(mGpsStatus);
+       return status;
+    }
+
     /**
      * Sends additional commands to a location provider.
      * Can be used to support provider specific extensions to the Location Manager API
@@ -1164,9 +1255,7 @@ public class LocationManager {
      * @param extras optional arguments for the command (or null).
      * The provider may optionally fill the extras Bundle with results from the command.
      *
-     * @return true if the command succeeds. 
-     *
-     * {@hide}
+     * @return true if the command succeeds.
      */
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
         try {

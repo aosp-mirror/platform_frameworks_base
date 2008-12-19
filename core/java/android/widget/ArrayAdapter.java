@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * A ListAdapter that manages a ListView backed by an array of arbitrary
- * objects.  By default this class expects that the provided resource id referecnes
+ * objects.  By default this class expects that the provided resource id references
  * a single TextView.  If you want to use a more complex layout, use the constructors that
  * also takes a field id.  That field id should reference a TextView in the larger layout
  * resource.
@@ -179,7 +179,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
     }
 
     /**
-     * Inserts the spcified object at the specified index in the array.
+     * Inserts the specified object at the specified index in the array.
      *
      * @param object The object to insert into the array.
      * @param index The index at which the object must be inserted.
@@ -385,7 +385,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
     }
 
     /**
-     * <p>An array filters constrains the content of the array adapter with
+     * <p>An array filter constrains the content of the array adapter with
      * a prefix. Each item that does not start with the supplied prefix
      * is removed from the list.</p>
      */

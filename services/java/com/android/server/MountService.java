@@ -22,6 +22,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.IMountService;
 import android.os.Environment;
@@ -59,10 +60,11 @@ class MountService extends IMountService.Stub {
     private Notification mUsbStorageNotification;
 
     private class SdDoorListener extends UEventObserver {    
-        static final String SD_DOOR_UEVENT_MATCH = "DEVPATH=/class/switch/sd-door";
+        static final String SD_DOOR_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/sd-door";
+        static final String SD_DOOR_SWITCH_NAME = "sd-door";
 
         public void onUEvent(UEvent event) {
-            if ("sd-door".equals(event.get("SWITCH_NAME"))) {
+            if (SD_DOOR_SWITCH_NAME.equals(event.get("SWITCH_NAME"))) {
                 sdDoorStateChanged(event.get("SWITCH_STATE"));
             }
         }
@@ -127,9 +129,7 @@ class MountService extends IMountService.Stub {
             throw new SecurityException("Requires MOUNT_UNMOUNT_FILESYSTEMS permission");
         }
 
-        // notify listeners that we are trying to eject
-        notifyMediaEject(mountPath);
-        // tell usbd to unmount the media
+        // tell mountd to unmount the media
         mListener.ejectMedia(mountPath);
     }
 
@@ -269,21 +269,23 @@ class MountService extends IMountService.Stub {
      * @return A {@link Notification} that leads to the dialog to enable USB storage.
      */
     private synchronized Notification getUsbStorageNotification() {
+        Resources r = Resources.getSystem();
+        CharSequence title =
+                r.getText(com.android.internal.R.string.usb_storage_notification_title);
+        CharSequence message =
+                r.getText(com.android.internal.R.string.usb_storage_notification_message);
+
         if (mUsbStorageNotification == null) {
-            CharSequence title =
-                    mContext.getString(com.android.internal.R.string.usb_storage_notification_title);
-            CharSequence message =
-                    mContext.getString(com.android.internal.R.string.usb_storage_notification_message);
-            
             mUsbStorageNotification = new Notification();
             mUsbStorageNotification.icon = com.android.internal.R.drawable.stat_sys_data_usb;
-            mUsbStorageNotification.tickerText = title;
             mUsbStorageNotification.when = 0;
             mUsbStorageNotification.flags = Notification.FLAG_AUTO_CANCEL;
             mUsbStorageNotification.defaults |= Notification.DEFAULT_SOUND;
-            mUsbStorageNotification.setLatestEventInfo(mContext, title, message,
-                    getUsbStorageDialogIntent());
         }
+
+        mUsbStorageNotification.tickerText = title;
+        mUsbStorageNotification.setLatestEventInfo(mContext, title, message,
+                getUsbStorageDialogIntent());
 
         return mUsbStorageNotification;
     }

@@ -16,14 +16,39 @@
 
 package android.text.method;
 
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.View;
-import android.os.Message;
-import android.text.*;
-import android.widget.TextView;
 
-public interface KeyListener
-{
+/**
+ * Interface for converting text key events into edit operations on an
+ * Editable class.  Note that for must cases this interface has been
+ * superceded by general soft input methods as defined by
+ * {@link android.view.inputmethod.InputMethod}; it should only be used
+ * for cases where an application has its own on-screen keypad and also wants
+ * to process hard keyboard events to match it.
+ */
+public interface KeyListener {
+    /**
+     * Return the type of text that this key listener is manipulating,
+     * as per {@link android.text.InputType}.  This is used to
+     * determine the mode of the soft keyboard that is shown for the editor.
+     * 
+     * <p>If you return
+     * {@link android.text.InputType#TYPE_NULL}
+     * then <em>no</em> soft keyboard will provided.  In other words, you
+     * must be providing your own key pad for on-screen input and the key
+     * listener will be used to handle input from a hard keyboard.
+     * 
+     * <p>If you
+     * return any other value, a soft input method will be created when the
+     * user puts focus in the editor, which will provide a keypad and also
+     * consume hard key events.  This means that the key listener will generally
+     * not be used, instead the soft input method will take care of managing
+     * key input as per the content type returned here.
+     */
+    public int getInputType();
+    
     /**
      * If the key listener wants to handle this key, return true,
      * otherwise return false and the caller (i.e. the widget host)
@@ -39,4 +64,9 @@ public interface KeyListener
      */
     public boolean onKeyUp(View view, Editable text,
                            int keyCode, KeyEvent event);
+    
+    /**
+     * Remove the given shift states from the edited text.
+     */
+    public void clearMetaKeyState(View view, Editable content, int states);
 }

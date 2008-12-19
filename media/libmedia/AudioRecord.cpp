@@ -2,19 +2,20 @@
 **
 ** Copyright 2008, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "AudioRecord"
 
 #include <stdint.h>
@@ -53,24 +54,26 @@ AudioRecord::AudioRecord(
         uint32_t sampleRate,
         int format,
         int channelCount,
-        int bufferCount,
+        int frameCount,
         uint32_t flags,
-        callback_t cbf, void* user)
+        callback_t cbf,
+        void* user,
+        int notificationFrames)
     : mStatus(NO_INIT)
 {
     mStatus = set(streamType, sampleRate, format, channelCount,
-            bufferCount, flags, cbf, user);
+            frameCount, flags, cbf, user, notificationFrames);
 }
 
 AudioRecord::~AudioRecord()
 {
     if (mStatus == NO_ERROR) {
-        if (mPosition) {
-            releaseBuffer(&mAudioBuffer);
-        }
-        // obtainBuffer() will give up with an error
-        mAudioRecord->stop();
+        // Make sure that callback function exits in the case where
+        // it is looping on buffer empty condition in obtainBuffer().
+        // Otherwise the callback thread will never exit.
+        stop();
         if (mClientRecordThread != 0) {
+            mCblk->cv.signal();
             mClientRecordThread->requestExitAndWait();
             mClientRecordThread.clear();
         }
@@ -84,11 +87,15 @@ status_t AudioRecord::set(
         uint32_t sampleRate,
         int format,
         int channelCount,
-        int bufferCount,
+        int frameCount,
         uint32_t flags,
-        callback_t cbf, void* user)
+        callback_t cbf,
+        void* user,
+        int notificationFrames,
+        bool threadCanCallJava)
 {
 
+    LOGV("set(): sampleRate %d, channelCount %d, frameCount %d",sampleRate, channelCount, frameCount);
     if (mAudioFlinger != 0) {
         return INVALID_OPERATION;
     }
@@ -112,11 +119,6 @@ status_t AudioRecord::set(
     if (channelCount == 0) {
         channelCount = 1;
     }
-    if (bufferCount == 0) {
-        bufferCount = 2;
-    } else if (bufferCount < 2) {
-        return BAD_VALUE;
-    }
 
     // validate parameters
     if (format != AudioSystem::PCM_16_BIT) {
@@ -125,22 +127,34 @@ status_t AudioRecord::set(
     if (channelCount != 1 && channelCount != 2) {
         return BAD_VALUE;
     }
-    if (bufferCount < 2) {
+
+    // TODO: Get input frame count from hardware.
+    int minFrameCount = 1024*2;
+
+    if (frameCount == 0) {
+        frameCount = minFrameCount;
+    } else if (frameCount < minFrameCount) {
         return BAD_VALUE;
     }
 
+    if (notificationFrames == 0) {
+        notificationFrames = frameCount/2;
+    }
+
     // open record channel
+    status_t status;
     sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), streamType,
-            sampleRate, format, channelCount, bufferCount, flags);
+            sampleRate, format, channelCount, frameCount, flags, &status);
     if (record == 0) {
-        return NO_INIT;
+        LOGE("AudioFlinger could not create record track, status: %d", status);
+        return status;
     }
     sp<IMemory> cblk = record->getCblk();
     if (cblk == 0) {
         return NO_INIT;
     }
     if (cbf != 0) {
-        mClientRecordThread = new ClientRecordThread(*this);
+        mClientRecordThread = new ClientRecordThread(*this, threadCanCallJava);
         if (mClientRecordThread == 0) {
             return NO_INIT;
         }
@@ -153,16 +167,23 @@ status_t AudioRecord::set(
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
     mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
+    mCblk->out = 0;
     mSampleRate = sampleRate;
-    mFrameCount = audioFlinger->frameCount();
     mFormat = format;
-    mBufferCount = bufferCount;
+    // Update buffer size in case it has been limited by AudioFlinger during track creation
+    mFrameCount = mCblk->frameCount;
     mChannelCount = channelCount;
     mActive = 0;
     mCbf = cbf;
+    mNotificationFrames = notificationFrames;
+    mRemainingFrames = notificationFrames;
     mUserData = user;
-    mLatency = seconds(mFrameCount) / mSampleRate;
-    mPosition = 0;
+    // TODO: add audio hardware input latency here
+    mLatency = (1000*mFrameCount) / mSampleRate;
+    mMarkerPosition = 0;
+    mNewPosition = 0;
+    mUpdatePeriod = 0;
+
     return NO_ERROR;
 }
 
@@ -173,7 +194,7 @@ status_t AudioRecord::initCheck() const
 
 // -------------------------------------------------------------------------
 
-nsecs_t AudioRecord::latency() const
+uint32_t AudioRecord::latency() const
 {
     return mLatency;
 }
@@ -193,9 +214,14 @@ int AudioRecord::channelCount() const
     return mChannelCount;
 }
 
-int AudioRecord::bufferCount() const
+uint32_t AudioRecord::frameCount() const
 {
-    return mBufferCount;
+    return mFrameCount;
+}
+
+int AudioRecord::frameSize() const
+{
+    return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
 }
 
 // -------------------------------------------------------------------------
@@ -203,54 +229,60 @@ int AudioRecord::bufferCount() const
 status_t AudioRecord::start()
 {
     status_t ret = NO_ERROR;
-    
-    // If using record thread, protect start sequence to make sure that
-    // no stop command is processed before the thread is started
-    if (mClientRecordThread != 0) {
-        mRecordThreadLock.lock();        
-    }
+    sp<ClientRecordThread> t = mClientRecordThread;
 
-    if (android_atomic_or(1, &mActive) == 0) {
-        setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
-        ret = mAudioRecord->start();
-        if (ret == NO_ERROR) {
-            if (mClientRecordThread != 0) {
-                mClientRecordThread->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+    LOGV("start");
+
+    if (t != 0) {
+        if (t->exitPending()) {
+            if (t->requestExitAndWait() == WOULD_BLOCK) {
+                LOGE("AudioRecord::start called from thread");
+                return WOULD_BLOCK;
             }
         }
+        t->mLock.lock();
+     }
+
+    if (android_atomic_or(1, &mActive) == 0) {
+        mNewPosition = mCblk->user + mUpdatePeriod;
+        if (t != 0) {
+           t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+        } else {
+            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+        }
+        ret = mAudioRecord->start();
     }
-    
-    if (mClientRecordThread != 0) {
-        mRecordThreadLock.unlock();        
+
+    if (t != 0) {
+        t->mLock.unlock();
     }
-    
+
     return ret;
 }
 
 status_t AudioRecord::stop()
 {
-    // If using record thread, protect stop sequence to make sure that
-    // no start command is processed before requestExit() is called
-    if (mClientRecordThread != 0) {
-        mRecordThreadLock.lock();        
-    }
+    sp<ClientRecordThread> t = mClientRecordThread;
+
+    LOGV("stop");
+
+    if (t != 0) {
+        t->mLock.lock();
+     }
 
     if (android_atomic_and(~1, &mActive) == 1) {
-        if (mPosition) {
-            mPosition = 0;
-            releaseBuffer(&mAudioBuffer);
-        }
         mAudioRecord->stop();
-        setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
-        if (mClientRecordThread != 0) {
-            mClientRecordThread->requestExit();
+        if (t != 0) {
+            t->requestExit();
+        } else {
+            setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
         }
     }
-    
-    if (mClientRecordThread != 0) {
-        mRecordThreadLock.unlock();        
+
+    if (t != 0) {
+        t->mLock.unlock();
     }
-    
+
     return NO_ERROR;
 }
 
@@ -259,22 +291,74 @@ bool AudioRecord::stopped() const
     return !mActive;
 }
 
+status_t AudioRecord::setMarkerPosition(uint32_t marker)
+{
+    if (mCbf == 0) return INVALID_OPERATION;
+
+    mMarkerPosition = marker;
+
+    return NO_ERROR;
+}
+
+status_t AudioRecord::getMarkerPosition(uint32_t *marker)
+{
+    if (marker == 0) return BAD_VALUE;
+
+    *marker = mMarkerPosition;
+
+    return NO_ERROR;
+}
+
+status_t AudioRecord::setPositionUpdatePeriod(uint32_t updatePeriod)
+{
+    if (mCbf == 0) return INVALID_OPERATION;
+
+    uint32_t curPosition;
+    getPosition(&curPosition);
+    mNewPosition = curPosition + updatePeriod;
+    mUpdatePeriod = updatePeriod;
+
+    return NO_ERROR;
+}
+
+status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod)
+{
+    if (updatePeriod == 0) return BAD_VALUE;
+
+    *updatePeriod = mUpdatePeriod;
+
+    return NO_ERROR;
+}
+
+status_t AudioRecord::getPosition(uint32_t *position)
+{
+    if (position == 0) return BAD_VALUE;
+
+    *position = mCblk->user;
+
+    return NO_ERROR;
+}
+
+
 // -------------------------------------------------------------------------
 
 status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, bool blocking)
 {
-    int active = mActive;
+    int active;
     int timeout = 0;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
+    uint32_t framesReq = audioBuffer->frameCount;
 
-    const uint32_t u = cblk->user;
-    uint32_t s = cblk->server;
+    audioBuffer->frameCount  = 0;
+    audioBuffer->size        = 0;
 
-    if (u == s) {
+    uint32_t framesReady = cblk->framesReady();
+
+    if (framesReady == 0) {
         Mutex::Autolock _l(cblk->lock);
         goto start_loop_here;
-        while (u == s) {
+        while (framesReady == 0) {
             active = mActive;
             if (UNLIKELY(!active))
                 return NO_MORE_BUFFERS;
@@ -284,40 +368,45 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, bool blocking)
             result = cblk->cv.waitRelative(cblk->lock, seconds(1));
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
-                        "user=%08x, server=%08x", u, s);
+                        "user=%08x, server=%08x", cblk->user, cblk->server);
                 timeout = 1;
             }
             // read the server count again
         start_loop_here:
-            s = cblk->server;
+            framesReady = cblk->framesReady();
         }
     }
 
     LOGW_IF(timeout,
         "*** SERIOUS WARNING *** obtainBuffer() timed out "
         "but didn't need to be locked. We recovered, but "
-        "this shouldn't happen (user=%08x, server=%08x)", u, s);
+        "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
+
+    if (framesReq > framesReady) {
+        framesReq = framesReady;
+    }
+
+    uint32_t u = cblk->user;
+    uint32_t bufferEnd = cblk->userBase + cblk->frameCount;
+
+    if (u + framesReady > bufferEnd) {
+        framesReq = bufferEnd - u;
+    }
 
     audioBuffer->flags       = 0;
     audioBuffer->channelCount= mChannelCount;
     audioBuffer->format      = mFormat;
-    audioBuffer->frameCount  = mFrameCount;
-    audioBuffer->size        = cblk->size;
-    audioBuffer->raw         = (int8_t*)
-            cblk->buffer(cblk->user & audio_track_cblk_t::BUFFER_MASK);
+    audioBuffer->frameCount  = framesReq;
+    audioBuffer->size        = framesReq*mChannelCount*sizeof(int16_t);
+    audioBuffer->raw         = (int8_t*)cblk->buffer(u);
+    active = mActive;
     return active ? status_t(NO_ERROR) : status_t(STOPPED);
 }
 
 void AudioRecord::releaseBuffer(Buffer* audioBuffer)
 {
-    // next buffer...
-    if (UNLIKELY(mPosition)) {
-        // clean the remaining part of the buffer
-        size_t capacity = mAudioBuffer.size - mPosition;
-        memset(mAudioBuffer.i8 + mPosition, 0, capacity);
-    }
     audio_track_cblk_t* cblk = mCblk;
-    cblk->stepUser(mBufferCount);
+    cblk->stepUser(audioBuffer->frameCount);
 }
 
 // -------------------------------------------------------------------------
@@ -325,32 +414,38 @@ void AudioRecord::releaseBuffer(Buffer* audioBuffer)
 ssize_t AudioRecord::read(void* buffer, size_t userSize)
 {
     ssize_t read = 0;
+    Buffer audioBuffer;
+    int8_t *dst = static_cast<int8_t*>(buffer);
+
+    if (ssize_t(userSize) < 0) {
+        // sanity-check. user is most-likely passing an error code.
+        LOGE("AudioRecord::read(buffer=%p, size=%u (%d)",
+                buffer, userSize, userSize);
+        return BAD_VALUE;
+    }
+
+    LOGV("read size: %d", userSize);
+
     do {
-        if (mPosition == 0) {
-            status_t err = obtainBuffer(&mAudioBuffer, true);
-            if (err < 0) {
-                // out of buffers, return #bytes written
-                if (err == status_t(NO_MORE_BUFFERS))
-                    break;
-                return ssize_t(err);
-            }
+
+        audioBuffer.frameCount = userSize/mChannelCount/sizeof(int16_t);
+
+        status_t err = obtainBuffer(&audioBuffer, true);
+        if (err < 0) {
+            // out of buffers, return #bytes written
+            if (err == status_t(NO_MORE_BUFFERS))
+                break;
+            return ssize_t(err);
         }
 
-        size_t capacity = mAudioBuffer.size - mPosition;
-        size_t toRead = userSize < capacity ? userSize : capacity;
+        size_t bytesRead = audioBuffer.size;
+        memcpy(dst, audioBuffer.i8, bytesRead);
 
-        memcpy(buffer, mAudioBuffer.i8 + mPosition, toRead);
+        dst += bytesRead;
+        userSize -= bytesRead;
+        read += bytesRead;
 
-        buffer = static_cast<int8_t*>(buffer) + toRead;
-        mPosition += toRead;
-        userSize -= toRead;
-        capacity -= toRead;
-        read += toRead;
-
-        if (capacity == 0) {
-            mPosition = 0;
-            releaseBuffer(&mAudioBuffer);
-        }
+        releaseBuffer(&audioBuffer);
     } while (userSize);
 
     return read;
@@ -361,28 +456,83 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 {
     Buffer audioBuffer;
-    bool more;
+    uint32_t frames = mRemainingFrames;
+    size_t readSize = 0;
+
+    // Manage marker callback
+    if (mMarkerPosition > 0) {
+        if (mCblk->user >= mMarkerPosition) {
+            mCbf(EVENT_MARKER, mUserData, (void *)&mMarkerPosition);
+            mMarkerPosition = 0;
+        }
+    }
+
+    // Manage new position callback
+    if (mUpdatePeriod > 0) {
+        while (mCblk->user >= mNewPosition) {
+            mCbf(EVENT_NEW_POS, mUserData, (void *)&mNewPosition);
+            mNewPosition += mUpdatePeriod;
+        }
+    }
 
     do {
-        status_t err = obtainBuffer(&audioBuffer, true); 
+        audioBuffer.frameCount = frames;
+        status_t err = obtainBuffer(&audioBuffer, false);
         if (err < NO_ERROR) {
-            LOGE("Error obtaining an audio buffer, giving up.");
-            return false;
+            if (err != WOULD_BLOCK) {
+                LOGE("Error obtaining an audio buffer, giving up.");
+                return false;
+            }
         }
-        more = mCbf(mUserData, audioBuffer);
+        if (err == status_t(STOPPED)) return false;
+
+        if (audioBuffer.size == 0) break;
+
+        size_t reqSize = audioBuffer.size;
+        mCbf(EVENT_MORE_DATA, mUserData, &audioBuffer);
+        readSize = audioBuffer.size;
+
+        // Sanity check on returned size
+        if (ssize_t(readSize) <= 0) break;
+        if (readSize > reqSize) readSize = reqSize;
+
+        audioBuffer.size = readSize;
+        audioBuffer.frameCount = readSize/mChannelCount/sizeof(int16_t);
+        frames -= audioBuffer.frameCount;
+
         releaseBuffer(&audioBuffer);
-    } while (more && !thread->exitPending());
 
-    // stop the track automatically
-    this->stop();
+    } while (frames);
 
+    
+    // Manage overrun callback
+    if (mActive && (mCblk->framesAvailable_l() == 0)) {
+        LOGV("Overrun user: %x, server: %x, flowControlFlag %d", mCblk->user, mCblk->server, mCblk->flowControlFlag);
+        if (mCblk->flowControlFlag == 0) {
+            mCbf(EVENT_OVERRUN, mUserData, 0);
+            mCblk->flowControlFlag = 1;
+        }
+    }
+
+    // If no data was read, it is likely that obtainBuffer() did
+    // not find available data in PCM buffer: we release the processor for
+    // a few millisecond before polling again for available data.
+    if (readSize == 0) {
+        usleep(5000);
+    } 
+
+    if (frames == 0) {
+        mRemainingFrames = mNotificationFrames;
+    } else {
+        mRemainingFrames = frames;
+    }
     return true;
 }
 
 // =========================================================================
 
-AudioRecord::ClientRecordThread::ClientRecordThread(AudioRecord& receiver)
-    : Thread(false), mReceiver(receiver)
+AudioRecord::ClientRecordThread::ClientRecordThread(AudioRecord& receiver, bool bCanCallJava)
+    : Thread(bCanCallJava), mReceiver(receiver)
 {
 }
 

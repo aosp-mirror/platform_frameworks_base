@@ -72,7 +72,7 @@ class NotificationManagerService extends INotificationManager.Stub
     
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250}; 
 
-    private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_RING;
+    private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
 
     final Context mContext;
     final IActivityManager mAm;

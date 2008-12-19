@@ -18,86 +18,104 @@
  * @author Sergey I. Salishev
  * @version $Revision: 1.2 $
  */
+
 package javax.imageio.event;
 
 import java.util.EventListener;
 import javax.imageio.ImageReader;
 
 /**
- * The IIOReadProgressListener interface notifies callers 
- * about the progress of the image and thumbnail reading methods.
+ * The IIOReadProgressListener interface notifies callers about the progress of
+ * the image and thumbnail reading methods.
+ * 
+ * @since Android 1.0
  */
 public interface IIOReadProgressListener extends EventListener {
 
     /**
-     * Notifies this listener that the image reading has been completed. 
+     * Notifies this listener that the image reading has been completed.
      * 
-     * @param source the ImageReader object which calls this method.
+     * @param source
+     *            the ImageReader object which calls this method.
      */
     void imageComplete(ImageReader source);
-    
+
     /**
      * Notifies this listener about the degree of completion of the read call.
      * 
-     * @param source the ImageReader object which calls this method.
-     * @param percentageDone the percentage of decoding done.
+     * @param source
+     *            the ImageReader object which calls this method.
+     * @param percentageDone
+     *            the percentage of decoding done.
      */
     void imageProgress(ImageReader source, float percentageDone);
-    
+
     /**
-     * Notifies this listener that an image read operation has been started. 
+     * Notifies this listener that an image read operation has been started.
      * 
-     * @param source the ImageReader object which calls this method.
-     * @param imageIndex the index of the image in an input file or 
-     * stream to be read.
+     * @param source
+     *            the ImageReader object which calls this method.
+     * @param imageIndex
+     *            the index of the image in an input file or stream to be read.
      */
     void imageStarted(ImageReader source, int imageIndex);
-    
+
     /**
      * Notifies this listener that a read operation has been aborted.
      * 
-     * @param source the ImageReader object which calls this method.
+     * @param source
+     *            the ImageReader object which calls this method.
      */
     void readAborted(ImageReader source);
-    
+
     /**
-     * Notifies this listener that a sequence of read operations has been completed. 
+     * Notifies this listener that a sequence of read operations has been
+     * completed.
      * 
-     * @param source the ImageReader object which calls this method.
+     * @param source
+     *            the ImageReader object which calls this method.
      */
     void sequenceComplete(ImageReader source);
-    
+
     /**
-     * Notifies this listener that a sequence of read operation has been started. 
+     * Notifies this listener that a sequence of read operation has been
+     * started.
      * 
-     * @param source the ImageReader object which calls this method.
-     * @param minIndex the index of the first image to be read.
+     * @param source
+     *            the ImageReader object which calls this method.
+     * @param minIndex
+     *            the index of the first image to be read.
      */
     void sequenceStarted(ImageReader source, int minIndex);
-    
+
     /**
      * Notifies that a thumbnail read operation has been completed.
      * 
-     * @param source the ImageReader object which calls this method.
+     * @param source
+     *            the ImageReader object which calls this method.
      */
     void thumbnailComplete(ImageReader source);
-    
+
     /**
      * Notifies this listener about the degree of completion of the read call.
      * 
-     * @param source the ImageReader object which calls this method.
-     * @param percentageDone the percentage of decoding done.
+     * @param source
+     *            the ImageReader object which calls this method.
+     * @param percentageDone
+     *            the percentage of decoding done.
      */
     void thumbnailProgress(ImageReader source, float percentageDone);
-    
+
     /**
-     * Notifies this listener that a thumbnail reading operation has been started. 
+     * Notifies this listener that a thumbnail reading operation has been
+     * started.
      * 
-     * @param source the ImageReader object which calls this method.
-     * @param imageIndex the index of the image in an input file or 
-     * stream to be read.
-     * @param thumbnailIndex the index of the thumbnail to be read.
+     * @param source
+     *            the ImageReader object which calls this method.
+     * @param imageIndex
+     *            the index of the image in an input file or stream to be read.
+     * @param thumbnailIndex
+     *            the index of the thumbnail to be read.
      */
     void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex);
 }
-

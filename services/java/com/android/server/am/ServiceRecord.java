@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import com.android.internal.os.BatteryStatsImpl;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -34,7 +36,7 @@ import java.util.List;
  * A running application service.
  */
 class ServiceRecord extends Binder {
-    final BatteryStats.Uid.Pkg.Serv stats;
+    final BatteryStatsImpl.Uid.Pkg.Serv stats;
     final ComponentName name; // service component.
     final String shortName; // name.flattenToShortString().
     final Intent.FilterComparison intent;
@@ -114,7 +116,7 @@ class ServiceRecord extends Binder {
         }
     }
 
-    ServiceRecord(BatteryStats.Uid.Pkg.Serv servStats, ComponentName name,
+    ServiceRecord(BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
             Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter) {
         this.stats = servStats;
         this.name = name;

@@ -69,7 +69,7 @@ can create an SD card image and mount it when launching the emulator like so:</p
 <b>$</b> emulator -sdcard ./img
 </pre>
 <p>For more information, read about the 
-<a href="{@docRoot}reference/othertools.html#mksdcard">mksdcard tool</a>.</p>
+<a href="{@docRoot}guide/developing/tools/othertools.html#mksdcard">mksdcard tool</a>.</p>
 	
 <p>The format of the trace files is described <a href="#format">later 
    in this document</a>. </p>
@@ -111,7 +111,7 @@ the emulator host machine:</p>
     the first row show the extent (entry to exit) of all the calls to the selected
     method. The method in this case is LoadListener.nativeFinished() and it was
     selected in the profile view. </p>
-<p><img src="../images/traceview_timeline.png" alt="Traceview timeline panel" width="893" height="284"></p>
+<p><img src="/images/traceview_timeline.png" alt="Traceview timeline panel" width="893" height="284"></p>
 <a name="profilepanel"></a>
 <h3>Profile Panel</h3>
 <p>The image below shows the profile pane. The profile pane shows a
@@ -128,7 +128,7 @@ the emulator host machine:</p>
     view, we can see that there were 14 calls to LoadListener.nativeFinished(); looking
     at the timeline panel shows that one of those calls took an unusually
     long time.</p>
-<p><img src="../images/traceview_profile.png" alt="Traceview profile panel." width="892" height="630"></p>
+<p><img src="/images/traceview_profile.png" alt="Traceview profile panel." width="892" height="630"></p>
 
 <a name="format"></a>
 <h2>Traceview File Format</h2>

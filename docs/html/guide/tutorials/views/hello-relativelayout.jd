@@ -1,4 +1,6 @@
 page.title=Hello, RelativeLayout
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.RelativeLayout} is a ViewGroup that allows you to layout child elements
@@ -71,7 +73,3 @@ public void onCreate(Bundle savedInstanceState) {
   <li>{@link android.widget.EditText}</li>
   <li>{@link android.widget.Button}</li>
 </ul>
-
-
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
-

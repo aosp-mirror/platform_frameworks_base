@@ -67,6 +67,14 @@ public class NetworkUtils {
     public native static boolean stopDhcp(String interfaceName);
 
     /**
+     * Release the current DHCP lease.
+     * @param interfaceName the name of the interface for which the lease should
+     * be released
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean releaseDhcpLease(String interfaceName);
+
+    /**
      * Return the last DHCP-related error message that was recorded.
      * <p/>NOTE: This string is not localized, but currently it is only
      * used in logging.

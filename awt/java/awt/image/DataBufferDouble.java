@@ -18,26 +18,33 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image;
 
 /**
- * The Class DataBufferDouble is the subclass of DataBuffer
- * for the case where the underlying data is of type double.
+ * The Class DataBufferDouble is the subclass of DataBuffer for the case where
+ * the underlying data is of type double.
+ * 
+ * @since Android 1.0
  */
 public final class DataBufferDouble extends DataBuffer {
 
-    /** The data. */
+    /**
+     * The data.
+     */
     double data[][];
 
     /**
      * Instantiates a new data buffer of type double.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param offsets the starting indices for reading the 
-     * data from the internal data arrays
-    */
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param offsets
+     *            the starting indices for reading the data from the internal
+     *            data arrays.
+     */
     public DataBufferDouble(double dataArrays[][], int size, int offsets[]) {
         super(TYPE_DOUBLE, size, dataArrays.length, offsets);
         data = dataArrays.clone();
@@ -46,9 +53,10 @@ public final class DataBufferDouble extends DataBuffer {
     /**
      * Instantiates a new data buffer of type double.
      * 
-     * @param dataArrays the data arrays to copy the data from
-     * @param size the length (number of elements) to use 
-     * from the data arrays
+     * @param dataArrays
+     *            the data arrays to copy the data from.
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
      */
     public DataBufferDouble(double dataArrays[][], int size) {
         super(TYPE_DOUBLE, size, dataArrays.length);
@@ -56,12 +64,15 @@ public final class DataBufferDouble extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type double
-     * with a single underlying array of data.
+     * Instantiates a new data buffer of type double with a single underlying
+     * array of data.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
-     * @param offset the starting index to use when reading the data
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
+     * @param offset
+     *            the starting index to use when reading the data.
      */
     public DataBufferDouble(double dataArray[], int size, int offset) {
         super(TYPE_DOUBLE, size, 1, offset);
@@ -70,12 +81,13 @@ public final class DataBufferDouble extends DataBuffer {
     }
 
     /**
-     * Instantiates a new data buffer of type double
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new data buffer of type double with a single underlying
+     * array of data starting at index 0.
      * 
-     * @param dataArray the data array to copy the data from
-     * @param size the length (number of elements) to use 
+     * @param dataArray
+     *            the data array to copy the data from.
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferDouble(double dataArray[], int size) {
         super(TYPE_DOUBLE, size);
@@ -84,12 +96,13 @@ public final class DataBufferDouble extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type double
-     * with offsets equal to zero.
+     * Instantiates a new empty data buffer of type double with offsets equal to
+     * zero.
      * 
-     * @param size the length (number of elements) to use 
-     * from the data arrays
-     * @param numBanks the number of data arrays to create
+     * @param size
+     *            the length (number of elements) to use from the data arrays.
+     * @param numBanks
+     *            the number of data arrays to create.
      */
     public DataBufferDouble(int size, int numBanks) {
         super(TYPE_DOUBLE, size, numBanks);
@@ -101,11 +114,11 @@ public final class DataBufferDouble extends DataBuffer {
     }
 
     /**
-     * Instantiates a new empty data buffer of type double
-     * with a single underlying array of data starting at
-     * index 0.
+     * Instantiates a new empty data buffer of type double with a single
+     * underlying array of data starting at index 0.
      * 
-     * @param size the length (number of elements) to use 
+     * @param size
+     *            the length (number of elements) to use.
      */
     public DataBufferDouble(int size) {
         super(TYPE_DOUBLE, size);
@@ -139,12 +152,12 @@ public final class DataBufferDouble extends DataBuffer {
 
     @Override
     public int getElem(int bank, int i) {
-        return (int) (data[bank][offsets[bank] + i]);
+        return (int)(data[bank][offsets[bank] + i]);
     }
 
     @Override
     public float getElemFloat(int bank, int i) {
-        return (float) (data[bank][offsets[bank] + i]);
+        return (float)(data[bank][offsets[bank] + i]);
     }
 
     @Override
@@ -167,9 +180,9 @@ public final class DataBufferDouble extends DataBuffer {
     /**
      * Gets the data of the specified internal data array.
      * 
-     * @param bank the index of the desired data array
-     * 
-     * @return the data
+     * @param bank
+     *            the index of the desired data array.
+     * @return the data.
      */
     public double[] getData(int bank) {
         notifyTaken();
@@ -178,12 +191,12 @@ public final class DataBufferDouble extends DataBuffer {
 
     @Override
     public int getElem(int i) {
-        return (int) (data[0][offset + i]);
+        return (int)(data[0][offset + i]);
     }
 
     @Override
     public float getElemFloat(int i) {
-        return (float) (data[0][offset + i]);
+        return (float)(data[0][offset + i]);
     }
 
     @Override
@@ -194,7 +207,7 @@ public final class DataBufferDouble extends DataBuffer {
     /**
      * Gets the bank data.
      * 
-     * @return the bank data
+     * @return the bank data.
      */
     public double[][] getBankData() {
         notifyTaken();
@@ -204,11 +217,10 @@ public final class DataBufferDouble extends DataBuffer {
     /**
      * Gets the data of the first data array.
      * 
-     * @return the data
+     * @return the data.
      */
     public double[] getData() {
         notifyTaken();
         return data[0];
     }
 }
-

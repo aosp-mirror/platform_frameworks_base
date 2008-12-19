@@ -27,8 +27,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 /**
- * The {@link RingtonePreference} allows the user to choose one from all of the
- * available ringtones. The chosen ringtone's URI will be persisted as a string.
+ * A {@link Preference} that allows the user to choose a ringtone from those on the device. 
+ * The chosen ringtone's URI will be persisted as a string.
  * <p>
  * If the user chooses the "Default" item, the saved string will be one of
  * {@link System#DEFAULT_RINGTONE_URI} or

@@ -19,6 +19,7 @@ package android.os;
 import android.net.LocalSocketAddress;
 import android.net.LocalSocket;
 import android.util.Log;
+import dalvik.system.Zygote;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -221,13 +222,13 @@ public class Process {
     public static final int start(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
-                                  boolean enableDebugger,
+                                  int debugFlags,
                                   String[] zygoteArgs)
     {
         if (supportsProcesses()) {
             try {
                 return startViaZygote(processClass, niceName, uid, gid, gids,
-                        enableDebugger, zygoteArgs);
+                        debugFlags, zygoteArgs);
             } catch (ZygoteStartFailedEx ex) {
                 Log.e(LOG_TAG,
                         "Starting VM process through Zygote failed");
@@ -259,9 +260,9 @@ public class Process {
      * {@hide}
      */
     public static final int start(String processClass, int uid, int gid,
-            int[] gids, boolean enableDebugger, String[] zygoteArgs) {
+            int[] gids, int debugFlags, String[] zygoteArgs) {
         return start(processClass, "", uid, gid, gids, 
-                enableDebugger, zygoteArgs);
+                debugFlags, zygoteArgs);
     }
 
     private static void invokeStaticMain(String className) {
@@ -452,7 +453,7 @@ public class Process {
                                   final String niceName,
                                   final int uid, final int gid,
                                   final int[] gids,
-                                  boolean enableDebugger,
+                                  int debugFlags,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
         int pid;
@@ -465,8 +466,14 @@ public class Process {
             argsForZygote.add("--runtime-init");
             argsForZygote.add("--setuid=" + uid);
             argsForZygote.add("--setgid=" + gid);
-            if (enableDebugger) {
+            if ((debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) != 0) {
                 argsForZygote.add("--enable-debugger");
+            }
+            if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
+                argsForZygote.add("--enable-checkjni");
+            }
+            if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
+                argsForZygote.add("--enable-assert");
             }
 
             //TODO optionally enable debuger
@@ -529,7 +536,12 @@ public class Process {
     public static final native int myTid();
 
     /**
-     * Returns the UID assigned to a partlicular user name, or -1 if there is
+     * Returns the identifier of this process's user.
+     */
+    public static final native int myUid();
+
+    /**
+     * Returns the UID assigned to a particular user name, or -1 if there is
      * none.  If the given string consists of only numbers, it is converted
      * directly to a uid.
      */

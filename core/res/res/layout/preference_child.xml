@@ -18,7 +18,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:paddingRight="?android:attr/scrollbarSize">
     
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -46,6 +47,7 @@
     <!-- Preference should place its actual preference widget here. -->
     <LinearLayout android:id="@+android:id/widget_frame"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent"
+         />
 
 </LinearLayout>

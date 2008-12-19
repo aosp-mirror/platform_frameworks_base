@@ -432,8 +432,9 @@ public class MenuBuilder implements Menu {
             rintent.setComponent(new ComponentName(
                     ri.activityInfo.applicationInfo.packageName,
                     ri.activityInfo.name));
-            final MenuItem item = add(group, id, categoryOrder, ri.loadLabel(pm));
-            item.setIntent(rintent);
+            final MenuItem item = add(group, id, categoryOrder, ri.loadLabel(pm))
+                    .setIcon(ri.loadIcon(pm))
+                    .setIntent(rintent);
             if (outSpecificItems != null && ri.specificIndex >= 0) {
                 outSpecificItems[ri.specificIndex] = item;
             }
@@ -624,7 +625,8 @@ public class MenuBuilder implements Menu {
         return mItems.size();
     }
 
-    public MenuItem get(int index) {
+    /** {@inheritDoc} */
+    public MenuItem getItem(int index) {
         return mItems.get(index);
     }
 
@@ -773,7 +775,8 @@ public class MenuBuilder implements Menu {
                         (shortcutAlphaChar != 0) &&
                         (shortcutAlphaChar == possibleChars.meta[0]
                          || shortcutAlphaChar == possibleChars.meta[2]
-                         || (shortcutAlphaChar == '\b' && keyCode == KeyEvent.KEYCODE_DEL))) {
+                         || (shortcutAlphaChar == '\b' && keyCode == KeyEvent.KEYCODE_DEL)) &&
+                        item.isEnabled()) {
                     return item;
                 }
             } else {
@@ -781,7 +784,8 @@ public class MenuBuilder implements Menu {
                 if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
                         (shortcutNumericChar != 0) &&
                         (shortcutNumericChar == possibleChars.meta[0]
-                            || shortcutNumericChar == possibleChars.meta[2])) {
+                            || shortcutNumericChar == possibleChars.meta[2]) &&
+                        item.isEnabled()) {
                     return item;
                 }
             }
@@ -829,11 +833,16 @@ public class MenuBuilder implements Menu {
      *            sub menu is about to be shown, <var>allMenusAreClosing</var>
      *            is false.
      */
-    public final void close(boolean allMenusAreClosing) {
+    final void close(boolean allMenusAreClosing) {
         Callback callback = getCallback();
         if (callback != null) {
             callback.onCloseMenu(this, allMenusAreClosing);
         }
+    }
+
+    /** {@inheritDoc} */
+    public void close() {
+        close(true);
     }
 
     /**

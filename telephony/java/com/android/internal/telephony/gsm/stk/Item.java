@@ -42,6 +42,7 @@ public class Item implements Parcelable {
     public Item(Parcel in) {
         id = in.readInt();
         text = in.readString();
+        icon = in.readParcelable(null);
     }
 
     public int describeContents() {
@@ -51,6 +52,7 @@ public class Item implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(text);
+        dest.writeParcelable(icon, flags);
     }
 
     public static final Parcelable.Creator<Item> CREATOR = new Parcelable.Creator<Item>() {

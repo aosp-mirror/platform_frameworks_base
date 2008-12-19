@@ -20,8 +20,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.pim.DateFormat;
 import android.text.TextUtils.TruncateAt;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -107,7 +107,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         DateFormatSymbols symbols = new DateFormatSymbols();
         mWeekDays = symbols.getShortWeekdays();
         
-        mDateFormat = DateFormat.getLongDateFormat(context);
+        mDateFormat = DateFormat.getMediumDateFormat(context);
         mCalendar = Calendar.getInstance();
         updateTitle(mInitialYear, mInitialMonth, mInitialDay);
         

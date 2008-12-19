@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Config;
+import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -57,6 +59,9 @@ import java.util.List;
  * <p>ScrollView only supports vertical scrolling.
  */
 public class ScrollView extends FrameLayout {
+    static final String TAG = "ScrollView";
+    static final boolean localLOGV = false || Config.LOGV;
+    
     private static final int ANIMATED_SCROLL_GAP = 250;
 
     /**
@@ -194,6 +199,7 @@ public class ScrollView extends FrameLayout {
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
+        setScrollContainer(true);
     }
 
     @Override
@@ -839,12 +845,16 @@ public class ScrollView extends FrameLayout {
     public final void smoothScrollBy(int dx, int dy) {
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
+            if (localLOGV) Log.v(TAG, "Smooth scroll: mScrollY=" + mScrollY
+                    + " dy=" + dy);
             mScroller.startScroll(mScrollX, mScrollY, dx, dy);
             invalidate();
         } else {
             if (!mScroller.isFinished()) {
                 mScroller.abortAnimation();
             }
+            if (localLOGV) Log.v(TAG, "Immediate scroll: mScrollY=" + mScrollY
+                    + " dy=" + dy);
             scrollBy(dx, dy);
         }
         mLastScroll = AnimationUtils.currentAnimationTimeMillis();
@@ -927,14 +937,19 @@ public class ScrollView extends FrameLayout {
                 View child = getChildAt(0);
                 mScrollX = clamp(x, this.getWidth(), child.getWidth());
                 mScrollY = clamp(y, this.getHeight(), child.getHeight());
+                if (localLOGV) Log.v(TAG, "mScrollY=" + mScrollY + " y=" + y
+                        + " height=" + this.getHeight()
+                        + " child height=" + child.getHeight());
             } else {
                 mScrollX = x;
                 mScrollY = y;
             }            
             if (oldX != mScrollX || oldY != mScrollY) {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-                postInvalidate();  // So we draw again
             }
+            
+            // Keep on drawing until the animation has finished.
+            postInvalidate();
         }
     }
 
@@ -1005,6 +1020,9 @@ public class ScrollView extends FrameLayout {
 
         int scrollYDelta = 0;
 
+        if (localLOGV) Log.v(TAG, "child=" + rect.toShortString()
+                + " screenTop=" + screenTop + " screenBottom=" + screenBottom
+                + " height=" + height);
         if (rect.bottom > screenBottom && rect.top > screenTop) {
             // need to move down to get it in view: move down just enough so
             // that the entire rectangle is in view (or at least the first
@@ -1021,6 +1039,8 @@ public class ScrollView extends FrameLayout {
             // make sure we aren't scrolling beyond the end of our content
             int bottom = getChildAt(getChildCount() - 1).getBottom();
             int distanceToBottom = bottom - screenBottom;
+            if (localLOGV) Log.v(TAG, "scrollYDelta=" + scrollYDelta
+                    + " distanceToBottom=" + distanceToBottom);
             scrollYDelta = Math.min(scrollYDelta, distanceToBottom);
 
         } else if (rect.top < screenTop && rect.bottom < screenBottom) {
@@ -1098,8 +1118,7 @@ public class ScrollView extends FrameLayout {
         rectangle.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
-        // note: until bug 1137695 is fixed, disable smooth scrolling for this api
-        return scrollToChildRect(rectangle, true);//immediate);
+        return scrollToChildRect(rectangle, immediate);
     }
 
     @Override
@@ -1121,6 +1140,24 @@ public class ScrollView extends FrameLayout {
         // Calling this with the present values causes it to re-clam them
         scrollTo(mScrollX, mScrollY);
     }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        View currentFocused = findFocus();
+        if (null == currentFocused || this == currentFocused)
+            return;
+
+        final int maxJump = mBottom - mTop;
+
+        if (isWithinDeltaOfScreen(currentFocused, maxJump)) {
+            currentFocused.getDrawingRect(mTempRect);
+            offsetDescendantRectToMyCoords(currentFocused, mTempRect);
+            int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
+            doScrollY(scrollDelta);
+        }
+    }    
 
     /**
      * Return true if child is an descendant of parent, (or equal to the parent).

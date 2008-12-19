@@ -26,6 +26,6 @@ interface IPowerManager
     void userActivity(long when, boolean noChangeLights);
     void userActivityWithForce(long when, boolean noChangeLights, boolean force);
     void setPokeLock(int pokey, IBinder lock, String tag);
-    void setStayOnSetting(boolean val);
+    void setStayOnSetting(int val);
     long getScreenOnTime();
 }

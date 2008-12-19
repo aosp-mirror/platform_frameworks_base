@@ -729,36 +729,13 @@ public class PduPersister {
                 }
                 is = mContentResolver.openInputStream(dataUri);
                 
-                boolean fakeRawAmr = contentType.equals("audio/amr");
-
                 if (LOCAL_LOGV) {
                     Log.v(TAG, "Saving data to: " + uri);
                 }
 
                 byte[] buffer = new byte[256];
                 for (int len = 0; (len = is.read(buffer)) != -1; ) {
-                    if (fakeRawAmr && len > 32) {
-                        // This is a Gross Hack. We can only record audio to amr format in a 3gpp container.
-                        // Millions of handsets out there only support what is essentially raw AMR.
-                        // We work around this issue by extracting the AMR data out of the 3gpp container
-                        // (in a really stupid and non-portable way), prepending a little header, and then
-                        // using that as the attachment.
-                        // This also requires some cooperation from the SoundRecorder, which ends up saving
-                        // a "recording.amr" file with mime type audio/amr, even though it's a 3gpp file.
-                        if (buffer[4] ==  0x66 &&       // f
-                                buffer[5] == 0x74 &&    // t
-                                buffer[6] == 0x79 &&    // y
-                                buffer[7] == 0x70) {    // p
-                            byte [] amrHeader = new byte [] { 0x23, 0x21, 0x41, 0x4d, 0x52, 0x0a };
-                            os.write(amrHeader);
-                            os.write(buffer, 32, len - 32);
-                        } else {
-                            os.write(buffer, 0, len);
-                        }
-                        fakeRawAmr = false;
-                    } else {
-                        os.write(buffer, 0, len);
-                    }
+                    os.write(buffer, 0, len);
                 }
             } else {
                 if (LOCAL_LOGV) {

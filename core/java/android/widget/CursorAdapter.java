@@ -357,9 +357,8 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
 
         @Override
         public void onChange(boolean selfChange) {
-            if (mAutoRequery && mCursor != null) {
-                if (Config.LOGV) Log.v("Cursor", "Auto requerying " + mCursor +
-                        " due to update");
+            if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {
+                if (Config.LOGV) Log.v("Cursor", "Auto requerying " + mCursor + " due to update");
                 mDataValid = mCursor.requery();
             }
         }

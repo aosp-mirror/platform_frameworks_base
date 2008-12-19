@@ -22,6 +22,12 @@ package java.awt.event;
 
 import java.awt.AWTEvent;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class TextEvent extends AWTEvent {
 
     private static final long serialVersionUID = 6269902291250941179L;

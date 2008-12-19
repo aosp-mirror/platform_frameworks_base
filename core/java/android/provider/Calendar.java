@@ -38,11 +38,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.pim.DateUtils;
 import android.pim.ICalendar;
 import android.pim.RecurrenceSet;
-import android.pim.Time;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
 
@@ -429,16 +429,25 @@ public final class Calendar {
         public static final String EXDATE = "exdate";
 
         /**
-         * The original event this event is an exception for
+         * The _sync_id of the original recurring event for which this event is
+         * an exception.
          * <P>Type: TEXT</P>
          */
         public static final String ORIGINAL_EVENT = "originalEvent";
 
         /**
-         * The time of the original instance time this event is an exception for
+         * The original instance time of the recurring event for which this
+         * event is an exception.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String ORIGINAL_INSTANCE_TIME = "originalInstanceTime";
+
+        /**
+         * The allDay status (true or false) of the original recurring event
+         * for which this event is an exception.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String ORIGINAL_ALL_DAY = "originalAllDay";
 
         /**
          * The last date this event repeats on, or NULL if it never ends
@@ -543,7 +552,7 @@ public final class Calendar {
                         time.clear(tzidParam.value);
                     }
                     try {
-                        time.parse2445(dtstart);
+                        time.parse(dtstart);
                     } catch (Exception e) {
                         if (Config.LOGD) {
                             Log.d(TAG, "Cannot parse dtstart " + dtstart, e);
@@ -564,7 +573,7 @@ public final class Calendar {
                         // TODO: make sure the timezones are the same for
                         // start, end.
                         try {
-                            time.parse2445(dtend);
+                            time.parse(dtend);
                         } catch (Exception e) {
                             if (Config.LOGD) {
                                 Log.d(TAG, "Cannot parse dtend " + dtend, e);

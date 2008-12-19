@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.awt.Rectangle;
@@ -28,42 +29,58 @@ import org.apache.harmony.awt.gl.Crossing;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class QuadCurve2D is a Shape that represents a segment of a 
- * quadratic (Bezier) curve. The curved segment is determined by three points:
- * a start point, an end point, and a control point.  The line from the control 
- * point to the starting point gives the tangent to the curve at the
- * starting point, and the line from the control point to the end point 
- * gives the tangent to the curve at the end point.
+ * The Class QuadCurve2D is a Shape that represents a segment of a quadratic
+ * (Bezier) curve. The curved segment is determined by three points: a start
+ * point, an end point, and a control point. The line from the control point to
+ * the starting point gives the tangent to the curve at the starting point, and
+ * the line from the control point to the end point gives the tangent to the
+ * curve at the end point.
+ * 
+ * @since Android 1.0
  */
 public abstract class QuadCurve2D implements Shape, Cloneable {
 
     /**
-     * The Class Float is the subclass of QuadCurve2D that has all 
-     * of its data values stored with float-level precision.
+     * The Class Float is the subclass of QuadCurve2D that has all of its data
+     * values stored with float-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Float extends QuadCurve2D {
 
-        /** The x coordinate of the starting point of the curved segment. */
+        /**
+         * The x coordinate of the starting point of the curved segment.
+         */
         public float x1;
-        
-        /** The y coordinate of the starting point of the curved segment. */
+
+        /**
+         * The y coordinate of the starting point of the curved segment.
+         */
         public float y1;
-        
-        /** The x coordinate of the control point.  */
+
+        /**
+         * The x coordinate of the control point.
+         */
         public float ctrlx;
-        
-        /** The y coordinate of the control point. */
+
+        /**
+         * The y coordinate of the control point.
+         */
         public float ctrly;
-        
-        /** The x coordinate of the end point of the curved segment. */
+
+        /**
+         * The x coordinate of the end point of the curved segment.
+         */
         public float x2;
-        
-        /** The y coordinate of the end point of the curved segment. */
+
+        /**
+         * The y coordinate of the end point of the curved segment.
+         */
         public float y2;
 
         /**
-         * Instantiates a new float-valued QuadCurve2D with all coordinate values
-         * set to zero.
+         * Instantiates a new float-valued QuadCurve2D with all coordinate
+         * values set to zero.
          */
         public Float() {
         }
@@ -72,12 +89,20 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
          * Instantiates a new float-valued QuadCurve2D with the specified
          * coordinate values.
          * 
-         * @param x1 the x coordinate of the starting point of the curved segment
-         * @param y1 the y coordinate of the starting point of the curved segment
-         * @param ctrlx the x coordinate of the control point
-         * @param ctrly the y coordinate of the control point
-         * @param x2 the x coordinate of the end point of the curved segment
-         * @param y2 the y coordinate of the end point of the curved segment
+         * @param x1
+         *            the x coordinate of the starting point of the curved
+         *            segment.
+         * @param y1
+         *            the y coordinate of the starting point of the curved
+         *            segment.
+         * @param ctrlx
+         *            the x coordinate of the control point.
+         * @param ctrly
+         *            the y coordinate of the control point.
+         * @param x2
+         *            the x coordinate of the end point of the curved segment.
+         * @param y2
+         *            the y coordinate of the end point of the curved segment.
          */
         public Float(float x1, float y1, float ctrlx, float ctrly, float x2, float y2) {
             setCurve(x1, y1, ctrlx, ctrly, x2, y2);
@@ -141,12 +166,20 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
         /**
          * Sets the data values of the curve.
          * 
-         * @param x1 the x coordinate of the starting point of the curved segment
-         * @param y1 the y coordinate of the starting point of the curved segment
-         * @param ctrlx the x coordinate of the control point
-         * @param ctrly the y coordinate of the control point
-         * @param x2 the x coordinate of the end point of the curved segment
-         * @param y2 the y coordinate of the end point of the curved segment
+         * @param x1
+         *            the x coordinate of the starting point of the curved
+         *            segment.
+         * @param y1
+         *            the y coordinate of the starting point of the curved
+         *            segment.
+         * @param ctrlx
+         *            the x coordinate of the control point.
+         * @param ctrly
+         *            the y coordinate of the control point.
+         * @param x2
+         *            the x coordinate of the end point of the curved segment.
+         * @param y2
+         *            the y coordinate of the end point of the curved segment.
          */
         public void setCurve(float x1, float y1, float ctrlx, float ctrly, float x2, float y2) {
             this.x1 = x1;
@@ -167,32 +200,46 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     }
 
     /**
-     * The Class Double is the subclass of QuadCurve2D that has all 
-     * of its data values stored with double-level precision.
+     * The Class Double is the subclass of QuadCurve2D that has all of its data
+     * values stored with double-level precision.
+     * 
+     * @since Android 1.0
      */
     public static class Double extends QuadCurve2D {
 
-        /** The x coordinate of the starting point of the curved segment. */
+        /**
+         * The x coordinate of the starting point of the curved segment.
+         */
         public double x1;
-        
-        /** The y coordinate of the starting point of the curved segment. */
+
+        /**
+         * The y coordinate of the starting point of the curved segment.
+         */
         public double y1;
-        
-        /** The x coordinate of the control point. */
+
+        /**
+         * The x coordinate of the control point.
+         */
         public double ctrlx;
-        
-        /** The y coordinate of the control point. */
+
+        /**
+         * The y coordinate of the control point.
+         */
         public double ctrly;
-        
-        /** The x coordinate of the end point of the curved segment. */
+
+        /**
+         * The x coordinate of the end point of the curved segment.
+         */
         public double x2;
-        
-        /** The y coordinate of the end point of the curved segment. */
+
+        /**
+         * The y coordinate of the end point of the curved segment.
+         */
         public double y2;
 
         /**
-         * Instantiates a new double-valued QuadCurve2D with all coordinate values
-         * set to zero.
+         * Instantiates a new double-valued QuadCurve2D with all coordinate
+         * values set to zero.
          */
         public Double() {
         }
@@ -201,12 +248,20 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
          * Instantiates a new double-valued QuadCurve2D with the specified
          * coordinate values.
          * 
-         * @param x1 the x coordinate of the starting point of the curved segment
-         * @param y1 the y coordinate of the starting point of the curved segment
-         * @param ctrlx the x coordinate of the control point
-         * @param ctrly the y coordinate of the control point
-         * @param x2 the x coordinate of the end point of the curved segment
-         * @param y2 the y coordinate of the end point of the curved segment
+         * @param x1
+         *            the x coordinate of the starting point of the curved
+         *            segment.
+         * @param y1
+         *            the y coordinate of the starting point of the curved
+         *            segment.
+         * @param ctrlx
+         *            the x coordinate of the control point.
+         * @param ctrly
+         *            the y coordinate of the control point.
+         * @param x2
+         *            the x coordinate of the end point of the curved segment.
+         * @param y2
+         *            the y coordinate of the end point of the curved segment.
          */
         public Double(double x1, double y1, double ctrlx, double ctrly, double x2, double y2) {
             setCurve(x1, y1, ctrlx, ctrly, x2, y2);
@@ -277,28 +332,37 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     }
 
     /*
-     * QuadCurve2D path iterator 
+     * QuadCurve2D path iterator
      */
     /**
      * The PathIterator for a Quad2D curve.
      */
     class Iterator implements PathIterator {
 
-        /** The source QuadCurve2D object. */
+        /**
+         * The source QuadCurve2D object.
+         */
         QuadCurve2D c;
 
-        /** The path iterator transformation. */
+        /**
+         * The path iterator transformation.
+         */
         AffineTransform t;
 
-        /** The current segment index. */
+        /**
+         * The current segment index.
+         */
         int index;
 
         /**
-         * Constructs a new QuadCurve2D.Iterator for given curve and transformation
+         * Constructs a new QuadCurve2D.Iterator for given curve and
+         * transformation
          * 
-         * @param q - the source QuadCurve2D object
-         * @param t the AffineTransform that acts on the coordinates before 
-         * returning them (or null)
+         * @param q
+         *            the source QuadCurve2D object.
+         * @param t
+         *            the AffineTransform that acts on the coordinates before
+         *            returning them (or null).
          */
         Iterator(QuadCurve2D q, AffineTransform t) {
             this.c = q;
@@ -380,284 +444,307 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     /**
      * Gets the x coordinate of the starting point.
      * 
-     * @return the x coordinate of the starting point
+     * @return the x coordinate of the starting point.
      */
     public abstract double getX1();
 
     /**
      * Gets the y coordinate of the starting point.
      * 
-     * @return the y coordinate of the starting point
+     * @return the y coordinate of the starting point.
      */
     public abstract double getY1();
 
     /**
      * Gets the starting point.
      * 
-     * @return the starting point
+     * @return the starting point.
      */
     public abstract Point2D getP1();
 
     /**
      * Gets the x coordinate of the control point.
      * 
-     * @return the x coordinate of the control point
+     * @return the x coordinate of the control point.
      */
     public abstract double getCtrlX();
 
     /**
      * Gets the y coordinate of the control point.
      * 
-     * @return y coordinate of the control point
+     * @return y coordinate of the control point.
      */
     public abstract double getCtrlY();
 
     /**
      * Gets the control point.
      * 
-     * @return the control point
+     * @return the control point.
      */
     public abstract Point2D getCtrlPt();
 
     /**
      * Gets the x coordinate of the end point.
      * 
-     * @return the x coordinate of the end point
+     * @return the x coordinate of the end point.
      */
     public abstract double getX2();
 
     /**
      * Gets the y coordinate of the end point.
      * 
-     * @return the y coordinate of the end point
+     * @return the y coordinate of the end point.
      */
     public abstract double getY2();
 
     /**
      * Gets the end point.
      * 
-     * @return the end point
+     * @return the end point.
      */
     public abstract Point2D getP2();
 
     /**
      * Sets the data of the curve.
      * 
-     * @param x1 the x coordinate of the starting point of the curved segment
-     * @param y1 the y coordinate of the starting point of the curved segment
-     * @param ctrlx the x coordinate of the control point
-     * @param ctrly the y coordinate of the control point
-     * @param x2 the x coordinate of the end point of the curved segment
-     * @param y2 the y coordinate of the end point of the curved segment
+     * @param x1
+     *            the x coordinate of the starting point of the curved segment.
+     * @param y1
+     *            the y coordinate of the starting point of the curved segment.
+     * @param ctrlx
+     *            the x coordinate of the control point.
+     * @param ctrly
+     *            the y coordinate of the control point.
+     * @param x2
+     *            the x coordinate of the end point of the curved segment.
+     * @param y2
+     *            the y coordinate of the end point of the curved segment.
      */
-    public abstract void setCurve(double x1, double y1, double ctrlx, double ctrly, double x2, double y2);
+    public abstract void setCurve(double x1, double y1, double ctrlx, double ctrly, double x2,
+            double y2);
 
     /**
      * Sets the data of the curve.
      * 
-     * @param p1 the starting point of the curved segment
-     * @param cp the control point
-     * @param p2 the end point of the curved segment
-     * 
-     * @throws NullPointerException if any of the three points is null.
+     * @param p1
+     *            the starting point of the curved segment.
+     * @param cp
+     *            the control point.
+     * @param p2
+     *            the end point of the curved segment.
+     * @throws NullPointerException
+     *             if any of the three points is null.
      */
     public void setCurve(Point2D p1, Point2D cp, Point2D p2) {
         setCurve(p1.getX(), p1.getY(), cp.getX(), cp.getY(), p2.getX(), p2.getY());
     }
 
     /**
-     * Sets the data of the curve by reading the data from an array
-     * of values. The values are read in the same order as the arguments
-     * of the method {@link QuadCurve2D#setCurve(double, double, double, double, double, double)}.
+     * Sets the data of the curve by reading the data from an array of values.
+     * The values are read in the same order as the arguments of the method
+     * {@link QuadCurve2D#setCurve(double, double, double, double, double, double)}
+     * .
      * 
-     * @param coords the array of values containing the new coordinates
-     * @param offset the offset of the data to read within the array
-     * 
-     * @throws ArrayIndexOutOfBoundsException if coords.length < offset + 6.
-     * @throws NullPointerException if the coordinate array is null.
+     * @param coords
+     *            the array of values containing the new coordinates.
+     * @param offset
+     *            the offset of the data to read within the array.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {@code coords.length} < offset + 6.
+     * @throws NullPointerException
+     *             if the coordinate array is null.
      */
     public void setCurve(double[] coords, int offset) {
-        setCurve(
-                coords[offset + 0], coords[offset + 1],
-                coords[offset + 2], coords[offset + 3],
+        setCurve(coords[offset + 0], coords[offset + 1], coords[offset + 2], coords[offset + 3],
                 coords[offset + 4], coords[offset + 5]);
     }
 
     /**
-     * Sets the data of the curve by reading the data from an array
-     * of points. The values are read in the same order as the arguments
-     * of the method {@link QuadCurve2D#setCurve(Point2D, Point2D, Point2D)}
+     * Sets the data of the curve by reading the data from an array of points.
+     * The values are read in the same order as the arguments of the method
+     * {@link QuadCurve2D#setCurve(Point2D, Point2D, Point2D)}.
      * 
-     * @param points the array of points containing the new coordinates
-     * @param offset the offset of the data to read within the array
-     * 
-     * @throws ArrayIndexOutOfBoundsException if points.length < offset + 3.
-     * @throws NullPointerException if the point array is null.
+     * @param points
+     *            the array of points containing the new coordinates.
+     * @param offset
+     *            the offset of the data to read within the array.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if points.length < offset + 3.
+     * @throws NullPointerException
+     *             if the point array is null.
      */
     public void setCurve(Point2D[] points, int offset) {
-        setCurve(
-                points[offset + 0].getX(), points[offset + 0].getY(),
-                points[offset + 1].getX(), points[offset + 1].getY(),
-                points[offset + 2].getX(), points[offset + 2].getY());
+        setCurve(points[offset + 0].getX(), points[offset + 0].getY(), points[offset + 1].getX(),
+                points[offset + 1].getY(), points[offset + 2].getX(), points[offset + 2].getY());
     }
 
     /**
      * Sets the data of the curve by copying it from another QuadCurve2D.
      * 
-     * @param curve the curve to copy the data points from
-     * 
-     * @throws NullPointerException if the curve is null.
+     * @param curve
+     *            the curve to copy the data points from.
+     * @throws NullPointerException
+     *             if the curve is null.
      */
     public void setCurve(QuadCurve2D curve) {
-        setCurve(
-                curve.getX1(), curve.getY1(),
-                curve.getCtrlX(), curve.getCtrlY(),
-                curve.getX2(), curve.getY2());
+        setCurve(curve.getX1(), curve.getY1(), curve.getCtrlX(), curve.getCtrlY(), curve.getX2(),
+                curve.getY2());
     }
 
     /**
-     * Gets the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point
-     * for this curve.
+     * Gets the square of the distance from the control point to the straight
+     * line segment connecting the start point and the end point for this curve.
      * 
-     * @return the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
+     * @return the square of the distance from the control point to the straight
+     *         line segment connecting the start point and the end point.
      */
     public double getFlatnessSq() {
-        return Line2D.ptSegDistSq(
-                getX1(), getY1(),
-                getX2(), getY2(),
-                getCtrlX(), getCtrlY());
+        return Line2D.ptSegDistSq(getX1(), getY1(), getX2(), getY2(), getCtrlX(), getCtrlY());
     }
 
     /**
-     * Gets the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
+     * Gets the square of the distance from the control point to the straight
+     * line segment connecting the start point and the end point.
      * 
-     * @param x1 the x coordinate of the starting point of the curved segment
-     * @param y1 the y coordinate of the starting point of the curved segment
-     * @param ctrlx the x coordinate of the control point
-     * @param ctrly the y coordinate of the control point
-     * @param x2 the x coordinate of the end point of the curved segment
-     * @param y2 the y coordinate of the end point of the curved segment
-     * 
-     * @return the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
+     * @param x1
+     *            the x coordinate of the starting point of the curved segment.
+     * @param y1
+     *            the y coordinate of the starting point of the curved segment.
+     * @param ctrlx
+     *            the x coordinate of the control point.
+     * @param ctrly
+     *            the y coordinate of the control point.
+     * @param x2
+     *            the x coordinate of the end point of the curved segment.
+     * @param y2
+     *            the y coordinate of the end point of the curved segment.
+     * @return the square of the distance from the control point to the straight
+     *         line segment connecting the start point and the end point.
      */
-    public static double getFlatnessSq(double x1, double y1, double ctrlx, double ctrly, double x2, double y2) {
+    public static double getFlatnessSq(double x1, double y1, double ctrlx, double ctrly, double x2,
+            double y2) {
         return Line2D.ptSegDistSq(x1, y1, x2, y2, ctrlx, ctrly);
     }
 
     /**
-     * Gets the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point
-     * by reading the coordinates of the points from an array of values.
-     * The values are read in the same order as the arguments
-     * of the method {@link QuadCurve2D#getFlatnessSq(double, double, double, double, double, double)}.
+     * Gets the square of the distance from the control point to the straight
+     * line segment connecting the start point and the end point by reading the
+     * coordinates of the points from an array of values. The values are read in
+     * the same order as the arguments of the method
+     * {@link QuadCurve2D#getFlatnessSq(double, double, double, double, double, double)}
+     * .
      * 
-     * @param coords the array of points containing the coordinates to use for 
-     * the calculation
-     * @param offset the offset of the data to read within the array
-     * 
-     * @return the square of the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
-     * 
-     * @throws ArrayIndexOutOfBoundsException if coords.length < offset + 6.
-     * @throws NullPointerException if the coordinate array is null.
+     * @param coords
+     *            the array of points containing the coordinates to use for the
+     *            calculation
+     * @param offset
+     *            the offset of the data to read within the array
+     * @return the square of the distance from the control point to the straight
+     *         line segment connecting the start point and the end point.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {@code coords.length} < offset + 6.
+     * @throws NullPointerException
+     *             if the coordinate array is null.
      */
     public static double getFlatnessSq(double coords[], int offset) {
-        return Line2D.ptSegDistSq(
-                coords[offset + 0], coords[offset + 1],
-                coords[offset + 4], coords[offset + 5],
-                coords[offset + 2], coords[offset + 3]);
+        return Line2D.ptSegDistSq(coords[offset + 0], coords[offset + 1], coords[offset + 4],
+                coords[offset + 5], coords[offset + 2], coords[offset + 3]);
     }
 
     /**
-     * Gets the distance from the control point to the
-     * straight line segment connecting the start point and the end point
-     * of this QuadCurve2D.
+     * Gets the distance from the control point to the straight line segment
+     * connecting the start point and the end point of this QuadCurve2D.
      * 
-     * @return the the distance from the control point to the
-     * straight line segment connecting the start point and the end point
-     * of this QuadCurve2D
+     * @return the the distance from the control point to the straight line
+     *         segment connecting the start point and the end point of this
+     *         QuadCurve2D.
      */
     public double getFlatness() {
         return Line2D.ptSegDist(getX1(), getY1(), getX2(), getY2(), getCtrlX(), getCtrlY());
     }
 
     /**
-     * Gets the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
+     * Gets the distance from the control point to the straight line segment
+     * connecting the start point and the end point.
      * 
-     * @param x1 the x coordinate of the starting point of the curved segment
-     * @param y1 the y coordinate of the starting point of the curved segment
-     * @param ctrlx the x coordinate of the control point
-     * @param ctrly the y coordinate of the control point
-     * @param x2 the x coordinate of the end point of the curved segment
-     * @param y2 the y coordinate of the end point of the curved segment
-     * 
-     * @return the the distance from the control point to the
-     * straight line segment connecting the start point and the end point
+     * @param x1
+     *            the x coordinate of the starting point of the curved segment.
+     * @param y1
+     *            the y coordinate of the starting point of the curved segment.
+     * @param ctrlx
+     *            the x coordinate of the control point.
+     * @param ctrly
+     *            the y coordinate of the control point.
+     * @param x2
+     *            the x coordinate of the end point of the curved segment.
+     * @param y2
+     *            the y coordinate of the end point of the curved segment.
+     * @return the the distance from the control point to the straight line
+     *         segment connecting the start point and the end point.
      */
-    public static double getFlatness(double x1, double y1, double ctrlx,
-            double ctrly, double x2, double y2)
-    {
+    public static double getFlatness(double x1, double y1, double ctrlx, double ctrly, double x2,
+            double y2) {
         return Line2D.ptSegDist(x1, y1, x2, y2, ctrlx, ctrly);
     }
 
     /**
-     * Gets the the distance from the control point to the
-     * straight line segment connecting the start point and the end point.
-     * The values are read in the same order as the arguments
-     * of the method {@link QuadCurve2D#getFlatness(double, double, double, double, double, double)}.
+     * Gets the the distance from the control point to the straight line segment
+     * connecting the start point and the end point. The values are read in the
+     * same order as the arguments of the method
+     * {@link QuadCurve2D#getFlatness(double, double, double, double, double, double)}
+     * .
      * 
-     * @param coords the array of points containing the coordinates to use for 
-     * the calculation
-     * @param offset the offset of the data to read within the array
-     * 
-     * @return the the distance from the control point to the
-     * straight line segment connecting the start point and the end point
-     * 
-     * @throws ArrayIndexOutOfBoundsException if coords.length < offset + 6.
-     * @throws NullPointerException if the coordinate array is null.
+     * @param coords
+     *            the array of points containing the coordinates to use for the
+     *            calculation.
+     * @param offset
+     *            the offset of the data to read within the array.
+     * @return the the distance from the control point to the straight line
+     *         segment connecting the start point and the end point.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {code coords.length} < offset + 6.
+     * @throws NullPointerException
+     *             if the coordinate array is null.
      */
     public static double getFlatness(double coords[], int offset) {
-        return Line2D.ptSegDist(
-                coords[offset + 0], coords[offset + 1],
-                coords[offset + 4], coords[offset + 5],
-                coords[offset + 2], coords[offset + 3]);
+        return Line2D.ptSegDist(coords[offset + 0], coords[offset + 1], coords[offset + 4],
+                coords[offset + 5], coords[offset + 2], coords[offset + 3]);
     }
 
     /**
-     * Creates the data for two quadratic curves by dividing this
-     * curve in two. The division point is the point on the curve 
-     * that is closest to this curve's control point. The data of 
-     * this curve is left unchanged.
+     * Creates the data for two quadratic curves by dividing this curve in two.
+     * The division point is the point on the curve that is closest to this
+     * curve's control point. The data of this curve is left unchanged.
      * 
-     * @param left the QuadCurve2D where the left (start) segment's 
-     * data is written
-     * @param right the QuadCurve2D where the right (end) segment's 
-     * data is written
-     * 
-     * @throws NullPointerException if either curve is null.
+     * @param left
+     *            the QuadCurve2D where the left (start) segment's data is
+     *            written.
+     * @param right
+     *            the QuadCurve2D where the right (end) segment's data is
+     *            written.
+     * @throws NullPointerException
+     *             if either curve is null.
      */
     public void subdivide(QuadCurve2D left, QuadCurve2D right) {
         subdivide(this, left, right);
     }
 
     /**
-     * Creates the data for two quadratic curves by dividing a source
-     * curve in two. The division point is the point on the curve 
-     * that is closest to the source curve's control point. The data of 
-     * the source curve is left unchanged.
+     * Creates the data for two quadratic curves by dividing a source curve in
+     * two. The division point is the point on the curve that is closest to the
+     * source curve's control point. The data of the source curve is left
+     * unchanged.
      * 
-     * @param src the curve that provides the initial data
-     * @param left the QuadCurve2D where the left (start) segment's 
-     * data is written
-     * @param right the QuadCurve2D where the right (end) segment's 
-     * data is written
-     * 
-     * @throws NullPointerException if one of the curves is null.
+     * @param src
+     *            the curve that provides the initial data.
+     * @param left
+     *            the QuadCurve2D where the left (start) segment's data is
+     *            written.
+     * @param right
+     *            the QuadCurve2D where the right (end) segment's data is
+     *            written.
+     * @throws NullPointerException
+     *             if one of the curves is null.
      */
     public static void subdivide(QuadCurve2D src, QuadCurve2D left, QuadCurve2D right) {
         double x1 = src.getX1();
@@ -681,26 +768,33 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     }
 
     /**
-     * Creates the data for two quadratic curves by dividing a source
-     * curve in two. The division point is the point on the curve 
-     * that is closest to the source curve's control point. The data
-     * for the three curves is read and written from arrays of values in 
-     * the usual order: x1, y1, cx, cy, x2, y2.
-     *  
-     * @param src the array that gives the data values for the source curve
-     * @param srcoff the offset in the src array to read the values from
-     * @param left the array where the coordinates of the start curve should be written
-     * @param leftOff the offset in the left array to start writing the values
-     * @param right the array where the coordinates of the end curve should be written
-     * @param rightOff the offset in the right array to start writing the values
+     * Creates the data for two quadratic curves by dividing a source curve in
+     * two. The division point is the point on the curve that is closest to the
+     * source curve's control point. The data for the three curves is read and
+     * written from arrays of values in the usual order: x1, y1, cx, cy, x2, y2.
      * 
-     * @throws ArrayIndexOutOfBoundsException if src.length < srcoff + 6
-     * or if left.length < leftOff + 6 or if right.length < rightOff + 6.
-     * @throws NullPointerException if one of the arrays is null.
+     * @param src
+     *            the array that gives the data values for the source curve.
+     * @param srcoff
+     *            the offset in the src array to read the values from.
+     * @param left
+     *            the array where the coordinates of the start curve should be
+     *            written.
+     * @param leftOff
+     *            the offset in the left array to start writing the values.
+     * @param right
+     *            the array where the coordinates of the end curve should be
+     *            written.
+     * @param rightOff
+     *            the offset in the right array to start writing the values.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {@code src.length} < srcoff + 6 or if {@code left.length}
+     *             < leftOff + 6 or if {@code right.length} < rightOff + 6.
+     * @throws NullPointerException
+     *             if one of the arrays is null.
      */
-    public static void subdivide(double src[], int srcoff, double left[],
-            int leftOff, double right[], int rightOff)
-    {
+    public static void subdivide(double src[], int srcoff, double left[], int leftOff,
+            double right[], int rightOff) {
         double x1 = src[srcoff + 0];
         double y1 = src[srcoff + 1];
         double cx = src[srcoff + 2];
@@ -732,42 +826,43 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     }
 
     /**
-     * Finds the roots of the quadratic polynomial. This is 
-     * accomplished by finding the (real) values of x that solve
-     * the following equation: eqn[2]*x*x + eqn[1]*x + eqn[0] = 0.
-     * The solutions are written back into the array eqn starting
-     * from the index 0 in the array. The return value tells how 
-     * many array elements have been changed by this method call.
+     * Finds the roots of the quadratic polynomial. This is accomplished by
+     * finding the (real) values of x that solve the following equation:
+     * eqn[2]*x*x + eqn[1]*x + eqn[0] = 0. The solutions are written back into
+     * the array eqn starting from the index 0 in the array. The return value
+     * tells how many array elements have been changed by this method call.
      * 
-     * @param eqn an array containing the coefficients of the 
-     * quadratic polynomial to solve.
-     * 
-     * @return the number of roots of the quadratic polynomial
-     * 
-     * @throws ArrayIndexOutOfBoundsException if eqn.length < 3.
-     * @throws NullPointerException if the array is null.
+     * @param eqn
+     *            an array containing the coefficients of the quadratic
+     *            polynomial to solve.
+     * @return the number of roots of the quadratic polynomial.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {@code eqn.length} < 3.
+     * @throws NullPointerException
+     *             if the array is null.
      */
     public static int solveQuadratic(double eqn[]) {
         return solveQuadratic(eqn, eqn);
     }
 
     /**
-     * Finds the roots of the quadratic polynomial. This is 
-     * accomplished by finding the (real) values of x that solve
-     * the following equation: eqn[2]*x*x + eqn[1]*x + eqn[0] = 0.
-     * The solutions are written into the array res starting
-     * from the index 0 in the array. The return value tells how 
-     * many array elements have been written by this method call.
+     * Finds the roots of the quadratic polynomial. This is accomplished by
+     * finding the (real) values of x that solve the following equation:
+     * eqn[2]*x*x + eqn[1]*x + eqn[0] = 0. The solutions are written into the
+     * array res starting from the index 0 in the array. The return value tells
+     * how many array elements have been written by this method call.
      * 
-     * @param eqn an array containing the coefficients of the 
-     * quadratic polynomial to solve.
-     * @param res the array that this method writes the results into
-     * 
-     * @return the number of roots of the quadratic polynomial
-     * 
-     * @throws ArrayIndexOutOfBoundsException if eqn.length < 3 or 
-     * if res.length is less than the number of roots.
-     * @throws NullPointerException if either array is null.
+     * @param eqn
+     *            an array containing the coefficients of the quadratic
+     *            polynomial to solve.
+     * @param res
+     *            the array that this method writes the results into.
+     * @return the number of roots of the quadratic polynomial.
+     * @throws ArrayIndexOutOfBoundsException
+     *             if {@code eqn.length} < 3 or if {@code res.length} is less
+     *             than the number of roots.
+     * @throws NullPointerException
+     *             if either array is null.
      */
     public static int solveQuadratic(double eqn[], double res[]) {
         return Crossing.solveQuad(eqn, res);
@@ -821,4 +916,3 @@ public abstract class QuadCurve2D implements Shape, Cloneable {
     }
 
 }
-

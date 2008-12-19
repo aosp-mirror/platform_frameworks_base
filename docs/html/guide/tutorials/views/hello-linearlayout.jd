@@ -1,4 +1,6 @@
 page.title=Hello, LinearLayout
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.LinearLayout} is a GroupView that will lay child View elements
@@ -125,4 +127,4 @@ Pay attention to the effect of the <code>layout_weight</code>. Try
 <li>{@link android.widget.TextView}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>
+

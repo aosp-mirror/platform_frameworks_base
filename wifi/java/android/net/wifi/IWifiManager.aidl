@@ -55,6 +55,12 @@ interface IWifiManager
     boolean setWifiEnabled(boolean enable);
 
     int getWifiState();
+
+    int getNumAllowedChannels();
+
+    boolean setNumAllowedChannels(int numChannels);
+
+    int[] getValidChannelCounts();
     
     boolean saveConfiguration();
 

@@ -28,6 +28,11 @@ Mutex AudioSystem::gLock;
 sp<IAudioFlinger> AudioSystem::gAudioFlinger;
 sp<AudioSystem::DeathNotifier> AudioSystem::gDeathNotifier;
 audio_error_callback AudioSystem::gAudioErrorCallback = NULL;
+// Cached values
+int AudioSystem::gOutSamplingRate = 0;
+int AudioSystem::gOutFrameCount = 0;
+uint32_t AudioSystem::gOutLatency = 0;
+
 
 // establish binder interface to AudioFlinger service
 const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
@@ -47,11 +52,15 @@ const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
             gDeathNotifier = new DeathNotifier();
         } else {
             if (gAudioErrorCallback) {
-                gAudioErrorCallback(NO_ERROR);               
+                gAudioErrorCallback(NO_ERROR);
             }
          }
         binder->linkToDeath(gDeathNotifier);
         gAudioFlinger = interface_cast<IAudioFlinger>(binder);
+        // Cache frequently accessed parameters 
+        gOutFrameCount = (int)gAudioFlinger->frameCount();
+        gOutSamplingRate = (int)gAudioFlinger->sampleRate();
+        gOutLatency = gAudioFlinger->latency();
     }
     LOGE_IF(gAudioFlinger==0, "no AudioFlinger!?");
     return gAudioFlinger;
@@ -71,7 +80,7 @@ status_t AudioSystem::isSpeakerphoneOn(bool* state) {
 }
 
 status_t AudioSystem::bluetoothSco(bool state) {
-    uint32_t mask = ROUTE_BLUETOOTH;
+    uint32_t mask = ROUTE_BLUETOOTH_SCO;
     uint32_t routes = state ? mask : ROUTE_EARPIECE;
     return setRouting(MODE_IN_CALL, routes, ROUTE_ALL);
 }
@@ -79,7 +88,7 @@ status_t AudioSystem::bluetoothSco(bool state) {
 status_t AudioSystem::isBluetoothScoOn(bool* state) {
     uint32_t routes = 0;
     status_t s = getRouting(MODE_IN_CALL, &routes);
-    *state = !!(routes & ROUTE_BLUETOOTH);
+    *state = !!(routes & ROUTE_BLUETOOTH_SCO);
     return s;
 }
 
@@ -235,11 +244,50 @@ int AudioSystem::logToLinear(float volume)
     return volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
 }
 
+status_t AudioSystem::getOutputSamplingRate(int* samplingRate)
+{
+    if (gOutSamplingRate == 0) {
+        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+        if (af == 0) return PERMISSION_DENIED;
+        // gOutSamplingRate is updated by get_audio_flinger()
+    }    
+    *samplingRate = gOutSamplingRate;
+    
+    return NO_ERROR;
+}
+
+status_t AudioSystem::getOutputFrameCount(int* frameCount)
+{
+    if (gOutFrameCount == 0) {
+        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+        if (af == 0) return PERMISSION_DENIED;
+        // gOutSamplingRate is updated by get_audio_flinger()
+    }
+    *frameCount = gOutFrameCount;
+    return NO_ERROR;
+}
+
+status_t AudioSystem::getOutputLatency(uint32_t* latency)
+{
+    if (gOutLatency == 0) {
+        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+        if (af == 0) return PERMISSION_DENIED;
+        // gOutLatency is updated by get_audio_flinger()
+    }    
+    *latency = gOutLatency;
+    
+    return NO_ERROR;
+}
+
 // ---------------------------------------------------------------------------
 
-void AudioSystem::DeathNotifier::binderDied(const wp<IBinder>& who) {    
+void AudioSystem::DeathNotifier::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock _l(AudioSystem::gLock);
     AudioSystem::gAudioFlinger.clear();
+    AudioSystem::gOutSamplingRate = 0;
+    AudioSystem::gOutFrameCount = 0;
+    AudioSystem::gOutLatency = 0;
+    
     if (gAudioErrorCallback) {
         gAudioErrorCallback(DEAD_OBJECT);
     }

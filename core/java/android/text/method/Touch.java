@@ -17,6 +17,7 @@
 package android.text.method;
 
 import android.text.Layout;
+import android.text.Layout.Alignment;
 import android.text.Spannable;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,15 +42,31 @@ public class Touch {
 
         int left = Integer.MAX_VALUE;
         int right = 0;
+        Alignment a = null;
 
         for (int i = top; i <= bottom; i++) {
             left = (int) Math.min(left, layout.getLineLeft(i));
             right = (int) Math.max(right, layout.getLineRight(i));
+
+            if (a == null) {
+                a = layout.getParagraphAlignment(i);
+            }
         }
 
         padding = widget.getTotalPaddingLeft() + widget.getTotalPaddingRight();
-        x = Math.min(x, right - (widget.getWidth() - padding));
-        x = Math.max(x, left);
+        int width = widget.getWidth();
+        int diff = 0;
+
+        if (right - left < width - padding) {
+            if (a == Alignment.ALIGN_CENTER) {
+                diff = (width - padding - (right - left)) / 2;
+            } else if (a == Alignment.ALIGN_OPPOSITE) {
+                diff = width - padding - (right - left);
+            }
+        }
+
+        x = Math.min(x, right - (width - padding) - diff);
+        x = Math.max(x, left - diff);
 
         widget.scrollTo(x, y);
     }

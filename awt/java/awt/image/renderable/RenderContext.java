@@ -18,6 +18,7 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image.renderable;
 
 import java.awt.RenderingHints;
@@ -25,27 +26,37 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 
 /**
- * The Class RenderContext stores data on how an image is to be 
- * rendered: the affine transform, the area of interest, and 
- * the rendering hints.
+ * The Class RenderContext stores data on how an image is to be rendered: the
+ * affine transform, the area of interest, and the rendering hints.
+ * 
+ * @since Android 1.0
  */
 public class RenderContext implements Cloneable {
 
-    /** The affine transform. */
+    /**
+     * The affine transform.
+     */
     AffineTransform transform;
-    
-    /** The area of interest. */
+
+    /**
+     * The area of interest.
+     */
     Shape aoi;
-    
-    /** The rendering hints. */
+
+    /**
+     * The rendering hints.
+     */
     RenderingHints hints;
 
     /**
      * Instantiates a new render context.
      * 
-     * @param usr2dev the affine transform
-     * @param aoi the area of interest
-     * @param hints the rendering hints
+     * @param usr2dev
+     *            the affine transform.
+     * @param aoi
+     *            the area of interest.
+     * @param hints
+     *            the rendering hints.
      */
     public RenderContext(AffineTransform usr2dev, Shape aoi, RenderingHints hints) {
         this.transform = (AffineTransform)usr2dev.clone();
@@ -56,8 +67,10 @@ public class RenderContext implements Cloneable {
     /**
      * Instantiates a new render context with no specified hints.
      * 
-     * @param usr2dev the affine transform
-     * @param aoi the area of interest
+     * @param usr2dev
+     *            the affine transform.
+     * @param aoi
+     *            the area of interest.
      */
     public RenderContext(AffineTransform usr2dev, Shape aoi) {
         this(usr2dev, aoi, null);
@@ -66,18 +79,21 @@ public class RenderContext implements Cloneable {
     /**
      * Instantiates a new render context with no specified area of interest.
      * 
-     * @param usr2dev the affine transform
-     * @param hints the rendering hints
+     * @param usr2dev
+     *            the affine transform.
+     * @param hints
+     *            the rendering hints.
      */
     public RenderContext(AffineTransform usr2dev, RenderingHints hints) {
         this(usr2dev, null, hints);
     }
 
     /**
-     * Instantiates a new render context with no rendering hints or 
-     * area of interest.
+     * Instantiates a new render context with no rendering hints or area of
+     * interest.
      * 
-     * @param usr2dev the affine transform
+     * @param usr2dev
+     *            the affine transform.
      */
     public RenderContext(AffineTransform usr2dev) {
         this(usr2dev, null, null);
@@ -91,36 +107,36 @@ public class RenderContext implements Cloneable {
     /**
      * Sets the affine transform for this render context.
      * 
-     * @param newTransform the new affine transform
+     * @param newTransform
+     *            the new affine transform.
      */
     public void setTransform(AffineTransform newTransform) {
         transform = (AffineTransform)newTransform.clone();
     }
 
     /**
-     * Concatenates the current transform with the specified transform
-     * (so they are applied with the specified transform acting first)
-     * and sets the resulting transform as the affine transform of 
-     * this rendering context.
+     * Concatenates the current transform with the specified transform (so they
+     * are applied with the specified transform acting first) and sets the
+     * resulting transform as the affine transform of this rendering context.
      * 
-     * @param modTransform the new transform which modifies the 
-     * current transform
-     * 
-     * @deprecated use {@link RenderContext#preConcatenateTransform(AffineTransform)}
+     * @param modTransform
+     *            the new transform which modifies the current transform.
+     * @deprecated use
+     *             {@link RenderContext#preConcatenateTransform(AffineTransform)}
+     *             .
      */
-    @Deprecated    
+    @Deprecated
     public void preConcetenateTransform(AffineTransform modTransform) {
         preConcatenateTransform(modTransform);
     }
 
     /**
-     * Concatenates the current transform with the specified transform
-     * (so they are applied with the specified transform acting first)
-     * and sets the resulting transform as the affine transform of 
-     * this rendering context.
+     * Concatenates the current transform with the specified transform (so they
+     * are applied with the specified transform acting first) and sets the
+     * resulting transform as the affine transform of this rendering context.
      * 
-     * @param modTransform the new transform which modifies the 
-     * current transform
+     * @param modTransform
+     *            the new transform which modifies the current transform.
      */
     public void preConcatenateTransform(AffineTransform modTransform) {
         transform.preConcatenate(modTransform);
@@ -129,10 +145,10 @@ public class RenderContext implements Cloneable {
     /**
      * Concatenate the specified transform with the current transform.
      * 
-     * @param modTransform the new transform which modifies the 
-     * current transform
-     * 
-     * @deprecated use {@link RenderContext#concatenateTransform(AffineTransform)}
+     * @param modTransform
+     *            the new transform which modifies the current transform.
+     * @deprecated use
+     *             {@link RenderContext#concatenateTransform(AffineTransform)}.
      */
     @Deprecated
     public void concetenateTransform(AffineTransform modTransform) {
@@ -142,8 +158,8 @@ public class RenderContext implements Cloneable {
     /**
      * Concatenate the specified transform with the current transform.
      * 
-     * @param modTransform the new transform which modifies the 
-     * current transform
+     * @param modTransform
+     *            the new transform which modifies the current transform.
      */
     public void concatenateTransform(AffineTransform modTransform) {
         transform.concatenate(modTransform);
@@ -152,7 +168,7 @@ public class RenderContext implements Cloneable {
     /**
      * Gets the transform.
      * 
-     * @return the transform
+     * @return the transform.
      */
     public AffineTransform getTransform() {
         return (AffineTransform)transform.clone();
@@ -161,7 +177,8 @@ public class RenderContext implements Cloneable {
     /**
      * Sets the area of interest.
      * 
-     * @param newAoi the new area of interest
+     * @param newAoi
+     *            the new area of interest.
      */
     public void setAreaOfInterest(Shape newAoi) {
         aoi = newAoi;
@@ -170,7 +187,7 @@ public class RenderContext implements Cloneable {
     /**
      * Gets the area of interest.
      * 
-     * @return the area of interest
+     * @return the area of interest.
      */
     public Shape getAreaOfInterest() {
         return aoi;
@@ -179,7 +196,8 @@ public class RenderContext implements Cloneable {
     /**
      * Sets the rendering hints.
      * 
-     * @param hints the new rendering hints
+     * @param hints
+     *            the new rendering hints.
      */
     public void setRenderingHints(RenderingHints hints) {
         this.hints = hints;
@@ -188,7 +206,7 @@ public class RenderContext implements Cloneable {
     /**
      * Gets the rendering hints.
      * 
-     * @return the rendering hints
+     * @return the rendering hints.
      */
     public RenderingHints getRenderingHints() {
         return hints;

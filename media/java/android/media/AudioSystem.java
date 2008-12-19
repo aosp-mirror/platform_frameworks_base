@@ -41,7 +41,16 @@ public class AudioSystem
     public static final int STREAM_MUSIC = 3;
     /* The audio stream for alarms */
     public static final int STREAM_ALARM = 4;
+    /* The audio stream for notifications */
+    public static final int STREAM_NOTIFICATION = 5;
+    /**
+     * @deprecated Use {@link #numStreamTypes() instead}
+     */
     public static final int NUM_STREAMS = 5;
+
+    // Expose only the getter method publicly so we can change it in the future
+    private static final int NUM_STREAM_TYPES = 6;
+    public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
     
     /* max and min volume levels */
     /* Maximum volume setting, for use with setVolume(int,int) */
@@ -112,9 +121,13 @@ public class AudioSystem
     /* Routing bits for setRouting/getRouting API */
     public static final int ROUTE_EARPIECE          = (1 << 0);
     public static final int ROUTE_SPEAKER           = (1 << 1);
-    public static final int ROUTE_BLUETOOTH         = (1 << 2);
+     
+    /** @deprecated use {@link #ROUTE_BLUETOOTH_SCO} */        
+    @Deprecated public static final int ROUTE_BLUETOOTH = (1 << 2);
+    public static final int ROUTE_BLUETOOTH_SCO     = (1 << 2);
     public static final int ROUTE_HEADSET           = (1 << 3);
-    public static final int ROUTE_ALL               = 0xFFFFFFFF;
+    public static final int ROUTE_BLUETOOTH_A2DP    = (1 << 4);
+    public static final int ROUTE_ALL               = 0xFFFFFFFF;  
 
     /*
      * Sets the audio routing for a specified mode

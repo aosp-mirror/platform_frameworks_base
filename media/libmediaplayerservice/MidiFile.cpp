@@ -431,7 +431,7 @@ status_t MidiFile::setLooping(int loop)
 }
 
 status_t MidiFile::createOutputTrack() {
-    if (mAudioSink->open(pLibConfig->sampleRate,pLibConfig->numChannels, 2) != NO_ERROR) {
+    if (mAudioSink->open(pLibConfig->sampleRate, pLibConfig->numChannels, AudioSystem::PCM_16_BIT, 2) != NO_ERROR) {
         LOGE("mAudioSink open failed");
         return ERROR_OPEN_FAILED;
     }

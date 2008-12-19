@@ -62,6 +62,7 @@ import android.widget.AdapterView;
 import com.android.internal.policy.PolicyManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -613,7 +614,8 @@ public class Activity extends ContextThemeWrapper
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
-    private Object mLastNonConfigurationInstance;
+    /*package*/ Object mLastNonConfigurationInstance;
+    /*package*/ HashMap<String,Object> mLastNonConfigurationChildInstances;
     Activity mParent;
     boolean mCalled;
     private boolean mResumed;
@@ -1379,6 +1381,38 @@ public class Activity extends ContextThemeWrapper
         return null;
     }
     
+    /**
+     * Retrieve the non-configuration instance data that was previously
+     * returned by {@link #onRetainNonConfigurationChildInstances()}.  This will
+     * be available from the initial {@link #onCreate} and
+     * {@link #onStart} calls to the new instance, allowing you to extract
+     * any useful dynamic state from the previous instance.
+     * 
+     * <p>Note that the data you retrieve here should <em>only</em> be used
+     * as an optimization for handling configuration changes.  You should always
+     * be able to handle getting a null pointer back, and an activity must
+     * still be able to restore itself to its previous state (through the
+     * normal {@link #onSaveInstanceState(Bundle)} mechanism) even if this
+     * function returns null.
+     * 
+     * @return Returns the object previously returned by
+     * {@link #onRetainNonConfigurationChildInstances()}
+     */
+    HashMap<String,Object> getLastNonConfigurationChildInstances() {
+        return mLastNonConfigurationChildInstances;
+    }
+    
+    /**
+     * This method is similar to {@link #onRetainNonConfigurationInstance()} except that
+     * it should return either a mapping from  child activity id strings to arbitrary objects,
+     * or null.  This method is intended to be used by Activity framework subclasses that control a
+     * set of child activities, such as ActivityGroup.  The same guarantees and restrictions apply
+     * as for {@link #onRetainNonConfigurationInstance()}.  The default implementation returns null.
+     */
+    HashMap<String,Object> onRetainNonConfigurationChildInstances() {
+        return null;
+    }
+    
     public void onLowMemory() {
         mCalled = true;
     }
@@ -1837,10 +1871,47 @@ public class Activity extends ContextThemeWrapper
      * Called when the current {@link Window} of the activity gains or loses
      * focus.  This is the best indicator of whether this activity is visible
      * to the user.
+     * 
+     * <p>Note that this provides information what global focus state, which
+     * is managed independently of activity lifecycles.  As such, while focus
+     * changes will generally have some relation to lifecycle changes (an
+     * activity that is stopped will not generally get window focus), you
+     * should not rely on any particular order between the callbacks here and
+     * those in the other lifecycle methods such as {@link #onResume}.
+     * 
+     * <p>As a general rule, however, a resumed activity will have window
+     * focus...  unless it has displayed other dialogs or popups that take
+     * input focus, in which case the activity itself will not have focus
+     * when the other windows have it.  Likewise, the system may display
+     * system-level windows (such as the status bar notification panel or
+     * a system alert) which will temporarily take window input focus without
+     * pausing the foreground activity.
      *
      * @param hasFocus Whether the window of this activity has focus.
+     * 
+     * @see #hasWindowFocus()
+     * @see #onResume
      */
     public void onWindowFocusChanged(boolean hasFocus) {
+    }
+    
+    /**
+     * Returns true if this activity's <em>main</em> window currently has window focus.
+     * Note that this is not the same as the view itself having focus.
+     * 
+     * @return True if this activity's main window currently has window focus.
+     * 
+     * @see #onWindowAttributesChanged(android.view.WindowManager.LayoutParams)
+     */
+    public boolean hasWindowFocus() {
+        Window w = getWindow();
+        if (w != null) {
+            View d = w.getDecorView();
+            if (d != null) {
+                return d.hasWindowFocus();
+            }
+        }
+        return false;
     }
     
     /**
@@ -2157,6 +2228,15 @@ public class Activity extends ContextThemeWrapper
      */
     public void openContextMenu(View view) {
         view.showContextMenu();
+    }
+    
+    /**
+     * Programmatically closes the most recently opened context menu, if showing.
+     * 
+     * @hide pending API council
+     */
+    public void closeContextMenu() {
+        mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
     }
     
     /**
@@ -2910,6 +2990,7 @@ public class Activity extends ContextThemeWrapper
      * @param flags May be {@link PendingIntent#FLAG_ONE_SHOT PendingIntent.FLAG_ONE_SHOT},
      * {@link PendingIntent#FLAG_NO_CREATE PendingIntent.FLAG_NO_CREATE},
      * {@link PendingIntent#FLAG_CANCEL_CURRENT PendingIntent.FLAG_CANCEL_CURRENT},
+     * {@link PendingIntent#FLAG_UPDATE_CURRENT PendingIntent.FLAG_UPDATE_CURRENT},
      * or any of the flags as supported by
      * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
      * of the intent that can be supplied when the actual send happens.
@@ -3285,10 +3366,21 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info, CharSequence title, 
             Activity parent, String id, Object lastNonConfigurationInstance,
             Configuration config) {
+        attach(context, aThread, instr, token, application, intent, info, title, parent, id,
+            lastNonConfigurationInstance, null, config);
+    }
+    
+    final void attach(Context context, ActivityThread aThread, Instrumentation instr, IBinder token,
+        Application application, Intent intent, ActivityInfo info, CharSequence title, 
+        Activity parent, String id, Object lastNonConfigurationInstance,
+        HashMap<String,Object> lastNonConfigurationChildInstances, Configuration config) {
         attachBaseContext(context);
 
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
+        if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
+            mWindow.setSoftInputMode(info.softInputMode);
+        }
         mUiThread = Thread.currentThread();
 
         mMainThread = aThread;
@@ -3302,6 +3394,7 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
         mEmbeddedID = id;
         mLastNonConfigurationInstance = lastNonConfigurationInstance;
+        mLastNonConfigurationChildInstances = lastNonConfigurationChildInstances;
 
         mWindow.setWindowManager(null, mToken, mComponent.flattenToString());
         if (mParent != null) {
@@ -3375,6 +3468,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    final void performPause() {
+        onPause();
+    }
+    
     final void performStop() {
         if (!mStopped) {
             if (mWindow != null) {

@@ -38,7 +38,9 @@
             android:layout_alignParentLeft="true"
             android:textAppearance="?android:attr/textAppearanceLargeInverse"
             android:singleLine="true"
-            android:duplicateParentState="true" />
+            android:duplicateParentState="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal" />
 
         <TextView
             android:id="@+id/shortcut"

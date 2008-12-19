@@ -24,6 +24,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 /**
  * A helper class to help make handling asynchronous {@link ContentResolver}
  * queries easier.
@@ -37,7 +39,7 @@ public abstract class AsyncQueryHandler extends Handler {
     private static final int EVENT_ARG_UPDATE = 3;
     private static final int EVENT_ARG_DELETE = 4;
     
-    /* package */ ContentResolver mResolver;
+    /* package */ final WeakReference<ContentResolver> mResolver;
 
     private static Looper sLooper = null;
 
@@ -62,18 +64,26 @@ public abstract class AsyncQueryHandler extends Handler {
 
         @Override
         public void handleMessage(Message msg) {
+            final ContentResolver resolver = mResolver.get();
+            if (resolver == null) return;
+
             WorkerArgs args = (WorkerArgs) msg.obj;
 
             int token = msg.what;
             int event = msg.arg1;
-            
+
             switch (event) {
                 case EVENT_ARG_QUERY:
                     Cursor cursor;
                     try {
-                        cursor = mResolver.query(args.uri, args.projection,
+                        cursor = resolver.query(args.uri, args.projection,
                                 args.selection, args.selectionArgs,
                                 args.orderBy);
+                        // Calling getCount() causes the cursor window to be filled,
+                        // which will make the first access on the main thread a lot faster.
+                        if (cursor != null) {
+                            cursor.getCount();
+                        }
                     } catch (Exception e) {
                         cursor = null;
                     }
@@ -82,18 +92,16 @@ public abstract class AsyncQueryHandler extends Handler {
                     break;
 
                 case EVENT_ARG_INSERT:
-                    args.result = mResolver.insert(args.uri, args.values);
+                    args.result = resolver.insert(args.uri, args.values);
                     break;
 
                 case EVENT_ARG_UPDATE:
-                    int r = mResolver.update(args.uri, args.values, args.selection,
+                    args.result = resolver.update(args.uri, args.values, args.selection,
                             args.selectionArgs);
-                    args.result = new Integer(r);
                     break;
 
                 case EVENT_ARG_DELETE:
-                    int r2 = mResolver.delete(args.uri, args.selection, args.selectionArgs);
-                    args.result = new Integer(r2);
+                    args.result = resolver.delete(args.uri, args.selection, args.selectionArgs);
                     break;
 
             }
@@ -115,7 +123,7 @@ public abstract class AsyncQueryHandler extends Handler {
 
     public AsyncQueryHandler(ContentResolver cr) {
         super();
-        mResolver = cr;
+        mResolver = new WeakReference<ContentResolver>(cr);
         synchronized (AsyncQueryHandler.class) {
             if (sLooper == null) {
                 HandlerThread thread = new HandlerThread("AsyncQueryWorker");

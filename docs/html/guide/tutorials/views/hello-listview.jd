@@ -1,4 +1,6 @@
 page.title=Hello, ListView
+parent.title=Hello, Views
+parent.link=index.html
 @jd:body
 
 <p>A {@link android.widget.ListView} is a View that shows items in a vertically scrolling list. The items are
@@ -86,4 +88,3 @@ public void onCreate(Bundle savedInstanceState) {
 	<li>{@link android.widget.ListAdapter}</li>
 </ul>
 
-<p><a href="{@docRoot}guide/tutorials/views/hello-views-index.html">&larr; Back to Hello Views</a></p>

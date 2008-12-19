@@ -103,6 +103,15 @@ public class PackageInfo implements Parcelable {
      * in if the flag {@link PackageManager#GET_SIGNATURES} was set.
      */
     public Signature[] signatures;
+    
+    /**
+     * Application specified preferred configuration
+     * {@link android.R.styleable#AndroidManifestUsesConfiguration
+     * &lt;uses-configuration&gt;} tags included under &lt;manifest&gt;,
+     * or null if there were none. This is only filled in if the flag
+     * {@link PackageManager#GET_CONFIGURATIONS} was set.  
+     */
+    public ConfigurationInfo[] configPreferences;
 
     public PackageInfo() {
     }
@@ -136,6 +145,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(permissions, parcelableFlags);
         dest.writeStringArray(requestedPermissions);
         dest.writeTypedArray(signatures, parcelableFlags);
+        dest.writeTypedArray(configPreferences, parcelableFlags);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -166,5 +176,6 @@ public class PackageInfo implements Parcelable {
         permissions = source.createTypedArray(PermissionInfo.CREATOR);
         requestedPermissions = source.createStringArray();
         signatures = source.createTypedArray(Signature.CREATOR);
+        configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
     }
 }

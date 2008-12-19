@@ -26,6 +26,12 @@ import java.util.Locale;
 
 import org.apache.harmony.awt.im.InputMethodContext;
 
+/**
+ * This class is not supported in Android 1.0. It is merely provided to maintain
+ * interface compatibility with desktop Java implementations.
+ * 
+ * @since Android 1.0
+ */
 public class InputContext {
     protected InputContext() {
     }

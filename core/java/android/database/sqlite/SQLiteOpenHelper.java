@@ -26,8 +26,6 @@ import android.util.Log;
  * optionally {@link #onOpen}, and this class takes care of opening the database
  * if it exists, creating it if it does not, and upgrading it as necessary.
  * Transactions are used to make sure the database is always in a sensible state.
- *
- * @see com.google.provider.NotePad.NotePadProvider
  */
 public abstract class SQLiteOpenHelper {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();

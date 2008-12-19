@@ -2,16 +2,16 @@
 **
 ** Copyright 2007, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -68,16 +68,25 @@ status_t AudioHardwareGeneric::standby()
 }
 
 AudioStreamOut* AudioHardwareGeneric::openOutputStream(
-        int format, int channelCount, uint32_t sampleRate)
+        int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
     AutoMutex lock(mLock);
 
     // only one output stream allowed
-    if (mOutput) return 0;
+    if (mOutput) {
+        if (status) {
+            *status = INVALID_OPERATION;
+        }
+        return 0;
+    }
 
     // create new output stream
     AudioStreamOutGeneric* out = new AudioStreamOutGeneric();
-    if (out->set(this, mFd, format, channelCount, sampleRate) == NO_ERROR) {
+    status_t lStatus = out->set(this, mFd, format, channelCount, sampleRate);
+    if (status) {
+        *status = lStatus;
+    }
+    if (lStatus == NO_ERROR) {
         mOutput = out;
     } else {
         delete out;
@@ -90,16 +99,25 @@ void AudioHardwareGeneric::closeOutputStream(AudioStreamOutGeneric* out) {
 }
 
 AudioStreamIn* AudioHardwareGeneric::openInputStream(
-        int format, int channelCount, uint32_t sampleRate)
+        int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
     AutoMutex lock(mLock);
 
     // only one input stream allowed
-    if (mInput) return 0;
+    if (mInput) {
+        if (status) {
+            *status = INVALID_OPERATION;
+        }
+        return 0;
+    }
 
     // create new output stream
     AudioStreamInGeneric* in = new AudioStreamInGeneric();
-    if (in->set(this, mFd, format, channelCount, sampleRate) == NO_ERROR) {
+    status_t lStatus = in->set(this, mFd, format, channelCount, sampleRate);
+    if (status) {
+        *status = lStatus;
+    }
+    if (lStatus == NO_ERROR) {
         mInput = in;
     } else {
         delete in;

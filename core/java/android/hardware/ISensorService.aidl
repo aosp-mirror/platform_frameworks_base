@@ -26,5 +26,4 @@ interface ISensorService
 {
     ParcelFileDescriptor getDataChanel();
     boolean enableSensor(IBinder listener, int sensor, int enable);
-    oneway void reportAccuracy(int sensor, int value);
 }

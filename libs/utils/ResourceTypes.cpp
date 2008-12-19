@@ -164,7 +164,11 @@ void Res_png_9patch::fileToDevice()
 
 size_t Res_png_9patch::serializedSize()
 {
-    return sizeof(Res_png_9patch)
+    // The size of this struct is 32 bytes on the 32-bit target system
+    // 4 * int8_t
+    // 4 * int32_t
+    // 3 * pointer
+    return 32
             + numXDivs * sizeof(int32_t)
             + numYDivs * sizeof(int32_t)
             + numColors * sizeof(uint32_t);
@@ -180,8 +184,10 @@ void* Res_png_9patch::serialize()
 void Res_png_9patch::serialize(void * outData)
 {
     char* data = (char*) outData;
-    memmove(data, this, sizeof(Res_png_9patch));
-    data +=  sizeof(Res_png_9patch);
+    memmove(data, &wasDeserialized, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
+    memmove(data + 12, &paddingLeft, 16);   // copy paddingXXXX
+    data += 32;
+
     memmove(data, this->xDivs, numXDivs * sizeof(int32_t));
     data +=  numXDivs * sizeof(int32_t);
     memmove(data, this->yDivs, numYDivs * sizeof(int32_t));
@@ -189,25 +195,30 @@ void Res_png_9patch::serialize(void * outData)
     memmove(data, this->colors, numColors * sizeof(uint32_t));
 }
 
-Res_png_9patch* Res_png_9patch::deserialize(const void* inData)
-{
-    deserialize(inData, (Res_png_9patch*) inData);
-    return (Res_png_9patch*) inData;
-}
-
-void Res_png_9patch::deserialize(const void* inData, Res_png_9patch* outData) {
-    Res_png_9patch* patch = (Res_png_9patch*) inData;
+static void deserializeInternal(const void* inData, Res_png_9patch* outData) {
+    char* patch = (char*) inData;
     if (inData != outData) {
-        memcpy(outData, inData, patch->serializedSize());
+        memmove(&outData->wasDeserialized, patch, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
+        memmove(&outData->paddingLeft, patch + 12, 4);     // copy  wasDeserialized, numXDivs, numYDivs, numColors
     }
     outData->wasDeserialized = true;
     char* data = (char*)outData;
     data +=  sizeof(Res_png_9patch);
     outData->xDivs = (int32_t*) data;
-    data +=  patch->numXDivs * sizeof(int32_t);
+    data +=  outData->numXDivs * sizeof(int32_t);
     outData->yDivs = (int32_t*) data;
-    data +=  patch->numYDivs * sizeof(int32_t);
+    data +=  outData->numYDivs * sizeof(int32_t);
     outData->colors = (uint32_t*) data;
+}
+
+Res_png_9patch* Res_png_9patch::deserialize(const void* inData)
+{
+    if (sizeof(void*) != sizeof(int32_t)) {
+        LOGE("Cannot deserialize on non 32-bit system\n");
+        return NULL;
+    }
+    deserializeInternal(inData, (Res_png_9patch*) inData);
+    return (Res_png_9patch*) inData;
 }
 
 // --------------------------------------------------------------------
@@ -3863,7 +3874,7 @@ void ResTable::print() const
                 }
                 for (size_t configIndex=0; configIndex<NTC; configIndex++) {
                     const ResTable_type* type = typeConfigs->configs[configIndex];
-                    if ((((int)type)&0x3) != 0) {
+                    if ((((uint64_t)type)&0x3) != 0) {
                         printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
                         continue;
                     }

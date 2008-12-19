@@ -72,10 +72,11 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
         mDialog = builder.create();
         
         WindowManager.LayoutParams lp = mDialog.getWindow().getAttributes();
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
         if (windowToken != null) {
             lp.token = windowToken;
         }
+        lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         
         mDialog.show();
     }

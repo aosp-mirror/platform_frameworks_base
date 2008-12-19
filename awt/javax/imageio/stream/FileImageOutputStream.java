@@ -18,39 +18,44 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.stream;
 
 import java.io.*;
 
 /**
- * The FileImageOutputStream class implements ImageOutputStream 
- * and writes the output data to a File or RandomAccessFile. 
+ * The FileImageOutputStream class implements ImageOutputStream and writes the
+ * output data to a File or RandomAccessFile.
+ * 
+ * @since Android 1.0
  */
 public class FileImageOutputStream extends ImageOutputStreamImpl {
 
-    /** The file. */
+    /**
+     * The file.
+     */
     RandomAccessFile file;
 
     /**
-     * Instantiates a new FileImageOutputStream with the specified
-     * File.
+     * Instantiates a new FileImageOutputStream with the specified File.
      * 
-     * @param f the output File.
-     * 
-     * @throws FileNotFoundException if the file not found.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param f
+     *            the output File.
+     * @throws FileNotFoundException
+     *             if the file not found.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public FileImageOutputStream(File f) throws FileNotFoundException, IOException {
-        this(f != null
-                ? new RandomAccessFile(f, "rw")
-                : null);
+        this(f != null ? new RandomAccessFile(f, "rw") : null);
     }
 
     /**
      * Instantiates a new FileImageOutputStream with the specified
      * RandomAccessFile.
      * 
-     * @param raf the output RandomAccessFile.
+     * @param raf
+     *            the output RandomAccessFile.
      */
     public FileImageOutputStream(RandomAccessFile raf) {
         if (raf == null) {
@@ -102,14 +107,14 @@ public class FileImageOutputStream extends ImageOutputStreamImpl {
         try {
             checkClosed();
             return file.length();
-        } catch(IOException e) {
+        } catch (IOException e) {
             return super.length(); // -1L
         }
     }
 
     @Override
     public void seek(long pos) throws IOException {
-        //-- checkClosed() is performed in super.seek()
+        // -- checkClosed() is performed in super.seek()
         super.seek(pos);
         file.seek(pos);
         streamPos = file.getFilePointer();

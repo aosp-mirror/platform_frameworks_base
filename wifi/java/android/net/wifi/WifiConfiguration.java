@@ -265,6 +265,82 @@ public class WifiConfiguration implements Parcelable {
             wepKeys[i] = null;
     }
 
+    /** {@hide pending API Council approval} */
+    public String toString() {
+        StringBuffer sbuf = new StringBuffer();
+        if (this.status == WifiConfiguration.Status.CURRENT) {
+            sbuf.append("* ");
+        } else if (this.status == WifiConfiguration.Status.DISABLED) {
+            sbuf.append("- ");
+        }
+        sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
+                append(" BSSID: ").append(this.BSSID).append(" PRIO: ").append(this.priority).
+                append('\n');
+        sbuf.append(" KeyMgmt:");
+        for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
+            if (this.allowedKeyManagement.get(k)) {
+                sbuf.append(" ");
+                if (k < KeyMgmt.strings.length) {
+                    sbuf.append(KeyMgmt.strings[k]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append(" Protocols:");
+        for (int p = 0; p < this.allowedProtocols.size(); p++) {
+            if (this.allowedProtocols.get(p)) {
+                sbuf.append(" ");
+                if (p < Protocol.strings.length) {
+                    sbuf.append(Protocol.strings[p]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n');
+        sbuf.append(" AuthAlgorithms:");
+        for (int a = 0; a < this.allowedAuthAlgorithms.size(); a++) {
+            if (this.allowedAuthAlgorithms.get(a)) {
+                sbuf.append(" ");
+                if (a < AuthAlgorithm.strings.length) {
+                    sbuf.append(AuthAlgorithm.strings[a]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n');
+        sbuf.append(" PairwiseCiphers:");
+        for (int pc = 0; pc < this.allowedPairwiseCiphers.size(); pc++) {
+            if (this.allowedPairwiseCiphers.get(pc)) {
+                sbuf.append(" ");
+                if (pc < PairwiseCipher.strings.length) {
+                    sbuf.append(PairwiseCipher.strings[pc]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n');
+        sbuf.append(" GroupCiphers:");
+        for (int gc = 0; gc < this.allowedGroupCiphers.size(); gc++) {
+            if (this.allowedGroupCiphers.get(gc)) {
+                sbuf.append(" ");
+                if (gc < GroupCipher.strings.length) {
+                    sbuf.append(GroupCipher.strings[gc]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n');
+        if (this.preSharedKey != null) {
+            sbuf.append(" PSK: ").append('*');
+        }
+        return sbuf.toString();
+    }
+
     /**
      * Construct a WifiConfiguration from a scanned network
      * @param scannedAP the scan result used to construct the config entry

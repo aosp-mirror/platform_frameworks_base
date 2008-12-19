@@ -26,6 +26,12 @@ public interface Spanned
 extends CharSequence
 {
     /**
+     * Bitmask of bits that are relevent for controlling point/mark behavior
+     * of spans.
+     */
+    public static final int SPAN_POINT_MARK_MASK = 0x33;
+    
+    /**
      * 0-length spans with type SPAN_MARK_MARK behave like text marks:
      * they remain at their original offset when text is inserted
      * at that offset.
@@ -91,6 +97,14 @@ extends CharSequence
      */
     public static final int SPAN_EXCLUSIVE_INCLUSIVE = SPAN_POINT_POINT;
 
+    /**
+     * This flag is set on spans that are being used to apply temporary
+     * styling information on the composing text of an input method, so that
+     * they can be found and removed when the composing text is being
+     * replaced.
+     */
+    public static final int SPAN_COMPOSING = 0x100;
+    
     /**
      * The bits numbered SPAN_USER_SHIFT and above are available
      * for callers to use to store scalar data associated with their

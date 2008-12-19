@@ -47,7 +47,7 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 </table>
 
-<p>Once you have created the disk image file, you can load it in the emulator at startup using the emulator's -sdcard option. For more information, see <a href="{@docRoot}reference/emulator.html">Android Emulator</a>.</p>
+<p>Once you have created the disk image file, you can load it in the emulator at startup using the emulator's -sdcard option. For more information, see <a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
 
 <pre>emulator -sdcard &lt;file&gt;</pre>
 
@@ -55,7 +55,7 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 <h2>dx</h2>
 
-<p>The dx tool lets you generate Android bytecode from .class files. The tool converts target files and/or directories to Dalvik executable format (.dex) files, so that they can run in the Android environment. It can also dump the class files in a human-readable format and run a target unit test. You can get the usage and options for this tool by using <code>dx -help</code>.</p>
+<p>The dx tool lets you generate Android bytecode from .class files. The tool converts target files and/or directories to Dalvik executable format (.dex) files, so that they can run in the Android environment. It can also dump the class files in a human-readable format and run a target unit test. You can get the usage and options for this tool by using <code>dx --help</code>.</p>
 
 <a name="activitycreator"></a>
 
@@ -63,7 +63,7 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 <p>If you aren't using the Eclipse IDE and ADT plugin, you can use the the activitycreator script to get started with a new application. When you run the script, it creates the structure of a minimal Android application that you can build on and extend to meet your needs. </p>
 
-<p>For Linux and Mac, the SDK provides <code>activitycreator.py</code>, a Python script, and for Windows <code>activitycreator.bat</code>, a batch script that runs an executable. Regardless of platform, the usage for the script is the same:</p>
+<p>For Linux and Mac, the SDK provides <code>activitycreator</code>, a shell script, and for Windows <code>activitycreator.bat</code>, a batch script that runs an executable. Regardless of platform, the usage for the script is the same:</p>
 
 <pre>activitycreator [--out &lt;folder&gt;] [--ide intellij] your.package.name.ActivityName</pre>
 
@@ -97,7 +97,7 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 	<li>bin -- The output folder for the compiled .apk (when built by Ant).</li>
 </ul>
 
-<p>When you are ready, you can use Ant to <a href="{@docRoot}intro/installing.html#buildingwithant">build the project</a> so that you can run it on the emulator.</p>
+<p>When you are ready, you can use Ant to <a href="{@docRoot}guide/developing/other-ide.html#antbuild">build the project</a> so that you can run it on the emulator.</p>
 
 <p>If you are using Eclipse with the ADT plugin, you do not need to use activitycreator. You can use the New Project Wizard, provided by the ADT plugin, instead. </p>
 

@@ -332,12 +332,8 @@ jboolean jni_eglGetConfigs(JNIEnv *_env, jobject _this, jobject display,
 
     if (success && configs) {
         for (int i=0 ; i<num ; i++) {
-            jobject obj = _env->GetObjectArrayElement(configs, i);
-            if (obj == NULL) {
-                doThrow(_env, "java/lang/NullPointerException");
-                break;
-            }
-            _env->SetIntField(obj, gConfig_EGLConfigFieldID, (jint)nativeConfigs[i]);
+            jobject obj = _env->NewObject(gConfig_class, gConfig_ctorID, (jint)nativeConfigs[i]);
+            _env->SetObjectArrayElement(configs, i, obj);
         }
     }
     return success;
@@ -396,8 +392,7 @@ jboolean jni_eglMakeCurrent(JNIEnv *_env, jobject _this, jobject display, jobjec
 jstring jni_eglQueryString(JNIEnv *_env, jobject _this, jobject display, jint name) {
     EGLDisplay dpy = getDisplay(_env, display);
     const char* chars = eglQueryString(dpy, name);
-    return _env->NewString((const jchar *)chars,
-                            (jsize)strlen((const char *)chars));
+    return _env->NewStringUTF(chars);
 }
 
 jboolean jni_eglSwapBuffers(JNIEnv *_env, jobject _this, jobject display, jobject surface) {

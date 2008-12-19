@@ -122,7 +122,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
      * Whether to continuously callback on the item selected listener during a
      * fling.
      */
-    private boolean mShouldCallbackDuringFling;
+    private boolean mShouldCallbackDuringFling = true;
 
     /**
      * Whether to callback when an item that is not selected is clicked.
@@ -133,6 +133,13 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
      * If true, do not callback to item selected listener. 
      */
     private boolean mSuppressSelectionChanged;
+
+    /**
+     * If true, we have received the "invoke" (center or enter buttons) key
+     * down. This is checked before we action on the "invoke" key up, and is
+     * subsequently cleared.
+     */
+    private boolean mReceivedInvokeKeyDown;
     
     private AdapterContextMenuInfo mContextMenuInfo;
     
@@ -882,8 +889,8 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
          */
         mParent.requestDisallowInterceptTouchEvent(true);
         
-        // As the user scrolls, we want to callback selection changes so related
-        // into on the screen is up-to-date with the user's selection
+        // As the user scrolls, we want to callback selection changes so related-
+        // info on the screen is up-to-date with the gallery's selection
         if (mSuppressSelectionChanged) {
             mSuppressSelectionChanged = false;
         }
@@ -1062,6 +1069,11 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
                 playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT);
             }
             return true;
+
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+        case KeyEvent.KEYCODE_ENTER:
+            mReceivedInvokeKeyDown = true;
+            // fallthrough to default handling
         }
         
         return super.onKeyDown(keyCode, event);
@@ -1072,19 +1084,26 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         switch (keyCode) {
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER: {
-            if (mItemCount > 0) {
-
-                dispatchPress(mSelectedChild);
-                postDelayed(new Runnable() {
-                    public void run() {
-                        dispatchUnpress();
-                    }
-                }, ViewConfiguration.getPressedStateDuration());
-
-                int selectedIndex = mSelectedPosition - mFirstPosition;
-                performItemClick(getChildAt(selectedIndex), mSelectedPosition, mAdapter
-                        .getItemId(mSelectedPosition));
+            
+            if (mReceivedInvokeKeyDown) {
+                if (mItemCount > 0) {
+    
+                    dispatchPress(mSelectedChild);
+                    postDelayed(new Runnable() {
+                        public void run() {
+                            dispatchUnpress();
+                        }
+                    }, ViewConfiguration.getPressedStateDuration());
+    
+                    int selectedIndex = mSelectedPosition - mFirstPosition;
+                    performItemClick(getChildAt(selectedIndex), mSelectedPosition, mAdapter
+                            .getItemId(mSelectedPosition));
+                }
             }
+            
+            // Clear the flag
+            mReceivedInvokeKeyDown = false;
+            
             return true;
         }
         }

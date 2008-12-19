@@ -107,12 +107,18 @@ static const KeycodeLabel KEYCODES[] = {
     { "MENU", 82 },
     { "NOTIFICATION", 83 },
     { "SEARCH", 84 },
+    { "PLAYPAUSE", 85 },
+    { "STOP", 86 },
+    { "NEXTSONG", 87 },
+    { "PREVIOUSSONG", 88 },
+    { "REWIND", 89 },
+    { "FORWARD", 90 },
 
     // NOTE: If you add a new keycode here you must also add it to:
     //   (enum KeyCode, in this file)
-    //   java/android/android/view/KeyEvent.java
+    //   frameworks/base/core/java/android/view/KeyEvent.java
     //   tools/puppet_master/PuppetMaster.nav_keys.py
-    //   apps/common/res/values/attrs.xml
+    //   frameworks/base/core/res/res/values/attrs.xml
 
     { NULL, 0 }
 };
@@ -204,7 +210,13 @@ typedef enum KeyCode {
     kKeyCodePlus = 81,
     kKeyCodeMenu = 82,
     kKeyCodeNotification = 83,
-    kKeyCodeSearch = 84
+    kKeyCodeSearch = 84,
+    kKeyCodePlayPause = 85,
+    kKeyCodeStop = 86,
+    kKeyCodeNextSong = 87,
+    kKeyCodePreviousSong = 88,
+    kKeyCodeRewind = 89,
+    kKeyCodeForward = 90
 } KeyCode;
 
 static const KeycodeLabel FLAGS[] = {

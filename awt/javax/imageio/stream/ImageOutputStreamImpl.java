@@ -18,6 +18,7 @@
  * @author Rustem V. Rafikov
  * @version $Revision: 1.3 $
  */
+
 package javax.imageio.stream;
 
 import java.io.IOException;
@@ -29,16 +30,19 @@ import java.nio.ByteOrder;
  */
 
 /**
- * The ImageOutputStreamImpl abstract class implements
- * the ImageOutputStream interface.
+ * The ImageOutputStreamImpl abstract class implements the ImageOutputStream
+ * interface.
+ * 
+ * @since Android 1.0
  */
-public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl
-        implements ImageOutputStream {
+public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl implements
+        ImageOutputStream {
 
     /**
      * Instantiates a new ImageOutputStreamImpl.
      */
-    public ImageOutputStreamImpl() {}
+    public ImageOutputStreamImpl() {
+    }
 
     public abstract void write(int b) throws IOException;
 
@@ -62,7 +66,7 @@ public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl
         } else {
 
         }
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -76,7 +80,7 @@ public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl
         } else {
 
         }
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -86,7 +90,7 @@ public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl
         } else {
 
         }
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -108,62 +112,63 @@ public abstract class ImageOutputStreamImpl extends ImageInputStreamImpl
     }
 
     public void writeUTF(String s) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeShorts(short[] s, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeChars(char[] c, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeInts(int[] i, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeLongs(long[] l, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeFloats(float[] f, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeDoubles(double[] d, int off, int len) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeBit(int bit) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public void writeBits(long bits, int numBits) throws IOException {
-        //-- TODO implement
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     /**
-     * Flushes the bits. This method should be called in the write
-     * methods by subclasses.
+     * Flushes the bits. This method should be called in the write methods by
+     * subclasses.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     protected final void flushBits() throws IOException {
         if (bitOffset == 0) {
             return;
         }
-        
-        //-- TODO implement
+
+        // -- TODO implement
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

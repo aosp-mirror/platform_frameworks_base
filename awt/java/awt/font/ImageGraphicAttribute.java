@@ -18,6 +18,7 @@
  * @author Ilya S. Okomin
  * @version $Revision$
  */
+
 package java.awt.font;
 
 import java.awt.Graphics2D;
@@ -27,44 +28,57 @@ import java.awt.geom.Rectangle2D;
 import org.apache.harmony.misc.HashCode;
 
 /**
- * The ImageGraphicAttribute class provides an opportunity to insert 
- * images to a text.
+ * The ImageGraphicAttribute class provides an opportunity to insert images to a
+ * text.
+ * 
+ * @since Android 1.0
  */
 public final class ImageGraphicAttribute extends GraphicAttribute {
 
     // Image object rendered by this ImageGraphicAttribute
-    /** The image. */
+    /**
+     * The image.
+     */
     private Image fImage;
 
     // X coordinate of the origin point
-    /** The origin x. */
+    /**
+     * The origin x.
+     */
     private float fOriginX;
 
     // Y coordinate of the origin point
-    /** The origin y. */
+    /**
+     * The origin y.
+     */
     private float fOriginY;
 
     // the width of the image object
-    /** The img width. */
+    /**
+     * The img width.
+     */
     private float fImgWidth;
 
     // the height of the image object
-    /** The img height. */
+    /**
+     * The img height.
+     */
     private float fImgHeight;
 
     /**
      * Instantiates a new ImageGraphicAttribute with the specified image,
      * alignment and origins.
      * 
-     * @param image the Image to be rendered by ImageGraphicAttribute.
-     * @param alignment the alignment of the ImageGraphicAttribute.
-     * @param originX the origin X coordinate in the image of
-     * ImageGraphicAttribute.  
-     * @param originY the origin Y coordinate in the image of
-     * ImageGraphicAttribute.  
+     * @param image
+     *            the Image to be rendered by ImageGraphicAttribute.
+     * @param alignment
+     *            the alignment of the ImageGraphicAttribute.
+     * @param originX
+     *            the origin X coordinate in the image of ImageGraphicAttribute.
+     * @param originY
+     *            the origin Y coordinate in the image of ImageGraphicAttribute.
      */
-    public ImageGraphicAttribute(Image image, int alignment, float originX, 
-            float originY) {
+    public ImageGraphicAttribute(Image image, int alignment, float originX, float originY) {
         super(alignment);
 
         this.fImage = image;
@@ -80,8 +94,10 @@ public final class ImageGraphicAttribute extends GraphicAttribute {
      * Instantiates a new ImageGraphicAttribute with the specified image and
      * alignment.
      * 
-     * @param image the Image to be rendered by ImageGraphicAttribute.
-     * @param alignment the alignment of the ImageGraphicAttribute.
+     * @param image
+     *            the Image to be rendered by ImageGraphicAttribute.
+     * @param alignment
+     *            the alignment of the ImageGraphicAttribute.
      */
     public ImageGraphicAttribute(Image image, int alignment) {
         this(image, alignment, 0, 0);
@@ -105,10 +121,10 @@ public final class ImageGraphicAttribute extends GraphicAttribute {
      * Compares the specified ImageGraphicAttribute object with this
      * ImageGraphicAttribute object.
      * 
-     * @param iga the ImageGraphicAttribute object to be compared.
-     * 
+     * @param iga
+     *            the ImageGraphicAttribute object to be compared.
      * @return true, if the specified ImageGraphicAttribute object is equal to
-     * this ImageGraphicAttribute object, false otherwise.
+     *         this ImageGraphicAttribute object, false otherwise.
      */
     public boolean equals(ImageGraphicAttribute iga) {
         if (iga == null) {
@@ -119,26 +135,23 @@ public final class ImageGraphicAttribute extends GraphicAttribute {
             return true;
         }
 
-        return (fOriginX == iga.fOriginX &&
-                fOriginY == iga.fOriginY &&
-                getAlignment() == iga.getAlignment() &&
-                fImage.equals(iga.fImage));
+        return (fOriginX == iga.fOriginX && fOriginY == iga.fOriginY
+                && getAlignment() == iga.getAlignment() && fImage.equals(iga.fImage));
     }
 
     /**
      * Compares the specified Object with this ImageGraphicAttribute object.
-     *  
-     * @param obj the Object to be compared.
      * 
+     * @param obj
+     *            the Object to be compared.
      * @return true, if the specified Object is equal to this
-     * ImageGraphicAttribute object, false otherwise.
+     *         ImageGraphicAttribute object, false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
         try {
-            return equals((ImageGraphicAttribute) obj);
-        }
-        catch(ClassCastException e) {
+            return equals((ImageGraphicAttribute)obj);
+        } catch (ClassCastException e) {
             return false;
         }
 
@@ -149,9 +162,6 @@ public final class ImageGraphicAttribute extends GraphicAttribute {
         g2.drawImage(fImage, (int)(x - fOriginX), (int)(y - fOriginY), null);
     }
 
-    /** 
-     * @see java.awt.font.GraphicAttribute#getAdvance()
-     */
     @Override
     public float getAdvance() {
         return Math.max(0, fImgWidth - fOriginX);
@@ -167,13 +177,9 @@ public final class ImageGraphicAttribute extends GraphicAttribute {
         return new Rectangle2D.Float(-fOriginX, -fOriginY, fImgWidth, fImgHeight);
     }
 
-    /** 
-     * @see java.awt.font.GraphicAttribute#getDescent()
-     */
     @Override
     public float getDescent() {
         return Math.max(0, fImgHeight - fOriginY);
     }
 
 }
-

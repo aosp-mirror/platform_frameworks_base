@@ -562,10 +562,16 @@ getout:
 
 static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void * data)
 {
+    if (sizeof(void*) != sizeof(int32_t)) {
+        // can't deserialize on a non-32 bit system
+        return;
+    }
     size_t patchSize = inPatch->serializedSize();
     void * newData = malloc(patchSize);
     memcpy(newData, data, patchSize);
     Res_png_9patch* outPatch = inPatch->deserialize(newData);
+    // deserialization is done in place, so outPatch == newData
+    assert(outPatch == newData);
     assert(outPatch->numXDivs == inPatch->numXDivs);
     assert(outPatch->numYDivs == inPatch->numYDivs);
     assert(outPatch->paddingLeft == inPatch->paddingLeft);
@@ -581,6 +587,7 @@ static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void * data)
     for (int i = 0; i < outPatch->numColors; i++) {
         assert(outPatch->colors[i] == inPatch->colors[i]);
     }
+    free(newData);
 }
 
 static bool patch_equals(Res_png_9patch& patch1, Res_png_9patch& patch2) {

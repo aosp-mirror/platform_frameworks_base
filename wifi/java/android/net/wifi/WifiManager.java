@@ -504,6 +504,56 @@ public class WifiManager {
     }
 
     /**
+     * Return the number of frequency channels that are allowed
+     * to be used in the current regulatory domain.
+     * @return the number of allowed channels, or {@code -1} if an error occurs
+     *
+     * @hide pending API council
+     */
+    public int getNumAllowedChannels() {
+        try {
+            return mService.getNumAllowedChannels();
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Set the number of frequency channels that are allowed to be used
+     * in the current regulatory domain. This method should be used only
+     * if the correct number of channels cannot be determined automatically
+     * for some reason.
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * {@code numChannels} is out of range.
+     *
+     * @hide pending API council
+     */
+    public boolean setNumAllowedChannels(int numChannels) {
+        try {
+            return mService.setNumAllowedChannels(numChannels);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return the list of valid values for the number of allowed radio channels
+     * for various regulatory domains.
+     * @return the list of channel counts, or {@code null} if the operation fails
+     *
+     * @hide pending API council review
+     */
+    public int[] getValidChannelCounts() {
+        try {
+            return mService.getValidChannelCounts();
+        } catch (RemoteException e) {
+            return null;
+        }
+   }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information

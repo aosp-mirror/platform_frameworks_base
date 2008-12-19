@@ -213,6 +213,9 @@ public interface IActivityManager extends IInterface {
      * SIGUSR1 is delivered. All others are ignored.
      */
     public void signalPersistentProcesses(int signal) throws RemoteException;
+    // Retrieve running application processes in the system
+    public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses()
+            throws RemoteException;
     
     /** Information you can retrieve about a particular application. */
     public static class ContentProviderHolder implements Parcelable {
@@ -350,4 +353,5 @@ public interface IActivityManager extends IInterface {
     int KILL_PIDS_FOR_MEMORY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
     int REPORT_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
+    int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;
 }

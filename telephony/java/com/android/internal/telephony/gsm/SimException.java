@@ -31,3 +31,28 @@ public class SimException extends Exception
         super(s);
     }
 }
+
+final class SimVmFixedException extends SimException {
+    SimVmFixedException()
+    {
+
+    }
+
+    SimVmFixedException(String s)
+    {
+        super(s);
+    }    
+}
+
+final class SimVmNotSupportedException extends SimException {
+    SimVmNotSupportedException()
+    {
+
+    }
+
+    SimVmNotSupportedException(String s)
+    {
+        super(s);
+    }    
+}
+

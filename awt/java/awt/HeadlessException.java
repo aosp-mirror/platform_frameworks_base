@@ -18,16 +18,21 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
- * The HeadlessException class provides notifications and error messages 
- * when code that is dependent on a keyboard, display, or mouse is called 
- * in an environment that does not support a keyboard, display, or mouse.
+ * The HeadlessException class provides notifications and error messages when
+ * code that is dependent on a keyboard, display, or mouse is called in an
+ * environment that does not support a keyboard, display, or mouse.
+ * 
+ * @since Android 1.0
  */
 public class HeadlessException extends UnsupportedOperationException {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = 167183644944358563L;
 
     /**
@@ -40,7 +45,8 @@ public class HeadlessException extends UnsupportedOperationException {
     /**
      * Instantiates a new headless exception with the specified message.
      * 
-     * @param msg the String which represents error message. 
+     * @param msg
+     *            the String which represents error message.
      */
     public HeadlessException(String msg) {
         super(msg);

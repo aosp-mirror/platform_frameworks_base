@@ -18,26 +18,30 @@
  * @author Michael Danilov
  * @version $Revision$
  */
+
 package java.awt;
 
-
 /**
- * The AWTException class is used to provide notification and information
- * about AWT errors.
+ * The AWTException class is used to provide notification and information about
+ * AWT errors.
+ * 
+ * @since Android 1.0
  */
 public class AWTException extends Exception {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -1900414231151323879L;
 
     /**
      * Instantiates a new AWT exception with the specified message.
      * 
-     * @param msg the specific message for current exception.
+     * @param msg
+     *            the specific message for current exception.
      */
     public AWTException(String msg) {
         super(msg);
     }
 
 }
-

@@ -10,6 +10,11 @@
 #include "StringPool.h"
 #include "SourcePos.h"
 
+#include <set>
+#include <map>
+
+using namespace std;
+
 class ResourceTable;
 
 enum {
@@ -136,12 +141,14 @@ public:
 
     uint32_t getResId(const String16& package,
                       const String16& type,
-                      const String16& name) const;
+                      const String16& name,
+                      bool onlyPublic = false) const;
 
     uint32_t getResId(const String16& ref,
                       const String16* defType = NULL,
                       const String16* defPackage = NULL,
-                      const char** outErrorMsg = NULL) const;
+                      const char** outErrorMsg = NULL,
+                      bool onlyPublic = false) const;
 
     static bool isValidResourceName(const String16& s);
     
@@ -155,6 +162,8 @@ public:
 
     status_t assignResourceIds();
     status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL);
+    void addLocalization(const String16& name, const String8& locale);
+    status_t validateLocalizations(void);
 
     status_t flatten(Bundle*, const sp<AaptFile>& dest);
 
@@ -491,7 +500,6 @@ private:
 
     String16 mAssetsPackage;
     sp<AaptAssets> mAssets;
-    DefaultKeyedVector<String16, DefaultKeyedVector<String16, uint32_t> > mPublicNames;
     DefaultKeyedVector<String16, sp<Package> > mPackages;
     Vector<sp<Package> > mOrderedPackages;
     uint32_t mNextPackageId;
@@ -500,6 +508,9 @@ private:
     size_t mNumLocal;
     SourcePos mCurrentXmlPos;
     Bundle* mBundle;
+    
+    // key = string resource name, value = set of locales in which that name is defined
+    map<String16, set<String8> > mLocalizations;
 };
 
 class ResourceFilter

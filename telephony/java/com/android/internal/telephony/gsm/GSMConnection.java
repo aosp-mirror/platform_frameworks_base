@@ -16,7 +16,9 @@
 
 package com.android.internal.telephony.gsm;
 import com.android.internal.telephony.*;
+import android.content.Context;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.Looper;
 import android.os.Message;
@@ -72,6 +74,8 @@ public class GSMConnection extends Connection {
 
     Handler h;
 
+    private PowerManager.WakeLock mPartialWakeLock;
+
     //***** Event Constants
 
     static final int EVENT_DTMF_DONE = 1;
@@ -106,8 +110,11 @@ public class GSMConnection extends Connection {
 
     /** This is probably an MT call that we first saw in a CLCC response */
     /*package*/
-    GSMConnection (DriverCall dc, CallTracker ct, int index)
+    GSMConnection (Context context, DriverCall dc, CallTracker ct, int index)
     {
+        createWakeLock(context);
+        acquireWakeLock();
+
         owner = ct;
         h = new MyHandler(owner.getLooper());
 
@@ -124,8 +131,11 @@ public class GSMConnection extends Connection {
 
     /** This is an MO call, created when dialing */
     /*package*/
-    GSMConnection (String dialString, CallTracker ct, GSMCall parent)
+    GSMConnection (Context context, String dialString, CallTracker ct, GSMCall parent)
     {
+        createWakeLock(context);
+        acquireWakeLock();
+
         owner = ct;
         h = new MyHandler(owner.getLooper());
 
@@ -412,6 +422,7 @@ public class GSMConnection extends Connection {
                 parent.connectionDisconnected(this);            
             }
         }
+        releaseWakeLock();
     }
 
     // Returns true if state has changed, false if nothing changed
@@ -513,6 +524,7 @@ public class GSMConnection extends Connection {
             // outgoing calls only
             processNextPostDialChar();
         }
+        releaseWakeLock();
     }
 
     private void
@@ -574,6 +586,21 @@ public class GSMConnection extends Connection {
         return postDialString.substring(nextPostDialChar);
     }
     
+    @Override
+    protected void finalize()
+    {
+        /**
+         * It is understood that This finializer is not guaranteed
+         * to be called and the release lock call is here just in
+         * case there is some path that doesn't call onDisconnect
+         * and or onConnectedInOrOut.
+         */
+        if (mPartialWakeLock.isHeld()) {
+            Log.e(LOG_TAG, "[GSMConn] UNEXPECTED; mPartialWakeLock is held when finalizing.");
+        }
+        releaseWakeLock();
+    }
+
     private void
     processNextPostDialChar()
     {
@@ -672,6 +699,28 @@ public class GSMConnection extends Connection {
         }
     }
 
+    private void
+    createWakeLock(Context context) {
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
+    }
+    
+    private void
+    acquireWakeLock() {
+        log("acquireWakeLock");
+        mPartialWakeLock.acquire();
+    }
+
+    private void
+    releaseWakeLock() {
+        synchronized(mPartialWakeLock) {
+            if (mPartialWakeLock.isHeld()) {
+                log("releaseWakeLock");
+                mPartialWakeLock.release();
+            }
+        }
+    }
+    
     private void log(String msg) {
         Log.d(LOG_TAG, "[GSMConn] " + msg);
     }

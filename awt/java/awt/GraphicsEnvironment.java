@@ -28,17 +28,20 @@ import org.apache.harmony.awt.ContextStorage;
 import org.apache.harmony.awt.gl.CommonGraphics2DFactory;
 
 /**
- * The GraphicsEnvironment class defines a collection of GraphicsDevice 
- * objects and Font objects which are available for Java application on
- * current platform.
+ * The GraphicsEnvironment class defines a collection of GraphicsDevice objects
+ * and Font objects which are available for Java application on current
+ * platform.
+ * 
+ * @since Android 1.0
  */
 public abstract class GraphicsEnvironment {
-    
+
     /**
-     * Constructor could not be used directly and should be obtained in 
-     * extended classes. 
+     * Constructor could not be used directly and should be obtained in extended
+     * classes.
      */
-    protected GraphicsEnvironment() {}
+    protected GraphicsEnvironment() {
+    }
 
     /**
      * Gets the local GraphicsEnvironment.
@@ -46,17 +49,16 @@ public abstract class GraphicsEnvironment {
      * @return the local GraphicsEnvironment.
      */
     public static GraphicsEnvironment getLocalGraphicsEnvironment() {
-        synchronized(ContextStorage.getContextLock()) {
+        synchronized (ContextStorage.getContextLock()) {
             if (ContextStorage.getGraphicsEnvironment() == null) {
-                if (isHeadless()) {                    
-                    ContextStorage.setGraphicsEnvironment(new HeadlessGraphicsEnvironment());                    
+                if (isHeadless()) {
+                    ContextStorage.setGraphicsEnvironment(new HeadlessGraphicsEnvironment());
                 } else {
-                    CommonGraphics2DFactory g2df =
-                            (CommonGraphics2DFactory) Toolkit.getDefaultToolkit().getGraphicsFactory();
-                    
-                    ContextStorage.setGraphicsEnvironment( 
-                            g2df.createGraphicsEnvironment(ContextStorage.getWindowFactory())
-                    );
+                    CommonGraphics2DFactory g2df = (CommonGraphics2DFactory)Toolkit
+                            .getDefaultToolkit().getGraphicsFactory();
+
+                    ContextStorage.setGraphicsEnvironment(g2df
+                            .createGraphicsEnvironment(ContextStorage.getWindowFactory()));
                 }
             }
 
@@ -65,24 +67,24 @@ public abstract class GraphicsEnvironment {
     }
 
     /**
-     * Returns whether or not a display, keyboard, and mouse are supported 
-     * in this graphics environment.
+     * Returns whether or not a display, keyboard, and mouse are supported in
+     * this graphics environment.
      * 
-     * @return true, if HeadlessException will be thrown from areas of 
-     * the graphics environment that are dependent on a display, keyboard, 
-     * or mouse; false otherwise.
+     * @return true, if HeadlessException will be thrown from areas of the
+     *         graphics environment that are dependent on a display, keyboard,
+     *         or mouse, false otherwise.
      */
     public boolean isHeadlessInstance() {
         return false;
     }
 
     /**
-     * Checks whether or not a display, keyboard, and mouse are supported 
-     * in this environment. 
+     * Checks whether or not a display, keyboard, and mouse are supported in
+     * this environment.
      * 
-     * @return true, if a HeadlessException is thrown from areas of 
-     * the Toolkit and GraphicsEnvironment that are dependent on 
-     * a display, keyboard, or mouse; false otherwise.
+     * @return true, if a HeadlessException is thrown from areas of the Toolkit
+     *         and GraphicsEnvironment that are dependent on a display,
+     *         keyboard, or mouse, false otherwise.
      */
     public static boolean isHeadless() {
         return "true".equals(System.getProperty("java.awt.headless"));
@@ -92,8 +94,8 @@ public abstract class GraphicsEnvironment {
      * Gets the maximum bounds of system centered windows.
      * 
      * @return the maximum bounds of system centered windows.
-     * 
-     * @throws HeadlessException if isHeadless() method returns true.
+     * @throws HeadlessException
+     *             if isHeadless() method returns true.
      */
     public Rectangle getMaximumWindowBounds() throws HeadlessException {
         return getDefaultScreenDevice().getDefaultConfiguration().getBounds();
@@ -103,8 +105,8 @@ public abstract class GraphicsEnvironment {
      * Gets the Point which should defines the center of system window.
      * 
      * @return the Point where the system window should be centered.
-     * 
-     * @throws HeadlessException if isHeadless() method returns true.
+     * @throws HeadlessException
+     *             if isHeadless() method returns true.
      */
     public Point getCenterPoint() throws HeadlessException {
         Rectangle mwb = getMaximumWindowBounds();
@@ -112,9 +114,8 @@ public abstract class GraphicsEnvironment {
     }
 
     /**
-     * Indicates that the primary font should be used. 
-     * Primary font is specified by initial system locale or default encoding).
-     * 
+     * Indicates that the primary font should be used. Primary font is specified
+     * by initial system locale or default encoding).
      */
     public void preferLocaleFonts() {
         // Note: API specification says following:
@@ -123,7 +124,8 @@ public abstract class GraphicsEnvironment {
         // it may have no effect at all." So, doing nothing is an
         // acceptable behavior for this method.
 
-        // For now FontManager uses 1.4 font.properties scheme for font mapping, so
+        // For now FontManager uses 1.4 font.properties scheme for font mapping,
+        // so
         // this method doesn't make any sense. The implementation of this method
         // which will influence font mapping is postponed until
         // 1.5 mapping scheme not implemented.
@@ -141,7 +143,8 @@ public abstract class GraphicsEnvironment {
         // it may have no effect at all." So, doing nothing is an
         // acceptable behavior for this method.
 
-        // For now FontManager uses 1.4 font.properties scheme for font mapping, so
+        // For now FontManager uses 1.4 font.properties scheme for font mapping,
+        // so
         // this method doesn't make any sense. The implementation of this method
         // which will influence font mapping is postponed until
         // 1.5 mapping scheme not implemented.
@@ -153,19 +156,19 @@ public abstract class GraphicsEnvironment {
      * Creates the Graphics2D object for rendering to the specified
      * BufferedImage.
      * 
-     * @param bufferedImage the BufferedImage object.
-     * 
-     * @return the Graphics2D object which allows to render to the specified 
-     * BufferedImage.
+     * @param bufferedImage
+     *            the BufferedImage object.
+     * @return the Graphics2D object which allows to render to the specified
+     *         BufferedImage.
      */
     public abstract Graphics2D createGraphics(BufferedImage bufferedImage);
 
     /**
-     * Gets the array of all available fonts instances in this 
+     * Gets the array of all available fonts instances in this
      * GraphicsEnviroments.
      * 
-     * @return the array of all available fonts instances in this 
-     * GraphicsEnviroments.
+     * @return the array of all available fonts instances in this
+     *         GraphicsEnviroments.
      */
     public abstract Font[] getAllFonts();
 
@@ -180,11 +183,11 @@ public abstract class GraphicsEnvironment {
      * Gets the array of all available font family names for the specified
      * locale.
      * 
-     * @param locale the Locale object which represents geographical
-     * region. The default locale is used if locale is null.
-     * 
-     * @return the array of available font family names for the specified 
-     * locale.
+     * @param locale
+     *            the Locale object which represents geographical region. The
+     *            default locale is used if locale is null.
+     * @return the array of available font family names for the specified
+     *         locale.
      */
     public abstract String[] getAvailableFontFamilyNames(Locale locale);
 
@@ -192,18 +195,18 @@ public abstract class GraphicsEnvironment {
      * Gets the default screen device as GraphicDevice object.
      * 
      * @return the GraphicDevice object which represents default screen device.
-     * 
-     * @throws HeadlessException if isHeadless() returns true.
+     * @throws HeadlessException
+     *             if isHeadless() returns true.
      */
     public abstract GraphicsDevice getDefaultScreenDevice() throws HeadlessException;
 
     /**
      * Gets an array of all available screen devices.
      * 
-     * @return the array of GraphicsDevice obgects which represents 
-     * all available screen devices.
-     * 
-     * @throws HeadlessException if isHeadless() returns true.
+     * @return the array of GraphicsDevice objects which represents all
+     *         available screen devices.
+     * @throws HeadlessException
+     *             if isHeadless() returns true.
      */
     public abstract GraphicsDevice[] getScreenDevices() throws HeadlessException;
 }

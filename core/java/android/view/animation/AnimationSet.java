@@ -224,6 +224,23 @@ public class AnimationSet extends Animation {
     }
 
     /**
+     * The duration hint of an animation set is the maximum of the duration
+     * hints of all of its component animations.
+     * 
+     * @see android.view.animation.Animation#computeDurationHint
+     */
+    public long computeDurationHint() {
+        long duration = 0;
+        final int count = mAnimations.size();
+        final ArrayList<Animation> animations = mAnimations;
+        for (int i = count - 1; i >= 0; --i) {
+            final long d = animations.get(i).computeDurationHint();
+            if (d > duration) duration = d;
+        }
+        return duration;
+    }
+    
+    /**
      * The transformation of an animation set is the concatenation of all of its
      * component animations.
      * 

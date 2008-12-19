@@ -1,6 +1,30 @@
 page.title=Intents and Intent Filters
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.content.Intent}</li>
+<li>{@link android.content.IntentFilter}</li>
+<li>{@link android.app.Activity}</li>
+<li>{@link android.app.Service}</li>
+<li>{@link android.content.BroadcastReceiver}</li>
+<li>{@link android.content.pm.PackageManager}</li>
+</ol>
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#iobjs">Intent Objects</a></li>
+<li><a href="#ires">Intent Resolution</a>, including:</li>
+<li style="margin-left: 2em"><a href="#ifs">Intent filters</a></li>
+<li style="margin-left: 2em"><a href="#ccases">Common cases</a></li>
+<li style="margin-left: 2em"><a href="#imatch">Using intent matching</a></li>
+</ol>
+</div>
+</div>
+
+
 <p>
 Three of the core components of an application &mdash; activities, services, and 
 broadcast receivers &mdash; are activated through messages, called <i>intents</i>.   
@@ -10,29 +34,28 @@ object, is a passive data structure holding an abstract description of an operat
 to be performed &mdash; or, in the case of broadcasts, a description of something 
 that has happened and is being announced.  There are separate mechanisms for 
 delivering intents to each type of component: 
+</p>
 
 <ul>
-
-<p><li>An Intent object is passed to <code>{@link android.content.Context#startActivity 
+<li>An Intent object is passed to <code>{@link android.content.Context#startActivity 
 Context.startActivity()}</code> or <code>{@link android.app.Activity#startActivityForResult 
 Activity.startActivityForResult()}</code> to launch an activity or get an existing 
-activity to do something new.
+activity to do something new.</li>
 
-<p><li>An Intent object is passed to <code>{@link android.content.Context#startService 
+<li><p>An Intent object is passed to <code>{@link android.content.Context#startService 
 Context.startService()}</code> to initiate a service or deliver new instructions to an 
 ongoing service.  Similarly, an intent can be passed to <code>{@link 
 android.content.Context#bindService Context.bindService()}</code> to establish a 
-connection between the calling component and a target service.  It initiates the 
-service if it's not already running.
+connection between the calling component and a target service.  It can optionally
+initiate the service if it's not already running.</p></li>
 
-<p><li>Intent objects passed to any of the broadcast methods (such as <code>{@link 
+<li><p>Intent objects passed to any of the broadcast methods (such as <code>{@link 
 android.content.Context#sendBroadcast(Intent) Context.sendBroadcast()}</code>, 
 <code>{@link android.content.Context#sendOrderedBroadcast(Intent, String) 
 Context.sendOrderedBroadcast()}</code>, or <code>{@link 
 android.content.Context#sendStickyBroadcast Context.sendStickyBroadcast()}</code>) 
 are delivered to all interested broadcast receivers.  Many kinds of broadcasts 
-originate in system code.
-
+originate in system code.</p></li>
 </ul>
 
 <p>
@@ -42,71 +65,63 @@ There is no overlap within these messaging systems:  Broadcast intents are deliv
 only to broadcast receivers, never to activities or services.  An intent passed to 
 {@code startActivity()} is delivered only to an activity, never to a service or 
 broadcast receiver, and so on.
+</p>
 
 <p>
-Intents can be divided into two groups:
+This document begins with a description of Intent objects.  It then describes the 
+rules Android uses to map intents to components &mdash; how it resolves which 
+component should receive an intent message.  For intents that don't explicitly 
+name a target component, this process involves testing the Intent object against 
+<i>intent filters</i> associated with potential targets. 
+</p>
 
-<ul>
 
-<p><li><i>Explicit intents</i> designate the target component by its class name.
-They're typically used for application-internal messages &mdash; such as
-an activity starting a subordinate service or launching a sister activity 
-&mdash; since component names would generally not be known to developers
-of other applications.
-
-<p><li><i>Implicit intents</i> do not name the target.  Instead, the
-Android system determines the best component (or components) to respond
-to the message.  It compares the contents of the Intent object with
-<i>intent filters</i>, structures associated with components that can 
-potentially receive intents.  Filters advertise the capabilities of a 
-component and delimit the intents it can handle.
- 
-
-</ul>   
+<h2><a name="iobjs"></a>Intent Objects</h2>
 
 <p>
-This document describes the rules Android uses to map intents to components &mdash; 
-how it determines which component should receive an intent message.  
-It begins with a description of Intent objects, and then describes intent filters
-and how intents are tested against the filters.
-
-
-<h2>Intent Objects</h2>
-
-<p>
-An {@link android.content.Intent} object is a bundle of information.  It contains 
-information of interest to the component that receives the intent (such as the action 
-to be taken and the data to act on) plus information 
-of interest to the Android system (such as the category of component that should handle 
-the intent and instructions on how to launch a target activity).  Principally, it can contain 
-the following:
+An {@link android.content.Intent} object is a bundle of information.  It 
+contains information of interest to the component that receives the intent 
+(such as the action to be taken and the data to act on) plus information 
+of interest to the Android system (such as the category of component that 
+should handle the intent and instructions on how to launch a target activity).  
+Principally, it can contain the following:
+</p>
 
 <dl>
 
-<p><dt><b>Component class name</b></dt> 
-<dd>The fully qualified class name of the component that should handle the intent 
-&mdash; for example "{@code com.example.project.FreneticActivity}".  
-This field is optional (and it would not normally be set for broadcast intents, since 
-broadcasts are intended for more than a single receiver).   However, if a class name 
-is specified, nothing else in the Intent 
-object matters for determining which component should get the intent; it will be 
-delivered to the named component.  (Of course, the other contents of the intent will 
-matter to the component that receives it.)
+<dt><b>Component name</b><a name="cname"></a></dt> 
+<dd>The name of the component that should handle the intent.  This field is 
+a {@link android.content.ComponentName} object &mdash; a combination of the 
+fully qualified class name of the target component (for example "{@code 
+com.example.project.app.FreneticActivity}") and the package name set
+in the manifest file of the application where the component resides (for 
+example, "{@code com.example.project}").  The package part of the component 
+name and the package name set in the manifest do not necessarily have to match.
+
+<p>  
+The component name is optional.  If it is set, the Intent object is 
+delivered to an instance of the designated class.  If it is not set, 
+Android uses other information in the Intent object to locate a suitable 
+target &mdash; see <a href="#ires">Intent Resolution</a>, later in this 
+document.
+</p>
 
 <p>
-The component class is set by <code>{@link android.content.Intent#setComponent 
+The component name is set by <code>{@link android.content.Intent#setComponent 
 setComponent()}</code>,  <code>{@link android.content.Intent#setClass 
 setClass()}</code>, or <code>{@link android.content.Intent#setClassName(String, String) 
 setClassName()}</code> and read by <code>{@link android.content.Intent#getComponent 
 getComponent()}</code>. 
+</p>
+</dd>
 
 <p><dt><b>Action</b></dt>
 <dd>A string naming the action to be performed &mdash; or, in the case of broadcast 
-intents, the action that took place and is being reported.  This is the only field 
-in the object that must be set.  The Intent class defines a number of action constants, 
-including these:
+intents, the action that took place and is being reported.  The Intent class defines 
+a number of action constants, including these:
+</p>
 
-<p><table>
+<table>
 <tr>
    <th>Constant</th>
    <th>Target component</th>
@@ -122,7 +137,7 @@ including these:
 </tr><tr>
    <td>{@code ACTION_MAIN}
    <td>activity
-   <td>Start up as the initial activity of a task.
+   <td>Start up as the initial activity of a task, with no data input and no returned output.
 </tr><tr>
    <td>{@code ACTION_SYNC}
    <td>activity
@@ -147,45 +162,75 @@ including these:
 </table>
 
 <p>
-See the {@link android.content.Intent} class description for a full list of pre-defined action constants.
+See the {@link android.content.Intent} class description for a list of 
+pre-defined constants for generic actions.  Other actions are defined 
+elsewhere in the Android API.
+You can also define your own action strings for activating the components 
+in your application.  Those you invent should include the application 
+package as a prefix &mdash; for example: 
+"<code>com.example.project.SHOW_COLOR</code>". 
+</p>
 
 <p>
-You can define action strings of your own.  Those you define should include the 
-application package as a prefix &mdash; for example: 
-"<code>com.example.project.DEBIT_ACCT</code>".  The action in an Intent object 
-is set by the <code>{@link android.content.Intent#setAction setAction()}</code> 
-method and read by <code>{@link android.content.Intent#getAction getAction()}</code>.
+The action largely determines how the rest of the intent is structured
+&mdash; particularly the <a href="#data">data</a> and 
+<a href="#extras">extras</a> fields &mdash; 
+much as a method name determines a set of arguments and a return value.
+For this reason, it's a good idea to use action names that are
+as specific as possible, and to couple them tightly to the other fields of
+the intent.  In other words, instead of defining an action in isolation,
+define an entire protocol for the Intent objects your components can handle.
+</p>
 
-<p><dt><b>Data</b></dt>
-<dd>The data to be acted on.  Different actions are paired with different kinds
-of data specifications.  For example, if the action field is {@code ACTION_EDIT}, 
+<p>
+The action in an Intent object is set by the 
+<code>{@link android.content.Intent#setAction setAction()}</code> 
+method and read by 
+<code>{@link android.content.Intent#getAction getAction()}</code>.
+</p>
+</dd>
+
+<p><dt><b>Data</b><a name="data"></a></dt>
+<dd>The URI of the data to be acted on and the MIME type of that data.  Different 
+actions are paired with different kinds of data specifications.  For example, if 
+the action field is {@code ACTION_EDIT}, 
 the data field would contain the URI of the document to be displayed for editing.  
 If the action is {@code ACTION_CALL}, the data field would be a {@code tel:} URI 
 with the number to call.  Similarly, if the action is {@code ACTION_VIEW} and the 
-data field is a {@code mailto:} URI, the receiving activity would be called upon 
-to display a screen for composing an e-mail message, with the address filled in 
-from the URI.
+data field is an {@code http:} URI, the receiving activity would be called upon 
+to download and display whatever data the URI refers to.
 
 <p>
-It's often important to know the type of data (its MIME type) in addition to its URI.  
-Typically, the type is inferred from the URI.  But it can also be explicitly set.  
+When matching an intent to a component that is capable of handling the data, 
+it's often important to know the type of data (its MIME type) in addition to its URI.  
+For example, a component able to display image data should not be called
+upon to play an audio file.
+</p>
+
+<p>
+In many cases, the data type can be inferred from the URI &mdash; particularly 
+{@code content:} URIs, which indicate that the data is located on the device and
+controlled by a content provider (see the  
+<a href="{@docRoot}guide/topics/providers/content-providers.html">separate 
+discussion on content providers</a>).  But the type can also be explicitly set 
+in the Intent object.  
 The <code>{@link android.content.Intent#setData setData()}</code> method specifies 
 data only as a URI, <code>{@link android.content.Intent#setType setType()}</code> 
 specifies it only as a MIME type, and <code>{@link 
 android.content.Intent#setDataAndType setDataAndType()}</code> specifies it as both 
-a URI and a MIME type.  The data and type are read by <code>{@link 
-android.content.Intent#getData getData()}</code> and <code>{@link 
+a URI and a MIME type.  The URI is read by <code>{@link 
+android.content.Intent#getData getData()}</code> and the type by <code>{@link 
 android.content.Intent#getType getType()}</code>.
-
+</p>
+</dd>
 
 <p><dt><b>Category</b></dt>
 <dd>A string containing additional information about the kind of component 
-that should handle the intent.  Categories generally apply only to activities.  
+that should handle the intent.  Any number of category descriptions can be 
+placed in an Intent object.  As it does for actions, the Intent class defines
+several category constants, including these: 
 
-<p>
-Any number of category descriptions can be placed in an Intent object.  As it does for actions, the Intent class defines a number of category constants, including these: 
-
-<p><table>
+<table>
 <tr>
    <th>Constant</th>
    <th>Meaning</th>
@@ -211,29 +256,28 @@ Any number of category descriptions can be placed in an Intent object.  As it do
 </table> 
 
 <p>
-In addition to the role categories play in Intent objects, they have an 
-independent function in intent filters.  As the examples above suggest, they 
-instruct the Android system how to treat the activity that owns the filter.  For 
-example, {@code CATEGORY_HOME} defines the home activity.
-
-<p>
 See the {@link android.content.Intent} class description for the full list of 
 categories.
+</p>
 
 <p>
 The <code>{@link android.content.Intent#addCategory addCategory()}</code> method 
 places a category in an Intent object, <code>{@link android.content.Intent#removeCategory 
 removeCategory()}</code> deletes a category previously added, and <code>{@link android.content.Intent#getCategories getCategories()}</code> gets the set of all 
 categories currently in the object. 
+</p>
+</dd>
 
-<p><dt><b>Extras</b></dt>
+<p><dt><b>Extras</b><a name="extras"></a></dt>
 <dd>Key-value pairs for additional information that should be delivered to the 
 component handling the intent.  Just as some actions are paired with particular 
 kinds of data URIs, some are paired with particular extras.  For example, an 
 {@code ACTION_TIMEZONE_CHANGED} intent has a "{@code time-zone}" extra that 
 identifies the new time zone, and {@code ACTION_HEADSET_PLUG} has a 
 "{@code state}" extra indicating whether the headset is now plugged in or 
-unplugged, as well as a "{@code name}" extra for the type of headset.
+unplugged, as well as a "{@code name}" extra for the type of headset. 
+If you were to invent a {@code SHOW_COLOR} action, the color value would
+be set in an extra key-value pair.
 
 <p>
 The Intent object has a series of {@code put...()} methods for inserting various 
@@ -242,12 +286,15 @@ the data.  These methods parallel those for {@link android.os.Bundle} objects.
 In fact, the extras can be installed and read as a Bundle using the <code>{@link 
 android.content.Intent#putExtras putExtras()}</code> and <code>{@link 
 android.content.Intent#getExtras getExtras()}</code> methods.
+</p>
+</dd>
 
-<p><dt><b>Launch instructions</b></dt>
-<dd>Flags that instruct the Android system how to launch an activity (for 
-example, which task the activity should belong to) and how to treat it after 
-it's launched (for example, whether it belongs in the list of recent activities).  
-All these flags are defined in the Intent class.   
+<p><dt><b>Flags</b></dt>
+<dd>Flags of various sorts.  Many instruct the Android system how to launch an 
+activity (for example, which task the activity should belong to) and how to treat 
+it after it's launched (for example, whether it belongs in the list of recent 
+activities).  All these flags are defined in the Intent class.   
+</dd>
 
 </dl>
 
@@ -256,38 +303,89 @@ The Android system and the applications that come with the platform employ
 Intent objects both to send out system-originated broadcasts and to activate 
 system-defined components.  To see how to structure an intent to activate a 
 system component, consult the 
-<a href="{@docRoot}../reference/available-intents.html">list of intents</a> 
+<a href="{@docRoot}guide/appendix/g-app-intents.html">list of intents</a> 
 in the reference.  
-For example, the component that initiates phone calls can be activated by an
-{@code ACTION_CALL} intent with a {@code tel:} URI specifying the phone number.
+</p>
 
 
-<h2>Intent Filters</h2>
-
-<p>
-If an intent explicitly names a component class, Android delivers the intent to 
-an instance of that class, creating the instance if necessary.  However, if the 
-intent does not designate a target by name, Android must find the appropriate 
-component to handle the request &mdash; a single activity or service to perform 
-the requested action or the set of broadcast receivers to respond to the 
-broadcast announcement.  It does so by comparing the Intent object against 
-components' intent filters.
+<h2><a name="ires"></a>Intent Resolution</h2>
 
 <p>
-To inform the system which intents they can handle, activities, services, and 
-broadcast receivers can have one or more intent filters.  
+Intents can be divided into two groups:
+</p>
+
+<ul>
+<li><i>Explicit intents</i> designate the target component by its 
+name (the <a href="#cname">component name field</a>, mentioned earlier, 
+has a value set).  Since component names would generally not be known to 
+developers of other applications, explicit intents are typically used 
+for application-internal messages &mdash; such as an activity starting 
+a subordinate service or launching a sister activity.</li>
+
+<li><p><i>Implicit intents</i> do not name a target (the field for 
+the component name is blank).  Implicit intents are often used to 
+activate components in other applications.</p></li>   
+</ul>
+
+<p>
+Android delivers an explicit intent to an instance of the designated 
+target class.  Nothing in the Intent object other than the component 
+name matters for determining which component should get the intent.  
+</p>
+
+<p>
+A different strategy is needed for implicit intents.  In the absence of a 
+designated target, the Android system must find the best component (or 
+components) to handle the intent &mdash; a single activity or service to 
+perform the requested action or the set of broadcast receivers to respond 
+to the broadcast announcement.  It does so by comparing the contents of 
+the Intent object to <i>intent filters</i>, structures associated with 
+components that can potentially receive intents.  Filters advertise the 
+capabilities of a component and delimit the intents it can handle.  They 
+open the component to the possibility of receiving implicit intents of 
+the advertised type.  If a component does not have any intent filters, 
+it can receive only explicit intents.  A component with filters can 
+receive both explicit and implicit intents.
+</p>
+
+<p>
+Only three aspects of an Intent object are consulted when the object
+is tested against an intent filter:
+</p>
+
+<p style="margin-left: 2em">action
+<br/>data (both URI and data type)
+<br/>category</p>
+
+<p>
+The extras and flags play no part in resolving which component receives
+an intent.
+</p>
+
+
+<h3><a name="ifs"></a>Intent filters</h3>
+
+<p>
+To inform the system which implicit intents they can handle, activities, 
+services, and broadcast receivers can have one or more intent filters.  
 Each filter describes a capability of the component, a set of intents that 
-the component is willing to receive.  It, in effect, filters out unwanted 
-intents.  An implicit intent (one that doesn't name a target class) is delivered 
-to a component only if it can pass through one of the component's filters.
-If a component lacks any intent filters, it can be activated only by explicit 
-intents (those that specifically name its class).
+the component is willing to receive.  It, in effect, filters in 
+intents of a desired type, while filtering out unwanted 
+intents &mdash; but only unwanted implicit intents (those that don't name
+a target class).  An explicit intent is always delivered to its target, 
+no matter what it contains; the filter is not consulted.  But an implicit 
+intent is delivered to a component only if it can pass through one of the 
+component's filters.
+</p>
 
 <p>
 A component has separate filters for each job it can do, each face it can 
-present to the user.  For example, if an activity can either display
-a list of items that the user can select or display the full details of one of
-the items, it would have a separate filter for each of these possibilities.
+present to the user.  For example, the principal activity of the sample
+NotePad application has three filters &mdash; one for starting up with a
+blank slate, another for starting with an assigned directory of notes 
+that the user can view, edit, or select from, and a third for finding a 
+particular note without an initial specification of its directory.
+</p>
 
 <p>
 An intent filter is an instance of the {@link android.content.IntentFilter} class.  
@@ -298,22 +396,38 @@ Java code, but in the application's manifest file (AndroidManifest.xml) as
 broadcast receivers that are registered dynamically by calling <code>{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String, 
 Handler) Context.registerReceiver()}</code>; they are directly created as 
 IntentFilter objects.)
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Filters and security</h2>
+<p>An intent filter cannot be relied on for security.  While it opens a
+component to receiving only certain kinds of implicit intents, it does 
+nothing to prevent explicit intents from targeting the component.  Even 
+though a filter restricts the intents a component will be asked to handle
+to certain actions and data sources, someone could always put 
+together an explicit intent with a different action and data source, and 
+name the component as the target.
+</p>
+</div>
+</div> 
 
 <p>
 A filter has fields that parallel the action, data, and category fields of an 
-Intent object.  A new intent is tested against the filter in all three areas.  
+Intent object.  An implicit intent is tested against the filter in all three areas.  
 To be delivered to the component that owns the filter, it must pass all three tests.  
 If it fails even one of them, the Android system won't deliver it to the 
 component &mdash; at least not on the basis of that filter.  However, since a 
-component can have multiple intent filters, an arriving intent that does not pass 
+component can have multiple intent filters, an intent that does not pass 
 through one of a component's filters might make it through on another.
+</p>
 
 <p>
 Each of the three tests is described in detail below:
+</p>
 
 <dl>
 
-<p>
 <dt><b>Action test</b></dt>
 <dd>An {@code &lt;intent-filter&gt;} element in the manifest file lists actions 
 as {@code &lt;action&gt;} subelements.  For example:
@@ -327,15 +441,28 @@ as {@code &lt;action&gt;} subelements.  For example:
 
 <p>
 As the example shows, while an Intent object names just a single action, 
-a filter may list more than one &mdash; or it may not list any at all.
+a filter may list more than one.  The list cannot be empty; a filter must 
+contain at least one {@code &lt;action&gt;} element, or it
+will block all intents.
+</p>
 
 <p>
-To pass this test, the action specified in the {@link android.content.Intent} 
-object must match one of the actions listed in the filter.  However, if the 
-filter doesn't list any actions, all actions are accepted, so all intents pass 
-the test.
+To pass this test, the action specified in the Intent object must match 
+one of the actions listed in the filter.  If the object or the filter 
+does not specify an action, the results are as follows: 
+</p>
 
-<p>
+<ul>
+<li>If the filter fails to list any actions, there is nothing for an 
+intent to match, so all intents fail the test.  No intents can get 
+through the filter.</li>
+
+<li><p>On the other hand, an Intent object that doesn't specify an 
+action automatically passes the test &mdash; as long as the filter 
+contains at least one action.</p></li>
+</ul
+</dd>
+
 <dt><b>Category test</b></dt>
 <dd>An {@code &lt;intent-filter&gt;} element also lists categories as subelements.  
 For example:
@@ -346,110 +473,217 @@ For example:
     . . .
 &lt;/intent-filter&gt;</pre>
 
-<p>Note that the constants described earlier for actions and categories are not
+<p>
+Note that the constants described earlier for actions and categories are not
 used in the manifest file.  The full string values are used instead.  For 
 instance, the "{@code android.intent.category.BROWSABLE}" string in the example 
 above corresponds to the {@code CATEGORY_BROWSABLE} constant mentioned earlier 
 in this document.  Similarly, the string "{@code android.intent.action.EDIT}" 
 corresponds to the {@code ACTION_EDIT} constant.
-
-<p>
-Many categories tell the Android system how to treat the component.  For example,
-"{@code android.intent.category.LAUNCHER}" (the {@code CATEGORY_LAUNCHER} constant 
-in code) instructs the system to include the activity in the screen showing 
-applications the user can launch.  Some categories &mdash; like "{@code 
-android.intent.category.DEFAULT}" in the example above &mdash typically appear 
-only in filters, not in Intent objects.
+</p>
 
 <p>
 For an intent to pass the category test, every category in the Intent object 
 must match a category in the filter.  The filter can list additional categories, 
-but it cannot omit any in the intent.  An intent with no 
-categories always passes this test, regardless of what's in the filter. 
+but it cannot omit any that are in the intent.
+</p>
 
 <p>
+In principle, therefore, an Intent object with no categories should always pass 
+this test, regardless of what's in the filter.  That's mostly true.  However, 
+with one exception, Android treats all implicit intents passed to {@link 
+android.content.Context#startActivity startActivity()} as if they contained 
+at least one category:  "{@code android.intent.category.DEFAULT}" (the
+{@code CATEGORY_DEFAULT} constant).  
+Therefore, activities that are willing to receive implicit intents must 
+include "{@code android.intent.category.DEFAULT}" in their intent filters. 
+(Filters with "{@code android.intent.action.MAIN}" and 
+"{@code android.intent.category.LAUNCHER}" settings are the exception.  
+They mark activities that begin new tasks and that are represented on the 
+launcher screen.  They can include "{@code android.intent.category.DEFAULT}" 
+in the list of categories, but don't need to.)  See <a href="#imatch">Using
+intent matching</a>, later, for more on these filters.)
+</p>
+<dd>
+
 <dt><b>Data test</b></dt>
 <dd>Like the action and categories, the data specification for an intent filter 
 is contained in a subelement.  And, as in those cases, the subelement can appear 
 multiple times, or not at all.  For example:
 
 <pre>&lt;intent-filter . . . &gt;
-    &lt;data android:scheme="content" 
-          android:host="com.example" 
-          android:path="folder/*" . . . /&gt;
-    &lt;data android:scheme="content" 
-          android:type="image/jpeg" . . . /&gt;
+    &lt;data android:type="video/mpeg" android:scheme="http" . . . /&gt; 
+    &lt;data android:type="audio/mpeg" android:scheme="http" . . . /&gt;
     . . .
 &lt;/intent-filter&gt;</pre>
 
 <p>
-Each {@code &lt;data&gt;} element can specify a URI and a data type (MIME type).  
+Each {@code &lt;data&gt;} element can specify a URI and a data type (MIME media type).  
 There are separate attributes &mdash; {@code scheme}, {@code host}, {@code port}, 
 and {@code path} &mdash; for each part of the URI:  
+</p>
 
-<dl><dd>{@code scheme://host:port/path}</dd></dl>
+<p style="margin-left: 2em">{@code scheme://host:port/path}</p>
 
 <p>
 For example, in the following URI,
+</p>
 
-<dl><dd>{@code content://com.example.project:200/folder/subfolder/etc}</dd></dl>
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
 
 <p> the scheme is "{@code content}", the host is "{@code com.example.project}", 
 the port is "{@code 200}", and the path is "{@code folder/subfolder/etc}".  
 The host and port together constitute the URI <i>authority</i>; if a host is 
 not specified, the port is ignored.
+</p>
 
 <p>
 Each of these attributes is optional, but they are not independent of each other:  
 For an authority to be meaningful, a scheme must also be specified.  
 For a path to be meaningful, both a scheme and an authority must be specified.  
+</p>
 
 <p>
 When the URI in an Intent object is compared to a URI specification in a filter, 
-it's compared only to the parts of the URI actually specified in the filter.  
+it's compared only to the parts of the URI actually mentioned in the filter.  
 For example, if a filter specifies only a scheme, all URIs with that scheme match 
 the filter.  If a filter specifies a scheme and an authority but no path, all URIs 
 with the same scheme and authority match, regardless of their paths.  If a filter 
 specifies a scheme, an authority, and a path, only URIs with the same scheme, 
 authority, and path match.  However, a path specification in the filter can 
 contain wildcards to require only a partial match of the path.
+</p>
 
 <p>
-A {@code &lt;data&gt;} element specifies a MIME type with the {@code type} attribute.  
-Both the Intent object and the filter can use the '*" wildcard for the subtype field 
-&mdash; for example, "{@code text/*}" or "{@code image/*}" &mdash; indicating any 
-subtype matches. 
+The {@code type} attribute of a {@code &lt;data&gt;} element specifies the MIME type 
+of the data.  It's more common in filters than a URI.  Both the Intent object and 
+the filter can use a "*" wildcard for the subtype field &mdash; for example, 
+"{@code text/*}" or "{@code audio/*}" &mdash; indicating any subtype matches.
+</p>
 
 <p>
 The data test compares both the URI and the data type in the Intent object to a URI 
 and data type specified in the filter.  The rules are as follows:
+</p>
 
-<ul>
+<ol type="a">
+<li>An Intent object that contains neither a URI nor a data type passes the 
+test only if the filter likewise does not specify any URIs or data types.</li>
 
-<p><li>An Intent object that contains neither a URI nor a data type passes the 
-test only if the filter likewise does not specify any URIs or data types.
-
-<p><li>An Intent object that contains a URI but no data type (and a type cannot 
+<li><p>An Intent object that contains a URI but no data type (and a type cannot 
 be inferred from the URI) passes the test only if its URI matches a URI in the 
 filter and the filter likewise does not specify a type.  This will be the case 
-only for URIs like {@code mailto:} and {@code tel:} that do not refer to actual data.
+only for URIs like {@code mailto:} and {@code tel:} that do not refer to actual data.</p></li>
 
-<p><li>An Intent object that contains a data type but not a URI passes the test 
-only if the filter lists the same data type and similarly does not specify a URI.
+<li><p>An Intent object that contains a data type but not a URI passes the test 
+only if the filter lists the same data type and similarly does not specify a URI.</p></li>
 
-<p><li>An Intent object that contains both a URI and a data type (or a data type 
+<li><p>An Intent object that contains both a URI and a data type (or a data type 
 can be inferred from the URI) passes the data type part of the test only if its 
 type matches a type listed in the filter.  It passes the URI part of the test 
 either if its URI matches a URI in the filter or if it has a {@code content:} 
 or {@code file:} URI and the filter does not specify a URI.  In other words, 
 a component is presumed to support {@code content:} and {@code file:} data if
-its filter list only a data type. 
-
-</ul> 
+its filter lists only a data type.</p></li>
+</ol>
+</dl>
 
 <p>
-If an intent can pass through the filters of more than one component, the user 
-may be asked which component to activate.
+If an intent can pass through the filters of more than one activity or service, 
+the user may be asked which component to activate.  An exception is raised if
+no target can be found.
+</p>
+
+
+<h3><a name="ccases"></a>Common cases</h3>
+
+<p>
+The last rule shown above for the data test, rule (d), reflects the expectation 
+that components are able to get local data from a file or content provider.
+Therefore, their filters can list just a data type and do not need to explicitly
+name the {@code content:} and {@code file:} schemes.
+This is a typical case.  A {@code &lt;data&gt;} element like the following, 
+for example, tells Android that the component can get image data from a content 
+provider and display it:
+</p>
+
+<pre>&lt;data android:type="image/*" /&gt;</pre>
+
+<p>
+Since most available data is dispensed by content providers, filters that 
+specify a data type but not a URI are perhaps the most common.
+</p>
+
+<p>
+Another common configuration is filters with a scheme and a data type.  For
+example, a {@code &lt;data&gt;} element like the following tells Android that
+the component can get video data from the network and display it:
+</p>
+
+<pre>&lt;data android:scheme="http" android:type="video/*" /&gt;</pre>
+
+<p>
+Consider, for example, what the browser application does when
+the user follows a link on a web page.   It first tries to display the data 
+(as it could if the link was to an HTML page).  If it can't display the data, 
+it puts together an implicit intent with the scheme and data type and tries
+to start an activity that can do the job.  If there are no takers, it asks the
+download manager to download the data.  That puts it under the control
+of a content provider, so a potentially larger pool of activities
+(those with filters that just name a data type) can respond.
+</p>
+
+<p>
+Most applications also have a way to start fresh, without a reference
+to any particular data.  Activities that can initiate applications 
+have filters with "{@code android.intent.action.MAIN}" specified as
+the action.  If they are to be represented in the application launcher,
+they also specify the "{@code android.intent.category.LAUNCHER}" 
+category:
+</p>
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="code android.intent.action.MAIN" /&gt;
+    &lt;category android:name="code android.intent.category.LAUNCHER" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+
+<h3><a name="imatch"></a>Using intent matching</h3>
+
+<p>
+Intents are matched against intent filters not only to discover a target
+component to activate, but also to discover something about the set of
+components on the device.  For example, the Android system populates the 
+application launcher, the top-level screen that shows the applications 
+that are available for the user to launch, by finding all the  activities
+ with intent filters that specify the "{@code android.intent.action.MAIN}" 
+action and "{@code android.intent.category.LAUNCHER}" category 
+(as illustrated in the previous section).  It then displays the icons and 
+labels of those activities in the launcher.  Similarly, it discovers the 
+home screen by looking for the activity with 
+"{@code android.intent.category.HOME}" in its filter.
+</p>
+
+<p>
+Your application can use intent matching is a similar way.
+The {@link android.content.pm.PackageManager} has a set of {@code query...()}
+methods that return all components that can accept a particular intent, and 
+a similar series of {@code resolve...()} methods that determine the best
+component to respond to an intent.  For example, 
+{@link android.content.pm.PackageManager#queryIntentActivities 
+queryIntentActivities()} returns a list of all activities that can perform
+the intent passed as an argument, and {@link 
+android.content.pm.PackageManager#queryIntentServices 
+queryIntentServices()} returns a similar list of services.  
+Neither method activates the components; they just list the ones that
+can respond.  There's a similar method, 
+{@link android.content.pm.PackageManager#queryBroadcastReceivers 
+queryBroadcastReceivers()}, for broadcast receivers.
+</p>
+
+
+
+
 
 
   

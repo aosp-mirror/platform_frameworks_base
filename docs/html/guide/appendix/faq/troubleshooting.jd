@@ -3,7 +3,7 @@ page.title=Troubleshooting
 
 
 <p>Here are some tips and tricks for common Android errors. Don't forget to use the
-    ddms logcat capability to get a deeper view when errors occur. See <a href="{@docRoot}guide/developing/debugging-tasks.html">Debugging Tasks</a> for more debugging tips. </p>
+    ddms logcat capability to get a deeper view when errors occur. See <a href="{@docRoot}guide/developing/debug-tasks.html">Debugging</a> for more debugging tips. </p>
 <ul>
     <li><a href="#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</a></li>
     <li><a href="#nodevice">ADB reports &quot;no device&quot; when an emulator is running</a></li>
@@ -61,7 +61,7 @@ that are required to install the Android plugin (wst, emf, etc...).</li>
         will often not be caught by compilers, but will prevent your application
         from being displayed because the intent filter will not be matched. Extra
         spaces or other characters can often sneak into these strings.</li>
-    <li>Did you send your .apk file to the device (<a href="{@docRoot}reference/adb.html#move">adb install</a>)?</li>
+    <li>Did you send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb install</a>)?</li>
     <li>Run logcat on your device (<code>adb logcat</code>)
         and then install your .apk file. Check the logcat output to see whether the
         application is being installed and recognized properly. Here's sample output
@@ -78,7 +78,7 @@ D/PackageManager( 414): Activities: com.example.codelab.rssexample.MyRssReader c
 	    compiling it.</li>
 </ul>
 <a name="noupdate"></a><h2>I updated my app, but the updates don't seem to be showing up on the device</h2>
-    <p>Did you remember to send your .apk file to the device (<a href="{@docRoot}reference/adb.html#move">adb
+    <p>Did you remember to send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb
         install</a>)?</p>
 
 <a name="layout_wilih"></a><h2>I'm getting a &quot;Binary XML file line #2: You must supply a layout_wilih
@@ -99,9 +99,11 @@ ignored</h2>
     <p>You might not have permission (or might not have requested permission) to
         call this activity or receive this intent. Many standard Android activities,
         such as making a call, have a permission assigned to it to prevent arbitrary
-        applications from sending or receiving requests. See <a href="{@docRoot}devel/security.html">Security
-        and Permissions</a> for more information on permissions, and {@link android.Manifest.permission
-        Manifest.permission} for a list of permissions enforced by Android. 
+        applications from sending or receiving requests. See <a
+        href="{@docRoot}guide/topics/security/security.html">Security and
+        Permissions</a> for more information on permissions, and 
+		{@link android.Manifest.permission Manifest.permission} for a list of
+        standard permissions supported by the Android platform.
 </p>
 <a name="build"></a><h2>Help! My project won't build in Eclipse</h2>
 <p>If your project doesn't build, you may notice symptoms such as new
@@ -174,7 +176,7 @@ to start with, the safest option is to run through all of them in order:</p>
 <h2 id="apidemosreinstall">I can't install ApiDemos apps in my IDE because of a signing error</a></h2>
 
 <p>The Android system requires that all applications be signed, as described in 
-<a href="{@docRoot}intro/develop-and-debug.html#signing">Signing Your Applications</a>. The ApiDemos 
+	<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>. The ApiDemos 
 applications included with the SDK are preinstalled on the emulator and for that reason have been 
 compiled and signed with a private key.</p>
 
@@ -209,7 +211,7 @@ commands to the emulator instance that you are targeting. To do that you can add
 
 <pre>adb -s emulator-5556 install</pre>
 
-<p>For more information about adb, see the <a href="{@docRoot}reference/adb.html">Android Debug Bridge</a> 
+<p>For more information about adb, see the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> 
 documentation.</p>
 
 
@@ -236,7 +238,7 @@ C:\Users\&lt;user&gt;\AppData\Local\Android</code></li>
 <p>This problem has been verified on Windows and may apply to other platforms. </p>
 
 <p>For general information about signing Android applications, see 
-<a href="{@docRoot}intro/develop-and-debug.html#signing">Signing Your Applications</a>. </p>
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>. </p>
 
 <h2 id="addjunit">I can't run a JUnit test class in Eclipse/ADT</h2>
 

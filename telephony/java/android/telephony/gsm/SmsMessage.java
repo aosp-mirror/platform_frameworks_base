@@ -16,11 +16,12 @@
 
 package android.telephony.gsm;
 
-import android.pim.Time;
 import android.telephony.PhoneNumberUtils;
 import android.util.Config;
 import android.util.Log;
 import android.telephony.PhoneNumberUtils;
+import android.text.format.Time;
+
 import com.android.internal.telephony.gsm.EncodeException;
 import com.android.internal.telephony.gsm.GsmAlphabet;
 import com.android.internal.telephony.gsm.SimUtils;
@@ -222,7 +223,7 @@ public class SmsMessage {
      * 
      * @hide pending API Council approval to extend the public API
      */
-    public static final int MAX_USER_DATA_BYTES_WITH_HEADER = 134;
+    static final int MAX_USER_DATA_BYTES_WITH_HEADER = 134;
 
     /** The maximum number of payload septets per message */
     public static final int MAX_USER_DATA_SEPTETS = 160;
@@ -329,6 +330,9 @@ public class SmsMessage {
      */
     boolean isStatusReportMessage = false;
 
+    /**
+     * This class represents the encoded form of an outgoing SMS.
+     */
     public static class SubmitPdu {
         public byte[] encodedScAddress; // Null if not applicable.
         public byte[] encodedMessage;
@@ -472,23 +476,25 @@ public class SmsMessage {
             ret[1] = septets;
             if (septets > MAX_USER_DATA_SEPTETS) {
                 ret[0] = (septets / MAX_USER_DATA_SEPTETS_WITH_HEADER) + 1;
-                ret[2] = septets % MAX_USER_DATA_SEPTETS_WITH_HEADER;
+                ret[2] = MAX_USER_DATA_SEPTETS_WITH_HEADER
+                            - (septets % MAX_USER_DATA_SEPTETS_WITH_HEADER);
             } else {
                 ret[0] = 1;
                 ret[2] = MAX_USER_DATA_SEPTETS - septets;
             }
             ret[3] = ENCODING_7BIT;
         } catch (EncodeException ex) {
-            // fall back to USC-2
+            // fall back to UCS-2
             int octets = messageBody.length() * 2;
-            ret[1] = octets;
+            ret[1] = messageBody.length();
             if (octets > MAX_USER_DATA_BYTES) {
                 // 6 is the size of the user data header
                 ret[0] = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
-                ret[2] = octets % MAX_USER_DATA_BYTES_WITH_HEADER;
+                ret[2] = (MAX_USER_DATA_BYTES_WITH_HEADER
+                            - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
             } else {
                 ret[0] = 1;
-                ret[2] = MAX_USER_DATA_BYTES - octets;
+                ret[2] = (MAX_USER_DATA_BYTES - octets)/2;
             }
             ret[3] = ENCODING_16BIT;
         }
@@ -559,8 +565,7 @@ public class SmsMessage {
                 
                 System.arraycopy(header, 0, userData, 0, header.length);
                 System.arraycopy(textPart, 0, userData, header.length, textPart.length);
-            }
-            else {
+            } else {
                 userData = textPart;
             }
 
@@ -875,7 +880,9 @@ public class SmsMessage {
 
             if (dataInSeptets) {
                 // Return the number of septets
-                return userDataLength - headerSeptets;
+                int count = userDataLength - headerSeptets;
+                // If count < 0, return 0 (means UDL was probably incorrect)
+                return count < 0 ? 0 : count;
             } else {
                 // Return the number of octets
                 return userData.length;

@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.test;
 
+import android.os.Looper;
 import android.os.Message;
 import android.os.Handler;
 import android.telephony.PhoneNumberUtils;
@@ -162,6 +163,10 @@ class SimulatedGsmCallState extends Handler
 
     //***** Overridden from Handler
 
+    public SimulatedGsmCallState(Looper looper) {
+        super(looper);
+    }
+
     public void
     handleMessage(Message msg)
     {
@@ -176,7 +181,8 @@ class SimulatedGsmCallState extends Handler
     }
 
     //***** Public Methods
-
+   
+    
     /** 
      * Start the simulated phone ringing 
      * true if succeeded, false if failed

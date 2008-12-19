@@ -31,7 +31,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 /**
- * The {@link EditTextPreference} class is a preference that allows for string
+ * A {@link Preference} that allows for string
  * input.
  * <p>
  * It is a subclass of {@link DialogPreference} and shows the {@link EditText}

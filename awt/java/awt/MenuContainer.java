@@ -18,17 +18,21 @@
  * @author Pavel Dolgov
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
  * The MenuContainer interface represents all menu containers.
+ * 
+ * @since Android 1.0
  */
 public interface MenuContainer {
 
     /**
      * Removes the specified MenuComponent from the MenuContainer.
      * 
-     * @param c the MenuComponent.
+     * @param c
+     *            the MenuComponent.
      */
     public void remove(MenuComponent c);
 
@@ -42,15 +46,12 @@ public interface MenuContainer {
     /**
      * Posts an Event.
      * 
-     * @param e the Event.
-     * 
-     * @return true if the event is posted successfully; 
-     * false otherwise.
-     * 
+     * @param e
+     *            the Event.
+     * @return true if the event is posted successfully, false otherwise.
      * @deprecated Replaced by dispatchEvent method.
      */
     @Deprecated
     public boolean postEvent(Event e);
 
 }
-

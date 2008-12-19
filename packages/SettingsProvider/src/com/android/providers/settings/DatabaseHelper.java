@@ -57,19 +57,14 @@ import java.util.List;
  */
 class DatabaseHelper extends SQLiteOpenHelper {
     /**
-     * Path to file containing default favorite packages, relative to ANDROID_ROOT.
-     */
-    private static final String DEFAULT_FAVORITES_PATH = "etc/favorites.xml";
-
-    /**
      * Path to file containing default bookmarks, relative to ANDROID_ROOT.
      */
     private static final String DEFAULT_BOOKMARKS_PATH = "etc/bookmarks.xml";
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 25;
-
+    private static final int DATABASE_VERSION = 30;
+    
     private Context mContext;
 
     public DatabaseHelper(Context context) {
@@ -77,6 +72,15 @@ class DatabaseHelper extends SQLiteOpenHelper {
         mContext = context;
     }
 
+    private void createSecureTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE secure (" +
+                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "name TEXT UNIQUE ON CONFLICT REPLACE," +
+                "value TEXT" +
+                ");");
+        db.execSQL("CREATE INDEX secureIndex1 ON secure (name);");
+    }
+    
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE system (" +
@@ -85,6 +89,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     "value TEXT" +
                     ");");
         db.execSQL("CREATE INDEX systemIndex1 ON system (name);");
+
+        createSecureTable(db);
 
         db.execSQL("CREATE TABLE gservices (" +
                    "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -113,27 +119,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX bookmarksIndex1 ON bookmarks (folder);");
         db.execSQL("CREATE INDEX bookmarksIndex2 ON bookmarks (shortcut);");
 
-        db.execSQL("CREATE TABLE favorites (" +
-                "_id INTEGER PRIMARY KEY," +
-                "title TEXT," +
-                "intent TEXT," +
-                "container INTEGER," +
-                "screen INTEGER," +
-                "cellX INTEGER," +
-                "cellY INTEGER," +
-                "spanX INTEGER," +
-                "spanY INTEGER," +
-                "itemType INTEGER," +
-                "isShortcut INTEGER," +
-                "iconType INTEGER," +
-                "iconPackage TEXT," +
-                "iconResource TEXT," +
-                "icon BLOB" +
-                ");");
-
-        // Populate favorites table with initial favorites
-        loadFavorites(db);
-        
         // Populate bookmarks table with initial bookmarks
         loadBookmarks(db);
 
@@ -146,7 +131,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-        
         Log.w(TAG, "Upgrading settings database from version " + oldVersion + " to "
                 + currentVersion);
         
@@ -215,12 +199,129 @@ class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 25;
         }
+
+        if (upgradeVersion == 25) {
+            db.beginTransaction();
+            try {
+                db.execSQL("ALTER TABLE favorites ADD uri TEXT");
+                db.execSQL("ALTER TABLE favorites ADD displayMode INTEGER");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 26;
+        }
         
+        if (upgradeVersion == 26) {
+            // This introduces the new secure settings table.
+            db.beginTransaction();
+            try {
+                createSecureTable(db);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 27;
+        }
+        
+        if (upgradeVersion == 27) {
+            // Copy settings values from 'system' to 'secure' and delete them from 'system'
+            SQLiteStatement insertStmt = null;
+            SQLiteStatement deleteStmt = null;
+            
+            db.beginTransaction();
+            try {
+                insertStmt =
+                    db.compileStatement("INSERT INTO secure (name,value) SELECT name,value FROM "
+                        + "system WHERE name=?");
+                deleteStmt = db.compileStatement("DELETE FROM system WHERE name=?");
+
+                String[] settingsToMove = {
+                    Settings.Secure.ADB_ENABLED,
+                    Settings.Secure.ANDROID_ID,
+                    Settings.Secure.BLUETOOTH_ON,
+                    Settings.Secure.DATA_ROAMING,
+                    Settings.Secure.DEVICE_PROVISIONED,
+                    Settings.Secure.HTTP_PROXY,
+                    Settings.Secure.INSTALL_NON_MARKET_APPS,
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                    Settings.Secure.LOGGING_ID,
+                    Settings.Secure.NETWORK_PREFERENCE,
+                    Settings.Secure.PARENTAL_CONTROL_ENABLED,
+                    Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
+                    Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
+                    Settings.Secure.SETTINGS_CLASSNAME,
+                    Settings.Secure.USB_MASS_STORAGE_ENABLED,
+                    Settings.Secure.USE_GOOGLE_MAIL,
+                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+                    Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,
+                    Settings.Secure.WIFI_ON,
+                    Settings.Secure.WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE,
+                    Settings.Secure.WIFI_WATCHDOG_AP_COUNT,
+                    Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS,
+                    Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED,
+                    Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS,
+                    Settings.Secure.WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT,
+                    Settings.Secure.WIFI_WATCHDOG_MAX_AP_CHECKS,
+                    Settings.Secure.WIFI_WATCHDOG_ON,
+                    Settings.Secure.WIFI_WATCHDOG_PING_COUNT,
+                    Settings.Secure.WIFI_WATCHDOG_PING_DELAY_MS,
+                    Settings.Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS,
+                };
+                
+                for (String setting : settingsToMove) {
+                    insertStmt.bindString(1, setting);
+                    insertStmt.execute();
+                    
+                    deleteStmt.bindString(1, setting);
+                    deleteStmt.execute();
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (insertStmt != null) {
+                    insertStmt.close();
+                }
+                if (deleteStmt != null) {
+                    deleteStmt.close();
+                }
+            }
+            upgradeVersion = 28;
+        }
+        
+        if (upgradeVersion == 28 || upgradeVersion == 29) {
+            // Note: The upgrade to 28 was flawed since it didn't delete the old
+            // setting first before inserting. Combining 28 and 29 with the
+            // fixed version.
+
+            // This upgrade adds the STREAM_NOTIFICATION type to the list of
+            // types affected by ringer modes (silent, vibrate, etc.)
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                int newValue = (1 << AudioManager.STREAM_RING)
+                        | (1 << AudioManager.STREAM_NOTIFICATION)
+                        | (1 << AudioManager.STREAM_SYSTEM);
+                db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                        + String.valueOf(newValue) + "')");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            
+            upgradeVersion = 30;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
             db.execSQL("DROP TABLE IF EXISTS system");
             db.execSQL("DROP INDEX IF EXISTS systemIndex1");
+            db.execSQL("DROP TABLE IF EXISTS secure");
+            db.execSQL("DROP INDEX IF EXISTS secureIndex1");
             db.execSQL("DROP TABLE IF EXISTS gservices");
             db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
             db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
@@ -254,122 +355,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             c.close();
         }
-    }
-    
-    /**
-     * Loads the default set of favorite packages from an xml file.
-     *
-     * @param db The database to write the values into
-     * @param startingIndex The zero-based position at which favorites in this file should begin
-     * @param subPath The relative path from ANDROID_ROOT to the file to read
-     * @param quiet If true, do no complain if the file is missing
-     */
-    private int loadFavorites(SQLiteDatabase db, int startingIndex, String subPath, boolean quiet) {
-        FileReader favReader;
-
-        // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
-        final File favFile = new File(Environment.getRootDirectory(), subPath);
-        try {
-            favReader = new FileReader(favFile);
-        } catch (FileNotFoundException e) {
-            if (!quiet) {
-                Log.e(TAG, "Couldn't find or open favorites file " + favFile);
-            }
-            return 0;
-        }
-
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        ContentValues values = new ContentValues();
-
-        PackageManager packageManager = mContext.getPackageManager();
-        ActivityInfo info;
-        int i = startingIndex;
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(favReader);
-
-            XmlUtils.beginDocument(parser, "favorites");
-
-            while (true) {
-                XmlUtils.nextElement(parser);
-
-                String name = parser.getName();
-                if (!"favorite".equals(name)) {
-                    break;
-                }
-
-                String pkg = parser.getAttributeValue(null, "package");
-                String cls = parser.getAttributeValue(null, "class");
-                try {
-                    ComponentName cn = new ComponentName(pkg, cls);
-                    info = packageManager.getActivityInfo(cn, 0);
-                    intent.setComponent(cn);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    values.put(com.android.internal.provider.Settings.Favorites.INTENT,
-                            intent.toURI());
-                    values.put(com.android.internal.provider.Settings.Favorites.TITLE,
-                            info.loadLabel(packageManager).toString());
-                    values.put(com.android.internal.provider.Settings.Favorites.CONTAINER,
-                            com.android.internal.provider.Settings.Favorites.CONTAINER_DESKTOP);
-                    values.put(com.android.internal.provider.Settings.Favorites.ITEM_TYPE,
-                            com.android.internal.provider.Settings.Favorites.ITEM_TYPE_APPLICATION);
-                    values.put(com.android.internal.provider.Settings.Favorites.SCREEN,
-                            parser.getAttributeValue(null, "screen"));
-                    values.put(com.android.internal.provider.Settings.Favorites.CELLX,
-                            parser.getAttributeValue(null, "x"));
-                    values.put(com.android.internal.provider.Settings.Favorites.CELLY,
-                            parser.getAttributeValue(null, "y"));
-                    values.put(com.android.internal.provider.Settings.Favorites.SPANX, 1);
-                    values.put(com.android.internal.provider.Settings.Favorites.SPANY, 1);
-                    db.insert("favorites", null, values);
-                    i++;
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, "Unable to add favorite: " + pkg + "/" + cls, e);
-                }
-            }
-        } catch (XmlPullParserException e) {
-            Log.w(TAG, "Got execption parsing favorites.", e);
-        } catch (IOException e) {
-            Log.w(TAG, "Got execption parsing favorites.", e);
-        }
-        
-        // Add a clock
-        values.clear();
-        values.put(com.android.internal.provider.Settings.Favorites.CONTAINER,
-                com.android.internal.provider.Settings.Favorites.CONTAINER_DESKTOP);
-        values.put(com.android.internal.provider.Settings.Favorites.ITEM_TYPE,
-                com.android.internal.provider.Settings.Favorites.ITEM_TYPE_WIDGET_CLOCK);
-        values.put(com.android.internal.provider.Settings.Favorites.SCREEN, 1);
-        values.put(com.android.internal.provider.Settings.Favorites.CELLX, 1);
-        values.put(com.android.internal.provider.Settings.Favorites.CELLY, 0);
-        values.put(com.android.internal.provider.Settings.Favorites.SPANX, 2);
-        values.put(com.android.internal.provider.Settings.Favorites.SPANY, 2);
-        db.insert("favorites", null, values);
-
-        // Add a search box
-        values.clear();
-        values.put(com.android.internal.provider.Settings.Favorites.CONTAINER,
-                com.android.internal.provider.Settings.Favorites.CONTAINER_DESKTOP);
-        values.put(com.android.internal.provider.Settings.Favorites.ITEM_TYPE,
-                com.android.internal.provider.Settings.Favorites.ITEM_TYPE_WIDGET_SEARCH);
-        values.put(com.android.internal.provider.Settings.Favorites.SCREEN, 2);
-        values.put(com.android.internal.provider.Settings.Favorites.CELLX, 0);
-        values.put(com.android.internal.provider.Settings.Favorites.CELLY, 0);
-        values.put(com.android.internal.provider.Settings.Favorites.SPANX, 4);
-        values.put(com.android.internal.provider.Settings.Favorites.SPANY, 1);
-        db.insert("favorites", null, values);
-
-        return i;
-    }
-
-    /**
-     * Loads the default set of favorite packages.
-     * 
-     * @param db The database to write the values into
-     */
-    private void loadFavorites(SQLiteDatabase db) {
-        loadFavorites(db, 0, DEFAULT_FAVORITES_PATH, false);
     }
 
     /**
@@ -466,23 +451,36 @@ class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
 
-        // Music has double the number of levels
-        loadSetting(stmt, Settings.System.VOLUME_MUSIC, AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
-        loadSetting(stmt, Settings.System.VOLUME_RING, AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_RING]);
-        loadSetting(stmt, Settings.System.VOLUME_SYSTEM, AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_SYSTEM]);
-        loadSetting(stmt, Settings.System.VOLUME_VOICE, AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_VOICE_CALL]);
-        loadSetting(stmt, Settings.System.VOLUME_ALARM, AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_ALARM]);
-        loadSetting(stmt, Settings.System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+        loadSetting(stmt, Settings.System.VOLUME_MUSIC,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+        loadSetting(stmt, Settings.System.VOLUME_RING,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_RING]);
+        loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_SYSTEM]);
+        loadSetting(
+                stmt,
+                Settings.System.VOLUME_VOICE,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_VOICE_CALL]);
+        loadSetting(stmt, Settings.System.VOLUME_ALARM,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_ALARM]);
+        loadSetting(
+                stmt,
+                Settings.System.VOLUME_NOTIFICATION,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_NOTIFICATION]);
+        loadSetting(stmt, Settings.System.MODE_RINGER,
+                AudioManager.RINGER_MODE_NORMAL);
 
         loadVibrateSetting(db, false);
         
         // By default, only the ring/notification and system streams are affected
         loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_SYSTEM));
+                (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
+                (1 << AudioManager.STREAM_SYSTEM));
         
         loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioManager.STREAM_MUSIC) |
                  (1 << AudioManager.STREAM_RING) |
+                 (1 << AudioManager.STREAM_NOTIFICATION) |
                  (1 << AudioManager.STREAM_SYSTEM)));
 
         stmt.close();
@@ -506,7 +504,11 @@ class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadSettings(SQLiteDatabase db) {
-
+        loadSystemSettings(db);
+        loadSecureSettings(db);   
+    }
+    
+    private void loadSystemSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
         
@@ -520,15 +522,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 + Settings.System.RADIO_BLUETOOTH + "," + Settings.System.RADIO_WIFI);
         
         loadSetting(stmt, Settings.System.AIRPLANE_MODE_ON, 0);
-        loadSetting(stmt, Settings.System.BLUETOOTH_ON, 0);
-
-        // USB mass storage on by default
-        loadSetting(stmt, Settings.System.USB_MASS_STORAGE_ENABLED, 1);
-        
-        loadSetting(stmt, Settings.System.WIFI_ON, 0);
-        loadSetting(stmt, Settings.System.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1);
-        loadSetting(stmt, Settings.System.NETWORK_PREFERENCE,
-                ConnectivityManager.DEFAULT_NETWORK_PREFERENCE);
         
         loadSetting(stmt, Settings.System.AUTO_TIME, 1); // Sync time to NITZ
         
@@ -536,31 +529,52 @@ class DatabaseHelper extends SQLiteOpenHelper {
         loadSetting(stmt, Settings.System.SCREEN_BRIGHTNESS, 
                 (int) (android.os.Power.BRIGHTNESS_ON * 0.4f));
         
-        // Don't allow non-market apps to be installed
-        loadSetting(stmt, Settings.System.INSTALL_NON_MARKET_APPS, 0);
-        
         // Enable normal window animations (menus, toasts); disable
         // activity transition animations.
         loadSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE, "1");
-        loadSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE, "0");
-        
-        // Set the default location providers to network based (cell-id)
-        loadSetting(stmt, Settings.System.LOCATION_PROVIDERS_ALLOWED, 
-                LocationManager.NETWORK_PROVIDER);
+        loadSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE, "1");
 
-        // Data roaming default, based on build
-        loadSetting(stmt, Settings.System.DATA_ROAMING, 
-                "true".equalsIgnoreCase(
-                        SystemProperties.get("ro.com.android.dataroaming", 
-                                "false")) ? 1 : 0);
         // Default date format based on build
         loadSetting(stmt, Settings.System.DATE_FORMAT,
                 SystemProperties.get("ro.com.android.dateformat", 
                         "MM-dd-yyyy"));
+        stmt.close();
+    }
+    
+    private void loadSecureSettings(SQLiteDatabase db) {
+        SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                + " VALUES(?,?);");
+        
+        // Bluetooth off
+        loadSetting(stmt, Settings.Secure.BLUETOOTH_ON, 0);
+        
+        // Data roaming default, based on build
+        loadSetting(stmt, Settings.Secure.DATA_ROAMING, 
+                "true".equalsIgnoreCase(
+                        SystemProperties.get("ro.com.android.dataroaming", 
+                                "false")) ? 1 : 0);        
+        
+        // Don't allow non-market apps to be installed
+        loadSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS, 0);
+        
+        // Set the default location providers to network based (cell-id)
+        loadSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, 
+                LocationManager.NETWORK_PROVIDER);
+        
+        loadSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
+            ConnectivityManager.DEFAULT_NETWORK_PREFERENCE);
 
+        // USB mass storage on by default
+        loadSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED, 1);
+        
+        // WIFI on, notify about available networks
+        loadSetting(stmt, Settings.Secure.WIFI_ON, 0);
+        loadSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1);
+        
         // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
         // persistent system property instead.
-        //loadSetting(stmt, Settings.System.ADB_ENABLED, 0);
+        //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
+        
         stmt.close();
     }
 

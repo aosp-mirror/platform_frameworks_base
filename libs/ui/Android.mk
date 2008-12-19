@@ -2,7 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	BlitHardware.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
 	EGLDisplaySurface.cpp \
@@ -14,10 +13,12 @@ LOCAL_SRC_FILES:= \
 	ICamera.cpp \
 	ICameraClient.cpp \
 	ICameraService.cpp \
+	IOverlay.cpp \
 	ISurfaceComposer.cpp \
 	ISurface.cpp \
 	ISurfaceFlingerClient.cpp \
 	LayerState.cpp \
+	Overlay.cpp \
 	PixelFormat.cpp \
 	Point.cpp \
 	Rect.cpp \

@@ -2,16 +2,16 @@
 **
 ** Copyright 2007, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -34,6 +34,7 @@ enum {
     CHANNEL_COUNT,
     FORMAT,
     FRAME_COUNT,
+    LATENCY,
     SET_MASTER_VOLUME,
     SET_MASTER_MUTE,
     MASTER_VOLUME,
@@ -66,8 +67,10 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags)
+                                int frameCount,
+                                uint32_t flags,
+                                const sp<IMemory>& sharedBuffer,
+                                status_t *status)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -76,13 +79,17 @@ public:
         data.writeInt32(sampleRate);
         data.writeInt32(format);
         data.writeInt32(channelCount);
-        data.writeInt32(bufferCount);
+        data.writeInt32(frameCount);
         data.writeInt32(flags);
-        status_t status = remote()->transact(CREATE_TRACK, data, &reply);
-        if ( status != NO_ERROR) {
-            LOGE("createTrack error: %s", strerror(-status));
+        data.writeStrongBinder(sharedBuffer->asBinder());
+        status_t lStatus = remote()->transact(CREATE_TRACK, data, &reply);
+        if (lStatus != NO_ERROR) {
+            LOGE("createTrack error: %s", strerror(-lStatus));
         }
-        
+        lStatus = reply.readInt32();
+        if (status) {
+            *status = lStatus;
+        }
         return interface_cast<IAudioTrack>(reply.readStrongBinder());
     }
 
@@ -92,8 +99,9 @@ public:
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
-                                int bufferCount,
-                                uint32_t flags)
+                                int frameCount,
+                                uint32_t flags,
+                                status_t *status)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -102,9 +110,13 @@ public:
         data.writeInt32(sampleRate);
         data.writeInt32(format);
         data.writeInt32(channelCount);
-        data.writeInt32(bufferCount);
+        data.writeInt32(frameCount);
         data.writeInt32(flags);
         remote()->transact(OPEN_RECORD, data, &reply);
+        status_t lStatus = reply.readInt32();
+        if (status) {
+            *status = lStatus;
+        }
         return interface_cast<IAudioRecord>(reply.readStrongBinder());
     }
 
@@ -137,6 +149,14 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         remote()->transact(FRAME_COUNT, data, &reply);
+        return reply.readInt32();
+    }
+
+    virtual uint32_t latency() const
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        remote()->transact(LATENCY, data, &reply);
         return reply.readInt32();
     }
 
@@ -308,9 +328,12 @@ status_t BnAudioFlinger::onTransact(
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
-            sp<IAudioTrack> track = createTrack(pid, 
+            sp<IMemory> buffer = interface_cast<IMemory>(data.readStrongBinder());
+            status_t status;
+            sp<IAudioTrack> track = createTrack(pid,
                     streamType, sampleRate, format,
-                    channelCount, bufferCount, flags);
+                    channelCount, bufferCount, flags, buffer, &status);
+            reply->writeInt32(status);
             reply->writeStrongBinder(track->asBinder());
             return NO_ERROR;
         } break;
@@ -323,8 +346,10 @@ status_t BnAudioFlinger::onTransact(
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
+            status_t status;
             sp<IAudioRecord> record = openRecord(pid, streamType,
-                    sampleRate, format, channelCount, bufferCount, flags);
+                    sampleRate, format, channelCount, bufferCount, flags, &status);
+            reply->writeInt32(status);
             reply->writeStrongBinder(record->asBinder());
             return NO_ERROR;
         } break;
@@ -348,7 +373,12 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( frameCount() );
             return NO_ERROR;
         } break;
-        case SET_MASTER_VOLUME: {
+        case LATENCY: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            reply->writeInt32( latency() );
+            return NO_ERROR;
+        } break;
+         case SET_MASTER_VOLUME: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             reply->writeInt32( setMasterVolume(data.readFloat()) );
             return NO_ERROR;

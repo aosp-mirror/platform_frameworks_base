@@ -22,6 +22,7 @@ import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 final class WindowLeaked extends AndroidRuntimeException {
     public WindowLeaked(String msg) {
@@ -128,7 +129,7 @@ public class WindowManagerImpl implements WindowManager {
                 root.mAddNesting++;
                 // Update layout parameters.
                 view.setLayoutParams(wparams);
-                root.setLayoutParams(wparams);
+                root.setLayoutParams(wparams, true);
                 return;
             }
             
@@ -144,7 +145,7 @@ public class WindowManagerImpl implements WindowManager {
                 }
             }
             
-            root = new ViewRoot();
+            root = new ViewRoot(view.getContext());
             root.mAddNesting = 1;
 
             view.setLayoutParams(wparams);
@@ -191,7 +192,7 @@ public class WindowManagerImpl implements WindowManager {
             int index = findViewLocked(view, true);
             ViewRoot root = mRoots[index];
             mParams[index] = wparams;
-            root.setLayoutParams(wparams);
+            root.setLayoutParams(wparams, false);
         }
     }
 
@@ -236,6 +237,10 @@ public class WindowManagerImpl implements WindowManager {
             return view;
         }
 
+        InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
+        if (imm != null) {
+            imm.windowDismissed(mViews[index].getWindowToken());
+        }
         root.die(false);
         finishRemoveViewLocked(view, index);
         return view;
@@ -292,6 +297,26 @@ public class WindowManagerImpl implements WindowManager {
                 }
             }
         }
+    }
+    
+    public WindowManager.LayoutParams getRootViewLayoutParameter(View view) {
+        ViewParent vp = view.getParent();
+        while (vp != null && !(vp instanceof ViewRoot)) {
+            vp = vp.getParent();
+        }
+        
+        if (vp == null) return null;
+        
+        ViewRoot vr = (ViewRoot)vp;
+        
+        int N = mRoots.length;
+        for (int i = 0; i < N; ++i) {
+            if (mRoots[i] == vr) {
+                return mParams[i];
+            }
+        }
+        
+        return null;
     }
     
     public void closeAll() {

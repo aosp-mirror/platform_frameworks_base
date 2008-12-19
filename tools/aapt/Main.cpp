@@ -46,6 +46,7 @@ void usage(void)
         "   List contents of Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
         " %s d[ump] WHAT file.{apk} [asset [asset ...]]\n"
+        "   badging          Print the label and icon for the app declared in APK.\n"
         "   permissions      Print the permissions from the APK.\n"
         "   resources        Print the resource table from the APK.\n"
         "   configurations   Print the configurations in the APK.\n"
@@ -53,6 +54,7 @@ void usage(void)
         "   xmlstrings       Print the strings of the given compiled xml assets.\n\n", gProgName);
     fprintf(stderr,
         " %s p[ackage] [-f][-u][-m][-v][-x][-M AndroidManifest.xml] \\\n"
+        "        [-0 extension [-0 extension ...]] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir] [-P public-definitions-file] \\\n"
         "        [-S resource-sources] [-F apk-file] [-J R-file-dir] \\\n"
@@ -106,7 +108,9 @@ void usage(void)
         "   -M  specify full path to AndroidManifest.xml to include in zip\n"
         "   -P  specify where to output public resource definitions\n"
         "   -S  directory in which to find resources\n"
-        "   -0  don't compress files we're adding\n");
+        "   -0  specifies an additional extension for which such files will not\n"
+        "       be stored compressed in the .apk.  An empty string means to not\n"
+        "       compress any files at all.\n");
 }
 
 /*
@@ -303,7 +307,18 @@ int main(int argc, char* const argv[])
                 bundle.setResourceSourceDir(argv[0]);
                 break;
             case '0':
-                bundle.setCompressionMethod(ZipEntry::kCompressStored);
+                argc--;
+                argv++;
+                if (!argc) {
+                    fprintf(stderr, "ERROR: No argument supplied for '-e' option\n");
+                    wantUsage = true;
+                    goto bail;
+                }
+                if (argv[0][0] != 0) {
+                    bundle.addNoCompressExtension(argv[0]);
+                } else {
+                    bundle.setCompressionMethod(ZipEntry::kCompressStored);
+                }
                 break;
             default:
                 fprintf(stderr, "ERROR: Unknown flag '-%c'\n", *cp);

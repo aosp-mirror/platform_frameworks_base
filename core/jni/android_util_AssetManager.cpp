@@ -901,7 +901,8 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         return JNI_FALSE;
     }
 
-    jint* dest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* baseDest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* dest = baseDest;
     if (dest == NULL) {
         env->ReleasePrimitiveArrayCritical(attrs, src, 0);
         doThrow(env, "java/lang/OutOfMemoryError");
@@ -1074,7 +1075,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         indices[0] = indicesIdx;
         env->ReleasePrimitiveArrayCritical(outIndices, indices, 0);
     }
-    env->ReleasePrimitiveArrayCritical(outValues, dest, 0);
+    env->ReleasePrimitiveArrayCritical(outValues, baseDest, 0);
     env->ReleasePrimitiveArrayCritical(attrs, src, 0);
 
     return JNI_TRUE;
@@ -1112,7 +1113,8 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
         return JNI_FALSE;
     }
     
-    jint* dest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* baseDest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* dest = baseDest;
     if (dest == NULL) {
         env->ReleasePrimitiveArrayCritical(attrs, src, 0);
         doThrow(env, "java/lang/OutOfMemoryError");
@@ -1201,7 +1203,7 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
         env->ReleasePrimitiveArrayCritical(outIndices, indices, 0);
     }
     
-    env->ReleasePrimitiveArrayCritical(outValues, dest, 0);
+    env->ReleasePrimitiveArrayCritical(outValues, baseDest, 0);
     env->ReleasePrimitiveArrayCritical(attrs, src, 0);
     
     return JNI_TRUE;
@@ -1243,7 +1245,8 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
     
     const jsize NV = env->GetArrayLength(outValues);
     
-    jint* dest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* baseDest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
+    jint* dest = baseDest;
     if (dest == NULL) {
         doThrow(env, "java/lang/OutOfMemoryError");
         return JNI_FALSE;
@@ -1295,7 +1298,7 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
     
     res.unlock();
     
-    env->ReleasePrimitiveArrayCritical(outValues, dest, 0);
+    env->ReleasePrimitiveArrayCritical(outValues, baseDest, 0);
     
     return i;
 }

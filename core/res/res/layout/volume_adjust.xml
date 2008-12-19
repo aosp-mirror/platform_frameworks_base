@@ -41,6 +41,12 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/additional_message"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
     <ImageView
         android:id="@+id/ringer_stream_icon"
         android:layout_width="wrap_content"

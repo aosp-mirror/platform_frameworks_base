@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.http.EventHandler;
@@ -35,6 +37,7 @@ class FileLoader extends StreamLoader {
     private String mPath;  // Full path to the file to load
     private Context mContext;  // Application context, used for asset loads
     private boolean mIsAsset;  // Indicates if the load is an asset or not
+    private boolean mAllowFileAccess; // Allow/block file system access
 
     /**
      * Construct a FileLoader with the file URL specified as the content
@@ -44,12 +47,15 @@ class FileLoader extends StreamLoader {
      * @param loadListener LoadListener to pass the content to
      * @param context Context to use to access the asset.
      * @param asset true if url points to an asset.
+     * @param allowFileAccess true if this WebView is allowed to access files
+     *                        on the file system.
      */
     FileLoader(String url, LoadListener loadListener, Context context,
-            boolean asset) {
+            boolean asset, boolean allowFileAccess) {
         super(loadListener);
         mIsAsset = asset;
         mContext = context;
+        mAllowFileAccess = allowFileAccess;
 
         // clean the Url
         int index = url.indexOf('?');
@@ -73,35 +79,27 @@ class FileLoader extends StreamLoader {
                 mDataStream = mContext.getAssets().open(mPath,
                         AssetManager.ACCESS_STREAMING);
             } else {
-                mHandler.error(EventHandler.FILE_ERROR,
-                        mContext.getString(
-                                com.android.internal.R.string.httpErrorFileNotFound));
-                return false;
-/*
-                if (!mPath.startsWith(
-                        Environment.getExternalStorageDirectory().getPath())) {
+                if (!mAllowFileAccess) {
                     mHandler.error(EventHandler.FILE_ERROR,
-                            mContext.getString(
-                                    com.android.internal.R.string.httpErrorFileNotFound));
+                            mContext.getString(R.string.httpErrorFileNotFound));
                     return false;
                 }
+
                 mDataStream = new FileInputStream(mPath);
                 mContentLength = (new File(mPath)).length();
-*/
             }
             mHandler.status(1, 1, 0, "OK");
 
         } catch (java.io.FileNotFoundException ex) {
             mHandler.error(
                     EventHandler.FILE_NOT_FOUND_ERROR,
-                    mContext.getString(com.android.internal.R.string.httpErrorFileNotFound) +
+                    mContext.getString(R.string.httpErrorFileNotFound) +
                     " " + ex.getMessage());
             return false;
 
         } catch (java.io.IOException ex) {
             mHandler.error(EventHandler.FILE_ERROR,
-                           mContext.getString(
-                                   com.android.internal.R.string.httpErrorFileNotFound) +
+                           mContext.getString(R.string.httpErrorFileNotFound) +
                            " " + ex.getMessage());
             return false;
         }
@@ -121,10 +119,13 @@ class FileLoader extends StreamLoader {
      * @param loadListener LoadListener to pass the content to
      * @param context Context to use to access the asset.
      * @param asset true if url points to an asset.
+     * @param allowFileAccess true if this FileLoader can load files from the
+     *                        file system.
      */
     public static void requestUrl(String url, LoadListener loadListener,
-            Context context, boolean asset) {
-        FileLoader loader = new FileLoader(url, loadListener, context, asset);
+            Context context, boolean asset, boolean allowFileAccess) {
+        FileLoader loader = new FileLoader(url, loadListener, context, asset,
+                allowFileAccess);
         loader.load();
     }
 

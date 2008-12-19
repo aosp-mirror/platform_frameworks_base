@@ -18,22 +18,24 @@
  * @author Ilya S. Okomin
  * @version $Revision$
  */
+
 package java.awt.font;
 
 /**
- * The LineMetrics class provides information such as concerning how the text 
- * is positioned with respect to the base line, such as ascent, descent, 
- * and leading.
+ * The LineMetrics class provides information such as concerning how the text is
+ * positioned with respect to the base line, such as ascent, descent, and
+ * leading.
  * 
+ * @since Android 1.0
  */
 public abstract class LineMetrics {
 
     /**
-     * Gets the baseline offsets of the text according to the 
-     * the baseline of this text.
+     * Gets the baseline offsets of the text according to the the baseline of
+     * this text.
      * 
-     * @return the baseline offsets of the text according to the 
-     * the baseline of this text.
+     * @return the baseline offsets of the text according to the the baseline of
+     *         this text.
      */
     public abstract float[] getBaselineOffsets();
 
@@ -45,11 +47,11 @@ public abstract class LineMetrics {
     public abstract int getNumChars();
 
     /**
-     * Gets the baseline index, returns one of the following 
-     * index: ROMAN_BASELINE, CENTER_BASELINE, HANGING_BASELINE.
+     * Gets the baseline index, returns one of the following index:
+     * ROMAN_BASELINE, CENTER_BASELINE, HANGING_BASELINE.
      * 
-     * @return the baseline index: ROMAN_BASELINE, CENTER_BASELINE
-     * or HANGING_BASELINE.
+     * @return the baseline index: ROMAN_BASELINE, CENTER_BASELINE or
+     *         HANGING_BASELINE.
      */
     public abstract int getBaselineIndex();
 
@@ -89,11 +91,11 @@ public abstract class LineMetrics {
     public abstract float getLeading();
 
     /**
-     * Gets the height of the text as a sum of the ascent, the descent 
-     * and the leading.
+     * Gets the height of the text as a sum of the ascent, the descent and the
+     * leading.
      * 
-     * @return the height of the text as a sum of the ascent, the descent 
-     * and the leading.
+     * @return the height of the text as a sum of the ascent, the descent and
+     *         the leading.
      */
     public abstract float getHeight();
 
@@ -112,4 +114,3 @@ public abstract class LineMetrics {
     public abstract float getAscent();
 
 }
-

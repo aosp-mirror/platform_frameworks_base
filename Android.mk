@@ -30,6 +30,7 @@ framework-res-source-path := APPS/framework-res_intermediates/src
 # ============================================================
 include $(CLEAR_VARS)
 
+# FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
 
 # The following filters out code we are temporarily not including at all.
@@ -66,6 +67,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
+	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
@@ -96,6 +98,14 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
+	core/java/com/android/internal/view/IInputContext.aidl \
+	core/java/com/android/internal/view/IInputContextCallback.aidl \
+	core/java/com/android/internal/view/IInputMethod.aidl \
+	core/java/com/android/internal/view/IInputMethodCallback.aidl \
+	core/java/com/android/internal/view/IInputMethodClient.aidl \
+	core/java/com/android/internal/view/IInputMethodManager.aidl \
+	core/java/com/android/internal/view/IInputMethodSession.aidl \
+	im/java/android/im/IImPlugin.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
@@ -110,6 +120,7 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/gsm/ISms.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl
 
+# FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
 LOCAL_INTERMEDIATE_SOURCES := \
@@ -126,6 +137,8 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
 
+#LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+
 LOCAL_DX_FLAGS := --core-library
 
 include $(BUILD_JAVA_LIBRARY)
@@ -134,7 +147,7 @@ include $(BUILD_JAVA_LIBRARY)
 # the source for this library.
 framework_res_R_stamp := \
 	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
-$(full_classes_jar): $(framework_res_R_stamp)
+$(full_classes_compiled_jar): $(framework_res_R_stamp)
 
 # Make sure that framework-res is installed when framework is.
 $(LOCAL_INSTALLED_MODULE): | $(dir $(LOCAL_INSTALLED_MODULE))framework-res.apk
@@ -159,9 +172,16 @@ aidl_files := \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/Surface.aidl \
 	frameworks/base/core/java/android/view/WindowManager.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputContext.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputMethod.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputMethodCallback.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputMethodClient.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputMethodManager.aidl \
+	frameworks/base/core/java/com/android/internal/view/IInputMethodSession.aidl \
 	frameworks/base/graphics/java/android/graphics/Bitmap.aidl \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
 	frameworks/base/graphics/java/android/graphics/Region.aidl \
+	frameworks/base/im/java/android/im/IImPlugin.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
@@ -261,10 +281,16 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
-		-error 1 -error 2 -error 3 -error 4 -error 6 -error 8 \
-		-overview $(LOCAL_PATH)/core/java/overview.html \
-		-hdf android.buglink 1 \
-		-hdf android.whichdoc framework
+		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
+		-overview $(LOCAL_PATH)/core/java/overview.html
+
+framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
+
+web_docs_sample_code_flags := \
+		-hdf android.hasSamples 1 \
+		-samplecode samples/ApiDemos guide/samples/ApiDemos "API Demos" \
+		-samplecode samples/LunarLander guide/samples/LunarLander "Lunar Lander" \
+		-samplecode samples/NotePad guide/samples/NotePad "Note Pad"
 
 sample_dir := development/samples
 
@@ -278,7 +304,7 @@ web_docs_sample_code_flags := \
 		            guide/samples/NotePad "Note Pad"
 
 
-# ====  static html  ==================================
+# ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
@@ -287,19 +313,23 @@ LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_MODULE:=framework
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
 
-framework_keep_file := $(OUT_DOCS)/$(LOCAL_MODULE)-keep.txt
+LOCAL_MODULE := offline-sdk
 
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-title "Android SDK" \
-		-keeplist $(framework_keep_file) \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
 		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src \
 		-apixml $(INTERNAL_PLATFORM_API_FILE) \
 		-sdkvalues $(OUT_DOCS) \
+		-warning 3 \
+		-hdf android.whichdoc offline
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
@@ -311,55 +341,57 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
-$(framework_keep_file): $(full_target)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
-
-# ====  codesite ezt templates  =======================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
-
-LOCAL_MODULE:=codesite
-LOCAL_DROIDDOC_OPTIONS:=\
-		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		$(web_docs_sample_code_flags) \
-		-toroot /android/
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=$(SRC_DROIDDOC_DIR)/templates-codesite
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-google
-
-include $(BUILD_DROIDDOC)
 
 # ==== docs for the web (on the google app engine server) =======================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+
+LOCAL_MODULE := online-sdk
+
+LOCAL_DROIDDOC_OPTIONS:= \
+	$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+	$(web_docs_sample_code_flags) \
+	-toroot / \
+    -hdf android.whichdoc online
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+include $(BUILD_DROIDDOC)
+
+
+# ==== docs that have all of the stuff that's @hidden =======================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
 
-LOCAL_MODULE:=gae
+LOCAL_MODULE := hidden
 LOCAL_DROIDDOC_OPTIONS:=\
- $(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
- $(web_docs_sample_code_flags) \
- -toroot /gae/
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+        -title "Android SDK - Including hidden APIs."
+#        -hidden
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=$(SRC_DROIDDOC_DIR)/templates
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
-
 
 # Build ext.jar
 # ============================================================
@@ -385,24 +417,8 @@ LOCAL_MODULE := ext
 
 include $(BUILD_JAVA_LIBRARY)
 
-# ====  the documentation  ===================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(ext_src_files) docs/overview-ext.html
-
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core
-
-LOCAL_MODULE := ext
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_DROIDDOC_OPTIONS := -overview $(LOCAL_PATH)/docs/overview-ext.html
-
-include $(BUILD_DROIDDOC)
-
 
 # Include subdirectory makefiles
 # ============================================================
 
-ifneq ($(SDK_ONLY),true)
-  include $(call first-makefiles-under,$(LOCAL_PATH))
-endif
+include $(call first-makefiles-under,$(LOCAL_PATH))

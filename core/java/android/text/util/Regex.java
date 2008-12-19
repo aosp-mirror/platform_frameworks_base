@@ -65,7 +65,7 @@ public class Regex {
      */
     public static final Pattern WEB_URL_PATTERN
         = Pattern.compile(
-            "((?:(http|https):\\/\\/(?:(?:[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)"
+            "((?:(http|https|Http|Https):\\/\\/(?:(?:[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)"
             + "\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2}))+(?:\\:(?:[a-zA-Z0-9\\$\\-\\_"
             + "\\.\\+\\!\\*\\'\\(\\)\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2}))+)?\\@)?)?"
             + "((?:(?:[a-zA-Z0-9][a-zA-Z0-9\\-]*\\.)+"   // named host
@@ -103,7 +103,9 @@ public class Regex {
             + "(?:\\:\\d{1,5})?)" // plus option port number
             + "(\\/(?:(?:[a-zA-Z0-9\\;\\/\\?\\:\\@\\&\\=\\#\\~"  // plus option query params
             + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_])|(?:\\%[a-fA-F0-9]{2}))*)?"
-            + "\\b"); // and finally, a word boundary  this is to stop foo.sure from matching as foo.su
+            + "(?:\\b|$)"); // and finally, a word boundary or end of
+                            // input.  This is to stop foo.sure from
+                            // matching as foo.su
 
     public static final Pattern IP_ADDRESS_PATTERN
         = Pattern.compile(
@@ -134,10 +136,20 @@ public class Regex {
      * might be phone numbers in arbitrary text, not for validating whether
      * something is in fact a phone number.  It will miss many things that
      * are legitimate phone numbers.
+     * 
+     * <p> The pattern matches the following:
+     * <ul>
+     * <li>Optionally, a + sign followed immediately by one or more digits. Spaces, dots, or dashes
+     * may follow.
+     * <li>Optionally, sets of digits in parentheses, separated by spaces, dots, or dashes.
+     * <li>A string starting and ending with a digit, containing digits, spaces, dots, and/or dashes.
+     * </ul>
      */
     public static final Pattern PHONE_PATTERN
-        = Pattern.compile(
-                "(?:\\+[0-9]+)|(?:[0-9()][0-9()\\- \\.][0-9()\\- \\.]+[0-9])");
+        = Pattern.compile(                                  // sdd = space, dot, or dash
+                "(\\+[0-9]+[\\- \\.]*)?"                    // +<digits><sdd>*
+                + "(\\([0-9]+\\)[\\- \\.]*)?"               // (<digits>)<sdd>*
+                + "([0-9][0-9\\- \\.][0-9\\- \\.]+[0-9])"); // <digit><digit|sdd>+<digit> 
 
     /**
      *  Convenience method to take all of the non-null matching groups in a

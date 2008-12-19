@@ -23,10 +23,11 @@
 #include <utils/Timers.h>
 
 #include <ui/EGLNativeSurface.h>
-#include <ui/BlitHardware.h>
 
 #include <pixelflinger/pixelflinger.h>
 #include <linux/fb.h>
+
+struct copybit_device_t;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -71,7 +72,7 @@ private:
     int32_t             mSwapCount;
     nsecs_t             mSleep;
     uint32_t            mFeatureFlags;
-    copybit_t*          mBlitEngine;
+    copybit_device_t*   mBlitEngine;
 };
 
 // ---------------------------------------------------------------------------

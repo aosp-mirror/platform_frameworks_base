@@ -37,7 +37,10 @@ interface ILocationManager
 
     void requestLocationUpdates(String provider, long minTime, float minDistance,
         in ILocationListener listener);
+    void requestLocationUpdatesPI(String provider, long minTime, float minDistance,
+        in PendingIntent intent);
     void removeUpdates(in ILocationListener listener);
+    void removeUpdatesPI(in PendingIntent intent);
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);

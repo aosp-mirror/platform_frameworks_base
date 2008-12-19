@@ -17,10 +17,10 @@ selections. </em></li>
 
 <div style="float:right;white-space:nowrap">
 <span style="color:#BBB;">
-	[<a href="tutorial-ex1.html" style="color:#BBB;">Exercise 1</a>]</span>
-	[<a href="tutorial-ex2.html">Exercise 2</a>]
-	[<a href="tutorial-ex3.html">Exercise 3</a>]
-	[<a href="tutorial-extra-credit.html">Extra Credit</a>]
+	[<a href="notepad-ex1.html" style="color:#BBB;">Exercise 1</a>]</span>
+	[<a href="notepad-ex2.html">Exercise 2</a>]
+	[<a href="notepad-ex3.html">Exercise 3</a>]
+	[<a href="notepad-extra-credit.html">Extra Credit</a>]
 </div>
 
 
@@ -31,8 +31,8 @@ selections. </em></li>
     
     <p><code>Notepadv1</code> is a project that is provided as a starting point. It
     takes care of some of the boilerplate work that you have already seen if you
-    followed the <a href="{@docRoot}intro/hello-android.html">Hello
-    Android tutorial.</a></p>
+    followed the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello,
+    World</a> tutorial.</p>
     
   <ol>
     <li>
@@ -42,7 +42,7 @@ selections. </em></li>
       In the New Android Project dialog, select <strong>Create project from existing source</strong>.</li>
     <li>
       Click <strong>Browse</strong> and navigate to where you copied the <code>NotepadCodeLab</code> 
-      (downloaded during <a href="/android/intro/tutorial.html#preparing">setup</a>). Select 
+      (downloaded during <a href="{@docRoot}guide/tutorials/notepad/index.html#preparing">setup</a>). Select 
       <code>Notepadv1</code> and click <strong>Choose</strong>.</li>
     <li>
       You should see <code>Notepadv1</code> in the <em>Project name</em> and also see the <em>Location</em>
@@ -72,8 +72,8 @@ selections. </em></li>
     {@link android.content.ContentProvider ContentProvider}.</p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">If you are interested, you can find out more about 
-    <a href="{@docRoot}devel/data/contentproviders.html">content providers</a> or the whole 
-    subject of <a href="{@docRoot}devel/data.html">Storing, Retrieving, and Exposing Data</a>.
+    <a href="{@docRoot}guide/topics/providers/content-providers.html">content providers</a> or the whole 
+    subject of <a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>.
     The NotePad sample in the <code>samples/</code> folder of the SDK also has an example of how
     to create a ContentProvider.</p>
   </div>
@@ -145,9 +145,9 @@ selections. </em></li>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">Full screen layouts are not the only option for an Activity however. You
     might also want to use a <a
-href="{@docRoot}kb/commontasks.html#floatingorfull">floating 
+href="{@docRoot}guide/appendix/faq/commontasks.html#floatingorfull">floating 
     layout</a> (for example, a <a
-href="{@docRoot}kb/commontasks.html#dialogsandalerts">dialog
+href="{@docRoot}guide/appendix/faq/commontasks.html#dialogsandalerts">dialog
     or alert</a>), 
     or perhaps you don't need a layout at all (the Activity will be invisible 
     to the user unless you specify some kind of layout for it to use).</p>
@@ -236,7 +236,7 @@ and
       background-color:#FFFFDD;">Resources and the R class</h2>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">The folders under res/ in the Eclipse project are for resources. 
-     There is a <a href="{@docRoot}kb/commontasks.html#filelist">specific structure</a> to the
+     There is a <a href="{@docRoot}guide/appendix/faq/commontasks.html#filelist">specific structure</a> to the
      folders and files under res/.</p>
     <p style="padding-left:.5em;font-size:12px;
 margin:0; padding:.0em .5em .5em 1em;">Resources defined in these folders and files will have
@@ -330,7 +330,7 @@ Notepadv1
     titles:</p>
     <ol>
     <li>
-      In the <code>onCreate</code> method, call <code>super()</code> with the 
+      In the <code>onCreate</code> method, call <code>super.onCreate()</code> with the 
       <code>savedInstanceState</code> parameter that's passed in.</li>
     <li>
       Call <code>setContentView()</code> and pass <code>R.layout.notepad_list</code>.</li>
@@ -376,11 +376,11 @@ Notepadv1
       background-color:#FFFFDD;">More on menus</h2>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">The notepad application we are constructing only scratches the 
-     surface with <a href="{@docRoot}kb/commontasks.html#addmenuitems">menus</a>. </p>
+     surface with <a href="{@docRoot}guide/appendix/faq/commontasks.html#addmenuitems">menus</a>. </p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">You can also <a href="{@docRoot}kb/commontasks.html#menukeyshortcuts">add
-shortcut keys for menu items</a>, <a href="{@docRoot}kb/commontasks.html#menukeyshortcuts">create
-submenus</a> and even <a href="{@docRoot}kb/commontasks.html#addingtoothermenus">add
+     padding:.0em .5em .5em 1em;">You can also <a href="{@docRoot}guide/appendix/faq/commontasks.html#menukeyshortcuts">add
+shortcut keys for menu items</a>, <a href="{@docRoot}guide/appendix/faq/commontasks.html#menukeyshortcuts">create
+submenus</a> and even <a href="{@docRoot}guide/appendix/faq/commontasks.html#addingtoothermenus">add
 menu items to other applications!</a>. </p>
   </div>
 
@@ -582,7 +582,7 @@ We will simply
 from
 the zip file to compare with your own.</p>
 
-<p>Once you are ready, move on to <a href="tutorial-ex2.html">Tutorial
+<p>Once you are ready, move on to <a href="notepad-ex2.html">Tutorial
 Exercise 2</a> to add the ability to create, edit and delete notes.</p>
-<p><a href="tutorial.html">Back to the Tutorial main page...</a></p>
+<p><a href="index.html">Back to the Tutorial main page...</a></p>
 

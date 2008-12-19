@@ -1,0 +1,21 @@
+page.title=2D and 3D Graphics
+@jd:body
+
+
+<p>Android graphics are powered by a custom 2D graphics library and OpenGL ES 1.0
+for 3D graphics.</p>
+
+<h2>2D Graphics</h2>
+<p>Android offers a custom 2D graphics library for drawing shapes and images.</p>
+<p>The {@link android.graphics} and {@link android.graphics.drawable} 
+packages are where you'll find the classes used for drawing in two-dimensions.
+For common drawing tasks, though, the {@link android.graphics.drawable} package 
+is where you'll find what you need.</p>
+<p>For an introduction to drawing shapes and images, read the 
+<a href="2d-graphics.html">2D Graphics</a> document.</p>
+
+
+<h2>3D with OpenGL</h2>
+<p>High performance 3D graphic utilities are provided on Android with the OpenGL ES API.
+You'll find the OpenGL APIs in the {@link android.opengl} package.
+Read more about <a href="opengl.html">3D with OpenGL</a>.</p>

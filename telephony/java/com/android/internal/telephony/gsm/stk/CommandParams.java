@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,102 +18,152 @@ package com.android.internal.telephony.gsm.stk;
 
 import android.graphics.Bitmap;
 
-import java.util.List;
-
 /**
  * Container class for proactive command parameters. 
  *
  */
 class CommandParams {
-    public CtlvCommandDetails cmdDet;
+    CommandDetails cmdDet;
 
-    CommandParams(CtlvCommandDetails cmdDet) {
+    CommandParams(CommandDetails cmdDet) {
         this.cmdDet = cmdDet;
     }
-}
 
-class CommonUIParams extends CommandParams {
-    String mText;
-    Bitmap mIcon;
-    boolean mIconSelfExplanatory;
-    TextAttribute mTextAttrs;
-
-    CommonUIParams(CtlvCommandDetails cmdDet, String text,
-            TextAttribute textAttrs) {
-        super(cmdDet);
-
-        mText = text;
-        mTextAttrs = textAttrs;
-        mIconSelfExplanatory = false;
-        mIcon = null;
+    AppInterface.CommandType getCommandType() {
+        return AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
     }
 
-    void setIcon(Bitmap icon) {
-        mIcon = icon;
-    }
-
-    void setIconSelfExplanatory(boolean iconSelfExplanatory) {
-        mIconSelfExplanatory = iconSelfExplanatory;
-    }
+    boolean setIcon(Bitmap icon) { return true; }
 }
 
 class DisplayTextParams extends CommandParams {
-    String text = null;
-    Bitmap icon = null;
-    List<TextAttribute> textAttrs = null;
-    boolean immediateResponse = false;
-    boolean userClear = false;
-    boolean isHighPriority = false;
+    TextMessage textMsg;
 
-    DisplayTextParams(CtlvCommandDetails cmdDet) {
+    DisplayTextParams(CommandDetails cmdDet, TextMessage textMsg) {
         super(cmdDet);
+        this.textMsg = textMsg;
+    }
+
+    boolean setIcon(Bitmap icon) {
+        if (icon != null && textMsg != null) {
+            textMsg.icon = icon;
+            return true;
+        }
+        return false;
     }
 }
 
-class GetInkeyParams extends CommandParams {
-    boolean isYesNo;
-    boolean isUcs2;
+class LaunchBrowserParams extends CommandParams {
+    TextMessage confirmMsg;
+    LaunchBrowserMode mode;
+    String url;
 
-    GetInkeyParams(CtlvCommandDetails cmdDet, boolean isYesNo,
-            boolean isUcs2) {
+    LaunchBrowserParams(CommandDetails cmdDet, TextMessage confirmMsg,
+            String url, LaunchBrowserMode mode) {
         super(cmdDet);
+        this.confirmMsg = confirmMsg;
+        this.mode = mode;
+        this.url = url;
+    }
 
-        this.isYesNo = isYesNo;
-        this.isUcs2 = isUcs2;
+    boolean setIcon(Bitmap icon) {
+        if (icon != null && confirmMsg != null) {
+            confirmMsg.icon = icon;
+            return true;
+        }
+        return false;
     }
 }
 
-class GetInputParams extends CommandParams {
-    boolean isUcs2;
-    boolean isPacked;
+class PlayToneParams extends CommandParams {
+    TextMessage textMsg;
+    ToneSettings settings;
 
-    GetInputParams(CtlvCommandDetails cmdDet, boolean isUcs2,
-            boolean isPacked) {
+    PlayToneParams(CommandDetails cmdDet, TextMessage textMsg,
+            Tone tone, Duration duration, boolean vibrate) {
         super(cmdDet);
+        this.textMsg = textMsg;
+        this.settings = new ToneSettings(duration, tone, vibrate);
+    }
 
-        this.isUcs2 = isUcs2;
-        this.isPacked = isPacked;
+    boolean setIcon(Bitmap icon) {
+        if (icon != null && textMsg != null) {
+            textMsg.icon = icon;
+            return true;
+        }
+        return false;
+    }
+}
+
+class CallSetupParams extends CommandParams {
+    TextMessage confirmMsg;
+    TextMessage callMsg;
+
+    CallSetupParams(CommandDetails cmdDet, TextMessage confirmMsg,
+            TextMessage callMsg) {
+        super(cmdDet);
+        this.confirmMsg = confirmMsg;
+        this.callMsg = callMsg;
+    }
+
+    boolean setIcon(Bitmap icon) {
+        if (icon == null) {
+            return false;
+        }
+        if (confirmMsg != null && confirmMsg.icon == null) {
+            confirmMsg.icon = icon;
+            return true;
+        } else if (callMsg != null && callMsg.icon == null) {
+            callMsg.icon = icon;
+            return true;
+        }
+        return false;
     }
 }
 
 class SelectItemParams extends CommandParams {
-    Menu mMenu = null;
-    PresentationType mPresentationType;
-    int mIconLoadState = LOAD_NO_ICON;
+    Menu menu = null;
+    boolean loadTitleIcon = false;
 
-    // loading icons state parameters.
-    static final int LOAD_NO_ICON           = 0;
-    static final int LOAD_TITLE_ICON        = 1;
-    static final int LOAD_ITEMS_ICONS       = 2;
-    static final int LOAD_TITLE_ITEMS_ICONS = 3;
-
-    SelectItemParams(CtlvCommandDetails cmdDet, Menu menu,
-            PresentationType presentationType, int iconLoadState) {
+    SelectItemParams(CommandDetails cmdDet, Menu menu, boolean loadTitleIcon) {
         super(cmdDet);
+        this.menu = menu;
+        this.loadTitleIcon = loadTitleIcon;
+    }
 
-        mMenu = menu;
-        mPresentationType = presentationType;
-        mIconLoadState = iconLoadState;
+    boolean setIcon(Bitmap icon) {
+        if (icon != null && menu != null) {
+            if (loadTitleIcon && menu.titleIcon == null) {
+                menu.titleIcon = icon;
+            } else {
+                for (Item item : menu.items) {
+                    if (item.icon != null) {
+                        continue;
+                    }
+                    item.icon = icon;
+                    break;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
+
+class GetInputParams extends CommandParams {
+    Input input = null;
+
+    GetInputParams(CommandDetails cmdDet, Input input) {
+        super(cmdDet);
+        this.input = input;
+    }
+
+    boolean setIcon(Bitmap icon) { 
+        if (icon != null && input != null) {
+            input.icon = icon;
+        }
+        return true;
+    }
+}
+
 

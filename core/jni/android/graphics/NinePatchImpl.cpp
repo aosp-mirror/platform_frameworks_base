@@ -103,6 +103,10 @@ SkScalar calculateStretch(SkScalar boundsLimit, SkScalar startingPoint,
 void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                        const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
                        const SkPaint* paint, SkRegion** outRegion) {
+    if (canvas && canvas->quickReject(bounds, SkCanvas::kBW_EdgeType)) {
+        return;
+    }
+    
     // if our canvas is GL, draw this as a mesh, which will be faster than
     // in parts (which is faster for raster)
     if (canvas && canvas->getViewport(NULL)) {

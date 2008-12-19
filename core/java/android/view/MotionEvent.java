@@ -27,10 +27,36 @@ import android.util.Config;
  * it is being used for.
  */
 public final class MotionEvent implements Parcelable {
+    /**
+     * Constant for {@link #getAction}: A pressed gesture has started, the
+     * motion contains the initial starting location.
+     */
     public static final int ACTION_DOWN             = 0;
+    /**
+     * Constant for {@link #getAction}: A pressed gesture has finished, the
+     * motion contains the final release location as well as any intermediate
+     * points since the last down or move event.
+     */
     public static final int ACTION_UP               = 1;
+    /**
+     * Constant for {@link #getAction}: A change has happened during a
+     * press gesture (between {@link #ACTION_DOWN} and {@link #ACTION_UP}).
+     * The motion contains the most recent point, as well as any intermediate
+     * points since the last down or move event.
+     */
     public static final int ACTION_MOVE             = 2;
+    /**
+     * Constant for {@link #getAction}: The current gesture has been aborted.
+     * You will not receive any more points in it.  You should treat this as
+     * an up event, but not perform any action that you normally would.
+     */
     public static final int ACTION_CANCEL           = 3;
+    /**
+     * Constant for {@link #getAction}: A movement has happened outside of the
+     * normal bounds of the UI element.  This does not provide a full gesture,
+     * but only the initial location of the movement/touch.
+     */
+    public static final int ACTION_OUTSIDE          = 4;
 
     private static final boolean TRACK_RECYCLED_LOCATION = false;
     

@@ -17,6 +17,8 @@
 package android.media;
 
 import android.view.Surface;
+import android.hardware.Camera;
+import java.io.IOException;
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -63,6 +65,17 @@ public class MediaRecorder
         native_setup();
     }
   
+    /**
+     * Sets a Camera to use for recording. Use this function to switch
+     * quickly between preview and capture mode without a teardown of
+     * the camera object. Must call before prepare().
+     * 
+     * @param c the Camera to use for recording
+     * FIXME: Temporarily hidden until API approval
+     * @hide
+     */
+    public native void setCamera(Camera c);
+
     /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
      * before prepare() to make sure that the desirable preview display is
@@ -113,11 +126,13 @@ public class MediaRecorder
        */
         private OutputFormat() {}
         public static final int DEFAULT = 0;
-        /** 3GPP media codec */
+        /** 3GPP media file format*/
         public static final int THREE_GPP = 1;
-        /** MPEG4 media codec */
+        /** MPEG4 media file format*/
         public static final int MPEG_4 = 2;
-    }
+        /** Raw AMR file format */
+        public static final int RAW_AMR = 3;
+    };
 
     /**
      * Defines the audio encoding. These constants are used with 
@@ -260,8 +275,9 @@ public class MediaRecorder
      * 
      * @throws IllegalStateException if it is called after
      * start() or before setOutputFormat().
+     * @throws IOException if prepare fails otherwise.
      */
-    public native void prepare() throws IllegalStateException;
+    public native void prepare() throws IllegalStateException, IOException;
 
     /**
      * Begins capturing and encoding data to the file specified with 

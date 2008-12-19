@@ -18,22 +18,27 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
  * The ImageCapabilities class gives information about an image's capabilities.
+ * 
+ * @since Android 1.0
  */
 public class ImageCapabilities implements Cloneable {
-    
-    /** The accelerated. */
+
+    /**
+     * The accelerated.
+     */
     private final boolean accelerated;
 
     /**
-     * Instantiates a new ImageCapabilities with the specified
-     * acceleration flag which indicates whether acceleration
-     * is desired or not.
+     * Instantiates a new ImageCapabilities with the specified acceleration flag
+     * which indicates whether acceleration is desired or not.
      * 
-     * @param accelerated the accelerated flag.
+     * @param accelerated
+     *            the accelerated flag.
      */
     public ImageCapabilities(boolean accelerated) {
         this.accelerated = accelerated;
@@ -50,23 +55,22 @@ public class ImageCapabilities implements Cloneable {
     }
 
     /**
-     * Returne true if the Image of this ImageCapabilities is or can be
+     * Returns true if the Image of this ImageCapabilities is or can be
      * accelerated.
-     *  
+     * 
      * @return true, if the Image of this ImageCapabilities is or can be
-     * accelerated, false otherwise.
+     *         accelerated, false otherwise.
      */
     public boolean isAccelerated() {
         return accelerated;
     }
 
     /**
-     * Returns true if this ImageCapabilities applies to
-     * the VolatileImage which can lose its surfaces.
+     * Returns true if this ImageCapabilities applies to the VolatileImage which
+     * can lose its surfaces.
      * 
-     * @return true if this ImageCapabilities applies to
-     * the VolatileImage which can lose its surfaces, 
-     * false otherwise.
+     * @return true if this ImageCapabilities applies to the VolatileImage which
+     *         can lose its surfaces, false otherwise.
      */
     public boolean isTrueVolatile() {
         return true;

@@ -7,11 +7,11 @@ page.title=Android Samples
 So here we've provided the source code for some simple Android applications.</p>
 
 <dl>
- <dt><a href="ApiDemos/">API Demos</a></dt>
+ <dt><a href="ApiDemos/index.html">API Demos</a></dt>
   <dd>A variety of small applications that demonstrate simple views and widgets.</dd>
- <dt><a href="LunarLander/">Lunar Lander</a></dt>
+ <dt><a href="LunarLander/index.html">Lunar Lander</a></dt>
   <dd>A classic Lunar Lander game.</dd>
- <dt><a href="NotePad/">Notepad</a></dt>
+ <dt><a href="NotePad/index.html">Note Pad</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
-    <a href="{@docRoot}guide/tutorials/notepad/notepad-index.html">Notepad tutorial</a>.</dd>
+    <a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
 </dl>

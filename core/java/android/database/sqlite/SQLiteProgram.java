@@ -239,7 +239,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                     Log.d(TAG, "      " + ste);
                 }
             }
-            onAllReferencesReleased();
+            // when in finalize() it is already removed from weakhashmap
+            // so it is safe to not removed itself from db
+            onAllReferencesReleasedFromContainer();
         }
     }
 

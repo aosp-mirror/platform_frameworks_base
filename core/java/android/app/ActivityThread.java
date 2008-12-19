@@ -220,7 +220,8 @@ public final class ActivityThread {
             mApplicationInfo = aInfo;
             mPackageName = aInfo.packageName;
             mAppDir = aInfo.sourceDir;
-            mResDir = aInfo.publicSourceDir;
+            mResDir = aInfo.uid == Process.myUid() ? aInfo.sourceDir
+                    : aInfo.publicSourceDir;
             mSharedLibraries = aInfo.sharedLibraryFiles;
             mDataDir = aInfo.dataDir;
             mDataDirFile = mDataDir != null ? new File(mDataDir) : null;
@@ -1057,6 +1058,7 @@ public final class ActivityThread {
         Activity parent;
         String embeddedID;
         Object lastNonConfigurationInstance;
+        HashMap<String,Object> lastNonConfigurationChildInstances;
         boolean paused;
         boolean stopped;
         boolean hideForNow;
@@ -1966,6 +1968,12 @@ public final class ActivityThread {
     
     public final Activity startActivityNow(Activity parent, String id,
             Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state) {
+        return startActivityNow(parent, id, intent, activityInfo, token, state, null);
+    }
+
+    public final Activity startActivityNow(Activity parent, String id,
+        Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
+        Object lastNonConfigurationInstance) {
         ActivityRecord r = new ActivityRecord();
             r.token = token;
             r.intent = intent;
@@ -1973,6 +1981,7 @@ public final class ActivityThread {
             r.parent = parent;
             r.embeddedID = id;
             r.activityInfo = activityInfo;
+            r.lastNonConfigurationInstance = lastNonConfigurationInstance;
         if (localLOGV) {
             ComponentName compname = intent.getComponent();
             String name;
@@ -2090,9 +2099,11 @@ public final class ActivityThread {
                 Configuration config = new Configuration(mConfiguration);
                 activity.attach(appContext, this, getInstrumentation(), r.token, app, 
                         r.intent, r.activityInfo, title, r.parent, r.embeddedID,
-                        r.lastNonConfigurationInstance, config);
+                        r.lastNonConfigurationInstance, r.lastNonConfigurationChildInstances,
+                        config);
                 
                 r.lastNonConfigurationInstance = null;
+                r.lastNonConfigurationChildInstances = null;
                 activity.mStartedActivity = false;
                 int theme = r.activityInfo.getThemeResource();
                 if (theme != 0) {
@@ -2948,6 +2959,17 @@ public final class ActivityThread {
                                 + ": " + e.toString(), e);
                     }
                 }
+                try {
+                    r.lastNonConfigurationChildInstances
+                            = r.activity.onRetainNonConfigurationChildInstances();
+                } catch (Exception e) {
+                    if (!mInstrumentation.onException(r.activity, e)) {
+                        throw new RuntimeException(
+                                "Unable to retain child activities "
+                                + r.intent.getComponent().toShortString()
+                                + ": " + e.toString(), e);
+                    }
+                }
                 
             }
             try {
@@ -3225,11 +3247,7 @@ public final class ActivityThread {
                 Locale.setDefault(config.locale);
             }
 
-            if (mSystemContext != null) {
-                mSystemContext.getResources().updateConfiguration(config, null);
-                //Log.i(TAG, "Updated system resources " + mSystemContext.getResources()
-                //        + ": " + mSystemContext.getResources().getConfiguration());
-            }
+            Resources.updateSystemConfiguration(config, null);
 
             ApplicationContext.ApplicationPackageManager.configurationChanged();
             //Log.i(TAG, "Configuration changed in " + currentPackageName());

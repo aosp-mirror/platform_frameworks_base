@@ -66,7 +66,6 @@ public final class BridgeInflater extends LayoutInflater {
         mConstructorArgs[0] = context;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
         View view = null;

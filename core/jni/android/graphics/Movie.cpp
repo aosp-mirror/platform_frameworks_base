@@ -106,7 +106,7 @@ static jobject movie_decodeByteArray(JNIEnv* env, jobject clazz,
 
     int totalLength = env->GetArrayLength(byteArray);
     if ((offset | length) < 0 || offset + length > totalLength) {
-        doThrow(env, "java/lang/ArrayIndexException");
+        doThrow(env, "java/lang/ArrayIndexOutOfBoundsException");
         return 0;
     }
 

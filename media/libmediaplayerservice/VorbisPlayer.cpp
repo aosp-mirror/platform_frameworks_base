@@ -385,7 +385,7 @@ status_t VorbisPlayer::createOutputTrack() {
 
     LOGV("Create AudioTrack object: rate=%ld, channels=%d\n",
             vi->rate, vi->channels);
-    if (mAudioSink->open(vi->rate, vi->channels, DEFAULT_AUDIOSINK_BUFFERCOUNT) != NO_ERROR) {
+    if (mAudioSink->open(vi->rate, vi->channels, AudioSystem::PCM_16_BIT, DEFAULT_AUDIOSINK_BUFFERCOUNT) != NO_ERROR) {
         LOGE("mAudioSink open failed");
         return ERROR_OPEN_FAILED;
     }

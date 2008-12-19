@@ -18,35 +18,45 @@
  * @author Alexey A. Petrenko
  * @version $Revision$
  */
+
 package java.awt;
 
-
 /**
- * The BufferCapabilities class represents the capabilities 
- * and other properties of the image buffers.
+ * The BufferCapabilities class represents the capabilities and other properties
+ * of the image buffers.
+ * 
+ * @since Android 1.0
  */
 public class BufferCapabilities implements Cloneable {
-    
-    /** The front buffer capabilities. */
+
+    /**
+     * The front buffer capabilities.
+     */
     private final ImageCapabilities frontBufferCapabilities;
-    
-    /** The back buffer capabilities. */
+
+    /**
+     * The back buffer capabilities.
+     */
     private final ImageCapabilities backBufferCapabilities;
-    
-    /** The flip contents. */
+
+    /**
+     * The flip contents.
+     */
     private final FlipContents flipContents;
 
     /**
      * Instantiates a new BufferCapabilities object.
      * 
-     * @param frontBufferCapabilities the front buffer capabilities, 
-     * can not be null.
-     * @param backBufferCapabilities the the back and intermediate 
-     * buffers capabilities, can not be null.
-     * @param flipContents the back buffer contents after page flipping, 
-     * null if page flipping is not used.
+     * @param frontBufferCapabilities
+     *            the front buffer capabilities, can not be null.
+     * @param backBufferCapabilities
+     *            the the back and intermediate buffers capabilities, can not be
+     *            null.
+     * @param flipContents
+     *            the back buffer contents after page flipping, null if page
+     *            flipping is not used.
      */
-    public BufferCapabilities(ImageCapabilities frontBufferCapabilities, 
+    public BufferCapabilities(ImageCapabilities frontBufferCapabilities,
             ImageCapabilities backBufferCapabilities, FlipContents flipContents) {
         if (frontBufferCapabilities == null || backBufferCapabilities == null) {
             throw new IllegalArgumentException();
@@ -70,8 +80,8 @@ public class BufferCapabilities implements Cloneable {
     /**
      * Gets the image capabilities of the front buffer.
      * 
-     * @return the ImageCapabilities object represented capabilities 
-     * of the front buffer. 
+     * @return the ImageCapabilities object represented capabilities of the
+     *         front buffer.
      */
     public ImageCapabilities getFrontBufferCapabilities() {
         return frontBufferCapabilities;
@@ -80,15 +90,15 @@ public class BufferCapabilities implements Cloneable {
     /**
      * Gets the image capabilities of the back buffer.
      * 
-     * @return the ImageCapabilities object represented capabilities 
-     * of the back buffer. 
+     * @return the ImageCapabilities object represented capabilities of the back
+     *         buffer.
      */
     public ImageCapabilities getBackBufferCapabilities() {
         return backBufferCapabilities;
     }
 
     /**
-     * Gets the flip contents of the back buffer after page-flipping. 
+     * Gets the flip contents of the back buffer after page-flipping.
      * 
      * @return the FlipContents of the back buffer after page-flipping.
      */
@@ -99,8 +109,7 @@ public class BufferCapabilities implements Cloneable {
     /**
      * Checks if the buffer strategy uses page flipping.
      * 
-     * @return true, if the buffer strategy uses page flipping,
-     * false otherwise.
+     * @return true, if the buffer strategy uses page flipping, false otherwise.
      */
     public boolean isPageFlipping() {
         return flipContents != null;
@@ -110,7 +119,7 @@ public class BufferCapabilities implements Cloneable {
      * Checks if page flipping is only available in full-screen mode.
      * 
      * @return true, if page flipping is only available in full-screen mode,
-     * false otherwise.
+     *         false otherwise.
      */
     public boolean isFullScreenRequired() {
         return false;
@@ -119,39 +128,40 @@ public class BufferCapabilities implements Cloneable {
     /**
      * Checks if page flipping can be performed using more than two buffers.
      * 
-     * @return true, if page flipping can be performed using more than two buffers,
-     * false otherwise.
+     * @return true, if page flipping can be performed using more than two
+     *         buffers, false otherwise.
      */
     public boolean isMultiBufferAvailable() {
         return false;
     }
 
     /**
-     * The FlipContents class represents a set of possible back buffer contents 
+     * The FlipContents class represents a set of possible back buffer contents
      * after page-flipping.
+     * 
+     * @since Android 1.0
      */
     public static final class FlipContents {
-        
+
         /**
-         * The back buffered contents are cleared with the background color 
+         * The back buffered contents are cleared with the background color
          * after flipping.
          */
         public static final FlipContents BACKGROUND = new FlipContents();
-        
-        /** 
-         * The back buffered contents are copied to the front buffer before 
+
+        /**
+         * The back buffered contents are copied to the front buffer before
          * flipping.
          */
         public static final FlipContents COPIED = new FlipContents();
-        
-        /** 
-         * The back buffer contents are the prior contents of the 
-         * front buffer.
+
+        /**
+         * The back buffer contents are the prior contents of the front buffer.
          */
         public static final FlipContents PRIOR = new FlipContents();
-        
-        /** 
-         * The back buffer contents are undefined after flipping 
+
+        /**
+         * The back buffer contents are undefined after flipping
          */
         public static final FlipContents UNDEFINED = new FlipContents();
 

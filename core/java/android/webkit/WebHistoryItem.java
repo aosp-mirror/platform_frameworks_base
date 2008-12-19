@@ -33,6 +33,8 @@ public class WebHistoryItem implements Cloneable {
     private String mTitle;
     // The base url of this item.
     private String mUrl;
+    // The original requested url of this item.
+    private String mOriginalUrl;
     // The favicon for this item.
     private Bitmap mFavicon;
     // The pre-flattened data used for saving the state.
@@ -95,6 +97,18 @@ public class WebHistoryItem implements Cloneable {
     }
 
     /**
+     * Return the original url of this history item. This was the requested
+     * url, the final url may be different as there might have been 
+     * redirects while loading the site.
+     * @return The original url of this history item.
+     * 
+     * @hide pending API Council approval
+     */
+    public String getOriginalUrl() {
+        return mOriginalUrl;
+    }
+    
+    /**
      * Return the document title of this history item.
      * @return The document title of this history item.
      * Note: The VM ensures 32-bit atomic read/write operations so we don't have
@@ -154,8 +168,10 @@ public class WebHistoryItem implements Cloneable {
     private native void inflate(int nativeFrame, byte[] data);
 
     /* Called by jni when the item is updated */
-    private void update(String url, String title, Bitmap favicon, byte[] data) {
+    private void update(String url, String originalUrl, String title, 
+            Bitmap favicon, byte[] data) {
         mUrl = url;
+        mOriginalUrl = originalUrl;
         mTitle = title;
         mFavicon = favicon;
         mFlattenedData = data;

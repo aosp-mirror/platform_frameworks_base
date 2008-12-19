@@ -695,6 +695,9 @@ bool AaptGroupEntry::getKeysHiddenName(const char* name,
     } else if (strcmp(name, "keyshidden") == 0) {
         mask = out->MASK_KEYSHIDDEN;
         value = out->KEYSHIDDEN_YES;
+    } else if (strcmp(name, "keyssoft") == 0) {
+        mask = out->MASK_KEYSHIDDEN;
+        value = out->KEYSHIDDEN_SOFT;
     }
     
     if (mask != 0) {

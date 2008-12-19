@@ -152,9 +152,9 @@ class StatusBarIcon {
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
-            Log.e(StatusBarService.TAG, "Icon not found in "
+            Log.w(StatusBarService.TAG, "Icon not found in "
                   + (data.iconPackage != null ? data.iconId : "<system>")
-                  + ": " + Integer.toHexString(data.iconId), e);
+                  + ": " + Integer.toHexString(data.iconId));
         }
 
         return null;

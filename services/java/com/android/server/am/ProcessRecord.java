@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 
 import android.app.ActivityManager;
@@ -38,10 +39,11 @@ import java.util.HashSet;
  * is currently running.
  */
 class ProcessRecord implements Watchdog.PssRequestor {
-    final BatteryStats.Uid.Proc batteryStats; // where to collect runtime statistics
+    final BatteryStatsImpl.Uid.Proc batteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final String processName;   // name of the process
-    String uniquePackage;       // Name of package if only one in the process
+    // List of packages running in the process
+    final HashSet<String> pkgList = new HashSet();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -107,7 +109,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
         pw.println(prefix+"manageSpaceActivityName="+info.manageSpaceActivityName);
         pw.println(prefix + "dir=" + info.sourceDir + " publicDir=" + info.publicSourceDir 
               + " data=" + info.dataDir);
-        pw.println(prefix + "uniquePackage=" + uniquePackage);
+        pw.println(prefix + "packageList=" + pkgList);
         pw.println(prefix + "instrumentationClass=" + instrumentationClass
               + " instrumentationProfileFile=" + instrumentationProfileFile);
         pw.println(prefix + "instrumentationArguments=" + instrumentationArguments);
@@ -136,12 +138,12 @@ class ProcessRecord implements Watchdog.PssRequestor {
         pw.println(prefix + "receivers=" + receivers);
     }
     
-    ProcessRecord(BatteryStats.Uid.Proc _batteryStats, IApplicationThread _thread,
+    ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
             ApplicationInfo _info, String _processName) {
         batteryStats = _batteryStats;
         info = _info;
         processName = _processName;
-        uniquePackage = _info.packageName;
+        pkgList.add(_info.packageName);
         thread = _thread;
         maxAdj = ActivityManagerService.EMPTY_APP_ADJ;
         hiddenAdj = ActivityManagerService.HIDDEN_APP_MIN_ADJ;
@@ -189,5 +191,34 @@ class ProcessRecord implements Watchdog.PssRequestor {
         return "ProcessRecord{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + pid + ":" + processName + "/" + info.uid + "}";
+    }
+    
+    /*
+     *  Return true if package has been added false if not
+     */
+    public boolean addPackage(String pkg) {
+        if (!pkgList.contains(pkg)) {
+            pkgList.add(pkg);
+            return true;
+        }
+        return false;
+    }
+    
+    /*
+     *  Delete all packages from list except the package indicated in info
+     */
+    public void resetPackageList() {
+        pkgList.clear();
+        pkgList.add(info.packageName);
+    }
+    
+    public String[] getPackageList() {
+        int size = pkgList.size();
+        if (size == 0) {
+            return null;
+        }
+        String list[] = new String[size];
+        pkgList.toArray(list);
+        return list;
     }
 }

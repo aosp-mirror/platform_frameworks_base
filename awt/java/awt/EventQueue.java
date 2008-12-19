@@ -18,6 +18,7 @@
  * @author Michael Danilov, Pavel Dolgov
  * @version $Revision$
  */
+
 package java.awt;
 
 import java.awt.event.InvocationEvent;
@@ -25,60 +26,69 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.EmptyStackException;
 
 /**
- * The EventQueue class manages events. It is a platform-independent class 
- * that queues events both from the underlying peer classes and from trusted 
+ * The EventQueue class manages events. It is a platform-independent class that
+ * queues events both from the underlying peer classes and from trusted
  * application classes.
+ * 
+ * @since Android 1.0
  */
 public class EventQueue {
-    
-    /** The core ref. */
-    private final EventQueueCoreAtomicReference coreRef = 
-            new EventQueueCoreAtomicReference();
-    
+
+    /**
+     * The core ref.
+     */
+    private final EventQueueCoreAtomicReference coreRef = new EventQueueCoreAtomicReference();
+
     /**
      * The Class EventQueueCoreAtomicReference.
      */
     private static final class EventQueueCoreAtomicReference {
-        
-        /** The core. */
+
+        /**
+         * The core.
+         */
         private EventQueueCore core;
 
-        /*synchronized*/ /**
+        /* synchronized */
+        /**
          * Gets the.
          * 
-         * @return the event queue core
+         * @return the event queue core.
          */
-        EventQueueCore get() { 
+        EventQueueCore get() {
             return core;
         }
 
-        /*synchronized*/ /**
+        /* synchronized */
+        /**
          * Sets the.
          * 
-         * @param newCore the new core
+         * @param newCore
+         *            the new core.
          */
-        void set(EventQueueCore newCore) { 
+        void set(EventQueueCore newCore) {
             core = newCore;
         }
     }
 
     /**
-     * Returns true if the calling thread is the current 
-     * AWT EventQueue's dispatch thread. 
+     * Returns true if the calling thread is the current AWT EventQueue's
+     * dispatch thread.
      * 
-     * @return true, if the calling thread is the current 
-     * AWT EventQueue's dispatch thread; false otherwise.
+     * @return true, if the calling thread is the current AWT EventQueue's
+     *         dispatch thread; false otherwise.
      */
     public static boolean isDispatchThread() {
         return Thread.currentThread() instanceof EventDispatchThread;
     }
 
     /**
-     * Posts an InvocationEvent which executes the run() method on a Runnable 
+     * Posts an InvocationEvent which executes the run() method on a Runnable
      * when dispatched by the AWT event dispatcher thread.
      * 
-     * @param runnable the Runnable whose run method should be executed 
-     * synchronously on the EventQueue.
+     * @param runnable
+     *            the Runnable whose run method should be executed synchronously
+     *            on the EventQueue.
      */
     public static void invokeLater(Runnable runnable) {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -87,29 +97,28 @@ public class EventQueue {
     }
 
     /**
-     * Posts an InvocationEvent which executes the run() method on a Runnable 
-     * when dispatched by the AWT event dispatcher thread and the 
-     * notifyAll method is called on it immediately after run returns.
+     * Posts an InvocationEvent which executes the run() method on a Runnable
+     * when dispatched by the AWT event dispatcher thread and the notifyAll
+     * method is called on it immediately after run returns.
      * 
-     * @param runnable the Runnable whose run method should be executed 
-     * synchronously on the EventQueue.
-     * 
-     * @throws InterruptedException if another thread has interrupted 
-     * this thread.
-     * @throws InvocationTargetException if a throwable is thrown 
-     * when running the runnable. 
+     * @param runnable
+     *            the Runnable whose run method should be executed synchronously
+     *            on the EventQueue.
+     * @throws InterruptedException
+     *             if another thread has interrupted this thread.
+     * @throws InvocationTargetException
+     *             if an error occurred while running the runnable.
      */
-    public static void invokeAndWait(Runnable runnable)
-            throws InterruptedException, InvocationTargetException {
+    public static void invokeAndWait(Runnable runnable) throws InterruptedException,
+            InvocationTargetException {
 
         if (isDispatchThread()) {
             throw new Error();
         }
 
         final Toolkit toolkit = Toolkit.getDefaultToolkit();
-        final Object notifier = new Object();  //$NON-LOCK-1$
-        InvocationEvent event = new InvocationEvent(
-                toolkit, runnable, notifier, true);
+        final Object notifier = new Object(); // $NON-LOCK-1$
+        InvocationEvent event = new InvocationEvent(toolkit, runnable, notifier, true);
 
         synchronized (notifier) {
             toolkit.getSystemEventQueueImpl().postEvent(event);
@@ -126,7 +135,7 @@ public class EventQueue {
     /**
      * Gets the system event queue.
      * 
-     * @return the system event queue
+     * @return the system event queue.
      */
     private static EventQueue getSystemEventQueue() {
         Thread th = Thread.currentThread();
@@ -135,48 +144,45 @@ public class EventQueue {
         }
         return null;
     }
-    
+
     /**
-     * Gets the most recent event's timestamp.
-     * This event was dispatched from the EventQueue associated with the 
-     * calling thread.
+     * Gets the most recent event's timestamp. This event was dispatched from
+     * the EventQueue associated with the calling thread.
      * 
-     * @return the timestamp of the last Event to be dispatched, 
-     * or System.currentTimeMillis() if this method is invoked from 
-     * a thread other than an event-dispatching thread.
+     * @return the timestamp of the last Event to be dispatched, or
+     *         System.currentTimeMillis() if this method is invoked from a
+     *         thread other than an event-dispatching thread.
      */
     public static long getMostRecentEventTime() {
         EventQueue eq = getSystemEventQueue();
-        return (eq != null) ? 
-                eq.getMostRecentEventTimeImpl() : System.currentTimeMillis();
+        return (eq != null) ? eq.getMostRecentEventTimeImpl() : System.currentTimeMillis();
     }
-    
+
     /**
      * Gets the most recent event time impl.
      * 
-     * @return the most recent event time impl
+     * @return the most recent event time impl.
      */
     private long getMostRecentEventTimeImpl() {
         return getCore().getMostRecentEventTime();
     }
 
     /**
-     * Returns the the currently dispatched event by the EventQueue 
-     * associated with the calling thread.
+     * Returns the the currently dispatched event by the EventQueue associated
+     * with the calling thread.
      * 
-     * @return the currently dispatched event or null if this method 
-     * is invoked from a thread other than an event-dispatching thread.
+     * @return the currently dispatched event or null if this method is invoked
+     *         from a thread other than an event-dispatching thread.
      */
     public static AWTEvent getCurrentEvent() {
         EventQueue eq = getSystemEventQueue();
-        return (eq != null) ? 
-                eq.getCurrentEventImpl() : null;
+        return (eq != null) ? eq.getCurrentEventImpl() : null;
     }
 
     /**
      * Gets the current event impl.
      * 
-     * @return the current event impl
+     * @return the current event impl.
      */
     private AWTEvent getCurrentEventImpl() {
         return getCore().getCurrentEvent();
@@ -192,7 +198,8 @@ public class EventQueue {
     /**
      * Instantiates a new event queue.
      * 
-     * @param t the t
+     * @param t
+     *            the t.
      */
     EventQueue(Toolkit t) {
         setCore(new EventQueueCore(this, t));
@@ -201,7 +208,8 @@ public class EventQueue {
     /**
      * Posts a event to the EventQueue.
      * 
-     * @param event AWTEvent.
+     * @param event
+     *            AWTEvent.
      */
     public void postEvent(AWTEvent event) {
         event.isPosted = true;
@@ -209,29 +217,28 @@ public class EventQueue {
     }
 
     /**
-     * Returns an event from the EventQueue and removes it from this queue. 
-     *  
-     * @return the next AWTEvent.
+     * Returns an event from the EventQueue and removes it from this queue.
      * 
-     * @throws InterruptedException is thrown if another thread 
-     * interrupts this thread.
+     * @return the next AWTEvent.
+     * @throws InterruptedException
+     *             is thrown if another thread interrupts this thread.
      */
     public AWTEvent getNextEvent() throws InterruptedException {
         return getCore().getNextEvent();
     }
-    
+
     /**
      * Gets the next event no wait.
      * 
-     * @return the next event no wait
+     * @return the next event no wait.
      */
     AWTEvent getNextEventNoWait() {
         return getCore().getNextEventNoWait();
     }
 
     /**
-     * Returns the first event of the EventQueue (without removing it 
-     * from the queue).
+     * Returns the first event of the EventQueue (without removing it from the
+     * queue).
      * 
      * @return the the first AWT event of the EventQueue.
      */
@@ -240,11 +247,11 @@ public class EventQueue {
     }
 
     /**
-     * Returns the first event of the EventQueue with the specified ID
-     * (without removing it from the queue).
+     * Returns the first event of the EventQueue with the specified ID (without
+     * removing it from the queue).
      * 
-     * @param id the type ID of event.
-     * 
+     * @param id
+     *            the type ID of event.
      * @return the first event of the EventQueue with the specified ID.
      */
     public AWTEvent peekEvent(int id) {
@@ -252,21 +259,22 @@ public class EventQueue {
     }
 
     /**
-     * Replaces the existing EventQueue with the specified EventQueue. 
-     * Any pending events are transferred to the new EventQueue. 
+     * Replaces the existing EventQueue with the specified EventQueue. Any
+     * pending events are transferred to the new EventQueue.
      * 
-     * @param newEventQueue the new event queue.
+     * @param newEventQueue
+     *            the new event queue.
      */
     public void push(EventQueue newEventQueue) {
         getCore().push(newEventQueue);
     }
-    
+
     /**
-     * Stops dispatching events using this EventQueue. 
-     * Any pending events are transferred to the previous EventQueue.
+     * Stops dispatching events using this EventQueue. Any pending events are
+     * transferred to the previous EventQueue.
      * 
-     * @throws EmptyStackException is thrown if no previous push 
-     * was made on this EventQueue.
+     * @throws EmptyStackException
+     *             is thrown if no previous push was made on this EventQueue.
      */
     protected void pop() throws EmptyStackException {
         getCore().pop();
@@ -275,7 +283,8 @@ public class EventQueue {
     /**
      * Dispatches the specified event.
      * 
-     * @param event the AWTEvent.
+     * @param event
+     *            the AWTEvent.
      */
     protected void dispatchEvent(AWTEvent event) {
         getCore().dispatchEventImpl(event);
@@ -284,7 +293,7 @@ public class EventQueue {
     /**
      * Checks if the queue is empty.
      * 
-     * @return true, if is empty
+     * @return true, if is empty.
      */
     boolean isEmpty() {
         return getCore().isEmpty();
@@ -293,16 +302,17 @@ public class EventQueue {
     /**
      * Gets the core.
      * 
-     * @return the core
+     * @return the core.
      */
     EventQueueCore getCore() {
         return coreRef.get();
     }
-    
+
     /**
      * Sets the core.
      * 
-     * @param newCore the new core
+     * @param newCore
+     *            the new core.
      */
     void setCore(EventQueueCore newCore) {
         coreRef.set((newCore != null) ? newCore : new EventQueueCore(this));

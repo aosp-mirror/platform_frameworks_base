@@ -982,10 +982,10 @@ public abstract class Context {
             String profileFile, Bundle arguments);
 
     /**
-     * Return the handle to a system-level service by name.  The class of the
-     * returned object varies by the requested name.  Currently available names
+     * Return the handle to a system-level service by name. The class of the
+     * returned object varies by the requested name. Currently available names
      * are:
-     *
+     * 
      * <dl>
      *  <dt> {@link #WINDOW_SERVICE} ("window")
      *  <dd> The top-level window manager in which you can place custom
@@ -1021,6 +1021,9 @@ public abstract class Context {
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
      *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of
      * Wi-Fi connectivity.
+     * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
+     * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
+     * for management of input methods.
      * </dl>
      * 
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -1029,9 +1032,9 @@ public abstract class Context {
      * Services, Providers, etc.)
      *
      * @param name The name of the desired service.
-     *
+     * 
      * @return The service or null if the name does not exist.
-     *
+     * 
      * @see #WINDOW_SERVICE
      * @see android.view.WindowManager
      * @see #LAYOUT_INFLATER_SERVICE
@@ -1062,6 +1065,8 @@ public abstract class Context {
      * @see android.media.AudioManager
      * @see #TELEPHONY_SERVICE
      * @see android.internal.TelephonyManager
+     * @see #INPUT_METHOD_SERVICE
+     * @see android.view.inputmethod.InputMethodManager
      */
     public abstract Object getSystemService(String name);
 
@@ -1233,6 +1238,15 @@ public abstract class Context {
      * @see android.text.ClipboardManager
      */
     public static final String CLIPBOARD_SERVICE = "clipboard";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a 
+     * {@link android.view.inputmethod.InputMethodManager} for accessing input
+     * methods.
+     *
+     * @see #getSystemService
+     */
+    public static final String INPUT_METHOD_SERVICE = "input_method";
 
     /**
      * Determine whether the given permission is allowed for a particular

@@ -46,13 +46,15 @@ class StubMethodAdapter implements MethodVisitor {
 
     private boolean mMessageGenerated;
     private final boolean mIsStatic;
+    private final boolean mIsNative;
 
     public StubMethodAdapter(MethodVisitor mv, String methodName, Type returnType,
-            String invokeSignature, boolean isStatic) {
+            String invokeSignature, boolean isStatic, boolean isNative) {
         mParentVisitor = mv;
         mReturnType = returnType;
         mInvokeSignature = invokeSignature;
         mIsStatic = isStatic;
+        mIsNative = isNative;
         
         if (CONSTRUCTOR.equals(methodName) || CLASS_INIT.equals(methodName)) {
             mIsInitMethod = true;
@@ -61,20 +63,23 @@ class StubMethodAdapter implements MethodVisitor {
     
     private void generateInvoke() {
         /* Generates the code:
-         *  OverrideMethod.invoke("signature", this);
+         *  OverrideMethod.invoke("signature", mIsNative ? true : false, null or this);
          */
         mParentVisitor.visitLdcInsn(mInvokeSignature);
+        // push true or false
+        mParentVisitor.visitInsn(mIsNative ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
+        // push null or this
         if (mIsStatic) {
-            mParentVisitor.visitInsn(Opcodes.ACONST_NULL); // push null
+            mParentVisitor.visitInsn(Opcodes.ACONST_NULL);
         } else {
-            mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0); // push this
+            mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         }
         mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                 "com/android/tools/layoutlib/create/OverrideMethod",
                 "invoke",
-                "(Ljava/lang/String;Ljava/lang/Object;)V");
+                "(Ljava/lang/String;ZLjava/lang/Object;)V");
     }
-    
+
     private void generateReturn() {
         /* Generates one of, depending on the return type:
          *   return;

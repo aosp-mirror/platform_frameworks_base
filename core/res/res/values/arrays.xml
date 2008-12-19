@@ -19,7 +19,7 @@
 -->
 <resources>
 
-    <!-- These are all of the drawable resources that should be preloaded by
+    <!-- Do not translate. These are all of the drawable resources that should be preloaded by
          the zygote process before it starts forking application processes. -->
     <array name="preloaded_drawables">
         <item>@drawable/scrollbar_handle_vertical</item>
@@ -87,15 +87,17 @@
         
     </array>
     
+    <!-- Do not translate. -->
     <integer-array name="maps_starting_lat_lng">
         <item>36149777</item>
         <item>-95993398</item>
     </integer-array>
+    <!-- Do not translate. -->
     <integer-array name="maps_starting_zoom">
         <item>3</item>
     </integer-array>
 
-    <!-- Defines the slots for the right-hand side icons.  That is to say, the
+    <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="status_bar_icon_order">
         <item>clock</item>
@@ -111,5 +113,6 @@
         <item>gps</item>
         <item>sync_active</item>
         <item>sync_failing</item>
+        <item>ime</item>
     </string-array>
 </resources>

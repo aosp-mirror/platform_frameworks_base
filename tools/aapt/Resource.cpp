@@ -916,6 +916,10 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         }
     }
 
+    if (table.validateLocalizations()) {
+        hasErrors = true;
+    }
+    
     if (hasErrors) {
         return UNKNOWN_ERROR;
     }

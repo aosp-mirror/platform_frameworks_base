@@ -1,0 +1,8 @@
+FrameworkTestApplication should hold snippets of functionality that are
+helpful for testing the UI framework code, but not appropriate for
+sample code.  For instance, a layout contrived to exercise an edge case
+of scrolling behavior.
+
+InstrumentationTestCases should be added under tests and added to the
+list of tests in FrameworkInstrumentationTestRunner.
+

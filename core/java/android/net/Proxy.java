@@ -43,9 +43,9 @@ final public class Proxy {
     static final public String getHost(Context ctx) {
         ContentResolver contentResolver = ctx.getContentResolver();
         Assert.assertNotNull(contentResolver);
-        String host = Settings.System.getString(
+        String host = Settings.Secure.getString(
                 contentResolver,
-                Settings.System.HTTP_PROXY);
+                Settings.Secure.HTTP_PROXY);
         if (host != null) {
             int i = host.indexOf(':');
             if (i == -1) {
@@ -67,9 +67,9 @@ final public class Proxy {
     static final public int getPort(Context ctx) {
         ContentResolver contentResolver = ctx.getContentResolver();
         Assert.assertNotNull(contentResolver);
-        String host = Settings.System.getString(
+        String host = Settings.Secure.getString(
                 contentResolver,
-                Settings.System.HTTP_PROXY);
+                Settings.Secure.HTTP_PROXY);
         if (host != null) {
             int i = host.indexOf(':');
             if (i == -1) {

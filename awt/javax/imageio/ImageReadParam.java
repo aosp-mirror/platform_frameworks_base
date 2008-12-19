@@ -18,6 +18,7 @@
  * @author Sergey I. Salishev
  * @version $Revision: 1.2 $
  */
+
 package javax.imageio;
 
 import java.awt.Dimension;
@@ -29,45 +30,50 @@ import java.awt.image.BufferedImage;
  */
 
 /**
- * The ImageReadParam class provides information to the ImageReader about
- * how an image is to be decoded.
+ * The ImageReadParam class provides information to the ImageReader about how an
+ * image is to be decoded.
+ * 
+ * @since Android 1.0
  */
-
 public class ImageReadParam extends IIOParam {
 
-    /** 
-     * This flag indicates if this ImageReadParam supports setting the source 
-     * rendering size.  
+    /**
+     * This flag indicates if this ImageReadParam supports setting the source
+     * rendering size.
      */
     protected boolean canSetSourceRenderSize;
-    
-    /** 
-     * The destination BufferedImage. 
+
+    /**
+     * The destination BufferedImage.
      */
     protected BufferedImage destination;
-    
-    /** The destination bands. */
+
+    /**
+     * The destination bands.
+     */
     protected int[] destinationBands;
-    
-    /** 
-     * The minimum progressive pass.  
+
+    /**
+     * The minimum progressive pass.
      */
     protected int minProgressivePass;
-    
-    /** 
-     * The number of progressive passes.  
+
+    /**
+     * The number of progressive passes.
      */
     protected int numProgressivePasses;
-    
-    /** The source render size. */
+
+    /**
+     * The source render size.
+     */
     protected Dimension sourceRenderSize;
 
     /**
-     * Returns true if this ImageReaderParam supports rendering a
-     * source image at an arbitrary size.
+     * Returns true if this ImageReaderParam supports rendering a source image
+     * at an arbitrary size.
      * 
-     * @return true if this ImageReaderParam supports rendering a
-     * source image at an arbitrary size, false otherwise.
+     * @return true, if this ImageReaderParam supports rendering a source image
+     *         at an arbitrary size, false otherwise.
      */
     public boolean canSetSourceRenderSize() {
         return canSetSourceRenderSize;
@@ -92,11 +98,9 @@ public class ImageReadParam extends IIOParam {
     }
 
     /**
-     * Gets the index of the maximum pass to be decoded.
-     * This method returns Integer.MAX_VALUE, if 
-     * getSourceNumProgressivePasses() method returns value
-     * that is equal to Integer.MAX_VALUE. Otherwise
-     * this method returns 
+     * Gets the index of the maximum pass to be decoded. This method returns
+     * Integer.MAX_VALUE, if getSourceNumProgressivePasses() method returns
+     * value that is equal to Integer.MAX_VALUE. Otherwise this method returns
      * getSourceMinProgressivePass() + getSourceNumProgressivePasses() - 1.
      * 
      * @return the index of the maximum pass to be decoded.
@@ -109,19 +113,19 @@ public class ImageReadParam extends IIOParam {
     }
 
     /**
-     * Gets the index of the minimum progressive pass that is decoded,
-     * default is 0. 
+     * Gets the index of the minimum progressive pass that is decoded, default
+     * is 0.
      * 
      * @return the index of the minimum progressive pass that is decoded,
-     * default is 0.
+     *         default is 0.
      */
     public int getSourceMinProgressivePass() {
         return minProgressivePass;
     }
 
     /**
-     * Gets the number of progressive passes.
-     * The default value is Integer.MAX_VALUE. 
+     * Gets the number of progressive passes. The default value is
+     * Integer.MAX_VALUE.
      * 
      * @return the number of progressive passes.
      */
@@ -130,8 +134,8 @@ public class ImageReadParam extends IIOParam {
     }
 
     /**
-     * Gets the dimension of source image which will be rendered
-     * during decoding process.
+     * Gets the dimension of source image which will be rendered during decoding
+     * process.
      * 
      * @return the source render size.
      */
@@ -140,11 +144,12 @@ public class ImageReadParam extends IIOParam {
     }
 
     /**
-     * Sets the specified destination image.
-     * This image will be used by read, readAll, and readRaster methods,
-     * and a reference to it will be returned by those methods.
+     * Sets the specified destination image. This image will be used by read,
+     * readAll, and readRaster methods, and a reference to it will be returned
+     * by those methods.
      * 
-     * @param destination the destination image.
+     * @param destination
+     *            the destination image.
      */
     public void setDestination(BufferedImage destination) {
         this.destination = destination;
@@ -153,7 +158,8 @@ public class ImageReadParam extends IIOParam {
     /**
      * Sets the indices of the destination bands.
      * 
-     * @param destinationBands the indices of the destination bands.
+     * @param destinationBands
+     *            the indices of the destination bands.
      */
     public void setDestinationBands(int[] destinationBands) {
         this.destinationBands = destinationBands;
@@ -167,8 +173,10 @@ public class ImageReadParam extends IIOParam {
     /**
      * Sets the source progressive passes.
      * 
-     * @param minPass the index of the minimum pass to be decoded.
-     * @param numPasses the number of passes to be decoded.
+     * @param minPass
+     *            the index of the minimum pass to be decoded.
+     * @param numPasses
+     *            the number of passes to be decoded.
      */
     public void setSourceProgressivePasses(int minPass, int numPasses) {
         minProgressivePass = minPass;
@@ -176,18 +184,18 @@ public class ImageReadParam extends IIOParam {
     }
 
     /**
-     * Sets the dimension size of source image if an
-     * image can be rendered at an arbitrary size.
+     * Sets the dimension size of source image if an image can be rendered at an
+     * arbitrary size.
      * 
-     * @param size the size of rendered image.
-     * 
-     * @throws UnsupportedOperationException the unsupported operation exception
+     * @param size
+     *            the size of rendered image.
+     * @throws UnsupportedOperationException
+     *             the unsupported operation exception.
      */
     public void setSourceRenderSize(Dimension size) throws UnsupportedOperationException {
         if (!canSetSourceRenderSize) {
             throw new UnsupportedOperationException("can't set source renderer size");
         }
-        sourceRenderSize = size;        
+        sourceRenderSize = size;
     }
 }
-

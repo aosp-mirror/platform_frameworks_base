@@ -375,6 +375,17 @@ android_media_MediaPlayer_setLooping(JNIEnv *env, jobject thiz, jboolean looping
     process_media_player_call( env, thiz, mp->setLooping(looping), NULL, NULL );
 }
 
+static jboolean
+android_media_MediaPlayer_isLooping(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+    return mp->isLooping();
+}
+
 static void
 android_media_MediaPlayer_setVolume(JNIEnv *env, jobject thiz, float leftVolume, float rightVolume)
 {
@@ -450,6 +461,7 @@ static JNINativeMethod gMethods[] = {
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer_reset},
     {"setAudioStreamType",  "(I)V",                             (void *)android_media_MediaPlayer_setAudioStreamType},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer_setLooping},
+    {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
@@ -506,6 +518,7 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
+extern int register_android_media_AmrInputStream(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -535,6 +548,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_MediaMetadataRetriever(env) < 0) {
         LOGE("ERROR: MediaMetadataRetriever native registration failed\n");
+        goto bail;
+    }
+
+    if (register_android_media_AmrInputStream(env) < 0) {
+        LOGE("ERROR: AmrInputStream native registration failed\n");
         goto bail;
     }
 

@@ -96,6 +96,7 @@ final class StringBlock {
                     mStyleIDs.subId = nativeIndexOfString(mNative, "sub");
                     mStyleIDs.strikeId = nativeIndexOfString(mNative, "strike");
                     mStyleIDs.listItemId = nativeIndexOfString(mNative, "li");
+                    mStyleIDs.marqueeId = nativeIndexOfString(mNative, "marquee");
 
                     if (localLOGV) Log.v(TAG, "BoldId=" + mStyleIDs.boldId
                             + ", ItalicId=" + mStyleIDs.italicId
@@ -127,6 +128,7 @@ final class StringBlock {
         private int supId;
         private int strikeId;
         private int listItemId;
+        private int marqueeId;
     }
 
     private CharSequence applyStyles(String str, int[] style, StyleIDs ids) {
@@ -179,6 +181,10 @@ final class StringBlock {
                 buffer.setSpan(new BulletSpan(10),
                                style[i+1], style[i+2]+1,
                                Spannable.SPAN_PARAGRAPH);
+            } else if (type == ids.marqueeId) {
+                buffer.setSpan(TextUtils.TruncateAt.MARQUEE,
+                               style[i+1], style[i+2]+1,
+                               Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             } else {
                 String tag = nativeGetString(mNative, type);
 
@@ -213,6 +219,15 @@ final class StringBlock {
                     if (sub != null) {
                         int color = XmlUtils.convertValueToUnsignedInt(sub, -1);
                         buffer.setSpan(new BackgroundColorSpan(color),
+                                       style[i+1], style[i+2]+1,
+                                       Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                } else if (tag.startsWith("a;")) {
+                    String sub;
+
+                    sub = subtag(tag, ";href=");
+                    if (sub != null) {
+                        buffer.setSpan(new URLSpan(sub),
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }

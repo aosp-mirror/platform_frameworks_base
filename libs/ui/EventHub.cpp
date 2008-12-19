@@ -315,9 +315,8 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
         }
 
         //printf("poll %d, returned %d\n", mFDCount, pollres);
-        if(mFDs[0].revents & POLLIN) {
-            read_notify(mFDs[0].fd);
-        }
+
+        // mFDs[0] is used for inotify, so process regular events starting at mFDs[1]
         for(i = 1; i < mFDCount; i++) {
             if(mFDs[i].revents) {
                 LOGV("revents for %d = 0x%08x", i, mFDs[i].revents);
@@ -356,6 +355,12 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
                     }
                 }
             }
+        }
+        
+        // read_notify() will modify mFDs and mFDCount, so this must be done after
+        // processing all other events.
+        if(mFDs[0].revents & POLLIN) {
+            read_notify(mFDs[0].fd);
         }
     }
 }
@@ -607,7 +612,7 @@ int EventHub::open_device(const char *deviceName)
         sprintf(propName, "hw.keyboards.%u.devname", publicID);
         property_set(propName, devname);
 
-        LOGI("New keyboard: publicID=%d device->id=%d devname='%s propName='%s' keylayout='%s'\n",
+        LOGI("New keyboard: publicID=%d device->id=%d devname='%s' propName='%s' keylayout='%s'\n",
                 publicID, device->id, devname, propName, keylayoutFilename);
     }
 

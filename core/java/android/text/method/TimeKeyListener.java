@@ -17,12 +17,18 @@
 package android.text.method;
 
 import android.view.KeyEvent;
+import android.text.InputType;
 
 /**
  * For entering times in a text field.
  */
 public class TimeKeyListener extends NumberKeyListener
 {
+    public int getInputType() {
+        return InputType.TYPE_CLASS_DATETIME
+        | InputType.TYPE_DATETIME_VARIATION_TIME;
+    }
+    
     @Override
     protected char[] getAcceptedChars()
     {

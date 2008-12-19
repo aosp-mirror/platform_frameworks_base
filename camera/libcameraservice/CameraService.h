@@ -1,6 +1,7 @@
 /*
 **
-** Copyright 2008, The Android Open Source Project
+** Copyright (C) 2008, The Android Open Source Project
+** Copyright (C) 2008 HTC Inc.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -20,6 +21,8 @@
 
 #include <ui/ICameraService.h>
 #include <ui/CameraHardwareInterface.h>
+#include <ui/Camera.h>
+
 class android::MemoryHeapBase;
 
 namespace android {
@@ -32,7 +35,7 @@ namespace android {
 // When enabled, this feature allows you to send an event to the CameraService
 // so that you can cause all references to the heap object gWeakHeap, defined
 // below, to be printed. You will also need to set DEBUG_REFS=1 and
-// DEBUG_REFS_ENABLED_BY_DEFAULT=0 in libutils/RefBase.cpp. You just have to 
+// DEBUG_REFS_ENABLED_BY_DEFAULT=0 in libutils/RefBase.cpp. You just have to
 // set gWeakHeap to the appropriate heap you want to track.
 
 #define DEBUG_HEAP_LEAKS 0
@@ -67,11 +70,15 @@ private:
     public:
         virtual void            disconnect();
 
+        // connect new client with existing camera remote
+        virtual status_t        connect(const sp<ICameraClient>& client);
+
         // pass the buffered ISurface to the camera service
         virtual status_t        setPreviewDisplay(const sp<ISurface>& surface);
-        
-        // tell the service whether to callback with each preview frame
-        virtual void            setHasFrameCallback(bool installed);
+
+        // set the frame callback flag to affect how the received frames from
+        // preview are handled.
+        virtual void            setFrameCallbackFlag(int frame_callback_flag);
 
         // start preview mode, must call setPreviewDisplay first
         virtual status_t        startPreview();
@@ -112,6 +119,7 @@ private:
                     void        postRaw(const sp<IMemory>& mem);
                     void        postJpeg(const sp<IMemory>& mem);
                     void        postFrame(const sp<IMemory>& mem);
+                    void        copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size);
                     void        postError(status_t error);
                     void        postAutoFocus(bool focused);
 
@@ -119,20 +127,20 @@ private:
         mutable     Mutex                       mLock;
         // mSurfaceLock synchronizes access to mSurface between
         // setPreviewSurface() and postFrame().  Note that among
-        // the public methods, all accesses to mSurface are 
+        // the public methods, all accesses to mSurface are
         // syncrhonized by mLock.  However, postFrame() is called
-        // by the CameraHardwareInterface callback, and needs to 
+        // by the CameraHardwareInterface callback, and needs to
         // access mSurface.  It cannot hold mLock, however, because
         // stopPreview() may be holding that lock while attempting
         // top stop preview, and stopPreview itself will block waiting
-        // for a callback from CameraHardwareInterface.  If this 
+        // for a callback from CameraHardwareInterface.  If this
         // happens, it will cause a deadlock.
         mutable     Mutex                       mSurfaceLock;
         mutable     Condition                   mReady;
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
                     sp<MemoryHeapBase>          mPreviewBuffer;
-                    bool                        mHasFrameCallback;
+                    int                         mFrameCallbackFlag;
 
                     // these are immutable once the object is created,
                     // they don't need to be protected by a lock

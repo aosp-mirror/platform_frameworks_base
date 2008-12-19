@@ -74,6 +74,7 @@ import com.android.internal.R;
  * @attr ref com.android.internal.R.styleable#SlidingDrawer_topOffset
  * @attr ref com.android.internal.R.styleable#SlidingDrawer_bottomOffset
  * @attr ref com.android.internal.R.styleable#SlidingDrawer_orientation
+ * @attr ref com.android.internal.R.styleable#SlidingDrawer_allowSingleTap
  * @attr ref com.android.internal.R.styleable#SlidingDrawer_animateOnClick
  */
 public class SlidingDrawer extends ViewGroup {
@@ -124,6 +125,7 @@ public class SlidingDrawer extends ViewGroup {
     private long mCurrentAnimationTime;
     private int mTouchDelta;
     private boolean mAnimating;
+    private boolean mAllowSingleTap;
     private boolean mAnimateOnClick;
 
     /**
@@ -186,6 +188,7 @@ public class SlidingDrawer extends ViewGroup {
         mVertical = orientation == ORIENTATION_VERTICAL;
         mBottomOffset = (int) a.getDimension(R.styleable.SlidingDrawer_bottomOffset, 0.0f);
         mTopOffset = (int) a.getDimension(R.styleable.SlidingDrawer_topOffset, 0.0f);
+        mAllowSingleTap = a.getBoolean(R.styleable.SlidingDrawer_allowSingleTap, true);
         mAnimateOnClick = a.getBoolean(R.styleable.SlidingDrawer_animateOnClick, true);
 
         int handleId = a.getResourceId(R.styleable.SlidingDrawer_handle, 0);
@@ -241,11 +244,11 @@ public class SlidingDrawer extends ViewGroup {
         measureChild(handle, widthMeasureSpec, heightMeasureSpec);
 
         if (mVertical) {
-            int height = heightSpecSize - handle.getMeasuredHeight();
+            int height = heightSpecSize - handle.getMeasuredHeight() - mTopOffset;
             mContent.measure(MeasureSpec.makeMeasureSpec(widthSpecSize, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
         } else {
-            int width = widthSpecSize - handle.getMeasuredWidth();
+            int width = widthSpecSize - handle.getMeasuredWidth() - mTopOffset;
             mContent.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(heightSpecSize, MeasureSpec.EXACTLY));
         }
@@ -269,6 +272,12 @@ public class SlidingDrawer extends ViewGroup {
                 } else {
                     canvas.drawBitmap(cache, handle.getRight(), 0, null);                    
                 }
+            } else {
+                canvas.save();
+                canvas.translate(isVertical ? 0 : handle.getLeft() - mTopOffset,
+                        isVertical ? handle.getTop() - mTopOffset : 0);
+                drawChild(canvas, mContent, drawingTime);
+                canvas.restore();
             }
         } else if (mExpanded) {
             drawChild(canvas, mContent, drawingTime);
@@ -415,12 +424,14 @@ public class SlidingDrawer extends ViewGroup {
                                 (!mExpanded && left > mBottomOffset + mRight - mLeft -
                                         mHandleWidth - TAP_THRESHOLD)) {
 
-                            playSoundEffect(SoundEffectConstants.CLICK);
+                            if (mAllowSingleTap) {
+                                playSoundEffect(SoundEffectConstants.CLICK);
 
-                            if (mExpanded) {
-                                animateClose(vertical ? top : left);
-                            } else {
-                                animateOpen(vertical ? top : left);
+                                if (mExpanded) {
+                                    animateClose(vertical ? top : left);
+                                } else {
+                                    animateOpen(vertical ? top : left);
+                                }
                             }
 
                         } else {
@@ -889,6 +900,9 @@ public class SlidingDrawer extends ViewGroup {
             if (mLocked) {
                 return;
             }
+            // mAllowSingleTap isn't relevant here; you're *always*
+            // allowed to open/close the drawer by clicking with the
+            // trackball.
 
             if (mAnimateOnClick) {
                 animateToggle();

@@ -104,7 +104,7 @@ void LayerBuffer::onDraw(const Region& clip) const
          * the requested scale factor, in which case we perform the scaling
          * in several passes. */
 
-        copybit_t* copybit = mFlinger->getBlitEngine();
+        copybit_device_t* copybit = mFlinger->getBlitEngine();
         const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
         const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
 
@@ -123,7 +123,7 @@ void LayerBuffer::onDraw(const Region& clip) const
             if (UNLIKELY(mTemporaryDealer == 0)) {
                 // allocate a memory-dealer for this the first time
                 mTemporaryDealer = mFlinger->getSurfaceHeapManager()
-                        ->createHeap(NATIVE_MEMORY_TYPE_PMEM);
+                        ->createHeap(ISurfaceComposer::eHardware);
                 mTempBitmap.init(mTemporaryDealer);
             }
 
@@ -230,7 +230,18 @@ sp<LayerBaseClient::Surface> LayerBuffer::getSurface() const
 status_t LayerBuffer::registerBuffers(int w, int h, int hstride, int vstride,
             PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
 {
-    status_t err = (memoryHeap!=0 && memoryHeap->heapID() >= 0) ? NO_ERROR : NO_INIT;
+    if (memoryHeap == NULL) {
+        // this is allowed, but in this case, it is illegal to receive
+        // postBuffer(). The surface just erases the framebuffer with
+        // fully transparent pixels.
+        mHeap.clear();
+        mWidth = w;
+        mHeight = h;
+        mNeedsBlending = false;
+        return NO_ERROR;
+    }
+    
+    status_t err = (memoryHeap->heapID() >= 0) ? NO_ERROR : NO_INIT;
     if (err != NO_ERROR)
         return err;
 
@@ -281,6 +292,32 @@ void LayerBuffer::unregisterBuffers()
     invalidateLocked();
 }
 
+sp<Overlay> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t format)
+{
+    sp<Overlay> result;
+    Mutex::Autolock _l(mLock);
+    if (mHeap != 0 || mBuffer != 0) {
+        // we're a push surface. error.
+        return result;
+    }
+    
+    overlay_device_t* overlay_dev = mFlinger->getOverlayEngine();
+    if (overlay_dev == NULL) {
+        // overlays not supported
+        return result;
+    }
+
+    overlay_t* overlay = overlay_dev->createOverlay(overlay_dev, w, h, format);
+    if (overlay == NULL) {
+        // couldn't create the overlay (no memory? no more overlays?)
+        return result;
+    }
+    
+    /* TODO: implement the real stuff here */
+    
+    return result;
+}
+
 sp<LayerBuffer::Buffer> LayerBuffer::getBuffer() const
 {
     Mutex::Autolock _l(mLock);
@@ -328,6 +365,15 @@ void LayerBuffer::SurfaceBuffer::unregisterBuffers()
     LayerBuffer* owner(getOwner());
     if (owner)
         owner->unregisterBuffers();
+}
+
+sp<Overlay> LayerBuffer::SurfaceBuffer::createOverlay(
+        uint32_t w, uint32_t h, int32_t format) {
+    sp<Overlay> result;
+    LayerBuffer* owner(getOwner());
+    if (owner)
+        result = owner->createOverlay(w, h, format);
+    return result;
 }
 
 void LayerBuffer::SurfaceBuffer::disown()

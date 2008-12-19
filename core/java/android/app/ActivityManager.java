@@ -29,7 +29,6 @@ import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 import android.util.Log;
-
 import java.util.List;
 
 /**
@@ -597,6 +596,77 @@ public class ActivityManager {
     public List<ProcessErrorStateInfo> getProcessesInErrorState() {
         try {
             return ActivityManagerNative.getDefault().getProcessesInErrorState();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Information you can retrieve about a running process.
+     */
+    public static class RunningAppProcessInfo implements Parcelable {        
+        /**
+         * The name of the process that this object is associated with
+         */
+        public String processName;
+
+        /**
+         * The pid of this process; 0 if none
+         */
+        public int pid;
+        
+        public String pkgList[];
+        
+        public RunningAppProcessInfo() {
+        }
+        
+        public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
+            processName = pProcessName;
+            pid = pPid;
+            pkgList = pArr;
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(processName);
+            dest.writeInt(pid);
+            dest.writeStringArray(pkgList);
+        }
+
+        public void readFromParcel(Parcel source) {
+            processName = source.readString();
+            pid = source.readInt();
+            pkgList = source.readStringArray();
+        }
+
+        public static final Creator<RunningAppProcessInfo> CREATOR = 
+            new Creator<RunningAppProcessInfo>() {
+            public RunningAppProcessInfo createFromParcel(Parcel source) {
+                return new RunningAppProcessInfo(source);
+            }
+            public RunningAppProcessInfo[] newArray(int size) {
+                return new RunningAppProcessInfo[size];
+            }
+        };
+
+        private RunningAppProcessInfo(Parcel source) {
+            readFromParcel(source);
+        }
+    }
+    
+    /**
+     * Returns a list of application processes that are running on the device.
+     * 
+     * @return Returns a list of RunningAppProcessInfo records, or null if there are no
+     * running processes (it will not return an empty list).  This list ordering is not
+     * specified.
+     */
+    public List<RunningAppProcessInfo> getRunningAppProcesses() {
+        try {
+            return ActivityManagerNative.getDefault().getRunningAppProcesses();
         } catch (RemoteException e) {
             return null;
         }

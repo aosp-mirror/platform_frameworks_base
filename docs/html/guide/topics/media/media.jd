@@ -28,6 +28,7 @@ page.title=Media Capabilities
 <li>{@link android.media.MediaPlayer} (playback, all audio and video formats)</li>
 <li>{@link android.media.MediaRecorder} (record, all audio formats)</li>
 </ul>
+</div>
 
 <p>The Android platform offers built-in encoding/decoding for a variety of common media types, 
 so that you can easily integrate audio, video, and images into your applications. Accessing the platform's media 

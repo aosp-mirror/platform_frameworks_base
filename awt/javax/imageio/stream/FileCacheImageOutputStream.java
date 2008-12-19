@@ -15,7 +15,6 @@
  *  limitations under the License.
  */
 
-
 package javax.imageio.stream;
 
 import java.io.IOException;
@@ -24,35 +23,48 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 /**
- * The FileCacheImageOutputStream class is an implementation of 
- * ImageOutputStream that writes to its OutputStream
- * using a temporary file as a cache. 
+ * The FileCacheImageOutputStream class is an implementation of
+ * ImageOutputStream that writes to its OutputStream using a temporary file as a
+ * cache.
+ * 
+ * @since Android 1.0
  */
 public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
-    
-    /** The Constant IIO_TEMP_FILE_PREFIX. */
+
+    /**
+     * The Constant IIO_TEMP_FILE_PREFIX.
+     */
     static final String IIO_TEMP_FILE_PREFIX = "iioCache";
-    
-    /** The Constant MAX_BUFFER_LEN. */
+
+    /**
+     * The Constant MAX_BUFFER_LEN.
+     */
     static final int MAX_BUFFER_LEN = 1048575; // 1 MB - is it not too much?
 
-    /** The os. */
+    /**
+     * The os.
+     */
     private OutputStream os;
-    
-    /** The file. */
+
+    /**
+     * The file.
+     */
     private File file;
-    
-    /** The raf. */
+
+    /**
+     * The raf.
+     */
     private RandomAccessFile raf;
 
     /**
      * Instantiates a FileCacheImageOutputStream.
      * 
-     * @param stream the OutputStream for writing.
-     * @param cacheDir the cache directory where the chache file
-     * will be created.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param stream
+     *            the OutputStream for writing.
+     * @param cacheDir
+     *            the cache directory where the cache file will be created.
+     * @throws IOException
+     *             if an I/O exception has occurred.
      */
     public FileCacheImageOutputStream(OutputStream stream, File cacheDir) throws IOException {
         if (stream == null) {
@@ -96,7 +108,7 @@ public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
     @Override
     public void write(int b) throws IOException {
         flushBits(); // See the flushBits method description
-        
+
         raf.write(b);
         streamPos++;
     }
@@ -148,7 +160,7 @@ public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
         } else {
             byte buffer[] = new byte[MAX_BUFFER_LEN];
             while (bytesToRead > 0) {
-                int count = (int) Math.min(MAX_BUFFER_LEN, bytesToRead);
+                int count = (int)Math.min(MAX_BUFFER_LEN, bytesToRead);
                 raf.readFully(buffer, 0, count);
                 os.write(buffer, 0, count);
                 bytesToRead -= count;
@@ -169,7 +181,7 @@ public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
         }
 
         raf.seek(pos);
-        streamPos = raf.getFilePointer();        
+        streamPos = raf.getFilePointer();
         bitOffset = 0;
     }
 
@@ -177,7 +189,7 @@ public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
     public long length() {
         try {
             return raf.length();
-        } catch(IOException e) {
+        } catch (IOException e) {
             return -1L;
         }
     }

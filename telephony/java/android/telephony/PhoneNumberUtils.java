@@ -505,9 +505,10 @@ public class PhoneNumberUtils
      *  Called Party BCD Number
      *
      *  See Also TS 51.011 10.5.1 "dialing number/ssc string"
+     *  and TS 11.11 "10.3.1 EF adn (Abbreviated dialing numbers)"
      *
      * @param bytes the data buffer
-     * @param offset should point to the TOI/NPI octet after the length byte
+     * @param offset should point to the TOA (aka. TON/NPI) octet after the length byte
      * @param length is the number of bytes including TOA byte
      *                and must be at least 2
      *
@@ -518,7 +519,7 @@ public class PhoneNumberUtils
      */
     public static String
     calledPartyBCDToString (byte[] bytes, int offset, int length) {
-        boolean prependedPlus = false;
+        boolean prependPlus = false;
         StringBuilder ret = new StringBuilder(1 + length * 2);
 
         if (length < 2) {
@@ -526,16 +527,90 @@ public class PhoneNumberUtils
         }
 
         if ((bytes[offset] & 0xff) == TOA_International) {
-            ret.append("+");
-            prependedPlus = true;
+            prependPlus = true;
         }
 
         internalCalledPartyBCDFragmentToString(
                 ret, bytes, offset + 1, length - 1);
 
-        if (prependedPlus && ret.length() == 1) {
+        if (prependPlus && ret.length() == 0) {
             // If the only thing there is a prepended plus, return ""
             return "";
+        }
+
+        if (prependPlus) {
+            // This is an "international number" and should have
+            // a plus prepended to the dialing number. But there
+            // can also be Gsm MMI codes as defined in TS 22.030 6.5.2
+            // so we need to handle those also.
+            //
+            // http://web.telia.com/~u47904776/gsmkode.htm is a
+            // has a nice list of some of these GSM codes.
+            //
+            // Examples are:
+            //   **21*+886988171479#
+            //   **21*8311234567#
+            //   *21#
+            //   #21#
+            //   *#21#
+            //   *31#+11234567890
+            //   #31#+18311234567
+            //   #31#8311234567
+            //   18311234567
+            //   +18311234567#
+            //   +18311234567
+            // Odd ball cases that some phones handled
+            // where there is no dialing number so they
+            // append the "+"
+            //   *21#+
+            //   **21#+
+            String retString = ret.toString();
+            Pattern p = Pattern.compile("(^[#*])(.*)([#*])(.*)(#)$");
+            Matcher m = p.matcher(retString);
+            if (m.matches()) {
+                if ("".equals(m.group(2))) {
+                    // Started with two [#*] ends with #
+                    // So no dialing number and we'll just
+                    // append a +, this handles **21#+
+                    ret = new StringBuilder();
+                    ret.append(m.group(1));
+                    ret.append(m.group(3));
+                    ret.append(m.group(4));
+                    ret.append(m.group(5));
+                    ret.append("+");
+                } else {
+                    // Starts with [#*] and ends with #
+                    // Assume group 4 is a dialing number
+                    // such as *21*+1234554#
+                    ret = new StringBuilder();
+                    ret.append(m.group(1));
+                    ret.append(m.group(2));
+                    ret.append(m.group(3));
+                    ret.append("+");
+                    ret.append(m.group(4));
+                    ret.append(m.group(5));
+                }
+            } else {
+                p = Pattern.compile("(^[#*])(.*)([#*])(.*)");
+                m = p.matcher(retString);
+                if (m.matches()) {
+                    // Starts with [#*] and only one other [#*]
+                    // Assume the data after last [#*] is dialing
+                    // number (i.e. group 4) such as *31#+11234567890.
+                    // This also includes the odd ball *21#+
+                    ret = new StringBuilder();
+                    ret.append(m.group(1));
+                    ret.append(m.group(2));
+                    ret.append(m.group(3));
+                    ret.append("+");
+                    ret.append(m.group(4));
+                } else {
+                    // Does NOT start with [#*] just prepend '+'
+                    ret = new StringBuilder();
+                    ret.append('+');
+                    ret.append(retString);
+                }
+            }
         }
 
         return ret.toString();
@@ -688,7 +763,7 @@ public class PhoneNumberUtils
     numberToCalledPartyBCD(String number) {
         // The extra byte required for '+' is taken into consideration while calculating
         // length of ret.
-        int size = ((number.charAt(0) == '+') ? number.length() - 1 : number.length());
+        int size = (hasPlus(number) ? number.length() - 1 : number.length());
         byte[] ret = new byte[(size + 1) / 2 + 1];
 
         return numberToCalledPartyBCDHelper(ret, 0, number);
@@ -702,7 +777,7 @@ public class PhoneNumberUtils
     numberToCalledPartyBCDWithLength(String number) {
         // The extra byte required for '+' is taken into consideration while calculating
         // length of ret.
-        int size = ((number.charAt(0) == '+') ? number.length() - 1 : number.length());
+        int size = (hasPlus(number) ? number.length() - 1 : number.length());
         int length = (size + 1) / 2 + 1;
         byte[] ret = new byte[length + 1];
 
@@ -710,21 +785,22 @@ public class PhoneNumberUtils
         return numberToCalledPartyBCDHelper(ret, 1, number);
     }
 
+    private static boolean
+    hasPlus(String s) {
+      return s.indexOf('+') >= 0;
+    }
+
     private static byte[]
     numberToCalledPartyBCDHelper(byte[] ret, int offset, String number) {
-        int size;
-        int curChar;
-
-        size = number.length();
-
-        if (number.charAt(0) == '+') {
-            curChar = 1;
+        if (hasPlus(number)) {
+            number = number.replaceAll("\\+", "");
             ret[offset] = (byte) TOA_International;
         } else {
-            curChar = 0;
             ret[offset] = (byte) TOA_Unknown;
         }
 
+        int size = number.length();
+        int curChar = 0;
         int countFullBytes = ret.length - offset - 1 - ((size - curChar) & 1);
         for (int i = 1; i < 1 + countFullBytes; i++) {
             ret[offset + i]
@@ -818,6 +894,8 @@ public class PhoneNumberUtils
     public static final int FORMAT_UNKNOWN = 0;
     /** NANP formatting */
     public static final int FORMAT_NANP = 1;
+    /** Japanese formatting */
+    public static final int FORMAT_JAPAN = 2;
 
     /** List of country codes for countries that use the NANP */
     private static final String[] NANP_COUNTRIES = new String[] {
@@ -878,6 +956,9 @@ public class PhoneNumberUtils
                 return FORMAT_NANP;
             }
         }
+        if (locale.equals(Locale.JAPAN)) {
+            return FORMAT_JAPAN;
+        }
         return FORMAT_UNKNOWN;
     }
 
@@ -891,10 +972,12 @@ public class PhoneNumberUtils
     public static void formatNumber(Editable text, int defaultFormattingType) {
         int formatType = defaultFormattingType;
 
-        // This only handles +1 for now
         if (text.length() > 2 && text.charAt(0) == '+') {
             if (text.charAt(1) == '1') {
                 formatType = FORMAT_NANP;
+            } else if (text.length() >= 3 && text.charAt(1) == '8'
+                && text.charAt(2) == '1') {
+                formatType = FORMAT_JAPAN;
             } else {
                 return;
             }
@@ -903,6 +986,9 @@ public class PhoneNumberUtils
         switch (formatType) {
             case FORMAT_NANP:
                 formatNanpNumber(text);
+                return;
+            case FORMAT_JAPAN:
+                formatJapaneseNumber(text);
                 return;
         }
     }
@@ -932,7 +1018,7 @@ public class PhoneNumberUtils
             return;
         }
         CharSequence saved = text.subSequence(0, length);
-        
+
         // Strip the dashes first, as we're going to add them back
         int p = 0;
         while (p < text.length()) {
@@ -1013,7 +1099,7 @@ public class PhoneNumberUtils
             int pos = dashPositions[i];
             text.replace(pos + i, pos + i, "-");
         }
-        
+
         // Remove trailing dashes
         int len = text.length();
         while (len > 0) {
@@ -1024,6 +1110,25 @@ public class PhoneNumberUtils
                 break;
             }
         }
+    }
+
+    /**
+     * Formats a phone number in-place using the Japanese formatting rules.
+     * Numbers will be formatted as:
+     *
+     * <p><code>
+     * 03-xxxx-xxxx
+     * 090-xxxx-xxxx
+     * 0120-xxx-xxx
+     * +81-3-xxxx-xxxx
+     * +81-90-xxxx-xxxx
+     * </code></p>
+     *
+     * @param text the number to be formatted, will be modified with
+     * the formatting
+     */
+    public static void formatJapaneseNumber(Editable text) {
+        JapanesePhoneNumberFormatter.format(text);
     }
 
     // Three and four digit phone numbers for either special services
@@ -1040,10 +1145,10 @@ public class PhoneNumberUtils
      * listed in the ril / sim, then return true, otherwise false.
      */
     public static boolean isEmergencyNumber(String number) {
-        // Strip the separators from the number before comparing it 
+        // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortion(number);
-        
+
         // retrieve the list of emergency numbers
         String numbers = SystemProperties.get("ro.ril.ecclist");
 

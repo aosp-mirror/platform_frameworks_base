@@ -1,0 +1,84 @@
+#!/bin/sh
+
+locale=de
+
+extract()
+{
+    module=$1
+    shift
+
+    P4PORT=perforce1:1666 p4 print -q //depot/google3/googledata/transconsole/xtb/$module/$locale.xtb > $module-$locale.xtb
+
+    files=$(
+        for i in $3
+        do
+            find $i -name '*.xml' -print0 |
+            xargs -0 grep -l '<string' |
+            grep -v -e '-[a-z][a-z]/' |
+            grep -v -e '-[a-z][a-z]-' |
+            grep -v -e '-r[A-Z][A-Z]/' |
+            grep -v -e '-r[A-Z][A-Z]-'
+        done
+    )
+
+    for i in $files
+    do
+        out=$(
+            perl -e '
+                $file = $ARGV[0];
+                $locale = $ARGV[1];
+
+                $file =~ /^(.*)\/values([^\/]*)\/(.*)/;
+                $prefix = $1;
+                $values = $2;
+                $suffix = $3;
+
+                if ($values =~ /^(-mcc[^-]*)*(-mnc[^-]*)*(.*)$/) {
+                    print "$prefix/values$1$2-$locale$3/$suffix\n";
+                } else {
+                    print "$prefix/values-$locale$values/$suffix\n";
+                }
+            ' $i $locale
+        )
+
+        p4 edit $out
+        p4 add $out
+        mkdir -p `dirname $out`
+        ../../../../out/host/linux-x86/bin/transconsole -m $1 $2 -p $module -i $module-$locale.xtb $i > $out
+    done
+}
+
+extract AndroidAlarmClock ../../../../packages/apps/AlarmClock ../../apps/AlarmClock ../../../../packages/apps/AlarmClock
+extract AndroidBrowser ../../../../packages/apps/Browser ../../apps/Browser ../../../../packages/apps/Browser
+extract AndroidCalculator ../../../../packages/apps/Calculator ../../apps/Calculator ../../../../packages/apps/Calculator
+extract AndroidCalendar ../../../../packages/apps/Calendar ../../apps/Calendar ../../../../packages/apps/Calendar
+extract AndroidCamera ../../../../packages/apps/Camera ../../apps/Camera ../../../../packages/apps/Camera
+extract AndroidContacts ../../../../packages/apps/Contacts ../../apps/Contacts ../../../../packages/apps/Contacts
+extract AndroidDownloads ../../../../packages/providers/DownloadProvider ../../content/providers/downloads ../../../../packages/providers/DownloadProvider
+extract AndroidDrm ../../../../packages/providers/DrmProvider ../../content/providers/drm ../../../../packages/providers/DrmProvider
+extract AndroidEmail ../../../../packages/apps/Email ../../apps/Email ../../../../packages/apps/Email
+extract AndroidFallback ../../../../development/apps/Fallback ../../apps/Fallback ../../../../development/apps/Fallback
+extract AndroidGmail ../../../../vendor ../../partner ../../../../vendor/google/providers/gmail
+extract AndroidGmail ../../../../vendor ../../partner ../../../../vendor/google/apps/Gmail
+extract AndroidGoogleApps ../../../../vendor ../../partner ../../../../vendor/google/apps/GoogleApps
+extract AndroidGoogleSearch ../../../../packages/apps/GoogleSearch ../../apps/GoogleSearch ../../../../packages/apps/GoogleSearch
+extract AndroidHome ../../../../packages/apps/Launcher ../../apps/Home ../../../../packages/apps/Launcher
+extract AndroidIM ../../../../packages/apps/IM ../../apps/IM ../../../../packages/apps/IM
+extract AndroidMaps ../../../../vendor ../../partner ../../../../vendor/google/apps/Maps
+extract AndroidMaps ../../../../vendor ../../partner ../../../../vendor/google/apps/Street
+extract AndroidMms ../../../../packages/apps/Mms ../../apps/Mms ../../../../packages/apps/Mms
+extract AndroidMusic ../../../../packages/apps/Music ../../apps/Music ../../../../packages/apps/Music
+extract AndroidPhone ../../../../packages/apps/Phone ../../apps/Phone ../../../../packages/apps/Phone
+extract AndroidPlatform ../../../../frameworks/base/core/res ../../apps/common ../../../../frameworks/base/core/res
+extract AndroidSettings ../../../../packages/apps/Settings ../../apps/Settings ../../../../packages/apps/Settings
+extract AndroidSetupWizard ../../../../vendor ../../partner ../../../../vendor/google/apps/SetupWizard
+extract AndroidSoundRecorder ../../../../packages/apps/SoundRecorder ../../apps/SoundRecorder ../../../../packages/apps/SoundRecorder
+extract AndroidStk ../../../../packages/apps/Stk ../../apps/Stk ../../../../packages/apps/Stk
+extract AndroidSync ../../../../packages/apps/Sync ../../apps/Sync ../../../../packages/apps/Sync
+extract AndroidTalk ../../../../vendor ../../partner ../../../../vendor/google/apps/Talk
+extract AndroidUpdater ../../../../packages/apps/Updater ../../apps/Updater ../../../../packages/apps/Updater
+extract AndroidVending ../../../../vendor ../../partner ../../../../vendor/google/apps/Vending
+extract AndroidVoiceDialer ../../../../packages/apps/VoiceDialer ../../apps/VoiceDialer ../../../../packages/apps/VoiceDialer
+extract AndroidYoutube ../../../../vendor ../../partner ../../../../vendor/google/apps/YouTube
+
+exit 0

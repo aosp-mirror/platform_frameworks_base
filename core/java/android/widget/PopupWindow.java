@@ -22,9 +22,9 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -43,31 +43,58 @@ import android.util.AttributeSet;
  */
 public class PopupWindow {
     /**
-     * The height of the status bar so we know how much of the screen we can
-     * actually be displayed in.
-     * <p>
-     * TODO: This IS NOT the right way to do this.
-     * Instead of knowing how much of the screen is available, a popup that
-     * wants anchor and maximize space shouldn't be setting a height, instead
-     * the PopupViewContainer should have its layout height as fill_parent and
-     * properly position the popup.
+     * Mode for {@link #setInputMethodMode(int): the requirements for the
+     * input method should be based on the focusability of the popup.  That is
+     * if it is focusable than it needs to work with the input method, else
+     * it doesn't.
      */
-    private static final int STATUS_BAR_HEIGHT = 30;
+    public static final int INPUT_METHOD_FROM_FOCUSABLE = 0;
+    
+    /**
+     * Mode for {@link #setInputMethodMode(int): this popup always needs to
+     * work with an input method, regardless of whether it is focusable.  This
+     * means that it will always be displayed so that the user can also operate
+     * the input method while it is shown.
+     */
+    
+    public static final int INPUT_METHOD_NEEDED = 1;
+    
+    /**
+     * Mode for {@link #setInputMethodMode(int): this popup never needs to
+     * work with an input method, regardless of whether it is focusable.  This
+     * means that it will always be displayed to use as much space on the
+     * screen as needed, regardless of whether this covers the input method.
+     */
+    public static final int INPUT_METHOD_NOT_NEEDED = 2;
+    
+    private final Context mContext;
+    private final WindowManager mWindowManager;
     
     private boolean mIsShowing;
+    private boolean mIsDropdown;
 
     private View mContentView;
     private View mPopupView;
     private boolean mFocusable;
+    private int mInputMethodMode = INPUT_METHOD_FROM_FOCUSABLE;
+    private boolean mTouchable = true;
+    private boolean mOutsideTouchable = false;
+    private boolean mClippingEnabled = true;
 
+    private OnTouchListener mTouchInterceptor;
+    
+    private int mWidthMode;
     private int mWidth;
+    private int mHeightMode;
     private int mHeight;
 
+    private int mPopupWidth;
+    private int mPopupHeight;
+    
     private int[] mDrawingLocation = new int[2];
-    private int[] mRootLocation = new int[2];
+    private int[] mScreenLocation = new int[2];
     private Rect mTempRect = new Rect();
     
-    private Context mContext;
     private Drawable mBackground;
 
     private boolean mAboveAnchor;
@@ -106,6 +133,8 @@ public class PopupWindow {
      */
     public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
         mContext = context;
+        mWindowManager = (WindowManager)context.getSystemService(
+                Context.WINDOW_SERVICE);
 
         TypedArray a =
             context.obtainStyledAttributes(
@@ -183,6 +212,9 @@ public class PopupWindow {
      */
     public PopupWindow(View contentView, int width, int height,
             boolean focusable) {
+        mContext = contentView.getContext();
+        mWindowManager = (WindowManager)mContext.getSystemService(
+                Context.WINDOW_SERVICE);
         setContentView(contentView);
         setWidth(width);
         setHeight(height);
@@ -218,11 +250,15 @@ public class PopupWindow {
     }
     
     /**
-     * set the flag on popup to ignore cheek press events
-     * This method has to be invoked before displaying the content view
-     * of the popup for the window flags to take effect and will be ignored
-     * if the pop up is already displayed. By default this flag is set to false
+     * Set the flag on popup to ignore cheek press eventt; by default this flag
+     * is set to false
      * which means the pop wont ignore cheek press dispatch events.
+     * 
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     * 
+     * @see #update()
      */
     public void setIgnoreCheekPress() {
         mIgnoreCheekPress = true;
@@ -230,9 +266,17 @@ public class PopupWindow {
     
 
     /**
-     * <p>Change the animation style for this popup.</p>
+     * <p>Change the animation style resource for this popup.</p>
      *
-     * @param animationStyle animation style to use when the popup appears and disappears
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     *
+     * @param animationStyle animation style to use when the popup appears
+     *      and disappears.  Set to -1 for the default animation, 0 for no
+     *      animation, or a resource identifier for an explicit animation.
+     *      
+     * @see #update()
      */
     public void setAnimationStyle(int animationStyle) {
         mAnimationStyle = animationStyle;
@@ -253,7 +297,8 @@ public class PopupWindow {
      * <p>Change the popup's content. The content is represented by an instance
      * of {@link android.view.View}.</p>
      *
-     * <p>This method has no effect if called when the popup is showing.</p>
+     * <p>This method has no effect if called when the popup is showing.  To
+     * apply it while a popup is showing, call </p>
      *
      * @param contentView the new content for the popup
      *
@@ -269,6 +314,14 @@ public class PopupWindow {
     }
 
     /**
+     * Set a callback for all touch events being dispatched to the popup
+     * window.
+     */
+    public void setTouchInterceptor(OnTouchListener l) {
+        mTouchInterceptor = l;
+    }
+    
+    /**
      * <p>Indicate whether the popup window can grab the focus.</p>
      *
      * @return true if the popup is focusable, false otherwise
@@ -282,20 +335,168 @@ public class PopupWindow {
     /**
      * <p>Changes the focusability of the popup window. When focusable, the
      * window will grab the focus from the current focused widget if the popup
-     * contains a focusable {@link android.view.View}.</p>
+     * contains a focusable {@link android.view.View}.  By default a popup
+     * window is not focusable.</p>
      *
      * <p>If the popup is showing, calling this method will take effect only
-     * the next time the popup is shown.</p>
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
      *
-     * @param focusable true if the popup should grab focus, false otherwise
+     * @param focusable true if the popup should grab focus, false otherwise.
      *
      * @see #isFocusable()
      * @see #isShowing() 
+     * @see #update()
      */
     public void setFocusable(boolean focusable) {
         mFocusable = focusable;
     }
 
+    /**
+     * Return the current value in {@link #setInputMethodMode(int)}.
+     * 
+     * @see #setInputMethodMode(int)
+     */
+    public int getInputMethodMode() {
+        return mInputMethodMode;
+        
+    }
+    
+    /**
+     * Control how the popup operates with an input method: one of
+     * {@link #INPUT_METHOD_FROM_FOCUSABLE}, {@link #INPUT_METHOD_NEEDED},
+     * or {@link #INPUT_METHOD_NOT_NEEDED}.
+     * 
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     * 
+     * @see #getInputMethodMode()
+     * @see #update()
+     */
+    public void setInputMethodMode(int mode) {
+        mInputMethodMode = mode;
+    }
+    
+    /**
+     * <p>Indicates whether the popup window receives touch events.</p>
+     * 
+     * @return true if the popup is touchable, false otherwise
+     * 
+     * @see #setTouchable(boolean)
+     */
+    public boolean isTouchable() {
+        return mTouchable;
+    }
+
+    /**
+     * <p>Changes the touchability of the popup window. When touchable, the
+     * window will receive touch events, otherwise touch events will go to the
+     * window below it. By default the window is touchable.</p>
+     *
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     *
+     * @param touchable true if the popup should receive touch events, false otherwise
+     *
+     * @see #isTouchable()
+     * @see #isShowing() 
+     * @see #update()
+     */
+    public void setTouchable(boolean touchable) {
+        mTouchable = touchable;
+    }
+
+    /**
+     * <p>Indicates whether the popup window will be informed of touch events
+     * outside of its window.</p>
+     * 
+     * @return true if the popup is outside touchable, false otherwise
+     * 
+     * @see #setOutsideTouchable(boolean)
+     */
+    public boolean isOutsideTouchable() {
+        return mOutsideTouchable;
+    }
+
+    /**
+     * <p>Controls whether the pop-up will be informed of touch events outside
+     * of its window.  This only makes sense for pop-ups that are touchable
+     * but not focusable, which means touches outside of the window will
+     * be delivered to the window behind.  The default is false.</p>
+     *
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     *
+     * @param touchable true if the popup should receive outside
+     * touch events, false otherwise
+     *
+     * @see #isOutsideTouchable()
+     * @see #isShowing() 
+     * @see #update()
+     */
+    public void setOutsideTouchable(boolean touchable) {
+        mOutsideTouchable = touchable;
+    }
+
+    /**
+     * <p>Indicates whether clipping of the popup window is enabled.</p>
+     * 
+     * @return true if the clipping is enabled, false otherwise
+     * 
+     * @see #setClippingEnabled(boolean)
+     */
+    public boolean isClippingEnabled() {
+        return mClippingEnabled;
+    }
+
+    /**
+     * <p>Allows the popup window to extend beyond the bounds of the screen. By default the
+     * window is clipped to the screen boundaries. Setting this to false will allow windows to be
+     * accurately positioned.</p>
+     * 
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     *
+     * @param enabled false if the window should be allowed to extend outside of the screen
+     * @see #isShowing() 
+     * @see #isClippingEnabled()
+     * @see #update()
+     */
+    public void setClippingEnabled(boolean enabled) {
+        mClippingEnabled = enabled;
+    }
+
+    /**
+     * <p>Change the width and height measure specs that are given to the
+     * window manager by the popup.  By default these are 0, meaning that
+     * the current width or height is requested as an explicit size from
+     * the window manager.  You can supply
+     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} or 
+     * {@link ViewGroup.LayoutParams#FILL_PARENT} to have that measure
+     * spec supplied instead, replacing the absolute width and height that
+     * has been set in the popup.</p>
+     *
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown.</p>
+     *
+     * @param widthSpec an explicit width measure spec mode, either
+     * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
+     * {@link ViewGroup.LayoutParams#FILL_PARENT}, or 0 to use the absolute
+     * width.
+     * @param heightSpec an explicit height measure spec mode, either
+     * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
+     * {@link ViewGroup.LayoutParams#FILL_PARENT}, or 0 to use the absolute
+     * height.
+     */
+    public void setWindowLayoutMode(int widthSpec, int heightSpec) {
+        mWidthMode = widthSpec;
+        mHeightMode = heightSpec;
+    }
+    
     /**
      * <p>Return this popup's height MeasureSpec</p>
      *
@@ -377,11 +578,10 @@ public class PopupWindow {
         }
 
         mIsShowing = true;
+        mIsDropdown = false;
 
         WindowManager.LayoutParams p = createPopupLayout(parent.getWindowToken());
-        if (mAnimationStyle != -1) {
-            p.windowAnimations = mAnimationStyle;
-        }
+        p.windowAnimations = computeAnimationResource();
        
         preparePopup(p);
         if (gravity == Gravity.NO_GRAVITY) {
@@ -426,6 +626,7 @@ public class PopupWindow {
         }
 
         mIsShowing = true;
+        mIsDropdown = true;
 
         WindowManager.LayoutParams p = createPopupLayout(anchor.getWindowToken());
         preparePopup(p);
@@ -433,13 +634,9 @@ public class PopupWindow {
             mPopupView.refreshDrawableState();
         }
         mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
-        if (mAnimationStyle == -1) {
-            p.windowAnimations = mAboveAnchor
-                    ? com.android.internal.R.style.Animation_DropDownUp
-                    : com.android.internal.R.style.Animation_DropDownDown;
-        } else {
-            p.windowAnimations = mAnimationStyle;
-        }
+        if (mHeightMode < 0) p.height = mHeightMode;
+        if (mWidthMode < 0) p.width = mWidthMode;
+        p.windowAnimations = computeAnimationResource();
         invokePopup(p);
     }
 
@@ -479,7 +676,8 @@ public class PopupWindow {
         } else {
             mPopupView = mContentView;
         }
-        
+        mPopupWidth = p.width;
+        mPopupHeight = p.height;
     }
 
     /**
@@ -491,8 +689,7 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void invokePopup(WindowManager.LayoutParams p) {
-        WindowManagerImpl wm = WindowManagerImpl.getDefault();
-        wm.addView(mPopupView, p);
+        mWindowManager.addView(mPopupView, p);
     }
 
     /**
@@ -518,18 +715,56 @@ public class PopupWindow {
         } else {
             p.format = PixelFormat.TRANSLUCENT;
         }
-        if(mIgnoreCheekPress) {
-            p.flags |= WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
-        }
-        if (!mFocusable) {
-            p.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        }
+        p.flags = computeFlags(p.flags);
         p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
         p.token = token;
         
         return p;
     }
 
+    private int computeFlags(int curFlags) {
+        curFlags &= ~(
+                WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES |
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        if(mIgnoreCheekPress) {
+            curFlags |= WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
+        }
+        if (!mFocusable) {
+            curFlags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            if (mInputMethodMode == INPUT_METHOD_NEEDED) {
+                curFlags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            }
+        } else if (mInputMethodMode == INPUT_METHOD_NOT_NEEDED) {
+            curFlags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        }
+        if (!mTouchable) {
+            curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        }
+        if (mTouchable) {
+            curFlags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+        }
+        if (!mClippingEnabled) {
+            curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        }
+        return curFlags;
+    }
+    
+    private int computeAnimationResource() {
+        if (mAnimationStyle == -1) {
+            if (mIsDropdown) {
+                return mAboveAnchor
+                        ? com.android.internal.R.style.Animation_DropDownUp
+                        : com.android.internal.R.style.Animation_DropDownDown;
+            }
+            return 0;
+        }
+        return mAnimationStyle;
+    }
+    
     /**
      * <p>Positions the popup window on screen. When the popup window is too
      * tall to fit under the anchor, a parent scroll view is seeked and scrolled
@@ -548,33 +783,48 @@ public class PopupWindow {
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
         p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
-
+        
         boolean onTop = false;
 
-        if (p.y + p.height > WindowManagerImpl.getDefault().getDefaultDisplay().getHeight()) {
+        p.gravity = Gravity.LEFT | Gravity.TOP;
+        
+        anchor.getLocationOnScreen(mScreenLocation);
+        final Rect displayFrame = new Rect();
+        anchor.getWindowVisibleDisplayFrame(displayFrame);
+        
+        final View root = anchor.getRootView();
+        if (mScreenLocation[1] + anchor.getMeasuredHeight() + yoff + mPopupHeight > displayFrame.bottom
+                || p.x + mPopupWidth - root.getWidth() > 0) {
             // if the drop down disappears at the bottom of the screen. we try to
             // scroll a parent scrollview or move the drop down back up on top of
             // the edit box
-            View root = anchor.getRootView();
-            root.getLocationInWindow(mRootLocation);
-            int delta = p.y + p.height - mRootLocation[1] - root.getHeight();
-
-            if (delta > 0 || p.x + p.width - mRootLocation[0] - root.getWidth() > 0) {
-                Rect r = new Rect(anchor.getScrollX(), anchor.getScrollY(),
-                        p.width, p.height + anchor.getMeasuredHeight());
-
-                onTop = !anchor.requestRectangleOnScreen(r, true);
-
-                if (onTop) {
-                    p.y -= anchor.getMeasuredHeight() + p.height;
-                } else {
-                    anchor.getLocationOnScreen(mDrawingLocation);
-                    p.x = mDrawingLocation[0] + xoff;
-                    p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
-                }
+            int scrollX = anchor.getScrollX();
+            int scrollY = anchor.getScrollY();
+            Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth,
+                    scrollY + mPopupHeight + anchor.getMeasuredHeight());
+            anchor.requestRectangleOnScreen(r, true);
+            
+            // now we re-evaluate the space available, and decide from that
+            // whether the pop-up will go above or below the anchor.
+            anchor.getLocationInWindow(mDrawingLocation);
+            p.x = mDrawingLocation[0] + xoff;
+            p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
+            
+            // determine whether there is more space above or below the anchor
+            anchor.getLocationOnScreen(mScreenLocation);
+            
+            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getMeasuredHeight() - yoff)
+                    < (mScreenLocation[1] - yoff - displayFrame.top);
+            if (onTop) {
+                p.gravity = Gravity.LEFT | Gravity.BOTTOM;
+                p.y = root.getHeight() - mDrawingLocation[1] - yoff;
+            } else {
+                p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
             }
         }
 
+        p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
+        
         return onTop;
     }
     
@@ -589,18 +839,18 @@ public class PopupWindow {
      *         shown.
      */
     public int getMaxAvailableHeight(View anchor) {
-        // TODO: read comment on STATUS_BAR_HEIGHT
-        final int screenHeight = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight()
-                - STATUS_BAR_HEIGHT;
+        final Rect displayFrame = new Rect();
+        anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
-        anchorPos[1] -= STATUS_BAR_HEIGHT;
-
-        final int distanceFromAnchorToBottom = screenHeight - (anchorPos[1] + anchor.getHeight());
         
+        final int distanceToBottom = displayFrame.bottom
+                - (anchorPos[1] + anchor.getHeight());
+        final int distanceToTop = anchorPos[1] - displayFrame.top;
+
         // anchorPos[1] is distance from anchor to top of screen
-        int returnedHeight = Math.max(anchorPos[1], distanceFromAnchorToBottom);
+        int returnedHeight = Math.max(distanceToBottom, distanceToTop);
         if (mBackground != null) {
             mBackground.getPadding(mTempRect);
             returnedHeight -= mTempRect.top + mTempRect.bottom; 
@@ -618,11 +868,11 @@ public class PopupWindow {
      */
     public void dismiss() {
         if (isShowing() && mPopupView != null) {
-            WindowManagerImpl wm = WindowManagerImpl.getDefault();
-            wm.removeView(mPopupView);
+            mWindowManager.removeView(mPopupView);
             if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                 ((ViewGroup) mPopupView).removeView(mContentView);
             }
+            mPopupView = null;
             mIsShowing = false;
 
             if (mOnDismissListener != null) {
@@ -641,8 +891,44 @@ public class PopupWindow {
     }
     
     /**
+     * Updates the state of the popup window, if it is currently being displayed,
+     * from the currently set state.  This include:
+     * {@link #setClippingEnabled(boolean)}, {@link #setFocusable(boolean)},
+     * {@link #setIgnoreCheekPress()}, {@link #setInputMethodMode(int)},
+     * {@link #setTouchable(boolean)}, and {@link #setAnimationStyle(int)}.
+     */
+    public void update() {
+        if (!isShowing() || mContentView == null) {
+            return;
+        }
+        
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                mPopupView.getLayoutParams();
+        
+        boolean update = false;
+        
+        final int newAnim = computeAnimationResource();
+        if (newAnim != p.windowAnimations) {
+            p.windowAnimations = newAnim;
+            update = true;
+        }
+
+        final int newFlags = computeFlags(p.flags);
+        if (newFlags != p.flags) {
+            p.flags = newFlags;
+            update = true;
+        }
+        
+        if (update) {
+            mWindowManager.updateViewLayout(mPopupView, p);
+        }
+    }
+    
+    /**
      * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.</p>
+     * height can be set to -1 to update location only.  Calling this function
+     * also updates the window with the current popup state as
+     * described for {@link #update()}.</p>
      *
      * @param x the new x location
      * @param y the new y location
@@ -667,13 +953,15 @@ public class PopupWindow {
 
         boolean update = false;
 
-        if (width != -1 && p.width != width) {
-            p.width = width;
+        final int finalWidth = mWidthMode < 0 ? mWidthMode : p.width;
+        if (width != -1 && p.width != finalWidth) {
+            p.width = finalWidth;
             update = true;
         }
 
-        if (height != -1 && p.height != height) {
-            p.height = height;
+        final int finalHeight = mHeightMode < 0 ? mHeightMode : p.height;
+        if (height != -1 && p.height != finalHeight) {
+            p.height = finalHeight;
             update = true;
         }
 
@@ -687,6 +975,18 @@ public class PopupWindow {
             update = true;
         }
 
+        final int newAnim = computeAnimationResource();
+        if (newAnim != p.windowAnimations) {
+            p.windowAnimations = newAnim;
+            update = true;
+        }
+
+        final int newFlags = computeFlags(p.flags);
+        if (newFlags != p.flags) {
+            p.flags = newFlags;
+            update = true;
+        }
+        
         if (update) {
             if (mPopupView != mContentView) {
                 final View popupViewContainer = mPopupView;
@@ -704,14 +1004,15 @@ public class PopupWindow {
                 }
             }
 
-            WindowManagerImpl wm = WindowManagerImpl.getDefault();
-            wm.updateViewLayout(mPopupView, p);
+            mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
 
     /**
      * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.</p>
+     * height can be set to -1 to update location only.  Calling this function
+     * also updates the window with the current popup state as
+     * described for {@link #update()}.</p>
      *
      * @param anchor the popup's anchor view
      * @param width the new width, can be -1 to ignore
@@ -723,7 +1024,9 @@ public class PopupWindow {
 
     /**
      * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.</p>
+     * height can be set to -1 to update location only.  Calling this function
+     * also updates the window with the current popup state as
+     * described for {@link #update()}.</p>
      *
      * @param anchor the popup's anchor view
      * @param xoff x offset from the view's left edge
@@ -739,17 +1042,25 @@ public class PopupWindow {
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                 mPopupView.getLayoutParams();
 
-        int x = p.x;
-        int y = p.y;
+        if (width == -1) {
+            width = mPopupWidth;
+        } else {
+            mPopupWidth = width;
+        }
+        if (height == -1) {
+            height = mPopupHeight;
+        } else {
+            mPopupHeight = height;
+        }
+        
         findDropDownPosition(anchor, p, xoff, yoff);
-
-        update(x, y, width, height);
+        update(p.x, p.y, width, height);
     }
     
     /**
      * Listener that is called when this popup window is dismissed.
      */
-    interface OnDismissListener {
+    public interface OnDismissListener {
         /**
          * Called when this popup window is dismissed.
          */
@@ -785,12 +1096,23 @@ public class PopupWindow {
         }
 
         @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            if (mTouchInterceptor != null && mTouchInterceptor.onTouch(this, ev)) {
+                return true;
+            }
+            return super.dispatchTouchEvent(ev);
+        }
+
+        @Override
         public boolean onTouchEvent(MotionEvent event) {
             final int x = (int) event.getX();
             final int y = (int) event.getY();
             
             if ((event.getAction() == MotionEvent.ACTION_DOWN)
                     && ((x < 0) || (x >= getWidth()) || (y < 0) || (y >= getHeight()))) {
+                dismiss();
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                 dismiss();
                 return true;
             } else {

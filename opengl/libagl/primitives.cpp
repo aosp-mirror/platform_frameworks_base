@@ -133,7 +133,7 @@ void lightVertexDarkSmoothFog(ogles_context_t* c, vertex_t* v)
 {
     if (!(v->flags & vertex_t::LIT)) {
         v->flags |= vertex_t::LIT;
-        v->fog = c->fog.fog(c, v->window.z);
+        v->fog = c->fog.fog(c, v->eye.z);
         const GLvoid* cp = c->arrays.color.element(
                 v->index & vertex_cache_t::INDEX_MASK);
         c->arrays.color.fetch(c, v->color.v, cp);
@@ -144,14 +144,14 @@ void lightVertexDarkFlatFog(ogles_context_t* c, vertex_t* v)
 {
     if (!(v->flags & vertex_t::LIT)) {
         v->flags |= vertex_t::LIT;
-        v->fog = c->fog.fog(c, v->window.z);
+        v->fog = c->fog.fog(c, v->eye.z);
     }
 }
 static inline
 void lightVertexSmoothFog(ogles_context_t* c, vertex_t* v)
 {
     if (!(v->flags & vertex_t::LIT)) {
-        v->fog = c->fog.fog(c, v->window.z);
+        v->fog = c->fog.fog(c, v->eye.z);
         c->lighting.lightVertex(c, v);
     }
 }
@@ -243,12 +243,20 @@ void compute_iterators_t::initTriangle(
     m_area = m_dx01*m_dy02 + (-m_dy10)*m_dx20;
 }
 
+void compute_iterators_t::initLine(
+        vertex_t const* v0, vertex_t const* v1)
+{
+    m_dx01 = m_dy02 = v1->window.x - v0->window.x;
+    m_dy10 = m_dx20 = v0->window.y - v1->window.y;
+    m_area = m_dx01*m_dy02 + (-m_dy10)*m_dx20;
+}
+
 void compute_iterators_t::initLerp(vertex_t const* v0, uint32_t enables)
 {
     m_x0 = v0->window.x;
     m_y0 = v0->window.y;
     const GGLcoord area = (m_area + TRI_HALF) >> TRI_FRACTION_BITS;
-    const GGLcoord minArea = 2; // cannot be inversed
+    const GGLcoord minArea = 2; // cannot be inverted
     // triangles with an area smaller than 1.0 are not smooth-shaded
 
     int q=0, s=0, d=0;
@@ -336,6 +344,20 @@ void compute_iterators_t::iterators1616(GGLfixed* it,
     it[2] = dcdy;
 }
 
+void compute_iterators_t::iterators0032(int64_t* it,
+        int32_t c0, int32_t c1, int32_t c2) const
+{
+    const int s = m_area_scale - 16;
+    int32_t dc01 = (c1 - c0)>>s;
+    int32_t dc02 = (c2 - c0)>>s;
+    // 16.16 x 16.16 == 32.32
+    int64_t dcdx = gglMulii(dc01, m_dy02) + gglMulii(dc02, m_dy10);
+    int64_t dcdy = gglMulii(dc02, m_dx01) + gglMulii(dc01, m_dx20);
+    it[ 0] = (c0<<16) - ((dcdx*m_x0 + dcdy*m_y0)>>4);
+    it[ 1] = dcdx;
+    it[ 2] = dcdy;
+}
+
 #if defined(__arm__) && !defined(__thumb__)
 inline void compute_iterators_t::iterators0032(int32_t* it,
         int32_t c0, int32_t c1, int32_t c2) const
@@ -346,16 +368,11 @@ inline void compute_iterators_t::iterators0032(int32_t* it,
 void compute_iterators_t::iterators0032(int32_t* it,
         int32_t c0, int32_t c1, int32_t c2) const
 {
-    const int s = m_area_scale - 16;
-    int32_t dc01 = (c1 - c0)>>s;
-    int32_t dc02 = (c2 - c0)>>s;
-    // 16.16 x 16.16 == 32.32
-    int64_t dcdx = gglMulii(dc01, m_dy02) + gglMulii(dc02, m_dy10);
-    int64_t dcdy = gglMulii(dc02, m_dx01) + gglMulii(dc01, m_dx20);
-    int32_t c = (c0<<16) - ((dcdx*m_x0 + dcdy*m_y0)>>4);
-    it[ 0] = c;
-    it[ 1] = dcdx;
-    it[ 2] = dcdy;
+    int64_t it64[3];
+    iterators0032(it, c0, c1, c2);
+    it[0] = it64[0];
+    it[1] = it64[1];
+    it[2] = it64[2];
 }
 #endif
 
@@ -454,7 +471,7 @@ void primitive_point(ogles_context_t* c, vertex_t* v)
             c->arrays.color.fetch(c, v->color.v, cp);
         }
         if (enables & GGL_ENABLE_FOG) {
-            v->fog = c->fog.fog(c, v->window.z);
+            v->fog = c->fog.fog(c, v->eye.z);
         }
     }
 
@@ -514,21 +531,11 @@ void primitive_nop_line(ogles_context_t*, vertex_t*, vertex_t*) {
 
 void primitive_line(ogles_context_t* c, vertex_t* v0, vertex_t* v1)
 {
-    // This is a cheezy implementation of line drawing that
-    // uses 2 triangles per line. 
-    // That said, how often line drawing is used?
-
     // get texture coordinates
     fetch_texcoord(c, v0, v1, v1);
 
     // light/shade the vertices first (they're copied below)
     c->lighting.lightTriangle(c, v0, v1, v1);
-
-    vertex_t v[4];
-    v[0] = *v0;
-    v[1] = *v1;
-    v0 = &v[0];
-    v1 = &v[1];
 
     // clip the line if needed
     if (ggl_unlikely((v0->flags | v1->flags) & vertex_t::CLIP_ALL)) {
@@ -546,8 +553,8 @@ void primitive_line(ogles_context_t* c, vertex_t* v0, vertex_t* v1)
                             GGL_ENABLE_DEPTH_TEST;
 
     if (ggl_unlikely(enables & mask)) {
-        c->lerp.initTriangle(v0, v1, v1);
-        lerp_triangle(c, v0, v1, v1);
+        c->lerp.initLine(v0, v1);
+        lerp_triangle(c, v0, v1, v0);
     }
 
     // render our line
@@ -654,17 +661,26 @@ void lerp_triangle(ogles_context_t* c,
         const int32_t v0z = clampZ(v0->window.z);
         const int32_t v1z = clampZ(v1->window.z);
         const int32_t v2z = clampZ(v2->window.z);
-        lerp.iterators0032(itz, v0z, v1z, v2z);
         if (ggl_unlikely(c->polygonOffset.enable)) {
+            const int32_t units = (c->polygonOffset.units << 16);
             const GLfixed factor = c->polygonOffset.factor;
-            const GLfixed units = c->polygonOffset.units;
-            int32_t maxDepthSlope = max(abs(itz[1]), abs(itz[2]));
-            int32_t offset = (int64_t(maxDepthSlope)*factor +
-                    (int64_t(units) << 16)) >> 16;
-            itz[0] += offset; // XXX: this can cause overflows
+            if (factor) {
+                int64_t itz64[3];
+                lerp.iterators0032(itz64, v0z, v1z, v2z);
+                int64_t maxDepthSlope = max(itz64[1], itz64[2]);
+                itz[0] = uint32_t(itz64[0]) 
+                        + uint32_t((maxDepthSlope*factor)>>16) + units;
+                itz[1] = uint32_t(itz64[1]);
+                itz[2] = uint32_t(itz64[2]);
+            } else {
+                lerp.iterators0032(itz, v0z, v1z, v2z);
+                itz[0] += units; 
+            }
+        } else {
+            lerp.iterators0032(itz, v0z, v1z, v2z);
         }
         c->rasterizer.procs.zGrad3xv(c, itz);
-    }
+    }    
 
     if (ggl_unlikely(enables & GGL_ENABLE_FOG)) {
         GLfixed itf[3];
@@ -880,11 +896,11 @@ void clip_triangle(ogles_context_t* c,
                 vertex_t** output = ovl;
                 unsigned int oc = 0;
                 unsigned int sentinel = 0;
-                // previous vertice, compute distance to the plane
+                // previous vertex, compute distance to the plane
                 vertex_t* s = ivl[ic-1];
                 const vec4_t& equation = c->clipPlanes.plane[plane].equation;
                 GLfixed sd = dot4(equation.v, s->eye.v);
-                // clip each vertice against this plane...
+                // clip each vertex against this plane...
                 for (unsigned int i=0 ; i<ic ; i++) {            
                     vertex_t* p = ivl[i];
                     const GLfixed pd = dot4(equation.v, p->eye.v);
@@ -946,10 +962,10 @@ void clip_triangle(ogles_context_t* c,
                 vertex_t** output = ovl;
                 unsigned int oc = 0;
                 unsigned int sentinel = 0;
-                // previous vertice, compute distance to the plane
+                // previous vertex, compute distance to the plane
                 vertex_t* s = ivl[ic-1];
                 GLfixed sd = frustumPlaneDist(plane, s->clip);
-                // clip each vertice against this plane...
+                // clip each vertex against this plane...
                 for (unsigned int i=0 ; i<ic ; i++) {            
                     vertex_t* p = ivl[i];
                     const GLfixed pd = frustumPlaneDist(plane, p->clip);

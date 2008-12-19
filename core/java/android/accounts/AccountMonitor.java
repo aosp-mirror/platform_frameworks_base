@@ -42,31 +42,42 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
     private final Context mContext;
     private final AccountMonitorListener mListener;
     private boolean mClosed = false;
+    private int pending = 0;
 
     // This thread runs in the background and runs the code to update accounts
     // in the listener.
     private class AccountUpdater extends Thread {
         private IBinder mService;
-        
+
         public AccountUpdater(IBinder service) {
             mService = service;
         }
-        
+
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             IAccountsService accountsService = IAccountsService.Stub.asInterface(mService);
-            String[] accounts;
-            try {
-                accounts = accountsService.getAccounts();
-            } catch (RemoteException e) {
-                // if the service was killed then the system will restart it and when it does we
-                // will get another onServiceConnected, at which point we will do a notify.
-                Log.w("AccountMonitor", "Remote exception when getting accounts", e);
-                return;
-            }
+            String[] accounts = null;
+            do {
+                try {
+                    accounts = accountsService.getAccounts();
+                } catch (RemoteException e) {
+                    // if the service was killed then the system will restart it and when it does we
+                    // will get another onServiceConnected, at which point we will do a notify.
+                    Log.w("AccountMonitor", "Remote exception when getting accounts", e);
+                    return;
+                }
+
+                synchronized (AccountMonitor.this) {
+                    --pending;
+                    if (pending == 0) {
+                        break;
+                    }
+                }
+            } while (true);
+
             mContext.unbindService(AccountMonitor.this);
-            
+
             try {
                 mListener.onAccountsUpdated(accounts);
             } catch (SQLException e) {
@@ -76,7 +87,7 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
             }
         }
     }
-    
+
     /**
      * Initializes the AccountMonitor and initiates a bind to the
      * AccountsService to get the initial account list.  For 1.0,
@@ -93,7 +104,7 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
         mContext = context;
         mListener = listener;
 
-        // Register an intent receiver to monitor account changes
+        // Register a broadcast receiver to monitor account changes
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(AccountsServiceConstants.LOGIN_ACCOUNTS_CHANGED_ACTION);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);  // To recover from disk-full.
@@ -116,14 +127,27 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
     public void onServiceDisconnected(ComponentName className) {
     }
 
-    private void notifyListener() {
-        // initiate the bind
-        if (!mContext.bindService(AccountsServiceConstants.SERVICE_INTENT, this,
-                Context.BIND_AUTO_CREATE)) {
-            // This is normal if GLS isn't part of this build.
-            Log.w("AccountMonitor",
-                    "Couldn't connect to the accounts service (Missing service?)");
+    private synchronized void notifyListener() {
+        if (pending == 0) {
+            // initiate the bind
+            if (!mContext.bindService(AccountsServiceConstants.SERVICE_INTENT,
+                                      this, Context.BIND_AUTO_CREATE)) {
+                // This is normal if GLS isn't part of this build.
+                Log.w("AccountMonitor",
+                      "Couldn't connect to "  +
+                      AccountsServiceConstants.SERVICE_INTENT +
+                      " (Missing service?)");
+            }
+        } else {
+            // already bound.  bindService will not trigger another
+            // call to onServiceConnected, so instead we make sure
+            // that the existing background thread will call
+            // getAccounts() after this function returns, by
+            // incrementing pending.
+            //
+            // Yes, this else clause contains only a comment.
         }
+        ++pending;
     }
 
     /**

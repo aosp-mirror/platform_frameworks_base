@@ -18,26 +18,29 @@
  * @author Igor V. Stolyarov
  * @version $Revision$
  */
+
 package java.awt.image.renderable;
 
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 
 /**
- * A factory for creating RenderedImage objects based on parameters
- * and rendering hints.
+ * A factory for creating RenderedImage objects based on parameters and
+ * rendering hints.
+ * 
+ * @since Android 1.0
  */
 public interface RenderedImageFactory {
 
     /**
      * Creates the rendered image.
      * 
-     * @param a0 the ParameterBlock
-     * @param a1 the RenderingHints
-     * 
-     * @return the rendered image
+     * @param a0
+     *            the ParameterBlock.
+     * @param a1
+     *            the RenderingHints.
+     * @return the rendered image.
      */
     public RenderedImage create(ParameterBlock a0, RenderingHints a1);
 
 }
-

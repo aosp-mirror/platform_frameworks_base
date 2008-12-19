@@ -16,7 +16,7 @@ page.title=Common Tasks and How to Do Them in Android
     <li><a href="#configurewindowproperties">Configuring general window properties </a></li>
     <li><a href="#localhostalias">Referring to localhost from the emulated environment</a></li>
     <li><a href="#appstate">Storing and retrieving state</a></li>
-    <li><a href="{@docRoot}devel/data/preferences.html">Storing and retrieving preferences</a></li>
+    <li><a href="{@docRoot}guide/topics/data/data-storage.html#preferences">Storing and retrieving preferences</a></li>
     <li><a href="#storingandretrieving">Storing and retrieving larger or more complex
             persistent data</a> (files and data) </li>
     <li><a href="#playback">Playing audio, video, still, or other media files</a></li>
@@ -36,34 +36,43 @@ page.title=Common Tasks and How to Do Them in Android
     <li><a href="#filelist">List of files for an Android application</a></li>
     <li><a href="#logging">Print messages to a log file</a></li>
 </ul>
-<p>The ApiDemos sample application includes
-   many, many examples of common tasks and UI features. See the code inside samples/ApiDemos and
-   the other sample applications under the samples/ folder in the
-   SDK.</p>
+<p>The ApiDemos sample application includes many, many examples of common
+tasks and UI features. See the code inside
+<code>&lt;sdk&gt;samples/ApiDemos</code> and the other sample applications
+under the <code>samples/</code> folder in the SDK.</p>
 
-<a name="neweclipseandroidproject" id="neweclipseandroidproject"></a><h2>Creating an Android Application using the Eclipse Plugin</h2>
+
+<h2 id="neweclipseandroidproject">Creating an Android Application using the Eclipse Plugin</h2>
+
 <p>Using the Android Eclipse plugin is the fastest and easiest way
 to start creating a new Android application. The plugin automatically generates
 the correct project structure for your application, and keeps the resources
 compiled for you automatically.</p>
-<p>It is still a good idea to know what is going on though. Take a look at
-<a href="{@docRoot}intro/anatomy.html">Overview of an Android Application</a> to understand 
-the basics of how an Android application works.</p>
-<p>It is also recommended that you take a look at the 
-ApiDemos application and the other
-sample applications in the samples/ folder in the SDK.</p>
-<p>Finally, a great way to started with Android development in Eclipse is to
-follow both the <a href="{@docRoot}intro/hello-android.html">Hello Android</a> and
-<a href="{@docRoot}intro/tutorial.html">Notepad</a> code tutorials. In particular, the start
-of the Hello Android tutorial is an excellent introduction to creating a new
-Android application in Eclipse.</p>
 
-<a name="newandroidprojectnoeclipse" id="newandroidprojectnoeclipse"></a><h2>Creating an Android Application without the Eclipse Plugin</h2>
+<p>It is still a good idea to know what is going on though. Take a look at <a
+href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+to understand the basics of how an Android application works.</p> 
+
+<p>You should also take a look at the ApiDemos application and the other sample
+applications included in the SDK, in the <code>&lt;sdk&gt;/samples/ 
+folder in the SDK.</p>
+
+<p>Finally, a great way to started with Android development in Eclipse is to
+follow both the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello,
+World</a> and <a
+href="{@docRoot}guide/tutorials/notepad/index.html">Notepad</a> code
+tutorials. In particular, the start of the Hello Android tutorial is an
+excellent introduction to creating a new Android application in Eclipse.</p>
+
+<h2 id="newandroidprojectnoeclipse">Creating an Android Application without the Eclipse Plugin</h2>
+
 <p>This topic describes the manual steps in creating an Android application.
-    Before reading this, you should read <a href="{@docRoot}intro/anatomy.html">Overview of an Android
-    Application</a> to understand the basics of how an Android application works.
-    You might also want to look at the sample applications that ship with Android
-    under the samples/ directory. </p>
+Before reading this, you should read <a
+href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+to understand the basics of how an Android application works. You might also 
+want to look at the sample code included with the Android SDK, in the 
+<code>&lt;sdk&gt;/samples/</code> directory. </p>
+
 <p>Here is a list of the basic steps in building an application.</p>
 <ol>
     <li><strong>Create your required resource files</strong> &nbsp;&nbsp;This includes
@@ -71,8 +80,9 @@ Android application in Eclipse.</p>
         needs, and layout files describing your user interface. A full list of optional
         and required files and syntax details for each is given in <a href="#filelist">File
         List for an Android Application</a>. </li>
-    <li><strong>Design your user interface</strong> &nbsp;&nbsp;See <a href="{@docRoot}devel/implementing-ui.html">Implementing
-            a UI</a> for details on elements of the Android screen. </li>
+    <li><strong>Design your user interface</strong> &nbsp;&nbsp;See <a
+    href="{@docRoot}guide/topics/views/index.html">Implementing a UI</a> for
+    details on elements of the Android screen. </li>
     <li><strong>Implement your Activity </strong>(this page)<strong>&nbsp;&nbsp; </strong> You
         will create one class/file for each screen in your application. Screens will
         inherit from an {@link android.app android.app} class, typically {@link android.app.Activity
@@ -85,12 +95,12 @@ Android application in Eclipse.</p>
         the device, are described below.
         The list of files you'll need for your application are described in <a href="#filelist">List
         of Files for an Android Application</a>. </li>
-    <li><strong><a href="{@docRoot}intro/installing.html#building">Build and install your
+    <li><strong><a href="{@docRoot}guide/developing/other-ide.html#buildingwithant">Build and install your
                 package</a>.</strong> The Android SDK has some nice tools for generating
                 projects and debugging code. </li>
 </ol>
 
-<a name="addexternallibrary" id="addexternallibrary"></a><h2>Adding an External Library (.jar) using Eclipse</h2>
+<h2 id="addexternallibrary">Adding an External Library (.jar) using Eclipse</h2>
 <p>
 You can use a third party JAR in your application by adding it to your Eclipse project as follows:
 </p>
@@ -108,11 +118,13 @@ Alternatively, if you want to include third party JARs with your package, create
 It is not necessary to put external JARs in the assets folder.
 </p>
 
-<a name="implementcallbacks" id="implementcallbacks"></a><h2>Implementing Activity Callbacks</h2>
+<a name="implementcallbacks" id="implementcallbacks"></a>
+<h2>Implementing Activity Callbacks</h2>
 <p>Android calls a number of callbacks to let you draw your screen, store data before
     pausing, and refresh data after closing. You must implement at least some of
-    these methods. See <a href="{@docRoot}intro/lifecycle.html">Lifetime of a Screen</a> to learn
-    when and in what order these methods are called. Here are some of the standard types of screen classes that Android provides:</p>
+    these methods. See <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Lifecycles</a>
+    discussion in Application Fundamentals to learn when and in what order these methods 
+    are called. Here are some of the standard types of screen classes that Android provides:</p>
 <ul>
     <li>{@link android.app.Activity android.app.Activity} - This is a standard screen,
         with no specialization.</li>
@@ -135,10 +147,12 @@ It is not necessary to put external JARs in the assets folder.
 <h3>Floating or full?<a name="floatingorfull" id="floatingorfull"></a></h3>
 <p>When you open a new screen you can decide whether to make it transparent or floating,
     or full-screen. The choice of new screen affects the event sequence of events
-    in the old screen (if the new screen obscures the old screen, a different series
-    of events is called in the old screen). See <a href="{@docRoot}intro/lifecycle.html">Lifetime
-    of an Activity</a> for details. </p>
-<p>Transparent or floating windows are implemented in three standard ways: </p>
+    in the old screen (if the new screen obscures the old screen, a different
+    series of events is called in the old screen). See <a
+    href="{@docRoot}guide/topics/fundamentals.html#lcycles">Lifecycles</a> discussion
+    in Application Fundamentals for details. </p> 
+<p>Transparent or floating windows are implemented in three
+    standard ways: </p>
 <ul>
     <li>Create an {@link android.app.Dialog app.Dialog} class </li>
     <li>Create an {@link android.app.AlertDialog app.AlertDialog} class </li>
@@ -186,8 +200,8 @@ startActivity(myIntent);    </pre>
 <p>Android defines a number of standard values, for instance the action constants
     defined by {@link android.content.Intent}. You can define custom values, but
     both the caller and handler must use them. See the &lt;intent-filter&gt;
-    tag description in <a href="{@docRoot}devel/bblocks-manifest.html">AndroidManifest.xml
-    File Details</a> for more information on the manifest syntax for the handling
+    tag description in <a href="{@docRoot}guide/topics/manifest/manifest.html">The AndroidManifest.xml
+    File</a> for more information on the manifest syntax for the handling
     application. </p>
 <a name="returningaresult" id="returningaresult"></a><h3>Returning a Result from a Screen</h3>
 <p>A window can return a result after it closes. This result will be passed back
@@ -246,15 +260,14 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
             finish();
         }
     };
-</pre>
+	</pre>
 <h3>Lifetime of the new screen </h3>
 <p>An activity can remove itself from the history stack by calling {@link android.app.Activity#finish()
     Activity.finish()} on itself, or the activity that opened the screen can call
     {@link android.app.Activity#finishActivity(int) Activity.finishActivity()}
     on any screens that it opens to close them. </p>
 <a name="listening" id="listening"></a><h2>Listening for Button Clicks</h2>
-<p>Button click and other UI event capturing are covered in <a href="{@docRoot}devel/ui/notifications.html">Listening
-        for UI Notifications</a> on the UI Design page.</p>
+<p>Button click and other UI event capturing are covered in <a href="{@docRoot}guide/topics/views/ui-events.html">Handling UI Events</a> on the UI Design page.</p>
 <a name="configurewindowproperties" id="configurewindowproperties"></a><h2>Configuring General Window Properties</h2>
 <p>You can set a number of general window properties, such as whether to display
     a title, whether the window is floating, and whether it displays an icon, by
@@ -287,18 +300,16 @@ loopback interface.
     the application is finalized. See the topics for {@link android.app.Activity#onSaveInstanceState} and
     {@link android.app.Activity#onCreate} for
     examples of storing and retrieving state.</p>
-<p>Read more about the life cycle of an application in <a href="{@docRoot}intro/lifecycle.html">Lifetime
-        of an Activity</a>.</p>
+<p>Read more about the lifecycle of an application in <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>.</p>
 <h3>Storing and Retrieving Larger or More Complex Persistent Data<a name="storingandretrieving" id="storingandretrieving"></a></h3>
 <p>Your application can store files or complex collection objects, and reserve them
     for private use by itself or other activities in the application, or it can expose
-    its data to all other applications on the device. See <a href="{@docRoot}devel/data.html">Storing,
+    its data to all other applications on the device. See <a href="{@docRoot}guide/topics/data/data-storage.html">Storing,
     Retrieving, and Exposing Data</a> to learn how to store and retrieve private data,
     how to store and retrieve common data from the device, and how to expose your
     private data to other applications.</p>
 <a name="playback" id="playback"></a><h2>Playing Media Files</h2>
-<p>Please see the document <a href="{@docRoot}toolbox/apis/media.html">Android
-Media APIs</a> for more details.</p>
+<p>Please see the document <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a> for more details.</p>
 <a name="broadcastreceivers" id="broadcastreceivers"></a><h2>Listening For and Broadcasting Global Messages, and Setting Alarms</h2>
 <p>You can create a listening class that can be notified or even instantiated whenever
     a specific type of system message is sent. 
@@ -313,7 +324,7 @@ Media APIs</a> for more details.</p>
     that describes the types of messages it will receive. Just as Android's IntentResolver
     will look for appropriate Activity matches for a startActivity() call, it will
     look for any matching Receivers (but it will send the message to all matching
-    receiver, not the &quot;best&quot; match). </p>
+    receivers, not to the &quot;best&quot; match). </p>
 <p>To send a notification, the caller creates an {@link android.content.Intent Intent}
     object and calls {@link android.app.Activity#sendBroadcast(android.content.Intent)
     Context.sendBroadcast()} with that Intent. Multiple recipients can receive
@@ -332,8 +343,7 @@ Media APIs</a> for more details.</p>
 <p><em><strong>Note:</strong></em>&nbsp;&nbsp;&nbsp;If a receiver or broadcaster
     enforces permissions, your application might need to request permission
     to send or receive messages from that object. You can request permission by using
-    the {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
-    tag in the manifest. </p>
+    the &lt;uses-permission&gt; tag in the manifest. </p>
 <p>Here is a code snippet of a sender and receiver. This example does not demonstrate
     registering receivers dynamically. For a full code example, see the AlarmService
     class in the ApiDemos project.</p>
@@ -759,8 +769,8 @@ public class MyActivity extends Activity {
     };
 
     &#64;Override
-    protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         [ . . . ]
     }
@@ -786,14 +796,14 @@ public class MyActivity extends Activity {
 </pre>
 
 <p>For further discussions on this topic, see 
-<a href="{@docRoot}toolbox/responsiveness.html">Developing Responsive Applications</a> 
+<a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a> 
 and the {@link android.os.Handler} documentation.</p>
 
 <a name="selectingtext" id="selectingtext"></a><h2>Selecting, Highlighting, or Styling Portions of Text</h2>
 <p>You can highlight or style the formatting of strings or substrings of text in
     a TextView object. There are two ways to do this:</p>
 <ul>
-    <li>If you use a <a href="{@docRoot}reference/available-resources.html#stringresources">string resource</a>,
+    <li>If you use a <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">string resource</a>,
         you can add some simple styling, such as bold or italic using HTML notation.
         The currently supported tags are: <code>B</code> (bold),
         <code>I</code> (italic), <code>U</code> (underline),
@@ -855,9 +865,8 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
 
 <a name="filelist" id="filelist"></a><h2>List of Files for an Android Application</h2>
 <p>The following list describes the structure and files of an Android application.
-    Many of these files can be built for you (or stubbed out) by the activitycreator.py
-    application shipped in the tools/ menu of the SDK. See <a href="{@docRoot}intro/installing.html#building">Building
-    an Android Sample Application</a> for more information on using activitycreator.py. </p>
+    Many of these files can be built for you (or stubbed out) by the activitycreator
+    application shipped in the tools/ menu of the SDK. </p>
 <table width="100%" border="0">
     <tr>
         <td width="28%" valign="top">MyApp/<br /></td>
@@ -869,7 +878,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
             where they can be launched (from the main program menu or elsewhere),
             any content providers it implements and what kind of data they handle,
             where the implementation classes are, and other application-wide
-            information. Syntax details for this file are described in <a href="{@docRoot}devel/bblocks-manifest.html">AndroidManifest.xml</a>.</td>
+            information. Syntax details for this file are described in <a href="{@docRoot}guide/topics/manifest/manifest.html">The AndroidManifest.xml File</a>.</td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;src/<br />
@@ -883,14 +892,14 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
             your application. Resources are external data files or description files
             that are compiled into your code at build time. Files in different folders
             are compiled differently, so you must put the proper resource into the
-            proper folder. (See <a href="{@docRoot}devel/resources-i18n.html">Resources</a> for details.)</td>
+            proper folder. (See <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a> for details.)</td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;anim/<br />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>animation1</em>.xml<br />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>...</em></td>
         <td valign="top">(<em>optional</em>) Holds any animation XML description files that the
-            application uses. The format of these files is described in <a href="{@docRoot}devel/resources-i18n.html">Resources</a>. </td>
+            application uses. The format of these files is described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drawable/<br />
@@ -904,7 +913,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
             graphics such as bitmaps, stretchable bitmaps, or gradients. Supported
             bitmap file formats are PNG (preferred), JPG, and GIF (discouraged),
             as well as the custom 9-patch stretchable bitmap format. These formats
-            are described in <a href="{@docRoot}devel/resources-i18n.html">Resources</a>. </td>
+            are described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;layout/<br />
@@ -913,9 +922,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
         <td valign="top">(<em>optional</em>) Holds all the XML files describing screens or parts
             of screens. Although you could create a screen in Java, defining them
             in XML files is typically easier. A layout file is similar in concept
-            to an HTML file that describes the screen layout and components. See <a href="{@docRoot}devel/implementing-ui.html">Implementing a 
-            UI</a> for more information about designing screens, and <a href="{@docRoot}reference/available-resources.html#layoutresources">Layout
-            Resources</a> for the syntax of these files.</td>
+            to an HTML file that describes the screen layout and components. See <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> for more information about designing screens, and <a href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Available Resource Types</a> for the syntax of these files.</td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values/<br />
@@ -930,7 +937,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
                 such as strings, colors, and styles. The naming, quantity, and number
                 of these files are not enforced--any XML file is compiled, but these
                 are the standard names given to these files. However, the syntax
-                of these files is prescribed by Android, and described in <a href="{@docRoot}devel/resources-i18n.html">Resources</a>. </p>
+                of these files is prescribed by Android, and described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </p>
         </td>
     </tr>
     <tr>
@@ -953,7 +960,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
     <code>Log.w()</code>, or <code>Log.e()</code> to log messages.
     (See the {@link android.util.Log} class.)<br/> E.g., 
     <code>Log.e(this.toString(), "error: " + err.toString())</code></li>
-    <li>Launch <a href="/android/reference/ddms.html">DDMS</a> from a terminal
+    <li>Launch <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a> from a terminal
     by executing <code>ddms</code> in your Android SDK <code>/tools</code> path.</li>
     <li>Run your application in the Android emulator.</li>
     <li>From the DDMS application, select the emulator 

@@ -18,21 +18,27 @@
  * @author Ilya S. Okomin
  * @version $Revision$
  */
+
 package java.awt;
 
 /**
- * The FontFormatException class is used to provide notification
- * and information that font can't be created.
+ * The FontFormatException class is used to provide notification and information
+ * that font can't be created.
+ * 
+ * @since Android 1.0
  */
 public class FontFormatException extends Exception {
-    
-    /** The Constant serialVersionUID. */
+
+    /**
+     * The Constant serialVersionUID.
+     */
     private static final long serialVersionUID = -4481290147811361272L;
 
     /**
      * Instantiates a new font format exception with detailed message.
      * 
-     * @param reason the detailed message.
+     * @param reason
+     *            the detailed message.
      */
     public FontFormatException(String reason) {
         super(reason);

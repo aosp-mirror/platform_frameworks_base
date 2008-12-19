@@ -33,7 +33,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import com.android.internal.util.XmlUtils;
 
 import java.io.IOException;
@@ -544,23 +543,8 @@ import java.util.Set;
  * <h3>Flags</h3>
  *
  * <p>These are the possible flags that can be used in the Intent via
- * {@link #setFlags} and {@link #addFlags}.
- *
- * <ul>
- *     <li> {@link #FLAG_GRANT_READ_URI_PERMISSION}
- *     <li> {@link #FLAG_GRANT_WRITE_URI_PERMISSION}
- *     <li> {@link #FLAG_FROM_BACKGROUND}
- *     <li> {@link #FLAG_DEBUG_LOG_RESOLUTION}
- *     <li> {@link #FLAG_ACTIVITY_NO_HISTORY}
- *     <li> {@link #FLAG_ACTIVITY_SINGLE_TOP}
- *     <li> {@link #FLAG_ACTIVITY_NEW_TASK}
- *     <li> {@link #FLAG_ACTIVITY_MULTIPLE_TASK}
- *     <li> {@link #FLAG_ACTIVITY_FORWARD_RESULT}
- *     <li> {@link #FLAG_ACTIVITY_PREVIOUS_IS_TOP}
- *     <li> {@link #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS}
- *     <li> {@link #FLAG_ACTIVITY_BROUGHT_TO_FRONT}
- *     <li> {@link #FLAG_RECEIVER_REGISTERED_ONLY}
- * </ul>
+ * {@link #setFlags} and {@link #addFlags}.  See {@link #setFlags} for a list
+ * of all possible flags.
  */
 public class Intent implements Parcelable {
     // ---------------------------------------------------------------------
@@ -575,6 +559,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MAIN = "android.intent.action.MAIN";
+
     /**
      * Activity Action: Display the data to the user.  This is the most common
      * action performed on data -- it is the generic action you can use on
@@ -588,11 +573,13 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VIEW = "android.intent.action.VIEW";
+
     /**
      * A synonym for {@link #ACTION_VIEW}, the "standard" action that is
      * performed on a piece of data.
      */
     public static final String ACTION_DEFAULT = ACTION_VIEW;
+
     /**
      * Used to indicate that some piece of data should be attached to some other
      * place.  For example, image data could be attached to a contact.  It is up
@@ -603,6 +590,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";
+
     /**
      * Activity Action: Provide explicit editable access to the given data.
      * <p>Input: {@link #getData} is URI of data to be edited.
@@ -610,6 +598,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EDIT = "android.intent.action.EDIT";
+
     /**
      * Activity Action: Pick an existing item, or insert a new item, and then edit it.
      * <p>Input: {@link #getType} is the desired MIME type of the item to create or edit.
@@ -620,6 +609,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INSERT_OR_EDIT = "android.intent.action.INSERT_OR_EDIT";
+
     /**
      * Activity Action: Pick an item from the data, returning what was selected.
      * <p>Input: {@link #getData} is URI containing a directory of data
@@ -628,13 +618,15 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PICK = "android.intent.action.PICK";
+
     /**
      * Activity Action: Creates a shortcut.
-     * <p>Input: Nothing.
+     * <p>Input: Nothing.</p>
      * <p>Output: An Intent representing the shortcut. The intent must contain three
      * extras: SHORTCUT_INTENT (value: Intent), SHORTCUT_NAME (value: String),
      * and SHORTCUT_ICON (value: Bitmap) or SHORTCUT_ICON_RESOURCE
-     * (value: ShortcutIconResource).
+     * (value: ShortcutIconResource).</p>
+     *
      * @see #EXTRA_SHORTCUT_INTENT
      * @see #EXTRA_SHORTCUT_NAME
      * @see #EXTRA_SHORTCUT_ICON
@@ -672,10 +664,12 @@ public class Intent implements Parcelable {
             "android.intent.extra.shortcut.ICON_RESOURCE";
 
     /**
-     * Represents a shortcut icon resource.
+     * Represents a shortcut/live folder icon resource.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT
      * @see Intent#EXTRA_SHORTCUT_ICON_RESOURCE
+     * @see android.provider.LiveFolders#ACTION_CREATE_LIVE_FOLDER
+     * @see android.provider.LiveFolders#EXTRA_LIVE_FOLDER_ICON
      */
     public static class ShortcutIconResource implements Parcelable {
         /**
@@ -974,10 +968,13 @@ public class Intent implements Parcelable {
     public static final String ACTION_SEARCH = "android.intent.action.SEARCH";
     /**
      * Activity Action: Perform a web search.
-     * <p>Input: {@link #getData} is URI of data. If it is a url
-     * starts with http or https, the site will be opened. If it is plain text,
-     * Google search will be applied.
-     * <p>Output: nothing.
+     * <p>
+     * Input: {@link android.app.SearchManager#QUERY
+     * getStringExtra(SearchManager.QUERY)} is the text to search for. If it is
+     * a url starts with http or https, the site will be opened. If it is plain
+     * text, Google search will be applied.
+     * <p>
+     * Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
@@ -1029,7 +1026,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
-
+    
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1339,6 +1336,14 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_GTALK_SERVICE_DISCONNECTED =
             "android.intent.action.GTALK_DISCONNECTED";
+    
+    /**
+     * Broadcast Action: An input method has been changed.
+     * {@hide pending API Council approval}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_INPUT_METHOD_CHANGED =
+            "android.intent.action.INPUT_METHOD_CHANGED";
 
     /**
      * <p>Broadcast Action: The user has switched the phone into or out of Airplane Mode. One or
@@ -1665,6 +1670,15 @@ public class Intent implements Parcelable {
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
 
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_VOICE_COMMAND}
+     * intents to request which audio route the voice command should prefer.
+     * The value should be a route from {@link android.media.AudioManager}, for
+     * example ROUTE_BLUETOOTH_SCO. Providing this value is optional.
+     * {@hide pending API Council approval}
+     */
+    public static final String EXTRA_AUDIO_ROUTE = "android.intent.extra.AUDIO_ROUTE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
@@ -1692,7 +1706,10 @@ public class Intent implements Parcelable {
     public static final int FLAG_DEBUG_LOG_RESOLUTION = 0x00000008;
 
     /**
-     * If set, the new activity is not kept in the history stack.
+     * If set, the new activity is not kept in the history stack.  As soon as
+     * the user navigates away from it, the activity is finished.  This may also
+     * be set with the {@link android.R.styleable#AndroidManifestActivity_noHistory
+     * noHistory} attribute.
      */
     public static final int FLAG_ACTIVITY_NO_HISTORY = 0x40000000;
     /**
@@ -1815,9 +1832,33 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 0x00200000;
     /**
-     * If set, this activity is being launched from history (longpress home key).
+     * This flag is not normally set by application code, but set for you by
+     * the system if this activity is being launched from history
+     * (longpress home key).
      */
     public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 0x00100000;
+    /**
+     * If set, this marks a point in the task's activity stack that should
+     * be cleared when the task is reset.  That is, the next time the task
+     * is broad to the foreground with
+     * {@link #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} (typically as a result of
+     * the user re-launching it from home), this activity and all on top of
+     * it will be finished so that the user does not return to them, but
+     * instead returns to whatever activity preceeded it.
+     * 
+     * <p>This is useful for cases where you have a logical break in your
+     * application.  For example, an e-mail application may have a command
+     * to view an attachment, which launches an image view activity to
+     * display it.  This activity should be part of the e-mail application's
+     * task, since it is a part of the task the user is involved in.  However,
+     * if the user leaves that task, and later selects the e-mail app from
+     * home, we may like them to return to the conversation they were
+     * viewing, not the picture attachment, since that is confusing.  By
+     * setting this flag when launching the image viewer, that viewer and
+     * any activities it starts will be removed the next time the user returns
+     * to mail.
+     */
+    public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
 
     /**
      * If set, when sending a broadcast only registered receivers will be
@@ -3746,6 +3787,30 @@ public class Intent implements Parcelable {
     }
 
     /**
+     * Completely replace the extras in the Intent with the extras in the
+     * given Intent.
+     * 
+     * @param src The exact extras contained in this Intent are copied
+     * into the target intent, replacing any that were previously there.
+     */
+    public Intent replaceExtras(Intent src) {
+        mExtras = src.mExtras != null ? new Bundle(src.mExtras) : null;
+        return this;
+    }
+    
+    /**
+     * Completely replace the extras in the Intent with the given Bundle of
+     * extras.
+     * 
+     * @param extras The new set of extras in the Intent, or null to erase
+     * all extras.
+     */
+    public Intent replaceExtras(Bundle extras) {
+        mExtras = extras != null ? new Bundle(extras) : null;
+        return this;
+    }
+    
+    /**
      * Remove extended data from the intent.
      *
      * @see #putExtra
@@ -3783,14 +3848,17 @@ public class Intent implements Parcelable {
      * @see #FLAG_GRANT_WRITE_URI_PERMISSION
      * @see #FLAG_DEBUG_LOG_RESOLUTION
      * @see #FLAG_FROM_BACKGROUND
-     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
      * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
+     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
      * @see #FLAG_ACTIVITY_CLEAR_TOP
      * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
      * @see #FLAG_ACTIVITY_FORWARD_RESULT
+     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      * @see #FLAG_ACTIVITY_NEW_TASK
      * @see #FLAG_ACTIVITY_NO_HISTORY
+     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
+     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
      * @see #FLAG_ACTIVITY_SINGLE_TOP
      * @see #FLAG_RECEIVER_REGISTERED_ONLY
      */
@@ -4355,7 +4423,11 @@ public class Intent implements Parcelable {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (nodeName.equals("extra")) {
-                parseExtra(resources, intent, parser, attrs);
+                if (intent.mExtras == null) {
+                    intent.mExtras = new Bundle();
+                }
+                resources.parseBundleExtra("extra", attrs, intent.mExtras);
+                XmlUtils.skipCurrentTag(parser);
 
             } else {
                 XmlUtils.skipCurrentTag(parser);
@@ -4363,50 +4435,5 @@ public class Intent implements Parcelable {
         }
 
         return intent;
-    }
-
-    private static void parseExtra(Resources resources, Intent intent, XmlPullParser parser,
-            AttributeSet attrs) throws XmlPullParserException, IOException {
-        TypedArray sa = resources.obtainAttributes(attrs,
-                com.android.internal.R.styleable.IntentExtra);
-
-        String name = sa.getString(
-                com.android.internal.R.styleable.IntentExtra_name);
-        if (name == null) {
-            sa.recycle();
-            throw new RuntimeException(
-                    "<extra> requires an android:name attribute at "
-                    + parser.getPositionDescription());
-        }
-
-        TypedValue v = sa.peekValue(
-                com.android.internal.R.styleable.IntentExtra_value);
-        if (v != null) {
-            if (v.type == TypedValue.TYPE_STRING) {
-                CharSequence cs = v.coerceToString();
-                intent.putExtra(name, cs != null ? cs.toString() : null);
-            } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
-                intent.putExtra(name, v.data != 0);
-            } else if (v.type >= TypedValue.TYPE_FIRST_INT
-                    && v.type <= TypedValue.TYPE_LAST_INT) {
-                intent.putExtra(name, v.data);
-            } else if (v.type == TypedValue.TYPE_FLOAT) {
-                intent.putExtra(name, v.getFloat());
-            } else {
-                sa.recycle();
-                throw new RuntimeException(
-                        "<extra> only supports string, integer, float, color, and boolean at "
-                        + parser.getPositionDescription());
-            }
-        } else {
-            sa.recycle();
-            throw new RuntimeException(
-                    "<extra> requires an android:value or android:resource attribute at "
-                    + parser.getPositionDescription());
-        }
-
-        sa.recycle();
-
-        XmlUtils.skipCurrentTag(parser);
     }
 }

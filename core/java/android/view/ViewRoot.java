@@ -16,18 +16,26 @@
 
 package android.view;
 
+import com.android.internal.view.IInputMethodCallback;
+import com.android.internal.view.IInputMethodSession;
+
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.*;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.Log;
 import android.util.EventLog;
+import android.util.SparseArray;
 import android.view.View.MeasureSpec;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Scroller;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.app.ActivityManagerNative;
@@ -51,15 +59,19 @@ import static javax.microedition.khronos.opengles.GL10.*;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock"})
-final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.SoundEffectPlayer {
+public final class ViewRoot extends Handler implements ViewParent,
+        View.AttachInfo.SoundEffectPlayer {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
     @SuppressWarnings({"ConstantConditionalExpression"})
     private static final boolean LOCAL_LOGV = false ? Config.LOGD : Config.LOGV;
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
+    private static final boolean DEBUG_LAYOUT = false || LOCAL_LOGV;
+    private static final boolean DEBUG_INPUT_RESIZE = false || LOCAL_LOGV;
     private static final boolean DEBUG_ORIENTATION = false || LOCAL_LOGV;
-    private static final boolean DEBUG_TRACKBALL = LOCAL_LOGV;
+    private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
+    private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
     static final boolean PROFILE_DRAWING = false;
@@ -75,85 +87,103 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
      */
     static final int MAX_TRACKBALL_DELAY = 250;
 
-    private static long sInstanceCount = 0;
+    static long sInstanceCount = 0;
 
-    private static IWindowSession sWindowSession;
+    static IWindowSession sWindowSession;
 
-    private static final Object mStaticInit = new Object();
-    private static boolean mInitialized = false;
+    static final Object mStaticInit = new Object();
+    static boolean mInitialized = false;
 
     static final ThreadLocal<Handler> sUiThreads = new ThreadLocal<Handler>();
     static final RunQueue sRunQueue = new RunQueue();
 
-    private long mLastTrackballTime = 0;
-    private final TrackballAxis mTrackballAxisX = new TrackballAxis();
-    private final TrackballAxis mTrackballAxisY = new TrackballAxis();
+    long mLastTrackballTime = 0;
+    final TrackballAxis mTrackballAxisX = new TrackballAxis();
+    final TrackballAxis mTrackballAxisY = new TrackballAxis();
 
-    private final Thread mThread;
+    final int[] mTmpLocation = new int[2];
+    
+    final InputMethodCallback mInputMethodCallback;
+    final SparseArray<Object> mPendingEvents = new SparseArray<Object>();
+    int mPendingEventSeq = 0;
+    
+    final Thread mThread;
 
-    private final WindowLeaked mLocation;
+    final WindowLeaked mLocation;
 
-    private final WindowManager.LayoutParams mWindowAttributes = new WindowManager.LayoutParams();
+    final WindowManager.LayoutParams mWindowAttributes = new WindowManager.LayoutParams();
 
     final W mWindow;
 
-    private View mView;
-    private View mFocusedView;
-    private int mViewVisibility;
-    private boolean mAppVisible = true;
+    View mView;
+    View mFocusedView;
+    int mViewVisibility;
+    boolean mAppVisible = true;
 
-    private final Region mTransparentRegion;
-    private final Region mPreviousTransparentRegion;
+    final Region mTransparentRegion;
+    final Region mPreviousTransparentRegion;
 
-    private int mWidth;
-    private int mHeight;
-    private Rect mDirty; // will be a graphics.Region soon
+    int mWidth;
+    int mHeight;
+    Rect mDirty; // will be a graphics.Region soon
 
-    private final View.AttachInfo mAttachInfo;
+    final View.AttachInfo mAttachInfo;
 
-    private final Rect mTempRect; // used in the transaction to not thrash the heap.
+    final Rect mTempRect; // used in the transaction to not thrash the heap.
+    final Rect mVisRect; // used to retrieve visible rect of focused view.
+    final Point mVisPoint; // used to retrieve global offset of focused view.
 
-    private boolean mTraversalScheduled;
-    private boolean mWillDrawSoon;
-    private boolean mLayoutRequested;
-    private boolean mFirst;
-    private boolean mReportNextDraw;
-    private boolean mFullRedrawNeeded;
-    private boolean mNewSurfaceNeeded;
+    boolean mTraversalScheduled;
+    boolean mWillDrawSoon;
+    boolean mLayoutRequested;
+    boolean mFirst;
+    boolean mReportNextDraw;
+    boolean mFullRedrawNeeded;
+    boolean mNewSurfaceNeeded;
+    boolean mHasHadWindowFocus;
 
-    private boolean mWindowAttributesChanged = false;
+    boolean mWindowAttributesChanged = false;
 
     // These can be accessed by any thread, must be protected with a lock.
-    private Surface mSurface;
+    Surface mSurface;
 
-    private boolean mAdded;
-    private boolean mAddedTouchMode;
+    boolean mAdded;
+    boolean mAddedTouchMode;
 
     /*package*/ int mAddNesting;
 
     // These are accessed by multiple threads.
-    private final Rect mWinFrame; // frame given by window manager.
+    final Rect mWinFrame; // frame given by window manager.
 
-    private final Rect mCoveredInsets = new Rect();
-    private final Rect mNewCoveredInsets = new Rect();
+    final Rect mPendingVisibleInsets = new Rect();
+    final Rect mPendingContentInsets = new Rect();
+    final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
+            = new ViewTreeObserver.InternalInsetsInfo();
 
-    private EGL10 mEgl;
-    private EGLDisplay mEglDisplay;
-    private EGLContext mEglContext;
-    private EGLSurface mEglSurface;
-    private GL11 mGL;
-    private Canvas mGlCanvas;
-    private boolean mUseGL;
-    private boolean mGlWanted;
+    boolean mScrollMayChange;
+    int mSoftInputMode;
+    View mLastScrolledFocus;
+    int mScrollY;
+    int mCurScrollY;
+    Scroller mScroller;
+    
+    EGL10 mEgl;
+    EGLDisplay mEglDisplay;
+    EGLContext mEglContext;
+    EGLSurface mEglSurface;
+    GL11 mGL;
+    Canvas mGlCanvas;
+    boolean mUseGL;
+    boolean mGlWanted;
 
     /**
      * see {@link #playSoundEffect(int)}
      */
-    private AudioManager mAudioManager;
+    AudioManager mAudioManager;
 
 
 
-    public ViewRoot() {
+    public ViewRoot(Context context) {
         super();
 
         ++sInstanceCount;
@@ -164,9 +194,10 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         synchronized (mStaticInit) {
             if (!mInitialized) {
                 try {
+                    InputMethodManager imm = InputMethodManager.getInstance(context);
                     sWindowSession = IWindowManager.Stub.asInterface(
                             ServiceManager.getService("window"))
-                            .openSession(new Binder());
+                            .openSession(imm.getClient(), imm.getInputContext());
                     mInitialized = true;
                 } catch (RemoteException e) {
                 }
@@ -180,8 +211,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         mHeight = -1;
         mDirty = new Rect();
         mTempRect = new Rect();
+        mVisRect = new Rect();
+        mVisPoint = new Point();
         mWinFrame = new Rect();
         mWindow = new W(this);
+        mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
         mPreviousTransparentRegion = new Region();
@@ -194,7 +228,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             handler = new RootHandler();
             sUiThreads.set(handler);
         }
-        mAttachInfo = new View.AttachInfo(handler, this);
+        mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, handler, this);
     }
 
     @Override
@@ -350,8 +384,10 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         synchronized (this) {
             if (mView == null) {
                 mWindowAttributes.copyFrom(attrs);
+                mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
                 mView = view;
+                mAttachInfo.mRootView = view;
                 if (panelParentView != null) {
                     mAttachInfo.mPanelParentWindowToken
                             = panelParentView.getApplicationWindowToken();
@@ -366,16 +402,20 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 
                 try {
                     res = sWindowSession.add(mWindow, attrs,
-                            getHostVisibility(), mCoveredInsets);
+                            getHostVisibility(), mAttachInfo.mContentInsets);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
+                    mAttachInfo.mRootView = null;
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 }
+                mPendingContentInsets.set(mAttachInfo.mContentInsets);
+                mPendingVisibleInsets.set(0, 0, 0, 0);
                 if (Config.LOGV) Log.v("ViewRoot", "Added window " + mWindow);
                 if (res < WindowManagerImpl.ADD_OKAY) {
                     mView = null;
+                    mAttachInfo.mRootView = null;
                     mAdded = false;
                     unscheduleTraversals();
                     switch (res) {
@@ -427,9 +467,13 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         return mLocation;
     }
 
-    public void setLayoutParams(WindowManager.LayoutParams attrs) {
+    void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
             mWindowAttributes.copyFrom(attrs);
+            if (newView) {
+                mSoftInputMode = attrs.softInputMode;
+                requestLayout();
+            }
             mWindowAttributesChanged = true;
             scheduleTraversals();
         }
@@ -467,6 +511,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
     public void invalidateChild(View child, Rect dirty) {
         checkThread();
         if (LOCAL_LOGV) Log.v(TAG, "Invalidate child: " + dirty);
+        if (mCurScrollY != 0) {
+            mTempRect.set(dirty);
+            mTempRect.offset(0, -mCurScrollY);
+            dirty = mTempRect;
+        }
         mDirty.union(dirty);
         if (!mWillDrawSoon) {
             scheduleTraversals();
@@ -486,6 +535,8 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         if (child != mView) {
             throw new RuntimeException("child is not mine, honest!");
         }
+        // Note: don't apply scroll offset, because we want to know its
+        // visibility in the virtual canvas being given to the view hierarchy.
         return r.intersect(0, 0, mWidth, mHeight);
     }
 
@@ -528,7 +579,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         boolean windowResizesToFitContent = false;
         boolean fullRedrawNeeded = mFullRedrawNeeded;
         boolean newSurface = false;
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) host.getLayoutParams();
+        WindowManager.LayoutParams lp = mWindowAttributes;
 
         int desiredWindowWidth;
         int desiredWindowHeight;
@@ -544,7 +595,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
-            params = mWindowAttributes;
+            params = lp;
         }
 
         if (mFirst) {
@@ -559,9 +610,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             // is attached to the window.  Note that at this point the surface
             // object is not initialized to its backing store, but soon it
             // will be (assuming the window is visible).
-            attachInfo.mWindowToken = mWindow.asBinder();
             attachInfo.mSurface = mSurface;
-            attachInfo.mSession = sWindowSession;
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
@@ -590,16 +639,35 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                     destroyGL();
                 }
             }
+            if (viewVisibility == View.GONE) {
+                // After making a window gone, we will count it as being
+                // shown for the first time the next time it gets focus.
+                mHasHadWindowFocus = false;
+            }
         }
 
+        boolean insetsChanged = false;
+        
         if (mLayoutRequested) {
             if (mFirst) {
-                host.fitSystemWindows(mCoveredInsets);
+                host.fitSystemWindows(mAttachInfo.mContentInsets);
                 // make sure touch mode code executes by setting cached value
                 // to opposite of the added touch mode.
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
                 ensureTouchModeLocally(mAddedTouchMode);
             } else {
+                if (!mAttachInfo.mContentInsets.equals(mPendingContentInsets)) {
+                    mAttachInfo.mContentInsets.set(mPendingContentInsets);
+                    host.fitSystemWindows(mAttachInfo.mContentInsets);
+                    insetsChanged = true;
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
+                            + mAttachInfo.mContentInsets);
+                }
+                if (!mAttachInfo.mVisibleInsets.equals(mPendingVisibleInsets)) {
+                    mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Visible insets changing to: "
+                            + mAttachInfo.mVisibleInsets);
+                }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowResizesToFitContent = true;
@@ -614,7 +682,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
 
             // Ask host how big it wants to be
-            if (DEBUG_ORIENTATION) Log.v("ViewRoot",
+            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v("ViewRoot",
                     "Measuring " + host + " in display " + desiredWindowWidth
                     + "x" + desiredWindowHeight + "...");
             host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
@@ -633,11 +701,37 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             attachInfo.mKeepScreenOn = false;
             host.dispatchCollectViewAttributes(0);
             if (attachInfo.mKeepScreenOn != oldVal) {
-                params = mWindowAttributes;
+                params = lp;
                 //Log.i(TAG, "Keep screen on changed: " + attachInfo.mKeepScreenOn);
             }
         }
 
+        if (mFirst || attachInfo.mViewVisibilityChanged) {
+            attachInfo.mViewVisibilityChanged = false;
+            int resizeMode = mSoftInputMode &
+                    WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+            // If we are in auto resize mode, then we need to determine
+            // what mode to use now.
+            if (resizeMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
+                final int N = attachInfo.mScrollContainers.size();
+                for (int i=0; i<N; i++) {
+                    if (attachInfo.mScrollContainers.get(i).isShown()) {
+                        resizeMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+                    }
+                }
+                if (resizeMode == 0) {
+                    resizeMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
+                }
+                if ((lp.softInputMode &
+                        WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) != resizeMode) {
+                    lp.softInputMode = (lp.softInputMode &
+                            ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) |
+                            resizeMode;
+                    params = lp;
+                }
+            }
+        }
+        
         if (params != null && (host.mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) != 0) {
             if (!PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
@@ -647,10 +741,26 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         boolean windowShouldResize = mLayoutRequested && windowResizesToFitContent
             && (mWidth != host.mMeasuredWidth || mHeight != host.mMeasuredHeight);
 
+        final boolean computesInternalInsets =
+                attachInfo.mTreeObserver.hasComputeInternalInsetsListeners();
+        boolean insetsPending = false;
         int relayoutResult = 0;
-        if (mFirst || windowShouldResize || viewVisibilityChanged || params != null) {
+        if (mFirst || windowShouldResize || insetsChanged
+                || viewVisibilityChanged || params != null) {
 
             if (viewVisibility == View.VISIBLE) {
+                // If this window is giving internal insets to the window
+                // manager, and it is being added or changing its visibility,
+                // then we want to first give the window manager "fake"
+                // insets to cause it to effectively ignore the content of
+                // the window during layout.  This avoids it briefly causing
+                // other windows to resize/move based on the raw frame of the
+                // window, waiting until we can finish laying out this window
+                // and get back to the window manager with the ultimately
+                // computed insets.
+                insetsPending = computesInternalInsets
+                        && (mFirst || viewVisibilityChanged);
+                
                 if (mWindowAttributes.memoryType == WindowManager.LayoutParams.MEMORY_TYPE_GPU) {
                     if (params == null) {
                         params = mWindowAttributes;
@@ -661,7 +771,8 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
 
             final Rect frame = mWinFrame;
             boolean initialized = false;
-            boolean coveredInsetsChanged = false;
+            boolean contentInsetsChanged = false;
+            boolean visibleInsetsChanged = false;
             try {
                 boolean hadSurface = mSurface.isValid();
                 int fl = 0;
@@ -673,31 +784,57 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 }
                 relayoutResult = sWindowSession.relayout(
                     mWindow, params, host.mMeasuredWidth, host.mMeasuredHeight,
-                    viewVisibility, frame, mNewCoveredInsets, mSurface);
+                    viewVisibility, insetsPending, frame,
+                    mPendingContentInsets, mPendingVisibleInsets, mSurface);
                 if (params != null) {
                     params.flags = fl;
                 }
 
-                coveredInsetsChanged = !mNewCoveredInsets.equals(mCoveredInsets);
-                if (coveredInsetsChanged) {
-                    mCoveredInsets.set(mNewCoveredInsets);
-                    host.fitSystemWindows(mCoveredInsets);
+                if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
+                        + " content=" + mPendingContentInsets.toShortString()
+                        + " visible=" + mPendingVisibleInsets.toShortString()
+                        + " surface=" + mSurface);
+                
+                contentInsetsChanged = !mPendingContentInsets.equals(
+                        mAttachInfo.mContentInsets);
+                visibleInsetsChanged = !mPendingVisibleInsets.equals(
+                        mAttachInfo.mVisibleInsets);
+                if (contentInsetsChanged) {
+                    mAttachInfo.mContentInsets.set(mPendingContentInsets);
+                    host.fitSystemWindows(mAttachInfo.mContentInsets);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
+                            + mAttachInfo.mContentInsets);
+                }
+                if (visibleInsetsChanged) {
+                    mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Visible insets changing to: "
+                            + mAttachInfo.mVisibleInsets);
                 }
 
-                if (!hadSurface && mSurface.isValid()) {
-                    // If we are creating a new surface, then we need to
-                    // completely redraw it.  Also, when we get to the
-                    // point of drawing it we will hold off and schedule
-                    // a new traversal instead.  This is so we can tell the
-                    // window manager about all of the windows being displayed
-                    // before actually drawing them, so it can display then
-                    // all at once.
-                    newSurface = true;
-                    fullRedrawNeeded = true;
-
-                    if (mGlWanted && !mUseGL) {
-                        initializeGL();
-                        initialized = mGlCanvas != null;
+                if (!hadSurface) {
+                    if (mSurface.isValid()) {
+                        // If we are creating a new surface, then we need to
+                        // completely redraw it.  Also, when we get to the
+                        // point of drawing it we will hold off and schedule
+                        // a new traversal instead.  This is so we can tell the
+                        // window manager about all of the windows being displayed
+                        // before actually drawing them, so it can display then
+                        // all at once.
+                        newSurface = true;
+                        fullRedrawNeeded = true;
+    
+                        if (mGlWanted && !mUseGL) {
+                            initializeGL();
+                            initialized = mGlCanvas != null;
+                        }
+                    }
+                } else if (!mSurface.isValid()) {
+                    // If the surface has been removed, then reset the scroll
+                    // positions.
+                    mLastScrolledFocus = null;
+                    mScrollY = mCurScrollY = 0;
+                    if (mScroller != null) {
+                        mScroller.abortAnimation();
                     }
                 }
             } catch (RemoteException e) {
@@ -721,10 +858,16 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                     (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
             if (focusChangedDueToTouchMode || mWidth != host.mMeasuredWidth
-                    || mHeight != host.mMeasuredHeight || coveredInsetsChanged) {
+                    || mHeight != host.mMeasuredHeight || contentInsetsChanged) {
                 childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                 childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
 
+                if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
+                        + mWidth + " measuredWidth=" + host.mMeasuredWidth
+                        + " mHeight=" + mHeight
+                        + " measuredHeight" + host.mMeasuredHeight
+                        + " coveredInsetsChanged=" + contentInsetsChanged);
+                
                  // Ask host how big it wants to be
                 host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
@@ -749,6 +892,9 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 }
 
                 if (measureAgain) {
+                    if (DEBUG_LAYOUT) Log.v(TAG,
+                            "And hey let's measure once more: width=" + width
+                            + " height=" + height);
                     host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
                 }
 
@@ -756,12 +902,14 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             }
         }
 
-        boolean triggerGlobalLayoutListener = mLayoutRequested
+        final boolean didLayout = mLayoutRequested;
+        boolean triggerGlobalLayoutListener = didLayout
                 || attachInfo.mRecomputeGlobalAttributes;
-        if (mLayoutRequested) {
+        if (didLayout) {
             mLayoutRequested = false;
-            if (DEBUG_ORIENTATION) Log.v(
-                "ViewRoot", "Setting frame " + host + " to (" +
+            mScrollMayChange = true;
+            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
+                "ViewRoot", "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
             long startTime;
             if (PROFILE_LAYOUT) {
@@ -780,10 +928,10 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             if ((host.mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) != 0) {
                 // start out transparent
                 // TODO: AVOID THAT CALL BY CACHING THE RESULT?
-                host.getLocationInWindow(host.mLocation);
-                mTransparentRegion.set(host.mLocation[0], host.mLocation[1],
-                        host.mLocation[0] + host.mRight - host.mLeft,
-                        host.mLocation[1] + host.mBottom - host.mTop);
+                host.getLocationInWindow(mTmpLocation);
+                mTransparentRegion.set(mTmpLocation[0], mTmpLocation[1],
+                        mTmpLocation[0] + host.mRight - host.mLeft,
+                        mTmpLocation[1] + host.mBottom - host.mTop);
 
                 host.gatherTransparentRegion(mTransparentRegion);
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
@@ -809,6 +957,24 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             attachInfo.mTreeObserver.dispatchOnGlobalLayout();
         }
 
+        if (computesInternalInsets) {
+            ViewTreeObserver.InternalInsetsInfo insets = attachInfo.mGivenInternalInsets;
+            final Rect givenContent = attachInfo.mGivenInternalInsets.contentInsets;
+            final Rect givenVisible = attachInfo.mGivenInternalInsets.visibleInsets;
+            givenContent.left = givenContent.top = givenContent.right
+                    = givenContent.bottom = givenVisible.left = givenVisible.top
+                    = givenVisible.right = givenVisible.bottom = 0;
+            attachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
+            if (insetsPending || !mLastGivenInsets.equals(insets)) {
+                mLastGivenInsets.set(insets);
+                try {
+                    sWindowSession.setInsets(mWindow, insets.mTouchableInsets,
+                            insets.contentInsets, insets.visibleInsets);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+            
         if (mFirst) {
             // handle first focus request
             if (mView != null && !mView.hasFocus()) {
@@ -841,7 +1007,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             }
         } else {
             // We were supposed to report when we are done drawing. Since we canceled the
-            // draw, rememeber it here.
+            // draw, remember it here.
             if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
                 mReportNextDraw = true;
             }
@@ -903,6 +1069,21 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             return;
         }
 
+        scrollToRectOrFocus(null, false);
+        
+        int yoff;
+        final boolean scrolling = mScroller != null
+                && mScroller.computeScrollOffset(); 
+        if (scrolling) {
+            yoff = mScroller.getCurrY();
+        } else {
+            yoff = mScrollY;
+        }
+        if (mCurScrollY != yoff) {
+            mCurScrollY = yoff;
+            fullRedrawNeeded = true;
+        }
+        
         Rect dirty = mDirty;
         if (mUseGL) {
             if (!dirty.isEmpty()) {
@@ -914,7 +1095,9 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                     mGL.glEnable(GL_SCISSOR_TEST);
 
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                    canvas.translate(0, -yoff);
                     mView.draw(canvas);
+                    canvas.translate(0, yoff);
 
                     mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
                     checkEglErrors();
@@ -927,6 +1110,10 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                         sDrawTime = now;
                     }
                 }
+            }
+            if (scrolling) {
+                mFullRedrawNeeded = true;
+                scheduleTraversals();
             }
             return;
         }
@@ -973,11 +1160,18 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 // background. This automatically respects the clip/dirty region
                 if (!canvas.isOpaque()) {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                } else if (yoff != 0) {
+                    // If we are applying an offset, we need to clear the area
+                    // where the offset doesn't appear to avoid having garbage
+                    // left in the blank areas.
+                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 }
 
                 dirty.setEmpty();
                 mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                canvas.translate(0, -yoff);
                 mView.draw(canvas);
+                canvas.translate(0, yoff);
 
                 if (SHOW_FPS) {
                     int now = (int)SystemClock.elapsedRealtime();
@@ -999,12 +1193,125 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
             }
         }
+        
+        if (scrolling) {
+            mFullRedrawNeeded = true;
+            scheduleTraversals();
+        }
     }
 
+    boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
+        final View.AttachInfo attachInfo = mAttachInfo;
+        final Rect ci = attachInfo.mContentInsets;
+        final Rect vi = attachInfo.mVisibleInsets;
+        int scrollY = 0;
+        boolean handled = false;
+        
+        if (vi.left > ci.left || vi.top > ci.top
+                || vi.right > ci.right || vi.bottom > ci.bottom) {
+            // We'll assume that we aren't going to change the scroll
+            // offset, since we want to avoid that unless it is actually
+            // going to make the focus visible...  otherwise we scroll
+            // all over the place.
+            scrollY = mScrollY;
+            // We can be called for two different situations: during a draw,
+            // to update the scroll position if the focus has changed (in which
+            // case 'rectangle' is null), or in response to a
+            // requestChildRectangleOnScreen() call (in which case 'rectangle'
+            // is non-null and we just want to scroll to whatever that
+            // rectangle is).
+            View focus = mFocusedView;
+            if (focus != mLastScrolledFocus) {
+                // If the focus has changed, then ignore any requests to scroll
+                // to a rectangle; first we want to make sure the entire focus
+                // view is visible.
+                rectangle = null;
+            }
+            if (focus == mLastScrolledFocus && !mScrollMayChange
+                    && rectangle == null) {
+                // Optimization: if the focus hasn't changed since last
+                // time, and no layout has happened, then just leave things
+                // as they are.
+                if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Keeping scroll y="
+                        + mScrollY + " vi=" + vi.toShortString());
+            } else if (focus != null) {
+                // We need to determine if the currently focused view is
+                // within the visible part of the window and, if not, apply
+                // a pan so it can be seen.
+                mLastScrolledFocus = focus;
+                mScrollMayChange = false;
+                // Try to find the rectangle from the focus view.
+                if (focus.getGlobalVisibleRect(mVisRect, null)) {
+                    if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Root w="
+                            + mView.getWidth() + " h=" + mView.getHeight()
+                            + " ci=" + ci.toShortString()
+                            + " vi=" + vi.toShortString());
+                    if (rectangle == null) {
+                        focus.getFocusedRect(mTempRect);
+                        if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Focus " + focus
+                                + ": focusRect=" + mTempRect.toShortString());
+                        ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                focus, mTempRect);
+                        if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                "Focus in window: focusRect="
+                                + mTempRect.toShortString()
+                                + " visRect=" + mVisRect.toShortString());
+                    } else {
+                        mTempRect.set(rectangle);
+                        if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                "Request scroll to rect: "
+                                + mTempRect.toShortString()
+                                + " visRect=" + mVisRect.toShortString());
+                    }
+                    if (mTempRect.intersect(mVisRect)) {
+                        if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                "Focus window visible rect: "
+                                + mTempRect.toShortString());
+                        if (mTempRect.height() >
+                                (mView.getHeight()-vi.top-vi.bottom)) {
+                            // If the focus simply is not going to fit, then
+                            // best is probably just to leave things as-is.
+                            if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                    "Too tall; leaving scrollY=" + scrollY);
+                        } else if ((mTempRect.top-scrollY) < vi.top) {
+                            scrollY -= vi.top - (mTempRect.top-scrollY);
+                            if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                    "Top covered; scrollY=" + scrollY);
+                        } else if ((mTempRect.bottom-scrollY)
+                                > (mView.getHeight()-vi.bottom)) {
+                            scrollY += (mTempRect.bottom-scrollY)
+                                    - (mView.getHeight()-vi.bottom);
+                            if (DEBUG_INPUT_RESIZE) Log.v(TAG,
+                                    "Bottom covered; scrollY=" + scrollY);
+                        }
+                        handled = true;
+                    }
+                }
+            }
+        }
+        
+        if (scrollY != mScrollY) {
+            if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Pan scroll changed: old="
+                    + mScrollY + " , new=" + scrollY);
+            if (!immediate) {
+                if (mScroller == null) {
+                    mScroller = new Scroller(mView.getContext());
+                }
+                mScroller.startScroll(0, mScrollY, 0, scrollY-mScrollY);
+            } else if (mScroller != null) {
+                mScroller.abortAnimation();
+            }
+            mScrollY = scrollY;
+        }
+        
+        return handled;
+    }
+    
     public void requestChildFocus(View child, View focused) {
         checkThread();
         if (mFocusedView != focused) {
             mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mFocusedView, focused);
+            scheduleTraversals();
         }
         mFocusedView = focused;
     }
@@ -1063,6 +1370,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             mView.dispatchDetachedFromWindow();
         }
         mView = null;
+        mAttachInfo.mRootView = null;
         if (mUseGL) {
             destroyGL();
         }
@@ -1081,16 +1389,17 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
     }
 
 
-    private final static int DO_TRAVERSAL = 1000;
-    private final static int DIE = 1001;
-    private final static int RESIZED = 1002;
-    private final static int RESIZED_REPORT = 1003;
-    private final static int WINDOW_FOCUS_CHANGED = 1004;
-    private final static int DISPATCH_KEY = 1005;
-    private final static int DISPATCH_POINTER = 1006;
-    private final static int DISPATCH_TRACKBALL = 1007;
-    private final static int DISPATCH_APP_VISIBILITY = 1008;
-    private final static int DISPATCH_GET_NEW_SURFACE = 1009;
+    public final static int DO_TRAVERSAL = 1000;
+    public final static int DIE = 1001;
+    public final static int RESIZED = 1002;
+    public final static int RESIZED_REPORT = 1003;
+    public final static int WINDOW_FOCUS_CHANGED = 1004;
+    public final static int DISPATCH_KEY = 1005;
+    public final static int DISPATCH_POINTER = 1006;
+    public final static int DISPATCH_TRACKBALL = 1007;
+    public final static int DISPATCH_APP_VISIBILITY = 1008;
+    public final static int DISPATCH_GET_NEW_SURFACE = 1009;
+    public final static int FINISHED_EVENT = 1010;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1106,6 +1415,9 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 Debug.stopMethodTracing();
                 mProfile = false;
             }
+            break;
+        case FINISHED_EVENT:
+            handleFinishedEvent(msg.arg1, msg.arg2 != 0);
             break;
         case DISPATCH_KEY:
             if (LOCAL_LOGV) Log.v(
@@ -1124,7 +1436,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 }
                 didFinish = true;
             } else {
-                didFinish = false;
+                didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
             }
 
             try {
@@ -1136,7 +1448,10 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                     if (isDown) {
                         ensureTouchMode(true);
                     }
-
+                    if(Config.LOGV) {
+                        captureMotionLog("captureDispatchPointer", event);
+                    }
+                    event.offsetLocation(0, mCurScrollY);
                     handled = mView.dispatchTouchEvent(event);
                     if (!handled && isDown) {
                         int edgeSlop = ViewConfiguration.getEdgeSlop();
@@ -1207,7 +1522,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             handleGetNewSurface();
             break;
         case RESIZED:
-            if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2) {
+            Rect coveredInsets = ((Rect[])msg.obj)[0];
+            Rect visibleInsets = ((Rect[])msg.obj)[1];
+            if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
+                    && mPendingContentInsets.equals(coveredInsets)
+                    && mPendingVisibleInsets.equals(visibleInsets)) {
                 break;
             }
             // fall through...
@@ -1217,6 +1536,8 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 mWinFrame.right = msg.arg1;
                 mWinFrame.top = 0;
                 mWinFrame.bottom = msg.arg2;
+                mPendingContentInsets.set(((Rect[])msg.obj)[0]);
+                mPendingVisibleInsets.set(((Rect[])msg.obj)[1]);
                 if (msg.what == RESIZED_REPORT) {
                     mReportNextDraw = true;
                 }
@@ -1244,6 +1565,18 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 }
                 if (mView != null) {
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
+                }
+                
+                // Note: must be done after the focus change callbacks,
+                // so all of the view state is set up correctly.
+                if (hasWindowFocus) {
+                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    if (imm != null) {
+                        imm.onWindowFocus(mView.findFocus(),
+                                mWindowAttributes.softInputMode, !mHasHadWindowFocus,
+                                mWindowAttributes.flags);
+                    }
+                    mHasHadWindowFocus = true;
                 }
             }
         } break;
@@ -1387,7 +1720,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             didFinish = false;
         }
 
-        //Log.i("foo", "Motion event:" + event);
+        if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
         boolean handled = false;
         try {
@@ -1397,7 +1730,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                 handled = mView.dispatchTrackballEvent(event);
                 if (!handled) {
                     // we could do something here, like changing the focus
-                    // or someting?
+                    // or something?
                 }
             }
         } finally {
@@ -1456,8 +1789,8 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                     + " / Y=" + y.position + " step="
                     + y.step + " dir=" + y.dir + " acc=" + y.acceleration
                     + " move=" + event.getY());
-            final float xOff = x.collect(event.getX(), "X");
-            final float yOff = y.collect(event.getY(), "Y");
+            final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
+            final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
 
             // Generate DPAD events based on the trackball movement.
             // We pick the axis that has moved the most as the direction of
@@ -1489,9 +1822,9 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             if (keycode != 0) {
                 if (movement < 0) movement = -movement;
                 int accelMovement = (int)(movement * accel);
-                //Log.i(TAG, "Move: movement=" + movement
-                //        + " accelMovement=" + accelMovement
-                //        + " accel=" + accel);
+                if (DEBUG_TRACKBALL) Log.v(TAG, "Move: movement=" + movement
+                        + " accelMovement=" + accelMovement
+                        + " accel=" + accel);
                 if (accelMovement > movement) {
                     if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
                             + keycode);
@@ -1602,8 +1935,116 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         return false;
     }
 
+    /**
+     * log motion events 
+     */
+    private static void captureMotionLog(String subTag, MotionEvent ev) {
+        //check dynamic switch        
+        if (ev == null ||
+                SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_EVENT, 0) == 0) {
+            return;
+        } 
+        
+        StringBuilder sb = new StringBuilder(subTag + ": ");        
+        sb.append(ev.getDownTime()).append(',');        
+        sb.append(ev.getEventTime()).append(',');        
+        sb.append(ev.getAction()).append(',');        
+        sb.append(ev.getX()).append(',');        
+        sb.append(ev.getY()).append(',');        
+        sb.append(ev.getPressure()).append(',');        
+        sb.append(ev.getSize()).append(',');        
+        sb.append(ev.getMetaState()).append(',');        
+        sb.append(ev.getXPrecision()).append(',');        
+        sb.append(ev.getYPrecision()).append(',');        
+        sb.append(ev.getDeviceId()).append(',');        
+        sb.append(ev.getEdgeFlags());
+        Log.d(TAG, sb.toString());        
+    }
+    /**
+     * log motion events 
+     */
+    private static void captureKeyLog(String subTag, KeyEvent ev) {
+        //check dynamic switch                
+        if (ev == null || 
+                SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_EVENT, 0) == 0) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder(subTag + ": ");        
+        sb.append(ev.getDownTime()).append(',');
+        sb.append(ev.getEventTime()).append(',');
+        sb.append(ev.getAction()).append(',');
+        sb.append(ev.getKeyCode()).append(',');        
+        sb.append(ev.getRepeatCount()).append(',');
+        sb.append(ev.getMetaState()).append(',');
+        sb.append(ev.getDeviceId()).append(',');
+        sb.append(ev.getScanCode());
+        Log.d(TAG, sb.toString());        
+    }    
 
+    int enqueuePendingEvent(Object event, boolean sendDone) {
+        int seq = mPendingEventSeq+1;
+        if (seq < 0) seq = 0;
+        mPendingEventSeq = seq;
+        mPendingEvents.put(seq, event);
+        return sendDone ? seq : -seq;
+    }
+
+    Object retrievePendingEvent(int seq) {
+        if (seq < 0) seq = -seq;
+        Object event = mPendingEvents.get(seq);
+        if (event != null) {
+            mPendingEvents.remove(seq);
+        }
+        return event;
+    }
+    
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
+        boolean handled = false;
+        handled = mView.dispatchKeyEventPreIme(event);
+        if (handled) {
+            if (sendDone) {
+                if (LOCAL_LOGV) Log.v(
+                    "ViewRoot", "Telling window manager key is finished");
+                try {
+                    sWindowSession.finishKey(mWindow);
+                } catch (RemoteException e) {
+                }
+            }
+            return;
+        }
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && mView != null && imm.isActive()) {
+            int seq = enqueuePendingEvent(event, sendDone);
+            if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
+                    + seq + " event=" + event);
+            imm.dispatchKeyEvent(mView.getContext(), seq, event,
+                    mInputMethodCallback);
+            return;
+        }
+        deliverKeyEventToViewHierarchy(event, sendDone);
+    }
+
+    void handleFinishedEvent(int seq, boolean handled) {
+        final KeyEvent event = (KeyEvent)retrievePendingEvent(seq);
+        if (DEBUG_IMF) Log.v(TAG, "IME finished event: seq=" + seq
+                + " handled=" + handled + " event=" + event);
+        if (event != null) {
+            final boolean sendDone = seq >= 0;
+            if (!handled) {
+                deliverKeyEventToViewHierarchy(event, sendDone);
+                return;
+            } else if (sendDone) {
+                if (LOCAL_LOGV) Log.v(
+                        "ViewRoot", "Telling window manager key is finished");
+                try {
+                    sWindowSession.finishKey(mWindow);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+    
+    private void deliverKeyEventToViewHierarchy(KeyEvent event, boolean sendDone) {
         try {
             if (mView != null && mAdded) {
                 final int action = event.getAction();
@@ -1611,8 +2052,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
 
                 if (checkForLeavingTouchModeAndConsume(event)) {
                     return;
+                }                
+                
+                if (Config.LOGV) {
+                    captureKeyLog("captureDispatchKeyEvent", event);
                 }
-
                 boolean keyHandled = mView.dispatchKeyEvent(event);
 
                 if ((!keyHandled && isDown) || (action == KeyEvent.ACTION_MULTIPLE)) {
@@ -1740,10 +2184,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                     // animation info.
                     try {
                         if ((sWindowSession.relayout(
-                            mWindow, mWindowAttributes,
-                            mView.mMeasuredWidth, mView.mMeasuredHeight,
-                            viewVisibility, mWinFrame, mCoveredInsets, mSurface)
-                            &WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+                                    mWindow, mWindowAttributes,
+                                    mView.mMeasuredWidth, mView.mMeasuredHeight,
+                                    viewVisibility, false, mWinFrame, mPendingContentInsets,
+                                    mPendingVisibleInsets, mSurface)
+                                &WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
                             sWindowSession.finishDrawing(mWindow);
                         }
                     } catch (RemoteException e) {
@@ -1767,12 +2212,23 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         }
     }
 
-    public void dispatchResized(int w, int h, boolean reportDraw) {
-        if (DEBUG_DRAW) Log.v(TAG, "Resized " + this + ": w=" + w
-                + " h=" + h + " reportDraw=" + reportDraw);
-        Message msg = obtainMessage(reportDraw ? RESIZED_REPORT : RESIZED);
+    public void dispatchFinishedEvent(int seq, boolean handled) {
+        Message msg = obtainMessage(FINISHED_EVENT);
+        msg.arg1 = seq;
+        msg.arg2 = handled ? 1 : 0;
+        sendMessage(msg);
+    }
+    
+    public void dispatchResized(int w, int h, Rect coveredInsets,
+            Rect visibleInsets, boolean reportDraw) {
+        if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w
+                + " h=" + h + " coveredInsets=" + coveredInsets.toShortString()
+                + " visibleInsets=" + visibleInsets.toShortString()
+                + " reportDraw=" + reportDraw);
+        Message msg = obtainMessage(reportDraw ? RESIZED_REPORT :RESIZED);
         msg.arg1 = w;
         msg.arg2 = h;
+        msg.obj = new Rect[] { new Rect(coveredInsets), new Rect(visibleInsets) };
         sendMessage(msg);
     }
 
@@ -1855,6 +2311,30 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         // ViewRoot never intercepts touch event, so this can be a no-op
     }
 
+    public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
+            boolean immediate) {
+        return scrollToRectOrFocus(rectangle, immediate);
+    }
+    
+    static class InputMethodCallback extends IInputMethodCallback.Stub {
+        private WeakReference<ViewRoot> mViewRoot;
+
+        public InputMethodCallback(ViewRoot viewRoot) {
+            mViewRoot = new WeakReference<ViewRoot>(viewRoot);
+        }
+        
+        public void finishedEvent(int seq, boolean handled) {
+            final ViewRoot viewRoot = mViewRoot.get();
+            if (viewRoot != null) {
+                viewRoot.dispatchFinishedEvent(seq, handled);
+            }
+        }
+
+        public void sessionCreated(IInputMethodSession session) throws RemoteException {
+            // Stub -- not for use in the client.
+        }
+    }
+    
     static class W extends IWindow.Stub {
         private WeakReference<ViewRoot> mViewRoot;
 
@@ -1862,10 +2342,12 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
             mViewRoot = new WeakReference<ViewRoot>(viewRoot);
         }
 
-        public void resized(int w, int h, boolean reportDraw) {
+        public void resized(int w, int h, Rect coveredInsets,
+                Rect visibleInsets, boolean reportDraw) {
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
-                viewRoot.dispatchResized(w, h, reportDraw);
+                viewRoot.dispatchResized(w, h, coveredInsets,
+                        visibleInsets, reportDraw);
             }
         }
 
@@ -1961,9 +2443,30 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
      * discrete (DPAD) movements based on raw trackball motion.
      */
     static final class TrackballAxis {
+        /**
+         * The maximum amount of acceleration we will apply.
+         */
+        static final float MAX_ACCELERATION = 20;
+        
+        /**
+         * The maximum amount of time (in milliseconds) between events in order
+         * for us to consider the user to be doing fast trackball movements,
+         * and thus apply an acceleration.
+         */
+        static final long FAST_MOVE_TIME = 100;
+        
+        /**
+         * Scaling factor to the time (in milliseconds) between events to how
+         * much to multiple/divide the current acceleration.  When movement
+         * is < FAST_MOVE_TIME this multiplies the acceleration; when >
+         * FAST_MOVE_TIME it divides it.
+         */
+        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/50);
+        
         float position;
         float absPosition;
         float acceleration = 1;
+        long lastMoveTime = 0;
         int step;
         int dir;
         int nonAccelMovement;
@@ -1971,6 +2474,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
         void reset(int _step) {
             position = 0;
             acceleration = 1;
+            lastMoveTime = 0;
             step = _step;
             dir = 0;
         }
@@ -1985,23 +2489,56 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
          * @return Returns the absolute value of the amount of movement
          * collected so far.
          */
-        float collect(float off, String axis) {
+        float collect(float off, long time, String axis) {
+            long normTime;
             if (off > 0) {
+                normTime = (long)(off * FAST_MOVE_TIME);
                 if (dir < 0) {
                     if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to positive!");
                     position = 0;
                     step = 0;
                     acceleration = 1;
+                    lastMoveTime = 0;
                 }
                 dir = 1;
             } else if (off < 0) {
+                normTime = (long)((-off) * FAST_MOVE_TIME);
                 if (dir > 0) {
                     if (DEBUG_TRACKBALL) Log.v(TAG, axis + " reversed to negative!");
                     position = 0;
                     step = 0;
                     acceleration = 1;
+                    lastMoveTime = 0;
                 }
                 dir = -1;
+            } else {
+                normTime = 0;
+            }
+            
+            // The number of milliseconds between each movement that is
+            // considered "normal" and will not result in any acceleration
+            // or deceleration, scaled by the offset we have here.
+            if (normTime > 0) {
+                long delta = time - lastMoveTime;
+                lastMoveTime = time;
+                float acc = acceleration;
+                if (delta < normTime) {
+                    // The user is scrolling rapidly, so increase acceleration.
+                    float scale = (normTime-delta) * ACCEL_MOVE_SCALING_FACTOR;
+                    if (scale > 1) acc *= scale;
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " accelerate: off="
+                            + off + " normTime=" + normTime + " delta=" + delta
+                            + " scale=" + scale + " acc=" + acc);
+                    acceleration = acc < MAX_ACCELERATION ? acc : MAX_ACCELERATION;
+                } else {
+                    // The user is scrolling slowly, so decrease acceleration.
+                    float scale = (delta-normTime) * ACCEL_MOVE_SCALING_FACTOR;
+                    if (scale > 1) acc /= scale;
+                    if (DEBUG_TRACKBALL) Log.v(TAG, axis + " deccelerate: off="
+                            + off + " normTime=" + normTime + " delta=" + delta
+                            + " scale=" + scale + " acc=" + acc);
+                    acceleration = acc > 1 ? acc : 1;
+                }
             }
             position += off;
             return (absPosition = Math.abs(position));
@@ -2050,12 +2587,11 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                         break;
                     // After the first two, we generate discrete movements
                     // consistently with the trackball, applying an acceleration
-                    // if the trackball is moving quickly.  The acceleration is
-                    // currently very simple, just reducing the amount of
-                    // trackball motion required as more discrete movements are
-                    // generated.  This should probably be changed to take time
-                    // more into account, so that quick trackball movements will
-                    // have increased acceleration.
+                    // if the trackball is moving quickly.  This is a simple
+                    // acceleration on top of what we already compute based
+                    // on how quickly the wheel is being turned, to apply
+                    // a longer increasing acceleration to continuous movement
+                    // in one direction.
                     default:
                         if (absPosition < 1) {
                             return movement;
@@ -2065,7 +2601,7 @@ final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Soun
                         absPosition = Math.abs(position);
                         float acc = acceleration;
                         acc *= 1.1f;
-                        acceleration = acc < 20 ? acc : acceleration;
+                        acceleration = acc < MAX_ACCELERATION ? acc : acceleration;
                         break;
                 }
             } while (true);

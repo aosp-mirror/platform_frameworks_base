@@ -35,6 +35,7 @@ public class AndroidTestRunner extends BaseTestRunner {
     private String mTestClassName;
     private List<TestCase> mTestCases;
     private Context mContext;
+    private boolean mSkipExecution = false;
 
     private List<TestListener> mTestListeners = Lists.newArrayList();
     private Instrumentation mInstrumentation;
@@ -124,7 +125,14 @@ public class AndroidTestRunner extends BaseTestRunner {
     }
 
     protected TestResult createTestResult() {
+        if (mSkipExecution) {
+            return new NoExecTestResult();
+        }
         return new TestResult();
+    }
+    
+    void setSkipExecution(boolean skip) {
+        mSkipExecution = skip;
     }
 
     public List<TestCase> getTestCases() {

@@ -16,6 +16,8 @@
 
 package android.provider;
 
+import com.android.internal.R;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -28,8 +30,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
-
-import com.android.internal.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -1546,6 +1546,32 @@ public class Contacts {
             public static final String PHONE_ISPRIMARY = "phone_isprimary";
 
             /**
+             * The extra field for an optional second contact phone number.
+             * <P>Type: String</P>
+             */
+            public static final String SECONDARY_PHONE = "secondary_phone";
+
+            /**
+             * The extra field for an optional second contact phone number type.
+             * <P>Type: Either an integer value from {@link android.provider.Contacts.PhonesColumns PhonesColumns},
+             *  or a string specifying a type and label.</P>
+             */
+            public static final String SECONDARY_PHONE_TYPE = "secondary_phone_type";
+
+            /**
+             * The extra field for an optional third contact phone number.
+             * <P>Type: String</P>
+             */
+            public static final String TERTIARY_PHONE = "tertiary_phone";
+
+            /**
+             * The extra field for an optional third contact phone number type.
+             * <P>Type: Either an integer value from {@link android.provider.Contacts.PhonesColumns PhonesColumns},
+             *  or a string specifying a type and label.</P>
+             */
+            public static final String TERTIARY_PHONE_TYPE = "tertiary_phone_type";
+
+            /**
              * The extra field for the contact email address.
              * <P>Type: String</P>
              */
@@ -1563,6 +1589,32 @@ public class Contacts {
              * <P>Type: boolean</P>
              */
             public static final String EMAIL_ISPRIMARY = "email_isprimary";
+
+            /**
+             * The extra field for an optional second contact email address.
+             * <P>Type: String</P>
+             */
+            public static final String SECONDARY_EMAIL = "secondary_email";
+
+            /**
+             * The extra field for an optional second contact email type.
+             * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
+             *  or a string specifying a type and label.</P>
+             */
+            public static final String SECONDARY_EMAIL_TYPE = "secondary_email_type";
+
+            /**
+             * The extra field for an optional third contact email address.
+             * <P>Type: String</P>
+             */
+            public static final String TERTIARY_EMAIL = "tertiary_email";
+
+            /**
+             * The extra field for an optional third contact email type.
+             * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
+             *  or a string specifying a type and label.</P>
+             */
+            public static final String TERTIARY_EMAIL_TYPE = "tertiary_email_type";
 
             /**
              * The extra field for the contact postal address.

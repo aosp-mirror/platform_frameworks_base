@@ -21,17 +21,65 @@ import java.util.Map;
 /**
  * Entry point of the Layout Lib. Implementations of this interface provide a method to compute
  * and render a layout.
+ * <p/>
+ * <p/>{@link #getApiLevel()} gives the ability to know which methods are available.
+ * <p/>
+ * Changes in API level 2:
+ * <ul>
+ * <li>{@link #getApiLevel()}</li>
+ * <li>{@link #computeLayout(IXmlPullParser, Object, int, int, String, boolean, Map, Map, IProjectCallback, ILayoutLog)},
+ * deprecated {@link #computeLayout(IXmlPullParser, Object, int, int, String, Map, Map, IProjectCallback, ILayoutLog)}.</li>
+ * </ul>
  */
 public interface ILayoutBridge {
+    
+    final int API_CURRENT = 2;
+
+    /**
+     * Returns the API level of the layout library.
+     * While no methods will ever be removed, some may become deprecated, and some new ones
+     * will appear.
+     */
+    int getApiLevel();
 
     /**
      * Initializes the Bridge object.
      * @param fontOsLocation the location of the fonts.
      * @param enumValueMap map attrName => { map enumFlagName => Integer value }.
      * @return true if success.
+     * @since 1
      */
     boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap);
 
+    /**
+     * Computes and renders a layout
+     * @param layoutDescription the {@link IXmlPullParser} letting the LayoutLib Bridge visit the
+     * layout file.
+     * @param projectKey An Object identifying the project. This is used for the cache mechanism.
+     * @param screenWidth
+     * @param screenHeight
+     * @param themeName The name of the theme to use.
+     * @param isProjectTheme true if the theme is a project theme, false if it is a framework theme.
+     * @param projectResources the resources of the project. The map contains (String, map) pairs
+     * where the string is the type of the resource reference used in the layout file, and the
+     * map contains (String, {@link IResourceValue}) pairs where the key is the resource name,
+     * and the value is the resource value.
+     * @param frameworkResources the framework resources. The map contains (String, map) pairs
+     * where the string is the type of the resource reference used in the layout file, and the map
+     * contains (String, {@link IResourceValue}) pairs where the key is the resource name, and the
+     * value is the resource value.
+     * @param projectCallback The {@link IProjectCallback} object to get information from
+     * the project.
+     * @param logger the object responsible for displaying warning/errors to the user.
+     * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @since 2
+     */
+    ILayoutResult computeLayout(IXmlPullParser layoutDescription,
+            Object projectKey,
+            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback projectCallback, ILayoutLog logger);
 
     /**
      * Computes and renders a layout
@@ -54,7 +102,10 @@ public interface ILayoutBridge {
      * the project.
      * @param logger the object responsible for displaying warning/errors to the user.
      * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @deprecated Use {@link #computeLayout(IXmlPullParser, Object, int, int, String, boolean, Map, Map, IProjectCallback, ILayoutLog)}.
+     * @since 1
      */
+    @Deprecated
     ILayoutResult computeLayout(IXmlPullParser layoutDescription,
             Object projectKey,
             int screenWidth, int screenHeight, String themeName,
@@ -69,6 +120,7 @@ public interface ILayoutBridge {
      * <p/>The cache is not configuration dependent and should only be cleared when a
      * resource changes (at this time only bitmaps and 9 patches go into the cache).
      * @param objectKey the key for the project.
+     * @since 1
      */
     void clearCaches(Object projectKey);
 }

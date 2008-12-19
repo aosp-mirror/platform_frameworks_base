@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.text.InputType;
 import android.text.Spanned;
 import android.text.SpannableStringBuilder;
 import android.view.KeyEvent;
@@ -109,6 +110,17 @@ public class DigitsKeyListener extends NumberKeyListener
         return dim;
     }
 
+    public int getInputType() {
+        int contentType = InputType.TYPE_CLASS_NUMBER;
+        if (mSign) {
+            contentType |= InputType.TYPE_NUMBER_FLAG_SIGNED;
+        }
+        if (mDecimal) {
+            contentType |= InputType.TYPE_NUMBER_FLAG_DECIMAL;
+        }
+        return contentType;
+    }
+    
     @Override
     public CharSequence filter(CharSequence source, int start, int end,
                                Spanned dest, int dstart, int dend) {

@@ -265,8 +265,8 @@ void GraphicsJNI::ipoint_to_jpoint(const SkIPoint& ir, JNIEnv* env, jobject obj)
 {
     SkASSERT(env->IsInstanceOf(obj, gPoint_class));
 
-    env->SetIntField(obj, gPointF_xFieldID, ir.fX);
-    env->SetIntField(obj, gPointF_yFieldID, ir.fY);
+    env->SetIntField(obj, gPoint_xFieldID, ir.fX);
+    env->SetIntField(obj, gPoint_yFieldID, ir.fY);
 }
 
 SkPoint* GraphicsJNI::jpointf_to_point(JNIEnv* env, jobject obj, SkPoint* point)

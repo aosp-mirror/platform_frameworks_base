@@ -354,12 +354,12 @@ class CallbackProxy extends Handler {
 
             case SAVE_PASSWORD:
                 Bundle bundle = msg.getData();
-                String host = bundle.getString("host");
+                String schemePlusHost = bundle.getString("host");
                 String username = bundle.getString("username");
                 String password = bundle.getString("password");
                 // If the client returned false it means that the notify message
                 // will not be sent and we should notify WebCore ourselves.
-                if (!mWebView.onSavePassword(host, username, password,
+                if (!mWebView.onSavePassword(schemePlusHost, username, password,
                             (Message) msg.obj)) {
                     synchronized (this) {
                         notify();
@@ -700,8 +700,8 @@ class CallbackProxy extends Handler {
     // functions just need to operate within the UI thread.
     //--------------------------------------------------------------------------
 
-    public boolean onSavePassword(String host, String username, String password,
-            Message resumeMsg) {
+    public boolean onSavePassword(String schemePlusHost, String username,
+            String password, Message resumeMsg) {
         // resumeMsg should be null at this point because we want to create it
         // within the CallbackProxy.
         if (Config.DEBUG) {
@@ -711,7 +711,7 @@ class CallbackProxy extends Handler {
 
         Message msg = obtainMessage(SAVE_PASSWORD, resumeMsg);
         Bundle bundle = msg.getData();
-        bundle.putString("host", host);
+        bundle.putString("host", schemePlusHost);
         bundle.putString("username", username);
         bundle.putString("password", password);
         synchronized (this) {

@@ -18,82 +18,98 @@
  * @author Ilya S. Okomin
  * @version $Revision$
  */
+
 package java.awt.font;
 
 import java.awt.geom.Rectangle2D;
 
 /**
- * The GlyphMetrics class provides information about the size and shape 
- * of a single glyph. 
- * Each glyph has information to specify whether its baseline is horizontal 
- * or vertical as well as information on how it interacts with 
- * other characters in a text, given as one of the
- * following types: STANDARD, LIGATURE, COMBINING, or COMPONENT.
+ * The GlyphMetrics class provides information about the size and shape of a
+ * single glyph. Each glyph has information to specify whether its baseline is
+ * horizontal or vertical as well as information on how it interacts with other
+ * characters in a text, given as one of the following types: STANDARD,
+ * LIGATURE, COMBINING, or COMPONENT.
+ * 
+ * @since Android 1.0
  */
 public final class GlyphMetrics {
 
     // advance width of the glyph character cell
-    /** The advance x. */
+    /**
+     * The advance x.
+     */
     private float advanceX;
-    
+
     // advance height of the glyph character cell
-    /** The advance y. */
+    /**
+     * The advance y.
+     */
     private float advanceY;
 
     // flag if the glyph horizontal
-    /** The horizontal. */
+    /**
+     * The horizontal.
+     */
     private boolean horizontal;
 
-    // glyph type code 
-    /** The glyph type. */
+    // glyph type code
+    /**
+     * The glyph type.
+     */
     private byte glyphType;
-    
+
     // bounding box for outline of the glyph
-    /** The bounds. */
+    /**
+     * The bounds.
+     */
     private Rectangle2D.Float bounds;
 
-    /** 
-     * The Constant STANDARD indicates a glyph that represents a single 
-     * character. 
+    /**
+     * The Constant STANDARD indicates a glyph that represents a single
+     * character.
      */
     public static final byte STANDARD = 0;
 
-    /** 
-     * The Constant LIGATURE indicates a glyph that represents multiple 
-     * characters as a ligature. 
+    /**
+     * The Constant LIGATURE indicates a glyph that represents multiple
+     * characters as a ligature.
      */
     public static final byte LIGATURE = 1;
 
-    /** 
-     * The Constant COMBINING indicates a glyph which has no caret position 
+    /**
+     * The Constant COMBINING indicates a glyph which has no caret position
      * between glyphs (for example umlaut).
      */
     public static final byte COMBINING = 2;
 
-    /** 
-     * The Constant COMPONENT indicates a glyph with no corresponding character 
+    /**
+     * The Constant COMPONENT indicates a glyph with no corresponding character
      * in the backing store.
      */
     public static final byte COMPONENT = 3;
 
-    /** 
-     * The Constant WHITESPACE indicates a glyph without visual 
-     * representation. 
+    /**
+     * The Constant WHITESPACE indicates a glyph without visual representation.
      */
     public static final byte WHITESPACE = 4;
 
     /**
      * Instantiates a new GlyphMetrics object with the specified parameters.
      * 
-     * @param horizontal specifies if metrics are for a horizontal baseline 
-     * (true value), or a vertical baseline (false value).
-     * @param advanceX the X component of the glyph's advance.
-     * @param advanceY the Y component of the glyph's advance.
-     * @param bounds the glyph's bounds.
-     * @param glyphType the glyph's type.
+     * @param horizontal
+     *            specifies if metrics are for a horizontal baseline (true
+     *            value), or a vertical baseline (false value).
+     * @param advanceX
+     *            the X component of the glyph's advance.
+     * @param advanceY
+     *            the Y component of the glyph's advance.
+     * @param bounds
+     *            the glyph's bounds.
+     * @param glyphType
+     *            the glyph's type.
      */
-    public GlyphMetrics(boolean horizontal, float advanceX, float advanceY, 
-            Rectangle2D bounds, byte glyphType) {
+    public GlyphMetrics(boolean horizontal, float advanceX, float advanceY, Rectangle2D bounds,
+            byte glyphType) {
         this.horizontal = horizontal;
         this.advanceX = advanceX;
         this.advanceY = advanceY;
@@ -107,9 +123,12 @@ public final class GlyphMetrics {
     /**
      * Instantiates a new horizontal GlyphMetrics with the specified parameters.
      * 
-     * @param advanceX the X component of the glyph's advance.
-     * @param bounds the glyph's bounds.
-     * @param glyphType the glyph's type.
+     * @param advanceX
+     *            the X component of the glyph's advance.
+     * @param bounds
+     *            the glyph's bounds.
+     * @param glyphType
+     *            the glyph's type.
      */
     public GlyphMetrics(float advanceX, Rectangle2D bounds, byte glyphType) {
         this.advanceX = advanceX;
@@ -129,7 +148,7 @@ public final class GlyphMetrics {
      * @return glyph's bounds.
      */
     public Rectangle2D getBounds2D() {
-        return (Rectangle2D.Float) this.bounds.clone();
+        return (Rectangle2D.Float)this.bounds.clone();
     }
 
     /**
@@ -187,11 +206,11 @@ public final class GlyphMetrics {
     }
 
     /**
-     * Gets the distance from the right (for horizontal) or 
-     * bottom (for vertical) of the glyph bounds to the advance.
+     * Gets the distance from the right (for horizontal) or bottom (for
+     * vertical) of the glyph bounds to the advance.
      * 
-     * @return the distance from the right (for horizontal) or 
-     * bottom (for vertical) of the glyph bounds to the advance.
+     * @return the distance from the right (for horizontal) or bottom (for
+     *         vertical) of the glyph bounds to the advance.
      */
     public float getRSB() {
         if (this.horizontal) {
@@ -201,11 +220,11 @@ public final class GlyphMetrics {
     }
 
     /**
-     * Gets the distance from 0, 0 to the left (for horizontal) 
-     * or top (for vertical) of the glyph bounds.
+     * Gets the distance from 0, 0 to the left (for horizontal) or top (for
+     * vertical) of the glyph bounds.
      * 
-     * @return the distance from 0, 0 to the left (for horizontal) 
-     * or top (for vertical) of the glyph bounds.
+     * @return the distance from 0, 0 to the left (for horizontal) or top (for
+     *         vertical) of the glyph bounds.
      */
     public float getLSB() {
         if (this.horizontal) {
@@ -245,4 +264,3 @@ public final class GlyphMetrics {
     }
 
 }
-

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.RuntimeInit;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
@@ -37,6 +38,7 @@ import android.app.IIntentReceiver;
 import android.app.IIntentSender;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
+import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.content.ComponentName;
@@ -86,6 +88,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
+
+import dalvik.system.Zygote;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -619,7 +623,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * All information we have collected about the runtime performance of
      * any user id that can impact battery performance.
      */
-    final BatteryStats mBatteryStats;
+    final BatteryStatsService mBatteryStatsService;
 
     /**
      * Current configuration information.  HistoryRecord objects are given
@@ -1041,7 +1045,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         m.mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         m.mLaunchingActivity.setReferenceCounted(false);
         
-        m.mBatteryStats.publish(context);
+        m.mBatteryStatsService.publish(context);
         
         synchronized (thr) {
             thr.mReady = true;
@@ -1209,10 +1213,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         systemDir.mkdirs();
-        mBatteryStats = new BatteryStats(new File(
+        mBatteryStatsService = new BatteryStatsService(new File(
                 systemDir, "batterystats.bin").toString());
-        mBatteryStats.readLocked();
-        mBatteryStats.writeLocked();
+        mBatteryStatsService.getActiveStatistics().readLocked();
+        mBatteryStatsService.getActiveStatistics().writeLocked();
 
         mConfiguration.makeDefault();
         mProcessStats.init();
@@ -1336,19 +1340,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            synchronized(mBatteryStats) {
+            synchronized(mBatteryStatsService.getActiveStatistics()) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
-                        if (mBatteryStats.isOnBattery()) {
+                        if (mBatteryStatsService.isOnBattery()) {
                             final int N = mProcessStats.countWorkingStats();
                             for (int i=0; i<N; i++) {
                                 ProcessStats.Stats st
                                         = mProcessStats.getWorkingStats(i);
                                 ProcessRecord pr = mPidsSelfLocked.get(st.pid);
                                 if (pr != null) {
-                                    BatteryStats.Uid.Proc ps = pr.batteryStats;
-                                    ps.userTime += st.rel_utime;
-                                    ps.systemTime += st.rel_stime;
+                                    BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
+                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
                             }
                         }
@@ -1357,7 +1360,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
                 if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
                     mLastWriteTime = now;
-                    mBatteryStats.writeLocked();
+                    mBatteryStatsService.getActiveStatistics().writeLocked();
                 }
             }
         }
@@ -1627,11 +1630,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app = newProcessRecordLocked(null, info, processName);
             mProcessNames.put(processName, info.uid, app);
         } else {
-            // If this is a new package in the process, then the process does
-            // not have a unique package name.
-            if (!info.packageName.equals(app.uniquePackage)) {
-                app.uniquePackage = null;
-            }
+            // If this is a new package in the process, add the package to the list
+            app.addPackage(info.packageName);
         }
 
         // If the system is not ready yet, then hold off on starting this
@@ -1684,13 +1684,23 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     uid = 0;
                 }
             }
+            int debugFlags = 0;
+            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+            }
+            if ("1".equals(SystemProperties.get("debug.checkjni"))) {
+                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+            }
+            if ("1".equals(SystemProperties.get("debug.assert"))) {
+                debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
+            }
             int pid = Process.start("android.app.ActivityThread",
                     mSimpleProcessManagement ? app.processName : null, uid, uid,
-                    gids, ((app.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0), null);
-            BatteryStats bs = app.batteryStats.getBatteryStats();
+                    gids, debugFlags, null);
+            BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
             synchronized (bs) {
                 if (bs.isOnBattery()) {
-                    app.batteryStats.starts++;
+                    app.batteryStats.incStartsLocked();
                 }
             }
             
@@ -2989,8 +2999,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             intent.setComponent(new ComponentName(
                     aInfo.applicationInfo.packageName, aInfo.name));
 
+            // Don't debug things in the system process
             if (debug) {
-                setDebugApp(aInfo.processName, true, false);
+                if (!aInfo.processName.equals("system")) {
+                    setDebugApp(aInfo.processName, true, false);
+                }
             }
         }
 
@@ -3195,7 +3208,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final void stopActivityLocked(HistoryRecord r) {
         if (DEBUG_SWITCH) Log.d(TAG, "Stopping: " + r);
-        if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0) {
+        if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
+                || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
             if (!r.finishing) {
                 requestFinishActivityLocked(r, Activity.RESULT_CANCELED, null,
                         "no-history");
@@ -4311,7 +4325,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             thread.asBinder().linkToDeath(new AppDeathRecipient(
                     app, pid, thread), 0);
         } catch (RemoteException e) {
-            app.uniquePackage = app.info.packageName;
+            app.resetPackageList();
             startProcessLocked(app, "link fail", processName);
             return false;
         }
@@ -4353,7 +4367,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // an infinite loop of restarting processes...
             Log.w(TAG, "Exception thrown during bind!", e);
 
-            app.uniquePackage = app.info.packageName;
+            app.resetPackageList();
             startProcessLocked(app, "bind fail", processName);
             return false;
         }
@@ -4799,6 +4813,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         String msg = "Permission Denial: getIntentSender() from pid="
                             + Binder.getCallingPid()
                             + ", uid=" + Binder.getCallingUid()
+                            + ", (need uid=" + uid + ")"
                             + " is not allowed to send as package " + packageName;
                         Log.w(TAG, msg);
                         throw new SecurityException(msg);
@@ -4821,7 +4836,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
             final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
-            flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT);
+            final boolean updateCurrent = (flags&PendingIntent.FLAG_UPDATE_CURRENT) != 0;
+            flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT
+                    |PendingIntent.FLAG_UPDATE_CURRENT);
 
             PendingIntentRecord.Key key = new PendingIntentRecord.Key(
                     type, packageName, activity, resultWho,
@@ -4831,6 +4848,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             PendingIntentRecord rec = ref != null ? ref.get() : null;
             if (rec != null) {
                 if (!cancelCurrent) {
+                    if (updateCurrent) {
+                        rec.key.requestIntent.replaceExtras(intent);
+                    }
                     return rec;
                 }
                 rec.canceled = true;
@@ -5721,10 +5741,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 continue;
             }
         
+            final int flags = target.info.flags;
+            
             final boolean finishOnTaskLaunch =
-                (target.info.flags&ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
+                (flags&ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
             final boolean allowTaskReparenting =
-                (target.info.flags&ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
+                (flags&ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
             
             if (target.task == task) {
                 // We are inside of the task being reset...  we'll either
@@ -5736,6 +5758,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     taskTopI = targetI;
                 }
                 if (below != null && below.task == task) {
+                    final boolean clearWhenTaskReset =
+                            (target.intent.getFlags()
+                                    &Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
                     if (!finishOnTaskLaunch && target.resultTo != null) {
                         // If this activity is sending a reply to a previous
                         // activity, we can't do anything with it now until
@@ -5808,12 +5833,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                         replyChainEnd = -1;
                         addRecentTask(target.task);
-                    } else if (forceReset || finishOnTaskLaunch) {
+                    } else if (forceReset || finishOnTaskLaunch
+                            || clearWhenTaskReset) {
                         // If the activity should just be removed -- either
                         // because it asks for it, or the task should be
                         // cleared -- then finish it and anything that is
                         // part of its reply chain.
-                        if (replyChainEnd < 0) {
+                        if (clearWhenTaskReset) {
+                            // In this case, we want to finish this activity
+                            // and everything above it, so be sneaky and pretend
+                            // like these are all in the reply chain.
+                            replyChainEnd = targetI+1;
+                            while (replyChainEnd < mHistory.size() &&
+                                    ((HistoryRecord)mHistory.get(
+                                                replyChainEnd)).task == task) {
+                                replyChainEnd++;
+                            }
+                            replyChainEnd--;
+                        } else if (replyChainEnd < 0) {
                             replyChainEnd = targetI;
                         }
                         HistoryRecord p = null;
@@ -6377,9 +6414,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mProvidersByClass.put(cpi.name, cpr);
                 }
                 app.pubProviders.put(cpi.name, cpr);
-                if (!cpi.applicationInfo.packageName.equals(app.uniquePackage)) {
-                    app.uniquePackage = null;
-                }
+                app.addPackage(cpi.applicationInfo.packageName);
             }
         }
         return providers;
@@ -6725,9 +6760,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final ProcessRecord newProcessRecordLocked(IApplicationThread thread,
             ApplicationInfo info, String customProcess) {
         String proc = customProcess != null ? customProcess : info.processName;
-        BatteryStats.Uid.Proc ps = null;
-        synchronized (mBatteryStats) {
-            ps = mBatteryStats.getProcessStatsLocked(info.uid, proc);
+        BatteryStatsImpl.Uid.Proc ps = null;
+        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        synchronized (stats) {
+            ps = stats.getProcessStatsLocked(info.uid, proc);
         }
         return new ProcessRecord(ps, thread, info, proc);
     }
@@ -6931,15 +6967,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (!(sender instanceof PendingIntentRecord)) {
             return;
         }
-        synchronized(mBatteryStats) {
-            if (mBatteryStats.isOnBattery()) {
-                mBatteryStats.enforceCallingPermission();
+        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        synchronized (stats) {
+            if (mBatteryStatsService.isOnBattery()) {
+                mBatteryStatsService.enforceCallingPermission();
                 PendingIntentRecord rec = (PendingIntentRecord)sender;
                 int MY_UID = Binder.getCallingUid();
                 int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
-                BatteryStats.Uid.Pkg pkg = mBatteryStats.getPackageStatsLocked(uid,
-                        rec.key.packageName);
-                pkg.wakeups++;
+                BatteryStatsImpl.Uid.Pkg pkg =
+                    stats.getPackageStatsLocked(uid, rec.key.packageName);
+                pkg.incWakeupsLocked();
             }
         }
     }
@@ -7538,6 +7575,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         return errList;
+    }
+    
+    public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
+        // Lazy instantiation of list
+        List<ActivityManager.RunningAppProcessInfo> runList = null;
+        synchronized (this) {
+            // Iterate across all processes
+            final int N = mLRUProcesses.size();
+            for (int i = 0; i < N; i++) {
+                ProcessRecord app = mLRUProcesses.get(i);
+                if ((app.thread != null) && (!app.crashing && !app.notResponding)) {
+                    // Generate process state info for running application
+                    ActivityManager.RunningAppProcessInfo currApp = 
+                        new ActivityManager.RunningAppProcessInfo(app.processName,
+                                app.pid, app.getPackageList());
+                    if (runList == null) {
+                        runList = new ArrayList<ActivityManager.RunningAppProcessInfo>();
+                    }
+                    runList.add(currApp);
+                }
+            }
+        }
+        return runList;
     }
 
     @Override
@@ -8268,7 +8328,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.crashing = false;
         app.notResponding = false;
         
-        app.uniquePackage = app.info.packageName;
+        app.resetPackageList();
         app.thread = null;
         app.forcingToForeground = null;
         app.foregroundServices = false;
@@ -8532,9 +8592,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (r == null) {
                     filter = new Intent.FilterComparison(service.cloneFilter());
                     ServiceRestarter res = new ServiceRestarter();
-                    BatteryStats.Uid.Pkg.Serv ss = null;
-                    synchronized (mBatteryStats) {
-                        ss = mBatteryStats.getServiceStatsLocked(
+                    BatteryStatsImpl.Uid.Pkg.Serv ss = null;
+                    BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+                    synchronized (stats) {
+                        ss = stats.getServiceStatsLocked(
                                 sInfo.applicationInfo.uid, sInfo.packageName,
                                 sInfo.name);
                     }
@@ -9616,8 +9677,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     final int uid = intentExtras != null
                             ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
                     if (uid >= 0) {
-                        synchronized (mBatteryStats) {
-                            mBatteryStats.uidStats.remove(uid);
+                        BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
+                        synchronized (bs) {
+                            bs.removeUidStatsLocked(uid);
                         }
                     }
                 } else {
@@ -9652,11 +9714,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // Add to the sticky list if requested.
         if (sticky) {
-            if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
+            if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
+                    callingPid, callingUid)
                     != PackageManager.PERMISSION_GRANTED) {
                 String msg = "Permission Denial: broadcastIntent() requesting a sticky broadcast from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
+                        + callingPid + ", uid=" + callingUid
                         + " requires " + android.Manifest.permission.BROADCAST_STICKY;
                 Log.w(TAG, msg);
                 throw new SecurityException(msg);
@@ -10433,13 +10495,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } catch (PackageManager.NameNotFoundException e) {
             }
             if (ii == null) {
-                Log.w(TAG, "Unable to find instrumentation info for: "
-                      + className);
+                reportStartInstrumentationFailure(watcher, className,
+                        "Unable to find instrumentation info for: " + className);
                 return false;
             }
             if (ai == null) {
-                Log.w(TAG, "Unable to find instrumentation target package: "
-                      + ii.targetPackage);
+                reportStartInstrumentationFailure(watcher, className,
+                        "Unable to find instrumentation target package: " + ii.targetPackage);
                 return false;
             }
 
@@ -10453,7 +10515,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + " not allowed because package " + ii.packageName
                         + " does not have a signature matching the target "
                         + ii.targetPackage;
-                Log.w(TAG, msg);
+                reportStartInstrumentationFailure(watcher, className, msg);
                 throw new SecurityException(msg);
             }
 
@@ -10469,6 +10531,30 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         return true;
+    }
+    
+    /**
+     * Report errors that occur while attempting to start Instrumentation.  Always writes the 
+     * error to the logs, but if somebody is watching, send the report there too.  This enables
+     * the "am" command to report errors with more information.
+     * 
+     * @param watcher The IInstrumentationWatcher.  Null if there isn't one.
+     * @param cn The component name of the instrumentation.
+     * @param report The error report.
+     */
+    private void reportStartInstrumentationFailure(IInstrumentationWatcher watcher, 
+            ComponentName cn, String report) {
+        Log.w(TAG, report);
+        try {
+            if (watcher != null) {
+                Bundle results = new Bundle();
+                results.putString(Instrumentation.REPORT_KEY_IDENTIFIER, "ActivityManagerService");
+                results.putString("Error", report);
+                watcher.instrumentationStatus(cn, -1, results);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, e);
+        }
     }
 
     void finishInstrumentationLocked(ProcessRecord app, int resultCode, Bundle results) {
@@ -10549,19 +10635,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Configuration newConfig = new Configuration(mConfiguration);
             changes = newConfig.updateFrom(values);
             if (changes != 0) {
-                mConfiguration = newConfig;
-                
                 if (DEBUG_SWITCH) {
                     Log.i(TAG, "Updating configuration to: " + values);
                 }
                 
                 EventLog.writeEvent(LOG_CONFIGURATION_CHANGED, changes);
-        
-                if (values.locale != null &&
-                        !mConfiguration.locale.equals(values.locale)) {
-                    saveLocaleLocked(values.locale);
+
+                if (values.locale != null) {
+                    saveLocaleLocked(values.locale, 
+                                     !values.locale.equals(mConfiguration.locale),
+                                     values.userSetLocale);
                 }
-        
+
+                mConfiguration = newConfig;
+
                 Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                 msg.obj = new Configuration(mConfiguration);
                 mHandler.sendMessage(msg);
@@ -10744,10 +10831,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     /**
      * Save the locale.  You must be inside a synchronized (this) block.
      */
-    private void saveLocaleLocked(Locale l) {
-        SystemProperties.set("persist.locale.lang", l.getLanguage());
-        SystemProperties.set("persist.locale.country", l.getCountry());
-        SystemProperties.set("persist.locale.var", l.getVariant());
+    private void saveLocaleLocked(Locale l, boolean isDiff, boolean isPersist) {
+        if(isDiff) {
+            SystemProperties.set("user.language", l.getLanguage());
+            SystemProperties.set("user.region", l.getCountry());
+        } 
+
+        if(isPersist) {
+            SystemProperties.set("persist.sys.language", l.getLanguage());
+            SystemProperties.set("persist.sys.country", l.getCountry());
+            SystemProperties.set("persist.sys.localevar", l.getVariant());
+        }
     }
 
     // =========================================================

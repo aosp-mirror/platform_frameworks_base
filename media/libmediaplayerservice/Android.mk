@@ -7,7 +7,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=               \
+	MediaRecorderClient.cpp \
 	MediaPlayerService.cpp \
+	MetadataRetrieverClient.cpp \
 	VorbisPlayer.cpp \
 	MidiFile.cpp
 
@@ -21,6 +23,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libvorbisidec \
 	libsonivox \
 	libopencoreplayer \
+	libopencoreauthor \
 	libmedia \
 	libandroid_runtime
 

@@ -88,56 +88,34 @@ const ToneGenerator::ToneDescriptor
 //
 ////////////////////////////////////////////////////////////////////////////////
 ToneGenerator::ToneGenerator(int streamType, float volume) {
-    const sp<IAudioFlinger>& lpAudioFlinger = AudioSystem::get_audio_flinger();
 
     LOGV("ToneGenerator constructor: streamType=%d, volume=%f\n", streamType, volume);
 
     mState = TONE_IDLE;
+
+    if (AudioSystem::getOutputSamplingRate(&mSamplingRate) != NO_ERROR) {
+        LOGE("Unable to marshal AudioFlinger");
+        return;
+    }
+    if (AudioSystem::getOutputFrameCount(&mBufferSize) != NO_ERROR) {
+        LOGE("Unable to marshal AudioFlinger");
+        return;
+    }
+    mStreamType = streamType;
+    mVolume = volume;
     mpAudioTrack = 0;
     mpToneDesc = 0;
     mpNewToneDesc = 0;
 
-    if (lpAudioFlinger == 0) {
-        LOGE("Unable to marshal AudioFlinger");
-        goto ToneGenerator_exit;
+    if (initAudioTrack()) {
+        LOGV("ToneGenerator INIT OK, time: %d\n", (unsigned int)(systemTime()/1000000));
+    } else {
+        LOGV("!!!ToneGenerator INIT FAILED!!!\n");
     }
-
-    mSamplingRate = lpAudioFlinger->sampleRate();
-
-    mVolume = volume;
-    // Open audio track in mono, PCM 16bit, default sampling rate, 2 buffers
-    mpAudioTrack
-            = new AudioTrack(streamType, 0, AudioSystem::PCM_16_BIT, 1, NUM_PCM_BUFFERS, 0, audioCallback, this);
-
-    if (mpAudioTrack == 0) {
-        LOGE("AudioTrack allocation failed");
-        goto ToneGenerator_exit;
-    }
-    LOGV("Create Track: %p\n", mpAudioTrack);
-
-    if (mpAudioTrack->initCheck() != NO_ERROR) {
-        LOGE("AudioTrack->initCheck failed");
-        goto ToneGenerator_exit;
-    }
-
-    mpAudioTrack->setVolume(volume, volume);
-
-    LOGV("ToneGenerator INIT OK, time: %d\n", (unsigned int)(systemTime()/1000000));
-
-    mState = TONE_INIT;
-
-    return;
-
-ToneGenerator_exit:
-
-    // Cleanup
-    if (mpAudioTrack) {
-        LOGV("Delete Track I: %p\n", mpAudioTrack);
-        delete mpAudioTrack;
-    }
-
-    LOGV("!!!ToneGenerator INIT FAILED!!!\n");
 }
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -179,8 +157,15 @@ ToneGenerator::~ToneGenerator() {
 bool ToneGenerator::startTone(int toneType) {
     bool lResult = false;
 
-    if (mState == TONE_IDLE || toneType >= NUM_TONES)
+    if (toneType >= NUM_TONES)
         return lResult;
+
+    if (mState == TONE_IDLE) {
+        LOGV("startTone: try to re-init AudioTrack");
+        if (!initAudioTrack()) {
+            return lResult;
+        }
+    }
 
     LOGV("startTone\n");
 
@@ -198,8 +183,10 @@ bool ToneGenerator::startTone(int toneType) {
             mpAudioTrack->start();
             mLock.lock();
             if (mState == TONE_STARTING) {
-                if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR)
+                if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR) {
                     LOGE("--- timed out");
+                    mState = TONE_IDLE;
+                }
             }
 
             if (mState == TONE_PLAYING)
@@ -216,6 +203,7 @@ bool ToneGenerator::startTone(int toneType) {
             LOGV("cond received");
         } else {
             LOGE("--- timed out");
+            mState = TONE_IDLE;
         }
     }
     mLock.unlock();
@@ -250,7 +238,8 @@ void ToneGenerator::stopTone() {
             LOGV("track stop complete, time %d", (unsigned int)(systemTime()/1000000));
         } else {
             LOGE("--- timed out");
-            mState = TONE_INIT;
+            mState = TONE_IDLE;
+            mpAudioTrack->stop();
         }
     }
 
@@ -260,6 +249,62 @@ void ToneGenerator::stopTone() {
 }
 
 //---------------------------------- private methods ---------------------------
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//    Method:        ToneGenerator::initAudioTrack()
+//
+//    Description:    Allocates and configures AudioTrack used for PCM output.
+//
+//    Input:
+//        none
+//
+//    Output:
+//        none
+//
+////////////////////////////////////////////////////////////////////////////////
+bool ToneGenerator::initAudioTrack() {
+
+    if (mpAudioTrack) {
+        delete mpAudioTrack;
+        mpAudioTrack = 0;
+    }
+
+   // Open audio track in mono, PCM 16bit, default sampling rate, 2 buffers of
+    mpAudioTrack
+            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, NUM_PCM_BUFFERS*mBufferSize, 0, audioCallback, this, mBufferSize);
+
+    if (mpAudioTrack == 0) {
+        LOGE("AudioTrack allocation failed");
+        goto initAudioTrack_exit;
+    }
+    LOGV("Create Track: %p\n", mpAudioTrack);
+
+    if (mpAudioTrack->initCheck() != NO_ERROR) {
+        LOGE("AudioTrack->initCheck failed");
+        goto initAudioTrack_exit;
+    }
+
+    mpAudioTrack->setVolume(mVolume, mVolume);
+
+    mState = TONE_INIT;
+
+    return true;
+
+initAudioTrack_exit:
+
+    // Cleanup
+    if (mpAudioTrack) {
+        LOGV("Delete Track I: %p\n", mpAudioTrack);
+        delete mpAudioTrack;
+        mpAudioTrack = 0;
+    }
+
+    return false;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -278,19 +323,24 @@ void ToneGenerator::stopTone() {
 //        returned value: always true.
 //
 ////////////////////////////////////////////////////////////////////////////////
-void ToneGenerator::audioCallback(void* user, const AudioTrack::Buffer& info) {
+void ToneGenerator::audioCallback(int event, void* user, void *info) {
+    
+    if (event != AudioTrack::EVENT_MORE_DATA) return;
+    
+    const AudioTrack::Buffer *buffer = static_cast<const AudioTrack::Buffer *>(info);
     ToneGenerator *lpToneGen = static_cast<ToneGenerator *>(user);
-    short *lpOut = info.i16;
-    unsigned int lReqSmp = info.size/sizeof(short);
+    short *lpOut = buffer->i16;
+    unsigned int lReqSmp = buffer->size/sizeof(short);
     unsigned int lGenSmp;
     unsigned int lWaveCmd = WaveGenerator::WAVEGEN_CONT;
     bool lSignal = false;
 
+    if (buffer->size == 0) return;
 
     lpToneGen->mLock.lock();
 
     // Clear output buffer: WaveGenerator accumulates into lpOut buffer
-    memset(lpOut, 0, info.size);
+    memset(lpOut, 0, buffer->size);
 
     // Update pcm frame count and end time (current time at the end of this process)
     lpToneGen->mTotalSmp += lReqSmp;
@@ -317,8 +367,11 @@ void ToneGenerator::audioCallback(void* user, const AudioTrack::Buffer& info) {
         goto audioCallback_Exit;
     }
 
-    // Exit if to sequence is over
+    // Exit if tone sequence is over
     if (lpToneGen->mpToneDesc->segments[lpToneGen->mCurSegment] == 0) {
+        if (lpToneGen->mState == TONE_PLAYING) {
+            lpToneGen->mState = TONE_STOPPING;            
+        }
         goto audioCallback_Exit;
     }
 
@@ -327,7 +380,7 @@ void ToneGenerator::audioCallback(void* user, const AudioTrack::Buffer& info) {
 
         LOGV("End Segment, time: %d\n", (unsigned int)(systemTime()/1000000));
 
-        lGenSmp = lReqSmp; 
+        lGenSmp = lReqSmp;
 
         if (lpToneGen->mCurSegment & 0x0001) {
             // If odd segment,  OFF -> ON transition : reset wave generator

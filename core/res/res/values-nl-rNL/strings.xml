@@ -1,558 +1,905 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="BaMmi">Oproep blokkeren</string>
-  <string name="CLIRDefaultOffNextCallOff">ID-beperkingsstandaarden op onbeperkt. Volgend gesprek: niet beperkt</string>
-  <string name="CLIRDefaultOffNextCallOn">ID-beperkingsstandaarden op onbeperkt. Volgend gesprek: beperkt</string>
-  <string name="CLIRDefaultOnNextCallOff">ID-beperkingsstandaarden op beperkt. Volgend gesprek: niet beperkt</string>
-  <string name="CLIRDefaultOnNextCallOn">ID-beperkingsstandaarden op beperkt. Volgend gesprek: beperkt</string>
-  <string name="CLIRPermanent">ID-beperking ingesteld op permanente modus.</string>
-  <string name="CfMmi">Oproep doorschakelen</string>
-  <string name="ClipMmi">Nummerweergave inkomend gesprek</string>
-  <string name="ClirMmi">Nummerweergave uitgaand gesprek</string>
-  <string name="CwMmi">Gesprek in wachtstand</string>
-  <string name="Midnight">"Middernacht"</string>
-  <string name="Noon">"12 uur 'smiddags"</string>
-  <string name="PinMmi">Pincode wijzigen</string>
-  <string name="PwdMmi">Wachtwoord wijzigen</string>
-  <string name="VideoView_error_button">OK</string>
-  <string name="VideoView_error_text_unknown">Fout opgetreden bij afspelen van geselecteerde video.</string>
-  <string name="VideoView_error_title">Videoafspeelfout</string>
-  <string name="abbrev_month">"<xliff:g id="format">%b</xliff:g>"</string>
-  <string name="abbrev_month_day">"<xliff:g id="format">%-d %b</xliff:g>"</string>
-  <string name="abbrev_month_day_year">"<xliff:g id="format">%-d %b %Y</xliff:g>"</string>
-  <string name="abbrev_month_year">"<xliff:g id="format">%b %Y</xliff:g>"</string>
-  <string name="activate_keyguard">Toetsbescherming activeren</string>
-  <string name="ago">geleden</string>
-  <string name="alwaysUse">Deze toepassing altijd gebruiken voor deze toepassing</string>
-  <string name="am">"AM"</string>
-  <string name="battery_low_percent_format">Minder dan <xliff:g id="number">%d%%</xliff:g>
-    resterend</string>
-  <string name="battery_low_subtitle">Lage batterijstroom</string>
-  <string name="battery_low_title">Oplader verbinden</string>
-  <string name="battery_status_charging">Bezig met opladen\u2026</string>
-  <string name="battery_status_text_percent_format"><xliff:g id="number">%d%%</xliff:g></string>
-  <string name="before">Voor</string>
-  <string name="browserSavedFormData">Formuliergegevens opgeslagen</string>
-  <string name="byteShort">b</string>
-  <string name="cancel">Annuleren</string>
-  <string name="capital_off">UIT</string>
-  <string name="capital_on">AAN</string>
-  <string name="cfReasonBusy">Oproep doorschakelen bezig</string>
-  <string name="cfReasonNR">Oproep doorschakelen niet bereikbaar</string>
-  <string name="cfReasonNRy">Oproep doorschakelen geen antwoord</string>
-  <string name="cfReasonUnconditional">Oproep doorschakelen onvoorwaardelijk</string>
-  <string name="cfTemplateForwarded">{0}: {1}</string>
-  <string name="cfTemplateForwardedTime">{0}: {1} na {2} seconden</string>
-  <string name="cfTemplateNotForwarded">{0}: Niet doorgestuurd</string>
-  <string name="cfTemplateRegistered">{0}: Niet doorgestuurd ({1})</string>
-  <string name="cfTemplateRegisteredTime">{0}: Niet doorgestuurd ({1} na {2} seconden)</string>
-  <string name="chooseActivity">Een actie selecteren</string>
-  <string name="contentServiceSync">Sync</string>
-  <string name="contentServiceSyncNotificationDesc">Bezig met synchroniseren</string>
-  <string name="contentServiceSyncNotificationTitle">Sync</string>
-  <string name="contentServiceXmppAvailable">XMPP actief</string>
-  <string name="copy">Kopiëren</string>
-  <string name="copyUrl">URL kopiëren</string>
-  <string name="cut">Knippen</string>
-  <string name="daily">Elke dag</string>
-  <string name="daily_format">h:mm aa</string>
-  <string name="date1_date2">"<xliff:g id="format">%2$s \u2013 %5$s</xliff:g>"</string>
-  <string name="date1_time1_date2_time2">"<xliff:g id="format">%2$s, %3$s \u2013 %5$s, %6$s</xliff:g>"</string>
-  <string name="date_picker_set">Instellen</string>
-  <string name="date_range_separator">" \u2013 "</string>
-  <string name="day">dag</string>
-  <string name="day_of_week_long_friday">Vrijdag</string>
-  <string name="day_of_week_long_monday">Maandag</string>
-  <string name="day_of_week_long_saturday">Zaterdag</string>
-  <string name="day_of_week_long_sunday">Zondag</string>
-  <string name="day_of_week_long_thursday">Donderdag</string>
-  <string name="day_of_week_long_tuesday">Dinsdag</string>
-  <string name="day_of_week_long_wednesday">Woensdag</string>
-  <string name="day_of_week_medium_friday">Vri</string>
-  <string name="day_of_week_medium_monday">Maa</string>
-  <string name="day_of_week_medium_saturday">Zat</string>
-  <string name="day_of_week_medium_sunday">Zon</string>
-  <string name="day_of_week_medium_thursday">Don</string>
-  <string name="day_of_week_medium_tuesday">Din</string>
-  <string name="day_of_week_medium_wednesday">Woe</string>
-  <string name="day_of_week_short_friday">Vr</string>
-  <string name="day_of_week_short_monday">Ma</string>
-  <string name="day_of_week_short_saturday">Za</string>
-  <string name="day_of_week_short_sunday">Zo</string>
-  <string name="day_of_week_short_thursday">Do</string>
-  <string name="day_of_week_short_tuesday">Di</string>
-  <string name="day_of_week_short_wednesday">Wo</string>
-  <string name="day_of_week_shorter_friday">V</string>
-  <string name="day_of_week_shorter_monday">M</string>
-  <string name="day_of_week_shorter_saturday">Za</string>
-  <string name="day_of_week_shorter_sunday">Zo</string>
-  <string name="day_of_week_shorter_thursday">Do</string>
-  <string name="day_of_week_shorter_tuesday">Di</string>
-  <string name="day_of_week_shorter_wednesday">W</string>
-  <string name="day_of_week_shortest_friday">V</string>
-  <string name="day_of_week_shortest_monday">M</string>
-  <string name="day_of_week_shortest_saturday">Z</string>
-  <string name="day_of_week_shortest_sunday">Z</string>
-  <string name="day_of_week_shortest_thursday">Do</string>
-  <string name="day_of_week_shortest_tuesday">Di</string>
-  <string name="day_of_week_shortest_wednesday">W</string>
-  <string name="days">dagen</string>
-  <string name="daysDurationFuturePlural">over <xliff:g id="days">%d</xliff:g> dagen</string>
-  <string name="daysDurationPastPlural"><xliff:g id="days">%d</xliff:g> dagen geleden</string>
-  <string name="defaultMsisdnAlphaTag">Msisdn1</string>
-  <string name="defaultVoiceMailAlphaTag">Voicemail</string>
-  <string name="elapsed_time_short_format_h_mm_ss"><xliff:g id="format">%1$d:%2$02d:%3$02d</xliff:g></string>
-  <string name="elapsed_time_short_format_mm_ss"><xliff:g id="format">%1$02d:%2$02d</xliff:g></string>
-  <string name="ellipsis">\u2026</string>
-  <string name="emergency_call_dialog_call">Noodoproep</string>
-  <string name="emergency_call_dialog_cancel">Annuleren</string>
-  <string name="emergency_call_dialog_number_for_display">Alarmnummers</string>
-  <string name="emergency_call_dialog_text">Een alarmnummer bellen?</string>
-  <string name="emergency_call_number_uri">tel:112</string>
-  <string name="emptyPhoneNumber">(geen telefoonnummer)</string>
-  <string name="every_weekday">"Elke werkdag (Maa\u2013vri)"</string>
-  <string name="factorytest_failed">Fabriekstest mislukt</string>
-  <string name="factorytest_no_action">Geen pakket gevonden dat de handeling        FACTORY_TEST levert.</string>
-  <string name="factorytest_not_system">De handeling FACTORY_TEST
-        wordt alleen ondersteund voor pakketten die geïnstalleerd zijn in /system/app.</string>
-  <string name="factorytest_reboot">Opnieuw opstarten</string>
-  <string name="friday">Vrijdag</string>
-  <string name="gigabyteShort">Gb</string>
-  <string name="global_action_lock">Vergrendeling</string>
-  <string name="global_action_power_off">Uitschakelen</string>
-  <string name="global_action_silent_mode_off_status">Geluid staat AAN</string>
-  <string name="global_action_silent_mode_on_status">Geluid staat UIT</string>
-  <string name="global_action_toggle_silent_mode">Stille modus</string>
-  <string name="global_actions">Globale handelingen</string>
-  <string name="hour">uur</string>
-  <string name="hours">uur</string>
-  <string name="httpError">Onbekende fout</string>
-  <string name="httpErrorAuth">Verificatie mislukt</string>
-  <string name="httpErrorBadUrl">Ongeldige url</string>
-  <string name="httpErrorConnect">Verbinding maken met server mislukt</string>
-  <string name="httpErrorFailedSslHandshake">Uitvoeren van ssl-handshake mislukt</string>
-  <string name="httpErrorFile">Bestandfout</string>
-  <string name="httpErrorFileNotFound">Bestand niet gevonden</string>
-  <string name="httpErrorIO">Lezen van of schrijven naar server mislukt</string>
-  <string name="httpErrorLookup">Onbekende host</string>
-  <string name="httpErrorOk">OK</string>
-  <string name="httpErrorProxyAuth">Verificeren van proxyserver mislukt</string>
-  <string name="httpErrorRedirectLoop">Te veel omleidingen door server</string>
-  <string name="httpErrorTimeout">Time-out bij serververbinding</string>
-  <string name="httpErrorUnsupportedAuthScheme">Niet-ondersteund verificatieschema. Verificeren mislukt.</string>
-  <string name="httpErrorUnsupportedScheme">Protocol wordt niet ondersteund</string>
-  <string name="in">in</string>
-  <string name="keyguard_label_text">Om vrij te geven drukt u op Menu en vervolgens op 0.</string>
-  <string name="keyguard_password_emergency_instructions">Druk op de Beltoets om het alarmnummer te bellen.</string>
-  <string name="keyguard_password_enter_pin_code">Pincode invoeren</string>
-  <string name="keyguard_password_instructions">Voer een wachtwoord in of bel een alarmnummer.</string>
-  <string name="keyguard_password_wrong_pin_code">Onjuiste pincode!</string>
-  <string name="kilobyteShort">Kb</string>
-  <string name="lockscreen_carrier_default">(Geen service)</string>
-  <string name="lockscreen_carrier_key">gsm.operator.alpha</string>
-  <string name="lockscreen_emergency_call">Noodoproep</string>
-  <string name="lockscreen_instructions_when_pattern_disabled">Druk op Menu om vrij te geven</string>
-  <string name="lockscreen_instructions_when_pattern_enabled">Druk op Menu om vrij te geven of bel een alarmnummer</string>
-  <string name="lockscreen_low_battery">Oplader verbinden</string>
-  <string name="lockscreen_missing_sim_instructions">Voer een SIM-kaart in</string>
-  <string name="lockscreen_missing_sim_message">Geen SIM in toestel</string>
-  <string name="lockscreen_pattern_correct">Juist!</string>
-  <string name="lockscreen_pattern_instructions">Patroon tekenen om vrij te geven</string>
-  <string name="lockscreen_pattern_wrong">Verkeerd patroon! Nogmaals proberen</string>
-  <string name="lockscreen_plugged_in">Bezig met opladen (<xliff:g id="number">%d%%</xliff:g>)</string>
-  <string name="lockscreen_screen_locked">Schermblokkering</string>
-  <string name="lockscreen_too_many_failed_attempts_countdown">Probeer opnieuw over <xliff:g id="number">%d</xliff:g> seconden</string>
-  <string name="lockscreen_too_many_failed_attempts_dialog_message">
-        U heeft nu <xliff:g id="number">%d</xliff:g> mislukte pogingen om
-        het vrijgavepatroon correct te tekenen.\n
-        Probeer opnieuw over <xliff:g id="number">%d</xliff:g> seconden.
-    </string>
-  <string name="lockscreen_too_many_failed_attempts_dialog_title">Blokkeerpatroonwaarschuwing</string>
-  <string name="low_internal_storage_text">Weinig intern geheugen</string>
-  <string name="low_internal_storage_view_text">Toestel heeft weinig intern geheugen</string>
-  <string name="low_internal_storage_view_title">Weinig intern geheugen</string>
-  <string name="megabyteShort">Mb</string>
-  <string name="midnight">"middernacht"</string>
-  <string name="minute">minuut</string>
-  <string name="minutes">minuten</string>
-  <string name="mmiComplete">MMI voltooid</string>
-  <string name="mmiError">Netwerkfout of onjuiste MMI-code.</string>
-  <string name="monday">Maandag</string>
-  <string name="month">"<xliff:g id="format">%B</xliff:g>"</string>
-  <string name="month_day">"<xliff:g id="format">%-d %B</xliff:g>"</string>
-  <string name="month_day_year">"<xliff:g id="format">%-d %B %Y</xliff:g>"</string>
-  <string name="month_long_april">April</string>
-  <string name="month_long_august">Augustus</string>
-  <string name="month_long_december">December</string>
-  <string name="month_long_february">Februari</string>
-  <string name="month_long_january">Januari</string>
-  <string name="month_long_july">Juli</string>
-  <string name="month_long_june">Juni</string>
-  <string name="month_long_march">Maart</string>
-  <string name="month_long_may">Mei</string>
-  <string name="month_long_november">November</string>
-  <string name="month_long_october">Oktober</string>
-  <string name="month_long_september">September</string>
-  <string name="month_medium_april">apr</string>
-  <string name="month_medium_august">aug</string>
-  <string name="month_medium_december">dec</string>
-  <string name="month_medium_february">feb</string>
-  <string name="month_medium_january">jan</string>
-  <string name="month_medium_july">jul</string>
-  <string name="month_medium_june">jun</string>
-  <string name="month_medium_march">mrt</string>
-  <string name="month_medium_may">mei</string>
-  <string name="month_medium_november">nov</string>
-  <string name="month_medium_october">okt</string>
-  <string name="month_medium_september">sep</string>
-  <string name="month_shortest_april">A</string>
-  <string name="month_shortest_august">A</string>
-  <string name="month_shortest_december">D</string>
-  <string name="month_shortest_february">F</string>
-  <string name="month_shortest_january">J</string>
-  <string name="month_shortest_july">J</string>
-  <string name="month_shortest_june">J</string>
-  <string name="month_shortest_march">M</string>
-  <string name="month_shortest_may">M</string>
-  <string name="month_shortest_november">N</string>
-  <string name="month_shortest_october">O</string>
-  <string name="month_shortest_september">S</string>
-  <string name="month_year">"<xliff:g id="format">%B %Y</xliff:g>"</string>
-  <string name="monthly">Elke mnd</string>
-  <string name="monthly_format">d MMM</string>
-  <string name="more_item_label">Meer</string>
-  <string name="no">Annuleren</string>
-  <string name="noApplications">Geen toepassingen beschikbaar om        de handeling uit te voeren</string>
-  <string name="no_recent_tasks">Geen recente toepassingen</string>
-  <string name="noon">"12 uur 'smiddags"</string>
-  <string name="numeric_date">"<xliff:g id="format">%d/%m/%Y</xliff:g>"</string>
-  <string name="numeric_date_notation">"<xliff:g id="format">%d/%m/%y</xliff:g>"</string>
-  <string name="numeric_md1_md2">"<xliff:g id="format">%3$s/%2$s \u2013 %8$s/%7$s</xliff:g>"</string>
-  <string name="numeric_md1_time1_md2_time2">"<xliff:g id="format">%3$s/%2$s, %5$s \u2013 %8$s/%7$s, %10$s</xliff:g>"</string>
-  <string name="numeric_mdy1_mdy2">"<xliff:g id="format">%3$s/%2$s/%4$s \u2013 %8$s/%7$s/%9$s</xliff:g>"</string>
-  <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="format">%3$s/%2$s/%4$s, %5$s \u2013 %8$s/%7$s/%9$s, %10$s</xliff:g>"</string>
-  <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="format">%1$s %3$s/%2$s, %5$s \u2013 %6$s %8$s/%7$s, %10$s</xliff:g>"</string>
-  <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="format">%1$s %3$s/%2$s \u2013 %6$s %8$s/%7$s</xliff:g>"</string>
-  <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="format">%1$s %3$s/%2$s/%4$s, %5$s \u2013 %6$s %8$s/%7$s/%9$s, %10$s</xliff:g>"</string>
-  <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="format">%1$s %3$s/%2$s/%4$s \u2013 %6$s %8$s/%7$s/%9$s</xliff:g>"</string>
-  <string name="ok">OK</string>
-  <string name="open_permission_deny">U hebt geen toestemming om deze pagina te openen.</string>
-  <string name="passwordIncorrect">Ongeldig wachtwoord</string>
-  <string name="paste">Plakken</string>
-  <string name="permdesc_accessFineLocation">Open, indien beschikbaar, het Global
-        Positioning System op het toestel.
-        Verkeerde toepassingen kunnen dit gebruiken om te bepalen waar u
-        zich bevindt en extra batterijstroom verbruiken.</string>
-  <string name="permdesc_accessCoarseLocation">Gebruik, indien beschikbaar, een
-        netwerkdatabank om de locatie van het toestel te schatten. Verkeerde toepassingen
-        kunnen dit gebruiken om te schatten waar u zich bevindt.</string>
-  <string name="permdesc_accessPhoneInterface">Toepassingen mogen de interne
-        Telefooninterface openen. Is bij normale toepassingen nooit nodig.</string>
-  <string name="permdesc_accessSurfaceFlinger">Toepassingen mogen de        functies op laag niveau van SurfaceFlinger gebruiken.</string>
-  <string name="permdesc_addSystemService">Toepassingen mogen hun
-        eigen systeemdiensten van laag-niveau publiceren. Verkeerde toepassingen kunnen
-        het systeem kapen en gegevens erop beschadigen of stelen.</string>
-  <string name="permdesc_brick">Hiermee kan de toepassing de gehele
-        dienst permanent uitschakelen. Dit is erg gevaarlijk.</string>
-  <string name="permdesc_broadcastPackageRemoved">Hiermee kan een toepassing
-        een melding uitzenden met de mededeling dat een toepassingspakket is verwijderd.
-        Verkeerde toepassingen kunnen dit gebruiken om andere
-        actieve toepassingen te stoppen.</string>
-  <string name="permdesc_broadcastSticky">Hiermee kan een toepassing
-        plakuitzendingen versturen, die blijven hangen als de uitzending stopt.
-        Verkeerde toepassingen kunnen het toestel traag of instabiel maken
-        door te veel geheugengebruik te veroorzaken.</string>
-  <string name="permdesc_callPhone">Hiermee kunnen toepassingen
-        telefoonnummers bellen zonder uw tussenkomst. Verkeerde toepassingen
-        kunnen ongewilde gesprekken op uw telefoonrekening veroorzaken.</string>
-  <string name="permdesc_camera">Hiermee kunnen toepassingen
-        foto's maken met de camera. Hiermee kan de toepassing op elk moment de
-        beelden van de camera ophalen.</string>
-  <string name="permdesc_changeComponentState">Hiermee kan een toepassing veranderen of
-        een component van een andere toepassing wordt ingeschakeld of niet. Slechte toepassingen kunnen
-        dit gebruiken om belangrijke toestelfuncties uit te schakelen. Wees voorzichtig met het verlenen van
-        toestemmingen, omdat het mogelijk is dat toepassingscomponenten in een onbruikbare, inconsistente of instabiele toestand geraken.
-    </string>
-  <string name="permdesc_changeConfiguration">Hiermee kan een toepassing
-        de actuele configuratie veranderen, zoals de locatie of algemene
-        tekengrootte.</string>
-  <string name="permdesc_clearAppCache">Hiermee kan een toepassing toestelgeheugen
-        vrijmaken door bestanden uit de cachemap te verwijderen. Toegang wordt 
-        meestal beperkt tot systeemprocessen.</string>
-  <string name="permdesc_deleteCacheFiles">Hiermee kan een toepassing        cachebestanden verwijderen.</string>
-  <string name="permdesc_deletePackages">Hiermee kan een toepassing
-        Android-pakketten verwijderen. Slechte toepassingen kunnen dit misbruiken om belangrijke toepassingen te wissen.</string>
-  <string name="permdesc_devicePower">Hiermee kan de toepassing het        toestel in- of uitschakelen, of ingeschakeld laten.</string>
-  <string name="permdesc_dump">Hiermee kan een toepassingen
-        de interne toestand van het systeem opvragen. Verkeerde toepassingen kunnen
-        een diverse privé- en veiligheidsinformatie verkrijgen die ze
-        normaal gesproken niet nodig hebben.</string>
-  <string name="permdesc_factoryTest">Uitvoeren als een fabriekstest op laag
-        niveau, waardoor volledige toegang tot de toestelhardware gegeven is. Alleen beschikbaar
-        als een toestel in de fabriekstestmodus staat.</string>
-  <string name="permdesc_flashlight">Hiermee kan de toepassing de        flitser besturen.</string>
-  <string name="permdesc_forceBack">Hiermee kan een toepassing elke
-        activiteit die op de voorgrond staat sluiten en terugkeren.
-        Is bij normale toepassingen nooit nodig.</string>
-  <string name="permdesc_fotaUpdate">Hiermee kan een toepassing
-        meldingen ontvangen over systeemupdates die in behandeling zijn en hun installatie
-        in gang zetten. Slechte toepassingen kunnen dit misbruiken om het
-        te beschadigen met niet toegestane updates, of algemeen het updaten
-        te verstoren.</string>
-  <string name="permdesc_getTasks">Hiermee kan een toepassing
-        informatie ophalen over geactiveerde en recent geactiveerde taken. Verkeerde
-        toepassingen kunnen hierdoor
-        toegang krijgen tot privé-informatie over andere toepassingen.</string>
-  <string name="permdesc_hardware_test">Hiermee kan de toepassing diverse        randapparaten besturen met als doel het testen van de hardware.</string>
-  <string name="permdesc_injectEvents">Hiermee kan een toepassing
-        zijn eigen invoergebeurtenissen (toetsindrukken enz.) naar andere toepassingen sturen. Slechte
-        toepassingen kunnen dit misbruiken om controle over het toestel te krijgen.</string>
-  <string name="permdesc_installPackages">Hiermee kan een toepassing nieuwe Android-
-        pakketten installeren of updaten. Slechte toepassingen kunnen dit misbruiken om nieuwe
-        toepassingen met twijfelachtig verstrekkende rechten toe te voegen.</string>
-  <string name="permdesc_internalSystemWindow">Hiermee kunnen vensters
-        worden gemaakt die bedoeld zijn voor gebruik door het interne systeem
-        van de gebruikersinterface. Niet bedoeld voor normale toepassingen.</string>
-  <string name="permdesc_manageAppTokens">Hiermee kunnen toepassingen
-        hun eigen tokens maken, en zo de normale Z-ordening
-        buiten spel zetten. Is bij normale toepassingen nooit nodig.</string>
-  <string name="permdesc_masterClear">Hiermee kan een toepassing het
-        systeem volledig opnieuw instellen op fabrieksinstellingen, waardoor alle gegevens,
-        configuratie en geïnstalleerde toepassingen worden gewist.</string>
-  <string name="permdesc_modifyAudioSettings">Hiermee kan een toepassing        globale audioinstellingen aanpassen, zoals volume en route.</string>
-  <string name="permdesc_mount_unmount_filesystems">Hiermee kan de toepassing        bestandssystemen voor verwisselbaar geheugen koppelen en loskoppelen.</string>
-  <string name="permdesc_persistentActivity">Hiermee kan een toepassing
-        gedeeltes van zichzelf fixeren, zodat het systeem deze niet meer kan gebruiken voor andere
-        toepassingen.</string>
-  <string name="permdesc_raisedThreadPriority">Hiermee kan een toepassing
-        zgn raised thread priorities gebruiken, wat mogelijk invloed heeft op de reactiesnelheid van de
-        gebruikersinterface.</string>
-  <string name="permdesc_readContacts">Hiermee kan een toepassing alle
-        contactgegevens (adres) op het toestel lezen. Slechte toepassingen
-        kunnen dit misbruiken om uw gegevens naar andere personen te sturen.</string>
-  <string name="permdesc_readFrameBuffer">Hiermee kan een toepassing        de gegevens van de framebuffer lezen.</string>
-  <string name="permdesc_readInputState">Hiermee kunnen toepassingen de
-        toetsen zien die u indrukt, ook bij interactie met een andere toepassing (zoals
-        het invoeren van een wachtwoord). Is bij normale toepassingen nooit nodig.</string>
-  <string name="permdesc_readSms">Hiermee kan een toepassing
-      sms-berichten op telefoon of SIM-kaart lezen. Slechte toepassingen
-      kunnen vertrouwelijke berichten lezen.</string>
-  <string name="permdesc_receiveBootCompleted">Hiermee kan een toepassing
-        zichzelf starten zodra het systeem is opgestart.
-        Hierdoor kan het opstarten van het toestel langer duren en de
-        toepassing het toestel afremmen omdat het altijd is geactiveerd.</string>
-  <string name="permdesc_receiveMms">Hiermee kan een toepassing
-      multimediaberichten ontvangen en verwerken. Slechte toepassingen kunnen
-      uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven.</string>
-  <string name="permdesc_receiveSms">Hiermee kan een toepassing
-      tekstberichten ontvangen en verwerken. Slechte toepassingen kunnen
-      uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven.</string>
-  <string name="permdesc_receiveWapPush">Hiermee kan een toepassing
-      wap-berichten ontvangen en verwerken. Slechte toepassingen kunnen
-      uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven.</string>
-  <string name="permdesc_recordAudio">Hierdoor kan een toepassing        het opnamepad voor audio openen.</string>
-  <string name="permdesc_reorderTasks">Hiermee kan een toepassing
-        taken naar de voorgrond en achtergrond verplaatsen. Slechte toepassingen kunnen
-        zichzelf zonder tussenkomst naar de voorgrond forceren.</string>
-  <string name="permdesc_runInstrumentation">Hiermee kan een toepassing
-        zijn eigen instrumentatiecode invoegen in elke andere toepassing.
-        Slechte toepassingen kunnen zo het systeem in gevaar brengen. Deze
-        toepassing is alleen nodig voor ontwikkelingsdoeleinden, nooit voor normaal
-        gebruik van het toestel.</string>
-  <string name="permdesc_runSetActivityWatcher">Hiermee kan een toepassing
-        de wijze waarop het systeem activiteiten start in de gaten houden en besturen.
-        Slechte toepassingen kunnen zo het systeem in gevaar brengen. Deze
-        toepassing is alleen nodig voor ontwikkelingsdoeleinden, nooit voor normaal
-        gebruik van het toestel.</string>
-  <string name="permdesc_sendSms">Hiermee kan een toepassing
-      tekstberichten verzenden. Slechte toepassingen kunnen u op kosten jagen door
-      zonder toestemming berichten te verzenden.</string>
-  <string name="permdesc_setAlwaysFinish">Hiermee kan een toepassing
-        besturen of activiteiten altijd voltooid moeten zijn als ze
-        naar de achtergrond gaan. Nooit
-        nodig voor normale toepassingen.</string>
-  <string name="permdesc_setAnimationScale">Hiermee kan een toepassing op        elk moment de globale animatiesnelheid (snellere of tragere animaties) veranderen.</string>
-  <string name="permdesc_setDebugApp">Hiermee kan een toepassing
-        foutopsporing voor andere toepassingen inschakelen. Slechte toepassingen kunnen
-        dit misbruiken om andere toepassingen te stoppen.</string>
-  <string name="permdesc_setOrientation">Hiermee kan een toepassing op
-        elk moment de schermligging veranderen. Is bij normale toepassingen
-        nooit nodig.</string>
-  <string name="permdesc_setPreferredApplications">Hiermee kan een toepassing
-        uw voorkeurstoepassingen veranderen. Slechte toepassingen kunnen zo
-        stilletjes veranderen welke toepassingen gestart moeten worden, zodat
-        bestaande toepassingen privégegevens over u verzamelen.</string>
-  <string name="permdesc_setProcessLimit">Hiermee kan een toepassing
-        het maximumaantal geactiveerde processen besturen. Nooit
-        nodig voor normale toepassingen.</string>
-  <string name="permdesc_setWallpaper">Hiermee kan de toepassing        de systeemachtergrond instellen.</string>
-  <string name="permdesc_signalPersistentProcesses">Hiermee kan een toepassing verzoeken        dat het meegeleverde signaal naar alle aanhoudende processen wordt gestuurd.</string>
-  <string name="permdesc_statusBar">Hiermee kan een toepassing        de statusbalk en pictogrammen openen, sluiten of uitschakelen.</string>
-  <string name="permdesc_systemAlertWindow">Hiermee kan een toepassing
-        systeemmeldingen weergeven. Slechte toepassingen kunnen het
-        volledige toestelscherm overnemen.</string>
-  <string name="permdesc_vibrate">Hiermee kan de toepassing de        triller besturen.</string>
-  <string name="permdesc_writeContacts">Hiermee kan een toepassing alle
-        contactgegevens (adres) op het toestel aanpassen. Slechte
-        toepassingen kunnen dit misbruiken om contactgegevens te wissen of wijzigen.</string>
-  <string name="permdesc_writeSettings">Hiermee kan een toepassing de
-        instellingsgegevens van het systeem aanpassen. Slechte toepassingen kunnen de configuratie
-        van het systeem beschadigen.</string>
-  <string name="permdesc_writeSms">Hiermee kan een toepassing
-      sms-berichten op telefoon of SIM-kaart schrijven. Slechte toepassingen
-      kunnen berichten verwijderen.</string>
-  <string name="permlab_accessFineLocation">Toegang tot gps-locatie</string>
-  <string name="permlab_accessCoarseLocation">Toegang tot netwerklocatie</string>
-  <string name="permlab_accessPhoneInterface">Toegang tot telefooninterface</string>
-  <string name="permlab_accessSurfaceFlinger">Toegang tot SurfaceFlinger</string>
-  <string name="permlab_addSystemService">Systeemservice toevoegen</string>
-  <string name="permlab_brick">Toestel uitschakelen</string>
-  <string name="permlab_broadcastPackageRemoved">Uitzendpakket verwijderd</string>
-  <string name="permlab_broadcastSticky">Belangrijke uitzending</string>
-  <string name="permlab_callPhone">Telefoonnummers bellen</string>
-  <string name="permlab_camera">Camera</string>
-  <string name="permlab_changeComponentState">Toepassingscomponenten in- of uitschakelen</string>
-  <string name="permlab_changeConfiguration">Configuratie wijzigen</string>
-  <string name="permlab_clearAppCache">Cachegegevens van toepassing wissen</string>
-  <string name="permlab_deleteCacheFiles">Cachebestanden wissen</string>
-  <string name="permlab_deletePackages">Pakketten verwijderen</string>
-  <string name="permlab_devicePower">Toestel inschakelen</string>
-  <string name="permlab_dump">Systeemstatus dumpen</string>
-  <string name="permlab_factoryTest">Fabriekstest</string>
-  <string name="permlab_flashlight">Flitser</string>
-  <string name="permlab_forceBack">Terug forceren</string>
-  <string name="permlab_fotaUpdate">Installatie van systeemupdate</string>
-  <string name="permlab_getTasks">Taakinformatie verkrijgen</string>
-  <string name="permlab_hardware_test">Hardwaretest</string>
-  <string name="permlab_injectEvents">Invoergebeurtenissen invoegen</string>
-  <string name="permlab_installPackages">Pakketten installeren</string>
-  <string name="permlab_internalSystemWindow">Intern systeemvenster</string>
-  <string name="permlab_manageAppTokens">Toepassingstokens beheren</string>
-  <string name="permlab_masterClear">Volledige systeemreset</string>
-  <string name="permlab_modifyAudioSettings">Audioinstellingen wijzigen</string>
-  <string name="permlab_mount_unmount_filesystems">Bestandssystemen koppelen en losmaken</string>
-  <string name="permlab_persistentActivity">Aanhoudende handelingen</string>
-  <string name="permlab_raisedThreadPriority">Raised thread priorities</string>
-  <string name="permlab_readContacts">Contactgegevens lezen</string>
-  <string name="permlab_readFrameBuffer">Framebuffer lezen</string>
-  <string name="permlab_readInputState">Invoerstatus lezen</string>
-  <string name="permlab_readSms">Sms/mms-berichten lezen</string>
-  <string name="permlab_receiveBootCompleted">Uitvoeren bij opstarten</string>
-  <string name="permlab_receiveMms">Mms-berichten ontvangen</string>
-  <string name="permlab_receiveSms">Sms-berichten ontvangen</string>
-  <string name="permlab_receiveWapPush">Wap-berichten ontvangen</string>
-  <string name="permlab_recordAudio">Audio opnemen</string>
-  <string name="permlab_reorderTasks">Taken herschikken</string>
-  <string name="permlab_runInstrumentation">Instrumentatie uitvoeren</string>
-  <string name="permlab_runSetActivityWatcher">Activiteitenmonitor instellen</string>
-  <string name="permlab_sendSms">Sms-berichten verzenden</string>
-  <string name="permlab_setAlwaysFinish">Altijd voltooien instellen</string>
-  <string name="permlab_setAnimationScale">Animatieschaal instellen</string>
-  <string name="permlab_setDebugApp">Foutopsporing instellen</string>
-  <string name="permlab_setOrientation">Ligging instellen</string>
-  <string name="permlab_setPreferredApplications">Voorkeurstoepassingen instellen</string>
-  <string name="permlab_setProcessLimit">Proceslimiet instellen</string>
-  <string name="permlab_setWallpaper">Achtergrond instellen</string>
-  <string name="permlab_signalPersistentProcesses">Signaal naar aanhoudende processen</string>
-  <string name="permlab_statusBar">Statusbalk besturen</string>
-  <string name="permlab_systemAlertWindow">Systeemmeldingen</string>
-  <string name="permlab_vibrate">Triller</string>
-  <string name="permlab_writeContacts">Contactgegevens schrijven</string>
-  <string name="permlab_writeSettings">Systeeminstellingen schrijven</string>
-  <string name="permlab_writeSms">Sms/mms-berichten schrijven</string>
-  <string name="petabyteShort">Pb</string>
-  <string name="pm">"PM"</string>
-  <string name="power_dialog">Energieopties</string>
-  <string name="power_off">Uitschakelen</string>
-  <string name="prepend_shortcut_label">Menu+</string>
-  <string name="preposition_for_date">op %s</string>
-  <string name="preposition_for_time">bij %s</string>
-  <string name="preposition_for_year">in %s</string>
-  <string name="safeMode">Veilige modus</string>
-  <string name="same_month_md1_md2">"<xliff:g id="format">%2$s %3$s \u2013 %8$s</xliff:g>"</string>
-  <string name="same_month_md1_time1_md2_time2">"<xliff:g id="format">%3$s %2$s, %5$s \u2013 %8$s %7$s, %10$s</xliff:g>"</string>
-  <string name="same_month_mdy1_mdy2">"<xliff:g id="format">%3$s \u2013 %8$s %2$s, %9$s</xliff:g>"</string>
-  <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="format">%3$s %2$s %4$s, %5$s \u2013 %8$s %7$s %9$s, %10$s</xliff:g>"</string>
-  <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="format">%1$s %3$s %2$s, %5$s \u2013 %6$s %8$s %7$s, %10$s</xliff:g>"</string>
-  <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="format">%1$s %3$s %2$s \u2013 %6$s %8$s %7$s</xliff:g>"</string>
-  <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="format">%1$s %3$s %2$s %4$s, %5$s \u2013 %6$s %8$s %7$s %9$s, %10$s</xliff:g>"</string>
-  <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="format">%1$s %3$s %2$s %4$s \u2013 %6$s %8$s %7$s, %9$s</xliff:g>"</string>
-  <string name="same_year_md1_md2">"<xliff:g id="format">%3$s %2$s \u2013 %8$s %7$s</xliff:g>"</string>
-  <string name="same_year_md1_time1_md2_time2">"<xliff:g id="format">%3$s %2$s, %5$s \u2013 %8$s %7$s, %10$s</xliff:g>"</string>
-  <string name="same_year_mdy1_mdy2">"<xliff:g id="format">%3$s %2$s \u2013 %8$s %7$s, %9$s</xliff:g>"</string>
-  <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="format">%3$s %2$s %4$s, %5$s \u2013 %8$s %7$s %9$s, %10$s</xliff:g>"</string>
-  <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="format">%1$s %3$s %2$s, %5$s \u2013 %6$s %8$s %7$s, %10$s</xliff:g>"</string>
-  <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="format">%1$s %3$s %2$s \u2013 %6$s %8$s %7$s</xliff:g>"</string>
-  <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="format">%1$s %3$s %2$s %4$s, %5$s \u2013 %6$s %8$s %7$s %9$s, %10$s</xliff:g>"</string>
-  <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="format">%1$s %3$s %2$s \u2013 %6$s %8$s %7$s %9$s</xliff:g>"</string>
-  <string name="saturday">Zaterdag</string>
-  <string name="save_password_label">Bevestigen</string>
-  <string name="save_password_message">Wilt u dat de browser dit wachtwoord onthoudt?</string>
-  <string name="save_password_never">Nooit</string>
-  <string name="save_password_notnow">Niet nu</string>
-  <string name="save_password_remember">Onthouden</string>
-  <string name="screen_lock">Vergrendeling</string>
-  <string name="screen_progress">Bezig\u2026</string>
-  <string name="search_go">Ga naar</string>
-  <string name="second">seconde</string>
-  <string name="seconds">seconden</string>
-  <string name="selectAll">Alles selecteren</string>
-  <string name="selectMenuLabel">Selecteren</string>
-  <string name="sendText">Kiezen wat met de tekst gebeurt</string>
-  <string name="serviceClassData">Gegevens</string>
-  <string name="serviceClassDataAsync">Async</string>
-  <string name="serviceClassDataSync">Sync</string>
-  <string name="serviceClassFAX">FAX</string>
-  <string name="serviceClassPAD">PAD</string>
-  <string name="serviceClassPacket">Pakket</string>
-  <string name="serviceClassSMS">SMS</string>
-  <string name="serviceClassVoice">Spraak</string>
-  <string name="serviceDisabled">Service uitgeschakeld</string>
-  <string name="serviceEnabled">Service ingeschakeld</string>
-  <string name="serviceEnabledFor">Service ingeschakeld voor:</string>
-  <string name="serviceErased">Wissen gelukt</string>
-  <string name="serviceNotProvisioned">Service niet opgenomen.</string>
-  <string name="serviceRegistered">Registratie gelukt</string>
-  <string name="silent_mode">Stille modus</string>
-  <string name="simAbsentLabel">SIM ontbreekt of onjuist geplaatst</string>
-  <string name="simNetworkPersonalizationLabel">SIM kan niet op dit toestel worden gebruikt</string>
-  <string name="simPINLabel">SIM-pincode nodig (en momenteel niet ondersteund)</string>
-  <string name="simPUKLabel">SIM-PUK-code nodig (en momenteel niet ondersteund)</string>
-  <string name="status_bar_applications_title">Toepassing</string>
-  <string name="status_bar_date_format">"<xliff:g id="format">d MMMM yyyy</xliff:g>"</string>
-  <string name="status_bar_latest_events_title">Nieuwste gebeurtenissen</string>
-  <string name="status_bar_no_notifications_title">Meldingen</string>
-  <string name="status_bar_ongoing_events_title">Actueel</string>
-  <string name="status_bar_time_format">"<xliff:g id="format">h:mm AA</xliff:g>"</string>
-  <string name="sunday">Zondag</string>
-  <string name="terabyteShort">Tb</string>
-  <string name="thursday">Donderdag</string>
-  <string name="time1_time2">"<xliff:g id="format">%1$s \u2013 %2$s</xliff:g>"</string>
-  <string name="time_date">"<xliff:g id="format">%1$s, %3$s</xliff:g>"</string>
-  <string name="time_picker_set">Instellen</string>
-  <string name="time_wday">"<xliff:g id="format">%2$s %1$s</xliff:g>"</string>
-  <string name="time_wday_date">"<xliff:g id="format">%2$s %1$s %3$s</xliff:g>"</string>
-  <string name="today">Vandaag</string>
-  <string name="tomorrow">Morgen</string>
-  <string name="tuesday">Dinsdag</string>
-  <string name="turn_off_radio">Radio uitschakelen</string>
-  <string name="turn_on_radio">Radio uitschakelen</string>
-  <string name="unknownName">(onbekend)</string>
-  <string name="untitled">&lt;Naamloos&gt;</string>
-  <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="format">%1$s %2$s, %3$s \u2013 %4$s %5$s, %6$s</xliff:g>"</string>
-  <string name="wday1_date1_wday2_date2">"<xliff:g id="format">%1$s %2$s \u2013 %4$s %5$s</xliff:g>"</string>
-  <string name="wday_date">"<xliff:g id="format">%2$s %3$s</xliff:g>"</string>
-  <string name="web_user_agent">Mozilla/5.0 (Linux; U; Android 0.6; en)
-        AppleWebKit/525.10+ (KHTML, zoals Gecko) Versie/3.0.4 Mobile Safari/523.12.2</string>
-  <string name="wednesday">Woensdag</string>
-  <string name="week">week</string>
-  <string name="weekly">"Wekelijks op <xliff:g id="day">%s</xliff:g>"</string>
-  <string name="weekly_format">d MMM</string>
-  <string name="weeks">weken</string>
-  <string name="whichApplication">Welke toepassing wilt u gebruiken?</string>
-  <string name="yearly">Elk jaar</string>
-  <string name="yearly_format">yyyy</string>
-  <string name="yes">OK</string>
-  <string name="yesterday">Gisteren</string>
+    <string name="byteShort">"b"</string>
+    <string name="kilobyteShort">"Kb"</string>
+    <string name="megabyteShort">"Mb"</string>
+    <string name="gigabyteShort">"Gb"</string>
+    <string name="terabyteShort">"Tb"</string>
+    <string name="petabyteShort">"Pb"</string>
+    <string name="untitled">"&lt;Naamloos&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(geen telefoonnummer)"</string>
+    <string name="unknownName">"(onbekend)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Voicemail"</string>
+    <string name="defaultMsisdnAlphaTag">"Msisdn1"</string>
+    <string name="mmiError">"Netwerkfout of onjuiste MMI-code."</string>
+    <string name="serviceEnabled">"Service ingeschakeld"</string>
+    <string name="serviceEnabledFor">"Service ingeschakeld voor:"</string>
+    <string name="serviceDisabled">"Service uitgeschakeld"</string>
+    <string name="serviceRegistered">"Registratie gelukt"</string>
+    <string name="serviceErased">"Wissen gelukt"</string>
+    <string name="passwordIncorrect">"Ongeldig wachtwoord"</string>
+    <string name="mmiComplete">"MMI voltooid"</string>
+    <!-- no translation found for badPin (5103184589972647739) -->
+    <skip />
+    <!-- no translation found for badPuk (2200634943393540609) -->
+    <skip />
+    <!-- no translation found for mismatchPin (5055729703806180857) -->
+    <skip />
+    <!-- no translation found for invalidPin (6201854814319326475) -->
+    <skip />
+    <!-- no translation found for needPuk (4788728144863892764) -->
+    <skip />
+    <!-- no translation found for needPuk2 (7056908944942451033) -->
+    <skip />
+    <string name="ClipMmi">"Nummerweergave inkomend gesprek"</string>
+    <string name="ClirMmi">"Nummerweergave uitgaand gesprek"</string>
+    <string name="CfMmi">"Oproep doorschakelen"</string>
+    <string name="CwMmi">"Gesprek in wachtstand"</string>
+    <string name="BaMmi">"Oproep blokkeren"</string>
+    <string name="PwdMmi">"Wachtwoord wijzigen"</string>
+    <string name="PinMmi">"Pincode wijzigen"</string>
+    <string name="CLIRDefaultOnNextCallOn">"ID-beperkingsstandaarden op beperkt. Volgend gesprek: beperkt"</string>
+    <string name="CLIRDefaultOnNextCallOff">"ID-beperkingsstandaarden op beperkt. Volgend gesprek: niet beperkt"</string>
+    <string name="CLIRDefaultOffNextCallOn">"ID-beperkingsstandaarden op onbeperkt. Volgend gesprek: beperkt"</string>
+    <string name="CLIRDefaultOffNextCallOff">"ID-beperkingsstandaarden op onbeperkt. Volgend gesprek: niet beperkt"</string>
+    <string name="serviceNotProvisioned">"Service niet opgenomen."</string>
+    <string name="CLIRPermanent">"ID-beperking ingesteld op permanente modus."</string>
+    <string name="serviceClassVoice">"Spraak"</string>
+    <string name="serviceClassData">"Gegevens"</string>
+    <string name="serviceClassFAX">"FAX"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Async"</string>
+    <string name="serviceClassDataSync">"Sync"</string>
+    <string name="serviceClassPacket">"Pakket"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"{0}: Niet doorgestuurd"</string>
+    <string name="cfTemplateForwarded">"{0}: {1}"</string>
+    <string name="cfTemplateForwardedTime">"{0}: {1} na {2} seconden"</string>
+    <string name="cfTemplateRegistered">"{0}: Niet doorgestuurd ({1})"</string>
+    <string name="cfTemplateRegisteredTime">"{0}: Niet doorgestuurd ({1} na {2} seconden)"</string>
+    <string name="httpErrorOk">"OK"</string>
+    <string name="httpError">"Onbekende fout"</string>
+    <string name="httpErrorLookup">"Onbekende host"</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Niet-ondersteund verificatieschema. Verificeren mislukt."</string>
+    <string name="httpErrorAuth">"Verificatie mislukt"</string>
+    <string name="httpErrorProxyAuth">"Verificeren van proxyserver mislukt"</string>
+    <string name="httpErrorConnect">"Verbinding maken met server mislukt"</string>
+    <string name="httpErrorIO">"Lezen van of schrijven naar server mislukt"</string>
+    <string name="httpErrorTimeout">"Time-out bij serververbinding"</string>
+    <string name="httpErrorRedirectLoop">"Te veel omleidingen door server"</string>
+    <string name="httpErrorUnsupportedScheme">"Protocol wordt niet ondersteund"</string>
+    <string name="httpErrorFailedSslHandshake">"Uitvoeren van ssl-handshake mislukt"</string>
+    <string name="httpErrorBadUrl">"Ongeldige url"</string>
+    <string name="httpErrorFile">"Bestandfout"</string>
+    <string name="httpErrorFileNotFound">"Bestand niet gevonden"</string>
+    <!-- no translation found for httpErrorTooManyRequests (3764334538393544875) -->
+    <skip />
+    <string name="contentServiceSync">"Sync"</string>
+    <string name="contentServiceSyncNotificationTitle">"Sync"</string>
+    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (8477597194404210723) -->
+    <skip />
+    <!-- no translation found for low_memory (4191592786596642367) -->
+    <skip />
+    <!-- no translation found for me (4616693653158602117) -->
+    <skip />
+    <string name="power_dialog">"Energieopties"</string>
+    <string name="silent_mode">"Stille modus"</string>
+    <string name="turn_on_radio">"Radio uitschakelen"</string>
+    <string name="turn_off_radio">"Radio uitschakelen"</string>
+    <string name="screen_lock">"Vergrendeling"</string>
+    <string name="power_off">"Uitschakelen"</string>
+    <!-- no translation found for shutdown_progress (3735034517335251808) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm (699224922526414097) -->
+    <skip />
+    <string name="no_recent_tasks">"Geen recente toepassingen"</string>
+    <string name="global_actions">"Globale handelingen"</string>
+    <string name="global_action_lock">"Vergrendeling"</string>
+    <string name="global_action_power_off">"Uitschakelen"</string>
+    <string name="global_action_toggle_silent_mode">"Stille modus"</string>
+    <string name="global_action_silent_mode_on_status">"Geluid staat UIT"</string>
+    <string name="global_action_silent_mode_off_status">"Geluid staat AAN"</string>
+    <string name="safeMode">"Veilige modus"</string>
+    <!-- no translation found for permgrouplab_costMoney (904087853776533085) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_costMoney (4662370555643969515) -->
+    <skip />
+    <!-- no translation found for permgrouplab_messages (2984053976424233925) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_messages (2129093134354989379) -->
+    <skip />
+    <!-- no translation found for permgrouplab_personalInfo (4548406335021507392) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_personalInfo (8499310823817958034) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (8535677827151907069) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (2341662219604651887) -->
+    <skip />
+    <!-- no translation found for permgrouplab_network (3597781730625751831) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_network (8332572695347918340) -->
+    <skip />
+    <!-- no translation found for permgrouplab_accounts (8631201594657951893) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accounts (443982868906396781) -->
+    <skip />
+    <!-- no translation found for permgrouplab_hardwareControls (5074512938567152139) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_hardwareControls (8772503144945278440) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phoneCalls (7096448531266882376) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phoneCalls (6703873478653366233) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemTools (1840847965111633430) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemTools (2810337951496685271) -->
+    <skip />
+    <!-- no translation found for permgrouplab_developmentTools (692844635256963358) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_developmentTools (5253915519857796400) -->
+    <skip />
+    <string name="permlab_statusBar">"Statusbalk besturen"</string>
+    <string name="permdesc_statusBar">"Hiermee kan een toepassing de statusbalk en pictogrammen openen, sluiten of uitschakelen."</string>
+    <!-- no translation found for permlab_expandStatusBar (6382500803293284173) -->
+    <skip />
+    <!-- no translation found for permdesc_expandStatusBar (90953162060681436) -->
+    <skip />
+    <!-- no translation found for permlab_processOutgoingCalls (786316295241100144) -->
+    <skip />
+    <!-- no translation found for permdesc_processOutgoingCalls (1655242138991854396) -->
+    <skip />
+    <string name="permlab_receiveSms">"Sms-berichten ontvangen"</string>
+    <string name="permdesc_receiveSms">"Hiermee kan een toepassing tekstberichten ontvangen en verwerken. Slechte toepassingen kunnen uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven."</string>
+    <string name="permlab_receiveMms">"Mms-berichten ontvangen"</string>
+    <string name="permdesc_receiveMms">"Hiermee kan een toepassing multimediaberichten ontvangen en verwerken. Slechte toepassingen kunnen uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven."</string>
+    <string name="permlab_sendSms">"Sms-berichten verzenden"</string>
+    <string name="permdesc_sendSms">"Hiermee kan een toepassing tekstberichten verzenden. Slechte toepassingen kunnen u op kosten jagen door zonder toestemming berichten te verzenden."</string>
+    <string name="permlab_readSms">"Sms/mms-berichten lezen"</string>
+    <string name="permdesc_readSms">"Hiermee kan een toepassing sms-berichten op telefoon of SIM-kaart lezen. Slechte toepassingen kunnen vertrouwelijke berichten lezen."</string>
+    <string name="permlab_writeSms">"Sms/mms-berichten schrijven"</string>
+    <string name="permdesc_writeSms">"Hiermee kan een toepassing sms-berichten op telefoon of SIM-kaart schrijven. Slechte toepassingen kunnen berichten verwijderen."</string>
+    <string name="permlab_receiveWapPush">"Wap-berichten ontvangen"</string>
+    <string name="permdesc_receiveWapPush">"Hiermee kan een toepassing wap-berichten ontvangen en verwerken. Slechte toepassingen kunnen uw berichten in de gaten houden of verwijderen zonder dat dit wordt aangegeven."</string>
+    <string name="permlab_getTasks">"Taakinformatie verkrijgen"</string>
+    <string name="permdesc_getTasks">"Hiermee kan een toepassing informatie ophalen over geactiveerde en recent geactiveerde taken. Verkeerde toepassingen kunnen hierdoor toegang krijgen tot privé-informatie over andere toepassingen."</string>
+    <string name="permlab_reorderTasks">"Taken herschikken"</string>
+    <string name="permdesc_reorderTasks">"Hiermee kan een toepassing taken naar de voorgrond en achtergrond verplaatsen. Slechte toepassingen kunnen zichzelf zonder tussenkomst naar de voorgrond forceren."</string>
+    <string name="permlab_setDebugApp">"Foutopsporing instellen"</string>
+    <string name="permdesc_setDebugApp">"Hiermee kan een toepassing foutopsporing voor andere toepassingen inschakelen. Slechte toepassingen kunnen dit misbruiken om andere toepassingen te stoppen."</string>
+    <string name="permlab_changeConfiguration">"Configuratie wijzigen"</string>
+    <string name="permdesc_changeConfiguration">"Hiermee kan een toepassing de actuele configuratie veranderen, zoals de locatie of algemene tekengrootte."</string>
+    <!-- no translation found for permlab_restartPackages (5836367540766044606) -->
+    <skip />
+    <!-- no translation found for permdesc_restartPackages (1764965996765573321) -->
+    <skip />
+    <!-- no translation found for permlab_setProcessForeground (4860990420780868638) -->
+    <skip />
+    <!-- no translation found for permdesc_setProcessForeground (3795477299954784360) -->
+    <skip />
+    <string name="permlab_forceBack">"Terug forceren"</string>
+    <string name="permdesc_forceBack">"Hiermee kan een toepassing elke activiteit die op de voorgrond staat sluiten en terugkeren. Is bij normale toepassingen nooit nodig."</string>
+    <string name="permlab_dump">"Systeemstatus dumpen"</string>
+    <string name="permdesc_dump">"Hiermee kan een toepassingen de interne toestand van het systeem opvragen. Verkeerde toepassingen kunnen een diverse privé- en veiligheidsinformatie verkrijgen die ze normaal gesproken niet nodig hebben."</string>
+    <string name="permlab_addSystemService">"Systeemservice toevoegen"</string>
+    <string name="permdesc_addSystemService">"Toepassingen mogen hun eigen systeemdiensten van laag-niveau publiceren. Verkeerde toepassingen kunnen het systeem kapen en gegevens erop beschadigen of stelen."</string>
+    <string name="permlab_runSetActivityWatcher">"Activiteitenmonitor instellen"</string>
+    <string name="permdesc_runSetActivityWatcher">"Hiermee kan een toepassing de wijze waarop het systeem activiteiten start in de gaten houden en besturen. Slechte toepassingen kunnen zo het systeem in gevaar brengen. Deze toepassing is alleen nodig voor ontwikkelingsdoeleinden, nooit voor normaal gebruik van het toestel."</string>
+    <string name="permlab_broadcastPackageRemoved">"Uitzendpakket verwijderd"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Hiermee kan een toepassing een melding uitzenden met de mededeling dat een toepassingspakket is verwijderd. Verkeerde toepassingen kunnen dit gebruiken om andere actieve toepassingen te stoppen."</string>
+    <!-- no translation found for permlab_broadcastSmsReceived (1994692154847312518) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastSmsReceived (6072362543164841432) -->
+    <skip />
+    <!-- no translation found for permlab_broadcastWapPush (3070023012636951639) -->
+    <skip />
+    <!-- no translation found for permdesc_broadcastWapPush (726912255218924336) -->
+    <skip />
+    <string name="permlab_setProcessLimit">"Proceslimiet instellen"</string>
+    <string name="permdesc_setProcessLimit">"Hiermee kan een toepassing het maximumaantal geactiveerde processen besturen. Nooit nodig voor normale toepassingen."</string>
+    <string name="permlab_setAlwaysFinish">"Altijd voltooien instellen"</string>
+    <string name="permdesc_setAlwaysFinish">"Hiermee kan een toepassing besturen of activiteiten altijd voltooid moeten zijn als ze naar de achtergrond gaan. Nooit nodig voor normale toepassingen."</string>
+    <string name="permlab_fotaUpdate">"Installatie van systeemupdate"</string>
+    <string name="permdesc_fotaUpdate">"Hiermee kan een toepassing meldingen ontvangen over systeemupdates die in behandeling zijn en hun installatie in gang zetten. Slechte toepassingen kunnen dit misbruiken om het te beschadigen met niet toegestane updates, of algemeen het updaten te verstoren."</string>
+    <!-- no translation found for permlab_batteryStats (1598947993704535568) -->
+    <skip />
+    <!-- no translation found for permdesc_batteryStats (6247598531831307989) -->
+    <skip />
+    <string name="permlab_internalSystemWindow">"Intern systeemvenster"</string>
+    <string name="permdesc_internalSystemWindow">"Hiermee kunnen vensters worden gemaakt die bedoeld zijn voor gebruik door het interne systeem van de gebruikersinterface. Niet bedoeld voor normale toepassingen."</string>
+    <string name="permlab_systemAlertWindow">"Systeemmeldingen"</string>
+    <string name="permdesc_systemAlertWindow">"Hiermee kan een toepassing systeemmeldingen weergeven. Slechte toepassingen kunnen het volledige toestelscherm overnemen."</string>
+    <string name="permlab_setAnimationScale">"Animatieschaal instellen"</string>
+    <string name="permdesc_setAnimationScale">"Hiermee kan een toepassing op elk moment de globale animatiesnelheid (snellere of tragere animaties) veranderen."</string>
+    <string name="permlab_manageAppTokens">"Toepassingstokens beheren"</string>
+    <string name="permdesc_manageAppTokens">"Hiermee kunnen toepassingen hun eigen tokens maken, en zo de normale Z-ordening buiten spel zetten. Is bij normale toepassingen nooit nodig."</string>
+    <string name="permlab_injectEvents">"Invoergebeurtenissen invoegen"</string>
+    <string name="permdesc_injectEvents">"Hiermee kan een toepassing zijn eigen invoergebeurtenissen (toetsindrukken enz.) naar andere toepassingen sturen. Slechte toepassingen kunnen dit misbruiken om controle over het toestel te krijgen."</string>
+    <string name="permlab_readInputState">"Invoerstatus lezen"</string>
+    <string name="permdesc_readInputState">"Hiermee kunnen toepassingen de toetsen zien die u indrukt, ook bij interactie met een andere toepassing (zoals het invoeren van een wachtwoord). Is bij normale toepassingen nooit nodig."</string>
+    <string name="permlab_setOrientation">"Ligging instellen"</string>
+    <string name="permdesc_setOrientation">"Hiermee kan een toepassing op elk moment de schermligging veranderen. Is bij normale toepassingen nooit nodig."</string>
+    <string name="permlab_signalPersistentProcesses">"Signaal naar aanhoudende processen"</string>
+    <string name="permdesc_signalPersistentProcesses">"Hiermee kan een toepassing verzoeken dat het meegeleverde signaal naar alle aanhoudende processen wordt gestuurd."</string>
+    <string name="permlab_persistentActivity">"Aanhoudende handelingen"</string>
+    <string name="permdesc_persistentActivity">"Hiermee kan een toepassing gedeeltes van zichzelf fixeren, zodat het systeem deze niet meer kan gebruiken voor andere toepassingen."</string>
+    <string name="permlab_deletePackages">"Pakketten verwijderen"</string>
+    <string name="permdesc_deletePackages">"Hiermee kan een toepassing Android-pakketten verwijderen. Slechte toepassingen kunnen dit misbruiken om belangrijke toepassingen te wissen."</string>
+    <!-- no translation found for permlab_clearAppUserData (3858185484601410171) -->
+    <skip />
+    <!-- no translation found for permdesc_clearAppUserData (7233537744753081136) -->
+    <skip />
+    <string name="permlab_deleteCacheFiles">"Cachebestanden wissen"</string>
+    <string name="permdesc_deleteCacheFiles">"Hiermee kan een toepassing cachebestanden verwijderen."</string>
+    <!-- no translation found for permlab_getPackageSize (6743556676630447973) -->
+    <skip />
+    <!-- no translation found for permdesc_getPackageSize (2893996655828539776) -->
+    <skip />
+    <string name="permlab_installPackages">"Pakketten installeren"</string>
+    <string name="permdesc_installPackages">"Hiermee kan een toepassing nieuwe Android- pakketten installeren of updaten. Slechte toepassingen kunnen dit misbruiken om nieuwe toepassingen met twijfelachtig verstrekkende rechten toe te voegen."</string>
+    <string name="permlab_clearAppCache">"Cachegegevens van toepassing wissen"</string>
+    <string name="permdesc_clearAppCache">"Hiermee kan een toepassing toestelgeheugen vrijmaken door bestanden uit de cachemap te verwijderen. Toegang wordt meestal beperkt tot systeemprocessen."</string>
+    <!-- no translation found for permlab_readLogs (6653488552442991707) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (356352685800884319) -->
+    <skip />
+    <!-- no translation found for permlab_diagnostic (2955142476313469329) -->
+    <skip />
+    <!-- no translation found for permdesc_diagnostic (1282409892215520166) -->
+    <skip />
+    <string name="permlab_changeComponentState">"Toepassingscomponenten in- of uitschakelen"</string>
+    <string name="permdesc_changeComponentState">"Hiermee kan een toepassing veranderen of een component van een andere toepassing wordt ingeschakeld of niet. Slechte toepassingen kunnen dit gebruiken om belangrijke toestelfuncties uit te schakelen. Wees voorzichtig met het verlenen van toestemmingen, omdat het mogelijk is dat toepassingscomponenten in een onbruikbare, inconsistente of instabiele toestand geraken."</string>
+    <string name="permlab_setPreferredApplications">"Voorkeurstoepassingen instellen"</string>
+    <string name="permdesc_setPreferredApplications">"Hiermee kan een toepassing uw voorkeurstoepassingen veranderen. Slechte toepassingen kunnen zo stilletjes veranderen welke toepassingen gestart moeten worden, zodat bestaande toepassingen privégegevens over u verzamelen."</string>
+    <string name="permlab_writeSettings">"Systeeminstellingen schrijven"</string>
+    <string name="permdesc_writeSettings">"Hiermee kan een toepassing de instellingsgegevens van het systeem aanpassen. Slechte toepassingen kunnen de configuratie van het systeem beschadigen."</string>
+    <!-- no translation found for permlab_writeSecureSettings (4851801872124242319) -->
+    <skip />
+    <!-- no translation found for permdesc_writeSecureSettings (2080620249472761366) -->
+    <skip />
+    <!-- no translation found for permlab_writeGservices (296370685945777755) -->
+    <skip />
+    <!-- no translation found for permdesc_writeGservices (2496928471286495053) -->
+    <skip />
+    <string name="permlab_receiveBootCompleted">"Uitvoeren bij opstarten"</string>
+    <string name="permdesc_receiveBootCompleted">"Hiermee kan een toepassing zichzelf starten zodra het systeem is opgestart. Hierdoor kan het opstarten van het toestel langer duren en de toepassing het toestel afremmen omdat het altijd is geactiveerd."</string>
+    <string name="permlab_broadcastSticky">"Belangrijke uitzending"</string>
+    <string name="permdesc_broadcastSticky">"Hiermee kan een toepassing plakuitzendingen versturen, die blijven hangen als de uitzending stopt. Verkeerde toepassingen kunnen het toestel traag of instabiel maken door te veel geheugengebruik te veroorzaken."</string>
+    <string name="permlab_readContacts">"Contactgegevens lezen"</string>
+    <string name="permdesc_readContacts">"Hiermee kan een toepassing alle contactgegevens (adres) op het toestel lezen. Slechte toepassingen kunnen dit misbruiken om uw gegevens naar andere personen te sturen."</string>
+    <string name="permlab_writeContacts">"Contactgegevens schrijven"</string>
+    <string name="permdesc_writeContacts">"Hiermee kan een toepassing alle contactgegevens (adres) op het toestel aanpassen. Slechte toepassingen kunnen dit misbruiken om contactgegevens te wissen of wijzigen."</string>
+    <!-- no translation found for permlab_writeOwnerData (8036840529708535113) -->
+    <skip />
+    <!-- no translation found for permdesc_writeOwnerData (5873447528845878348) -->
+    <skip />
+    <!-- no translation found for permlab_readOwnerData (1847040178513733757) -->
+    <skip />
+    <!-- no translation found for permdesc_readOwnerData (7563299529149214764) -->
+    <skip />
+    <!-- no translation found for permlab_readCalendar (2111238731453410895) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4408253940601239114) -->
+    <skip />
+    <!-- no translation found for permlab_writeCalendar (7518052789370653396) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (8057304232140147596) -->
+    <skip />
+    <!-- no translation found for permlab_accessMockLocation (321094551062270213) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMockLocation (3651565866471419739) -->
+    <skip />
+    <!-- no translation found for permlab_accessLocationExtraCommands (8291822077788811687) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLocationExtraCommands (5135782633548630731) -->
+    <skip />
+    <string name="permlab_accessFineLocation">"Toegang tot gps-locatie"</string>
+    <string name="permdesc_accessFineLocation">"Open, indien beschikbaar, het Global Positioning System op het toestel. Verkeerde toepassingen kunnen dit gebruiken om te bepalen waar u zich bevindt en extra batterijstroom verbruiken."</string>
+    <string name="permlab_accessCoarseLocation">"Toegang tot netwerklocatie"</string>
+    <string name="permdesc_accessCoarseLocation">"Gebruik, indien beschikbaar, een netwerkdatabank om de locatie van het toestel te schatten. Verkeerde toepassingen kunnen dit gebruiken om te schatten waar u zich bevindt."</string>
+    <string name="permlab_accessSurfaceFlinger">"Toegang tot SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Toepassingen mogen de functies op laag niveau van SurfaceFlinger gebruiken."</string>
+    <string name="permlab_readFrameBuffer">"Framebuffer lezen"</string>
+    <string name="permdesc_readFrameBuffer">"Hiermee kan een toepassing de gegevens van de framebuffer lezen."</string>
+    <string name="permlab_modifyAudioSettings">"Audioinstellingen wijzigen"</string>
+    <string name="permdesc_modifyAudioSettings">"Hiermee kan een toepassing globale audioinstellingen aanpassen, zoals volume en route."</string>
+    <string name="permlab_recordAudio">"Audio opnemen"</string>
+    <string name="permdesc_recordAudio">"Hierdoor kan een toepassing het opnamepad voor audio openen."</string>
+    <string name="permlab_camera">"Camera"</string>
+    <!-- unknown placeholder BREAK in permdesc_camera -->
+    <skip />
+    <string name="permlab_brick">"Toestel uitschakelen"</string>
+    <string name="permdesc_brick">"Hiermee kan de toepassing de gehele dienst permanent uitschakelen. Dit is erg gevaarlijk."</string>
+    <!-- no translation found for permlab_reboot (8844650672567077423) -->
+    <skip />
+    <!-- no translation found for permdesc_reboot (4704919552870918328) -->
+    <skip />
+    <string name="permlab_mount_unmount_filesystems">"Bestandssystemen koppelen en losmaken"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Hiermee kan de toepassing bestandssystemen voor verwisselbaar geheugen koppelen en loskoppelen."</string>
+    <string name="permlab_vibrate">"Triller"</string>
+    <string name="permdesc_vibrate">"Hiermee kan de toepassing de triller besturen."</string>
+    <string name="permlab_flashlight">"Flitser"</string>
+    <string name="permdesc_flashlight">"Hiermee kan de toepassing de flitser besturen."</string>
+    <string name="permlab_hardware_test">"Hardwaretest"</string>
+    <string name="permdesc_hardware_test">"Hiermee kan de toepassing diverse randapparaten besturen met als doel het testen van de hardware."</string>
+    <string name="permlab_callPhone">"Telefoonnummers bellen"</string>
+    <string name="permdesc_callPhone">"Hiermee kunnen toepassingen telefoonnummers bellen zonder uw tussenkomst. Verkeerde toepassingen kunnen ongewilde gesprekken op uw telefoonrekening veroorzaken."</string>
+    <!-- no translation found for permlab_callPrivileged (2166923597287697159) -->
+    <skip />
+    <!-- no translation found for permdesc_callPrivileged (5109789447971735501) -->
+    <skip />
+    <!-- no translation found for permlab_locationUpdates (4216418293360456836) -->
+    <skip />
+    <!-- no translation found for permdesc_locationUpdates (7635814693478743648) -->
+    <skip />
+    <!-- no translation found for permlab_checkinProperties (2260796787386280708) -->
+    <skip />
+    <!-- no translation found for permdesc_checkinProperties (3508022022841741945) -->
+    <skip />
+    <!-- no translation found for permlab_modifyPhoneState (7791696535097912313) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyPhoneState (6352405226410454770) -->
+    <skip />
+    <!-- no translation found for permlab_readPhoneState (7320082586621086653) -->
+    <skip />
+    <!-- no translation found for permdesc_readPhoneState (8004450067066407969) -->
+    <skip />
+    <!-- no translation found for permlab_wakeLock (1591164750935072136) -->
+    <skip />
+    <!-- no translation found for permdesc_wakeLock (160471538196734936) -->
+    <skip />
+    <string name="permlab_devicePower">"Toestel inschakelen"</string>
+    <string name="permdesc_devicePower">"Hiermee kan de toepassing het toestel in- of uitschakelen, of ingeschakeld laten."</string>
+    <string name="permlab_factoryTest">"Fabriekstest"</string>
+    <string name="permdesc_factoryTest">"Uitvoeren als een fabriekstest op laag niveau, waardoor volledige toegang tot de toestelhardware gegeven is. Alleen beschikbaar als een toestel in de fabriekstestmodus staat."</string>
+    <string name="permlab_setWallpaper">"Achtergrond instellen"</string>
+    <string name="permdesc_setWallpaper">"Hiermee kan de toepassing de systeemachtergrond instellen."</string>
+    <!-- no translation found for permlab_setWallpaperHints (4192438316932517807) -->
+    <skip />
+    <!-- no translation found for permdesc_setWallpaperHints (738757439960921674) -->
+    <skip />
+    <string name="permlab_masterClear">"Volledige systeemreset"</string>
+    <string name="permdesc_masterClear">"Hiermee kan een toepassing het systeem volledig opnieuw instellen op fabrieksinstellingen, waardoor alle gegevens, configuratie en geïnstalleerde toepassingen worden gewist."</string>
+    <!-- no translation found for permlab_setTimeZone (477196167239548690) -->
+    <skip />
+    <!-- no translation found for permdesc_setTimeZone (8564892020460841198) -->
+    <skip />
+    <!-- no translation found for permlab_getAccounts (2764070033402295170) -->
+    <skip />
+    <!-- no translation found for permdesc_getAccounts (1203491378748649898) -->
+    <skip />
+    <!-- no translation found for permlab_accessNetworkState (2032916924886010827) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkState (7081329402551195933) -->
+    <skip />
+    <!-- no translation found for permlab_createNetworkSockets (4706698319966917864) -->
+    <skip />
+    <!-- no translation found for permdesc_createNetworkSockets (2580337178778551792) -->
+    <skip />
+    <!-- no translation found for permlab_writeApnSettings (3190585220761979369) -->
+    <skip />
+    <!-- no translation found for permdesc_writeApnSettings (4093875220468761052) -->
+    <skip />
+    <!-- no translation found for permlab_changeNetworkState (2710779001260856872) -->
+    <skip />
+    <!-- no translation found for permdesc_changeNetworkState (8076109230787022270) -->
+    <skip />
+    <!-- no translation found for permlab_accessWifiState (3613679494230374297) -->
+    <skip />
+    <!-- no translation found for permdesc_accessWifiState (8226508433563326925) -->
+    <skip />
+    <!-- no translation found for permlab_changeWifiState (6043889338995432957) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiState (7829372845909567994) -->
+    <skip />
+    <!-- no translation found for permlab_bluetoothAdmin (5513286736585647334) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothAdmin (1838208497914347365) -->
+    <skip />
+    <!-- no translation found for permlab_bluetooth (6378797624765639115) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetooth (8592386018922265273) -->
+    <skip />
+    <!-- no translation found for permlab_disableKeyguard (4574886811903233903) -->
+    <skip />
+    <!-- no translation found for permdesc_disableKeyguard (815972646344251271) -->
+    <skip />
+    <!-- no translation found for permlab_readSyncSettings (8818819977141505127) -->
+    <skip />
+    <!-- no translation found for permdesc_readSyncSettings (8454705401908767847) -->
+    <skip />
+    <!-- no translation found for permlab_writeSyncSettings (4514911143753152941) -->
+    <skip />
+    <!-- no translation found for permdesc_writeSyncSettings (7630627689635091836) -->
+    <skip />
+    <!-- no translation found for permlab_readSyncStats (5748337739678952863) -->
+    <skip />
+    <!-- no translation found for permdesc_readSyncStats (582551457321957183) -->
+    <skip />
+    <!-- no translation found for permlab_subscribedFeedsRead (2043206814904506589) -->
+    <skip />
+    <!-- no translation found for permdesc_subscribedFeedsRead (6977343942680042449) -->
+    <skip />
+    <!-- no translation found for permlab_subscribedFeedsWrite (2556727307229571556) -->
+    <skip />
+    <!-- no translation found for permdesc_subscribedFeedsWrite (4134783294590266220) -->
+    <skip />
+    <!-- no translation found for phoneTypes:0 (6070018634209800981) -->
+    <!-- no translation found for phoneTypes:1 (1514509689885965711) -->
+    <!-- no translation found for phoneTypes:2 (497473201754095234) -->
+    <!-- no translation found for phoneTypes:3 (5554432614281047787) -->
+    <!-- no translation found for phoneTypes:4 (2222084401110150993) -->
+    <!-- no translation found for phoneTypes:5 (2290007103906353121) -->
+    <!-- no translation found for phoneTypes:6 (6930783706213719251) -->
+    <!-- no translation found for phoneTypes:7 (1326005699931077792) -->
+    <!-- no translation found for emailAddressTypes:0 (1540640638077615417) -->
+    <!-- no translation found for emailAddressTypes:1 (4252853367575831977) -->
+    <!-- no translation found for emailAddressTypes:2 (7158046581744435718) -->
+    <!-- no translation found for emailAddressTypes:3 (3625034471181268169) -->
+    <!-- no translation found for postalAddressTypes:0 (5732960259696659380) -->
+    <!-- no translation found for postalAddressTypes:1 (7132240704786130285) -->
+    <!-- no translation found for postalAddressTypes:2 (1317604357745852817) -->
+    <!-- no translation found for postalAddressTypes:3 (1582953598462826702) -->
+    <!-- no translation found for imAddressTypes:0 (7806620012096518833) -->
+    <!-- no translation found for imAddressTypes:1 (5748846799950672787) -->
+    <!-- no translation found for imAddressTypes:2 (6196536810275073680) -->
+    <!-- no translation found for imAddressTypes:3 (8519128375350623648) -->
+    <!-- no translation found for organizationTypes:0 (1299224825223821142) -->
+    <!-- no translation found for organizationTypes:1 (2455717447227299354) -->
+    <!-- no translation found for organizationTypes:2 (7027570839313438290) -->
+    <!-- no translation found for imProtocols:0 (3318725788774688043) -->
+    <!-- no translation found for imProtocols:1 (1787713387022932886) -->
+    <!-- no translation found for imProtocols:2 (6751174158442316516) -->
+    <!-- no translation found for imProtocols:3 (1151283347465052653) -->
+    <!-- no translation found for imProtocols:4 (2157980008878817934) -->
+    <!-- no translation found for imProtocols:5 (7836237460308230767) -->
+    <!-- no translation found for imProtocols:6 (1180789904462172516) -->
+    <!-- no translation found for imProtocols:7 (21955111672779862) -->
+    <string name="keyguard_password_enter_pin_code">"Pincode invoeren"</string>
+    <string name="keyguard_password_wrong_pin_code">"Onjuiste pincode!"</string>
+    <string name="keyguard_label_text">"Om vrij te geven drukt u op Menu en vervolgens op 0."</string>
+    <string name="emergency_call_dialog_number_for_display">"Alarmnummers"</string>
+    <string name="lockscreen_carrier_default">"(Geen service)"</string>
+    <string name="lockscreen_screen_locked">"Schermblokkering"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Druk op Menu om vrij te geven of bel een alarmnummer"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Druk op Menu om vrij te geven"</string>
+    <string name="lockscreen_pattern_instructions">"Patroon tekenen om vrij te geven"</string>
+    <string name="lockscreen_emergency_call">"Noodoproep"</string>
+    <string name="lockscreen_pattern_correct">"Juist!"</string>
+    <string name="lockscreen_pattern_wrong">"Verkeerd patroon! Nogmaals proberen"</string>
+    <string name="lockscreen_plugged_in">"Bezig met opladen (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <string name="lockscreen_low_battery">"Oplader verbinden"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5051192587315492957) -->
+    <skip />
+    <string name="lockscreen_missing_sim_message">"Geen SIM in toestel"</string>
+    <string name="lockscreen_missing_sim_instructions">"Voer een SIM-kaart in"</string>
+    <!-- no translation found for lockscreen_network_locked_message (323609607922245071) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_puk_locked_message (1005803622871256359) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (5033160098036646955) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_locked_message (7398401200962556379) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (5939537246164692076) -->
+    <skip />
+    <!-- unknown placeholder BREAK in lockscreen_too_many_failed_attempts_dialog_message -->
+    <skip />
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (1569017295989454551) -->
+    <skip />
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Probeer opnieuw over <xliff:g id="NUMBER">%d</xliff:g> seconden"</string>
+    <!-- no translation found for lockscreen_forgot_pattern_button_text (4219994639843985488) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_too_many_attempts (7504679498838839295) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_instructions (6542400673357252011) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_username_hint (6378418320242015111) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_password_hint (3224230234042131153) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_submit_button (5562051040043760034) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_invalid_input (4881057177478491580) -->
+    <skip />
+    <!-- unknown placeholder FORMAT in status_bar_time_format -->
+    <skip />
+    <!-- no translation found for hour_minute_ampm (1850330605794978742) -->
+    <skip />
+    <!-- no translation found for hour_minute_cap_ampm (1122840227537374196) -->
+    <skip />
+    <!-- no translation found for hour_ampm (7665432130905376251) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (3600295014648400268) -->
+    <skip />
+    <!-- no translation found for status_bar_clear_all_button (2202004591253243750) -->
+    <skip />
+    <string name="status_bar_no_notifications_title">"Meldingen"</string>
+    <string name="status_bar_ongoing_events_title">"Actueel"</string>
+    <string name="status_bar_latest_events_title">"Nieuwste gebeurtenissen"</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="battery_status_charging">"Bezig met opladen…"</string>
+    <string name="battery_low_title">"Oplader verbinden"</string>
+    <string name="battery_low_subtitle">"Lage batterijstroom"</string>
+    <string name="battery_low_percent_format">"Minder dan <xliff:g id="NUMBER">%d%%</xliff:g> resterend"</string>
+    <string name="factorytest_failed">"Fabriekstest mislukt"</string>
+    <string name="factorytest_not_system">"De handeling FACTORY_TEST wordt alleen ondersteund voor pakketten die geïnstalleerd zijn in /system/app."</string>
+    <string name="factorytest_no_action">"Geen pakket gevonden dat de handeling FACTORY_TEST levert."</string>
+    <string name="factorytest_reboot">"Opnieuw opstarten"</string>
+    <string name="save_password_label">"Bevestigen"</string>
+    <string name="save_password_message">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
+    <string name="save_password_notnow">"Niet nu"</string>
+    <string name="save_password_remember">"Onthouden"</string>
+    <string name="save_password_never">"Nooit"</string>
+    <string name="open_permission_deny">"U hebt geen toestemming om deze pagina te openen."</string>
+    <!-- no translation found for text_copied (6106873823411904723) -->
+    <skip />
+    <string name="more_item_label">"Meer"</string>
+    <string name="prepend_shortcut_label">"Menu+"</string>
+    <!-- no translation found for menu_space_shortcut_label (194586306440382711) -->
+    <skip />
+    <!-- no translation found for menu_enter_shortcut_label (7214761412193519345) -->
+    <skip />
+    <!-- no translation found for menu_delete_shortcut_label (2854936426194985313) -->
+    <skip />
+    <string name="search_go">"Ga naar"</string>
+    <string name="today">"Vandaag"</string>
+    <string name="yesterday">"Gisteren"</string>
+    <string name="tomorrow">"Morgen"</string>
+    <!-- no translation found for oneMonthDurationPast (3402179395240209557) -->
+    <skip />
+    <!-- no translation found for beforeOneMonthDurationPast (7578100953282866827) -->
+    <skip />
+    <!-- no translation found for num_seconds_ago:one (7416512229671810725) -->
+    <!-- no translation found for num_seconds_ago:other (8138756910300398447) -->
+    <!-- no translation found for num_minutes_ago:one (8620869479299420562) -->
+    <!-- no translation found for num_minutes_ago:other (5065488162050522741) -->
+    <!-- no translation found for num_hours_ago:one (853404611989669641) -->
+    <!-- no translation found for num_hours_ago:other (3558873784561756849) -->
+    <!-- no translation found for num_days_ago:one (4222479980812128212) -->
+    <!-- no translation found for num_days_ago:other (5445701370433601703) -->
+    <!-- no translation found for in_num_seconds:one (4253290037777327003) -->
+    <!-- no translation found for in_num_seconds:other (1280033870920841404) -->
+    <!-- no translation found for in_num_minutes:one (1487585791027953091) -->
+    <!-- no translation found for in_num_minutes:other (6274204576475209932) -->
+    <!-- no translation found for in_num_hours:one (6501470863235186391) -->
+    <!-- no translation found for in_num_hours:other (4415358752953289251) -->
+    <!-- no translation found for in_num_days:one (5608475533104443893) -->
+    <!-- no translation found for in_num_days:other (3827193006163842267) -->
+    <string name="preposition_for_date">"op %s"</string>
+    <string name="preposition_for_time">"bij %s"</string>
+    <string name="preposition_for_year">"in %s"</string>
+    <string name="day">"dag"</string>
+    <string name="days">"dagen"</string>
+    <string name="hour">"uur"</string>
+    <string name="hours">"uur"</string>
+    <string name="minute">"minuut"</string>
+    <string name="minutes">"minuten"</string>
+    <string name="second">"seconde"</string>
+    <string name="seconds">"seconden"</string>
+    <string name="week">"week"</string>
+    <string name="weeks">"weken"</string>
+    <!-- no translation found for year (8024790425994085153) -->
+    <skip />
+    <!-- no translation found for years (8592090054773244417) -->
+    <skip />
+    <string name="sunday">"Zondag"</string>
+    <string name="monday">"Maandag"</string>
+    <string name="tuesday">"Dinsdag"</string>
+    <string name="wednesday">"Woensdag"</string>
+    <string name="thursday">"Donderdag"</string>
+    <string name="friday">"Vrijdag"</string>
+    <string name="saturday">"Zaterdag"</string>
+    <string name="every_weekday">"Elke werkdag (Maa–vri)"</string>
+    <string name="daily">"Elke dag"</string>
+    <string name="weekly">"Wekelijks op <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Elke mnd"</string>
+    <string name="yearly">"Elk jaar"</string>
+    <string name="VideoView_error_title">"Videoafspeelfout"</string>
+    <string name="VideoView_error_text_unknown">"Fout opgetreden bij afspelen van geselecteerde video."</string>
+    <string name="VideoView_error_button">"OK"</string>
+    <string name="am">"AM"</string>
+    <string name="pm">"PM"</string>
+    <!-- unknown placeholder FORMAT in numeric_date -->
+    <skip />
+    <!-- unknown placeholder FORMAT in wday1_date1_time1_wday2_date2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in wday1_date1_wday2_date2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in date1_time1_date2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in date1_date2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in time1_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in time_wday_date -->
+    <skip />
+    <!-- unknown placeholder FORMAT in wday_date -->
+    <skip />
+    <!-- unknown placeholder FORMAT in time_date -->
+    <skip />
+    <!-- unknown placeholder FORMAT in time_wday -->
+    <skip />
+    <!-- no translation found for full_date_month_first (6011143962222283357) -->
+    <skip />
+    <!-- no translation found for full_date_day_first (8621594762705478189) -->
+    <skip />
+    <!-- no translation found for medium_date_month_first (48990963718825728) -->
+    <skip />
+    <!-- no translation found for medium_date_day_first (2898992016440387123) -->
+    <skip />
+    <!-- no translation found for twelve_hour_time_format (6015557937879492156) -->
+    <skip />
+    <!-- no translation found for twenty_four_hour_time_format (5176807998669709535) -->
+    <skip />
+    <string name="noon">"12 uur \'smiddags"</string>
+    <string name="Noon">"12 uur \'smiddags"</string>
+    <string name="midnight">"middernacht"</string>
+    <string name="Midnight">"Middernacht"</string>
+    <!-- unknown placeholder FORMAT in month_day -->
+    <skip />
+    <!-- unknown placeholder FORMAT in month -->
+    <skip />
+    <!-- unknown placeholder FORMAT in month_day_year -->
+    <skip />
+    <!-- unknown placeholder FORMAT in month_year -->
+    <skip />
+    <!-- no translation found for time_of_day (8375993139317154157) -->
+    <skip />
+    <!-- no translation found for date_and_time (9197690194373107109) -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_md1_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_wday1_md1_wday2_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_mdy1_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_wday1_mdy1_wday2_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_md1_time1_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_wday1_md1_time1_wday2_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_mdy1_time1_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_year_wday1_mdy1_time1_wday2_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_md1_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_wday1_md1_wday2_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_mdy1_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_wday1_mdy1_wday2_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_md1_time1_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_wday1_md1_time1_wday2_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_mdy1_time1_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in numeric_wday1_mdy1_time1_wday2_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_md1_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_wday1_md1_wday2_md2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_mdy1_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_wday1_mdy1_wday2_mdy2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_md1_time1_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_wday1_md1_time1_wday2_md2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_mdy1_time1_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in same_month_wday1_mdy1_time1_wday2_mdy2_time2 -->
+    <skip />
+    <!-- unknown placeholder FORMAT in abbrev_month_day_year -->
+    <skip />
+    <!-- unknown placeholder FORMAT in abbrev_month_year -->
+    <skip />
+    <!-- unknown placeholder FORMAT in abbrev_month_day -->
+    <skip />
+    <!-- unknown placeholder FORMAT in abbrev_month -->
+    <skip />
+    <string name="day_of_week_long_sunday">"Zondag"</string>
+    <string name="day_of_week_long_monday">"Maandag"</string>
+    <string name="day_of_week_long_tuesday">"Dinsdag"</string>
+    <string name="day_of_week_long_wednesday">"Woensdag"</string>
+    <string name="day_of_week_long_thursday">"Donderdag"</string>
+    <string name="day_of_week_long_friday">"Vrijdag"</string>
+    <string name="day_of_week_long_saturday">"Zaterdag"</string>
+    <string name="day_of_week_medium_sunday">"Zon"</string>
+    <string name="day_of_week_medium_monday">"Maa"</string>
+    <string name="day_of_week_medium_tuesday">"Din"</string>
+    <string name="day_of_week_medium_wednesday">"Woe"</string>
+    <string name="day_of_week_medium_thursday">"Don"</string>
+    <string name="day_of_week_medium_friday">"Vri"</string>
+    <string name="day_of_week_medium_saturday">"Zat"</string>
+    <string name="day_of_week_short_sunday">"Zo"</string>
+    <string name="day_of_week_short_monday">"Ma"</string>
+    <string name="day_of_week_short_tuesday">"Di"</string>
+    <string name="day_of_week_short_wednesday">"Wo"</string>
+    <string name="day_of_week_short_thursday">"Do"</string>
+    <string name="day_of_week_short_friday">"Vr"</string>
+    <string name="day_of_week_short_saturday">"Za"</string>
+    <string name="day_of_week_shorter_sunday">"Zo"</string>
+    <string name="day_of_week_shorter_monday">"M"</string>
+    <string name="day_of_week_shorter_tuesday">"Di"</string>
+    <string name="day_of_week_shorter_wednesday">"W"</string>
+    <string name="day_of_week_shorter_thursday">"Do"</string>
+    <string name="day_of_week_shorter_friday">"V"</string>
+    <string name="day_of_week_shorter_saturday">"Za"</string>
+    <string name="day_of_week_shortest_sunday">"Z"</string>
+    <string name="day_of_week_shortest_monday">"M"</string>
+    <string name="day_of_week_shortest_tuesday">"Di"</string>
+    <string name="day_of_week_shortest_wednesday">"W"</string>
+    <string name="day_of_week_shortest_thursday">"Do"</string>
+    <string name="day_of_week_shortest_friday">"V"</string>
+    <string name="day_of_week_shortest_saturday">"Z"</string>
+    <string name="month_long_january">"Januari"</string>
+    <string name="month_long_february">"Februari"</string>
+    <string name="month_long_march">"Maart"</string>
+    <string name="month_long_april">"April"</string>
+    <string name="month_long_may">"Mei"</string>
+    <string name="month_long_june">"Juni"</string>
+    <string name="month_long_july">"Juli"</string>
+    <string name="month_long_august">"Augustus"</string>
+    <string name="month_long_september">"September"</string>
+    <string name="month_long_october">"Oktober"</string>
+    <string name="month_long_november">"November"</string>
+    <string name="month_long_december">"December"</string>
+    <string name="month_medium_january">"jan"</string>
+    <string name="month_medium_february">"feb"</string>
+    <string name="month_medium_march">"mrt"</string>
+    <string name="month_medium_april">"apr"</string>
+    <string name="month_medium_may">"mei"</string>
+    <string name="month_medium_june">"jun"</string>
+    <string name="month_medium_july">"jul"</string>
+    <string name="month_medium_august">"aug"</string>
+    <string name="month_medium_september">"sep"</string>
+    <string name="month_medium_october">"okt"</string>
+    <string name="month_medium_november">"nov"</string>
+    <string name="month_medium_december">"dec"</string>
+    <string name="month_shortest_january">"J"</string>
+    <string name="month_shortest_february">"F"</string>
+    <string name="month_shortest_march">"M"</string>
+    <string name="month_shortest_april">"A"</string>
+    <string name="month_shortest_may">"M"</string>
+    <string name="month_shortest_june">"J"</string>
+    <string name="month_shortest_july">"J"</string>
+    <string name="month_shortest_august">"A"</string>
+    <string name="month_shortest_september">"S"</string>
+    <string name="month_shortest_october">"O"</string>
+    <string name="month_shortest_november">"N"</string>
+    <string name="month_shortest_december">"D"</string>
+    <!-- unknown placeholder FORMAT in elapsed_time_short_format_mm_ss -->
+    <skip />
+    <!-- unknown placeholder FORMAT in elapsed_time_short_format_h_mm_ss -->
+    <skip />
+    <string name="selectAll">"Alles selecteren"</string>
+    <string name="cut">"Knippen"</string>
+    <!-- no translation found for cutAll (4474519683293791451) -->
+    <skip />
+    <string name="copy">"Kopiëren"</string>
+    <!-- no translation found for copyAll (4777548804630476932) -->
+    <skip />
+    <string name="paste">"Plakken"</string>
+    <string name="copyUrl">"URL kopiëren"</string>
+    <!-- no translation found for inputMethod (7911866729148111492) -->
+    <skip />
+    <!-- no translation found for editTextMenuTitle (3984253728638788023) -->
+    <skip />
+    <string name="low_internal_storage_view_title">"Weinig intern geheugen"</string>
+    <string name="low_internal_storage_view_text">"Toestel heeft weinig intern geheugen"</string>
+    <string name="ok">"OK"</string>
+    <string name="cancel">"Annuleren"</string>
+    <string name="yes">"OK"</string>
+    <string name="no">"Annuleren"</string>
+    <string name="capital_on">"AAN"</string>
+    <string name="capital_off">"UIT"</string>
+    <string name="whichApplication">"Welke toepassing wilt u gebruiken?"</string>
+    <string name="alwaysUse">"Deze toepassing altijd gebruiken voor deze toepassing"</string>
+    <!-- no translation found for clearDefaultHintMsg (5742432113023174321) -->
+    <skip />
+    <string name="chooseActivity">"Een actie selecteren"</string>
+    <string name="noApplications">"Geen toepassingen beschikbaar om de handeling uit te voeren"</string>
+    <!-- no translation found for aerr_title (2654390351574026098) -->
+    <skip />
+    <!-- no translation found for aerr_application (4917288809565116720) -->
+    <skip />
+    <!-- no translation found for aerr_process (1273819861108073461) -->
+    <skip />
+    <!-- no translation found for anr_title (3305935690891435915) -->
+    <skip />
+    <!-- no translation found for anr_activity_application (1653036325679156678) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (2674027618362070465) -->
+    <skip />
+    <!-- no translation found for anr_application_process (2163656674970221928) -->
+    <skip />
+    <!-- no translation found for anr_process (7747550780123472160) -->
+    <skip />
+    <!-- no translation found for force_close (9020954128872810669) -->
+    <skip />
+    <!-- no translation found for wait (7973775702304037058) -->
+    <skip />
+    <!-- no translation found for debug (857932504764728770) -->
+    <skip />
+    <string name="sendText">"Kiezen wat met de tekst gebeurt"</string>
+    <!-- no translation found for volume_ringtone (4121694816346562058) -->
+    <skip />
+    <!-- no translation found for volume_music (4869950240104717493) -->
+    <skip />
+    <!-- no translation found for volume_call (5723421277753250395) -->
+    <skip />
+    <!-- no translation found for volume_alarm (2752102730973081294) -->
+    <skip />
+    <!-- no translation found for volume_unknown (6908187627672375742) -->
+    <skip />
+    <!-- no translation found for ringtone_default (2873893375149093475) -->
+    <skip />
+    <!-- no translation found for ringtone_default_with_actual (5474076151665761913) -->
+    <skip />
+    <!-- no translation found for ringtone_silent (7477159279081654685) -->
+    <skip />
+    <!-- no translation found for ringtone_picker_title (7055241890764367884) -->
+    <skip />
+    <!-- no translation found for ringtone_unknown (6888219771401173795) -->
+    <skip />
+    <!-- no translation found for wifi_available:one (8168012881468888470) -->
+    <!-- no translation found for wifi_available:other (4666122955807117718) -->
+    <!-- no translation found for wifi_available_detailed:one (5107769161192143259) -->
+    <!-- no translation found for wifi_available_detailed:other (853347657960575809) -->
+    <!-- no translation found for select_character (3735110139249491726) -->
+    <skip />
+    <!-- no translation found for sms_control_default_app_name (7522184737840550841) -->
+    <skip />
+    <!-- no translation found for sms_control_title (2742400596989418394) -->
+    <skip />
+    <!-- no translation found for sms_control_message (3447126217666595989) -->
+    <skip />
+    <!-- no translation found for sms_control_yes (8839660939359273650) -->
+    <skip />
+    <!-- no translation found for sms_control_no (909756849988183801) -->
+    <skip />
+    <!-- no translation found for date_time_set (2495199891239480952) -->
+    <skip />
+    <!-- no translation found for default_permission_group (7742780381379652409) -->
+    <skip />
+    <!-- no translation found for no_permissions (85461124044682315) -->
+    <skip />
+    <!-- no translation found for perms_hide (4145325555929151849) -->
+    <skip />
+    <!-- no translation found for perms_show_all (6040194843455403173) -->
+    <skip />
+    <!-- no translation found for googlewebcontenthelper_loading (2140804350507245589) -->
+    <skip />
+    <!-- no translation found for usb_storage_title (8699631567051394409) -->
+    <skip />
+    <!-- no translation found for usb_storage_message (5344039189213308733) -->
+    <skip />
+    <!-- no translation found for usb_storage_button_mount (6700104384375121662) -->
+    <skip />
+    <!-- no translation found for usb_storage_button_unmount (465869657252626688) -->
+    <skip />
+    <!-- no translation found for usb_storage_error_message (3192564550748426087) -->
+    <skip />
+    <!-- no translation found for usb_storage_notification_title (6237028017872246940) -->
+    <skip />
+    <!-- no translation found for usb_storage_notification_message (7371717280517625905) -->
+    <skip />
+    <!-- no translation found for select_input_method (2658280517827502015) -->
+    <skip />
+    <!-- no translation found for fast_scroll_alphabet (1017432309285755759) -->
+    <skip />
+    <!-- no translation found for fast_scroll_numeric_alphabet (3092587363718901074) -->
+    <skip />
+    <!-- no translation found for candidates_style (7738463880139922176) -->
+    <skip />
 </resources>

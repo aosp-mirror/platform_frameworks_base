@@ -18,6 +18,7 @@
  * @author Denis M. Kishenko
  * @version $Revision$
  */
+
 package java.awt.geom;
 
 import java.util.NoSuchElementException;
@@ -25,59 +26,77 @@ import java.util.NoSuchElementException;
 import org.apache.harmony.awt.internal.nls.Messages;
 
 /**
- * The Class Arc2D represents a segment of a curve inscribed 
- * in a rectangle. The curve is defined by a start angle and an 
- * extent angle (the end angle minus the start angle) as 
- * a pie wedge whose point is in the center of the rectangle.
- * The Arc2D as a shape may be either OPEN (including nothing 
- * but the curved arc segment itself), CHORD (the curved arc
- * segment closed by a connecting segment from the end to the 
- * beginning of the arc, or PIE (the segments from the end 
- * of the arc to the center of the rectangle and from the
- * center of the rectangle back to the arc's start point are 
- * included).
+ * The Class Arc2D represents a segment of a curve inscribed in a rectangle. The
+ * curve is defined by a start angle and an extent angle (the end angle minus
+ * the start angle) as a pie wedge whose point is in the center of the
+ * rectangle. The Arc2D as a shape may be either OPEN (including nothing but the
+ * curved arc segment itself), CHORD (the curved arc segment closed by a
+ * connecting segment from the end to the beginning of the arc, or PIE (the
+ * segments from the end of the arc to the center of the rectangle and from the
+ * center of the rectangle back to the arc's start point are included).
+ * 
+ * @since Android 1.0
  */
 public abstract class Arc2D extends RectangularShape {
 
-    /** The arc type OPEN indicates that the shape includes only the 
-     * curved arc segment. */
+    /**
+     * The arc type OPEN indicates that the shape includes only the curved arc
+     * segment.
+     */
     public final static int OPEN = 0;
-    
-    /** The arc type CHORD indicates that as a shape the connecting
-     * segment from the end point of the curved arc to the beginning
-     * point is included. */
+
+    /**
+     * The arc type CHORD indicates that as a shape the connecting segment from
+     * the end point of the curved arc to the beginning point is included.
+     */
     public final static int CHORD = 1;
-    
-    /** The arc type PIE indicates that as a shape the two segments 
-     * from the arc's endpoint to the center of the rectangle and from 
-     * the center of the rectangle to the arc's endpoint are included. */
+
+    /**
+     * The arc type PIE indicates that as a shape the two segments from the
+     * arc's endpoint to the center of the rectangle and from the center of the
+     * rectangle to the arc's endpoint are included.
+     */
     public final static int PIE = 2;
 
     /**
-     * The Class Float is a subclass of Arc2D in which all of the 
-     * data values are given as floats.
+     * The Class Float is a subclass of Arc2D in which all of the data values
+     * are given as floats.
+     * 
      * @see Arc2D.Double
+     * @since Android 1.0
      */
     public static class Float extends Arc2D {
 
-        /** The x coordinate of the upper left corner of the rectangle that
-         * contains the arc. */
+        /**
+         * The x coordinate of the upper left corner of the rectangle that
+         * contains the arc.
+         */
         public float x;
-        
-        /** The y coordinate of the upper left corner of the rectangle that
-         * contains the arc. */
+
+        /**
+         * The y coordinate of the upper left corner of the rectangle that
+         * contains the arc.
+         */
         public float y;
-        
-        /** The width of the rectangle that contains the arc. */
+
+        /**
+         * The width of the rectangle that contains the arc.
+         */
         public float width;
-        
-        /** The height of the rectangle that contains the arc. */
+
+        /**
+         * The height of the rectangle that contains the arc.
+         */
         public float height;
-        
-        /** The start angle of the arc in degrees. */
+
+        /**
+         * The start angle of the arc in degrees.
+         */
         public float start;
-        
-        /** The width angle of the arc in degrees. */
+
+        /**
+         * The width angle of the arc in degrees.
+         */
         public float extent;
 
         /**
@@ -90,8 +109,9 @@ public abstract class Arc2D extends RectangularShape {
         /**
          * Instantiates a new Arc2D of the specified type with float values.
          * 
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
         public Float(int type) {
             super(type);
@@ -100,20 +120,26 @@ public abstract class Arc2D extends RectangularShape {
         /**
          * Instantiates a Arc2D with the specified float-valued data.
          * 
-         * @param x the x coordinate of the upper left corner of the rectangle that
-         * contains the arc.
-         * @param y the y coordinate of the upper left corner of the rectangle that
-         * contains the arc.
-         * @param width the width of the rectangle that
-         * contains the arc.
-         * @param height the height of the rectangle that
-         * contains the arc.
-         * @param start the start angle of the arc in degrees.
-         * @param extent the width angle of the arc in degrees.
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param x
+         *            the x coordinate of the upper left corner of the rectangle
+         *            that contains the arc.
+         * @param y
+         *            the y coordinate of the upper left corner of the rectangle
+         *            that contains the arc.
+         * @param width
+         *            the width of the rectangle that contains the arc.
+         * @param height
+         *            the height of the rectangle that contains the arc.
+         * @param start
+         *            the start angle of the arc in degrees.
+         * @param extent
+         *            the width angle of the arc in degrees.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
-        public Float(float x, float y, float width, float height, float start, float extent, int type) {
+        public Float(float x, float y, float width, float height, float start, float extent,
+                int type) {
             super(type);
             this.x = x;
             this.y = y;
@@ -124,14 +150,18 @@ public abstract class Arc2D extends RectangularShape {
         }
 
         /**
-         * Instantiates a new Angle2D with the specified float-valued data
-         * and the bounding rectangle given by the parameter bounds.
+         * Instantiates a new Angle2D with the specified float-valued data and
+         * the bounding rectangle given by the parameter bounds.
          * 
-         * @param bounds the bounding rectangle of the Angle2D.
-         * @param start the start angle of the arc in degrees.
-         * @param extent the width angle of the arc in degrees.
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param bounds
+         *            the bounding rectangle of the Angle2D.
+         * @param start
+         *            the start angle of the arc in degrees.
+         * @param extent
+         *            the width angle of the arc in degrees.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
         public Float(Rectangle2D bounds, float start, float extent, int type) {
             super(type);
@@ -148,8 +178,8 @@ public abstract class Arc2D extends RectangularShape {
             return x;
         }
 
-       @Override
-       public double getY() {
+        @Override
+        public double getY() {
             return y;
         }
 
@@ -179,9 +209,8 @@ public abstract class Arc2D extends RectangularShape {
         }
 
         @Override
-        public void setArc(double x, double y, double width, double height,
-                double start, double extent, int type)
-        {
+        public void setArc(double x, double y, double width, double height, double start,
+                double extent, int type) {
             this.setArcType(type);
             this.x = (float)x;
             this.y = (float)y;
@@ -209,30 +238,44 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * The Class Double is a subclass of Arc2D in which all of the 
-     * data values are given as doubles.
+     * The Class Double is a subclass of Arc2D in which all of the data values
+     * are given as doubles.
+     * 
      * @see Arc2D.Float
+     * @since Android 1.0
      */
     public static class Double extends Arc2D {
 
-        /** The x coordinate of the upper left corner of the rectangle that
-         * contains the arc. */
+        /**
+         * The x coordinate of the upper left corner of the rectangle that
+         * contains the arc.
+         */
         public double x;
-        
-        /** The y coordinate of the upper left corner of the rectangle that
-         * contains the arc. */
+
+        /**
+         * The y coordinate of the upper left corner of the rectangle that
+         * contains the arc.
+         */
         public double y;
-        
-        /** The width of the rectangle that contains the arc. */
+
+        /**
+         * The width of the rectangle that contains the arc.
+         */
         public double width;
-        
-        /** The height of the rectangle that contains the arc. */
+
+        /**
+         * The height of the rectangle that contains the arc.
+         */
         public double height;
-        
-        /** The start angle of the arc in degrees. */
+
+        /**
+         * The start angle of the arc in degrees.
+         */
         public double start;
-        
-        /** The width angle of the arc in degrees. */
+
+        /**
+         * The width angle of the arc in degrees.
+         */
         public double extent;
 
         /**
@@ -245,8 +288,9 @@ public abstract class Arc2D extends RectangularShape {
         /**
          * Instantiates a new Arc2D of the specified type with double values.
          * 
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
         public Double(int type) {
             super(type);
@@ -255,22 +299,26 @@ public abstract class Arc2D extends RectangularShape {
         /**
          * Instantiates a Arc2D with the specified double-valued data.
          * 
-         * @param x the x coordinate of the upper left corner of the rectangle that
-         * contains the arc.
-         * @param y the y coordinate of the upper left corner of the rectangle that
-         * contains the arc.
-         * @param width the width of the rectangle that
-         * contains the arc.
-         * @param height the height of the rectangle that
-         * contains the arc.
-         * @param start the start angle of the arc in degrees.
-         * @param extent the width angle of the arc in degrees.
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param x
+         *            the x coordinate of the upper left corner of the rectangle
+         *            that contains the arc.
+         * @param y
+         *            the y coordinate of the upper left corner of the rectangle
+         *            that contains the arc.
+         * @param width
+         *            the width of the rectangle that contains the arc.
+         * @param height
+         *            the height of the rectangle that contains the arc.
+         * @param start
+         *            the start angle of the arc in degrees.
+         * @param extent
+         *            the width angle of the arc in degrees.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
-        public Double(double x, double y, double width, double height,
-                double start, double extent, int type)
-        {
+        public Double(double x, double y, double width, double height, double start, double extent,
+                int type) {
             super(type);
             this.x = x;
             this.y = y;
@@ -281,14 +329,18 @@ public abstract class Arc2D extends RectangularShape {
         }
 
         /**
-         * Instantiates a new Angle2D with the specified float-valued data
-         * and the bounding rectangle given by the parameter bounds.
+         * Instantiates a new Angle2D with the specified float-valued data and
+         * the bounding rectangle given by the parameter bounds.
          * 
-         * @param bounds the bounding rectangle of the Angle2D.
-         * @param start the start angle of the arc in degrees.
-         * @param extent the width angle of the arc in degrees.
-         * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-         * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+         * @param bounds
+         *            the bounding rectangle of the Angle2D.
+         * @param start
+         *            the start angle of the arc in degrees.
+         * @param extent
+         *            the width angle of the arc in degrees.
+         * @param type
+         *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+         *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
          */
         public Double(Rectangle2D bounds, double start, double extent, int type) {
             super(type);
@@ -336,9 +388,8 @@ public abstract class Arc2D extends RectangularShape {
         }
 
         @Override
-        public void setArc(double x, double y, double width, double height,
-                double start, double extent, int type)
-        {
+        public void setArc(double x, double y, double width, double height, double start,
+                double extent, int type) {
             this.setArcType(type);
             this.x = x;
             this.y = y;
@@ -366,73 +417,116 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * The Class Iterator is the subclass of PathIterator that is used to 
+     * The Class Iterator is the subclass of PathIterator that is used to
      * traverse the boundary of a shape of type Arc2D.
      */
     class Iterator implements PathIterator {
 
-        /** The x coordinate of the center of the arc's bounding rectangle. */
+        /**
+         * The x coordinate of the center of the arc's bounding rectangle.
+         */
         double x;
 
-        /** The y coordinate of the center of the arc's bounding rectangle. */
+        /**
+         * The y coordinate of the center of the arc's bounding rectangle.
+         */
         double y;
 
-        /** Half of the width of the arc's bounding rectangle (the radius in the case of a circular arc). */
+        /**
+         * Half of the width of the arc's bounding rectangle (the radius in the
+         * case of a circular arc).
+         */
         double width;
-        
-        /** Half of the height of the arc's bounding rectangle (the radius in the case of a circular arc). */
+
+        /**
+         * Half of the height of the arc's bounding rectangle (the radius in the
+         * case of a circular arc).
+         */
         double height;
-        
-        /** The start angle of the arc in degrees. */
+
+        /**
+         * The start angle of the arc in degrees.
+         */
         double angle;
-        
-        /** The angle extent in degrees. */
+
+        /**
+         * The angle extent in degrees.
+         */
         double extent;
-         
-        /** The closure type of the arc. */
+
+        /**
+         * The closure type of the arc.
+         */
         int type;
-        
-        /** The path iterator transformation. */
+
+        /**
+         * The path iterator transformation.
+         */
         AffineTransform t;
-        
-        /** The current segment index. */
+
+        /**
+         * The current segment index.
+         */
         int index;
-        
-        /** The number of arc segments the source arc subdivided to be approximated by Bezier curves. Depends on extent value. */
+
+        /**
+         * The number of arc segments the source arc subdivided to be
+         * approximated by Bezier curves. Depends on extent value.
+         */
         int arcCount;
-        
-        /** The number of line segments. Depends on closure type. */
+
+        /**
+         * The number of line segments. Depends on closure type.
+         */
         int lineCount;
-        
-        /** The step to calculate next arc subdivision point. */
+
+        /**
+         * The step to calculate next arc subdivision point.
+         */
         double step;
-        
-        /** The temporary value of cosinus of the current angle. */
+
+        /**
+         * The temporary value of cosinus of the current angle.
+         */
         double cos;
 
-        /** The temporary value of sinus of the current angle. */
+        /**
+         * The temporary value of sinus of the current angle.
+         */
         double sin;
-        
+
         /** The coefficient to calculate control points of Bezier curves. */
         double k;
-        
-        /** The temporary value of x coordinate of the Bezier curve control vector. */
+
+        /**
+         * The temporary value of x coordinate of the Bezier curve control
+         * vector.
+         */
         double kx;
 
-        /** The temporary value of y coordinate of the Bezier curve control vector. */
+        /**
+         * The temporary value of y coordinate of the Bezier curve control
+         * vector.
+         */
         double ky;
-        
-        /** The x coordinate of the first path point (MOVE_TO). */
+
+        /**
+         * The x coordinate of the first path point (MOVE_TO).
+         */
         double mx;
-        
-        /** The y coordinate of the first path point (MOVE_TO). */
+
+        /**
+         * The y coordinate of the first path point (MOVE_TO).
+         */
         double my;
 
         /**
          * Constructs a new Arc2D.Iterator for given line and transformation
          * 
-         * @param a - the source Arc2D object
-         * @param t the AffineTransformation.
+         * @param a
+         *            the source Arc2D object.
+         * @param t
+         *            the AffineTransformation.
          */
         Iterator(Arc2D a, AffineTransform t) {
             if (width < 0 || height < 0) {
@@ -462,8 +556,7 @@ public abstract class Arc2D extends RectangularShape {
             } else {
                 arcCount = (int)Math.rint(Math.abs(extent) / 90.0);
                 step = Math.toRadians(extent / arcCount);
-                k = 4.0 / 3.0 * (1.0 - Math.cos(step / 2.0))
-                        / Math.sin(step / 2.0);
+                k = 4.0 / 3.0 * (1.0 - Math.cos(step / 2.0)) / Math.sin(step / 2.0);
             }
 
             lineCount = 0;
@@ -578,13 +671,16 @@ public abstract class Arc2D extends RectangularShape {
 
     }
 
-    /** The closure type of the arc. */
+    /**
+     * The closure type of the arc.
+     */
     private int type;
 
     /**
      * Instantiates a new arc2D.
      * 
-     * @param type the closure type.
+     * @param type
+     *            the closure type.
      */
     protected Arc2D(int type) {
         setArcType(type);
@@ -595,11 +691,16 @@ public abstract class Arc2D extends RectangularShape {
      * object with values either of type float or of type double depending on
      * whether this Arc2D instance is of type Float or Double.
      * 
-     * @param x the x coordinate of the upper left corner of the bounding rectangle.
-     * @param y the y coordinate of the upper left corner of the bounding rectangle.
-     * @param width the width of the bounding rectangle.
-     * @param height the height of the bounding rectangle.
-     * 
+     * @param x
+     *            the x coordinate of the upper left corner of the bounding
+     *            rectangle.
+     * @param y
+     *            the y coordinate of the upper left corner of the bounding
+     *            rectangle.
+     * @param width
+     *            the width of the bounding rectangle.
+     * @param height
+     *            the height of the bounding rectangle.
      * @return the corresponding Rectangle2D object.
      */
     protected abstract Rectangle2D makeBounds(double x, double y, double width, double height);
@@ -621,39 +722,46 @@ public abstract class Arc2D extends RectangularShape {
     /**
      * Sets the start angle.
      * 
-     * @param start the new start angle.
+     * @param start
+     *            the new start angle.
      */
     public abstract void setAngleStart(double start);
 
     /**
      * Sets the width angle.
      * 
-     * @param extent the new width angle.
+     * @param extent
+     *            the new width angle.
      */
     public abstract void setAngleExtent(double extent);
 
     /**
      * Sets the data values that define the arc.
      * 
-     * @param x the x coordinate of the upper left corner of the rectangle that
-     * contains the arc.
-     * @param y the y coordinate of the upper left corner of the rectangle that
-     * contains the arc.
-     * @param width the width of the rectangle that
-     * contains the arc.
-     * @param height the height of the rectangle that
-     * contains the arc.
-     * @param start the start angle of the arc in degrees.
-     * @param extent the width angle of the arc in degrees.
-     * @param type the type of the new Arc2D, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * @param x
+     *            the x coordinate of the upper left corner of the rectangle
+     *            that contains the arc.
+     * @param y
+     *            the y coordinate of the upper left corner of the rectangle
+     *            that contains the arc.
+     * @param width
+     *            the width of the rectangle that contains the arc.
+     * @param height
+     *            the height of the rectangle that contains the arc.
+     * @param start
+     *            the start angle of the arc in degrees.
+     * @param extent
+     *            the width angle of the arc in degrees.
+     * @param type
+     *            the type of the new Arc2D, either {@link Arc2D#OPEN},
+     *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
      */
-    public abstract void setArc(double x, double y, double width,
-            double height, double start, double extent, int type);
+    public abstract void setArc(double x, double y, double width, double height, double start,
+            double extent, int type);
 
     /**
-     * Gets the arc type, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * Gets the arc type, either {@link Arc2D#OPEN}, {@link Arc2D#CHORD}, or
+     * {@link Arc2D#PIE}.
      * 
      * @return the arc type.
      */
@@ -662,10 +770,11 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * Sets the arc type, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * Sets the arc type, either {@link Arc2D#OPEN}, {@link Arc2D#CHORD}, or
+     * {@link Arc2D#PIE}.
      * 
-     * @param type the new arc type.
+     * @param type
+     *            the new arc type.
      */
     public void setArcType(int type) {
         if (type != OPEN && type != CHORD && type != PIE) {
@@ -682,9 +791,8 @@ public abstract class Arc2D extends RectangularShape {
      */
     public Point2D getStartPoint() {
         double a = Math.toRadians(getAngleStart());
-        return new Point2D.Double(
-                getX() + (1.0 + Math.cos(a)) * getWidth() / 2.0,
-                getY() + (1.0 - Math.sin(a)) * getHeight() / 2.0);
+        return new Point2D.Double(getX() + (1.0 + Math.cos(a)) * getWidth() / 2.0, getY()
+                + (1.0 - Math.sin(a)) * getHeight() / 2.0);
     }
 
     /**
@@ -694,9 +802,8 @@ public abstract class Arc2D extends RectangularShape {
      */
     public Point2D getEndPoint() {
         double a = Math.toRadians(getAngleStart() + getAngleExtent());
-        return new Point2D.Double(
-                getX() + (1.0 + Math.cos(a)) * getWidth() / 2.0,
-                getY() + (1.0 - Math.sin(a)) * getHeight() / 2.0);
+        return new Point2D.Double(getX() + (1.0 + Math.cos(a)) * getWidth() / 2.0, getY()
+                + (1.0 - Math.sin(a)) * getHeight() / 2.0);
     }
 
     public Rectangle2D getBounds2D() {
@@ -712,8 +819,8 @@ public abstract class Arc2D extends RectangularShape {
         Point2D p2 = getEndPoint();
 
         double bx1 = containsAngle(180.0) ? rx1 : Math.min(p1.getX(), p2.getX());
-        double by1 = containsAngle(90.0)  ? ry1 : Math.min(p1.getY(), p2.getY());
-        double bx2 = containsAngle(0.0)   ? rx2 : Math.max(p1.getX(), p2.getX());
+        double by1 = containsAngle(90.0) ? ry1 : Math.min(p1.getY(), p2.getY());
+        double bx2 = containsAngle(0.0) ? rx2 : Math.max(p1.getX(), p2.getX());
         double by2 = containsAngle(270.0) ? ry2 : Math.max(p1.getY(), p2.getY());
 
         if (type == PIE) {
@@ -735,12 +842,17 @@ public abstract class Arc2D extends RectangularShape {
     /**
      * Sets the data that defines the arc.
      * 
-     * @param point the upper left corner of the bounding rectangle.
-     * @param size the size of the bounding rectangle.
-     * @param start the start angle of the arc in degrees.
-     * @param extent the angle witdth of the arc in degrees.
-     * @param type the closure type, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * @param point
+     *            the upper left corner of the bounding rectangle.
+     * @param size
+     *            the size of the bounding rectangle.
+     * @param start
+     *            the start angle of the arc in degrees.
+     * @param extent
+     *            the angle width of the arc in degrees.
+     * @param type
+     *            the closure type, either {@link Arc2D#OPEN},
+     *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
      */
     public void setArc(Point2D point, Dimension2D size, double start, double extent, int type) {
         setArc(point.getX(), point.getY(), size.getWidth(), size.getHeight(), start, extent, type);
@@ -749,11 +861,15 @@ public abstract class Arc2D extends RectangularShape {
     /**
      * Sets the data that defines the arc.
      * 
-     * @param rect the arc's bounding rectangle.
-     * @param start the start angle of the arc in degrees.
-     * @param extent the angle witdth of the arc in degrees.
-     * @param type the closure type, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * @param rect
+     *            the arc's bounding rectangle.
+     * @param start
+     *            the start angle of the arc in degrees.
+     * @param extent
+     *            the angle width of the arc in degrees.
+     * @param type
+     *            the closure type, either {@link Arc2D#OPEN},
+     *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
      */
     public void setArc(Rectangle2D rect, double start, double extent, int type) {
         setArc(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), start, extent, type);
@@ -762,47 +878,60 @@ public abstract class Arc2D extends RectangularShape {
     /**
      * Sets the data that defines the arc by copying it from another Arc2D.
      * 
-     * @param arc the arc whose data is copied into this arc.
+     * @param arc
+     *            the arc whose data is copied into this arc.
      */
     public void setArc(Arc2D arc) {
-        setArc(arc.getX(), arc.getY(), arc.getWidth(), arc.getHeight(), arc
-                .getAngleStart(), arc.getAngleExtent(), arc.getArcType());
+        setArc(arc.getX(), arc.getY(), arc.getWidth(), arc.getHeight(), arc.getAngleStart(), arc
+                .getAngleExtent(), arc.getArcType());
     }
 
     /**
      * Sets the data for a circular arc by giving its center and radius.
      * 
-     * @param x the x coordinate of the center of the circle.
-     * @param y the y coordinate of the center of the circle.
-     * @param radius the radius of the circle.
-     * @param start the start angle of the arc in degrees.
-     * @param extent the angle witdth of the arc in degrees.
-     * @param type the closure type, either {@link Arc2D#OPEN}, 
-     * {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
+     * @param x
+     *            the x coordinate of the center of the circle.
+     * @param y
+     *            the y coordinate of the center of the circle.
+     * @param radius
+     *            the radius of the circle.
+     * @param start
+     *            the start angle of the arc in degrees.
+     * @param extent
+     *            the angle width of the arc in degrees.
+     * @param type
+     *            the closure type, either {@link Arc2D#OPEN},
+     *            {@link Arc2D#CHORD}, or {@link Arc2D#PIE}.
      */
-    public void setArcByCenter(double x, double y, double radius, double start, double extent, int type) {
+    public void setArcByCenter(double x, double y, double radius, double start, double extent,
+            int type) {
         setArc(x - radius, y - radius, radius * 2.0, radius * 2.0, start, extent, type);
     }
 
     /**
-     * Sets the arc data for a circular arc based on two tangent lines
-     * and the radius. The two tangent lines are the lines from p1 
-     * to p2 and from p2 to p3, which determine a unique circle 
-     * with the given radius. The start and end points of the arc 
-     * are the points where the circle touches the two lines, and 
-     * the arc itself is the shorter of the two circle segments 
-     * determined by the two points (in other words, it is the 
-     * piece of the circle that is closer to the lines' intersection 
-     * point p2 and forms a concave shape with the segments from p1 to p2 
-     * and from p2 to p3).
+     * Sets the arc data for a circular arc based on two tangent lines and the
+     * radius. The two tangent lines are the lines from p1 to p2 and from p2 to
+     * p3, which determine a unique circle with the given radius. The start and
+     * end points of the arc are the points where the circle touches the two
+     * lines, and the arc itself is the shorter of the two circle segments
+     * determined by the two points (in other words, it is the piece of the
+     * circle that is closer to the lines' intersection point p2 and forms a
+     * concave shape with the segments from p1 to p2 and from p2 to p3).
      * 
-     * @param p1 a point which determines one of the two tanget lines (with p2).
-     * @param p2 the point of intersection of the two tangent lines.
-     * @param p3 a point which determines one of the two tanget lines (with p2).
-     * @param radius the radius of the circular arc.
+     * @param p1
+     *            a point which determines one of the two tangent lines (with
+     *            p2).
+     * @param p2
+     *            the point of intersection of the two tangent lines.
+     * @param p3
+     *            a point which determines one of the two tangent lines (with
+     *            p2).
+     * @param radius
+     *            the radius of the circular arc.
      */
     public void setArcByTangent(Point2D p1, Point2D p2, Point2D p3, double radius) {
-        // Used simple geometric calculations of arc center, radius and angles by tangents
+        // Used simple geometric calculations of arc center, radius and angles
+        // by tangents
         double a1 = -Math.atan2(p1.getY() - p2.getY(), p1.getX() - p2.getX());
         double a2 = -Math.atan2(p3.getY() - p2.getY(), p3.getX() - p2.getX());
         double am = (a1 + a2) / 2.0;
@@ -821,10 +950,11 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * Sets a new start angle to be the angle given by the the vector 
-     * from the current center point to the specified point.
+     * Sets a new start angle to be the angle given by the the vector from the
+     * current center point to the specified point.
      * 
-     * @param point the point that determines the new start angle.
+     * @param point
+     *            the point that determines the new start angle.
      */
     public void setAngleStart(Point2D point) {
         double angle = Math.atan2(point.getY() - getCenterY(), point.getX() - getCenterX());
@@ -832,20 +962,23 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * Sets the angles in terms of vectors from the current arc center 
-     * to the points (x1, y1) and (x2, y2). The start angle is given 
-     * by the vector from the current center to the point (x1, y1) and
-     * the end angle is given by the vector from the center to the point
-     * (x2, y2).
+     * Sets the angles in terms of vectors from the current arc center to the
+     * points (x1, y1) and (x2, y2). The start angle is given by the vector from
+     * the current center to the point (x1, y1) and the end angle is given by
+     * the vector from the center to the point (x2, y2).
      * 
-     * @param x1 the x coordinate of the point whose vector from the center
-     * point determines the new start angle of the arc.
-     * @param y1 the y coordinate of the point whose vector from the center
-     * point determines the new start angle of the arc.
-     * @param x2 the x coordinate of the point whose vector from the center
-     * point determines the new end angle of the arc.
-     * @param y2 the y coordinate of the point whose vector from the center
-     * point determines the new end angle of the arc.
+     * @param x1
+     *            the x coordinate of the point whose vector from the center
+     *            point determines the new start angle of the arc.
+     * @param y1
+     *            the y coordinate of the point whose vector from the center
+     *            point determines the new start angle of the arc.
+     * @param x2
+     *            the x coordinate of the point whose vector from the center
+     *            point determines the new end angle of the arc.
+     * @param y2
+     *            the y coordinate of the point whose vector from the center
+     *            point determines the new end angle of the arc.
      */
     public void setAngles(double x1, double y1, double x2, double y2) {
         double cx = getCenterX();
@@ -861,29 +994,30 @@ public abstract class Arc2D extends RectangularShape {
     }
 
     /**
-     * Sets the angles in terms of vectors from the current arc center 
-     * to the points p1 and p2. The start angle is given 
-     * by the vector from the current center to the point p1 and
-     * the end angle is given by the vector from the center to the point
-     * p2.
+     * Sets the angles in terms of vectors from the current arc center to the
+     * points p1 and p2. The start angle is given by the vector from the current
+     * center to the point p1 and the end angle is given by the vector from the
+     * center to the point p2.
      * 
-     * @param p1 the point whose vector from the center
-     * point determines the new start angle of the arc.
-     * @param p2 the point whose vector from the center
-     * point determines the new end angle of the arc.
+     * @param p1
+     *            the point whose vector from the center point determines the
+     *            new start angle of the arc.
+     * @param p2
+     *            the point whose vector from the center point determines the
+     *            new end angle of the arc.
      */
     public void setAngles(Point2D p1, Point2D p2) {
         setAngles(p1.getX(), p1.getY(), p2.getX(), p2.getY());
     }
 
     /**
-     * Normalizes the angle by removing extra winding (past 360 degrees)
-     * and placing it in the positive degree range.
+     * Normalizes the angle by removing extra winding (past 360 degrees) and
+     * placing it in the positive degree range.
      * 
-     * @param angle - the source angle in degrees
-     * 
-     * @return an angle between 0 and 360 degrees which corresponds
-     * to the same direction vector as the source angle.
+     * @param angle
+     *            the source angle in degrees.
+     * @return an angle between 0 and 360 degrees which corresponds to the same
+     *         direction vector as the source angle.
      */
     double getNormAngle(double angle) {
         double n = Math.floor(angle / 360.0);
@@ -893,10 +1027,10 @@ public abstract class Arc2D extends RectangularShape {
     /**
      * Determines whether the given angle is contained in the span of the arc.
      * 
-     * @param angle the angle to test in degrees.
-     * 
-     * @return true, if the given angle is between the start angle and 
-     * the end angle of the arc.
+     * @param angle
+     *            the angle to test in degrees.
+     * @return true, if the given angle is between the start angle and the end
+     *         angle of the arc.
      */
     public boolean containsAngle(double angle) {
         double extent = getAngleExtent();
@@ -912,8 +1046,7 @@ public abstract class Arc2D extends RectangularShape {
         if (a2 < 0.0) {
             return angle >= a2 + 360.0 || angle <= a1;
         }
-        return extent > 0.0 ? a1 <= angle && angle <= a2 : a2 <= angle
-                && angle <= a1;
+        return extent > 0.0 ? a1 <= angle && angle <= a2 : a2 <= angle && angle <= a1;
     }
 
     public boolean contains(double px, double py) {
@@ -931,8 +1064,7 @@ public abstract class Arc2D extends RectangularShape {
             return true;
         }
 
-        boolean containsAngle = containsAngle(Math.toDegrees(-Math
-                .atan2(ny, nx)));
+        boolean containsAngle = containsAngle(Math.toDegrees(-Math.atan2(ny, nx)));
         if (type == PIE) {
             return containsAngle;
         }
@@ -943,14 +1075,13 @@ public abstract class Arc2D extends RectangularShape {
         Line2D l = new Line2D.Double(getStartPoint(), getEndPoint());
         int ccw1 = l.relativeCCW(px, py);
         int ccw2 = l.relativeCCW(getCenterX(), getCenterY());
-        return ccw1 == 0 || ccw2 == 0
-                || ((ccw1 + ccw2) == 0 ^ absExtent > 180.0);
+        return ccw1 == 0 || ccw2 == 0 || ((ccw1 + ccw2) == 0 ^ absExtent > 180.0);
     }
 
     public boolean contains(double rx, double ry, double rw, double rh) {
 
-        if (!(contains(rx, ry) && contains(rx + rw, ry)
-                && contains(rx + rw, ry + rh) && contains(rx, ry + rh))) {
+        if (!(contains(rx, ry) && contains(rx + rw, ry) && contains(rx + rw, ry + rh) && contains(
+                rx, ry + rh))) {
             return false;
         }
 
@@ -1003,9 +1134,8 @@ public abstract class Arc2D extends RectangularShape {
         }
 
         if (type == PIE) {
-            if (r.intersectsLine(p1.getX(), p1.getY(), cx, cy) ||
-                r.intersectsLine(p2.getX(), p2.getY(), cx, cy))
-            {
+            if (r.intersectsLine(p1.getX(), p1.getY(), cx, cy)
+                    || r.intersectsLine(p2.getX(), p2.getY(), cx, cy)) {
                 return true;
             }
         } else {
@@ -1025,4 +1155,3 @@ public abstract class Arc2D extends RectangularShape {
     }
 
 }
-

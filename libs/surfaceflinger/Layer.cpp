@@ -92,26 +92,29 @@ status_t Layer::setBuffers( Client* client,
     status_t err = getPixelFormatInfo(format, &info);
     if (err) return err;
 
-    // TODO: if eHardware is explicitely requested, we should fail
+    // TODO: if eHardware is explicitly requested, we should fail
     // on systems where we can't allocate memory that can be used with
     // DMA engines for instance.
+    
+    // FIXME: we always ask for hardware for now (this should come from copybit)
+    flags |= ISurfaceComposer::eHardware;
 
-    int memory_type = NATIVE_MEMORY_TYPE_PMEM;
+    const uint32_t memory_flags = flags & 
+            (ISurfaceComposer::eGPU | 
+             ISurfaceComposer::eHardware | 
+             ISurfaceComposer::eSecure);
     
     // pixel-alignment. the final alignment may be bigger because
     // we always force a 4-byte aligned bpr.
     uint32_t alignment = 1;
 
-    const uint32_t mask = ISurfaceComposer::eGPU | ISurfaceComposer::eSecure;
-    if ((flags & mask) == ISurfaceComposer::eGPU) {
-        // don't grant GPU memory if GPU is disabled
-        char value[PROPERTY_VALUE_MAX];
-        property_get("debug.egl.hw", value, "1");
-        if (atoi(value) != 0) {
-            flags |= ISurfaceComposer::eHardware;
-            memory_type = NATIVE_MEMORY_TYPE_GPU;
-            // TODO: this value should come from the h/w
-            alignment = 8; 
+    if (flags & ISurfaceComposer::eGPU) {
+        // FIXME: this value should come from the h/w
+        alignment = 8; 
+        // FIXME: this is msm7201A specific, as its GPU only supports
+        // BGRA_8888.
+        if (format == PIXEL_FORMAT_RGBA_8888) {
+            format = PIXEL_FORMAT_BGRA_8888;
         }
     }
 
@@ -119,7 +122,7 @@ status_t Layer::setBuffers( Client* client,
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
     sp<MemoryDealer> allocators[2];
     for (int i=0 ; i<2 ; i++) {
-        allocators[i] = client->createAllocator(memory_type);
+        allocators[i] = client->createAllocator(memory_flags);
         if (allocators[i] == 0)
             return NO_MEMORY;
         mBuffers[i].init(allocators[i]);
@@ -133,7 +136,7 @@ status_t Layer::setBuffers( Client* client,
     mSurface = new Surface(clientIndex(),
             allocators[0]->getMemoryHeap(),
             allocators[1]->getMemoryHeap(),
-            memory_type, mIdentity);
+            mIdentity);
 
     return NO_ERROR;
 }
@@ -180,7 +183,7 @@ void Layer::onDraw(const Region& clip) const
         front.getBitmapSurface(&src);
         copybit_rect_t srect = { 0, 0, t.width, t.height };
 
-        copybit_t* copybit = mFlinger->getBlitEngine();
+        copybit_device_t* copybit = mFlinger->getBlitEngine();
         copybit->set_parameter(copybit, COPYBIT_TRANSFORM, getOrientation());
         copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
         copybit->set_parameter(copybit, COPYBIT_DITHER,

@@ -35,7 +35,7 @@ to refresh the list of available windows on the right.</p>
   <li>Wire-frame View: a wire-frame drawing of the layout, on the bottom-right.</li>
 </ul>
 <br/>
-<img src="/android/images/hierarchyviewer-layout.png" alt="" height="509" width="700" />
+<img src="{@docRoot}images/hierarchyviewer-layout.png" alt="" height="509" width="700" />
 
 <p>Select a node in the Tree View to display the properties of that element in 
 the Properties View. When a node is selected, the Wire-frame View 
@@ -66,7 +66,7 @@ You must reload the Layout View by clicking <strong>Load View Hierarchy</strong>
   <li>Loupe View: a magnified, pixel-grid view of the device window, on the right.</li>
 </ul>
 <br/>
-<img src="/android/images/hierarchyviewer-pixelperfect.png" alt="" height="509" width="700" />
+<img src="{@docRoot}images/hierarchyviewer-pixelperfect.png" alt="" height="509" width="700" />
 
 <p>Click on an element in the Explorer View and a "layout box" will be drawn in the
 Normal View to indicate the layout position of that element. The layout box uses multiple rectangles, to indicate the normal bounds, the padding and the margin (as needed). The purple or green rectangle indicates 
@@ -95,5 +95,4 @@ in the Normal View, because the hierarchy believes you are still focused on the 
   <li><strong>Zoom</strong>: Adjust the zoom level of the Loupe View.</li>
 </ul>
 
-<p><strong><a href="/android/intro/tools.html">Back to Development Tools</a></strong></p>
 
