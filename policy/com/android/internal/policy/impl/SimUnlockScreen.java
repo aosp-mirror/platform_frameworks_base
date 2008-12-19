@@ -101,11 +101,19 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     public void onResume() {
         // start fresh
         mHeaderText.setText(R.string.keyguard_password_enter_pin_code);
+
+        // make sure that the number of entered digits is consistent when we
+        // erase the SIM unlock code, including orientation changes.
         mPinText.setText("");
+        mEnteredDigits = 0;
     }
 
     /** {@inheritDoc} */
     public void cleanUp() {
+        // hide the dialog.
+        if (mSimUnlockProgressDialog != null) {
+            mSimUnlockProgressDialog.hide();
+        }
         mUpdateMonitor.removeCallback(this);
     }
 
@@ -143,7 +151,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             }
         }
     }
-    
+
     public void onClick(View v) {
         if (v == mBackSpaceButton) {
             final Editable digits = mPinText.getText();
@@ -191,7 +199,9 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
         new CheckSimPin(mPinText.getText().toString()) {
             void onSimLockChangedResponse(boolean success) {
-                getSimUnlockProgressDialog().hide();
+                if (mSimUnlockProgressDialog != null) {
+                    mSimUnlockProgressDialog.hide();
+                }
                 if (success) {
                     // before closing the keyguard, report back that
                     // the sim is unlocked so it knows right away

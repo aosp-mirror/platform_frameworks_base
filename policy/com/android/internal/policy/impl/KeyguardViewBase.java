@@ -131,7 +131,13 @@ public abstract class KeyguardViewBase extends FrameLayout {
         final int keyCode = event.getKeyCode();
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
-                case KeyEvent.KEYCODE_HEADSETHOOK: {
+                case KeyEvent.KEYCODE_HEADSETHOOK: 
+                case KeyEvent.KEYCODE_PLAYPAUSE: 
+                case KeyEvent.KEYCODE_STOP: 
+                case KeyEvent.KEYCODE_NEXTSONG: 
+                case KeyEvent.KEYCODE_PREVIOUSSONG: 
+                case KeyEvent.KEYCODE_REWIND: 
+                case KeyEvent.KEYCODE_FORWARD: {
                     Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
                     getContext().sendOrderedBroadcast(intent, null);
@@ -161,7 +167,13 @@ public abstract class KeyguardViewBase extends FrameLayout {
             }
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
             switch (keyCode) {
-                case KeyEvent.KEYCODE_HEADSETHOOK: {
+                case KeyEvent.KEYCODE_HEADSETHOOK: 
+                case KeyEvent.KEYCODE_PLAYPAUSE: 
+                case KeyEvent.KEYCODE_STOP: 
+                case KeyEvent.KEYCODE_NEXTSONG: 
+                case KeyEvent.KEYCODE_PREVIOUSSONG: 
+                case KeyEvent.KEYCODE_REWIND: 
+                case KeyEvent.KEYCODE_FORWARD: {
                     Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
                     getContext().sendOrderedBroadcast(intent, null);

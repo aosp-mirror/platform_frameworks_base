@@ -131,6 +131,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private Context mContext;
     private AlarmManager mAlarmManager;
 
+    private boolean mSystemReady;
+    
     /** Low level access to the power manager for enableUserActivity.  Having this
      * requires that we run in the system process.  */
     LocalPowerManager mRealPowerManager;
@@ -254,6 +256,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     public void onSystemReady() {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "onSystemReady");
+            mSystemReady = true;
             doKeyguard();
         }
     }
@@ -638,7 +641,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_HEADSETHOOK: 
+            case KeyEvent.KEYCODE_PLAYPAUSE: 
+            case KeyEvent.KEYCODE_STOP: 
+            case KeyEvent.KEYCODE_NEXTSONG: 
+            case KeyEvent.KEYCODE_PREVIOUSSONG: 
+            case KeyEvent.KEYCODE_REWIND: 
+            case KeyEvent.KEYCODE_FORWARD:
             case KeyEvent.KEYCODE_CAMERA:
                 return false;
         }
@@ -806,6 +815,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private void handleShow() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleShow");
+            if (!mSystemReady) return;
+            
             // while we're showing, we control the wake state, so ask the power
             // manager not to honor request for userActivity.
             mRealPowerManager.enableUserActivity(false);
@@ -875,6 +886,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
             mKeyguardViewManager.verifyUnlock();
+            mShowing = true;
         }
     }
 

@@ -160,8 +160,8 @@ public class KeyguardUpdateMonitor {
             }
         };
 
-        mDeviceProvisioned = Settings.System.getInt(
-                mContext.getContentResolver(), Settings.System.DEVICE_PROVISIONED, 0) != 0;
+        mDeviceProvisioned = Settings.Secure.getInt(
+                mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
      
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -170,8 +170,8 @@ public class KeyguardUpdateMonitor {
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
-                    mDeviceProvisioned = Settings.System.getInt(mContext.getContentResolver(), 
-                            Settings.System.DEVICE_PROVISIONED, 0) != 0;
+                    mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(), 
+                        Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
                     if (mDeviceProvisioned && mContentObserver != null) {
                         // We don't need the observer anymore...
                         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
@@ -182,13 +182,13 @@ public class KeyguardUpdateMonitor {
             };
             
             mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.DEVICE_PROVISIONED),
+                    Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
                     false, mContentObserver);
             
             // prevent a race condition between where we check the flag and where we register the
             // observer by grabbing the value once again...
-            mDeviceProvisioned = Settings.System.getInt(mContext.getContentResolver(), 
-                    Settings.System.DEVICE_PROVISIONED, 0) != 0;
+            mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(), 
+                Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
         }
         
         mInPortrait = queryInPortrait();
