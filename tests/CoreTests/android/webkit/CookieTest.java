@@ -180,5 +180,9 @@ public class CookieTest extends AndroidTestCase {
         assertTrue(cookie.equals("a=b; a=c"));
         cookie = mCookieManager.getCookie(url);
         assertTrue(cookie.equals("a=c"));
+
+        mCookieManager.setCookie(url, "a=d");
+        cookie = mCookieManager.getCookie(url + "/wee");
+        assertTrue(cookie.equals("a=b; a=c; a=d"));
     }
 }

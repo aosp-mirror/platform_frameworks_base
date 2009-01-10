@@ -20,126 +20,124 @@ import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SimUtils;
 
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
+import android.os.HandlerState;
+import android.os.HandlerStateMachine;
 import android.os.Message;
 
-import java.util.concurrent.BlockingQueue;
-
 /**
- * Class used for queuing raw ril messages, decoding them into CommanParams 
- * objects and sending the result back to the STK Service. 
- *
+ * Class used for queuing raw ril messages, decoding them into CommanParams
+ * objects and sending the result back to the STK Service.
  */
-class RilMessageDecoder extends Handler {
+class RilMessageDecoder extends HandlerStateMachine {
 
     // members
-    private final BlockingQueue<RilMessage> mInQueue;
     private static RilMessageDecoder sInstance = null;
     private CommandParamsFactory mCmdParamsFactory = null;
     private RilMessage mCurrentRilMessage = null;
     private Handler mCaller = null;
 
+    // States
+    private StateStart mStateStart = new StateStart();
+    private StateCmdParamsReady mStateCmdParamsReady = new StateCmdParamsReady();
+
     // constants
     static final int START = 1;
     static final int CMD_PARAMS_READY = 2;
 
-    static RilMessageDecoder getInstance(BlockingQueue<RilMessage> inQ,
-            Handler caller, SIMFileHandler fh) {
-        if (sInstance != null) {
-            return sInstance;
+    static synchronized RilMessageDecoder getInstance(Handler caller, SIMFileHandler fh) {
+        if (sInstance == null) {
+            sInstance = new RilMessageDecoder(caller, fh);
         }
-        if (inQ != null) {
-            HandlerThread thread = new HandlerThread("Stk RIL Messages decoder");
-            thread.start();
-            return new RilMessageDecoder(thread.getLooper(), inQ, caller, fh);
-        }
-        return null;
+        return sInstance;
     }
 
-    private RilMessageDecoder(Looper looper, BlockingQueue<RilMessage> inQ,
-            Handler caller, SIMFileHandler fh) {
-        super(looper);
-        mInQueue = inQ;
+    private RilMessageDecoder(Handler caller, SIMFileHandler fh) {
+        super("RilMessageDecoder");
+        setDbg(false);
+        setInitialState(mStateStart);
+
         mCaller = caller;
-        mCmdParamsFactory = CommandParamsFactory.getInstance(this, fh);
+        mCmdParamsFactory = CommandParamsFactory.getInstance(this.getHandler(), fh);
     }
 
-    public void handleMessage(Message msg) {
-        switch(msg.what) {
-        case START:
-            start();
-            break;
-        case CMD_PARAMS_READY:
-            mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
-            mCurrentRilMessage.mData = msg.obj;
-            sendCmdForExecution();
-            break;
-        }
-    }
-
-    private void start() {
-        boolean interrupted = false;
-        try {
-            while (true) {
-                try {
-                    mCurrentRilMessage = mInQueue.take();
-                    StkLog.d(this, "Decoding new message");
-                    break;
-                } catch (InterruptedException e) {
-                    interrupted = true;
-                    // fall through and retry
+    class StateStart extends HandlerState {
+        @Override public void processMessage(Message msg) {
+            if (msg.what == START) {
+                if (decodeMessageParams((RilMessage)msg.obj)) {
+                    transitionTo(mStateCmdParamsReady);
                 }
-            }
-        } finally {
-            if (interrupted) {
-                Thread.currentThread().interrupt();
-            }
-            if (mCurrentRilMessage != null) {
-                decodeMessage(mCurrentRilMessage);
+            } else {
+                StkLog.d(this, "StateStart unexpected expecting START=" +
+                         START + " got " + msg.what);
             }
         }
     }
 
-    private void decodeMessage(RilMessage msg) {
-        switch(msg.mId) {
+    class StateCmdParamsReady extends HandlerState {
+        @Override public void processMessage(Message msg) {
+            if (msg.what == CMD_PARAMS_READY) {
+                mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
+                mCurrentRilMessage.mData = msg.obj;
+                sendCmdForExecution(mCurrentRilMessage);
+                transitionTo(mStateStart);
+            } else {
+                StkLog.d(this, "StateCmdParamsReady expecting CMD_PARAMS_READY="
+                         + CMD_PARAMS_READY + " got " + msg.what);
+                deferMessage(msg);
+            }
+        }
+    }
+
+    public void startDecodingMessageParams(RilMessage rilMsg) {
+        Message msg = obtainMessage(START);
+        msg.obj = rilMsg;
+        sendMessage(msg);
+    }
+
+    private boolean decodeMessageParams(RilMessage rilMsg) {
+        boolean decodingStarted;
+
+        mCurrentRilMessage = rilMsg;
+        switch(rilMsg.mId) {
         case Service.MSG_ID_SESSION_END:
         case Service.MSG_ID_CALL_SETUP:
             mCurrentRilMessage.mResCode = ResultCode.OK;
-            sendCmdForExecution();
+            sendCmdForExecution(mCurrentRilMessage);
+            decodingStarted = false;
             break;
         case Service.MSG_ID_PROACTIVE_COMMAND:
         case Service.MSG_ID_EVENT_NOTIFY:
         case Service.MSG_ID_REFRESH:
             byte[] rawData = null;
             try {
-                rawData = SimUtils.hexStringToBytes((String) msg.mData);
+                rawData = SimUtils.hexStringToBytes((String) rilMsg.mData);
             } catch (Exception e) {
                 // zombie messages are dropped
-                getNextMessage();
-                return;
+                StkLog.d(this, "decodeMessageParams dropping zombie messages");
+                decodingStarted = false;
+                break;
             }
             try {
-                // Start asynch parsing of the command parameters. 
+                // Start asynch parsing of the command parameters.
                 mCmdParamsFactory.make(BerTlv.decode(rawData));
+                decodingStarted = true;
             } catch (ResultException e) {
                 // send to Service for proper RIL communication.
                 mCurrentRilMessage.mResCode = e.result();
-                sendCmdForExecution();
+                sendCmdForExecution(mCurrentRilMessage);
+                decodingStarted = false;
             }
             break;
+        default:
+            decodingStarted = false;
+            break;
         }
+        return decodingStarted;
     }
 
-    private void sendCmdForExecution() {
+    private void sendCmdForExecution(RilMessage rilMsg) {
         Message msg = mCaller.obtainMessage(Service.MSG_ID_RIL_MSG_DECODED,
-                new RilMessage(mCurrentRilMessage));
+                new RilMessage(rilMsg));
         msg.sendToTarget();
-        getNextMessage();
-    }
-
-    private void getNextMessage() {
-        Message nextMsg = this.obtainMessage(START);
-        nextMsg.sendToTarget();
     }
 }

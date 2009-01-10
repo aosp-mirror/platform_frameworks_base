@@ -10,6 +10,7 @@
 
 #include <host/pseudolocalize.h>
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <sstream>
 #include <stdio.h>

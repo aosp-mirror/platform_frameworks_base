@@ -41,11 +41,6 @@ status_t AudioHardwareStub::initCheck()
     return NO_ERROR;
 }
 
-status_t AudioHardwareStub::standby()
-{
-    return NO_ERROR;
-}
-
 AudioStreamOut* AudioHardwareStub::openOutputStream(
         int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
@@ -123,6 +118,11 @@ ssize_t AudioStreamOutStub::write(const void* buffer, size_t bytes)
     // fake timing for audio output
     usleep(bytes * 1000000 / sizeof(int16_t) / channelCount() / sampleRate());
     return bytes;
+}
+
+status_t AudioStreamOutStub::standby()
+{
+    return NO_ERROR;
 }
 
 status_t AudioStreamOutStub::dump(int fd, const Vector<String16>& args)

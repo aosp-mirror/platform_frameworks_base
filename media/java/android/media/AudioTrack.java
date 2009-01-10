@@ -269,7 +269,7 @@ public class AudioTrack
         // stream type
         if( (streamType != AudioManager.STREAM_ALARM) && (streamType != AudioManager.STREAM_MUSIC)
            && (streamType != AudioManager.STREAM_RING) && (streamType != AudioManager.STREAM_SYSTEM)
-           && (streamType != AudioManager.STREAM_VOICE_CALL) ) {
+           && (streamType != AudioManager.STREAM_VOICE_CALL) && (streamType != AudioManager.STREAM_NOTIFICATION) ) {
             throw (new IllegalArgumentException("Invalid stream type."));
         } else {
             mStreamType = streamType;

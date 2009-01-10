@@ -1,11 +1,18 @@
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-ALL_PREBUILT += $(TARGET_OUT)/bin/dumpstate
-$(TARGET_OUT)/bin/dumpstate : $(LOCAL_PATH)/dumpstate | $(ACP)
-	$(transform-prebuilt-to-target)
+LOCAL_SRC_FILES:= dumpstate.c utils.c
 
-SYMLINKS := $(TARGET_OUT_EXECUTABLES)/dumpcrash
+LOCAL_MODULE:= dumpstate
+
+LOCAL_SHARED_LIBRARIES := libcutils
+
+include $(BUILD_EXECUTABLE)
+
+COMMANDS = dumpcrash bugreport
+SYMLINKS := $(addprefix $(TARGET_OUT_EXECUTABLES)/,$(COMMANDS))
 $(SYMLINKS): DUMPSTATE_BINARY := dumpstate
 $(SYMLINKS): $(LOCAL_INSTALLED_MODULE) $(LOCAL_PATH)/Android.mk
 	@echo "Symlink: $@ -> $(DUMPSTATE_BINARY)"
@@ -14,3 +21,5 @@ $(SYMLINKS): $(LOCAL_INSTALLED_MODULE) $(LOCAL_PATH)/Android.mk
 	$(hide) ln -sf $(DUMPSTATE_BINARY) $@
 
 ALL_DEFAULT_INSTALLED_MODULES += $(SYMLINKS)
+
+endif

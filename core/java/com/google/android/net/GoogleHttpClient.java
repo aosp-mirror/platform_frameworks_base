@@ -38,12 +38,11 @@ import java.net.URISyntaxException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.os.SystemClock;
+import android.os.Build;
 import android.net.http.AndroidHttpClient;
 import android.provider.Checkin;
 import android.util.Config;
 import android.util.Log;
-
-import com.android.internal.os.RuntimeInit;
 
 /**
  * {@link AndroidHttpClient} wrapper that uses {@link UrlRules} to rewrite URLs
@@ -69,8 +68,38 @@ public class GoogleHttpClient implements HttpClient {
      * Create an HTTP client.  Normally one client is shared throughout an app.
      * @param resolver to use for accessing URL rewriting rules.
      * @param userAgent to report in your HTTP requests.
+     * @deprecated Use {@link #GoogleHttpClient(android.content.ContentResolver, String, boolean)} 
      */
     public GoogleHttpClient(ContentResolver resolver, String userAgent) {
+        mClient = AndroidHttpClient.newInstance(userAgent);
+        mResolver = resolver;
+        mUserAgent = userAgent;
+    }
+
+    /**
+     * Create an HTTP client.  Normaly this client is shared throughout an app.
+     * The HTTP client will construct its User-Agent as follows:
+     *
+     * <appAndVersion> (<build device> <build id>)
+     * or
+     * <appAndVersion> (<build device> <build id>); gzip
+     * (if gzip capable)
+     *
+     * @param resolver to use for acccessing URL rewriting rules.
+     * @param appAndVersion Base app and version to use in the User-Agent.
+     * e.g., "MyApp/1.0"
+     * @param gzipCapable Whether or not this client is able to consume gzip'd
+     * responses.  Only used to modify the User-Agent, not other request
+     * headers.  Needed because Google servers require gzip in the User-Agent
+     * in order to return gzip'd content.
+     */
+    public GoogleHttpClient(ContentResolver resolver, String appAndVersion,
+            boolean gzipCapable) {
+        String userAgent = appAndVersion
+                + " (" + Build.DEVICE + " " + Build.ID + ")";
+        if (gzipCapable) {
+            userAgent = userAgent + "; gzip";
+        }
         mClient = AndroidHttpClient.newInstance(userAgent);
         mResolver = resolver;
         mUserAgent = userAgent;
@@ -181,6 +210,7 @@ public class GoogleHttpClient implements HttpClient {
      *
      * @param originalUserAgent to modify (however you identify yourself)
      * @return user agent with a "yes, I really can handle gzip" token added.
+     * @deprecated Use {@link #GoogleHttpClient(android.content.ContentResolver, String, boolean)} 
      */
     public static String getGzipCapableUserAgent(String originalUserAgent) {
         return originalUserAgent + "; gzip";

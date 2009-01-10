@@ -28,17 +28,18 @@ import android.util.AttributeSet;
 
 /**
  * 
- * An object used to define frame-by-frame animations that can be used as a View object's
- * background.
- * <p>Each frame in a frame-by-frame animation is a drawable 
- * <a href="{@docRoot}devel/resources-i18n.html">resource</a>.
+ * An object used to create frame-by-frame animations, defined by a series of Drawable objects,
+ * which can be used as a View object's background.
+ * <p>
  * The simplest way to create a frame-by-frame animation is to define the animation in an XML
- * file in the drawable/ folder, set it as the background to a View object, then call
- * AnimationDrawable.run() to start the animation, as shown here. More details about the
- * format of the animation XML file are given in
- * <a href="{@docRoot}reference/available-resources.html#animationdrawable">Frame by Frame
- * Animation</a>.
- * spin_animation.xml file in res/drawable/ folder:</p>
+ * file, placed in the res/drawable/ folder, and set it as the background to a View object. Then, call
+ * {@link #run()} to start the animation.
+ * <p>
+ * An AnimationDrawable defined in XML consists of a single <code>&lt;animation-list></code> element,
+ * and a series of nested <code>&lt;item></code> tags. Each item defines a frame of the animation.
+ * See the example below.
+ * </p>
+ * <p>spin_animation.xml file in res/drawable/ folder:</p>
  * <pre>&lt;!-- Animation frames are wheel0.png -- wheel5.png files inside the
  * res/drawable/ folder --&gt;
  * &lt;animation-list android:id=&quot;selected&quot; android:oneshot=&quot;false&quot;&gt;
@@ -51,7 +52,8 @@ import android.util.AttributeSet;
  * &lt;/animation-list&gt;</pre>
  *
  * <p>Here is the code to load and play this animation.</p>
- * <pre>// Load the ImageView that will host the animation and
+ * <pre>
+ * // Load the ImageView that will host the animation and
  * // set its background to our AnimationDrawable XML resource.
  * ImageView img = (ImageView)findViewById(R.id.spinning_wheel_image);
  * img.setBackgroundResource(R.drawable.spin_animation);
@@ -62,6 +64,12 @@ import android.util.AttributeSet;
  * // Start the animation (looped playback by default).
  * frameAnimation.start()
  * </pre>
+ *
+ * @attr ref android.R.styleable#AnimationDrawable_visible
+ * @attr ref android.R.styleable#AnimationDrawable_variablePadding
+ * @attr ref android.R.styleable#AnimationDrawable_oneshot
+ * @attr ref android.R.styleable#AnimationDrawableItem_duration
+ * @attr ref android.R.styleable#AnimationDrawableItem_drawable
  */
 public class AnimationDrawable extends DrawableContainer implements Runnable {
     private final AnimationState mAnimationState;

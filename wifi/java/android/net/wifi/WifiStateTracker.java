@@ -50,7 +50,7 @@ import java.net.UnknownHostException;
  * Track the state of Wifi connectivity. All event handling is done here,
  * and all changes in connectivity state are initiated here.
  *
- * {@hide}
+ * @hide
  */
 public class WifiStateTracker extends NetworkStateTracker {
 
@@ -225,7 +225,16 @@ public class WifiStateTracker extends NetworkStateTracker {
     
     private boolean mIsScanModeActive;
     private boolean mIsScanModeSetDueToAHiddenNetwork;
-    private boolean mDriverIsStopped;
+
+    // Wi-Fi run states:
+    private static final int RUN_STATE_STARTING = 1;
+    private static final int RUN_STATE_RUNNING  = 2;
+    private static final int RUN_STATE_STOPPING = 3;
+    private static final int RUN_STATE_STOPPED  = 4;
+    private int mRunState;
+
+    private boolean mIsScanOnly;
+    
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
 
@@ -277,6 +286,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         // Allocate DHCP info object once, and fill it in on each request
         mDhcpInfo = new DhcpInfo();
         mIsScanModeSetDueToAHiddenNetwork = false;
+        mRunState = RUN_STATE_STARTING;
 
         // Setting is in seconds
         NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(), 
@@ -367,7 +377,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * unavailable.
      * @return {@code true} if Wi-Fi connections are possible
      */
-    public boolean isAvailable() {
+    public synchronized boolean isAvailable() {
         /*
          * TODO: Should we also look at scan results to see whether we're
          * in range of any access points?
@@ -375,7 +385,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         SupplicantState suppState = mWifiInfo.getSupplicantState();
         return suppState != SupplicantState.UNINITIALIZED &&
                 suppState != SupplicantState.INACTIVE &&
-                (mTornDownByConnMgr || !mDriverIsStopped);
+                (mTornDownByConnMgr || !isDriverStopped());
     }
 
     /**
@@ -471,15 +481,10 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     /**
      * Send the tracker a notification that the Wi-Fi driver has been stopped.
-     * The notification is in the form of a synthesized DISCONNECTED event.
      */
     void notifyDriverStopped() {
-        setDriverStopped(true);
-        Message msg = Message.obtain(
-                this, EVENT_SUPPLICANT_STATE_CHANGED,
-                new SupplicantStateChangeResult(-1, SupplicantState.DISCONNECTED));
-        msg.sendToTarget();
-        
+       mRunState = RUN_STATE_STOPPED;
+
         // Send a driver stopped message to our handler
         Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 0, 0).sendToTarget();
     }
@@ -489,8 +494,6 @@ public class WifiStateTracker extends NetworkStateTracker {
      * having been stopped.
      */
     void notifyDriverStarted() {
-        setDriverStopped(false);
-
         // Send a driver started message to our handler
         Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 1, 0).sendToTarget();
     }
@@ -505,12 +508,8 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
-    private synchronized void setDriverStopped(boolean isStopped) {
-        mDriverIsStopped = isStopped;
-    }
-
     private synchronized boolean isDriverStopped() {
-        return mDriverIsStopped;
+        return mRunState == RUN_STATE_STOPPED || mRunState == RUN_STATE_STOPPING;
     }
 
     /**
@@ -543,23 +542,25 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Start the Wi-Fi driver, if it is in the stopped state. If
-     * the driver has been stopped as a result of a teardown request
-     * by the connectivity manager, then only the connectivity
-     * manager can restart it.
+     * Set the run state to either "normal" or "scan-only".
+     * @param scanOnlyMode true if the new mode should be scan-only.
      */
-    public synchronized void startDriver() {
-        if (mDriverIsStopped && !mTornDownByConnMgr) {
-            WifiNative.startDriverCommand();
-        }
-    }
-
-    /**
-     * Stop the Wi-Fi driver, if it is not already in the stopped state.
-     */
-    public synchronized void stopDriver() {
-        if (!mDriverIsStopped) {
-            WifiNative.stopDriverCommand();
+    public synchronized void setScanOnlyMode(boolean scanOnlyMode) {
+        // do nothing unless scan-only mode is changing
+        if (mIsScanOnly != scanOnlyMode) {
+            int scanType = (scanOnlyMode ?
+                    SUPPL_SCAN_HANDLING_LIST_ONLY : SUPPL_SCAN_HANDLING_NORMAL);
+            if (LOCAL_LOGD) Log.v(TAG, "Scan-only mode changing to " + scanOnlyMode + " scanType=" + scanType);
+            if (WifiNative.setScanResultHandlingCommand(scanType)) {
+                mIsScanOnly = scanOnlyMode;
+                if (!isDriverStopped()) {
+                    if (scanOnlyMode) {
+                        WifiNative.disconnectCommand();
+                    } else {
+                        WifiNative.reconnectCommand();
+                    }
+                }
+            }
         }
     }
 
@@ -610,6 +611,7 @@ public class WifiStateTracker extends NetworkStateTracker {
 
         switch (msg.what) {
             case EVENT_SUPPLICANT_CONNECTION:
+                mRunState = RUN_STATE_RUNNING;
                 checkUseStaticIp();
                 /*
                  * DHCP requests are blocking, so run them in a separate thread.
@@ -618,6 +620,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 dhcpThread.start();
                 mDhcpTarget = new DhcpHandler(dhcpThread.getLooper(), this);
                 mIsScanModeActive = true;
+                mTornDownByConnMgr = false;
                 mLastBssid = null;
                 mLastSsid = null;
                 requestConnectionInfo();
@@ -745,9 +748,25 @@ public class WifiStateTracker extends NetworkStateTracker {
                         (newState == SupplicantState.DISCONNECTED && isDriverStopped())) {
                     setSupplicantState(newState);
                     if (newState == SupplicantState.DORMANT) {
-                        handleDisconnectedState(DetailedState.FAILED);
+                        DetailedState newDetailedState;
+                        if (!mIsScanOnly) {
+                            newDetailedState = DetailedState.FAILED;
+                        } else {
+                            newDetailedState = DetailedState.IDLE;
+                        }
+                        handleDisconnectedState(newDetailedState);
                         sendNetworkStateChangeBroadcast();
-                        sendEmptyMessageDelayed(EVENT_DEFERRED_RECONNECT, RECONNECT_DELAY_MSECS);
+                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly) {
+                            sendEmptyMessageDelayed(EVENT_DEFERRED_RECONNECT, RECONNECT_DELAY_MSECS);
+                        } else if (mRunState == RUN_STATE_STOPPING) {
+                            synchronized (this) {
+                                WifiNative.stopDriverCommand();
+                            }
+                        } else if (mRunState == RUN_STATE_STARTING && !mIsScanOnly) {
+                            synchronized (this) {
+                                WifiNative.reconnectCommand();
+                            }
+                        }
                     } else if (newState == SupplicantState.DISCONNECTED) {
                         if (isDriverStopped()) {
                             handleDisconnectedState(DetailedState.DISCONNECTED);
@@ -804,6 +823,14 @@ public class WifiStateTracker extends NetworkStateTracker {
                 EventLog.writeEvent(EVENTLOG_NETWORK_STATE_CHANGED, eventLogParam);
                 
                 if (LOCAL_LOGD) Log.v(TAG, "New network state is " + result.state);
+                /*
+                 * If we're in scan-only mode, don't advance the state machine, and
+                 * don't report the state change to clients.
+                 */
+                if (mIsScanOnly) {
+                    if (LOCAL_LOGD) Log.v(TAG, "Dropping event in scan-only mode");
+                    break;
+                }
                 if (result.state != DetailedState.SCANNING) {
                     /*
                      * Reset the scan count since there was a network state
@@ -867,7 +894,6 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
 
             case EVENT_SCAN_RESULTS_AVAILABLE:
-
                 mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
                 sendScanResultsAvailable();
                 /**
@@ -908,7 +934,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                     if (++mReconnectCount > getMaxDhcpRetries()) {
                         mWM.disableNetwork(mLastNetworkId);
                     }
-                    WifiNative.reconnectCommand();
+                    synchronized(this) {
+                        WifiNative.reconnectCommand();
+                    }
                 }
                 break;
 
@@ -952,7 +980,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mHaveIPAddress = false;
                     mWifiInfo.setIpAddress(0);
                     mObtainingIPAddress = false;
-                    WifiNative.disconnectCommand();
+                    synchronized(this) {
+                        WifiNative.disconnectCommand();
+                    }
                 }
                 break;
                 
@@ -973,9 +1003,16 @@ public class WifiStateTracker extends NetworkStateTracker {
                      */
                     setNumAllowedChannels();
                     synchronized (this) {
-                        // In some situations, supplicant needs to be kickstarted to
-                        // start the background scanning
-                        WifiNative.scanCommand();
+                        if (mRunState == RUN_STATE_STARTING) {
+                            mRunState = RUN_STATE_RUNNING;
+                            if (!mIsScanOnly) {
+                                WifiNative.reconnectCommand();
+                            } else {
+                                // In some situations, supplicant needs to be kickstarted to
+                                // start the background scanning
+                                WifiNative.scanCommand();
+                            }
+                        }
                     }
                 }
                 break;
@@ -1122,16 +1159,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     public WifiInfo requestConnectionInfo() {
         requestConnectionStatus(mWifiInfo);
         requestPolledInfo(mWifiInfo);
-/*
-        WifiInfo info = mWifiInfo;
-
-        Log.v(TAG, "Status from supplicant: NID=" + info.getNetworkId() +
-            " SSID=" + (info.getSSID() == null ? "<none>" : info.getSSID()) +
-            " BSSID=" + (info.getBSSID() == null ? "<none>" : info.getBSSID()) +
-            " WPA_STATE=" + (info.getSupplicantState() == null ? "<none>" : info.getSupplicantState()) +
-            " RSSI=" + info.getRssi());
-*/
-
         return mWifiInfo;
     }
 
@@ -1201,7 +1228,7 @@ public class WifiStateTracker extends NetworkStateTracker {
              * interested in RSSI of all the changes in signal
              * level.
              */
-            // TODO: The "3" below needs to be a symbol somewhere, but
+            // TODO: The second arg to the call below needs to be a symbol somewhere, but
             // it's actually the size of an array of icons that's private
             // to StatusBar Policy.
             int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
@@ -1235,14 +1262,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     /**
      * Disable Wi-Fi connectivity by stopping the driver.
      */
-    public synchronized boolean teardown() {
-        // Take down any open network notifications
-        setNotificationVisible(false, 0, false, 0);
-        
+    public boolean teardown() {
         if (!mTornDownByConnMgr) {
-            boolean result = WifiNative.stopDriverCommand();
-            setTornDownByConnMgr(result);
-            return result;
+            if (disconnectAndStop()) {
+                setTornDownByConnMgr(true);
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return true;
         }
@@ -1251,14 +1278,35 @@ public class WifiStateTracker extends NetworkStateTracker {
     /**
      * Reenable Wi-Fi connectivity by restarting the driver.
      */
-    public synchronized boolean reconnect() {
+    public boolean reconnect() {
         if (mTornDownByConnMgr) {
-            boolean result = WifiNative.startDriverCommand();
-            setTornDownByConnMgr(!result);
-            return result;
+            if (restart()) {
+                setTornDownByConnMgr(false);
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return true;
         }
+    }
+
+    public synchronized boolean disconnectAndStop() {
+        // Take down any open network notifications
+        setNotificationVisible(false, 0, false, 0);
+
+        mRunState = RUN_STATE_STOPPING;
+        return WifiNative.disconnectCommand();
+    }
+
+    public synchronized boolean restart() {
+        if (mRunState == RUN_STATE_STOPPED) {
+            mRunState = RUN_STATE_STARTING;
+            return WifiNative.startDriverCommand();
+        } else if (mRunState == RUN_STATE_STOPPING) {
+            mRunState = RUN_STATE_STARTING;
+        }
+        return true;
     }
 
     public boolean setRadio(boolean turnOn) {

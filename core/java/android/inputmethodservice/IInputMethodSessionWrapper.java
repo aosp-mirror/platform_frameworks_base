@@ -91,7 +91,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
             case DO_UPDATE_SELECTION: {
                 HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
                 mInputMethodSession.updateSelection(args.argi1, args.argi2,
-                        args.argi3, args.argi4);
+                        args.argi3, args.argi4, args.argi5, args.argi6);
                 mCaller.recycleArgs(args);
                 return;
             }
@@ -135,9 +135,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     }
 
     public void updateSelection(int oldSelStart, int oldSelEnd,
-            int newSelStart, int newSelEnd) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIII(DO_UPDATE_SELECTION,
-                oldSelStart, oldSelEnd, newSelStart, newSelEnd));
+            int newSelStart, int newSelEnd, int candidatesStart, int candidatesEnd) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIIIII(DO_UPDATE_SELECTION,
+                oldSelStart, oldSelEnd, newSelStart, newSelEnd,
+                candidatesStart, candidatesEnd));
     }
     
     public void updateCursor(Rect newCursor) {

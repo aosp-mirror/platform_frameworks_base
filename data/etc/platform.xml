@@ -87,6 +87,7 @@
     <assign-permission name="android.permission.SET_ANIMATION_SCALE" uid="shell" />
     <assign-permission name="android.permission.SET_PREFERRED_APPLICATIONS" uid="shell" />
     <assign-permission name="android.permission.WRITE_SETTINGS" uid="shell" />
+    <assign-permission name="android.permission.WRITE_SECURE_SETTINGS" uid="shell" />
     <assign-permission name="android.permission.BROADCAST_STICKY" uid="shell" />
     <!-- Development tool permissions granted to the shell. -->
     <assign-permission name="android.permission.SET_DEBUG_APP" uid="shell" />
@@ -116,15 +117,11 @@
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
-    <library name="com.google.android.maps"
-            file="/system/framework/com.google.android.maps.jar" />
-    <library name="com.google.android.gtalkservice"
-            file="/system/framework/com.google.android.gtalkservice.jar" />
     <library name="android.awt"
             file="/system/framework/android.awt.jar" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
     <library name="com.android.im.plugin"
-            file="/system/framework/com.android.im.plugin.jar"/>
+            file="/system/framework/com.android.im.plugin.jar"/>          
 
 </permissions>

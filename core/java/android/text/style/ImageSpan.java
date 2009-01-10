@@ -32,29 +32,73 @@ public class ImageSpan extends DynamicDrawableSpan {
     private int mResourceId;
     private Context mContext;
     private String mSource;
-    
 
     public ImageSpan(Bitmap b) {
+        this(b, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     */
+    public ImageSpan(Bitmap b, int verticalAlignment) {
+        super(verticalAlignment);
         mDrawable = new BitmapDrawable(b);
         mDrawable.setBounds(0, 0, mDrawable.getIntrinsicWidth(),
                 mDrawable.getIntrinsicHeight());
     }
 
     public ImageSpan(Drawable d) {
+        this(d, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     */
+    public ImageSpan(Drawable d, int verticalAlignment) {
+        super(verticalAlignment);
         mDrawable = d;
     }
 
     public ImageSpan(Drawable d, String source) {
+        this(d, source, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     */
+    public ImageSpan(Drawable d, String source, int verticalAlignment) {
+        super(verticalAlignment);
         mDrawable = d;
         mSource = source;
     }
 
     public ImageSpan(Context context, Uri uri) {
+        this(context, uri, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     */
+    public ImageSpan(Context context, Uri uri, int verticalAlignment) {
+        super(verticalAlignment);
         mContext = context;
         mContentUri = uri;
     }
 
     public ImageSpan(Context context, int resourceId) {
+        this(context, resourceId, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     */
+    public ImageSpan(Context context, int resourceId, int verticalAlignment) {
+        super(verticalAlignment);
         mContext = context;
         mResourceId = resourceId;
     }

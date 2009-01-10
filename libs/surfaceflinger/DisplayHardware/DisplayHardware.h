@@ -26,7 +26,7 @@
 
 #include "DisplayHardware/DisplayHardwareBase.h"
 
-struct overlay_device_t;
+struct overlay_control_device_t;
 struct copybit_device_t;
 struct copybit_image_t;
 struct copybit_t;
@@ -78,7 +78,7 @@ public:
     void getDisplaySurface(GGLSurface* fb) const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
     copybit_device_t* getBlitEngine() const { return mBlitEngine; }
-    overlay_device_t* getOverlayEngine() const { return mOverlayEngine; }
+    overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
     
     Rect bounds() const {
         return Rect(mWidth, mHeight);
@@ -103,7 +103,7 @@ private:
     mutable Region  mDirty;
     sp<EGLDisplaySurface> mDisplaySurface;
     copybit_device_t*     mBlitEngine;
-    overlay_device_t*     mOverlayEngine;
+    overlay_control_device_t* mOverlayEngine;
 };
 
 }; // namespace android

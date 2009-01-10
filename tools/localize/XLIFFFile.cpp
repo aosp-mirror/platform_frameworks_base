@@ -1,5 +1,6 @@
 #include "XLIFFFile.h"
 
+#include <algorithm>
 #include <sys/time.h>
 #include <time.h>
 

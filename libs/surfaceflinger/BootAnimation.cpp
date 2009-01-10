@@ -36,8 +36,8 @@
 #include <ui/ISurfaceFlingerClient.h>
 #include <ui/EGLNativeWindowSurface.h>
 
-#include <graphics/SkBitmap.h>
-#include <graphics/SkImageDecoder.h>
+#include <core/SkBitmap.h>
+#include <images/SkImageDecoder.h>
 
 #include <GLES/egl.h>
 

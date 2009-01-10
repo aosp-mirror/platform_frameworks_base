@@ -146,26 +146,26 @@ public class DateUtils
 
     // The following FORMAT_* symbols are used for specifying the format of
     // dates and times in the formatDateRange method.
-    public static final int FORMAT_SHOW_TIME      = 0x00001;
-    public static final int FORMAT_SHOW_WEEKDAY   = 0x00002;
-    public static final int FORMAT_SHOW_YEAR      = 0x00004;
-    public static final int FORMAT_NO_YEAR        = 0x00008;
-    public static final int FORMAT_SHOW_DATE      = 0x00010;
-    public static final int FORMAT_NO_MONTH_DAY   = 0x00020;
-    public static final int FORMAT_12HOUR         = 0x00040;
-    public static final int FORMAT_24HOUR         = 0x00080;
-    public static final int FORMAT_CAP_AMPM       = 0x00100;
-    public static final int FORMAT_NO_NOON        = 0x00200;
-    public static final int FORMAT_CAP_NOON       = 0x00400;
-    public static final int FORMAT_NO_MIDNIGHT    = 0x00800;
-    public static final int FORMAT_CAP_MIDNIGHT   = 0x01000;
-    public static final int FORMAT_UTC            = 0x02000;
-    public static final int FORMAT_ABBREV_TIME    = 0x04000;
+    public static final int FORMAT_SHOW_TIME = 0x00001;
+    public static final int FORMAT_SHOW_WEEKDAY = 0x00002;
+    public static final int FORMAT_SHOW_YEAR = 0x00004;
+    public static final int FORMAT_NO_YEAR = 0x00008;
+    public static final int FORMAT_SHOW_DATE = 0x00010;
+    public static final int FORMAT_NO_MONTH_DAY = 0x00020;
+    public static final int FORMAT_12HOUR = 0x00040;
+    public static final int FORMAT_24HOUR = 0x00080;
+    public static final int FORMAT_CAP_AMPM = 0x00100;
+    public static final int FORMAT_NO_NOON = 0x00200;
+    public static final int FORMAT_CAP_NOON = 0x00400;
+    public static final int FORMAT_NO_MIDNIGHT = 0x00800;
+    public static final int FORMAT_CAP_MIDNIGHT = 0x01000;
+    public static final int FORMAT_UTC = 0x02000;
+    public static final int FORMAT_ABBREV_TIME = 0x04000;
     public static final int FORMAT_ABBREV_WEEKDAY = 0x08000;
-    public static final int FORMAT_ABBREV_MONTH   = 0x10000;
-    public static final int FORMAT_NUMERIC_DATE   = 0x20000;
-    public static final int FORMAT_ABBREV_ALL     = (FORMAT_ABBREV_TIME
-            | FORMAT_ABBREV_WEEKDAY | FORMAT_ABBREV_MONTH);
+    public static final int FORMAT_ABBREV_MONTH = 0x10000;
+    public static final int FORMAT_NUMERIC_DATE = 0x20000;
+    public static final int FORMAT_ABBREV_RELATIVE = 0x40000;
+    public static final int FORMAT_ABBREV_ALL = 0x80000;
     public static final int FORMAT_CAP_NOON_MIDNIGHT = (FORMAT_CAP_NOON | FORMAT_CAP_MIDNIGHT);
     public static final int FORMAT_NO_NOON_MIDNIGHT = (FORMAT_NO_NOON | FORMAT_NO_MIDNIGHT);
 
@@ -233,18 +233,20 @@ public class DateUtils
     };
 
     /**
-     * Request the full spelled-out name.
-     * For use with the 'abbrev' parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
-     * @more
-     * <p>e.g. "Sunday" or "January"
+     * Request the full spelled-out name. For use with the 'abbrev' parameter of
+     * {@link #getDayOfWeekString} and {@link #getMonthString}.
+     * 
+     * @more <p>
+     *       e.g. "Sunday" or "January"
      */
     public static final int LENGTH_LONG = 10;
 
     /**
-     * Request an abbreviated version of the name.
-     * For use with the 'abbrev' parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
-     * @more
-     * <p>e.g. "Sun" or "Jan"
+     * Request an abbreviated version of the name. For use with the 'abbrev'
+     * parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
+     * 
+     * @more <p>
+     *       e.g. "Sun" or "Jan"
      */
     public static final int LENGTH_MEDIUM = 20;
 
@@ -364,52 +366,161 @@ public class DateUtils
      *     0, MINUTE_IN_MILLIS, HOUR_IN_MILLIS, DAY_IN_MILLIS, WEEK_IN_MILLIS
      */
     public static CharSequence getRelativeTimeSpanString(long time, long now, long minResolution) {
-        Resources r = Resources.getSystem();
+        int flags = FORMAT_SHOW_DATE | FORMAT_SHOW_YEAR | FORMAT_ABBREV_MONTH;
+        return getRelativeTimeSpanString(time, now, minResolution, flags);
+    }
 
+    /**
+     * Returns a string describing 'time' as a time relative to 'now'.
+     * <p>
+     * Time spans in the past are formatted like "42 minutes ago". Time spans in
+     * the future are formatted like "in 42 minutes".
+     * <p>
+     * Can use {@link #FORMAT_ABBREV_RELATIVE} flag to use abbreviated relative
+     * times, like "42 mins ago".
+     * 
+     * @param time the time to describe, in milliseconds
+     * @param now the current time in milliseconds
+     * @param minResolution the minimum timespan to report. For example, a time
+     *            3 seconds in the past will be reported as "0 minutes ago" if
+     *            this is set to MINUTE_IN_MILLIS. Pass one of 0,
+     *            MINUTE_IN_MILLIS, HOUR_IN_MILLIS, DAY_IN_MILLIS,
+     *            WEEK_IN_MILLIS
+     * @param flags a bit mask of formatting options, such as
+     *            {@link #FORMAT_NUMERIC_DATE} or
+     *            {@link #FORMAT_ABBREV_RELATIVE}
+     */
+    public static CharSequence getRelativeTimeSpanString(long time, long now, long minResolution,
+            int flags) {
+        Resources r = Resources.getSystem();
+        boolean abbrevRelative = (flags & (FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_ALL)) != 0;
+        
         boolean past = (now >= time);
         long duration = Math.abs(now - time);
-        
+
         int resId;
         long count;
         if (duration < MINUTE_IN_MILLIS && minResolution < MINUTE_IN_MILLIS) {
             count = duration / SECOND_IN_MILLIS;
             if (past) {
-                resId = com.android.internal.R.plurals.num_seconds_ago;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_num_seconds_ago;
+                } else {
+                    resId = com.android.internal.R.plurals.num_seconds_ago;
+                }
             } else {
-                resId = com.android.internal.R.plurals.in_num_seconds;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_in_num_seconds;
+                } else {
+                    resId = com.android.internal.R.plurals.in_num_seconds;
+                }
             }
         } else if (duration < HOUR_IN_MILLIS && minResolution < HOUR_IN_MILLIS) {
             count = duration / MINUTE_IN_MILLIS;
             if (past) {
-                resId = com.android.internal.R.plurals.num_minutes_ago;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_num_minutes_ago;
+                } else {
+                    resId = com.android.internal.R.plurals.num_minutes_ago;
+                }
             } else {
-                resId = com.android.internal.R.plurals.in_num_minutes;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_in_num_minutes;
+                } else {
+                    resId = com.android.internal.R.plurals.in_num_minutes;
+                }
             }
         } else if (duration < DAY_IN_MILLIS && minResolution < DAY_IN_MILLIS) {
             count = duration / HOUR_IN_MILLIS;
             if (past) {
-                resId = com.android.internal.R.plurals.num_hours_ago;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_num_hours_ago;
+                } else {
+                    resId = com.android.internal.R.plurals.num_hours_ago;
+                }
             } else {
-                resId = com.android.internal.R.plurals.in_num_hours;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_in_num_hours;
+                } else {
+                    resId = com.android.internal.R.plurals.in_num_hours;
+                }
             }
         } else if (duration < WEEK_IN_MILLIS && minResolution < WEEK_IN_MILLIS) {
             count = duration / DAY_IN_MILLIS;
             if (past) {
-                resId = com.android.internal.R.plurals.num_days_ago;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_num_days_ago;
+                } else {
+                    resId = com.android.internal.R.plurals.num_days_ago;
+                }
             } else {
-                resId = com.android.internal.R.plurals.in_num_days;
+                if (abbrevRelative) {
+                    resId = com.android.internal.R.plurals.abbrev_in_num_days;
+                } else {
+                    resId = com.android.internal.R.plurals.in_num_days;
+                }
             }
         } else {
-            // Longer than a week ago, so just show the date.
-            int flags = FORMAT_SHOW_DATE | FORMAT_SHOW_YEAR | FORMAT_ABBREV_MONTH;
-            
             // We know that we won't be showing the time, so it is safe to pass
             // in a null context.
             return formatDateRange(null, time, time, flags);
         }
-        
+
         String format = r.getQuantityString(resId, (int) count);
         return String.format(format, count);
+    }
+    
+    /**
+     * Return string describing the elapsed time since startTime formatted like
+     * "[relative time/date], [time]".
+     * <p>
+     * Example output strings for the US date format.
+     * <ul>
+     * <li>3 mins ago, 10:15 AM</li>
+     * <li>yesterday, 12:20 PM</li>
+     * <li>Dec 12, 4:12 AM</li>
+     * <li>11/14/2007, 8:20 AM</li>
+     * </ul>
+     * 
+     * @param time some time in the past.
+     * @param minResolution the minimum elapsed time (in milliseconds) to report
+     *            when showing relative times. For example, a time 3 seconds in
+     *            the past will be reported as "0 minutes ago" if this is set to
+     *            {@link #MINUTE_IN_MILLIS}.
+     * @param transitionResolution the elapsed time (in milliseconds) at which
+     *            to stop reporting relative measurements. Elapsed times greater
+     *            than this resolution will default to normal date formatting.
+     *            For example, will transition from "6 days ago" to "Dec 12"
+     *            when using {@link #WEEK_IN_MILLIS}.
+     */
+    public static CharSequence getRelativeDateTimeString(Context c, long time, long minResolution,
+            long transitionResolution, int flags) {
+        Resources r = Resources.getSystem();
+
+        long now = System.currentTimeMillis();
+        long duration = Math.abs(now - time);
+
+        // getRelativeTimeSpanString() doesn't correctly format relative dates
+        // above a week or exact dates below a day, so clamp
+        // transitionResolution as needed.
+        if (transitionResolution > WEEK_IN_MILLIS) {
+            transitionResolution = WEEK_IN_MILLIS;
+        } else if (transitionResolution < DAY_IN_MILLIS) {
+            transitionResolution = DAY_IN_MILLIS;
+        }
+
+        CharSequence timeClause = formatDateRange(c, time, time, FORMAT_SHOW_TIME);
+        
+        String result;
+        if (duration < transitionResolution) {
+            CharSequence relativeClause = getRelativeTimeSpanString(time, now, minResolution, flags);
+            result = r.getString(com.android.internal.R.string.relative_time, relativeClause, timeClause);
+        } else {
+            CharSequence dateClause = getRelativeTimeSpanString(c, time, false);
+            result = r.getString(com.android.internal.R.string.date_time, dateClause, timeClause);
+        }
+
+        return result;
     }
 
     /**
@@ -1005,8 +1116,8 @@ public class DateUtils
         boolean showYear = (flags & FORMAT_SHOW_YEAR) != 0;
         boolean noYear = (flags & FORMAT_NO_YEAR) != 0;
         boolean useUTC = (flags & FORMAT_UTC) != 0;
-        boolean abbrevWeekDay = (flags & FORMAT_ABBREV_WEEKDAY) != 0;
-        boolean abbrevMonth = (flags & FORMAT_ABBREV_MONTH) != 0;
+        boolean abbrevWeekDay = (flags & (FORMAT_ABBREV_WEEKDAY | FORMAT_ABBREV_ALL)) != 0;
+        boolean abbrevMonth = (flags & (FORMAT_ABBREV_MONTH | FORMAT_ABBREV_ALL)) != 0;
         boolean noMonthDay = (flags & FORMAT_NO_MONTH_DAY) != 0;
         boolean numericDate = (flags & FORMAT_NUMERIC_DATE) != 0;
     
@@ -1087,7 +1198,7 @@ public class DateUtils
                 startTimeFormat = HOUR_MINUTE_24;
                 endTimeFormat = HOUR_MINUTE_24;
             } else {
-                boolean abbrevTime = (flags & FORMAT_ABBREV_TIME) != 0;
+                boolean abbrevTime = (flags & (FORMAT_ABBREV_TIME | FORMAT_ABBREV_ALL)) != 0;
                 boolean capAMPM = (flags & FORMAT_CAP_AMPM) != 0;
                 boolean noNoon = (flags & FORMAT_NO_NOON) != 0;
                 boolean capNoon = (flags & FORMAT_CAP_NOON) != 0;
@@ -1419,7 +1530,6 @@ public class DateUtils
         long now = System.currentTimeMillis();
         long span = now - millis;
 
-        Resources res = c.getResources();
         if (sNowTime == null) {
             sNowTime = new Time();
             sThenTime = new Time();
@@ -1449,6 +1559,7 @@ public class DateUtils
             prepositionId = R.string.preposition_for_date;
         }
         if (withPreposition) {
+            Resources res = c.getResources();
             result = res.getString(prepositionId, result);
         }
         return result;

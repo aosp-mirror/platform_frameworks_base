@@ -17,6 +17,7 @@
 #ifndef ANDROID_REF_BASE_H
 #define ANDROID_REF_BASE_H
 
+#include <cutils/atomic.h>
 #include <utils/TextOutput.h>
 
 #include <stdint.h>
@@ -138,6 +139,29 @@ private:
             RefBase&        operator=(const RefBase& o);
             
         weakref_impl* const mRefs;
+};
+
+// ---------------------------------------------------------------------------
+
+template <class T>
+class LightRefBase
+{
+public:
+    inline LightRefBase() : mCount(0) { }
+    inline void incStrong(const void* id) const {
+        android_atomic_inc(&mCount);
+    }
+    inline void decStrong(const void* id) const {
+        if (android_atomic_dec(&mCount) == 1) {
+            delete static_cast<const T*>(this);
+        }
+    }
+    
+protected:
+    inline ~LightRefBase() { }
+    
+private:
+    mutable volatile int32_t mCount;
 };
 
 // ---------------------------------------------------------------------------

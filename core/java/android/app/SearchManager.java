@@ -739,6 +739,14 @@ import android.view.KeyEvent;
  *         <td align="center">No</td>
  *     </tr>
  *     
+ *     <tr><th>android:inputType</th>
+ *         <td>If provided, supplies a hint about the type of search text the user will be
+ *             entering.  For most searches, in which free form text is expected, this attribute
+ *             need not be provided.  Suitable values for this attribute are described in the
+ *             <a href="../R.attr.html#inputType">inputType</a> attribute.</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *     
  *     </tbody>
  * </table>
  * 

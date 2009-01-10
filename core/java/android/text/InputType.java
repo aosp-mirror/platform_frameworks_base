@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2008 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.text;
 
 import android.text.TextUtils;
@@ -104,6 +120,11 @@ public interface InputType {
      */
     public static final int TYPE_TEXT_FLAG_MULTI_LINE = 0x00020000;
     
+    /**
+     * Flag for {@link #TYPE_CLASS_TEXT}: flags any text being used as a search string
+     */
+    public static final int TYPE_TEXT_FLAG_SEARCH = 0x00040000;
+    
     // ----------------------------------------------------------------------
     
     /**
@@ -139,8 +160,7 @@ public interface InputType {
     public static final int TYPE_TEXT_VARIATION_PERSON_NAME = 0x00000050;
     
     /**
-     * Variation of {@link #TYPE_CLASS_TEXT}: entering a postal mailing
-     * address.
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering a postal mailing address.
      */
     public static final int TYPE_TEXT_VARIATION_POSTAL_ADDRESS = 0x00000060;
     
@@ -150,14 +170,12 @@ public interface InputType {
     public static final int TYPE_TEXT_VARIATION_PASSWORD = 0x00000070;
     
     /**
-     * Variation of {@link #TYPE_CLASS_TEXT}: entering a search string
-     * for a web search.
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering a simple text search (e.g. web search)
      */
-    public static final int TYPE_TEXT_VARIATION_WEB_SEARCH = 0x00000080;
+    public static final int TYPE_TEXT_VARIATION_SEARCH_STRING = 0x00000080;
     
     /**
-     * Variation of {@link #TYPE_CLASS_TEXT}: entering text inside of
-     * a web form.
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering text inside of a web form.
      */
     public static final int TYPE_TEXT_VARIATION_WEB_EDIT_TEXT = 0x00000090;
     

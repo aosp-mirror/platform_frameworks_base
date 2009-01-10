@@ -35,7 +35,10 @@ enum {
     TAKE_PICTURE,
     SET_PARAMETERS,
     GET_PARAMETERS,
-    CONNECT
+    CONNECT,
+    LOCK,
+    UNLOCK,
+    PREVIEW_ENABLED
 };
 
 class BpCamera: public BpInterface<ICamera>
@@ -96,6 +99,16 @@ public:
         remote()->transact(STOP_PREVIEW, data, &reply);
     }
 
+    // check preview state
+    bool previewEnabled()
+    {
+        LOGV("previewEnabled");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(PREVIEW_ENABLED, data, &reply);
+        return reply.readInt32();
+    }
+
     // auto focus
     status_t autoFocus()
     {
@@ -146,6 +159,20 @@ public:
         remote()->transact(CONNECT, data, &reply);
         return reply.readInt32();
     }
+    virtual status_t lock()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(LOCK, data, &reply);
+        return reply.readInt32();
+    }
+    virtual status_t unlock()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(UNLOCK, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(Camera, "android.hardware.ICamera");
@@ -194,6 +221,12 @@ status_t BnCamera::onTransact(
             stopPreview();
             return NO_ERROR;
         } break;
+        case PREVIEW_ENABLED: {
+            LOGV("PREVIEW_ENABLED");
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(previewEnabled());
+            return NO_ERROR;
+        } break;
         case AUTO_FOCUS: {
             LOGV("AUTO_FOCUS");
             CHECK_INTERFACE(ICamera, data, reply);
@@ -223,6 +256,16 @@ status_t BnCamera::onTransact(
             CHECK_INTERFACE(ICamera, data, reply);
             sp<ICameraClient> cameraClient = interface_cast<ICameraClient>(data.readStrongBinder());
             reply->writeInt32(connect(cameraClient));
+            return NO_ERROR;
+        } break;
+        case LOCK: {
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(lock());
+            return NO_ERROR;
+        } break;
+        case UNLOCK: {
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(unlock());
             return NO_ERROR;
         } break;
         default:

@@ -30,10 +30,10 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 template <class TYPE>
-class EGLNativeSurface : public egl_native_window_t
+class EGLNativeSurface : public egl_native_window_t, public LightRefBase<TYPE>
 {
 public:
-    EGLNativeSurface() : mCount(0) { 
+    EGLNativeSurface() { 
         memset(egl_native_window_t::reserved, 0, 
                 sizeof(egl_native_window_t::reserved));
         memset(egl_native_window_t::reserved_proc, 0, 
@@ -41,19 +41,10 @@ public:
         memset(egl_native_window_t::oem, 0, 
                 sizeof(egl_native_window_t::oem));
     }
-    inline void incStrong(void*) const {
-        android_atomic_inc(&mCount);
-    }
-    inline void decStrong(void*) const {
-        if (android_atomic_dec(&mCount) == 1) {
-             delete static_cast<const TYPE*>(this);
-         }
-    }
 protected:
     EGLNativeSurface& operator = (const EGLNativeSurface& rhs);
     EGLNativeSurface(const EGLNativeSurface& rhs);
     inline ~EGLNativeSurface() { };
-    mutable volatile int32_t mCount;
 };
 
 // ---------------------------------------------------------------------------

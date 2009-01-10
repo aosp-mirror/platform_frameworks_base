@@ -36,6 +36,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -43,13 +44,13 @@ import java.util.Calendar;
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
     static final boolean localLOGV = false || Config.LOGV;
-    
+
     // Set this to true to use debug default values.
     static final boolean DB = false;
-    
+
     static final int MONITOR = 2718;
     static final int GLOBAL_PSS = 2719;
-    
+
     static final int TIME_TO_WAIT = DB ? 15*1000 : 60*1000;
     static final int EVENT_LOG_TAG = 2802;
     static final int EVENT_LOG_PROC_PSS_TAG = 2803;
@@ -61,29 +62,29 @@ public class Watchdog extends Thread {
     static final int EVENT_LOG_MEMINFO_TAG = 2809;
     static final int EVENT_LOG_VMSTAT_TAG = 2810;
     static final int EVENT_LOG_REQUESTED_REBOOT_TAG = 2811;
-    
+
     static final int MEMCHECK_DEFAULT_INTERVAL = DB ? 30 : 30*60; // 30 minutes
     static final int MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL = DB ? 60 : 2*60*60;      // 2 hours
     static final int MEMCHECK_DEFAULT_SYSTEM_SOFT_THRESHOLD = (DB ? 10:16)*1024*1024; // 16MB
     static final int MEMCHECK_DEFAULT_SYSTEM_HARD_THRESHOLD = (DB ? 14:20)*1024*1024; // 20MB
     static final int MEMCHECK_DEFAULT_PHONE_SOFT_THRESHOLD = (DB ? 4:8)*1024*1024;    // 8MB
     static final int MEMCHECK_DEFAULT_PHONE_HARD_THRESHOLD = (DB ? 8:12)*1024*1024;   // 12MB
-    
+
     static final int MEMCHECK_DEFAULT_EXEC_START_TIME = 1*60*60;           // 1:00am
     static final int MEMCHECK_DEFAULT_EXEC_END_TIME = 5*60*60;             // 5:00am
     static final int MEMCHECK_DEFAULT_MIN_SCREEN_OFF = DB ? 1*60 : 5*60;   // 5 minutes
     static final int MEMCHECK_DEFAULT_MIN_ALARM = DB ? 1*60 : 3*60;        // 3 minutes
     static final int MEMCHECK_DEFAULT_RECHECK_INTERVAL = DB ? 1*60 : 5*60; // 5 minutes
-    
+
     static final int REBOOT_DEFAULT_INTERVAL = DB ? 1 : 0;                 // never force reboot
     static final int REBOOT_DEFAULT_START_TIME = 3*60*60;                  // 3:00am
     static final int REBOOT_DEFAULT_WINDOW = 60*60;                        // within 1 hour
-    
+
     static final String CHECKUP_ACTION = "com.android.service.Watchdog.CHECKUP";
     static final String REBOOT_ACTION = "com.android.service.Watchdog.REBOOT";
-    
+
     static Watchdog sWatchdog;
-    
+
     /* This handler will be used to post message back onto the main thread */
     final Handler mHandler;
     final Runnable mGlobalPssCollected;
@@ -96,11 +97,11 @@ public class Watchdog extends Thread {
     boolean mCompleted;
     boolean mForceKillSystem;
     Monitor mCurrentMonitor;
-    
+
     PssRequestor mPhoneReq;
     int mPhonePid;
     int mPhonePss;
-    
+
     long mLastMemCheckTime = -(MEMCHECK_DEFAULT_INTERVAL*1000);
     boolean mHavePss;
     long mLastMemCheckRealtime = -(MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL*1000);
@@ -117,7 +118,7 @@ public class Watchdog extends Thread {
             MEMCHECK_DEFAULT_PHONE_SOFT_THRESHOLD,
             Settings.Gservices.MEMCHECK_PHONE_HARD_THRESHOLD,
             MEMCHECK_DEFAULT_PHONE_HARD_THRESHOLD);
-    
+
     final Calendar mCalendar = Calendar.getInstance();
     long mMemcheckLastTime;
     long mMemcheckExecStartTime;
@@ -127,10 +128,10 @@ public class Watchdog extends Thread {
     boolean mNeedScheduledCheck;
     PendingIntent mCheckupIntent;
     PendingIntent mRebootIntent;
-    
+
     long mBootTime;
     int mRebootInterval;
-    
+
     boolean mReqRebootNoWait;     // should wait for one interval before reboot?
     int mReqRebootInterval = -1;  // >= 0 if a reboot has been requested
     int mReqRebootStartTime = -1; // >= 0 if a specific start time has been requested
@@ -138,7 +139,7 @@ public class Watchdog extends Thread {
     int mReqMinScreenOff = -1;    // >= 0 if a specific screen off time has been requested
     int mReqMinNextAlarm = -1;    // >= 0 if specific time to next alarm has been requested
     int mReqRecheckInterval= -1;  // >= 0 if a specific recheck interval has been requested
-    
+
     /**
      * This class monitors the memory in a particular process.
      */
@@ -147,17 +148,17 @@ public class Watchdog extends Thread {
         final String mEnabledSetting;
         final String mSoftSetting;
         final String mHardSetting;
-        
+
         int mSoftThreshold;
         int mHardThreshold;
         boolean mEnabled;
         long mLastPss;
-        
+
         static final int STATE_OK = 0;
         static final int STATE_SOFT = 1;
         static final int STATE_HARD = 2;
         int mState;
-        
+
         MemMonitor(String processName, String enabledSetting,
                 String softSetting, int defSoftThreshold,
                 String hardSetting, int defHardThreshold) {
@@ -168,7 +169,7 @@ public class Watchdog extends Thread {
             mSoftThreshold = defSoftThreshold;
             mHardThreshold = defHardThreshold;
         }
-        
+
         void retrieveSettings(ContentResolver resolver) {
             mSoftThreshold = Settings.Gservices.getInt(
                     resolver, mSoftSetting, mSoftThreshold);
@@ -177,7 +178,7 @@ public class Watchdog extends Thread {
             mEnabled = Settings.Gservices.getInt(
                     resolver, mEnabledSetting, 0) != 0;
         }
-        
+
         boolean checkLocked(long curTime, int pid, int pss) {
             mLastPss = pss;
             if (mLastPss < mSoftThreshold) {
@@ -188,19 +189,19 @@ public class Watchdog extends Thread {
                 mState = STATE_HARD;
             }
             EventLog.writeEvent(EVENT_LOG_PROC_PSS_TAG, mProcessName, pid, mLastPss);
-            
+
             if (mState == STATE_OK) {
                 // Memory is good, don't recover.
                 return false;
             }
-            
+
             if (mState == STATE_HARD) {
                 // Memory is really bad, kill right now.
                 EventLog.writeEvent(EVENT_LOG_HARD_RESET_TAG, mProcessName, pid,
                         mHardThreshold, mLastPss);
                 return mEnabled;
             }
-            
+
             // It is time to schedule a reset...
             // Check if we are currently within the time to kill processes due
             // to memory use.
@@ -219,13 +220,13 @@ public class Watchdog extends Thread {
             }
             return mEnabled;
         }
-        
+
         void clear() {
             mLastPss = 0;
             mState = STATE_OK;
         }
     }
-    
+
     /**
      * Used for scheduling monitor callbacks and checking memory usage.
      */
@@ -242,7 +243,7 @@ public class Watchdog extends Thread {
                         logGlobalMemory();
                     }
                 } break;
-                
+
                 case MONITOR: {
                     if (mHavePss) {
                         // During the last pass we collected pss information, so
@@ -251,7 +252,7 @@ public class Watchdog extends Thread {
                         if (localLOGV) Log.v(TAG, "Have pss, checking memory.");
                         checkMemory();
                     }
-                    
+
                     if (mHaveGlobalPss) {
                         // During the last pass we collected pss information, so
                         // now it is time to report it.
@@ -259,9 +260,9 @@ public class Watchdog extends Thread {
                         if (localLOGV) Log.v(TAG, "Have global pss, logging.");
                         logGlobalMemory();
                     }
-                    
+
                     long now = SystemClock.uptimeMillis();
-                    
+
                     // See if we should force a reboot.
                     int rebootInterval = mReqRebootInterval >= 0
                             ? mReqRebootInterval : Settings.Gservices.getInt(
@@ -273,7 +274,7 @@ public class Watchdog extends Thread {
                         // be considered...
                         checkReboot(false);
                     }
-                    
+
                     // See if we should check memory conditions.
                     long memCheckInterval = Settings.Gservices.getLong(
                             mResolver, Settings.Gservices.MEMCHECK_INTERVAL,
@@ -287,7 +288,7 @@ public class Watchdog extends Thread {
                         if (localLOGV) Log.v(TAG, "Collecting memory usage.");
                         collectMemory();
                         mHavePss = true;
-                        
+
                         long memCheckRealtimeInterval = Settings.Gservices.getLong(
                                 mResolver, Settings.Gservices.MEMCHECK_LOG_REALTIME_INTERVAL,
                                 MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL) * 1000;
@@ -299,13 +300,13 @@ public class Watchdog extends Thread {
                             mHaveGlobalPss = true;
                         }
                     }
-                    
+
                     final int size = mMonitors.size();
                     for (int i = 0 ; i < size ; i++) {
                         mCurrentMonitor = mMonitors.get(i);
                         mCurrentMonitor.monitor();
                     }
-                    
+
                     synchronized (Watchdog.this) {
                         mCompleted = true;
                         mCurrentMonitor = null;
@@ -320,7 +321,7 @@ public class Watchdog extends Thread {
             mHandler.sendEmptyMessage(GLOBAL_PSS);
         }
     }
-    
+
     final class CheckupReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
@@ -328,7 +329,7 @@ public class Watchdog extends Thread {
             checkMemory();
         }
     }
-    
+
     final class RebootReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
@@ -336,7 +337,7 @@ public class Watchdog extends Thread {
             checkReboot(true);
         }
     }
-    
+
     final class RebootRequestReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
@@ -354,15 +355,15 @@ public class Watchdog extends Thread {
             checkReboot(true);
         }
     }
-    
+
     public interface Monitor {
         void monitor();
     }
-    
+
     public interface PssRequestor {
         void requestPss();
     }
-    
+
     public class PssStats {
         public int mEmptyPss;
         public int mEmptyCount;
@@ -374,20 +375,20 @@ public class Watchdog extends Thread {
         public int mVisibleCount;
         public int mForegroundPss;
         public int mForegroundCount;
-        
+
         public int mNoPssCount;
-        
+
         public int mProcDeaths[] = new int[10];
     }
-    
+
     public static Watchdog getInstance() {
         if (sWatchdog == null) {
             sWatchdog = new Watchdog();
         }
-        
+
         return sWatchdog;
     }
-    
+
     private Watchdog() {
         super("watchdog");
         mHandler = new HeartbeatHandler();
@@ -402,24 +403,24 @@ public class Watchdog extends Thread {
         mPower = power;
         mAlarm = alarm;
         mActivity = activity;
-        
+
         context.registerReceiver(new CheckupReceiver(),
                 new IntentFilter(CHECKUP_ACTION));
         mCheckupIntent = PendingIntent.getBroadcast(context,
                 0, new Intent(CHECKUP_ACTION), 0);
-        
+
         context.registerReceiver(new RebootReceiver(),
                 new IntentFilter(REBOOT_ACTION));
         mRebootIntent = PendingIntent.getBroadcast(context,
                 0, new Intent(REBOOT_ACTION), 0);
-        
+
         context.registerReceiver(new RebootRequestReceiver(),
                 new IntentFilter(Intent.ACTION_REBOOT),
                 android.Manifest.permission.REBOOT, null);
-        
+
         mBootTime = System.currentTimeMillis();
     }
-    
+
     public void processStarted(PssRequestor req, String name, int pid) {
         synchronized (this) {
             if ("com.android.phone".equals(name)) {
@@ -429,7 +430,7 @@ public class Watchdog extends Thread {
             }
         }
     }
-    
+
     public void reportPss(PssRequestor req, String name, int pss) {
         synchronized (this) {
             if (mPhoneReq == req) {
@@ -437,7 +438,7 @@ public class Watchdog extends Thread {
             }
         }
     }
-    
+
     public void addMonitor(Monitor monitor) {
         synchronized (this) {
             if (isAlive()) {
@@ -459,7 +460,7 @@ public class Watchdog extends Thread {
             }
         }
     }
-    
+
     /**
      * Retrieve memory usage over all application processes.  This is an
      * async operation, so must be done before doing memory checks.
@@ -467,7 +468,7 @@ public class Watchdog extends Thread {
     void collectGlobalMemory() {
         mActivity.requestPss(mGlobalPssCollected);
     }
-    
+
     /**
      * Check memory usage in the system, scheduling kills/reboots as needed.
      * This always runs on the mHandler thread.
@@ -476,11 +477,11 @@ public class Watchdog extends Thread {
         boolean needScheduledCheck;
         long curTime;
         long nextTime = 0;
-        
+
         long recheckInterval = Settings.Gservices.getLong(
                 mResolver, Settings.Gservices.MEMCHECK_RECHECK_INTERVAL,
                 MEMCHECK_DEFAULT_RECHECK_INTERVAL) * 1000;
-        
+
         mSystemMemMonitor.retrieveSettings(mResolver);
         mPhoneMemMonitor.retrieveSettings(mResolver);
         retrieveBrutalityAmount();
@@ -488,7 +489,7 @@ public class Watchdog extends Thread {
         synchronized (this) {
             curTime = System.currentTimeMillis();
             mNeedScheduledCheck = false;
-            
+
             // How is the system doing?
             if (mSystemMemMonitor.checkLocked(curTime, Process.myPid(),
                     (int)Process.getPss(Process.myPid()))) {
@@ -497,7 +498,7 @@ public class Watchdog extends Thread {
                 notifyAll();
                 return;
             }
-            
+
             // How is the phone process doing?
             if (mPhoneReq != null) {
                 if (mPhoneMemMonitor.checkLocked(curTime, mPhonePid,
@@ -508,7 +509,7 @@ public class Watchdog extends Thread {
             } else {
                 mPhoneMemMonitor.clear();
             }
-            
+
             needScheduledCheck = mNeedScheduledCheck;
             if (needScheduledCheck) {
                 // Something is going bad, but now is not a good time to
@@ -523,14 +524,14 @@ public class Watchdog extends Thread {
                     computeMemcheckTimesLocked(nextTime);
                     nextTime = mMemcheckExecStartTime;
                 }
-                
+
                 if (localLOGV) {
                     mCalendar.setTimeInMillis(nextTime);
                     Log.v(TAG, "Next Alarm Time: " + mCalendar);
                 }
             }
         }
-        
+
         if (needScheduledCheck) {
             if (localLOGV) Log.v(TAG, "Scheduling next memcheck alarm for "
                     + ((nextTime-curTime)/1000/60) + "m from now");
@@ -555,7 +556,7 @@ public class Watchdog extends Thread {
     final long[] mVMStatSizes = new long[mVMStatFields.length];
     final long[] mPrevVMStatSizes = new long[mVMStatFields.length];
     long mLastLogGlobalMemoryTime;
-    
+
     void logGlobalMemory() {
         PssStats stats = mPssStats;
         mActivity.collectPss(stats);
@@ -591,7 +592,7 @@ public class Watchdog extends Thread {
                 (int)mVMStatSizes[0], (int)mVMStatSizes[1], (int)mVMStatSizes[2],
                 (int)mVMStatSizes[3], (int)mVMStatSizes[4]);
     }
-    
+
     void checkReboot(boolean fromAlarm) {
         int rebootInterval = mReqRebootInterval >= 0 ? mReqRebootInterval
                 : Settings.Gservices.getInt(
@@ -604,7 +605,7 @@ public class Watchdog extends Thread {
             mAlarm.remove(mRebootIntent);
             return;
         }
-        
+
         long rebootStartTime = mReqRebootStartTime >= 0 ? mReqRebootStartTime
                 : Settings.Gservices.getLong(
                 mResolver, Settings.Gservices.REBOOT_START_TIME,
@@ -617,17 +618,17 @@ public class Watchdog extends Thread {
                 : Settings.Gservices.getLong(
                 mResolver, Settings.Gservices.MEMCHECK_RECHECK_INTERVAL,
                 MEMCHECK_DEFAULT_RECHECK_INTERVAL)) * 1000;
-        
+
         retrieveBrutalityAmount();
-        
+
         long realStartTime;
         long now;
-        
+
         synchronized (this) {
             now = System.currentTimeMillis();
             realStartTime = computeCalendarTime(mCalendar, now,
                     rebootStartTime);
-            
+
             long rebootIntervalMillis = rebootInterval*24*60*60*1000;
             if (DB || mReqRebootNoWait ||
                     (now-mBootTime) >= (rebootIntervalMillis-rebootWindowMillis)) {
@@ -639,7 +640,7 @@ public class Watchdog extends Thread {
                     rebootSystem("Checkin scheduled forced");
                     return;
                 }
-                
+
                 // Are we within the reboot window?
                 if (now < realStartTime) {
                     // Schedule alarm for next check interval.
@@ -654,7 +655,7 @@ public class Watchdog extends Thread {
                         rebootSystem("Checked scheduled range");
                         return;
                     }
-                    
+
                     // Schedule next alarm either within the window or in the
                     // next interval.
                     if ((now+recheckInterval) >= (realStartTime+rebootWindowMillis)) {
@@ -670,21 +671,25 @@ public class Watchdog extends Thread {
                 }
             }
         }
-        
+
         if (localLOGV) Log.v(TAG, "Scheduling next reboot alarm for "
                 + ((realStartTime-now)/1000/60) + "m from now");
         mAlarm.remove(mRebootIntent);
         mAlarm.set(AlarmManager.RTC_WAKEUP, realStartTime, mRebootIntent);
     }
-    
+
     /**
      * Perform a full reboot of the system.
      */
     void rebootSystem(String reason) {
         Log.i(TAG, "Rebooting system because: " + reason);
-        android.os.Power.reboot(reason);
+        try {
+            android.os.Power.reboot(reason);
+        } catch (IOException e) {
+            Log.e(TAG, "Reboot failed!", e);
+        }
     }
-    
+
     /**
      * Load the current Gservices settings for when
      * {@link #shouldWeBeBrutalLocked} will allow the brutality to happen.
@@ -700,12 +705,12 @@ public class Watchdog extends Thread {
                 mResolver, Settings.Gservices.MEMCHECK_MIN_ALARM,
                 MEMCHECK_DEFAULT_MIN_ALARM)) * 1000;
     }
-    
+
     /**
      * Determine whether it is a good time to kill, crash, or otherwise
      * plunder the current situation for the overall long-term benefit of
      * the world.
-     * 
+     *
      * @param curTime The current system time.
      * @return Returns null if this is a good time, else a String with the
      * text of why it is not a good time.
@@ -714,40 +719,40 @@ public class Watchdog extends Thread {
         if (mBattery == null || !mBattery.isPowered()) {
             return "battery";
         }
-        
+
         if (mMinScreenOff >= 0 && (mPower == null ||
                 mPower.timeSinceScreenOn() < mMinScreenOff)) {
             return "screen";
         }
-            
+
         if (mMinAlarm >= 0 && (mAlarm == null ||
                 mAlarm.timeToNextAlarm() < mMinAlarm)) {
             return "alarm";
         }
-            
+
         return null;
     }
-    
+
     /**
      * Compute the times during which we next would like to perform process
      * restarts.
-     * 
+     *
      * @param curTime The current system time.
      */
     void computeMemcheckTimesLocked(long curTime) {
         if (mMemcheckLastTime == curTime) {
             return;
         }
-        
+
         mMemcheckLastTime = curTime;
-        
+
         long memcheckExecStartTime = Settings.Gservices.getLong(
                 mResolver, Settings.Gservices.MEMCHECK_EXEC_START_TIME,
                 MEMCHECK_DEFAULT_EXEC_START_TIME);
         long memcheckExecEndTime = Settings.Gservices.getLong(
                 mResolver, Settings.Gservices.MEMCHECK_EXEC_END_TIME,
                 MEMCHECK_DEFAULT_EXEC_END_TIME);
-        
+
         mMemcheckExecEndTime = computeCalendarTime(mCalendar, curTime,
                 memcheckExecEndTime);
         if (mMemcheckExecEndTime < curTime) {
@@ -758,7 +763,7 @@ public class Watchdog extends Thread {
         }
         mMemcheckExecStartTime = computeCalendarTime(mCalendar, curTime,
                 memcheckExecStartTime);
-        
+
         if (localLOGV) {
             mCalendar.setTimeInMillis(curTime);
             Log.v(TAG, "Current Time: " + mCalendar);
@@ -768,7 +773,7 @@ public class Watchdog extends Thread {
             Log.v(TAG, "End Check Time: " + mCalendar);
         }
     }
-    
+
     static long computeCalendarTime(Calendar c, long curTime,
             long secondsSinceMidnight) {
 
@@ -782,7 +787,7 @@ public class Watchdog extends Thread {
         c.set(Calendar.MINUTE, val);
         c.set(Calendar.SECOND, (int)secondsSinceMidnight - (val*60));
         c.set(Calendar.MILLISECOND, 0);
-        
+
         long newTime = c.getTimeInMillis();
         if (newTime < curTime) {
             // The given time (in seconds since midnight) has already passed for today, so advance
@@ -790,19 +795,19 @@ public class Watchdog extends Thread {
             c.add(Calendar.DAY_OF_MONTH, 1);
             newTime = c.getTimeInMillis();
         }
-            
+
         return newTime;
     }
-    
+
     @Override
     public void run() {
         while (true) {
             mCompleted = false;
             mHandler.sendEmptyMessage(MONITOR);
-            
+
             synchronized (this) {
                 long timeout = TIME_TO_WAIT;
-                
+
                 // NOTE: We use uptimeMillis() here because we do not want to increment the time we
                 // wait while asleep. If the device is asleep then the thing that we are waiting
                 // to timeout on is asleep as well and won't have a chance to run. Causing a false
@@ -827,22 +832,22 @@ public class Watchdog extends Thread {
                     continue;
                 }
             }
-        
-            // If we got here, that means that the system is most likely hung. 
-            // First send a SIGQUIT so that we can see where it was hung. Then 
+
+            // If we got here, that means that the system is most likely hung.
+            // First send a SIGQUIT so that we can see where it was hung. Then
             // kill this process so that the system will restart.
             String name = (mCurrentMonitor != null) ? mCurrentMonitor.getClass().getName() : "null";
             EventLog.writeEvent(EVENT_LOG_TAG, name);
             Process.sendSignal(Process.myPid(), Process.SIGNAL_QUIT);
-            
+
             // Wait a bit longer before killing so we can make sure that the stacks are captured.
             try {
                 Thread.sleep(10*1000);
             } catch (InterruptedException e) {
             }
-            
+
             // Only kill the process if the debugger is not attached.
-            if (!Debug.isDebuggerConnected()) { 
+            if (!Debug.isDebuggerConnected()) {
                 Process.killProcess(Process.myPid());
             }
         }

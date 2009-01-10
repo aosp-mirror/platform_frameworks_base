@@ -2841,11 +2841,6 @@ public class WebView extends AbsoluteLayout
     // a center key.  Does not affect long press with the trackball/touch.
     private boolean mGotEnterDown = false;
 
-    // Enable copy/paste with trackball here.
-    // This should be left disabled until the framework can guarantee
-    // delivering matching key-up and key-down events for the shift key
-    private static final boolean ENABLE_COPY_PASTE = true;
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (LOGV_ENABLED) {
@@ -2876,7 +2871,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (ENABLE_COPY_PASTE && mShiftIsPressed == false 
+        if (mShiftIsPressed == false && nativeFocusNodeWantsKeyEvents() == false
                 && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
             mExtendSelection = false;
@@ -2911,10 +2906,6 @@ public class WebView extends AbsoluteLayout
                 mPrivateHandler.sendMessageDelayed(mPrivateHandler
                         .obtainMessage(LONG_PRESS_ENTER), LONG_PRESS_TIMEOUT);
                 nativeRecordButtons(true, true);
-                // FIXME, currently in webcore keydown it doesn't do anything.
-                // In keyup, it calls both keydown and keyup, we should fix it.
-                mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
-                        EventHub.KEYEVENT_UNHANDLED_TYPE, event);
                 return true;
             }
             // Bubble up the key event as WebView doesn't handle it
@@ -2949,15 +2940,10 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        if (nativeFocusNodeWantsKeyEvents()) {
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
-                                 EventHub.KEYEVENT_FOCUS_NODE_TYPE, event);
-            // return true as DOM handles the key
-            return true;
-        } else if (false) { // reserved to check the meta tag
+        // TODO: should we pass all the keys to DOM or check the meta tag
+        if (nativeFocusNodeWantsKeyEvents() || true) {
             // pass the key to DOM
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, keyCode,
-                                 EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
             // return true as DOM handles the key
             return true;
         }
@@ -3008,8 +2994,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (ENABLE_COPY_PASTE && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
+        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT 
+                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
             if (commitCopy()) {
                 return true;
             }
@@ -3050,25 +3036,18 @@ public class WebView extends AbsoluteLayout
             Rect visibleRect = sendOurVisibleRect();
             // Note that sendOurVisibleRect calls viewToContent, so the
             // coordinates should be in content coordinates.
-            boolean nodeOnScreen = false;
-            boolean isTextField = false;
-            boolean isTextArea = false;
-            FocusNode node = null;
             if (nativeUpdateFocusNode()) {
-                node = mFocusNode;
-                isTextField = node.mIsTextField;
-                isTextArea = node.mIsTextArea;
-                nodeOnScreen = Rect.intersects(node.mBounds, visibleRect);
-            }
-            if (nodeOnScreen && !isTextField && !isTextArea) {
-                nativeSetFollowedLink(true);
-                mWebViewCore.sendMessage(EventHub.SET_FINAL_FOCUS,
-                        EventHub.BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP, 0,
-                        new WebViewCore.FocusData(mFocusData));
-                playSoundEffect(SoundEffectConstants.CLICK);
-                if (!mCallbackProxy.uiOverrideUrlLoading(node.mText)) {
-                    mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
-                            EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+                if (Rect.intersects(mFocusNode.mBounds, visibleRect)) {
+                    nativeSetFollowedLink(true);
+                    mWebViewCore.sendMessage(EventHub.SET_FINAL_FOCUS,
+                            EventHub.BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP, 0,
+                            new WebViewCore.FocusData(mFocusData));
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    if (!mCallbackProxy.uiOverrideUrlLoading(mFocusNode.mText)) {
+                        // use CLICK instead of KEY_DOWN/KEY_UP so that we can
+                        // trigger mouse click events
+                        mWebViewCore.sendMessage(EventHub.CLICK);
+                    }
                 }
                 return true;
             }
@@ -3076,15 +3055,10 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (nativeFocusNodeWantsKeyEvents()) {
-            mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
-                    EventHub.KEYEVENT_FOCUS_NODE_TYPE, event);
-            // return true as DOM handles the key
-            return true;
-        } else if (false) { // reserved to check the meta tag
+        // TODO: should we pass all the keys to DOM or check the meta tag
+        if (nativeFocusNodeWantsKeyEvents() || true) {
             // pass the key to DOM
-            mWebViewCore.sendMessage(EventHub.KEY_UP, keyCode,
-                    EventHub.KEYEVENT_UNHANDLED_TYPE, event);
+            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
             // return true as DOM handles the key
             return true;
         }
@@ -3637,12 +3611,7 @@ public class WebView extends AbsoluteLayout
     private long mTrackballUpTime = 0;
     private long mLastFocusTime = 0;
     private Rect mLastFocusBounds;
-    
-    // Used to determine that the trackball is down AND that it has not
-    // been moved while down, whereas mTrackballDown is true until we
-    // receive an ACTION_UP
-    private boolean mTrackTrackball = false;
-    
+
     // Set by default; BrowserActivity clears to interpret trackball data
     // directly for movement. Currently, the framework only passes 
     // arrow key events, not trackball events, from one child to the next
@@ -3666,7 +3635,6 @@ public class WebView extends AbsoluteLayout
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mPrivateHandler.removeMessages(SWITCH_TO_ENTER);
-            mTrackTrackball = true;
             mTrackballDown = true;
             if (mNativeClass != 0) {
                 nativeRecordButtons(true, true);
@@ -3681,12 +3649,10 @@ public class WebView extends AbsoluteLayout
                         + " mLastFocusTime=" + mLastFocusTime);
             }
             return false; // let common code in onKeyDown at it
-        } else if (mTrackTrackball) {
-            // LONG_PRESS_ENTER is set in common onKeyDown
-            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
-            mTrackTrackball = false;
         } 
         if (ev.getAction() == MotionEvent.ACTION_UP) {
+            // LONG_PRESS_ENTER is set in common onKeyDown
+            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
             mTrackballDown = false;
             mTrackballUpTime = time;
             if (mShiftIsPressed) {
@@ -4511,7 +4477,6 @@ public class WebView extends AbsoluteLayout
                     // as this is shared by keydown and trackballdown, reset all
                     // the states
                     mGotEnterDown = false;
-                    mTrackTrackball = false;
                     mTrackballDown = false;
                     // LONG_PRESS_ENTER is sent as a delayed message. If we
                     // switch to windows overview, the WebView will be

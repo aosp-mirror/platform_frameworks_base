@@ -246,6 +246,7 @@
         <item name="android:maxHeight">20dip</item>
         <item name="android:thumb">@android:drawable/seek_thumb</item>
         <item name="android:thumbOffset">8px</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <style name="Widget.RatingBar">

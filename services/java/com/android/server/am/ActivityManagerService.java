@@ -9659,7 +9659,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_BROADCAST) Log.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
             + " ordered=" + ordered);
-
+        if ((resultTo != null) && !ordered) {
+            Log.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
+        }
+        
         // Handle special intents: if this broadcast is from the package
         // manager about a package being removed, we need to remove all of
         // its activities from the history stack.

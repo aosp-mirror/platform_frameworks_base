@@ -27,7 +27,6 @@ namespace android {
 
 enum {
     DESTROY = IBinder::FIRST_CALL_TRANSACTION, // one-way transaction
-    SWAP_BUFFERS,
 };
 
 class BpOverlay : public BpInterface<IOverlay>
@@ -43,14 +42,6 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IOverlay::getInterfaceDescriptor());
         remote()->transact(DESTROY, data, &reply, IBinder::FLAG_ONEWAY);
-    }
-
-    virtual ssize_t swapBuffers()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IOverlay::getInterfaceDescriptor());
-        remote()->transact(SWAP_BUFFERS, data, &reply);
-        return reply.readInt32();
     }
 };
 
@@ -71,12 +62,6 @@ status_t BnOverlay::onTransact(
         case DESTROY: {
             CHECK_INTERFACE(IOverlay, data, reply);
             destroy();
-            return NO_ERROR;
-        } break;
-        case SWAP_BUFFERS: {
-            CHECK_INTERFACE(IOverlay, data, reply);
-            ssize_t offset = swapBuffers();
-            reply->writeInt32(offset);
             return NO_ERROR;
         } break;
         default:

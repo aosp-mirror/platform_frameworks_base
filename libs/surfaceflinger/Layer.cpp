@@ -316,7 +316,7 @@ uint32_t Layer::doTransaction(uint32_t flags)
             if (err == NO_ERROR) {
                 const uint32_t mask = clientBackBufferIndex ? eResizeBuffer1 : eResizeBuffer0;
                 android_atomic_and(~mask, &(lcblk->swapState));
-                // since a buffer became availlable, we can let the client go...
+                // since a buffer became available, we can let the client go...
                 mFlinger->scheduleBroadcast(client);
                 mResizeTransactionDone = true;
 
@@ -511,7 +511,7 @@ Region Layer::post(uint32_t* previousSate, bool& recomputeVisibleRegions)
             }
             mResizeTransactionDone = false;
             recomputeVisibleRegions = true;
-            invalidate = true;
+            this->contentDirty = true;
         }
     }
 

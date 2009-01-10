@@ -16,6 +16,8 @@
 
 package android.os;
 
+import java.io.IOException;
+
 /**
  * Class that provides access to some of the power management functions.
  *
@@ -71,12 +73,12 @@ public class Power
      * Brightness value for dim backlight
      */
     public static final int BRIGHTNESS_DIM = 20;
-    
+
     /**
      * Brightness value for fully on
      */
     public static final int BRIGHTNESS_ON = 255;
-    
+
     /**
      * Brightness value to use when battery is low
      */
@@ -104,11 +106,11 @@ public class Power
     public static native int setScreenState(boolean on);
 
     public static native int setLastUserActivityTimeout(long ms);
-    
+
     /**
      * Turn the device off.
-     * 
-     * This method is considered deprecated in favor of 
+     *
+     * This method is considered deprecated in favor of
      * {@link android.policy.ShutdownThread.shutdownAfterDisablingRadio()}.
      *
      * @deprecated
@@ -120,7 +122,9 @@ public class Power
     /**
      * Reboot the device.
      * @param reason code to pass to the kernel (e.g. "recovery"), or null.
+     *
+     * @throws IOException if reboot fails for some reason (eg, lack of
+     *         permission)
      */
-    public static native void reboot(String reason);
+    public static native void reboot(String reason) throws IOException;
 }
-

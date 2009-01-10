@@ -28,7 +28,7 @@ import com.android.layoutlib.api.ILayoutResult.ILayoutViewInfo;
 import com.android.layoutlib.bridge.LayoutResult.LayoutViewInfo;
 import com.android.ninepatch.NinePatch;
 import com.android.tools.layoutlib.create.OverrideMethod;
-import com.android.tools.layoutlib.create.OverrideMethod.MethodListener;
+import com.android.tools.layoutlib.create.MethodAdapter;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -101,13 +101,10 @@ public final class Bridge implements ILayoutBridge {
         new HashMap<String, NinePatch>();
     
     private static Map<String, Map<String, Integer>> sEnumValueMap;
-    
-    private final static MethodListener sNullMethodListener = new MethodListener() {
-        public void onInvoke(String signature, boolean isNative, Object caller) {
-            // pass
-        }
-    };
 
+    /**
+     * A default logger than prints to stdout/stderr.
+     */
     private final static ILayoutLog sDefaultLogger = new ILayoutLog() {
         public void error(String message) {
             System.err.println(message);
@@ -127,21 +124,16 @@ public final class Bridge implements ILayoutBridge {
         }
     };
 
-    /** Logger defined during a compute layout operation. */
+    /**
+     * Logger defined during a compute layout operation.
+     * <p/>
+     * This logger is generally set to {@link #sDefaultLogger} except during rendering
+     * operations when it might be set to a specific provided logger.
+     * <p/>
+     * To change this value, use a block synchronized on {@link #sDefaultLogger}.
+     */
     private static ILayoutLog sLogger = sDefaultLogger;
 
-    private final static String[] IGNORED_STATIC_METHODS = new String[] {
-        "android.content.res.AssetManager#init()V",
-        "android.content.res.AssetManager#deleteTheme(I)V",
-        "android.content.res.AssetManager#destroy()V",
-        "android.graphics._Original_Paint#native_init()I",
-        "android.graphics.Bitmap#nativeRecycle(I)V",
-        "android.graphics.Bitmap#nativeDestructor(I)V",
-        "android.view.animation.Transformation#<clinit>()V",
-        "android.view.animation.Transformation#<init>()V",
-        "android.view.animation.Transformation#clear()V",
-    };
-    
     /*
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutBridge#getApiLevel()
@@ -163,32 +155,52 @@ public final class Bridge implements ILayoutBridge {
     private static synchronized boolean sinit(String fontOsLocation,
             Map<String, Map<String, Integer>> enumValueMap) {
 
-        // set an empty method listener for some known static methods we don't care about.
-        for (String method : IGNORED_STATIC_METHODS) {
-            OverrideMethod.setMethodListener(method, sNullMethodListener);
-        }
+        // When DEBUG_LAYOUT is set and is not 0 or false, setup a default listener
+        // on static (native) methods which prints the signature on the console and
+        // throws an exception.
+        // This is useful when testing the rendering in ADT to identify static native 
+        // methods that are ignored -- layoutlib_create makes them returns 0/false/null
+        // which is generally OK yet might be a problem, so this is how you'd find out.
+        //
+        // Currently layoutlib_create only overrides static native method.
+        // Static non-natives are not overridden and thus do not get here.
+        final String debug = System.getenv("DEBUG_LAYOUT");
+        if (debug != null && !debug.equals("0") && !debug.equals("false")) {
 
-        
-        // set a the default listener for the rest of the static methods. It prints out
-        // missing stub methods and then throws an exception for native methods if the
-        // environment variable DEBUG_LAYOUT is not defined.
-        OverrideMethod.setDefaultListener(new MethodListener() {
-            public void onInvoke(String signature, boolean isNative, Object caller) {
-                if (isNative) {
+            OverrideMethod.setDefaultListener(new MethodAdapter() {
+                @Override
+                public void onInvokeV(String signature, boolean isNative, Object caller) {
                     if (sLogger != null) {
-                        sLogger.error("Missing Stub: " + signature +
-                                (isNative ? " (native)" : ""));
+                        synchronized (sDefaultLogger) {
+                            sLogger.error("Missing Stub: " + signature +
+                                    (isNative ? " (native)" : ""));
+                        }
                     }
 
-                    if (System.getenv("DEBUG_LAYOUT") == null) {
-                        // TODO throwing this exception doesn't seem that useful. It breaks
+                    if (debug.equalsIgnoreCase("throw")) {
+                        // Throwing this exception doesn't seem that useful. It breaks
                         // the layout editor yet doesn't display anything meaningful to the
-                        // user. Having the error in the console is just as useful.
+                        // user. Having the error in the console is just as useful. We'll
+                        // throw it only if the environment variable is "throw" or "THROW".
                         throw new StaticMethodNotImplementedException(signature);
                     }
                 }
+            });
+        }
+
+        // Override View.isInEditMode to return true.
+        //
+        // This allows custom views that are drawn in the Graphical Layout Editor to adapt their
+        // rendering for preview. Most important this let custom views know that they can't expect
+        // the rest of their activities to be alive.
+        OverrideMethod.setMethodListener("android.view.View#isInEditMode()Z",
+            new MethodAdapter() {
+                @Override
+                public int onInvokeI(String signature, boolean isNative, Object caller) {
+                    return 1;
+                }
             }
-        });
+        );
 
         // load the fonts.
         FontLoader fontLoader = FontLoader.create(fontOsLocation);
@@ -283,7 +295,9 @@ public final class Bridge implements ILayoutBridge {
             logger = sDefaultLogger;
         }
         
-        sLogger = logger;
+        synchronized (sDefaultLogger) {
+            sLogger = logger;
+        }
         
         // find the current theme and compute the style inheritance map
         Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
@@ -368,7 +382,9 @@ public final class Bridge implements ILayoutBridge {
                     t.getClass().getSimpleName() + ": " + t.getMessage());
         } finally {
             // Remove the global logger
-            sLogger = sDefaultLogger;
+            synchronized (sDefaultLogger) {
+                sLogger = sDefaultLogger;
+            }
         }
     }
 

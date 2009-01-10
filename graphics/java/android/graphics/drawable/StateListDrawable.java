@@ -31,6 +31,24 @@ import android.util.StateSet;
  * Lets you assign a number of graphic images to a single Drawable and swap out the visible item by a string
  * ID value.
  *
+ * <p>It can be defined in an XML file with the <code>&lt;selector></code> element.
+ * Each state Drawable is defined in a nested <code>&lt;item></code> element.</p>
+ *
+ * @attr ref android.R.styleable#StateListDrawable_visible
+ * @attr ref android.R.styleable#StateListDrawable_variablePadding
+ * @attr ref android.R.styleable#StateListDrawable_constantSize
+ * @attr ref android.R.styleable#DrawableStates_state_focused
+ * @attr ref android.R.styleable#DrawableStates_state_window_focused
+ * @attr ref android.R.styleable#DrawableStates_state_enabled
+ * @attr ref android.R.styleable#DrawableStates_state_checkable
+ * @attr ref android.R.styleable#DrawableStates_state_checked
+ * @attr ref android.R.styleable#DrawableStates_state_selected
+ * @attr ref android.R.styleable#DrawableStates_state_active
+ * @attr ref android.R.styleable#DrawableStates_state_single
+ * @attr ref android.R.styleable#DrawableStates_state_first
+ * @attr ref android.R.styleable#DrawableStates_state_middle
+ * @attr ref android.R.styleable#DrawableStates_state_last
+ * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
     public StateListDrawable()
@@ -144,7 +162,45 @@ public class StateListDrawable extends DrawableContainer {
     StateListState getStateListState() {
         return mStateListState;
     }
+    
+    /**
+     * Gets the number of states contained in this drawable.
+     * 
+     * @return The number of states contained in this drawable.
+     * @see #getStateSet(int)
+     * @see #getStateDrawable(int)
+     * @hide pending API council
+     */
+    public int getStateCount() {
+        return mStateListState.getChildCount();        
+    }
 
+    /**
+     * Gets the state set at an index.
+     * 
+     * @param index The index of the state set.
+     * @return The state set at the index.
+     * @see #getStateCount()
+     * @see #getStateDrawable(int)
+     * @hide pending API council
+     */
+    public int[] getStateSet(int index) {
+        return mStateListState.mStateSets[index];
+    }
+    
+    /**
+     * Gets the drawable at an index.
+     * 
+     * @param index The index of the drawable.
+     * @return The drawable at the index.
+     * @see #getStateCount()
+     * @see #getStateSet(int)
+     * @hide pending API council
+     */
+    public Drawable getStateDrawable(int index) {
+        return mStateListState.getChildren()[index];
+    }
+    
     static final class StateListState extends DrawableContainerState
     {
         StateListState(StateListState orig, StateListDrawable owner)

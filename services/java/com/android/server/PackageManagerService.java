@@ -204,7 +204,7 @@ class PackageManagerService extends IPackageManager.Stub {
     boolean mRestoredSettings;
     boolean mReportedUidError;
 
-    // Group-ids that are given to all packages as read from etc/permissions.xml.
+    // Group-ids that are given to all packages as read from etc/permissions/*.xml.
     int[] mGlobalGids;
 
     // These are the built-in uid -> permission mappings that were read from the
@@ -534,8 +534,43 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     void readPermissions() {
+        // Read permissions from .../etc/permission directory.
+        File libraryDir = new File(Environment.getRootDirectory(), "etc/permissions");
+        if (!libraryDir.exists() || !libraryDir.isDirectory()) {
+            Log.w(TAG, "No directory " + libraryDir + ", skipping");
+            return;
+        }
+        if (!libraryDir.canRead()) {
+            Log.w(TAG, "Directory " + libraryDir + " cannot be read");
+            return;
+        }
+
+        // Iterate over the files in the directory and scan .xml files
+        for (File f : libraryDir.listFiles()) {
+            // We'll read platform.xml last
+            if (f.getPath().endsWith("etc/permissions/platform.xml")) {
+                continue;
+            }
+            
+            if (!f.getPath().endsWith(".xml")) {
+                Log.i(TAG, "Non-xml file " + f + " in " + libraryDir + " directory, ignoring");
+                continue;
+            }
+            if (!f.canRead()) {
+                Log.w(TAG, "Permissions library file " + f + " cannot be read");
+                continue;
+            }
+
+            readPermissionsFromXml(f);
+        }
+        
+        // Read permissions from .../etc/permissions/platform.xml last so it will take precedence
         final File permFile = new File(Environment.getRootDirectory(),
-                "etc/permissions.xml");
+                "etc/permissions/platform.xml");
+        readPermissionsFromXml(permFile);
+    }
+    
+    private void readPermissionsFromXml(File permFile) {        
         FileReader permReader = null;
         try {
             permReader = new FileReader(permFile);
@@ -566,9 +601,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "<group> without gid at "
                                 + parser.getPositionDescription());
                     }
+
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-                    
                 } else if ("permission".equals(name)) {
                     String perm = parser.getAttributeValue(null, "name");
                     if (perm == null) {
@@ -622,6 +657,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "<library> without file at "
                                 + parser.getPositionDescription());
                     } else {
+                        Log.i(TAG, "Got library " + lname + " in " + lfile);
                         this.mSharedLibraries.put(lname, lfile);
                     }
                     XmlUtils.skipCurrentTag(parser);

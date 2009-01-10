@@ -23,62 +23,82 @@
 #include <utils/Errors.h>
 #include <utils/IInterface.h>
 #include <utils/RefBase.h>
+#include <utils/threads.h>
+
 #include <ui/PixelFormat.h>
+#include <ui/IOverlay.h>
 
 #include <hardware/overlay.h>
 
 namespace android {
 
-class IOverlay;
 class IMemory;
 class IMemoryHeap;
+
+// ----------------------------------------------------------------------------
+
+class OverlayRef : public LightRefBase<OverlayRef>
+{
+public:
+    OverlayRef(overlay_handle_t const*, const sp<IOverlay>&,
+            uint32_t w, uint32_t h, int32_t f, uint32_t ws, uint32_t hs);
+
+    static sp<OverlayRef> readFromParcel(const Parcel& data);
+    static status_t writeToParcel(Parcel* reply, const sp<OverlayRef>& o);    
+
+private:
+    friend class LightRefBase<OverlayRef>;
+    friend class Overlay;
+
+    OverlayRef();
+    virtual ~OverlayRef();
+
+    overlay_handle_t const *mOverlayHandle;
+    sp<IOverlay> mOverlayChanel;
+    uint32_t mWidth;
+    uint32_t mHeight;
+    int32_t  mFormat;
+    int32_t  mWidthStride;
+    int32_t  mHeightStride;
+    bool mOwnHandle;
+};
+
+// ----------------------------------------------------------------------------
 
 class Overlay : public virtual RefBase
 {
 public:
-    Overlay(overlay_t* overlay, 
-            const sp<IOverlay>& o, const sp<IMemoryHeap>& heap);
+    Overlay(const sp<OverlayRef>& overlayRef);
 
     /* destroys this overlay */
     void destroy();
     
-    /* post/swaps buffers */
-    status_t swapBuffers();
-    
     /* get the HAL handle for this overlay */
     overlay_handle_t const* getHandleRef() const;
-    
-    /* returns the offset of the current buffer */
-    size_t getBufferOffset() const;
-    
-    /* returns a heap to this overlay. this may not be supported. */
-    sp<IMemoryHeap> getHeap() const;
-    
+
+    /* blocks until an overlay buffer is available and return that buffer. */
+    overlay_buffer_t dequeueBuffer();
+
+    /* release the overlay buffer and post it */
+    int queueBuffer(overlay_buffer_t buffer);
+
+    /* returns the address of a given buffer if supported, NULL otherwise. */
+    void* getBufferAddress(overlay_buffer_t buffer);
+
     /* get physical informations about the overlay */
     uint32_t getWidth() const;
     uint32_t getHeight() const;
     int32_t getFormat() const;
     int32_t getWidthStride() const;
     int32_t getHeightStride() const;
-
-    static sp<Overlay> readFromParcel(const Parcel& data);
-    static status_t writeToParcel(Parcel* reply, const sp<Overlay>& o);
-
+    status_t getStatus() const;
+    
 private:
-    Overlay(overlay_handle_t*, const sp<IOverlay>&, const sp<IMemoryHeap>&,  
-            uint32_t w, uint32_t h, int32_t f, uint32_t ws, uint32_t hs);
-
     virtual ~Overlay();
 
-    sp<IOverlay>        mOverlay;
-    sp<IMemoryHeap>     mHeap;
-    size_t              mCurrentBufferOffset;
-    overlay_handle_t const *mOverlayHandle;
-    uint32_t            mWidth;
-    uint32_t            mHeight;
-    int32_t             mFormat;
-    int32_t             mWidthStride;
-    int32_t             mHeightStride;
+    sp<OverlayRef> mOverlayRef;
+    overlay_data_device_t *mOverlayData;
+    status_t mStatus;
 };
 
 // ----------------------------------------------------------------------------

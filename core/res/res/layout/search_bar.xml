@@ -22,10 +22,11 @@
     android:id="@+id/search_bar"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:paddingBottom="14dip"
+    android:paddingBottom="200dip"
     android:orientation="vertical" 
     android:focusable="true"
     android:descendantFocusability="afterDescendants">
+    <!-- android:paddingBottom="14dip"  TODO MUST FIX - it's a hack to get the popup to show -->
 
     <!-- Outer layout defines the entire search bar at the top of the screen -->
     <!-- Bottom padding of 16 is due to the graphic, with 9 extra pixels of drop
@@ -69,34 +70,30 @@
             android:gravity="center_vertical"
             android:baselineAligned="false" >
 
-            <EditText
+            <AutoCompleteTextView
                 android:id="@+id/search_src_text"
                 android:layout_height="wrap_content"
                 android:layout_width="0dip"
                 android:layout_weight="1.0"
                 android:paddingLeft="8dip"
                 android:paddingRight="6dip"
-                android:inputType="text|textAutoComplete" />
+                android:inputType="text|textAutoComplete"
+                android:completionThreshold="1" />
+                <!-- android:focusableInTouchMode="false" -->
+                <!-- android:singleLine="true" -->
+                <!-- android:selectAllOnFocus="true" -->
                 
-            <ImageButton android:id="@+id/search_go_btn"
+            <!-- This button can switch between text and icon "modes" -->
+            <Button 
+                android:id="@+id/search_go_btn"
                 android:layout_marginLeft="1dip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_btn_search"
+                android:drawableLeft="@android:drawable/ic_btn_search"
             />
 
         </LinearLayout>
         
     </LinearLayout>
-
-    <!-- The margintop of -21 adjusts the listview to abut the bottom of the edittext. -->
-    <ListView 
-        android:id="@+id/search_suggest_list"
-        android:layout_marginTop="-21dip"
-        android:layout_width="200dip"
-        android:layout_height="fill_parent"
-        android:background="@android:drawable/spinner_dropdown_background_down"
-        android:divider="@android:drawable/divider_horizontal_bright" 
-        android:cacheColorHint="#FFFFFFFF" />
 
 </LinearLayout>

@@ -33,8 +33,6 @@ public:
     DECLARE_META_INTERFACE(Overlay);
 
     virtual void destroy() = 0; // one-way
-    
-    virtual ssize_t swapBuffers() = 0;
 };
 
 // ----------------------------------------------------------------------------

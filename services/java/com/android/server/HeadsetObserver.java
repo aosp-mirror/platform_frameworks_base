@@ -88,23 +88,8 @@ class HeadsetObserver extends UEventObserver {
             mHeadsetName = newName;
             mHeadsetState = newState;
             AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-    
-            if (mHeadsetState == 1) {
-                audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_HEADSET,
-                                       AudioManager.ROUTE_ALL);
-                audioManager.setRouting(AudioManager.MODE_RINGTONE,
-                                       AudioManager.ROUTE_HEADSET | AudioManager.ROUTE_SPEAKER,
-                                       AudioManager.ROUTE_ALL);
-                audioManager.setRouting(AudioManager.MODE_IN_CALL, AudioManager.ROUTE_HEADSET,
-                                       AudioManager.ROUTE_ALL);
-            } else {
-                audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_SPEAKER,
-                                       AudioManager.ROUTE_ALL);
-                audioManager.setRouting(AudioManager.MODE_RINGTONE, AudioManager.ROUTE_SPEAKER,
-                                       AudioManager.ROUTE_ALL);
-                audioManager.setRouting(AudioManager.MODE_IN_CALL, AudioManager.ROUTE_EARPIECE,
-                                       AudioManager.ROUTE_ALL);
-            }
+
+            audioManager.setWiredHeadsetOn(mHeadsetState == 1);
             sendIntent();
         }
     }

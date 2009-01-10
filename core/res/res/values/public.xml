@@ -1035,6 +1035,9 @@
   
   <public type="drawable" name="ic_btn_search" id="0x0108009e" />
   <public type="drawable" name="ic_dialog_menu_generic" id="0x010800a0" />
+  <public type="drawable" name="ic_menu_login" id="0x010800a1" />
+  <public type="drawable" name="ic_menu_refresh" id="0x010800a2" />
+  <public type="drawable" name="ic_menu_notifications" id="0x010800a3" />
 </resources>
 
 

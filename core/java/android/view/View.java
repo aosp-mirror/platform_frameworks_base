@@ -3562,7 +3562,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      *
      * @param outAttrs Fill in with attribute information about the connection.
      */
-    public InputConnection createInputConnection(EditorInfo outAttrs) {
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return null;
     }
 
@@ -4315,12 +4315,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if (mAttachInfo != null) {
             handler = mAttachInfo.mHandler;
         } else {
-            handler = ViewRoot.sUiThreads.get();
-            if (handler == null) {
-                // Assume that post will succeed later
-                ViewRoot.sRunQueue.post(action);
-                return true;
-            }
+            // Assume that post will succeed later
+            ViewRoot.getRunQueue().post(action);
+            return true;
         }
 
         return handler.post(action);
@@ -4347,12 +4344,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if (mAttachInfo != null) {
             handler = mAttachInfo.mHandler;
         } else {
-            handler = ViewRoot.sUiThreads.get();
-            if (handler == null) {
-                // Assume that post will succeed later
-                ViewRoot.sRunQueue.postDelayed(action, delayMillis);
-                return true;
-            }
+            // Assume that post will succeed later
+            ViewRoot.getRunQueue().postDelayed(action, delayMillis);
+            return true;
         }
 
         return handler.postDelayed(action, delayMillis);
@@ -4373,12 +4367,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if (mAttachInfo != null) {
             handler = mAttachInfo.mHandler;
         } else {
-            handler = ViewRoot.sUiThreads.get();
-            if (handler == null) {
-                // Assume that post will succeed later
-                ViewRoot.sRunQueue.removeCallbacks(action);
-                return true;
-            }
+            // Assume that post will succeed later
+            ViewRoot.getRunQueue().removeCallbacks(action);
+            return true;
         }
 
         handler.removeCallbacks(action);

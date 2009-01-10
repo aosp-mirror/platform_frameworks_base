@@ -33,6 +33,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import java.util.concurrent.locks.ReentrantLock;
+import java.lang.ref.WeakReference;
 
 /**
  * Provides a dedicated drawing surface embedded inside of a view hierarchy.
@@ -308,7 +309,7 @@ public class SurfaceView extends View {
                 mLayout.memoryType = mRequestedType;
 
                 if (mWindow == null) {
-                    mWindow = new MyWindow();
+                    mWindow = new MyWindow(this);
                     mLayout.type = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
                     mLayout.gravity = Gravity.LEFT|Gravity.TOP;
                     mSession.add(mWindow, mLayout,
@@ -392,33 +393,45 @@ public class SurfaceView extends View {
         mNewSurfaceNeeded = true;
         updateWindow(false);
     }
-    
-    private class MyWindow extends IWindow.Stub {
+
+    private static class MyWindow extends IWindow.Stub {
+        private WeakReference<SurfaceView> mSurfaceView;
+
+        public MyWindow(SurfaceView surfaceView) {
+            mSurfaceView = new WeakReference<SurfaceView>(surfaceView);
+        }
+
         public void resized(int w, int h, Rect coveredInsets,
                 Rect visibleInsets, boolean reportDraw) {
-            if (localLOGV) Log.v(
-                "SurfaceView", SurfaceView.this + " got resized: w=" +
-                w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);
-            synchronized (this) {
-                if (mCurWidth != w || mCurHeight != h) {
-                    mCurWidth = w;
-                    mCurHeight = h;
-                }
-                if (reportDraw) {
-                    try {
-                        mSession.finishDrawing(mWindow);
-                    } catch (RemoteException e) {
+            SurfaceView surfaceView = mSurfaceView.get();
+            if (surfaceView != null) {
+                if (localLOGV) Log.v(
+                        "SurfaceView", surfaceView + " got resized: w=" +
+                                w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);
+                synchronized (this) {
+                    if (mCurWidth != w || mCurHeight != h) {
+                        mCurWidth = w;
+                        mCurHeight = h;
+                    }
+                    if (reportDraw) {
+                        try {
+                            surfaceView.mSession.finishDrawing(surfaceView.mWindow);
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
             }
         }
 
         public void dispatchKey(KeyEvent event) {
-            //Log.w("SurfaceView", "Unexpected key event in surface: " + event);
-            if (mSession != null && mSurface != null) {
-                try {
-                    mSession.finishKey(mWindow);
-                } catch (RemoteException ex) {
+            SurfaceView surfaceView = mSurfaceView.get();
+            if (surfaceView != null) {
+                //Log.w("SurfaceView", "Unexpected key event in surface: " + event);
+                if (surfaceView.mSession != null && surfaceView.mSurface != null) {
+                    try {
+                        surfaceView.mSession.finishKey(surfaceView.mWindow);
+                    } catch (RemoteException ex) {
+                    }
                 }
             }
         }
@@ -446,10 +459,13 @@ public class SurfaceView extends View {
         public void dispatchAppVisibility(boolean visible) {
             // The point of SurfaceView is to let the app control the surface.
         }
-        
+
         public void dispatchGetNewSurface() {
-            Message msg = mHandler.obtainMessage(GET_NEW_SURFACE_MSG);
-            mHandler.sendMessage(msg);
+            SurfaceView surfaceView = mSurfaceView.get();
+            if (surfaceView != null) {
+                Message msg = surfaceView.mHandler.obtainMessage(GET_NEW_SURFACE_MSG);
+                surfaceView.mHandler.sendMessage(msg);
+            }
         }
 
         public void windowFocusChanged(boolean hasFocus, boolean touchEnabled) {

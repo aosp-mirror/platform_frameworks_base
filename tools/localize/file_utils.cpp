@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "file_utils.h"
 #include "Perforce.h"
 #include <sys/fcntl.h>

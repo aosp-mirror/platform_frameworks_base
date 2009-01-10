@@ -26,6 +26,8 @@ public class HandlerCaller {
         public int argi2;
         public int argi3;
         public int argi4;
+        public int argi5;
+        public int argi6;
     }
     
     static final int ARGS_POOL_MAX_SIZE = 10;
@@ -150,6 +152,18 @@ public class HandlerCaller {
         args.argi2 = arg2;
         args.argi3 = arg3;
         args.argi4 = arg4;
+        return mH.obtainMessage(what, 0, 0, args);
+    }
+    
+    public Message obtainMessageIIIIII(int what, int arg1, int arg2,
+            int arg3, int arg4, int arg5, int arg6) {
+        SomeArgs args = obtainArgs();
+        args.argi1 = arg1;
+        args.argi2 = arg2;
+        args.argi3 = arg3;
+        args.argi4 = arg4;
+        args.argi5 = arg5;
+        args.argi6 = arg6;
         return mH.obtainMessage(what, 0, 0, args);
     }
     

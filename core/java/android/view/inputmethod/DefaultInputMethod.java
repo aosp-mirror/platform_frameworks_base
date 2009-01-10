@@ -67,7 +67,7 @@ public class DefaultInputMethod implements InputMethod, InputMethodSession {
     }
     
     public void updateSelection(int oldSelStart, int oldSelEnd,
-            int newSelStart, int newSelEnd) {
+            int newSelStart, int newSelEnd, int candidatesStart, int candidatesEnd) {
     }
 
     public void updateCursor(Rect newCursor) {
@@ -119,9 +119,9 @@ class SimpleInputMethod extends IInputMethod.Stub {
         }
         
         public void updateSelection(int oldSelStart, int oldSelEnd,
-                int newSelStart, int newSelEnd) {
+                int newSelStart, int newSelEnd, int candidatesStart, int candidatesEnd) {
             mSession.updateSelection(oldSelStart, oldSelEnd,
-                    newSelStart, newSelEnd);
+                    newSelStart, newSelEnd, candidatesStart, candidatesEnd);
         }
 
         public void updateCursor(Rect newCursor) {

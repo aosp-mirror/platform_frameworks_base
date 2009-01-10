@@ -225,6 +225,15 @@ static void android_hardware_Camera_stopPreview(JNIEnv *env, jobject thiz)
     c->stopPreview();
 }
 
+static bool android_hardware_Camera_previewEnabled(JNIEnv *env, jobject thiz)
+{
+    sp<Camera> c = get_native_camera(env, thiz);
+    if (c == 0)
+        return false;
+
+    return c->previewEnabled();
+}
+
 static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject thiz, jboolean installed)
 {
     sp<Camera> c = get_native_camera(env, thiz);
@@ -382,6 +391,22 @@ static void android_hardware_Camera_reconnect(JNIEnv *env, jobject thiz)
     }
 }
 
+static jint android_hardware_Camera_lock(JNIEnv *env, jobject thiz)
+{
+    sp<Camera> c = get_native_camera(env, thiz);
+    if (c == 0)
+        return INVALID_OPERATION;
+    return (jint) c->lock();
+}
+
+static jint android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
+{
+    sp<Camera> c = get_native_camera(env, thiz);
+    if (c == 0)
+        return INVALID_OPERATION;
+    return (jint) c->lock();
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -400,6 +425,9 @@ static JNINativeMethod camMethods[] = {
   { "stopPreview",
     "()V",
     (void *)android_hardware_Camera_stopPreview },
+  { "previewEnabled",
+    "()Z",
+    (void *)android_hardware_Camera_previewEnabled },
   { "setHasPreviewCallback",
     "(Z)V",
     (void *)android_hardware_Camera_setHasPreviewCallback },
@@ -418,6 +446,12 @@ static JNINativeMethod camMethods[] = {
   { "reconnect",
     "()V",
     (void*)android_hardware_Camera_reconnect },
+  { "lock",
+    "()I",
+    (void*)android_hardware_Camera_lock },
+  { "unlock",
+    "()I",
+    (void*)android_hardware_Camera_unlock },
 };
 
 struct field {

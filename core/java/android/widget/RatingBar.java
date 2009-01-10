@@ -26,10 +26,14 @@ import com.android.internal.R;
 
 /**
  * A RatingBar is an extension of SeekBar and ProgressBar that shows a rating in
- * stars. The user can touch and/or drag to set the rating when using the
- * default size RatingBar. The smaller RatingBar style ({@link android.R.attr#ratingBarStyleSmall})
- * and the larger indicator-only style ({@link android.R.attr#ratingBarStyleIndicator})
- * do not support user interaction and should only be used as indicators.
+ * stars. The user can touch/drag or use arrow keys to set the rating when using
+ * the default size RatingBar. The smaller RatingBar style (
+ * {@link android.R.attr#ratingBarStyleSmall}) and the larger indicator-only
+ * style ({@link android.R.attr#ratingBarStyleIndicator}) do not support user
+ * interaction and should only be used as indicators.
+ * <p>
+ * When using a RatingBar that supports user interaction, placing widgets to the
+ * left or right of the RatingBar is discouraged.
  * <p>
  * The number of stars set (via {@link #setNumStars(int)} or in an XML layout)
  * will be shown when the layout width is set to wrap content (if another layout
@@ -44,17 +48,18 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#RatingBar_isIndicator
  */
 public class RatingBar extends AbsSeekBar {
-    
+
     /**
-     * A callback that notifies clients when the rating has been changed. This 
-     * includes changes that were initiated by the user through a touch gesture as well
-     * as changes that were initiated programmatically.
+     * A callback that notifies clients when the rating has been changed. This
+     * includes changes that were initiated by the user through a touch gesture
+     * or arrow key/trackball as well as changes that were initiated
+     * programmatically.
      */
     public interface OnRatingBarChangeListener {
         
         /**
          * Notification that the rating has changed. Clients can use the
-         * fromTouch parameter to distinguish user-initiated changes from those
+         * fromUser parameter to distinguish user-initiated changes from those
          * that occurred programmatically. This will not be called continuously
          * while the user is dragging, only when the user finalizes a rating by
          * lifting the touch.
@@ -62,10 +67,10 @@ public class RatingBar extends AbsSeekBar {
          * @param ratingBar The RatingBar whose rating has changed.
          * @param rating The current rating. This will be in the range
          *            0..numStars.
-         * @param fromTouch True if the rating change was initiated by a user's
-         *            touch gesture.
+         * @param fromUser True if the rating change was initiated by a user's
+         *            touch gesture or arrow key/horizontal trackbell movement.
          */
-        void onRatingChanged(RatingBar ratingBar, float rating, boolean fromTouch);
+        void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser);
 
     }
 
@@ -138,6 +143,7 @@ public class RatingBar extends AbsSeekBar {
      */
     public void setIsIndicator(boolean isIndicator) {
         mIsUserSeekable = !isIndicator;
+        setFocusable(!isIndicator);
     }
     
     /**
@@ -179,7 +185,7 @@ public class RatingBar extends AbsSeekBar {
      * @param rating The rating to set.
      */
     public void setRating(float rating) {
-        setProgress((int) (rating * getProgressPerStar()));
+        setProgress(Math.round(rating * getProgressPerStar()));
     }
 
     /**
@@ -235,14 +241,14 @@ public class RatingBar extends AbsSeekBar {
     }
 
     @Override
-    void onProgressRefresh(float scale, boolean fromTouch) {
-        super.onProgressRefresh(scale, fromTouch);
+    void onProgressRefresh(float scale, boolean fromUser) {
+        super.onProgressRefresh(scale, fromUser);
 
         // Keep secondary progress in sync with primary
         updateSecondaryProgress(getProgress());
         
-        if (!fromTouch) {
-            // Callback for non-touch rating changes
+        if (!fromUser) {
+            // Callback for non-user rating changes
             dispatchRatingChange(false);
         }
     }
@@ -291,10 +297,10 @@ public class RatingBar extends AbsSeekBar {
         }
     }
     
-    void dispatchRatingChange(boolean fromTouch) {
+    void dispatchRatingChange(boolean fromUser) {
         if (mOnRatingBarChangeListener != null) {
             mOnRatingBarChangeListener.onRatingChanged(this, getRating(),
-                    fromTouch);
+                    fromUser);
         }
     }
 

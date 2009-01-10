@@ -52,8 +52,6 @@ class CommandParamsFactory extends Handler {
     static final int REFRESH_NAA_INIT                       = 0x03;
     static final int REFRESH_UICC_RESET                     = 0x04;
 
-    private static final String TAG = "CmdParamsFactory";
-
     static synchronized CommandParamsFactory getInstance(Handler caller,
             SIMFileHandler fh) {
         if (sInstance != null) {
@@ -173,6 +171,7 @@ class CommandParamsFactory extends Handler {
         }
     }
 
+    @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
         case MSG_ID_LOAD_ICON_DONE:
@@ -751,7 +750,7 @@ class CommandParamsFactory extends Handler {
      private boolean processPlayTone(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(TAG, "process PlayTone");
+        StkLog.d(this, "process PlayTone");
 
         Tone tone = null;
         TextMessage textMsg = new TextMessage();
@@ -816,7 +815,7 @@ class CommandParamsFactory extends Handler {
      */
      private boolean processSetupCall(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
-        StkLog.d(TAG, "process SetupCall");
+        StkLog.d(this, "process SetupCall");
 
         Iterator<ComprehensionTlv> iter = ctlvs.iterator();
         ComprehensionTlv ctlv = null;

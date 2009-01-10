@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import android.util.Log;
-
 import com.android.internal.telephony.gsm.GsmAlphabet;
 import com.android.internal.telephony.gsm.SimUtils;
 import com.android.internal.telephony.gsm.stk.Duration.TimeUnit;
@@ -27,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 abstract class ValueParser {
-    
-    private static final String TAG = "ValueParser";
 
     /**
      * Search for a Command Details object from a list.
@@ -186,7 +182,7 @@ abstract class ValueParser {
      */
     static ItemsIconId retrieveItemsIconId(ComprehensionTlv ctlv)
             throws ResultException {
-        Log.d(TAG, "retrieveIconIdList:");
+        StkLog.d("ValueParser", "retrieveItemsIconId:");
         ItemsIconId id = new ItemsIconId();
 
         byte[] rawValue = ctlv.getRawValue();

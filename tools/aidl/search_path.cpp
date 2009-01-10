@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include "search_path.h"
 #include "options.h"
+#include <string.h>
 
 #ifdef HAVE_MS_C_RUNTIME
 #include <io.h>

@@ -66,7 +66,7 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
-    boolean acquireWifiLock(IBinder lock, String tag);
+    boolean acquireWifiLock(IBinder lock, int lockType, String tag);
 
     boolean releaseWifiLock(IBinder lock);
 }

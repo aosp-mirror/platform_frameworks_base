@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.content.pm.PackageManager;
@@ -94,8 +95,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     static final Object mStaticInit = new Object();
     static boolean mInitialized = false;
 
-    static final ThreadLocal<Handler> sUiThreads = new ThreadLocal<Handler>();
-    static final RunQueue sRunQueue = new RunQueue();
+    static final ThreadLocal<RunQueue> sRunQueues = new ThreadLocal<RunQueue>();
 
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
@@ -222,13 +222,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mFirst = true; // true for the first time the view is added
         mSurface = new Surface();
         mAdded = false;
-
-        Handler handler = sUiThreads.get();
-        if (handler == null) {
-            handler = new RootHandler();
-            sUiThreads.set(handler);
-        }
-        mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, handler, this);
+        mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
     }
 
     @Override
@@ -617,7 +611,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mKeepScreenOn = false;
             viewVisibilityChanged = false;
             host.dispatchAttachedToWindow(attachInfo, 0);
-            sRunQueue.executeActions(attachInfo.mHandler);
+            getRunQueue().executeActions(attachInfo.mHandler);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
         } else {
             desiredWindowWidth = mWinFrame.width();
@@ -1400,10 +1394,22 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int DISPATCH_APP_VISIBILITY = 1008;
     public final static int DISPATCH_GET_NEW_SURFACE = 1009;
     public final static int FINISHED_EVENT = 1010;
+    public final static int DISPATCH_KEY_FROM_IME = 1011;
+    public final static int FINISH_INPUT_CONNECTION = 1012;
 
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
+        case View.AttachInfo.INVALIDATE_MSG:
+            ((View) msg.obj).invalidate();
+            break;
+        case View.AttachInfo.INVALIDATE_RECT_MSG:
+            int left = msg.arg1 >>> 16;
+            int top = msg.arg1 & 0xFFFF;
+            int right = msg.arg2 >>> 16;
+            int bottom = msg.arg2 & 0xFFFF;
+            ((View) msg.obj).invalidate(left, top, right, bottom);
+            break;
         case DO_TRAVERSAL:
             if (mProfile) {
                 Debug.startMethodTracing("ViewRoot");
@@ -1583,6 +1589,18 @@ public final class ViewRoot extends Handler implements ViewParent,
         case DIE:
             dispatchDetachedFromWindow();
             break;
+        case DISPATCH_KEY_FROM_IME:
+            if (LOCAL_LOGV) Log.v(
+                "ViewRoot", "Dispatching key "
+                + msg.obj + " from IME to " + mView);
+            deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
+            break;
+        case FINISH_INPUT_CONNECTION: {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.reportFinishInputConnection((InputConnection)msg.obj);
+            }
+        } break;
         }
     }
 
@@ -2614,24 +2632,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
-    private static final class RootHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case View.AttachInfo.INVALIDATE_MSG:
-                    ((View) msg.obj).invalidate();
-                    break;
-                case View.AttachInfo.INVALIDATE_RECT_MSG:
-                    int left = msg.arg1 >>> 16;
-                    int top = msg.arg1 & 0xFFFF;
-                    int right = msg.arg2 >>> 16;
-                    int bottom = msg.arg2 & 0xFFFF;
-                    ((View) msg.obj).invalidate(left, top, right, bottom);
-                    break;
-            }
-        }
-    }
-
     private SurfaceHolder mHolder = new SurfaceHolder() {
         // we only need a SurfaceHolder for opengl. it would be nice
         // to implement everything else though, especially the callback
@@ -2681,6 +2681,16 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     };
 
+    static RunQueue getRunQueue() {
+        RunQueue rq = sRunQueues.get();
+        if (rq != null) {
+            return rq;
+        }
+        rq = new RunQueue();
+        sRunQueues.set(rq);
+        return rq;
+    }
+    
     /**
      * @hide
      */

@@ -372,15 +372,13 @@ public class Browser {
                 SEARCHES_WHERE_CLAUSE,
                 new String [] { search },
                 null);
+            ContentValues map = new ContentValues();
+            map.put(SearchColumns.SEARCH, search);
+            map.put(SearchColumns.DATE, now);
             /* We should only get one answer that is exactly the same. */
             if (c.moveToFirst()) {
-                ContentValues map = new ContentValues();
-                map.put(BookmarkColumns.DATE, now);
-                cr.update(BOOKMARKS_URI, map, "_id = " + c.getInt(0), null);
+                cr.update(SEARCHES_URI, map, "_id = " + c.getInt(0), null);
             } else {
-                ContentValues map = new ContentValues();
-                map.put(SearchColumns.SEARCH, search);
-                map.put(SearchColumns.DATE, now);
                 cr.insert(SEARCHES_URI, map);
             }
             c.deactivate();

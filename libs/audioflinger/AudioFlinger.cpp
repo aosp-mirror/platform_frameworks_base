@@ -100,11 +100,11 @@ static bool settingsAllowed() {
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(), Thread(false),
         mMasterVolume(0), mMasterMute(true), mHardwareAudioMixer(0), mA2dpAudioMixer(0),
-        mAudioMixer(0), mAudioHardware(0), mA2dpAudioInterface(0),
-        mHardwareOutput(0), mA2dpOutput(0), mOutput(0), mAudioRecordThread(0),
-        mSampleRate(0), mFrameCount(0), mChannelCount(0), mFormat(0),
-        mMixBuffer(0), mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0),
-        mStandby(false), mInWrite(false)
+        mAudioMixer(0), mAudioHardware(0), mA2dpAudioInterface(0), mHardwareOutput(0),
+        mA2dpOutput(0), mOutput(0), mRequestedOutput(0), mAudioRecordThread(0),
+        mSampleRate(0), mFrameCount(0), mChannelCount(0), mFormat(0), mMixBuffer(0),
+        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mStandby(false),
+        mInWrite(false)
 {
     mHardwareStatus = AUDIO_HW_IDLE;
     mAudioHardware = AudioHardwareInterface::create();
@@ -116,9 +116,9 @@ AudioFlinger::AudioFlinger()
         mHardwareOutput = mAudioHardware->openOutputStream(AudioSystem::PCM_16_BIT, 0, 0, &status);
         mHardwareStatus = AUDIO_HW_IDLE;
         if (mHardwareOutput) {
-            mSampleRate = mHardwareOutput->sampleRate();
-            mHardwareAudioMixer = new AudioMixer(getOutputFrameCount(mHardwareOutput), mSampleRate);
-            setOutput(mHardwareOutput);
+            mHardwareAudioMixer = new AudioMixer(getOutputFrameCount(mHardwareOutput), mHardwareOutput->sampleRate());
+            mRequestedOutput = mHardwareOutput;
+            doSetOutput(mHardwareOutput);
 
             // FIXME - this should come from settings
             setMasterVolume(1.0f);
@@ -159,7 +159,6 @@ AudioFlinger::AudioFlinger()
     }
 
     char value[PROPERTY_VALUE_MAX];
-    // FIXME: What property should this be???
     property_get("ro.audio.silent", value, "0");
     if (atoi(value)) {
         LOGD("Silence is golden");
@@ -173,9 +172,8 @@ AudioFlinger::~AudioFlinger()
         mAudioRecordThread->exit();
         mAudioRecordThread.clear();        
     }
-    delete mOutput;
-    delete mA2dpOutput;
     delete mAudioHardware;
+    // deleting mA2dpAudioInterface also deletes mA2dpOutput;
     delete mA2dpAudioInterface;
     delete [] mMixBuffer;
     delete mHardwareAudioMixer;
@@ -184,26 +182,22 @@ AudioFlinger::~AudioFlinger()
  
 void AudioFlinger::setOutput(AudioStreamOut* output)
 {
-    // lock on mOutputLock to prevent threadLoop() from starving us
-    Mutex::Autolock _l2(mOutputLock);
-    
-    // to synchronize with threadLoop()
-    Mutex::Autolock _l(mLock);
+    mRequestedOutput = output;
+}
 
-    if (mOutput != output) {
-        mSampleRate = output->sampleRate();
-        mChannelCount = output->channelCount();
-    
-        // FIXME - Current mixer implementation only supports stereo output
-        if (mChannelCount == 1) {
-            LOGE("Invalid audio hardware channel count");
-        }
-        mFormat = output->format();
-        mFrameCount = getOutputFrameCount(output);
-                
-        mAudioMixer = (output == mA2dpOutput ? mA2dpAudioMixer : mHardwareAudioMixer);
-        mOutput = output;
+void AudioFlinger::doSetOutput(AudioStreamOut* output)
+{
+    mSampleRate = output->sampleRate();
+    mChannelCount = output->channelCount();
+
+    // FIXME - Current mixer implementation only supports stereo output
+    if (mChannelCount == 1) {
+        LOGE("Invalid audio hardware channel count");
     }
+    mFormat = output->format();
+    mFrameCount = getOutputFrameCount(output);
+    mAudioMixer = (output == mA2dpOutput ? mA2dpAudioMixer : mHardwareAudioMixer);
+    mOutput = output;
 }
 
 size_t AudioFlinger::getOutputFrameCount(AudioStreamOut* output) 
@@ -330,21 +324,11 @@ bool AudioFlinger::threadLoop()
     Vector< sp<Track> > tracksToRemove;
     size_t enabledTracks = 0;
     nsecs_t standbyTime = systemTime();
-    AudioMixer* mixer = 0;
-    size_t frameCount = 0;
-    int channelCount = 0;
-    uint32_t sampleRate = 0;
-    AudioStreamOut* output = 0;
 
     do {
         enabledTracks = 0;
         { // scope for the mLock
         
-            // locking briefly on the secondary mOutputLock is necessary to avoid
-            // having this thread starve the thread that called setOutput()
-            mOutputLock.lock();
-            mOutputLock.unlock();
-
             Mutex::Autolock _l(mLock);
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
 
@@ -354,7 +338,7 @@ bool AudioFlinger::threadLoop()
                 LOGV("Audio hardware entering standby\n");
                 mHardwareStatus = AUDIO_HW_STANDBY;
                 if (!mStandby) {
-                    mAudioHardware->standby();
+                    mOutput->standby();
                     mStandby = true;
                 }
                 mHardwareStatus = AUDIO_HW_IDLE;
@@ -366,15 +350,16 @@ bool AudioFlinger::threadLoop()
                 continue;
             }
 
-            // get active mixer and output parameter while the lock is held and keep them
-            // consistent till the next loop.
-            
-            mixer = audioMixer();
-            frameCount = mFrameCount;
-            channelCount = mChannelCount;
-            sampleRate = mSampleRate;
-            output = mOutput;
-            
+            // check for change in output
+            if (mRequestedOutput != mOutput) {
+
+                // put current output into standby mode
+                if (mOutput) mOutput->standby();
+
+                // change output
+                doSetOutput(mRequestedOutput);
+            }
+
             // find out which tracks need to be processed
             size_t count = activeTracks.size();
             for (size_t i=0 ; i<count ; i++) {
@@ -386,7 +371,7 @@ bool AudioFlinger::threadLoop()
 
                 // The first time a track is added we wait
                 // for all its buffers to be filled before processing it
-                mixer->setActiveTrack(track->name());
+                mAudioMixer->setActiveTrack(track->name());
                 if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
                         !track->isPaused())
                 {
@@ -412,8 +397,8 @@ bool AudioFlinger::threadLoop()
                     }
 
                     // XXX: these things DON'T need to be done each time
-                    mixer->setBufferProvider(track);
-                    mixer->enable(AudioMixer::MIXING);
+                    mAudioMixer->setBufferProvider(track);
+                    mAudioMixer->enable(AudioMixer::MIXING);
 
                     int param;
                     if ( track->mFillingUpStatus == Track::FS_FILLED) {
@@ -428,15 +413,15 @@ bool AudioFlinger::threadLoop()
                     } else {
                         param = AudioMixer::RAMP_VOLUME;
                     }
-                    mixer->setParameter(param, AudioMixer::VOLUME0, left);
-                    mixer->setParameter(param, AudioMixer::VOLUME1, right);
-                    mixer->setParameter(
+                    mAudioMixer->setParameter(param, AudioMixer::VOLUME0, left);
+                    mAudioMixer->setParameter(param, AudioMixer::VOLUME1, right);
+                    mAudioMixer->setParameter(
                         AudioMixer::TRACK,
                         AudioMixer::FORMAT, track->format());
-                    mixer->setParameter(
+                    mAudioMixer->setParameter(
                         AudioMixer::TRACK,
                         AudioMixer::CHANNEL_COUNT, track->channelCount());
-                    mixer->setParameter(
+                    mAudioMixer->setParameter(
                         AudioMixer::RESAMPLE,
                         AudioMixer::SAMPLE_RATE,
                         int(cblk->sampleRate));
@@ -463,7 +448,7 @@ bool AudioFlinger::threadLoop()
                         }
                     }
                     // LOGV("disable(%d)", track->name());
-                    mixer->disable(AudioMixer::MIXING);
+                    mAudioMixer->disable(AudioMixer::MIXING);
                 }
             }
 
@@ -475,27 +460,27 @@ bool AudioFlinger::threadLoop()
                     mActiveTracks.remove(track);
                     if (track->isTerminated()) {
                         mTracks.remove(track);
-                        mixer->deleteTrackName(track->mName);
+                        mAudioMixer->deleteTrackName(track->mName);
                     }
                 }
             }  
        }
         if (LIKELY(enabledTracks)) {
             // mix buffers...
-            mixer->process(curBuf);
+            mAudioMixer->process(curBuf);
 
             // output audio to hardware
             mLastWriteTime = systemTime();
             mInWrite = true;
-            size_t mixBufferSize = frameCount*channelCount*sizeof(int16_t);
-            output->write(curBuf, mixBufferSize);
+            size_t mixBufferSize = mFrameCount*mChannelCount*sizeof(int16_t);
+            mOutput->write(curBuf, mixBufferSize);
             mNumWrites++;
             mInWrite = false;
             mStandby = false;
             nsecs_t temp = systemTime();
             standbyTime = temp + kStandbyTimeInNsecs;
             nsecs_t delta = temp - mLastWriteTime;
-            nsecs_t maxPeriod = seconds(frameCount) / sampleRate * 2;
+            nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 2;
             if (delta > maxPeriod) {
                 LOGW("write blocked for %llu msecs", ns2ms(delta));
                 mNumDelayedWrites++;
@@ -653,6 +638,8 @@ status_t AudioFlinger::setMasterVolume(float value)
 
 status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
 {
+    status_t err = NO_ERROR;
+
     // check calling permissions
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
@@ -677,16 +664,20 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
     }
 #endif
 
-    AutoMutex lock(mHardwareLock);
-    mHardwareStatus = AUDIO_HW_GET_ROUTING;
-    uint32_t r;
-    uint32_t err = mAudioHardware->getRouting(mode, &r);
-    if (err == NO_ERROR) {
-        r = (r & ~mask) | (routes & mask);
-        mHardwareStatus = AUDIO_HW_SET_ROUTING;
-        err = mAudioHardware->setRouting(mode, r);
+    // do nothing if only A2DP routing is affected
+    mask &= ~AudioSystem::ROUTE_BLUETOOTH_A2DP;
+    if (mask) {
+        AutoMutex lock(mHardwareLock);
+        mHardwareStatus = AUDIO_HW_GET_ROUTING;
+        uint32_t r;
+        err = mAudioHardware->getRouting(mode, &r);
+        if (err == NO_ERROR) {
+            r = (r & ~mask) | (routes & mask);
+            mHardwareStatus = AUDIO_HW_SET_ROUTING;
+            err = mAudioHardware->setRouting(mode, r);
+        }
+        mHardwareStatus = AUDIO_HW_IDLE;
     }
-    mHardwareStatus = AUDIO_HW_IDLE;
     return err;
 }
 

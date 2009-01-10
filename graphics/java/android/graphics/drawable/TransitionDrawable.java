@@ -20,9 +20,19 @@ import android.graphics.Canvas;
 import android.os.SystemClock;
 
 /**
- * Transition drawables are an extension of LayerDrawables and are intended to cross fade between
- * the first and second layers. To start the transition, call {@link #startTransition(int)}. To
- * display just the first layer, call {@link #resetTransition()}
+ * An extension of LayerDrawables that is intended to cross-fade between
+ * the first and second layer. To start the transition, call {@link #startTransition(int)}. To
+ * display just the first layer, call {@link #resetTransition()}.
+ * <p>
+ * It can be defined in an XML file with the <code>&lt;transition></code> element.
+ * Each Drawable in the transition is defined in a nested <code>&lt;item></code>.
+ * </p>
+ * @attr ref android.R.styleable#LayerDrawableItem_left
+ * @attr ref android.R.styleable#LayerDrawableItem_top
+ * @attr ref android.R.styleable#LayerDrawableItem_right
+ * @attr ref android.R.styleable#LayerDrawableItem_bottom
+ * @attr ref android.R.styleable#LayerDrawableItem_drawable
+ * @attr ref android.R.styleable#LayerDrawableItem_id
  *
  */
 public class TransitionDrawable extends LayerDrawable implements Drawable.Callback {

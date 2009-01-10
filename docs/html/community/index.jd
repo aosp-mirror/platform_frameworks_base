@@ -2,7 +2,7 @@ community=true
 page.title=Community
 @jd:body
 
-	<div id="mainBodyFixed">
+	<div id="mainBodyFluid">
 			<h1>Community</h1>
 			<p>Welcome to the Android community! We're glad you're here and invite you to participate in these discussions. Before posting, please red the <a href="#">Groups Charter</a> that covers the community guidelines.</p>
 			<p>To get the most out of this group, please do the following before you post:</p>

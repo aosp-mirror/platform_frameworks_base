@@ -31,6 +31,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -75,6 +76,7 @@ public final class SearchableInfo implements Parcelable {
     public boolean mQueryRewriteFromText = false;
     private int mIconId = 0;
     private int mSearchButtonText = 0;
+    private int mSearchInputType = 0;
     private String mSuggestAuthority = null;
     private String mSuggestPath = null;
     private String mSuggestSelection = null;
@@ -415,6 +417,10 @@ public final class SearchableInfo implements Parcelable {
             mIconId = a.getResourceId(com.android.internal.R.styleable.Searchable_icon, 0);
             mSearchButtonText = a.getResourceId(
                     com.android.internal.R.styleable.Searchable_searchButtonText, 0);
+            mSearchInputType = a.getInt(com.android.internal.R.styleable.Searchable_inputType, 
+                    InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_FLAG_SEARCH |
+                    InputType.TYPE_TEXT_VARIATION_SEARCH_STRING);
 
             setSearchModeFlags();
             if (DBG_INHIBIT_SUGGESTIONS == 0) {
@@ -657,6 +663,16 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
+     * Return the input type as specified in the searchable attributes.  This will default to
+     * InputType.TYPE_CLASS_TEXT if not specified (which is appropriate for free text input).
+     * 
+     * @return the input type
+     */
+    public int getInputType() {
+        return mSearchInputType;
+    }
+    
+    /**
      * Return the list of searchable activities, for use in the drop-down.
      */
     public static ArrayList<SearchableInfo> getSearchablesList() {
@@ -694,6 +710,7 @@ public final class SearchableInfo implements Parcelable {
         mSearchMode = in.readInt();
         mIconId = in.readInt();
         mSearchButtonText = in.readInt();
+        mSearchInputType = in.readInt();
         setSearchModeFlags();
 
         mSuggestAuthority = in.readString();
@@ -722,6 +739,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchMode);
         dest.writeInt(mIconId);
         dest.writeInt(mSearchButtonText);
+        dest.writeInt(mSearchInputType);
         
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);

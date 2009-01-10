@@ -57,8 +57,9 @@ public abstract class BaseInputConnection implements InputConnection {
                     h = mIMM.mServedView.getHandler();
                 }
             }
-            if (h != null && mTargetView != null) {
-                h.post(new DispatchKey(event, mTargetView.getRootView()));
+            if (h != null) {
+                h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                        event));
             }
         }
         return false;
@@ -80,19 +81,5 @@ public abstract class BaseInputConnection implements InputConnection {
     public boolean showStatusIcon(String packageName, int resId) {
         mIMM.updateStatusIcon(resId, packageName);
         return true;
-    }
-    
-    static class DispatchKey implements Runnable {
-        KeyEvent mEvent;
-        View mView;
-        
-        DispatchKey(KeyEvent event, View v) {
-            mEvent = event;
-            mView = v;
-        }
-        
-        public void run() {
-            mView.dispatchKeyEvent(mEvent);
-        }
     }
 }

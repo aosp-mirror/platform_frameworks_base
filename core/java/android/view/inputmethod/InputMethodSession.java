@@ -53,9 +53,14 @@ public interface InputMethodSession {
      * start position.
      * @param newSelEnd The new text offset of the cursor selection
      * end position.
+     * @param candidatesStart The text offset of the current candidate
+     * text start position.
+     * @param candidatesEnd The text offset of the current candidate
+     * text end position.
      */
     public void updateSelection(int oldSelStart, int oldSelEnd,
-            int newSelStart, int newSelEnd);
+            int newSelStart, int newSelEnd,
+            int candidatesStart, int candidatesEnd);
 
     /**
      * This method is called when cursor location of the target input field

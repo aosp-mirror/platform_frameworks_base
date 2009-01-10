@@ -16,16 +16,16 @@
 
 package android.widget;
 
-import java.util.ArrayList;
-import java.util.Random;
+import com.android.internal.database.ArrayListCursor;
+import com.google.android.collect.Lists;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.internal.database.ArrayListCursor;
-import com.google.android.collect.Lists;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * This is a series of tests of basic API contracts for SimpleCursorAdapter.  It is
@@ -34,7 +34,7 @@ import com.google.android.collect.Lists;
  * NOTE:  This contract holds for underlying cursor types too and these should
  * be extracted into a set of tests that can be run on any descendant of CursorAdapter.
  */
-public class SimpleCursorAdapterTest extends InstrumentationTestCase {
+public class SimpleCursorAdapterTest extends AndroidTestCase {
     
     String[] mFrom;
     int[] mTo;
@@ -55,7 +55,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
         mFrom = new String[]{"Column1", "Column2"};
         mTo = new int[]{com.android.internal.R.id.text1, com.android.internal.R.id.text2};
         mLayout = com.android.internal.R.layout.simple_list_item_2;
-        mContext = getInstrumentation().getTargetContext();
+        mContext = getContext();
 
         // raw data for building a basic test cursor
         mData2x2 = createTestList(2, 2);
@@ -65,7 +65,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     /**
      * Borrowed from CursorWindowTest.java
      */
-    private static ArrayList<ArrayList> createTestList(int rows, int cols) {
+    private ArrayList<ArrayList> createTestList(int rows, int cols) {
         ArrayList<ArrayList> list = Lists.newArrayList();
         Random generator = new Random();
 
@@ -84,7 +84,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     /**
      * Test creating with a live cursor
      */
-    @MediumTest
+    @SmallTest
     public void testCreateLive() {
         SimpleCursorAdapter ca = new SimpleCursorAdapter(mContext, mLayout, mCursor2x2, mFrom, mTo);
         
@@ -95,7 +95,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     /**
      * Test creating with a null cursor
      */
-    @MediumTest
+    @SmallTest
     public void testCreateNull() {
         SimpleCursorAdapter ca = new SimpleCursorAdapter(mContext, mLayout, null, mFrom, mTo);
         
@@ -106,7 +106,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     /**
      * Test changeCursor() with live cursor
      */
-    @MediumTest
+    @SmallTest
     public void testChangeCursorLive() {
         SimpleCursorAdapter ca = new SimpleCursorAdapter(mContext, mLayout, mCursor2x2, mFrom, mTo);
         
@@ -125,7 +125,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     /**
      * Test changeCursor() with null cursor
      */
-    @MediumTest
+    @SmallTest
     public void testChangeCursorNull() {
         SimpleCursorAdapter ca = new SimpleCursorAdapter(mContext, mLayout, mCursor2x2, mFrom, mTo);
         
@@ -144,7 +144,7 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
      * deal with cursors that have the same essential data (as defined by the original mFrom
      * array) but it's OK if the physical structure of the cursor changes (columns rearranged).
      */
-    @MediumTest
+    @SmallTest
     public void testChangeCursorColumns() {
         TestSimpleCursorAdapter ca = new TestSimpleCursorAdapter(mContext, mLayout, mCursor2x2, 
                 mFrom, mTo);
@@ -167,11 +167,81 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
     }
     
     /**
+     * Test that you can safely construct with a null cursor *and* null to/from arrays.
+     * This is new functionality added in 12/2008.
+     */
+    @SmallTest
+    public void testNullConstructor() {
+        SimpleCursorAdapter ca = new SimpleCursorAdapter(mContext, mLayout, null, null, null);
+        assertEquals(0, ca.getCount());
+    }
+    
+    /**
+     * Test going from a null cursor to a non-null cursor *and* setting the to/from arrays
+     * This is new functionality added in 12/2008.
+     */
+    @SmallTest
+    public void testChangeNullToMapped() {
+        TestSimpleCursorAdapter ca = new TestSimpleCursorAdapter(mContext, mLayout, null, null, null);
+        assertEquals(0, ca.getCount());
+
+        ca.changeCursorAndColumns(mCursor2x2, mFrom, mTo);
+        assertEquals(2, ca.getCount());
+        
+        // check columns of original - mFrom and mTo should line up
+        int[] columns = ca.getConvertedFrom();
+        assertEquals(2, columns.length);
+        assertEquals(0, columns[0]);
+        assertEquals(1, columns[1]);
+        int[] viewIds = ca.getTo();
+        assertEquals(2, viewIds.length);
+        assertEquals(com.android.internal.R.id.text1, viewIds[0]);
+        assertEquals(com.android.internal.R.id.text2, viewIds[1]);
+    }
+    
+    /**
+     * Test going from one mapping to a different mapping
+     * This is new functionality added in 12/2008.
+     */
+    @SmallTest
+    public void testChangeMapping() {
+        TestSimpleCursorAdapter ca = new TestSimpleCursorAdapter(mContext, mLayout, mCursor2x2, 
+                mFrom, mTo);
+        assertEquals(2, ca.getCount());
+
+        // Now create a new configuration with same cursor and just one column mapped
+        String[] singleFrom = new String[]{"Column1"};
+        int[] singleTo = new int[]{com.android.internal.R.id.text1};
+        ca.changeCursorAndColumns(mCursor2x2, singleFrom, singleTo);
+
+        // And examine the results, make sure they're still consistent
+        int[] columns = ca.getConvertedFrom();
+        assertEquals(1, columns.length);
+        assertEquals(0, columns[0]);
+        int[] viewIds = ca.getTo();
+        assertEquals(1, viewIds.length);
+        assertEquals(com.android.internal.R.id.text1, viewIds[0]);
+        
+        // And again, same cursor, different map
+        singleFrom = new String[]{"Column2"};
+        singleTo = new int[]{com.android.internal.R.id.text2};
+        ca.changeCursorAndColumns(mCursor2x2, singleFrom, singleTo);
+
+        // And examine the results, make sure they're still consistent
+        columns = ca.getConvertedFrom();
+        assertEquals(1, columns.length);
+        assertEquals(1, columns[0]);
+        viewIds = ca.getTo();
+        assertEquals(1, viewIds.length);
+        assertEquals(com.android.internal.R.id.text2, viewIds[0]);
+    }
+    
+    /**
      * This is simply a way to sneak a look at the protected mFrom() array.  A more API-
      * friendly way to do this would be to mock out a View and a ViewBinder and exercise
      * it via those seams.
      */
-    private class TestSimpleCursorAdapter extends SimpleCursorAdapter {
+    private static class TestSimpleCursorAdapter extends SimpleCursorAdapter {
         
         public TestSimpleCursorAdapter(Context context, int layout, Cursor c,
                 String[] from, int[] to) {
@@ -180,6 +250,10 @@ public class SimpleCursorAdapterTest extends InstrumentationTestCase {
 
         int[] getConvertedFrom() {
             return mFrom;
+        }
+        
+        int[] getTo() {
+            return mTo;
         }
     }
 }

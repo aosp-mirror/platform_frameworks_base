@@ -28,4 +28,5 @@ interface IPowerManager
     void setPokeLock(int pokey, IBinder lock, String tag);
     void setStayOnSetting(int val);
     long getScreenOnTime();
+    void preventScreenOn(boolean prevent);
 }

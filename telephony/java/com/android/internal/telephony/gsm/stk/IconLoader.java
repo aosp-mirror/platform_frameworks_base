@@ -67,7 +67,6 @@ class IconLoader extends Handler {
     // CLUT entry size, {Red, Green, Black}
     private static final int CLUT_ENTRY_SIZE = 3;
 
-    static private final String TAG = "STK IconLoader"; 
 
     private IconLoader(Looper looper , SIMFileHandler fh) {
         super(looper);
@@ -128,6 +127,7 @@ class IconLoader extends Handler {
         readId();
     }
 
+    @Override
     public void handleMessage(Message msg) {
         AsyncResult ar;
 
@@ -163,7 +163,7 @@ class IconLoader extends Handler {
                 break;
             }
         } catch (Exception e) {
-            Log.d(TAG, "Icon load failed");
+            StkLog.d(this, "Icon load failed");
             // post null icon back to the caller.
             postIcon();
         }
@@ -251,10 +251,10 @@ class IconLoader extends Handler {
                 bitIndex = 7;
             }
             pixels[pixelIndex++] = bitToBnW((currentByte >> bitIndex-- ) & 0x01);
-        };
+        }
 
         if (pixelIndex != numOfPixels) {
-            Log.e(TAG, "parse end and size error");
+            StkLog.d("IconLoader", "parseToBnW; size error");
         }
         return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
     }

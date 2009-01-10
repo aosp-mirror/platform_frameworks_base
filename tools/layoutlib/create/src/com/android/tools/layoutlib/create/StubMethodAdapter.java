@@ -74,23 +74,14 @@ class StubMethodAdapter implements MethodVisitor {
         } else {
             mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         }
-        mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
-                "com/android/tools/layoutlib/create/OverrideMethod",
-                "invoke",
-                "(Ljava/lang/String;ZLjava/lang/Object;)V");
-    }
 
-    private void generateReturn() {
-        /* Generates one of, depending on the return type:
-         *   return;
-         *   return 0;
-         *   return 0L;
-         *   return 0.0f;
-         *   return 0.0;
-         *   return null;
-         */
-        switch(mReturnType != null ? mReturnType.getSort() : Type.VOID) {
+        int sort = mReturnType != null ? mReturnType.getSort() : Type.VOID;
+        switch(sort) {
         case Type.VOID:
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeV",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)V");
             mParentVisitor.visitInsn(Opcodes.RETURN);
             break;
         case Type.BOOLEAN:
@@ -98,25 +89,84 @@ class StubMethodAdapter implements MethodVisitor {
         case Type.BYTE:
         case Type.SHORT:
         case Type.INT:
-            mParentVisitor.visitInsn(Opcodes.ICONST_0);
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeI",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)I");
+            switch(sort) {
+            case Type.BOOLEAN:
+                Label l1 = new Label();
+                mParentVisitor.visitJumpInsn(Opcodes.IFEQ, l1);
+                mParentVisitor.visitInsn(Opcodes.ICONST_1);
+                mParentVisitor.visitInsn(Opcodes.IRETURN);
+                mParentVisitor.visitLabel(l1);
+                mParentVisitor.visitInsn(Opcodes.ICONST_0);
+                break;
+            case Type.CHAR:
+                mParentVisitor.visitInsn(Opcodes.I2C);
+                break;
+            case Type.BYTE:
+                mParentVisitor.visitInsn(Opcodes.I2B);
+                break;
+            case Type.SHORT:
+                mParentVisitor.visitInsn(Opcodes.I2S);
+                break;
+            }
             mParentVisitor.visitInsn(Opcodes.IRETURN);
             break;
         case Type.LONG:
-            mParentVisitor.visitInsn(Opcodes.LCONST_0);
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeL",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)J");
             mParentVisitor.visitInsn(Opcodes.LRETURN);
             break;
         case Type.FLOAT:
-            mParentVisitor.visitInsn(Opcodes.FCONST_0);
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeF",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)F");
             mParentVisitor.visitInsn(Opcodes.FRETURN);
             break;
         case Type.DOUBLE:
-            mParentVisitor.visitInsn(Opcodes.DCONST_0);
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeD",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)D");
             mParentVisitor.visitInsn(Opcodes.DRETURN);
             break;
         case Type.ARRAY:
         case Type.OBJECT:
-            mParentVisitor.visitInsn(Opcodes.ACONST_NULL);
+            mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "com/android/tools/layoutlib/create/OverrideMethod",
+                    "invokeA",
+                    "(Ljava/lang/String;ZLjava/lang/Object;)Ljava/lang/Object;");
+            mParentVisitor.visitTypeInsn(Opcodes.CHECKCAST, mReturnType.getInternalName());
             mParentVisitor.visitInsn(Opcodes.ARETURN);
+            break;
+        }
+
+    }
+
+    private void generatePop() {
+        /* Pops the stack, depending on the return type.
+         */
+        switch(mReturnType != null ? mReturnType.getSort() : Type.VOID) {
+        case Type.VOID:
+            break;
+        case Type.BOOLEAN:
+        case Type.CHAR:
+        case Type.BYTE:
+        case Type.SHORT:
+        case Type.INT:
+        case Type.FLOAT:
+        case Type.ARRAY:
+        case Type.OBJECT:
+            mParentVisitor.visitInsn(Opcodes.POP);
+            break;
+        case Type.LONG:
+        case Type.DOUBLE:
+            mParentVisitor.visitInsn(Opcodes.POP2);
             break;
         }
     }
@@ -134,7 +184,6 @@ class StubMethodAdapter implements MethodVisitor {
     public void visitMaxs(int maxStack, int maxLocals) {
         if (!mIsInitMethod && !mMessageGenerated) {
             generateInvoke();
-            generateReturn();
             mMessageGenerated = true;
         }
         mParentVisitor.visitMaxs(maxStack, maxLocals);
@@ -148,7 +197,6 @@ class StubMethodAdapter implements MethodVisitor {
     public void visitEnd() {
         if (!mIsInitMethod && !mMessageGenerated) {
             generateInvoke();
-            generateReturn();
             mMessageGenerated = true;
             mParentVisitor.visitMaxs(1, 1);
         }
@@ -198,10 +246,13 @@ class StubMethodAdapter implements MethodVisitor {
             case Opcodes.FRETURN:
             case Opcodes.IRETURN:
             case Opcodes.LRETURN:
+                // Pop the last word from the stack since invoke will generate its own return.
+                generatePop();
                 generateInvoke();
                 mMessageGenerated = true;
+            default:
+                mParentVisitor.visitInsn(opcode);
             }
-            mParentVisitor.visitInsn(opcode);
         }
     }
 

@@ -47,7 +47,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.BatteryManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.text.TextUtils;
@@ -67,7 +66,7 @@ import java.io.PrintWriter;
  * the IWifiManager interface. It also creates a WifiMonitor to listen
  * for Wifi-related events.
  *
- * {@hide}
+ * @hide
  */
 public class WifiService extends IWifiManager.Stub {
     private static final String TAG = "WifiService";
@@ -106,9 +105,9 @@ public class WifiService extends IWifiManager.Stub {
     private static final int DEFAULT_WAKELOCK_TIMEOUT = 8000;
 
     // Wake lock used by driver-stop operation
-    private static PowerManager.WakeLock mDriverStopWakeLock;
+    private static PowerManager.WakeLock sDriverStopWakeLock;
     // Wake lock used by other operations
-    private static PowerManager.WakeLock mWakeLock;
+    private static PowerManager.WakeLock sWakeLock;
 
     private static final int MESSAGE_ENABLE_WIFI      = 0;
     private static final int MESSAGE_DISABLE_WIFI     = 1;
@@ -116,7 +115,7 @@ public class WifiService extends IWifiManager.Stub {
     private static final int MESSAGE_START_WIFI       = 3;
     private static final int MESSAGE_RELEASE_WAKELOCK = 4;
 
-    private WifiHandler mWifiHandler;
+    private final  WifiHandler mWifiHandler;
 
     /*
      * Map used to keep track of hidden networks presence, which
@@ -197,17 +196,17 @@ public class WifiService extends IWifiManager.Stub {
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-        mDriverStopWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+        sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+        sDriverStopWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
         mWifiStateTracker.setReleaseWakeLockCallback(
                 new Runnable() {
                     public void run() {
                         mWifiHandler.removeMessages(MESSAGE_RELEASE_WAKELOCK);
-                        synchronized (mDriverStopWakeLock) {
-                            if (mDriverStopWakeLock.isHeld()) {
+                        synchronized (sDriverStopWakeLock) {
+                            if (sDriverStopWakeLock.isHeld()) {
                                 if (DBG) Log.d(TAG, "Releasing driver-stop wakelock " +
-                                        mDriverStopWakeLock);
-                                mDriverStopWakeLock.release();
+                                        sDriverStopWakeLock);
+                                sDriverStopWakeLock.release();
                             }
                         }
                     }
@@ -435,7 +434,7 @@ public class WifiService extends IWifiManager.Stub {
          * before adding a new one
          */
         synchronized (mWifiHandler) {
-            mWakeLock.acquire();
+            sWakeLock.acquire();
             sendEnableMessage(enable, true);
         }
 
@@ -679,7 +678,7 @@ public class WifiService extends IWifiManager.Stub {
         if (!TextUtils.isEmpty(value)) {
             try {
                 config.priority = Integer.parseInt(value);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignore) {
             }
         }
 
@@ -688,7 +687,7 @@ public class WifiService extends IWifiManager.Stub {
         if (!TextUtils.isEmpty(value)) {
             try {
                 config.hiddenSSID = Integer.parseInt(value) != 0;
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignore) {
             }
         }
 
@@ -697,7 +696,7 @@ public class WifiService extends IWifiManager.Stub {
         if (!TextUtils.isEmpty(value)) {
             try {
                 config.wepTxKeyIndex = Integer.parseInt(value);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignore) {
             }
         }
 
@@ -823,7 +822,7 @@ public class WifiService extends IWifiManager.Stub {
             if (!TextUtils.isEmpty(priorityVal)) {
                 try {
                     currentPriority = Integer.parseInt(priorityVal);
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException ignore) {
                 }
             }
             doReconfig = currentPriority != config.priority;
@@ -1473,7 +1472,7 @@ public class WifiService extends IWifiManager.Stub {
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND we are transitioning from a state in which the device was supposed
-                 * to stay awake and a state in which it is not supposed to stay awake.
+                 * to stay awake to a state in which it is not supposed to stay awake.
                  * If "stay awake" state is not changing, we do nothing, to avoid resetting
                  * the already-set timer.
                  */
@@ -1499,7 +1498,7 @@ public class WifiService extends IWifiManager.Stub {
          * of {@code 0} isn't really a plugged type, but rather an indication that the
          * device isn't plugged in at all, there is no bit value corresponding to a
          * {@code pluggedType} value of {@code 0}. That is why we shift by
-         * {@code pluggedType&nbsp;&mdash;&nbsp;1} instead of by {@code pluggedType}.
+         * {@code pluggedType&nbsp;&#8212;&nbsp;1} instead of by {@code pluggedType}.
          * @param stayAwakeConditions a bit string specifying which "plugged types" should
          * keep the device (and hence Wi-Fi) awake.
          * @param pluggedType the type of plug (USB, AC, or none) for which the check is
@@ -1519,33 +1518,44 @@ public class WifiService extends IWifiManager.Stub {
         msg.sendToTarget();
     }
 
+    private void sendStartMessage(boolean scanOnlyMode) {
+        if (DBG) Log.d(TAG, "sendStartMessage(" + scanOnlyMode + ")");
+        Message.obtain(mWifiHandler, MESSAGE_START_WIFI, scanOnlyMode ? 1 : 0, 0).sendToTarget();
+    }
+
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn();
         boolean lockHeld = mLocks.hasLocks();
+        int strongestLockMode;
 
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
         boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
+        if (mDeviceIdle && lockHeld) {
+            strongestLockMode = mLocks.getStrongestLockMode();
+        } else {
+            strongestLockMode = WifiManager.WIFI_MODE_FULL;
+        }
 
         synchronized (mWifiHandler) {
             if (wifiShouldBeEnabled) {
                 if (wifiShouldBeStarted) {
-                    mWakeLock.acquire();
+                    sWakeLock.acquire();
                     sendEnableMessage(true, false);
-                    mWakeLock.acquire();
-                    mWifiHandler.sendEmptyMessage(MESSAGE_START_WIFI);
+                    sWakeLock.acquire();
+                    sendStartMessage(strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
                 } else {
                     int wakeLockTimeout =
                             Settings.Secure.getInt(
                                     mContext.getContentResolver(),
                                     Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
                                     DEFAULT_WAKELOCK_TIMEOUT);
-                    mDriverStopWakeLock.acquire();
+                    sDriverStopWakeLock.acquire();
                     mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
                     mWifiHandler.sendEmptyMessageDelayed(MESSAGE_RELEASE_WAKELOCK, wakeLockTimeout);
                 }
             } else {
-                mWakeLock.acquire();
+                sWakeLock.acquire();
                 sendEnableMessage(false, false);
             }
         }
@@ -1590,37 +1600,36 @@ public class WifiService extends IWifiManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
 
-                case MESSAGE_ENABLE_WIFI: {
+                case MESSAGE_ENABLE_WIFI:
                     setWifiEnabledBlocking(true, msg.arg1 == 1);
-                    /* fall through */
-                }
-
-                case MESSAGE_START_WIFI: {
-                    mWifiStateTracker.startDriver();
-                    mWakeLock.release();
+                    sWakeLock.release();
                     break;
-                }
 
-                case MESSAGE_DISABLE_WIFI: {
+                case MESSAGE_START_WIFI:
+                    mWifiStateTracker.setScanOnlyMode(msg.arg1 != 0);
+                    mWifiStateTracker.restart();
+                    sWakeLock.release();
+                    break;
+
+                case MESSAGE_DISABLE_WIFI:
+                    // a non-zero msg.arg1 value means the "enabled" setting
+                    // should be persisted
                     setWifiEnabledBlocking(false, msg.arg1 == 1);
-                    mWakeLock.release();
+                    sWakeLock.release();
                     break;
-                }
 
-                case MESSAGE_STOP_WIFI: {
-                    mWifiStateTracker.stopDriver();
+                case MESSAGE_STOP_WIFI:
+                    mWifiStateTracker.disconnectAndStop();
                     // don't release wakelock
                     break;
-                }
 
-                case MESSAGE_RELEASE_WAKELOCK: {
-                    synchronized (mDriverStopWakeLock) {
-                        if (mDriverStopWakeLock.isHeld()) {
-                            mDriverStopWakeLock.release();
+                case MESSAGE_RELEASE_WAKELOCK:
+                    synchronized (sDriverStopWakeLock) {
+                        if (sDriverStopWakeLock.isHeld()) {
+                            sDriverStopWakeLock.release();
                         }
                     }
                     break;
-                }
             }
         }
     }
@@ -1653,6 +1662,9 @@ public class WifiService extends IWifiManager.Stub {
                                          r.SSID == null ? "" : r.SSID);
             }
         }
+        pw.println();
+        pw.println("Locks held:");
+        mLocks.dump(pw);
     }
 
     private static String stateName(int wifiState) {
@@ -1674,11 +1686,13 @@ public class WifiService extends IWifiManager.Stub {
 
     private class WifiLock implements IBinder.DeathRecipient {
         String mTag;
+        int mLockMode;
         IBinder mBinder;
 
-        WifiLock(String tag, IBinder binder) {
+        WifiLock(int lockMode, String tag, IBinder binder) {
             super();
             mTag = tag;
+            mLockMode = lockMode;
             mBinder = binder;
             try {
                 mBinder.linkToDeath(this, 0);
@@ -1694,30 +1708,40 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         public String toString() {
-            return "WifiLock{" + mTag + " binder=" + mBinder + "}";
+            return "WifiLock{" + mTag + " type=" + mLockMode + " binder=" + mBinder + "}";
         }
     }
 
     private class LockList {
-        private ArrayList<WifiLock> mList;
+        private List<WifiLock> mList;
 
-        public LockList() {
+        private LockList() {
             mList = new ArrayList<WifiLock>();
         }
 
-        public boolean hasLocks() {
+        private synchronized boolean hasLocks() {
             return !mList.isEmpty();
         }
 
-        public void addLock(WifiLock lock) {
-            int index = findLockByBinder(lock.mBinder);
-            if (index < 0) {
+        private synchronized int getStrongestLockMode() {
+            if (mList.isEmpty()) {
+                return WifiManager.WIFI_MODE_FULL;
+            }
+            for (WifiLock l : mList) {
+                if (l.mLockMode == WifiManager.WIFI_MODE_FULL) {
+                    return WifiManager.WIFI_MODE_FULL;
+                }
+            }
+            return WifiManager.WIFI_MODE_SCAN_ONLY;
+        }
+
+        private void addLock(WifiLock lock) {
+            if (findLockByBinder(lock.mBinder) < 0) {
                 mList.add(lock);
-            } else {
             }
         }
 
-        public WifiLock removeLock(IBinder binder) {
+        private WifiLock removeLock(IBinder binder) {
             int index = findLockByBinder(binder);
             if (index >= 0) {
                 return mList.remove(index);
@@ -1733,11 +1757,28 @@ public class WifiService extends IWifiManager.Stub {
                     return i;
             return -1;
         }
+
+        private synchronized void clear() {
+            if (!mList.isEmpty()) {
+                mList.clear();
+                updateWifiState();
+            }
+        }
+
+        private void dump(PrintWriter pw) {
+            for (WifiLock l : mList) {
+                pw.print("    ");
+                pw.println(l);
+            }
+        }
     }
 
-    public boolean acquireWifiLock(IBinder binder, String tag) {
+    public boolean acquireWifiLock(IBinder binder, int lockMode, String tag) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        WifiLock wifiLock = new WifiLock(tag, binder);
+        if (lockMode != WifiManager.WIFI_MODE_FULL && lockMode != WifiManager.WIFI_MODE_SCAN_ONLY) {
+            return false;
+        }
+        WifiLock wifiLock = new WifiLock(lockMode, tag, binder);
         synchronized (mLocks) {
             return acquireWifiLockLocked(wifiLock);
         }

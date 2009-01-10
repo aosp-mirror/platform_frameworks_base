@@ -250,7 +250,7 @@ void DisplayHardware::init(uint32_t dpy)
 
     mOverlayEngine = NULL;
     if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
-        overlay_open(module, &mOverlayEngine);
+        overlay_control_open(module, &mOverlayEngine);
     }
 }
 
@@ -266,7 +266,7 @@ void DisplayHardware::fini()
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(mDisplay);
     copybit_close(mBlitEngine);
-    overlay_close(mOverlayEngine);
+    overlay_control_close(mOverlayEngine);
 }
 
 void DisplayHardware::releaseScreen() const

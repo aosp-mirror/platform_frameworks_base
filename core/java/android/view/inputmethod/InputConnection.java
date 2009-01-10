@@ -26,6 +26,9 @@ import android.view.KeyEvent;
  * {@link InputMethod} back to the application that is receiving its input. It
  * is used to perform such things as reading text around the cursor,
  * committing text to the text box, and sending raw key events to the application.
+ * 
+ * <p>Implementations of this interface should generally be done by
+ * subclassing {@link BaseInputConnection}.
  */
 public interface InputConnection {
     /**
@@ -136,6 +139,14 @@ public interface InputConnection {
      */
     public boolean setComposingText(CharSequence text, int newCursorPosition);
 
+    /**
+     * Have the text editor finish whatever composing text is currently
+     * active.  This simple leaves the text as-is, removing any special
+     * composing styling or other state that was around it.  The cursor
+     * position remains unchanged.
+     */
+    public boolean finishComposingText();
+    
     /**
      * Commit text to the text box and set the new cursor position.
      * Any composing text set previously will be removed

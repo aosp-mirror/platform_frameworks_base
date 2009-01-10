@@ -23,6 +23,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_COMMIT_TEXT = 50;
     private static final int DO_COMMIT_COMPLETION = 55;
     private static final int DO_SET_COMPOSING_TEXT = 60;
+    private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
     private static final int DO_DELETE_SURROUNDING_TEXT = 80;
     private static final int DO_HIDE_STATUS_ICON = 100;
@@ -87,6 +88,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void setComposingText(CharSequence text, int newCursorPosition) {
         dispatchMessage(obtainMessageIO(DO_SET_COMPOSING_TEXT, newCursorPosition, text));
+    }
+
+    public void finishComposingText() {
+        dispatchMessage(obtainMessage(DO_FINISH_COMPOSING_TEXT));
     }
 
     public void sendKeyEvent(KeyEvent event) {
@@ -179,6 +184,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
             }
             case DO_SET_COMPOSING_TEXT: {
                 mInputConnection.setComposingText((CharSequence)msg.obj, msg.arg1);
+                return;
+            }
+            case DO_FINISH_COMPOSING_TEXT: {
+                mInputConnection.finishComposingText();
                 return;
             }
             case DO_SEND_KEY_EVENT: {

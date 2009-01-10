@@ -618,10 +618,151 @@ static bool patch_equals(Res_png_9patch& patch1, Res_png_9patch& patch2) {
     return true;
 }
 
+
+static void analyze_image(image_info &imageInfo, png_colorp rgbPalette, png_bytep alphaPalette,
+                          int *paletteEntries, bool *hasTransparency, int *colorType,
+                          png_bytepp outRows)
+{
+    int w = imageInfo.width;
+    int h = imageInfo.height;
+    bool trans = imageInfo.hasTransparency;
+    int i, j, rr, gg, bb, aa, idx;
+    uint32_t colors[256], col;
+    int num_colors = 0;
+
+    bool isOpaque = true;
+    bool isPalette = true;
+    bool isGrayscale = true;
+
+    // Scan the entire image and determine if:
+    // 1. Every pixel has R == G == B (grayscale)
+    // 2. Every pixel has A == 255 (opaque)
+    // 3. There are no more than 256 distinct RGBA colors
+    for (j = 0; j < h; j++) {
+        png_bytep row = imageInfo.rows[j];
+        png_bytep out = outRows[j];
+        for (i = 0; i < w; i++) {
+            rr = *row++;
+            gg = *row++;
+            bb = *row++;
+            aa = *row++;
+            if (!trans) {
+                // Ignore the actually byte and assume alpha == 255
+                aa = 0xff;
+            }
+
+            // Check if image is really grayscale
+            if (isGrayscale) {
+              if (rr != gg || rr != bb) {
+                isGrayscale = false;
+              }
+            }
+
+            // Check if image is really opaque
+            if (isOpaque) {
+              if (aa != 0xff) {
+                isOpaque = false;
+              }
+            }
+
+            // Check if image is really <= 256 colors
+            if (isPalette) {
+                col = (uint32_t) ((rr << 24) | (gg << 16) | (bb << 8) | aa);
+                bool match = false;
+                for (idx = 0; idx < num_colors; idx++) {
+                    if (colors[idx] == col) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                // Write the palette index for the pixel to outRows optimistically
+                // We might overwrite it later if we decide to encode as gray or
+                // gray + alpha
+                *out++ = idx;
+                if (!match) {
+                    if (num_colors == 256) {
+                        isPalette = false;
+                    } else {
+                        colors[num_colors++] = col;
+                    }
+                }
+            }
+        }
+    }
+
+    *paletteEntries = 0;
+    *hasTransparency = !isOpaque;
+    int bpp = isOpaque ? 3 : 4;
+    int paletteSize = w * h + bpp * num_colors;
+
+    // Choose the best color type for the image.
+    // 1. Opaque gray - use COLOR_TYPE_GRAY at 1 byte/pixel
+    // 2. Gray + alpha - use COLOR_TYPE_PALETTE if the number of distinct combinations
+    //     is sufficiently small, otherwise use COLOR_TYPE_GRAY_ALPHA
+    // 3. RGB(A) - use COLOR_TYPE_PALETTE if the number of distinct colors is sufficiently
+    //     small, otherwise use COLOR_TYPE_RGB{_ALPHA}
+    if (isGrayscale) {
+        if (isOpaque) {
+            *colorType = PNG_COLOR_TYPE_GRAY; // 1 byte/pixel
+        } else {
+            // Use a simple heuristic to determine whether using a palette will
+            // save space versus using gray + alpha for each pixel.
+            // This doesn't take into account chunk overhead, filtering, LZ
+            // compression, etc.
+            if (isPalette && (paletteSize < 2 * w * h)) {
+                *colorType = PNG_COLOR_TYPE_PALETTE; // 1 byte/pixel + 4 bytes/color
+            } else {
+                *colorType = PNG_COLOR_TYPE_GRAY_ALPHA; // 2 bytes per pixel
+            }
+        }
+    } else if (isPalette && (paletteSize < bpp * w * h)) {
+        *colorType = PNG_COLOR_TYPE_PALETTE;
+    } else {
+        *colorType = isOpaque ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA;
+    }
+
+    // Perform postprocessing of the image or palette data based on the final
+    // color type chosen
+
+    if (*colorType == PNG_COLOR_TYPE_PALETTE) {
+        // Create separate RGB and Alpha palettes and set the number of colors
+        *paletteEntries = num_colors;
+
+        // Create the RGB and alpha palettes
+        for (int idx = 0; idx < num_colors; idx++) {
+            col = colors[idx];
+            rgbPalette[idx].red   = (png_byte) ((col >> 24) & 0xff);
+            rgbPalette[idx].green = (png_byte) ((col >> 16) & 0xff);
+            rgbPalette[idx].blue  = (png_byte) ((col >>  8) & 0xff);
+            alphaPalette[idx]     = (png_byte)  (col        & 0xff);
+        }
+    } else if (*colorType == PNG_COLOR_TYPE_GRAY || *colorType == PNG_COLOR_TYPE_GRAY_ALPHA) {
+        // If the image is gray or gray + alpha, compact the pixels into outRows
+        for (j = 0; j < h; j++) {
+            png_bytep row = imageInfo.rows[j];
+            png_bytep out = outRows[j];
+            for (i = 0; i < w; i++) {
+                rr = *row++;
+                gg = *row++;
+                bb = *row++;
+                aa = *row++;
+                
+                *out++ = rr;
+                if (!isOpaque) {
+                    *out++ = aa;
+                }
+            }
+        }
+    }
+}
+
+
 static void write_png(const char* imageName,
                       png_structp write_ptr, png_infop write_info,
                       image_info& imageInfo)
 {
+    bool optimize = true;
     png_uint_32 width, height;
     int color_type;
     int bit_depth, interlace_type, compression_type;
@@ -629,16 +770,72 @@ static void write_png(const char* imageName,
 
     png_unknown_chunk unknowns[1];
 
+    png_bytepp outRows = (png_bytepp) malloc((int) imageInfo.height * png_sizeof(png_bytep));
+    if (outRows == (png_bytepp) 0) {
+        printf("Can't allocate output buffer!\n");
+        exit(1);
+    }
+    for (i = 0; i < (int) imageInfo.height; i++) {
+        outRows[i] = (png_bytep) malloc(2 * (int) imageInfo.width);
+        if (outRows[i] == (png_bytep) 0) {
+            printf("Can't allocate output buffer!\n");
+            exit(1);
+        }
+    }
+
     png_set_compression_level(write_ptr, Z_BEST_COMPRESSION);
 
-    color_type = PNG_COLOR_MASK_COLOR;
-    if (imageInfo.hasTransparency) {
-        color_type |= PNG_COLOR_MASK_ALPHA;
+    NOISY(printf("Writing image %s: w = %d, h = %d, trans = %s\n", imageName,
+          (int) imageInfo.width, (int) imageInfo.height,
+          imageInfo.hasTransparency ? "true" : "false"));
+
+    png_color rgbPalette[256];
+    png_byte alphaPalette[256];
+    bool hasTransparency;
+    int paletteEntries;
+
+    if (optimize) {
+        analyze_image(imageInfo, rgbPalette, alphaPalette, &paletteEntries, &hasTransparency,
+                      &color_type, outRows);
+        switch (color_type) {
+        case PNG_COLOR_TYPE_PALETTE:
+            NOISY(printf("Image %s has %d colors%s, using PNG_COLOR_TYPE_PALETTE\n",
+                         imageName, paletteEntries,
+                         hasTransparency ? " (with alpha)" : ""));
+            break;
+        case PNG_COLOR_TYPE_GRAY:
+            NOISY(printf("Image %s is opaque gray, using PNG_COLOR_TYPE_GRAY\n", imageName));
+            break;
+        case PNG_COLOR_TYPE_GRAY_ALPHA:
+            NOISY(printf("Image %s is gray + alpha, using PNG_COLOR_TYPE_GRAY_ALPHA\n", imageName));
+            break;
+        case PNG_COLOR_TYPE_RGB:
+            NOISY(printf("Image %s is opaque RGB, using PNG_COLOR_TYPE_RGB\n", imageName));
+            break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            NOISY(printf("Image %s is RGB + alpha, using PNG_COLOR_TYPE_RGB_ALPHA\n", imageName));
+            break;
+        }
+    } else {
+        // Force RGB or RGB_ALPHA color type, copy transparency from input
+        paletteEntries = 0;
+        hasTransparency = imageInfo.hasTransparency;
+        color_type = hasTransparency ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB;
     }
 
     png_set_IHDR(write_ptr, write_info, imageInfo.width, imageInfo.height,
                  8, color_type, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+    if (color_type == PNG_COLOR_TYPE_PALETTE) {
+        png_set_PLTE(write_ptr, write_info, rgbPalette, paletteEntries);
+        if (hasTransparency) {
+            png_set_tRNS(write_ptr, write_info, alphaPalette, paletteEntries, (png_color_16p) 0);
+        }
+       png_set_filter(write_ptr, 0, PNG_NO_FILTERS);
+    } else {
+       png_set_filter(write_ptr, 0, PNG_ALL_FILTERS);
+    }
 
     if (imageInfo.is9Patch) {
         NOISY(printf("Adding 9-patch info...\n"));
@@ -659,14 +856,23 @@ static void write_png(const char* imageName,
     }
 
     png_write_info(write_ptr, write_info);
-
+         
     if (!imageInfo.hasTransparency) {
         png_set_filler(write_ptr, 0, PNG_FILLER_AFTER);
     }
 
-    png_write_image(write_ptr, imageInfo.rows);
+    if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
+        png_write_image(write_ptr, imageInfo.rows);
+    } else {
+        png_write_image(write_ptr, outRows);
+    }
 
     png_write_end(write_ptr, write_info);
+
+    for (i = 0; i < (int) imageInfo.height; i++) {
+        free(outRows[i]);
+    }
+    free(outRows);
 
     png_get_IHDR(write_ptr, write_info, &width, &height,
        &bit_depth, &color_type, &interlace_type,
@@ -687,9 +893,9 @@ status_t preProcessImage(Bundle* bundle, const sp<AaptAssets>& assets,
         return NO_ERROR;
     }
 
-    // Example of renaming a file:	
-    //*outNewLeafName = file->getPath().getBasePath().getFileName();	
-    //outNewLeafName->append(".nupng");	
+    // Example of renaming a file:
+    //*outNewLeafName = file->getPath().getBasePath().getFileName();
+    //outNewLeafName->append(".nupng");
 
     String8 printableName(file->getPrintableSource());
 

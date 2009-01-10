@@ -1,5 +1,6 @@
 #include "XMLHandler.h"
 
+#include <algorithm>
 #include <expat.h>
 #include <stdio.h>
 #include <string.h>

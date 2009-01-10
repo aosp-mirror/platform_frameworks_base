@@ -569,7 +569,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private WifiManager.WifiLock getWifiWakelock() {
         if (mWifiLock == null && mWifiManager != null) {
-            mWifiLock = mWifiManager.createWifiLock(WIFILOCK_KEY);
+            mWifiLock = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, WIFILOCK_KEY);
             mWifiLock.setReferenceCounted(false);
         }
         return mWifiLock;

@@ -62,4 +62,6 @@
   <item type="id" name="inputMethod" />
   <item type="id" name="keyboardView" />
   <item type="id" name="button_close" />
+  <item type="id" name="selectText" />
+  <item type="id" name="stopSelectingText" />
 </resources>

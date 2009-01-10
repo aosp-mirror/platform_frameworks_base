@@ -21,8 +21,6 @@
 #include <utils/Debug.h>
 #include <utils/String8.h>
 #include <ui/Region.h>
-#include <corecg/SkRegion.h>
-#include <corecg/SkRect.h>
 
 namespace android {
 

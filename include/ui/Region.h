@@ -27,7 +27,7 @@
 
 #include <hardware/copybit.h>
 
-#include <corecg/SkRegion.h>
+#include <core/SkRegion.h>
 
 namespace android {
 // ---------------------------------------------------------------------------

@@ -115,7 +115,7 @@ static const flag_entry gFormatFlags[] = {
       "a floating point value, such as \"<code>1.2</code>\"."},
     { dimensionArray, sizeof(dimensionArray)/2, ResTable_map::TYPE_DIMENSION,
       "a dimension value, which is a floating point number appended with a unit such as \"<code>14.5sp</code>\".\n"
-      "Available units are: px (pixels), db (density-independent pixels), sp (scaled pixels based on preferred font size),\n"
+      "Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),\n"
       "in (inches), mm (millimeters)." },
     { fractionArray, sizeof(fractionArray)/2, ResTable_map::TYPE_FRACTION,
       "a fractional value, which is a floating point number appended with either % or %p, such as \"<code>14.5%</code>\".\n"
@@ -3479,4 +3479,3 @@ bool ResourceTable::getItemValue(
     }
     return res;
 }
-

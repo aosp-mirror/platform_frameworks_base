@@ -952,7 +952,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public void setInputMethod(IBinder token, String id) {
         synchronized (mMethodMap) {
-            if (mCurToken == null || mCurToken != token) {
+            if (mCurToken == null) {
+                if (mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException(
+                            "Using null token requires permission "
+                            + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+                }
+            } else if (mCurToken != token) {
                 Log.w(TAG, "Ignoring setInputMethod of token: " + token);
             }
 
@@ -1257,6 +1265,100 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mIms = null;
         }
     }
+    
+    // ----------------------------------------------------------------------
+    
+    public boolean setInputMethodEnabled(String id, boolean enabled) {
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Requires permission "
+                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+            
+            // Make sure this is a valid input method.
+            InputMethodInfo imm = mMethodMap.get(id);
+            if (imm == null) {
+                if (imm == null) {
+                    throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+                }
+            }
+            
+            StringBuilder builder = new StringBuilder(256);
+            
+            boolean removed = false;
+            String firstId = null;
+            
+            // Look through the currently enabled input methods.
+            String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_INPUT_METHODS);
+            if (enabledStr != null) {
+                final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
+                splitter.setString(enabledStr);
+                while (splitter.hasNext()) {
+                    String curId = splitter.next();
+                    if (curId.equals(id)) {
+                        if (enabled) {
+                            // We are enabling this input method, but it is
+                            // already enabled.  Nothing to do.  The previous
+                            // state was enabled.
+                            return true;
+                        }
+                        // We are disabling this input method, and it is
+                        // currently enabled.  Skip it to remove from the
+                        // new list.
+                        removed = true;
+                    } else if (!enabled) {
+                        // We are building a new list of input methods that
+                        // doesn't contain the given one.
+                        if (firstId == null) firstId = curId;
+                        if (builder.length() > 0) builder.append(':');
+                        builder.append(curId);
+                    }
+                }
+            }
+            
+            if (!enabled) {
+                if (!removed) {
+                    // We are disabling the input method but it is already
+                    // disabled.  Nothing to do.  The previous state was
+                    // disabled.
+                    return false;
+                }
+                // Update the setting with the new list of input methods.
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
+                // We the disabled input method is currently selected, switch
+                // to another one.
+                String selId = Settings.Secure.getString(mContext.getContentResolver(),
+                        Settings.Secure.DEFAULT_INPUT_METHOD);
+                if (id.equals(selId)) {
+                    Settings.Secure.putString(mContext.getContentResolver(),
+                            Settings.Secure.DEFAULT_INPUT_METHOD,
+                            firstId != null ? firstId : "");
+                }
+                // Previous state was enabled.
+                return true;
+            }
+            
+            // Add in the newly enabled input method.
+            if (enabledStr == null || enabledStr.length() == 0) {
+                enabledStr = id;
+            } else {
+                enabledStr = enabledStr + ':' + id;
+            }
+            
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
+            
+            // Previous state was disabled.
+            return false;
+        }
+    }
+    
+    // ----------------------------------------------------------------------
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

@@ -2232,8 +2232,6 @@ public class Activity extends ContextThemeWrapper
     
     /**
      * Programmatically closes the most recently opened context menu, if showing.
-     * 
-     * @hide pending API council
      */
     public void closeContextMenu() {
         mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);

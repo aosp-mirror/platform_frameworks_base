@@ -28,10 +28,12 @@ import org.apache.http.conn.params.ConnRouteParams;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Random;
 
 import android.content.Context;
 import android.net.Proxy;
 import android.net.http.AndroidHttpClient;
+import android.util.Config;
 import android.util.Log;
 
 /**
@@ -46,7 +48,7 @@ public class GpsXtraDownloader {
     private Context mContext;
     private String[] mXtraServers;
     // to load balance our server requests
-    private int mNextServerIndex = 0;
+    private int mNextServerIndex;
 
     GpsXtraDownloader(Context context, Properties properties) {
         mContext = context;
@@ -69,6 +71,10 @@ public class GpsXtraDownloader {
             if (server2 != null) mXtraServers[count++] = server2;
             if (server3 != null) mXtraServers[count++] = server3;
         }
+        
+        // randomize first server
+        Random random = new Random();
+        mNextServerIndex = random.nextInt(count);
     }
 
     byte[] downloadXtraData() {
@@ -100,6 +106,8 @@ public class GpsXtraDownloader {
 
     protected static byte[] doDownload(String url, boolean isProxySet, 
             String proxyHost, int proxyPort) {
+        if (Config.LOGD) Log.d(TAG, "Downloading XTRA data from " + url);
+
         AndroidHttpClient client = null;
         try {
             client = AndroidHttpClient.newInstance("Android");
@@ -121,7 +129,7 @@ public class GpsXtraDownloader {
             HttpResponse response = client.execute(req);
             StatusLine status = response.getStatusLine();
             if (status.getStatusCode() != 200) { // HTTP 200 is success.
-                Log.d(TAG, "HTTP error: " + status.getReasonPhrase());
+                if (Config.LOGD) Log.d(TAG, "HTTP error: " + status.getReasonPhrase());
                 return null;
             }
 
@@ -150,7 +158,7 @@ public class GpsXtraDownloader {
             }
             return body;
         } catch (Exception e) {
-            Log.d(TAG, "error " + e);
+            if (Config.LOGD) Log.d(TAG, "error " + e);
         } finally {
             if (client != null) {
                 client.close();

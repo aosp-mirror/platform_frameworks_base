@@ -27,8 +27,20 @@ import android.view.View;
 
 import java.io.IOException;
 
-/** Drawable that manages an array of other drawables. These are drawn in array
-    order, so the element with the largest index will be drawn on top.
+/** 
+ * A Drawable that manages an array of other Drawables. These are drawn in array
+ * order, so the element with the largest index will be drawn on top.
+ * <p>
+ * It can be defined in an XML file with the <code>&lt;layer-list></code> element.
+ * Each Drawable in the layer is defined in a nested <code>&lt;item></code>.
+ * </p>
+ *
+ * @attr ref android.R.styleable#LayerDrawableItem_left
+ * @attr ref android.R.styleable#LayerDrawableItem_top
+ * @attr ref android.R.styleable#LayerDrawableItem_right
+ * @attr ref android.R.styleable#LayerDrawableItem_bottom
+ * @attr ref android.R.styleable#LayerDrawableItem_drawable
+ * @attr ref android.R.styleable#LayerDrawableItem_id
 */
 public class LayerDrawable extends Drawable implements Drawable.Callback {
     LayerState mLayerState;

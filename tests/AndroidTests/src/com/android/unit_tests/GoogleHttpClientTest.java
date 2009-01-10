@@ -67,7 +67,8 @@ public class GoogleHttpClientTest extends AndroidTestCase {
     @LargeTest
     public void testThreadCheck() throws Exception {
         ContentResolver resolver = getContext().getContentResolver();
-        GoogleHttpClient client = new GoogleHttpClient(resolver, "Test");
+        GoogleHttpClient client = new GoogleHttpClient(resolver, "Test",
+                false /* no gzip */);
 
         try {
             // Note: we must test against a real server, because the connection
@@ -101,7 +102,8 @@ public class GoogleHttpClientTest extends AndroidTestCase {
 
         // TODO: Use a MockContentProvider/MockContentResolver instead.
         ContentResolver resolver = getContext().getContentResolver();
-        GoogleHttpClient client = new GoogleHttpClient(resolver, "Test");
+        GoogleHttpClient client = new GoogleHttpClient(resolver, "Test",
+                false /* not gzip capable */);
         Settings.Gservices.putString(resolver,
                 "url:test", "http://foo.bar/ rewrite " + mServerUrl + "new/");
 

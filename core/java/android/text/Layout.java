@@ -1074,7 +1074,9 @@ public abstract class Layout {
         float h2 = getSecondaryHorizontal(point) - 0.5f;
 
         int caps = TextKeyListener.getMetaState(editingBuffer,
-                                                KeyEvent.META_SHIFT_ON);
+                                                KeyEvent.META_SHIFT_ON) |
+                   TextKeyListener.getMetaState(editingBuffer,
+                                                TextKeyListener.META_SELECTING);
         int fn = TextKeyListener.getMetaState(editingBuffer,
                                               KeyEvent.META_ALT_ON);
         int dist = 0;

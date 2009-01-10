@@ -1772,9 +1772,19 @@ public final class Settings {
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
+         * @deprecated This identifier is poorly initialized and has
+         * many collisions.  It should not be used.
          */
+        @Deprecated
         public static final String LOGGING_ID = "logging_id";
-    
+
+        /**
+         * The Logging ID (a unique 64-bit value) as a hex string.
+         * Used as a pseudonymous identifier for logging.
+         * @hide
+         */
+        public static final String LOGGING_ID2 = "logging_id2";
+
         /**
          * User preference for which network(s) should be used. Only the
          * connectivity service should touch this.

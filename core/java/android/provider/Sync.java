@@ -25,7 +25,6 @@ import android.os.Handler;
 
 import java.util.Map;
 
-
 /**
  * The Sync provider stores information used in managing the syncing of the device,
  * including the history and pending syncs.
@@ -500,6 +499,9 @@ public final class Sync {
         /** controls whether or not the individual provider is synced when tickles are received */
         public static final String SETTING_SYNC_PROVIDER_PREFIX = "sync_provider_";
 
+        /** query column project */
+        private static final String[] PROJECTION = { KEY, VALUE };
+
         /**
          * Convenience function for updating a single settings value as a
          * boolean. This will either create a new entry in the table if the
@@ -518,6 +520,32 @@ public final class Sync {
             values.put(VALUE, Boolean.toString(val));
             // this insert is translated into an update by the underlying Sync provider
             contentResolver.insert(CONTENT_URI, values);
+        }
+
+        /**
+         * Convenience function for getting a setting value as a boolean without using the
+         * QueryMap for light-weight setting querying.
+         * @param contentResolver The ContentResolver for querying the setting.
+         * @param name The name of the setting to query
+         * @param def The default value for the setting.
+         * @return The value of the setting.
+         */
+        static public boolean getBoolean(ContentResolver contentResolver,
+                String name, boolean def) {
+            Cursor cursor = contentResolver.query(
+                    CONTENT_URI,
+                    PROJECTION,
+                    KEY + "=?",
+                    new String[] { name },
+                    null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    return Boolean.parseBoolean(cursor.getString(1));
+                }
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+            return def;
         }
 
         /**

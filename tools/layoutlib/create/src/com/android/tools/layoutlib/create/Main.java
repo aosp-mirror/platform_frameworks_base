@@ -45,9 +45,11 @@ public class Main {
             AsmGenerator agen = new AsmGenerator(log, osDestJar[0],
                     new Class<?>[] {  // classes to inject in the final JAR
                         OverrideMethod.class,
-                        OverrideMethod.MethodListener.class
+                        MethodListener.class,
+                        MethodAdapter.class
                     },
                     new String[] {  // methods to force override
+                        "android.view.View#isInEditMode",
                         "android.content.res.Resources$Theme#obtainStyledAttributes",
                     },
                     new String[] {  // classes to rename (so that we can replace them in layoutlib)

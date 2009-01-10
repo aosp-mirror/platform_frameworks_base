@@ -78,6 +78,8 @@ public:
 
             status_t    reconnect();
             void        disconnect();
+            status_t    lock();
+            status_t    unlock();
 
             status_t    getStatus() { return mStatus; }
 
@@ -90,6 +92,9 @@ public:
 
             // stop preview mode
             void        stopPreview();
+
+            // get preview state
+            bool        previewEnabled();
 
             // autoFocus - status returned from callback
             status_t    autoFocus();

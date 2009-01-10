@@ -172,7 +172,7 @@ public final class CookieManager {
             if (urlPath.startsWith(path)) {
                 int len = path.length();
                 int urlLen = urlPath.length();
-                if (urlLen > len) {
+                if (path.charAt(len-1) != PATH_DELIM && urlLen > len) {
                     // make sure /wee doesn't match /we
                     return urlPath.charAt(len) == PATH_DELIM;
                 }
@@ -440,29 +440,43 @@ public final class CookieManager {
     /**
      * Remove all session cookies, which are cookies without expiration date
      */
-    public synchronized void removeSessionCookie() {
-        Collection<ArrayList<Cookie>> cookieList = mCookieMap.values();
-        Iterator<ArrayList<Cookie>> listIter = cookieList.iterator();
-        while (listIter.hasNext()) {
-            ArrayList<Cookie> list = listIter.next();
-            Iterator<Cookie> iter = list.iterator();
-            while (iter.hasNext()) {
-                Cookie cookie = iter.next();
-                if (cookie.expires == -1) {
-                    iter.remove();
+    public void removeSessionCookie() {
+        final Runnable clearCache = new Runnable() {
+            public void run() {
+                synchronized(CookieManager.this) {
+                    Collection<ArrayList<Cookie>> cookieList = mCookieMap.values();
+                    Iterator<ArrayList<Cookie>> listIter = cookieList.iterator();
+                    while (listIter.hasNext()) {
+                        ArrayList<Cookie> list = listIter.next();
+                        Iterator<Cookie> iter = list.iterator();
+                        while (iter.hasNext()) {
+                            Cookie cookie = iter.next();
+                            if (cookie.expires == -1) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                    CookieSyncManager.getInstance().clearSessionCookies();
                 }
             }
-        }
-        CookieSyncManager.getInstance().clearSessionCookies();
+        };
+        new Thread(clearCache).start();
     }
 
     /**
      * Remove all cookies
      */
-    public synchronized void removeAllCookie() {
-        mCookieMap = new LinkedHashMap<String, ArrayList<Cookie>>(
-                MAX_DOMAIN_COUNT, 0.75f, true);
-        CookieSyncManager.getInstance().clearAllCookies();
+    public void removeAllCookie() {
+        final Runnable clearCache = new Runnable() {
+            public void run() {
+                synchronized(CookieManager.this) {
+                    mCookieMap = new LinkedHashMap<String, ArrayList<Cookie>>(
+                            MAX_DOMAIN_COUNT, 0.75f, true);
+                    CookieSyncManager.getInstance().clearAllCookies();
+                }
+            }
+        };
+        new Thread(clearCache).start();
     }
 
     /**
@@ -475,23 +489,30 @@ public final class CookieManager {
     /**
      * Remove all expired cookies
      */
-    public synchronized void removeExpiredCookie() {
-        long now = System.currentTimeMillis();
-        Collection<ArrayList<Cookie>> cookieList = mCookieMap.values();
-        Iterator<ArrayList<Cookie>> listIter = cookieList.iterator();
-        while (listIter.hasNext()) {
-            ArrayList<Cookie> list = listIter.next();
-            Iterator<Cookie> iter = list.iterator();
-            while (iter.hasNext()) {
-                Cookie cookie = iter.next();
-                // expires == -1 means no expires defined. Otherwise negative
-                // means far future
-                if (cookie.expires > 0 && cookie.expires < now) {
-                    iter.remove();
+    public void removeExpiredCookie() {
+        final Runnable clearCache = new Runnable() {
+            public void run() {
+                synchronized(CookieManager.this) {
+                    long now = System.currentTimeMillis();
+                    Collection<ArrayList<Cookie>> cookieList = mCookieMap.values();
+                    Iterator<ArrayList<Cookie>> listIter = cookieList.iterator();
+                    while (listIter.hasNext()) {
+                        ArrayList<Cookie> list = listIter.next();
+                        Iterator<Cookie> iter = list.iterator();
+                        while (iter.hasNext()) {
+                            Cookie cookie = iter.next();
+                            // expires == -1 means no expires defined. Otherwise 
+                            // negative means far future
+                            if (cookie.expires > 0 && cookie.expires < now) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                    CookieSyncManager.getInstance().clearExpiredCookies(now);
                 }
             }
-        }
-        CookieSyncManager.getInstance().clearExpiredCookies(now);
+        };
+        new Thread(clearCache).start();
     }
 
     /**

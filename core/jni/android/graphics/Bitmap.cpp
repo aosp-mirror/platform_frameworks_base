@@ -1,5 +1,5 @@
 #include "SkBitmap.h"
-#include "SkImageDecoder.h"
+#include "SkImageEncoder.h"
 #include "SkColorPriv.h"
 #include "GraphicsJNI.h"
 #include "SkDither.h"

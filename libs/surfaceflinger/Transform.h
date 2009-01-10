@@ -25,7 +25,7 @@
 
 #include <GLES/gl.h>
 
-#include <corecg/SkMatrix.h>
+#include <core/SkMatrix.h>
 
 namespace android {
 

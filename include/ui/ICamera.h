@@ -39,6 +39,12 @@ public:
     // connect new client with existing camera remote
     virtual status_t        connect(const sp<ICameraClient>& client) = 0;
 
+    // prevent other processes from using this ICamera interface
+    virtual status_t        lock() = 0;
+
+    // allow other processes to use this ICamera interface
+    virtual status_t        unlock() = 0;
+
     // pass the buffered ISurface to the camera service
     virtual status_t        setPreviewDisplay(const sp<ISurface>& surface) = 0;
 
@@ -51,6 +57,9 @@ public:
 
     // stop preview mode
     virtual void            stopPreview() = 0;
+
+    // get preview state
+    virtual bool            previewEnabled() = 0;
 
     // auto focus
     virtual status_t        autoFocus() = 0;

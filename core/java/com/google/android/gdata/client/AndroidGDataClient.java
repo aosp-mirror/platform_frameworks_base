@@ -49,8 +49,7 @@ public class AndroidGDataClient implements GDataClient {
     private static final String X_HTTP_METHOD_OVERRIDE =
         "X-HTTP-Method-Override";
 
-    private static final String USER_AGENT_GZIP = 
-            GoogleHttpClient.getGzipCapableUserAgent("Android-GData/1.0");
+    private static final String USER_AGENT_APP_VERSION = "Android-GData/1.0";
 
     private static final int MAX_REDIRECTS = 10;
 
@@ -123,7 +122,8 @@ public class AndroidGDataClient implements GDataClient {
      * through the Android proxy server, using null to indicate not using proxy.
      */
     public AndroidGDataClient(ContentResolver resolver) {
-        mHttpClient = new GoogleHttpClient(resolver, USER_AGENT_GZIP);
+        mHttpClient = new GoogleHttpClient(resolver, USER_AGENT_APP_VERSION,
+                true /* gzip capable */);
         mResolver = resolver;
     }
 

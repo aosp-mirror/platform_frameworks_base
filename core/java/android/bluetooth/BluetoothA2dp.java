@@ -90,7 +90,7 @@ public class BluetoothA2dp {
     }
 
     /** Initiate a connection to an A2DP sink.
-     *  Listen for A2DP_SINK_STATE_CHANGED_ACTION to find out when the
+     *  Listen for SINK_STATE_CHANGED_ACTION to find out when the
      *  connection is completed.
      *  @param address Remote BT address.
      *  @return Result code, negative indicates an immediate error.
@@ -106,7 +106,7 @@ public class BluetoothA2dp {
     }
 
     /** Initiate disconnect from an A2DP sink.
-     *  Listen for A2DP_SINK_STATE_CHANGED_ACTION to find out when
+     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
      *  disconnect is completed.
      *  @param address Remote BT address.
      *  @return Result code, negative indicates an immediate error.

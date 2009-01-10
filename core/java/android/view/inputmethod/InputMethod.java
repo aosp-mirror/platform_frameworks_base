@@ -16,19 +16,17 @@
 
 package android.view.inputmethod;
 
-import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 
 /**
  * The InputMethod interface represents an input method which can generate key
  * events and text, such as digital, email addresses, CJK characters, other
  * language characters, and etc., while handling various input events, and send
- * the text back to the application that requests text input.
- * 
+ * the text back to the application that requests text input.  See
+ * {@link InputMethodManager} for more general information about the
+ * architecture.
+ *
  * <p>Applications will not normally use this interface themselves, instead
  * relying on the standard interaction provided by
  * {@link android.widget.TextView} and {@link android.widget.EditText}.
@@ -42,6 +40,14 @@ import android.view.MotionEvent;
  * {@link android.Manifest.permission#BIND_INPUT_METHOD} in order to interact
  * with the service; if this is not required, the system will not use that
  * input method, because it can not trust that it is not compromised.
+ * 
+ * <p>The InputMethod interface is actually split into two parts: the interface
+ * here is the top-level interface to the input method, providing all
+ * access to it, which only the system can access (due to the BIND_INPUT_METHOD
+ * permission requirement).  In addition its method
+ * {@link #createSession(android.view.inputmethod.InputMethod.SessionCallback)}
+ * can be called to instantate a secondary {@link InputMethodSession} interface
+ * which is what clients use to communicate with the input method.
  */
 public interface InputMethod {
     /**

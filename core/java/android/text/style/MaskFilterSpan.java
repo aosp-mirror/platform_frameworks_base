@@ -16,11 +16,10 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.graphics.MaskFilter;
 import android.text.TextPaint;
 
-public class MaskFilterSpan extends CharacterStyle {
+public class MaskFilterSpan extends CharacterStyle implements UpdateAppearance {
 
 	private MaskFilter mFilter;
 

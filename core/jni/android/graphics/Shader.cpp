@@ -4,7 +4,7 @@
 #include "SkShader.h"
 #include "SkGradientShader.h"
 #include "SkPorterDuff.h"
-#include "SkShaderExtras.h"
+#include "SkComposeShader.h"
 #include "SkTemplates.h"
 #include "SkXfermode.h"
 

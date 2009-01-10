@@ -18,7 +18,7 @@ package android.text.style;
 
 import android.text.TextPaint;
 
-public class BackgroundColorSpan extends CharacterStyle {
+public class BackgroundColorSpan extends CharacterStyle implements UpdateAppearance {
 
     private int mColor;
 

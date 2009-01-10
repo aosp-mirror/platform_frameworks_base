@@ -25,7 +25,7 @@ import android.view.View;
  * text can be selected.  If clicked, the {@link #onClick} method will
  * be called.
  */
-public abstract class ClickableSpan extends CharacterStyle {
+public abstract class ClickableSpan extends CharacterStyle implements UpdateAppearance {
 
     /**
      * Performs the click action associated with this span.

@@ -136,6 +136,18 @@ sp<ICamera> Camera::remote()
     return mCamera;
 }
 
+status_t Camera::lock()
+{
+    if (mCamera != 0) return mCamera->lock();
+    return NO_INIT;
+}
+
+status_t Camera::unlock()
+{
+    if (mCamera != 0) return mCamera->unlock();
+    return NO_INIT;
+}
+
 // pass the buffered ISurface to the camera service
 status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
 {
@@ -170,6 +182,13 @@ void Camera::stopPreview()
 {
     LOGV("stopPreview");
     mCamera->stopPreview();
+}
+
+// get preview state
+bool Camera::previewEnabled()
+{
+    LOGV("previewEnabled");
+    return mCamera->previewEnabled();
 }
 
 status_t Camera::autoFocus()

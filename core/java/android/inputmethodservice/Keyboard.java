@@ -438,7 +438,6 @@ public class Keyboard {
             }
         }
 
-        
         /**
          * Returns the square of the distance between the center of the key and the given point.
          * @param x the x-coordinate of the point
@@ -446,9 +445,9 @@ public class Keyboard {
          * @return the square of the distance of the point from the center of the key
          */
         public int squaredDistanceFrom(int x, int y) {
-            float xDist = Math.abs((this.x + this.x + width) / 2f - x);
-            float yDist = Math.abs((this.y + this.y + height) / 2f - y);
-            return (int) (xDist * xDist + yDist * yDist);
+            int xDist = this.x + width / 2 - x;
+            int yDist = this.y + height / 2 - y;
+            return xDist * xDist + yDist * yDist;
         }
         
         /**
@@ -749,7 +748,8 @@ public class Keyboard {
         if (value.type == TypedValue.TYPE_DIMENSION) {
             return a.getDimensionPixelOffset(index, defValue);
         } else if (value.type == TypedValue.TYPE_FRACTION) {
-            return (int) a.getFraction(index, base, base, defValue);
+            // Round it to avoid values like 47.9999 from getting truncated
+            return Math.round(a.getFraction(index, base, base, defValue));
         }
         return defValue;
     }

@@ -84,11 +84,25 @@ public final class MediaStore
     public static final String EXTRA_MEDIA_FOCUS = "android.intent.extra.focus";
 
     /**
-     * The name of the Intent-extra used to control the orientation of a MovieView.
-     * This is an int property that overrides the MovieView activity's requestedOrientation.
+     * The name of the Intent-extra used to control the orientation of a ViewImage or a MovieView.
+     * This is an int property that overrides the activity's requestedOrientation.
      * @see android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
      */
     public static final String EXTRA_SCREEN_ORIENTATION = "android.intent.extra.screenOrientation";
+
+    /**
+     * The name of the Intent-extra used to control the orientation of a ViewImage.
+     * This is a boolean property that overrides the activity's default fullscreen state.
+     * @hide
+     */
+    public static final String EXTRA_FULL_SCREEN = "android.intent.extra.fullScreen";
+
+    /**
+     * The name of the Intent-extra used to control the orientation of a ViewImage.
+     * This is a boolean property that specifies whether or not to show action icons.
+     * @hide
+     */
+    public static final String EXTRA_SHOW_ACTION_ICONS = "android.intent.extra.showActionIcons";
 
     /**
      * The name of the Intent-extra used to control the onCompletion behavior of a MovieView.
@@ -116,6 +130,22 @@ public final class MediaStore
      * @hide
      */
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
+
+    /**
+     * Standard Intent action that can be sent to have the media application
+     * capture an video and return it.  The caller may pass in an extra EXTRA_VIDEO_QUALITY
+     * control the video quality.
+     * @hide
+     */
+    public final static String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
+
+    /**
+     * The name of the Intent-extra used to control the quality of a recorded video. This is an
+     * integer property. Currently value 0 means low quality, suitable for MMS messages, and
+     * value 1 means high quality. In the future other quality levels may be added.
+     * @hide
+     */
+    public final static String EXTRA_VIDEO_QUALITY = "android.intent.extra.videoQuality";
 
     /**
      * Common fields for most MediaProvider tables
@@ -1162,13 +1192,21 @@ public final class MediaStore
 
     public static final class Video {
         /**
-         * The default sort order for this table
+         *  deprecated  Replaced by DEFAULT_SORT_ORDER2
+         *  This variable is a mistake that is retained for backwards compatibility.
+         *  (There is no "name" column in the Video table.)
          */
         public static final String DEFAULT_SORT_ORDER = "name ASC";
 
+        /**
+         * The default sort order for this table
+         * @hide
+         */
+        public static final String DEFAULT_SORT_ORDER2 = MediaColumns.DISPLAY_NAME;
+
         public static final Cursor query(ContentResolver cr, Uri uri, String[] projection)
         {
-            return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
+            return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER2);
         }
 
         public interface VideoColumns extends MediaColumns {

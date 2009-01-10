@@ -1309,6 +1309,54 @@
         <item quantity="one">tomorrow</item>
         <item quantity="other">in <xliff:g id="count">%d</xliff:g> days</item>
     </plurals>
+    
+    <!-- This is used to express that something occurred some number of abbreviated seconds in the past (e.g., 5 secs ago). -->
+    <plurals name="abbrev_num_seconds_ago">
+        <item quantity="one">1 sec ago</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> secs ago</item>
+    </plurals>
+
+    <!-- This is used to express that something occurred some number of abbreviated minutes in the past (e.g., 5 mins ago). -->
+    <plurals name="abbrev_num_minutes_ago">
+        <item quantity="one">1 min ago</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> mins ago</item>
+    </plurals>
+
+    <!-- This is used to express that something occurred some number of abbreviated hours in the past (e.g., 5 hrs ago). -->
+    <plurals name="abbrev_num_hours_ago">
+        <item quantity="one">1 hour ago</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> hours ago</item>
+    </plurals>
+
+    <!-- This is used to express that something occurred some number of abbreviated days in the past (e.g., 5 days ago). -->
+    <plurals name="abbrev_num_days_ago">
+        <item quantity="one">yesterday</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> days ago</item>
+    </plurals>
+
+    <!-- This is used to express that something will occur some number of abbreviated seconds in the future (e.g., in 5 secs). -->
+    <plurals name="abbrev_in_num_seconds">
+        <item quantity="one">in 1 sec</item>
+        <item quantity="other">in <xliff:g id="count">%d</xliff:g> secs</item>
+    </plurals>
+
+    <!-- This is used to express that something will occur some number of abbreviated minutes in the future (e.g., in 5 mins). -->
+    <plurals name="abbrev_in_num_minutes">
+        <item quantity="one">in 1 min</item>
+        <item quantity="other">in <xliff:g id="count">%d</xliff:g> mins</item>
+    </plurals>
+
+    <!-- This is used to express that something will occur some number of abbreviated hours in the future (e.g., in 5 hrs). -->
+    <plurals name="abbrev_in_num_hours">
+        <item quantity="one">in 1 hour</item>
+        <item quantity="other">in <xliff:g id="count">%d</xliff:g> hours</item>
+    </plurals>
+
+    <!-- This is used to express that something will occur some number of abbreviated days in the future (e.g., in 5 days). -->
+    <plurals name="abbrev_in_num_days">
+        <item quantity="one">tomorrow</item>
+        <item quantity="other">in <xliff:g id="count">%d</xliff:g> days</item>
+    </plurals>
 
     <!-- String used to display the date. Preposition for date display ("on May 29") -->
     <string name="preposition_for_date">on %s</string>
@@ -1418,6 +1466,14 @@
     <!-- Format indicating a range of times on a particular date.
          Example: "8:00 - 11:00 am, Dec 31, 2007" -->
     <string name="time_date">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
+
+    <!-- Format indicating a specific date and time.
+         Example: "Dec 31, 2007, 11:00 am" -->
+    <string name="date_time">"<xliff:g id="date" example="Dec 31, 2007">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
+
+    <!-- Format indicating a relative expression and time.
+         Example: "4 hours ago, 11:00 am" -->
+    <string name="relative_time">"<xliff:g id="date" example="4 hours ago">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
 
     <!-- Format indicating a range of times on a particular day of the week.
          Example: "8:00 - 11:00 am, Mon" -->
@@ -1916,6 +1972,12 @@
 
     <!-- Item on EditText context menu. This action is used to select all text in the edit field. -->
     <string name="selectAll">Select all</string>
+
+    <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. -->
+    <string name="selectText">Select text</string>
+
+    <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. -->
+    <string name="stopSelectingText">Stop selecting text</string>
 
     <!-- Item on EditText context menu.  This action is used to cut selected the text into the clipboard.  -->
     <string name="cut">Cut</string>

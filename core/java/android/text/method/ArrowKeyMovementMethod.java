@@ -31,8 +31,10 @@ ArrowKeyMovementMethod
 implements MovementMethod
 {
     private boolean up(TextView widget, Spannable buffer) {
-        boolean cap = MetaKeyKeyListener.getMetaState(buffer,
-                        KeyEvent.META_SHIFT_ON) == 1;
+        boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                        KeyEvent.META_SHIFT_ON) == 1) ||
+                      (MetaKeyKeyListener.getMetaState(buffer,
+                        MetaKeyKeyListener.META_SELECTING) != 0);
         boolean alt = MetaKeyKeyListener.getMetaState(buffer,
                         KeyEvent.META_ALT_ON) == 1;
         Layout layout = widget.getLayout();
@@ -55,8 +57,10 @@ implements MovementMethod
     }
 
     private boolean down(TextView widget, Spannable buffer) {
-        boolean cap = MetaKeyKeyListener.getMetaState(buffer,
-                        KeyEvent.META_SHIFT_ON) == 1;
+        boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                        KeyEvent.META_SHIFT_ON) == 1) ||
+                      (MetaKeyKeyListener.getMetaState(buffer,
+                        MetaKeyKeyListener.META_SELECTING) != 0);
         boolean alt = MetaKeyKeyListener.getMetaState(buffer,
                         KeyEvent.META_ALT_ON) == 1;
         Layout layout = widget.getLayout();
@@ -79,8 +83,10 @@ implements MovementMethod
     }
 
     private boolean left(TextView widget, Spannable buffer) {
-        boolean cap = MetaKeyKeyListener.getMetaState(buffer,
-                        KeyEvent.META_SHIFT_ON) == 1;
+        boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                        KeyEvent.META_SHIFT_ON) == 1) ||
+                      (MetaKeyKeyListener.getMetaState(buffer,
+                        MetaKeyKeyListener.META_SELECTING) != 0);
         boolean alt = MetaKeyKeyListener.getMetaState(buffer,
                         KeyEvent.META_ALT_ON) == 1;
         Layout layout = widget.getLayout();
@@ -101,8 +107,10 @@ implements MovementMethod
     }
 
     private boolean right(TextView widget, Spannable buffer) {
-        boolean cap = MetaKeyKeyListener.getMetaState(buffer,
-                        KeyEvent.META_SHIFT_ON) == 1;
+        boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                        KeyEvent.META_SHIFT_ON) == 1) ||
+                      (MetaKeyKeyListener.getMetaState(buffer,
+                        MetaKeyKeyListener.META_SELECTING) != 0);
         boolean alt = MetaKeyKeyListener.getMetaState(buffer,
                         KeyEvent.META_ALT_ON) == 1;
         Layout layout = widget.getLayout();
@@ -141,6 +149,13 @@ implements MovementMethod
         case KeyEvent.KEYCODE_DPAD_RIGHT:
             handled |= right(widget, buffer);
             break;
+
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+            if (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0) {
+                if (widget.showContextMenu()) {
+                    handled = true;
+                }
+            }
         }
 
         if (handled) {
@@ -179,7 +194,10 @@ implements MovementMethod
                 int line = layout.getLineForVertical(y);
                 int off = layout.getOffsetForHorizontal(line, x);
 
-                boolean cap = (event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0;
+                boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                                KeyEvent.META_SHIFT_ON) == 1) ||
+                              (MetaKeyKeyListener.getMetaState(buffer,
+                                MetaKeyKeyListener.META_SELECTING) != 0);
 
                 if (cap) {
                     Selection.extendSelection(buffer, off);

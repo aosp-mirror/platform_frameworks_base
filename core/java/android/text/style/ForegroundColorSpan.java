@@ -16,10 +16,9 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.text.TextPaint;
 
-public class ForegroundColorSpan extends CharacterStyle {
+public class ForegroundColorSpan extends CharacterStyle implements UpdateAppearance {
 
     private int mColor;
 

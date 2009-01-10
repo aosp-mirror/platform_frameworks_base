@@ -68,6 +68,7 @@ import android.text.method.TextKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
+import android.text.style.UpdateAppearance;
 import android.text.style.UpdateLayout;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
@@ -3505,7 +3506,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (highlight != null && mInputMethodState != null && imm != null) {
-            imm.updateSelection(this, selStart, selEnd);
+            if (imm.isActive(this)) {
+                int candStart = -1;
+                int candEnd = -1;
+                if (mText instanceof Spannable) {
+                    Spannable sp = (Spannable)mText;
+                    candStart = EditableInputConnection.getComposingSpanStart(sp);
+                    candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                }
+                imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
+            }
             
             if (imm.isWatchingCursor(this)) {
                 final InputMethodState ims = mInputMethodState;
@@ -3762,7 +3772,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyUp(keyCode, event);
     }
 
-    @Override public InputConnection createInputConnection(EditorInfo outAttrs) {
+    @Override public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (mInputType != EditorInfo.TYPE_NULL) {
             if (mInputMethodState == null) {
                 mInputMethodState = new InputMethodState();
@@ -5137,7 +5147,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (what instanceof UpdateLayout ||
+        if (what instanceof UpdateAppearance ||
             what instanceof ParagraphStyle) {
             invalidate();
             mHighlightPathBogus = true;
@@ -5167,6 +5177,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void afterTextChanged(Editable buffer) {
             TextView.this.sendAfterTextChanged(buffer);
+
+            if (MetaKeyKeyListener.getMetaState(buffer,
+                                 MetaKeyKeyListener.META_SELECTING) != 0) {
+                MetaKeyKeyListener.stopSelecting(TextView.this, buffer);
+            }
+
             TextView.this.reportExtractedText();
         }
 
@@ -5550,6 +5566,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    private boolean canSelectText() {
+        if (mText instanceof Spannable && mText.length() != 0 &&
+            mMovement != null && mMovement.canSelectArbitrarily()) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean canCut() {
         if (mTransformation instanceof PasswordTransformationMethod) {
             return false;
@@ -5623,6 +5648,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean selection = getSelectionStart() != getSelectionEnd();
 
+        if (canSelectText()) {
+            if (MetaKeyKeyListener.getMetaState(mText, MetaKeyKeyListener.META_SELECTING) != 0) {
+                menu.add(0, ID_STOP_SELECTING_TEXT, 0,
+                        com.android.internal.R.string.stopSelectingText).
+                    setOnMenuItemClickListener(handler);
+                added = true;
+            } else {
+                menu.add(0, ID_SELECT_TEXT, 0,
+                        com.android.internal.R.string.selectText).
+                    setOnMenuItemClickListener(handler);
+                added = true;
+            }
+        }
+
         if (canCut()) {
             int name;
             if (selection) {
@@ -5688,6 +5727,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private static final int ID_SELECT_ALL = com.android.internal.R.id.selectAll;
+    private static final int ID_SELECT_TEXT = com.android.internal.R.id.selectText;
+    private static final int ID_STOP_SELECTING_TEXT = com.android.internal.R.id.stopSelectingText;
     private static final int ID_CUT = com.android.internal.R.id.cut;
     private static final int ID_COPY = com.android.internal.R.id.copy;
     private static final int ID_PASTE = com.android.internal.R.id.paste;
@@ -5728,7 +5769,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                         mText.length());
                 return true;
 
+            case ID_SELECT_TEXT:
+                MetaKeyKeyListener.startSelecting(this, (Spannable) mText);
+                return true;
+
+            case ID_STOP_SELECTING_TEXT:
+                MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
+                Selection.setSelection((Spannable) mText, getSelectionEnd());
+                return true;
+
             case ID_CUT:
+                MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
+
                 if (min == max) {
                     min = 0;
                     max = mText.length();
@@ -5739,6 +5791,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_COPY:
+                MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
+
                 if (min == max) {
                     min = 0;
                     max = mText.length();
@@ -5748,6 +5802,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_PASTE:
+                MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
+
                 CharSequence paste = clip.getText();
 
                 if (paste != null) {
@@ -5758,6 +5814,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_COPY_URL:
+                MetaKeyKeyListener.stopSelecting(this, (Spannable) mText);
+
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max,
                                                        URLSpan.class);
                 if (urls.length == 1) {

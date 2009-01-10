@@ -385,14 +385,11 @@ public interface Menu {
      * @return The menu item.
      * @exception IndexOutOfBoundsException
      *                when {@code index < 0 || >= size()}
-     * @hide pending API council
      */
     public MenuItem getItem(int index);
     
     /**
      * Closes the menu, if open.
-     * 
-     * @hide pending API council
      */
     public void close();
     

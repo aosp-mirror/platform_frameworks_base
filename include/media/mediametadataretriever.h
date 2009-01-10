@@ -47,6 +47,11 @@ enum {
     METADATA_KEY_RATING          = 13,
     METADATA_KEY_COMMENT         = 14,
     METADATA_KEY_COPYRIGHT       = 15,
+    METADATA_KEY_BIT_RATE        = 16,
+    METADATA_KEY_FRAME_RATE      = 17,
+    METADATA_KEY_VIDEO_FORMAT    = 18,
+    METADATA_KEY_VIDEO_HEIGHT    = 19,
+    METADATA_KEY_VIDEO_WIDTH     = 20,
     // Add more here...
 };
 
