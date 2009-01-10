@@ -250,6 +250,15 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
+    public boolean finishComposingText() {
+        try {
+            mIInputContext.finishComposingText();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     public boolean sendKeyEvent(KeyEvent event) {
         try {
             mIInputContext.sendKeyEvent(event);

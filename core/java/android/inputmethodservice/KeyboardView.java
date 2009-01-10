@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
@@ -37,6 +38,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.PopupWindow;
@@ -132,6 +134,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     
     private static final int MSG_REMOVE_PREVIEW = 1;
     private static final int MSG_REPEAT = 2;
+    private static final int MSG_LONGPRESS = 3;
     
     private int mVerticalCorrection;
     private int mProximityThreshold;
@@ -178,6 +181,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private static final int REPEAT_INTERVAL = 50; // ~20 keys per second
     private static final int REPEAT_START_DELAY = 400;
+    private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     private Vibrator mVibrator;
     private long[] mVibratePattern = new long[] {1, 20};
@@ -205,6 +209,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                         Message repeat = Message.obtain(this, MSG_REPEAT);
                         sendMessageDelayed(repeat, REPEAT_INTERVAL);                        
                     }
+                    break;
+                case MSG_LONGPRESS:
+                    openPopupIfRequired((MotionEvent) msg.obj);
                     break;
             }
             
@@ -308,27 +315,28 @@ public class KeyboardView extends View implements View.OnClickListener {
             @Override
             public boolean onFling(MotionEvent me1, MotionEvent me2, 
                     float velocityX, float velocityY) {
-                if (velocityX > 400 && Math.abs(velocityY) < 400) {
+                final float absX = Math.abs(velocityX);
+                final float absY = Math.abs(velocityY);
+                if (velocityX > 500 && absY < absX) {
                     swipeRight();
                     return true;
-                } else if (velocityX < -400 && Math.abs(velocityY) < 400) {
+                } else if (velocityX < -500 && absY < absX) {
                     swipeLeft();
                     return true;
-                } else if (velocityY < -400 && Math.abs(velocityX) < 400) {
+                } else if (velocityY < -500 && absX < absY) {
                     swipeUp();
                     return true;
-                } else if (velocityY > 400 && Math.abs(velocityX) < 400) {
+                } else if (velocityY > 500 && absX < 200) {
                     swipeDown();
+                    return true;
+                } else if (absX > 800 || absY > 800) {
                     return true;
                 }
                 return false;
             }
-            
-            @Override
-            public void onLongPress(MotionEvent me) {
-                openPopupIfRequired(me);
-            }
         });
+
+        mGestureDetector.setIsLongpressEnabled(false);
     }
 
     public void setOnKeyboardActionListener(OnKeyboardActionListener listener) {
@@ -351,6 +359,9 @@ public class KeyboardView extends View implements View.OnClickListener {
      * @param keyboard the keyboard to display in this view
      */
     public void setKeyboard(Keyboard keyboard) {
+        if (mKeyboard != null) {
+            showPreview(NOT_A_KEY);
+        }
         mKeyboard = keyboard;
         requestLayout();
         invalidate();
@@ -518,10 +529,10 @@ public class KeyboardView extends View implements View.OnClickListener {
                 // For characters, use large font. For labels like "Done", use small font.
                 if (label.length() > 1 && key.codes.length < 2) {
                     paint.setTextSize(mLabelTextSize);
-                    paint.setFakeBoldText(true);
+                    paint.setTypeface(Typeface.DEFAULT_BOLD);
                 } else {
                     paint.setTextSize(mKeyTextSize);
-                    paint.setFakeBoldText(false);
+                    paint.setTypeface(Typeface.DEFAULT);
                 }
                 // Draw a drop shadow for the text
                 paint.setShadowLayer(3f, 0, 0, 0xCC000000);
@@ -878,6 +889,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
+            mHandler.removeMessages(MSG_LONGPRESS);            
             return true;
         }
         
@@ -907,12 +919,17 @@ public class KeyboardView extends View implements View.OnClickListener {
                     Message msg = mHandler.obtainMessage(MSG_REPEAT);
                     mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
                 }
+                if (mCurrentKey != NOT_A_KEY) {
+                    Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
+                    mHandler.sendMessageDelayed(msg, LONGPRESS_TIMEOUT);
+                }
                 showPreview(keyIndex);
                 playKeyClick();
                 vibrate();
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                boolean continueLongPress = false;
                 if (keyIndex != NOT_A_KEY) {
                     if (mCurrentKey == NOT_A_KEY) {
                         mCurrentKey = keyIndex;
@@ -920,6 +937,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     } else {
                         if (keyIndex == mCurrentKey) {
                             mCurrentKeyTime += eventTime - mLastMoveTime;
+                            continueLongPress = true;
                         } else {
                             resetMultiTap();
                             mLastKey = mCurrentKey;
@@ -936,11 +954,21 @@ public class KeyboardView extends View implements View.OnClickListener {
                         mRepeatKeyIndex = NOT_A_KEY;
                     }
                 }
+                if (!continueLongPress) {
+                    // Cancel old longpress
+                    mHandler.removeMessages(MSG_LONGPRESS);
+                    // Start new longpress if key has changed
+                    if (keyIndex != NOT_A_KEY) {
+                        Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
+                        mHandler.sendMessageDelayed(msg, LONGPRESS_TIMEOUT);
+                    }
+                }
                 showPreview(keyIndex);
                 break;
 
             case MotionEvent.ACTION_UP:
                 mHandler.removeMessages(MSG_REPEAT);
+                mHandler.removeMessages(MSG_LONGPRESS);
                 if (keyIndex == mCurrentKey) {
                     mCurrentKeyTime += eventTime - mLastMoveTime;
                 } else {

@@ -75,7 +75,7 @@ public:
     virtual ~LayerBase();
     
     DisplayID           dpy;
-    mutable bool        invalidate;
+    mutable bool        contentDirty;
             Region      visibleRegionScreen;
             Region      transparentRegionScreen;
             Region      coveredRegionScreen;
@@ -112,18 +112,87 @@ public:
             Rect visibleBounds() const;
             void drawRegion(const Region& reg) const;
 
+            void invalidate();
+            
+    /**
+     * draw - performs some global clipping optimizations
+     * and calls onDraw().
+     * Typically this method is not overridden, instead implement onDraw()
+     * to perform the actual drawing.  
+     */
     virtual void draw(const Region& clip) const;
+    
+    /**
+     * onDraw - draws the surface.
+     */
     virtual void onDraw(const Region& clip) const = 0;
+    
+    /**
+     * initStates - called just after construction
+     */
     virtual void initStates(uint32_t w, uint32_t h, uint32_t flags);
+    
+    /**
+     * setSizeChanged - called when the *current* state's size is changed.
+     */
     virtual void setSizeChanged(uint32_t w, uint32_t h);
+    
+    /**
+     * doTransaction - process the transaction. This is a good place to figure
+     * out which attributes of the surface have changed.
+     */
     virtual uint32_t doTransaction(uint32_t transactionFlags);
+    
+    /**
+     * setVisibleRegion - called to set the new visible region. This gives
+     * a chance to update the new visible region or record the fact it changed.
+     */
     virtual void setVisibleRegion(const Region& visibleRegion);
+    
+    /**
+     * setCoveredRegion - called when the covered region changes. The covered
+     * region correspond to any area of the surface that is covered 
+     * (transparently or not) by another surface.
+     */
     virtual void setCoveredRegion(const Region& coveredRegion);
+    
+    /**
+     * getPhysicalSize - returns the physical size of the drawing state of
+     * the surface. If the surface is backed by a bitmap, this is the size of
+     * the bitmap (as opposed to the size of the drawing state).
+     */
     virtual Point getPhysicalSize() const;
+    
+    /**
+     * lockPageFlip - called each time the screen is redrawn and returns whether
+     * the visible regions need to be recomputed (this is a fairly heavy
+     * operation, so this should be set only if needed). Typically this is used
+     * to figure out if the content or size of a surface has changed.
+     */
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
+    
+    /**
+     * unlockPageFlip - called each time the screen is redrawn. updates the
+     * final dirty region wrt the planeTransform.
+     * At this point, all visible regions, surface position and size, etc... are
+     * correct.
+     */
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
+    
+    /**
+     * finishPageFlip - called after all surfaces have drawn.
+     */
     virtual void finishPageFlip();
+    
+    /**
+     * needsBlending - true if this surface needs blending
+     */
     virtual bool needsBlending() const  { return false; }
+    
+    /**
+     * isSecure - true if this surface is secure, that is if it prevents a
+     * screenshot to be taken,
+     */
     virtual bool isSecure() const       { return false; }
 
             enum { // flags for doTransaction()
@@ -162,7 +231,6 @@ protected:
 
           bool canUseCopybit() const;
           
-          
                 SurfaceFlinger* mFlinger;
                 uint32_t        mFlags;
 
@@ -184,7 +252,10 @@ protected:
                 bool            mPremultipliedAlpha;
 
                 // only read
-     const      uint32_t        mIdentity;
+    const       uint32_t        mIdentity;
+     
+                // atomic
+    volatile    int32_t         mInvalidate;
                 
 
 private:
@@ -254,7 +325,7 @@ public:
                 { return INVALID_OPERATION; }
         virtual void postBuffer(ssize_t offset) { }
         virtual void unregisterBuffers() { };
-        virtual sp<Overlay> createOverlay(
+        virtual sp<OverlayRef> createOverlay(
                 uint32_t w, uint32_t h, int32_t format) {
             return NULL;
         };

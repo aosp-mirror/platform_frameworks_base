@@ -493,8 +493,6 @@ MediaRecorder::MediaRecorder()
     if (service != NULL) {
         mMediaRecorder = service->createMediaRecorder(getpid());
     }
-
-    mMediaRecorder = service->createMediaRecorder(getpid());
     if (mMediaRecorder != NULL) {
         mCurrentState = MEDIA_RECORDER_IDLE;
     }

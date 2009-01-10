@@ -670,6 +670,35 @@ public class AudioManager {
     }
 
     /**
+     * Sets audio routing to the wired headset on or off.
+     *
+     * @param on set <var>true</var> to route audio to/from wired 
+     *           headset; <var>false</var> disable wired headset audio
+     * @hide
+     */
+    public void setWiredHeadsetOn(boolean on){
+        // A2DP has higher priority than wired headset, so headset connect/disconnect events
+        // should not affect A2DP routing
+        setRouting(MODE_NORMAL,
+                on ? ROUTE_HEADSET : ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
+        setRouting(MODE_RINGTONE,
+                on ? ROUTE_HEADSET | ROUTE_SPEAKER : ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
+        setRouting(MODE_IN_CALL,
+                on ? ROUTE_HEADSET : ROUTE_EARPIECE, ROUTE_ALL);
+    }
+
+    /**
+     * Checks whether audio routing to the wired headset is on or off.
+     *
+     * @return true if audio is being routed to/from wired headset;
+     *         false if otherwise
+     * @hide
+     */
+    public boolean isWiredHeadsetOn() {
+        return (getRouting(MODE_NORMAL) & ROUTE_HEADSET) == 0 ? false : true;
+    }
+
+    /**
      * Sets the microphone mute on or off.
      *
      * @param on set <var>true</var> to mute the microphone; 

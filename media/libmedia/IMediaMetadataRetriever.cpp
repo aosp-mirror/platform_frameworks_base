@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <utils/Parcel.h>
-#include <graphics/SkBitmap.h>
+#include <SkBitmap.h>
 #include <media/IMediaMetadataRetriever.h>
 
 namespace android {

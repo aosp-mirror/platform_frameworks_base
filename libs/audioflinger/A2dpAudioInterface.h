@@ -35,7 +35,6 @@ public:
                         A2dpAudioInterface();
     virtual             ~A2dpAudioInterface();
     virtual status_t    initCheck();
-    virtual status_t    standby();
 
     virtual status_t    setVoiceVolume(float volume);
     virtual status_t    setMasterVolume(float volume);
@@ -74,11 +73,11 @@ private:
                                 int channelCount,
                                 uint32_t sampleRate);
         virtual uint32_t    sampleRate() const { return 44100; }
-        // must be 32-bit aligned - driver only seems to like 4800
-        virtual size_t      bufferSize() const { return 5120; }
+        // SBC codec wants a multiple of 512
+        virtual size_t      bufferSize() const { return 512 * 30; }
         virtual int         channelCount() const { return 2; }
         virtual int         format() const { return AudioSystem::PCM_16_BIT; }
-        virtual uint32_t    latency() const { return 0; }
+        virtual uint32_t    latency() const { return ((1000*channelCount()*bufferSize())/frameSize())/sampleRate() + 200; }
         virtual status_t    setVolume(float volume) { return INVALID_OPERATION; }
         virtual ssize_t     write(const void* buffer, size_t bytes);
                 status_t    standby();
@@ -86,14 +85,11 @@ private:
 
     private:
                 int         mFd;
+                bool        mStandby;
                 int         mStartCount;
                 int         mRetryCount;
                 void*       mData;
                 bool        mInitialized;
-
-#define kBufferSize 50000
-                char                    mBuffer[kBufferSize];
-                int                     mBufferRemaining;
     };
 
     Mutex                   mLock;

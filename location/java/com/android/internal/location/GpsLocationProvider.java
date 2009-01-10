@@ -147,6 +147,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
+    private String mNtpServer;
 
     private Context mContext;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
@@ -179,6 +180,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
             FileInputStream stream = new FileInputStream(file);
             mProperties.load(stream);
             stream.close();
+            mNtpServer = mProperties.getProperty("NTP_SERVER", null);
         } catch (IOException e) {
             Log.e(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE, e);
         }
@@ -192,7 +194,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
     public boolean requiresNetwork() {
         // We want updateNetworkState() to get called when the network state changes
         // for XTRA and NTP time injection support.
-        return true;
+        return (mNtpServer != null || native_supports_xtra());
     }
 
     public void updateNetworkState(int state) {
@@ -308,12 +310,14 @@ public class GpsLocationProvider extends LocationProviderImpl {
             mEventThread = new GpsEventThread();
             mEventThread.start();
 
-            // run network thread for NTP and XTRA support
-            if (mNetworkThread == null) {
-                mNetworkThread = new GpsNetworkThread();
-                mNetworkThread.start();
-            } else {
-                mNetworkThread.signal();
+            if (requiresNetwork()) {
+                // run network thread for NTP and XTRA support
+                if (mNetworkThread == null) {
+                    mNetworkThread = new GpsNetworkThread();
+                    mNetworkThread.start();
+                } else {
+                    mNetworkThread.signal();
+                }
             }
         } else {
             Log.w(TAG, "Failed to enable location provider");
@@ -560,7 +564,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
         mLastFixTime = System.currentTimeMillis();
         // report time to first fix
-        if (mTTFF == 0) {
+        if (mTTFF == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
             mTTFF = (int)(mLastFixTime - mFixRequestTime);
             if (Config.LOGD) Log.d(TAG, "TTFF: " + mTTFF);
 
@@ -763,25 +767,34 @@ public class GpsLocationProvider extends LocationProviderImpl {
                     synchronized (this) {
                         try {
                             if (!mNetworkAvailable) {
-                                if (Config.LOGD) Log.d(TAG, "NetworkThread wait for network");
+                                if (Config.LOGD) Log.d(TAG, 
+                                        "NetworkThread wait for network");
                                 wait();
                             } else if (waitTime > 0) {
-                                if (Config.LOGD) Log.d(TAG, "NetworkThread wait for " + waitTime + "ms");
+                                if (Config.LOGD) {
+                                    Log.d(TAG, "NetworkThread wait for " +
+                                            waitTime + "ms");
+                                }
                                 wait(waitTime);
                             }
                         } catch (InterruptedException e) {
-                            if (Config.LOGD) Log.d(TAG, "InterruptedException in GpsNetworkThread");
+                            if (Config.LOGD) {
+                                Log.d(TAG, "InterruptedException in GpsNetworkThread");
+                            }
                         }
                     }
                     waitTime = getWaitTime();
-                } while (mEnabled && ((!mXtraDownloadRequested && waitTime > 0) || !mNetworkAvailable));
+                } while (mEnabled && ((!mXtraDownloadRequested && waitTime > 0)
+                        || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
                 if (mEnabled) {
-                    if (mNextNtpTime <= System.currentTimeMillis()) {
-                        String ntpServer = mProperties.getProperty("NTP_SERVER", "pool.ntp.org"); 
-                        if (Config.LOGD) Log.d(TAG, "Requesting time from NTP server " + ntpServer);
-                        if (client.requestTime(ntpServer, 10000)) {
+                    if (mNtpServer != null && 
+                            mNextNtpTime <= System.currentTimeMillis()) {
+                        if (Config.LOGD) {
+                            Log.d(TAG, "Requesting time from NTP server " + mNtpServer);
+                        }
+                        if (client.requestTime(mNtpServer, 10000)) {
                             long time = client.getNtpTime();
                             long timeReference = client.getNtpTimeReference();
                             int certainty = (int)(client.getRoundTripTime()/2);
@@ -799,11 +812,13 @@ public class GpsLocationProvider extends LocationProviderImpl {
                     }
 
                     if ((mXtraDownloadRequested || 
-                            (mNextXtraTime > 0 && mNextXtraTime <= System.currentTimeMillis())) && 
-                            xtraDownloader != null) {
+                            (mNextXtraTime > 0 && mNextXtraTime <= System.currentTimeMillis()))
+                            && xtraDownloader != null) {
                         byte[] data = xtraDownloader.downloadXtraData();
                         if (data != null) {
-                            if (Config.LOGD) Log.d(TAG, "calling native_inject_xtra_data");
+                            if (Config.LOGD) {
+                                Log.d(TAG, "calling native_inject_xtra_data");
+                            }
                             native_inject_xtra_data(data, data.length);
                             mNextXtraTime = 0;
                             mXtraDownloadRequested = false;
@@ -827,7 +842,10 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
         private long getWaitTime() {
             long now = System.currentTimeMillis();
-            long waitTime = mNextNtpTime - now;
+            long waitTime = Long.MAX_VALUE;
+            if (mNtpServer != null) {
+                waitTime = mNextNtpTime - now;
+            }
             if (mNextXtraTime != 0) {
                 long xtraWaitTime = mNextXtraTime - now;
                 if (xtraWaitTime < waitTime) {

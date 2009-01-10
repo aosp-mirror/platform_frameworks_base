@@ -15,8 +15,8 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+android:id/background" android:drawable="@android:drawable/btn_rating_star_off_normal" />
-    <item android:id="@+android:id/secondaryProgress" android:drawable="@android:drawable/btn_rating_star_off_normal" />
-    <item android:id="@+android:id/progress" android:drawable="@android:drawable/btn_rating_star_on_normal" />
+    <item android:id="@+android:id/background" android:drawable="@android:drawable/ratingbar_full_empty" />
+    <item android:id="@+android:id/secondaryProgress" android:drawable="@android:drawable/ratingbar_full_empty" />
+    <item android:id="@+android:id/progress" android:drawable="@android:drawable/ratingbar_full_filled" />
 </layer-list>
 

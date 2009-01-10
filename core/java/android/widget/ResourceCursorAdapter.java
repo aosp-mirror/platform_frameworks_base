@@ -40,7 +40,8 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
      * @param context The context where the ListView associated with this
      *            SimpleListItemFactory is running
      * @param layout resource identifier of a layout file that defines the views
-     *            for this list item.
+     *            for this list item.  Unless you override them later, this will
+     *            define both the item views and the drop down views.
      */
     public ResourceCursorAdapter(Context context, int layout, Cursor c) {
         super(context, c);
@@ -64,6 +65,15 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
         return mInflater.inflate(mDropDownLayout, parent, false);
     }
 
+    /**
+     * <p>Sets the layout resource of the item views.</p>
+     *
+     * @param layout the layout resources used to create item views
+     */
+    public void setViewResource(int layout) {
+        mLayout = layout;
+    }
+    
     /**
      * <p>Sets the layout resource of the drop down views.</p>
      *

@@ -37,6 +37,7 @@ import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.TextKeyListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -265,13 +266,20 @@ import android.widget.AutoCompleteTextView;
         if (mGotEnterDown && !down) {
             return true;
         }
-        // WebView check the trackballtime in onKeyDown to avoid calling native
-        // from both trackball and key handling. As this is called from 
-        // TextDialog, we always want WebView to check with native. Reset
-        // trackballtime to ensure it.
-        mWebView.resetTrackballTime();
-        return down ? mWebView.onKeyDown(keyCode, event) : 
-                mWebView.onKeyUp(keyCode, event);
+        // if it is a navigation key, pass it to WebView
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+                || keyCode == KeyEvent.KEYCODE_DPAD_UP
+                || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            // WebView check the trackballtime in onKeyDown to avoid calling
+            // native from both trackball and key handling. As this is called 
+            // from TextDialog, we always want WebView to check with native. 
+            // Reset trackballtime to ensure it.
+            mWebView.resetTrackballTime();
+            return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                    .onKeyUp(keyCode, event);
+        }
+        return false;
     }
     
     /**
@@ -315,31 +323,30 @@ import android.widget.AutoCompleteTextView;
             updateCachedTextfield();
             return;
         }
-        // In this case, replace before with all but the last character of the 
-        // new text.
-        if (count > 1) {
-            String replace = s.subSequence(start, start + count - 1).toString();
+        // Find the last character being replaced.  If it can be represented by
+        // events, we will pass them to native (after replacing the beginning
+        // of the changed text), so we can see javascript events.
+        // Otherwise, replace the text being changed (including the last
+        // character) in the textfield.
+        TextUtils.getChars(s, start + count - 1, start + count, mCharacter, 0);
+        KeyCharacterMap kmap =
+                KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
+        KeyEvent[] events = kmap.getEvents(mCharacter);
+        boolean cannotUseKeyEvents = null == events;
+        int charactersFromKeyEvents = cannotUseKeyEvents ? 0 : 1;
+        if (count > 1 || cannotUseKeyEvents) {
+            String replace = s.subSequence(start,
+                    start + count - charactersFromKeyEvents).toString();
             mWebView.replaceTextfieldText(start, start + before, replace,
-                    start + count - 1, start + count - 1);
+                    start + count - charactersFromKeyEvents,
+                    start + count - charactersFromKeyEvents);
         } else {
             // This corrects the selection which may have been affected by the 
             // trackball or auto-correct.
             mWebView.setSelection(start, start + before);
         }
-        // Whether the text to be added is only one character, or we already
-        // added all but the last character, we now figure out the DOM events
-        // for the last character, and pass them down.
-        TextUtils.getChars(s, start + count - 1, start + count, mCharacter, 0);
-        // We only care about the events that translate directly into 
-        // characters. Should we be using KeyCharacterMap.BUILT_IN_KEYBOARD?
-        // The comment makes it sound like it may not be directly related to 
-        // the keys. However, KeyCharacterMap.ALPHA says it has "maybe some
-        // numbers."  Not sure if that will have the numbers we may need.
-        KeyCharacterMap kmap =
-                KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
-        KeyEvent[] events = kmap.getEvents(mCharacter);
         updateCachedTextfield();
-        if (null == events) {
+        if (cannotUseKeyEvents) {
             return;
         }
         int length = events.length;
@@ -433,6 +440,8 @@ import android.widget.AutoCompleteTextView;
             method = null;
         }
         setTransformationMethod(method);
+        setInputType(inPassword ? EditorInfo.TYPE_TEXT_VARIATION_PASSWORD :
+                EditorInfo.TYPE_CLASS_TEXT);
     }
 
     /* package */ void setMaxLength(int maxLength) {

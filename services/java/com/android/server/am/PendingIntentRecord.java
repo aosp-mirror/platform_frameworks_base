@@ -208,10 +208,12 @@ class PendingIntentRecord extends IIntentSender.Stub {
                         break;
                     case IActivityManager.INTENT_SENDER_BROADCAST:
                         try {
+                            // If a completion callback has been requested, require
+                            // that the broadcast be delivered synchronously
                             owner.broadcastIntentInPackage(key.packageName, uid,
                                     finalIntent, resolvedType,
                                     finishedReceiver, code, null, null, null,
-                                    false, false);
+                                    (finishedReceiver != null), false);
                             sendFinish = false;
                         } catch (RuntimeException e) {
                             Log.w(ActivityManagerService.TAG,

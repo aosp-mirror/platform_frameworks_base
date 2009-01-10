@@ -180,7 +180,7 @@ public:
             }
 
             copybit_device_t* getBlitEngine() const;
-            overlay_device_t* getOverlayEngine() const;
+            overlay_control_device_t* getOverlayEngine() const;
             
 private:
     friend class BClient;
@@ -382,23 +382,15 @@ private:
 
 // ---------------------------------------------------------------------------
 
-class FreezeLock {
+class FreezeLock : public LightRefBase<FreezeLock> {
     SurfaceFlinger* mFlinger;
-    mutable volatile int32_t mCount;
 public:
     FreezeLock(SurfaceFlinger* flinger)
-        : mFlinger(flinger), mCount(0) {
+        : mFlinger(flinger) {
         mFlinger->incFreezeCount();
     }
     ~FreezeLock() {
         mFlinger->decFreezeCount();
-    }
-    inline void incStrong(void*) const {
-        android_atomic_inc(&mCount);
-    }
-    inline void decStrong(void*) const {
-        if (android_atomic_dec(&mCount) == 1)
-             delete this;
     }
 };
 

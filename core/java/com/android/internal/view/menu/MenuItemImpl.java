@@ -547,19 +547,7 @@ public final class MenuItemImpl implements MenuItem {
     boolean setVisibleInt(boolean shown) {
         final int oldFlags = mFlags;
         mFlags = (mFlags & ~HIDDEN) | (shown ? 0 : HIDDEN);
-        if (oldFlags != mFlags) {
-            final int visibility = (shown) ? View.VISIBLE : View.GONE;
-            
-            for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-                if (hasItemView(i)) {
-                    ((View) mItemViews[i].get()).setVisibility(visibility);
-                }
-            }
-         
-            return true;
-        }
-        
-        return false;
+        return oldFlags != mFlags;
     }
     
     public MenuItem setVisible(boolean shown) {

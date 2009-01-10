@@ -27,13 +27,19 @@ import android.util.AttributeSet;
 
 /**
  * 
- * A resource that contains a number of alternate images, each assigned a maximum numerical value. 
+ * A resource that manages a number of alternate Drawables, each assigned a maximum numerical value. 
  * Setting the level value of the object with {@link #setLevel(int)} will load the image with the next 
- * greater or equal value assigned to its max attribute. See <a href="{@docRoot}reference/available-resources.html#levellistdrawable">
- * Level List</a> in the Resources topic to learn how to specify this type as an XML resource. A good example use of 
+ * greater or equal value assigned to its max attribute. 
+ * A good example use of 
  * a LevelListDrawable would be a battery level indicator icon, with different images to indicate the current
  * battery level.
- *
+ * <p>
+ * It can be defined in an XML file with the <code>&lt;level-list></code> element.
+ * Each Drawable level is defined in a nested <code>&lt;item></code>
+ * </p>
+ * @attr ref android.R.styleable#LevelListDrawableItem_minLevel
+ * @attr ref android.R.styleable#LevelListDrawableItem_maxLevel
+ * @attr ref android.R.styleable#LevelListDrawableItem_drawable
  */
 public class LevelListDrawable extends DrawableContainer {
     public LevelListDrawable()

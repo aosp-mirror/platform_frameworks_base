@@ -107,7 +107,7 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
     }
 
     // create a new Client object
-    sp<Client> client = new Client(this, cameraClient);
+    sp<Client> client = new Client(this, cameraClient, IPCThreadState::self()->getCallingPid());
     mClient = client;
 #if DEBUG_CLIENT_REFERENCES
     // Enable tracking for this object, and track increments and decrements of
@@ -151,10 +151,12 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
 }
 
 CameraService::Client::Client(const sp<CameraService>& cameraService,
-        const sp<ICameraClient>& cameraClient) :
-    mCameraService(cameraService), mCameraClient(cameraClient), mHardware(0)
+        const sp<ICameraClient>& cameraClient, pid_t clientPid) 
 {
     LOGD("Client E constructor");
+    mCameraService = cameraService;
+    mCameraClient = cameraClient;
+    mClientPid = clientPid;
     mHardware = openCameraHardware();
 
     // Callback is disabled by default
@@ -162,12 +164,36 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     LOGD("Client X constructor");
 }
 
+status_t CameraService::Client::checkPid()
+{
+    // zero means the interface is not locked down
+    if (mClientPid == 0) return NO_ERROR;
+    return (int) mClientPid == IPCThreadState::self()->getCallingPid() ? NO_ERROR : -EBUSY;
+}
+
+status_t CameraService::Client::lock()
+{
+    // lock camera to this client
+    status_t result = checkPid();
+    if (result == NO_ERROR) mClientPid = IPCThreadState::self()->getCallingPid();
+    return result;
+}
+
+status_t CameraService::Client::unlock()
+{
+    // allow anyone to use camera
+    status_t result = checkPid();
+    if (result == NO_ERROR) mClientPid = 0;
+    return result;
+}
+
 status_t CameraService::Client::connect(const sp<ICameraClient>& client)
 {
-    // remvoe old client
-    LOGD("connect (new client)");
+    // remove old client
+    LOGV("connect new client to existing camera");
     Mutex::Autolock _l(mLock);
     mCameraClient = client;
+    mClientPid = IPCThreadState::self()->getCallingPid();
     mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     return NO_ERROR;
 }
@@ -209,6 +235,7 @@ void CameraService::Client::disconnect()
 {
     LOGD("Client E disconnect");
     Mutex::Autolock lock(mLock);
+    if (checkPid() != NO_ERROR) return;
     mCameraService->removeClient(mCameraClient);
     if (mHardware != 0) {
         // Before destroying mHardware, we must make sure it's in the
@@ -228,6 +255,8 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 {
     LOGD("setPreviewDisplay(%p)", surface.get());
     Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
     Mutex::Autolock surfaceLock(mSurfaceLock);
     // asBinder() is safe on NULL (returns NULL)
     if (surface->asBinder() != mSurface->asBinder()) {
@@ -245,6 +274,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 void CameraService::Client::setFrameCallbackFlag(int frame_callback_flag)
 {
     Mutex::Autolock lock(mLock);
+    if (checkPid() != NO_ERROR) return;
     mFrameCallbackFlag = frame_callback_flag;
 }
 
@@ -258,6 +288,8 @@ status_t CameraService::Client::startPreview()
      */
 
     Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");
@@ -269,13 +301,14 @@ status_t CameraService::Client::startPreview()
         return INVALID_OPERATION;
     }
 
+    // do nothing if preview is already started
+    if (mHardware->previewEnabled()) return NO_ERROR;
+
     // XXX: This needs to be improved. remove all hardcoded stuff
 
     int w, h;
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
-
-    mSurface->unregisterBuffers();
 
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
     debug_frame_cnt = 0;
@@ -284,6 +317,7 @@ status_t CameraService::Client::startPreview()
     status_t ret = mHardware->startPreview(previewCallback,
                                            mCameraService.get());
     if (ret == NO_ERROR) {
+        mSurface->unregisterBuffers();
         mSurface->registerBuffers(w,h,w,h,
                                   PIXEL_FORMAT_YCbCr_420_SP,
                                   mHardware->getPreviewHeap());
@@ -300,6 +334,7 @@ void CameraService::Client::stopPreview()
     LOGD("stopPreview()");
 
     Mutex::Autolock lock(mLock);
+    if (checkPid() != NO_ERROR) return;
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");
@@ -313,6 +348,13 @@ void CameraService::Client::stopPreview()
         mSurface->unregisterBuffers();
     }
     mPreviewBuffer.clear();
+}
+
+bool CameraService::Client::previewEnabled()
+{
+    Mutex::Autolock lock(mLock);
+    if (mHardware == 0) return false;
+    return mHardware->previewEnabled();
 }
 
 // Safely retrieves a strong pointer to the client during a hardware callback.
@@ -424,6 +466,8 @@ status_t CameraService::Client::autoFocus()
     LOGV("autoFocus");
 
     Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");
@@ -440,6 +484,8 @@ status_t CameraService::Client::takePicture()
     LOGD("takePicture");
 
     Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");
@@ -580,6 +626,8 @@ status_t CameraService::Client::setParameters(const String8& params)
     LOGD("setParameters(%s)", params.string());
 
     Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");

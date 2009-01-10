@@ -34,6 +34,7 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.lang.ref.WeakReference;
 
 /**
  * Provides a dedicated drawing surface embedded inside of a view hierarchy.
@@ -393,7 +394,7 @@ public class SurfaceView extends View {
         mNewSurfaceNeeded = true;
         updateWindow(false);
     }
-    
+
     private static class MyWindow extends IWindow.Stub {
         private WeakReference<SurfaceView> mSurfaceView;
 
@@ -407,8 +408,7 @@ public class SurfaceView extends View {
             if (surfaceView != null) {
                 if (localLOGV) Log.v(
                         "SurfaceView", surfaceView + " got resized: w=" +
-                        w + " h=" + h + ", cur w=" + mCurWidth + " h=" + 
-                        mCurHeight);
+                                w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);
                 synchronized (this) {
                     if (mCurWidth != w || mCurHeight != h) {
                         mCurWidth = w;
@@ -416,8 +416,7 @@ public class SurfaceView extends View {
                     }
                     if (reportDraw) {
                         try {
-                            surfaceView.mSession.finishDrawing(
-                                    surfaceView.mWindow);
+                            surfaceView.mSession.finishDrawing(surfaceView.mWindow);
                         } catch (RemoteException e) {
                         }
                     }
@@ -428,10 +427,8 @@ public class SurfaceView extends View {
         public void dispatchKey(KeyEvent event) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
-                //Log.w("SurfaceView", "Unexpected key event in surface: " 
-                // + event);
-                if (surfaceView.mSession != null && surfaceView.mSurface != 
-                        null) {
+                //Log.w("SurfaceView", "Unexpected key event in surface: " + event);
+                if (surfaceView.mSession != null && surfaceView.mSurface != null) {
                     try {
                         surfaceView.mSession.finishKey(surfaceView.mWindow);
                     } catch (RemoteException ex) {
@@ -463,13 +460,12 @@ public class SurfaceView extends View {
         public void dispatchAppVisibility(boolean visible) {
             // The point of SurfaceView is to let the app control the surface.
         }
-        
+
         public void dispatchGetNewSurface() {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
-                Message msg = surfaceView.mHandler.obtainMessage(
-                        GET_NEW_SURFACE_MSG);
-                surfaceView.mHandler.sendMessage(msg); 
+                Message msg = surfaceView.mHandler.obtainMessage(GET_NEW_SURFACE_MSG);
+                surfaceView.mHandler.sendMessage(msg);
             }
         }
 

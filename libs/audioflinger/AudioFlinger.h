@@ -150,6 +150,7 @@ private:
     virtual                 ~AudioFlinger();
     
     void                    setOutput(AudioStreamOut* output);
+    void                    doSetOutput(AudioStreamOut* output);
     size_t                  getOutputFrameCount(AudioStreamOut* output);
 
     // Internal dump utilites.
@@ -450,7 +451,6 @@ private:
 
     mutable     Mutex                                       mHardwareLock;
     mutable     Mutex                                       mLock;
-    mutable     Mutex                                       mOutputLock;
     mutable     Condition                                   mWaitWorkCV;
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;
                 SortedVector< wp<Track> >                   mActiveTracks;
@@ -468,6 +468,7 @@ private:
                 AudioStreamOut*                     mHardwareOutput;
                 AudioStreamOut*                     mA2dpOutput;
                 AudioStreamOut*                     mOutput;
+                AudioStreamOut*                     mRequestedOutput;
                 sp<AudioRecordThread>               mAudioRecordThread;
                 uint32_t                            mSampleRate;
                 size_t                              mFrameCount;

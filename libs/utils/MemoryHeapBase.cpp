@@ -119,19 +119,24 @@ status_t MemoryHeapBase::mapfd(int fd, size_t size)
         // if it didn't work, let mmap() fail.
     }
 
-    void* base = (uint8_t*)mmap(0, size,
-            PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if (base == MAP_FAILED) {
-        LOGE("mmap(fd=%d, size=%u) failed (%s)",
-                fd, uint32_t(size), strerror(errno));
-        close(fd);
-        return -errno;
+    if ((mFlags & DONT_MAP_LOCALLY) == 0) {
+        void* base = (uint8_t*)mmap(0, size,
+                PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+        if (base == MAP_FAILED) {
+            LOGE("mmap(fd=%d, size=%u) failed (%s)",
+                    fd, uint32_t(size), strerror(errno));
+            close(fd);
+            return -errno;
+        }
+        //LOGD("mmap(fd=%d, base=%p, size=%lu)", fd, base, size);
+        mBase = base;
+        mNeedUnmap = true;
+    } else  {
+        mBase = 0; // not MAP_FAILED
+        mNeedUnmap = false;
     }
-    //LOGD("mmap(fd=%d, base=%p, size=%lu)", fd, base, size);
     mFD = fd;
-    mBase = base;
     mSize = size;
-    mNeedUnmap = true;
     return NO_ERROR;
 }
 

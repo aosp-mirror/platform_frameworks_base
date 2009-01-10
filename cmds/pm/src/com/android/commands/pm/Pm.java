@@ -94,6 +94,16 @@ public final class Pm {
             return;
         }
         
+        if ("enable".equals(op)) {
+            runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+            return;
+        }
+        
+        if ("disable".equals(op)) {
+            runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+            return;
+        }
+        
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -111,6 +121,9 @@ public final class Pm {
             }
         } finally {
             if (validCommand == false) {
+                if (op != null) {
+                    System.err.println("Error: unknown command '" + op + "'");
+                }
                 showUsage();
             }
         }
@@ -662,6 +675,49 @@ public final class Pm {
         return obs.result;
     }
 
+    private static String enabledSettingToString(int state) {
+        switch (state) {
+            case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                return "default";
+            case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                return "enabled";
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                return "disabled";
+        }
+        return "unknown";
+    }
+    
+    private void runSetEnabledSetting(int state) {
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package or component specified");
+            showUsage();
+            return;
+        }
+        ComponentName cn = ComponentName.unflattenFromString(pkg);
+        if (cn == null) {
+            try {
+                mPm.setApplicationEnabledSetting(pkg, state, 0);
+                System.err.println("Package " + pkg + " new state: "
+                        + enabledSettingToString(
+                                mPm.getApplicationEnabledSetting(pkg)));
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(PM_NOT_RUNNING_ERR);
+            }
+        } else {
+            try {
+                mPm.setComponentEnabledSetting(cn, state, 0);
+                System.err.println("Component " + cn.toShortString() + " new state: "
+                        + enabledSettingToString(
+                                mPm.getComponentEnabledSetting(cn)));
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(PM_NOT_RUNNING_ERR);
+            }
+        }
+    }
+
     /**
      * Displays the package file for a package.
      * @param pckg
@@ -752,6 +808,8 @@ public final class Pm {
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
+        System.err.println("       pm enable PACKAGE_OR_COMPONENT");
+        System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("");
         System.err.println("The list packages command prints all packages.  Use");
         System.err.println("the -f option to see their associated file.");
@@ -780,5 +838,8 @@ public final class Pm {
         System.err.println("The uninstall command removes a package from the system. Use");
         System.err.println("the -k option to keep the data and cache directories around");
         System.err.println("after the package removal.");
+        System.err.println("");
+        System.err.println("The enable and disable commands change the enabled state of");
+        System.err.println("a given package or component (written as \"package/class\").");
     }
 }

@@ -33,10 +33,24 @@ namespace android {
 
 class MemoryDealer;
 class Region;
-class Overlay;
+class OverlayRef;
 
 class LayerBuffer : public LayerBaseClient
 {
+    class Source : public LightRefBase<Source> {
+    public:
+        Source(LayerBuffer& layer);
+        virtual ~Source();
+        virtual void onDraw(const Region& clip) const;
+        virtual void onTransaction(uint32_t flags);
+        virtual void onVisibilityResolved(const Transform& planeTransform);
+        virtual void postBuffer(ssize_t offset);
+        virtual void unregisterBuffers();
+    protected:
+        LayerBuffer& mLayer;
+    };
+
+
 public:
     static const uint32_t typeInfo;
     static const char* const typeID;
@@ -51,39 +65,31 @@ public:
 
     virtual sp<LayerBaseClient::Surface> getSurface() const;
     virtual void onDraw(const Region& clip) const;
+    virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
 
     status_t registerBuffers(int w, int h, int hstride, int vstride,
             PixelFormat format, const sp<IMemoryHeap>& heap);
     void postBuffer(ssize_t offset);
     void unregisterBuffers();
-    sp<Overlay> createOverlay(uint32_t w, uint32_t h, int32_t format);
-    void invalidate();
-    void invalidateLocked();
+    sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format);
+    
+    sp<Source> getSource() const;
+    void setNeedsBlending(bool blending);
+    const Rect& getTransformedBounds() const {
+        return mTransformedBounds;
+    }
 
 private:
-
-    struct NativeBuffer
-    {
+    struct NativeBuffer {
         copybit_image_t   img;
         copybit_rect_t    crop;
     };
 
-    class Buffer
-    {
+    class Buffer : public LightRefBase<Buffer> {
     public:
         Buffer(const sp<IMemoryHeap>& heap, ssize_t offset,
                 int w, int h, int hs, int vs, int f);
-        inline void incStrong(void*) const {
-            android_atomic_inc(&mCount);
-        }
-        inline void decStrong(void*) const {
-            int32_t c = android_atomic_dec(&mCount);
-            //LOGE_IF(c<1, "Buffer::decStrong() called too many times");
-            if (c == 1) {
-                 delete this;
-             }
-        }
         inline status_t getStatus() const {
             return mHeap!=0 ? NO_ERROR : NO_INIT;
         }
@@ -91,14 +97,86 @@ private:
             return mNativeBuffer;
         }
     protected:
+        friend class LightRefBase<Buffer>;
         Buffer& operator = (const Buffer& rhs);
         Buffer(const Buffer& rhs);
         ~Buffer();
-        mutable volatile int32_t mCount;
     private:
         sp<IMemoryHeap>    mHeap;
         NativeBuffer       mNativeBuffer;
     };
+
+    class BufferSource : public Source {
+    public:
+        BufferSource(LayerBuffer& layer,
+                int w, int h, int hstride, int vstride,
+                PixelFormat format, const sp<IMemoryHeap>& heap);
+        virtual ~BufferSource();
+
+        status_t getStatus() const { return mStatus; }
+        sp<Buffer> getBuffer() const;
+        void setBuffer(const sp<Buffer>& buffer);
+
+        virtual void onDraw(const Region& clip) const;
+        virtual void postBuffer(ssize_t offset);
+        virtual void unregisterBuffers();
+    private:
+        mutable Mutex   mLock;
+        sp<IMemoryHeap> mHeap;
+        sp<Buffer>      mBuffer;
+        status_t        mStatus;
+        int             mWidth;
+        int             mHeight;
+        int             mHStride;
+        int             mVStride;
+        int             mFormat;
+        mutable sp<MemoryDealer> mTemporaryDealer;
+        mutable LayerBitmap mTempBitmap;
+        mutable GLuint  mTextureName;
+    };
+    
+    class OverlaySource : public Source {
+    public:
+        OverlaySource(LayerBuffer& layer,
+                sp<OverlayRef>* overlayRef, 
+                uint32_t w, uint32_t h, int32_t format);
+        virtual ~OverlaySource();
+        virtual void onTransaction(uint32_t flags);
+        virtual void onVisibilityResolved(const Transform& planeTransform);
+    private:
+        void serverDestroy(); 
+        class OverlayChanel : public BnOverlay {
+            mutable Mutex mLock;
+            sp<OverlaySource> mSource;
+            virtual void destroy() {
+                sp<OverlaySource> source;
+                { // scope for the lock;
+                    Mutex::Autolock _l(mLock);
+                    source = mSource;
+                    mSource.clear();
+                }
+                if (source != 0) {
+                    source->serverDestroy();
+                }
+            }
+        public:
+            OverlayChanel(const sp<OverlaySource>& source)
+                : mSource(source) {
+            }
+        };
+        friend class OverlayChanel;
+        bool mVisibilityChanged;
+
+        overlay_t* mOverlay;        
+        overlay_handle_t const *mOverlayHandle;
+        uint32_t mWidth;
+        uint32_t mHeight;
+        int32_t mFormat;
+        int32_t mWidthStride;
+        int32_t mHeightStride;
+        mutable Mutex mLock;
+    };
+
 
     class SurfaceBuffer : public LayerBaseClient::Surface
     {
@@ -109,7 +187,7 @@ private:
                 PixelFormat format, const sp<IMemoryHeap>& heap);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual sp<Overlay> createOverlay(
+        virtual sp<OverlayRef> createOverlay(
                 uint32_t w, uint32_t h, int32_t format);
        void disown();
     private:
@@ -122,24 +200,14 @@ private:
     };
 
     friend class SurfaceFlinger;
-    sp<Buffer> getBuffer() const;
-    void       setBuffer(const sp<Buffer>& buffer);
     sp<SurfaceBuffer>   getClientSurface() const;
 
     mutable Mutex   mLock;
-    sp<IMemoryHeap> mHeap;
-    sp<Buffer>      mBuffer;
-    int             mWidth;
-    int             mHeight;
-    int             mHStride;
-    int             mVStride;
-    int             mFormat;
-    mutable GLuint  mTextureName;
+    sp<Source>      mSource;
+
     bool            mInvalidate;
     bool            mNeedsBlending;
     mutable wp<SurfaceBuffer> mClientSurface;
-    mutable sp<MemoryDealer> mTemporaryDealer;
-    mutable LayerBitmap mTempBitmap;
 };
 
 // ---------------------------------------------------------------------------

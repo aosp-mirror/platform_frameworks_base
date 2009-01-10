@@ -477,7 +477,7 @@ public abstract class AbstractTableMerger
     private void fullyDeleteRowsWithSyncId(String syncId, String account, SyncResult syncResult) {
         final String[] selectionArgs = new String[]{syncId, account};
         // delete the rows explicitly so that the delete operation can be overridden
-        Cursor c = mDb.query(mTable, new String[]{"_id"}, SELECT_BY_ID_AND_ACCOUNT,
+        Cursor c = mDb.query(mTable, getDeleteRowProjection(), SELECT_BY_ID_AND_ACCOUNT,
                 selectionArgs, null, null, null);
         try {
             c.moveToFirst();
@@ -491,6 +491,16 @@ public abstract class AbstractTableMerger
         if (mDeletedTable != null) {
             mDb.delete(mDeletedTable, SELECT_BY_ID_AND_ACCOUNT, selectionArgs);
         }
+    }
+
+    /**
+     * Provides the projection used by
+     * {@link AbstractTableMerger#deleteRow(android.database.Cursor)}.
+     * This should be overridden if the deleteRow implementation requires
+     * additional columns.
+     */
+    protected String[] getDeleteRowProjection() {
+        return new String[]{"_id"};
     }
 
     /**

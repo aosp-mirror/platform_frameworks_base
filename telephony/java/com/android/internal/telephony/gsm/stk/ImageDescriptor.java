@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import android.util.Log;
-
 /**
  * {@hide}
  */
@@ -36,8 +34,6 @@ public class ImageDescriptor {
     static final int CODING_SCHEME_COLOUR = 0x21;
 
     public static final int ID_LENGTH = 9;
-
-    private static final String TAG = "ImageDescriptor";
 
     ImageDescriptor() {
         width = 0;
@@ -72,7 +68,7 @@ public class ImageDescriptor {
 
             d.length = ((rawData[valueIndex++] & 0xff) << 8 | (rawData[valueIndex++] & 0xff));
         } catch (IndexOutOfBoundsException e) {
-            Log.d(TAG, "failed parsing image descriptor");
+            StkLog.d("ImageDescripter", "parse; failed parsing image descriptor");
             d = null;
         }
         return d;

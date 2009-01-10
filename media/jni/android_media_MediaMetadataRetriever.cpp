@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
-#include <graphics/SkBitmap.h>
+#include <core/SkBitmap.h>
 #include <media/mediametadataretriever.h>
 #include <private/media/VideoFrame.h>
 

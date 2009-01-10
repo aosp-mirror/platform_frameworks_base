@@ -1,6 +1,6 @@
 #!/bin/sh
 
-locale=de
+locale=it
 
 extract()
 {
@@ -27,6 +27,8 @@ extract()
             perl -e '
                 $file = $ARGV[0];
                 $locale = $ARGV[1];
+
+                $locale =~ s/([a-z][a-z])-([A-Z][A-Z])/$1-r$2/;
 
                 $file =~ /^(.*)\/values([^\/]*)\/(.*)/;
                 $prefix = $1;

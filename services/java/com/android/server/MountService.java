@@ -137,7 +137,11 @@ class MountService extends IMountService.Stub {
      * Broadcasts the USB mass storage connected event to all clients.
      */
     void notifyUmsConnected() {
-        setUsbStorageNotificationVisibility(true);
+        String storageState = Environment.getExternalStorageState();
+        if (!storageState.equals(Environment.MEDIA_REMOVED) &&
+                !storageState.equals(Environment.MEDIA_BAD_REMOVAL)) {
+            setUsbStorageNotificationVisibility(true);
+        }
         Intent intent = new Intent(Intent.ACTION_UMS_CONNECTED);
         mContext.sendBroadcast(intent);
     }

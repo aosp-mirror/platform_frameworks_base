@@ -48,6 +48,132 @@ import android.widget.FrameLayout;
  * which final implementations can derive from and customize.  See the
  * base class {@link AbstractInputMethodService} and the {@link InputMethod}
  * interface for more information on the basics of writing input methods.
+ * 
+ * <p>An input method has significant discretion in how it goes about its
+ * work: the {@link android.inputmethodservice.InputMethodService} provides
+ * a basic framework for standard UI elements (input view, candidates view,
+ * and running in fullscreen mode), but it is up to a particular implementor
+ * to decide how to use them.  For example, one input method could implement
+ * an input area with a keyboard, another could allow the user to draw text,
+ * while a third could have no input area (and thus not be visible to the
+ * user) but instead listen to audio and perform text to speech conversion.</p>
+ * 
+ * <p>In the implementation provided here, all of these elements are placed
+ * together in a single window managed by the InputMethodService.  It will
+ * execute callbacks as it needs information about them, and provides APIs for
+ * programmatic control over them.  They layout of these elements is explicitly
+ * defined:</p>
+ * 
+ * <ul>
+ * <li>The soft input view, if available, is placed at the bottom of the
+ * screen.
+ * <li>The candidates view, if currently shown, is placed above the soft
+ * input view.
+ * <li>If not running fullscreen, the application is moved or resized to be
+ * above these views; if running fullscreen, the window will completely cover
+ * the application and its top part will contain the extract text of what is
+ * currently being edited by the application.
+ * </ul>
+ * 
+ * 
+ * <a name="SoftInputView"></a>
+ * <h3>Soft Input View</h3>
+ * 
+ * <p>Central to most input methods is the soft input view.  This is where most
+ * user interaction occurs: pressing on soft keys, drawing characters, or
+ * however else your input method wants to generate text.  Most implementations
+ * will simply have their own view doing all of this work, and return a new
+ * instance of it when {@link #onCreateInputView()} is called.  At that point,
+ * as long as the input view is visible, you will see user interaction in
+ * that view and can call back on the InputMethodService to interact with the
+ * application as appropriate.</p>
+ * 
+ * <p>There are some situations where you want to decide whether or not your
+ * soft input view should be shown to the user.  This is done by implementing
+ * the {@link #onEvaluateInputViewShown()} to return true or false based on
+ * whether it should be shown in the current environment.  If any of your
+ * state has changed that may impact this, call
+ * {@link #updateInputViewShown()} to have it re-evaluated.  The default
+ * implementation always shows the input view unless there is a hard
+ * keyboard available, which is the appropriate behavior for most input
+ * methods.</p>
+ * 
+ * 
+ * <a name="CandidatesView"></a>
+ * <h3>Candidates View</h3>
+ * 
+ * <p>Often while the user is generating raw text, an input method wants to
+ * provide them with a list of possible interpretations of that text that can
+ * be selected for use.  This is accomplished with the candidates view, and
+ * like the soft input view you implement {@link #onCreateCandidatesView()}
+ * to instantiate your own view implementing your candidates UI.</p>
+ * 
+ * <p>Management of the candidates view is a little different than the input
+ * view, because the candidates view tends to be more transient, being shown
+ * only when there are possible candidates for the current text being entered
+ * by the user.  To control whether the candidates view is shown, you use
+ * {@link #setCandidatesViewShown(boolean)}.  Note that because the candidate
+ * view tends to be shown and hidden a lot, it does not impact the application
+ * UI in the same way as the soft input view: it will never cause application
+ * windows to resize, only cause them to be panned if needed for the user to
+ * see the current focus.</p>
+ * 
+ * 
+ * <a name="FullscreenMode"></a>
+ * <h3>Fullscreen Mode</h3>
+ * 
+ * <p>Sometimes your input method UI is too large to integrate with the
+ * application UI, so you just want to take over the screen.  This is
+ * accomplished by switching to full-screen mode, causing the input method
+ * window to fill the entire screen and add its own "extracted text" editor
+ * showing the user the text that is being typed.  Unlike the other UI elements,
+ * there is a standard implementation for the extract editor that you should
+ * not need to change.  The editor is placed at the top of the IME, above the
+ * input and candidates views.</p>
+ * 
+ * <p>Similar to the input view, you control whether the IME is running in
+ * fullscreen mode by implementing {@link #onEvaluateFullscreenMode()}
+ * to return true or false based on
+ * whether it should be fullscreen in the current environment.  If any of your
+ * state has changed that may impact this, call
+ * {@link #updateFullscreenMode()} to have it re-evaluated.  The default
+ * implementation selects fullscreen mode when the screen is in a landscape
+ * orientation, which is appropriate behavior for most input methods that have
+ * a significant input area.</p>
+ * 
+ * <p>When in fullscreen mode, you have some special requirements because the
+ * user can not see the application UI.  In particular, you should implement
+ * {@link #onDisplayCompletions(CompletionInfo[])} to show completions
+ * generated by your application, typically in your candidates view like you
+ * would normally show candidates.
+ * 
+ * 
+ * <a name="GeneratingText"></a>
+ * <h3>Generating Text</h3>
+ * 
+ * <p>The key part of an IME is of course generating text for the application.
+ * This is done through calls to the
+ * {@link android.view.inputmethod.InputConnection} interface to the
+ * application, which can be retrieved from {@link #getCurrentInputConnection()}.
+ * This interface allows you to generate raw key events or, if the target
+ * supports it, directly edit in strings of candidates and committed text.</p>
+ * 
+ * <p>Information about what the target is expected and supports can be found
+ * through the {@link android.view.inputmethod.EditorInfo} class, which is
+ * retrieved with {@link #getCurrentInputEditorInfo()} method.  The most
+ * important part of this is {@link android.view.inputmethod.EditorInfo#inputType
+ * EditorInfo.inputType}; in particular, if this is
+ * {@link android.view.inputmethod.EditorInfo#TYPE_NULL EditorInfo.TYPE_NULL},
+ * then the target does not support complex edits and you need to only deliver
+ * raw key events to it.  An input method will also want to look at other
+ * values here, to for example detect password mode, auto complete text views,
+ * phone number entry, etc.</p>
+ * 
+ * <p>When the user switches between input targets, you will receive calls to
+ * {@link #onFinishInput()} and {@link #onStartInput(EditorInfo, boolean)}.
+ * You can use these to reset and initialize your input state for the current
+ * target.  For example, you will often want to clear any input state, and
+ * update a soft keyboard to be appropriate for the new inputType.</p>
  */
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
@@ -68,7 +194,7 @@ public class InputMethodService extends AbstractInputMethodService {
     InputBinding mInputBinding;
     InputConnection mInputConnection;
     boolean mInputStarted;
-    EditorInfo mInputInfo;
+    EditorInfo mInputEditorInfo;
     
     boolean mShowInputRequested;
     boolean mShowCandidatesRequested;
@@ -210,12 +336,13 @@ public class InputMethodService extends AbstractInputMethodService {
          * InputMethodService.onUpdateSelection()}.
          */
         public void updateSelection(int oldSelStart, int oldSelEnd,
-                int newSelStart, int newSelEnd) {
+                int newSelStart, int newSelEnd,
+                int candidatesStart, int candidatesEnd) {
             if (!isEnabled()) {
                 return;
             }
             InputMethodService.this.onUpdateSelection(oldSelStart, oldSelEnd,
-                    newSelStart, newSelEnd);
+                    newSelStart, newSelEnd, candidatesStart, candidatesEnd);
         }
         
         /**
@@ -303,6 +430,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this);
         initViews();
+        mWindow.getWindow().setLayout(FILL_PARENT, WRAP_CONTENT);
     }
     
     void initViews() {
@@ -384,8 +512,8 @@ public class InputMethodService extends AbstractInputMethodService {
         return mInputStarted;
     }
     
-    public EditorInfo getCurrentInputInfo() {
-        return mInputInfo;
+    public EditorInfo getCurrentInputEditorInfo() {
+        return mInputEditorInfo;
     }
     
     /**
@@ -459,14 +587,14 @@ public class InputMethodService extends AbstractInputMethodService {
         int[] loc = mTmpLocation;
         if (mInputFrame.getVisibility() == View.VISIBLE) {
             mInputFrame.getLocationInWindow(loc);
-            outInsets.contentTopInsets = loc[1];
+        } else {
+            loc[1] = 0;
         }
+        outInsets.contentTopInsets = loc[1];
         if (mCandidatesFrame.getVisibility() == View.VISIBLE) {
             mCandidatesFrame.getLocationInWindow(loc);
-            outInsets.visibleTopInsets = loc[1];
-        } else {
-            outInsets.visibleTopInsets = loc[1];
         }
+        outInsets.visibleTopInsets = loc[1];
         outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE;
     }
     
@@ -712,7 +840,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (doShowInput) {
             if (mInputStarted) {
                 if (DEBUG) Log.v(TAG, "showWindow: starting input view");
-                onStartInputView(mInputInfo, false);
+                onStartInputView(mInputEditorInfo, false);
             }
             startExtractingText();
         }
@@ -744,11 +872,11 @@ public class InputMethodService extends AbstractInputMethodService {
     
     void doStartInput(EditorInfo attribute, boolean restarting) {
         mInputStarted = true;
-        mInputInfo = attribute;
+        mInputEditorInfo = attribute;
         onStartInput(attribute, restarting);
         if (mWindowVisible) {
             if (mWindowCreated) {
-                onStartInputView(mInputInfo, restarting);
+                onStartInputView(mInputEditorInfo, restarting);
             }
             startExtractingText();
         }
@@ -795,7 +923,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * the extract text, if it is being shown.
      */
     public void onUpdateSelection(int oldSelStart, int oldSelEnd,
-            int newSelStart, int newSelEnd) {
+            int newSelStart, int newSelEnd,
+            int candidatesStart, int candidatesEnd) {
         if (mExtractEditText != null && mExtractedText != null) {
             final int off = mExtractedText.startOffset;
             mExtractEditText.setSelection(newSelStart-off, newSelEnd-off);
@@ -821,10 +950,22 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mWindowVisible && event.getKeyCode() == KeyEvent.KEYCODE_BACK
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
                 && event.getRepeatCount() == 0) {
-            dismissSoftInput();
-            return true;
+            if (mShowInputRequested) {
+                // If the soft input area is shown, back closes it and we
+                // consume the back key.
+                dismissSoftInput();
+                return true;
+            }
+            if (mShowCandidatesRequested) {
+                // If the candidates are shown, we just want to make sure
+                // they are now hidden but otherwise let the app execute
+                // the back.
+                // XXX this needs better interaction with the soft input
+                // implementation.
+                //setCandidatesViewShown(false);
+            }
         }
         return false;
     }
@@ -857,8 +998,8 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mExtractedText != null) {
                 mExtractEditText.setExtractedText(mExtractedText);
             }
-            mExtractEditText.setInputType(getCurrentInputInfo().inputType);
-            mExtractEditText.setHint(mInputInfo.hintText);
+            mExtractEditText.setInputType(getCurrentInputEditorInfo().inputType);
+            mExtractEditText.setHint(mInputEditorInfo.hintText);
         }
     }
 }

@@ -118,7 +118,7 @@ public abstract class Animation {
      * Indicates whether the animation transformation should be applied after the
      * animation ends.
      */
-    boolean mFillAfter = false;
+    boolean mFillAfter = true;
 
     /**
      * The time in milliseconds at which the animation must start;
@@ -292,12 +292,18 @@ public abstract class Animation {
     }
 
     /**
-     * How long this animation should last.
+     * How long this animation should last. The duration cannot be negative.
      * 
      * @param durationMillis Duration in milliseconds
+     *
+     * @throw java.lang.IllegalArgumentException if the duration is < 0
+     *
      * @attr ref android.R.styleable#Animation_duration
      */
     public void setDuration(long durationMillis) {
+        if (durationMillis < 0) {
+            throw new IllegalArgumentException("Animation duration cannot be negative");
+        }
         mDuration = durationMillis;
     }
 
@@ -401,7 +407,7 @@ public abstract class Animation {
 
     /**
      * If fillBefore is true, this animation will apply its transformation
-     * before the start time of the animation. Defaults to false if not set.
+     * before the start time of the animation. Defaults to true if not set.
      * Note that this applies when using an {@link
      * android.view.animation.AnimationSet AnimationSet} to chain
      * animations. The transformation is not applied before the AnimationSet
@@ -416,7 +422,7 @@ public abstract class Animation {
 
     /**
      * If fillAfter is true, the transformation that this animation performed
-     * will persist when it is finished. Defaults to false if not set.
+     * will persist when it is finished. Defaults to true if not set.
      * Note that this applies when using an {@link
      * android.view.animation.AnimationSet AnimationSet} to chain
      * animations. The transformation is not applied before the AnimationSet
@@ -607,12 +613,17 @@ public abstract class Animation {
         }
 
         final long startOffset = getStartOffset();
-        float normalizedTime = ((float) (currentTime - (mStartTime + startOffset))) /
-                    (float) mDuration;
+        final long duration = mDuration;
+        float normalizedTime;
+        if (duration != 0) {
+            normalizedTime = ((float) (currentTime - (mStartTime + startOffset))) /
+                    (float) duration;
+        } else {
+            // time is a step-change with a zero duration
+            normalizedTime = currentTime < mStartTime ? 0.0f : 1.0f;
+        }
 
         boolean expired = normalizedTime >= 1.0f;
-        // Pin time to 0.0 to 1.0 range
-        normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
         mMore = !expired;
 
         if ((normalizedTime >= 0.0f || mFillBefore) && (normalizedTime <= 1.0f || mFillAfter)) {
@@ -622,6 +633,9 @@ public abstract class Animation {
                 }
                 mStarted = true;
             }
+
+            // Pin time to 0.0 to 1.0 range
+            normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);            
 
             if (mCycleFlip) {
                 normalizedTime = 1.0f - normalizedTime;
@@ -788,16 +802,15 @@ public abstract class Animation {
         void onAnimationStart(Animation animation);
 
         /**
-         * <p>Notifies the end of the animation. This callback is invoked
-         * only for animation with repeat mode set to NO_REPEAT.</p>
+         * <p>Notifies the end of the animation. This callback is not invoked
+         * for animations with repeat count set to INFINITE.</p>
          *
          * @param animation The animation which reached its end.
          */
         void onAnimationEnd(Animation animation);
 
         /**
-         * <p>Notifies the repetition of the animation. This callback is invoked
-         * only for animation with repeat mode set to RESTART or REVERSE.</p>
+         * <p>Notifies the repetition of the animation.</p>
          *
          * @param animation The animation which was repeated.
          */

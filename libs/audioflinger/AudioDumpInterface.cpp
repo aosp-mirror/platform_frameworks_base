@@ -49,14 +49,6 @@ AudioDumpInterface::~AudioDumpInterface()
 }
 
 
-status_t AudioDumpInterface::standby()
-{
-    if(mStreamOut)  mStreamOut->Close();
-    gFirst = true;
-    return mFinalInterface->standby();
-}
-
-
 AudioStreamOut* AudioDumpInterface::openOutputStream(
         int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
@@ -105,6 +97,14 @@ ssize_t AudioStreamOutDump::write(const void* buffer, size_t bytes)
     }
     return ret;
 }
+
+status_t AudioStreamOutDump::standby()
+{
+    Close();
+    gFirst = true;
+    return mFinalStream->standby();
+}
+
 
 void AudioStreamOutDump::Close(void)
 {

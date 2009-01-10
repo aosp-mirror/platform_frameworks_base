@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public abstract class AbsSeekBar extends ProgressBar {
@@ -53,7 +54,6 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     public AbsSeekBar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.SeekBar, defStyle, 0);
@@ -114,10 +114,15 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (progressDrawable != null) {
             progressDrawable.setAlpha(isEnabled() ? NO_ALPHA : (int) (NO_ALPHA * mDisabledAlpha));
         }
+        
+        if (mThumb != null && mThumb.isStateful()) {
+            int[] state = getDrawableState();
+            mThumb.setState(state);
+        }
     }
     
     @Override
-    void onProgressRefresh(float scale, boolean fromTouch) { 
+    void onProgressRefresh(float scale, boolean fromUser) { 
         Drawable thumb = mThumb;
         if (thumb != null) {
             setThumbPos(getWidth(), getHeight(), thumb, scale, Integer.MIN_VALUE);
@@ -236,6 +241,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                setPressed(true);
                 onStartTrackingTouch();
                 trackTouchEvent(event);
                 break;
@@ -248,10 +254,12 @@ public abstract class AbsSeekBar extends ProgressBar {
             case MotionEvent.ACTION_UP:
                 trackTouchEvent(event);
                 onStopTrackingTouch();
+                setPressed(false);
                 break;
                 
             case MotionEvent.ACTION_CANCEL:
                 onStopTrackingTouch();
+                setPressed(false);
                 break;
         }
         return true;
@@ -304,6 +312,25 @@ public abstract class AbsSeekBar extends ProgressBar {
      * canceled.
      */
     void onStopTrackingTouch() {
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        int progress = getProgress();
+        
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (progress <= 0) break;
+                setProgress(progress - 1, true);
+                return true;
+        
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (progress >= getMax()) break;
+                setProgress(progress + 1, true);
+                return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
 }

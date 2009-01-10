@@ -40,6 +40,7 @@ public:
     virtual uint32_t    latency() const { return mFinalStream->latency(); }
     virtual status_t    setVolume(float volume)
                             { return mFinalStream->setVolume(volume); }
+    virtual status_t    standby();
     virtual status_t    dump(int fd, const Vector<String16>& args) { return mFinalStream->dump(fd, args); }
     void                Close(void);
 
@@ -54,7 +55,6 @@ class AudioDumpInterface : public AudioHardwareBase
 
 public:
                         AudioDumpInterface(AudioHardwareInterface* hw);
-    virtual status_t    standby();
     virtual AudioStreamOut* openOutputStream(
                                 int format=0,
                                 int channelCount=0,

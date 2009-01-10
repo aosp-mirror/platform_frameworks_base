@@ -304,7 +304,7 @@
     <!-- Allows access to hardware peripherals.  Intended only for hardware testing -->
     <permission android:name="android.permission.HARDWARE_TEST"
         android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
-        android:protectionLevel="normal"
+        android:protectionLevel="signature"
         android:label="@string/permlab_hardware_test"
         android:description="@string/permdesc_hardware_test" />
 

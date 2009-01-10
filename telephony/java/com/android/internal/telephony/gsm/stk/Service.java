@@ -123,10 +123,7 @@ public class Service extends Handler implements AppInterface {
     private StkCmdMessage mCurrntCmd = null;
     private StkCmdMessage mMenuCmd = null;
 
-    private BlockingQueue<RilMessage> mRilMessagesQ = null;
     private RilMessageDecoder mMsgDecoder = null;
-
-    public static final String TAG = "STK";
 
     // Service constants.
     static final int MSG_ID_SESSION_END              = 1;
@@ -159,12 +156,8 @@ public class Service extends Handler implements AppInterface {
         mCmdIf = ci;
         mContext = context;
 
-        // Initialize a blocking queue to be used for ril messages, and a 
-        // RilMessagesDecoder for decoding the messages into a CommandParams. 
-        // Each CommandParams is put into a SynchronousQueue and pulled by the 
-        // Service take() when its ready to handle the next command.
-        mRilMessagesQ = new LinkedBlockingQueue<RilMessage>();
-        mMsgDecoder = RilMessageDecoder.getInstance(mRilMessagesQ, this, fh);
+        // Get the RilMessagesDecoder for decoding the messages.
+        mMsgDecoder = RilMessageDecoder.getInstance(this, fh);
 
         // Register ril events handling.
         mCmdIf.setOnStkSessionEnd(this, MSG_ID_SESSION_END, null);
@@ -177,8 +170,6 @@ public class Service extends Handler implements AppInterface {
 
         // Register for SIM ready event.
         mSimRecords.registerForRecordsLoaded(this, MSG_ID_SIM_LOADED, null);
-        // start decoding ril messages.
-        mMsgDecoder.obtainMessage(RilMessageDecoder.START).sendToTarget();
     }
 
     private void handleRilMsg(RilMessage rilMsg) {
@@ -470,9 +461,7 @@ public class Service extends Handler implements AppInterface {
         return getInstance(null, null, null, null, null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void handleMessage(Message msg) {
 
         switch (msg.what) {
@@ -492,10 +481,10 @@ public class Service extends Handler implements AppInterface {
                     }
                 }
             }
-            mRilMessagesQ.add(new RilMessage(msg.what, data));
+            mMsgDecoder.startDecodingMessageParams(new RilMessage(msg.what, data));
             break;
         case MSG_ID_CALL_SETUP:
-            mRilMessagesQ.add(new RilMessage(msg.what, null));
+            mMsgDecoder.startDecodingMessageParams(new RilMessage(msg.what, null));
             break;
         case MSG_ID_SIM_LOADED:
             break;
@@ -550,6 +539,7 @@ public class Service extends Handler implements AppInterface {
         switch (resMsg.resCode) {
         case HELP_INFO_REQUIRED:
             helpRequired = true;
+            // fall through
         case OK:
         case PRFRMD_WITH_PARTIAL_COMPREHENSION:
         case PRFRMD_WITH_MISSING_INFO:

@@ -31,9 +31,18 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * <p>A drawable that can rotate another drawable based on the current level
+ * <p>A Drawable that can rotate another Drawable based on the current level
  * value. The start and end angles of rotation can be controlled to map any
  * circular arc to the level values range.</p>
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;rotate></code> element.</p>
+ *
+ * @attr ref android.R.styleable#RotateDrawable_visible
+ * @attr ref android.R.styleable#RotateDrawable_fromDegrees
+ * @attr ref android.R.styleable#RotateDrawable_toDegrees
+ * @attr ref android.R.styleable#RotateDrawable_pivotX
+ * @attr ref android.R.styleable#RotateDrawable_pivotY
+ * @attr ref android.R.styleable#RotateDrawable_drawable
  */
 public class RotateDrawable extends Drawable implements Drawable.Callback {
 

@@ -16,11 +16,10 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.graphics.Rasterizer;
 import android.text.TextPaint;
 
-public class RasterizerSpan extends CharacterStyle {
+public class RasterizerSpan extends CharacterStyle implements UpdateAppearance {
 
 	private Rasterizer mRasterizer;
 

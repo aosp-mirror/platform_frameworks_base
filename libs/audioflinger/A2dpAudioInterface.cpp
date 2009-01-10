@@ -79,11 +79,6 @@ AudioStreamIn* A2dpAudioInterface::openInputStream(
     return NULL;
 }
 
-status_t A2dpAudioInterface::standby()
-{
-    return 0;
-}
-
 status_t A2dpAudioInterface::setMicMute(bool state)
 {
     return 0;
@@ -123,8 +118,8 @@ status_t A2dpAudioInterface::dump(int fd, const Vector<String16>& args)
 // ----------------------------------------------------------------------------
 
 A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
-    mFd(-1), mStartCount(0), mRetryCount(0), mData(NULL),
-    mInitialized(false), mBufferRemaining(0)
+    mFd(-1), mStandby(false), mStartCount(0), mRetryCount(0), mData(NULL),
+    mInitialized(false)
 {
 }
 
@@ -155,26 +150,50 @@ A2dpAudioInterface::A2dpAudioStreamOut::~A2dpAudioStreamOut()
 
 ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t bytes)
 {    
+    status_t status = NO_INIT;
+    size_t remaining = bytes;
+
     if (!mInitialized) {
-        int ret = a2dp_init("00:00:00:00:00:00", 44100, 2, &mData);
-        if (ret)
-            return ret;
+        status = a2dp_init("00:00:00:00:00:00", 44100, 2, &mData);
+        if (status < 0) {
+            LOGE("a2dp_init failed err: %d\n", status);
+            goto Error;
+        }
         mInitialized = true;
     }
     
-    size_t remaining = bytes;
     while (remaining > 0) {
-        int written = a2dp_write(mData, buffer, remaining);        
-        remaining -= written;
-        buffer = ((char *)buffer) + written;
+        status = a2dp_write(mData, buffer, remaining);
+        if (status <= 0) {
+            LOGE("a2dp_write failed err: %d\n", status);
+            goto Error;
+        }
+        remaining -= status;
+        buffer = ((char *)buffer) + status;
     }
+
+    mStandby = false;
     
     return bytes;
+
+Error:   
+    // Simulate audio output timing in case of error
+    usleep(bytes * 1000000 / frameSize() / sampleRate());
+
+    return status;
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
 {
-    return 0;
+    int result = 0;
+
+    if (!mStandby) {
+        result = a2dp_stop(mData);
+        if (result == 0)
+            mStandby = true;
+    }
+
+    return result;
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::dump(int fd, const Vector<String16>& args)

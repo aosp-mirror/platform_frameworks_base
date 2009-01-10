@@ -71,7 +71,7 @@ uint32_t LayerBlur::doTransaction(uint32_t flags)
         mRefreshCache = true;
         mCacheDirty = true;
         flags |= eVisibleRegion;
-        this->invalidate = true;
+        this->contentDirty = true;
     }
     return LayerBase::doTransaction(flags);    
 }

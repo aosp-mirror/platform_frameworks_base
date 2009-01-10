@@ -32,7 +32,10 @@ class MemoryHeapBase : public virtual BnMemoryHeap
 public:
     enum {
         READ_ONLY = IMemoryHeap::READ_ONLY,
-        MAP_ONCE = IMemoryHeap::MAP_ONCE
+        MAP_ONCE = IMemoryHeap::MAP_ONCE,
+        // memory won't be mapped locally, but will be mapped in the remote
+        // process.
+        DONT_MAP_LOCALLY = 0x00000100
     };
 
     /* 

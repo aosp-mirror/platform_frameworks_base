@@ -25,7 +25,6 @@ import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -300,14 +299,10 @@ final class WebViewCore {
      */
     private native void nativeSplitContent();
 
-    // these must be kept lock-step with the KeyState enum in WebViewCore.h
-    static private final int KEY_ACTION_DOWN = 0;
-    static private final int KEY_ACTION_UP = 1;
+    private native boolean nativeKey(int keyCode, int unichar,
+            int repeatCount, boolean isShift, boolean isAlt, boolean isDown);
 
-    private native boolean nativeSendKeyToFocusNode(int keyCode, int unichar,
-                int repeatCount, boolean isShift, boolean isAlt, int keyAction);
-
-    private native boolean nativeKeyUp(int keycode, int keyvalue);
+    private native boolean nativeClick();
 
     private native void nativeSendListBoxChoices(boolean[] choices, int size);
 
@@ -527,6 +522,7 @@ final class WebViewCore {
         static final int PASS_TO_JS = 115;
         static final int SET_GLOBAL_BOUNDS = 116;
         static final int UPDATE_CACHE_AND_TEXT_ENTRY = 117;
+        static final int CLICK = 118;
         static final int DOC_HAS_IMAGES = 120;
         static final int SET_SNAP_ANCHOR = 121;
         static final int DELETE_SELECTION = 122;
@@ -572,19 +568,6 @@ final class WebViewCore {
         // flag values passed to message SET_FINAL_FOCUS
         static final int NO_FOCUS_CHANGE_BLOCK = 0;
         static final int BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP = 1;
-
-        /*  The KEY_DOWN and KEY_UP messages pass the keyCode in arg1, and a
-            "type" in arg2. These are the types, and they describe what the
-            circumstances were that prompted the UI thread to send the keyevent
-            to webkit.
-         
-            FOCUS_NODE - the currently focused node says it wants key events
-                         (e.g. plugins)
-            UNHANDLED - the UI side did not handle the key, so we give webkit
-                        a shot at it.
-         */
-        static final int KEYEVENT_FOCUS_NODE_TYPE = 0;
-        static final int KEYEVENT_UNHANDLED_TYPE = 1;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -680,11 +663,15 @@ final class WebViewCore {
                             break;
 
                         case KEY_DOWN:
-                            keyDown(msg.arg1, msg.arg2, (KeyEvent) msg.obj);
+                            key((KeyEvent) msg.obj, true);
                             break;
 
                         case KEY_UP:
-                            keyUp(msg.arg1, msg.arg2, (KeyEvent) msg.obj);
+                            key((KeyEvent) msg.obj, false);
+                            break;
+
+                        case CLICK:
+                            nativeClick();
                             break;
 
                         case VIEW_SIZE_CHANGED:
@@ -1130,48 +1117,18 @@ final class WebViewCore {
         mBrowserFrame.loadUrl(url);
     }
 
-    private void keyDown(int code, int target, KeyEvent event) {
+    private void key(KeyEvent evt, boolean isDown) {
         if (LOGV_ENABLED) {
-            Log.v(LOGTAG, "CORE keyDown at " + System.currentTimeMillis()
-                    + ", " + event);
+            Log.v(LOGTAG, "CORE key at " + System.currentTimeMillis() + ", "
+                    + evt);
         }
-        switch (target) {
-            case EventHub.KEYEVENT_UNHANDLED_TYPE:
-                break;
-            case EventHub.KEYEVENT_FOCUS_NODE_TYPE:
-                if (nativeSendKeyToFocusNode(code, event.getUnicodeChar(),
-                                             event.getRepeatCount(),
-                                             event.isShiftPressed(),
-                                             event.isAltPressed(),
-                                             KEY_ACTION_DOWN)) {
-                    return;
-                }
-                break;
+        if (!nativeKey(evt.getKeyCode(), evt.getUnicodeChar(),
+                evt.getRepeatCount(), evt.isShiftPressed(), evt.isAltPressed(),
+                isDown)) {
+            // bubble up the event handling
+            mCallbackProxy.onUnhandledKeyEvent(evt);
         }
-        // If we get here, no one handled it, so call our proxy
-        mCallbackProxy.onUnhandledKeyEvent(event);
     }
-
-    private void keyUp(int code, int target, KeyEvent event) {
-        if (LOGV_ENABLED) {
-            Log.v(LOGTAG, "CORE keyUp at " + System.currentTimeMillis()
-                    + ", " + event);
-        }
-        switch (target) {
-            case EventHub.KEYEVENT_UNHANDLED_TYPE:
-                if (!nativeKeyUp(code, event.getUnicodeChar())) {
-                    mCallbackProxy.onUnhandledKeyEvent(event);
-                }
-                break;
-            case EventHub.KEYEVENT_FOCUS_NODE_TYPE:
-                nativeSendKeyToFocusNode(code, event.getUnicodeChar(),
-                                         event.getRepeatCount(),
-                                         event.isShiftPressed(),
-                                         event.isAltPressed(),
-                                         KEY_ACTION_UP);
-                break;
-            }
-        }
 
     // These values are used to avoid requesting a layout based on old values
     private int mCurrentViewWidth = 0;

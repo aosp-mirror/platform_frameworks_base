@@ -44,22 +44,74 @@ public class EditableInputConnection extends BaseInputConnection {
     public static final Object COMPOSING = new ComposingText();
     
     private final TextView mTextView;
-    private final Handler mUiHandler;
 
     private Object[] mDefaultComposingSpans;
     
     public EditableInputConnection(TextView textview) {
         super(textview);
         mTextView = textview;
-        mUiHandler = textview.getHandler();
     }
 
+    public static final void removeComposingSpans(Spannable text) {
+        text.removeSpan(COMPOSING);
+        Object[] sps = text.getSpans(0, text.length(), Object.class);
+        if (sps != null) {
+            for (int i=sps.length-1; i>=0; i--) {
+                Object o = sps[i];
+                if ((text.getSpanFlags(o)&Spanned.SPAN_COMPOSING) != 0) {
+                    text.removeSpan(o);
+                }
+            }
+        }
+    }
+    
+    public static void setComposingSpans(Spannable text) {
+        final Object[] sps = text.getSpans(0, text.length(), Object.class);
+        if (sps != null) {
+            for (int i=sps.length-1; i>=0; i--) {
+                final Object o = sps[i];
+                if (o == COMPOSING) {
+                    text.removeSpan(o);
+                    continue;
+                }
+                final int fl = text.getSpanFlags(o);
+                if ((fl&(Spanned.SPAN_COMPOSING|Spanned.SPAN_POINT_MARK_MASK)) 
+                        != (Spanned.SPAN_COMPOSING|Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)) {
+                    text.setSpan(o, text.getSpanStart(o), text.getSpanEnd(o),
+                            (fl&Spanned.SPAN_POINT_MARK_MASK)
+                                    | Spanned.SPAN_COMPOSING
+                                    | Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+        }
+        
+        text.setSpan(COMPOSING, 0, text.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
+    }
+    
+    public static int getComposingSpanStart(Spannable text) {
+        return text.getSpanStart(COMPOSING);
+    }
+    
+    public static int getComposingSpanEnd(Spannable text) {
+        return text.getSpanEnd(COMPOSING);
+    }
+    
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "setComposingText " + text);
         replaceText(text, newCursorPosition, true);
         return true;
     }
 
+    public boolean finishComposingText() {
+        if (DEBUG) Log.v(TAG, "finishComposingText");
+        final Editable content = getEditable();
+        if (content != null) {
+            removeComposingSpans(content);
+        }
+        return true;
+    }
+    
     public boolean commitText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "commitText " + text);
         replaceText(text, newCursorPosition, false);
@@ -210,43 +262,6 @@ public class EditableInputConnection extends BaseInputConnection {
             return tv.getEditableText();
         }
         return null;
-    }
-    
-    public static void setComposingSpans(Spannable text) {
-        final Object[] sps = text.getSpans(0, text.length(), Object.class);
-        if (sps != null) {
-            for (int i=sps.length-1; i>=0; i--) {
-                final Object o = sps[i];
-                if (o == COMPOSING) {
-                    text.removeSpan(o);
-                    continue;
-                }
-                final int fl = text.getSpanFlags(o);
-                if ((fl&(Spanned.SPAN_COMPOSING|Spanned.SPAN_POINT_MARK_MASK)) 
-                        != (Spanned.SPAN_COMPOSING|Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)) {
-                    text.setSpan(o, text.getSpanStart(o), text.getSpanEnd(o),
-                            (fl&Spanned.SPAN_POINT_MARK_MASK)
-                                    | Spanned.SPAN_COMPOSING
-                                    | Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-            }
-        }
-        
-        text.setSpan(COMPOSING, 0, text.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
-    }
-    
-    public static final void removeComposingSpans(Spannable text) {
-        text.removeSpan(COMPOSING);
-        Object[] sps = text.getSpans(0, text.length(), Object.class);
-        if (sps != null) {
-            for (int i=sps.length-1; i>=0; i--) {
-                Object o = sps[i];
-                if ((text.getSpanFlags(o)&Spanned.SPAN_COMPOSING) != 0) {
-                    text.removeSpan(o);
-                }
-            }
-        }
     }
     
     private void replaceText(CharSequence text, int newCursorPosition,

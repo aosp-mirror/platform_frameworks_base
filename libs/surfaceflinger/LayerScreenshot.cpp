@@ -23,7 +23,7 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
-#include <graphics/SkBitmap.h>
+#include <core/SkBitmap.h>
 
 #include <ui/EGLDisplaySurface.h>
 

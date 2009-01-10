@@ -158,6 +158,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private UnsynchronizedWakeLock mBroadcastWakeLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock;
+    private UnsynchronizedWakeLock mPreventScreenOnPartialLock;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     private TimeoutTask mTimeoutTask = new TimeoutTask();
@@ -180,6 +181,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private HashMap<IBinder,PokeLock> mPokeLocks = new HashMap<IBinder,PokeLock>();
     private long mScreenOnTime;
     private long mScreenOnStartTime;
+    private boolean mPreventScreenOn;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -383,6 +385,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                                 PowerManager.SCREEN_DIM_WAKE_LOCK, "StayOnWhilePluggedIn Screen Dim", false);
         mStayOnWhilePluggedInPartialLock = new UnsynchronizedWakeLock(
                                 PowerManager.PARTIAL_WAKE_LOCK, "StayOnWhilePluggedIn Partial", false);
+        mPreventScreenOnPartialLock = new UnsynchronizedWakeLock(
+                                PowerManager.PARTIAL_WAKE_LOCK, "PreventScreenOn Partial", false);
 
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
         mScreenOnIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -790,6 +794,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
+        pw.println("  mPreventScreenOnPartialLock=" + mPreventScreenOnPartialLock);
         mScreenBrightness.dump(pw, "  mScreenBrightness: ");
         mKeyboardBrightness.dump(pw, "  mKeyboardBrightness: ");
         mButtonBrightness.dump(pw, "  mButtonBrightness: ");
@@ -1035,6 +1040,118 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
 
+    /**
+     * Prevents the screen from turning on even if it *should* turn on due
+     * to a subsequent full wake lock being acquired.
+     * <p>
+     * This is a temporary hack that allows an activity to "cover up" any
+     * display glitches that happen during the activity's startup
+     * sequence.  (Specifically, this API was added to work around a
+     * cosmetic bug in the "incoming call" sequence, where the lock screen
+     * would flicker briefly before the incoming call UI became visible.)
+     * TODO: There ought to be a more elegant way of doing this,
+     * probably by having the PowerManager and ActivityManager
+     * work together to let apps specify that the screen on/off
+     * state should be synchronized with the Activity lifecycle.
+     * <p>
+     * Note that calling preventScreenOn(true) will NOT turn the screen
+     * off if it's currently on.  (This API only affects *future*
+     * acquisitions of full wake locks.)
+     * But calling preventScreenOn(false) WILL turn the screen on if
+     * it's currently off because of a prior preventScreenOn(true) call.
+     * <p>
+     * Any call to preventScreenOn(true) MUST be followed promptly by a call
+     * to preventScreenOn(false).  In fact, if the preventScreenOn(false)
+     * call doesn't occur within 5 seconds, we'll turn the screen back on
+     * ourselves (and log a warning about it); this prevents a buggy app
+     * from disabling the screen forever.)
+     * <p>
+     * TODO: this feature should really be controlled by a new type of poke
+     * lock (rather than an IPowerManager call).
+     */
+    public void preventScreenOn(boolean prevent) {
+        // TODO: use a totally new permission (separate from DEVICE_POWER) for this?
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        synchronized (mLocks) {
+            if (prevent) {
+                // First of all, grab a partial wake lock to
+                // make sure the CPU stays on during the entire
+                // preventScreenOn(true) -> preventScreenOn(false) sequence.
+                mPreventScreenOnPartialLock.acquire();
+
+                // Post a forceReenableScreen() call (for 5 seconds in the
+                // future) to make sure the matching preventScreenOn(false) call
+                // has happened by then.
+                mHandler.removeCallbacks(mForceReenableScreenTask);
+                mHandler.postDelayed(mForceReenableScreenTask, 5000);
+
+                // Finally, set the flag that prevents the screen from turning on.
+                // (Below, in setPowerState(), we'll check mPreventScreenOn and
+                // we *won't* call Power.setScreenState(true) if it's set.)
+                mPreventScreenOn = true;
+            } else {
+                // (Re)enable the screen.
+                mPreventScreenOn = false;
+
+                // We're "undoing" a the prior preventScreenOn(true) call, so we
+                // no longer need the 5-second safeguard.
+                mHandler.removeCallbacks(mForceReenableScreenTask);
+
+                // Forcibly turn on the screen if it's supposed to be on.  (This
+                // handles the case where the screen is currently off because of
+                // a prior preventScreenOn(true) call.)
+                if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                    if (mSpew) {
+                        Log.d(TAG,
+                              "preventScreenOn: turning on after a prior preventScreenOn(true)!");
+                    }
+                    int err = Power.setScreenState(true);
+                    if (err != 0) {
+                        Log.w(TAG, "preventScreenOn: error from Power.setScreenState(): " + err);
+                    }
+                }
+
+                // Release the partial wake lock that we held during the
+                // preventScreenOn(true) -> preventScreenOn(false) sequence.
+                mPreventScreenOnPartialLock.release();
+            }
+        }
+    }
+
+    /**
+     * Sanity-check that gets called 5 seconds after any call to
+     * preventScreenOn(true).  This ensures that the original call
+     * is followed promptly by a call to preventScreenOn(false).
+     */
+    private void forceReenableScreen() {
+        // We shouldn't get here at all if mPreventScreenOn is false, since
+        // we should have already removed any existing
+        // mForceReenableScreenTask messages...
+        if (!mPreventScreenOn) {
+            Log.w(TAG, "forceReenableScreen: mPreventScreenOn is false, nothing to do");
+            return;
+        }
+
+        // Uh oh.  It's been 5 seconds since a call to
+        // preventScreenOn(true) and we haven't re-enabled the screen yet.
+        // This means the app that called preventScreenOn(true) is either
+        // slow (i.e. it took more than 5 seconds to call preventScreenOn(false)),
+        // or buggy (i.e. it forgot to call preventScreenOn(false), or
+        // crashed before doing so.)
+
+        // Log a warning, and forcibly turn the screen back on.
+        Log.w(TAG, "App called preventScreenOn(true) but didn't promptly reenable the screen! "
+              + "Forcing the screen back on...");
+        preventScreenOn(false);
+    }
+
+    private Runnable mForceReenableScreenTask = new Runnable() {
+            public void run() {
+                forceReenableScreen();
+            }
+        };
+
     private void setPowerState(int state)
     {
         setPowerState(state, false, false);
@@ -1096,7 +1213,31 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
             if (oldScreenOn != newScreenOn) {
                 if (newScreenOn) {
-                    err = Power.setScreenState(true);
+                    // Turn on the screen UNLESS there was a prior
+                    // preventScreenOn(true) request.  (Note that the lifetime
+                    // of a single preventScreenOn() request is limited to 5
+                    // seconds to prevent a buggy app from disabling the
+                    // screen forever; see forceReenableScreen().)
+                    boolean reallyTurnScreenOn = true;
+                    if (mSpew) {
+                        Log.d(TAG, "- turning screen on...  mPreventScreenOn = "
+                              + mPreventScreenOn);
+                    }
+
+                    if (mPreventScreenOn) {
+                        if (mSpew) {
+                            Log.d(TAG, "- PREVENTING screen from really turning on!");
+                        }
+                        reallyTurnScreenOn = false;
+                    }
+                    if (reallyTurnScreenOn) {
+                        err = Power.setScreenState(true);
+                    } else {
+                        Power.setScreenState(false);
+                        // But continue as if we really did turn the screen on...
+                        err = 0;
+                    }
+
                     mScreenOnStartTime = SystemClock.elapsedRealtime();
                     mLastTouchDown = 0;
                     mTotalTouchDownTime = 0;

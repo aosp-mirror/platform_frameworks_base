@@ -29,11 +29,18 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * A drawable that changes the size of another drawable based on its current
- * level value.  You can control how much the child drawable changes in width
+ * A Drawable that changes the size of another Drawable based on its current
+ * level value.  You can control how much the child Drawable changes in width
  * and height based on the level, as well as a gravity to control where it is
  * placed in its overall container.  Most often used to implement things like
  * progress bars.
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;scale></code> element.</p>
+ *
+ * @attr ref android.R.styleable#ScaleDrawable_scaleWidth
+ * @attr ref android.R.styleable#ScaleDrawable_scaleHeight
+ * @attr ref android.R.styleable#ScaleDrawable_scaleGravity
+ * @attr ref android.R.styleable#ScaleDrawable_drawable
  */
 public class ScaleDrawable extends Drawable implements Drawable.Callback {
     private ScaleState mScaleState;

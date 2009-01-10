@@ -133,11 +133,10 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
                 final PreferenceGroup preferenceAsGroup = (PreferenceGroup) preference;
                 if (preferenceAsGroup.isOnSameScreenAsChildren()) {
                     flattenPreferenceGroup(preferences, preferenceAsGroup);
-                    preference.setOnPreferenceChangeInternalListener(this);
                 }
-            } else {
-                preference.setOnPreferenceChangeInternalListener(this);
             }
+
+            preference.setOnPreferenceChangeInternalListener(this);
         }
     }
 

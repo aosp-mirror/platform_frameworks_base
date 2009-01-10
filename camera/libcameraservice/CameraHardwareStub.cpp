@@ -183,6 +183,10 @@ void CameraHardwareStub::stopPreview()
     mPreviewThread.clear();
 }
 
+bool CameraHardwareStub::previewEnabled() {
+    return mPreviewThread != 0;
+}
+
 // ---------------------------------------------------------------------------
 
 int CameraHardwareStub::beginAutoFocusThread(void *cookie)

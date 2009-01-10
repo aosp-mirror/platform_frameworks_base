@@ -29,11 +29,17 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * A drawable that clips another drawable based on this drawable's current
- * level value.  You can control how much the child drawable gets clipped in width
+ * A Drawable that clips another Drawable based on this Drawable's current
+ * level value.  You can control how much the child Drawable gets clipped in width
  * and height based on the level, as well as a gravity to control where it is
  * placed in its overall container.  Most often used to implement things like
  * progress bars.
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;clip></code> element.</p>
+ *
+ * @attr ref android.R.styleable#ClipDrawable_clipOrientation
+ * @attr ref android.R.styleable#ClipDrawable_gravity
+ * @attr ref android.R.styleable#ClipDrawable_drawable
  */
 public class ClipDrawable extends Drawable implements Drawable.Callback {
     private ClipState mClipState;

@@ -896,13 +896,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void setFilterText(String filterText) {
         if (mTextFilterEnabled && filterText != null && filterText.length() > 0) {
             createTextFilter(false);
-            // This is going to call our listener onTextChanged, but we are
-            // not ready to bring up a window yet
+            // This is going to call our listener onTextChanged, but we might not
+            // be ready to bring up a window yet
             mTextFilter.setText(filterText);
             mTextFilter.setSelection(filterText.length());
             if (mAdapter instanceof Filterable) {
-                Filter f = ((Filterable) mAdapter).getFilter();
-                f.filter(filterText);
+                // if mPopup is non-null, then onTextChanged will do the filtering
+                if (mPopup == null) {
+                    Filter f = ((Filterable) mAdapter).getFilter();
+                    f.filter(filterText);
+                }
                 // Set filtered to true so we will display the filter window when our main
                 // window is ready
                 mFiltered = true;
@@ -1361,7 +1364,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         Rect selectorRect = mSelectorRect;
         if (selector != null && (isFocused() || touchModeDrawsInPressedState())
                 && selectorRect != null && !selectorRect.isEmpty()) {
+
+            final View v = getChildAt(mSelectedPosition - mFirstPosition);
+
+            if (v != null) v.setPressed(true);
             setPressed(true);
+
             final boolean longClickable = isLongClickable();
             Drawable d = selector.getCurrent();
             if (d != null && d instanceof TransitionDrawable) {
@@ -1641,9 +1649,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         case KeyEvent.KEYCODE_ENTER:
             if (isPressed() && mSelectedPosition >= 0 && mAdapter != null &&
                     mSelectedPosition < mAdapter.getCount()) {
-                final int index = mSelectedPosition - mFirstPosition;
-                performItemClick(getChildAt(index), mSelectedPosition, mSelectedRowId);
+                final View view = getChildAt(mSelectedPosition - mFirstPosition);
+                performItemClick(view, mSelectedPosition, mSelectedRowId);
                 setPressed(false);
+                if (view != null) view.setPressed(false);
                 return true;
             }
         }
@@ -1763,7 +1772,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 handler.removeCallbacks(mPendingCheckForLongPress);
             }
             setPressed(false);
-            View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
+            View motionView = getChildAt(mMotionPosition - mFirstPosition);
             if (motionView != null) {
                 motionView.setPressed(false);
             }

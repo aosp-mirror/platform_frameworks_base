@@ -26,10 +26,14 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * A ColorDrawable is a specialized drawable that fills the Canvas with a specified color,
- * and with respect to the clip region. Note that a ColorDrawable ignores the ColorFilter.
+ * A specialized Drawable that fills the Canvas with a specified color,
+ * with respect to the clip region. Note that a ColorDrawable ignores the ColorFilter.
  * It also ignores the Bounds, meaning it will draw everywhere in the current clip,
  * even if setBounds(...) was called with a smaller area.
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;color></code> element.</p>
+ *
+ * @attr ref android.R.styleable#ColorDrawable_color
  */
 public class ColorDrawable extends Drawable {
     private ColorState mState;

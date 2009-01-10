@@ -23,8 +23,8 @@
 
 #include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
-#include <graphics/SkBitmap.h>
-#include <graphics/SkPixelRef.h>
+#include <SkBitmap.h>
+#include <SkPixelRef.h>
 
 namespace android {
 

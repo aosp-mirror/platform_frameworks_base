@@ -46,7 +46,7 @@ const char* const LayerBuffer::typeID = "LayerBuffer";
 LayerBuffer::LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
         Client* client, int32_t i)
     : LayerBaseClient(flinger, display, client, i),
-    mBuffer(0), mTextureName(-1U), mInvalidate(false), mNeedsBlending(false)
+      mNeedsBlending(false)
 {
 }
 
@@ -56,154 +56,6 @@ LayerBuffer::~LayerBuffer()
     if (s != 0) {
         s->disown();
         mClientSurface.clear();
-    }
-
-    // this should always be called from the OpenGL thread
-    if (mTextureName != -1U) {
-        //glDeleteTextures(1, &mTextureName);
-        deletedTextures.add(mTextureName);
-    }
-    // to help debugging we set those to zero
-    mWidth = mHeight = 0;
-}
-
-bool LayerBuffer::needsBlending() const
-{
-    Mutex::Autolock _l(mLock);
-    return mNeedsBlending;
-}
-
-void LayerBuffer::onDraw(const Region& clip) const
-{
-    sp<Buffer> buffer(getBuffer());
-    if (UNLIKELY(buffer == 0))  {
-        // nothing to do, we don't have a buffer
-        clearWithOpenGL(clip);
-        return;
-    }
-
-    status_t err = NO_ERROR;
-    NativeBuffer src(buffer->getBuffer());
-    const int can_use_copybit = canUseCopybit();
-
-    if (can_use_copybit)  {
-        //StopWatch watch("MDP");
-
-        const int src_width  = src.crop.r - src.crop.l;
-        const int src_height = src.crop.b - src.crop.t;
-        int W = mTransformedBounds.width();
-        int H = mTransformedBounds.height();
-        if (getOrientation() & Transform::ROT_90) {
-            int t(W); W=H; H=t;
-        }
-
-        /* With LayerBuffer, it is likely that we'll have to rescale the
-         * surface, because this is often used for video playback or
-         * camera-preview. Since we want these operation as fast as possible
-         * we make sure we can use the 2D H/W even if it doesn't support
-         * the requested scale factor, in which case we perform the scaling
-         * in several passes. */
-
-        copybit_device_t* copybit = mFlinger->getBlitEngine();
-        const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
-        const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
-
-        float xscale = 1.0f;
-        if (src_width > W*min)          xscale = 1.0f / min;
-        else if (src_width*mag < W)     xscale = mag;
-
-        float yscale = 1.0f;
-        if (src_height > H*min)         yscale = 1.0f / min;
-        else if (src_height*mag < H)    yscale = mag;
-
-        if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
-            //LOGD("MDP scaling hack w=%d, h=%d, ww=%d, wh=%d, xs=%f, ys=%f",
-            //        src_width, src_height, W, H, xscale, yscale);
-
-            if (UNLIKELY(mTemporaryDealer == 0)) {
-                // allocate a memory-dealer for this the first time
-                mTemporaryDealer = mFlinger->getSurfaceHeapManager()
-                        ->createHeap(ISurfaceComposer::eHardware);
-                mTempBitmap.init(mTemporaryDealer);
-            }
-
-            const int tmp_w = floorf(src_width  * xscale);
-            const int tmp_h = floorf(src_height * yscale);
-            err = mTempBitmap.setBits(tmp_w, tmp_h, 1, src.img.format);
-
-            if (LIKELY(err == NO_ERROR)) {
-                NativeBuffer tmp;
-                mTempBitmap.getBitmapSurface(&tmp.img);
-                tmp.crop.l = 0;
-                tmp.crop.t = 0;
-                tmp.crop.r = tmp.img.w;
-                tmp.crop.b = tmp.img.h;
-
-                region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
-                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
-                err = copybit->stretch(copybit,
-                        &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
-                src = tmp;
-            }
-        }
-
-        const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        copybit_image_t dst;
-        hw.getDisplaySurface(&dst);
-        const copybit_rect_t& drect
-                = reinterpret_cast<const copybit_rect_t&>(mTransformedBounds);
-        const State& s(drawingState());
-        region_iterator it(clip);
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, getOrientation());
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER,
-                s.flags & ISurfaceComposer::eLayerDither ?
-                        COPYBIT_ENABLE : COPYBIT_DISABLE);
-        err = copybit->stretch(copybit,
-                &dst, &src.img, &drect, &src.crop, &it);
-    }
-
-    if (!can_use_copybit || err) {
-        if (UNLIKELY(mTextureName == -1LU)) {
-            mTextureName = createTexture();
-        }
-        GLuint w = 0;
-        GLuint h = 0;
-        GGLSurface t;
-            t.version = sizeof(GGLSurface);
-            t.width  = src.crop.r;
-            t.height = src.crop.b;
-            t.stride = src.img.w;
-            t.vstride= src.img.h;
-            t.format = src.img.format;
-            t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
-        const Region dirty(Rect(t.width, t.height));
-        loadTexture(dirty, mTextureName, t, w, h);
-        drawWithOpenGL(clip, mTextureName, t);
-    }
-}
-
-void LayerBuffer::invalidateLocked()
-{
-    mInvalidate = true;
-    mFlinger->signalEvent();
-}
-
-void LayerBuffer::invalidate()
-{
-    Mutex::Autolock _l(mLock);
-    invalidateLocked();
-}
-
-void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
-        Region& outDirtyRegion)
-{
-    Mutex::Autolock _l(mLock);
-    if (mInvalidate) {
-        mInvalidate = false;
-        outDirtyRegion.orSelf(visibleRegionScreen);
     }
 }
 
@@ -226,114 +78,106 @@ sp<LayerBaseClient::Surface> LayerBuffer::getSurface() const
     return s;
 }
 
+bool LayerBuffer::needsBlending() const {
+    return mNeedsBlending;
+}
 
-status_t LayerBuffer::registerBuffers(int w, int h, int hstride, int vstride,
-            PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
-{
-    if (memoryHeap == NULL) {
-        // this is allowed, but in this case, it is illegal to receive
-        // postBuffer(). The surface just erases the framebuffer with
-        // fully transparent pixels.
-        mHeap.clear();
-        mWidth = w;
-        mHeight = h;
-        mNeedsBlending = false;
-        return NO_ERROR;
-    }
-    
-    status_t err = (memoryHeap->heapID() >= 0) ? NO_ERROR : NO_INIT;
-    if (err != NO_ERROR)
-        return err;
-
-    // TODO: validate format/parameters
-
-    Mutex::Autolock _l(mLock);
-    mHeap = memoryHeap;
-    mWidth = w;
-    mHeight = h;
-    mHStride = hstride;
-    mVStride = vstride;
-    mFormat = format;
-    PixelFormatInfo info;
-    getPixelFormatInfo(format, &info);
-    mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
-    return NO_ERROR;
+void LayerBuffer::setNeedsBlending(bool blending) {
+    mNeedsBlending = blending;
 }
 
 void LayerBuffer::postBuffer(ssize_t offset)
 {
-    sp<IMemoryHeap> heap;
-    int w, h, hs, vs, f;
-    { // scope for the lock
-        Mutex::Autolock _l(mLock);
-        w = mWidth;
-        h = mHeight;
-        hs= mHStride;
-        vs= mVStride;
-        f = mFormat;
-        heap = mHeap;
-    }
-
-    sp<Buffer> buffer;
-    if (heap != 0) {
-        buffer = new Buffer(heap, offset, w, h, hs, vs, f);
-        if (buffer->getStatus() != NO_ERROR)
-            buffer.clear();
-        setBuffer(buffer);
-        invalidate();
-    }
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->postBuffer(offset);
 }
 
 void LayerBuffer::unregisterBuffers()
 {
-    Mutex::Autolock _l(mLock);
-    mHeap.clear();
-    mBuffer.clear();
-    invalidateLocked();
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->unregisterBuffers();
+    // XXX: clear mSource
 }
 
-sp<Overlay> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t format)
+uint32_t LayerBuffer::doTransaction(uint32_t flags)
 {
-    sp<Overlay> result;
-    Mutex::Autolock _l(mLock);
-    if (mHeap != 0 || mBuffer != 0) {
-        // we're a push surface. error.
-        return result;
-    }
-    
-    overlay_device_t* overlay_dev = mFlinger->getOverlayEngine();
-    if (overlay_dev == NULL) {
-        // overlays not supported
-        return result;
-    }
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->onTransaction(flags);
+    return LayerBase::doTransaction(flags);    
+}
 
-    overlay_t* overlay = overlay_dev->createOverlay(overlay_dev, w, h, format);
-    if (overlay == NULL) {
-        // couldn't create the overlay (no memory? no more overlays?)
-        return result;
+void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
+        Region& outDirtyRegion)
+{
+    // this code-path must be as tight as possible, it's called each time
+    // the screen is composited.
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->onVisibilityResolved(planeTransform);
+    LayerBase::unlockPageFlip(planeTransform, outDirtyRegion);    
+}
+
+void LayerBuffer::onDraw(const Region& clip) const
+{
+    sp<Source> source(getSource());
+    if (LIKELY(source != 0)) {
+        source->onDraw(clip);
+    } else {
+        clearWithOpenGL(clip);
     }
-    
-    /* TODO: implement the real stuff here */
-    
+}
+
+/**
+ * This creates a "buffer" source for this surface
+ */
+status_t LayerBuffer::registerBuffers(int w, int h, int hstride, int vstride,
+        PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
+{
+    Mutex::Autolock _l(mLock);
+    if (mSource != 0)
+        return INVALID_OPERATION;
+
+    sp<BufferSource> source = new BufferSource(*this, w, h,
+            hstride, vstride, format, memoryHeap);
+
+    status_t result = source->getStatus();
+    if (result == NO_ERROR) {
+        mSource = source;
+    }
+    return result;
+}    
+
+/**
+ * This creates an "overlay" source for this surface
+ */
+sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f)
+{
+    sp<OverlayRef> result;
+    Mutex::Autolock _l(mLock);
+    if (mSource != 0)
+        return result;
+
+    sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f);
+    if (result != 0) {
+        mSource = source;
+    }
     return result;
 }
 
-sp<LayerBuffer::Buffer> LayerBuffer::getBuffer() const
-{
+sp<LayerBuffer::Source> LayerBuffer::getSource() const {
     Mutex::Autolock _l(mLock);
-    return mBuffer;
+    return mSource;
 }
 
-void LayerBuffer::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
-{
-    Mutex::Autolock _l(mLock);
-    mBuffer = buffer;
-}
-
-// ---------------------------------------------------------------------------
+// ============================================================================
+// LayerBuffer::SurfaceBuffer
+// ============================================================================
 
 LayerBuffer::SurfaceBuffer::SurfaceBuffer(SurfaceID id, LayerBuffer* owner)
-    : LayerBaseClient::Surface(id, owner->getIdentity()), mOwner(owner)
+: LayerBaseClient::Surface(id, owner->getIdentity()), mOwner(owner)
 {
 }
 
@@ -367,9 +211,9 @@ void LayerBuffer::SurfaceBuffer::unregisterBuffers()
         owner->unregisterBuffers();
 }
 
-sp<Overlay> LayerBuffer::SurfaceBuffer::createOverlay(
+sp<OverlayRef> LayerBuffer::SurfaceBuffer::createOverlay(
         uint32_t w, uint32_t h, int32_t format) {
-    sp<Overlay> result;
+    sp<OverlayRef> result;
     LayerBuffer* owner(getOwner());
     if (owner)
         result = owner->createOverlay(w, h, format);
@@ -382,12 +226,13 @@ void LayerBuffer::SurfaceBuffer::disown()
     mOwner = 0;
 }
 
-
-// ---------------------------------------------------------------------------
+// ============================================================================
+// LayerBuffer::Buffer
+// ============================================================================
 
 LayerBuffer::Buffer::Buffer(const sp<IMemoryHeap>& heap, ssize_t offset,
         int w, int h, int hs, int vs, int f)
-    : mCount(0), mHeap(heap)
+: mHeap(heap)
 {
     NativeBuffer& src(mNativeBuffer);
     src.crop.l = 0;
@@ -406,6 +251,318 @@ LayerBuffer::Buffer::Buffer(const sp<IMemoryHeap>& heap, ssize_t offset,
 
 LayerBuffer::Buffer::~Buffer()
 {
+}
+
+// ============================================================================
+// LayerBuffer::Source
+// LayerBuffer::BufferSource
+// LayerBuffer::OverlaySource
+// ============================================================================
+
+LayerBuffer::Source::Source(LayerBuffer& layer)
+    : mLayer(layer)
+{    
+}
+LayerBuffer::Source::~Source() {    
+}
+void LayerBuffer::Source::onDraw(const Region& clip) const {
+}
+void LayerBuffer::Source::onTransaction(uint32_t flags) {
+}
+void LayerBuffer::Source::onVisibilityResolved(
+        const Transform& planeTransform) {
+}
+void LayerBuffer::Source::postBuffer(ssize_t offset) {
+}
+void LayerBuffer::Source::unregisterBuffers() {
+}
+
+// ---------------------------------------------------------------------------
+
+LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
+        int w, int h, int hstride, int vstride,
+        PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
+    : Source(layer), mStatus(NO_ERROR), mTextureName(-1U)
+{
+    if (memoryHeap == NULL) {
+        // this is allowed, but in this case, it is illegal to receive
+        // postBuffer(). The surface just erases the framebuffer with
+        // fully transparent pixels.
+        mHeap.clear();
+        mWidth = w;
+        mHeight = h;
+        mLayer.setNeedsBlending(false);
+        return;
+    }
+
+    status_t err = (memoryHeap->heapID() >= 0) ? NO_ERROR : NO_INIT;
+    if (err != NO_ERROR) {
+        mStatus = err;
+        return;
+    }
+
+    // TODO: validate format/parameters
+    mHeap = memoryHeap;
+    mWidth = w;
+    mHeight = h;
+    mHStride = hstride;
+    mVStride = vstride;
+    mFormat = format;
+    PixelFormatInfo info;
+    getPixelFormatInfo(format, &info);
+    mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);
+}
+
+LayerBuffer::BufferSource::~BufferSource()
+{    
+    if (mTextureName != -1U) {
+        LayerBase::deletedTextures.add(mTextureName);
+    }
+}
+
+void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
+{    
+    sp<IMemoryHeap> heap;
+    int w, h, hs, vs, f;
+    { // scope for the lock
+        Mutex::Autolock _l(mLock);
+        w = mWidth;
+        h = mHeight;
+        hs= mHStride;
+        vs= mVStride;
+        f = mFormat;
+        heap = mHeap;
+    }
+
+    sp<Buffer> buffer;
+    if (heap != 0) {
+        buffer = new LayerBuffer::Buffer(heap, offset, w, h, hs, vs, f);
+        if (buffer->getStatus() != NO_ERROR)
+            buffer.clear();
+        setBuffer(buffer);
+        mLayer.invalidate();
+    }
+}
+
+void LayerBuffer::BufferSource::unregisterBuffers()
+{
+    Mutex::Autolock _l(mLock);
+    mHeap.clear();
+    mBuffer.clear();
+    mLayer.invalidate();
+}
+
+sp<LayerBuffer::Buffer> LayerBuffer::BufferSource::getBuffer() const
+{
+    Mutex::Autolock _l(mLock);
+    return mBuffer;
+}
+
+void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
+{
+    Mutex::Autolock _l(mLock);
+    mBuffer = buffer;
+}
+
+void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
+{
+    sp<Buffer> buffer(getBuffer());
+    if (UNLIKELY(buffer == 0))  {
+        // nothing to do, we don't have a buffer
+        mLayer.clearWithOpenGL(clip);
+        return;
+    }
+
+    status_t err = NO_ERROR;
+    NativeBuffer src(buffer->getBuffer());
+    const Rect& transformedBounds = mLayer.getTransformedBounds();
+    const int can_use_copybit = mLayer.canUseCopybit();
+
+    if (can_use_copybit)  {
+        const int src_width  = src.crop.r - src.crop.l;
+        const int src_height = src.crop.b - src.crop.t;
+        int W = transformedBounds.width();
+        int H = transformedBounds.height();
+        if (mLayer.getOrientation() & Transform::ROT_90) {
+            int t(W); W=H; H=t;
+        }
+
+        /* With LayerBuffer, it is likely that we'll have to rescale the
+         * surface, because this is often used for video playback or
+         * camera-preview. Since we want these operation as fast as possible
+         * we make sure we can use the 2D H/W even if it doesn't support
+         * the requested scale factor, in which case we perform the scaling
+         * in several passes. */
+
+        copybit_device_t* copybit = mLayer.mFlinger->getBlitEngine();
+        const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
+        const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
+
+        float xscale = 1.0f;
+        if (src_width > W*min)          xscale = 1.0f / min;
+        else if (src_width*mag < W)     xscale = mag;
+
+        float yscale = 1.0f;
+        if (src_height > H*min)         yscale = 1.0f / min;
+        else if (src_height*mag < H)    yscale = mag;
+
+        if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
+            if (UNLIKELY(mTemporaryDealer == 0)) {
+                // allocate a memory-dealer for this the first time
+                mTemporaryDealer = mLayer.mFlinger->getSurfaceHeapManager()
+                ->createHeap(ISurfaceComposer::eHardware);
+                mTempBitmap.init(mTemporaryDealer);
+            }
+
+            const int tmp_w = floorf(src_width  * xscale);
+            const int tmp_h = floorf(src_height * yscale);
+            err = mTempBitmap.setBits(tmp_w, tmp_h, 1, src.img.format);
+
+            if (LIKELY(err == NO_ERROR)) {
+                NativeBuffer tmp;
+                mTempBitmap.getBitmapSurface(&tmp.img);
+                tmp.crop.l = 0;
+                tmp.crop.t = 0;
+                tmp.crop.r = tmp.img.w;
+                tmp.crop.b = tmp.img.h;
+
+                region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
+                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+                err = copybit->stretch(copybit,
+                        &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
+                src = tmp;
+            }
+        }
+
+        const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
+        copybit_image_t dst;
+        hw.getDisplaySurface(&dst);
+        const copybit_rect_t& drect
+        = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+        const State& s(mLayer.drawingState());
+        region_iterator it(clip);
+        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, mLayer.getOrientation());
+        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
+        copybit->set_parameter(copybit, COPYBIT_DITHER,
+                s.flags & ISurfaceComposer::eLayerDither ?
+                        COPYBIT_ENABLE : COPYBIT_DISABLE);
+        err = copybit->stretch(copybit,
+                &dst, &src.img, &drect, &src.crop, &it);
+    }
+
+    if (!can_use_copybit || err) {
+        if (UNLIKELY(mTextureName == -1LU)) {
+            mTextureName = mLayer.createTexture();
+        }
+        GLuint w = 0;
+        GLuint h = 0;
+        GGLSurface t;
+        t.version = sizeof(GGLSurface);
+        t.width  = src.crop.r;
+        t.height = src.crop.b;
+        t.stride = src.img.w;
+        t.vstride= src.img.h;
+        t.format = src.img.format;
+        t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
+        const Region dirty(Rect(t.width, t.height));
+        mLayer.loadTexture(dirty, mTextureName, t, w, h);
+        mLayer.drawWithOpenGL(clip, mTextureName, t);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
+        sp<OverlayRef>* overlayRef, 
+        uint32_t w, uint32_t h, int32_t format)
+    : Source(layer), mVisibilityChanged(false), mOverlay(0), mOverlayHandle(0)
+{
+    overlay_control_device_t* overlay_dev = mLayer.mFlinger->getOverlayEngine();
+
+    if (overlay_dev == NULL) {
+        // overlays not supported
+        return;
+    }
+
+    overlay_t* overlay = overlay_dev->createOverlay(overlay_dev, w, h, format);
+    if (overlay == NULL) {
+        // couldn't create the overlay (no memory? no more overlays?)
+        return;
+    }
+
+    // enable dithering...
+    overlay_dev->setParameter(overlay_dev, overlay, 
+            OVERLAY_DITHER, OVERLAY_ENABLE);
+
+    mOverlay = overlay;
+    mWidth = overlay->w;
+    mHeight = overlay->h;
+    mFormat = overlay->format; 
+    mWidthStride = overlay->w_stride;
+    mHeightStride = overlay->h_stride;
+
+    mOverlayHandle = overlay->getHandleRef(overlay);
+    
+    // NOTE: here it's okay to acquire a reference to "this"m as long as
+    // the reference is not released before we leave the ctor.
+    sp<OverlayChanel> chanel = new OverlayChanel(this);
+
+    *overlayRef = new OverlayRef(mOverlayHandle, chanel,
+            mWidth, mHeight, mFormat, mWidthStride, mHeightStride);
+}
+
+LayerBuffer::OverlaySource::~OverlaySource()
+{    
+}
+
+void LayerBuffer::OverlaySource::onTransaction(uint32_t flags)
+{
+    const Layer::State& front(mLayer.drawingState());
+    const Layer::State& temp(mLayer.currentState());
+    if (temp.sequence != front.sequence) {
+        mVisibilityChanged = true;
+    }
+}
+
+void LayerBuffer::OverlaySource::onVisibilityResolved(
+        const Transform& planeTransform)
+{
+    // this code-path must be as tight as possible, it's called each time
+    // the screen is composited.
+    if (UNLIKELY(mOverlay != 0)) {
+        if (mVisibilityChanged) {
+            mVisibilityChanged = false;
+            const Rect& bounds = mLayer.getTransformedBounds();
+            int x = bounds.left;
+            int y = bounds.top;
+            int w = bounds.width();
+            int h = bounds.height();
+            
+            // we need a lock here to protect "destroy"
+            Mutex::Autolock _l(mLock);
+            if (mOverlay) {
+                overlay_control_device_t* overlay_dev = 
+                    mLayer.mFlinger->getOverlayEngine();
+                overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
+                overlay_dev->setParameter(overlay_dev, mOverlay, 
+                        OVERLAY_TRANSFORM, mLayer.getOrientation());
+            }
+        }
+    }
+}
+
+void LayerBuffer::OverlaySource::serverDestroy() 
+{
+    // we need a lock here to protect "onVisibilityResolved"
+    Mutex::Autolock _l(mLock);
+    if (mOverlay) {
+        overlay_control_device_t* overlay_dev = 
+                mLayer.mFlinger->getOverlayEngine();
+        overlay_dev->destroyOverlay(overlay_dev, mOverlay);
+        mOverlay = 0;
+    }
 }
 
 // ---------------------------------------------------------------------------

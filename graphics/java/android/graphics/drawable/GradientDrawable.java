@@ -40,9 +40,35 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * A simple color gradient for buttons, backgrounds, etc. See
- * <a href="{@docRoot}reference/available-resources.html#gradientdrawable">Gradient</a>
- * in the Resources topic to learn how to specify this type as an XML resource.
+ * A Drawable with a color gradient for buttons, backgrounds, etc. 
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;shape></code> element.</p>
+ *
+ * @attr ref android.R.styleable#GradientDrawable_visible
+ * @attr ref android.R.styleable#GradientDrawable_shape
+ * @attr ref android.R.styleable#GradientDrawable_innerRadiusRatio
+ * @attr ref android.R.styleable#GradientDrawable_thicknessRatio
+ * @attr ref android.R.styleable#GradientDrawable_useLevel
+ * @attr ref android.R.styleable#GradientDrawableSize_width
+ * @attr ref android.R.styleable#GradientDrawableSize_height
+ * @attr ref android.R.styleable#GradientDrawableGradient_startColor
+ * @attr ref android.R.styleable#GradientDrawableGradient_centerColor
+ * @attr ref android.R.styleable#GradientDrawableGradient_endColor
+ * @attr ref android.R.styleable#GradientDrawableGradient_useLevel
+ * @attr ref android.R.styleable#GradientDrawableGradient_angle
+ * @attr ref android.R.styleable#GradientDrawableGradient_type
+ * @attr ref android.R.styleable#GradientDrawableGradient_centerX
+ * @attr ref android.R.styleable#GradientDrawableGradient_centerY
+ * @attr ref android.R.styleable#GradientDrawableGradient_gradientRadius
+ * @attr ref android.R.styleable#GradientDrawableSolid_color
+ * @attr ref android.R.styleable#GradientDrawableStroke_width
+ * @attr ref android.R.styleable#GradientDrawableStroke_color
+ * @attr ref android.R.styleable#GradientDrawableStroke_dashWidth
+ * @attr ref android.R.styleable#GradientDrawableStroke_dashGap
+ * @attr ref android.R.styleable#GradientDrawablePadding_left
+ * @attr ref android.R.styleable#GradientDrawablePadding_top
+ * @attr ref android.R.styleable#GradientDrawablePadding_right
+ * @attr ref android.R.styleable#GradientDrawablePadding_bottom
  */
 public class GradientDrawable extends Drawable {
     /**

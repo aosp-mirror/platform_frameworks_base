@@ -96,6 +96,11 @@ public:
     virtual void        stopPreview() = 0;
 
     /**
+     * Returns true if preview is enabled.
+     */
+    virtual bool        previewEnabled() = 0;
+
+    /**
      * Start auto focus, the callback routine is called
      * once when focusing is complete. autoFocus() will
      * be called again if another auto focus is needed.

@@ -91,6 +91,7 @@ LOCAL_SRC_FILES:= \
 	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
 	android_media_AudioTrack.cpp \
+	android_media_JetPlayer.cpp \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
 	android_hardware_SensorManager.cpp \
@@ -116,10 +117,14 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
 	$(LOCAL_PATH)/android/graphics \
-	$(call include-path-for, bluedroid corecg graphics) \
+	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(LOCAL_PATH)/../../include/ui \
 	$(LOCAL_PATH)/../../include/utils \
+	external/skia/include/core \
+	external/skia/include/effects \
+	external/skia/include/images \
+	external/skia/include/utils \
 	external/sqlite/dist \
 	external/sqlite/android \
 	external/expat/lib \

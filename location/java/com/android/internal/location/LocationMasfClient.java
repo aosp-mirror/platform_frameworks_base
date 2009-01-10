@@ -1167,6 +1167,10 @@ public class LocationMasfClient {
 
     private void addNeighborsToCellProfile(CellState cellState, ProtoBuf cellularProfile) {
         List<CellState.NeighborCell> neighbors = cellState.getNeighbors();
+
+        int mPrimaryMcc = cellState.getMcc();
+        int mPrimaryMnc = cellState.getMnc();
+
         if (neighbors != null) {
             for (CellState.NeighborCell neighbor : neighbors) {
                 ProtoBuf nCell = new ProtoBuf(GcellularMessageTypes.GCELL);
@@ -1175,6 +1179,12 @@ public class LocationMasfClient {
                 nCell.setInt(GCell.RSSI, neighbor.getRssi());
                 if (neighbor.getPsc() != -1) {
                     nCell.setInt(GCell.PRIMARY_SCRAMBLING_CODE, neighbor.getPsc());
+                }
+                if (mPrimaryMcc != -1) {
+                    nCell.setInt(GCell.MCC, mPrimaryMcc);
+                }
+                if (mPrimaryMnc != -1) {
+                    nCell.setInt(GCell.MNC, mPrimaryMnc);
                 }
                 cellularProfile.addProtoBuf(GCellularProfile.NEIGHBORS, nCell);
             }

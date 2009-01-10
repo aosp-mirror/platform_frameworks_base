@@ -33,6 +33,7 @@ public:
 
     virtual status_t    startPreview(preview_callback cb, void* user);
     virtual void        stopPreview();
+    virtual bool        previewEnabled();
     virtual status_t    autoFocus(autofocus_callback, void *user);
     virtual status_t    takePicture(shutter_callback,
                                     raw_callback,

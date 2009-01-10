@@ -68,7 +68,8 @@ public class AsmGenerator {
      * 
      * @param log Output logger.
      * @param osDestJar The path of the destination JAR to create.
-     * @param stubMethods The list of methods to stub out
+     * @param stubMethods The list of methods to stub out. Each entry must be in the form
+     *          "package.package.OuterClass$InnerClass#MethodName".
      * @param renameClasses The list of classes to rename, must be an even list: the binary FQCN
      *          of class to replace followed by the new FQCN.
      * @param deleteReturns List of classes for which the methods returning them should be deleted.

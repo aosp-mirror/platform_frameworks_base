@@ -37,6 +37,7 @@ public:
     virtual uint32_t    latency() const { return 0; }
     virtual status_t    setVolume(float volume) { return NO_ERROR; }
     virtual ssize_t     write(const void* buffer, size_t bytes);
+    virtual status_t    standby();
     virtual status_t    dump(int fd, const Vector<String16>& args);
 };
 
@@ -59,7 +60,6 @@ public:
                         AudioHardwareStub();
     virtual             ~AudioHardwareStub();
     virtual status_t    initCheck();
-    virtual status_t    standby();
     virtual status_t    setVoiceVolume(float volume);
     virtual status_t    setMasterVolume(float volume);
 

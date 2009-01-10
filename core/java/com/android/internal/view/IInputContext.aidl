@@ -42,6 +42,8 @@ import com.android.internal.view.IInputContextCallback;
 
     void setComposingText(CharSequence text, int newCursorPosition);
 
+    void finishComposingText();
+    
     void commitText(CharSequence text, int newCursorPosition);
 
     void commitCompletion(in CompletionInfo completion);

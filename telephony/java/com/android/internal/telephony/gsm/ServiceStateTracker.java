@@ -921,7 +921,12 @@ final class ServiceStateTracker extends Handler
                         // need adjust time to reflect default timezone setting
                         long tzOffset;
                         tzOffset = zone.getOffset(System.currentTimeMillis());
-                        setAndBroadcastNetworkSetTime(System.currentTimeMillis() - tzOffset);
+                        if (getAutoTime()) {
+                            setAndBroadcastNetworkSetTime(System.currentTimeMillis() - tzOffset);
+                        } else {
+                            // Adjust the saved NITZ time to account for tzOffset.
+                            mSavedTime = mSavedTime - tzOffset;
+                        }
                     } else if (iso.equals("")){
                         // Country code not found.  This is likely a test network.
                         // Get a TimeZone based only on the NITZ parameters (best guess).

@@ -17,10 +17,10 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <graphics/SkCanvas.h>
-#include <graphics/SkDevice.h>
-#include <graphics/SkGLCanvas.h>
-#include <graphics/SkPaint.h>
+#include <core/SkCanvas.h>
+#include <core/SkDevice.h>
+#include <core/SkPaint.h>
+#include <utils/SkGLCanvas.h>
 #include "GraphicsJNI.h"
 
 #include "jni.h"

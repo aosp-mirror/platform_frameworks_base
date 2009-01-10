@@ -65,6 +65,10 @@ public class InputConnectionWrapper implements InputConnection {
         return mBase.setComposingText(text, newCursorPosition);
     }
 
+    public boolean finishComposingText() {
+        return mBase.finishComposingText();
+    }
+    
     public boolean commitText(CharSequence text, int newCursorPosition) {
         return mBase.commitText(text, newCursorPosition);
     }

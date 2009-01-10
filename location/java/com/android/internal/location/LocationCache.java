@@ -103,6 +103,12 @@ public class LocationCache {
                 cellState.getLac(), cellState.getCid());
             Record record = mCellCache.lookup(primaryCellKey);
 
+            // Relax MCC/MNC condition
+            if (record == null) {
+                primaryCellKey = getCellCacheKey(-1, -1, cellState.getLac(), cellState.getCid());
+                record = mCellCache.lookup(primaryCellKey);
+            }
+
             if (record == null) {
                 // Make a server request if primary cell doesn't exist in DB
                 return false;
@@ -121,6 +127,14 @@ public class LocationCache {
                     String historicalCellKey = getCellCacheKey(historicalCell.getMcc(),
                         historicalCell.getMnc(), historicalCell.getLac(), historicalCell.getCid());
                     Record record = mCellCache.lookup(historicalCellKey);
+
+                    // Relax MCC/MNC condition
+                    if (record == null) {
+                        historicalCellKey = getCellCacheKey(-1, -1, historicalCell.getLac(),
+                            historicalCell.getCid());
+                        record = mCellCache.lookup(historicalCellKey);
+                    }
+
                     if (record != null && record.isValid()) {
                         mCellCentroid.addLocation(record.getLat(), record.getLng(),
                             record.getAccuracy(), record.getConfidence());
@@ -561,7 +575,6 @@ public class LocationCache {
             double cLng = getCentroidLng();
 
             int meanDistanceSum = 0;
-            int meanRadiiSum = 0;
             int smallestCircle = MAX_ACCURACY_ALLOWED;
             int smallestCircleDistance = MAX_ACCURACY_ALLOWED;
             float[] distance = new float[1];
@@ -577,11 +590,10 @@ public class LocationCache {
                     smallestCircle = mRadii[i];
                     smallestCircleDistance = (int)distance[0];
                 }
-                meanRadiiSum += mRadii[i];
             }
 
             if (outlierExists) {
-                return (meanDistanceSum + meanRadiiSum)/mNumber;
+                return meanDistanceSum/mNumber;
             } else {
                 return Math.max(smallestCircle, smallestCircleDistance);
             }

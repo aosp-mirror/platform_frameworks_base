@@ -800,7 +800,7 @@ public:
                               jobject bounds) {
         SkRect   r;
         SkIRect ir;
-        bool     result = canvas->getClipBounds(&r);
+        bool     result = canvas->getClipBounds(&r, SkCanvas::kBW_EdgeType);
 
         r.round(&ir);
         (void)GraphicsJNI::irect_to_jrect(ir, env, bounds);

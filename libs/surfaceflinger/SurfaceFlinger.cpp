@@ -231,7 +231,7 @@ copybit_device_t* SurfaceFlinger::getBlitEngine() const
     return graphicPlane(0).displayHardware().getBlitEngine();
 }
 
-overlay_device_t* SurfaceFlinger::getOverlayEngine() const
+overlay_control_device_t* SurfaceFlinger::getOverlayEngine() const
 {
     return graphicPlane(0).displayHardware().getOverlayEngine();
 }
@@ -773,12 +773,12 @@ void SurfaceFlinger::computeVisibleRegions(
         coveredRegion.andSelf(aboveCoveredLayers);
 
         // compute this layer's dirty region
-        if (layer->invalidate) {
+        if (layer->contentDirty) {
             // we need to invalidate the whole region
             dirty = visibleRegion;
             // as well, as the old visible region
             dirty.orSelf(layer->visibleRegionScreen);
-            layer->invalidate = false;
+            layer->contentDirty = false;
         } else {
             // compute the exposed region
             // dirty = what's visible now - what's wasn't covered before
@@ -1456,7 +1456,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                     "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
                     layer->getTypeID(), layer,
                     s.z, layer->tx(), layer->ty(), s.w, s.h,
-                    layer->needsBlending(), layer->invalidate,
+                    layer->needsBlending(), layer->contentDirty,
                     s.alpha, s.flags,
                     s.transform[0], s.transform[1],
                     s.transform[2], s.transform[3]);
@@ -1471,22 +1471,6 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                         "id=0x%08x, client=0x%08x, identity=%u\n",
                         lbc->clientIndex(), lbc->client ? lbc->client->cid : 0,
                         lbc->getIdentity());
-            }
-            result.append(buffer);
-            buffer[0] = 0;
-            /*** LayerBuffer ***/
-            LayerBuffer* const lbuf =
-                LayerBase::dynamicCast<LayerBuffer*>((LayerBase*)layer);
-            if (lbuf) {
-                sp<LayerBuffer::Buffer> lbb(lbuf->getBuffer());
-                if (lbb != 0) {
-                    const LayerBuffer::NativeBuffer& nbuf(lbb->getBuffer());
-                    snprintf(buffer, SIZE,
-                            "      "
-                            "mBuffer={w=%u, h=%u, f=%d, offset=%u, base=%p, fd=%d }\n",
-                            nbuf.img.w, nbuf.img.h, nbuf.img.format, nbuf.img.offset,
-                            nbuf.img.base, nbuf.img.fd);
-                }
             }
             result.append(buffer);
             buffer[0] = 0;

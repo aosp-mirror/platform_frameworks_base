@@ -445,19 +445,19 @@
              {@link android.text.InputType#TYPE_TEXT_VARIATION_NORMAL}. -->
         <flag name="text" value="0x00000001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             request captilization of all characters.  Corresponds to
+             request capitalization of all characters.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_CHARACTERS}. -->
         <flag name="textCapCharacters" value="0x00001001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             request captilization of the first character of every word.  Corresponds to
+             request capitalization of the first character of every word.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_WORDS}. -->
         <flag name="textCapWords" value="0x00002001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             request captilization of the first character of every sentence.  Corresponds to
+             request capitalization of the first character of every sentence.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_CAP_SENTENCES}. -->
         <flag name="textCapSentences" value="0x00004001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             request auto-correction of texting being input.  Corresponds to
+             request auto-correction of text being input.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_AUTO_CORRECT}. -->
         <flag name="textAutoCorrect" value="0x00008001" />
         <!-- Can be combined with <var>text</var> and its variations to
@@ -469,6 +469,10 @@
              allow multiple lines of text in the field.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_MULTI_LINE}. -->
         <flag name="textMultiLine" value="0x00020001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that a search string is being entered.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_SEARCH}. -->
+        <flag name="textSearch" value="0x00040001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
@@ -497,10 +501,11 @@
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_PASSWORD}. -->
         <flag name="textPassword" value="0x00000071" />
-        <!-- Text that will be used for a web search.  Corresponds to
+        <!-- Text that will be used for free form search strings.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
-             {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_SEARCH}. -->
-        <flag name="textWebSearch" value="0x00000081" />
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_SEARCH_STRING} |
+             {@link android.text.InputType#TYPE_TEXT_FLAG_SEARCH}. -->
+        <flag name="textSearchString" value="0x00040081" />
         <!-- Text that is being supplied as text in a web form.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}. -->
@@ -2469,8 +2474,11 @@
             attribute.</i> -->
         <attr name="hint" />
         <!-- If supplied, this string will be displayed as the text of the "Search" button.
-          <i>Optional attribute.</i> -->
+          <i>Optional attribute.</i> 
+          {@deprecated This will create a non-standard UI appearance, because the search bar UI is
+                       changing to use only icons for its buttons.}-->
         <attr name="searchButtonText" format="string" />
+        <attr name="inputType" />
         
         <!-- Additional features are controlled by mode bits in this field.  Omitting
             this field, or setting to zero, provides default behavior.  <i>Optional attribute.</i> 

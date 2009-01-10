@@ -31,6 +31,15 @@ import java.io.IOException;
  * A Drawable that insets another Drawable by a specified distance.
  * This is used when a View needs a background that is smaller than
  * the View's actual bounds.
+ *
+ * <p>It can be defined in an XML file with the <code>&lt;inset></code> element.</p>
+ *
+ * @attr ref android.R.styleable#InsetDrawable_visible
+ * @attr ref android.R.styleable#InsetDrawable_drawable
+ * @attr ref android.R.styleable#InsetDrawable_insetLeft
+ * @attr ref android.R.styleable#InsetDrawable_insetRight
+ * @attr ref android.R.styleable#InsetDrawable_insetTop
+ * @attr ref android.R.styleable#InsetDrawable_insetBottom
  */
 public class InsetDrawable extends Drawable implements Drawable.Callback
 {

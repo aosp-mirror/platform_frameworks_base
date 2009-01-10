@@ -74,6 +74,7 @@ extern int register_android_hardware_SensorManager(JNIEnv *env);
 extern int register_android_media_AudioRecord(JNIEnv *env);
 extern int register_android_media_AudioSystem(JNIEnv *env);
 extern int register_android_media_AudioTrack(JNIEnv *env);
+extern int register_android_media_JetPlayer(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
 
 extern int register_android_message_digest_sha1(JNIEnv *env);
@@ -1073,6 +1074,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_media_AudioRecord),
     REG_JNI(register_android_media_AudioSystem),
     REG_JNI(register_android_media_AudioTrack),
+    REG_JNI(register_android_media_JetPlayer),
     REG_JNI(register_android_media_ToneGenerator),
 
     REG_JNI(register_android_opengl_classes),

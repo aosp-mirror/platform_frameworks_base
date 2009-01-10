@@ -73,7 +73,7 @@ public:
         remote()->transact(UNREGISTER_BUFFERS, data, &reply);
     }
 
-    virtual sp<Overlay> createOverlay(
+    virtual sp<OverlayRef> createOverlay(
              uint32_t w, uint32_t h, int32_t format)
     {
         Parcel data, reply;
@@ -82,7 +82,7 @@ public:
         data.writeInt32(h);
         data.writeInt32(format);
         remote()->transact(CREATE_OVERLAY, data, &reply);
-        return Overlay::readFromParcel(reply);
+        return OverlayRef::readFromParcel(reply);
     }
 };
 
@@ -128,8 +128,8 @@ status_t BnSurface::onTransact(
             int w = data.readInt32();
             int h = data.readInt32();
             int f = data.readInt32();
-            sp<Overlay> o = createOverlay(w, h, w);
-            return Overlay::writeToParcel(reply, o);
+            sp<OverlayRef> o = createOverlay(w, h, w);
+            return OverlayRef::writeToParcel(reply, o);
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

@@ -73,6 +73,12 @@ private:
         // connect new client with existing camera remote
         virtual status_t        connect(const sp<ICameraClient>& client);
 
+        // prevent other processes from using this ICamera interface
+        virtual status_t        lock();
+
+        // allow other processes to use this ICamera interface
+        virtual status_t        unlock();
+
         // pass the buffered ISurface to the camera service
         virtual status_t        setPreviewDisplay(const sp<ISurface>& surface);
 
@@ -85,6 +91,9 @@ private:
 
         // stop preview mode
         virtual void            stopPreview();
+
+        // get preview state
+        virtual bool            previewEnabled();
 
         // auto focus
         virtual status_t        autoFocus();
@@ -103,10 +112,13 @@ private:
 
     private:
         friend class CameraService;
-                                Client( const sp<CameraService>& cameraService,
-                                        const sp<ICameraClient>& cameraClient);
+                                Client(const sp<CameraService>& cameraService,
+                                        const sp<ICameraClient>& cameraClient,
+                                        pid_t clientPid);
                                 Client();
         virtual                 ~Client();
+
+                    status_t    checkPid();
 
         static      void        previewCallback(const sp<IMemory>& mem, void* user);
         static      void        shutterCallback(void *user);
@@ -132,7 +144,7 @@ private:
         // by the CameraHardwareInterface callback, and needs to
         // access mSurface.  It cannot hold mLock, however, because
         // stopPreview() may be holding that lock while attempting
-        // top stop preview, and stopPreview itself will block waiting
+        // to stop preview, and stopPreview itself will block waiting
         // for a callback from CameraHardwareInterface.  If this
         // happens, it will cause a deadlock.
         mutable     Mutex                       mSurfaceLock;
@@ -146,6 +158,7 @@ private:
                     // they don't need to be protected by a lock
                     sp<ICameraClient>           mCameraClient;
                     sp<CameraHardwareInterface> mHardware;
+                    pid_t                       mClientPid;
     };
 
 // ----------------------------------------------------------------------------

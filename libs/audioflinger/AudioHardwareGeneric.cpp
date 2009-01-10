@@ -61,12 +61,6 @@ status_t AudioHardwareGeneric::initCheck()
     return NO_INIT;
 }
 
-status_t AudioHardwareGeneric::standby()
-{
-    // Implement: audio hardware to standby mode
-    return NO_ERROR;
-}
-
 AudioStreamOut* AudioHardwareGeneric::openOutputStream(
         int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
@@ -213,6 +207,12 @@ ssize_t AudioStreamOutGeneric::write(const void* buffer, size_t bytes)
 {
     Mutex::Autolock _l(mLock);
     return ssize_t(::write(mFd, buffer, bytes));
+}
+
+status_t AudioStreamOutGeneric::standby()
+{
+    // Implement: audio hardware to standby mode
+    return NO_ERROR;
 }
 
 status_t AudioStreamOutGeneric::dump(int fd, const Vector<String16>& args)

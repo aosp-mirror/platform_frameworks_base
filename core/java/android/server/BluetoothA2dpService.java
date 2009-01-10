@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
-    private static final String TAG = "BluetoothDeviceService";
+    private static final String TAG = "BluetoothA2dpService";
     private static final boolean DBG = true;
 
     public static final String BLUETOOTH_A2DP_SERVICE = "bluetooth_a2dp";
@@ -143,12 +143,27 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (path == null) {
             return BluetoothError.ERROR;
         }
-        if (!connectSinkNative(path)) {
+        
+        SinkState sink = mAudioDevices.get(path);
+        int state = BluetoothA2dp.STATE_DISCONNECTED;
+        if (sink != null) {
+            state = sink.state;
+        }
+        switch (state) {
+        case BluetoothA2dp.STATE_CONNECTED:
+        case BluetoothA2dp.STATE_PLAYING:
+        case BluetoothA2dp.STATE_DISCONNECTING:
             return BluetoothError.ERROR;
-        } else {
-            updateState(path, BluetoothA2dp.STATE_CONNECTING);
+        case BluetoothA2dp.STATE_CONNECTING:
             return BluetoothError.SUCCESS;
         }
+        
+        // State is DISCONNECTED    
+        if (!connectSinkNative(path)) {
+            return BluetoothError.ERROR;
+        }
+        updateState(path, BluetoothA2dp.STATE_CONNECTING);
+        return BluetoothError.SUCCESS;
     }
 
     public synchronized int disconnectSink(String address) {
@@ -165,6 +180,14 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (path == null) {
             return BluetoothError.ERROR;
         }
+        switch (mAudioDevices.get(path).state) {
+        case BluetoothA2dp.STATE_DISCONNECTED:
+            return BluetoothError.ERROR;
+        case BluetoothA2dp.STATE_DISCONNECTING:
+            return BluetoothError.SUCCESS;
+        }
+
+        // State is CONNECTING or CONNECTED or PLAYING 
         if (!disconnectSinkNative(path)) {
             return BluetoothError.ERROR;
         } else {

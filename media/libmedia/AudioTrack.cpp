@@ -231,20 +231,22 @@ status_t AudioTrack::set(
     mAudioTrack = track;
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
+    mCblk->out = 1;
+    // Update buffer size in case it has been limited by AudioFlinger during track creation
+    mFrameCount = mCblk->frameCount;
     if (sharedBuffer == 0) {
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
     } else {
         mCblk->buffers = sharedBuffer->pointer();
+         // Force buffer full condition as data is already present in shared memory
+        mCblk->stepUser(mFrameCount);
     }
-    mCblk->out = 1;
     mCblk->volume[0] = mCblk->volume[1] = 0x1000;
     mVolume[LEFT] = 1.0f;
     mVolume[RIGHT] = 1.0f;
     mSampleRate = sampleRate;
     mStreamType = streamType;
     mFormat = format;
-    // Update buffer size in case it has been limited by AudioFlinger during track creation
-    mFrameCount = mCblk->frameCount;
     mChannelCount = channelCount;
     mSharedBuffer = sharedBuffer;
     mMuted = false;
@@ -327,11 +329,6 @@ void AudioTrack::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        if (mSharedBuffer != 0) {
-             // Force buffer full condition as data is already present in shared memory
-            mCblk->user = mFrameCount;
-            mCblk->flowControlFlag = 0;
-        }
         mNewPosition = mCblk->server + mUpdatePeriod;
         if (t != 0) {
            t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
@@ -467,7 +464,6 @@ status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount
     }
 
     if (loopStart >= loopEnd ||
-        loopStart < cblk->user ||
         loopEnd - loopStart > mFrameCount) {
         LOGW("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, mFrameCount, cblk->user);
         return BAD_VALUE;
@@ -958,12 +954,8 @@ uint32_t audio_track_cblk_t::framesAvailable_l()
     uint32_t s = this->server;
 
     if (out) {
-        if (u < loopEnd) {
-            return s + frameCount - u;
-        } else {
-            uint32_t limit = (s < loopStart) ? s : loopStart;
-            return limit + frameCount - u;
-        }
+        uint32_t limit = (s < loopStart) ? s : loopStart;
+        return limit + frameCount - u;
     } else {
         return frameCount + u - s;
     }

@@ -336,7 +336,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (isPopupShowing()) {
+        if (isPopupShowing() && mDropDownList.getSelectedItemPosition() >= 0) {
             boolean consumed = mDropDownList.onKeyUp(keyCode, event);
             if (consumed) {
                 switch (keyCode) {
@@ -359,13 +359,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (isPopupShowing()) {
             // the key events are forwarded to the list in the drop down view
             // note that ListView handles space but we don't want that to happen
-            if (keyCode != KeyEvent.KEYCODE_SPACE) {
+            // also if selection is not currently in the drop down, then don't
+            // let center or enter presses go there since that would cause it
+            // to select one of its items
+            if (keyCode != KeyEvent.KEYCODE_SPACE
+                    && (mDropDownList.getSelectedItemPosition() >= 0
+                            || (keyCode != KeyEvent.KEYCODE_ENTER
+                                    && keyCode != KeyEvent.KEYCODE_DPAD_CENTER))) {
                 int curIndex = mDropDownList.getSelectedItemPosition();
                 boolean consumed;
                 if (keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= 0) {
                     // When the selection is at the top, we block the key
                     // event to prevent focus from moving.
                     mDropDownList.hideSelector();
+                    mDropDownList.requestLayout();
                     mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
                     mPopup.update();
                     return true;
@@ -548,17 +555,21 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private void performCompletion(View selectedView, int position, long id) {
         if (isPopupShowing()) {
             Object selectedItem;
-            if (position == -1) {
+            if (position < 0) {
                 selectedItem = mDropDownList.getSelectedItem();
             } else {
                 selectedItem = mAdapter.getItem(position);
+            }
+            if (selectedItem == null) {
+                Log.w(TAG, "performCompletion: no selected item");
+                return;
             }
             replaceText(convertSelectionToString(selectedItem));
 
             if (mItemClickListener != null) {
                 final DropDownListView list = mDropDownList;
 
-                if (selectedView == null || position == -1) {
+                if (selectedView == null || position < 0) {
                     selectedView = list.getSelectedView();
                     position = list.getSelectedItemPosition();
                     id = list.getSelectedItemId();
@@ -665,8 +676,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mPopup.setOutsideTouchable(true);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
             mPopup.showAsDropDown(this, mDropDownHorizontalOffset, mDropDownVerticalOffset);
+            mDropDownList.setSelection(ListView.INVALID_POSITION);
             mDropDownList.hideSelector();
-            mDropDownList.setSelection(0);
             mDropDownList.requestFocus();
             post(mHideSelector);
         }
@@ -828,6 +839,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         public void run() {
             if (mDropDownList != null) {
                 mDropDownList.hideSelector();
+                mDropDownList.requestLayout();
             }
         }
     }

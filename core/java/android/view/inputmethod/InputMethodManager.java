@@ -17,8 +17,6 @@
 package android.view.inputmethod;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +29,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRoot;
 
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -43,9 +42,142 @@ import com.android.internal.view.InputBindResult;
 import java.util.List;
 
 /**
- * Public interface to the global input method manager.  You can retrieve
- * an instance of this interface with
+ * Central system API to the overall input method framework (IMF) architecture,
+ * which arbitrates interaction between applications and the current input method.
+ * You can retrieve an instance of this interface with
  * {@link Context#getSystemService(String) Context.getSystemService()}.
+ * 
+ * <p>Topics covered here:
+ * <ol>
+ * <li><a href="#ArchitectureOverview">Architecture Overview</a>
+ * </ol>
+ * 
+ * <a name="ArchitectureOverview"></a>
+ * <h3>Architecture Overview</h3>
+ * 
+ * <p>There are three primary parties involved in the input method
+ * framework (IMF) architecture:</p>
+ * 
+ * <ul>
+ * <li> The <strong>input method manager</strong> as expressed by this class
+ * is the central point of the system that manages interaction between all
+ * other parts.  It is expressed as the client-side API here which exists
+ * in each application context and communicates with a global system service
+ * that manages the interaction across all processes.
+ * <li> An <strong>input method (IME)</strong> implements a particular
+ * interaction model allowing the user to generate text.  The system binds
+ * to the current input method that is use, causing it to be created and run,
+ * and tells it when to hide and show its UI.  Only one IME is running at a time.
+ * <li> Multiple <strong>client applications</strong> arbitrate with the input
+ * method manager for input focus and control over the state of the IME.  Only
+ * one such client is ever active (working with the IME) at a time.
+ * </ul>
+ * 
+ * 
+ * <a name="Applications"></a>
+ * <h3>Applications</h3>
+ * 
+ * <p>In most cases, applications that are using the standard
+ * {@link android.widget.TextView} or its subclasses will have little they need
+ * to do to work well with soft input methods.  The main things you need to
+ * be aware of are:</p>
+ * 
+ * <ul>
+ * <li> Properly set the {@link android.R.attr#inputType} if your editable
+ * text views, so that the input method will have enough context to help the
+ * user in entering text into them.
+ * <li> Deal well with losing screen space when the input method is
+ * displayed.  Ideally an application should handle its window being resized
+ * smaller, but it can rely on the system performing panning of the window
+ * if needed.  You should set the {@link android.R.attr#windowSoftInputMode}
+ * attribute on your activity or the corresponding values on windows you
+ * create to help the system determine whether to pan or resize (it will
+ * try to determine this automatically but may get it wrong).
+ * <li> You can also control the preferred soft input state (open, closed, etc)
+ * for your window using the same {@link android.R.attr#windowSoftInputMode}
+ * attribute.
+ * </ul>
+ * 
+ * <p>More finer-grained control is available through the APIs here to directly
+ * interact with the IMF and its IME -- either showing or hiding the input
+ * area, letting the user pick an input method, etc.</p>
+ * 
+ * <p>For the rare people amongst us writing their own text editors, you
+ * will need to implement {@link android.view.View#onCreateInputConnection}
+ * to return a new instance of your own {@link InputConnection} interface
+ * allowing the IME to interact with your editor.</p>
+ * 
+ * 
+ * <a name="InputMethods"></a>
+ * <h3>Input Methods</h3>
+ * 
+ * <p>An input method (IME) is implemented
+ * as a {@link android.app.Service}, typically deriving from
+ * {@link android.inputmethodservice.InputMethodService}.  It must provide
+ * the core {@link InputMethod} interface, though this is normally handled by
+ * {@link android.inputmethodservice.InputMethodService} and implementors will
+ * only need to deal with the higher-level API there.</p>
+ * 
+ * See the {@link android.inputmethodservice.InputMethodService} class for
+ * more information on implementing IMEs.
+ * 
+ * 
+ * <a name="Security"></a>
+ * <h3>Security</h3>
+ * 
+ * <p>There are a lot of security issues associated with input methods,
+ * since they essentially have freedom to completely drive the UI and monitor
+ * everything the user enters.  The Android input method framework also allows
+ * arbitrary third party IMEs, so care must be taken to restrict their
+ * selection and interactions.</p>
+ * 
+ * <p>Here are some key points about the security architecture behind the
+ * IMF:</p>
+ * 
+ * <ul>
+ * <li> <p>Only the system is allowed to directly access an IME's
+ * {@link InputMethod} interface, via the
+ * {@link android.Manifest.permission#BIND_INPUT_METHOD} permission.  This is
+ * enforced in the system by not binding to an input method service that does
+ * not require this permission, so the system can guarantee no other untrusted
+ * clients are accessing the current input method outside of its control.</p>
+ * 
+ * <li> <p>There may be many client processes of the IMF, but only one may
+ * be active at a time.  The inactive clients can not interact with key
+ * parts of the IMF through the mechanisms described below.</p>
+ * 
+ * <li> <p>Clients of an input method are only given access to its
+ * {@link InputMethodSession} interface.  One instance of this interface is
+ * created for each client, and only calls from the session associated with
+ * the active client will be processed by the current IME.  This is enforced
+ * by {@link android.inputmethodservice.AbstractInputMethodService} for normal
+ * IMEs, but must be explicitly handled by an IME that is customizing the
+ * raw {@link InputMethodSession} implementation.</p>
+ * 
+ * <li> <p>Only the active client's {@link InputConnection} will accept
+ * operations.  The IMF tells each client process whether it is active, and
+ * the framework enforces that in inactive processes calls on to the current
+ * InputConnection will be ignored.  This ensures that the current IME can
+ * only deliver events and text edits to the UI that the user sees as
+ * being in focus.</p>
+ * 
+ * <li> <p>An IME can never interact with an {@link InputConnection} while
+ * the screen is off.  This is enforced by making all clients inactive while
+ * the screen is off, and prevents bad IMEs from driving the UI when the user
+ * can not be aware of its behavior.</p>
+ * 
+ * <li> <p>A client application can ask that the system let the user pick a
+ * new IME, but can not programmatically switch to one itself.  This avoids
+ * malicious applications from switching the user to their own IME, which
+ * remains running when the user navigates away to another application.  An
+ * IME, on the other hand, <em>is</em> allowed to programmatically switch
+ * the system to another IME, since it already has full control of user
+ * input.</p>
+ * 
+ * <li> <p>The user must explicitly enable a new IME in settings before
+ * they can switch to it, to confirm with the system that they know about it
+ * and want to make it available for use.</p>
+ * </ul>
  */
 public final class InputMethodManager {
     static final boolean DEBUG = false;
@@ -118,6 +250,8 @@ public final class InputMethodManager {
     Rect mCursorRect = new Rect();
     int mCursorSelStart;
     int mCursorSelEnd;
+    int mCursorCandStart;
+    int mCursorCandEnd;
 
     // -----------------------------------------------------------
     
@@ -200,6 +334,10 @@ public final class InputMethodManager {
         }
 
         public boolean setComposingText(CharSequence text, int newCursorPosition) {
+            return false;
+        }
+
+        public boolean finishComposingText() {
             return false;
         }
 
@@ -292,6 +430,9 @@ public final class InputMethodManager {
             return false;
         }
         public boolean setComposingText(CharSequence text, int newCursorPosition) {
+            return false;
+        }
+        public boolean finishComposingText() {
             return false;
         }
     };
@@ -430,23 +571,45 @@ public final class InputMethodManager {
      * Disconnect any existing input connection, clearing the served view.
      */
     void finishInputLocked() {
-        synchronized (mH) {
-            if (mServedView != null) {
-                if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
-                updateStatusIcon(0, null);
-                
-                if (mCurrentTextBoxAttribute != null) {
-                    try {
-                        mService.finishInput(mClient);
-                    } catch (RemoteException e) {
-                    }
+        if (mServedView != null) {
+            if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
+            updateStatusIcon(0, null);
+            
+            if (mCurrentTextBoxAttribute != null) {
+                try {
+                    mService.finishInput(mClient);
+                } catch (RemoteException e) {
                 }
-                
-                mServedView = null;
-                mCompletions = null;
-                mServedConnecting = false;
-                clearConnectionLocked();
             }
+            
+            if (mServedInputConnection != null) {
+                // We need to tell the previously served view that it is no
+                // longer the input target, so it can reset its state.  Schedule
+                // this call on its window's Handler so it will be on the correct
+                // thread and outside of our lock.
+                Handler vh = mServedView.getHandler();
+                if (vh != null) {
+                    // This will result in a call to reportFinishInputConnection()
+                    // below.
+                    vh.sendMessage(vh.obtainMessage(ViewRoot.FINISH_INPUT_CONNECTION,
+                            mServedInputConnection));
+                }
+            }
+            
+            mServedView = null;
+            mCompletions = null;
+            mServedConnecting = false;
+            clearConnectionLocked();
+        }
+    }
+    
+    /**
+     * Called from the FINISH_INPUT_CONNECTION message above.
+     * @hide
+     */
+    public void reportFinishInputConnection(InputConnection ic) {
+        if (mServedInputConnection != ic) {
+            ic.finishComposingText();
         }
     }
     
@@ -584,7 +747,7 @@ public final class InputMethodManager {
         // do its stuff.
         // Life is good: let's hook everything up!
         EditorInfo tba = new EditorInfo();
-        InputConnection ic = view.createInputConnection(tba);
+        InputConnection ic = view.onCreateInputConnection(tba);
         if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
         
         synchronized (mH) {
@@ -609,6 +772,8 @@ public final class InputMethodManager {
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
+                mCursorCandStart = -1;
+                mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
                 setCurrentInputConnection(ic);
             } else {
@@ -678,15 +843,23 @@ public final class InputMethodManager {
      * @hide
      */
     public void focusOut(View view) {
+        InputConnection ic = null;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "focusOut: " + view
                     + " mServedView=" + mServedView
                     + " winFocus=" + view.hasWindowFocus());
-            if (mServedView == view && view.hasWindowFocus()) {
-                mLastServedView = view;
-                mH.removeMessages(MSG_CHECK_FOCUS);
-                mH.sendEmptyMessage(MSG_CHECK_FOCUS);
+            if (mServedView == view) {
+                ic = mServedInputConnection;
+                if (view.hasWindowFocus()) {
+                    mLastServedView = view;
+                    mH.removeMessages(MSG_CHECK_FOCUS);
+                    mH.sendEmptyMessage(MSG_CHECK_FOCUS);
+                }
             }
+        }
+        
+        if (ic != null) {
+            ic.finishComposingText();
         }
     }
 
@@ -733,22 +906,27 @@ public final class InputMethodManager {
     /**
      * Report the current selection range.
      */
-    public void updateSelection(View view, int selStart, int selEnd) {
+    public void updateSelection(View view, int selStart, int selEnd,
+            int candidatesStart, int candidatesEnd) {
         synchronized (mH) {
             if (mServedView != view || mCurrentTextBoxAttribute == null
                     || mCurMethod == null) {
                 return;
             }
             
-            if (mCursorSelStart != selStart || mCursorSelEnd != selEnd) {
+            if (mCursorSelStart != selStart || mCursorSelEnd != selEnd
+                    || mCursorCandStart != candidatesStart
+                    || mCursorCandEnd != candidatesEnd) {
                 if (DEBUG) Log.d(TAG, "updateSelection");
 
                 try {
                     if (DEBUG) Log.v(TAG, "SELECTION CHANGE: " + mCurMethod);
                     mCurMethod.updateSelection(mCursorSelStart, mCursorSelEnd,
-                            selStart, selEnd);
+                            selStart, selEnd, candidatesStart, candidatesEnd);
                     mCursorSelStart = selStart;
                     mCursorSelEnd = selEnd;
+                    mCursorCandStart = candidatesStart;
+                    mCursorCandEnd = candidatesEnd;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }

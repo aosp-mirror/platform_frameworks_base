@@ -30,7 +30,7 @@ namespace android {
 typedef int32_t    SurfaceID;
 
 class IMemoryHeap;
-class Overlay;
+class OverlayRef;
 
 class ISurface : public IInterface
 {
@@ -44,7 +44,7 @@ public:
 
     virtual void unregisterBuffers() = 0;
     
-    virtual sp<Overlay> createOverlay(
+    virtual sp<OverlayRef> createOverlay(
             uint32_t w, uint32_t h, int32_t format) = 0;
 };
 

@@ -24,7 +24,7 @@
 
 #include <GLES/gl.h>
 
-#include <graphics/SkBitmap.h>
+#include <core/SkBitmap.h>
 
 #include "android_runtime/AndroidRuntime.h"
 

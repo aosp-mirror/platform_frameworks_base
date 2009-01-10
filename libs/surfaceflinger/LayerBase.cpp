@@ -53,14 +53,15 @@ Vector<GLuint> LayerBase::deletedTextures;
 int32_t LayerBase::sIdentity = 0;
 
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
-    : dpy(display), invalidate(false),
+    : dpy(display), contentDirty(false),
       mFlinger(flinger),
       mTransformed(false),
       mOrientation(0),
       mCanUseCopyBit(false),
       mTransactionFlags(0),
       mPremultipliedAlpha(true),
-      mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
+      mIdentity(uint32_t(android_atomic_inc(&sIdentity))),
+      mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
     mFlags = hw.getFlags();
@@ -205,7 +206,7 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     if (temp.sequence != front.sequence) {
         // invalidate and recompute the visible regions if needed
         flags |= eVisibleRegion;
-        this->invalidate = true;
+        this->contentDirty = true;
     }
     
     // Commit the transaction
@@ -299,10 +300,20 @@ void LayerBase::lockPageFlip(bool& recomputeVisibleRegions)
 void LayerBase::unlockPageFlip(
         const Transform& planeTransform, Region& outDirtyRegion)
 {
+    if ((android_atomic_and(~1, &mInvalidate)&1) == 1) {
+        outDirtyRegion.orSelf(visibleRegionScreen);
+    }
 }
 
 void LayerBase::finishPageFlip()
 {
+}
+
+void LayerBase::invalidate()
+{
+    if ((android_atomic_or(1, &mInvalidate)&1) == 0) {
+        mFlinger->signalEvent();
+    }
 }
 
 void LayerBase::drawRegion(const Region& reg) const

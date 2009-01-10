@@ -17,18 +17,55 @@
 package android.text.style;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Paint.Style;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
 /**
  *
  */
-public abstract class DynamicDrawableSpan
-extends ReplacementSpan
-{
+public abstract class DynamicDrawableSpan extends ReplacementSpan {
+    private static final String TAG = "DynamicDrawableSpan";
+    
+    /**
+     * A constant indicating that the bottom of this span should be aligned
+     * with the bottom of the surrounding text, i.e., at the same level as the
+     * lowest descender in the text.
+     */
+    public static final int ALIGN_BOTTOM = 0;
+    
+    /**
+     * A constant indicating that the bottom of this span should be aligned
+     * with the baseline of the surrounding text.
+     */
+    public static final int ALIGN_BASELINE = 1;
+    
+    protected final int mVerticalAlignment;
+    
+    public DynamicDrawableSpan() {
+        mVerticalAlignment = ALIGN_BOTTOM;
+    }
+
+    /**
+     * @param verticalAlignment one of {@link #ALIGN_BOTTOM} or {@link #ALIGN_BASELINE}.
+     */
+    protected DynamicDrawableSpan(int verticalAlignment) {
+        mVerticalAlignment = verticalAlignment;
+    }
+
+    /**
+     * Returns the vertical alignment of this span, one of {@link #ALIGN_BOTTOM} or
+     * {@link #ALIGN_BASELINE}.
+     */
+    public int getVerticalAlignment() {
+        return mVerticalAlignment;
+    }
+
     /**
      * Your subclass must implement this method to provide the bitmap   
      * to be drawn.  The dimensions of the bitmap must be the same
@@ -61,7 +98,12 @@ extends ReplacementSpan
         Drawable b = getCachedDrawable();
         canvas.save();
         
-        canvas.translate(x, bottom - b.getBounds().bottom);
+        int transY = bottom - b.getBounds().bottom;
+        if (mVerticalAlignment == ALIGN_BASELINE) {
+            transY -= paint.getFontMetricsInt().descent;
+        }
+
+        canvas.translate(x, transY);
         b.draw(canvas);
         canvas.restore();
     }

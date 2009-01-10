@@ -233,10 +233,16 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_TITLE           = 7;
     public static final int METADATA_KEY_YEAR            = 8;
     public static final int METADATA_KEY_DURATION        = 9;
-    public static final int METADATA_KEY_NUM_TRACKS     = 10;
-    public static final int METADATA_KEY_IS_DRM_CRIPPLED= 11;
-    public static final int METADATA_KEY_CODEC          = 12;
-    public static final int METADATA_KEY_RATING         = 13;
-    public static final int METADATA_KEY_COMMENT        = 14;
-    public static final int METADATA_KEY_COPYRIGHT      = 15;
+    public static final int METADATA_KEY_NUM_TRACKS      = 10;
+    public static final int METADATA_KEY_IS_DRM_CRIPPLED = 11;
+    public static final int METADATA_KEY_CODEC           = 12;
+    public static final int METADATA_KEY_RATING          = 13;
+    public static final int METADATA_KEY_COMMENT         = 14;
+    public static final int METADATA_KEY_COPYRIGHT       = 15;
+    public static final int METADATA_KEY_BIT_RATE        = 16;
+    public static final int METADATA_KEY_FRAME_RATE      = 17;
+    public static final int METADATA_KEY_VIDEO_FORMAT    = 18;
+    public static final int METADATA_KEY_VIDEO_HEIGHT    = 19;
+    public static final int METADATA_KEY_VIDEO_WIDTH     = 20;
+    // Add more here...
 }
