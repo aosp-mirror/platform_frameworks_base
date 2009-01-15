@@ -27,6 +27,7 @@ import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Telephony;
 import static android.provider.Telephony.Intents.EXTRA_PLMN;
@@ -160,8 +161,12 @@ public class KeyguardUpdateMonitor {
             }
         };
 
-        mDeviceProvisioned = Settings.Secure.getInt(
-                mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        if (!SystemProperties.getBoolean("ro.requires_provisioning", false)) {
+            mDeviceProvisioned = true;
+        } else {
+            mDeviceProvisioned = Settings.Secure.getInt(
+                    mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        }
      
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
