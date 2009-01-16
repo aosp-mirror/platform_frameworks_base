@@ -350,6 +350,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     boolean isDeviceProvisioned() {
+        if (!SystemProperties.getBoolean("ro.requires_provisioning", false)) {
+            return true;
+        }
         return Settings.Secure.getInt(
                 mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
     }
