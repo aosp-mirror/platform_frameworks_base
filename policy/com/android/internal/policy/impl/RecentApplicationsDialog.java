@@ -78,7 +78,9 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         theWindow.requestFeature(Window.FEATURE_NO_TITLE);
         theWindow.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
         theWindow.setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                           WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        theWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         
         setContentView(com.android.internal.R.layout.recent_apps_dialog);
 

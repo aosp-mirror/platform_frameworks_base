@@ -65,7 +65,6 @@ import android.view.WindowManager;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_RESTORED_STATE;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -1376,8 +1375,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return;
         }
 
-        setFlags(FLAG_RESTORED_STATE, FLAG_RESTORED_STATE);
-        
         SparseArray<Parcelable> savedStates
                 = savedInstanceState.getSparseParcelableArray(VIEWS_TAG);
         if (savedStates != null) {
@@ -1946,7 +1943,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         WindowManager.LayoutParams params = getAttributes();
         
         if (!hasSoftInputMode()) {
-            params.softInputMode = (byte)a.getInt(
+            params.softInputMode = a.getInt(
                     com.android.internal.R.styleable.Window_windowSoftInputMode,
                     params.softInputMode);
         }

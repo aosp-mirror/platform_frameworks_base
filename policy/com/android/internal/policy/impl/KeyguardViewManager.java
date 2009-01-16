@@ -97,7 +97,8 @@ public class KeyguardViewManager {
 
             final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
             int flags = WindowManager.LayoutParams.FLAG_DITHER
-                    | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
+                    | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     stretch, stretch, WindowManager.LayoutParams.TYPE_KEYGUARD,
                     flags, PixelFormat.OPAQUE);
