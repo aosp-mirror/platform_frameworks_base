@@ -128,7 +128,7 @@ status_t BnSurface::onTransact(
             int w = data.readInt32();
             int h = data.readInt32();
             int f = data.readInt32();
-            sp<OverlayRef> o = createOverlay(w, h, w);
+            sp<OverlayRef> o = createOverlay(w, h, f);
             return OverlayRef::writeToParcel(reply, o);
         } break;
         default:

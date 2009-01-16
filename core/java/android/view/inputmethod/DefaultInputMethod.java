@@ -98,7 +98,7 @@ public class DefaultInputMethod implements InputMethod, InputMethodSession {
     public void hideSoftInput() {
     }
 
-    public void showSoftInput() {
+    public void showSoftInput(int flags) {
     }
 }
 
@@ -231,7 +231,7 @@ class SimpleInputMethod extends IInputMethod.Stub {
         }
     }
 
-    public void showSoftInput() {
+    public void showSoftInput(boolean blah) {
     }
     
     public void hideSoftInput() {

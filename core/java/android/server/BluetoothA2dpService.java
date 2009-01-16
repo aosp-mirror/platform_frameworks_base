@@ -53,6 +53,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
 
+    private static final String A2DP_SINK_ADDRESS = "a2dp_sink_address";
+
     private final Context mContext;
     private final IntentFilter mIntentFilter;
     private HashMap<String, SinkState> mAudioDevices;
@@ -251,6 +253,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
         }
 
+        mAudioManager.setParameter(A2DP_SINK_ADDRESS, lookupAddress(path));
         mAudioManager.setBluetoothA2dpOn(true);
         updateState(path, BluetoothA2dp.STATE_CONNECTED);
     }
@@ -302,13 +305,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             s.state = state;
         }
 
-        if (DBG) log("state " + address + " (" + path + ") " + prevState + "->" + state);
-
-        Intent intent = new Intent(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        intent.putExtra(BluetoothA2dp.SINK_PREVIOUS_STATE, prevState);
-        intent.putExtra(BluetoothA2dp.SINK_STATE, state);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        if (state != prevState) {
+            if (DBG) log("state " + address + " (" + path + ") " + prevState + "->" + state);
+    
+            Intent intent = new Intent(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothA2dp.SINK_PREVIOUS_STATE, prevState);
+            intent.putExtra(BluetoothA2dp.SINK_STATE, state);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        }
     }
 
     @Override

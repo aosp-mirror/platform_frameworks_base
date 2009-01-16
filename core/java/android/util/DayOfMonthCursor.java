@@ -68,6 +68,20 @@ public class DayOfMonthCursor extends MonthDisplayHelper {
     public int getSelectedDayOfMonth() {
         return getDayAt(mRow, mColumn);
     }
+
+    /**
+     * @return 0 if the selection is in the current month, otherwise -1 or +1
+     * depending on whether the selection is in the first or last row.
+     */
+    public int getSelectedMonthOffset() {
+        if (isWithinCurrentMonth(mRow, mColumn)) {
+            return 0;
+        }
+        if (mRow == 0) {
+            return -1;
+        }
+        return 1;
+    }
     
     public void setSelectedDayOfMonth(int dayOfMonth) {
         mRow = getRowOf(dayOfMonth);

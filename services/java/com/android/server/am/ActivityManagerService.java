@@ -1457,6 +1457,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return proc;
     }
 
+    private boolean isNextTransitionForward() {
+        int transit = mWindowManager.getPendingAppTransition();
+        return transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                || transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
+                || transit == WindowManagerPolicy.TRANSIT_TASK_TO_FRONT;
+    }
+    
     private final boolean realStartActivityLocked(HistoryRecord r,
             ProcessRecord app, boolean andResume, boolean checkConfig)
             throws RemoteException {
@@ -1506,7 +1513,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         r.task.taskId, r.shortComponentName);
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
-                    r.info, r.icicle, results, newIntents, !andResume);
+                    r.info, r.icicle, results, newIntents, !andResume,
+                    isNextTransitionForward());
         } catch (RemoteException e) {
             if (r.launchFailed) {
                 // This is the second time we failed -- finish activity
@@ -2271,7 +2279,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         System.identityHashCode(next),
                         next.task.taskId, next.shortComponentName);
                 
-                next.app.thread.scheduleResumeActivity(next);
+                next.app.thread.scheduleResumeActivity(next,
+                        isNextTransitionForward());
                 pauseIfSleepingLocked();
 
             } catch (Exception e) {

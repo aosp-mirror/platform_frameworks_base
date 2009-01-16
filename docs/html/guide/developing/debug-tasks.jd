@@ -1,7 +1,23 @@
-page.title=Debugging
+page.title=Debugging Tasks
 @jd:body
 
-<p>Android has a fairly extensive set of tools to help you debug your programs: </p>
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#additionaldebugging">Debug and Test Settings</a></li>
+    <li><a href="#toptips">Top Debugging Tips</a></li>
+    <li><a href="#ide-debug-port">Configuring Your IDE to Attach to the Debugging Port</a></li>
+  </ol>
+</div>
+</div>
+
+<p>This document offers some helpful guidance to debugging applications on Android.
+
+
+<h2 id="tools">Tools</h2>
+<p>The Android SDK includes a fairly extensive set of tools to help you debug your programs: </p>
 <ul>
     <li><a href="{@docRoot}guide/developing/tools/ddms.html"><strong>DDMS</strong></a> - A graphical program that
         supports port forwarding (so you can set up breakpoints in your code in your
@@ -48,13 +64,12 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
     of the doc to figure out why your application isn't appearing on the emulator,
     or why it's not starting. </p>
 
-<a name="additionaldebugging" id="additionaldebugging"></a>
 
-<h2>Debug and Test Settings on the Device</h2>
+<h2 id="additionaldebugging">Debug and Test Settings</h2>
 
-<p>Android lets you set a number of settings that will make it easier to test
-    and debug your applications. To get to the development settings page on the emulator,
-    go to <strong>Dev Tools </strong>&gt; <strong>Development Settings</strong>.
+<p>With the <strong>Dev Tools</strong> application, you can turn on a number of settings that will make it easier to test
+    and debug your applications. To get to the development settings page on the emulator, launch the
+    <strong>Dev Tools</strong> application and open <strong>Development Settings</strong>.
     This will open the development settings page with the following options (among
     others):</p>
 <ul>
@@ -97,10 +112,7 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
 </ul>
 <p>These settings will be remembered across emulator restarts. </p>
 
-<a name="toptips" id="toptips"></a>
-
-
-<h2>Top Debugging Tips</h2>
+<h2 id="toptips">Top Debugging Tips</h2>
 <!--
 <ul>
     <li><a href="#stackdump">Quick stack dump</a></li>
@@ -177,7 +189,7 @@ shell on the emulator. See <a href="{@docRoot}guide/developing/tools/adb.html">U
     util.Log} and {@link android.os.Debug} for your convenience. </dd>
 </dl>
 
-<h2 id="ide-debug-port">Configuring your IDE to attach to the debugging port</h2>
+<h2 id="ide-debug-port">Configuring Your IDE to Attach to the Debugging Port</h2>
 
 <p>DDMS will assign a specific debugging port to every virtual machine that it
     finds on the emulator. You must either attach your IDE to that

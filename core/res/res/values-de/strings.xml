@@ -25,8 +25,7 @@
     <string name="badPuk">"Der von Ihnen eingegebene PUK ist nicht korrekt."</string>
     <string name="mismatchPin">"Die von Ihnen eingegebenen PIN-Nummern stimmen nicht überein."</string>
     <string name="invalidPin">"Geben Sie eine PIN ein, die 4 bis 8 Zahlen enthält."</string>
-    <!-- no translation found for needPuk (919668385956251611) -->
-    <skip />
+    <string name="needPuk">"Ihre SIM-Karte ist mit einem PUK gesperrt. Geben Sie zum Entsperren den PUK-Code ein."</string>
     <string name="needPuk2">"Geben Sie zum Entsperren der SIM-Karte den PUK2 ein."</string>
     <string name="ClipMmi">"Anrufer-ID für eingehenden Anruf"</string>
     <string name="ClirMmi">"Anrufer-ID für abgehenden Anruf"</string>
@@ -151,14 +150,10 @@
     <string name="permdesc_runSetActivityWatcher">"Ermöglicht der Anwendung, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Anwendungen können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Telefonnutzung benötigt."</string>
     <string name="permlab_broadcastPackageRemoved">"Broadcast ohne Paket senden"</string>
     <string name="permdesc_broadcastPackageRemoved">"Ermöglicht einer Anwendung, eine Benachrichtigung zur Entfernung eines Anwendungspakets zu senden. Schädliche Anwendungen können so laufende Anwendungen beenden."</string>
-    <!-- no translation found for permlab_broadcastSmsReceived (5689095009030336593) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastSmsReceived (9122419277306740155) -->
-    <skip />
-    <!-- no translation found for permlab_broadcastWapPush (3145347413028582371) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastWapPush (3955303669461378091) -->
-    <skip />
+    <string name="permlab_broadcastSmsReceived">"per SMS empfangenen Broadcast senden"</string>
+    <string name="permdesc_broadcastSmsReceived">"Ermöglicht einer Anwendung, eine Benachrichtigung zu senden, dass eine Kurzmitteilung empfangen wurde. Schädliche Anwendungen könnten diese Option verwenden, um den Eingang von Kurzmitteilungen zu erzwingen."</string>
+    <string name="permlab_broadcastWapPush">"von WAP-PUSH empfangenen Broadcast senden"</string>
+    <string name="permdesc_broadcastWapPush">"Ermöglicht einer Anwendung, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Anwendungen könnten diese Option verwenden, um den Erhalt von MMS-Mitteilungen zu erzwingen, oder um unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte zu ersetzen."</string>
     <string name="permlab_setProcessLimit">"Anzahl der laufenden Prozesse beschränken"</string>
     <string name="permdesc_setProcessLimit">"Ermöglicht einer Anwendung, die maximale Anzahl an laufenden Prozessen zu steuern. Wird nicht für normale Anwendungen benötigt."</string>
     <string name="permlab_setAlwaysFinish">"alle Anwendungen im Hintergrund schließen"</string>
@@ -179,6 +174,8 @@
     <string name="permdesc_injectEvents">"Ermöglicht einer Anwendung, ihre eigenen Eingabeaktionen (Drücken von Tasten etc.) an andere Anwendungen zu liefern.  Schädliche Anwendungen können so die Kontrolle über Ihr Telefon übernehmen."</string>
     <string name="permlab_readInputState">"Tastatureingaben und Aktionen aufzeichnen"</string>
     <string name="permdesc_readInputState">"Ermöglicht Anwendungen, die von Ihnen gedrückten Tasten zu überwachen (etwa die Eingabe eines Passworts). Dies gilt auch für die Interaktion mit anderen Anwendungen. Sollte für normale Anwendungen nicht benötigt werden."</string>
+    <string name="permlab_bindInputMethod">"An eine Eingabemethode binden"</string>
+    <string name="permdesc_bindInputMethod">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Anwendungen benötigt werden."</string>
     <string name="permlab_setOrientation">"Bildschirmausrichtung ändern"</string>
     <string name="permdesc_setOrientation">"Ermöglicht der Anwendung, die Bildschirmdrehung jederzeit zu ändern. Sollte nicht für normale Anwendungen benötigt werden."</string>
     <string name="permlab_signalPersistentProcesses">"Linux-Signale an Anwendungen senden"</string>
@@ -202,16 +199,13 @@
     <string name="permlab_diagnostic">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic">"Ermöglicht einer Anwendung, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für Hardware-spezifische Diagnosen des Herstellers oder Netzbetreibers verwendet werden."</string>
     <string name="permlab_changeComponentState">"Anwendungskomponenten aktivieren oder deaktivieren"</string>
-    <!-- no translation found for permdesc_changeComponentState (4569107043246700630) -->
-    <skip />
+    <string name="permdesc_changeComponentState">"Ermöglicht einer Anwendung, die Komponente einer anderen Anwendung nach Belieben zu aktivieren oder zu deaktivieren. Schädliche Anwendungen können so wichtige Funktionen des Telefons deaktivieren. Bei der Erteilung von Berechtigungen ist daher Vorsicht geboten, da die Anwendungskomponenten unbrauchbar, inkonsistent und unstabil werden können."</string>
     <string name="permlab_setPreferredApplications">"Bevorzugte Einstellungen festlegen"</string>
     <string name="permdesc_setPreferredApplications">"Ermöglicht einer Anwendung, Ihre bevorzugten Einstellungen zu ändern. Schädliche Anwendungen können so laufende Anwendungen ohne Ihr Wissen ändern, damit die vorhandenen Anwendungen private Daten von Ihnen sammeln."</string>
     <string name="permlab_writeSettings">"Allgemeine Systemeinstellungen ändern"</string>
     <string name="permdesc_writeSettings">"Ermöglicht einer Anwendung, die Einstellungsdaten des Systems zu ändern. Schädliche Anwendungen können so die Systemkonfiguration beschädigen."</string>
-    <!-- no translation found for permlab_writeSecureSettings (204676251876718288) -->
-    <skip />
-    <!-- no translation found for permdesc_writeSecureSettings (4116616249170428132) -->
-    <skip />
+    <string name="permlab_writeSecureSettings">"Sicherheitseinstellungen für das System ändern"</string>
+    <string name="permdesc_writeSecureSettings">"Ermöglicht einer Anwendung, die Daten der Sicherheitseinstellungen des Systems zu ändern. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_writeGservices">"Google Services Map ändern"</string>
     <string name="permdesc_writeGservices">"Ermöglicht einer Anwendung, Änderungen an der Google Services Map vorzunehmen. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_receiveBootCompleted">"Automatisch nach dem Booten starten"</string>
@@ -316,11 +310,39 @@
     <string name="permdesc_subscribedFeedsRead">"Ermöglicht einer Anwendung, Details zu den zurzeit synchronisierten Feeds abzurufen."</string>
     <string name="permlab_subscribedFeedsWrite">"Abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite">"Ermöglicht einer Anwendung, Änderungen an den kürzlich synchronisierten Feeds vorzunehmen. Schädliche Anwendungen könnten so Ihre synchronisierten Feeds ändern."</string>
-    <!-- no translation found for phoneTypes:7 (9192514806975898961) -->
-    <!-- no translation found for emailAddressTypes:3 (2374913952870110618) -->
-    <!-- no translation found for postalAddressTypes:3 (4932682847595299369) -->
-    <!-- no translation found for imAddressTypes:3 (3145118944639869809) -->
-    <!-- no translation found for organizationTypes:2 (3455047468583965104) -->
+  <string-array name="phoneTypes">
+    <item>"Privat"</item>
+    <item>"Mobil"</item>
+    <item>"Beruflich"</item>
+    <item>"Beruflich (Fax)"</item>
+    <item>"Faxnummer (privat)"</item>
+    <item>"Pager"</item>
+    <item>"Andere"</item>
+    <item>"Benutzerdefiniert"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Privat"</item>
+    <item>"Beruflich"</item>
+    <item>"Andere"</item>
+    <item>"Benutzerdefiniert"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Privat"</item>
+    <item>"Beruflich"</item>
+    <item>"Andere"</item>
+    <item>"Benutzerdefiniert"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Privat"</item>
+    <item>"Beruflich"</item>
+    <item>"Andere"</item>
+    <item>"Benutzerdefiniert"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Beruflich"</item>
+    <item>"Andere"</item>
+    <item>"Benutzerdefiniert"</item>
+  </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
     <item>"Windows Live"</item>
@@ -331,22 +353,18 @@
     <item>"ICQ"</item>
     <item>"Jabber"</item>
   </string-array>
-    <!-- no translation found for keyguard_password_enter_pin_code (3731488827218876115) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_code">"PIN-Code eingeben"</string>
     <string name="keyguard_password_wrong_pin_code">"Falscher PIN-Code!"</string>
     <string name="keyguard_label_text">"Drücken Sie zum Entsperren auf \"Menü\" und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display">"Notrufnummer"</string>
     <string name="lockscreen_carrier_default">"(kein Dienst)"</string>
-    <!-- no translation found for lockscreen_screen_locked (7288443074806832904) -->
-    <skip />
+    <string name="lockscreen_screen_locked">"Display gesperrt."</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"Drücken Sie auf die \"Menü\", um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Drücken Sie zum Entsperren auf \"Menü\"."</string>
-    <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
-    <skip />
+    <string name="lockscreen_pattern_instructions">"Schema für Entsperrung zeichnen"</string>
     <string name="lockscreen_emergency_call">"Notruf"</string>
     <string name="lockscreen_pattern_correct">"Korrekt!"</string>
-    <!-- no translation found for lockscreen_pattern_wrong (4817583279053112312) -->
-    <skip />
+    <string name="lockscreen_pattern_wrong">"Tut uns leid. Versuchen Sie es noch einmal."</string>
     <string name="lockscreen_plugged_in">"Wird aufgeladen (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Stecken Sie Ihr Ladegerät ein."</string>
     <string name="lockscreen_missing_sim_message_short">"Keine SIM-Karte."</string>
@@ -362,17 +380,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Versuchen Sie es in <xliff:g id="NUMBER">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Muster vergessen?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Zu viele Versuche!"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (7400120254204758548) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"Melden Sie sich zum Entsperren"\n"mit Ihrem Google-Konto an."</string>
     <string name="lockscreen_glogin_username_hint">"Nutzername (E-Mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Passwort"</string>
     <string name="lockscreen_glogin_submit_button">"Anmelden"</string>
     <string name="lockscreen_glogin_invalid_input">"Ungültiger  Nutzername oder ungültiges Passwort."</string>
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <!-- no translation found for hour_minute_ampm (7044207493989843593) -->
-    <skip />
-    <!-- no translation found for hour_minute_cap_ampm (5778825208801303756) -->
-    <skip />
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <!-- no translation found for hour_ampm (7618670480400517084) -->
     <skip />
     <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
@@ -408,8 +423,7 @@
     <string name="yesterday">"Gestern"</string>
     <string name="tomorrow">"Morgen"</string>
     <string name="oneMonthDurationPast">"Vor 1 Monat"</string>
-    <!-- no translation found for beforeOneMonthDurationPast (909134546836499826) -->
-    <skip />
+    <string name="beforeOneMonthDurationPast">"Vor mehr als 1 Monat"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one">"Vor 1 Sekunde"</item>
     <item quantity="other">"Vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
@@ -442,6 +456,22 @@
     <item quantity="one">"morgen"</item>
     <item quantity="other">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
   </plurals>
+    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
+    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
+    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
+    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
+    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
+    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
+    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
+    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
+    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
+    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
+    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
+    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
+    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
+    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
+    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
+    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
     <string name="preposition_for_date">"am %s"</string>
     <string name="preposition_for_time">"am %s"</string>
     <string name="preposition_for_year">"in %s"</string>
@@ -484,17 +514,17 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <!-- no translation found for date_time (6104442718633642836) -->
+    <skip />
+    <!-- no translation found for relative_time (1818557177829411417) -->
+    <skip />
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <!-- no translation found for full_date_month_first (4336173217988750514) -->
-    <skip />
+    <string name="full_date_month_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <!-- no translation found for medium_date_month_first (4631100332959851900) -->
-    <skip />
+    <string name="medium_date_month_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <!-- no translation found for twelve_hour_time_format (8739508068310928118) -->
-    <skip />
-    <!-- no translation found for twenty_four_hour_time_format (2267729602804604858) -->
-    <skip />
+    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"Mittag"</string>
     <string name="Noon">"Mittag"</string>
     <string name="midnight">"Mitternacht"</string>
@@ -613,16 +643,16 @@
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Alles auswählen"</string>
+    <string name="selectText">"Text auswählen"</string>
+    <string name="stopSelectingText">"Textauswahl beenden"</string>
     <string name="cut">"Ausschneiden"</string>
     <string name="cutAll">"Alles ausschneiden"</string>
     <string name="copy">"Kopieren"</string>
     <string name="copyAll">"Alles kopieren"</string>
     <string name="paste">"Einfügen"</string>
     <string name="copyUrl">"URL kopieren"</string>
-    <!-- no translation found for inputMethod (7673923508389094672) -->
-    <skip />
-    <!-- no translation found for editTextMenuTitle (1672989176958581452) -->
-    <skip />
+    <string name="inputMethod">"Eingabemethode"</string>
+    <string name="editTextMenuTitle">"Text bearbeiten"</string>
     <string name="low_internal_storage_view_title">"Geringer Speicher"</string>
     <string name="low_internal_storage_view_text">"Kaum noch freier Telefonspeicher verfügbar."</string>
     <string name="ok">"OK"</string>
@@ -649,15 +679,17 @@
     <string name="debug">"Fehler suchen"</string>
     <string name="sendText">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone">"Klingeltonlautstärke"</string>
-    <string name="volume_music">"Lautstärke"</string>
+    <string name="volume_music">"Medienlautstärke"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Wiedergabe durch Bluetooth"</string>
     <string name="volume_call">"Lautstärke bei eingehendem Anruf"</string>
+    <string name="volume_call_hint_playing_through_bluetooth">"Wiedergabe durch Bluetooth"</string>
     <string name="volume_alarm">"Lautstärke für Alarm"</string>
+    <string name="volume_notification">"Benachrichtigungslautstärke"</string>
     <string name="volume_unknown">"Lautstärke"</string>
     <string name="ringtone_default">"Standard-Klingelton"</string>
     <string name="ringtone_default_with_actual">"Standard-Klingelton (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"Lautlos"</string>
-    <!-- no translation found for ringtone_picker_title (3515143939175119094) -->
-    <skip />
+    <string name="ringtone_picker_title">"Klingeltöne"</string>
     <string name="ringtone_unknown">"Unbekannter Klingelton"</string>
   <plurals name="wifi_available">
     <item quantity="one">"WLAN-Netzwerk verfügbar"</item>
@@ -667,8 +699,7 @@
     <item quantity="one">"Verfügbares WLAN-Netzwerk öffnen"</item>
     <item quantity="other">"Verfügbare WLAN-Netzwerke öffnen"</item>
   </plurals>
-    <!-- no translation found for select_character (3365550120617701745) -->
-    <skip />
+    <string name="select_character">"Zeichen einfügen"</string>
     <string name="sms_control_default_app_name">"Unbekannte Anwendung"</string>
     <string name="sms_control_title">"Kurznachrichten werden gesendet"</string>
     <string name="sms_control_message">"Es werden eine große Anzahl an Kurznachrichten versendet. Wählen Sie \"OK\", um fortzufahren, oder drücken Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
@@ -687,12 +718,8 @@
     <string name="usb_storage_error_message">"Bei der Verwendung Ihrer SD-Karte als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title">"USB-Verbindung"</string>
     <string name="usb_storage_notification_message">"Wählen Sie die Dateien aus, die von Ihrem oder auf Ihren Computer kopiert werden sollen."</string>
-    <!-- no translation found for select_input_method (2086499663193509436) -->
-    <skip />
-    <!-- no translation found for fast_scroll_alphabet (5433275485499039199) -->
-    <skip />
-    <!-- no translation found for fast_scroll_numeric_alphabet (4030170524595123610) -->
-    <skip />
-    <!-- no translation found for candidates_style (5248064431114273041) -->
-    <skip />
+    <string name="select_input_method">"Eingabemethode auswählen"</string>
+    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"Kandidaten"</u>"u&gt;"</font></string>
 </resources>

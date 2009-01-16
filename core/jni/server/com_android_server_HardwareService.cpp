@@ -23,7 +23,7 @@
 #include "android_runtime/AndroidRuntime.h"
 #include <utils/misc.h>
 #include <utils/Log.h>
-#include <hardware/vibrator.h>
+#include <hardware_legacy/vibrator.h>
 
 namespace android
 {

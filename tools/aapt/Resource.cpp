@@ -433,11 +433,73 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
     }
 }
 
+static void applyFileOverlay(const sp<AaptAssets>& assets, 
+                             const sp<ResourceTypeSet>& baseSet,
+                             const char *resType)
+{
+    // Replace any base level files in this category with any found from the overlay
+    // Also add any found only in the overlay.
+    sp<AaptAssets> overlay = assets->getOverlay();
+    String8 resTypeString(resType);
+    
+    // work through the linked list of overlays
+    while (overlay.get()) {
+        KeyedVector<String8, sp<ResourceTypeSet> >* overlayRes = overlay->getResources();
+
+        // get the overlay resources of the requested type
+        ssize_t index = overlayRes->indexOfKey(resTypeString);
+        if (index >= 0) {
+            sp<ResourceTypeSet> overlaySet = overlayRes->valueAt(index);
+
+            // for each of the resources, check for a match in the previously built
+            // non-overlay "baseset".
+            size_t overlayCount = overlaySet->size();
+            for (size_t overlayIndex=0; overlayIndex<overlayCount; overlayIndex++) {
+                size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
+                if (baseIndex != UNKNOWN_ERROR) {
+                    // look for same flavor.  For a given file (strings.xml, for example)
+                    // there may be a locale specific or other flavors - we want to match
+                    // the same flavor.
+                    sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
+                    sp<AaptGroup> baseGroup = baseSet->valueAt(baseIndex);
+                   
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles = 
+                            baseGroup->getFiles();
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles = 
+                            overlayGroup->getFiles();
+                    size_t overlayGroupSize = overlayFiles.size();
+                    for (size_t overlayGroupIndex = 0; 
+                            overlayGroupIndex<overlayGroupSize; 
+                            overlayGroupIndex++) {
+                        size_t baseFileIndex = 
+                                baseFiles.indexOfKey(overlayFiles.keyAt(overlayGroupIndex));
+                        if(baseFileIndex < UNKNOWN_ERROR) {
+                            baseGroup->removeFile(baseFileIndex);
+                        } else {
+                            // didn't find a match fall through and add it..
+                        }
+                        baseGroup->addFile(overlayFiles.valueAt(overlayGroupIndex));
+                    }
+                } else {
+                    // this group doesn't exist (a file that's only in the overlay)
+                    // add it
+                    baseSet->add(overlaySet->keyAt(overlayIndex),
+                                 overlaySet->valueAt(overlayIndex));
+                }
+            }
+            // this overlay didn't have resources for this type
+        }
+        // try next overlay
+        overlay = overlay->getOverlay();
+    }
+    return;
+}
+
 #define ASSIGN_IT(n) \
         do { \
-            ssize_t index = resources.indexOfKey(String8(#n)); \
+            ssize_t index = resources->indexOfKey(String8(#n)); \
             if (index >= 0) { \
-                n ## s = resources.valueAt(index); \
+                n ## s = resources->valueAt(index); \
             } \
         } while (0)
 
@@ -468,18 +530,16 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     NOISY(printf("Found %d included resource packages\n", (int)table.size()));
 
-    sp<AaptDir> res = assets->getDirs().valueFor(String8("res"));
-
     // --------------------------------------------------------------
     // First, gather all resource information.
     // --------------------------------------------------------------
 
     // resType -> leafName -> group
-    KeyedVector<String8, sp<ResourceTypeSet> > resources;
-    collect_files(assets, &resources);
+    KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+            new KeyedVector<String8, sp<ResourceTypeSet> >;
+    collect_files(assets, resources);
 
     sp<ResourceTypeSet> drawables;
-    sp<ResourceTypeSet> valuess;
     sp<ResourceTypeSet> layouts;
     sp<ResourceTypeSet> anims;
     sp<ResourceTypeSet> xmls;
@@ -492,9 +552,27 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     ASSIGN_IT(anim);
     ASSIGN_IT(xml);
     ASSIGN_IT(raw);
-    ASSIGN_IT(values);
     ASSIGN_IT(color);
     ASSIGN_IT(menu);
+
+    assets->setResources(resources);
+    // now go through any resource overlays and collect their files
+    sp<AaptAssets> current = assets->getOverlay();
+    while(current.get()) {
+        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+                new KeyedVector<String8, sp<ResourceTypeSet> >;
+        current->setResources(resources);
+        collect_files(current, resources);
+        current = current->getOverlay();
+    }
+    // apply the overlay files to the base set
+    applyFileOverlay(assets, drawables, "drawable");
+    applyFileOverlay(assets, layouts, "layout");
+    applyFileOverlay(assets, anims, "anim");
+    applyFileOverlay(assets, xmls, "xml");
+    applyFileOverlay(assets, raws, "raw");
+    applyFileOverlay(assets, colors, "color");
+    applyFileOverlay(assets, menus, "menu");
 
     bool hasErrors = false;
 
@@ -538,17 +616,26 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         }
     }
 
-    if (valuess != NULL) {
-        ResourceDirIterator it(valuess, String8("values"));
-        ssize_t res;
-        while ((res=it.next()) == NO_ERROR) {
-            sp<AaptFile> file = it.getFile();
+    // compile resources
+    current = assets;
+    while(current.get()) {
+        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+                current->getResources();
 
-            res = compileResourceFile(bundle, assets, file, it.getParams(), &table);
-            if (res != NO_ERROR) {
-                hasErrors = true;
+        ssize_t index = resources->indexOfKey(String8("values"));
+        if (index >= 0) {
+            ResourceDirIterator it(resources->valueAt(index), String8("values"));
+            ssize_t res;
+            while ((res=it.next()) == NO_ERROR) {
+                sp<AaptFile> file = it.getFile();
+                res = compileResourceFile(bundle, assets, file, it.getParams(), 
+                                          (current!=assets), &table);
+                if (res != NO_ERROR) {
+                    hasErrors = true;
+                }
             }
         }
+        current = current->getOverlay();
     }
 
     if (colors != NULL) {

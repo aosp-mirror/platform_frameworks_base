@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
@@ -41,6 +42,15 @@ import com.android.internal.app.AlertController;
  * FrameLayout fl = (FrameLayout) findViewById(R.id.body);
  * fl.add(myView, new LayoutParams(FILL_PARENT, WRAP_CONTENT));
  * </pre>
+ * 
+ * <p>The AlertDialog class takes care of automatically setting
+ * {@link WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM
+ * WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM} for you based on whether
+ * any views in the dialog return true from {@link View#onCheckIsTextEditor()
+ * View.onCheckIsTextEditor()}.  Generally you want this set for a Dialog
+ * without text editors, so that it will be placed on top of the current
+ * input method UI.  You can modify this behavior by forcing the flag to your
+ * desired mode after calling {@link #onCreate}.
  */
 public class AlertDialog extends Dialog implements DialogInterface {
     private AlertController mAlert;

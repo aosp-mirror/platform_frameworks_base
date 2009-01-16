@@ -645,6 +645,13 @@ public final class InputMethodManager {
     }
     
     /**
+     * Flag for {@link #showSoftInput} to indicate that the this is an implicit
+     * request to show the input window, not as the result of a direct request
+     * by the user.  The window may not be shown in this case.
+     */
+    public static final int SHOW_IMPLICIT = 0x0001;
+    
+    /**
      * Explicitly request that the current input method's soft input area be
      * shown to the user, if needed.  Call this if the user interacts with
      * your view in such a way that they have expressed they would like to
@@ -652,19 +659,28 @@ public final class InputMethodManager {
      * 
      * @param view The currently focused view, which would like to receive
      * soft keyboard input.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      */
-    public void showSoftInput(View view) {
+    public void showSoftInput(View view, int flags) {
         synchronized (mH) {
             if (mServedView != view) {
                 return;
             }
 
             try {
-                mService.showSoftInput(mClient);
+                mService.showSoftInput(mClient, flags);
             } catch (RemoteException e) {
             }
         }
     }
+    
+    /**
+     * Flag for {@link #hideSoftInputFromWindow} to indicate that the soft
+     * input window should only be hidden if it was not explicitly shown
+     * by the user.
+     */
+    public static final int HIDE_IMPLICIT_ONLY = 0x0001;
     
     /**
      * Request to hide the soft input window from the context of the window
@@ -674,15 +690,17 @@ public final class InputMethodManager {
      * 
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      */
-    public void hideSoftInputFromWindow(IBinder windowToken) {
+    public void hideSoftInputFromWindow(IBinder windowToken, int flags) {
         synchronized (mH) {
             if (mServedView == null || mServedView.getWindowToken() != windowToken) {
                 return;
             }
 
             try {
-                mService.hideSoftInput(mClient);
+                mService.hideSoftInput(mClient, flags);
             } catch (RemoteException e) {
             }
         }
@@ -880,13 +898,14 @@ public final class InputMethodManager {
     
     void closeCurrentInput() {
         try {
-            mService.hideSoftInput(mClient);
+            mService.hideSoftInput(mClient, 0);
         } catch (RemoteException e) {
         }
     }
     
     /**
      * Called by ViewRoot the first time it gets window focus.
+     * @hide
      */
     public void onWindowFocus(View focusedView, int softInputMode,
             boolean first, int windowFlags) {
@@ -896,8 +915,10 @@ public final class InputMethodManager {
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
             try {
+                final boolean isTextEditor = focusedView != null &&
+                focusedView.onCheckIsTextEditor();
                 mService.windowGainedFocus(mClient, focusedView != null,
-                        softInputMode, first, windowFlags);
+                        isTextEditor, softInputMode, first, windowFlags);
             } catch (RemoteException e) {
             }
         }
@@ -987,13 +1008,16 @@ public final class InputMethodManager {
      * Close/hide the input method's soft input area, so the user no longer
      * sees it or can interact with it.  This can only be called
      * from the currently active input method, as validated by the given token.
+     * 
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      */
-    public void hideSoftInputFromInputMethod(IBinder token) {
+    public void hideSoftInputFromInputMethod(IBinder token, int flags) {
         try {
-            mService.hideMySoftInput(token);
+            mService.hideMySoftInput(token, flags);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

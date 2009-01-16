@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Factory class, used for decoding raw byte arrays, received from baseband,
- * into a CommandParams object. 
+ * into a CommandParams object.
  *
  */
 class CommandParamsFactory extends Handler {
@@ -36,7 +36,7 @@ class CommandParamsFactory extends Handler {
     private IconLoader mIconLoader;
     private CommandParams mCmdParams = null;
     private int mIconLoadState = LOAD_NO_ICON;
-    private Handler mCaller = null;
+    private RilMessageDecoder mCaller = null;
 
     // constants
     static final int MSG_ID_LOAD_ICON_DONE = 1;
@@ -52,7 +52,7 @@ class CommandParamsFactory extends Handler {
     static final int REFRESH_NAA_INIT                       = 0x03;
     static final int REFRESH_UICC_RESET                     = 0x04;
 
-    static synchronized CommandParamsFactory getInstance(Handler caller,
+    static synchronized CommandParamsFactory getInstance(RilMessageDecoder caller,
             SIMFileHandler fh) {
         if (sInstance != null) {
             return sInstance;
@@ -63,7 +63,7 @@ class CommandParamsFactory extends Handler {
         return null;
     }
 
-    private CommandParamsFactory(Handler caller, SIMFileHandler fh) {
+    private CommandParamsFactory(RilMessageDecoder caller, SIMFileHandler fh) {
         mCaller = caller;
         mIconLoader = IconLoader.getInstance(this, fh);
     }
@@ -107,7 +107,7 @@ class CommandParamsFactory extends Handler {
             return;
         }
 
-        // extract command type enumeration from the raw value stored inside  
+        // extract command type enumeration from the raw value stored inside
         // the Command Details object.
         AppInterface.CommandType cmdType = AppInterface.CommandType
                 .fromInt(cmdDet.typeOfCommand);
@@ -203,18 +203,15 @@ class CommandParamsFactory extends Handler {
     }
 
     private void sendCmdParams(ResultCode resCode) {
-        Message msg = mCaller.obtainMessage(RilMessageDecoder.CMD_PARAMS_READY);
-        msg.arg1 = resCode.value();
-        msg.obj = mCmdParams;
-        msg.sendToTarget();
+        mCaller.sendMessageParamsDecoded(resCode, mCmdParams);
     }
 
     /**
      * Search for a COMPREHENSION-TLV object with the given tag from a list
-     * 
+     *
      * @param tag A tag to search for
      * @param ctlvs List of ComprehensionTlv objects used to search in
-     * 
+     *
      * @return A ComprehensionTlv object that has the tag value of {@code tag}.
      *         If no object is found with the tag, null is returned.
      */
@@ -229,10 +226,10 @@ class CommandParamsFactory extends Handler {
      * list iterated by {@code iter}. {@code iter} points to the object next to
      * the found object when this method returns. Used for searching the same
      * list for similar tags, usually item id.
-     * 
+     *
      * @param tag A tag to search for
      * @param iter Iterator for ComprehensionTlv objects used for search
-     * 
+     *
      * @return A ComprehensionTlv object that has the tag value of {@code tag}.
      *         If no object is found with the tag, null is returned.
      */
@@ -250,11 +247,11 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes DISPLAY_TEXT proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
-     * @return true if the command is processing is pending and additional 
+     * @return true if the command is processing is pending and additional
      *         asynchronous processing is required.
      * @throws ResultException
      */
@@ -272,7 +269,7 @@ class CommandParamsFactory extends Handler {
         if (ctlv != null) {
             textMsg.text = ValueParser.retrieveTextString(ctlv);
         }
-        // If the tlv object doesn't exist or the it is a null object reply 
+        // If the tlv object doesn't exist or the it is a null object reply
         // with command not understood.
         if (textMsg.text == null) {
             throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
@@ -311,7 +308,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes SET_UP_IDLE_MODE_TEXT proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
@@ -354,7 +351,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes GET_INKEY proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
@@ -366,7 +363,7 @@ class CommandParamsFactory extends Handler {
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
         StkLog.d(this, "process GetInkey");
-        
+
         Input input = new Input();
         IconId iconId = null;
 
@@ -404,7 +401,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes GET_INPUT proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
@@ -471,7 +468,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes REFRESH proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
@@ -482,8 +479,8 @@ class CommandParamsFactory extends Handler {
         StkLog.d(this, "process Refresh");
 
         // REFRESH proactive command is rerouted by the baseband and handled by
-        // the telephony layer. IDLE TEXT should be removed for a REFRESH command 
-        // with "initialization" or "reset" 
+        // the telephony layer. IDLE TEXT should be removed for a REFRESH command
+        // with "initialization" or "reset"
         switch (cmdDet.commandQualifier) {
         case REFRESH_NAA_INIT_AND_FULL_FILE_CHANGE:
         case REFRESH_NAA_INIT_AND_FILE_CHANGE:
@@ -497,11 +494,11 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes SELECT_ITEM proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
-     * @return true if the command is processing is pending and additional 
+     * @return true if the command is processing is pending and additional
      *         asynchronous processing is required.
      * @throws ResultException
      */
@@ -595,7 +592,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes EVENT_NOTIFY message from baseband.
-     * 
+     *
      * @param cmdDet Command Details container object.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command
@@ -805,7 +802,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes SETUP_CALL proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details object retrieved from the proactive command
      *        object
      * @param ctlvs List of ComprehensionTlv objects following Command Details

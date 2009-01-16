@@ -47,6 +47,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
     private PendingIntent mPendingIntent;
     private TestIntentReceiver mIntentReceiver;
     private String mOriginalAllowedProviders;
+    private int mOriginalMocksAllowed;
 
     private static final String LOG_TAG = "LocationProximityTest";
 
@@ -59,6 +60,15 @@ public class LocationManagerProximityTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        
+        // allow mock locations
+        mOriginalMocksAllowed =
+            android.provider.Settings.Secure.getInt(getContext().getContentResolver(),
+                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, 0);
+        
+        android.provider.Settings.Secure.putInt(getContext().getContentResolver(),
+                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, 1);
+        
         mOriginalAllowedProviders = 
             android.provider.Settings.Secure.getString(
                     getContext().getContentResolver(), 
@@ -100,6 +110,9 @@ public class LocationManagerProximityTest extends AndroidTestCase {
             getContext().unregisterReceiver(mIntentReceiver);
         }
         
+        android.provider.Settings.Secure.putInt(getContext().getContentResolver(),
+                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, mOriginalMocksAllowed);
+        
         if (mOriginalAllowedProviders != null) {
             // restore original settings
             android.provider.Settings.Secure.putString(
@@ -107,7 +120,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
                     android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED, 
                     mOriginalAllowedProviders);
             mLocationManager.updateProviders();
-        }    
+        }
     }
 
     /**

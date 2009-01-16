@@ -29,6 +29,7 @@ parent.link=index.html
       </ol>
     </li>
     <li><a href="#animation">Animation</a></li>
+    <li><a href="#menus">Menus</a></li>
     <li><a href="#layoutresources">Layout</a>
       <ol>
           <li><a href="#customresources">Custom Layout Resources</a>
@@ -95,10 +96,10 @@ XML files such as <a href="#layoutresources">layouts</a>.</p>
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.color.<em>some_name</em></code>
+        <strong>Java:</strong> <code>R.color.<em>some_name</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]color/some_name</code> (where <em>some_name</em> is the <em>name</em> of a specific color)
+        <strong>XML:</strong> <code>@[<em>package</em>:]color/some_name</code> (where <em>some_name</em> is the <em>name</em> of a specific color)
     </li>
 </ul>
 <p>
@@ -192,10 +193,10 @@ tags.
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.string.<em>some_name</em></code>
+        <strong>Java:</strong> <code>R.string.<em>some_name</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]string/some_name</code> (where <em>some_name</em> is the <em>name</em> of a specific string)
+        <strong>XML:</strong> <code>@[<em>package</em>:]string/some_name</code> (where <em>some_name</em> is the <em>name</em> of a specific string)
     </li>
 </ul>
 <p>
@@ -347,10 +348,10 @@ dimension.</p>
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.dimen.<em>some_name</em></code>
+        <strong>Java:</strong> <code>R.dimen.<em>some_name</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]dimen/<em>some_name</em></code> (where <em>some_name</em> is the <em>name</em> of a specific <code>&lt;dimen&gt;</code> element)
+        <strong>XML:</strong> <code>@[<em>package</em>:]dimen/<em>some_name</em></code> (where <em>some_name</em> is the <em>name</em> of a specific <code>&lt;dimen&gt;</code> element)
     </li>
 </ul>
 <p>
@@ -433,10 +434,10 @@ res/drawable/my_picture.png would be referenced as R.drawable.my_picture).</p>
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.drawable.<em>some_file</em></code>
+        <strong>Java:</strong> <code>R.drawable.<em>some_file</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]drawable/<em>some_file</em></code>
+        <strong>XML:</strong> <code>@[<em>package</em>:]drawable/<em>some_file</em></code>
     </li>
 </ul>
 
@@ -462,10 +463,10 @@ version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root
 </p>
 <ul>
     <li>
-        <strong>Java</strong>  <code>R.drawable.<em>some_name</em></code>
+        <strong>Java:</strong>  <code>R.drawable.<em>some_name</em></code>
     </li>
     <li>
-        <strong>XML</strong>  <code>@[<em>package</em>:]drawable/<em>some_name</em></code>  (where <em>some_name</em> is the name of a specific resource)
+        <strong>XML:</strong>  <code>@[<em>package</em>:]drawable/<em>some_name</em></code>  (where <em>some_name</em> is the name of a specific resource)
     </li>
 </ul>
 <p>
@@ -549,10 +550,10 @@ tv.setBackground(redDrawable);
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.drawable.<em>some_file</em></code>
+        <strong>Java:</strong> <code>R.drawable.<em>some_file</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]drawable.<em>some_file</em></code>
+        <strong>XML:</strong> <code>@[<em>package</em>:]drawable.<em>some_file</em></code>
     </li>
 </ul>
 
@@ -582,10 +583,10 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.anim.<em>some_file</em></code>
+        <strong>Java:</strong> <code>R.anim.<em>some_file</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]anim/<em>some_file</em></code>
+        <strong>XML:</strong> <code>@[<em>package</em>:]anim/<em>some_file</em></code>
     </li>
 </ul>
 <p>
@@ -624,7 +625,10 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
         &lt;set&gt;
     </dt>
     <dd>
-        The outermost tag, which can recursively hold itself or other animations. You can include as many child elements of the same or different types as you like. Supports the following attribute:
+        A container that can recursively hold itself or other animations.
+        Represents an {@link android.view.animation.AnimationSet}. 
+        You can include as many child elements of the same or different types as you like. 
+        Supports the following attribute:
         <ul>
             <li>
                 <em>shareInterpolator</em> - Whether to share the same Interpolator among all immediate child elements.
@@ -635,7 +639,8 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
         &lt;alpha&gt;
     </dt>
     <dd>
-        A fading animation, compiled to {@link android.view.animation.AlphaAnimation}. Supports the following attributes:
+        A fading animation. Represents an {@link android.view.animation.AlphaAnimation}. 
+        Supports the following attributes:
         <ul>
             <li>
                 <em>fromAlpha</em> - 0.0 to 1.0, where 0.0 is transparent.
@@ -649,7 +654,8 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
         &lt;scale&gt;
     </dt>
     <dd>
-        A resizing animation, compiled to {@link android.view.animation.ScaleAnimation}. You can specify what is the center point of the image (the pinned center), from which it grows outward (or inward), by specifying pivotX and pivotY. So, for example, if these were 0, 0 (top left corner), all growth would be down and to the right. <code>scale</code> supports the following attributes:
+        A resizing animation. Represents a {@link android.view.animation.ScaleAnimation}.
+         You can specify what is the center point of the image (the pinned center), from which it grows outward (or inward), by specifying pivotX and pivotY. So, for example, if these were 0, 0 (top left corner), all growth would be down and to the right. <code>scale</code> supports the following attributes:
         <ul>
             <li>
                 <em>fromXScale</em> - Starting X size, where 1.0 is no change.
@@ -675,7 +681,8 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
         &lt;translate&gt;
     </dt>
     <dd>
-        A motion animation that moves a visual element within its parent element. It is equivalent to {@link android.view.animation.TranslateAnimation}. 
+        A vertical/horizontal motion animation.
+        Represents a {@link android.view.animation.TranslateAnimation}. 
 Supports the following attributes in any of the following three formats: values from -100 to 100, ending with "%", indicating a percentage relative to itself; values from -100 to 100, ending in "%p", indicating a percentage relative to its parent; a float with no suffix, indicating an absolute value.
         <ul>
             <li>
@@ -696,7 +703,8 @@ Supports the following attributes in any of the following three formats: values 
         &lt;rotate&gt;
     </dt>
     <dd>
-        A rotation animation, compiled to {@link android.view.animation.RotateAnimation}. Supports the following attributes:
+        A rotation animation. Represents a {@link android.view.animation.RotateAnimation}.
+         Supports the following attributes:
         <ul>
             <li>
                 <em>fromDegrees</em> - Starting rotation, in degrees.
@@ -720,43 +728,133 @@ Supports the following attributes in any of the following three formats: values 
     </dd>
 </dl>
 <p>
-    Note that alpha, scale, rotate, translate all support the following attributes from the base animation class, BaseAnimation:
+In addition to the attributes defined for each element above, the elements 
+<code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>,
+<code>&lt;rotate&gt;</code>, and <code>&lt;set></code> all support the following attributes (inherited
+from the {@link android.view.animation.Animation} class):
 </p>
 <dl>
-    <dt>
-        <em>duration</em>
-    </dt>
+    <dt><em>{@link android.R.attr#duration duration}</em></dt>
     <dd>
-        Duration, in milliseconds, for this effect.
+        Duration, in milliseconds, for this effect. 
     </dd>
-    <dt>
-        <em>startOffset</em>
-    </dt>
+    <dt><em>{@link android.R.attr#startOffset startOffset}</em></dt>
     <dd>
-        Offset start time for this effect, in milliseconds.
+        Offset start time for this effect, in milliseconds. 
     </dd>
-    <dt>
-        <em>fillBefore</em>
-    </dt>
+    <dt><em>{@link android.R.attr#fillBefore fillBefore}</em></dt>
     <dd>
-        Equivalent to {@link android.view.animation.Animation#setFillBefore animation.Animation.setFillBefore()}.
+        When set true, the animation transformation is applied before the animation begins.
     </dd>
-    <dt>
-        <em>fillAfter</em>
-    </dt>
+    <dt><em>{@link android.R.attr#fillAfter fillAfter}</em></dt>
     <dd>
-        Equivalent to {@link android.view.animation.Animation#setFillAfter animation.Animation.setFillAfter()}.
+        When set true, the animation transformation is applied after the animation ends.
     </dd>
-    <dt>
-        <em>interpolator</em>
-    </dt>
+    <dt><em>{@link android.R.attr#repeatCount repeatCount}</em></dt>
+    <dd>
+        Defines the number of times the animation should repeat.
+    </dd>
+    <dt><em>{@link android.R.attr#repeatMode repeatMode}</em></dt>
+    <dd>
+        Defines the animation behavior when it reaches the end and the repeat count is greater than 0.
+        Options are to either restart or reverse the animation.
+    </dd>
+    <dt><em>{@link android.R.attr#zAdjustment zAdjustment}</em></dt>
+    <dd>
+        Defines the z-axis ordering mode to use when running the animation (normal, top, or bottom).
+    </dd>
+    <dt><em>{@link android.R.attr#interpolator interpolator}</em></dt>
     <dd>
         You can optionally set an interpolator for each element to determine how quickly or slowly it performs its effect over time. For example, slow at the beginning and faster at the end for EaseInInterpolator, and the reverse for EaseOutInterpolator. A list of interpolators is given in {@link android.R.anim}. To specify these, use the syntax @android:anim/<em>interpolatorName</em>.
     </dd>
 </dl>
 
-<p>For animation code samples, see the discussion in the 
-<a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a> topic.</p>
+<p>For more discussion and animation code samples, see the discussion in the 
+<a href="{@docRoot}guide/topics/graphics/2d-graphics.html#tween-animation">2D Graphics</a> document.</p>
+
+
+
+<h2 id="menus">Menus</h2>
+<p>Application menus (Options Menu, Context Menu, or Sub Menu) can be defined as
+XML resources and inflated by your application using {@link android.view.MenuInflater}.</p>
+
+<p><strong>Source file format:</strong> XML file, one resource per file, one root tag, 
+<code>&lt;?xml></code> declaration not required.</p>
+<p><strong>Resource file location:</strong> res/menu/<em>some_file</em>.xml</p>
+<p><strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.view.Menu} (or subclass) resource.</p>
+<p><strong>Resource reference name:</strong> </p>
+<ul><li><strong>Java:</strong> <code>R.menu.<em>some_file</em></code></li></ul>
+
+<h3>Syntax</h3>
+<p>The file must have a single root element: a <code>&lt;menu></code> element. In all,
+there are three valid elements: <code>&lt;menu></code>, <code>&lt;group></code> and <code>&lt;item></code>. The
+<code>&lt;item></code> and <code>&lt;group></code> elements must be the children of a <code>&lt;menu></code>, but <code>&lt;item></code>
+elements can also be the children of a <code>&lt;group></code>, and another <code>&lt;menu></code> element may be the child
+of an <code>&lt;item></code> (to create a Sub Menu).</p>
+<pre>
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;item android:id="@+id/<em>example_item</em>
+          android:title="<em>Example Item</em>"
+          android:icon="<em>@drawable/example_item_icon</em>" />
+
+    &lt;group android:id="@+id/<em>example_group</em>">
+        &lt;item android:id="@+id/<em>example_item2</em>
+              android:title="<em>Example Item 2</em>"
+              android:icon="<em>@drawable/example_item2_icon</em>" />
+    &lt;/group>
+
+    &lt;item android:id="@+id/<em>example_submenu</em>
+          android:title="<em>Example Sub Menu</em>" >
+        &lt;menu>
+            &lt;item android:id="@+id/<em>example_submenu_item</em>
+                  android:title="<em>Example Sub Menu Item</em>" />
+        &lt;/menu>
+    &lt;/item>
+
+&lt;/menu>
+</pre>
+
+<h3>Elements and Attributes</h3>
+<p>All attributes must be defined with the <em>android</em> namespace (e.g., <em>android:icon="@drawable/icon"</em>).</p>
+<dl>
+  <dt>&lt;menu></dt>
+    <dd>The root of a menu. Contains <code>&lt;item></code> and <code>&lt;group></code> nodes. No attributes.</dd>
+  <dt>&lt;group></dt>
+    <dd>A menu group. Contains <code>&lt;item></code> elements. Valid attributes:
+      <ul>
+        <li><em>id</em> - A unique integer ID for the group.</li>
+        <li><em>menuCategory</em> - Value corresponding to Menu CATEGORY_* constants &mdash; defines the priority of the group. Valid values: 
+          <em>container</em>, <em>system</em>, <em>secondary</em>, and <em>alternative</em>.</li>
+        <li><em>orderInCategory</em> - An integer that defines the default order of the items within the category.</li>
+        <li><em>checkableBehavior</em> - Whether the items are checkable. Valid values: 
+          <em>none</em>, <em>all</em> (exclusive / radio buttons), <em>single</em> (non-exclusive / checkboxes)</li>
+        <li><em>visible</em> - Whether the group is visible. <em>true</em> or <em>false</em>.</li>
+        <li><em>enabled</em> - Whether the group is enabled. <em>true</em> or <em>false</em>.</li>
+      </ul>
+    </dd>
+  <dt>&lt;item></dt>
+    <dd>A menu item. May contain a <code>&lt;menu></code> element (for a Sub Menu). Valid attributes:
+      <ul>
+        <li><em>id</em> - A unique resource ID for the item.</li>
+        <li><em>menuCategory</em> - Used to define the menu category.</li>
+        <li><em>orderInCategory</em> - Used to define the order of the item, within a group.</li>
+        <li><em>title</em> - A string for the menu title.</li>
+        <li><em>titleCondensed</em> - A condensed string title, for situations in which the normal title is too long.</li>
+        <li><em>icon</em> - A resource identifier for a drawable icon.</li>
+        <li><em>alphabeticShortcut</em> - A character for the alphabetic shortcut key.</li>
+        <li><em>numericShortcut</em> - A number for the numeric shortcut key.</li>
+        <li><em>checkable</em> - Whether the item is checkable. <em>true</em> or <em>false</em>.</li>
+        <li><em>checked</em> - Whether the item is checked by default. <em>true</em> or <em>false</em>.</li>
+        <li><em>visible</em> - Whether the item is visible by default. <em>true</em> or <em>false</em>.</li>
+        <li><em>enabled</em> - Whether the item is enabled by default. <em>true</em> or <em>false</em>.</li>
+      </ul>
+    </dd>
+</dl>
+
+<p>For more discussion on how to create menus in XML and inflate them in your application, 
+read <a href="{@docRoot}guide/topics/views/menus.html">Creating Menus</a>.</p>
+
 
 
 <h2 id="layoutresources">Layout</h2>
@@ -797,10 +895,10 @@ res/layout/<em>some_file</em>.xml.</p>
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.drawable.<em>some_file</em></code>
+        <strong>Java:</strong> <code>R.layout.<em>some_file</em></code>
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]layout/<em>some_file</em></code>
+        <strong>XML:</strong> <code>@[<em>package</em>:]layout/<em>some_file</em></code>
     </li>
 </ul>
 <p>
@@ -996,10 +1094,10 @@ setContentView(R.layout.main_screen);
 </p>
 <ul>
     <li>
-        <strong>Java</strong> <code>R.style.<em>styleID</em></code> for the whole style, <code>R.style.<em>styleID</em>.<em>itemID</em></code> for an individual setting
+        <strong>Java:</strong> <code>R.style.<em>styleID</em></code> for the whole style, <code>R.style.<em>styleID</em>.<em>itemID</em></code> for an individual setting
     </li>
     <li>
-        <strong>XML</strong> <code>@[<em>package</em>:]style/<em>styleID</em></code> for a whole style, <code>@[<em>package</em>:]style/<em>styleID</em>/<em>itemID</em></code> for an individual item. <strong>Note</strong>: to refer to a value in the <em>currently</em> applied theme, use "?" instead of "@" as described below (XML).
+        <strong>XML:</strong> <code>@[<em>package</em>:]style/<em>styleID</em></code> for a whole style, <code>@[<em>package</em>:]style/<em>styleID</em>/<em>itemID</em></code> for an individual item. <strong>Note</strong>: to refer to a value in the <em>currently</em> applied theme, use "?" instead of "@" as described below (XML).
     </li>
 </ul>
 <p>

@@ -92,6 +92,7 @@ private:
     friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
+    friend class Test;
     const sp<ISurface>& getISurface() const { return mSurface; }
 
     // can't be copied

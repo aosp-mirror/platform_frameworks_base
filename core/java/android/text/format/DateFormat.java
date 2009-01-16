@@ -70,7 +70,7 @@ import java.text.SimpleDateFormat;
     &quot;MMMM dd, yyyy h:mmaa&quot; -&gt; &quot;April 6, 1970 3:23am&quot<br/>
     &quot;E, MMMM dd, yyyy h:mmaa&quot; -&gt; &quot;Mon, April 6, 1970 3:23am&<br/>
     &quot;EEEE, MMMM dd, yyyy h:mmaa&quot; -&gt; &quot;Monday, April 6, 1970 3:23am&quot;<br/>
-    &quot;&apos;Best day evar: &apos;M/d/yy&quot; -&gt; &quot;Best day evar: 4/6/70&quot;
+    &quot;&apos;Noteworthy day: &apos;M/d/yy&quot; -&gt; &quot;Noteworthy day: 4/6/70&quot;
  */
 
 public class DateFormat {

@@ -36,7 +36,7 @@ import java.util.HashMap;
  * Manages a list of feeds for which this client is interested in receiving
  * change notifications.
  */
-public class SubscribedFeedsProvider extends SyncableContentProvider {
+public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
     private static final String TAG = "SubscribedFeedsProvider";
     private static final String DATABASE_NAME = "subscribedfeeds.db";
     private static final int DATABASE_VERSION = 10;
@@ -114,6 +114,7 @@ public class SubscribedFeedsProvider extends SyncableContentProvider {
         db.execSQL("CREATE TABLE _deleted_feeds (" +
                     "_sync_version TEXT," + // From the sync source
                     "_sync_id TEXT," +
+                    (isTemporary() ? "_sync_local_id INTEGER," : "") + // Used while syncing,
                     "_sync_account TEXT," +
                     "_sync_mark INTEGER, " + // Used to filter out new rows
                     "UNIQUE(_sync_id))");

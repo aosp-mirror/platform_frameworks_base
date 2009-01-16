@@ -38,7 +38,7 @@
 
 #include <private/media/AudioTrackShared.h>
 
-#include <hardware/AudioHardwareInterface.h>
+#include <hardware_legacy/AudioHardwareInterface.h>
 
 #include "AudioMixer.h"
 #include "AudioFlinger.h"
@@ -832,10 +832,15 @@ bool AudioFlinger::isMusicActive() const
 
 status_t AudioFlinger::setParameter(const char* key, const char* value)
 {
-    status_t result;
+    status_t result, result2;
     AutoMutex lock(mHardwareLock);
     mHardwareStatus = AUDIO_SET_PARAMETER;
     result = mAudioHardware->setParameter(key, value);
+    if (mA2dpAudioInterface) {
+        result2 = mA2dpAudioInterface->setParameter(key, value);
+        if (result2)
+            result = result2;
+    }
     mHardwareStatus = AUDIO_HW_IDLE;
     return result;
 }

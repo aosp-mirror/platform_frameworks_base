@@ -242,6 +242,9 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      * @param cursor the new cursor to be used
      */
     public void changeCursor(Cursor cursor) {
+        if (cursor == mCursor) {
+            return;
+        }
         if (mCursor != null) {
             mCursor.unregisterContentObserver(mChangeObserver);
             mCursor.unregisterDataSetObserver(mDataSetObserver);

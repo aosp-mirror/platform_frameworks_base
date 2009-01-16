@@ -17,7 +17,7 @@
 #define LOG_TAG "UEventObserver"
 #include "utils/Log.h"
 
-#include "hardware/uevent.h"
+#include "hardware_legacy/uevent.h"
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"

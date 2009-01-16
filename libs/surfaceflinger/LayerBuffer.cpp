@@ -95,10 +95,9 @@ void LayerBuffer::postBuffer(ssize_t offset)
 
 void LayerBuffer::unregisterBuffers()
 {
-    sp<Source> source(getSource());
+    sp<Source> source(clearSource());
     if (source != 0)
         source->unregisterBuffers();
-    // XXX: clear mSource
 }
 
 uint32_t LayerBuffer::doTransaction(uint32_t flags)
@@ -170,6 +169,14 @@ sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f)
 sp<LayerBuffer::Source> LayerBuffer::getSource() const {
     Mutex::Autolock _l(mLock);
     return mSource;
+}
+
+sp<LayerBuffer::Source> LayerBuffer::clearSource() {
+    sp<Source> source;
+    Mutex::Autolock _l(mLock);
+    source = mSource;
+    mSource.clear();
+    return source;
 }
 
 // ============================================================================
@@ -477,15 +484,16 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
         sp<OverlayRef>* overlayRef, 
         uint32_t w, uint32_t h, int32_t format)
-    : Source(layer), mVisibilityChanged(false), mOverlay(0), mOverlayHandle(0)
+    : Source(layer), mVisibilityChanged(false),
+    mOverlay(0), mOverlayHandle(0), mOverlayDevice(0)
 {
     overlay_control_device_t* overlay_dev = mLayer.mFlinger->getOverlayEngine();
-
     if (overlay_dev == NULL) {
         // overlays not supported
         return;
     }
 
+    mOverlayDevice = overlay_dev;
     overlay_t* overlay = overlay_dev->createOverlay(overlay_dev, w, h, format);
     if (overlay == NULL) {
         // couldn't create the overlay (no memory? no more overlays?)
@@ -507,14 +515,18 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
     
     // NOTE: here it's okay to acquire a reference to "this"m as long as
     // the reference is not released before we leave the ctor.
-    sp<OverlayChanel> chanel = new OverlayChanel(this);
+    sp<OverlayChannel> channel = new OverlayChannel(this);
 
-    *overlayRef = new OverlayRef(mOverlayHandle, chanel,
+    *overlayRef = new OverlayRef(mOverlayHandle, channel,
             mWidth, mHeight, mFormat, mWidthStride, mHeightStride);
 }
 
 LayerBuffer::OverlaySource::~OverlaySource()
-{    
+{
+    if (mOverlay && mOverlayDevice) {
+        overlay_control_device_t* overlay_dev = mOverlayDevice;
+        overlay_dev->destroyOverlay(overlay_dev, mOverlay);
+    }
 }
 
 void LayerBuffer::OverlaySource::onTransaction(uint32_t flags)
@@ -543,8 +555,7 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
             // we need a lock here to protect "destroy"
             Mutex::Autolock _l(mLock);
             if (mOverlay) {
-                overlay_control_device_t* overlay_dev = 
-                    mLayer.mFlinger->getOverlayEngine();
+                overlay_control_device_t* overlay_dev = mOverlayDevice;
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
                 overlay_dev->setParameter(overlay_dev, mOverlay, 
                         OVERLAY_TRANSFORM, mLayer.getOrientation());
@@ -555,11 +566,16 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
 
 void LayerBuffer::OverlaySource::serverDestroy() 
 {
+    mLayer.clearSource();
+    destroyOverlay();
+}
+
+void LayerBuffer::OverlaySource::destroyOverlay() 
+{
     // we need a lock here to protect "onVisibilityResolved"
     Mutex::Autolock _l(mLock);
     if (mOverlay) {
-        overlay_control_device_t* overlay_dev = 
-                mLayer.mFlinger->getOverlayEngine();
+        overlay_control_device_t* overlay_dev = mOverlayDevice;
         overlay_dev->destroyOverlay(overlay_dev, mOverlay);
         mOverlay = 0;
     }

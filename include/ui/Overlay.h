@@ -54,7 +54,7 @@ private:
     virtual ~OverlayRef();
 
     overlay_handle_t const *mOverlayHandle;
-    sp<IOverlay> mOverlayChanel;
+    sp<IOverlay> mOverlayChannel;
     uint32_t mWidth;
     uint32_t mHeight;
     int32_t  mFormat;
@@ -77,10 +77,10 @@ public:
     overlay_handle_t const* getHandleRef() const;
 
     /* blocks until an overlay buffer is available and return that buffer. */
-    overlay_buffer_t dequeueBuffer();
+    status_t dequeueBuffer(overlay_buffer_t* buffer);
 
     /* release the overlay buffer and post it */
-    int queueBuffer(overlay_buffer_t buffer);
+    status_t queueBuffer(overlay_buffer_t buffer);
 
     /* returns the address of a given buffer if supported, NULL otherwise. */
     void* getBufferAddress(overlay_buffer_t buffer);

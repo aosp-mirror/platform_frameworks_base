@@ -23,7 +23,7 @@
 
 #include <utils/threads.h>
 
-#include <hardware/AudioHardwareBase.h>
+#include <hardware_legacy/AudioHardwareBase.h>
 
 namespace android {
 

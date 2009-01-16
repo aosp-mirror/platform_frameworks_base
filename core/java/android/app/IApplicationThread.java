@@ -45,11 +45,11 @@ public interface IApplicationThread extends IInterface {
     void scheduleStopActivity(IBinder token, boolean showWindow,
             int configChanges) throws RemoteException;
     void scheduleWindowVisibility(IBinder token, boolean showWindow) throws RemoteException;
-    void scheduleResumeActivity(IBinder token) throws RemoteException;
+    void scheduleResumeActivity(IBinder token, boolean isForward) throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token,
             ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
-    		List<Intent> pendingNewIntents, boolean notResumed)
+    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
     		throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,

@@ -16,23 +16,11 @@
 
 package android.content;
 
-import android.accounts.AccountMonitor;
-import android.accounts.AccountMonitorListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.provider.SyncConstValue;
-import android.text.TextUtils;
-import android.util.Config;
-import android.util.Log;
-import android.os.Bundle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * A specialization of the ContentProvider that centralizes functionality
@@ -42,68 +30,13 @@ import java.util.Vector;
  * @hide
  */
 public abstract class SyncableContentProvider extends ContentProvider {
-    private static final String TAG = "SyncableContentProvider";
-    protected SQLiteOpenHelper mOpenHelper;
-    protected SQLiteDatabase mDb;
-    private final String mDatabaseName;
-    private final int mDatabaseVersion;
-    private final Uri mContentUri;
-    private AccountMonitor mAccountMonitor;
-
-    /** the account set in the last call to onSyncStart() */
-    private String mSyncingAccount;
-
-    private SyncStateContentProviderHelper mSyncState = null;
-
-    private static final String[] sAccountProjection = new String[] {SyncConstValue._SYNC_ACCOUNT};
-
-    private boolean mIsTemporary;
-
-    private AbstractTableMerger mCurrentMerger = null;
-    private boolean mIsMergeCancelled = false;
-
-    private static final String SYNC_ACCOUNT_WHERE_CLAUSE = SyncConstValue._SYNC_ACCOUNT + "=?";
-
-    protected boolean isTemporary() {
-        return mIsTemporary;
-    }
-
-    /**
-     * Indicates whether or not this ContentProvider contains a full
-     * set of data or just diffs. This knowledge comes in handy when
-     * determining how to incorporate the contents of a temporary
-     * provider into a real provider.
-     */
-    private boolean mContainsDiffs;
-
-    /**
-     * Initializes the SyncableContentProvider
-     * @param dbName the filename of the database
-     * @param dbVersion the current version of the database schema
-     * @param contentUri The base Uri of the syncable content in this provider
-     */
-    public SyncableContentProvider(String dbName, int dbVersion, Uri contentUri) {
-        super();
-
-        mDatabaseName = dbName;
-        mDatabaseVersion = dbVersion;
-        mContentUri = contentUri;
-        mIsTemporary = false;
-        setContainsDiffs(false);
-        if (Config.LOGV) {
-            Log.v(TAG, "created SyncableContentProvider " + this);
-        }
-    }
+    protected abstract boolean isTemporary();
 
     /**
      * Close resources that must be closed. You must call this to properly release
      * the resources used by the SyncableContentProvider.
      */
-    public void close() {
-        if (mOpenHelper != null) {
-            mOpenHelper.close();  // OK to call .close() repeatedly.
-        }
-    }
+    public abstract void close();
 
     /**
      * Override to create your schema and do anything else you need to do with a new database.
@@ -111,7 +44,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * This method may not use getDatabase(), or call content provider methods, it must only
      * use the database handle passed to it.
      */
-    protected void bootstrapDatabase(SQLiteDatabase db) {}
+    protected abstract void bootstrapDatabase(SQLiteDatabase db);
 
     /**
      * Override to upgrade your database from an old version to the version you specified.
@@ -131,56 +64,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * This method may not use getDatabase(), or call content provider methods, it must only
      * use the database handle passed to it.
      */
-    protected void onDatabaseOpened(SQLiteDatabase db) {}
-
-    private class DatabaseHelper extends SQLiteOpenHelper {
-        DatabaseHelper(Context context, String name) {
-            // Note: context and name may be null for temp providers
-            super(context, name, null, mDatabaseVersion);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            bootstrapDatabase(db);
-            mSyncState.createDatabase(db);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            if (!upgradeDatabase(db, oldVersion, newVersion)) {
-                mSyncState.discardSyncData(db, null /* all accounts */);
-                getContext().getContentResolver().startSync(mContentUri, new Bundle());
-            }
-        }
-
-        @Override
-        public void onOpen(SQLiteDatabase db) {
-            onDatabaseOpened(db);
-            mSyncState.onDatabaseOpened(db);
-        }
-    }
-
-    @Override
-    public boolean onCreate() {
-        if (isTemporary()) throw new IllegalStateException("onCreate() called for temp provider");
-        mOpenHelper = new DatabaseHelper(getContext(), mDatabaseName);
-        mSyncState = new SyncStateContentProviderHelper(mOpenHelper);
-
-        AccountMonitorListener listener = new AccountMonitorListener() {
-            public void onAccountsUpdated(String[] accounts) {
-                // Some providers override onAccountsChanged(); give them a database to work with.
-                mDb = mOpenHelper.getWritableDatabase();
-                onAccountsChanged(accounts);
-                TempProviderSyncAdapter syncAdapter = (TempProviderSyncAdapter)getSyncAdapter();
-                if (syncAdapter != null) {
-                    syncAdapter.onAccountsChanged(accounts);
-                }
-            }
-        };
-        mAccountMonitor = new AccountMonitor(getContext(), listener);
-
-        return true;
-    }
+    protected abstract void onDatabaseOpened(SQLiteDatabase db);
 
     /**
      * Get a non-persistent instance of this content provider.
@@ -190,49 +74,13 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @return a non-persistent content provider with the same layout as this
      * provider.
      */
-    public SyncableContentProvider getTemporaryInstance() {
-        SyncableContentProvider temp;
-        try {
-            temp = getClass().newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException("unable to instantiate class, "
-                    + "this should never happen", e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(
-                    "IllegalAccess while instantiating class, "
-                            + "this should never happen", e);
-        }
+    public abstract SyncableContentProvider getTemporaryInstance();
 
-        // Note: onCreate() isn't run for the temp provider, and it has no Context.
-        temp.mIsTemporary = true;
-        temp.setContainsDiffs(true);
-        temp.mOpenHelper = temp.new DatabaseHelper(null, null);
-        temp.mSyncState = new SyncStateContentProviderHelper(temp.mOpenHelper);
-        if (!isTemporary()) {
-            mSyncState.copySyncState(
-                    mOpenHelper.getReadableDatabase(),
-                    temp.mOpenHelper.getWritableDatabase(),
-                    getSyncingAccount());
-        }
-        return temp;
-    }
+    public abstract SQLiteDatabase getDatabase();
 
-    public SQLiteDatabase getDatabase() {
-       if (mDb == null) mDb = mOpenHelper.getWritableDatabase();
-       return mDb;
-    }
+    public abstract boolean getContainsDiffs();
 
-    public boolean getContainsDiffs() {
-        return mContainsDiffs;
-    }
-
-    public void setContainsDiffs(boolean containsDiffs) {
-        if (containsDiffs && !isTemporary()) {
-            throw new IllegalStateException(
-                    "only a temporary provider can contain diffs");
-        }
-        mContainsDiffs = containsDiffs;
-    }
+    public abstract void setContainsDiffs(boolean containsDiffs);
 
     /**
      * Each subclass of this class should define a subclass of {@link
@@ -247,133 +95,14 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @return A sequence of subclasses of {@link
      * AbstractTableMerger}, one for each table that should be merged.
      */
-    protected Iterable<? extends AbstractTableMerger> getMergers() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public final int update(final Uri url, final ContentValues values,
-            final String selection, final String[] selectionArgs) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-        try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                int numRows = mSyncState.asContentProvider().update(
-                        url, values, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
-                return numRows;
-            }
-
-            int result = updateInternal(url, values, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
-
-            if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-
-            return result;
-        } finally {
-            mDb.endTransaction();
-        }
-    }
-
-    @Override
-    public final int delete(final Uri url, final String selection,
-            final String[] selectionArgs) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-        try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                int numRows = mSyncState.asContentProvider().delete(url, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
-                return numRows;
-            }
-            int result = deleteInternal(url, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
-            if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-            return result;
-        } finally {
-            mDb.endTransaction();
-        }
-    }
-
-    @Override
-    public final Uri insert(final Uri url, final ContentValues values) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-        try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                Uri result = mSyncState.asContentProvider().insert(url, values);
-                mDb.setTransactionSuccessful();
-                return result;
-            }
-            Uri result = insertInternal(url, values);
-            mDb.setTransactionSuccessful();
-            if (!isTemporary() && result != null) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-            return result;
-        } finally {
-            mDb.endTransaction();
-        }
-    }
-
-    @Override
-    public final int bulkInsert(final Uri uri, final ContentValues[] values) {
-        int size = values.length;
-        int completed = 0;
-        final boolean isSyncStateUri = mSyncState.matches(uri);
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-        try {
-            for (int i = 0; i < size; i++) {
-                Uri result;
-                if (isTemporary() && isSyncStateUri) {
-                    result = mSyncState.asContentProvider().insert(uri, values[i]);
-                } else {
-                    result = insertInternal(uri, values[i]);
-                    mDb.yieldIfContended();
-                }
-                if (result != null) {
-                    completed++;
-                }
-            }
-            mDb.setTransactionSuccessful();
-        } finally {
-            mDb.endTransaction();
-        }
-        if (!isTemporary() && completed == values.length) {
-            getContext().getContentResolver().notifyChange(uri, null /* observer */,
-                    changeRequiresLocalSync(uri));
-        }
-        return completed;
-    }
+    protected abstract Iterable<? extends AbstractTableMerger> getMergers();
 
     /**
      * Check if changes to this URI can be syncable changes.
      * @param uri the URI of the resource that was changed
      * @return true if changes to this URI can be syncable changes, false otherwise
      */
-    public boolean changeRequiresLocalSync(Uri uri) {
-        return true;
-    }
-
-    @Override
-    public final Cursor query(final Uri url, final String[] projection,
-            final String selection, final String[] selectionArgs,
-            final String sortOrder) {
-        mDb = mOpenHelper.getReadableDatabase();
-        if (isTemporary() && mSyncState.matches(url)) {
-            return mSyncState.asContentProvider().query(
-                    url, projection, selection,  selectionArgs, sortOrder);
-        }
-        return queryInternal(url, projection, selection, selectionArgs, sortOrder);
-    }
+    public abstract boolean changeRequiresLocalSync(Uri uri);
 
     /**
      * Called right before a sync is started.
@@ -381,12 +110,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @param context the sync context for the operation
      * @param account
      */
-    public void onSyncStart(SyncContext context, String account) {
-        if (TextUtils.isEmpty(account)) {
-            throw new IllegalArgumentException("you passed in an empty account");
-        }
-        mSyncingAccount = account;
-    }
+    public abstract void onSyncStart(SyncContext context, String account);
 
     /**
      * Called right after a sync is completed
@@ -394,16 +118,13 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @param context the sync context for the operation
      * @param success true if the sync succeeded, false if an error occurred
      */
-    public void onSyncStop(SyncContext context, boolean success) {
-    }
+    public abstract void onSyncStop(SyncContext context, boolean success);
 
     /**
      * The account of the most recent call to onSyncStart()
      * @return the account
      */
-    public String getSyncingAccount() {
-        return mSyncingAccount;
-    }
+    public abstract String getSyncingAccount();
 
     /**
      * Merge diffs from a sync source with this content provider.
@@ -415,40 +136,8 @@ public abstract class SyncableContentProvider extends ContentProvider {
      *   a temporary content provider with the same layout as this provider containing
      * @param syncResult
      */
-    public void merge(SyncContext context, SyncableContentProvider diffs,
-            TempProviderSyncResult result, SyncResult syncResult) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        db.beginTransaction();
-        try {
-            synchronized(this) {
-                mIsMergeCancelled = false;
-            }
-            Iterable<? extends AbstractTableMerger> mergers = getMergers();
-            try {
-                for (AbstractTableMerger merger : mergers) {
-                    synchronized(this) {
-                        if (mIsMergeCancelled) break;
-                        mCurrentMerger = merger;
-                    }
-                    merger.merge(context, getSyncingAccount(), diffs, result, syncResult, this);
-                }
-                if (mIsMergeCancelled) return;
-                if (diffs != null) {
-                    mSyncState.copySyncState(
-                        diffs.mOpenHelper.getReadableDatabase(),
-                        mOpenHelper.getWritableDatabase(),
-                        getSyncingAccount());
-                }
-            } finally {
-                synchronized (this) {
-                    mCurrentMerger = null;
-                }
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
+    public abstract void merge(SyncContext context, SyncableContentProvider diffs,
+            TempProviderSyncResult result, SyncResult syncResult);
 
 
     /**
@@ -457,19 +146,10 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * provider is syncable). Subclasses of ContentProvider
      * that support canceling of sync should override this.
      */
-    public void onSyncCanceled() {
-        synchronized (this) {
-            mIsMergeCancelled = true;
-            if (mCurrentMerger != null) {
-                mCurrentMerger.onMergeCancelled();
-            }
-        }
-    }
+    public abstract void onSyncCanceled();
 
 
-    public boolean isMergeCancelled() {
-        return mIsMergeCancelled;
-    }
+    public abstract boolean isMergeCancelled();
 
     /**
      * Subclasses should override this instead of update(). See update()
@@ -514,31 +194,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * Make sure that there are no entries for accounts that no longer exist
      * @param accountsArray the array of currently-existing accounts
      */
-    protected void onAccountsChanged(String[] accountsArray) {
-        Map<String, Boolean> accounts = new HashMap<String, Boolean>();
-        for (String account : accountsArray) {
-            accounts.put(account, false);
-        }
-        accounts.put(SyncConstValue.NON_SYNCABLE_ACCOUNT, false);
-
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Map<String, String> tableMap = db.getSyncedTables();
-        Vector<String> tables = new Vector<String>();
-        tables.addAll(tableMap.keySet());
-        tables.addAll(tableMap.values());
-
-        db.beginTransaction();
-        try {
-            mSyncState.onAccountsChanged(accountsArray);
-            for (String table : tables) {
-                deleteRowsForRemovedAccounts(accounts, table,
-                        SyncConstValue._SYNC_ACCOUNT);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
+    protected abstract void onAccountsChanged(String[] accountsArray);
 
     /**
      * A helper method to delete all rows whose account is not in the accounts
@@ -550,71 +206,23 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @param accountColumnName the name of the column that is expected
      * to hold the account.
      */
-    protected void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts,
-            String table, String accountColumnName) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Cursor c = db.query(table, sAccountProjection, null, null,
-                accountColumnName, null, null);
-        try {
-            while (c.moveToNext()) {
-                String account = c.getString(0);
-                if (TextUtils.isEmpty(account)) {
-                    continue;
-                }
-                if (!accounts.containsKey(account)) {
-                    int numDeleted;
-                    numDeleted = db.delete(table, accountColumnName + "=?", new String[]{account});
-                    if (Config.LOGV) {
-                        Log.v(TAG, "deleted " + numDeleted
-                                + " records from table " + table
-                                + " for account " + account);
-                    }
-                }
-            }
-        } finally {
-            c.close();
-        }
-    }
+    protected abstract void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts,
+            String table, String accountColumnName);
 
     /**
      * Called when the sync system determines that this provider should no longer
      * contain records for the specified account.
      */
-    public void wipeAccount(String account) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Map<String, String> tableMap = db.getSyncedTables();
-        ArrayList<String> tables = new ArrayList<String>();
-        tables.addAll(tableMap.keySet());
-        tables.addAll(tableMap.values());
-
-        db.beginTransaction();
-
-        try {
-            // remote the SyncState data
-            mSyncState.discardSyncData(db, account);
-
-            // remove the data in the synced tables
-            for (String table : tables) {
-                db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE, new String[]{account});
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
+    public abstract void wipeAccount(String account);
 
     /**
      * Retrieves the SyncData bytes for the given account. The byte array returned may be null.
      */
-    public byte[] readSyncDataBytes(String account) {
-        return mSyncState.readSyncDataBytes(mOpenHelper.getReadableDatabase(), account);
-    }
+    public abstract byte[] readSyncDataBytes(String account);
 
     /**
      * Sets the SyncData bytes for the given account. The bytes array may be null.
      */
-    public void writeSyncDataBytes(String account, byte[] data) {
-        mSyncState.writeSyncDataBytes(mOpenHelper.getWritableDatabase(), account, data);
-    }
+    public abstract void writeSyncDataBytes(String account, byte[] data);
 }
 

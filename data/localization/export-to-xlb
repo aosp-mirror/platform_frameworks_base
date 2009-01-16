@@ -1,0 +1,36 @@
+#!/bin/sh
+
+mkdir -p /tmp/Maps/res/values
+
+P4PORT=perforce3:3666 p4 print -q //depot/branches/gmm_android_1_1_release_branch/googleclient/wireless/android/Maps/res/values/strings.xml > /tmp/Maps/res/values/strings.xml
+
+extract()
+{
+    module=$1
+    xlb=$2
+    map=""
+
+    shift; shift
+
+    while [ "$1" = '-m' ]
+    do
+        map="$map $1 $2 $3"
+        shift; shift; shift
+    done
+
+    files=$(
+        for i in $*
+        do
+            find $i -name '*.xml' -print0 |
+            xargs -0 grep -l '<string' |
+            grep -v -e '-[a-z][a-z]/' |
+            grep -v -e '-[a-z][a-z]-' |
+            grep -v -e '-r[A-Z][A-Z]/' |
+            grep -v -e '-r[A-Z][A-Z]-'
+        done
+    )
+
+    ../../../../out/host/linux-x86/bin/transconsole $map -p $module $files > ${xlb}.xlb
+}
+
+. ./tc-files

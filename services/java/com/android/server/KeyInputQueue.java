@@ -127,10 +127,10 @@ public abstract class KeyInputQueue {
     
     public void getInputConfiguration(Configuration config) {
         synchronized (mFirst) {
-            config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
-                    //Resources.Configuration.TOUCHSCREEN_NOTOUCH;
-            config.keyboard = Configuration.KEYBOARD_QWERTY;
-            config.navigation = Configuration.NAVIGATION_TRACKBALL;
+            config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+            config.keyboard = Configuration.KEYBOARD_NOKEYS;
+            config.navigation = Configuration.NAVIGATION_NONAV;
+            
             final int N = mDevices.size();
             for (int i=0; i<N; i++) {
                 InputDevice d = mDevices.valueAt(i);
@@ -139,6 +139,11 @@ public abstract class KeyInputQueue {
                         config.touchscreen
                                 = Configuration.TOUCHSCREEN_FINGER;
                         //Log.i("foo", "***** HAVE TOUCHSCREEN!");
+                    }
+                    if ((d.classes&RawInputEvent.CLASS_ALPHAKEY) != 0) {
+                        config.keyboard
+                                = Configuration.KEYBOARD_QWERTY;
+                        //Log.i("foo", "***** HAVE QWERTY!");
                     }
                     if ((d.classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                         config.navigation

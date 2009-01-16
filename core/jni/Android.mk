@@ -119,6 +119,7 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/android/graphics \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
+	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(LOCAL_PATH)/../../include/ui \
 	$(LOCAL_PATH)/../../include/utils \
 	external/skia/include/core \
@@ -147,6 +148,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libdvm \
 	libGLES_CM \
 	libhardware \
+	libhardware_legacy \
 	libsonivox \
 	libcrypto \
 	libssl \
@@ -168,6 +170,9 @@ endif
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += \
 	libdl
+  # we need to access the private Bionic header
+  # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
+  LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
 LOCAL_LDLIBS += -lpthread -ldl

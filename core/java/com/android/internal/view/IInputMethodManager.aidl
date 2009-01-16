@@ -37,15 +37,15 @@ interface IInputMethodManager {
     InputBindResult startInput(in IInputMethodClient client,
             in EditorInfo attribute, boolean initial, boolean needResult);
     void finishInput(in IInputMethodClient client);
-    void showSoftInput(in IInputMethodClient client);
-    void hideSoftInput(in IInputMethodClient client);
+    void showSoftInput(in IInputMethodClient client, int flags);
+    void hideSoftInput(in IInputMethodClient client, int flags);
     void windowGainedFocus(in IInputMethodClient client,
-            boolean viewHasFocus, int softInputMode, boolean first,
-            int windowFlags);
+            boolean viewHasFocus, boolean isTextEditor,
+            int softInputMode, boolean first, int windowFlags);
             
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void setInputMethod(in IBinder token, String id);
-    void hideMySoftInput(in IBinder token);
+    void hideMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(int iconId, String iconPackage);
     
     boolean setInputMethodEnabled(String id, boolean enabled);

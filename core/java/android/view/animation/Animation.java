@@ -118,7 +118,12 @@ public abstract class Animation {
      * Indicates whether the animation transformation should be applied after the
      * animation ends.
      */
-    boolean mFillAfter = true;
+    boolean mFillAfter = false;
+
+    /**
+     * Indicates whether fillAfter should be taken into account.
+     */
+    boolean mFillEnabled = false;    
 
     /**
      * The time in milliseconds at which the animation must start;
@@ -193,6 +198,7 @@ public abstract class Animation {
         setDuration((long) a.getInt(com.android.internal.R.styleable.Animation_duration, 0));
         setStartOffset((long) a.getInt(com.android.internal.R.styleable.Animation_startOffset, 0));
         
+        setFillEnabled(a.getBoolean(com.android.internal.R.styleable.Animation_fillEnabled, mFillEnabled));
         setFillBefore(a.getBoolean(com.android.internal.R.styleable.Animation_fillBefore, mFillBefore));
         setFillAfter(a.getBoolean(com.android.internal.R.styleable.Animation_fillAfter, mFillAfter));
 
@@ -406,6 +412,31 @@ public abstract class Animation {
     }
 
     /**
+     * If fillEnabled is true, this animation will apply fillBefore and fillAfter.
+     *
+     * @return true if the animation will take fillBefore and fillAfter into account
+     * @attr ref android.R.styleable#Animation_fillEnabled
+     */
+    public boolean isFillEnabled() {
+        return mFillEnabled;
+    }
+
+    /**
+     * If fillEnabled is true, the animation will apply the value of fillBefore and
+     * fillAfter. Otherwise, fillBefore and fillAfter are ignored and the animation
+     * transformation is always applied.
+     *
+     * @param fillEnabled true if the animation should take fillBefore and fillAfter into account
+     * @attr ref android.R.styleable#Animation_fillEnabled
+     *
+     * @see #setFillBefore(boolean)
+     * @see #setFillAfter(boolean)
+     */
+    public void setFillEnabled(boolean fillEnabled) {
+        mFillEnabled = fillEnabled;
+    }
+
+    /**
      * If fillBefore is true, this animation will apply its transformation
      * before the start time of the animation. Defaults to true if not set.
      * Note that this applies when using an {@link
@@ -415,6 +446,8 @@ public abstract class Animation {
      *
      * @param fillBefore true if the animation should apply its transformation before it starts
      * @attr ref android.R.styleable#Animation_fillBefore
+     *
+     * @see #setFillEnabled(boolean)
      */
     public void setFillBefore(boolean fillBefore) {
         mFillBefore = fillBefore;
@@ -422,7 +455,7 @@ public abstract class Animation {
 
     /**
      * If fillAfter is true, the transformation that this animation performed
-     * will persist when it is finished. Defaults to true if not set.
+     * will persist when it is finished. Defaults to false if not set.
      * Note that this applies when using an {@link
      * android.view.animation.AnimationSet AnimationSet} to chain
      * animations. The transformation is not applied before the AnimationSet
@@ -430,6 +463,8 @@ public abstract class Animation {
      *
      * @param fillAfter true if the animation should apply its transformation after it ends
      * @attr ref android.R.styleable#Animation_fillAfter
+     *
+     * @see #setFillEnabled(boolean) 
      */
     public void setFillAfter(boolean fillAfter) {
         mFillAfter = fillAfter;
@@ -623,8 +658,10 @@ public abstract class Animation {
             normalizedTime = currentTime < mStartTime ? 0.0f : 1.0f;
         }
 
-        boolean expired = normalizedTime >= 1.0f;
+        final boolean expired = normalizedTime >= 1.0f;
         mMore = !expired;
+
+        if (!mFillEnabled) normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
 
         if ((normalizedTime >= 0.0f || mFillBefore) && (normalizedTime <= 1.0f || mFillAfter)) {
             if (!mStarted) {
@@ -634,8 +671,7 @@ public abstract class Animation {
                 mStarted = true;
             }
 
-            // Pin time to 0.0 to 1.0 range
-            normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);            
+            if (mFillEnabled) normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
 
             if (mCycleFlip) {
                 normalizedTime = 1.0f - normalizedTime;

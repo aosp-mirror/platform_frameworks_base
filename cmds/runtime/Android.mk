@@ -14,7 +14,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libui \
 	libsystem_server \
-	libhardware
+	libhardware_legacy
 
 LOCAL_C_INCLUDES := \
 	$(JNI_H_INCLUDE)

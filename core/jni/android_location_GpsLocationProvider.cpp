@@ -18,7 +18,7 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "hardware/gps.h"
+#include "hardware_legacy/gps.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
 

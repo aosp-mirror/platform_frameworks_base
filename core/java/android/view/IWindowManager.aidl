@@ -67,6 +67,7 @@ interface IWindowManager
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit);
+    int getPendingAppTransition();
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             CharSequence nonLocalizedLabel, int labelRes,

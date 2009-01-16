@@ -8,7 +8,7 @@
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
     <string name="untitled">"&lt;無題&gt;"</string>
-    <string name="ellipsis">"…"</string>
+    <string name="ellipsis">"..."</string>
     <string name="emptyPhoneNumber">"(電話番号なし)"</string>
     <string name="unknownName">"(不明)"</string>
     <string name="defaultVoiceMailAlphaTag">"ボイスメール"</string>
@@ -25,13 +25,12 @@
     <string name="badPuk">"入力したPUKは正しくありません。"</string>
     <string name="mismatchPin">"入力したPINが一致しません。"</string>
     <string name="invalidPin">"4～8桁の数字のPINを入力してください。"</string>
-    <!-- no translation found for needPuk (919668385956251611) -->
-    <skip />
+    <string name="needPuk">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
     <string name="needPuk2">"SIMカードのロック解除のためPUK2を入力します。"</string>
     <string name="ClipMmi">"着信時の発信者番号"</string>
     <string name="ClirMmi">"発信時の発信者番号"</string>
     <string name="CfMmi">"電話の転送"</string>
-    <string name="CwMmi">"待機中の着信"</string>
+    <string name="CwMmi">"通話中着信"</string>
     <string name="BaMmi">"発信制限"</string>
     <string name="PwdMmi">"パスワードの変更"</string>
     <string name="PinMmi">"PINの変更"</string>
@@ -82,7 +81,7 @@
     <string name="screen_lock">"画面をロック"</string>
     <string name="power_off">"電源オフ"</string>
     <string name="shutdown_progress">"シャットダウン中..."</string>
-    <string name="shutdown_confirm">"携帯電話は停止されます。"</string>
+    <string name="shutdown_confirm">"携帯電話の電源をオフにします。"</string>
     <string name="no_recent_tasks">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions">"携帯電話オプション"</string>
     <string name="global_action_lock">"画面をロック"</string>
@@ -104,7 +103,7 @@
     <string name="permgrouplab_accounts">"Googleアカウント"</string>
     <string name="permgroupdesc_accounts">"利用可能なGoogleアカウントへのアクセス"</string>
     <string name="permgrouplab_hardwareControls">"ハードウェアの制御"</string>
-    <string name="permgroupdesc_hardwareControls">"ハンドセットのハードウェアへの直接アクセス"</string>
+    <string name="permgroupdesc_hardwareControls">"携帯電話のハードウェアに直接アクセスします。"</string>
     <string name="permgrouplab_phoneCalls">"電話の発信"</string>
     <string name="permgroupdesc_phoneCalls">"通話の監視、記録、処理"</string>
     <string name="permgrouplab_systemTools">"システムツール"</string>
@@ -112,7 +111,7 @@
     <string name="permgrouplab_developmentTools">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools">"アプリケーションのデベロッパーにのみ必要な機能です。"</string>
     <string name="permlab_statusBar">"ステータスバーを無効にしたり変更する"</string>
-    <string name="permdesc_statusBar">"ステータスバーを無効にしたり、システムアイコンを追加や削除することをアプリケーションに許可します。"</string>
+    <string name="permdesc_statusBar">"ステータスバーの無効化や、システムアイコンの追加や削除をアプリケーションに許可します。"</string>
     <string name="permlab_expandStatusBar">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar">"ステータスバーの拡大や縮小をアプリケーションに許可します。"</string>
     <string name="permlab_processOutgoingCalls">"発信の傍受"</string>
@@ -130,7 +129,7 @@
     <string name="permlab_receiveWapPush">"WAPの受信"</string>
     <string name="permdesc_receiveWapPush">"WAPメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
     <string name="permlab_getTasks">"実行中のアプリケーションの取得"</string>
-    <string name="permdesc_getTasks">"現在実行中または最近実行したタスクに関する情報の取得をアプリケーションに許可します。悪意のあるアプリケーションが他のアプリケーションから非公開情報を取得する恐れがあります。"</string>
+    <string name="permdesc_getTasks">"現在実行中または最近実行したタスクに関する情報の取得をアプリケーションに許可します。悪意のあるアプリケーションが他のアプリケーションの非公開情報を取得する恐れがあります。"</string>
     <string name="permlab_reorderTasks">"実行中のアプリケーションの順序の変更"</string>
     <string name="permdesc_reorderTasks">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリケーションに許可します。悪意のあるアプリケーションが優先されて、コントロールできなくなる恐れがあります。"</string>
     <string name="permlab_setDebugApp">"アプリケーションのデバッグを有効にする"</string>
@@ -140,7 +139,7 @@
     <string name="permlab_restartPackages">"他のアプリケーションの再起動"</string>
     <string name="permdesc_restartPackages">"他のアプリケーションの強制的な再起動をアプリケーションに許可します。"</string>
     <string name="permlab_setProcessForeground">"停止の阻止"</string>
-    <string name="permdesc_setProcessForeground">"フォアグラウンドでプロセスを実行して、終了できないようにすることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
+    <string name="permdesc_setProcessForeground">"フォアグラウンドでプロセスを実行して、強制終了できないようにすることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_forceBack">"アプリケーションの強制終了"</string>
     <string name="permdesc_forceBack">"フォアグラウンドで実行されている操作を強制終了して戻ることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_dump">"システムの内部状態の取得"</string>
@@ -149,19 +148,19 @@
     <string name="permdesc_addSystemService">"独自の低レベルのシステムサービスを公開することをアプリケーションに許可します。悪意のあるアプリケーションがシステムを乗っ取って、データの盗用や破壊をする恐れがあります。"</string>
     <string name="permlab_runSetActivityWatcher">"起動中のすべてのアプリケーションの監視と制御"</string>
     <string name="permdesc_runSetActivityWatcher">"システムが起動する操作の監視と制御をアプリケーションに許可します。悪意のあるアプリケーションがシステムを完全に破壊する恐れがあります。この許可は開発にのみ必要で、携帯電話の通常の使用にはまったく必要ありません。"</string>
-    <string name="permlab_broadcastPackageRemoved">"パッケージが削除されたブロードキャストの配信"</string>
-    <string name="permdesc_broadcastPackageRemoved">"アプリケーションパッケージの削除の通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、他の実行中のアプリケーションを強制終了する恐れがあります。"</string>
-    <string name="permlab_broadcastSmsReceived">"SMS受信ブロードキャストの配信"</string>
+    <string name="permlab_broadcastPackageRemoved">"パッケージ削除ブロードキャストの送信"</string>
+    <string name="permdesc_broadcastPackageRemoved">"アプリケーションパッケージの削除通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、他の実行中のアプリケーションを強制終了する恐れがあります。"</string>
+    <string name="permlab_broadcastSmsReceived">"SMS受信ブロードキャストの送信"</string>
     <string name="permdesc_broadcastSmsReceived">"SMSメッセージの受信通知の配信をアプリケーションに許可します。これにより悪意のあるアプリケーションが、受信SMSメッセージを偽造する恐れがあります。"</string>
-    <string name="permlab_broadcastWapPush">"WAP-PUSH受信ブロードキャストの配信"</string>
-    <string name="permdesc_broadcastWapPush">"WAP PUSHメッセージの受信の通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、MMS受信メッセージを偽造したり、ウェブページのコンテンツを密かに改ざんする恐れがあります。"</string>
+    <string name="permlab_broadcastWapPush">"WAP-PUSH受信ブロードキャストの送信"</string>
+    <string name="permdesc_broadcastWapPush">"WAP PUSHメッセージの受信通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、MMS受信メッセージを偽造したり、ウェブページのコンテンツを密かに改ざんしたりする恐れがあります。"</string>
     <string name="permlab_setProcessLimit">"実行中のプロセスの数を制限"</string>
     <string name="permdesc_setProcessLimit">"実行するプロセス数の上限の制御をアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
-    <string name="permlab_setAlwaysFinish">"バックグラウンドアプリケーションをすべて閉じる"</string>
+    <string name="permlab_setAlwaysFinish">"バックグラウンドアプリケーションをすべて終了する"</string>
     <string name="permdesc_setAlwaysFinish">"バックグラウンドになり次第必ず操作を終了させるかどうかの制御をアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_fotaUpdate">"システムアップデートの自動インストール"</string>
     <string name="permdesc_fotaUpdate">"保留中のシステムアップデートに関する通知を受信してインストールを開始することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、許可なく更新を行ってシステムを破壊したり、更新処理を妨害する恐れがあります。"</string>
-    <string name="permlab_batteryStats">"バッテリの統計の変更"</string>
+    <string name="permlab_batteryStats">"バッテリ統計の変更"</string>
     <string name="permdesc_batteryStats">"収集されたバッテリの統計の変更を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_internalSystemWindow">"未許可のウィンドウの表示"</string>
     <string name="permdesc_internalSystemWindow">"内部システムのユーザーインターフェースで使用するためのウィンドウ作成を許可します。通常のアプリケーションでは使用しません。"</string>
@@ -175,14 +174,12 @@
     <string name="permdesc_injectEvents">"入力イベント (キーを押すなど) を別のアプリケーションに伝えることをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話を乗っ取る恐れがあります。"</string>
     <string name="permlab_readInputState">"入力や操作の記録"</string>
     <string name="permdesc_readInputState">"別のアプリケーションへの入力 (パスワードなど) でもキー入力を監視することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
-    <!-- no translation found for permlab_bindInputMethod (3360064620230515776) -->
-    <skip />
-    <!-- no translation found for permdesc_bindInputMethod (3734838321027317228) -->
-    <skip />
+    <string name="permlab_bindInputMethod">"入力方法に関連付ける"</string>
+    <string name="permdesc_bindInputMethod">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_setOrientation">"画面の向きの変更"</string>
     <string name="permdesc_setOrientation">"いつでも画面の回転を変更することをアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_signalPersistentProcesses">"Linuxのシグナルをアプリケーションに送信"</string>
-    <string name="permdesc_signalPersistentProcesses">"すべての永続プロセスへの指定の信号の送信要求をアプリケーションに許可します。"</string>
+    <string name="permdesc_signalPersistentProcesses">"すべての永続プロセスに特定の信号を送信するリクエストをアプリケーションに許可します。"</string>
     <string name="permlab_persistentActivity">"アプリケーションを常に実行する"</string>
     <string name="permdesc_persistentActivity">"自身を部分的に永続させて、他のアプリケーション用にはその領域をシステムに使わせないようにすることをアプリケーションに許可します。"</string>
     <string name="permlab_deletePackages">"アプリケーションの削除"</string>
@@ -200,22 +197,19 @@
     <string name="permlab_readLogs">"システムログファイルの読み取り"</string>
     <string name="permdesc_readLogs">"システムのさまざまなログファイルの読み取りをアプリケーションに許可します。これにより携帯電話の使用状況に関する全般情報が取得されますが、個人情報や非公開情報が含まれることはありません。"</string>
     <string name="permlab_diagnostic">"diagが所有するリソースの読み書き"</string>
-    <string name="permdesc_diagnostic">"diagグループが所有するリソース (例、/dev内のファイル) への読み書きをアプリケーションに許可します。これはシステムの安定性とセキュリティに影響する恐れがあります。メーカーまたはオペレータによるハードウェア固有の診断以外には使用しないでください。"</string>
+    <string name="permdesc_diagnostic">"diagグループが所有するリソース (/dev内のファイルなど) への読み書きをアプリケーションに許可します。これはシステムの安定性とセキュリティに影響する恐れがあります。メーカーまたはオペレータによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState">"アプリケーションのコンポーネントを有効/無効にする"</string>
-    <!-- no translation found for permdesc_changeComponentState (4569107043246700630) -->
-    <skip />
+    <string name="permdesc_changeComponentState">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話の重要な機能を無効にする恐れがあります。アプリケーションコンポーネントが利用できない、整合性が取れない、または不安定な状態になる恐れがあるので、許可には注意が必要です。"</string>
     <string name="permlab_setPreferredApplications">"優先アプリケーションの設定"</string>
     <string name="permdesc_setPreferredApplications">"優先アプリケーションを変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、実行中のアプリケーションを密かに変更し、既存のアプリケーションになりすまして、非公開データを収集する恐れがあります。"</string>
     <string name="permlab_writeSettings">"システム全般の設定の変更"</string>
     <string name="permdesc_writeSettings">"システム設定データの変更をアプリケーションに許可します。悪意のあるアプリケーションがシステム設定を破壊する恐れがあります。"</string>
-    <!-- no translation found for permlab_writeSecureSettings (204676251876718288) -->
-    <skip />
-    <!-- no translation found for permdesc_writeSecureSettings (4116616249170428132) -->
-    <skip />
+    <string name="permlab_writeSecureSettings">"システムのセキュリティ設定の変更"</string>
+    <string name="permdesc_writeSecureSettings">"システムのセキュリティ設定の変更をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_writeGservices">"Googleサービスの地図の変更"</string>
     <string name="permdesc_writeGservices">"Googleサービスマップの変更をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_receiveBootCompleted">"起動時に自動的に開始"</string>
-    <string name="permdesc_receiveBootCompleted">"システムの起動後に、自動的に起動することをアプリケーションに許可します。これにより携帯電話の起動に時間がかかるようになり、アプリケーションが常に実行されるために携帯電話の全体的な動作が遅くなります。"</string>
+    <string name="permdesc_receiveBootCompleted">"システムの起動直後に自動的に起動することをアプリケーションに許可します。これにより携帯電話の起動に時間がかかるようになります。また、アプリケーションが常に実行中となるため、携帯電話の全体的な動作が遅くなります。"</string>
     <string name="permlab_broadcastSticky">"stickyブロードキャストの配信"</string>
     <string name="permdesc_broadcastSticky">"配信が終了してもメモリに残るようなstickyブロードキャストをアプリケーションに許可します。悪意のあるアプリケーションがメモリを使いすぎて、携帯電話の動作が遅くなったり、不安定になる恐れがあります。"</string>
     <string name="permlab_readContacts">"連絡先データの読み取り"</string>
@@ -223,7 +217,7 @@
     <string name="permlab_writeContacts">"連絡先データの書き込み"</string>
     <string name="permdesc_writeContacts">"携帯電話に保存した連絡先 (アドレス) データの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、連絡先データを消去や変更する恐れがあります。"</string>
     <string name="permlab_writeOwnerData">"所有者データの書き込み"</string>
-    <string name="permdesc_writeOwnerData">"携帯電話に保存した所有者のデータの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、所有者のデータを消去や変更する恐れがあります。"</string>
+    <string name="permdesc_writeOwnerData">"携帯電話に保存した所有者のデータの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、所有者のデータを消去または変更する恐れがあります。"</string>
     <string name="permlab_readOwnerData">"所有者データの読み取り"</string>
     <string name="permdesc_readOwnerData">"携帯電話に保存した所有者データの読み取りをアプリケーションに許可します。これにより悪意のあるアプリケーションが、所有者データを読み取る恐れがあります。"</string>
     <string name="permlab_readCalendar">"カレンダーデータの読み取り"</string>
@@ -235,7 +229,7 @@
     <string name="permlab_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドへのアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドにアクセスします。これにより悪意のあるアプリケーションが、GPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation">"正確な (GPS) 位置"</string>
-    <string name="permdesc_accessFineLocation">"GPSなど、携帯電話の正確な位置情報源に、可能な場合アクセスします。これにより悪意のあるアプリケーションが、ユーザーの現在地を特定したり、バッテリの消費が増える恐れがあります。"</string>
+    <string name="permdesc_accessFineLocation">"GPSなど、携帯電話の正確な位置情報源に、可能な場合アクセスします。これにより悪意のあるアプリケーションが、ユーザーの現在地を特定したり、バッテリの消費を増やしたりする恐れがあります。"</string>
     <string name="permlab_accessCoarseLocation">"おおよその (ネットワーク情報による) 位置"</string>
     <string name="permdesc_accessCoarseLocation">"セルラーネットワークデータベースなど、携帯電話のおおよその位置を特定する情報源が利用可能な場合にアクセスします。これにより悪意のあるアプリケーションが、ユーザーのおおよその位置を特定できる恐れがあります。"</string>
     <string name="permlab_accessSurfaceFlinger">"SurfaceFlingerへのアクセス"</string>
@@ -316,11 +310,39 @@
     <string name="permdesc_subscribedFeedsRead">"現在同期しているフィードの詳細の取得をアプリケーションに許可します。"</string>
     <string name="permlab_subscribedFeedsWrite">"登録したフィードの書き込み"</string>
     <string name="permdesc_subscribedFeedsWrite">"現在同期しているフィードの変更をアプリケーションに許可します。悪意のあるアプリケーションが同期フィードを変更する恐れがあります。"</string>
-    <!-- no translation found for phoneTypes:7 (9192514806975898961) -->
-    <!-- no translation found for emailAddressTypes:3 (2374913952870110618) -->
-    <!-- no translation found for postalAddressTypes:3 (4932682847595299369) -->
-    <!-- no translation found for imAddressTypes:3 (3145118944639869809) -->
-    <!-- no translation found for organizationTypes:2 (3455047468583965104) -->
+  <string-array name="phoneTypes">
+    <item>"自宅"</item>
+    <item>"携帯"</item>
+    <item>"勤務先"</item>
+    <item>"勤務先FAX"</item>
+    <item>"自宅FAX"</item>
+    <item>"ポケベル"</item>
+    <item>"その他"</item>
+    <item>"カスタム"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"自宅"</item>
+    <item>"勤務先"</item>
+    <item>"その他"</item>
+    <item>"カスタム"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"自宅"</item>
+    <item>"勤務先"</item>
+    <item>"その他"</item>
+    <item>"カスタム"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"自宅"</item>
+    <item>"勤務先"</item>
+    <item>"その他"</item>
+    <item>"カスタム"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"勤務先"</item>
+    <item>"その他"</item>
+    <item>"カスタム"</item>
+  </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
     <item>"Windows Live"</item>
@@ -331,22 +353,18 @@
     <item>"ICQ"</item>
     <item>"Jabber"</item>
   </string-array>
-    <!-- no translation found for keyguard_password_enter_pin_code (3731488827218876115) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_code">"PINコードを入力"</string>
     <string name="keyguard_password_wrong_pin_code">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text">"ロックを解除するには、Menu、0キーの順に押します。"</string>
     <string name="emergency_call_dialog_number_for_display">"緊急電話番号"</string>
     <string name="lockscreen_carrier_default">"(サービスなし)"</string>
-    <!-- no translation found for lockscreen_screen_locked (7288443074806832904) -->
-    <skip />
+    <string name="lockscreen_screen_locked">"画面がロックされています。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"Menuキーを押してロックを解除するか、緊急電話をかけます。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"ロックを解除するにはMenuキーを押します。"</string>
-    <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
-    <skip />
+    <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
     <string name="lockscreen_emergency_call">"緊急電話"</string>
     <string name="lockscreen_pattern_correct">"一致しました"</string>
-    <!-- no translation found for lockscreen_pattern_wrong (4817583279053112312) -->
-    <skip />
+    <string name="lockscreen_pattern_wrong">"もう一度試してください"</string>
     <string name="lockscreen_plugged_in">"充電中 (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"充電してください。"</string>
     <string name="lockscreen_missing_sim_message_short">"SIMカードがありません。"</string>
@@ -362,17 +380,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>秒後にもう一度試してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"パターンを忘れた場合"</string>
     <string name="lockscreen_glogin_too_many_attempts">"パターンの指定回数が多すぎる"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (7400120254204758548) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"ロックを解除するには、"\n"Googleアカウントでログインしてください。"</string>
     <string name="lockscreen_glogin_username_hint">"ユーザー名 (メール)"</string>
     <string name="lockscreen_glogin_password_hint">"パスワード"</string>
     <string name="lockscreen_glogin_submit_button">"ログイン"</string>
     <string name="lockscreen_glogin_invalid_input">"ユーザー名またはパスワードが正しくありません。"</string>
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <!-- no translation found for hour_minute_ampm (7044207493989843593) -->
-    <skip />
-    <!-- no translation found for hour_minute_cap_ampm (5778825208801303756) -->
-    <skip />
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <!-- no translation found for hour_ampm (7618670480400517084) -->
     <skip />
     <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
@@ -403,7 +418,7 @@
     <string name="menu_space_shortcut_label">"Space"</string>
     <string name="menu_enter_shortcut_label">"Enter"</string>
     <string name="menu_delete_shortcut_label">"Del"</string>
-    <string name="search_go">"Search"</string>
+    <string name="search_go">"検索"</string>
     <string name="today">"今日"</string>
     <string name="yesterday">"昨日"</string>
     <string name="tomorrow">"明日"</string>
@@ -441,6 +456,22 @@
     <item quantity="one">"明日"</item>
     <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>日後"</item>
   </plurals>
+    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
+    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
+    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
+    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
+    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
+    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
+    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
+    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
+    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
+    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
+    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
+    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
+    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
+    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
+    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
+    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
     <string name="preposition_for_date">"%s"</string>
     <string name="preposition_for_time">"%s"</string>
     <string name="preposition_for_year">"%s年"</string>
@@ -473,7 +504,7 @@
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
     <string name="pm">"PM"</string>
-    <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>"</string>
+    <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>"</string>
     <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g> (<xliff:g id="WEEKDAY2">%4$s</xliff:g>) <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="DATE2">%5$s</xliff:g> (<xliff:g id="WEEKDAY2">%4$s</xliff:g>)"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
@@ -481,8 +512,12 @@
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g>～<xliff:g id="TIME2">%2$s</xliff:g>"</string>
     <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g> (<xliff:g id="WEEKDAY">%2$s</xliff:g>) <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g> (<xliff:g id="WEEKDAY">%2$s</xliff:g>)"</string>
-    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for date_time (6104442718633642836) -->
+    <skip />
+    <!-- no translation found for relative_time (1818557177829411417) -->
+    <skip />
+    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
     <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
     <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
@@ -565,7 +600,7 @@
     <string name="day_of_week_shortest_monday">"月"</string>
     <string name="day_of_week_shortest_tuesday">"火"</string>
     <string name="day_of_week_shortest_wednesday">"水"</string>
-    <string name="day_of_week_shortest_thursday">"木"</string>
+    <string name="day_of_week_shortest_thursday">"火"</string>
     <string name="day_of_week_shortest_friday">"金"</string>
     <string name="day_of_week_shortest_saturday">"土"</string>
     <string name="month_long_january">"1月"</string>
@@ -594,7 +629,7 @@
     <string name="month_medium_december">"12月"</string>
     <string name="month_shortest_january">"1"</string>
     <string name="month_shortest_february">"2"</string>
-    <string name="month_shortest_march">"3"</string>
+    <string name="month_shortest_march">"月"</string>
     <string name="month_shortest_april">"4"</string>
     <string name="month_shortest_may">"5"</string>
     <string name="month_shortest_june">"6"</string>
@@ -607,16 +642,16 @@
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"すべて選択"</string>
+    <string name="selectText">"テキストを選択"</string>
+    <string name="stopSelectingText">"テキストの選択を終了"</string>
     <string name="cut">"切り取り"</string>
     <string name="cutAll">"すべて切り取り"</string>
     <string name="copy">"コピー"</string>
     <string name="copyAll">"すべてコピー"</string>
     <string name="paste">"貼り付け"</string>
     <string name="copyUrl">"URLをコピー"</string>
-    <!-- no translation found for inputMethod (7673923508389094672) -->
-    <skip />
-    <!-- no translation found for editTextMenuTitle (1672989176958581452) -->
-    <skip />
+    <string name="inputMethod">"入力方法"</string>
+    <string name="editTextMenuTitle">"テキストを編集"</string>
     <string name="low_internal_storage_view_title">"空き容量低下"</string>
     <string name="low_internal_storage_view_text">"携帯電話の空き容量が少なくなっています。"</string>
     <string name="ok">"OK"</string>
@@ -629,7 +664,7 @@
     <string name="alwaysUse">"この操作にデフォルトで使用します。"</string>
     <string name="clearDefaultHintMsg">"ホームの[設定]&gt;[アプリケーション]&gt;[アプリケーションを管理]で、デフォルトをクリアします。"</string>
     <string name="chooseActivity">"操作の選択"</string>
-    <string name="noApplications">"この操作を実行するアプリケーションはありません。"</string>
+    <string name="noApplications">"この操作を実行できるアプリケーションはありません。"</string>
     <string name="aerr_title">"エラー"</string>
     <string name="aerr_application">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>プロセス) が予期せず停止しました。もう一度試してください。"</string>
     <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>プロセスが予期せず停止しました。もう一度試してください。"</string>
@@ -643,23 +678,18 @@
     <string name="debug">"デバッグ"</string>
     <string name="sendText">"テキストの操作の選択"</string>
     <string name="volume_ringtone">"着信音の音量"</string>
-    <!-- no translation found for volume_music (5421651157138628171) -->
-    <skip />
-    <!-- no translation found for volume_music_hint_playing_through_bluetooth (9165984379394601533) -->
-    <skip />
+    <string name="volume_music">"メディアの音量"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
     <string name="volume_call">"着信音の音量"</string>
-    <!-- no translation found for volume_call_hint_playing_through_bluetooth (7750873841563910404) -->
-    <skip />
+    <string name="volume_call_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
     <string name="volume_alarm">"アラームの音量"</string>
-    <!-- no translation found for volume_notification (2422265656744276715) -->
-    <skip />
+    <string name="volume_notification">"通知音の音量"</string>
     <string name="volume_unknown">"音量"</string>
     <string name="ringtone_default">"デフォルトの着信音"</string>
     <string name="ringtone_default_with_actual">"デフォルトの着信音 (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"無音"</string>
-    <!-- no translation found for ringtone_picker_title (3515143939175119094) -->
-    <skip />
-    <string name="ringtone_unknown">"不明の着信音"</string>
+    <string name="ringtone_picker_title">"着信音"</string>
+    <string name="ringtone_unknown">"不明時着信音"</string>
   <plurals name="wifi_available">
     <item quantity="one">"Wi-Fiネットワークが利用可能"</item>
     <item quantity="other">"Wi-Fiネットワークが利用可能"</item>
@@ -668,8 +698,7 @@
     <item quantity="one">"Wi-Fiオープンネットワークが利用できます"</item>
     <item quantity="other">"Wi-Fiオープンネットワークが利用できます"</item>
   </plurals>
-    <!-- no translation found for select_character (3365550120617701745) -->
-    <skip />
+    <string name="select_character">"文字を挿入"</string>
     <string name="sms_control_default_app_name">"不明なアプリケーション"</string>
     <string name="sms_control_title">"SMSメッセージの送信中"</string>
     <string name="sms_control_message">"大量のSMSメッセージが送信されます。送信するには[OK]、中止するには[キャンセル]を選択します。"</string>
@@ -688,12 +717,8 @@
     <string name="usb_storage_error_message">"USBメモリにSDカードを使用する際に問題が発生しました。"</string>
     <string name="usb_storage_notification_title">"USB接続"</string>
     <string name="usb_storage_notification_message">"パソコンとの間でファイルをコピーします。"</string>
-    <!-- no translation found for select_input_method (2086499663193509436) -->
-    <skip />
-    <!-- no translation found for fast_scroll_alphabet (5433275485499039199) -->
-    <skip />
-    <!-- no translation found for fast_scroll_numeric_alphabet (4030170524595123610) -->
-    <skip />
-    <!-- no translation found for candidates_style (5248064431114273041) -->
-    <skip />
+    <string name="select_input_method">"入力方法の選択"</string>
+    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"候補"</u></font></string>
 </resources>

@@ -27,6 +27,11 @@ ifeq ($(TARGET_ARCH),arm)
 	LOCAL_CFLAGS += -fstrict-aliasing
 endif
 
+ifneq ($(TARGET_SIMULATOR),true)
+    # we need to access the private Bionic header <bionic_tls.h>
+    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+endif
+
 LOCAL_SHARED_LIBRARIES := libcutils libutils libpixelflinger
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libagl

@@ -466,18 +466,35 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000;
         
-        /** Window flag: set when this window was created from the restored
-         * state of a previous window, indicating this is not the first time
-         * the user has navigated to it.
-         */
-        public static final int FLAG_RESTORED_STATE = 0x00080000;
-        
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
          * {@hide} */
         public static final int FLAG_SYSTEM_ERROR = 0x40000000;
 
+        /**
+         * Given a particular set of window manager flags, determine whether
+         * such a window may be a target for an input method when it has
+         * focus.  In particular, this checks the
+         * {@link #FLAG_NOT_FOCUSABLE} and {@link #FLAG_ALT_FOCUSABLE_IM}
+         * flags and returns true if the combination of the two corresponds
+         * to a window that needs to be behind the input method so that the
+         * user can type into it.
+         * 
+         * @param flags The current window manager flags.
+         * 
+         * @return Returns true if such a window should be behind/interact
+         * with an input method, false if not.
+         */
+        public static boolean mayUseInputMethod(int flags) {
+            switch (flags&(FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
+                case 0:
+                case FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM:
+                    return true;
+            }
+            return false;
+        }
+        
         /**
          * Mask for {@link #softInputMode} of the bits that determine the
          * desired visibility state of the soft input area for this window.
@@ -502,16 +519,17 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_STATE_HIDDEN = 2;
         
         /**
-         * Visibility state for {@link #softInputMode}: please show the soft input area
-         * the first time the window is shown.
+         * Visibility state for {@link #softInputMode}: please show the soft
+         * input area when normally appropriate (when the user is navigating
+         * forward to your window).
          */
-        public static final int SOFT_INPUT_STATE_FIRST_VISIBLE = 3;
+        public static final int SOFT_INPUT_STATE_VISIBLE = 3;
         
         /**
-         * Visibility state for {@link #softInputMode}: please always show the soft
-         * input area.
+         * Visibility state for {@link #softInputMode}: please always make the
+         * soft input area visible when this window receives input focus.
          */
-        public static final int SOFT_INPUT_STATE_VISIBLE = 4;
+        public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 4;
         
         /**
          * Mask for {@link #softInputMode} of the bits that determine the
@@ -547,13 +565,22 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_ADJUST_PAN = 0x20;
         
         /**
+         * Bit for {@link #softInputMode}: set when the user has navigated
+         * forward to the window.  This is normally set automatically for
+         * you by the system, though you may want to set it in certain cases
+         * when you are displaying a window yourself.  This flag will always
+         * be cleared automatically after the window is displayed.
+         */
+        public static final int SOFT_INPUT_IS_FORWARD_NAVIGATION = 0x100;
+        
+        /**
          * Desired operating mode for any soft input area.  May any combination
          * of:
          * 
          * <ul>
          * <li> One of the visibility states
          * {@link #SOFT_INPUT_STATE_UNSPECIFIED}, {@link #SOFT_INPUT_STATE_UNCHANGED},
-         * {@link #SOFT_INPUT_STATE_HIDDEN}, {@link #SOFT_INPUT_STATE_FIRST_VISIBLE}, or
+         * {@link #SOFT_INPUT_STATE_HIDDEN}, {@link #SOFT_INPUT_STATE_ALWAYS_VISIBLE}, or
          * {@link #SOFT_INPUT_STATE_VISIBLE}.
          * <li> One of the adjustment options
          * {@link #SOFT_INPUT_ADJUST_UNSPECIFIED},

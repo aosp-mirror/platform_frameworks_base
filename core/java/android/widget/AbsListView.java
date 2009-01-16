@@ -696,7 +696,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
         setScrollingCacheEnabled(true);
-        setScrollContainer(true);
     }
 
     private void useDefaultSelector() {

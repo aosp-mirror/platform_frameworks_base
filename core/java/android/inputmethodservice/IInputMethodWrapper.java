@@ -105,7 +105,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 mInputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT:
-                mInputMethod.showSoftInput();
+                mInputMethod.showSoftInput(
+                        msg.arg1 != 0 ? InputMethod.SHOW_EXPLICIT : 0);
                 return;
             case DO_HIDE_SOFT_INPUT:
                 mInputMethod.hideSoftInput();
@@ -162,8 +163,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
     
-    public void showSoftInput() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_SHOW_SOFT_INPUT));
+    public void showSoftInput(boolean explicit) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_SHOW_SOFT_INPUT,
+                explicit ? 1 : 0));
     }
     
     public void hideSoftInput() {

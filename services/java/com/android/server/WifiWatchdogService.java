@@ -231,7 +231,7 @@ public class WifiWatchdogService {
      */
     private int getBackgroundCheckDelayMs() {
         return Settings.Secure.getInt(mContentResolver,
-            Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS, 5000);
+            Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS, 60000);
     }
     
     /**

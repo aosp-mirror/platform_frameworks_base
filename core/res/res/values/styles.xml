@@ -624,5 +624,7 @@
         <item name="android:labelTextSize">14sp</item>
         <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
         <item name="android:verticalCorrection">-10dip</item>
+        <item name="android:shadowColor">#BB000000</item>
+        <item name="android:shadowRadius">2.75</item>
     </style>
 </resources>

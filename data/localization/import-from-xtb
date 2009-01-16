@@ -1,7 +1,5 @@
 #!/bin/sh
 
-locale=it
-
 extract()
 {
     module=$1
@@ -50,6 +48,9 @@ extract()
     done
 }
 
+for locale in fr it es de nl cs pl ja zh-TW zh-CN ru
+do
+
 extract AndroidAlarmClock ../../../../packages/apps/AlarmClock ../../apps/AlarmClock ../../../../packages/apps/AlarmClock
 extract AndroidBrowser ../../../../packages/apps/Browser ../../apps/Browser ../../../../packages/apps/Browser
 extract AndroidCalculator ../../../../packages/apps/Calculator ../../apps/Calculator ../../../../packages/apps/Calculator
@@ -82,5 +83,7 @@ extract AndroidUpdater ../../../../packages/apps/Updater ../../apps/Updater ../.
 extract AndroidVending ../../../../vendor ../../partner ../../../../vendor/google/apps/Vending
 extract AndroidVoiceDialer ../../../../packages/apps/VoiceDialer ../../apps/VoiceDialer ../../../../packages/apps/VoiceDialer
 extract AndroidYoutube ../../../../vendor ../../partner ../../../../vendor/google/apps/YouTube
+
+done
 
 exit 0

@@ -714,10 +714,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     bufferType = BufferType.EDITABLE;
                     break;
             }
-            mInputType = EditorInfo.TYPE_CLASS_TEXT;
         }
 
-        if (password) {
+        if (password && (mInputType&EditorInfo.TYPE_MASK_CLASS)
+                == EditorInfo.TYPE_CLASS_TEXT) {
             mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
                 | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
         }
@@ -3772,8 +3772,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyUp(keyCode, event);
     }
 
+    @Override public boolean onCheckIsTextEditor() {
+        return mInputType != EditorInfo.TYPE_NULL;
+    }
+    
     @Override public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        if (mInputType != EditorInfo.TYPE_NULL) {
+        if (onCheckIsTextEditor()) {
             if (mInputMethodState == null) {
                 mInputMethodState = new InputMethodState();
             }
@@ -5334,12 +5338,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mLayout != null) {
             boolean moved = mMovement.onTouchEvent(this, (Spannable) mText, event);
 
-            if (mText instanceof Editable
-                    && mInputType != EditorInfo.TYPE_NULL) {
+            if (mText instanceof Editable && onCheckIsTextEditor()) {
                 if (event.getAction() == MotionEvent.ACTION_UP && isFocused()) {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(this);
+                    imm.showSoftInput(this, 0);
                 }
             }
 

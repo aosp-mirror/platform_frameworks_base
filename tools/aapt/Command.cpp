@@ -761,7 +761,7 @@ int doPackage(Bundle* bundle)
     }
 
     N = bundle->getFileSpecCount();
-    if (N < 1 && bundle->getResourceSourceDir() == NULL && bundle->getJarFiles().size() == 0
+    if (N < 1 && bundle->getResourceSourceDirs().size() == 0 && bundle->getJarFiles().size() == 0
             && bundle->getAndroidManifestFile() == NULL && bundle->getAssetSourceDir() == NULL) {
         fprintf(stderr, "ERROR: no input files\n");
         goto bail;
@@ -793,7 +793,7 @@ int doPackage(Bundle* bundle)
     }
 
     // If they asked for any files that need to be compiled, do so.
-    if (bundle->getResourceSourceDir() || bundle->getAndroidManifestFile()) {
+    if (bundle->getResourceSourceDirs().size() || bundle->getAndroidManifestFile()) {
         err = buildResources(bundle, assets);
         if (err != 0) {
             goto bail;

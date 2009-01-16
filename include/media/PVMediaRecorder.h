@@ -51,6 +51,8 @@ public:
     status_t getMaxAmplitude(int *max);
 
 private:
+    status_t doStop();
+
     AuthorDriverWrapper*            mAuthorDriverWrapper;
 };
 

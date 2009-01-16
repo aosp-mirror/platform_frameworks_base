@@ -2694,7 +2694,7 @@ public class WebView extends AbsoluteLayout
     private void displaySoftKeyboard() {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mTextEntry);
+        imm.showSoftInput(mTextEntry, 0);
     }
 
     // Used to register the global focus change listener one time to avoid
@@ -3065,6 +3065,13 @@ public class WebView extends AbsoluteLayout
 
         // Bubble up the key event as WebView doesn't handle it
         return false;
+    }
+    
+    /**
+     * @hide
+     */
+    public void emulateShiftHeld() {
+        mShiftIsPressed = true;
     }
 
     private boolean commitCopy() {

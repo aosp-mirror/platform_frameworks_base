@@ -44,7 +44,7 @@
     </ul>
     <ul>
       <li class="toggle-list">
-        <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">2D and 3D Graphics</a></div>
+        <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">Graphics</a></div>
           <ul>
             <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">2D Graphics</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">3D with OpenGL</a></li>
@@ -78,6 +78,7 @@
 
       <li><a href="<?cs var:toroot ?>guide/developing/eclipse-adt.html">In Eclipse, with ADT</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/other-ide.html">In Other IDEs</a></li>
+      <li><a href="<?cs var:toroot ?>guide/developing/device.html">On a Device</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/debug-tasks.html">Debugging Tasks</a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">Tools</a></div>

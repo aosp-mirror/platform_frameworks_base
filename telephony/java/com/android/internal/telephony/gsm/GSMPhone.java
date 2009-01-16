@@ -59,7 +59,7 @@ import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.SimCard;
 import com.android.internal.telephony.gsm.SimException;
-import com.android.internal.telephony.gsm.stk.Service;
+import com.android.internal.telephony.gsm.stk.StkService;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.io.IOException;
@@ -102,7 +102,7 @@ public class GSMPhone extends PhoneBase {
     SIMFileHandler mSIMFileHandler;
     SIMRecords mSIMRecords;
     GsmSimCard mSimCard;
-    Service mStkService;
+    StkService mStkService;
     MyHandler h;
     ArrayList <GsmMmiCode> mPendingMMIs = new ArrayList<GsmMmiCode>();
     SimPhoneBookInterfaceManager mSimPhoneBookIntManager;
@@ -182,7 +182,7 @@ public class GSMPhone extends PhoneBase {
             mSimSmsIntManager = new SimSmsInterfaceManager(this);
             mSubInfo = new PhoneSubInfo(this);
         }
-        mStkService = Service.getInstance(mCM, mSIMRecords, mContext,
+        mStkService = StkService.getInstance(mCM, mSIMRecords, mContext,
                 mSIMFileHandler, mSimCard);
                 
         mCM.registerForAvailable(h, EVENT_RADIO_AVAILABLE, null);

@@ -1460,7 +1460,7 @@ public class WifiService extends IWifiManager.Stub {
                  * current power conditions (i.e, not plugged in, plugged in to USB,
                  * or plugged in to AC).
                  */
-                if (!shouldStayAwake(stayAwakeConditions, mPluggedType)) {
+                if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                 }
@@ -1477,8 +1477,8 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
-                if (mScreenOff && shouldStayAwake(stayAwakeConditions, mPluggedType) &&
-                        !shouldStayAwake(stayAwakeConditions, pluggedType)) {
+                if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
+                        !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     mPluggedType = pluggedType;
@@ -1493,6 +1493,30 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         /**
+         * Determines whether the Wi-Fi chipset should stay awake or be put to
+         * sleep. Looks at the setting for the sleep policy and the current
+         * conditions.
+         * 
+         * @see #shouldDeviceStayAwake(int, int)
+         */
+        private boolean shouldWifiStayAwake(int stayAwakeConditions, int pluggedType) {
+            int wifiSleepPolicy = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.WIFI_SLEEP_POLICY, Settings.System.WIFI_SLEEP_POLICY_DEFAULT);
+
+            if (wifiSleepPolicy == Settings.System.WIFI_SLEEP_POLICY_NEVER) {
+                // Never sleep
+                return true;
+            } else if ((wifiSleepPolicy == Settings.System.WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED) &&
+                    (pluggedType != 0)) {
+                // Never sleep while plugged, and we're plugged
+                return true;
+            } else {
+                // Default
+                return shouldDeviceStayAwake(stayAwakeConditions, pluggedType);
+            }
+        }
+        
+        /**
          * Determine whether the bit value corresponding to {@code pluggedType} is set in
          * the bit string {@code stayAwakeConditions}. Because a {@code pluggedType} value
          * of {@code 0} isn't really a plugged type, but rather an indication that the
@@ -1506,7 +1530,7 @@ public class WifiService extends IWifiManager.Stub {
          * @return {@code true} if {@code pluggedType} indicates that the device is
          * supposed to stay awake, {@code false} otherwise.
          */
-        private boolean shouldStayAwake(int stayAwakeConditions, int pluggedType) {
+        private boolean shouldDeviceStayAwake(int stayAwakeConditions, int pluggedType) {
             return (stayAwakeConditions & pluggedType) != 0;
         }
     };
@@ -1528,7 +1552,6 @@ public class WifiService extends IWifiManager.Stub {
         boolean airplaneMode = isAirplaneModeOn();
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode;
-
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
         boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
         if (mDeviceIdle && lockHeld) {
@@ -1562,11 +1585,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void registerForBroadcasts() {
-        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_RADIOS);
-        boolean isAirplaneSensitive = airplaneModeRadios == null
-            || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
-        if (isAirplaneSensitive) {
+        if (isAirplaneSensitive()) {
             mContext.registerReceiver(mReceiver,
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
         }
@@ -1579,12 +1598,21 @@ public class WifiService extends IWifiManager.Stub {
         mContext.registerReceiver(mReceiver,
                 new IntentFilter(ACTION_DEVICE_IDLE));
     }
+    
+    private boolean isAirplaneSensitive() {
+        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_RADIOS);
+        return airplaneModeRadios == null
+            || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
+    }
+
     /**
-     * Returns true if airplane mode is currently on.
+     * Returns true if Wi-Fi is sensitive to airplane mode, and airplane mode is
+     * currently on.
      * @return {@code true} if airplane mode is on.
      */
     private boolean isAirplaneModeOn() {
-        return Settings.System.getInt(mContext.getContentResolver(),
+        return isAirplaneSensitive() && Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
 

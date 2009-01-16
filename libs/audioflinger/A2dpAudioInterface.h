@@ -22,7 +22,7 @@
 
 #include <utils/threads.h>
 
-#include <hardware/AudioHardwareBase.h>
+#include <hardware_legacy/AudioHardwareBase.h>
 
 
 namespace android {
@@ -74,7 +74,7 @@ private:
                                 uint32_t sampleRate);
         virtual uint32_t    sampleRate() const { return 44100; }
         // SBC codec wants a multiple of 512
-        virtual size_t      bufferSize() const { return 512 * 30; }
+        virtual size_t      bufferSize() const { return 512 * 20; }
         virtual int         channelCount() const { return 2; }
         virtual int         format() const { return AudioSystem::PCM_16_BIT; }
         virtual uint32_t    latency() const { return ((1000*channelCount()*bufferSize())/frameSize())/sampleRate() + 200; }
@@ -84,10 +84,15 @@ private:
         virtual status_t    dump(int fd, const Vector<String16>& args);
 
     private:
+        friend class A2dpAudioInterface;
+        status_t            setAddress(const char* address);
+
+    private:
                 int         mFd;
                 bool        mStandby;
                 int         mStartCount;
                 int         mRetryCount;
+                char        mA2dpAddress[20];
                 void*       mData;
                 bool        mInitialized;
     };

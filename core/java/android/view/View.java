@@ -1670,6 +1670,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         int viewFlagValues = 0;
         int viewFlagMasks = 0;
 
+        boolean setScrollContainer = false;
+        
         int x = 0;
         int y = 0;
 
@@ -1796,6 +1798,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                         viewFlagMasks |= SCROLLBARS_STYLE_MASK;
                     }
                     break;
+                case R.styleable.View_isScrollContainer:
+                    setScrollContainer = true;
+                    if (a.getBoolean(attr, false)) {
+                        setScrollContainer(true);
+                    }
+                    break;
                 case com.android.internal.R.styleable.View_keepScreenOn:
                     if (a.getBoolean(attr, false)) {
                         viewFlagValues |= KEEP_SCREEN_ON;
@@ -1856,6 +1864,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             scrollTo(x, y);
         }
 
+        if (!setScrollContainer && (viewFlagValues&SCROLLBARS_VERTICAL) != 0) {
+            setScrollContainer(true);
+        }
+  
         a.recycle();
     }
 
@@ -3555,10 +3567,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
+     * Check whether the called view is a text editor, in which case it
+     * would make sense to automatically display a soft input window for
+     * it.  Subclasses should override this if they implement
+     * {@link #onCreateInputConnection(EditorInfo)} to return true if
+     * a call on that method would return a non-null InputConnection.  The
+     * default implementation always returns false.
+     * 
+     * @return Returns true if this view is a text editor, else false.
+     */
+    public boolean onCheckIsTextEditor() {
+        return false;
+    }
+    
+    /**
      * Create a new InputConnection for an InputMethod to interact
      * with the view.  The default implementation returns null, since it doesn't
      * support input methods.  You can override this to implement such support.
      * This is only needed for views that take focus and text input.
+     * 
+     * <p>When implementing this, you probably also want to implement
+     * {@link #onCheckIsTextEditor()} to indicate you will return a
+     * non-null InputConnection.
      *
      * @param outAttrs Fill in with attribute information about the connection.
      */

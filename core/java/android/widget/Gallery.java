@@ -45,6 +45,9 @@ import android.widget.Scroller;
  * {@link android.R.styleable#Theme_galleryItemBackground} as the background for
  * each View given to the Gallery from the Adapter. If you are not doing this,
  * you may need to adjust some Gallery properties, such as the spacing.
+ * <p>
+ * Views given to the Gallery should use {@link Gallery.LayoutParams} as their
+ * layout parameters type.
  * 
  * @attr ref android.R.styleable#Gallery_animationDuration
  * @attr ref android.R.styleable#Gallery_spacing

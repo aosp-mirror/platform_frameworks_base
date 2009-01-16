@@ -25,7 +25,10 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -37,6 +40,7 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -854,6 +858,43 @@ public final class Settings {
          */
         public static final String WIFI_IDLE_MS = "wifi_idle_ms";
 
+        /**
+         * The policy for deciding when Wi-Fi should go to sleep (which will in
+         * turn switch to using the mobile data as an Internet connection).
+         * <p>
+         * Set to one of {@link #WIFI_SLEEP_POLICY_DEFAULT},
+         * {@link #WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED}, or
+         * {@link #WIFI_SLEEP_POLICY_NEVER}.
+         * 
+         * @hide pending API council
+         */
+        public static final String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
+
+        /**
+         * Value for {@link #WIFI_SLEEP_POLICY} to use the default Wi-Fi sleep
+         * policy, which is to sleep shortly after the turning off
+         * according to the {@link #STAY_ON_WHILE_PLUGGED_IN} setting.
+         * 
+         * @hide pending API council
+         */
+        public static final int WIFI_SLEEP_POLICY_DEFAULT = 0;
+
+        /**
+         * Value for {@link #WIFI_SLEEP_POLICY} to use the default policy when
+         * the device is on battery, and never go to sleep when the device is
+         * plugged in.
+         * 
+         * @hide pending API council
+         */
+        public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
+        
+        /**
+         * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
+         * 
+         * @hide pending API council
+         */
+        public static final int WIFI_SLEEP_POLICY_NEVER = 2;
+        
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
@@ -2674,7 +2715,12 @@ public final class Settings {
 
         /**
          * Descriptive name of the bookmark that can be displayed to the user.
-         * <P>Type: TEXT</P>
+         * If this is empty, the title should be resolved at display time (use
+         * {@link #getTitle(Context, Cursor)} any time you want to display the
+         * title of a bookmark.)
+         * <P>
+         * Type: TEXT
+         * </P>
          */
         public static final String TITLE = "title";
 
@@ -2754,17 +2800,16 @@ public final class Settings {
 
         /**
          * Add a new bookmark to the system.
-         *
+         * 
          * @param cr The ContentResolver to query.
          * @param intent The desired target of the bookmark.
-         * @param title Bookmark title that is shown to the user; null if none.
+         * @param title Bookmark title that is shown to the user; null if none
+         *            or it should be resolved to the intent's title.
          * @param folder Folder in which to place the bookmark; null if none.
-         * @param shortcut Shortcut that will invoke the bookmark; 0 if none.
-         *                 If this is non-zero and there is an existing
-         *                 bookmark entry with this same shortcut, then that
-         *                 existing shortcut is cleared (the bookmark is not
-         *                 removed).
-         *
+         * @param shortcut Shortcut that will invoke the bookmark; 0 if none. If
+         *            this is non-zero and there is an existing bookmark entry
+         *            with this same shortcut, then that existing shortcut is
+         *            cleared (the bookmark is not removed).
          * @return The unique content URL for the new bookmark entry.
          */
         public static Uri add(ContentResolver cr,
@@ -2813,8 +2858,48 @@ public final class Settings {
          * @return CharSequence The label for this folder that should be shown
          *         to the user.
          */
-        public static CharSequence labelForFolder(Resources r, String folder) {
+        public static CharSequence getLabelForFolder(Resources r, String folder) {
             return folder;
+        }
+
+        /**
+         * Return the title as it should be displayed to the user. This takes
+         * care of localizing bookmarks that point to activities.
+         * 
+         * @param context A context.
+         * @param cursor A cursor pointing to the row whose title should be
+         *            returned. The cursor must contain at least the
+         *            {@link #TITLE} and {@link #INTENT} columns.
+         * @return A title that is localized and can be displayed to the user.
+         */
+        public static CharSequence getTitle(Context context, Cursor cursor) {
+            int titleColumn = cursor.getColumnIndex(TITLE);
+            int intentColumn = cursor.getColumnIndex(INTENT);
+            if (titleColumn == -1 || intentColumn == -1) {
+                throw new IllegalArgumentException(
+                        "The cursor must contain the TITLE and INTENT columns.");
+            }
+            
+            String title = cursor.getString(titleColumn);
+            if (!TextUtils.isEmpty(title)) {
+                return title;
+            }
+            
+            String intentUri = cursor.getString(intentColumn);
+            if (TextUtils.isEmpty(intentUri)) {
+                return "";
+            }
+            
+            Intent intent;
+            try {
+                intent = Intent.getIntent(intentUri);
+            } catch (URISyntaxException e) {
+                return "";
+            }
+            
+            PackageManager packageManager = context.getPackageManager();
+            ResolveInfo info = packageManager.resolveActivity(intent, 0);
+            return info.loadLabel(packageManager);
         }
     }
 

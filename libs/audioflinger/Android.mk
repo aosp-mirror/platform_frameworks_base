@@ -12,7 +12,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libmedia \
-    libhardware
+    libhardware_legacy
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_CFLAGS += -DGENERIC_AUDIO
@@ -35,7 +35,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libmedia \
-    libhardware
+    libhardware_legacy
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_STATIC_LIBRARIES += libaudiointerface

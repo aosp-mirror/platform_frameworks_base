@@ -25,8 +25,7 @@
     <string name="badPuk">"Il PUK digitato è errato."</string>
     <string name="mismatchPin">"I PIN inseriti non corrispondono."</string>
     <string name="invalidPin">"Il PIN deve essere di 4-8 numeri."</string>
-    <!-- no translation found for needPuk (919668385956251611) -->
-    <skip />
+    <string name="needPuk">"La SIM è bloccata tramite PUK. Digita il codice PUK per sbloccarla."</string>
     <string name="needPuk2">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="ClipMmi">"ID chiamante in entrata"</string>
     <string name="ClirMmi">"ID chiamante in uscita"</string>
@@ -70,7 +69,7 @@
     <string name="httpErrorFile">"Impossibile accedere al file."</string>
     <string name="httpErrorFileNotFound">"Impossibile trovare il file richiesto."</string>
     <string name="httpErrorTooManyRequests">"Troppe richieste in fase di elaborazione. Riprova più tardi."</string>
-    <string name="contentServiceSync">"Sincronizzazione"</string>
+    <string name="contentServiceSync">"Sinc"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronizzazione"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Troppe eliminazioni di <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory">"Spazio di archiviazione del telefono esaurito. Elimina alcuni file per liberare spazio."</string>
@@ -175,10 +174,8 @@
     <string name="permdesc_injectEvents">"Consente a un\'applicazione di offrire i suoi eventi di input (pressioni di tasti etc.) ad altre applicazioni. Le applicazioni dannose possono sfruttare questa possibilità per assumere il controllo del telefono."</string>
     <string name="permlab_readInputState">"registrare il testo digitato e le azioni effettuate"</string>
     <string name="permdesc_readInputState">"Consente il rilevamento da parte delle applicazioni dei tasti premuti anche durante l\'interazione con un\'altra applicazione (come nel caso di inserimento di una password). Non dovrebbe essere mai necessario per le normali applicazioni."</string>
-    <!-- no translation found for permlab_bindInputMethod (3360064620230515776) -->
-    <skip />
-    <!-- no translation found for permdesc_bindInputMethod (3734838321027317228) -->
-    <skip />
+    <string name="permlab_bindInputMethod">"associare a un metodo di inserimento"</string>
+    <string name="permdesc_bindInputMethod">"Consente l\'associazione all\'interfaccia principale di un metodo di inserimento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_setOrientation">"cambiare l\'orientamento dello schermo"</string>
     <string name="permdesc_setOrientation">"Consente a un\'applicazione di cambiare la rotazione dello schermo in qualsiasi momento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_signalPersistentProcesses">"inviare segnali Linux alle applicazioni"</string>
@@ -202,16 +199,13 @@
     <string name="permlab_diagnostic">"leggere/scrivere a risorse di proprietà di diag"</string>
     <string name="permdesc_diagnostic">"Consente a un\'applicazione di leggere le risorse del gruppo diag e scrivere a esse, per esempio i file in /dev. Questa capacità potrebbe influire sulla stabilità e sicurezza del sistema. Dovrebbe essere utilizzata SOLTANTO per diagnostiche specifiche dell\'hardware effettuate dal produttore o dall\'operatore."</string>
     <string name="permlab_changeComponentState">"attivare o disattivare componenti delle applicazioni"</string>
-    <!-- no translation found for permdesc_changeComponentState (4569107043246700630) -->
-    <skip />
+    <string name="permdesc_changeComponentState">"Consente a un\'applicazione di attivare o disattivare un componente di un\'altra applicazione. Le applicazioni dannose possono sfruttare questa possibilità per disattivare importanti funzionalità del telefono. Prestare attenzione con questa autorizzazione perché è possibile rendere inutilizzabili, incoerenti o instabili i componenti delle applicazioni."</string>
     <string name="permlab_setPreferredApplications">"impostare le applicazioni preferite"</string>
     <string name="permdesc_setPreferredApplications">"Consente la modifica da parte di un\'applicazione delle applicazioni preferite. Le applicazioni dannose potrebbero essere in grado di modificare automaticamente le applicazioni in esecuzione, effettuando lo spoofing delle applicazioni esistenti per raccogliere dati riservati."</string>
     <string name="permlab_writeSettings">"modificare le impostazioni di sistema globali"</string>
     <string name="permdesc_writeSettings">"Consente la modifica in un\'applicazione dei dati delle impostazioni del sistema. Le applicazioni dannose possono danneggiare la configurazione del sistema."</string>
-    <!-- no translation found for permlab_writeSecureSettings (204676251876718288) -->
-    <skip />
-    <!-- no translation found for permdesc_writeSecureSettings (4116616249170428132) -->
-    <skip />
+    <string name="permlab_writeSecureSettings">"modificare le impostazioni di protezione del sistema"</string>
+    <string name="permdesc_writeSecureSettings">"Consente a un\'applicazione di modificare i dati delle impostazioni di protezione del sistema. Da non usare per normali applicazioni."</string>
     <string name="permlab_writeGservices">"modificare la mappa dei servizi Google"</string>
     <string name="permdesc_writeGservices">"Consente a un\'applicazione di modificare la mappa dei servizi Google. Da non usare per normali applicazioni."</string>
     <string name="permlab_receiveBootCompleted">"aprire automaticamente all\'avvio"</string>
@@ -269,7 +263,7 @@
     <string name="permlab_checkinProperties">"accedere a proprietà di archiviazione"</string>
     <string name="permdesc_checkinProperties">"Consente l\'accesso di lettura/scrittura alle proprietà caricate dal servizio di archiviazione. Da non usare per normali applicazioni."</string>
     <string name="permlab_modifyPhoneState">"modificare lo stato del telefono"</string>
-    <string name="permdesc_modifyPhoneState">"Consente all\'applicazione di controllare le funzioni telefoniche del dispositivo. Un\'applicazione con questa autorizzazione può cambiare rete, accendere e spegnere la radio del telefono e così via, il tutto automaticamente."</string>
+    <string name="permdesc_modifyPhoneState">"Consente all\'applicazione di controllare le funzioni telefoniche del dispositivo. Un\'applicazione con questa autorizzazione può cambiare rete, accendere e spegnere il modulo radio del telefono e così via, il tutto automaticamente."</string>
     <string name="permlab_readPhoneState">"leggere lo stato del telefono"</string>
     <string name="permdesc_readPhoneState">"Consente l\'accesso dell\'applicazione alle funzioni telefoniche del dispositivo. Un\'applicazione con questa autorizzazione può determinare il numero del telefono in uso, se una chiamata è attiva o meno, il numero a cui è collegata la chiamata e simili."</string>
     <string name="permlab_wakeLock">"impedire la sospensione del telefono"</string>
@@ -316,11 +310,39 @@
     <string name="permdesc_subscribedFeedsRead">"Consente a un\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
     <string name="permlab_subscribedFeedsWrite">"scrivere feed sottoscritti"</string>
     <string name="permdesc_subscribedFeedsWrite">"Consente la modifica da parte di un\'applicazione dei feed attualmente sincronizzati. Le applicazioni dannose potrebbero essere in grado di modificare i feed sincronizzati."</string>
-    <!-- no translation found for phoneTypes:7 (9192514806975898961) -->
-    <!-- no translation found for emailAddressTypes:3 (2374913952870110618) -->
-    <!-- no translation found for postalAddressTypes:3 (4932682847595299369) -->
-    <!-- no translation found for imAddressTypes:3 (3145118944639869809) -->
-    <!-- no translation found for organizationTypes:2 (3455047468583965104) -->
+  <string-array name="phoneTypes">
+    <item>"Casa"</item>
+    <item>"Cellulare"</item>
+    <item>"Lavoro"</item>
+    <item>"Fax lavoro"</item>
+    <item>"Fax abitazione"</item>
+    <item>"Cercapersone"</item>
+    <item>"Altro"</item>
+    <item>"Personale"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Casa"</item>
+    <item>"Lavoro"</item>
+    <item>"Altro"</item>
+    <item>"Personale"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Casa"</item>
+    <item>"Lavoro"</item>
+    <item>"Altro"</item>
+    <item>"Personale"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Casa"</item>
+    <item>"Lavoro"</item>
+    <item>"Altro"</item>
+    <item>"Personale"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Lavoro"</item>
+    <item>"Altro"</item>
+    <item>"Personale"</item>
+  </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
     <item>"Windows Live"</item>
@@ -331,22 +353,18 @@
     <item>"ICQ"</item>
     <item>"Jabber"</item>
   </string-array>
-    <!-- no translation found for keyguard_password_enter_pin_code (3731488827218876115) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_code">"Inserisci il PIN"</string>
     <string name="keyguard_password_wrong_pin_code">"Codice PIN errato."</string>
-    <string name="keyguard_label_text">"Per sbloccare, premere Menu, poi 0."</string>
+    <string name="keyguard_label_text">"Per sbloccare, premi Menu, poi 0."</string>
     <string name="emergency_call_dialog_number_for_display">"Numero di emergenza"</string>
     <string name="lockscreen_carrier_default">"(Nessun servizio)"</string>
-    <!-- no translation found for lockscreen_screen_locked (7288443074806832904) -->
-    <skip />
+    <string name="lockscreen_screen_locked">"Schermo bloccato."</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"Premi Menu per sbloccare o effettuare chiamate di emergenza."</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Premi Menu per sbloccare."</string>
-    <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
-    <skip />
+    <string name="lockscreen_pattern_instructions">"Traccia la sequenza di sblocco"</string>
     <string name="lockscreen_emergency_call">"Chiamata di emergenza"</string>
     <string name="lockscreen_pattern_correct">"Corretta."</string>
-    <!-- no translation found for lockscreen_pattern_wrong (4817583279053112312) -->
-    <skip />
+    <string name="lockscreen_pattern_wrong">"Riprova"</string>
     <string name="lockscreen_plugged_in">"In carica (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Collega il caricabatterie."</string>
     <string name="lockscreen_missing_sim_message_short">"Nessuna SIM presente."</string>
@@ -362,17 +380,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Riprova fra <xliff:g id="NUMBER">%d</xliff:g> secondi."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Hai dimenticato la sequenza?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Troppi tentativi di inserimento della sequenza."</string>
-    <!-- no translation found for lockscreen_glogin_instructions (7400120254204758548) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"Per sbloccare,"\n"accedi tramite il tuo account Google"</string>
     <string name="lockscreen_glogin_username_hint">"Nome utente (email)"</string>
     <string name="lockscreen_glogin_password_hint">"Password"</string>
     <string name="lockscreen_glogin_submit_button">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input">"Password o nome utente non valido."</string>
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <!-- no translation found for hour_minute_ampm (7044207493989843593) -->
-    <skip />
-    <!-- no translation found for hour_minute_cap_ampm (5778825208801303756) -->
-    <skip />
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <!-- no translation found for hour_ampm (7618670480400517084) -->
     <skip />
     <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
@@ -517,7 +532,7 @@
     <skip />
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (9219019380312413367) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
@@ -529,7 +544,7 @@
     <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
@@ -544,7 +559,7 @@
     <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for abbrev_month_year (3856424847226891943) -->
@@ -584,7 +599,7 @@
     <string name="day_of_week_shortest_sunday">"D"</string>
     <string name="day_of_week_shortest_monday">"Lun"</string>
     <string name="day_of_week_shortest_tuesday">"M"</string>
-    <string name="day_of_week_shortest_wednesday">"Mer"</string>
+    <string name="day_of_week_shortest_wednesday">"Me"</string>
     <string name="day_of_week_shortest_thursday">"G"</string>
     <string name="day_of_week_shortest_friday">"V"</string>
     <string name="day_of_week_shortest_saturday">"Sa"</string>
@@ -614,7 +629,7 @@
     <string name="month_medium_december">"Dic"</string>
     <string name="month_shortest_january">"G"</string>
     <string name="month_shortest_february">"F"</string>
-    <string name="month_shortest_march">"Mar"</string>
+    <string name="month_shortest_march">"M"</string>
     <string name="month_shortest_april">"Ap"</string>
     <string name="month_shortest_may">"Mag"</string>
     <string name="month_shortest_june">"Gi"</string>
@@ -627,20 +642,16 @@
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Seleziona tutto"</string>
-    <!-- no translation found for selectText (3889149123626888637) -->
-    <skip />
-    <!-- no translation found for stopSelectingText (4157931463872320996) -->
-    <skip />
+    <string name="selectText">"Seleziona testo"</string>
+    <string name="stopSelectingText">"Termina selezione testo"</string>
     <string name="cut">"Taglia"</string>
     <string name="cutAll">"Taglia tutto"</string>
     <string name="copy">"Copia"</string>
     <string name="copyAll">"Copia tutto"</string>
     <string name="paste">"Incolla"</string>
     <string name="copyUrl">"Copia URL"</string>
-    <!-- no translation found for inputMethod (7673923508389094672) -->
-    <skip />
-    <!-- no translation found for editTextMenuTitle (1672989176958581452) -->
-    <skip />
+    <string name="inputMethod">"Metodo inserimento"</string>
+    <string name="editTextMenuTitle">"Modifica testo"</string>
     <string name="low_internal_storage_view_title">"Spazio in esaurimento"</string>
     <string name="low_internal_storage_view_text">"Spazio di archiviazione del telefono in esaurimento."</string>
     <string name="ok">"OK"</string>
@@ -651,7 +662,7 @@
     <string name="capital_off">"OFF"</string>
     <string name="whichApplication">"Completa l\'azione con"</string>
     <string name="alwaysUse">"Usa come predefinita per questa azione."</string>
-    <string name="clearDefaultHintMsg">"Cancella predefinita in Impostazioni home &gt; Applicazioni &gt; Gestisci applicazioni."</string>
+    <string name="clearDefaultHintMsg">"Cancella predefinita in Home &gt; Impostazioni &gt; Applicazioni &gt; Gestisci applicazioni."</string>
     <string name="chooseActivity">"Seleziona un\'azione"</string>
     <string name="noApplications">"Nessuna applicazione è in grado di svolgere questa azione."</string>
     <string name="aerr_title">"Spiacenti."</string>
@@ -667,22 +678,17 @@
     <string name="debug">"Debug"</string>
     <string name="sendText">"Seleziona un\'azione per il testo"</string>
     <string name="volume_ringtone">"Volume suoneria"</string>
-    <!-- no translation found for volume_music (5421651157138628171) -->
-    <skip />
-    <!-- no translation found for volume_music_hint_playing_through_bluetooth (9165984379394601533) -->
-    <skip />
+    <string name="volume_music">"Volume media"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
     <string name="volume_call">"Volume chiamate"</string>
-    <!-- no translation found for volume_call_hint_playing_through_bluetooth (7750873841563910404) -->
-    <skip />
+    <string name="volume_call_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
     <string name="volume_alarm">"Volume allarme"</string>
-    <!-- no translation found for volume_notification (2422265656744276715) -->
-    <skip />
+    <string name="volume_notification">"Volume notifiche"</string>
     <string name="volume_unknown">"Volume"</string>
     <string name="ringtone_default">"Suoneria predefinita"</string>
     <string name="ringtone_default_with_actual">"Suoneria predefinita (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"Silenzioso"</string>
-    <!-- no translation found for ringtone_picker_title (3515143939175119094) -->
-    <skip />
+    <string name="ringtone_picker_title">"Suonerie"</string>
     <string name="ringtone_unknown">"Suoneria sconosciuta"</string>
   <plurals name="wifi_available">
     <item quantity="one">"Rete Wi-Fi disponibile"</item>
@@ -692,8 +698,7 @@
     <item quantity="one">"Rete Wi-Fi aperta disponibile"</item>
     <item quantity="other">"Reti Wi-Fi aperte disponibili"</item>
   </plurals>
-    <!-- no translation found for select_character (3365550120617701745) -->
-    <skip />
+    <string name="select_character">"Inserisci carattere"</string>
     <string name="sms_control_default_app_name">"Applicazione sconosciuta"</string>
     <string name="sms_control_title">"Invio SMS"</string>
     <string name="sms_control_message">"È in corso l\'invio di numerosi SMS. Seleziona \"OK\" per continuare, oppure \"Annulla\" per interrompere l\'invio."</string>
@@ -712,12 +717,8 @@
     <string name="usb_storage_error_message">"Problema di utilizzo della scheda SD per l\'archiviazione USB."</string>
     <string name="usb_storage_notification_title">"USB collegata"</string>
     <string name="usb_storage_notification_message">"Seleziona per copiare file sul/dal computer in uso."</string>
-    <!-- no translation found for select_input_method (2086499663193509436) -->
-    <skip />
-    <!-- no translation found for fast_scroll_alphabet (5433275485499039199) -->
-    <skip />
-    <!-- no translation found for fast_scroll_numeric_alphabet (4030170524595123610) -->
-    <skip />
-    <!-- no translation found for candidates_style (5248064431114273041) -->
-    <skip />
+    <string name="select_input_method">"Seleziona metodo di inserimento"</string>
+    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"candidati"</u>"u&gt;"</font></string>
 </resources>

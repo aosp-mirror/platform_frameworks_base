@@ -53,11 +53,14 @@ void usage(void)
         "   xmltree          Print the compiled xmls in the given assets.\n"
         "   xmlstrings       Print the strings of the given compiled xml assets.\n\n", gProgName);
     fprintf(stderr,
-        " %s p[ackage] [-f][-u][-m][-v][-x][-M AndroidManifest.xml] \\\n"
+        " %s p[ackage] [-d][-f][-m][-u][-v][-x][-z][-M AndroidManifest.xml] \\\n"
         "        [-0 extension [-0 extension ...]] \\\n"
+        "        [-g tolerance] \\\n"
+        "        [-j jarfile] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir] [-P public-definitions-file] \\\n"
-        "        [-S resource-sources] [-F apk-file] [-J R-file-dir] \\\n"
+        "        [-S resource-sources [-S resource-sources ...]] "
+        "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [raw-files-dir [raw-files-dir] ...]\n"
         "\n"
         "   Package the android resources.  It will read assets and resources that are\n"
@@ -91,6 +94,7 @@ void usage(void)
         "            port,land,zz_ZZ\n"
         "   -d  one or more device assets to include, separated by commas\n"
         "   -f  force overwrite of existing files\n"
+        "   -g  specify a pixel tolerance to force images to grayscale, default 0\n"
         "   -j  specify a jar or zip file containing classes to include\n"
         "   -m  make package directories under location specified by -J\n"
 #if 0
@@ -107,7 +111,8 @@ void usage(void)
         "   -J  specify where to output R.java resource constant definitions\n"
         "   -M  specify full path to AndroidManifest.xml to include in zip\n"
         "   -P  specify where to output public resource definitions\n"
-        "   -S  directory in which to find resources\n"
+        "   -S  directory in which to find resources.  Multiple directories will be scanned"
+        "       and the first match found (left to right) will take precedence."
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
         "       compress any files at all.\n");
@@ -200,6 +205,16 @@ int main(int argc, char* const argv[])
                 break;
             case 'f':
                 bundle.setForce(true);
+                break;
+            case 'g':
+                argc--;
+                argv++;
+                if (!argc) {
+                    fprintf(stderr, "ERROR: No argument supplied for '-g' option\n");
+                    wantUsage = true;
+                    goto bail;
+                }
+                bundle.setGrayscaleTolerance(atoi(argv[0]));
                 break;
             case 'm':
                 bundle.setMakePackageDirs(true);
@@ -304,7 +319,7 @@ int main(int argc, char* const argv[])
                     goto bail;
                 }
                 convertPath(argv[0]);
-                bundle.setResourceSourceDir(argv[0]);
+                bundle.addResourceSourceDir(argv[0]);
                 break;
             case '0':
                 argc--;

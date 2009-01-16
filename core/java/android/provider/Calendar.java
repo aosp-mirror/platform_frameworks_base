@@ -16,19 +16,6 @@
 
 package android.provider;
 
-import com.google.android.gdata.client.AndroidGDataClient;
-import com.google.android.gdata.client.AndroidXmlParserFactory;
-import com.google.wireless.gdata.calendar.client.CalendarClient;
-import com.google.wireless.gdata.calendar.data.EventEntry;
-import com.google.wireless.gdata.calendar.data.Who;
-import com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory;
-import com.google.wireless.gdata.client.AuthenticationException;
-import com.google.wireless.gdata.client.AllDeletedUnavailableException;
-import com.google.wireless.gdata.data.Entry;
-import com.google.wireless.gdata.data.StringUtils;
-import com.google.wireless.gdata.parser.ParseException;
-import com.android.internal.database.ArrayListCursor;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -45,8 +32,15 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
+import com.android.internal.database.ArrayListCursor;
+import com.google.android.gdata.client.AndroidGDataClient;
+import com.google.android.gdata.client.AndroidXmlParserFactory;
+import com.google.wireless.gdata.calendar.client.CalendarClient;
+import com.google.wireless.gdata.calendar.data.EventEntry;
+import com.google.wireless.gdata.calendar.data.Who;
+import com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory;
+import com.google.wireless.gdata.data.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -922,9 +916,30 @@ public final class Calendar {
         public static final String ALARM_TIME = "alarmTime";
 
         /**
+         * The creation time of this database entry, in UTC.
+         * (Useful for debugging missed reminders.)
+         * <P>Type: INTEGER (long; millis since epoch)</P>
+         */
+        public static final String CREATION_TIME = "creationTime";
+
+        /**
+         * The time that the alarm broadcast was received by the Calendar app,
+         * in UTC. (Useful for debugging missed reminders.)
+         * <P>Type: INTEGER (long; millis since epoch)</P>
+         */
+        public static final String RECEIVED_TIME = "receivedTime";
+
+        /**
+         * The time that the notification was created by the Calendar app,
+         * in UTC. (Useful for debugging missed reminders.)
+         * <P>Type: INTEGER (long; millis since epoch)</P>
+         */
+        public static final String NOTIFY_TIME = "notifyTime";
+
+        /**
          * The state of this alert.  It starts out as SCHEDULED, then when
          * the alarm goes off, it changes to FIRED, and then when the user
-         * sees and dismisses the alarm it changes to DISMISSED.
+         * dismisses the alarm it changes to DISMISSED.
          * <P>Type: INTEGER</P>
          */
         public static final String STATE = "state";
@@ -966,6 +981,10 @@ public final class Calendar {
             values.put(CalendarAlerts.BEGIN, begin);
             values.put(CalendarAlerts.END, end);
             values.put(CalendarAlerts.ALARM_TIME, alarmTime);
+            long currentTime = System.currentTimeMillis();
+            values.put(CalendarAlerts.CREATION_TIME, currentTime);
+            values.put(CalendarAlerts.RECEIVED_TIME, 0);
+            values.put(CalendarAlerts.NOTIFY_TIME, 0);
             values.put(CalendarAlerts.STATE, SCHEDULED);
             values.put(CalendarAlerts.MINUTES, minutes);
             return cr.insert(CONTENT_URI, values);

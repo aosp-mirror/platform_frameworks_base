@@ -16,7 +16,7 @@
 //#define LOG_NDEBUG 0
 
 #include <ui/EventHub.h>
-#include <hardware/power.h>
+#include <hardware_legacy/power.h>
 
 #include <cutils/properties.h>
 #include <utils/IServiceManager.h>
@@ -520,6 +520,10 @@ int EventHub::open_device(const char *deviceName)
         for (int i=0; i<((BTN_MISC+7)/8); i++) {
             if (key_bitmask[i] != 0) {
                 device->classes |= CLASS_KEYBOARD;
+                // 'Q' key support = cheap test of whether this is an alpha-capable kbd
+                if (test_bit(KEY_Q, key_bitmask)) {
+                    device->classes |= CLASS_ALPHAKEY;
+                }
                 break;
             }
         }

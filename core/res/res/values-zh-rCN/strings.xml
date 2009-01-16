@@ -18,23 +18,22 @@
     <string name="serviceEnabledFor">"已针对以下内容启用了服务："</string>
     <string name="serviceDisabled">"服务已被禁用。"</string>
     <string name="serviceRegistered">"注册成功。"</string>
-    <string name="serviceErased">"清除成功"</string>
+    <string name="serviceErased">"清除已成功。"</string>
     <string name="passwordIncorrect">"密码不正确。"</string>
-    <string name="mmiComplete">"MMI 已完成。"</string>
-    <string name="badPin">"您键入的旧 PIN 不正确。"</string>
-    <string name="badPuk">"您键入的 PUK 不正确。"</string>
-    <string name="mismatchPin">"您输入的 PIN 不匹配。"</string>
-    <string name="invalidPin">"键入一个 4 到 8 位数的 PIN。"</string>
-    <!-- no translation found for needPuk (919668385956251611) -->
-    <skip />
-    <string name="needPuk2">"键入 PUK2 以解锁 SIM 卡。"</string>
+    <string name="mmiComplete">"MMI 码已完成。"</string>
+    <string name="badPin">"您键入的旧 PIN 码不正确。"</string>
+    <string name="badPuk">"您键入的 PUK 码不正确。"</string>
+    <string name="mismatchPin">"您输入的 PIN 码不匹配。"</string>
+    <string name="invalidPin">"键入一个 4 到 8 位数的 PIN 码。"</string>
+    <string name="needPuk">"已对 SIM 卡进行 PUK 码锁定。键入 PUK 码将其解锁。"</string>
+    <string name="needPuk2">"键入 PUK2 码以解锁 SIM 卡。"</string>
     <string name="ClipMmi">"来电者 ID"</string>
     <string name="ClirMmi">"去电者 ID"</string>
     <string name="CfMmi">"呼叫转移"</string>
     <string name="CwMmi">"呼叫等待"</string>
     <string name="BaMmi">"呼叫限制"</string>
     <string name="PwdMmi">"密码更改"</string>
-    <string name="PinMmi">"PIN 更改"</string>
+    <string name="PinMmi">"PIN 码更改"</string>
     <string name="CLIRDefaultOnNextCallOn">"呼叫者 ID 默认情况下受限制。下一个呼叫：受限制"</string>
     <string name="CLIRDefaultOnNextCallOff">"呼叫者 ID 默认情况下受限制。下一个呼叫：不受限制"</string>
     <string name="CLIRDefaultOffNextCallOn">"呼叫者 ID 默认情况下不受限制。下一个呼叫：受限制"</string>
@@ -82,18 +81,18 @@
     <string name="screen_lock">"屏幕锁定"</string>
     <string name="power_off">"关机"</string>
     <string name="shutdown_progress">"正在关机..."</string>
-    <string name="shutdown_confirm">"您的手机会关闭。"</string>
+    <string name="shutdown_confirm">"您的手机会关机。"</string>
     <string name="no_recent_tasks">"没有最近的应用程序。"</string>
     <string name="global_actions">"手机选项"</string>
     <string name="global_action_lock">"屏幕锁定"</string>
     <string name="global_action_power_off">"关机"</string>
     <string name="global_action_toggle_silent_mode">"静音模式"</string>
     <string name="global_action_silent_mode_on_status">"声音已关闭"</string>
-    <string name="global_action_silent_mode_off_status">"声音已“开启”"</string>
+    <string name="global_action_silent_mode_off_status">"声音已开启"</string>
     <string name="safeMode">"安全模式"</string>
     <string name="permgrouplab_costMoney">"需要您支付费用的服务"</string>
     <string name="permgroupdesc_costMoney">"允许应用程序执行可能需要您支付费用的操作。"</string>
-    <string name="permgrouplab_messages">"您的消息"</string>
+    <string name="permgrouplab_messages">"您的信息"</string>
     <string name="permgroupdesc_messages">"阅读并编写您的短信、电子邮件和其他消息。"</string>
     <string name="permgrouplab_personalInfo">"您的个人信息"</string>
     <string name="permgroupdesc_personalInfo">"直接访问手机中存储的联系人和日历。"</string>
@@ -116,26 +115,26 @@
     <string name="permlab_expandStatusBar">"展开/收拢状态栏"</string>
     <string name="permdesc_expandStatusBar">"允许应用程序展开或收拢状态栏。"</string>
     <string name="permlab_processOutgoingCalls">"拦截去电"</string>
-    <string name="permdesc_processOutgoingCalls">"允许应用程序处理去电和更改要拨打的号码。恶意应用程序可能会监视、重定向或阻止去电。"</string>
+    <string name="permdesc_processOutgoingCalls">"允许应用程序处理去电和更改要拨打的号码。恶意应用程序可能会借此监视、重定向或阻止去电。"</string>
     <string name="permlab_receiveSms">"接收短信"</string>
-    <string name="permdesc_receiveSms">"允许应用程序接收和处理短信。恶意应用程序可能监视您的消息，或将消息删除，而不向您显示。"</string>
+    <string name="permdesc_receiveSms">"允许应用程序接收和处理短信。恶意应用程序可能会借此监视您的信息，或将信息删除，而不向您显示。"</string>
     <string name="permlab_receiveMms">"接收彩信"</string>
     <string name="permdesc_receiveMms">"允许应用程序接收和处理彩信。恶意应用程序可能会借此监视您的信息，或在您尚未看到的情况下就将其删除。"</string>
     <string name="permlab_sendSms">"发送短信"</string>
-    <string name="permdesc_sendSms">"允许应用程序发送短信。恶意应用程序可能会在未经您确认的情况下发送消息从而让您支付费用。"</string>
+    <string name="permdesc_sendSms">"允许应用程序发送短信。恶意应用程序可能会借此在未经您确认的情况下发送信息从而让您支付费用。"</string>
     <string name="permlab_readSms">"读取短信或彩信"</string>
-    <string name="permdesc_readSms">"允许应用程序读取您的手机或 SIM 卡中存储的短信。恶意应用程序可能会读取您的机密消息。"</string>
+    <string name="permdesc_readSms">"允许应用程序读取您的手机或 SIM 卡中存储的短信。恶意应用程序可能会借此读取您的机密信息。"</string>
     <string name="permlab_writeSms">"编辑短信或彩信"</string>
-    <string name="permdesc_writeSms">"允许应用程序写入手机或 SIM 卡中存储的短信。恶意应用程序可能会借此删除您的消息。"</string>
+    <string name="permdesc_writeSms">"允许应用程序写入手机或 SIM 卡中存储的短信。恶意应用程序可能会借此删除您的信息。"</string>
     <string name="permlab_receiveWapPush">"接收 WAP"</string>
-    <string name="permdesc_receiveWapPush">"允许应用程序接收和处理 WAP 消息。恶意应用程序可能监视您的消息，或将消息删除，而不向您显示。"</string>
-    <string name="permlab_getTasks">"检索运行的应用程序"</string>
-    <string name="permdesc_getTasks">"允许应用程序检索有关当前和最近运行的任务的信息。恶意应用程序可能会利用此权限发现有关其他应用程序的私有信息。"</string>
+    <string name="permdesc_receiveWapPush">"允许应用程序接收和处理 WAP 信息。恶意应用程序可能会借此监视您的信息，或将信息删除，而不向您显示。"</string>
+    <string name="permlab_getTasks">"检索正在运行的应用程序"</string>
+    <string name="permdesc_getTasks">"恶意应用程序可能会借此找到有关其他应用程序的私有信息。恶意应用程序可能会借此发现有关其他应用程序的私有信息。"</string>
     <string name="permlab_reorderTasks">"对正在运行的应用程序重新排序"</string>
     <string name="permdesc_reorderTasks">"允许应用程序将任务移至前端和后台。恶意应用程序可能会借此强行进到前台，而不受您的控制。"</string>
     <string name="permlab_setDebugApp">"启用应用程序调试"</string>
-    <string name="permdesc_setDebugApp">"允许应用程序启动对其他应用程序的调试。恶意应用程序可能利用此权限终止其他应用程序。"</string>
-    <string name="permlab_changeConfiguration">"更改 UI 设置"</string>
+    <string name="permdesc_setDebugApp">"允许应用程序启动对其他应用程序的调试。恶意应用程序可能会借此终止其他应用程序。"</string>
+    <string name="permlab_changeConfiguration">"更改您的 UI 设置"</string>
     <string name="permdesc_changeConfiguration">"允许应用程序更改当前配置，例如语言设置或整体的字体大小。"</string>
     <string name="permlab_restartPackages">"重新启动其他应用程序"</string>
     <string name="permdesc_restartPackages">"允许应用程序强制重新启动其他应用程序。"</string>
@@ -144,41 +143,39 @@
     <string name="permlab_forceBack">"强制应用程序关闭"</string>
     <string name="permdesc_forceBack">"允许应用程序强制前台的任何活动关闭和重新开始。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_dump">"检索系统内部状态"</string>
-    <string name="permdesc_dump">"允许应用程序检索系统的内部状态。恶意应用程序可能会检索通常它们本不需要的各种私有和安全信息。"</string>
+    <string name="permdesc_dump">"允许应用程序检索系统的内部状态。恶意应用程序可能会借此检索通常它们本不需要的各种私有和安全信息。"</string>
     <string name="permlab_addSystemService">"发布低级服务"</string>
-    <string name="permdesc_addSystemService">"允许应用程序发布自己的低级系统服务。恶意应用程序可能会攻击系统，以及盗取或破坏系统中的任何数据。"</string>
+    <string name="permdesc_addSystemService">"允许应用程序发布自己的低级系统服务。恶意应用程序可能会借此攻击系统，以及盗取或破坏系统中的任何数据。"</string>
     <string name="permlab_runSetActivityWatcher">"监视和控制所有应用程序启动"</string>
-    <string name="permdesc_runSetActivityWatcher">"允许应用程序监视和控制系统启动活动的方式。恶意应用程序可能会彻底损坏系统。此权限仅在开发时才需要，普通的手机应用不需要。"</string>
+    <string name="permdesc_runSetActivityWatcher">"允许应用程序监视和控制系统启动活动的方式。恶意应用程序可能会借此彻底损坏系统。此权限仅在开发时才需要，普通的手机应用不需要。"</string>
     <string name="permlab_broadcastPackageRemoved">"发送包删除的广播"</string>
-    <string name="permdesc_broadcastPackageRemoved">"允许应用程序广播已删除某应用程序包的通知。恶意应用程序可能会利用此权限终止任何其他正在运行的应用程序。"</string>
+    <string name="permdesc_broadcastPackageRemoved">"允许应用程序广播已删除某应用程序包的通知。恶意应用程序可能会借此来终止任何其他正在运行的应用程序。"</string>
     <string name="permlab_broadcastSmsReceived">"发送短信收到的广播"</string>
-    <string name="permdesc_broadcastSmsReceived">"允许应用程序广播已收到短信的通知。恶意应用程序可能会利用此权限伪造收到的短信。"</string>
+    <string name="permdesc_broadcastSmsReceived">"允许应用程序广播已收到短信的通知。恶意应用程序可能会借此伪造收到的短信。"</string>
     <string name="permlab_broadcastWapPush">"发送 WAP-PUSH 收到的广播"</string>
-    <string name="permdesc_broadcastWapPush">"允许应用程序播报收到 WAP PUSH 消息的通知。恶意应用程序可能会利用此权限乱发彩信或暗中用恶意内容替换任意网页中的内容。"</string>
-    <string name="permlab_setProcessLimit">"限制运行进程的数量"</string>
-    <string name="permdesc_setProcessLimit">"允许应用程序控制运行的最大进程数。普通应用程序从不需要使用此权限。"</string>
+    <string name="permdesc_broadcastWapPush">"允许应用程序播报收到 WAP PUSH 消息的通知。恶意应用程序可能会借此乱发彩信或暗中用恶意内容替换任意网页中的内容。"</string>
+    <string name="permlab_setProcessLimit">"限制正在运行的进程数"</string>
+    <string name="permdesc_setProcessLimit">"允许应用程序控制运行的进程数上限。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_setAlwaysFinish">"关闭所有后台应用程序"</string>
     <string name="permdesc_setAlwaysFinish">"允许应用程序控制活动是否始终是一转至后台就完成。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_fotaUpdate">"自动安装系统更新"</string>
-    <string name="permdesc_fotaUpdate">"允许应用程序接收有关未决系统更新的通知并安装这些更新。恶意应用程序可能会利用此权限通过未经授权的更新破坏系统，通常情况下，它们会干扰更新过程。"</string>
+    <string name="permdesc_fotaUpdate">"允许应用程序接收有关未决系统更新的通知并安装这些更新。恶意应用程序可能会借此通过未经授权的更新破坏系统，通常情况下，它们会干扰更新过程。"</string>
     <string name="permlab_batteryStats">"修改电池统计信息"</string>
     <string name="permdesc_batteryStats">"允许修改收集的电池统计信息。普通应用程序不能使用此权限。"</string>
     <string name="permlab_internalSystemWindow">"显示未授权的窗口"</string>
     <string name="permdesc_internalSystemWindow">"允许创建专用于内部系统用户界面的窗口。普通应用程序不能使用此权限。"</string>
     <string name="permlab_systemAlertWindow">"显示系统级警报"</string>
-    <string name="permdesc_systemAlertWindow">"允许应用程序显示系统警报窗口。恶意应用程序可能借此掌控整个手机屏幕。"</string>
+    <string name="permdesc_systemAlertWindow">"允许应用程序显示系统警报窗口。恶意应用程序可能会借此掌控整个手机屏幕。"</string>
     <string name="permlab_setAnimationScale">"修改全局动画速度"</string>
     <string name="permdesc_setAnimationScale">"允许应用程序随时更改全局动画速度（加快或减慢动画）。"</string>
     <string name="permlab_manageAppTokens">"管理应用程序令牌"</string>
     <string name="permdesc_manageAppTokens">"允许应用程序创建和管理自己的令牌，从而绕开其常规的 Z 方向。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_injectEvents">"按键和控制按钮"</string>
-    <string name="permdesc_injectEvents">"允许应用程序将其自己的输入活动（按键等）提供给其他应用程序。恶意应用程序可能会利用此权限掌控手机。"</string>
+    <string name="permdesc_injectEvents">"允许应用程序将其自己的输入活动（按键等）提供给其他应用程序。恶意应用程序可能会借此掌控手机。"</string>
     <string name="permlab_readInputState">"记录您键入的内容和执行的操作"</string>
     <string name="permdesc_readInputState">"即使在与其他应用程序交互时（例如输入密码），也允许应用程序查看您按的键。普通应用程序从不需要使用此权限。"</string>
-    <!-- no translation found for permlab_bindInputMethod (3360064620230515776) -->
-    <skip />
-    <!-- no translation found for permdesc_bindInputMethod (3734838321027317228) -->
-    <skip />
+    <string name="permlab_bindInputMethod">"绑定到输入方法"</string>
+    <string name="permdesc_bindInputMethod">"允许持有者绑定到输入方法的顶级接口。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_setOrientation">"更改屏幕方向"</string>
     <string name="permdesc_setOrientation">"允许应用程序随时更改屏幕的旋转方向。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_signalPersistentProcesses">"向应用程序发送 Linux 信号"</string>
@@ -186,7 +183,7 @@
     <string name="permlab_persistentActivity">"让应用程序始终运行"</string>
     <string name="permdesc_persistentActivity">"允许应用程序部分持续运行，这样系统便不能将其用于其他应用程序。"</string>
     <string name="permlab_deletePackages">"删除应用程序"</string>
-    <string name="permdesc_deletePackages">"允许应用程序删除 Android 包。恶意应用程序可能利用此权限删除重要的应用程序。"</string>
+    <string name="permdesc_deletePackages">"允许应用程序删除 Android 包。恶意应用程序可能会借此删除重要的应用程序。"</string>
     <string name="permlab_clearAppUserData">"删除其他应用程序的数据"</string>
     <string name="permdesc_clearAppUserData">"允许应用程序清除用户数据。"</string>
     <string name="permlab_deleteCacheFiles">"删除其他应用程序的缓存"</string>
@@ -194,7 +191,7 @@
     <string name="permlab_getPackageSize">"计算应用程序存储空间"</string>
     <string name="permdesc_getPackageSize">"允许应用程序检索其代码、数据和缓存大小"</string>
     <string name="permlab_installPackages">"直接安装应用程序"</string>
-    <string name="permdesc_installPackages">"允许应用程序安装新的或更新的 Android 程序包。恶意应用程序可能会利用此权限添加其具有任意权限的新应用程序。"</string>
+    <string name="permdesc_installPackages">"允许应用程序安装新的或更新的 Android 包。恶意应用程序可能会借此添加其具有任意权限的新应用程序。"</string>
     <string name="permlab_clearAppCache">"删除所有应用程序缓存数据"</string>
     <string name="permdesc_clearAppCache">"允许应用程序通过删除应用程序缓存目录中的文件释放手机存储空间。通常只限于访问系统进程。"</string>
     <string name="permlab_readLogs">"读取系统日志文件"</string>
@@ -202,42 +199,39 @@
     <string name="permlab_diagnostic">"读取/写入诊断拥有的资源"</string>
     <string name="permdesc_diagnostic">"允许应用程序读取和写入诊断组拥有的任何资源；例如 /dev 中的文件。这可能会潜在地影响系统稳定性和安全性。此权限只应用于由制造商或操作员执行的硬件特定的诊断。"</string>
     <string name="permlab_changeComponentState">"启用或禁用应用程序组件"</string>
-    <!-- no translation found for permdesc_changeComponentState (4569107043246700630) -->
-    <skip />
+    <string name="permdesc_changeComponentState">"允许应用程序更改是否启用其他应用程序的组件。恶意应用程序可能会借此来禁用重要的手机功能。使用此权限时务必谨慎，因为这可能导致应用程序组件进入不可用、不一致或不稳定的状态。"</string>
     <string name="permlab_setPreferredApplications">"设置首选的应用程序"</string>
-    <string name="permdesc_setPreferredApplications">"允许应用程序修改首选的应用程序。恶意应用程序可能会利用此权限暗中更改运行的应用程序，从而骗过您的现有应用程序来收集您的私密数据。"</string>
+    <string name="permdesc_setPreferredApplications">"允许应用程序修改首选的应用程序。恶意应用程序可能会借此暗中更改运行的应用程序，从而骗过您的现有应用程序来收集您的私有数据。"</string>
     <string name="permlab_writeSettings">"修改全局系统设置"</string>
-    <string name="permdesc_writeSettings">"允许应用程序修改系统的设置数据。恶意应用程序可能借此破坏您的系统配置。"</string>
-    <!-- no translation found for permlab_writeSecureSettings (204676251876718288) -->
-    <skip />
-    <!-- no translation found for permdesc_writeSecureSettings (4116616249170428132) -->
-    <skip />
+    <string name="permdesc_writeSettings">"允许应用程序修改系统的设置数据。恶意应用程序可能会借此破坏您的系统配置。"</string>
+    <string name="permlab_writeSecureSettings">"修改安全系统设置"</string>
+    <string name="permdesc_writeSecureSettings">"允许应用程序修改系统安全设置数据。普通应用程序不能使用此权限。"</string>
     <string name="permlab_writeGservices">"修改 Google 服务地图"</string>
     <string name="permdesc_writeGservices">"允许应用程序修改 Google 服务地图。普通应用程序不能使用此权限。"</string>
     <string name="permlab_receiveBootCompleted">"引导时自动启动"</string>
     <string name="permdesc_receiveBootCompleted">"允许应用程序在系统完成引导后即自行启动。这样会加长启动手机所需的时间，而且如果应用程序一直运行，会降低手机的整体速度。"</string>
     <string name="permlab_broadcastSticky">"发送顽固广播"</string>
-    <string name="permdesc_broadcastSticky">"允许应用程序发送顽固广播，这些广播在结束后仍会保留。恶意应用程序可能会使手机使用太多内存，从而降低其速度和稳定性。"</string>
+    <string name="permdesc_broadcastSticky">"允许应用程序发送顽固广播，这些广播在结束后仍会保留。恶意应用程序可能会借此使手机使用太多内存，从而降低其速度和稳定性。"</string>
     <string name="permlab_readContacts">"读取联系数据"</string>
-    <string name="permdesc_readContacts">"允许应用程序读取您手机中存储的所有联系（地址）数据。恶意应用程序可能利用此权限将您的数据发送给其他人。"</string>
+    <string name="permdesc_readContacts">"允许应用程序读取您手机中存储的所有联系（地址）数据。恶意应用程序可能会借此将您的数据发送给其他人。"</string>
     <string name="permlab_writeContacts">"写入联系数据"</string>
-    <string name="permdesc_writeContacts">"允许应用程序修改您手机中存储的联系（地址）数据。恶意应用程序可能会利用此权限清除或修改您的联系数据。"</string>
+    <string name="permdesc_writeContacts">"允许应用程序修改您手机中存储的联系（地址）数据。恶意应用程序可能会借此清除或修改您的联系数据。"</string>
     <string name="permlab_writeOwnerData">"写入所有者数据"</string>
-    <string name="permdesc_writeOwnerData">"允许应用程序修改您手机中存储的手机所有者数据。恶意应用程序可能会利用此权限清除或修改所有者数据。"</string>
+    <string name="permdesc_writeOwnerData">"允许应用程序修改您手机中存储的手机所有者数据。恶意应用程序可能会借此清除或修改所有者数据。"</string>
     <string name="permlab_readOwnerData">"读取所有者数据"</string>
-    <string name="permdesc_readOwnerData">"允许应用程序读取您手机中存储的手机所有者数据。恶意应用程序可能会利用此权限读取手机所有者数据。"</string>
+    <string name="permdesc_readOwnerData">"允许应用程序读取您手机中存储的手机所有者数据。恶意应用程序可能会借此读取手机所有者数据。"</string>
     <string name="permlab_readCalendar">"读取日历数据"</string>
-    <string name="permdesc_readCalendar">"允许应用程序读取您手机中存储的所有日历活动。恶意应用程序可能利用此权限将您的日历活动发送给其他人。"</string>
+    <string name="permdesc_readCalendar">"允许应用程序读取您手机中存储的所有日历活动。恶意应用程序可能会借此将您的日历活动发送给其他人。"</string>
     <string name="permlab_writeCalendar">"写入日历数据"</string>
-    <string name="permdesc_writeCalendar">"允许应用程序修改您手机中存储的日历活动。恶意应用程序可能会利用此权限清除或修改您的日历数据。"</string>
+    <string name="permdesc_writeCalendar">"允许应用程序修改您手机中存储的日历活动。恶意应用程序可能会借此清除或修改您的日历数据。"</string>
     <string name="permlab_accessMockLocation">"用于测试的模仿位置源"</string>
-    <string name="permdesc_accessMockLocation">"创建用于测试的模仿位置源。恶意应用程序可能会利用此权限替代真正的位置源（例如 GPS 或网络提供商）返回的位置和/或状态。"</string>
+    <string name="permdesc_accessMockLocation">"创建用于测试的模仿位置源。恶意应用程序可能会借此替代真正的位置源（例如 GPS 或网络提供商）返回的位置和/或状态。"</string>
     <string name="permlab_accessLocationExtraCommands">"访问额外的位置提供程序命令"</string>
-    <string name="permdesc_accessLocationExtraCommands">"访问额外的位置提供程序命令。恶意应用程序可能会利用此权限干扰 GPS 或其他位置源的操作。"</string>
+    <string name="permdesc_accessLocationExtraCommands">"访问额外的位置提供程序命令。恶意应用程序可能会借此干扰 GPS 或其他位置源的操作。"</string>
     <string name="permlab_accessFineLocation">"精准 (GPS) 位置"</string>
-    <string name="permdesc_accessFineLocation">"访问精准的位置源，例如手机上的全球定位系统（如果有）。恶意应用程序可能会利用此权限确定您所处的位置，并可能消耗额外的电池电量。"</string>
+    <string name="permdesc_accessFineLocation">"访问精准的位置源，例如手机上的全球定位系统（如果有）。恶意应用程序可能会借此确定您所处的位置，并可能消耗额外的电池电量。"</string>
     <string name="permlab_accessCoarseLocation">"粗略（基于网络的）位置"</string>
-    <string name="permdesc_accessCoarseLocation">"访问粗略的位置源（例如蜂窝网络数据库）以确定手机的大体位置（如果适用）。恶意应用程序可能利用此权限来确定您所处的大体位置。"</string>
+    <string name="permdesc_accessCoarseLocation">"访问粗略的位置源（例如蜂窝网络数据库）以确定手机的大体位置（如果适用）。恶意应用程序可能会借此来确定您的大体位置。"</string>
     <string name="permlab_accessSurfaceFlinger">"访问 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"允许应用程序使用 SurfaceFlinger 低级功能。"</string>
     <string name="permlab_readFrameBuffer">"读取帧缓冲区"</string>
@@ -247,7 +241,7 @@
     <string name="permlab_recordAudio">"录音"</string>
     <string name="permdesc_recordAudio">"允许应用程序访问录音路径。"</string>
     <string name="permlab_camera">"拍照"</string>
-    <string name="permdesc_camera">"允许应用程序通过相机拍照。此权限使应用程序可随时收集相机正在拍摄的图片。"</string>
+    <string name="permdesc_camera">"允许应用程序通过相机拍照。这样应用程序可随时收集相机正在拍摄的图片。"</string>
     <string name="permlab_brick">"永久禁用手机"</string>
     <string name="permdesc_brick">"允许应用程序永久禁用整个手机，这是很危险的。"</string>
     <string name="permlab_reboot">"强制手机重新引导"</string>
@@ -261,9 +255,9 @@
     <string name="permlab_hardware_test">"测试硬件"</string>
     <string name="permdesc_hardware_test">"允许应用程序控制各外围设备以进行硬件测试。"</string>
     <string name="permlab_callPhone">"直接呼叫电话号码"</string>
-    <string name="permdesc_callPhone">"允许应用程序在没有您干预的情况下呼叫电话号码。恶意应用程序可能在您的电话帐单上产生意外呼叫。请注意，此权限不允许应用程序呼叫紧急电话号码。"</string>
+    <string name="permdesc_callPhone">"允许应用程序在没有您干预的情况下呼叫电话号码。恶意应用程序可能会借此在您的电话帐单上产生意外呼叫。请注意，此权限不允许应用程序呼叫紧急电话号码。"</string>
     <string name="permlab_callPrivileged">"直接呼叫任何电话号码"</string>
-    <string name="permdesc_callPrivileged">"允许应用程序在没有您干预的情况下呼叫任何电话号码（包括紧急电话号码）。恶意应用程序可能对紧急服务拨打骚扰电话和非法电话。"</string>
+    <string name="permdesc_callPrivileged">"允许应用程序在没有您干预的情况下呼叫任何电话号码（包括紧急电话号码）。恶意应用程序可能会借此对紧急服务拨打骚扰电话和非法电话。"</string>
     <string name="permlab_locationUpdates">"控制位置更新通知"</string>
     <string name="permdesc_locationUpdates">"允许启用/禁用来自收音机的位置更新通知。普通应用程序不能使用此权限。"</string>
     <string name="permlab_checkinProperties">"访问检入属性"</string>
@@ -271,7 +265,7 @@
     <string name="permlab_modifyPhoneState">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState">"允许应用程序控制设备的手机功能。具有此权限的应用程序可能会切换网络，打开和关闭手机收音机以及类似操作，而不会通知您。"</string>
     <string name="permlab_readPhoneState">"读取手机状态"</string>
-    <string name="permdesc_readPhoneState">"允许应用程序访问设备的电话功能。具有这种权限的应用程序可确定此电话的电话号码、是否在进行通话以及通话对方的号码等。"</string>
+    <string name="permdesc_readPhoneState">"允许应用程序访问设备的电话功能。具有此权限的应用程序可确定此电话的电话号码、是否在进行通话以及通话对方的号码等。"</string>
     <string name="permlab_wakeLock">"防止手机休眠"</string>
     <string name="permdesc_wakeLock">"允许应用程序防止手机进入休眠状态。"</string>
     <string name="permlab_devicePower">"开机或关机"</string>
@@ -280,8 +274,8 @@
     <string name="permdesc_factoryTest">"作为一项低级制造商测试来运行，从而允许对手机硬件进行完全访问。此权限仅当手机在制造商测试模式下运行时才可用。"</string>
     <string name="permlab_setWallpaper">"设置壁纸"</string>
     <string name="permdesc_setWallpaper">"允许应用程序设置系统壁纸。"</string>
-    <string name="permlab_setWallpaperHints">"精确设置壁纸大小"</string>
-    <string name="permdesc_setWallpaperHints">"允许应用程序精确设置系统壁纸大小。"</string>
+    <string name="permlab_setWallpaperHints">"大体设置壁纸大小"</string>
+    <string name="permdesc_setWallpaperHints">"允许应用程序大体设置系统壁纸大小。"</string>
     <string name="permlab_masterClear">"将系统重设为出厂默认值"</string>
     <string name="permdesc_masterClear">"允许应用程序将系统完全重设为其出厂设置，即清除所有数据、配置和安装的应用程序。"</string>
     <string name="permlab_setTimeZone">"设置时区"</string>
@@ -307,7 +301,7 @@
     <string name="permlab_disableKeyguard">"禁用键锁"</string>
     <string name="permdesc_disableKeyguard">"允许应用程序禁用键锁和任何关联的密码安全措施。这种情况的一个恰当示例就是这样一个手机：当收到来电时禁用键锁，当通话结束后再重新启用键锁。"</string>
     <string name="permlab_readSyncSettings">"读取同步设置"</string>
-    <string name="permdesc_readSyncSettings">"允许应用程序读取同步设置，例如是否针对“联系人”启用同步。"</string>
+    <string name="permdesc_readSyncSettings">"允许应用程序读取同步设置，例如是否为“联系人”启用同步。"</string>
     <string name="permlab_writeSyncSettings">"写入同步设置"</string>
     <string name="permdesc_writeSyncSettings">"允许应用程序修改同步设置，例如是否针对“联系人”启用同步。"</string>
     <string name="permlab_readSyncStats">"读取同步统计信息"</string>
@@ -316,11 +310,39 @@
     <string name="permdesc_subscribedFeedsRead">"允许应用程序获取有关当前同步的供稿的详情。"</string>
     <string name="permlab_subscribedFeedsWrite">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite">"允许应用程序修改您当前同步的供稿。这样恶意程序可以更改您同步的供稿。"</string>
-    <!-- no translation found for phoneTypes:7 (9192514806975898961) -->
-    <!-- no translation found for emailAddressTypes:3 (2374913952870110618) -->
-    <!-- no translation found for postalAddressTypes:3 (4932682847595299369) -->
-    <!-- no translation found for imAddressTypes:3 (3145118944639869809) -->
-    <!-- no translation found for organizationTypes:2 (3455047468583965104) -->
+  <string-array name="phoneTypes">
+    <item>"家庭"</item>
+    <item>"手机"</item>
+    <item>"工作"</item>
+    <item>"工作传真"</item>
+    <item>"家庭传真"</item>
+    <item>"寻呼机"</item>
+    <item>"其他"</item>
+    <item>"自定义"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"家庭"</item>
+    <item>"工作"</item>
+    <item>"其他"</item>
+    <item>"自定义"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"家庭"</item>
+    <item>"工作"</item>
+    <item>"其他"</item>
+    <item>"自定义"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"家庭"</item>
+    <item>"工作"</item>
+    <item>"其他"</item>
+    <item>"自定义"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"工作"</item>
+    <item>"其他"</item>
+    <item>"自定义"</item>
+  </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
     <item>"Windows Live"</item>
@@ -331,29 +353,25 @@
     <item>"ICQ"</item>
     <item>"Jabber"</item>
   </string-array>
-    <!-- no translation found for keyguard_password_enter_pin_code (3731488827218876115) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_code">"输入 PIN 码"</string>
     <string name="keyguard_password_wrong_pin_code">"PIN 码不正确！"</string>
     <string name="keyguard_label_text">"要解锁，请按“菜单”，然后按 0。"</string>
     <string name="emergency_call_dialog_number_for_display">"紧急电话号码"</string>
     <string name="lockscreen_carrier_default">"（无服务）"</string>
-    <!-- no translation found for lockscreen_screen_locked (7288443074806832904) -->
-    <skip />
+    <string name="lockscreen_screen_locked">"屏幕已锁定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"按“菜单”解锁或拨打紧急电话。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"按“菜单”解锁。"</string>
-    <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
-    <skip />
+    <string name="lockscreen_pattern_instructions">"绘制解锁图案"</string>
     <string name="lockscreen_emergency_call">"紧急电话"</string>
     <string name="lockscreen_pattern_correct">"正确！"</string>
-    <!-- no translation found for lockscreen_pattern_wrong (4817583279053112312) -->
-    <skip />
+    <string name="lockscreen_pattern_wrong">"很抱歉，请重试"</string>
     <string name="lockscreen_plugged_in">"正在充电 (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short">"没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message">"手机中无 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_instructions">"请插入 SIM 卡。"</string>
     <string name="lockscreen_network_locked_message">"网络已锁定"</string>
-    <string name="lockscreen_sim_puk_locked_message">"SIM 卡已被 PUK 锁定。"</string>
+    <string name="lockscreen_sim_puk_locked_message">"已对 SIM 卡进行 PUK 码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions">"请联系客服部门。"</string>
     <string name="lockscreen_sim_locked_message">"SIM 卡已被锁定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"正在解锁 SIM 卡..."</string>
@@ -362,17 +380,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"忘记了图案？"</string>
     <string name="lockscreen_glogin_too_many_attempts">"图案尝试次数太多！"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (7400120254204758548) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"要解锁，"\n"请用您的 Google 帐户登录"</string>
     <string name="lockscreen_glogin_username_hint">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint">"密码"</string>
     <string name="lockscreen_glogin_submit_button">"登录"</string>
     <string name="lockscreen_glogin_invalid_input">"用户名或密码无效。"</string>
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <!-- no translation found for hour_minute_ampm (7044207493989843593) -->
-    <skip />
-    <!-- no translation found for hour_minute_cap_ampm (5778825208801303756) -->
-    <skip />
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <!-- no translation found for hour_ampm (7618670480400517084) -->
     <skip />
     <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
@@ -386,7 +401,7 @@
     <string name="battery_status_charging">"正在充电..."</string>
     <string name="battery_low_title">"请连接充电器"</string>
     <string name="battery_low_subtitle">"电量在减少："</string>
-    <string name="battery_low_percent_format">"剩余电量不足 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format">"剩余电量不足 <xliff:g id="NUMBER">%d%%</xliff:g>。"</string>
     <string name="factorytest_failed">"出厂测试失败"</string>
     <string name="factorytest_not_system">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action">"未发现支持 FACTORY_TEST 操作的包。"</string>
@@ -487,11 +502,11 @@
     <string name="VideoView_error_title">"无法播放视频"</string>
     <string name="VideoView_error_text_unknown">"很抱歉，此视频不能播放。"</string>
     <string name="VideoView_error_button">"确定"</string>
-    <string name="am">"AM"</string>
-    <string name="pm">"PM"</string>
+    <string name="am">"上午"</string>
+    <string name="pm">"下午"</string>
     <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%m</xliff:g> 月 <xliff:g id="DAY">%d</xliff:g> 日"</string>
     <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> 至 <xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>至<xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> 至 <xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g>至 <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> 至 <xliff:g id="TIME2">%2$s</xliff:g>"</string>
@@ -506,7 +521,7 @@
     <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
     <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
     <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
-    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
+    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="DAY">dd</xliff:g> 月 <xliff:g id="MONTH">MMM</xliff:g> 日"</string>
     <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
     <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
@@ -529,7 +544,7 @@
     <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
@@ -537,7 +552,7 @@
     <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"，<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
     <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至<xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
@@ -627,20 +642,16 @@
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"全选"</string>
-    <!-- no translation found for selectText (3889149123626888637) -->
-    <skip />
-    <!-- no translation found for stopSelectingText (4157931463872320996) -->
-    <skip />
+    <string name="selectText">"选择文本"</string>
+    <string name="stopSelectingText">"停止选择文本"</string>
     <string name="cut">"剪切"</string>
     <string name="cutAll">"全部剪切"</string>
     <string name="copy">"复制"</string>
     <string name="copyAll">"全部复制"</string>
     <string name="paste">"粘贴"</string>
     <string name="copyUrl">"复制网址"</string>
-    <!-- no translation found for inputMethod (7673923508389094672) -->
-    <skip />
-    <!-- no translation found for editTextMenuTitle (1672989176958581452) -->
-    <skip />
+    <string name="inputMethod">"输入方法"</string>
+    <string name="editTextMenuTitle">"编辑文本"</string>
     <string name="low_internal_storage_view_title">"存储空间不足"</string>
     <string name="low_internal_storage_view_text">"手机存储空间在减少。"</string>
     <string name="ok">"正常"</string>
@@ -666,24 +677,19 @@
     <string name="wait">"等待"</string>
     <string name="debug">"调试"</string>
     <string name="sendText">"选择一个文本操作"</string>
-    <string name="volume_ringtone">"铃声音量"</string>
-    <!-- no translation found for volume_music (5421651157138628171) -->
-    <skip />
-    <!-- no translation found for volume_music_hint_playing_through_bluetooth (9165984379394601533) -->
-    <skip />
+    <string name="volume_ringtone">"响铃音量"</string>
+    <string name="volume_music">"媒体音量"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"正通过蓝牙播放"</string>
     <string name="volume_call">"来电音量"</string>
-    <!-- no translation found for volume_call_hint_playing_through_bluetooth (7750873841563910404) -->
-    <skip />
+    <string name="volume_call_hint_playing_through_bluetooth">"正通过蓝牙播放"</string>
     <string name="volume_alarm">"警告音量"</string>
-    <!-- no translation found for volume_notification (2422265656744276715) -->
-    <skip />
+    <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
     <string name="ringtone_default">"默认的手机铃声"</string>
-    <string name="ringtone_default_with_actual">"删除手机铃声（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>）"</string>
+    <string name="ringtone_default_with_actual">"默认的手机铃声（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>）"</string>
     <string name="ringtone_silent">"静音"</string>
-    <!-- no translation found for ringtone_picker_title (3515143939175119094) -->
-    <skip />
-    <string name="ringtone_unknown">"未知的手机铃声"</string>
+    <string name="ringtone_picker_title">"铃声"</string>
+    <string name="ringtone_unknown">"未知手机铃声"</string>
   <plurals name="wifi_available">
     <item quantity="one">"有可用的 Wi-Fi 网络"</item>
     <item quantity="other">"有可用的 Wi-Fi 网络"</item>
@@ -692,9 +698,8 @@
     <item quantity="one">"打开可用的 Wi-Fi 网络"</item>
     <item quantity="other">"打开可用的 Wi-Fi 网络"</item>
   </plurals>
-    <!-- no translation found for select_character (3365550120617701745) -->
-    <skip />
-    <string name="sms_control_default_app_name">"未知的应用程序"</string>
+    <string name="select_character">"插入字符"</string>
+    <string name="sms_control_default_app_name">"未知应用程序"</string>
     <string name="sms_control_title">"正在发送短信"</string>
     <string name="sms_control_message">"正在发送大量短信。选择“确定”继续，或选择“取消”停止发送。"</string>
     <string name="sms_control_yes">"确定"</string>
@@ -712,12 +717,8 @@
     <string name="usb_storage_error_message">"使用 SD 卡进行 USB 存储时出现问题。"</string>
     <string name="usb_storage_notification_title">"USB 已连接"</string>
     <string name="usb_storage_notification_message">"选择以将文件复制到计算机或从计算机复制文件。"</string>
-    <!-- no translation found for select_input_method (2086499663193509436) -->
-    <skip />
-    <!-- no translation found for fast_scroll_alphabet (5433275485499039199) -->
-    <skip />
-    <!-- no translation found for fast_scroll_numeric_alphabet (4030170524595123610) -->
-    <skip />
-    <!-- no translation found for candidates_style (5248064431114273041) -->
-    <skip />
+    <string name="select_input_method">"选择输入方法"</string>
+    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"候选人"</u>"u&gt;"</font></string>
 </resources>

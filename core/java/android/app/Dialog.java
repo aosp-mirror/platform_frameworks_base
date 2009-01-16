@@ -48,13 +48,23 @@ import java.lang.ref.WeakReference;
 /**
  * Base class for Dialogs.
  * 
- * Note: Activities provide a facility to manage the creation, saving and
+ * <p>Note: Activities provide a facility to manage the creation, saving and
  * restoring of dialogs. See {@link Activity#onCreateDialog(int)},
  * {@link Activity#onPrepareDialog(int, Dialog)},
  * {@link Activity#showDialog(int)}, and {@link Activity#dismissDialog(int)}. If
  * these methods are used, {@link #getOwnerActivity()} will return the Activity
  * that managed this dialog.
  * 
+ * <p>Often you will want to have a Dialog display on top of the current
+ * input method, because there is no reason for it to accept text.  You can
+ * do this by setting the {@link WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM
+ * WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM} window flag (assuming
+ * your Dialog takes input focus, as it the default) with the following code:
+ * 
+ * <pre>
+ *     getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+ *             WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+ * </pre>
  */
 public class Dialog implements DialogInterface, Window.Callback,
         KeyEvent.Callback, OnCreateContextMenuListener {
@@ -209,7 +219,16 @@ public class Dialog implements DialogInterface, Window.Callback,
 
         onStart();
         mDecor = mWindow.getDecorView();
-        mWindowManager.addView(mDecor, mWindow.getAttributes());
+        WindowManager.LayoutParams l = mWindow.getAttributes();
+        if ((l.softInputMode
+                & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
+            WindowManager.LayoutParams nl = new WindowManager.LayoutParams();
+            nl.copyFrom(l);
+            nl.softInputMode |=
+                    WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+            l = nl;
+        }
+        mWindowManager.addView(mDecor, l);
         mShowing = true;
     }
     

@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <hardware/AudioHardwareBase.h>
+#include <hardware_legacy/AudioHardwareBase.h>
 
 namespace android {
 
