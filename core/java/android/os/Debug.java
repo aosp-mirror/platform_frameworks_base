@@ -182,11 +182,11 @@ public final class Debug
     }
 
     /**
-     * Change the JDWP port -- this is a temporary measure.
+     * Change the JDWP port.
      *
-     * If a debugger is currently attached the change may not happen
-     * until after the debugger disconnects.
+     * @deprecated no longer needed or useful
      */
+    @Deprecated
     public static void changeDebugPort(int port) {}
 
     /**

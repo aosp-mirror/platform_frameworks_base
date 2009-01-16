@@ -70,15 +70,14 @@
             android:gravity="center_vertical"
             android:baselineAligned="false" >
 
-            <AutoCompleteTextView
+            <view class="android.app.SearchDialog$SearchAutoComplete"
                 android:id="@+id/search_src_text"
                 android:layout_height="wrap_content"
                 android:layout_width="0dip"
                 android:layout_weight="1.0"
                 android:paddingLeft="8dip"
                 android:paddingRight="6dip"
-                android:inputType="text|textAutoComplete"
-                android:completionThreshold="1" />
+                android:inputType="text|textAutoComplete" />
                 <!-- android:focusableInTouchMode="false" -->
                 <!-- android:singleLine="true" -->
                 <!-- android:selectAllOnFocus="true" -->

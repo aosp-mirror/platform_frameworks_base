@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <pthread.h>
 #ifdef HAVE_ANDROID_OS
-#include <sys/tls.h>
+#include <bionic_tls.h>
 #endif
 
 #include <private/pixelflinger/ggl_context.h>

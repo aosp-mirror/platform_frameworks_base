@@ -50,8 +50,9 @@ public:
     // bit fields for classes of devices.
     enum {
         CLASS_KEYBOARD      = 0x00000001,
-        CLASS_TOUCHSCREEN   = 0x00000002,
-        CLASS_TRACKBALL     = 0x00000004
+        CLASS_ALPHAKEY      = 0x00000002,
+        CLASS_TOUCHSCREEN   = 0x00000004,
+        CLASS_TRACKBALL     = 0x00000008
     };
     uint32_t getDeviceClasses(int32_t deviceId) const;
     

@@ -203,7 +203,8 @@ static pthread_key_t gEGLThreadLocalStorageKey = -1;
 
 #if defined(HAVE_ANDROID_OS) && !USE_SLOW_BINDING && !GL_LOGGER
 
-#include <sys/tls.h>
+/* special private C library header */
+#include <bionic_tls.h>
 // We have a dedicated TLS slot in bionic
 static inline void setGlThreadSpecific(gl_hooks_t const *value) {
     ((uint32_t *)__get_tls())[TLS_SLOT_OPENGL_API] = (uint32_t)value;

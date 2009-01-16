@@ -31,10 +31,12 @@ Overlay::Overlay(const sp<OverlayRef>& overlayRef)
 {
     mOverlayData = NULL;
     hw_module_t const* module;
-    if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
-        if (overlay_data_open(module, &mOverlayData) == NO_ERROR) {
-            mStatus = mOverlayData->initialize(mOverlayData,
-                    overlayRef->mOverlayHandle);
+    if (overlayRef != 0) {
+        if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
+            if (overlay_data_open(module, &mOverlayData) == NO_ERROR) {
+                mStatus = mOverlayData->initialize(mOverlayData,
+                        overlayRef->mOverlayHandle);
+            }
         }
     }
 }
@@ -45,23 +47,27 @@ Overlay::~Overlay() {
     }
 }
 
-overlay_buffer_t Overlay::dequeueBuffer()
+status_t Overlay::dequeueBuffer(overlay_buffer_t* buffer)
 {
-    return mOverlayData->dequeueBuffer(mOverlayData);
+    if (mStatus != NO_ERROR) return mStatus;
+    return  mOverlayData->dequeueBuffer(mOverlayData, buffer);
 }
 
-int Overlay::queueBuffer(overlay_buffer_t buffer)
+status_t Overlay::queueBuffer(overlay_buffer_t buffer)
 {
+    if (mStatus != NO_ERROR) return mStatus;
     return mOverlayData->queueBuffer(mOverlayData, buffer);
 }
 
 void* Overlay::getBufferAddress(overlay_buffer_t buffer)
 {
+    if (mStatus != NO_ERROR) return NULL;
     return mOverlayData->getBufferAddress(mOverlayData, buffer);
 }
 
 void Overlay::destroy() {  
-    mOverlayRef->mOverlayChanel->destroy();
+    if (mStatus != NO_ERROR) return;
+    mOverlayRef->mOverlayChannel->destroy();
 }
 
 status_t Overlay::getStatus() const {
@@ -69,26 +75,32 @@ status_t Overlay::getStatus() const {
 }
 
 overlay_handle_t const* Overlay::getHandleRef() const {
+    if (mStatus != NO_ERROR) return NULL;
     return mOverlayRef->mOverlayHandle;
 }
 
 uint32_t Overlay::getWidth() const {
+    if (mStatus != NO_ERROR) return 0;
     return mOverlayRef->mWidth;
 }
 
 uint32_t Overlay::getHeight() const {
+    if (mStatus != NO_ERROR) return 0;
     return mOverlayRef->mHeight;
 }
 
 int32_t Overlay::getFormat() const {
+    if (mStatus != NO_ERROR) return -1;
     return mOverlayRef->mFormat;
 }
 
 int32_t Overlay::getWidthStride() const {
+    if (mStatus != NO_ERROR) return 0;
     return mOverlayRef->mWidthStride;
 }
 
 int32_t Overlay::getHeightStride() const {
+    if (mStatus != NO_ERROR) return 0;
     return mOverlayRef->mHeightStride;
 }
 // ----------------------------------------------------------------------------
@@ -100,9 +112,9 @@ OverlayRef::OverlayRef()
 {    
 }
 
-OverlayRef::OverlayRef(overlay_handle_t const* handle, const sp<IOverlay>& chanel,
+OverlayRef::OverlayRef(overlay_handle_t const* handle, const sp<IOverlay>& channel,
          uint32_t w, uint32_t h, int32_t f, uint32_t ws, uint32_t hs)
-    : mOverlayHandle(handle), mOverlayChanel(chanel),
+    : mOverlayHandle(handle), mOverlayChannel(channel),
     mWidth(w), mHeight(h), mFormat(f), mWidthStride(ws), mHeightStride(hs),
     mOwnHandle(false)
 {
@@ -141,7 +153,7 @@ sp<OverlayRef> OverlayRef::readFromParcel(const Parcel& data) {
             handle->data[i] = data.readInt32();
         result = new OverlayRef();
         result->mOverlayHandle = handle;
-        result->mOverlayChanel = overlay;
+        result->mOverlayChannel = overlay;
         result->mWidth = w;
         result->mHeight = h;
         result->mFormat = f;
@@ -153,7 +165,7 @@ sp<OverlayRef> OverlayRef::readFromParcel(const Parcel& data) {
 
 status_t OverlayRef::writeToParcel(Parcel* reply, const sp<OverlayRef>& o) {
     if (o != NULL) {
-        reply->writeStrongBinder(o->mOverlayChanel->asBinder());
+        reply->writeStrongBinder(o->mOverlayChannel->asBinder());
         reply->writeInt32(o->mWidth);
         reply->writeInt32(o->mHeight);
         reply->writeInt32(o->mFormat);
@@ -176,4 +188,3 @@ status_t OverlayRef::writeToParcel(Parcel* reply, const sp<OverlayRef>& o) {
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

@@ -1433,6 +1433,11 @@ public final class Gmail {
             return SORTED_USER_MEANINGFUL_SYSTEM_LABELS;
         }
 
+        /**
+         * If you are ever tempted to remove outbox or draft from this set make sure you have a
+         * way to stop draft and outbox messages from getting purged before they are sent to the
+         * server.
+         */
         private static final Set<String> FORCED_INCLUDED_LABELS =
                 Sets.newHashSet(LABEL_OUTBOX, LABEL_DRAFT);
 

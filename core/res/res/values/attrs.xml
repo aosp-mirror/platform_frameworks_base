@@ -227,12 +227,12 @@
             <!-- Don't display the soft input area, there is no reason to
                  do so on this window. -->
             <flag name="stateHidden" value="2" />
-            <!-- Make the soft input area visible when this window is
-                 first displayed. -->
-            <flag name="stateFirstVisible" value="3" />
-            <!-- The soft input area should always be displayed while in this
-                 window. -->
-            <flag name="stateVisible" value="4" />
+            <!-- Make the soft input area visible when normally appropriate
+                 (when the user is navigating forward to your window). -->
+            <flag name="stateVisible" value="3" />
+            <!-- Always make the soft input area visible when this window
+                 has input focus. -->
+            <flag name="stateAlwaysVisible" value="4" />
             
             <!-- The window resize/pan adjustment has not been specified,
                  the system will automatically select between resize and pan
@@ -923,6 +923,13 @@
             <!-- Edge of the view and inset -->
             <enum name="outsideInset" value="0x03000000" />
         </attr>
+        
+        <!-- Set this if the view will serve as a scrolling container, meaing
+             that it can be resized to shrink its overall window so that there
+             will be space for an input method.  If not set, the default
+             value will be true if "scrollbars" has the vertical scrollbar
+             set, else it will be false. -->
+        <attr name="isScrollContainer" format="boolean" />
         
         <!-- Sets the width of vertical scrollbars and height of horizontal scrollbars. -->
         <attr name="scrollbarSize" format="dimension" />
@@ -2219,11 +2226,15 @@
     <declare-styleable name="Animation">
         <!-- Defines the interpolator used to smooth the animation movement in time. -->
         <attr name="interpolator" />
+        <!-- When set to true, fillAfter is taken into account. -->
+        <attr name="fillEnabled" format="boolean" />
         <!-- When set to true, the animation transformation is applied before the animation has
-             started. The default value is true. -->
+             started. The default value is true. If fillEnabled is not set to true, fillBefore
+             is assumed to be true. -->
         <attr name="fillBefore" format="boolean" />
         <!-- When set to true, the animation transformation is applied after the animation is
-             over. The default value is false. -->
+             over. The default value is false. If fillEnabled is not set to true and the animation
+             is not set on a View, fillAfter is assumed to be true. -->
         <attr name="fillAfter" format="boolean" />
         <!-- Amount of time (in milliseconds) for the animation to run. -->
         <attr name="duration" />
@@ -2858,6 +2869,9 @@
 
         <!-- Layout resource for popup keyboards -->
         <attr name="popupLayout" format="reference" />
+        
+        <attr name="shadowColor" />
+        <attr name="shadowRadius" />
     </declare-styleable>
     
     <declare-styleable name="KeyboardViewPreviewState">

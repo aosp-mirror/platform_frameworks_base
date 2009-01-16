@@ -165,9 +165,20 @@ public interface InputMethod {
     public void revokeSession(InputMethodSession session);
     
     /**
-     * Request that any soft input part of the input method be shown to the user.
+     * Flag for {@link #showSoftInput(int)}: this show has been explicitly
+     * requested by the user.  If not set, the system has decided it may be
+     * a good idea to show the input method based on a navigation operation
+     * in the UI.
      */
-    public void showSoftInput();
+    public static final int SHOW_EXPLICIT = 0x00001;
+    
+    /**
+     * Request that any soft input part of the input method be shown to the user.
+     * 
+     * @param flags Provide additional information about the show request.
+     * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
+     */
+    public void showSoftInput(int flags);
     
     /**
      * Request that any soft input part of the input method be hidden from the user.

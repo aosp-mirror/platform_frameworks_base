@@ -514,7 +514,47 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     protected CharSequence convertSelectionToString(Object selectedItem) {
         return mFilter.convertResultToString(selectedItem);
     }
+    
+    /**
+     * <p>Clear the list selection.  This may only be temporary, as user input will often bring 
+     * it back.
+     */
+    public void clearListSelection() {
+        if (mDropDownList != null) {
+            mDropDownList.hideSelector();
+            mDropDownList.requestLayout();
+        }
+    }
+    
+    /**
+     * Set the position of the dropdown view selection.
+     * 
+     * @param position The position to move the selector to.
+     */
+    public void setListSelection(int position) {
+        if (mPopup.isShowing() && (mDropDownList != null)) {
+            mDropDownList.setSelection(position);
+            // ListView.setSelection() will call requestLayout()
+        }
+    }
 
+    /**
+     * Get the position of the dropdown view selection, if there is one.  Returns 
+     * {@link ListView#INVALID_POSITION ListView.INVALID_POSITION} if there is no dropdown or if
+     * there is no selection.
+     * 
+     * @return the position of the current selection, if there is one, or 
+     * {@link ListView#INVALID_POSITION ListView.INVALID_POSITION} if not.
+     * 
+     * @see ListView#getSelectedItemPosition()
+     */
+    public int getListSelection() {
+        if (mPopup.isShowing() && (mDropDownList != null)) {
+            return mDropDownList.getSelectedItemPosition();
+        }
+        return ListView.INVALID_POSITION;
+    }
+    
     /**
      * <p>Starts filtering the content of the drop down list. The filtering
      * pattern is the content of the edit box. Subclasses should override this

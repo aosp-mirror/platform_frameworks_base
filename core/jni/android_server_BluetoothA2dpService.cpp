@@ -270,11 +270,18 @@ static void onDisconnectSinkResult(DBusMessage *msg, void *user) {
     if (dbus_set_error_from_message(&err, msg)) {
         /* if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) */
         LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
+        if (strcmp(err.name, "org.bluez.Error.NotConnected") == 0) {
+            // we were already disconnected, so report disconnect
+            env->CallVoidMethod(nat->me,
+                                method_onSinkDisconnected,
+                                env->NewStringUTF(c_path));
+        } else {
+            // Assume it is still connected
+            env->CallVoidMethod(nat->me,
+                                method_onSinkConnected,
+                                env->NewStringUTF(c_path));
+        }
         dbus_error_free(&err);
-        // Assume it is still connected
-        env->CallVoidMethod(nat->me,
-                            method_onSinkConnected,
-                            env->NewStringUTF(c_path));
         if (env->ExceptionCheck()) {
             LOGE("VM Exception occurred in native function %s (%s:%d)",
                  __FUNCTION__, __FILE__, __LINE__);

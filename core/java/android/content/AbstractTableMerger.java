@@ -21,12 +21,8 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Debug;
-import static android.provider.SyncConstValue._SYNC_ACCOUNT;
-import static android.provider.SyncConstValue._SYNC_DIRTY;
-import static android.provider.SyncConstValue._SYNC_ID;
-import static android.provider.SyncConstValue._SYNC_LOCAL_ID;
-import static android.provider.SyncConstValue._SYNC_MARK;
-import static android.provider.SyncConstValue._SYNC_VERSION;
+import android.provider.BaseColumns;
+import static android.provider.SyncConstValue.*;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -53,7 +49,7 @@ public abstract class AbstractTableMerger
 
     private static final String TAG = "AbstractTableMerger";
     private static final String[] syncDirtyProjection =
-            new String[] {_SYNC_DIRTY, "_id", _SYNC_ID, _SYNC_VERSION};
+            new String[] {_SYNC_DIRTY, BaseColumns._ID, _SYNC_ID, _SYNC_VERSION};
     private static final String[] syncIdAndVersionProjection =
             new String[] {_SYNC_ID, _SYNC_VERSION};
 
@@ -61,8 +57,9 @@ public abstract class AbstractTableMerger
 
     private static final String SELECT_MARKED = _SYNC_MARK + "> 0 and " + _SYNC_ACCOUNT + "=?";
 
-    private static final String SELECT_BY_ID_AND_ACCOUNT =
+    private static final String SELECT_BY_SYNC_ID_AND_ACCOUNT =
             _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=?";
+    private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
     private static final String SELECT_UNSYNCED = ""
             + _SYNC_DIRTY + " > 0 and (" + _SYNC_ACCOUNT + "=? or " + _SYNC_ACCOUNT + " is null)";
@@ -90,7 +87,8 @@ public abstract class AbstractTableMerger
      * This is called when it is determined that a row should be deleted from the
      * ContentProvider. The localCursor is on a table from the local ContentProvider
      * and its current position is of the row that should be deleted. The localCursor
-     * contains the complete projection of the table.
+     * is only guaranteed to contain the BaseColumns.ID column so the implementation
+     * of deleteRow() must query the database directly if other columns are needed.
      * <p>
      * It is the responsibility of the implementation of this method to ensure that the cursor
      * points to the next row when this method returns, either by calling Cursor.deleteRow() or
@@ -153,7 +151,10 @@ public abstract class AbstractTableMerger
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "merge complete");
     }
 
-    private void mergeServerDiffs(SyncContext context,
+    /**
+     * @hide this is public for testing purposes only
+     */
+    public void mergeServerDiffs(SyncContext context,
             String account, SyncableContentProvider serverDiffs, SyncResult syncResult) {
         boolean diffsArePartial = serverDiffs.getContainsDiffs();
         // mark the current rows so that we can distinguish these from new
@@ -202,7 +203,7 @@ public abstract class AbstractTableMerger
             mDb.yieldIfContended();
             String serverSyncId = diffsCursor.getString(serverSyncIDColumn);
             String serverSyncVersion = diffsCursor.getString(serverSyncVersionColumn);
-            long localPersonID = 0;
+            long localRowId = 0;
             String localSyncVersion = null;
 
             diffsCount++;
@@ -316,7 +317,7 @@ public abstract class AbstractTableMerger
                                 " that matches the server _sync_id");
                     }
                     localSyncDirty = localCursor.getInt(0) != 0;
-                    localPersonID = localCursor.getLong(1);
+                    localRowId = localCursor.getLong(1);
                     localSyncVersion = localCursor.getString(3);
                     localCursor.moveToNext();
                 }
@@ -345,23 +346,20 @@ public abstract class AbstractTableMerger
                 continue;
             }
 
-            // If the _sync_local_id is set and > -1 in the diffsCursor
+            // If the _sync_local_id is present in the diffsCursor
             // then this record corresponds to a local record that was just
             // inserted into the server and the _sync_local_id is the row id
             // of the local record. Set these fields so that the next check
             // treats this record as an update, which will allow the
             // merger to update the record with the server's sync id
-            long serverLocalSyncId =
-                    diffsCursor.isNull(serverSyncLocalIdColumn)
-                            ? -1
-                            : diffsCursor.getLong(serverSyncLocalIdColumn);
-            if (serverLocalSyncId > -1) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "the remote record with sync id "
-                        + serverSyncId + " has a local sync id, "
-                        + serverLocalSyncId);
+            if (!diffsCursor.isNull(serverSyncLocalIdColumn)) {
+                localRowId = diffsCursor.getLong(serverSyncLocalIdColumn);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "the remote record with sync id " + serverSyncId
+                            + " has a local sync id, " + localRowId);
+                }
                 localSyncID = serverSyncId;
                 localSyncDirty = false;
-                localPersonID = serverLocalSyncId;
                 localSyncVersion = null;
             }
 
@@ -372,12 +370,9 @@ public abstract class AbstractTableMerger
                 if (recordChanged) {
                     if (localSyncDirty) {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG,
-                                    "remote record " +
-                                            serverSyncId +
-                                    " conflicts with local _sync_id " +
-                                    localSyncID + ", local _id " +
-                                    localPersonID);
+                            Log.v(TAG, "remote record " + serverSyncId
+                                    + " conflicts with local _sync_id " + localSyncID
+                                    + ", local _id " + localRowId);
                         }
                         conflict = true;
                     } else {
@@ -387,7 +382,7 @@ public abstract class AbstractTableMerger
                                              serverSyncId +
                                      " updates local _sync_id " +
                                      localSyncID + ", local _id " +
-                                     localPersonID);
+                                     localRowId);
                          }
                          update = true;
                     }
@@ -395,18 +390,16 @@ public abstract class AbstractTableMerger
             } else {
                 // the local db doesn't know about this record so add it
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "remote record "
-                            + serverSyncId + " is new, inserting");
+                    Log.v(TAG, "remote record " + serverSyncId + " is new, inserting");
                 }
                 insert = true;
             }
 
             if (update) {
-                updateRow(localPersonID, serverDiffs, diffsCursor);
+                updateRow(localRowId, serverDiffs, diffsCursor);
                 syncResult.stats.numUpdates++;
             } else if (conflict) {
-                resolveRow(localPersonID, serverSyncId, serverDiffs,
-                        diffsCursor);
+                resolveRow(localRowId, serverSyncId, serverDiffs, diffsCursor);
                 syncResult.stats.numUpdates++;
             } else if (insert) {
                 insertRow(serverDiffs, diffsCursor);
@@ -414,16 +407,16 @@ public abstract class AbstractTableMerger
             }
         }
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "processed " + diffsCount +
-                " server entries");
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "processed " + diffsCount + " server entries");
+        }
 
         // If tombstones aren't in use delete any remaining local rows that
         // don't have corresponding server rows. Keep the rows that don't
         // have a sync id since those were created locally and haven't been
         // synced to the server yet.
         if (!diffsArePartial) {
-            while (!localCursor.isAfterLast() &&
-                    !TextUtils.isEmpty(localCursor.getString(2))) {
+            while (!localCursor.isAfterLast() && !TextUtils.isEmpty(localCursor.getString(2))) {
                 if (mIsMergeCancelled) {
                     localCursor.deactivate();
                     deletedCursor.deactivate();
@@ -458,7 +451,6 @@ public abstract class AbstractTableMerger
         // Apply deletions from the server
         if (mDeletedTableURL != null) {
             diffsCursor = serverDiffs.query(mDeletedTableURL, null, null, null, null);
-            serverSyncIDColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
 
             while (diffsCursor.moveToNext()) {
                 if (mIsMergeCancelled) {
@@ -466,19 +458,31 @@ public abstract class AbstractTableMerger
                     return;
                 }
                 // delete all rows that match each element in the diffsCursor
-                fullyDeleteRowsWithSyncId(diffsCursor.getString(serverSyncIDColumn), account,
-                        syncResult);
+                fullyDeleteMatchingRows(diffsCursor, account, syncResult);
                 mDb.yieldIfContended();
             }
             diffsCursor.deactivate();
         }
     }
 
-    private void fullyDeleteRowsWithSyncId(String syncId, String account, SyncResult syncResult) {
-        final String[] selectionArgs = new String[]{syncId, account};
+    private void fullyDeleteMatchingRows(Cursor diffsCursor, String account,
+            SyncResult syncResult) {
+        int serverSyncIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
+        final boolean deleteBySyncId = !diffsCursor.isNull(serverSyncIdColumn);
+
         // delete the rows explicitly so that the delete operation can be overridden
-        Cursor c = mDb.query(mTable, getDeleteRowProjection(), SELECT_BY_ID_AND_ACCOUNT,
-                selectionArgs, null, null, null);
+        final Cursor c;
+        final String[] selectionArgs;
+        if (deleteBySyncId) {
+            selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn), account};
+            c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_SYNC_ID_AND_ACCOUNT,
+                    selectionArgs, null, null, null);
+        } else {
+            int serverSyncLocalIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_LOCAL_ID);
+            selectionArgs = new String[]{diffsCursor.getString(serverSyncLocalIdColumn)};
+            c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_ID, selectionArgs,
+                    null, null, null);
+        }
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -488,19 +492,9 @@ public abstract class AbstractTableMerger
         } finally {
             c.deactivate();
         }
-        if (mDeletedTable != null) {
-            mDb.delete(mDeletedTable, SELECT_BY_ID_AND_ACCOUNT, selectionArgs);
+        if (deleteBySyncId && mDeletedTable != null) {
+            mDb.delete(mDeletedTable, SELECT_BY_SYNC_ID_AND_ACCOUNT, selectionArgs);
         }
-    }
-
-    /**
-     * Provides the projection used by
-     * {@link AbstractTableMerger#deleteRow(android.database.Cursor)}.
-     * This should be overridden if the deleteRow implementation requires
-     * additional columns.
-     */
-    protected String[] getDeleteRowProjection() {
-        return new String[]{"_id"};
     }
 
     /**

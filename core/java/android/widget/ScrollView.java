@@ -125,18 +125,7 @@ public class ScrollView extends FrameLayout {
     private boolean mSmoothScrollingEnabled = true;
 
     public ScrollView(Context context) {
-        super(context);
-        initScrollView();
-
-        setVerticalScrollBarEnabled(true);
-        setVerticalFadingEdgeEnabled(true);
-
-        TypedArray a = context.obtainStyledAttributes(R.styleable.View);
-
-        initializeScrollbars(a);
-        initializeFadingEdge(a);
-
-        a.recycle();
+        this(context, null);
     }
 
     public ScrollView(Context context, AttributeSet attrs) {
@@ -199,7 +188,6 @@ public class ScrollView extends FrameLayout {
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
-        setScrollContainer(true);
     }
 
     @Override

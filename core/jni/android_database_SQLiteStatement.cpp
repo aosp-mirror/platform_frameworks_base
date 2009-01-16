@@ -59,7 +59,7 @@ static void native_execute(JNIEnv* env, jobject object)
 
     // Throw an exception if an error occured
     if (err != SQLITE_DONE) {
-        throw_sqlite3_exception_errcode(env, err, NULL);
+        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
     }
 
     // Reset the statment so it's ready to use again
@@ -81,7 +81,7 @@ static jlong native_1x1_long(JNIEnv* env, jobject object)
         // No errors, read the data and return it
         value = sqlite3_column_int64(statement, 0);
     } else {
-        throw_sqlite3_exception_errcode(env, err, NULL);
+        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
     }
 
     // Reset the statment so it's ready to use again
@@ -106,7 +106,7 @@ static jstring native_1x1_string(JNIEnv* env, jobject object)
         char const * text = (char const *)sqlite3_column_text(statement, 0);
         value = env->NewStringUTF(text);
     } else {
-        throw_sqlite3_exception_errcode(env, err, NULL);
+        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
     }
 
     // Reset the statment so it's ready to use again

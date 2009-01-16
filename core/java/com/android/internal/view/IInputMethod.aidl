@@ -48,7 +48,7 @@ oneway interface IInputMethod {
     
     void revokeSession(IInputMethodSession session);
     
-    void showSoftInput();
+    void showSoftInput(boolean explicit);
     
     void hideSoftInput();
 }

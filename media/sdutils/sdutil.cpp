@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <hardware/IMountService.h>
+#include <hardware_legacy/IMountService.h>
 #include <utils/BpBinder.h>
 #include <utils/IServiceManager.h>
 

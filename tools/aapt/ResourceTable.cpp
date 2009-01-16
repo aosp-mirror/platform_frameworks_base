@@ -546,6 +546,7 @@ status_t parseAndAddBag(Bundle* bundle,
                         const String16& itemIdent,
                         int32_t curFormat,
                         bool pseudolocalize,
+                        const bool overwrite,
                         ResourceTable* outTable)
 {
     status_t err;
@@ -572,7 +573,7 @@ status_t parseAndAddBag(Bundle* bundle,
 
     err = outTable->addBag(SourcePos(in->getPrintableSource(), block->getLineNumber()),
                            myPackage, curType, ident, parentIdent, itemIdent, str,
-                           &spans, &config, false, false, curFormat);
+                           &spans, &config, overwrite, false, curFormat);
     return err;
 }
 
@@ -588,6 +589,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                         bool curIsStyled,
                         int32_t curFormat,
                         bool pseudolocalize,
+                        const bool overwrite,
                         ResourceTable* outTable)
 {
     status_t err;
@@ -610,7 +612,7 @@ status_t parseAndAddEntry(Bundle* bundle,
 
     err = outTable->addEntry(SourcePos(in->getPrintableSource(), block->getLineNumber()),
                              myPackage, curType, ident, str, &spans, &config,
-                             false, curFormat);
+                             false, curFormat, overwrite);
 
     return err;
 }
@@ -619,6 +621,7 @@ status_t compileResourceFile(Bundle* bundle,
                              const sp<AaptAssets>& assets,
                              const sp<AaptFile>& in,
                              const ResTable_config& defParams,
+                             const bool overwrite,
                              ResourceTable* outTable)
 {
     ResXMLTree block;
@@ -979,7 +982,7 @@ status_t compileResourceFile(Bundle* bundle,
                         if (locale.size() > 0) {
                             fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
                                     " in locale '%s'\n", String8(name).string(),
-                                    bundle->getResourceSourceDir(),
+                                    bundle->getResourceSourceDirs()[0],
                                     locale.string());
                             // hasErrors = localHasErrors = true;
                         } else {
@@ -1172,7 +1175,8 @@ status_t compileResourceFile(Bundle* bundle,
                         block.getPosition(&parserPosition);
 
                         err = parseAndAddBag(bundle, in, &block, curParams, myPackage, curType,
-                                ident, parentIdent, itemIdent, curFormat, false, outTable);
+                                ident, parentIdent, itemIdent, curFormat, 
+                                false, overwrite, outTable);
                         if (err == NO_ERROR) {
                             if (curIsPseudolocalizable && localeIsDefined(curParams)
                                     && bundle->getPseudolocalize()) {
@@ -1181,7 +1185,7 @@ status_t compileResourceFile(Bundle* bundle,
                                 block.setPosition(parserPosition);
                                 err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
                                         curType, ident, parentIdent, itemIdent, curFormat, true,
-                                        outTable);
+                                        overwrite, outTable);
 #endif
                             }
                         } 
@@ -1204,7 +1208,7 @@ status_t compileResourceFile(Bundle* bundle,
                 block.getPosition(&parserPosition);
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
-                        *curTag, curIsStyled, curFormat, false, outTable);
+                        *curTag, curIsStyled, curFormat, false, overwrite, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
@@ -1215,7 +1219,7 @@ status_t compileResourceFile(Bundle* bundle,
                         // pseudolocalize here
                         block.setPosition(parserPosition);
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
-                                ident, *curTag, curIsStyled, curFormat, true, outTable);
+                                ident, *curTag, curIsStyled, curFormat, true, false, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }
@@ -1360,7 +1364,8 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                                  const Vector<StringPool::entry_style_span>* style,
                                  const ResTable_config* params,
                                  const bool doSetIndex,
-                                 const int32_t format)
+                                 const int32_t format,
+                                 const bool overwrite)
 {
     // Check for adding entries in other packages...  for now we do
     // nothing.  We need to do the right thing here to support skinning.
@@ -1384,7 +1389,7 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
-    status_t err = e->setItem(sourcePos, value, style, format);
+    status_t err = e->setItem(sourcePos, value, style, format, overwrite);
     if (err == NO_ERROR) {
         mNumLocal++;
     }
@@ -2125,7 +2130,7 @@ ResourceTable::validateLocalizations(void)
         // Look for strings with no default localization
         if (configSet.count(defaultLocale) == 0) {
             fprintf(stdout, "aapt: warning: string '%s' has no default translation in %s; found:",
-                    String8(nameIter->first).string(), mBundle->getResourceSourceDir());
+                    String8(nameIter->first).string(), mBundle->getResourceSourceDirs()[0]);
             for (set<String8>::iterator locales = configSet.begin();
                  locales != configSet.end();
                  locales++) {
@@ -2167,7 +2172,7 @@ ResourceTable::validateLocalizations(void)
                                         "for '%s' in %s\n",
                                         String8(nameIter->first).string(),
                                         config.string(),
-                                        mBundle->getResourceSourceDir());
+                                        mBundle->getResourceSourceDirs()[0]);
                                 //err = UNKNOWN_ERROR;
                             }
                         }
@@ -2728,7 +2733,8 @@ status_t ResourceTable::Entry::makeItABag(const SourcePos& sourcePos)
 status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
                                        const String16& value,
                                        const Vector<StringPool::entry_style_span>* style,
-                                       int32_t format)
+                                       int32_t format,
+                                       const bool overwrite)
 {
     Item item(sourcePos, false, value, style);
 
@@ -2740,7 +2746,7 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
                         item.sourcePos.file.string(), item.sourcePos.line);
         return UNKNOWN_ERROR;
     }
-    if (mType != TYPE_UNKNOWN) {
+    if ( (mType != TYPE_UNKNOWN) && (overwrite == false) ) {
         sourcePos.error("Resource entry %s is already defined.\n"
                         "%s:%d: Originally defined here.\n",
                         String8(mName).string(),

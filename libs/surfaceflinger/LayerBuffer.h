@@ -75,6 +75,7 @@ public:
     sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format);
     
     sp<Source> getSource() const;
+    sp<Source> clearSource();
     void setNeedsBlending(bool blending);
     const Rect& getTransformedBounds() const {
         return mTransformedBounds;
@@ -145,7 +146,8 @@ private:
         virtual void onVisibilityResolved(const Transform& planeTransform);
     private:
         void serverDestroy(); 
-        class OverlayChanel : public BnOverlay {
+        void destroyOverlay(); 
+        class OverlayChannel : public BnOverlay {
             mutable Mutex mLock;
             sp<OverlaySource> mSource;
             virtual void destroy() {
@@ -160,15 +162,16 @@ private:
                 }
             }
         public:
-            OverlayChanel(const sp<OverlaySource>& source)
+            OverlayChannel(const sp<OverlaySource>& source)
                 : mSource(source) {
             }
         };
-        friend class OverlayChanel;
+        friend class OverlayChannel;
         bool mVisibilityChanged;
 
         overlay_t* mOverlay;        
         overlay_handle_t const *mOverlayHandle;
+        overlay_control_device_t* mOverlayDevice;
         uint32_t mWidth;
         uint32_t mHeight;
         int32_t mFormat;

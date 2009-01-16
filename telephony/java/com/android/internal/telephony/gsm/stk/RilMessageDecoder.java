@@ -30,6 +30,10 @@ import android.os.Message;
  */
 class RilMessageDecoder extends HandlerStateMachine {
 
+    // constants
+    private static final int START = 1;
+    private static final int CMD_PARAMS_READY = 2;
+
     // members
     private static RilMessageDecoder sInstance = null;
     private CommandParamsFactory mCmdParamsFactory = null;
@@ -40,15 +44,49 @@ class RilMessageDecoder extends HandlerStateMachine {
     private StateStart mStateStart = new StateStart();
     private StateCmdParamsReady mStateCmdParamsReady = new StateCmdParamsReady();
 
-    // constants
-    static final int START = 1;
-    static final int CMD_PARAMS_READY = 2;
-
-    static synchronized RilMessageDecoder getInstance(Handler caller, SIMFileHandler fh) {
+    /**
+     * Get the singleton instance, constructing if necessary.
+     *
+     * @param caller
+     * @param fh
+     * @return RilMesssageDecoder
+     */
+    public static synchronized RilMessageDecoder getInstance(Handler caller, SIMFileHandler fh) {
         if (sInstance == null) {
             sInstance = new RilMessageDecoder(caller, fh);
         }
         return sInstance;
+    }
+
+    /**
+     * Start decoding the message parameters,
+     * when complete MSG_ID_RIL_MSG_DECODED will be returned to caller.
+     *
+     * @param rilMsg
+     */
+    public void sendStartDecodingMessageParams(RilMessage rilMsg) {
+        Message msg = obtainMessage(START);
+        msg.obj = rilMsg;
+        sendMessage(msg);
+    }
+
+    /**
+     * The command parameters have been decoded.
+     *
+     * @param resCode
+     * @param cmdParams
+     */
+    public void sendMessageParamsDecoded(ResultCode resCode, CommandParams cmdParams) {
+        Message msg = obtainMessage(RilMessageDecoder.CMD_PARAMS_READY);
+        msg.arg1 = resCode.value();
+        msg.obj = cmdParams;
+        sendMessage(msg);
+    }
+
+    private void sendCmdForExecution(RilMessage rilMsg) {
+        Message msg = mCaller.obtainMessage(StkService.MSG_ID_RIL_MSG_DECODED,
+                new RilMessage(rilMsg));
+        msg.sendToTarget();
     }
 
     private RilMessageDecoder(Handler caller, SIMFileHandler fh) {
@@ -57,10 +95,10 @@ class RilMessageDecoder extends HandlerStateMachine {
         setInitialState(mStateStart);
 
         mCaller = caller;
-        mCmdParamsFactory = CommandParamsFactory.getInstance(this.getHandler(), fh);
+        mCmdParamsFactory = CommandParamsFactory.getInstance(this, fh);
     }
 
-    class StateStart extends HandlerState {
+    private class StateStart extends HandlerState {
         @Override public void processMessage(Message msg) {
             if (msg.what == START) {
                 if (decodeMessageParams((RilMessage)msg.obj)) {
@@ -73,7 +111,7 @@ class RilMessageDecoder extends HandlerStateMachine {
         }
     }
 
-    class StateCmdParamsReady extends HandlerState {
+    private class StateCmdParamsReady extends HandlerState {
         @Override public void processMessage(Message msg) {
             if (msg.what == CMD_PARAMS_READY) {
                 mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
@@ -88,26 +126,20 @@ class RilMessageDecoder extends HandlerStateMachine {
         }
     }
 
-    public void startDecodingMessageParams(RilMessage rilMsg) {
-        Message msg = obtainMessage(START);
-        msg.obj = rilMsg;
-        sendMessage(msg);
-    }
-
     private boolean decodeMessageParams(RilMessage rilMsg) {
         boolean decodingStarted;
 
         mCurrentRilMessage = rilMsg;
         switch(rilMsg.mId) {
-        case Service.MSG_ID_SESSION_END:
-        case Service.MSG_ID_CALL_SETUP:
+        case StkService.MSG_ID_SESSION_END:
+        case StkService.MSG_ID_CALL_SETUP:
             mCurrentRilMessage.mResCode = ResultCode.OK;
             sendCmdForExecution(mCurrentRilMessage);
             decodingStarted = false;
             break;
-        case Service.MSG_ID_PROACTIVE_COMMAND:
-        case Service.MSG_ID_EVENT_NOTIFY:
-        case Service.MSG_ID_REFRESH:
+        case StkService.MSG_ID_PROACTIVE_COMMAND:
+        case StkService.MSG_ID_EVENT_NOTIFY:
+        case StkService.MSG_ID_REFRESH:
             byte[] rawData = null;
             try {
                 rawData = SimUtils.hexStringToBytes((String) rilMsg.mData);
@@ -133,11 +165,5 @@ class RilMessageDecoder extends HandlerStateMachine {
             break;
         }
         return decodingStarted;
-    }
-
-    private void sendCmdForExecution(RilMessage rilMsg) {
-        Message msg = mCaller.obtainMessage(Service.MSG_ID_RIL_MSG_DECODED,
-                new RilMessage(rilMsg));
-        msg.sendToTarget();
     }
 }

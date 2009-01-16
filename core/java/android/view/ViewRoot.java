@@ -1579,9 +1579,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                     InputMethodManager imm = InputMethodManager.peekInstance();
                     if (imm != null) {
                         imm.onWindowFocus(mView.findFocus(),
-                                mWindowAttributes.softInputMode, !mHasHadWindowFocus,
-                                mWindowAttributes.flags);
+                                mWindowAttributes.softInputMode,
+                                !mHasHadWindowFocus, mWindowAttributes.flags);
                     }
+                    // Clear the forward bit.  We can just do this directly, since
+                    // the window manager doesn't care about it.
+                    mWindowAttributes.softInputMode &=
+                            ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                    ((WindowManager.LayoutParams)mView.getLayoutParams())
+                            .softInputMode &=
+                                ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
                     mHasHadWindowFocus = true;
                 }
             }
@@ -2030,14 +2037,20 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             return;
         }
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null && mView != null && imm.isActive()) {
-            int seq = enqueuePendingEvent(event, sendDone);
-            if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
-                    + seq + " event=" + event);
-            imm.dispatchKeyEvent(mView.getContext(), seq, event,
-                    mInputMethodCallback);
-            return;
+        // If it is possible for this window to interact with the input
+        // method window, then we want to first dispatch our key events
+        // to the input method.
+        if (WindowManager.LayoutParams.mayUseInputMethod(
+                mWindowAttributes.flags)) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null && mView != null && imm.isActive()) {
+                int seq = enqueuePendingEvent(event, sendDone);
+                if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
+                        + seq + " event=" + event);
+                imm.dispatchKeyEvent(mView.getContext(), seq, event,
+                        mInputMethodCallback);
+                return;
+            }
         }
         deliverKeyEventToViewHierarchy(event, sendDone);
     }

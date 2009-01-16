@@ -92,6 +92,14 @@ status_t A2dpAudioInterface::getMicMute(bool* state)
 status_t A2dpAudioInterface::setParameter(const char *key, const char *value)
 {
     LOGD("setParameter %s,%s\n", key, value);
+    
+    if (!key || !value)
+        return -EINVAL;
+    
+    if (strcmp(key, "a2dp_sink_address") == 0) {        
+        return mOutput->setAddress(value);
+    }
+
     return 0;
 }
 
@@ -121,6 +129,8 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
     mFd(-1), mStandby(false), mStartCount(0), mRetryCount(0), mData(NULL),
     mInitialized(false)
 {
+    // use any address by default
+    strncpy(mA2dpAddress, "00:00:00:00:00:00", sizeof(mA2dpAddress));
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::set(
@@ -154,7 +164,7 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
     size_t remaining = bytes;
 
     if (!mInitialized) {
-        status = a2dp_init("00:00:00:00:00:00", 44100, 2, &mData);
+        status = a2dp_init(mA2dpAddress, 44100, 2, &mData);
         if (status < 0) {
             LOGE("a2dp_init failed err: %d\n", status);
             goto Error;
@@ -194,6 +204,24 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
     }
 
     return result;
+}
+
+status_t A2dpAudioInterface::A2dpAudioStreamOut::setAddress(const char* address)
+{
+    if (strlen(address) < sizeof(mA2dpAddress))
+        return -EINVAL;
+
+    if (strcmp(address, mA2dpAddress)) {
+        strcpy(mA2dpAddress, address);
+        
+        if (mInitialized) {
+            a2dp_cleanup(mData);
+            mData = NULL;
+            mInitialized = false;
+        }
+    }
+    
+    return NO_ERROR;
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::dump(int fd, const Vector<String16>& args)

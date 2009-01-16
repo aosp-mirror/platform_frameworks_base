@@ -38,6 +38,7 @@ status_t compileResourceFile(Bundle* bundle,
                              const sp<AaptAssets>& assets,
                              const sp<AaptFile>& in,
                              const ResTable_config& defParams,
+                             const bool overwrite,
                              ResourceTable* outTable);
 
 struct AccessorCookie
@@ -79,7 +80,8 @@ public:
                       const Vector<StringPool::entry_style_span>* style = NULL,
                       const ResTable_config* params = NULL,
                       const bool doSetIndex = false,
-                      const int32_t format = ResTable_map::TYPE_ANY);
+                      const int32_t format = ResTable_map::TYPE_ANY,
+                      const bool overwrite = false);
 
     status_t startBag(const SourcePos& pos,
                     const String16& package,
@@ -256,7 +258,8 @@ public:
         status_t setItem(const SourcePos& pos,
                          const String16& value,
                          const Vector<StringPool::entry_style_span>* style = NULL,
-                         int32_t format = ResTable_map::TYPE_ANY);
+                         int32_t format = ResTable_map::TYPE_ANY,
+                         const bool overwrite = false);
 
         status_t addToBag(const SourcePos& pos,
                           const String16& key, const String16& value,

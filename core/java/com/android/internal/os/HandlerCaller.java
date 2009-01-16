@@ -115,11 +115,15 @@ public class HandlerCaller {
         return mH.obtainMessage(what, 0, 0, arg1);
     }
     
+    public Message obtainMessageI(int what, int arg1) {
+        return mH.obtainMessage(what, arg1);
+    }
+    
     public Message obtainMessageIO(int what, int arg1, Object arg2) {
         return mH.obtainMessage(what, arg1, 0, arg2);
     }
     
-    public Message obtainMessageIO(int what, int arg1, int arg2, Object arg3) {
+    public Message obtainMessageIIO(int what, int arg1, int arg2, Object arg3) {
         return mH.obtainMessage(what, arg1, arg2, arg3);
     }
     

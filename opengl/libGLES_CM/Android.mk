@@ -15,7 +15,9 @@ LOCAL_MODULE:= libGLES_CM
 # needed on sim build because of weird logging issues
 ifeq ($(TARGET_SIMULATOR),true)
 else
-	LOCAL_SHARED_LIBRARIES += libdl
+    LOCAL_SHARED_LIBRARIES += libdl
+    # we need to access the Bionic private header <bionic_tls.h>
+    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
 include $(BUILD_SHARED_LIBRARY)

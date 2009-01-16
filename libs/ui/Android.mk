@@ -33,7 +33,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libpixelflinger \
-	libhardware
+	libhardware \
+	libhardware_legacy
 
 LOCAL_MODULE:= libui
 

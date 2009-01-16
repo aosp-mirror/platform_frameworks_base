@@ -42,6 +42,8 @@ public abstract class Filter {
     
     private Handler mThreadHandler;
     private Handler mResultHandler;
+    private String mConstraint;
+    private boolean mConstraintIsValid = false;
 
     /**
      * <p>Creates a new asynchronous filter.</p>
@@ -79,6 +81,14 @@ public abstract class Filter {
      */
     public final void filter(CharSequence constraint, FilterListener listener) {
         synchronized (this) {
+            String constraintAsString = constraint != null ? constraint.toString() : null;
+            if (mConstraintIsValid && (
+                    (constraintAsString == null && mConstraint == null) ||
+                    (constraintAsString != null && constraintAsString.equals(mConstraint)))) {
+                // nothing to do
+                return;
+            }
+
             if (mThreadHandler == null) {
                 HandlerThread thread = new HandlerThread(THREAD_NAME);
                 thread.start();
@@ -88,13 +98,18 @@ public abstract class Filter {
             Message message = mThreadHandler.obtainMessage(FILTER_TOKEN);
     
             RequestArguments args = new RequestArguments();
-            args.constraint = constraint;
+            // make sure we use an immutable copy of the constraint, so that
+            // it doesn't change while the filter operation is in progress
+            args.constraint = constraintAsString;
             args.listener = listener;
             message.obj = args;
     
             mThreadHandler.removeMessages(FILTER_TOKEN);
             mThreadHandler.removeMessages(FINISH_TOKEN);
             mThreadHandler.sendMessage(message);
+            
+            mConstraint = constraintAsString;
+            mConstraintIsValid = true;
         }
     }
 

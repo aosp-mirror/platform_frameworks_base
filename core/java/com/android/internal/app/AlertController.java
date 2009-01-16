@@ -27,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -172,11 +171,33 @@ public class AlertController {
         mHandler = new ButtonHandler(di);
     }
     
+    static boolean canTextInput(View v) {
+        if (v.onCheckIsTextEditor()) {
+            return true;
+        }
+        
+        if (!(v instanceof ViewGroup)) {
+            return false;
+        }
+        
+        ViewGroup vg = (ViewGroup)v;
+        int i = vg.getChildCount();
+        while (i > 0) {
+            i--;
+            v = vg.getChildAt(i);
+            if (canTextInput(v)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     public void installContent() {
         /* We use a custom title so never request a window title */
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         
-        if (mView == null) {
+        if (mView == null || !canTextInput(mView)) {
             mWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                     WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         }

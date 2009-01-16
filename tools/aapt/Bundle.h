@@ -31,11 +31,11 @@ class Bundle {
 public:
     Bundle(void)
         : mCmd(kCommandUnknown), mVerbose(false), mAndroidList(false),
-          mForce(false), mMakePackageDirs(false),
+          mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
-          mAssetSourceDir(NULL), mResourceSourceDir(NULL),
+          mAssetSourceDir(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
           mArgc(0), mArgv(NULL)
@@ -58,6 +58,8 @@ public:
     void setAndroidList(bool val) { mAndroidList = val; }
     bool getForce(void) const { return mForce; }
     void setForce(bool val) { mForce = val; }
+    void setGrayscaleTolerance(int val) { mGrayscaleTolerance = val; }
+    int  getGrayscaleTolerance() { return mGrayscaleTolerance; }
     bool getMakePackageDirs(void) const { return mMakePackageDirs; }
     void setMakePackageDirs(bool val) { mMakePackageDirs = val; }
     bool getUpdate(void) const { return mUpdate; }
@@ -78,8 +80,8 @@ public:
      */
     const char* getAssetSourceDir() const { return mAssetSourceDir; }
     void setAssetSourceDir(const char* dir) { mAssetSourceDir = dir; }
-    const char* getResourceSourceDir() const { return mResourceSourceDir; }
-    void setResourceSourceDir(const char* dir) { mResourceSourceDir = dir; }
+    const android::Vector<const char*>& getResourceSourceDirs() const { return mResourceSourceDirs; }
+    void addResourceSourceDir(const char* dir) { mResourceSourceDirs.insertAt(dir,0); }
     const char* getAndroidManifestFile() const { return mAndroidManifestFile; }
     void setAndroidManifestFile(const char* file) { mAndroidManifestFile = file; }
     const char* getPublicOutputFile() const { return mPublicOutputFile; }
@@ -130,6 +132,7 @@ private:
     bool        mVerbose;
     bool        mAndroidList;
     bool        mForce;
+    int         mGrayscaleTolerance;
     bool        mMakePackageDirs;
     bool        mUpdate;
     bool        mExtending;
@@ -138,7 +141,6 @@ private:
     int         mCompressionMethod;
     const char* mOutputAPKFile;
     const char* mAssetSourceDir;
-    const char* mResourceSourceDir;
     const char* mAndroidManifestFile;
     const char* mPublicOutputFile;
     const char* mRClassDir;
@@ -147,7 +149,8 @@ private:
     android::Vector<const char*> mPackageIncludes;
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
-
+    android::Vector<const char*> mResourceSourceDirs;
+    
     /* file specification */
     int         mArgc;
     char* const* mArgv;

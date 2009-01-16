@@ -19,7 +19,7 @@
 #include "jni.h"
 #include "android_runtime/AndroidRuntime.h"
 #include <utils/misc.h>
-#include <hardware/power.h>
+#include <hardware_legacy/power.h>
 #include <sys/reboot.h>
 
 namespace android

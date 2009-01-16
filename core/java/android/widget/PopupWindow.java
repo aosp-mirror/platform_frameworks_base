@@ -85,8 +85,10 @@ public class PopupWindow {
     
     private int mWidthMode;
     private int mWidth;
+    private int mLastWidth;
     private int mHeightMode;
     private int mHeight;
+    private int mLastHeight;
 
     private int mPopupWidth;
     private int mPopupHeight;
@@ -634,8 +636,8 @@ public class PopupWindow {
             mPopupView.refreshDrawableState();
         }
         mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
-        if (mHeightMode < 0) p.height = mHeightMode;
-        if (mWidthMode < 0) p.width = mWidthMode;
+        if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
+        if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
         p.windowAnimations = computeAnimationResource();
         invokePopup(p);
     }
@@ -708,8 +710,8 @@ public class PopupWindow {
         // by setting the x and y offsets to match the anchor's bottom
         // left corner
         p.gravity = Gravity.LEFT | Gravity.TOP;
-        p.width = mWidth;
-        p.height = mHeight;
+        p.width = mLastWidth = mWidth;
+        p.height = mLastHeight = mHeight;
         if (mBackground != null) {
             p.format = mBackground.getOpacity();
         } else {
@@ -953,15 +955,15 @@ public class PopupWindow {
 
         boolean update = false;
 
-        final int finalWidth = mWidthMode < 0 ? mWidthMode : p.width;
+        final int finalWidth = mWidthMode < 0 ? mWidthMode : mLastWidth;
         if (width != -1 && p.width != finalWidth) {
-            p.width = finalWidth;
+            p.width = mLastWidth = finalWidth;
             update = true;
         }
 
-        final int finalHeight = mHeightMode < 0 ? mHeightMode : p.height;
+        final int finalHeight = mHeightMode < 0 ? mHeightMode : mLastHeight;
         if (height != -1 && p.height != finalHeight) {
-            p.height = finalHeight;
+            p.height = mLastHeight = finalHeight;
             update = true;
         }
 

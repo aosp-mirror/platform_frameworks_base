@@ -289,9 +289,9 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * Handle a request by the system to show the soft input area.
          */
-        public void showSoftInput() {
+        public void showSoftInput(int flags) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
-            showWindow(true);
+            onShowRequested(flags);
         }
     }
     
@@ -805,6 +805,27 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
 
+    /**
+     * The system has decided that it may be time to show your input method.
+     * This is called due to a corresponding call to your
+     * {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}
+     * method.  The default implementation simply calls
+     * {@link #showWindow(boolean)}, except if the
+     * {@link InputMethod#SHOW_EXPLICIT InputMethod.SHOW_EXPLICIT} flag is
+     * not set and the input method is running in fullscreen mode.
+     * 
+     * @param flags Provides additional information about the show request,
+     * as per {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}.
+     */
+    public void onShowRequested(int flags) {
+        if ((flags&InputMethod.SHOW_EXPLICIT) == 0 && onEvaluateFullscreenMode()) {
+            // Don't show if this is not explicit requested by the user and
+            // the input method is fullscreen.  That would be too disruptive.
+            return;
+        }
+        showWindow(true);
+    }
+    
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
@@ -943,10 +964,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * Close this input method's soft input area, removing it from the display.
      * The input method will continue running, but the user can no longer use
      * it to generate input by touching the screen.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link InputMethodManager#HIDE_IMPLICIT_ONLY
+     * InputMethodManager.HIDE_IMPLICIT_ONLY} bit set.
      */
-    public void dismissSoftInput() {
+    public void dismissSoftInput(int flags) {
         ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE))
-                .hideSoftInputFromInputMethod(mToken);
+                .hideSoftInputFromInputMethod(mToken, flags);
     }
     
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -955,7 +979,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mShowInputRequested) {
                 // If the soft input area is shown, back closes it and we
                 // consume the back key.
-                dismissSoftInput();
+                dismissSoftInput(0);
                 return true;
             }
             if (mShowCandidatesRequested) {

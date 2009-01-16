@@ -14,9 +14,9 @@
  * limitations under the License.
 */
 
-#include <hardware/flashlight.h>
-#include <hardware/led.h>
-#include <hardware/power.h>
+#include <hardware_legacy/flashlight.h>
+#include <hardware_legacy/led.h>
+#include <hardware_legacy/power.h>
 
 #include <nativehelper/jni.h>
 #include <android_runtime/AndroidRuntime.h>

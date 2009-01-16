@@ -1,0 +1,151 @@
+page.title=Developing on a Device
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#devices">Available Devices</a>
+      <ol>
+        <li><a href="g1">T-Mobile G1</a></li>
+        <li><a href="dev-phone-1">Android Dev Phone 1</a></li>
+      </ol>
+    </li>
+    <li><a href="#setting-up">Setting up a Device for Development</a></li>
+  </ol>
+</div>
+</div>
+
+<p>When building mobile applications, it's vital to test them on real
+devices prior to releasing them to users. This page covers what you need to know, 
+including the types of devices that you can use, and how to set one up for
+developing and debugging.</p>
+
+
+<h2 id="devices">Available Devices</h2>
+<p>While developers can use regular
+consumer devices purchased at retail to test and use their apps, some developers
+may choose not to use a retail device, preferring an unlocked or no-contract
+device. Here are some options for obtaining devices capable of testing your applications.</p>
+
+
+<h3 id="g1">T-Mobile G1</h3>
+
+<p>The T-Mobile G1 device makes an excellent development device. You can write
+applications in the SDK and install them on the G1, then run them as users
+would, using the same hardware, system, and network.</p>
+
+<p>For more information about obtaining a G1, visit the <a
+href="http://www.t-mobileg1.com">T-Mobile G1 site</a>. </p>
+
+
+<h3 id="dev-phone-1">Android Dev Phone 1</h3>
+
+<div class="sidebox">
+<p>Selected specs for Android Dev Phone 1: </p>
+<ul>
+<li>Touch screen</li>
+<li>Trackball</li>
+<li>3.2 megapixel camera with autofocus</li>
+<li>Wi-Fi</li>
+<li>GPS-enabled</li>
+<li>Bluetooth v2.0
+    <ul><li>Handsfree profile v1.5</li>
+        <li>Headset profile v1.0</li></ul></li>
+<li>3G WCDMA (1700/2100 MHz)</li>
+<li>Quad-band GSM (850/900/1800/1900 MHz)</li>
+<li>QWERTY slider keyboard</li>
+<li>Includes 1GB MicroSD card (can be replaced with up to 16GB card)</li>
+</ul>
+</div> 
+
+<p>The Android Dev Phone 1 is a SIM-unlocked and hardware-unlocked device that
+is designed for advanced developers. The device ships with a system image that
+is fully compatible with Android 1.0, so you can rely on it when developing your
+applications. You can use any SIM in the device and can flash custom Android
+builds that will work with the unlocked bootloader. Unlike the bootloader on
+retail devices, the bootloader on the Android Dev Phone 1 does not enforce
+signed system images. The Android Dev Phone 1 should also appeal to developers 
+who live outside of T-Mobile geographies. </p>
+
+<p>To purchase an Android Dev Phone 1 device, you must first register as an
+Android developer on the Android Market site, if you haven't done so already.
+Once you've logged into your developer account on Android Market, you can
+purchase the device by clicking the "Purchase" link. To accommodate demand,
+there is a limit of 1 device per developer account, for now.</p>
+
+<p>The device currently costs $399 (USD) (including free shipping in the US),
+and will be available for purchase in 18 international markets, including the
+US, UK, Germany, Japan, India, Canada, France, Taiwan, Spain, Australia,
+Singapore, Switzerland, Netherlands, Austria, Sweden, Finland, Poland, and
+Hungary.  We will continue to expand this program into new geographies over
+time.  Check this page for updated information.</p>
+
+<p>Note that Android Dev Phone 1 devices are <em>not</em> intended for
+non-developer end users. Since the devices can be configured with system
+software not provided by or supported by Google or any other company, end users
+operate these devices at their own risk.</p>
+
+<p>For full device specs and more information about obtaining an Android Dev 
+Phone 1 device, see the <a href="http://market.android.com/publish">Android 
+Market</a> site.</p>
+
+
+<h2 id="setting-up">Setting up a Device for Development</h2>
+
+<p>With a T-mobile G1 or Android Dev Phone 1, you can develop and debug your Android applications just as you
+would on the emulator. There are just a few things to do before you can start.</p>
+<ol>
+  <li>Declare your application as "debuggable" in your Android Manifest.
+    <p>In Eclipse, you can do this from the <b>Application</b> tab when viewing the Manifest
+    (on the right side, set <b>Debuggable</b> to <em>true</em>). Otherwise, in the <code>AndroidManifest.xml</code>
+
+    file, add <code>android:debuggable="true"</code> to the <code>&lt;application></code> element.</p>
+  </li>
+  <li>Turn on "USB Debugging" on your device.
+    <p>On the device, go to the home screen, press <b>MENU</b>, select <b>Applications</b> > <b>Development</b>,
+    then enable <b>USB debugging</b>.</p>
+
+  </li>
+  <li>Setup your system to detect your device.
+    <ul>
+      <li>If you're developing on Windows (32-bit only), you need to install the USB driver for adb:
+        <ol>
+          <li>Download the driver ZIP file 
+          (<a href="http://dl.google.com/android/android_usb_windows.zip">android_usb_windows.zip</a>)
+          and unzip it.</li>
+          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, you'll be asked if you'd like Windows Update to search for software, select <em>No, not this time</em> and click <b>Next</b>.</li>
+
+          <li>Select <em>Install from a list or specified location</em> and click <b>Next</b>.</li>
+          <li>Select <em>Search for the best driver in these locations</em>. Browse and select the unzipped file.</li>
+          <li>Click <b>Finish</b>. You're all set.</li>
+
+        </ol>
+      </li>
+      <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
+      <li>If you're developing on Ubuntu Linux, you need to add a rules file:
+        <ol>
+          <li>Login as root and create this file: <code>/etc/udev/rules.d/50-android.rules</code>.
+            <p>For Gusty/Hardy, edit the file to read: <br/>
+              <code>SUBSYSTEM=="usb", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
+
+            <p>For Dapper, edit the file to read: <br/>
+              <code>SUBSYSTEM=="usb_device", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
+          </li>
+          <li>Now execute:<br/>
+              <code>chmod a+rx /etc/udev/rules.d/50-android.rules</code>
+          </li>
+        </ol>
+
+      </li>
+    </ul>
+  </li>
+</ol>
+<p>You can verify that your device is connected by executing <code>adb devices</code> from your 
+SDK tools/ directory. If connected, you'll see the device name listed as a "device."</p>
+<p>If using Eclipse, select run or debug as usual. You will be presented
+with a <b>Device Chooser</b> dialog that lists the available emulator(s) and connected device(s).
+Select the device to install and run the application there.</p>
+
+<p>If using the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb), 
+you can issue commands with the <code>-d</code> flag to target your connected device.</p>

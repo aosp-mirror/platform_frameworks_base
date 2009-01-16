@@ -23,6 +23,8 @@
 
 #include <GLES/egl.h>
 
+#include <cutils/properties.h>
+
 #include <utils/Log.h>
 
 #include <ui/EGLDisplaySurface.h>
@@ -193,11 +195,14 @@ void DisplayHardware::init(uint32_t dpy)
     }
     mRefreshRate = 60.f;    // TODO: get the real refresh rate 
     
-    // compute a "density" automatically as a scale factor from 160 dpi
-    // TODO: this value should be calculated a compile time based on the
-    // board.
-    mDensity = floorf((mDpiX>mDpiY ? mDpiX : mDpiY)*0.1f + 0.5f) * (10.0f/160.0f);
-    LOGI("density = %f", mDensity);
+    
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get("ro.sf.lcd_density", property, NULL) <= 0) {
+        LOGW("ro.sf.lcd_density not defined, using 160 dpi by default.");
+        strcpy(property, "160");
+    }
+    mDensity = atoi(property) * (1.0f/160.0f);
+
 
     /*
      * Create our OpenGL ES context

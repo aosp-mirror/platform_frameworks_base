@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.BufferedInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -124,6 +125,7 @@ public class AndroidGDataClient implements GDataClient {
     public AndroidGDataClient(ContentResolver resolver) {
         mHttpClient = new GoogleHttpClient(resolver, USER_AGENT_APP_VERSION,
                 true /* gzip capable */);
+        mHttpClient.enableCurlLogging(TAG, Log.VERBOSE);
         mResolver = resolver;
     }
 
@@ -213,7 +215,7 @@ public class AndroidGDataClient implements GDataClient {
                 Log.w(TAG, "StatusLine is null.");
                 throw new NullPointerException("StatusLine is null -- should not happen.");
             }
-            
+
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, response.getStatusLine().toString());
                 for (Header h : response.getAllHeaders()) {
@@ -225,7 +227,11 @@ public class AndroidGDataClient implements GDataClient {
             HttpEntity entity = response.getEntity();
 
             if ((status >= 200) && (status < 300) && entity != null) {
-                return AndroidHttpClient.getUngzippedContent(entity);
+                InputStream in = AndroidHttpClient.getUngzippedContent(entity);
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    in = logInputStreamContents(in);
+                }
+                return in;
             }
 
             // TODO: handle 301, 307?
@@ -306,6 +312,43 @@ public class AndroidGDataClient implements GDataClient {
             return in;
         }
         throw new IOException("Unable to access feed.");
+    }
+
+    /**
+     * Log the contents of the input stream.
+     * The original input stream is consumed, so the caller must use the
+     * BufferedInputStream that is returned.
+     * @param in InputStream
+     * @return replacement input stream for caller to use
+     * @throws IOException
+     */
+    private InputStream logInputStreamContents(InputStream in) throws IOException {
+        if (in == null) {
+            return in;
+        }
+        // bufferSize is the (arbitrary) maximum amount to log.
+        // The original InputStream is wrapped in a
+        // BufferedInputStream with a 16K buffer.  This lets
+        // us read up to 16K, write it to the log, and then
+        // reset the stream so the the original client can
+        // then read the data.  The BufferedInputStream
+        // provides the mark and reset support, even when
+        // the original InputStream does not.
+        final int bufferSize = 16384;
+        BufferedInputStream bin = new BufferedInputStream(in, bufferSize);
+        bin.mark(bufferSize);
+        int wanted = bufferSize;
+        int totalReceived = 0;
+        byte buf[] = new byte[wanted];
+        while (wanted > 0) {
+            int got = bin.read(buf, totalReceived, wanted);
+            if (got <= 0) break; // EOF
+            wanted -= got;
+            totalReceived += got;
+        }
+        Log.d(TAG, new String(buf, 0, totalReceived, "UTF-8"));
+        bin.reset();
+        return bin;
     }
 
     public InputStream getMediaEntryAsStream(String mediaEntryUrl, String authToken)

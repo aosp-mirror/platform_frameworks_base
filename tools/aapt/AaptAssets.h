@@ -441,6 +441,8 @@ private:
     AaptSymbolEntry                                 mDefSymbol;
 };
 
+class ResourceTypeSet;
+
 /**
  * Asset hierarchy being operated on.
  */
@@ -491,6 +493,13 @@ public:
 
     inline const Vector<sp<AaptDir> >& resDirs() { return mDirs; }
 
+    inline sp<AaptAssets> getOverlay() { return mOverlay; }
+    inline void setOverlay(sp<AaptAssets>& overlay) { mOverlay = overlay; }
+    
+    inline KeyedVector<String8, sp<ResourceTypeSet> >* getResources() { return mRes; }
+    inline void 
+        setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { mRes = res; }
+
 private:
     String8 mPackage;
     SortedVector<AaptGroupEntry> mGroupEntries;
@@ -501,6 +510,9 @@ private:
 
     bool mHaveIncludedAssets;
     AssetManager mIncludedAssets;
+
+    sp<AaptAssets> mOverlay;
+    KeyedVector<String8, sp<ResourceTypeSet> >* mRes;
 };
 
 #endif // __AAPT_ASSETS_H

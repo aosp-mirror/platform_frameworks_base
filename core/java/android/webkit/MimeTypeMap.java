@@ -430,8 +430,9 @@ public /* package */ class MimeTypeMap {
             sMimeTypeMap.loadEntry("text/h323", "323", true);
             sMimeTypeMap.loadEntry("text/iuls", "uls", true);
             sMimeTypeMap.loadEntry("text/mathml", "mml", true);
-            sMimeTypeMap.loadEntry("text/plain", "asc", true);
+            // add it first so it will be the default for ExtensionFromMimeType
             sMimeTypeMap.loadEntry("text/plain", "txt", true);
+            sMimeTypeMap.loadEntry("text/plain", "asc", true);
             sMimeTypeMap.loadEntry("text/plain", "text", true);
             sMimeTypeMap.loadEntry("text/plain", "diff", true);
             sMimeTypeMap.loadEntry("text/plain", "pot", true);
@@ -469,6 +470,8 @@ public /* package */ class MimeTypeMap {
             sMimeTypeMap.loadEntry("text/x-tex", "cls", true);
             sMimeTypeMap.loadEntry("text/x-vcalendar", "vcs", true);
             sMimeTypeMap.loadEntry("text/x-vcard", "vcf", true);
+            sMimeTypeMap.loadEntry("video/3gpp", "3gp", false);
+            sMimeTypeMap.loadEntry("video/3gpp", "3g2", false);
             sMimeTypeMap.loadEntry("video/dl", "dl", false);
             sMimeTypeMap.loadEntry("video/dv", "dif", false);
             sMimeTypeMap.loadEntry("video/dv", "dv", false);

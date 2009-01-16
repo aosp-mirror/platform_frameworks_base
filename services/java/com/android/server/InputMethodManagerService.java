@@ -211,6 +211,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     boolean mShowRequested;
     
     /**
+     * Set if we were explicitly told to show the input method.
+     */
+    boolean mShowExplicitlyRequested;
+    
+    /**
      * Set if we last told the input method to show itself.
      */
     boolean mInputShown;
@@ -569,7 +574,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_RESTART_INPUT, session, mCurAttribute));
         }
         if (mShowRequested) {
-            showCurrentInputLocked();
+            if (DEBUG) Log.v(TAG, "Attach new input asks to show input");
+            showCurrentInputLocked(mShowExplicitlyRequested
+                    ? 0 : InputMethodManager.SHOW_IMPLICIT);
         }
         return needResult
                 ? new InputBindResult(session.session, mCurId, mCurSeq)
@@ -820,7 +827,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
     
-    public void showSoftInput(IInputMethodClient client) {
+    public void showSoftInput(IInputMethodClient client, int flags) {
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
@@ -836,22 +843,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            showCurrentInputLocked();
+            if (DEBUG) Log.v(TAG, "Client requesting input be shown");
+            showCurrentInputLocked(flags);
         }
     }
     
-    void showCurrentInputLocked() {
+    void showCurrentInputLocked(int flags) {
         mShowRequested = true;
-        if (!mInputShown) {
-            if (mCurMethod != null) {
-                executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
-                        MSG_SHOW_SOFT_INPUT, mCurMethod));
-                mInputShown = true;
-            }
+        if ((flags&InputMethodManager.SHOW_IMPLICIT) == 0) {
+            mShowExplicitlyRequested = true;
+        }
+        if (mCurMethod != null) {
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIO(
+                    MSG_SHOW_SOFT_INPUT, mShowExplicitlyRequested ? 1 : 0,
+                            mCurMethod));
+            mInputShown = true;
         }
     }
     
-    public void hideSoftInput(IInputMethodClient client) {
+    public void hideSoftInput(IInputMethodClient client, int flags) {
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
@@ -867,25 +877,34 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            hideCurrentInputLocked();
+            if (DEBUG) Log.v(TAG, "Client requesting input be hidden");
+            hideCurrentInputLocked(flags);
         }
     }
     
-    void hideCurrentInputLocked() {
+    void hideCurrentInputLocked(int flags) {
+        if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
+                && mShowExplicitlyRequested) {
+            if (DEBUG) Log.v(TAG,
+                    "Not hiding: explicit show not cancelled by non-explicit hide");
+            return;
+        }
         if (mInputShown && mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
                     MSG_HIDE_SOFT_INPUT, mCurMethod));
         }
         mInputShown = false;
         mShowRequested = false;
+        mShowExplicitlyRequested = false;
     }
     
     public void windowGainedFocus(IInputMethodClient client,
-            boolean viewHasFocus, int softInputMode, boolean first,
-            int windowFlags) {
+            boolean viewHasFocus, boolean isTextEditor, int softInputMode,
+            boolean first, int windowFlags) {
         synchronized (mMethodMap) {
             if (DEBUG) Log.v(TAG, "windowGainedFocus: " + client.asBinder()
                     + " viewHasFocus=" + viewHasFocus
+                    + " isTextEditor=" + isTextEditor
                     + " softInputMode=#" + Integer.toHexString(softInputMode)
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
@@ -906,34 +925,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
                 case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                    if (!viewHasFocus || (softInputMode &
+                    if (!isTextEditor || (softInputMode &
                             WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
                             != WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                        if ((windowFlags&WindowManager.LayoutParams
-                                .FLAG_ALT_FOCUSABLE_IM) == 0) {
+                        if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
                             // There is no focus view, and this window will
-                            // be behind any soft input window, then hide the
+                            // be behind any soft input window, so hide the
                             // soft input window if it is shown.
-                            hideCurrentInputLocked();
+                            if (DEBUG) Log.v(TAG, "Unspecified window will hide input");
+                            hideCurrentInputLocked(0);
                         }
+                    } else if (isTextEditor && (softInputMode &
+                            WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                            == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                            && (softInputMode &
+                                    WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                        // There is a focus view, and we are navigating forward
+                        // into the window, so show the input window for the user.
+                        if (DEBUG) Log.v(TAG, "Unspecified window will show input");
+                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
                     }
                     break;
                 case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
                     // Do nothing.
                     break;
                 case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                    hideCurrentInputLocked();
-                    break;
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_FIRST_VISIBLE:
-                    if (first && !viewHasFocus && (windowFlags
-                            & WindowManager.LayoutParams.FLAG_RESTORED_STATE) == 0) {
-                        showCurrentInputLocked();
-                    }
+                    if (DEBUG) Log.v(TAG, "Window asks to hide input");
+                    hideCurrentInputLocked(0);
                     break;
                 case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
-                    if (viewHasFocus) {
-                        showCurrentInputLocked();
+                    if ((softInputMode &
+                            WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                        if (DEBUG) Log.v(TAG, "Window asks to show input going forward");
+                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
                     }
+                    break;
+                case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                    if (DEBUG) Log.v(TAG, "Window asks to always show input");
+                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
                     break;
             }
         }
@@ -968,18 +997,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public void hideMySoftInput(IBinder token) {
+    public void hideMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
             if (mCurToken == null || mCurToken != token) {
                 Log.w(TAG, "Ignoring hideInputMethod of token: " + token);
             }
 
-            if (mInputShown && mCurMethod != null) {
-                executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
-                        MSG_HIDE_SOFT_INPUT, mCurMethod));
-            }
-            mInputShown = false;
-            mShowRequested = false;
+            hideCurrentInputLocked(flags);
         }
     }
 
@@ -1028,7 +1052,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
             case MSG_SHOW_SOFT_INPUT:
                 try {
-                    ((IInputMethod)msg.obj).showSoftInput();
+                    ((IInputMethod)msg.obj).showSoftInput(msg.arg1 != 0);
                 } catch (RemoteException e) {
                 }
                 return true;
@@ -1400,6 +1424,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurMethod=" + mCurMethod);
             p.println("  mEnabledSession=" + mEnabledSession);
             p.println("  mShowRequested=" + mShowRequested
+                    + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mInputShown=" + mInputShown);
             p.println("  mScreenOn=" + mScreenOn);
         }

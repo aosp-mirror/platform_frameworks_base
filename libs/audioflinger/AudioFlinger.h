@@ -33,7 +33,7 @@
 #include <utils/KeyedVector.h>
 #include <utils/SortedVector.h>
 
-#include <hardware/AudioHardwareInterface.h>
+#include <hardware_legacy/AudioHardwareInterface.h>
 
 #include "AudioBufferProvider.h"
 

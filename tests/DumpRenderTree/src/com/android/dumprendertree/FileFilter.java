@@ -87,7 +87,10 @@ public class FileFilter {
         "font-face-implicit-local-font.html",
         "font-face-locally-installed.html",
         "beforeSelectorOnCodeElement.html",
-        "cssTarget-crash.html"
+        "cssTarget-crash.html",
+        "searchfield-heights.html", // Bug 1570692
+        "tabindex-focus-blur-all.html",
+        "search-rtl.html" // fast/forms/search-rtl.html
         };
     
     static void fillIgnoreResultSet() {

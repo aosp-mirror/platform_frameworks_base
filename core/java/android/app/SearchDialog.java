@@ -38,6 +38,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -538,7 +539,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
             updateWidgetState();
             // Only do suggestions if actually typed by user
-            if (mSuggestionsAdapter.getNonUserQuery()) {
+            if (!mSuggestionsAdapter.getNonUserQuery()) {
                 mPreviousSuggestionQuery = s.toString();
                 mUserQuery = mSearchTextField.getText().toString();
                 mUserQuerySelStart = mSearchTextField.getSelectionStart();
@@ -640,6 +641,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 if (DBG_LOG_TIMING == 1) {
                     dbgLogTiming("doTextKey()");
                 }
+                // dispatch "typing in the list" first
+                if (mSearchTextField.isPopupShowing() && 
+                        mSearchTextField.getListSelection() != ListView.INVALID_POSITION) {
+                     return onSuggestionsKey(v, keyCode, event);
+                }
+                // otherwise, dispatch an "edit view" key
                 switch (keyCode) {
                 case KeyEvent.KEYCODE_ENTER:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -648,6 +655,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);                    
                         return true;
                     }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_DOWN:                    
+                    // capture the EditText state, so we can restore the user entry later
+                    mUserQuery = mSearchTextField.getText().toString();
+                    mUserQuerySelStart = mSearchTextField.getSelectionStart();
+                    mUserQuerySelEnd = mSearchTextField.getSelectionEnd();
+                    // pass through - we're just watching here
                     break;
                 default:
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -668,24 +682,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * React to the user typing while the suggestions are focused.  First, check for action
      * keys.  If not handled, try refocusing regular characters into the EditText.  In this case,
      * replace the query text (start typing fresh text).
-     * 
-     * TODO:  Move this code into mTextKeyListener, testing for a list entry being hilited
      */
-    /*
-    View.OnKeyListener mSuggestionsKeyListener = new View.OnKeyListener() {
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            boolean handled = false;
-            // also guard against possible race conditions (late arrival after dismiss)
-            if (mSearchable != null) {
-                handled = doSuggestionsKey(v, keyCode, event);
-                if (!handled) {
-                    handled = refocusingKeyListener(v, keyCode, event);
-                }
+    private boolean onSuggestionsKey(View v, int keyCode, KeyEvent event) {
+        boolean handled = false;
+        // also guard against possible race conditions (late arrival after dismiss)
+        if (mSearchable != null) {
+            handled = doSuggestionsKey(v, keyCode, event);
+            if (!handled) {
+                handled = refocusingKeyListener(v, keyCode, event);
             }
-            return handled;
         }
-    };
-    */
+        return handled;
+    }
     
     /**
      * Per UI design, we're going to "steer" any typed keystrokes back into the EditText
@@ -821,26 +829,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             
             // First, check for enter or search (both of which we'll treat as a "click")
             if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
-                AdapterView<?> av = (AdapterView<?>) v;
-                int position = av.getSelectedItemPosition();
-                return launchSuggestion(av, position);
+                int position = mSearchTextField.getListSelection();
+                return launchSuggestion(mSuggestionsAdapter, position);
             }
             
-            // Next, check for left/right moves while we'll manually grab and shift focus
+            // Next, check for left/right moves, which we use to "return" the user to the edit view
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                // give focus to text editor
-                // but don't restore the user's original query
-                mLeaveJammedQueryOnRefocus = true;
-                if (mSearchTextField.requestFocus()) {
-                    mLeaveJammedQueryOnRefocus = false;
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                        mSearchTextField.setSelection(0);
-                    } else {
-                        mSearchTextField.setSelection(mSearchTextField.length());
-                    }
-                    return true;
-                }
-                mLeaveJammedQueryOnRefocus = false;
+                // give "focus" to text editor, but don't restore the user's original query
+                int selPoint = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 
+                        0 : mSearchTextField.length();
+                mSearchTextField.setSelection(selPoint);
+                mSearchTextField.setListSelection(0);
+                mSearchTextField.clearListSelection();
+                return true;
+            }
+            
+            // Next, check for an "up and out" move
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP && 0 == mSearchTextField.getListSelection()) {
+                jamSuggestionQuery(false, null, -1);
+                // let ACTV complete the move
+                return false;
             }
             
             // Next, check for an "action key"
@@ -849,11 +857,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     ((actionKey.mSuggestActionMsg != null) || 
                      (actionKey.mSuggestActionMsgColumn != null))) {
                 //   launch suggestion using action key column
-                ListView lv = (ListView) v;
-                int position = lv.getSelectedItemPosition();
+                int position = mSearchTextField.getListSelection();
                 if (position >= 0) {
-                    CursorAdapter ca = getSuggestionsAdapter(lv);
-                    Cursor c = ca.getCursor();
+                    Cursor c = mSuggestionsAdapter.getCursor();
                     if (c.moveToPosition(position)) {
                         final String actionMsg = getActionKeyMessage(c, actionKey);
                         if (actionMsg != null && (actionMsg.length() > 0)) {
@@ -975,19 +981,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         getContext().startActivity(launcher);
     }
 
-    /**
-     * Shared code for launching a query from a suggestion.
-     * 
-     * @param av The AdapterView (really a ListView) containing the suggestions
-     * @param position The suggestion we'll be launching from
-     * 
-     * @return Returns true if a successful launch, false if could not (e.g. bad position)
-     */
-    private boolean launchSuggestion(AdapterView<?> av, int position) {
-        CursorAdapter ca = getSuggestionsAdapter(av);
-        return launchSuggestion(ca, position);
-    }
-    
     /**
      * Shared code for launching a query from a suggestion.
      * @param ca The cursor adapter containing the suggestions
@@ -1115,6 +1108,36 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         return result;
     }
         
+    /**
+     * Local subclass for AutoCompleteTextView
+     * 
+     * This exists entirely to override the threshold method.  Otherwise we just use the class
+     * as-is.
+     */
+    public static class SearchAutoComplete extends AutoCompleteTextView {
+
+        public SearchAutoComplete(Context context) {
+            super(null);
+        }
+        
+        public SearchAutoComplete(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public SearchAutoComplete(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+        
+        /**
+         * We always return true, so that the effective threshold is "zero".  This allows us
+         * to provide "null" suggestions such as "just show me some recent entries".
+         */
+        @Override
+        public boolean enoughToFilter() {
+            return true;
+        }
+    }
+    
     /**
      * Support for AutoCompleteTextView-based suggestions
      */
@@ -1391,7 +1414,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * Implements OnItemClickListener
      */
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//        Log.d(LOG_TAG, "onItemClick() position " + position);
+        // Log.d(LOG_TAG, "onItemClick() position " + position);
         launchSuggestion(mSuggestionsAdapter, position);
     }
     
@@ -1399,7 +1422,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * Implements OnItemSelectedListener
      */
      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//         Log.d(LOG_TAG, "onItemSelected() position " + position);
+         // Log.d(LOG_TAG, "onItemSelected() position " + position);
          jamSuggestionQuery(true, parent, position);
      }
 
@@ -1407,7 +1430,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
       * Implements OnItemSelectedListener
       */
      public void onNothingSelected(AdapterView<?> parent) {
-//         Log.d(LOG_TAG, "onNothingSelected()");
+         // Log.d(LOG_TAG, "onNothingSelected()");
      }
 
     /**

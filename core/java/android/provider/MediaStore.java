@@ -1303,6 +1303,16 @@ public final class MediaStore
              * <P>Type: TEXT</P>
              */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+            /**
+             * The bookmark for the video. Time in ms. Represents the location in the video that the
+             * video should start playing at the next time it is opened. If the value is null or
+             * out of the range 0..DURATION-1 then the video should start playing from the
+             * beginning.
+             * @hide
+             * <P>Type: INTEGER</P>
+             */
+            public static final String BOOKMARK = "bookmark";
         }
 
         public static final class Media implements VideoColumns {

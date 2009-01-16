@@ -16,6 +16,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libhardware \
+	libhardware_legacy \
 	libnativehelper \
     libsystem_server \
 	libutils \

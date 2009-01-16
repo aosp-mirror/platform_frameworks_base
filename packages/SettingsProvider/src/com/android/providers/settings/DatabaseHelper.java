@@ -63,7 +63,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 30;
+    private static final int DATABASE_VERSION = 31;
     
     private Context mContext;
 
@@ -313,6 +313,23 @@ class DatabaseHelper extends SQLiteOpenHelper {
             }
             
             upgradeVersion = 30;
+        }
+        
+        if (upgradeVersion == 30) {
+            /*
+             * Upgrade 31 clears the title for all quick launch shortcuts so the
+             * activities' titles will be resolved at display time. Also, the
+             * folder is changed to '@quicklaunch'.
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("UPDATE bookmarks SET folder = '@quicklaunch'");
+                db.execSQL("UPDATE bookmarks SET title = ''");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 31;
         }
 
         if (upgradeVersion != currentVersion) {

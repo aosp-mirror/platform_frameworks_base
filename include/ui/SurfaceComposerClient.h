@@ -72,7 +72,7 @@ public:
     );
 
     // ------------------------------------------------------------------------
-    // Composer paramters
+    // Composer parameters
     // All composer parameters must be changed within a transaction
     // several surfaces can be updated in one transaction, all changes are
     // committed at once when the transaction is closed.
