@@ -156,6 +156,24 @@
         android:label="@string/permlab_writeCalendar"
         android:description="@string/permdesc_writeCalendar" />
 
+    <!-- Allows an application to read the user dictionary. This should
+         really only be required by an IME, or a dictionary editor like 
+         the Settings app. 
+         @hide Pending API council approval -->
+    <permission android:name="android.permission.READ_USER_DICTIONARY"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readDictionary"
+        android:description="@string/permdesc_readDictionary" />
+
+    <!-- Allows an application to write to the user dictionary.
+         @hide Pending API council approval -->
+    <permission android:name="android.permission.WRITE_USER_DICTIONARY"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_writeDictionary"
+        android:description="@string/permdesc_writeDictionary" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->

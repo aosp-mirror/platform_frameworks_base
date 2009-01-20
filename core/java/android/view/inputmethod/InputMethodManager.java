@@ -800,7 +800,7 @@ public final class InputMethodManager {
             
             try {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
-                        + ic + " tba=" + tba);
+                        + ic + " tba=" + tba + " initial=" + initial);
                 InputBindResult res = mService.startInput(mClient, tba, initial,
                         mCurMethod == null);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
@@ -848,6 +848,9 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "focusIn: " + view);
             // Okay we have a new view that is being served.
+            if (mServedView != view) {
+                mCurrentTextBoxAttribute = null;
+            }
             mServedView = view;
             mCompletions = null;
             mServedConnecting = true;

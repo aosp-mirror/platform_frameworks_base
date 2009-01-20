@@ -57,7 +57,6 @@ public class BluetoothHeadset {
     private IBluetoothHeadset mService;
     private final Context mContext;
     private final ServiceListener mServiceListener;
-    private ConnectHeadsetCallback mConnectHeadsetCallback;
 
     /** There was an error trying to obtain the state */
     public static final int STATE_ERROR        = -1;
@@ -72,6 +71,11 @@ public class BluetoothHeadset {
     public static final int RESULT_SUCCESS = 1;
     /** Connection cancelled before completetion. */
     public static final int RESULT_CANCELLED = 2;
+
+    /** Default priority for headsets that should be auto-connected */
+    public static final int PRIORITY_AUTO = 100;
+    /** Default priority for headsets that should not be auto-connected */
+    public static final int PRIORITY_OFF = 0;
 
     /**
      * An interface for notifying BluetoothHeadset IPC clients when they have
@@ -94,14 +98,6 @@ public class BluetoothHeadset {
          * the BluetoothHeadset service, but may be called more often in future.
          */
         public void onServiceDisconnected();
-    }
-
-    /**
-     * Interface for connectHeadset() callback.
-     * This callback can occur in the Binder thread.
-     */
-    public interface ConnectHeadsetCallback {
-        public void onConnectHeadsetResult(String address, int resultCode);
     }
 
     /**
@@ -175,24 +171,18 @@ public class BluetoothHeadset {
      * Request to initiate a connection to a headset.
      * This call does not block. Fails if a headset is already connecting
      * or connected.
-     * Will connect to the last connected headset if address is null.
-     * onConnectHeadsetResult() of your ConnectHeadsetCallback will be called
-     * on completition.
-     * @param address The Bluetooth Address to connect to, or null to connect
-     *                to the last connected headset.
-     * @param callback Callback on result. Not called if false is returned. Can
-     *                be null.
-     *                to the last connected headset.
+     * Initiates auto-connection if address is null. Tries to connect to all
+     * devices with priority greater than PRIORITY_AUTO in descending order.
+     * @param address The Bluetooth Address to connect to, or null to
+     *                auto-connect to the last connected headset.
      * @return        False if there was a problem initiating the connection
-     *                procedure, and your callback will not be used. True if
-     *                the connection procedure was initiated, in which case
-     *                your callback is guarenteed to be called.
+     *                procedure, and no further HEADSET_STATE_CHANGED intents
+     *                will be expected.
      */
-    public boolean connectHeadset(String address, ConnectHeadsetCallback callback) {
+    public boolean connectHeadset(String address) {
         if (mService != null) {
             try {
-                if (mService.connectHeadset(address, mHeadsetCallback)) {
-                    mConnectHeadsetCallback = callback;
+                if (mService.connectHeadset(address)) {
                     return true;
                 }
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
@@ -273,6 +263,71 @@ public class BluetoothHeadset {
         return false;
     }
 
+    /**
+     * Set priority of headset.
+     * Priority is a non-negative integer. By default paired headsets will have
+     * a priority of PRIORITY_AUTO, and unpaired headset PRIORITY_NONE (0).
+     * Headsets with priority greater than zero will be auto-connected, and
+     * incoming connections will be accepted (if no other headset is
+     * connected).
+     * Auto-connection occurs at the following events: boot, incoming phone
+     * call, outgoing phone call.
+     * Headsets with priority equal to zero, or that are unpaired, are not
+     * auto-connected.
+     * Incoming connections are ignored regardless of priority if there is
+     * already a headset connected.
+     * @param address Paired headset
+     * @param priority Integer priority, for example PRIORITY_AUTO or
+     *                 PRIORITY_NONE
+     * @return True if successful, false if there was some error.
+     */
+    public boolean setPriority(String address, int priority) {
+        if (mService != null) {
+            try {
+                return mService.setPriority(address, priority);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Get priority of headset.
+     * @param address Headset
+     * @return non-negative priority, or negative error code on error.
+     */
+    public int getPriority(String address) {
+        if (mService != null) {
+            try {
+                return mService.getPriority(address);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return -1;
+    }
+
+    /**
+     * Check class bits for possible HSP or HFP support.
+     * This is a simple heuristic that tries to guess if a device with the
+     * given class bits might support HSP or HFP. It is not accurate for all
+     * devices. It tries to err on the side of false positives.
+     * @return True if this device might support HSP or HFP.
+     */
+    public static boolean doesClassMatch(int btClass) {
+        switch (BluetoothClass.Device.getDevice(btClass)) {
+        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
@@ -286,14 +341,6 @@ public class BluetoothHeadset {
             mService = null;
             if (mServiceListener != null) {
                 mServiceListener.onServiceDisconnected();
-            }
-        }
-    };
-
-    private IBluetoothHeadsetCallback mHeadsetCallback = new IBluetoothHeadsetCallback.Stub() {
-        public void onConnectHeadsetResult(String address, int resultCode) {
-            if (mConnectHeadsetCallback != null) {
-                mConnectHeadsetCallback.onConnectHeadsetResult(address, resultCode);
             }
         }
     };

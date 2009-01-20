@@ -1129,6 +1129,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         
         /**
+         * We never allow ACTV to automatically replace the text, since we use "jamSuggestionQuery"
+         * to do that.  There's no point in letting ACTV do this here, because in the search UI,
+         * as soon as we click a suggestion, we're going to start shutting things down.
+         */
+        @Override
+        public void replaceText(CharSequence text) {
+        }
+        
+        /**
          * We always return true, so that the effective threshold is "zero".  This allows us
          * to provide "null" suggestions such as "just show me some recent entries".
          */

@@ -16,8 +16,10 @@
 
 package android.webkit;
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -30,7 +32,14 @@ import android.os.SystemClock;
 import android.util.Config;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import com.android.internal.R;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 
 /**
@@ -376,12 +385,24 @@ class CallbackProxy extends Handler {
 
             case JS_ALERT:
                 if (mWebChromeClient != null) {
-                    JsResult res = (JsResult) msg.obj;
+                    final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsAlert(mWebView, url, message,
-                                res)) {
-                        res.handleDefault();
+                            res)) {
+                        new AlertDialog.Builder(mContext)
+                                .setTitle(getJsDialogTitle(url))
+                                .setMessage(message)
+                                .setPositiveButton(R.string.ok,
+                                        new AlertDialog.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                res.confirm();
+                                            }
+                                        })
+                                .setCancelable(false)
+                                .show();
                     }
                     res.setReady();
                 }
@@ -389,12 +410,29 @@ class CallbackProxy extends Handler {
 
             case JS_CONFIRM:
                 if (mWebChromeClient != null) {
-                    JsResult res = (JsResult) msg.obj;
+                    final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsConfirm(mWebView, url, message,
-                                res)) {
-                        res.handleDefault();
+                            res)) {
+                        new AlertDialog.Builder(mContext)
+                                .setTitle(getJsDialogTitle(url))
+                                .setMessage(message)
+                                .setPositiveButton(R.string.ok, 
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                res.confirm();
+                                            }})
+                                .setNegativeButton(R.string.cancel, 
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                res.cancel();
+                                            }})
+                                .show();
                     }
                     // Tell the JsResult that it is ready for client
                     // interaction.
@@ -404,13 +442,49 @@ class CallbackProxy extends Handler {
 
             case JS_PROMPT:
                 if (mWebChromeClient != null) {
-                    JsPromptResult res = (JsPromptResult) msg.obj;
+                    final JsPromptResult res = (JsPromptResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String defaultVal = msg.getData().getString("default");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsPrompt(mWebView, url, message,
                                 defaultVal, res)) {
-                        res.handleDefault();
+                        final LayoutInflater factory = LayoutInflater
+                                .from(mContext);
+                        final View view = factory.inflate(R.layout.js_prompt,
+                                null);
+                        final EditText v = (EditText) view
+                                .findViewById(R.id.value);
+                        v.setText(defaultVal);
+                        ((TextView) view.findViewById(R.id.message))
+                                .setText(message);
+                        new AlertDialog.Builder(mContext)
+                                .setTitle(getJsDialogTitle(url))
+                                .setView(view)
+                                .setPositiveButton(R.string.ok,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int whichButton) {
+                                                res.confirm(v.getText()
+                                                        .toString());
+                                            }
+                                        })
+                                .setNegativeButton(R.string.cancel,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int whichButton) {
+                                                res.cancel();
+                                            }
+                                        })
+                                .setOnCancelListener(
+                                        new DialogInterface.OnCancelListener() {
+                                            public void onCancel(
+                                                    DialogInterface dialog) {
+                                                res.cancel();
+                                            }
+                                        })
+                                .show();
                     }
                     // Tell the JsResult that it is ready for client
                     // interaction.
@@ -420,12 +494,32 @@ class CallbackProxy extends Handler {
 
             case JS_UNLOAD:
                 if (mWebChromeClient != null) {
-                    JsResult res = (JsResult) msg.obj;
+                    final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsBeforeUnload(mWebView, url,
-                                message, res)) {
-                        res.handleDefault();
+                            message, res)) {
+                        final String m = mContext.getString(
+                                R.string.js_dialog_before_unload, message);
+                        new AlertDialog.Builder(mContext)
+                                .setMessage(m)
+                                .setPositiveButton(R.string.ok,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                res.confirm();
+                                            }
+                                        })
+                                .setNegativeButton(R.string.cancel,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                res.cancel();
+                                            }
+                                        })
+                                .show();
                     }
                     res.setReady();
                 }
@@ -466,6 +560,24 @@ class CallbackProxy extends Handler {
      */
     void switchOutDrawHistory() {
         sendMessage(obtainMessage(SWITCH_OUT_HISTORY));
+    }
+
+    private String getJsDialogTitle(String url) {
+        String title = url;
+        if (URLUtil.isDataUrl(url)) {
+            // For data: urls, we just display 'JavaScript' similar to Safari.
+            title = mContext.getString(R.string.js_dialog_title_default);
+        } else {
+            try {
+                URL aUrl = new URL(url);
+                // For example: "The page at 'http://www.mit.edu' says:"
+                title = mContext.getString(R.string.js_dialog_title,
+                        aUrl.getProtocol() + "://" + aUrl.getHost());
+            } catch (MalformedURLException ex) {
+                // do nothing. just use the url as the title
+            }
+        }
+        return title;
     }
 
     //--------------------------------------------------------------------------

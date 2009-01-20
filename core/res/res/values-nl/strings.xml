@@ -310,6 +310,14 @@
     <string name="permdesc_subscribedFeedsRead">"Hiermee kan een toepassing details over de huidige gesynchroniseerde feeds achterhalen."</string>
     <string name="permlab_subscribedFeedsWrite">"geabonneerde feeds schrijven"</string>
     <string name="permdesc_subscribedFeedsWrite">"Hiermee kan een toepassing uw huidige gesynchroniseerde feeds wijzigen. Een schadelijke toepassing kan op deze manier uw gesynchroniseerde feeds wijzigen."</string>
+    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
+    <skip />
+    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
+    <skip />
+    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
+    <skip />
+    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"Thuis"</item>
     <item>"Mobiel"</item>
@@ -406,6 +414,12 @@
     <string name="factorytest_not_system">"De actie FACTORY_TEST wordt alleen ondersteund voor pakketten die zijn geïnstalleerd in /system/app."</string>
     <string name="factorytest_no_action">"Er is geen pakket gevonden dat de actie FACTORY_TEST levert."</string>
     <string name="factorytest_reboot">"Opnieuw opstarten"</string>
+    <!-- no translation found for js_dialog_title (8143918455087008109) -->
+    <skip />
+    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
+    <skip />
     <string name="save_password_label">"Bevestigen"</string>
     <string name="save_password_message">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow">"Niet nu"</string>

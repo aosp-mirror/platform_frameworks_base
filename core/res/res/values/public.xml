@@ -748,7 +748,7 @@
   <public type="drawable" name="btn_plus" id="0x01080008" />
   <public type="drawable" name="btn_radio" id="0x01080009" />
   <public type="drawable" name="btn_star" id="0x0108000a" />
-  <public type="drawable" name="btn_star_big_off" id="0x0108000b" />
+  <public type="drawable" name="btn_star_big_off" id="0x0108000b" /> 
   <public type="drawable" name="btn_star_big_on" id="0x0108000c" />
   <public type="drawable" name="button_onoff_indicator_on" id="0x0108000d" />
   <public type="drawable" name="button_onoff_indicator_off" id="0x0108000e" />
@@ -1034,10 +1034,22 @@
   <public type="style" name="Theme.NoDisplay" id="0x01030055" />
   <public type="style" name="Animation.InputMethod" id="0x01030056" />
   <public type="style" name="Widget.KeyboardView" id="0x01030057" />
-  
-  <public type="drawable" name="ic_btn_search" id="0x0108009e" />
-  <public type="drawable" name="ic_dialog_menu_generic" id="0x010800a0" />
-  <public type="drawable" name="ic_menu_login" id="0x010800a1" />
-  <public type="drawable" name="ic_menu_refresh" id="0x010800a2" />
-  <public type="drawable" name="ic_menu_notifications" id="0x010800a3" />
+
+  <public type="drawable" name="emo_im_angel"               id="0x010800a4" />
+  <public type="drawable" name="emo_im_cool"                id="0x010800a5" />
+  <public type="drawable" name="emo_im_crying"              id="0x010800a6" />
+  <public type="drawable" name="emo_im_embarrassed"         id="0x010800a7" />
+  <public type="drawable" name="emo_im_foot_in_mouth"       id="0x010800a8" />
+  <public type="drawable" name="emo_im_happy"               id="0x010800a9" />
+  <public type="drawable" name="emo_im_kissing"             id="0x010800aa" />
+  <public type="drawable" name="emo_im_laughing"            id="0x010800ab" />
+  <public type="drawable" name="emo_im_lips_are_sealed"     id="0x010800ac" />
+  <public type="drawable" name="emo_im_money_mouth"         id="0x010800ad" />
+  <public type="drawable" name="emo_im_sad"                 id="0x010800ae" />
+  <public type="drawable" name="emo_im_surprised"           id="0x010800af" />
+  <public type="drawable" name="emo_im_tongue_sticking_out" id="0x010800b0" />
+  <public type="drawable" name="emo_im_undecided"           id="0x010800b1" />
+  <public type="drawable" name="emo_im_winking"             id="0x010800b2" />
+  <public type="drawable" name="emo_im_wtf"                 id="0x010800b3" />
+  <public type="drawable" name="emo_im_yelling"             id="0x010800b4" />
 </resources>

@@ -116,4 +116,35 @@ public class AutoCompleteTextViewPopup
                 ListView.INVALID_POSITION, textView.getListSelection());
     }
 
+    /** Make sure we handle an empty adapter properly */
+    @MediumTest
+    public void testPopupNavigateNoAdapter() throws Throwable {
+        AutoCompleteTextViewSimple theActivity = getActivity();
+        final AutoCompleteTextView textView = theActivity.getTextView();
+        final Instrumentation instrumentation = getInstrumentation();
+
+        // focus and type
+        textView.requestFocus();
+        instrumentation.waitForIdleSync();
+        sendKeys("A");
+
+        // No initial selection
+        assertEquals("getListSelection(-1)",
+                ListView.INVALID_POSITION, textView.getListSelection());
+
+        // check for selection position as expected
+        sendKeys("DPAD_DOWN");
+        assertEquals("getListSelection(0)", 0, textView.getListSelection());
+
+        // Now get rid of the adapter
+        runTestOnUiThread(new Runnable() {
+            public void run() {
+                textView.setAdapter((ArrayAdapter<?>) null);
+            }
+        });
+        instrumentation.waitForIdleSync();
+
+        // now try moving "down" - nothing should happen since there's no longer an adapter
+        sendKeys("DPAD_DOWN");
+    }
 }

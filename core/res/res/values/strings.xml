@@ -979,6 +979,18 @@
       your currently synced feeds. This could allow a malicious application to
       change your synced feeds.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_readDictionary">read user defined dictionary</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readDictionary">Allows an application to read any private
+      words, names and phrases that the user may have stored in the user dictionary.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_writeDictionary">write to user defined dictionary</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_writeDictionary">Allows an application to write new words into the
+      user dictionary.</string>
+
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
     <string-array name="phoneTypes">
@@ -1215,6 +1227,14 @@
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent"><xliff:g id="x">Mozilla/5.0 (Linux; U; Android %s)
         AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1</xliff:g></string>
+
+    <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
+    <string name="js_dialog_title">The page at \'<xliff:g id="title">%s</xliff:g>\' says:</string>
+    <!-- Default title for a javascript dialog -->
+    <string name="js_dialog_title_default">JavaScript</string>
+    <!-- Message in a javascript dialog asking if the user wishes to leave the
+             current page -->
+    <string name="js_dialog_before_unload">Navigate away from this page?\n\n<xliff:g id="message">%s</xliff:g>\n\nSelect OK to continue, or Cancel to stay on the current page.</string>
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>

@@ -310,6 +310,14 @@
     <string name="permdesc_subscribedFeedsRead">"允許應用程式取得目前已同步處理的資訊提供。"</string>
     <string name="permlab_subscribedFeedsWrite">"寫入訂閱資訊提供"</string>
     <string name="permdesc_subscribedFeedsWrite">"允許應用程式修改已同步處理的資訊提供。惡意程式可使用此功能變更已同步處理的資訊提供。"</string>
+    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
+    <skip />
+    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
+    <skip />
+    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
+    <skip />
+    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"首頁"</item>
     <item>"行動"</item>
@@ -406,6 +414,12 @@
     <string name="factorytest_not_system">"FACTORY_TEST 動作只支援安裝在 /system/app 裡的程式。"</string>
     <string name="factorytest_no_action">"找不到提供 FACTORY_TEST 的程式。"</string>
     <string name="factorytest_reboot">"重新開機"</string>
+    <!-- no translation found for js_dialog_title (8143918455087008109) -->
+    <skip />
+    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
+    <skip />
     <string name="save_password_label">"確認"</string>
     <string name="save_password_message">"是否記憶此密碼？"</string>
     <string name="save_password_notnow">"現在不要"</string>

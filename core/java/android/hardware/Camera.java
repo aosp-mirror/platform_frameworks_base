@@ -55,6 +55,7 @@ public class Camera {
     private PreviewCallback mPreviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
     private ErrorCallback mErrorCallback;
+    private boolean mOneShot;
     
     /**
      * Returns a new Camera object.
@@ -198,9 +199,25 @@ public class Camera {
      */
     public final void setPreviewCallback(PreviewCallback cb) {
         mPreviewCallback = cb;
-        setHasPreviewCallback(cb != null);
+        mOneShot = false;
+        setHasPreviewCallback(cb != null, false);
     }
-    private native final void setHasPreviewCallback(boolean installed);
+
+    /**
+     * Installs a callback to retrieve a single preview frame, after which the
+     * callback is cleared.
+     *
+     * @param cb A callback object that receives a copy of the preview frame.
+     */
+    public final void setOneShotPreviewCallback(PreviewCallback cb) {
+        if (cb != null) {
+            mPreviewCallback = cb;
+            mOneShot = true;
+            setHasPreviewCallback(true, true);
+        }
+    }
+
+    private native final void setHasPreviewCallback(boolean installed, boolean oneshot);
 
     private class EventHandler extends Handler
     {
@@ -230,8 +247,12 @@ public class Camera {
                 return;
             
             case PREVIEW_CALLBACK:
-                if (mPreviewCallback != null)
+                if (mPreviewCallback != null) {
                     mPreviewCallback.onPreviewFrame((byte[])msg.obj, mCamera);
+                    if (mOneShot) {
+                        mPreviewCallback = null;
+                    }
+                }
                 return;
 
             case AUTOFOCUS_CALLBACK:

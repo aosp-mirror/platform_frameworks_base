@@ -170,7 +170,7 @@ private:
         bool mVisibilityChanged;
 
         overlay_t* mOverlay;        
-        overlay_handle_t const *mOverlayHandle;
+        overlay_handle_t mOverlayHandle;
         overlay_control_device_t* mOverlayDevice;
         uint32_t mWidth;
         uint32_t mHeight;

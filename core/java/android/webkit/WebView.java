@@ -57,6 +57,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.TextDialog.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.widget.AbsoluteLayout;
 import android.widget.AdapterView;
@@ -2819,10 +2820,8 @@ public class WebView extends AbsoluteLayout
         public void run() {
             ArrayList<String> pastEntries = mDatabase.getFormData(mUrl, mName);
             if (pastEntries.size() > 0) {
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        mContext, com.android.internal.R.layout
-                        .search_dropdown_item_1line,
-                        pastEntries);
+                AutoCompleteAdapter adapter = new
+                        AutoCompleteAdapter(mContext, pastEntries);
                 ((HashMap) mUpdateMessage.obj).put("adapter", adapter);
                 mUpdateMessage.sendToTarget();
             }
@@ -4458,9 +4457,9 @@ public class WebView extends AbsoluteLayout
                 case UPDATE_TEXT_ENTRY_ADAPTER:
                     HashMap data = (HashMap) msg.obj;
                     if (mTextEntry.isSameTextField(msg.arg1)) {
-                        ArrayAdapter<String> adapter =
-                                (ArrayAdapter<String>) data.get("adapter");
-                        mTextEntry.setAdapter(adapter);
+                        AutoCompleteAdapter adapter =
+                                (AutoCompleteAdapter) data.get("adapter");
+                        mTextEntry.setAdapterCustom(adapter);
                     }
                     break;
                 case UPDATE_CLIPBOARD:

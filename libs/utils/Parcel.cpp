@@ -650,6 +650,26 @@ status_t Parcel::writeWeakBinder(const wp<IBinder>& val)
     return flatten_binder(ProcessState::self(), val, this);
 }
 
+status_t Parcel::writeNativeHandle(const native_handle& handle)
+{
+    if (handle.version != sizeof(native_handle))
+        return BAD_TYPE;
+
+    status_t err;
+    err = writeInt32(handle.numFds);
+    if (err != NO_ERROR) return err;
+    
+    err = writeInt32(handle.numInts);
+    if (err != NO_ERROR) return err;
+    
+    for (int i=0 ; err==NO_ERROR && i<handle.numFds ; i++)
+        err = writeDupFileDescriptor(handle.data[i]);
+    
+    err = write(handle.data + handle.numFds, sizeof(int)*handle.numInts);
+    
+    return err;
+}
+
 status_t Parcel::writeFileDescriptor(int fd)
 {
     flat_binder_object obj;
@@ -902,6 +922,47 @@ wp<IBinder> Parcel::readWeakBinder() const
     return val;
 }
 
+
+native_handle* Parcel::readNativeHandle(native_handle* (*alloc)(void*, int, int), void* cookie) const
+{
+    int numFds, numInts;
+    status_t err;
+    err = readInt32(&numFds);
+    if (err != NO_ERROR) return 0;
+    err = readInt32(&numInts);
+    if (err != NO_ERROR) return 0;
+
+    native_handle* h;
+    if (alloc == 0) {
+        size_t size = sizeof(native_handle) + sizeof(int)*(numFds + numInts);
+        h = (native_handle*)malloc(size); 
+        h->version = sizeof(native_handle);
+        h->numFds = numFds;
+        h->numInts = numInts;
+    } else {
+        h = alloc(cookie, numFds, numInts);
+        if (h->version != sizeof(native_handle)) {
+            return 0;
+        }
+    }
+    
+    for (int i=0 ; err==NO_ERROR && i<numFds ; i++) {
+        h->data[i] = readFileDescriptor();
+        if (h->data[i] < 0) err = BAD_VALUE;
+    }
+    
+    err = read(h->data + numFds, sizeof(int)*numInts);
+    
+    if (err != NO_ERROR) {
+        if (alloc == 0) {
+            free(h);
+        }
+        h = 0;
+    }
+    return h;
+}
+
+
 int Parcel::readFileDescriptor() const
 {
     const flat_binder_object* flat = readObject(true);
@@ -923,7 +984,7 @@ const flat_binder_object* Parcel::readObject(bool nullMetaData) const
                 = reinterpret_cast<const flat_binder_object*>(mData+DPOS);
         mDataPos = DPOS + sizeof(flat_binder_object);
         if (!nullMetaData && (obj->cookie == NULL && obj->binder == NULL)) {
-            // When transfering a NULL object, we don't write it into
+            // When transferring a NULL object, we don't write it into
             // the object list, so we don't want to check for it when
             // reading.
             LOGV("readObject Setting data pos of %p to %d\n", this, mDataPos);

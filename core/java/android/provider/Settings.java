@@ -1740,12 +1740,12 @@ public final class Settings {
          */
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/secure");
-        
+
         /**
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
-    
+
         /**
          * Setting to allow mock locations and location provider status to be injected into the
          * LocationManager service for testing purposes during application development.  These
@@ -1753,7 +1753,7 @@ public final class Settings {
          * by network, gps, or other location providers.
          */
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
-    
+
         /**
          * The Android ID (a unique 64-bit value) as a hex string.
          * Identical to that obtained by calling
@@ -1761,24 +1761,40 @@ public final class Settings {
          * so you can get it without binding to a service.
          */
         public static final String ANDROID_ID = "android_id";
-    
+
         /**
          * Whether bluetooth is enabled/disabled
          * 0=disabled. 1=enabled.
          */
         public static final String BLUETOOTH_ON = "bluetooth_on";
-    
+
+        /**
+         * Get the key that retrieves a bluetooth headset's priority.
+         * @hide
+         */
+        public static final String getBluetoothHeadsetPriorityKey(String address) {
+            return ("bluetooth_headset_priority_" + address.toUpperCase());
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth a2dp sink's priority.
+         * @hide
+         */
+        public static final String getBluetoothA2dpSinkPriorityKey(String address) {
+            return ("bluetooth_a2dp_sink_priority_" + address.toUpperCase());
+        }
+
         /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
          */
         public static final String DATA_ROAMING = "data_roaming";
-    
+
         /**
          * Setting to record the input method used by default, holding the ID
          * of the desired method.
          */
         public static final String DEFAULT_INPUT_METHOD = "default_input_method";
-    
+
         /**
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
@@ -1953,7 +1969,13 @@ public final class Settings {
          * Whether the Wi-Fi watchdog is enabled.
          */
         public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
-    
+
+        /**
+         * A comma-separated list of SSIDs for which the Wi-Fi watchdog should be enabled.
+         * @hide pending API council
+         */
+        public static final String WIFI_WATCHDOG_WATCH_LIST = "wifi_watchdog_watch_list";
+
         /**
          * The number of pings to test if an access point is a good connection.
          */
