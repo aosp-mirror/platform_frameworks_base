@@ -40,7 +40,7 @@ class IMemoryHeap;
 class OverlayRef : public LightRefBase<OverlayRef>
 {
 public:
-    OverlayRef(overlay_handle_t const*, const sp<IOverlay>&,
+    OverlayRef(overlay_handle_t, const sp<IOverlay>&,
             uint32_t w, uint32_t h, int32_t f, uint32_t ws, uint32_t hs);
 
     static sp<OverlayRef> readFromParcel(const Parcel& data);
@@ -53,7 +53,7 @@ private:
     OverlayRef();
     virtual ~OverlayRef();
 
-    overlay_handle_t const *mOverlayHandle;
+    overlay_handle_t mOverlayHandle;
     sp<IOverlay> mOverlayChannel;
     uint32_t mWidth;
     uint32_t mHeight;
@@ -74,7 +74,7 @@ public:
     void destroy();
     
     /* get the HAL handle for this overlay */
-    overlay_handle_t const* getHandleRef() const;
+    overlay_handle_t getHandleRef() const;
 
     /* blocks until an overlay buffer is available and return that buffer. */
     status_t dequeueBuffer(overlay_buffer_t* buffer);

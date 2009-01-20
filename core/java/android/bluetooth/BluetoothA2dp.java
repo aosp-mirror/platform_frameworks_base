@@ -72,6 +72,12 @@ public class BluetoothA2dp {
     /** Playing implies connected */
     public static final int STATE_PLAYING    = 4;
 
+    /** Default priority for a2dp devices that should allow incoming
+     * connections */
+    public static final int PRIORITY_AUTO = 100;
+    /** Default priority for a2dp devices that should not allow incoming
+     * connections */
+    public static final int PRIORITY_OFF = 0;
     private final IBluetoothA2dp mService;
     private final Context mContext;
 
@@ -155,6 +161,66 @@ public class BluetoothA2dp {
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
+        }
+    }
+
+    /**
+     * Set priority of a2dp sink.
+     * Priority is a non-negative integer. By default paired sinks will have
+     * a priority of PRIORITY_AUTO, and unpaired headset PRIORITY_NONE (0).
+     * Sinks with priority greater than zero will accept incoming connections
+     * (if no sink is currently connected).
+     * Priority for unpaired sink must be PRIORITY_NONE.
+     * @param address Paired sink
+     * @param priority Integer priority, for example PRIORITY_AUTO or
+     *                 PRIORITY_NONE
+     * @return Result code, negative indicates an error
+     */
+    public int setSinkPriority(String address, int priority) {
+        try {
+            return mService.setSinkPriority(address, priority);
+        } catch (RemoteException e) {
+            Log.w(TAG, "", e);
+            return BluetoothError.ERROR_IPC;
+        }
+    }
+
+    /**
+     * Get priority of a2dp sink.
+     * @param address Sink
+     * @return non-negative priority, or negative error code on error.
+     */
+    public int getSinkPriority(String address) {
+        try {
+            return mService.getSinkPriority(address);
+        } catch (RemoteException e) {
+            Log.w(TAG, "", e);
+            return BluetoothError.ERROR_IPC;
+        }
+    }
+
+    /**
+     * Check class bits for possible A2DP Sink support.
+     * This is a simple heuristic that tries to guess if a device with the
+     * given class bits might be a A2DP Sink. It is not accurate for all
+     * devices. It tries to err on the side of false positives.
+     * @return True if this device might be a A2DP sink
+     */
+    public static boolean doesClassMatchSink(int btClass) {
+        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
+            return true;
+        }
+        // By the A2DP spec, sinks must indicate the RENDER service.
+        // However we found some that do not (Chordette). So lets also
+        // match on some other class bits.
+        switch (BluetoothClass.Device.getDevice(btClass)) {
+        case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
+        case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+        case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+            return true;
+        default:
+            return false;
         }
     }
 

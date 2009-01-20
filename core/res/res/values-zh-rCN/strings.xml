@@ -310,6 +310,14 @@
     <string name="permdesc_subscribedFeedsRead">"允许应用程序获取有关当前同步的供稿的详情。"</string>
     <string name="permlab_subscribedFeedsWrite">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite">"允许应用程序修改您当前同步的供稿。这样恶意程序可以更改您同步的供稿。"</string>
+    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
+    <skip />
+    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
+    <skip />
+    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
+    <skip />
+    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"家庭"</item>
     <item>"手机"</item>
@@ -406,6 +414,12 @@
     <string name="factorytest_not_system">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action">"未发现支持 FACTORY_TEST 操作的包。"</string>
     <string name="factorytest_reboot">"重新引导"</string>
+    <!-- no translation found for js_dialog_title (8143918455087008109) -->
+    <skip />
+    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
+    <skip />
     <string name="save_password_label">"确认"</string>
     <string name="save_password_message">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow">"暂不保存"</string>

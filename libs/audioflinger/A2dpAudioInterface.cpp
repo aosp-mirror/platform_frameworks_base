@@ -126,7 +126,7 @@ status_t A2dpAudioInterface::dump(int fd, const Vector<String16>& args)
 // ----------------------------------------------------------------------------
 
 A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
-    mFd(-1), mStandby(false), mStartCount(0), mRetryCount(0), mData(NULL),
+    mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL),
     mInitialized(false)
 {
     // use any address by default

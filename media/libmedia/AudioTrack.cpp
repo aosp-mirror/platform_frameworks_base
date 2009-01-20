@@ -330,6 +330,8 @@ void AudioTrack::start()
 
     if (android_atomic_or(1, &mActive) == 0) {
         mNewPosition = mCblk->server + mUpdatePeriod;
+        mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
+        mCblk->waitTimeMs = 0;
         if (t != 0) {
            t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
         } else {
@@ -572,7 +574,7 @@ status_t AudioTrack::reload()
 
 // -------------------------------------------------------------------------
 
-status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, bool blocking)
+status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     int active;
     int timeout = 0;
@@ -594,15 +596,23 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, bool blocking)
                 LOGV("Not active and NO_MORE_BUFFERS");
                 return NO_MORE_BUFFERS;
             }
-            if (UNLIKELY(!blocking))
+            if (UNLIKELY(!waitCount))
                 return WOULD_BLOCK;
             timeout = 0;
-            result = cblk->cv.waitRelative(cblk->lock, seconds(1));
-            if (__builtin_expect(result!=NO_ERROR, false)) {
-                LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
-                        "user=%08x, server=%08x", cblk->user, cblk->server);
-                mAudioTrack->start(); // FIXME: Wake up audioflinger
-                timeout = 1;
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(WAIT_PERIOD_MS));
+            if (__builtin_expect(result!=NO_ERROR, false)) { 
+                cblk->waitTimeMs += WAIT_PERIOD_MS;
+                if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
+                    LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
+                            "user=%08x, server=%08x", cblk->user, cblk->server);
+                    mAudioTrack->start(); // FIXME: Wake up audioflinger
+                    timeout = 1;
+                    cblk->waitTimeMs = 0;
+                }
+                ;
+                if (--waitCount == 0) {
+                    return TIMED_OUT;
+                }
             }
             // read the server count again
         start_loop_here:
@@ -610,6 +620,8 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, bool blocking)
         }
     }
 
+    cblk->waitTimeMs = 0;
+    
     if (framesReq > framesAvail) {
         framesReq = framesAvail;
     }
@@ -667,8 +679,9 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
         if (mFormat == AudioSystem::PCM_16_BIT) {
             audioBuffer.frameCount >>= 1;
         }
-
-        status_t err = obtainBuffer(&audioBuffer, true);
+        // Calling obtainBuffer() with a negative wait count causes
+        // an (almost) infinite wait time.
+        status_t err = obtainBuffer(&audioBuffer, -1);
         if (err < 0) {
             // out of buffers, return #bytes written
             if (err == status_t(NO_MORE_BUFFERS))
@@ -706,7 +719,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 {
     Buffer audioBuffer;
     uint32_t frames;
-    size_t writtenSize = 0;
+    size_t writtenSize;
 
     // Manage underrun callback
     if (mActive && (mCblk->framesReady() == 0)) {
@@ -756,17 +769,19 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     do {
 
         audioBuffer.frameCount = frames;
-
-        status_t err = obtainBuffer(&audioBuffer, false);
+        
+        // Calling obtainBuffer() with a wait count of 1 
+        // limits wait time to WAIT_PERIOD_MS. This prevents from being 
+        // stuck here not being able to handle timed events (position, markers, loops). 
+        status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
-            if (err != WOULD_BLOCK) {
+            if (err != TIMED_OUT) {
                 LOGE("Error obtaining an audio buffer, giving up.");
                 return false;
             }
+            break;
         }
         if (err == status_t(STOPPED)) return false;
-
-        if (audioBuffer.size == 0) break;
 
         // Divide buffer size by 2 to take into account the expansion
         // due to 8 to 16 bit conversion: the callback must fill only half
@@ -801,13 +816,6 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         releaseBuffer(&audioBuffer);
     }
     while (frames);
-
-    // If no data was written, it is likely that obtainBuffer() did
-    // not find room in PCM buffer: we release the processor for
-    // a few millisecond before polling again for available room.
-    if (writtenSize == 0) {
-        usleep(5000);
-    }
 
     if (frames == 0) {
         mRemainingFrames = mNotificationFrames;
@@ -872,7 +880,12 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 
     u += frameCount;
     // Ensure that user is never ahead of server for AudioRecord
-    if (!out && u > this->server) {
+    if (out) {
+        // If stepServer() has been called once, switch to normal obtainBuffer() timeout period
+        if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS-1) {
+            bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+        }
+    } else if (u > this->server) {
         LOGW("stepServer occured after track reset");
         u = this->server;
     }
@@ -909,13 +922,20 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
     uint32_t s = this->server;
 
     s += frameCount;
-    // It is possible that we receive a flush()
-    // while the mixer is processing a block: in this case,
-    // stepServer() is called After the flush() has reset u & s and
-    // we have s > u
-    if (out && s > this->user) {
-        LOGW("stepServer occured after track reset");
-        s = this->user;
+    if (out) {
+        // Mark that we have read the first buffer so that next time stepUser() is called
+        // we switch to normal obtainBuffer() timeout period
+        if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS) {
+            bufferTimeoutMs = MAX_RUN_TIMEOUT_MS - 1;
+        }        
+        // It is possible that we receive a flush()
+        // while the mixer is processing a block: in this case,
+        // stepServer() is called After the flush() has reset u & s and
+        // we have s > u
+        if (s > this->user) {
+            LOGW("stepServer occured after track reset");
+            s = this->user;
+        }
     }
 
     if (s >= loopEnd) {

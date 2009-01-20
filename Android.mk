@@ -71,7 +71,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
-	core/java/android/bluetooth/IBluetoothHeadsetCallback.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
@@ -98,6 +97,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
+	core/java/com/android/internal/gadget/IGadgetService.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
 	core/java/com/android/internal/view/IInputMethod.aidl \
@@ -165,6 +165,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
+	frameworks/base/core/java/android/gadget/GadgetInfo.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
@@ -421,4 +422,8 @@ include $(BUILD_JAVA_LIBRARY)
 # Include subdirectory makefiles
 # ============================================================
 
+# If we're building with ONE_SHOT_MAKEFILE (mm, mmm), then what the framework
+# team really wants is to build the stuff defined by this makefile.
+ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
+endif

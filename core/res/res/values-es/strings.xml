@@ -310,6 +310,14 @@
     <string name="permdesc_subscribedFeedsRead">"Permite que una aplicación obtenga detalles sobre los feeds sincronizados en este momento."</string>
     <string name="permlab_subscribedFeedsWrite">"escribir feeds a los que está suscrito el usuario"</string>
     <string name="permdesc_subscribedFeedsWrite">"Permite que una aplicación modifique los feeds sincronizados actualmente. Este permiso podría provocar que una aplicación malintencionada cambie los feeds sincronizados."</string>
+    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
+    <skip />
+    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
+    <skip />
+    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
+    <skip />
+    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"Casa"</item>
     <item>"Móvil"</item>
@@ -406,6 +414,12 @@
     <string name="factorytest_not_system">"La acción FACTORY_TEST sólo es compatible con los paquetes instalados en /system/app."</string>
     <string name="factorytest_no_action">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST."</string>
     <string name="factorytest_reboot">"Reiniciar"</string>
+    <!-- no translation found for js_dialog_title (8143918455087008109) -->
+    <skip />
+    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
+    <skip />
+    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
+    <skip />
     <string name="save_password_label">"Confirmar"</string>
     <string name="save_password_message">"¿Deseas que el navegador recuerde esta contraseña?"</string>
     <string name="save_password_notnow">"Ahora no"</string>

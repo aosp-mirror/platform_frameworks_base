@@ -38,13 +38,20 @@ import android.text.method.MovementMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.TextKeyListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.widget.AbsoluteLayout.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 /**
  * TextDialog is a specialized version of EditText used by WebView
@@ -281,7 +288,7 @@ import android.widget.AutoCompleteTextView;
         }
         return false;
     }
-    
+
     /**
      *  Determine whether this TextDialog currently represents the node
      *  represented by ptr.
@@ -406,6 +413,9 @@ import android.widget.AutoCompleteTextView;
      * focus to the host.
      */
     /* package */ void remove() {
+        // hide the soft keyboard when the edit text is out of focus
+        InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
+                getWindowToken(), 0);
         mHandler.removeMessages(LONGPRESS);
         mWebView.removeView(this);
         mWebView.requestFocus();
@@ -425,6 +435,43 @@ import android.widget.AutoCompleteTextView;
      */
     private void sendDomEvent(KeyEvent event) {
         mWebView.passToJavaScript(getText().toString(), event);
+    }
+
+    public void setAdapterCustom(AutoCompleteAdapter adapter) {
+        adapter.setTextView(this);
+        super.setAdapter(adapter);
+    }
+
+    /**
+     *  This is a special version of ArrayAdapter which changes its text size
+     *  to match the text size of its host TextView.
+     */
+    public static class AutoCompleteAdapter extends ArrayAdapter<String> {
+        private TextView mTextView;
+
+        public AutoCompleteAdapter(Context context, ArrayList<String> entries) {
+            super(context, com.android.internal.R.layout
+                    .search_dropdown_item_1line, entries);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv =
+                    (TextView) super.getView(position, convertView, parent);
+            if (tv != null && mTextView != null) {
+                tv.setTextSize(mTextView.getTextSize());
+            }
+            return tv;
+        }
+
+        /**
+         * Set the TextView so we can match its text size.
+         */
+        private void setTextView(TextView tv) {
+            mTextView = tv;
+        }
     }
 
     /**

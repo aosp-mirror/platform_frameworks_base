@@ -131,6 +131,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mText = (TextView) findViewById(R.id.timepicker_input);
         mText.setOnFocusChangeListener(this);
         mText.setFilters(new InputFilter[] { mInputFilter });
+        mText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         
         mSlideUpOutAnimation = new TranslateAnimation(
                 Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF,

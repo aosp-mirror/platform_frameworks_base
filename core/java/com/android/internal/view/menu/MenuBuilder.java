@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -279,7 +280,8 @@ public class MenuBuilder implements Menu {
         mVisibleItems = new ArrayList<MenuItemImpl>();
         mIsVisibleItemsStale = true;
         
-        mShortcutsVisible = true;
+        mShortcutsVisible =
+                (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
     }
     
     public void setCallback(Callback callback) {
@@ -687,7 +689,8 @@ public class MenuBuilder implements Menu {
     }
 
     /**
-     * Sets whether the shortcuts should be visible on menus.
+     * Sets whether the shortcuts should be visible on menus.  Devices without hardware
+     * key input will never make shortcuts visible even if this method is passed 'true'.
      * 
      * @param shortcutsVisible Whether shortcuts should be visible (if true and a
      *            menu item does not have a shortcut defined, that item will
@@ -696,9 +699,11 @@ public class MenuBuilder implements Menu {
     public void setShortcutsVisible(boolean shortcutsVisible) {
         if (mShortcutsVisible == shortcutsVisible) return;
         
-        mShortcutsVisible = shortcutsVisible;
+        mShortcutsVisible =
+            (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+            && shortcutsVisible;
         
-        refreshShortcuts(shortcutsVisible, isQwertyMode());
+        refreshShortcuts(mShortcutsVisible, isQwertyMode());
     }
 
     /**

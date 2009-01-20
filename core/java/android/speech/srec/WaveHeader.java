@@ -263,5 +263,12 @@ public class WaveHeader {
         out.write(val >> 0);
         out.write(val >> 8);
     }
+    
+    @Override
+    public String toString() {
+        return String.format(
+                "WaveHeader format=%d numChannels=%d sampleRate=%d bitsPerSample=%d numBytes=%d",
+                mFormat, mNumChannels, mSampleRate, mBitsPerSample, mNumBytes);
+    }
 
 }

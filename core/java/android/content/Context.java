@@ -1249,6 +1249,15 @@ public abstract class Context {
     public static final String INPUT_METHOD_SERVICE = "input_method";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@blink android.gadget.GadgetManager} for accessing wallpapers.
+     *
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String GADGET_SERVICE = "gadget";
+    
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

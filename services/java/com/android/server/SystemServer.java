@@ -290,7 +290,7 @@ class ServerThread extends Thread {
                 Log.i(TAG, "Starting Audio Service");
                 ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
             } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Volume Service", e);
+                Log.e(TAG, "Failure starting Audio Service", e);
             }
 
             try {
@@ -299,6 +299,13 @@ class ServerThread extends Thread {
                 headset = new HeadsetObserver(context);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting HeadsetObserver", e);
+            }
+
+            try {
+                Log.i(TAG, "Starting Gadget Service");
+                ServiceManager.addService(Context.GADGET_SERVICE, new GadgetService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Gadget Service", e);
             }
         }
 

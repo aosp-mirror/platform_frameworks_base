@@ -627,4 +627,11 @@
         <item name="android:shadowColor">#BB000000</item>
         <item name="android:shadowRadius">2.75</item>
     </style>
+
+    <style name="ZoomControls">
+        <item name="android:background">@android:drawable/zoom_plate</item>
+        <item name="android:gravity">bottom</item>
+        <item name="android:paddingLeft">15dip</item>
+        <item name="android:paddingRight">15dip</item>
+    </style>
 </resources>

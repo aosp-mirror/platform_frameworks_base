@@ -17,6 +17,7 @@
 #ifndef ANDROID_PARCEL_H
 #define ANDROID_PARCEL_H
 
+#include <cutils/native_handle.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 #include <utils/String16.h>
@@ -78,6 +79,9 @@ public:
     status_t            writeString16(const char16_t* str, size_t len);
     status_t            writeStrongBinder(const sp<IBinder>& val);
     status_t            writeWeakBinder(const wp<IBinder>& val);
+
+    // doesn't take ownership of the native_handle
+    status_t            writeNativeHandle(const native_handle& handle);
     
     // Place a file descriptor into the parcel.  The given fd must remain
     // valid for the lifetime of the parcel.
@@ -108,6 +112,15 @@ public:
     const char16_t*     readString16Inplace(size_t* outLen) const;
     sp<IBinder>         readStrongBinder() const;
     wp<IBinder>         readWeakBinder() const;
+
+    
+    // if alloc is NULL, native_handle is allocated with malloc(), otherwise
+    // alloc is used. If the function fails, the effects of alloc() must be
+    // reverted by the caller.
+    native_handle*     readNativeHandle(
+            native_handle* (*alloc)(void* cookie, int numFds, int ints),
+            void* cookie) const;
+
     
     // Retrieve a file descriptor from the parcel.  This returns the raw fd
     // in the parcel, which you do not own -- use dup() to get your own copy.

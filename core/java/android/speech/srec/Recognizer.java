@@ -367,6 +367,35 @@ public final class Recognizer {
         SR_RecognizerStop(mRecognizer);
         SR_RecognizerDeactivateRule(mRecognizer, mActiveGrammar.mGrammar, "trash");
     }
+    
+    /**
+     * Reset the acoustic state vectorto it's default value.
+     * 
+     * @hide
+     */
+    public void resetAcousticState() {
+        SR_AcousticStateReset(mRecognizer);
+    }
+    
+    /**
+     * Set the acoustic state vector.
+     * @param state String containing the acoustic state vector.
+     * 
+     * @hide
+     */
+    public void setAcousticState(String state) {
+        SR_AcousticStateSet(mRecognizer, state);
+    }
+    
+    /**
+     * Get the acoustic state vector.
+     * @return String containing the acoustic state vector.
+     * 
+     * @hide
+     */
+    public String getAcousticState() {
+        return SR_AcousticStateGet(mRecognizer);
+    }
 
     /**
      * Clean up resources.
@@ -572,6 +601,9 @@ public final class Recognizer {
         return "EVENT_" + event;
     }
 
+    //
+    // SR_Recognizer methods
+    //
     private static native void SR_RecognizerStart(int recognizer);
     private static native void SR_RecognizerStop(int recognizer);
     private static native int SR_RecognizerCreate();
@@ -615,6 +647,14 @@ public final class Recognizer {
     private static native boolean SR_RecognizerIsSignalTooFewSamples(int recognizer);
     private static native boolean SR_RecognizerIsSignalTooManySamples(int recognizer);
     // private static native void SR_Recognizer_Change_Sample_Rate (size_t new_sample_rate);
+    
+    
+    //
+    // SR_AcousticState native methods
+    //
+    private static native void SR_AcousticStateReset(int recognizer);
+    private static native void SR_AcousticStateSet(int recognizer, String state);
+    private static native String SR_AcousticStateGet(int recognizer);
 
 
     //

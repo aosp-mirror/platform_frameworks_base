@@ -74,7 +74,7 @@ status_t Overlay::getStatus() const {
     return mStatus;
 }
 
-overlay_handle_t const* Overlay::getHandleRef() const {
+overlay_handle_t Overlay::getHandleRef() const {
     if (mStatus != NO_ERROR) return NULL;
     return mOverlayRef->mOverlayHandle;
 }
@@ -112,7 +112,7 @@ OverlayRef::OverlayRef()
 {    
 }
 
-OverlayRef::OverlayRef(overlay_handle_t const* handle, const sp<IOverlay>& channel,
+OverlayRef::OverlayRef(overlay_handle_t handle, const sp<IOverlay>& channel,
          uint32_t w, uint32_t h, int32_t f, uint32_t ws, uint32_t hs)
     : mOverlayHandle(handle), mOverlayChannel(channel),
     mWidth(w), mHeight(h), mFormat(f), mWidthStride(ws), mHeightStride(hs),
@@ -126,7 +126,7 @@ OverlayRef::~OverlayRef()
         /* FIXME: handles should be promoted to "real" API and be handled by 
          * the framework */
         for (int i=0 ; i<mOverlayHandle->numFds ; i++) {
-            close(mOverlayHandle->fds[i]);
+            close(mOverlayHandle->data[i]);
         }
         free((void*)mOverlayHandle);
     }
@@ -141,16 +141,8 @@ sp<OverlayRef> OverlayRef::readFromParcel(const Parcel& data) {
         uint32_t f = data.readInt32();
         uint32_t ws = data.readInt32();
         uint32_t hs = data.readInt32();
-        /* FIXME: handles should be promoted to "real" API and be handled by 
-         * the framework */
-        int numfd = data.readInt32();
-        int numint = data.readInt32();
-        overlay_handle_t* handle = (overlay_handle_t*)malloc(
-                sizeof(overlay_handle_t) + numint*sizeof(int));
-        for (int i=0 ; i<numfd ; i++)
-            handle->fds[i] = data.readFileDescriptor();
-        for (int i=0 ; i<numint ; i++)
-            handle->data[i] = data.readInt32();
+        native_handle* handle = data.readNativeHandle(NULL, NULL);
+
         result = new OverlayRef();
         result->mOverlayHandle = handle;
         result->mOverlayChannel = overlay;
@@ -171,14 +163,7 @@ status_t OverlayRef::writeToParcel(Parcel* reply, const sp<OverlayRef>& o) {
         reply->writeInt32(o->mFormat);
         reply->writeInt32(o->mWidthStride);
         reply->writeInt32(o->mHeightStride);
-        /* FIXME: handles should be promoted to "real" API and be handled by 
-         * the framework */
-        reply->writeInt32(o->mOverlayHandle->numFds);
-        reply->writeInt32(o->mOverlayHandle->numInts);
-        for (int i=0 ; i<o->mOverlayHandle->numFds ; i++)
-            reply->writeFileDescriptor(o->mOverlayHandle->fds[i]);
-        for (int i=0 ; i<o->mOverlayHandle->numInts ; i++)
-            reply->writeInt32(o->mOverlayHandle->data[i]);
+        reply->writeNativeHandle(*(o->mOverlayHandle));
     } else {
         reply->writeStrongBinder(NULL);
     }

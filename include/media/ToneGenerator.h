@@ -134,7 +134,7 @@ private:
     Condition mWaitCbkCond; // condition enabling interface to wait for audio callback completion after a change is requested
     float mVolume;  // Volume applied to audio track
     int mStreamType; // Audio stream used for output
-    int mProcessSize;  // Size of audio blocks generated at a time by audioCallback() (in PCM frames).
+    unsigned int mProcessSize;  // Size of audio blocks generated at a time by audioCallback() (in PCM frames).
 
     bool initAudioTrack();
     static void audioCallback(int event, void* user, void *info);

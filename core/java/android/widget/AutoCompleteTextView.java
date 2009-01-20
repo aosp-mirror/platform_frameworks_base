@@ -413,7 +413,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         // when the selection is at the bottom, we block the
                         // event to avoid going to the next focusable widget
                         Adapter adapter = mDropDownList.getAdapter();
-                        if (curIndex == adapter.getCount() - 1) {
+                        if (adapter != null && curIndex == adapter.getCount() - 1) {
                             return true;
                         }
                     }

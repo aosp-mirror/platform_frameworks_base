@@ -358,7 +358,7 @@ public:
             STOPPED = 1
         };
 
-            status_t    obtainBuffer(Buffer* audioBuffer, bool blocking);
+            status_t    obtainBuffer(Buffer* audioBuffer, int32_t waitCount);
             void        releaseBuffer(Buffer* audioBuffer);
 
 

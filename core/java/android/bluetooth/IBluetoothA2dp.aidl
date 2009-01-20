@@ -26,4 +26,6 @@ interface IBluetoothA2dp {
     int disconnectSink(in String address);
     List<String> listConnectedSinks();
     int getSinkState(in String address);
+    int setSinkPriority(in String address, int priority);
+    int getSinkPriority(in String address);
 }

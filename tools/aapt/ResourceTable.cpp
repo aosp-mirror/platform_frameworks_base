@@ -2165,15 +2165,14 @@ ResourceTable::validateLocalizations(void)
                         // consider that string to have fulfilled the localization requirement.
                         String8 region(config.string(), 2);
                         if (configSet.find(region) == configSet.end()) {
-                            // TODO: force an error if there is no default to fall back to
                             if (configSet.count(defaultLocale) == 0) {
-                                fprintf(stdout, "aapt: warning: "
+                                fprintf(stdout, "aapt: error: "
                                         "*** string '%s' has no default or required localization "
                                         "for '%s' in %s\n",
                                         String8(nameIter->first).string(),
                                         config.string(),
                                         mBundle->getResourceSourceDirs()[0]);
-                                //err = UNKNOWN_ERROR;
+                                err = UNKNOWN_ERROR;
                             }
                         }
                     }

@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.NetworkInfo;
+import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -30,7 +31,6 @@ import android.net.wifi.WifiStateTracker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Config;
@@ -241,6 +241,15 @@ public class WifiWatchdogService {
         return Settings.Secure.getInt(mContentResolver,
             Settings.Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS, 1000);
     }
+
+    /**
+     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WATCH_LIST
+     * @return the comma-separated list of SSIDs
+     */
+    private String getWatchList() {
+        return Settings.Secure.getString(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_WATCH_LIST);
+    }
     
     /**
      * Registers to receive the necessary Wi-Fi broadcasts.
@@ -304,8 +313,13 @@ public class WifiWatchdogService {
      * 
      * @return The DNS of the current AP.
      */
-    private static String getDns() {
-        return SystemProperties.get(SYSTEMPROPERTY_KEY_DNS);
+    private int getDns() {
+        DhcpInfo addressInfo = mWifiManager.getDhcpInfo();
+        if (addressInfo != null) {
+            return addressInfo.dns1;
+        } else {
+            return -1;
+        }
     }
     
     /**
@@ -315,18 +329,19 @@ public class WifiWatchdogService {
      * @return Whether the DNS is reachable
      */
     private boolean checkDnsConnectivity() {
-        String dns = getDns();
-        if (V) {
-            myLogV("checkDnsConnectivity: Checking " + dns + " for connectivity");
-        }
-        
-        if (TextUtils.isEmpty(dns)) {
+        int dns = getDns();
+        if (dns == -1) {
             if (V) {
                 myLogV("checkDnsConnectivity: Invalid DNS, returning false");
             }
             return false;
         }
         
+        if (V) {
+            myLogV("checkDnsConnectivity: Checking 0x" +
+                    Integer.toHexString(Integer.reverseBytes(dns)) + " for connectivity");
+        }
+
         int numInitialIgnoredPings = getInitialIgnoredPingCount();
         int numPings = getPingCount();
         int pingDelay = getPingDelayMs();
@@ -403,13 +418,13 @@ public class WifiWatchdogService {
     }
 
     private boolean backgroundCheckDnsConnectivity() {
-        String dns = getDns();
+        int dns = getDns();
         if (false && V) {
             myLogV("backgroundCheckDnsConnectivity: Background checking " + dns +
                     " for connectivity");
         }
         
-        if (TextUtils.isEmpty(dns)) {
+        if (dns == -1) {
             if (V) {
                 myLogV("backgroundCheckDnsConnectivity: DNS is empty, returning false");
             }
@@ -557,13 +572,38 @@ public class WifiWatchdogService {
                 return false;
             }
         }
-        
+
+        if (!isOnWatchList(ssid)) {
+            if (V) {
+                Log.v(TAG, "  SSID not on watch list, returning false");
+            }
+            return false;
+        }
+
         // The watchdog only monitors networks with multiple APs
         if (!hasRequiredNumberOfAps(ssid)) {
             return false;
         }
 
         return true;
+    }
+
+    private boolean isOnWatchList(String ssid) {
+        String watchList;
+
+        if (ssid == null || (watchList = getWatchList()) == null) {
+            return false;
+        }
+
+        String[] list = watchList.split(" *, *");
+
+        for (String name : list) {
+            if (ssid.equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
     
     /**
@@ -1180,7 +1220,7 @@ public class WifiWatchdogService {
         /** Used to generate IDs */
         private static Random sRandom = new Random();
         
-        static boolean isDnsReachable(String dns, int timeout) {
+        static boolean isDnsReachable(int dns, int timeout) {
             try {
                 DatagramSocket socket = new DatagramSocket();
                 
@@ -1191,7 +1231,13 @@ public class WifiWatchdogService {
                 fillQuery(buf);
                 
                 // Send the DNS query
-                InetAddress dnsAddress = InetAddress.getByName(dns);
+                byte parts[] = new byte[4];
+                parts[0] = (byte)(dns & 0xff);
+                parts[1] = (byte)((dns >> 8) & 0xff);
+                parts[2] = (byte)((dns >> 16) & 0xff);
+                parts[3] = (byte)((dns >> 24) & 0xff);
+
+                InetAddress dnsAddress = InetAddress.getByAddress(parts);
                 DatagramPacket packet = new DatagramPacket(buf,
                         buf.length, dnsAddress, DNS_PORT);
                 socket.send(packet);

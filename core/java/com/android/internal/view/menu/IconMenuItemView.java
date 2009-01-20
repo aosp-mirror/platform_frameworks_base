@@ -143,7 +143,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
     
     void setCaptionMode(boolean shortcut) {
 
-        mShortcutCaptionMode = shortcut;
+        mShortcutCaptionMode = shortcut && (mItemData.shouldShowShortcut());
         
         /*
          * If there is no item model, don't do any of the below (for example,
@@ -155,7 +155,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         
         CharSequence text = mItemData.getTitleForItemView(this);
         
-        if (shortcut) {
+        if (mShortcutCaptionMode) {
             
             if (mShortcutCaption == null) {
                 mShortcutCaption = mItemData.getShortcutLabel();

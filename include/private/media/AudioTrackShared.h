@@ -28,6 +28,11 @@ namespace android {
 
 #define MAX_SAMPLE_RATE     65535
 #define THREAD_PRIORITY_AUDIO_CLIENT (ANDROID_PRIORITY_AUDIO)
+// Maximum cumulated timeout milliseconds before restarting audioflinger thread
+#define MAX_STARTUP_TIMEOUT_MS  3000    // Longer timeout period at startup to cope with A2DP init time
+#define MAX_RUN_TIMEOUT_MS      1000
+#define WAIT_PERIOD_MS          10
+
 
 struct audio_track_cblk_t
 {
@@ -55,9 +60,11 @@ struct audio_track_cblk_t
                 int16_t     flowControlFlag; // underrun (out) or overrrun (in) indication
                 uint8_t     out;        // out equals 1 for AudioTrack and 0 for AudioRecord
                 uint8_t     forceReady; 
+                uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
+                uint16_t    waitTimeMs;      // Cumulated wait time
                 // Padding ensuring that data buffer starts on a cache line boundary (32 bytes). 
                 // See AudioFlinger::TrackBase constructor
-                int32_t     Padding[4];
+                int32_t     Padding[3];
                 
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);

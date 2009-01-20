@@ -245,6 +245,8 @@ status_t AudioRecord::start()
 
     if (android_atomic_or(1, &mActive) == 0) {
         mNewPosition = mCblk->user + mUpdatePeriod;
+        mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+        mCblk->waitTimeMs = 0;
         if (t != 0) {
            t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
         } else {
@@ -342,7 +344,7 @@ status_t AudioRecord::getPosition(uint32_t *position)
 
 // -------------------------------------------------------------------------
 
-status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, bool blocking)
+status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     int active;
     int timeout = 0;
@@ -362,14 +364,21 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, bool blocking)
             active = mActive;
             if (UNLIKELY(!active))
                 return NO_MORE_BUFFERS;
-            if (UNLIKELY(!blocking))
+            if (UNLIKELY(!waitCount))
                 return WOULD_BLOCK;
             timeout = 0;
-            result = cblk->cv.waitRelative(cblk->lock, seconds(1));
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(WAIT_PERIOD_MS));
             if (__builtin_expect(result!=NO_ERROR, false)) {
-                LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
-                        "user=%08x, server=%08x", cblk->user, cblk->server);
-                timeout = 1;
+                cblk->waitTimeMs += WAIT_PERIOD_MS;
+                if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
+                    LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
+                            "user=%08x, server=%08x", cblk->user, cblk->server);
+                    timeout = 1;
+                    cblk->waitTimeMs = 0;
+                }
+                if (--waitCount == 0) {
+                    return TIMED_OUT;
+                }
             }
             // read the server count again
         start_loop_here:
@@ -382,6 +391,8 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, bool blocking)
         "but didn't need to be locked. We recovered, but "
         "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
 
+    cblk->waitTimeMs = 0;
+    
     if (framesReq > framesReady) {
         framesReq = framesReady;
     }
@@ -430,7 +441,9 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 
         audioBuffer.frameCount = userSize/mChannelCount/sizeof(int16_t);
 
-        status_t err = obtainBuffer(&audioBuffer, true);
+        // Calling obtainBuffer() with a negative wait count causes
+        // an (almost) infinite wait time.
+        status_t err = obtainBuffer(&audioBuffer, -1);
         if (err < 0) {
             // out of buffers, return #bytes written
             if (err == status_t(NO_MORE_BUFFERS))
@@ -457,7 +470,7 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 {
     Buffer audioBuffer;
     uint32_t frames = mRemainingFrames;
-    size_t readSize = 0;
+    size_t readSize;
 
     // Manage marker callback
     if (mMarkerPosition > 0) {
@@ -477,16 +490,18 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     do {
         audioBuffer.frameCount = frames;
-        status_t err = obtainBuffer(&audioBuffer, false);
+        // Calling obtainBuffer() with a wait count of 1 
+        // limits wait time to WAIT_PERIOD_MS. This prevents from being 
+        // stuck here not being able to handle timed events (position, markers).
+        status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
-            if (err != WOULD_BLOCK) {
+            if (err != TIMED_OUT) {
                 LOGE("Error obtaining an audio buffer, giving up.");
                 return false;
             }
+            break;
         }
         if (err == status_t(STOPPED)) return false;
-
-        if (audioBuffer.size == 0) break;
 
         size_t reqSize = audioBuffer.size;
         mCbf(EVENT_MORE_DATA, mUserData, &audioBuffer);
@@ -513,13 +528,6 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
             mCblk->flowControlFlag = 1;
         }
     }
-
-    // If no data was read, it is likely that obtainBuffer() did
-    // not find available data in PCM buffer: we release the processor for
-    // a few millisecond before polling again for available data.
-    if (readSize == 0) {
-        usleep(5000);
-    } 
 
     if (frames == 0) {
         mRemainingFrames = mNotificationFrames;

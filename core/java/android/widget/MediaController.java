@@ -393,6 +393,12 @@ public class MediaController extends FrameLayout {
             doPauseResume();
             show(sDefaultTimeout);
             return true;
+        } else if (keyCode ==  KeyEvent.KEYCODE_STOP) {
+            if (mPlayer.isPlaying()) {
+                mPlayer.pause();
+                updatePausePlay();
+            }
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
                 keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             // don't show the controls for volume adjustment

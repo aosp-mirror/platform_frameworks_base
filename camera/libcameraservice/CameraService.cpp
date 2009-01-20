@@ -166,22 +166,26 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
 status_t CameraService::Client::checkPid()
 {
-    // zero means the interface is not locked down
-    if (mClientPid == 0) return NO_ERROR;
-    return (int) mClientPid == IPCThreadState::self()->getCallingPid() ? NO_ERROR : -EBUSY;
+    if (mClientPid == IPCThreadState::self()->getCallingPid()) return NO_ERROR;
+    LOGW("Attempt to use locked camera from different process");
+    return -EBUSY;
 }
 
 status_t CameraService::Client::lock()
 {
-    // lock camera to this client
-    status_t result = checkPid();
-    if (result == NO_ERROR) mClientPid = IPCThreadState::self()->getCallingPid();
-    return result;
+    // lock camera to this client if the the camera is unlocked
+    if (mClientPid == 0) {
+        mClientPid = IPCThreadState::self()->getCallingPid();
+        return NO_ERROR;
+    }
+    // returns NO_ERROR if the client already owns the camera, -EBUSY otherwise
+    return checkPid();
 }
 
 status_t CameraService::Client::unlock()
 {
     // allow anyone to use camera
+    LOGV("unlock");
     status_t result = checkPid();
     if (result == NO_ERROR) mClientPid = 0;
     return result;
@@ -189,12 +193,29 @@ status_t CameraService::Client::unlock()
 
 status_t CameraService::Client::connect(const sp<ICameraClient>& client)
 {
-    // remove old client
-    LOGV("connect new client to existing camera");
-    Mutex::Autolock _l(mLock);
-    mCameraClient = client;
-    mClientPid = IPCThreadState::self()->getCallingPid();
-    mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    // connect a new process to the camera
+    LOGV("connect");
+
+    // hold a reference to the old client or we will deadlock if the client is
+    // in the same process and we hold the lock when we remove the reference
+    sp<ICameraClient> oldClient;
+    {
+        Mutex::Autolock _l(mLock);
+        if (mClientPid != 0) {
+            LOGW("Tried to connect to locked camera");
+            return -EBUSY;
+        }
+        oldClient = mCameraClient;
+
+        // did the client actually change?
+        if (client->asBinder() == mCameraClient->asBinder()) return NO_ERROR;
+
+        LOGV("connect new process to existing camera client");
+        mCameraClient = client;
+        mClientPid = IPCThreadState::self()->getCallingPid();
+        mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    }
+
     return NO_ERROR;
 }
 
@@ -210,7 +231,7 @@ static void *unregister_surface(void *arg)
 
 CameraService::Client::~Client()
 {
-    // spin down hardware
+    // tear down client
     LOGD("Client E destructor");
     if (mSurface != 0) {
 #if HAVE_ANDROID_OS
@@ -227,6 +248,8 @@ CameraService::Client::~Client()
 #endif
     }
 
+    // make sure we tear down the hardware
+    mClientPid = IPCThreadState::self()->getCallingPid();
     disconnect();
     LOGD("Client X destructor");
 }
@@ -235,7 +258,12 @@ void CameraService::Client::disconnect()
 {
     LOGD("Client E disconnect");
     Mutex::Autolock lock(mLock);
+    if (mClientPid == 0) {
+        LOGV("camera is unlocked, don't tear down hardware");
+        return;
+    }
     if (checkPid() != NO_ERROR) return;
+
     mCameraService->removeClient(mCameraClient);
     if (mHardware != 0) {
         // Before destroying mHardware, we must make sure it's in the

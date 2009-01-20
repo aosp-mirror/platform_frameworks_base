@@ -171,9 +171,13 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
 
     public void setShortcut(boolean showShortcut, char shortcutKey) {
-        mShortcutView.setText(mItemData.getShortcutLabel());
+        final int newVisibility = (showShortcut && mItemData.shouldShowShortcut())
+                ? VISIBLE : GONE;
 
-        final int newVisibility = showShortcut ? VISIBLE : GONE;
+        if (newVisibility == VISIBLE) {
+            mShortcutView.setText(mItemData.getShortcutLabel());
+        }
+
         if (mShortcutView.getVisibility() != newVisibility) {
             mShortcutView.setVisibility(newVisibility);
         }

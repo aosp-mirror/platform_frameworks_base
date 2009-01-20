@@ -125,10 +125,9 @@ void Camera::disconnect()
 status_t Camera::reconnect()
 {
     LOGV("reconnect");
-    if (mCamera != 0) {
-        return mCamera->connect(this);
-    }
-    return NO_INIT;
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->connect(this);
 }
 
 sp<ICamera> Camera::remote()
@@ -138,14 +137,16 @@ sp<ICamera> Camera::remote()
 
 status_t Camera::lock()
 {
-    if (mCamera != 0) return mCamera->lock();
-    return NO_INIT;
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->lock();
 }
 
 status_t Camera::unlock()
 {
-    if (mCamera != 0) return mCamera->unlock();
-    return NO_INIT;
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->unlock();
 }
 
 // pass the buffered ISurface to the camera service
@@ -156,7 +157,9 @@ status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
         LOGE("app passed NULL surface");
         return NO_INIT;
     }
-    return mCamera->setPreviewDisplay(surface->getISurface());
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->setPreviewDisplay(surface->getISurface());
 }
 
 status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
@@ -166,7 +169,9 @@ status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
         LOGE("app passed NULL surface");
         return NO_INIT;
     }
-    return mCamera->setPreviewDisplay(surface);
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->setPreviewDisplay(surface);
 }
 
 
@@ -174,48 +179,62 @@ status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
 status_t Camera::startPreview()
 {
     LOGV("startPreview");
-    return mCamera->startPreview();
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->startPreview();
 }
 
 // stop preview mode
 void Camera::stopPreview()
 {
     LOGV("stopPreview");
-    mCamera->stopPreview();
+    sp <ICamera> c = mCamera;
+    if (c == 0) return;
+    c->stopPreview();
 }
 
 // get preview state
 bool Camera::previewEnabled()
 {
     LOGV("previewEnabled");
-    return mCamera->previewEnabled();
+    sp <ICamera> c = mCamera;
+    if (c == 0) return false;
+    return c->previewEnabled();
 }
 
 status_t Camera::autoFocus()
 {
     LOGV("autoFocus");
-    return mCamera->autoFocus();
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->autoFocus();
 }
 
 // take a picture
 status_t Camera::takePicture()
 {
     LOGV("takePicture");
-    return mCamera->takePicture();
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->takePicture();
 }
 
 // set preview/capture parameters - key/value pairs
 status_t Camera::setParameters(const String8& params)
 {
     LOGV("setParameters");
-    return mCamera->setParameters(params);
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->setParameters(params);
 }
 
 // get preview/capture parameters - key/value pairs
 String8 Camera::getParameters() const
 {
     LOGV("getParameters");
-    String8 params = mCamera->getParameters();
+    String8 params;
+    sp <ICamera> c = mCamera;
+    if (c != 0) params = mCamera->getParameters();
     return params;
 }
 
@@ -252,6 +271,8 @@ void Camera::setFrameCallback(frame_callback cb, void *cookie, int frame_callbac
     LOGV("setFrameCallback");
     mFrameCallback = cb;
     mFrameCallbackCookie = cookie;
+    sp <ICamera> c = mCamera;
+    if (c == 0) return;
     mCamera->setFrameCallbackFlag(frame_callback_flag);
 }
 

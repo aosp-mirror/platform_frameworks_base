@@ -70,6 +70,10 @@ sp<Camera> get_native_camera(JNIEnv *env, jobject thiz)
 static void err_callback(status_t err, void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("err_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     int error;
 
@@ -176,6 +180,10 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
 static void preview_callback(const sp<IMemory>& mem, void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("preview_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     int arg1 = 0, arg2 = 0;
     jobject obj = NULL;
@@ -234,7 +242,7 @@ static bool android_hardware_Camera_previewEnabled(JNIEnv *env, jobject thiz)
     return c->previewEnabled();
 }
 
-static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject thiz, jboolean installed)
+static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject thiz, jboolean installed, jboolean oneshot)
 {
     sp<Camera> c = get_native_camera(env, thiz);
     if (c == 0)
@@ -245,14 +253,22 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     // each preview frame for nothing.
     callback_cookie *cookie = (callback_cookie *)env->GetIntField(thiz, fields.listener_context);
 
-    c->setFrameCallback(installed ? preview_callback : NULL,
-            cookie,
-            installed ? FRAME_CALLBACK_FLAG_CAMERA: FRAME_CALLBACK_FLAG_NOOP);
+    int callback_flag;
+    if (installed) {
+        callback_flag = oneshot ? FRAME_CALLBACK_FLAG_BARCODE_SCANNER : FRAME_CALLBACK_FLAG_CAMERA;
+    } else {
+        callback_flag = FRAME_CALLBACK_FLAG_NOOP;
+    }
+    c->setFrameCallback(installed ? preview_callback : NULL, cookie, callback_flag);
 }
 
 static void autofocus_callback_impl(bool success, void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("autofocus_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     env->CallStaticVoidMethod(c->camera_class, fields.post_event,
                               c->camera_ref, kAutoFocusCallback,
@@ -276,6 +292,10 @@ static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
 static void jpeg_callback(const sp<IMemory>& mem, void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("jpeg`_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     int arg1 = 0, arg2 = 0;
     jobject obj = NULL;
@@ -319,6 +339,10 @@ static void jpeg_callback(const sp<IMemory>& mem, void *cookie)
 static void shutter_callback_impl(void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("shutter_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     env->CallStaticVoidMethod(c->camera_class, fields.post_event,
                               c->camera_ref, kShutterCallback, 0, 0, NULL);
@@ -328,6 +352,10 @@ static void raw_callback(const sp<IMemory>& mem __attribute__((unused)),
                          void *cookie)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        LOGE("raw_callback on dead VM");
+        return;
+    }
     callback_cookie *c = (callback_cookie *)cookie;
     env->CallStaticVoidMethod(c->camera_class, fields.post_event,
                               c->camera_ref, kRawCallback, 0, 0, NULL);
@@ -404,7 +432,7 @@ static jint android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
     sp<Camera> c = get_native_camera(env, thiz);
     if (c == 0)
         return INVALID_OPERATION;
-    return (jint) c->lock();
+    return (jint) c->unlock();
 }
 
 //-------------------------------------------------
@@ -429,7 +457,7 @@ static JNINativeMethod camMethods[] = {
     "()Z",
     (void *)android_hardware_Camera_previewEnabled },
   { "setHasPreviewCallback",
-    "(Z)V",
+    "(ZZ)V",
     (void *)android_hardware_Camera_setHasPreviewCallback },
   { "native_autoFocus",
     "()V",
