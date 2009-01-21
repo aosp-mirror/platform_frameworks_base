@@ -81,16 +81,116 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * <p>A View that displays web pages. This class is the basis upon which you 
- * can roll your own web browser or simply display some online content within your Activity.
- * It uses the WebKit rendering engine to display
- * web pages and includes methods to navigate forward and backward
- * through a history, zoom in and out, perform text searches and more.</p>
- * <p>Note that, in order for your Activity to access the Internet and load web pages
- * in a WebView, you must add the <var>INTERNET</var> permissions to your 
- * Android Manifest file:</p>
+ * <p>A View that displays web pages. This class is the basis upon
+ * which you can roll your own web browser or simply display some
+ * online content within your Activity.  It uses the WebKit rendering
+ * engine to display web pages and includes methods to navigate
+ * forward and backward through a history, zoom in and out, perform
+ * text searches and more.</p>
+ *
+ * <p>Note that, in order for your Activity to access the Internet and
+ * load web pages in a WebView, you must add the <var>INTERNET</var>
+ * permissions to your Android Manifest file:</p>
+ *
  * <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
+ *
  * <p>This must be a child of the <code>&lt;manifest></code> element.</p>
+ *
+ * <h3>Basic usage</h3>
+ *
+ * <p>By default, a WebView provides no browser-like widgets, does not
+ * enable JavaScript and errors will be ignored. If your goal is only
+ * to display some HTML as a part of your UI, this is probably fine;
+ * the user won't need to interact with the web page beyond reading
+ * it, and the web page won't need to interact with the user. If you
+ * actually want a fully blown web browser, then you probably want to
+ * invoke the Browser application with your URL rather than show it
+ * with a WebView. See {@link android.content.Intent} for more information.</p>
+ *
+ * <pre class="prettyprint">
+ * WebView webview = new WebView(this);
+ * setContentView(webview);
+ *
+ * // Simplest usage: note that an exception will NOT be thrown
+ * // if there is an error loading this page (see below).
+ * webview.loadUrl("http://slashdot.org/");
+ *
+ * // Of course you can also load from any string:
+ * String summary = "&lt;html>&lt;body>You scored &lt;b>192</b> points.&lt;/body>&lt;/html>";
+ * webview.loadData(summary, "text/html", "utf-8");
+ * // ... although note that there are restrictions on what this HTML can do.
+ * // See the JavaDocs for loadData and loadDataWithBaseUrl for more info.
+ * </pre>
+ *
+ * <p>A WebView has several customization points where you can add your
+ * own behavior. These are:</p>
+ *
+ * <ul>
+ *   <li>Creating and setting a {@link android.webkit.WebChromeClient} subclass.
+ *       This class is called when something that might impact a
+ *       browser UI happens, for instance, progress updates and
+ *       JavaScript alerts are sent here.
+ *   </li>
+ *   <li>Creating and setting a {@link android.webkit.WebViewClient} subclass.
+ *       It will be called when things happen that impact the
+ *       rendering of the content, eg, errors or form submissions. You
+ *       can also intercept URL loading here.</li>
+ *   <li>Via the {@link android.webkit.WebSettings} class, which contains
+ *       miscellaneous configuration. </li>
+ *   <li>With the {@link android.webkit.WebView#addJavascriptInterface} method.
+ *       This lets you bind Java objects into the WebView so they can be
+ *       controlled from the web pages JavaScript.</li>
+ * </ul>
+ *
+ * <p>Here's a more complicated example, showing error handling,
+ *    settings, and progress notification:</p>
+ *
+ * <pre class="prettyprint">
+ * // Let's display the progress in the activity title bar, like the
+ * // browser app does.
+ * getWindow().requestFeature(Window.FEATURE_PROGRESS);
+ *
+ * webview.getSettings().setJavaScriptEnabled(true);
+ *
+ * final Activity activity = this;
+ * webview.setWebChromeClient(new WebChromeClient() {
+ *   public void onProgressChanged(WebView view, int progress) {
+ *     // Activities and WebViews measure progress with different scales.
+ *     // The progress meter will automatically disappear when we reach 100%
+ *     activity.setProgress(progress * 1000);
+ *   }
+ * });
+ * webview.setWebViewClient(new WebViewClient() {
+ *   public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+ *     Toast.makeText(activity, "Oh no! " + description, Toast.LENGTH_SHORT).show();
+ *   }
+ * });
+ *
+ * webview.loadUrl("http://slashdot.org/");
+ * </pre>
+ *
+ * <h3>Cookie and window management</h3>
+ *
+ * <p>For obvious security reasons, your application has its own
+ * cache, cookie store etc - it does not share the Browser
+ * applications data. Cookies are managed on a separate thread, so
+ * operations like index building don't block the UI
+ * thread. Follow the instructions in {@link android.webkit.CookieSyncManager}
+ * if you want to use cookies in your application.
+ * </p>
+ *
+ * <p>By default, requests by the HTML to open new windows are
+ * ignored. This is true whether they be opened by JavaScript or by
+ * the target attribute on a link. You can customize your
+ * WebChromeClient to provide your own behaviour for opening multiple windows,
+ * and render them in whatever manner you want.</p>
+ *
+ * <p>Standard behavior for an Activity is to be destroyed and
+ * recreated when the devices orientation is changed. This will cause
+ * the WebView to reload the current page. If you don't want that, you
+ * can set your Activity to handle the orientation and keyboardHidden
+ * changes, and then just leave the WebView alone. It'll automatically
+ * re-orient itself as appropriate.</p>
  */
 public class WebView extends AbsoluteLayout 
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
@@ -1698,14 +1798,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Clear the resource cache. This will cause resources to be re-downloaded
-     * if accessed again.
-     * <p>
-     * Note: this really needs to be a static method as it clears cache for all
-     * WebView. But we need mWebViewCore to send message to WebCore thread, so
-     * we can't make this static.
+     * Clear the resource cache. Note that the cache is per-application, so
+     * this will clear the cache for all WebViews used.
+     *
+     * @param includeDiskFiles If false, only the RAM cache is cleared.
      */
     public void clearCache(boolean includeDiskFiles) {
+        // Note: this really needs to be a static method as it clears cache for all
+        // WebView. But we need mWebViewCore to send message to WebCore thread, so
+        // we can't make this static.
         mWebViewCore.sendMessage(EventHub.CLEAR_CACHE,
                 includeDiskFiles ? 1 : 0, 0);
     }

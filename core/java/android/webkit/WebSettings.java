@@ -109,9 +109,13 @@ public class WebSettings {
     private boolean mSyncPending = false;
     // Custom handler that queues messages until the WebCore thread is active.
     private final EventHandler mEventHandler;
+
     // Private settings so we don't have to go into native code to
     // retrieve the values. After setXXX, postSync() needs to be called.
-    // XXX: The default values need to match those in WebSettings.cpp
+    //
+    // The default values need to match those in WebSettings.cpp
+    // If the defaults change, please also update the JavaDocs so developers
+    // know what they are.
     private LayoutAlgorithm mLayoutAlgorithm = LayoutAlgorithm.NARROW_COLUMNS;
     private Context         mContext;
     private TextSize        mTextSize = TextSize.NORMAL;
@@ -431,24 +435,21 @@ public class WebSettings {
     }
 
     /**
-     * Tell the WebView to use the double tree rendering algorithm.
-     * @param use True if the WebView is to use double tree rendering, false
-     *            otherwise.
+     * @deprecated This setting controlled a rendering optimization
+     * that is no longer present. Setting it now has no effect.
      */
+    @Deprecated
     public synchronized void setUseDoubleTree(boolean use) {
-        if (mUseDoubleTree != use) {
-            mUseDoubleTree = use;
-            postSync();
-        }
+        return;
     }
 
     /**
-     * Return true if the WebView is using the double tree rendering algorithm.
-     * @return True if the WebView is using the double tree rendering
-     *         algorithm.
+     * @deprecated This setting controlled a rendering optimization
+     * that is no longer present. Setting it now has no effect.
      */
+    @Deprecated
     public synchronized boolean getUseDoubleTree() {
-        return mUseDoubleTree;
+        return false;
     }
 
     /**
@@ -553,7 +554,7 @@ public class WebSettings {
     }
 
     /**
-     * Return the current layout algorithm.
+     * Return the current layout algorithm. The default is NARROW_COLUMNS.
      * @return LayoutAlgorithm enum value describing the layout algorithm
      *         being used.
      * @see WebSettings.LayoutAlgorithm
@@ -574,7 +575,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the standard font family name.
+     * Get the standard font family name. The default is "sans-serif".
      * @return The standard font family name as a string.
      */
     public synchronized String getStandardFontFamily() {
@@ -593,7 +594,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the fixed font family name.
+     * Get the fixed font family name. The default is "monospace".
      * @return The fixed font family name as a string.
      */
     public synchronized String getFixedFontFamily() {
@@ -620,7 +621,7 @@ public class WebSettings {
     }
 
     /**
-     * Set the serif font family name.
+     * Set the serif font family name. The default is "sans-serif".
      * @param font A font family name.
      */
     public synchronized void setSerifFontFamily(String font) {
@@ -631,7 +632,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the serif font family name.
+     * Get the serif font family name. The default is "serif".
      * @return The serif font family name as a string.
      */
     public synchronized String getSerifFontFamily() {
@@ -650,7 +651,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the cursive font family name.
+     * Get the cursive font family name. The default is "cursive".
      * @return The cursive font family name as a string.
      */
     public synchronized String getCursiveFontFamily() {
@@ -669,7 +670,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the fantasy font family name.
+     * Get the fantasy font family name. The default is "fantasy".
      * @return The fantasy font family name as a string.
      */
     public synchronized String getFantasyFontFamily() {
@@ -690,7 +691,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the minimum font size.
+     * Get the minimum font size. The default is 8.
      * @return A non-negative integer between 1 and 72.
      */
     public synchronized int getMinimumFontSize() {
@@ -711,7 +712,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the minimum logical font size.
+     * Get the minimum logical font size. The default is 8.
      * @return A non-negative integer between 1 and 72.
      */
     public synchronized int getMinimumLogicalFontSize() {
@@ -732,7 +733,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the default font size.
+     * Get the default font size. The default is 16.
      * @return A non-negative integer between 1 and 72.
      */
     public synchronized int getDefaultFontSize() {
@@ -753,7 +754,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the default fixed font size.
+     * Get the default fixed font size. The default is 16.
      * @return A non-negative integer between 1 and 72.
      */
     public synchronized int getDefaultFixedFontSize() {
@@ -773,6 +774,7 @@ public class WebSettings {
 
     /**
      * Return true if the WebView will load image resources automatically.
+     * The default is true.
      * @return True if the WebView loads images automatically.
      */
     public synchronized boolean getLoadsImagesAutomatically() {
@@ -792,16 +794,16 @@ public class WebSettings {
     }
 
     /**
-     * Return true if the WebView will block network image.
+     * Return true if the WebView will block network image. The default is false.
      * @return True if the WebView blocks network image.
      */
     public synchronized boolean getBlockNetworkImage() {
         return mBlockNetworkImage;
     }
-    
+
     /**
      * @hide
-     * Tell the WebView to block all network load requests. 
+     * Tell the WebView to block all network load requests.
      * @param flag True if the WebView should block all network loads
      */
     public synchronized void setBlockNetworkLoads(boolean flag) {
@@ -814,13 +816,14 @@ public class WebSettings {
     /**
      * @hide
      * Return true if the WebView will block all network loads.
+     * The default is false.
      * @return True if the WebView blocks all network loads.
      */
     public synchronized boolean getBlockNetworkLoads() {
         return mBlockNetworkLoads;
     }
-    
-    
+
+
     private void verifyNetworkAccess() {
         if (!mBlockNetworkLoads) {
             if (mContext.checkPermission("android.permission.INTERNET", 
@@ -868,7 +871,7 @@ public class WebSettings {
     }
 
     /**
-     * Return true if javascript is enabled.
+     * Return true if javascript is enabled. <b>Note: The default is false.</b>
      * @return True if javascript is enabled.
      */
     public synchronized boolean getJavaScriptEnabled() {
@@ -905,7 +908,8 @@ public class WebSettings {
     }
 
     /**
-     * Return true if javascript can open windows automatically.
+     * Return true if javascript can open windows automatically. The default
+     * is false.
      * @return True if javascript can open windows automatically during
      *         window.open().
      */
@@ -925,7 +929,7 @@ public class WebSettings {
     }
 
     /**
-     * Get the default text encoding name.
+     * Get the default text encoding name. The default is "Latin-1".
      * @return The default text encoding name as a string.
      */
     public synchronized String getDefaultTextEncodingName() {
@@ -1014,8 +1018,8 @@ public class WebSettings {
 
     /**
      * Set the priority of the Render thread. Unlike the other settings, this
-     * one only needs to be called once per process.
-     * 
+     * one only needs to be called once per process. The default is NORMAL.
+     *
      * @param priority RenderPriority, can be normal, high or low.
      */
     public synchronized void setRenderPriority(RenderPriority priority) {
