@@ -22,8 +22,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libvorbisidec \
 	libsonivox \
-	libopencoreplayer \
-	libopencoreauthor \
+	libopencore_player \
+	libopencore_author \
 	libmedia \
 	libandroid_runtime
 
