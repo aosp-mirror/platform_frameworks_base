@@ -507,6 +507,18 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
     }
 }
 
+static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
+                                    const SkBitmap* bitmap, jobject jbuffer) {
+    SkAutoLockPixels alp(*bitmap);
+    void* dst = bitmap->getPixels();
+    
+    if (NULL != dst) {
+        android::AutoBufferPointer abp(env, jbuffer, JNI_FALSE);
+        // the java side has already checked that buffer is large enough
+        memcpy(dst, abp.pointer(), bitmap->getSize());
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <android_runtime/AndroidRuntime.h>
@@ -538,7 +550,9 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeSetPixel",           "(IIII)V", (void*)Bitmap_setPixel },
     {   "nativeSetPixels",          "(I[IIIIIII)V", (void*)Bitmap_setPixels },
     {   "nativeCopyPixelsToBuffer", "(ILjava/nio/Buffer;)V",
-                                        (void*)Bitmap_copyPixelsToBuffer }
+                                            (void*)Bitmap_copyPixelsToBuffer },
+    {   "nativeCopyPixelsFromBuffer", "(ILjava/nio/Buffer;)V",
+                                            (void*)Bitmap_copyPixelsFromBuffer }
 };
 
 #define kClassPathName  "android/graphics/Bitmap"
@@ -546,16 +560,7 @@ static JNINativeMethod gBitmapMethods[] = {
 int register_android_graphics_Bitmap(JNIEnv* env);
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
-#if 1
     return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
                                 gBitmapMethods, SK_ARRAY_COUNT(gBitmapMethods));
-#else
-    short n = 0;
-    int limit = (char*)env - (char*)0;
-    for (int i = 0; i < limit; i++) {
-        n += i*i;
-    }
-    return n;
-#endif
 }
 

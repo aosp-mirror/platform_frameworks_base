@@ -92,7 +92,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onBondingCreated = env->GetMethodID(clazz, "onBondingCreated", "(Ljava/lang/String;)V");
     method_onBondingRemoved = env->GetMethodID(clazz, "onBondingRemoved", "(Ljava/lang/String;)V");
 
-    method_onCreateBondingResult = env->GetMethodID(clazz, "onCreateBondingResult", "(Ljava/lang/String;Z)V");
+    method_onCreateBondingResult = env->GetMethodID(clazz, "onCreateBondingResult", "(Ljava/lang/String;I)V");
 
     method_onPasskeyAgentRequest = env->GetMethodID(clazz, "onPasskeyAgentRequest", "(Ljava/lang/String;I)V");
     method_onPasskeyAgentCancel = env->GetMethodID(clazz, "onPasskeyAgentCancel", "(Ljava/lang/String;)V");
@@ -609,6 +609,12 @@ static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
 }
 
 #ifdef HAVE_BLUETOOTH
+//TODO: Unify result codes in a header
+#define BOND_RESULT_ERROR -1000
+#define BOND_RESULT_SUCCESS 0
+#define BOND_RESULT_AUTH_FAILED 1
+#define BOND_RESULT_AUTH_REJECTED 2
+#define BOND_RESULT_REMOTE_DEVICE_DOWN 3
 void onCreateBondingResult(DBusMessage *msg, void *user) {
     LOGV(__FUNCTION__);
 
@@ -619,11 +625,26 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
 
     LOGV("... address = %s", address);
 
-    jboolean result = JNI_TRUE;
+    jint result = BOND_RESULT_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
-        /* if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) */
-        LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
-        result = JNI_FALSE;
+        if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) {
+            // Pins did not match, or remote device did not respond to pin
+            // request in time
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_AUTH_FAILED;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationRejected")) {
+            // We rejected pairing, or the remote side rejected pairing. This
+            // happens if either side presses 'cancel' at the pairing dialog.
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_AUTH_REJECTED;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".ConnectionAttemptFailed")) {
+            // Other device is not responding at all
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_REMOTE_DEVICE_DOWN;
+        } else {
+            LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
+            result = BOND_RESULT_ERROR;
+        }
         dbus_error_free(&err);
     }
 

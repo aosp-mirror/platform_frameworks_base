@@ -44,7 +44,12 @@ extract()
         p4 edit $out
         p4 add $out
         mkdir -p `dirname $out`
-        ../../../../out/host/linux-x86/bin/transconsole -m $1 $2 -p $module -i $module-$locale.xtb $i > $out
+        if ../../../../out/host/linux-x86/bin/transconsole -m $1 $2 -p $module -i $module-$locale.xtb $i > $out
+        then :
+        else
+            p4 revert $out
+            p4 delete $out
+        fi
     done
 }
 

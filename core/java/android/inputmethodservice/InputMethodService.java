@@ -498,7 +498,15 @@ public class InputMethodService extends AbstractInputMethodService {
             if (showingCandidates) {
                 setCandidatesViewShown(true);
             }
-            showWindow(showingInput);
+            if (showingInput) {
+                // If we are showing the full soft keyboard, then go through
+                // this path to take care of current decisions about fullscreen
+                // etc.
+                onShowRequested(InputMethod.SHOW_EXPLICIT);
+            } else {
+                // Otherwise just put it back for its candidates.
+                showWindow(false);
+            }
         }
     }
 
@@ -649,16 +657,14 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Override this to control when the input method should run in
      * fullscreen mode.  The default implementation runs in fullsceen only
-     * when the screen is in landscape mode and the input view is being
-     * shown ({@link #onEvaluateInputViewShown} returns true).  If you change what
+     * when the screen is in landscape mode.  If you change what
      * this returns, you will need to call {@link #updateFullscreenMode()}
      * yourself whenever the returned value may have changed to have it
      * re-evaluated and applied.
      */
     public boolean onEvaluateFullscreenMode() {
         Configuration config = getResources().getConfiguration();
-        return config.orientation == Configuration.ORIENTATION_LANDSCAPE
-                && onEvaluateInputViewShown();
+        return config.orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
     
     /**
@@ -870,7 +876,11 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
-     * Called when an input session is starting or restarting.
+     * Called when the input view is being shown and input has started on
+     * a new editor.  This will always be called after {@link #onStartInput},
+     * allowing you to do your general setup there and just view-specific
+     * setup here.  You are guaranteed that {@link #onCreateInputView()} will
+     * have been called some time before this function is called.
      * 
      * @param info Description of the type of text being edited.
      * @param restarting Set to true if we are restarting input on the
@@ -892,6 +902,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * as per {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}.
      */
     public void onShowRequested(int flags) {
+        if (!onEvaluateInputViewShown()) {
+            return;
+        }
         if ((flags&InputMethod.SHOW_EXPLICIT) == 0 && onEvaluateFullscreenMode()) {
             // Don't show if this is not explicit requested by the user and
             // the input method is fullscreen.  That would be too disruptive.
@@ -911,9 +924,11 @@ public class InputMethodService extends AbstractInputMethodService {
         boolean wasVisible = mWindowVisible;
         mWindowVisible = true;
         if (!mShowInputRequested) {
-            if (showInput) {
-                doShowInput = true;
-                mShowInputRequested = true;
+            if (mInputStarted) {
+                if (showInput) {
+                    doShowInput = true;
+                    mShowInputRequested = true;
+                }
             }
         } else {
             showInput = true;
@@ -1001,7 +1016,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInputEditorInfo = attribute;
         onStartInput(attribute, restarting);
         if (mWindowVisible) {
-            if (mWindowCreated) {
+            if (mShowInputRequested) {
                 onStartInputView(mInputEditorInfo, restarting);
             }
             startExtractingText();

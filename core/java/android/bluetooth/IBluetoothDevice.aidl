@@ -57,11 +57,11 @@ interface IBluetoothDevice
     boolean isAclConnected(in String address);
     boolean disconnectRemoteDeviceAcl(in String address);
 
-    boolean createBonding(in String address, in IBluetoothDeviceCallback callback);
-    boolean cancelBondingProcess(in String address);
-    String[] listBondings();
-    boolean hasBonding(in String address);
-    boolean removeBonding(in String address);
+    boolean createBond(in String address);
+    boolean cancelBondProcess(in String address);
+    boolean removeBond(in String address);
+    String[] listBonds();
+    int getBondState(in String address);
 
     String getRemoteName(in String address);
     String getRemoteAlias(in String address);

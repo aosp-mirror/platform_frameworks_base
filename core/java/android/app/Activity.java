@@ -1132,6 +1132,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Called as part of the activity lifecycle when an activity is about to go
+     * into the background as the result of user choice.  For example, when the
+     * user presses the Home key, {@link #onUserLeaving} will be called, but
+     * when an incoming phone call causes the in-call Activity to be automatically
+     * brought to the foreground, {@link #onUserLeaving} will not be called on
+     * the activity being interrupted.
+     */
+    protected void onUserLeaving() {
+    }
+    
+    /**
      * Generate a new thumbnail for this activity.  This method is called before
      * pausing the activity, and should draw into <var>outBitmap</var> the
      * imagery for the desired thumbnail in the dimensions of that bitmap.  It
@@ -3468,6 +3479,10 @@ public class Activity extends ContextThemeWrapper
 
     final void performPause() {
         onPause();
+    }
+    
+    final void performUserLeaving() {
+        onUserLeaving();
     }
     
     final void performStop() {

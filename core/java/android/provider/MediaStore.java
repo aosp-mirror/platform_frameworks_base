@@ -148,6 +148,13 @@ public final class MediaStore
     public final static String EXTRA_VIDEO_QUALITY = "android.intent.extra.videoQuality";
 
     /**
+     * The name of the Intent-extra used to indicate a Uri to be used to
+     * store the requested image or video.
+     * @hide
+     */
+    public final static String EXTRA_OUTPUT = "output";
+
+    /**
      * Common fields for most MediaProvider tables
      */
 

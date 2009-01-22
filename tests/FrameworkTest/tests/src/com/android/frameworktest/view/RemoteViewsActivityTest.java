@@ -62,6 +62,8 @@ public class RemoteViewsActivityTest extends ActivityInstrumentationTestCase<Rem
         assertTrue("RelateiveLayout not inflated", result.findViewById(R.id.relative) != null);
         assertTrue("AbsoluteLayout not inflated", result.findViewById(R.id.absolute) != null);
         assertTrue("ProgressBar not inflated", result.findViewById(R.id.progress) != null);
+        assertTrue("ImageButton not inflated", result.findViewById(R.id.image_button) != null);
+        assertTrue("Button not inflated", result.findViewById(R.id.button) != null);
     }
     
     @MediumTest

@@ -1246,6 +1246,22 @@ public class Intent implements Parcelable {
     public static final String ACTION_MEDIA_UNMOUNTED = "android.intent.action.MEDIA_UNMOUNTED";
 
     /**
+     * Broadcast Action:  External media is present, and being disk-checked
+     * The path to the mount point for the checking media is contained in the Intent.mData field.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MEDIA_CHECKING = "android.intent.action.MEDIA_CHECKING";
+
+    /**
+     * Broadcast Action:  External media is present, but is using an incompatible fs (or is blank)
+     * The path to the mount point for the checking media is contained in the Intent.mData field.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MEDIA_NOFS = "android.intent.action.MEDIA_NOFS";
+
+    /**
      * Broadcast Action:  External media is present and mounted at its mount point.
      * The path to the mount point for the removed media is contained in the Intent.mData field.
      * The Intent contains an extra with name "read-only" and Boolean value to indicate if the
@@ -1859,6 +1875,23 @@ public class Intent implements Parcelable {
      * to mail.
      */
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
+    /**
+     * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaving}
+     * callback from occurring on the current frontmost activity before it is
+     * paused as the newly-started activity is brought to the front.
+     * 
+     * <p>Typically, an activity can rely on that callback to indicate that an
+     * explicit user action has caused their activity to be moved out of the
+     * foreground. The callback marks an appropriate point in the activity's
+     * lifecycle for it to dismiss any notifications that it intends to display
+     * "until the user has seen them," such as a blinking LED.
+     * 
+     * <p>If an activity is ever started via any non-user-driven events such as
+     * phone-call receipt or an alarm handler, this flag should be passed to {@link
+     * Context#startActivity Context.startActivity}, ensuring that the pausing
+     * activity does not think the user has acknowledged its notification. 
+     */
+    public static final int FLAG_ACTIVITY_NO_USER_ACTION = 0x00040000;
 
     /**
      * If set, when sending a broadcast only registered receivers will be
@@ -3857,6 +3890,7 @@ public class Intent implements Parcelable {
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      * @see #FLAG_ACTIVITY_NEW_TASK
      * @see #FLAG_ACTIVITY_NO_HISTORY
+     * @see #FLAG_ACTIVITY_NO_USER_ACTION
      * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
      * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
      * @see #FLAG_ACTIVITY_SINGLE_TOP

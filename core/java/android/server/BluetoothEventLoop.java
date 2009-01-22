@@ -16,8 +16,9 @@
 
 package android.server;
 
-import android.bluetooth.BluetoothClass.Device;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetoothDeviceCallback;
 import android.content.Context;
@@ -41,11 +42,9 @@ class BluetoothEventLoop {
     private int mNativeData;
     private Thread mThread;
     private boolean mInterrupted;
-    private HashMap<String, IBluetoothDeviceCallback> mCreateBondingCallbacks;
     private HashMap<String, Integer> mPasskeyAgentRequestData;
     private HashMap<String, IBluetoothDeviceCallback> mGetRemoteServiceChannelCallbacks;
-    private HashMap<String, Boolean> mDefaultPinData;
-    private BluetoothDeviceService mBluetoothService;    
+    private BluetoothDeviceService mBluetoothService;
     private Context mContext;
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
@@ -57,10 +56,8 @@ class BluetoothEventLoop {
     /* pacakge */ BluetoothEventLoop(Context context, BluetoothDeviceService bluetoothService) {
         mBluetoothService = bluetoothService;
         mContext = context;
-        mCreateBondingCallbacks = new HashMap();
         mPasskeyAgentRequestData = new HashMap();
         mGetRemoteServiceChannelCallbacks = new HashMap();
-        mDefaultPinData = new HashMap();        
         initializeNativeDataNative();
     }
     private native void initializeNativeDataNative();
@@ -74,9 +71,6 @@ class BluetoothEventLoop {
     }
     private native void cleanupNativeDataNative();
 
-    /* pacakge */ HashMap<String, IBluetoothDeviceCallback> getCreateBondingCallbacks() {
-        return mCreateBondingCallbacks;
-    }
     /* pacakge */ HashMap<String, IBluetoothDeviceCallback> getRemoteServiceChannelCallbacks() {
         return mGetRemoteServiceChannelCallbacks;
     }
@@ -235,33 +229,24 @@ class BluetoothEventLoop {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
-    private void onCreateBondingResult(String address, boolean result) {
-        mBluetoothService.setOutgoingBondingDevAddress(null);
-        IBluetoothDeviceCallback callback = mCreateBondingCallbacks.get(address);
-        if (callback != null) {
-            try {
-                callback.onCreateBondingResult(address,
-                        result ? BluetoothDevice.RESULT_SUCCESS :
-                                 BluetoothDevice.RESULT_FAILURE);
-            } catch (RemoteException e) {}
-            mCreateBondingCallbacks.remove(address);
-        }        
+    private void onCreateBondingResult(String address, int result) {
+        address = address.toUpperCase();
+        if (result == BluetoothError.SUCCESS) {
+            mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
+        } else {
+            mBluetoothService.getBondState().setBondState(address,
+                                                          BluetoothDevice.BOND_NOT_BONDED, result);
+        }
     }
-    
-    public void onBondingCreated(String address) {
-        Intent intent = new Intent(BluetoothIntent.BONDING_CREATED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    
-    public void onBondingRemoved(String address) {
-        Intent intent = new Intent(BluetoothIntent.BONDING_REMOVED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
-        if (mDefaultPinData.containsKey(address)) {
-            mDefaultPinData.remove(address);        
-        }     
+    public void onBondingCreated(String address) {
+        mBluetoothService.getBondState().setBondState(address.toUpperCase(),
+                                                      BluetoothDevice.BOND_BONDED);
+    }
+
+    public void onBondingRemoved(String address) {
+        mBluetoothService.getBondState().setBondState(address.toUpperCase(),
+                BluetoothDevice.BOND_NOT_BONDED, BluetoothDevice.UNBOND_REASON_REMOVED);
     }
 
     public void onNameChanged(String name) {
@@ -271,24 +256,24 @@ class BluetoothEventLoop {
     }
 
     public void onPasskeyAgentRequest(String address, int nativeData) {
-        mPasskeyAgentRequestData.put(address, new Integer(nativeData));        
-        
-        if (address.equals(mBluetoothService.getOutgoingBondingDevAddress())) {
-            int btClass = mBluetoothService.getRemoteClass(address);
-            int remoteDeviceClass = Device.getDevice(btClass);
-            if (remoteDeviceClass == Device.AUDIO_VIDEO_WEARABLE_HEADSET ||
-                remoteDeviceClass == Device.AUDIO_VIDEO_HANDSFREE ||
-                remoteDeviceClass == Device.AUDIO_VIDEO_HEADPHONES ||
-                remoteDeviceClass == Device.AUDIO_VIDEO_PORTABLE_AUDIO ||
-                remoteDeviceClass == Device.AUDIO_VIDEO_CAR_AUDIO ||
-                remoteDeviceClass == Device.AUDIO_VIDEO_HIFI_AUDIO) {
-                if (!mDefaultPinData.containsKey(address)) {
-                    mDefaultPinData.put(address, false);
-                }
-                if (!mDefaultPinData.get(address)) {
-                    mDefaultPinData.remove(address);
-                    mDefaultPinData.put(address, true);
+        address = address.toUpperCase();
+        mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
+        if (mBluetoothService.getBondState().getBondState(address) ==
+                BluetoothDevice.BOND_BONDING) {
+            // we initiated the bonding
+            int btClass = mBluetoothService.getRemoteClass(address);
+
+            // try 0000 once if the device looks dumb
+            switch (BluetoothClass.Device.getDevice(btClass)) {
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
+            case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+            case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
+                if (mBluetoothService.getBondState().getAttempt(address) < 1) {
+                    mBluetoothService.getBondState().attempt(address);
                     mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes("0000"));
                     return;
                 }
@@ -298,18 +283,17 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
     }
-    
+
     public void onPasskeyAgentCancel(String address) {
+        address = address.toUpperCase();
         mPasskeyAgentRequestData.remove(address);
-        if (mDefaultPinData.containsKey(address)) {
-            mDefaultPinData.remove(address);
-            mDefaultPinData.put(address, false);
-        }
         Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+                                                      BluetoothDevice.UNBOND_REASON_CANCELLED);
     }
-    
+
     private void onGetRemoteServiceChannelResult(String address, int channel) {
         IBluetoothDeviceCallback callback = mGetRemoteServiceChannelCallbacks.get(address);
         if (callback != null) {

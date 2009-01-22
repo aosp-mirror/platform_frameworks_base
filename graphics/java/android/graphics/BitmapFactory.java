@@ -304,11 +304,6 @@ public class BitmapFactory {
             bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
         }
 
-        try {
-            is.reset();
-        } catch (IOException ex) {
-            // ignore
-        }
         return bm;
     }
 

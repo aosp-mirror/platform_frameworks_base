@@ -27,11 +27,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.util.Log;
 
+import java.util.List;
+
 public class GadgetPickActivity extends ListActivity
 {
     private static final String TAG = "GadgetPickActivity";
 
     GadgetManager mGadgetManager;
+    List<GadgetInfo> mInstalled;
     
     public GadgetPickActivity() {
         mGadgetManager = GadgetManager.getInstance(this);
@@ -43,9 +46,12 @@ public class GadgetPickActivity extends ListActivity
 
         Bundle extras = getIntent().getExtras();
 
-        String[] labels = new String[10];
-        for (int i=0; i<labels.length; i++) {
-            labels[i] = "Gadget " + (i+1);
+        List<GadgetInfo> installed = mGadgetManager.getInstalledProviders();
+        mInstalled = installed;
+        final int N = installed.size();
+        String[] labels = new String[N];
+        for (int i=0; i<N; i++) {
+            labels[i] = installed.get(i).provider.getClassName();
         }
 
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, labels));
@@ -54,11 +60,8 @@ public class GadgetPickActivity extends ListActivity
     @Override
     public void onListItemClick(ListView l, View v, int position, long id)
     {
-        Log.d(TAG, "Clicked item " + position);
-
         int gadgetId = mGadgetManager.allocateGadgetId(getCallingPackage());
-        mGadgetManager.bindGadgetId(gadgetId, new ComponentName(
-                    "com.android.gadgethost", "com.android.gadgethost.TestGadgetProvider"));
+        mGadgetManager.bindGadgetId(gadgetId, mInstalled.get(position).provider);
 
         Intent result = new Intent();
         result.putExtra(GadgetManager.EXTRA_GADGET_ID, gadgetId);

@@ -659,8 +659,8 @@ public class TextUtils {
                         p.writeInt(0);
                     }
 
-                    p.writeInt(tas.getTextSize());
                     p.writeInt(tas.getTextStyle());
+                    p.writeInt(tas.getTextSize());
 
                     ColorStateList csl = tas.getTextColor();
                     if (csl == null) {
@@ -799,8 +799,8 @@ public class TextUtils {
                         p.readInt() != 0
                             ? p.readString()
                             : null,
-                        p.readInt(),
-                        p.readInt(),
+                        p.readInt(), // style
+                        p.readInt(), // size
                         p.readInt() != 0
                             ? ColorStateList.CREATOR.createFromParcel(p)
                             : null,

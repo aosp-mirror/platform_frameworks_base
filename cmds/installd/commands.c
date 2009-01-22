@@ -118,12 +118,12 @@ int free_cache(int free_size)
     if (avail < 0) return -1;
 
     LOGI("free_cache(%d) avail %d\n", free_size, avail);
-    if (avail > free_size) return 0;
+    if (avail >= free_size) return 0;
 
     d = opendir(PKG_DIR_PREFIX);
     if (d == NULL) {
         LOGE("cannot open %s\n", PKG_DIR_PREFIX);
-        return 0;
+        return -1;
     }
     dfd = dirfd(d);
 
@@ -144,7 +144,7 @@ int free_cache(int free_size)
         close(subfd);
 
         avail = disk_free();
-        if (avail > free_size) {
+        if (avail >= free_size) {
             closedir(d);
             return 0;
         }

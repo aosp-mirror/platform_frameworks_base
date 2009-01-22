@@ -528,7 +528,16 @@ public class StkService extends Handler implements AppInterface {
     }
 
     private void handleCmdResponse(StkResponseMessage resMsg) {
-        // make sure the response details match the last valid command.
+        // Make sure the response details match the last valid command. An invalid 
+        // response is a one that doesn't have a corresponding proactive command
+        // and sending it can "confuse" the baseband/ril. 
+        // One reason for out of order responses can be UI glitches. For example, 
+        // if the application launch an activity, and that activity is stored  
+        // by the framework inside the history stack. That activity will be
+        // available for relaunch using the latest application dialog 
+        // (long press on the home button). Relaunching that activity can send 
+        // the same command's result again to the StkService and can cause it to  
+        // get out of sync with the SIM.
         if (!validateResponse(resMsg)) {
             return;
         }
@@ -578,9 +587,11 @@ public class StkService extends Handler implements AppInterface {
                 break;
             case SET_UP_CALL:
                 mCmdIf.handleCallSetupRequestFromSim(resMsg.usersConfirm, null);
-                if (!resMsg.usersConfirm) {
-                    resMsg.resCode = ResultCode.USER_NOT_ACCEPT;
-                }
+                // No need to send terminal response for SET UP CALL. The user's
+                // confirmation result is send back using a dedicated ril message
+                // invoked by the CommandInterface call above. 
+                mCurrntCmd = null;
+                return;
             }
             break;
         case NO_RESPONSE_FROM_USER:

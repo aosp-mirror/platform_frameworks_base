@@ -153,6 +153,15 @@ private:
     void                    doSetOutput(AudioStreamOut* output);
     size_t                  getOutputFrameCount(AudioStreamOut* output);
 
+#ifdef WITH_A2DP
+    static bool             streamDisablesA2dp(int streamType);
+    inline bool             isA2dpEnabled() const {
+                                return (mRequestedOutput == mA2dpOutput ||
+                                        (mOutput && mOutput == mA2dpOutput));
+                            }
+    void                    setA2dpEnabled(bool enable);
+#endif
+
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
     status_t dumpClients(int fd, const Vector<String16>& args);
@@ -371,6 +380,8 @@ private:
                 void        removeTrack(wp<Track> track, int name);
                 void        remove_track_l(wp<Track> track, int name);
                 void        destroyTrack(const sp<Track>& track);
+                void        addActiveTrack(const wp<Track>& track);
+                void        removeActiveTrack(const wp<Track>& track);
 
                 AudioMixer* audioMixer() {
                     return mAudioMixer;
@@ -481,6 +492,8 @@ private:
                 int                                 mNumDelayedWrites;
                 bool                                mStandby;
                 bool                                mInWrite;
+                int                                 mA2dpDisableCount;
+                bool                                mA2dpSuppressed;
 };
 
 // ----------------------------------------------------------------------------

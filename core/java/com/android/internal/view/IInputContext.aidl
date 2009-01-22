@@ -48,6 +48,10 @@ import com.android.internal.view.IInputContextCallback;
 
     void commitCompletion(in CompletionInfo completion);
 
+    void beginBatchEdit();
+    
+    void endBatchEdit();
+    
     void sendKeyEvent(in KeyEvent event);
     
     void clearMetaKeyStates(int states);

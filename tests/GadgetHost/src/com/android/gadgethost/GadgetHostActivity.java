@@ -81,9 +81,6 @@ public class GadgetHostActivity extends Activity
     }
 
     void addGadgetView(int gadgetId, GadgetInfo gadget) {
-        // TODO: Remove this hard-coded value when the GadgetInfo is real.
-        gadget.initialLayout = R.layout.test_gadget;
-
         // Inflate the gadget's RemoteViews
         GadgetHostView view = mHost.createView(this, gadgetId, gadget);
 

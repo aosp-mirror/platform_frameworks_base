@@ -31,7 +31,7 @@
         <item name="colorForegroundInverse">@android:color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@android:color/background_dark</item>
         <item name="disabledAlpha">0.5</item>
-        <item name="backgroundDimAmount">0.5</item>
+        <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@android:style/TextAppearance</item>

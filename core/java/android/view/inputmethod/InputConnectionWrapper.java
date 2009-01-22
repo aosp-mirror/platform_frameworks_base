@@ -77,6 +77,14 @@ public class InputConnectionWrapper implements InputConnection {
         return mBase.commitCompletion(text);
     }
     
+    public boolean beginBatchEdit() {
+        return mBase.beginBatchEdit();
+    }
+    
+    public boolean endBatchEdit() {
+        return mBase.endBatchEdit();
+    }
+    
     public boolean sendKeyEvent(KeyEvent event) {
         return mBase.sendKeyEvent(event);
     }

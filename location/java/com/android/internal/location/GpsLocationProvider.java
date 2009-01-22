@@ -155,6 +155,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
     private GpsEventThread mEventThread;
     private GpsNetworkThread mNetworkThread;
+    private Object mNetworkThreadLock = new Object();
    
     // how often to request NTP time, in milliseconds
     // current setting 4 hours
@@ -301,8 +302,9 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * when the provider is enabled.
      */
     @Override
-    public void enable() {
+    public synchronized void enable() {
         if (Config.LOGD) Log.d(TAG, "enable");
+        if (mEnabled) return;
         mEnabled = native_init();
 
         if (mEnabled) {
@@ -330,8 +332,10 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * down while the provider is disabled.
      */
     @Override
-    public void disable() {
+    public synchronized void disable() {
         if (Config.LOGD) Log.d(TAG, "disable");
+        if (!mEnabled) return;
+
         mEnabled = false;
         stopNavigating();
         native_disable();
@@ -344,6 +348,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
                 Log.w(TAG, "InterruptedException when joining mEventThread");
             }
             mEventThread = null;
+        }
+
+        if (mNetworkThread != null) {
+            mNetworkThread.setDone();
+            mNetworkThread = null;
         }
 
         native_cleanup();
@@ -745,12 +754,21 @@ public class GpsLocationProvider extends LocationProviderImpl {
         private long mNextNtpTime = 0;
         private long mNextXtraTime = 0;
         private boolean mXtraDownloadRequested = false;
+        private boolean mDone = false;
 
         public GpsNetworkThread() {
             super("GpsNetworkThread");
         }
 
         public void run() {
+            synchronized (mNetworkThreadLock) {
+                if (!mDone) {
+                    runLocked();
+                }
+            }
+        }
+
+        public void runLocked() {
             if (Config.LOGD) Log.d(TAG, "NetworkThread starting");
             
             SntpClient client = new SntpClient();
@@ -761,7 +779,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
             }
             
             // thread exits after disable() is called
-            while (mEnabled) {
+            while (!mDone) {
                 long waitTime = getWaitTime();
                 do {                        
                     synchronized (this) {
@@ -784,11 +802,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
                         }
                     }
                     waitTime = getWaitTime();
-                } while (mEnabled && ((!mXtraDownloadRequested && waitTime > 0)
+                } while (!mDone && ((!mXtraDownloadRequested && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
-                if (mEnabled) {
+                if (!mDone) {
                     if (mNtpServer != null && 
                             mNextNtpTime <= System.currentTimeMillis()) {
                         if (Config.LOGD) {
@@ -837,6 +855,12 @@ public class GpsLocationProvider extends LocationProviderImpl {
         }
 
         synchronized void signal() {
+            notify();
+        }
+
+        synchronized void setDone() {
+            if (Config.LOGD) Log.d(TAG, "stopping NetworkThread");
+            mDone = true;
             notify();
         }
 

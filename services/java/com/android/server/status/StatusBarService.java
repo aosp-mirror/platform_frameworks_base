@@ -331,6 +331,7 @@ public class StatusBarService extends IStatusBar.Stub
                 mPixelFormat);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBar");
+        lp.windowAnimations = R.style.Animation_StatusBar;
 
         WindowManagerImpl.getDefault().addView(mStatusBarView, lp);
     }

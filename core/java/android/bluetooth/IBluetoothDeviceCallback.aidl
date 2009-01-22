@@ -21,7 +21,6 @@ package android.bluetooth;
  */
 oneway interface IBluetoothDeviceCallback
 {
-    void onCreateBondingResult(in String address, int result);
     void onGetRemoteServiceChannelResult(in String address, int channel);
 
     void onEnableResult(int result);

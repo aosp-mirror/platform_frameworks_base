@@ -118,6 +118,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
+    static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -325,6 +326,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
      */
     boolean mBroadcastsScheduled = false;
+
+    /**
+     * Set to indicate whether to issue an onUserLeaving callback when a
+     * newly launched activity is being brought in front of us.
+     */
+    boolean mUserLeaving = false;
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -1768,7 +1775,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void startPausingLocked() {
+    private final void startPausingLocked(boolean userLeaving) {
         if (mPausingActivity != null) {
             RuntimeException e = new RuntimeException();
             Log.e(TAG, "Trying to pause when pause is already pending for "
@@ -1795,7 +1802,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 EventLog.writeEvent(LOG_AM_PAUSE_ACTIVITY,
                         System.identityHashCode(prev),
                         prev.shortComponentName);
-                prev.app.thread.schedulePauseActivity(prev, prev.finishing,
+                prev.app.thread.schedulePauseActivity(prev, prev.finishing, userLeaving,
                         prev.configChangeFlags);
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
@@ -2092,6 +2099,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Find the first activity that is not finishing.
         HistoryRecord next = topRunningActivityLocked(null);
 
+        // Remember how we'll process this pause/resume situation, and ensure
+        // that the state is reset however we wind up proceeding.
+        final boolean userLeaving = mUserLeaving;
+        mUserLeaving = false;
+
         if (next == null) {
             // There are no more activities!  Let's just start up the
             // Launcher...
@@ -2154,7 +2166,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // can be resumed...
         if (mResumedActivity != null) {
             if (DEBUG_SWITCH) Log.v(TAG, "Skip resume: need to start pausing");
-            startPausingLocked();
+            startPausingLocked(userLeaving);
             return true;
         }
 
@@ -2380,12 +2392,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
+        // Place a new activity at top of stack, so it is next to interact
+        // with the user.
         if (addPos < 0) {
             addPos = mHistory.size();
         }
         
-        // Place activity at top of stack, so it is next to interact
-        // with the user.
+        // If we are not placing the new activity frontmost, we do not want
+        // to deliver the onUserLeaving callback to the actual frontmost
+        // activity
+        if (addPos < NH) {
+            mUserLeaving = false;
+            if (DEBUG_USER_LEAVING) Log.v(TAG, "startActivity() behind front, mUserLeaving=false");
+        }
+        
+        // Slot the activity into the history stack and proceed
         mHistory.add(addPos, r);
         r.inHistory = true;
         r.frontOfTask = newTask;
@@ -2673,6 +2694,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
                 != 0 ? r : null;
 
+        // We'll invoke onUserLeaving before onPause only if the launching
+        // activity did not explicitly state that this is an automated launch.
+        mUserLeaving = (launchFlags&Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
+        if (DEBUG_USER_LEAVING) Log.v(TAG,
+                "startActivity() => mUserLeaving=" + mUserLeaving);
+        
         // If the onlyIfNeeded flag is set, then we can do this if the activity
         // being launched is the same as the one making the call...  or, as
         // a special case, if we do not know the caller then we count the
@@ -3360,7 +3387,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 
             if (mPausingActivity == null) {
                 if (DEBUG_PAUSE) Log.v(TAG, "Finish needs to pause: " + r);
-                startPausingLocked();
+                if (DEBUG_USER_LEAVING) Log.v(TAG, "finish() => pause with userLeaving=false");
+                startPausingLocked(false);
             }
 
         } else if (r.state != ActivityState.PAUSING) {
@@ -6875,7 +6903,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // run and release the wake lock when all done.
             if (mPausingActivity == null) {
                 if (DEBUG_PAUSE) Log.v(TAG, "Sleep needs to pause...");
-                startPausingLocked();
+                if (DEBUG_USER_LEAVING) Log.v(TAG, "Sleep => pause with userLeaving=false");
+                startPausingLocked(false);
             }
         }
     }

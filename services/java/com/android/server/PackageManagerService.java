@@ -26,6 +26,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -892,32 +894,57 @@ class PackageManagerService extends IPackageManager.Stub {
     }
     
     
-    public void freeApplicationCache(final long freeStorageSize, final IPackageDataObserver observer) {
+    public void freeStorageAndNotify(final long freeStorageSize, final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         // Queue up an async operation since clearing cache may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                boolean succeded = true;
+                int retCode = -1;
                 if (mInstaller != null) {
-                    int retCode = mInstaller.freeCache(freeStorageSize);
+                    retCode = mInstaller.freeCache(freeStorageSize);
                     if (retCode < 0) {
                         Log.w(TAG, "Couldn't clear application caches");
-                        succeded = false;
-                    } 
-                } //end if mInstaller
-                if(observer != null) {
-                    try {
-                        observer.onRemoveCompleted(null, succeded);
-                    } catch (RemoteException e) {
-                        Log.i(TAG, "Observer no longer exists.");
                     }
-                } //end if observer
-            } //end run
+                } //end if mInstaller
+                if (observer != null) {
+                    try {
+                        observer.onRemoveCompleted(null, (retCode >= 0));
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoveException when invoking call back");
+                    }
+                }
+            }
         });
     }
 
+    public void freeStorage(final long freeStorageSize, final PendingIntent opFinishedIntent) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CLEAR_APP_CACHE, null);
+        // Queue up an async operation since clearing cache may take a little while.
+        mHandler.post(new Runnable() {
+            public void run() {
+                mHandler.removeCallbacks(this);
+                int retCode = -1;
+                if (mInstaller != null) {
+                    retCode = mInstaller.freeCache(freeStorageSize);
+                    if (retCode < 0) {
+                        Log.w(TAG, "Couldn't clear application caches");
+                    }
+                }
+                if(opFinishedIntent != null) {
+                    try {
+                        // Callback via pending intent
+                        opFinishedIntent.send((retCode >= 0) ? 1 : 0);
+                    } catch (CanceledException e1) {
+                        Log.i(TAG, "Failed to send pending intent");
+                    }
+                }
+            }
+        });
+    }
+    
     public ActivityInfo getActivityInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);

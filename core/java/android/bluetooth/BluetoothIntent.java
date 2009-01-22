@@ -45,6 +45,12 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.HEADSET_STATE";
     public static final String HEADSET_PREVIOUS_STATE =
         "android.bluetooth.intent.HEADSET_PREVIOUS_STATE";
+    public static final String BOND_STATE =
+        "android.bluetooth.intent.BOND_STATE";
+    public static final String BOND_PREVIOUS_STATE =
+        "android.bluetooth.intent.BOND_PREVIOUS_STATE";
+    public static final String REASON =
+        "android.bluetooth.intent.REASON";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ENABLED_ACTION          =
@@ -105,12 +111,17 @@ public interface BluetoothIntent {
     public static final String REMOTE_ALIAS_CLEARED_ACTION       =
         "android.bluetooth.intent.action.REMOTE_ALIAS_CLEARED";
 
+    /**
+     * Broadcast when the bond state of a remote device changes.
+     * Has string extra ADDRESS and int extras BOND_STATE and
+     * BOND_PREVIOUS_STATE.
+     * If BOND_STATE is BluetoothDevice.BOND_NOT_BONDED then will
+     * also have an int extra REASON with a value of:
+     * BluetoothDevice.BOND_RESULT_*
+     * */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String BONDING_CREATED_ACTION            =
-        "android.bluetooth.intent.action.BONDING_CREATED";
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String BONDING_REMOVED_ACTION            =
-        "android.bluetooth.intent.action.BONDING_REMOVED";
+    public static final String BOND_STATE_CHANGED_ACTION      =
+        "android.bluetooth.intent.action.BOND_STATE_CHANGED_ACTION";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String HEADSET_STATE_CHANGED_ACTION      =

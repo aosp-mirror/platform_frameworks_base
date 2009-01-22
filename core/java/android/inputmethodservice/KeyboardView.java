@@ -153,9 +153,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     /** Listener for {@link OnKeyboardActionListener}. */
     private OnKeyboardActionListener mKeyboardActionListener;
     
-    private static final int MSG_REMOVE_PREVIEW = 1;
-    private static final int MSG_REPEAT = 2;
-    private static final int MSG_LONGPRESS = 3;
+    private static final int MSG_SHOW_PREVIEW = 1;
+    private static final int MSG_REMOVE_PREVIEW = 2;
+    private static final int MSG_REPEAT = 3;
+    private static final int MSG_LONGPRESS = 4;
     
     private int mVerticalCorrection;
     private int mProximityThreshold;
@@ -198,7 +199,8 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private static final int REPEAT_INTERVAL = 50; // ~20 keys per second
     private static final int REPEAT_START_DELAY = 400;
-    private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    private static final int LONGPRESS_TIMEOUT = 800;
+    // Deemed to be too short : ViewConfiguration.getLongPressTimeout();
 
     private static int MAX_NEARBY_KEYS = 12;
     private int[] mDistances = new int[MAX_NEARBY_KEYS];
@@ -215,6 +217,9 @@ public class KeyboardView extends View implements View.OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_SHOW_PREVIEW:
+                    mPreviewText.setVisibility(VISIBLE);
+                    break;
                 case MSG_REMOVE_PREVIEW:
                     mPreviewText.setVisibility(INVISIBLE);
                     break;
@@ -731,7 +736,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             return adjustCase(key.label);
         }
     }
-
+    
     private void showPreview(int keyIndex) {
         int oldKeyIndex = mCurrentKeyIndex;
         final PopupWindow previewPopup = mPreviewPopup;
@@ -751,6 +756,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         // If key changed and preview is on ...
         if (oldKeyIndex != mCurrentKeyIndex && mShowPreview) {
+            mHandler.removeMessages(MSG_SHOW_PREVIEW);
             if (previewPopup.isShowing()) {
                 if (keyIndex == NOT_A_KEY) {
                     mHandler.sendMessageDelayed(mHandler
@@ -803,7 +809,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mPreviewText.getBackground().setState(
                         key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
                 if (previewPopup.isShowing()) {
-                    previewPopup.update(mPopupPreviewX + mOffsetInWindow[0], 
+                    previewPopup.update(mPopupParent, mPopupPreviewX + mOffsetInWindow[0],
                             mPopupPreviewY + mOffsetInWindow[1], 
                             popupWidth, popupHeight);
                 } else {
@@ -811,7 +817,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                             mPopupPreviewX + mOffsetInWindow[0], 
                             mPopupPreviewY + mOffsetInWindow[1]);
                 }
-                mPreviewText.setVisibility(VISIBLE);
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_PREVIEW, keyIndex, 0), 
+                        ViewConfiguration.getTapTimeout());
             }
         }
     }
@@ -1014,6 +1021,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 break;
 
             case MotionEvent.ACTION_UP:
+                mHandler.removeMessages(MSG_SHOW_PREVIEW);
                 mHandler.removeMessages(MSG_REPEAT);
                 mHandler.removeMessages(MSG_LONGPRESS);
                 if (keyIndex == mCurrentKey) {

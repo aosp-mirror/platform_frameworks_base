@@ -237,7 +237,7 @@ public abstract class BatteryStats {
     public abstract long computeBatteryRealtime(long curTime, int which);
 
     /**
-     * Returns the total, last, or current uptime in micropeconds.
+     * Returns the total, last, or current uptime in microseconds.
      *
      * @param curTime the current elapsed realtime in microseconds.
      * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
@@ -299,6 +299,9 @@ public abstract class BatteryStats {
     }
 
     private final String formatRatioLocked(long num, long den) {
+        if (den == 0L) {
+            return "---%";
+        }
         float perc = ((float)num) / ((float)den) * 100;
         mFormatBuilder.setLength(0);
         mFormatter.format("%.1f%%", perc);
@@ -352,18 +355,20 @@ public abstract class BatteryStats {
         long batteryUptime = computeBatteryUptime(uSecNow, which);
         long batteryRealtime = computeBatteryRealtime(getBatteryRealtime(uSecTime), which);
         long elapsedRealtime = computeRealtime(uSecTime, which);
+        long uptime = computeUptime(SystemClock.uptimeMillis() * 1000, which);
+
         pw.println(prefix
-                + "  On battery: " + formatTimeMs(batteryUptime) + "("
+                + "  On battery: " + formatTimeMs(batteryUptime / 1000) + "("
                 + formatRatioLocked(batteryUptime, batteryRealtime)
                 + ") uptime, "
-                + formatTimeMs(batteryRealtime) + "("
+                + formatTimeMs(batteryRealtime / 1000) + "("
                 + formatRatioLocked(batteryRealtime, elapsedRealtime)
                 + ") realtime");
         pw.println(prefix
                 + "  Total: "
-                + formatTimeMs(computeUptime(SystemClock.uptimeMillis() * 1000, which))
+                + formatTimeMs(uptime / 1000)
                 + "uptime, "
-                + formatTimeMs(elapsedRealtime)
+                + formatTimeMs(elapsedRealtime / 1000)
                 + "realtime");
 
         pw.println(" ");
@@ -479,7 +484,7 @@ public abstract class BatteryStats {
                             if (startTime != 0 || starts != 0 || launches != 0) {
                                 pw.println(prefix + "      Service " + sent.getKey() + ":");
                                 pw.println(prefix + "        Time spent started: "
-                                        + formatTimeMs(startTime));
+                                        + formatTimeMs(startTime / 1000));
                                 pw.println(prefix + "        Starts: " + starts
                                         + ", launches: " + launches);
                                 apkActivity = true;

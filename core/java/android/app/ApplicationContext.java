@@ -315,8 +315,13 @@ class ApplicationContext extends Context {
             backup.renameTo(f);
         }
 
+        // Debugging
+        if (f.exists() && !f.canRead()) {
+            Log.w(TAG, "Attempt to read preferences file " + f + " without permission");
+        }
+        
         Map map = null;
-        if (f.exists()) {
+        if (f.exists() && f.canRead()) {
             try {
                 str = new FileInputStream(f);
                 map = XmlUtils.readMapXml(str);
@@ -2264,14 +2269,23 @@ class ApplicationContext extends Context {
             }
         }
         @Override
-        public void freeApplicationCache(long idealStorageSize, 
-                IPackageDataObserver observer) {
+        public void freeStorageAndNotify(long idealStorageSize, IPackageDataObserver observer) {
             try {
-                mPM.freeApplicationCache(idealStorageSize, observer);
+                mPM.freeStorageAndNotify(idealStorageSize, observer);
             } catch (RemoteException e) {
                 // Should never happen!
             }
         }
+        
+        @Override
+        public void freeStorage(long idealStorageSize, PendingIntent opFinishedIntent) {
+            try {
+                mPM.freeStorage(idealStorageSize, opFinishedIntent);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+        
         @Override
         public void getPackageSizeInfo(String packageName, 
                 IPackageStatsObserver observer) {

@@ -177,6 +177,19 @@ public interface InputConnection {
     public boolean commitCompletion(CompletionInfo text);
 
     /**
+     * Tell the editor that you are starting a batch of editor operations.
+     * The editor will try to avoid sending you updates about its state
+     * until {@link #endBatchEdit} is called.
+     */
+    public boolean beginBatchEdit();
+    
+    /**
+     * Tell the editor that you are done with a batch edit previously
+     * initiated with {@link #endBatchEdit}.
+     */
+    public boolean endBatchEdit();
+    
+    /**
      * Send a key event to the process that is currently attached through
      * this input connection.  The event will be dispatched like a normal
      * key event, to the currently focused; this generally is the view that

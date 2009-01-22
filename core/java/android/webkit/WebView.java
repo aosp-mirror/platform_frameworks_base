@@ -288,10 +288,6 @@ public class WebView extends AbsoluteLayout
     // The time that the Zoom Controls are visible before fading away
     private static final long ZOOM_CONTROLS_TIMEOUT = 
             ViewConfiguration.getZoomControlsTimeout();
-    // Wait a short time before sending kit focus message, in case 
-    // the user is still moving around, to avoid rebuilding the display list
-    // prematurely 
-    private static final long SET_KIT_FOCUS_DELAY = 250;
     // The amount of content to overlap between two screens when going through
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
@@ -4725,8 +4721,7 @@ public class WebView extends AbsoluteLayout
     // called by JNI
     private void sendKitFocus() {
         WebViewCore.FocusData focusData = new WebViewCore.FocusData(mFocusData);
-        mWebViewCore.sendMessageDelayed(EventHub.SET_KIT_FOCUS, focusData,
-                SET_KIT_FOCUS_DELAY);
+        mWebViewCore.sendMessage(EventHub.SET_KIT_FOCUS, focusData);
     }
 
     // called by JNI

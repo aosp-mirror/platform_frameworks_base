@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
+import android.view.animation.Animation;
 
 /**
  * This interface supplies all UI-specific behavior of the window manager.  An
@@ -247,6 +248,13 @@ public interface WindowManagerPolicy {
         public WindowState getAppStartingWindow();
 
         /**
+         * Is this window visible?  It is not visible if there is no
+         * surface, or we are in the process of running an exit animation
+         * that will remove the surface.
+         */
+        boolean isVisibleLw();
+        
+        /**
          * Is this window currently visible to the user on-screen?  It is 
          * displayed either if it is visible or it is currently running an 
          * animation before no longer being visible.  Must be called with the
@@ -282,7 +290,7 @@ public interface WindowManagerPolicy {
          * regardless of whether the client or window manager would like
          * it shown.  Must be called with the window manager lock held.
          */
-        public void hideLw();
+        public void hideLw(boolean doAnimation);
         
         /**
          * Can be called to undo the effect of {@link #hideLw}, allowing a
@@ -290,7 +298,7 @@ public interface WindowManagerPolicy {
          * also like it to be shown.  Must be called with the window manager
          * lock held.
          */
-        public void showLw();
+        public void showLw(boolean doAnimation);
     }
 
     /** No transition happening. */

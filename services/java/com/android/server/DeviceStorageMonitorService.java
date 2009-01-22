@@ -149,7 +149,7 @@ class DeviceStorageMonitorService extends Binder {
         mClearingCache = true;
         try {
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeApplicationCache(getMemThreshold(), observer);
+                    freeStorageAndNotify(getMemThreshold(), observer);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;

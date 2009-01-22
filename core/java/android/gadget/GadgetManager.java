@@ -54,17 +54,22 @@ public class GadgetManager {
     /**
      * Sent when it is time to update your gadget.
      */
-    public static final String GADGET_UPDATE_ACTION = "android.gadget.GADGET_UPDATE";
+    public static final String GADGET_UPDATE_ACTION = "android.gadget.action.GADGET_UPDATE";
 
     /**
      * Sent when the gadget is added to a host for the first time. TODO: Maybe we don't want this.
      */
-    public static final String GADGET_ENABLE_ACTION = "android.gadget.GADGET_ENABLE";
+    public static final String GADGET_ENABLE_ACTION = "android.gadget.action.GADGET_ENABLE";
 
     /**
      * Sent when the gadget is removed from the last host. TODO: Maybe we don't want this.
      */
-    public static final String GADGET_DISABLE_ACTION = "android.gadget.GADGET_DISABLE";
+    public static final String GADGET_DISABLE_ACTION = "android.gadget.action.GADGET_DISABLE";
+
+    /**
+     * Field for the manifest meta-data tag.
+     */
+    public static final String GADGET_PROVIDER_META_DATA = "android.gadget.provider";
 
     static WeakHashMap<Context, WeakReference<GadgetManager>> sManagerCache = new WeakHashMap();
     static IGadgetService sService;
@@ -108,10 +113,15 @@ public class GadgetManager {
     }
 
     /**
-     * Return a list of the gadgets that are currently installed.
+     * Return a list of the gadget providers that are currently installed.
      */
-    public List<GadgetInfo> getAvailableGadgets() {
-        return null;
+    public List<GadgetInfo> getInstalledProviders() {
+        try {
+            return sService.getInstalledProviders();
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
     }
 
     /**

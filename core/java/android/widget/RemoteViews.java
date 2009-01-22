@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -31,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
+import android.view.View.OnClickListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -371,6 +374,52 @@ public class RemoteViews implements Parcelable, Filter {
 
         public final static int TAG = 6;
     }
+    
+    /**
+     * Equivalent to calling
+     * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
+     * to launch the provided {@link PendingIntent}.
+     */
+    private class SetOnClickPendingIntent extends Action {
+        public SetOnClickPendingIntent(int id, PendingIntent pendingIntent) {
+            this.viewId = id;
+            this.pendingIntent = pendingIntent;
+        }
+        
+        public SetOnClickPendingIntent(Parcel parcel) {
+            viewId = parcel.readInt();
+            pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+        }
+        
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            pendingIntent.writeToParcel(dest, 0 /* no flags */);
+        }
+        
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+            if (target != null && pendingIntent != null) {
+                OnClickListener listener = new OnClickListener() {
+                    public void onClick(View v) {
+                        try {
+                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                            pendingIntent.send();
+                        } catch (CanceledException e) {
+                            throw new ActionException(e.toString());
+                        }
+                    }
+                };
+                target.setOnClickListener(listener);
+            }
+        }
+        
+        int viewId;
+        PendingIntent pendingIntent;
+
+        public final static int TAG = 7;
+    }
 
     /**
      * Create a new RemoteViews object that will display the views contained
@@ -418,6 +467,9 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case SetProgressBar.TAG:
                     mActions.add(new SetProgressBar(parcel));
+                    break;
+                case SetOnClickPendingIntent.TAG:
+                    mActions.add(new SetOnClickPendingIntent(parcel));
                     break;
                 default:
                     throw new ActionException("Tag " + tag + "not found");
@@ -491,8 +543,6 @@ public class RemoteViews implements Parcelable, Filter {
      * 
      * @param viewId The id of the view whose drawable should change
      * @param bitmap The new Bitmap for the drawable
-     * 
-     * @hide pending API Council approval to extend the public API
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
         addAction(new SetImageViewBitmap(viewId, bitmap));
@@ -532,6 +582,18 @@ public class RemoteViews implements Parcelable, Filter {
         addAction(new SetProgressBar(viewId, max, progress, indeterminate));
     }
     
+    /**
+     * Equivalent to calling
+     * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
+     * to launch the provided {@link PendingIntent}.
+     * 
+     * @param viewId The id of the view that will trigger the {@link PendingIntent} when clicked
+     * @param pendingIntent The {@link PendingIntent} to send when user clicks
+     */
+    public void setOnClickPendingIntent(int viewId, PendingIntent pendingIntent) {
+        addAction(new SetOnClickPendingIntent(viewId, pendingIntent));
+    }
+
     /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.

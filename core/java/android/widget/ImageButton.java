@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.widget.RemoteViews.RemoteView;
 
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import java.util.Map;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
+@RemoteView
 public class ImageButton extends ImageView {
     public ImageButton(Context context) {
         this(context, null);

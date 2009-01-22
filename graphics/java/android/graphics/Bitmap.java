@@ -184,6 +184,37 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Copy the pixels from the buffer, beginning at the current position,
+     * overwriting the bitmap's pixels. The data in the buffer is not changed
+     * in any way (unlike setPixels(), which converts from unpremultipled 32bit
+     * to whatever the bitmap's native format is.
+     */
+    public void copyPixelsFromBuffer(Buffer src) {
+        checkRecycled("copyPixelsFromBuffer called on recycled bitmap");
+        
+        int elements = src.remaining();
+        int shift;
+        if (src instanceof ByteBuffer) {
+            shift = 0;
+        } else if (src instanceof ShortBuffer) {
+            shift = 1;
+        } else if (src instanceof IntBuffer) {
+            shift = 2;
+        } else {
+            throw new RuntimeException("unsupported Buffer subclass");
+        }
+        
+        long bufferBytes = (long)elements << shift;
+        long bitmapBytes = (long)getRowBytes() * getHeight();
+        
+        if (bufferBytes < bitmapBytes) {
+            throw new RuntimeException("Buffer not large enough for pixels");
+        }
+        
+        nativeCopyPixelsFromBuffer(mNativeBitmap, src);
+    }
+        
+    /**
      * Tries to make a new bitmap based on the dimensions of this bitmap,
      * setting the new bitmap's config to the one specified, and then copying
      * this bitmap's pixels into the new bitmap. If the conversion is not
@@ -794,6 +825,7 @@ public final class Bitmap implements Parcelable {
                                                int y, int width, int height);
     private static native void nativeCopyPixelsToBuffer(int nativeBitmap,
                                                         Buffer dst);
+    private static native void nativeCopyPixelsFromBuffer(int nb, Buffer src);
 
     private static native Bitmap nativeCreateFromParcel(Parcel p);
     // returns true on success

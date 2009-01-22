@@ -986,6 +986,8 @@
   <public type="attr" name="keyboardMode" id="0x01010253" />
   <public type="attr" name="isScrollContainer" id="0x01010254" />
   <public type="attr" name="fillEnabled" id="0x01010255" />
+  <public type="attr" name="updatePeriodMillis" id="0x01010256" />
+  <public type="attr" name="initialLayout" id="0x01010257" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the
