@@ -950,7 +950,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = vf.bottom = displayHeight;
             
             mStatusBar.computeFrameLw(pf, df, vf, vf);
-            mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
+            if (mStatusBar.isDisplayedLw()) {
+                // If the status bar is hidden, we don't want to cause
+                // windows behind it to scroll.
+                mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
+            }
         }
     }
 
@@ -1154,7 +1158,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             && attrs.type >= FIRST_APPLICATION_WINDOW
             && attrs.type <= LAST_APPLICATION_WINDOW
             && win.fillsScreenLw(mW, mH, true)
-            && win.isDisplayedLw()) {
+            && win.isVisibleLw()) {
             mTopFullscreenOpaqueWindowState = win;
         } else if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
             mForceStatusBar = true;
@@ -1165,16 +1169,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean finishAnimationLw() {
         if (mStatusBar != null) {
             if (mForceStatusBar) {
-                mStatusBar.showLw();
+                mStatusBar.showLw(true);
             } else if (mTopFullscreenOpaqueWindowState != null) {
                WindowManager.LayoutParams lp =
                    mTopFullscreenOpaqueWindowState.getAttrs();
                boolean hideStatusBar =
                    (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
                if (hideStatusBar) {
-                   mStatusBar.hideLw();
+                   mStatusBar.hideLw(true);
                } else {
-                   mStatusBar.showLw();
+                   mStatusBar.showLw(true);
                }
            }
         }
