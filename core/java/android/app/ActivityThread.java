@@ -1207,10 +1207,12 @@ public final class ActivityThread {
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
 
         public final void schedulePauseActivity(IBinder token, boolean finished,
-                int configChanges) {
+                boolean userLeaving, int configChanges) {
             queueOrSendMessage(
                     finished ? H.PAUSE_ACTIVITY_FINISHING : H.PAUSE_ACTIVITY,
-                    token, configChanges);
+                    token,
+                    (userLeaving ? 1 : 0),
+                    configChanges);
         }
 
         public final void scheduleStopActivity(IBinder token, boolean showWindow,
@@ -1588,10 +1590,10 @@ public final class ActivityThread {
                     handleRelaunchActivity(r, msg.arg1);
                 } break;
                 case PAUSE_ACTIVITY:
-                    handlePauseActivity((IBinder)msg.obj, false, msg.arg2);
+                    handlePauseActivity((IBinder)msg.obj, false, msg.arg1 != 0, msg.arg2);
                     break;
                 case PAUSE_ACTIVITY_FINISHING:
-                    handlePauseActivity((IBinder)msg.obj, true, msg.arg2);
+                    handlePauseActivity((IBinder)msg.obj, true, msg.arg1 != 0, msg.arg2);
                     break;
                 case STOP_ACTIVITY_SHOW:
                     handleStopActivity((IBinder)msg.obj, true, msg.arg2);
@@ -2647,9 +2649,14 @@ public final class ActivityThread {
     }
 
     private final void handlePauseActivity(IBinder token, boolean finished,
-            int configChanges) {
+            boolean userLeaving, int configChanges) {
         ActivityRecord r = mActivities.get(token);
         if (r != null) {
+            //Log.v(TAG, "userLeaving=" + userLeaving + " handling pause of " + r);
+            if (userLeaving) {
+                performUserLeavingActivity(r);
+            }
+            
             r.activity.mConfigChangeFlags |= configChanges;
             Bundle state = performPauseActivity(token, finished, true);
 
@@ -2659,6 +2666,10 @@ public final class ActivityThread {
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    final void performUserLeavingActivity(ActivityRecord r) {
+        mInstrumentation.callActivityOnUserLeaving(r.activity);
     }
 
     final Bundle performPauseActivity(IBinder token, boolean finished,

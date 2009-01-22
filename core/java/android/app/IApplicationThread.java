@@ -40,7 +40,7 @@ import java.util.Map;
  * {@hide}
  */
 public interface IApplicationThread extends IInterface {
-    void schedulePauseActivity(IBinder token, boolean finished,
+    void schedulePauseActivity(IBinder token, boolean finished, boolean userLeaving,
             int configChanges) throws RemoteException;
     void scheduleStopActivity(IBinder token, boolean showWindow,
             int configChanges) throws RemoteException;

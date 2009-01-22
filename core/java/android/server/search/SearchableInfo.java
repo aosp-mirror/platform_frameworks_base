@@ -704,6 +704,7 @@ public final class SearchableInfo implements Parcelable {
      * positioned at the location in the buffer where it was written.
      */
     public SearchableInfo(Parcel in) {
+        mSearchable = in.readInt() != 0;
         mLabelId = in.readInt();
         mSearchActivity = ComponentName.readFromParcel(in);
         mHintId = in.readInt();
@@ -733,6 +734,7 @@ public final class SearchableInfo implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mSearchable ? 1 : 0);
         dest.writeInt(mLabelId);
         mSearchActivity.writeToParcel(dest, flags);
         dest.writeInt(mHintId);

@@ -234,30 +234,18 @@ public class BluetoothTest extends AndroidTestCase {
             }
             Log.i(TAG, "onEnableResult(" + result + ")");
         }
-        public void onCreateBondingResult(String device, int res) {
-            String result = "unknown";
-            switch (res) {
-            case BluetoothDevice.RESULT_SUCCESS:
-                result = "success";
-                break;
-            case BluetoothDevice.RESULT_FAILURE:
-                result = "FAILURE";
-                break;
-            }
-            Log.i(TAG, "onEnableResult(" + device + ", " + result + ")");
-        }
         public void onGetRemoteServiceChannelResult(String device, int channel) {}
     };
 
     @SmallTest
-    public void testCreateBondingWithCallback() throws Exception {
+    public void testCreateBond() throws Exception {
         BluetoothDevice device =
                 (BluetoothDevice)getContext().getSystemService(Context.BLUETOOTH_SERVICE);
         if (device == null) {
             Log.i(TAG, "Device not Bluetooth capable, skipping test");
             return;
         }
-        if (!device.createBonding("01:23:45:67:89:AB", mCallback)) {
+        if (!device.createBond("01:23:45:67:89:AB")) {
             Log.e(TAG, "createBonding() failed");
         }
     }
@@ -286,7 +274,7 @@ public class BluetoothTest extends AndroidTestCase {
             Log.i(TAG, "Device not Bluetooth capable, skipping test");
             return;
         }
-        String[] addresses = device.listBondings();
+        String[] addresses = device.listBonds();
         if (addresses == null) {
             Log.i(TAG, "Bluetooth disabled");
             return;
@@ -363,8 +351,7 @@ public class BluetoothTest extends AndroidTestCase {
             filter.addAction(BluetoothIntent.REMOTE_NAME_FAILED_ACTION);
             filter.addAction(BluetoothIntent.REMOTE_ALIAS_CHANGED_ACTION);
             filter.addAction(BluetoothIntent.REMOTE_ALIAS_CLEARED_ACTION);
-            filter.addAction(BluetoothIntent.BONDING_CREATED_ACTION);
-            filter.addAction(BluetoothIntent.BONDING_REMOVED_ACTION);
+            filter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
             filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
             getContext().registerReceiver(
                     (BroadcastReceiver)new BluetoothIntentReceiver(), filter);

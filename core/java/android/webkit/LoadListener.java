@@ -167,7 +167,7 @@ class LoadListener extends Handler implements EventHandler {
                  * should do with them.
                  */
                 if (mNativeLoader != 0) {
-                    commitHeaders();
+                    commitHeadersCheckRedirect();
                 }
                 break;
 
@@ -458,11 +458,6 @@ class LoadListener extends Handler implements EventHandler {
         if (Config.LOGV) {
             Log.v(LOGTAG, "LoadListener.data(): url: " + url());
         }
-
-        if (ignoreCallbacks()) {
-            return;
-        }
-
         // Decode base64 data
         // Note: It's fine that we only decode base64 here and not in the other
         // data call because the only caller of the stream version is not
@@ -484,7 +479,7 @@ class LoadListener extends Handler implements EventHandler {
             sendMessage = mDataBuilder.isEmpty();
             mDataBuilder.append(data, 0, length);
         }
-        if (sendMessage) {
+        if (sendMessage && !ignoreCallbacks()) {
             // Send a message whenever data comes in after a write to WebCore
             sendMessageInternal(obtainMessage(MSG_CONTENT_DATA));
         }
@@ -850,7 +845,8 @@ class LoadListener extends Handler implements EventHandler {
         return mContentLength;
     }
 
-    private void commitHeaders() {
+    // Commit the headers if the status code is not a redirect.
+    private void commitHeadersCheckRedirect() {
         if (mCancelled) return;
 
         // do not call webcore if it is redirect. According to the code in
@@ -860,6 +856,11 @@ class LoadListener extends Handler implements EventHandler {
             return;
         }
 
+        commitHeaders();
+    }
+
+    // This commits the headers without checking the response status code.
+    private void commitHeaders() {
         // Commit the headers to WebCore
         int nativeResponse = createNativeResponse();
         // The native code deletes the native response object.
@@ -1075,7 +1076,11 @@ class LoadListener extends Handler implements EventHandler {
                 }
             }
         } else {
-            cancel();
+            // With a null redirect, commit the original headers, the buffered
+            // data, and then finish the load.
+            commitHeaders();
+            commitLoad();
+            nativeFinished();
         }
 
         if (Config.LOGV) {

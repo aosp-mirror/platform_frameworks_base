@@ -340,10 +340,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             reapplyPadding(i, array[i]);
-            padding.left = Math.max(padding.left, mPaddingL[i]);
-            padding.top = Math.max(padding.top, mPaddingT[i]);
-            padding.right = Math.max(padding.right, mPaddingR[i]);
-            padding.bottom = Math.max(padding.bottom, mPaddingB[i]);
+            padding.left += mPaddingL[i];
+            padding.top += mPaddingT[i];
+            padding.right += mPaddingR[i];
+            padding.bottom += mPaddingB[i];
         }
         return true;
     }

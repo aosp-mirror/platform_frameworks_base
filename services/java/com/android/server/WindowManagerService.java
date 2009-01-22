@@ -165,6 +165,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * value to another, when no window animation is driving it.
      */
     static final int DEFAULT_DIM_DURATION = 200;
+
+    /** Adjustment to time to perform a dim, to make it more dramatic.
+     */
+    static final int DIM_DURATION_MULTIPLIER = 6;
     
     static final int UPDATE_FOCUS_NORMAL = 0;
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
@@ -1129,7 +1133,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         if (win.mSurface != null && !mDisplayFrozen) {
             // If we are not currently running the exit animation, we
             // need to see about starting one.
-            if (win.isVisible()) {
+            if (win.isVisibleLw()) {
                 int transit = WindowManagerPolicy.TRANSIT_EXIT;
                 if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
                     transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
@@ -1339,7 +1343,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             win.mViewVisibility = viewVisibility;
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || !win.mAppToken.clientHidden)) {
-                displayed = !win.isVisible();
+                displayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     win.mExiting = false;
                     win.mAnimation = null;
@@ -1389,7 +1393,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
                             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
                         }
-                        if (win.isVisible() &&
+                        if (win.isVisibleLw() &&
                               applyAnimationLocked(win, transit, false)) {
                             win.mExiting = true;
                             mKeyWaiter.finishedKey(session, client, true,
@@ -2215,6 +2219,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 if (swin != null && (swin.mDrawPending
                         || swin.mCommitDrawPending)) {
                     swin.mPolicyVisibility = false;
+                    swin.mPolicyVisibilityAfterAnim = false;
                  }
             }
             
@@ -2901,7 +2906,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState w = (WindowState)mWindows.get(i);
-                if (w.isVisible() && !w.isDisplayedLw()) {
+                if (w.isVisibleLw() && !w.isDisplayedLw()) {
                     return;
                 }
             }
@@ -4126,7 +4131,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                     topErrWindow = child;
                                 }
                             }
-                            if (!child.isVisible()) {
+                            if (!child.isVisibleLw()) {
                                 //Log.i(TAG, "Not visible!");
                                 continue;
                             }
@@ -4455,7 +4460,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
             
             if (mLastWin == null || !mLastWin.mToken.paused
-                || !mLastWin.isVisible()) {
+                || !mLastWin.isVisibleLw()) {
                 // If the current window has been paused, we aren't -really-
                 // finished...  so let the waiters still wait.
                 mLastWin = null;
@@ -4990,6 +4995,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         final boolean mIsImWindow;
         int mViewVisibility;
         boolean mPolicyVisibility = true;
+        boolean mPolicyVisibilityAfterAnim = true;
         boolean mAppFreezing;
         Surface mSurface;
         boolean mAttachedHidden;    // is our parent window hidden?
@@ -5634,6 +5640,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mAnimation = null;
             mAnimLayer = mLayer;
             mHasTransformation = false;
+            mPolicyVisibility = mPolicyVisibilityAfterAnim;
             mTransformation.clear();
             if (mHasDrawn
                     && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
@@ -5782,7 +5789,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
          * surface, or we are in the process of running an exit animation
          * that will remove the surface.
          */
-        boolean isVisible() {
+        public boolean isVisibleLw() {
             final AppWindowToken atoken = mAppToken;
             return mSurface != null && mPolicyVisibility && !mAttachedHidden
                     && (atoken == null || !atoken.hiddenRequested)
@@ -5937,18 +5944,32 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             return mHasDrawn;
         }
 
-        public void showLw() {
-            if (!mPolicyVisibility) {
+        public void showLw(boolean doAnimation) {
+            if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim) {
                 mSurfacesChanged = true;
                 mPolicyVisibility = true;
+                mPolicyVisibilityAfterAnim = true;
+                if (doAnimation) {
+                    applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_ENTER, true);
+                }
                 requestAnimationLocked(0);
             }
         }
 
-        public void hideLw() {
-            if (mPolicyVisibility) {
+        public void hideLw(boolean doAnimation) {
+            if (mPolicyVisibility || mPolicyVisibilityAfterAnim) {
                 mSurfacesChanged = true;
-                mPolicyVisibility = false;
+                if (doAnimation) {
+                    applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_EXIT, false);
+                    if (mAnimation == null) {
+                        doAnimation = false;
+                    }
+                }
+                if (doAnimation) {
+                    mPolicyVisibilityAfterAnim = false;
+                } else {
+                    mPolicyVisibility = false;
+                }
                 requestAnimationLocked(0);
             }
         }
@@ -5974,7 +5995,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             pw.println(prefix + "mTargetAppToken=" + mTargetAppToken);
             pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
                   + " mPolicyVisibility=" + mPolicyVisibility
-                  + " mAttachedHidden=" + mAttachedHidden
+                  + " (after=" + mPolicyVisibilityAfterAnim
+                  + ") mAttachedHidden=" + mAttachedHidden
                   + " mLastHidden=" + mLastHidden
                   + " mHaveFrame=" + mHaveFrame);
             pw.println(prefix + "Requested w=" + mRequestedWidth + " h=" + mRequestedHeight
@@ -7590,6 +7612,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                 long duration = (w.mAnimating && w.mAnimation != null)
                                         ? w.mAnimation.computeDurationHint()
                                         : DEFAULT_DIM_DURATION;
+                                if (target > mDimTargetAlpha) {
+                                    // This is happening behind the activity UI,
+                                    // so we can make it run a little longer to
+                                    // give a stronger impression without disrupting
+                                    // the user.
+                                    duration *= DIM_DURATION_MULTIPLIER;
+                                }
                                 mDimTargetAlpha = target;
                                 mDimDeltaPerMs = (mDimTargetAlpha-mDimCurrentAlpha)
                                         / duration;
@@ -7660,6 +7689,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 if (more) {
                     if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
                             + mDimSurface + ": alpha=" + mDimCurrentAlpha);
+                    mLastDimAnimTime = currentTime;
                     mDimSurface.setAlpha(mDimCurrentAlpha);
                     animating = true;
                 } else {

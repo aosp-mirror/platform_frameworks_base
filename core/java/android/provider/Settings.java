@@ -2121,6 +2121,12 @@ public final class Settings {
                 = "youtube_use_proxy";
 
         /**
+         * MMS - maximum message size in bytes for a MMS message.
+         */
+        public static final String MMS_MAXIMUM_MESSAGE_SIZE
+                = "mms_maximum_message_size";
+
+        /**
          * Event tags from the kernel event log to upload during checkin.
          */
         public static final String CHECKIN_EVENTS = "checkin_events";
@@ -2684,6 +2690,22 @@ public final class Settings {
         public static final String SHORT_KEYLIGHT_DELAY_MS =
                 "short_keylight_delay_ms";
 
+        /**
+         * URL that points to the voice search servers. To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_URL = "voice_search_url";
+
+        /**
+         * Speech encoding used with voice search on 3G networks. To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_ENCODING_THREE_G = "voice_search_encoding_three_g";
+
+        /**
+         * Speech encoding used with voice search on WIFI networks. To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
+        
+        
         /**
          * @deprecated
          * @hide

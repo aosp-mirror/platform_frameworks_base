@@ -21,7 +21,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -33,12 +38,13 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 
 public class AppCacheTest extends AndroidTestCase {
-    private static final boolean localLOGV = false;
+    private static final boolean localLOGV = true;
     public static final String TAG="AppCacheTest";
     public final long MAX_WAIT_TIME=60*1000;
     public final long WAIT_TIME_INCR=10*1000;
@@ -471,12 +477,11 @@ public class AppCacheTest extends AndroidTestCase {
     
     boolean invokePMFreeApplicationCache(long idealStorageSize) throws Exception {
         try {
-            
             String packageName = mContext.getPackageName();
             PackageDataObserver observer = new PackageDataObserver();
             //wait on observer
             synchronized(observer) {
-                getPm().freeApplicationCache(idealStorageSize, observer);
+                getPm().freeStorageAndNotify(idealStorageSize, observer);
                 long waitTime = 0;
                 while(!observer.isDone() || (waitTime > MAX_WAIT_TIME)) {
                     observer.wait(WAIT_TIME_INCR);
@@ -487,6 +492,31 @@ public class AppCacheTest extends AndroidTestCase {
                 }
             }
             return observer.retValue;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
+            return false;
+        } catch (InterruptedException e) {
+            Log.w(TAG, "InterruptedException :"+e);
+            return false;
+        }
+    }
+
+    boolean invokePMFreeStorage(long idealStorageSize, FreeStorageReceiver r, 
+            PendingIntent pi) throws Exception {
+        try {
+            // Spin lock waiting for call back
+            synchronized(r) {
+                getPm().freeStorage(idealStorageSize, pi);
+                long waitTime = 0;
+                while(!r.isDone() && (waitTime < MAX_WAIT_TIME)) {
+                    r.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!r.isDone()) {
+                    throw new Exception("timed out waiting for call back from PendingIntent");
+                }
+            }
+            return r.getResultCode() == 1;
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             return false;
@@ -561,6 +591,52 @@ public class AppCacheTest extends AndroidTestCase {
         //confirm result
         if(localLOGV) Log.i(TAG, "code="+stats.codeSize+", data="+stats.dataSize+
                 ", cache="+stats.cacheSize);
+    }
+    
+    class FreeStorageReceiver extends BroadcastReceiver {
+        public static final String ACTION_FREE = "com.android.unit_tests.testcallback";
+        private boolean doneFlag = false;
+        
+        public boolean isDone() {
+            return doneFlag;
+        }
+        
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equalsIgnoreCase(ACTION_FREE)) {
+                if (localLOGV) Log.i(TAG, "Got notification: clear cache succeeded "+getResultCode());
+                synchronized (this) {
+                    doneFlag = true;
+                    notifyAll();
+                }
+            }
+        }
+    }
+    
+    @SmallTest
+    public void testFreeStorage() throws Exception {
+        StatFs st = new StatFs("/data");
+        long blks1 = getFreeStorageBlks(st);
+        if(localLOGV) Log.i(TAG, "Available free blocks="+blks1);
+        long availableMem = getFreeStorageSize(st);
+        File cacheDir = mContext.getCacheDir();
+        assertNotNull(cacheDir);
+        createTestFiles1(cacheDir, "testtmpdir", 5);
+        long blks2 = getFreeStorageBlks(st);
+        if(localLOGV) Log.i(TAG, "Available blocks after writing test files in application cache="+blks2);
+        // Create receiver and register it
+        FreeStorageReceiver receiver = new FreeStorageReceiver();
+        mContext.registerReceiver(receiver, new IntentFilter(FreeStorageReceiver.ACTION_FREE));
+        PendingIntent pi = PendingIntent.getBroadcast(mContext,
+                0,  new Intent(FreeStorageReceiver.ACTION_FREE), 0);
+        // Invoke PackageManager api
+        invokePMFreeStorage(availableMem, receiver, pi);
+        long blks3 = getFreeStorageBlks(st);
+        if(localLOGV) Log.i(TAG, "Available blocks after freeing cache"+blks3);
+        assertEquals(receiver.getResultCode(), 1);
+        mContext.unregisterReceiver(receiver);
+        // Verify result  
+        verifyTestFiles1(cacheDir, "testtmpdir", 5);
     }
     
     /* utility method used to create observer and check async call back from PackageManager.

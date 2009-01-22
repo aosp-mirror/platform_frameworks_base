@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.KeyEvent;
+import android.widget.RemoteViews.RemoteView;
 
 
 /**
@@ -54,6 +55,7 @@ import android.view.KeyEvent;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
+@RemoteView
 public class Button extends TextView {
     public Button(Context context) {
         this(context, null);

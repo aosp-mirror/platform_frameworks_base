@@ -235,6 +235,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float[] mTmpOffset = new float[2];
         ExtractedTextRequest mExtracting;
         final ExtractedText mTmpExtracted = new ExtractedText();
+        boolean mBatchEditing;
     }
     InputMethodState mInputMethodState;
 
@@ -3505,7 +3506,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         InputMethodManager imm = InputMethodManager.peekInstance();
-        if (highlight != null && mInputMethodState != null && imm != null) {
+        if (highlight != null && mInputMethodState != null
+                && !mInputMethodState.mBatchEditing && imm != null) {
             if (imm.isActive(this)) {
                 int candStart = -1;
                 int candEnd = -1;
@@ -3864,6 +3866,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCommitCompletion(CompletionInfo text) {
     }
 
+    /**
+     * Called by the framework in response to a request to begin a batch
+     * of edit operations from the current input method, as a result of
+     * it calling {@link InputConnection#beginBatchEdit
+     * InputConnection.beginBatchEdit()}.  The default implementation sets
+     * up the TextView's internal state to take care of this; if overriding
+     * you should call through to the super class.
+     */
+    public void onBeginBatchEdit() {
+        if (mInputMethodState != null) {
+            // XXX we should be smarter here, such as not doing invalidates
+            // until all edits are done.
+            mInputMethodState.mBatchEditing = true;
+        }
+    }
+    
+    /**
+     * Called by the framework in response to a request to end a batch
+     * of edit operations from the current input method, as a result of
+     * it calling {@link InputConnection#endBatchEdit
+     * InputConnection.endBatchEdit()}.  The default implementation sets
+     * up the TextView's internal state to take care of this; if overriding
+     * you should call through to the super class.
+     */
+    public void onEndBatchEdit() {
+        if (mInputMethodState != null) {
+            mInputMethodState.mBatchEditing = false;
+            // Cheezy way to get us to report the current cursor location.
+            invalidateCursor();
+        }
+    }
+    
     /**
      * Called by the framework in response to a private command from the
      * current method, provided by it calling
@@ -5271,6 +5305,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mError != null) {
                 hideError();
             }
+            // Don't leave us in the middle of a batch edit.
+            onEndBatchEdit();
         }
 
         startStopMarquee(focused);
@@ -5300,6 +5336,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mBlink != null) {
                 mBlink.cancel();
             }
+            // Don't leave us in the middle of a batch edit.
+            onEndBatchEdit();
         }
 
         startStopMarquee(hasWindowFocus);

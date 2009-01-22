@@ -26,6 +26,8 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
     private static final int DO_DELETE_SURROUNDING_TEXT = 80;
+    private static final int DO_BEGIN_BATCH_EDIT = 90;
+    private static final int DO_END_BATCH_EDIT = 95;
     private static final int DO_HIDE_STATUS_ICON = 100;
     private static final int DO_SHOW_STATUS_ICON = 110;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
@@ -105,6 +107,14 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     public void deleteSurroundingText(int leftLength, int rightLength) {
         dispatchMessage(obtainMessageII(DO_DELETE_SURROUNDING_TEXT,
             leftLength, rightLength));
+    }
+
+    public void beginBatchEdit() {
+        dispatchMessage(obtainMessage(DO_BEGIN_BATCH_EDIT));
+    }
+
+    public void endBatchEdit() {
+        dispatchMessage(obtainMessage(DO_END_BATCH_EDIT));
     }
 
     public void hideStatusIcon() {
@@ -200,6 +210,14 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
             }
             case DO_DELETE_SURROUNDING_TEXT: {
                 mInputConnection.deleteSurroundingText(msg.arg1, msg.arg2);
+                return;
+            }
+            case DO_BEGIN_BATCH_EDIT: {
+                mInputConnection.beginBatchEdit();
+                return;
+            }
+            case DO_END_BATCH_EDIT: {
+                mInputConnection.beginBatchEdit();
                 return;
             }
             case DO_HIDE_STATUS_ICON: {

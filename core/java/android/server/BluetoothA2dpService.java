@@ -84,8 +84,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         mIntentFilter = new IntentFilter(BluetoothIntent.ENABLED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.DISABLED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.BONDING_CREATED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.BONDING_REMOVED_ACTION);
+        mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
         if (device.isEnabled()) {
@@ -111,10 +110,18 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 onBluetoothEnable();
             } else if (action.equals(BluetoothIntent.DISABLED_ACTION)) {
                 onBluetoothDisable();
-            } else if (action.equals(BluetoothIntent.BONDING_CREATED_ACTION)) {
-                setSinkPriority(address, BluetoothA2dp.PRIORITY_AUTO);
-            } else if (action.equals(BluetoothIntent.BONDING_REMOVED_ACTION)) {
-                setSinkPriority(address, BluetoothA2dp.PRIORITY_OFF);
+            } else if (action.equals(BluetoothIntent.BOND_STATE_CHANGED_ACTION)) {
+                int bondState = intent.getIntExtra(BluetoothIntent.BOND_STATE,
+                                                   BluetoothError.ERROR);
+                switch(bondState) {
+                case BluetoothDevice.BOND_BONDED:
+                    setSinkPriority(address, BluetoothA2dp.PRIORITY_AUTO);
+                    break;
+                case BluetoothDevice.BOND_BONDING:
+                case BluetoothDevice.BOND_NOT_BONDED:
+                    setSinkPriority(address, BluetoothA2dp.PRIORITY_OFF);
+                    break;
+                }
             }
         }
     };

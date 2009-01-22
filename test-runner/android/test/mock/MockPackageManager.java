@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -304,8 +305,17 @@ public class MockPackageManager extends PackageManager {
      * @hide - to match hiding in superclass
      */
     @Override
-    public void freeApplicationCache(
+    public void freeStorageAndNotify(
             long idealStorageSize, IPackageDataObserver observer) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void freeStorage(
+            long idealStorageSize, PendingIntent onFinishedIntent) {
         throw new UnsupportedOperationException();
     }
 

@@ -25,4 +25,5 @@ interface IGadgetService {
     void deleteGadgetId(int gadgetId);
     void bindGadgetId(int gadgetId, in ComponentName provider);
     GadgetInfo getGadgetInfo(int gadgetId);
+    List<GadgetInfo> getInstalledProviders();
 }

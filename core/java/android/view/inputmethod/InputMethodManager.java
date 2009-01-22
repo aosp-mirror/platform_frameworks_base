@@ -293,6 +293,14 @@ public final class InputMethodManager {
             return false;
         }
 
+        public boolean beginBatchEdit() {
+            return false;
+        }
+        
+        public boolean endBatchEdit() {
+            return false;
+        }
+        
         public boolean commitCompletion(CompletionInfo text) {
             return false;
         }
@@ -401,6 +409,12 @@ public final class InputMethodManager {
     };    
     
     final InputConnection mDummyInputConnection = new BaseInputConnection(this) {
+        public boolean beginBatchEdit() {
+            return false;
+        }
+        public boolean endBatchEdit() {
+            return false;
+        }
         public boolean commitText(CharSequence text, int newCursorPosition) {
             return false;
         }

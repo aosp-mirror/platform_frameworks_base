@@ -222,17 +222,27 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // configure the autocomplete aspects of the input box
         mSearchTextField.setOnItemClickListener(this);
         mSearchTextField.setOnItemSelectedListener(this);
-        
-        // attach the suggestions adapter
-        mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable);
-        mSearchTextField.setAdapter(mSuggestionsAdapter);
 
-        // finally, load the user's initial text (which may trigger suggestions)
-        mSuggestionsAdapter.setNonUserQuery(false);
+        // This conversion is necessary to force a preload of the EditText and thus force
+        // suggestions to be presented (even for an empty query)
         if (initialQuery == null) {
             initialQuery = "";     // This forces the preload to happen, triggering suggestions
         }
-        mSearchTextField.setText(initialQuery);
+
+        // attach the suggestions adapter, if suggestions are available
+        // The existence of a suggestions authority is the proxy for "suggestions available here"
+        if (mSearchable.getSuggestAuthority() == null) {
+            mSuggestionsAdapter = null;
+            mSearchTextField.setAdapter(mSuggestionsAdapter);
+            mSearchTextField.setText(initialQuery);
+        } else {
+            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable);
+            mSearchTextField.setAdapter(mSuggestionsAdapter);
+
+            // finally, load the user's initial text (which may trigger suggestions)
+            mSuggestionsAdapter.setNonUserQuery(false);
+            mSearchTextField.setText(initialQuery);
+        }
         
         if (selectInitialQuery) {
             mSearchTextField.selectAll();
@@ -344,7 +354,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return;
         }
         
-        mSuggestionsAdapter.setNonUserQuery(true);
+        if (mSuggestionsAdapter != null) {
+            mSuggestionsAdapter.setNonUserQuery(true);
+        }
         mSearchTextField.setText(displayQuery);
         // TODO because the new query is (not) processed in another thread, we can't just
         // take away this flag (yet).  The better solution here is going to require a new API
@@ -539,7 +551,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
             updateWidgetState();
             // Only do suggestions if actually typed by user
-            if (!mSuggestionsAdapter.getNonUserQuery()) {
+            if ((mSuggestionsAdapter != null) && !mSuggestionsAdapter.getNonUserQuery()) {
                 mPreviousSuggestionQuery = s.toString();
                 mUserQuery = mSearchTextField.getText().toString();
                 mUserQuerySelStart = mSearchTextField.getSelectionStart();
@@ -822,6 +834,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * React to the user typing an action key while in the suggestions list
      */
     private boolean doSuggestionsKey(View v, int keyCode, KeyEvent event) {
+        // Exit early in case of race condition
+        if (mSuggestionsAdapter == null) {
+            return false;
+        }
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             if (DBG_LOG_TIMING == 1) {
                 dbgLogTiming("doSuggestionsKey()");

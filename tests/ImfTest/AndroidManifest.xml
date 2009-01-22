@@ -1,0 +1,24 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+        package="com.android.imftest">
+
+   <application>
+    
+        <activity android:name=".samples.InputTypeActivity" android:label="Input Type Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.IMF_TEST" />
+            </intent-filter>
+        </activity>
+                
+        <activity android:name=".samples.ButtonActivity" android:label="Button Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.IMF_TEST" />
+            </intent-filter>
+        </activity>
+        
+    </application>
+    
+</manifest>

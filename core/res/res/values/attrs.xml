@@ -2934,5 +2934,22 @@
              requested keyboard mode, the key will be skipped -->
         <attr name="keyboardMode" />
     </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Gadget package class attributes -->
+    <!-- =============================== -->
+
+    <!-- Use <code>gadget-provider</code> as the root tag of the XML resource that
+         describes a gadget provider.  See TODO android.gadget android.gadget package
+         for more info.
+     -->
+    <declare-styleable name="GadgetProviderInfo">
+        <attr name="minWidth"/>
+        <attr name="minHeight"/>
+        <attr name="updatePeriodMillis" format="integer" />
+        <attr name="initialLayout" format="reference" />
+    </declare-styleable>
+    
+    
 </resources>
 

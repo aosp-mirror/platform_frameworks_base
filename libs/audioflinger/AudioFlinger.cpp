@@ -104,7 +104,7 @@ AudioFlinger::AudioFlinger()
         mA2dpOutput(0), mOutput(0), mRequestedOutput(0), mAudioRecordThread(0),
         mSampleRate(0), mFrameCount(0), mChannelCount(0), mFormat(0), mMixBuffer(0),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mStandby(false),
-        mInWrite(false)
+        mInWrite(false), mA2dpDisableCount(0), mA2dpSuppressed(false)
 {
     mHardwareStatus = AUDIO_HW_IDLE;
     mAudioHardware = AudioHardwareInterface::create();
@@ -204,6 +204,27 @@ size_t AudioFlinger::getOutputFrameCount(AudioStreamOut* output)
 {
     return output->bufferSize() / output->channelCount() / sizeof(int16_t);
 }
+
+#ifdef WITH_A2DP
+bool AudioFlinger::streamDisablesA2dp(int streamType)
+{
+    return (streamType == AudioTrack::SYSTEM ||
+            streamType == AudioTrack::RING ||
+            streamType == AudioTrack::ALARM ||
+            streamType == AudioTrack::NOTIFICATION);
+}
+
+void AudioFlinger::setA2dpEnabled(bool enable)
+{
+    if (enable) {
+        LOGD("set output to A2DP\n");
+        setOutput(mA2dpOutput);
+    } else {
+        LOGD("set output to hardware audio\n");
+        setOutput(mHardwareOutput);
+    }
+}
+#endif // WITH_A2DP
 
 status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
 {
@@ -457,7 +478,7 @@ bool AudioFlinger::threadLoop()
             if (UNLIKELY(count)) {
                 for (size_t i=0 ; i<count ; i++) {
                     const sp<Track>& track = tracksToRemove[i];
-                    mActiveTracks.remove(track);
+                    removeActiveTrack(track);
                     if (track->isTerminated()) {
                         mTracks.remove(track);
                         mAudioMixer->deleteTrackName(track->mName);
@@ -653,13 +674,16 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
     LOGD("setRouting %d %d %d\n", mode, routes, mask);
     if (mode == AudioSystem::MODE_NORMAL && 
             (mask & AudioSystem::ROUTE_BLUETOOTH_A2DP)) {
+        AutoMutex lock(&mLock);
+
+        bool enableA2dp = false;
         if (routes & AudioSystem::ROUTE_BLUETOOTH_A2DP) {
-            LOGD("set output to A2DP\n");
-            setOutput(mA2dpOutput);
-        } else {
-            LOGD("set output to hardware audio\n");
-            setOutput(mHardwareOutput);
+            if (mA2dpDisableCount > 0)
+                mA2dpSuppressed = true;
+            else
+                enableA2dp = true;
         }
+        setA2dpEnabled(enableA2dp);
         LOGD("setOutput done\n");
     }
 #endif
@@ -875,7 +899,7 @@ status_t AudioFlinger::addTrack(const sp<Track>& track)
         // effectively get the latency it requested.
         track->mFillingUpStatus = Track::FS_FILLING;
         track->mResetDone = false;
-        mActiveTracks.add(track);
+        addActiveTrack(track);
         return NO_ERROR;
     }
     return ALREADY_EXISTS;
@@ -897,7 +921,7 @@ void AudioFlinger::remove_track_l(wp<Track> track, int name)
         t->reset();
     }
     audioMixer()->deleteTrackName(name);
-    mActiveTracks.remove(track);
+    removeActiveTrack(track);
     mWaitWorkCV.broadcast();
 }
 
@@ -916,6 +940,44 @@ void AudioFlinger::destroyTrack(const sp<Track>& track)
         mTracks.remove(track);
         audioMixer()->deleteTrackName(keep->name());
     }
+}
+
+void AudioFlinger::addActiveTrack(const wp<Track>& t)
+{
+    mActiveTracks.add(t);
+
+#ifdef WITH_A2DP
+    // disable A2DP for certain stream types
+    sp<Track> track = t.promote();
+    if (streamDisablesA2dp(track->type())) {
+        if (mA2dpDisableCount++ == 0 && isA2dpEnabled()) {
+            setA2dpEnabled(false);
+            mA2dpSuppressed = true;
+            LOGD("mA2dpSuppressed = true\n");
+        }
+        LOGD("mA2dpDisableCount incremented to %d\n", mA2dpDisableCount);
+    }
+#endif
+}
+
+void AudioFlinger::removeActiveTrack(const wp<Track>& t)
+{
+    mActiveTracks.remove(t);
+#ifdef WITH_A2DP
+    // disable A2DP for certain stream types
+    sp<Track> track = t.promote();
+    if (streamDisablesA2dp(track->type())) {
+        if (mA2dpDisableCount > 0) {
+            mA2dpDisableCount--;
+            if (mA2dpDisableCount == 0 && mA2dpSuppressed) {
+                setA2dpEnabled(true);
+                mA2dpSuppressed = false;
+            }
+            LOGD("mA2dpDisableCount decremented to %d\n", mA2dpDisableCount);
+        } else
+            LOGE("mA2dpDisableCount is already zero");
+    }
+#endif
 }
 
 // ----------------------------------------------------------------------------

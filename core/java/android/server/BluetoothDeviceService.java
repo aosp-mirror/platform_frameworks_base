@@ -26,6 +26,7 @@ package android.server;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;  // just for dump()
+import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetoothDevice;
 import android.bluetooth.IBluetoothDeviceCallback;
@@ -49,14 +50,19 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private static final String TAG = "BluetoothDeviceService";
+    private static final boolean DBG = true;
+
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
     private IntentFilter mIntentFilter;
     private boolean mIsAirplaneSensitive;
+    private final BondState mBondState = new BondState();  // local cache of bondings
     private volatile boolean mIsEnabled;  // local cache of isEnabledNative()
     private boolean mIsDiscovering;
 
@@ -79,10 +85,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     public synchronized void init() {
         initializeNativeDataNative();
         mIsEnabled = (isEnabledNative() == 1);
+        if (mIsEnabled) {
+            mBondState.loadBondState();
+        }
         mIsDiscovering = false;
         mEventLoop = new BluetoothEventLoop(mContext, this);
         registerForAirplaneMode();
-        
+
         disableEsco();  // TODO: enable eSCO support once its fully supported
     }
     private native void initializeNativeDataNative();
@@ -112,7 +121,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     public synchronized boolean disable() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-
+        
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
@@ -171,7 +180,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     };
 
     private EnableThread mEnableThread;
-    private String mOutgoingBondingDevAddress = null;
 
     private class EnableThread extends Thread {
         private final IBluetoothDeviceCallback mEnableCallback;
@@ -198,6 +206,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                                        Settings.Secure.BLUETOOTH_ON, 1);
                 mIsDiscovering = false;
                 Intent intent = new Intent(BluetoothIntent.ENABLED_ACTION);
+                mBondState.loadBondState();
                 mContext.sendBroadcast(intent, BLUETOOTH_PERM);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(REGISTER_SDP_RECORDS), 3000);
             }
@@ -207,6 +216,119 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     private native int enableNative();
     private native int disableNative();
+
+    /* package */ BondState getBondState() {
+        return mBondState;
+    }
+
+    /** local cache of bonding state.
+    /* we keep our own state to track the intermediate state BONDING, which
+    /* bluez does not track.
+     * All addreses must be passed in upper case.
+     */
+    public class BondState {
+        private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
+        private final HashMap<String, Integer> mPinAttempt = new HashMap<String, Integer>();
+
+        public synchronized void loadBondState() {
+            if (!mIsEnabled) {
+                return;
+            }
+            String[] bonds = listBondingsNative();
+            if (bonds == null) {
+                return;
+            }
+            mState.clear();
+            if (DBG) log("found " + bonds.length + " bonded devices");
+            for (String address : bonds) {
+                mState.put(address.toUpperCase(), BluetoothDevice.BOND_BONDED);
+            }
+        }
+
+        public synchronized void setBondState(String address, int state) {
+            setBondState(address, state, 0);
+        }
+
+        /** reason is ignored unless state == BOND_NOT_BONDED */
+        public synchronized void setBondState(String address, int state, int reason) {
+            int oldState = getBondState(address);
+            if (oldState == state) {
+                return;
+            }
+            if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
+                         reason + ")");
+            Intent intent = new Intent(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.BOND_STATE, state);
+            intent.putExtra(BluetoothIntent.BOND_PREVIOUS_STATE, oldState);
+            if (state == BluetoothDevice.BOND_NOT_BONDED) {
+                if (reason <= 0) {
+                    Log.w(TAG, "setBondState() called to unbond device with invalid reason code " +
+                          "Setting reason = BOND_RESULT_REMOVED");
+                    reason = BluetoothDevice.UNBOND_REASON_REMOVED;
+                }
+                intent.putExtra(BluetoothIntent.REASON, reason);
+                mState.remove(address);
+            } else {
+                mState.put(address, state);
+            }
+            if (state == BluetoothDevice.BOND_BONDING) {
+                mPinAttempt.put(address, Integer.valueOf(0));
+            } else {
+                mPinAttempt.remove(address);
+            }
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        }
+
+        public synchronized int getBondState(String address) {
+            Integer state = mState.get(address);
+            if (state == null) {
+                return BluetoothDevice.BOND_NOT_BONDED;
+            }
+            return state.intValue();
+        }
+
+        public synchronized String[] listBonds() {
+            ArrayList<String> result = new ArrayList<String>(mState.size());
+            for (Map.Entry<String, Integer> e : mState.entrySet()) {
+                if (e.getValue().intValue() == BluetoothDevice.BOND_BONDED) {
+                    result.add(e.getKey());
+                }
+            }
+            return result.toArray(new String[result.size()]);
+        }
+
+        public synchronized int getAttempt(String address) {
+            Integer attempt = mPinAttempt.get(address);
+            if (attempt == null) {
+                return 0;
+            }
+            return attempt.intValue();
+        }
+
+        public synchronized void attempt(String address) {
+            Integer attempt = mPinAttempt.get(address);
+            if (attempt == null) {
+                return;
+            }
+            mPinAttempt.put(address, new Integer(attempt.intValue() + 1));
+        }
+
+    }
+    private native String[] listBondingsNative();
+
+    private static String toBondStateString(int bondState) {
+        switch (bondState) {
+        case BluetoothDevice.BOND_NOT_BONDED:
+            return "not bonded";
+        case BluetoothDevice.BOND_BONDING:
+            return "bonding";
+        case BluetoothDevice.BOND_BONDED:
+            return "bonded";
+        default:
+            return "??????";
+        }
+    }
 
     public synchronized String getAddress() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
@@ -230,12 +352,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         return setNameNative(name);
     }
     private native boolean setNameNative(String name);
-
-    public synchronized String[] listBondings() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return listBondingsNative();
-    }
-    private native String[] listBondingsNative();
 
     public synchronized String getMajorClass() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
@@ -551,106 +667,45 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
     private native boolean disconnectRemoteDeviceNative(String address);
 
-    private static final int MAX_OUTSTANDING_ASYNC = 32;
-    /**
-     * This method initiates a Bonding request to a remote device.
-     *
-     *
-     * @param address The Bluetooth address of the remote device
-     *
-     * @see #createBonding
-     * @see #cancelBondingProcess
-     * @see #removeBonding
-     * @see #hasBonding
-     * @see #listBondings
-     *
-     * @see android.bluetooth.PasskeyAgent
-     */
-    public synchronized boolean createBonding(String address, IBluetoothDeviceCallback callback) {
+    public synchronized boolean createBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
-
-        HashMap<String, IBluetoothDeviceCallback> callbacks = mEventLoop.getCreateBondingCallbacks();
-        if (callbacks.containsKey(address)) {
-            Log.w(TAG, "createBonding() already in progress for " + address);
+        address = address.toUpperCase();
+        if (mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
             return false;
         }
 
-        // Protect from malicious clients - limit number of outstanding requests
-        if (callbacks.size() > MAX_OUTSTANDING_ASYNC) {
-            Log.w(TAG, "Too many outstanding bonding requests, dropping request for " + address);
-            return false;
-        }
-
-        callbacks.put(address, callback);
         if (!createBondingNative(address, 60000 /* 1 minute */)) {
-            callbacks.remove(address);
             return false;
         }
-        mOutgoingBondingDevAddress = address;
+
+        mBondState.setBondState(address, BluetoothDevice.BOND_BONDING);
         return true;
     }
-           
     private native boolean createBondingNative(String address, int timeout_ms);
-    
-    /*package*/ String getOutgoingBondingDevAddress() {
-        return mOutgoingBondingDevAddress;
-    }
 
-    /*package*/ void setOutgoingBondingDevAddress(String outgoingBondingDevAddress) {
-        mOutgoingBondingDevAddress = outgoingBondingDevAddress;
-    }
-
-    /**
-     * This method cancels a pending bonding request.
-     *
-     * @param address The Bluetooth address of the remote device to which a
-     *        bonding request has been initiated.
-     *
-     * Note: When a request is canceled, method
-     *       {@link CreateBondingResultNotifier#notifyAuthenticationFailed}
-     *       will be called on the object passed to method
-     *       {@link #createBonding}.
-     *
-     * Note: it is safe to call this method when there is no outstanding
-     *       bonding request.
-     *
-     * @see #createBonding
-     * @see #cancelBondingProcess
-     * @see #removeBonding
-     * @see #hasBonding
-     * @see #listBondings
-     */
-    public synchronized boolean cancelBondingProcess(String address) {
+    public synchronized boolean cancelBondProcess(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
-        return cancelBondingProcessNative(address);
+        address = address.toUpperCase();
+        if (mBondState.getBondState(address) != BluetoothDevice.BOND_BONDING) {
+            return false;
+        }
+
+        mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+                                BluetoothDevice.UNBOND_REASON_CANCELLED);
+        cancelBondingProcessNative(address);
+        return true;
     }
     private native boolean cancelBondingProcessNative(String address);
 
-    /**
-     * This method removes a bonding to a remote device.  This is a local
-     * operation only, resulting in this adapter "forgetting" the bonding
-     * information about the specified remote device.  The other device itself
-     * does not know what the bonding has been torn down.  The next time either
-     * device attemps to connect to the other, the connection will fail, and
-     * the pairing procedure will have to be re-initiated.
-     *
-     * @param address The Bluetooth address of the remote device.
-     *
-     * @see #createBonding
-     * @see #cancelBondingProcess
-     * @see #removeBonding
-     * @see #hasBonding
-     * @see #listBondings
-     */
-    public synchronized boolean removeBonding(String address) {
+    public synchronized boolean removeBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
@@ -660,14 +715,18 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
     private native boolean removeBondingNative(String address);
 
-    public synchronized boolean hasBonding(String address) {
+    public synchronized String[] listBonds() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBondState.listBonds();
+    }
+
+    public synchronized int getBondState(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return false;
+            return BluetoothError.ERROR;
         }
-        return hasBondingNative(address);
+        return mBondState.getBondState(address.toUpperCase());
     }
-    private native boolean hasBondingNative(String address);
 
     public synchronized String[] listAclConnections() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
@@ -1016,6 +1075,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
     private native byte[] getRemoteServiceRecordNative(String address, int handle);
 
+    private static final int MAX_OUTSTANDING_ASYNC = 32;
+
     // AIDL does not yet support short's
     public synchronized boolean getRemoteServiceChannel(String address, int uuid16,
             IBluetoothDeviceCallback callback) {
@@ -1051,6 +1112,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             !BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
+        address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
         if (data == null) {
             Log.w(TAG, "setPin(" + address + ") called but no native data available, " +
@@ -1076,6 +1138,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
+        address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
         if (data == null) {
             Log.w(TAG, "cancelPin(" + address + ") called but no native data available, " +
@@ -1143,25 +1206,20 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
             BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
 
-            pw.println("\n--Bondings--");
-            String[] addresses = listBondings();
+            String[] addresses = listRemoteDevices();
+
+            pw.println("\n--Known devices--");
             for (String address : addresses) {
-                String name = getRemoteName(address);
-                pw.println(address + " (" + name + ")");
+                pw.printf("%s %10s (%d) %s\n", address,
+                           toBondStateString(mBondState.getBondState(address)),
+                           mBondState.getAttempt(address),
+                           getRemoteName(address));
             }
 
-            pw.println("\n--Current ACL Connections--");
             addresses = listAclConnections();
+            pw.println("\n--ACL connected devices--");
             for (String address : addresses) {
-                String name = getRemoteName(address);
-                pw.println(address + " (" + name + ")");
-            }
-
-            pw.println("\n--Known Devices--");
-            addresses = listRemoteDevices();
-            for (String address : addresses) {
-                String name = getRemoteName(address);
-                pw.println(address + " (" + name + ")");
+                pw.println(address);
             }
 
             // Rather not do this from here, but no-where else and I need this
@@ -1188,5 +1246,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             pw.println("\nBluetooth DISABLED");
         }
         pw.println("\nmIsAirplaneSensitive = " + mIsAirplaneSensitive);
+    }
+
+    private static void log(String msg) {
+        Log.d(TAG, msg);
     }
 }

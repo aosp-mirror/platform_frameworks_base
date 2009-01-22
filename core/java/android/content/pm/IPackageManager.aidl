@@ -34,6 +34,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.app.PendingIntent;
 
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
@@ -184,22 +185,51 @@ interface IPackageManager {
     int getApplicationEnabledSetting(in String packageName);
     
     /**
-     * Free storage by deleting LRU sorted list of cache files across all applications.
-     * If the currently available free storage on the device is greater than or equal to the
-     * requested free storage, no cache files are cleared. If the currently available storage on the 
-     * device is less than the requested free storage, some or all of the cache files across
-     * all applications are deleted(based on last accessed time) to increase the free storage 
-     * space on the device to the requested value. There is no gurantee that clearing all
-     * the cache files from all applications will clear up enough storage to achieve the desired
-     * value.
-     * @param freeStorageSize The number of bytes of storage to be 
-     * freed by the system. Say if freeStorageSize is XX, 
-     * and the current free storage is YY, 
-     * if XX is less than YY, just return. if not free XX-YY number of
-     * bytes if possible.
-     * @param observer callback used to notify when the operation is completed
+     * Free storage by deleting LRU sorted list of cache files across
+     * all applications. If the currently available free storage
+     * on the device is greater than or equal to the requested
+     * free storage, no cache files are cleared. If the currently
+     * available storage on the device is less than the requested
+     * free storage, some or all of the cache files across
+     * all applications are deleted (based on last accessed time)
+     * to increase the free storage space on the device to
+     * the requested value. There is no guarantee that clearing all
+     * the cache files from all applications will clear up
+     * enough storage to achieve the desired value.
+     * @param freeStorageSize The number of bytes of storage to be
+     * freed by the system. Say if freeStorageSize is XX,
+     * and the current free storage is YY,
+     * if XX is less than YY, just return. if not free XX-YY number
+     * of bytes if possible.
+     * @param observer call back used to notify when
+     * the operation is completed
      */
-     void freeApplicationCache(in long freeStorageSize, IPackageDataObserver observer);
+     void freeStorageAndNotify(in long freeStorageSize,
+             IPackageDataObserver observer);
+
+    /**
+     * Free storage by deleting LRU sorted list of cache files across
+     * all applications. If the currently available free storage
+     * on the device is greater than or equal to the requested
+     * free storage, no cache files are cleared. If the currently
+     * available storage on the device is less than the requested
+     * free storage, some or all of the cache files across
+     * all applications are deleted (based on last accessed time)
+     * to increase the free storage space on the device to
+     * the requested value. There is no guarantee that clearing all
+     * the cache files from all applications will clear up
+     * enough storage to achieve the desired value.
+     * @param freeStorageSize The number of bytes of storage to be
+     * freed by the system. Say if freeStorageSize is XX,
+     * and the current free storage is YY,
+     * if XX is less than YY, just return. if not free XX-YY number
+     * of bytes if possible.
+     * @param opFinishedIntent PendingIntent call back used to
+     * notify when the operation is completed.May be null
+     * to indicate that no call back is desired.
+     */
+     void freeStorage(in long freeStorageSize,
+             in PendingIntent opFinishedIntent);
      
     /**
      * Delete all the cache files in an applications cache directory

@@ -39,6 +39,28 @@ public class BluetoothDevice {
     public static final int RESULT_FAILURE = -1;
     public static final int RESULT_SUCCESS = 0;
 
+    /** We do not have a link key for the remote device, and are therefore not
+     * bonded */
+    public static final int BOND_NOT_BONDED = 0;
+    /** We have a link key for the remote device, and are probably bonded. */
+    public static final int BOND_BONDED = 1;
+    /** We are currently attempting bonding */
+    public static final int BOND_BONDING = 2;
+
+    //TODO: Unify these result codes in BluetoothResult or BluetoothError
+    /** A bond attempt failed because pins did not match, or remote device did
+     * not respond to pin request in time */
+    public static final int UNBOND_REASON_AUTH_FAILED = 1;
+    /** A bond attempt failed because the other side explicilty rejected
+     * bonding */
+    public static final int UNBOND_REASON_AUTH_REJECTED = 2;
+    /** A bond attempt failed because we cancelled the bonding process */
+    public static final int UNBOND_REASON_CANCELLED = 3;
+    /** A bond attempt failed because we could not contact the remote device */
+    public static final int UNBOND_REASON_AUTH_REMOTE_DEVICE_DOWN = 4;
+    /** An existing bond was explicitly revoked */
+    public static final int UNBOND_REASON_REMOVED = 5;
+
     private static final String TAG = "BluetoothDevice";
     
     private final IBluetoothDevice mService;
@@ -325,42 +347,36 @@ public class BluetoothDevice {
     /**
      * Create a bonding with a remote bluetooth device.
      *
-     * This is an asynchronous call. BluetoothIntent.BONDING_CREATED_ACTION
-     * will be broadcast if and when the remote device is successfully bonded.
+     * This is an asynchronous call. The result of this bonding attempt can be
+     * observed through BluetoothIntent.BOND_STATE_CHANGED_ACTION intents.
      *
      * @param address the remote device Bluetooth address.
-     * @return false if we cannot create a bonding to that device, true if
-     * there were no problems beginning the bonding process.
+     * @return false If there was an immediate problem creating the bonding,
+     *         true otherwise.
      */
-    public boolean createBonding(String address) {
-        return createBonding(address, null);
-    }
-
-    /**
-     * Create a bonding with a remote bluetooth device.
-     *
-     * This is an asynchronous call. onCreateBondingResult() of your callback
-     * will be called when the call is complete, with either RESULT_SUCCESS or
-     * RESULT_FAILURE.
-     *
-     * In addition to the callback, BluetoothIntent.BONDING_CREATED_ACTION will
-     * be broadcast if the remote device is successfully bonded.
-     *
-     * @param address The remote device Bluetooth address.
-     * @param callback Your callback, null is ok.
-     * @return true if your callback was successfully registered, or false if
-     * there was an error, implying your callback will never be called.
-     */
-    public boolean createBonding(String address, IBluetoothDeviceCallback callback) {
+    public boolean createBond(String address) {
         try {
-            return mService.createBonding(address, callback);
+            return mService.createBond(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
-    public boolean cancelBondingProcess(String address) {
+    /**
+     * Cancel an in-progress bonding request started with createBond.
+     */
+    public boolean cancelBondProcess(String address) {
         try {
-            return mService.cancelBondingProcess(address);
+            return mService.cancelBondProcess(address);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Remove an already exisiting bonding (delete the link key).
+     */
+    public boolean removeBond(String address) {
+        try {
+            return mService.removeBond(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -382,48 +398,34 @@ public class BluetoothDevice {
      *
      * This function does not check if the remote device is in range.
      *
+     * Remote devices that have an in-progress bonding attempt are not
+     * returned.
+     *
      * @return bluetooth hardware addresses of remote devices that are
      *         bonded. Array size is 0 if no devices are bonded. Null on error.
      */
-    public String[] listBondings() {
+    public String[] listBonds() {
         try {
-            return mService.listBondings();
+            return mService.listBonds();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
 
     /**
-     * Check if a remote device is bonded (paired) to the local device.
+     * Get the bonding state of a remote device.
      *
-     * Bonding (pairing) is the process by which the user enters a pin code for
-     * the device, which generates a shared link key, allowing for
-     * authentication and encryption of future connections. In Android we
-     * require bonding before RFCOMM or SCO connections can be made to a remote
-     * device.
-     *
-     * This function checks if we have a link key with the remote device. It
-     * does not cause any RF transmission, and does not check if the remote
-     * device still has it's link key with us. If the other side no longer has
-     * a link key then the RFCOMM or SCO connection attempt will result in an
-     * error.
-     *
-     * This function does not check if the remote device is in range.
+     * Result is one of:
+     * BluetoothError.*
+     * BOND_*
      *
      * @param address Bluetooth hardware address of the remote device to check.
-     * @return true if bonded, false otherwise and on error.
+     * @return Result code
      */
-    public boolean hasBonding(String address) {
+    public int getBondState(String address) {
         try {
-            return mService.hasBonding(address);
+            return mService.getBondState(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public boolean removeBonding(String address) {
-        try {
-            return mService.removeBonding(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+        return BluetoothError.ERROR_IPC;
     }
 
     public String getRemoteName(String address) {

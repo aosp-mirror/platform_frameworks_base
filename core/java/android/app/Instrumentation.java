@@ -1266,6 +1266,16 @@ public class Instrumentation {
         activity.performPause();
     }
     
+    /**
+     * Perform calling of an activity's {@link Activity#onUserLeaving} method.
+     * The default implementation simply calls through to that method.
+     * 
+     * @param activity The activity being notified that the user has navigated away
+     */
+    public void callActivityOnUserLeaving(Activity activity) {
+        activity.performUserLeaving();
+    }
+    
     /*
      * Starts allocation counting. This triggers a gc and resets the counts.
      */

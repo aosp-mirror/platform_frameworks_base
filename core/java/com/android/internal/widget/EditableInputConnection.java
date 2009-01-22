@@ -242,6 +242,18 @@ public class EditableInputConnection extends BaseInputConnection {
         return true;
     }
 
+    public boolean beginBatchEdit() {
+        if (mTextView == null) return false;
+        mTextView.onBeginBatchEdit();
+        return true;
+    }
+    
+    public boolean endBatchEdit() {
+        if (mTextView == null) return false;
+        mTextView.onEndBatchEdit();
+        return true;
+    }
+    
     public boolean clearMetaKeyStates(int states) {
         final Editable content = getEditable();
         if (content == null) return false;
