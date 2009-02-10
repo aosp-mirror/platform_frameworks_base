@@ -21,10 +21,10 @@ page.title=Publishing Your Applications
     <li><a href="#marketupgrade">Publishing Upgrades on Android Market</a>
     <li><a href="#marketintent">Using Intents to Launch the Market Application</a></li>
     </ol></li>
-
+<!--
 <li><span style="color:ccc">Publishing on Other Hosted Services</a></li>
 <li><span style="color:ccc">Publishing through a Web Server</a></li>
-
+-->
 </ol>
 
 <h2>See also</h2>

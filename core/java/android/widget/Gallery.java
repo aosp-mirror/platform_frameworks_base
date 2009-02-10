@@ -180,7 +180,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     public Gallery(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         
-        mGestureDetector = new GestureDetector(this);
+        mGestureDetector = new GestureDetector(context, this);
         mGestureDetector.setIsLongpressEnabled(true);
         
         TypedArray a = context.obtainStyledAttributes(

@@ -54,9 +54,6 @@ public class MediaRecorderSetAudioSourceStateUnitTest extends AndroidTestCase im
         recorder.setAudioSource(MediaRecorderStateUnitTestTemplate.AUDIO_SOURCE);
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testSetAudioSource() {
         mTestTemplate.runTestOnMethod(this);

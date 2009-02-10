@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.provider.Sync;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -333,6 +334,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    /**
+     * @see ConnectivityManager#getBackgroundDataSetting()
+     */
+    public boolean getBackgroundDataSetting() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.BACKGROUND_DATA, 1) == 1;
+    }
+    
+    /**
+     * @see ConnectivityManager#setBackgroundDataSetting(boolean)
+     */
+    public void setBackgroundDataSetting(boolean allowBackgroundDataUsage) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_BACKGROUND_DATA_SETTING,
+                "ConnectivityService");
+        
+        if (getBackgroundDataSetting() == allowBackgroundDataUsage) return;
+
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.BACKGROUND_DATA, allowBackgroundDataUsage ? 1 : 0);
+        
+        Intent broadcast = new Intent(
+                ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
+        mContext.sendBroadcast(broadcast);
+    }    
+    
     private int getNumConnectedNetworks() {
         int numConnectedNets = 0;
 
@@ -632,7 +659,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump ConnectivityService from from pid="
                     + Binder.getCallingPid()

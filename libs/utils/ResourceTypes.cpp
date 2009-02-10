@@ -1736,7 +1736,7 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
 }
 
 ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag,
-        uint32_t* outSpecFlags) const
+        uint32_t* outSpecFlags, ResTable_config* outConfig) const
 {
     if (mError != NO_ERROR) {
         return mError;
@@ -1809,7 +1809,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
             (const Res_value*)(((const uint8_t*)type) + offset);
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(type->config);
-        
+
         if (outSpecFlags != NULL) {
             if (typeClass->typeSpecFlags != NULL) {
                 *outSpecFlags |= dtohl(typeClass->typeSpecFlags[e]);
@@ -1834,6 +1834,9 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         outValue->res0 = bestValue->res0;
         outValue->dataType = bestValue->dataType;
         outValue->data = dtohl(bestValue->data);
+        if (outConfig != NULL) {
+            *outConfig = bestItem;
+        }
         TABLE_NOISY(size_t len;
               printf("Found value: pkg=%d, type=%d, str=%s, int=%d\n",
                      bestPackage->header->index,
@@ -3484,7 +3487,7 @@ ssize_t ResTable::getEntry(
         
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(thisType->config);
-        
+
         TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): imsi:%d/%d=%d/%d lang:%c%c=%c%c cnt:%c%c=%c%c "
                             "orien:%d=%d touch:%d=%d density:%d=%d key:%d=%d inp:%d=%d nav:%d=%d w:%d=%d h:%d=%d\n",
                            entryIndex, typeIndex+1, dtohl(thisType->config.size),

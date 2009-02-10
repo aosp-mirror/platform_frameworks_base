@@ -23,8 +23,8 @@
 namespace android {
 
 /*
- * A set of bit masks for specifying how the received frames from preview are
- * handled before the frame callback call.
+ * A set of bit masks for specifying how the received preview frames are
+ * handled before the previewCallback() call.
  *
  * The least significant 3 bits of an "int" value are used for this purpose:
  *
@@ -34,10 +34,18 @@ namespace android {
  *       | |-----------> determine whether the callback is one-shot or not
  *       |-------------> determine whether the frame is copied out or not
  *
+ * WARNING:
+ * When a frame is sent directly without copying, it is the frame receiver's
+ * responsiblity to make sure that the frame data won't get corrupted by
+ * subsequent preview frames filled by the camera. This flag is recommended
+ * only when copying out data brings significant performance price and the
+ * handling/processing of the received frame data is always faster than
+ * the preview frame rate so that data corruption won't occur.
+ *
  * For instance,
  * 1. 0x00 disables the callback. In this case, copy out and one shot bits
  *    are ignored.
- * 2. 0x01 enables a callback without copying out the recievied frames. A
+ * 2. 0x01 enables a callback without copying out the received frames. A
  *    typical use case is the Camcorder application to avoid making costly
  *    frame copies.
  * 3. 0x05 is enabling a callback with frame copied out repeatedly. A typical
@@ -96,6 +104,18 @@ public:
             // get preview state
             bool        previewEnabled();
 
+            // start recording mode, must call setPreviewDisplay first
+            status_t    startRecording();
+
+            // stop recording mode
+            void        stopRecording();
+
+            // get recording state
+            bool        recordingEnabled();
+
+            // release a recording frame
+            void        releaseRecordingFrame(const sp<IMemory>& mem);
+
             // autoFocus - status returned from callback
             status_t    autoFocus();
 
@@ -111,20 +131,19 @@ public:
             void        setShutterCallback(shutter_callback cb, void *cookie);
             void        setRawCallback(frame_callback cb, void *cookie);
             void        setJpegCallback(frame_callback cb, void *cookie);
-
-            void        setFrameCallback(frame_callback cb,
-                            void *cookie,
-                            int frame_callback_flag = FRAME_CALLBACK_FLAG_NOOP);
-
+            void        setRecordingCallback(frame_callback cb, void *cookie);
+            void        setPreviewCallback(frame_callback cb, void *cookie, int preview_callback_flag = FRAME_CALLBACK_FLAG_NOOP);
             void        setErrorCallback(error_callback cb, void *cookie);
             void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
+
     // ICameraClient interface
     virtual void        shutterCallback();
     virtual void        rawCallback(const sp<IMemory>& picture);
     virtual void        jpegCallback(const sp<IMemory>& picture);
-    virtual void        frameCallback(const sp<IMemory>& frame);
+    virtual void        previewCallback(const sp<IMemory>& frame);
     virtual void        errorCallback(status_t error);
     virtual void        autoFocusCallback(bool focused);
+    virtual void        recordingCallback(const sp<IMemory>& frame);
 
     sp<ICamera>         remote();
 
@@ -155,8 +174,10 @@ private:
             void                *mRawCallbackCookie;
             frame_callback      mJpegCallback;
             void                *mJpegCallbackCookie;
-            frame_callback      mFrameCallback;
-            void                *mFrameCallbackCookie;
+            frame_callback      mPreviewCallback;
+            void                *mPreviewCallbackCookie;
+            frame_callback      mRecordingCallback;
+            void                *mRecordingCallbackCookie;
             error_callback      mErrorCallback;
             void                *mErrorCallbackCookie;
             autofocus_callback  mAutoFocusCallback;

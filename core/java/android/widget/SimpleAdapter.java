@@ -36,12 +36,16 @@ import java.util.Map;
  * Binding data to views occurs in two phases. First, if a
  * {@link android.widget.SimpleAdapter.ViewBinder} is available,
  * {@link ViewBinder#setViewValue(android.view.View, Object, String)}
- * is invoked. If the returned value is true, binding has occured. If the
- * returned value is false and the view to bind is a TextView,
- * {@link #setViewText(TextView, String)} is invoked. If the returned value
- * is false and the view to bind is an ImageView,
- * {@link #setViewImage(ImageView, int)} or {@link #setViewImage(ImageView, String)} is
- * invoked. If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
+ * is invoked. If the returned value is true, binding has occurred. 
+ * If the returned value is false, the following views are then tried in order:
+ * <ul>
+ * <li> A view that implements Checkable (e.g. CheckBox).  The expected bind value is a boolean.
+ * <li> TextView.  The expected bind value is a string and {@link #setViewText(TextView, String)} 
+ * is invoked.
+ * <li> ImageView. The expected bind value is a resource id or a string and 
+ * {@link #setViewImage(ImageView, int)} or {@link #setViewImage(ImageView, String)} is invoked. 
+ * </ul>
+ * If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
  */
 public class SimpleAdapter extends BaseAdapter implements Filterable {
     private int[] mTo;
@@ -176,7 +180,16 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
                 }
 
                 if (!bound) {
-                    if (v instanceof TextView) {
+                    if (v instanceof Checkable) {
+                        if (data instanceof Boolean) {
+                            ((Checkable) v).setChecked((Boolean) data);
+                        } else {
+                            throw new IllegalStateException(v.getClass().getName() +
+                                    " should be bound to a Boolean, not a " + data.getClass());
+                        }
+                    } else if (v instanceof TextView) {
+                        // Note: keep the instanceof TextView check at the bottom of these
+                        // ifs since a lot of views are TextViews (e.g. CheckBoxes).
                         setViewText((TextView) v, text);
                     } else if (v instanceof ImageView) {
                         if (data instanceof Integer) {

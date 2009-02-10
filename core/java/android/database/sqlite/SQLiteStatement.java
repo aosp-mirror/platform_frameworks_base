@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.os.SystemClock;
+
 /**
  * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
  * The statement cannot return multiple rows, but 1x1 result sets are allowed.
@@ -43,10 +45,16 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public void execute() {
         mDatabase.lock();
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
+
         acquireReference();
         try {
             native_execute();
-        } finally {
+            if (logStats) {
+                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
+            }
+        } finally {                    
             releaseReference();
             mDatabase.unlock();
         }
@@ -64,9 +72,15 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long executeInsert() {
         mDatabase.lock();
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
+
         acquireReference();
         try {
             native_execute();
+            if (logStats) {
+                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
+            }
             return mDatabase.lastInsertRow();
         } finally {
             releaseReference();
@@ -84,9 +98,16 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long simpleQueryForLong() {
         mDatabase.lock();
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
+
         acquireReference();
         try {
-            return native_1x1_long();
+            long retValue = native_1x1_long();
+            if (logStats) {
+                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
+            }
+            return retValue;
         } finally {
             releaseReference();
             mDatabase.unlock();
@@ -103,9 +124,16 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public String simpleQueryForString() {
         mDatabase.lock();
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
+
         acquireReference();
         try {
-            return native_1x1_string();
+            String retValue = native_1x1_string();
+            if (logStats) {
+                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
+            }
+            return retValue;
         } finally {
             releaseReference();
             mDatabase.unlock();

@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -184,6 +185,11 @@ class HistoryRecord extends IApplicationToken.Stub {
             dataDir = aInfo.applicationInfo.dataDir;
             nonLocalizedLabel = aInfo.nonLocalizedLabel;
             labelRes = aInfo.labelRes;
+            if (nonLocalizedLabel == null && labelRes == 0) {
+                ApplicationInfo app = aInfo.applicationInfo;
+                nonLocalizedLabel = app.nonLocalizedLabel;
+                labelRes = app.labelRes;
+            }
             icon = aInfo.getIconResource();
             theme = aInfo.getThemeResource();
             if ((aInfo.flags&ActivityInfo.FLAG_MULTIPROCESS) != 0

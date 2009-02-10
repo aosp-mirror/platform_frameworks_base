@@ -144,6 +144,56 @@ public class ViewAnimator extends FrameLayout {
         }
     }
 
+    @Override
+    public void removeAllViews() {
+        super.removeAllViews();
+        mWhichChild = 0;
+        mFirstTime = true;
+    }
+
+    @Override
+    public void removeView(View view) {
+        final int index = indexOfChild(view);
+        if (index >= 0) {
+            removeViewAt(index);
+        }
+    }
+
+    @Override
+    public void removeViewAt(int index) {
+        super.removeViewAt(index);
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            mWhichChild = 0;
+            mFirstTime = true;
+        } else if (mWhichChild >= childCount) {
+            // Displayed is above child count, so float down to top of stack
+            setDisplayedChild(childCount - 1);
+        } else if (mWhichChild == index) {
+            // Displayed was removed, so show the new child living in its place
+            setDisplayedChild(mWhichChild);
+        }
+    }
+
+    public void removeViewInLayout(View view) {
+        removeView(view);
+    }
+
+    public void removeViews(int start, int count) {
+        super.removeViews(start, count);
+        if (getChildCount() == 0) {
+            mWhichChild = 0;
+            mFirstTime = true;
+        } else if (mWhichChild >= start && mWhichChild < start + count) {
+            // Try showing new displayed child, wrapping if needed
+            setDisplayedChild(mWhichChild);
+        }
+    }
+
+    public void removeViewsInLayout(int start, int count) {
+        removeViews(start, count);
+    }
+
     /**
      * Returns the View corresponding to the currently displayed child.
      *

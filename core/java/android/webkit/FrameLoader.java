@@ -220,6 +220,7 @@ class FrameLoader {
         // Tell the Listener respond with the cache file
         CacheLoader cacheLoader =
                 new CacheLoader(mListener, result);
+        mListener.setCacheLoader(cacheLoader);
         cacheLoader.load();
     }
 

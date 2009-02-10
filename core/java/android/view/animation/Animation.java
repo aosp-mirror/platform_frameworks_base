@@ -20,13 +20,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.graphics.RectF;
 
 /**
  * Abstraction for an Animation that can be applied to Views, Surfaces, or
  * other objects. See the {@link android.view.animation animation package
  * description file}.
  */
-public abstract class Animation {
+public abstract class Animation implements Cloneable {
     /**
      * Repeat the animation indefinitely.
      */
@@ -174,8 +175,12 @@ public abstract class Animation {
      */
     private int mZAdjustment;
     
-    // Indicates what was the last value returned by getTransformation()
     private boolean mMore = true;
+    private boolean mOneMoreTime = true;
+
+    RectF mPreviousRegion = new RectF();
+    Transformation mTransformation = new Transformation();
+    Transformation mPreviousTransformation = new Transformation();
 
     /**
      * Creates a new animation with a duration of 0ms, the default interpolator, with
@@ -217,16 +222,28 @@ public abstract class Animation {
         a.recycle();
     }
 
+    @Override
+    protected Animation clone() throws CloneNotSupportedException {
+        final Animation animation = (Animation) super.clone();
+        animation.mPreviousRegion = new RectF();
+        animation.mTransformation = new Transformation();
+        animation.mPreviousTransformation = new Transformation();
+        return animation;
+    }
+
     /**
      * Reset the initialization state of this animation.
      *
      * @see #initialize(int, int, int, int)
      */
     public void reset() {
+        mPreviousRegion.setEmpty();
+        mPreviousTransformation.clear();
         mInitialized = false;
         mCycleFlip = false;
         mRepeated = 0;
         mMore = true;
+        mOneMoreTime = true;
     }
 
     /**
@@ -255,10 +272,8 @@ public abstract class Animation {
      * @param parentHeight Height of the animated object's parent
      */
     public void initialize(int width, int height, int parentWidth, int parentHeight) {
+        reset();
         mInitialized = true;
-        mCycleFlip = false;
-        mRepeated = 0;
-        mMore = true;
     }
 
     /**
@@ -707,6 +722,11 @@ public abstract class Animation {
             }
         }
 
+        if (!mMore && mOneMoreTime) {
+            mOneMoreTime = false;
+            return true;
+        }
+
         return mMore;
     }
 
@@ -765,7 +785,54 @@ public abstract class Animation {
                 return value;
         }
     }
-    
+
+    /**
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param invalidate
+     * @param transformation
+     * 
+     * @hide
+     */
+    public void getInvalidateRegion(int left, int top, int right, int bottom,
+            RectF invalidate, Transformation transformation) {
+
+        final RectF previousRegion = mPreviousRegion;
+
+        invalidate.set(left, top, right, bottom);
+        transformation.getMatrix().mapRect(invalidate);
+        invalidate.union(previousRegion);
+
+        previousRegion.set(left, top, right, bottom);
+        transformation.getMatrix().mapRect(previousRegion);
+
+        final Transformation tempTransformation = mTransformation;
+        final Transformation previousTransformation = mPreviousTransformation;
+
+        tempTransformation.set(transformation);
+        transformation.set(previousTransformation);
+        previousTransformation.set(tempTransformation);
+    }
+
+    /**
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     *
+     * @hide
+     */
+    public void initializeInvalidateRegion(int left, int top, int right, int bottom) {
+        final RectF region = mPreviousRegion;
+        region.set(left, top, right, bottom);
+        if (mFillBefore) {
+            final Transformation previousTransformation = mPreviousTransformation;
+            applyTransformation(0.0f, previousTransformation);
+        }
+    }
+
     /**
      * Utility class to parse a string description of a size.
      */

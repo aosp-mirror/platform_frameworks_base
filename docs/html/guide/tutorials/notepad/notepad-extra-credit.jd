@@ -1,4 +1,6 @@
-page.title=Tutorial: Extra Credit
+page.title=Notepad Extra Credit
+parent.title=Notepad Tutorial
+parent.link=index.html
 @jd:body
 
 
@@ -65,6 +67,4 @@ when.</p>
 your application development, but also superb profiling support. You can also
 try using <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
 find the bottlenecks and fix them.</p>
-<p><a href="index.html">Back to the Tutorial main
-page...</a></p>
 

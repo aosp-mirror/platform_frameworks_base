@@ -33,7 +33,6 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.TextKeyListener;
@@ -44,7 +43,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.ArrayAdapter;
@@ -69,10 +67,8 @@ import java.util.ArrayList;
     // on the enter key.  The method for blocking unmatched key ups prevents
     // the shift key from working properly.
     private boolean         mGotEnterDown;
-    // Determines whether we allow calls to requestRectangleOnScreen to
-    // propagate.  We only want to scroll if the user is typing.  If the
-    // user is simply navigating through a textfield, we do not want to
-    // scroll.
+    // mScrollToAccommodateCursor being set to false prevents us from scrolling
+    // the cursor on screen when using the trackball to select a textfield.
     private boolean         mScrollToAccommodateCursor;
     private int             mMaxLength;
     // Keep track of the text before the change so we know whether we actually
@@ -183,6 +179,11 @@ import java.util.ArrayList;
                     mWebView.shortPressOnTextField();
                     return true;
                 }
+                // If we reached here, then this is a single line textfield, and
+                // the user pressed ENTER.  In this case, we want to hide the
+                // soft input method.
+                InputMethodManager.getInstance(mContext)
+                        .hideSoftInputFromWindow(getWindowToken(), 0);
                 sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
                 sendDomEvent(event);
             }
@@ -405,6 +406,12 @@ import java.util.ArrayList;
             //mWebView.setSelection(start, end);
             return true;
         }
+        // If the user is in a textfield, and the movement method is not
+        // handling the trackball events, it means they are at the end of the
+        // field and continuing to move the trackball.  In this case, we should
+        // not scroll the cursor on screen bc the user may be attempting to
+        // scroll the page, possibly in the opposite direction of the cursor.
+        mScrollToAccommodateCursor = false;
         return false;
     }
 
@@ -419,6 +426,17 @@ import java.util.ArrayList;
         mHandler.removeMessages(LONGPRESS);
         mWebView.removeView(this);
         mWebView.requestFocus();
+        mScrollToAccommodateCursor = false;
+    }
+
+    /* package */ void enableScrollOnScreen(boolean enable) {
+        mScrollToAccommodateCursor = enable;
+    }
+
+    /* package */ void bringIntoView() {
+        if (getLayout() != null) {
+            bringPointIntoView(Selection.getSelectionEnd(getText()));
+        }
     }
 
     @Override
@@ -437,8 +455,16 @@ import java.util.ArrayList;
         mWebView.passToJavaScript(getText().toString(), event);
     }
 
+    /**
+     *  Always use this instead of setAdapter, as this has features specific to
+     *  the TextDialog.
+     */
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
-        adapter.setTextView(this);
+        if (adapter != null) {
+            adapter.setTextView(this);
+        } else {
+            setInputType(EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+        }
         super.setAdapter(adapter);
     }
 
@@ -483,12 +509,12 @@ import java.util.ArrayList;
         PasswordTransformationMethod method;
         if (inPassword) {
             method = PasswordTransformationMethod.getInstance();
+            setInputType(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.
+                    TYPE_TEXT_VARIATION_PASSWORD);
         } else {
             method = null;
         }
         setTransformationMethod(method);
-        setInputType(inPassword ? EditorInfo.TYPE_TEXT_VARIATION_PASSWORD :
-                EditorInfo.TYPE_CLASS_TEXT);
     }
 
     /* package */ void setMaxLength(int maxLength) {
@@ -539,7 +565,6 @@ import java.util.ArrayList;
         // Set up a measure spec so a layout can always be recreated.
         mWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
         mHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-        mScrollToAccommodateCursor = false;
         requestFocus();
     }
 
@@ -547,18 +572,23 @@ import java.util.ArrayList;
      * Set whether this is a single-line textfield or a multi-line textarea.
      * Textfields scroll horizontally, and do not handle the enter key.
      * Textareas behave oppositely.
+     * Do NOT call this after calling setInPassword(true).  This will result in
+     * removing the password input type.
      */
     public void setSingleLine(boolean single) {
         if (mSingle != single) {
             TextKeyListener.Capitalize cap;
+            int inputType = EditorInfo.TYPE_CLASS_TEXT;
             if (single) {
                 cap = TextKeyListener.Capitalize.NONE;
             } else {
                 cap = TextKeyListener.Capitalize.SENTENCES;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
             }
             setKeyListener(TextKeyListener.getInstance(!single, cap));
             mSingle = single;
             setHorizontallyScrolling(single);
+            setInputType(inputType);
         }
     }
 

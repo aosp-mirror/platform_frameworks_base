@@ -26,9 +26,13 @@ import android.graphics.*;
  *
  */
 public class NinePatchDrawable extends Drawable {
+    private NinePatchState mNinePatchState;
+    private NinePatch mNinePatch;
+    private Rect mPadding;
+    private Paint mPaint;
+    private boolean mMutated;
 
-    public NinePatchDrawable(Bitmap bitmap, byte[] chunk,
-                             Rect padding, String srcName) {
+    public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
     }
     
@@ -45,8 +49,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mNinePatchState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mNinePatchState.mChangingConfigurations;
     }
     
     @Override
@@ -104,12 +107,13 @@ public class NinePatchDrawable extends Drawable {
     }
 
     /**
-     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat} value of OPAQUE or TRANSLUCENT.
+     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat}
+     * value of OPAQUE or TRANSLUCENT.
      */
     @Override
     public int getOpacity() {
-        return mNinePatch.hasAlpha() || (mPaint != null && mPaint.getAlpha() < 255)
-            ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+        return mNinePatch.hasAlpha() || (mPaint != null && mPaint.getAlpha() < 255) ?
+                PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
     }
 
     @Override
@@ -123,16 +127,35 @@ public class NinePatchDrawable extends Drawable {
         return mNinePatchState;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mNinePatchState = new NinePatchState(mNinePatchState);
+            mNinePatch = mNinePatchState.mNinePatch;
+            mPadding = mNinePatchState.mPadding;
+            mMutated = true;
+        }
+        return this;
+    }
+
     final static class NinePatchState extends ConstantState {
-        NinePatchState(NinePatch ninePatch, Rect padding)
-        {
+        final NinePatch mNinePatch;
+        final Rect mPadding;
+        int mChangingConfigurations;
+
+        NinePatchState(NinePatch ninePatch, Rect padding) {
             mNinePatch = ninePatch;
             mPadding = padding;
         }
 
+        NinePatchState(NinePatchState state) {
+            mNinePatch = new NinePatch(state.mNinePatch);
+            mPadding = new Rect(state.mPadding);
+            mChangingConfigurations = state.mChangingConfigurations;
+        }
+
         @Override
-        public Drawable newDrawable()
-        {
+        public Drawable newDrawable() {
             return new NinePatchDrawable(this);
         }
         
@@ -140,10 +163,6 @@ public class NinePatchDrawable extends Drawable {
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }
-
-        final NinePatch mNinePatch;
-        final Rect      mPadding;
-        int             mChangingConfigurations;
     }
 
     private NinePatchDrawable(NinePatchState state) {
@@ -151,10 +170,5 @@ public class NinePatchDrawable extends Drawable {
         mNinePatch = state.mNinePatch;
         mPadding = state.mPadding;
     }
-
-    private final NinePatchState    mNinePatchState;
-    private final NinePatch         mNinePatch;
-    private final Rect              mPadding;
-    private Paint                   mPaint;
 }
 

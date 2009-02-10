@@ -52,7 +52,9 @@
 #include "LayerBuffer.h"
 #include "LayerDim.h"
 #include "LayerBitmap.h"
+#include "LayerOrientationAnim.h"
 #include "LayerScreenshot.h"
+#include "OrientationAnimation.h"
 #include "SurfaceFlinger.h"
 #include "RFBServer.h"
 #include "VRamHeap.h"
@@ -224,6 +226,7 @@ void SurfaceFlinger::init()
 SurfaceFlinger::~SurfaceFlinger()
 {
     glDeleteTextures(1, &mWormholeTexName);
+    delete mOrientationAnimation;
 }
 
 copybit_device_t* SurfaceFlinger::getBlitEngine() const
@@ -447,6 +450,8 @@ status_t SurfaceFlinger::readyToRun()
      *  We're now ready to accept clients...
      */
 
+    mOrientationAnimation = new OrientationAnimation(this);
+    
     // start CPU gauge display
     if (mDebugCpu)
         mCpuGauge = new CPUGauge(this, ms2ns(500));
@@ -471,8 +476,8 @@ void SurfaceFlinger::waitForEvent()
 {
     // wait for something to do
     if (UNLIKELY(isFrozen())) {
-        // wait 2 seconds
-        int err = mSyncObject.wait(ms2ns(3000));
+        // wait 5 seconds
+        int err = mSyncObject.wait(ms2ns(5000));
         if (err != NO_ERROR) {
             if (isFrozen()) {
                 // we timed out and are still frozen
@@ -555,11 +560,8 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    if (UNLIKELY(isFrozen())) {
-        // we are not allowed to draw, but pause a bit to make sure
-        // apps don't end up using the whole CPU, if they depend on
-        // surfaceflinger for synchronization.
-        usleep(8333); // 8.3ms ~ 120fps
+    const bool skip = mOrientationAnimation->run();
+    if (UNLIKELY(skip)) {
         return;
     }
 
@@ -684,6 +686,8 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
+
+            mOrientationAnimation->onOrientationChanged();
         }
 
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
@@ -874,19 +878,9 @@ void SurfaceFlinger::handleRepaint()
 
     uint32_t flags = hw.getFlags();
     if (flags & DisplayHardware::BUFFER_PRESERVED) {
-        if (flags & DisplayHardware::COPY_BACK_EXTENSION) {
-            // yay. nothing to do here.
-        } else {
-            if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
-                // we need to fully redraw the part that will be updated
-                mDirtyRegion.set(mInvalidRegion.bounds());
-            } else {
-                // TODO: we only need te redraw the part that had been drawn
-                // the round before and is not drawn now
-            }
-        }
+        // here we assume DisplayHardware::flip()'s  implementation
+        // performs the copy-back optimization.
     } else {
-        // COPY_BACK_EXTENSION makes no sense here
         if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
             // we need to fully redraw the part that will be updated
             mDirtyRegion.set(mInvalidRegion.bounds());
@@ -1075,6 +1069,29 @@ void SurfaceFlinger::debugShowFPS() const
     }
     // XXX: mFPS has the value we want
  }
+
+status_t SurfaceFlinger::addLayer(LayerBase* layer)
+{
+    Mutex::Autolock _l(mStateLock);
+    addLayer_l(layer);
+    setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
+    return NO_ERROR;
+}
+
+status_t SurfaceFlinger::removeLayer(LayerBase* layer)
+{
+    Mutex::Autolock _l(mStateLock);
+    removeLayer_l(layer);
+    setTransactionFlags(eTransactionNeeded);
+    return NO_ERROR;
+}
+
+status_t SurfaceFlinger::invalidateLayerVisibility(LayerBase* layer)
+{
+    layer->forceVisibilityTransaction();
+    setTransactionFlags(eTraversalNeeded);
+    return NO_ERROR;
+}
 
 status_t SurfaceFlinger::addLayer_l(LayerBase* layer)
 {

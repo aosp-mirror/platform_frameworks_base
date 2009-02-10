@@ -60,15 +60,18 @@ static sp<Surface> get_surface(JNIEnv* env, jobject clazz)
     return sp<Surface>(p);
 }
 
-static void process_media_recorder_call(JNIEnv *env, status_t opStatus, const char* exception, const char* message)
+// Returns true if it throws an exception.
+static bool process_media_recorder_call(JNIEnv *env, status_t opStatus, const char* exception, const char* message)
 {
     LOGV("process_media_recorder_call");
     if (opStatus == (status_t)INVALID_OPERATION) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return true;
     } else if (opStatus != (status_t)OK) {
         jniThrowException(env, exception, message);
+        return true;
     }
-    return;
+    return false;
 }
 
 static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, jobject camera)
@@ -196,7 +199,9 @@ android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
     if (surface != NULL) {
         const sp<Surface>& native_surface = get_surface(env, surface);
         LOGI("prepare: surface=%p (id=%d)", native_surface.get(), native_surface->ID());
-        process_media_recorder_call(env, mr->setPreviewSurface(native_surface), "java/lang/RuntimeException", "setPreviewSurface failed.");
+        if (process_media_recorder_call(env, mr->setPreviewSurface(native_surface), "java/lang/RuntimeException", "setPreviewSurface failed.")) {
+            return;
+        }
     }
     process_media_recorder_call(env, mr->prepare(), "java/io/IOException", "prepare failed.");
 }

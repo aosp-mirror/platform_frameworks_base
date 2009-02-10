@@ -1,4 +1,6 @@
 page.title=Troubleshooting
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
 @jd:body
 
 
@@ -28,9 +30,14 @@ page.title=Troubleshooting
 <p>
 The "Android Editors" feature of the ADT Plugin requires specific Eclipse components, such as WST. If you
 encounter this error message during ADT installation, you need to install the
-required Eclipse components and then try the ADT installation again. The easiest way to install the required components for the 
-Android Editors feature of ADT is the following:
-<ul>
+required Eclipse components and then try the ADT installation again. Follow the steps below to install the required components for the 
+Android Editors feature, based on the version of Eclipse that you are using.</p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
+<tr>
+<td width="50%">
+<ol>
 <li>From the dialog where you select the <strong>Update sites to visit</strong>, select the checkboxes for both the
 ADT site, and the Callisto/Europa/Ganymede Discovery Site (you may want to
 check <strong>Automatically select mirrors</strong> at the bottom).</li>
@@ -41,6 +48,19 @@ don't do it, it doesn't load the content of the discovery site.</li>
 <li>On the right, click <strong>Select required</strong>. This will select all the components
 that are required to install the Android plugin (wst, emf, etc...).</li>
 <li>Click <strong>Next</strong>, accept the agreement, click <strong>Install All</strong>, and restart Eclipse.</li>
+</ol>
+</td>
+<td>
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Software Updates...</strong></li>
+    <li>Select the <strong>Installed Software</strong> tab.</li>
+    <li>Click <strong>Update...</strong></li>
+    <li>If an update for ADT is available, select it and click <strong>Finish</strong>.</li>
+</ol>
+</td>
+</tr>
+</table>
+
 
 </p>
 <a name="nodevice"></a><h2>ADB reports &quot;no device&quot; when an emulator is running</h2>

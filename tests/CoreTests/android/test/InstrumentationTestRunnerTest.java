@@ -89,6 +89,26 @@ public class InstrumentationTestRunnerTest extends TestCase {
         
     }
 
+    public void testDelayParameter() throws Exception {
+        int delayMsec = 1000;
+        Bundle args = new Bundle();
+        args.putInt(InstrumentationTestRunner.ARGUMENT_DELAY_MSEC, delayMsec);
+        args.putString(InstrumentationTestRunner.ARGUMENT_TEST_CLASS,
+                PlaceHolderTest.class.getName() + "," +
+                PlaceHolderTest2.class.getName());
+        mInstrumentationTestRunner.onCreate(args);
+        Thread t = new Thread() { public void run() { mInstrumentationTestRunner.onStart(); } };
+
+        // Should delay three times: before, between, and after the two tests.
+        long beforeTest = System.currentTimeMillis();
+        t.start();
+        t.join();
+        assertTrue(System.currentTimeMillis() > beforeTest + delayMsec * 3);
+        assertTrue(mInstrumentationTestRunner.isStarted());
+        assertTrue(mInstrumentationTestRunner.isFinished());
+        assertTrue(mStubAndroidTestRunner.isRun());
+    }
+
     private void assertContentsInOrder(List<TestDescriptor> actual, TestDescriptor... source) {
         TestDescriptor[] clonedSource = source.clone();
         assertEquals("Unexpected number of items.", clonedSource.length, actual.size());
@@ -217,6 +237,7 @@ public class InstrumentationTestRunnerTest extends TestCase {
         }
 
         public void runTest() {
+            super.runTest();
             mRun = true;
         }
     }

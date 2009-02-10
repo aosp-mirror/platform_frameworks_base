@@ -2235,12 +2235,13 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
-     * Creates a new Uri by encoding and appending a path segment to a base Uri.
+     * Creates a new Uri by appending an already-encoded path segment to a
+     * base Uri.
      *
      * @param baseUri Uri to append path segment to
-     * @param pathSegment to encode and append
-     * @return a new Uri based on baseUri with the given segment encoded and
-     * appended to the path
+     * @param pathSegment encoded path segment to append
+     * @return a new Uri based on baseUri with the given segment appended to 
+     *  the path
      * @throws NullPointerException if baseUri is null
      */
     public static Uri withAppendedPath(Uri baseUri, String pathSegment) {

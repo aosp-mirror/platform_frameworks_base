@@ -69,18 +69,15 @@ status_t LayerBitmap::setBits(uint32_t w, uint32_t h, uint32_t alignment,
         return NO_ERROR;
     }
 
+    PixelFormatInfo info;
+    getPixelFormatInfo(format, &info);
+
     uint32_t allocFlags = MemoryDealer::PAGE_ALIGNED;
     const uint32_t align = 4; // must match GL_UNPACK_ALIGNMENT
-    const uint32_t Bpp = bytesPerPixel(format);
+    const uint32_t Bpp = info.bytesPerPixel;
     uint32_t stride = (w + (alignment-1)) & ~(alignment-1);
     stride = ((stride * Bpp + (align-1)) & ~(align-1)) / Bpp;
-    size_t size = stride * h * Bpp;
-    if (format == PIXEL_FORMAT_YCbCr_422_SP ||
-        format == PIXEL_FORMAT_YCbCr_420_SP) {
-        // in YUV planar, bitsPerPixel is for the Y plane
-        size = (size * bitsPerPixel(format)) / 8;
-    }
-
+    size_t size = info.getScanlineSize(stride) * h;
     if (allocFlags & MemoryDealer::PAGE_ALIGNED) {
         size_t pagesize = getpagesize();
         size = (size + (pagesize-1)) & ~(pagesize-1);

@@ -317,8 +317,10 @@ status_t String8::real_append(const char* other, size_t otherLen)
         ->editResize(myLen+otherLen+1);
     if (buf) {
         char* str = (char*)buf->data();
-        memcpy(str+myLen, other, otherLen+1);
         mString = str;
+        str += myLen;
+        memcpy(str, other, otherLen);
+        str[otherLen] = '\0';
         return NO_ERROR;
     }
     return NO_MEMORY;

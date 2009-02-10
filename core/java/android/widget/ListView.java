@@ -1718,12 +1718,11 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Sets the currently selected item
+     * Sets the currently selected item. If in touch mode, the item will not be selected
+     * but it will still be positioned appropriately. If the specified selection position
+     * is less than 0, then the item at position 0 will be selected.
      *
      * @param position Index (starting at 0) of the data item to be selected.
-     *
-     * If in touch mode, the item will not be selected but it will still be positioned
-     * appropriately.
      */
     @Override
     public void setSelection(int position) {

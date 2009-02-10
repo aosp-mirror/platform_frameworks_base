@@ -71,10 +71,10 @@ public abstract class MetaKeyKeyListener {
             | META_SYM_LOCKED | META_SYM_USED
             | META_SYM_PRESSED | META_SYM_RELEASED;
     
-    private static final Object CAP = new Object();
-    private static final Object ALT = new Object();
-    private static final Object SYM = new Object();
-    private static final Object SELECTING = new Object();
+    private static final Object CAP = new NoCopySpan.Concrete();
+    private static final Object ALT = new NoCopySpan.Concrete();
+    private static final Object SYM = new NoCopySpan.Concrete();
+    private static final Object SELECTING = new NoCopySpan.Concrete();
 
     /**
      * Resets all meta state to inactive.
@@ -283,6 +283,10 @@ public abstract class MetaKeyKeyListener {
     }
 
     public void clearMetaKeyState(View view, Editable content, int states) {
+        clearMetaKeyState(content, states);
+    }
+
+    public static void clearMetaKeyState(Editable content, int states) {
         if ((states&META_SHIFT_ON) != 0) resetLock(content, CAP);
         if ((states&META_ALT_ON) != 0) resetLock(content, ALT);
         if ((states&META_SYM_ON) != 0) resetLock(content, SYM);

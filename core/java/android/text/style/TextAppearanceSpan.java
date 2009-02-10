@@ -19,20 +19,22 @@ package android.text.style;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
 /**
  * Sets the text color, size, style, and typeface to match a TextAppearance
  * resource.
  */
-public class TextAppearanceSpan extends MetricAffectingSpan {
-    private String mTypeface;
-    private int mStyle;
-    private int mTextSize;
-    private ColorStateList mTextColor;
-    private ColorStateList mTextColorLink;
+public class TextAppearanceSpan extends MetricAffectingSpan implements ParcelableSpan {
+    private final String mTypeface;
+    private final int mStyle;
+    private final int mTextSize;
+    private final ColorStateList mTextColor;
+    private final ColorStateList mTextColorLink;
 
     /**
      * Uses the specified TextAppearance resource to determine the
@@ -53,11 +55,13 @@ public class TextAppearanceSpan extends MetricAffectingSpan {
      */
     public TextAppearanceSpan(Context context, int appearance,
                               int colorList) {
+        ColorStateList textColor;
+        
         TypedArray a =
             context.obtainStyledAttributes(appearance,
                                            com.android.internal.R.styleable.TextAppearance);
 
-        mTextColor = a.getColorStateList(com.android.internal.R.styleable.
+        textColor = a.getColorStateList(com.android.internal.R.styleable.
                                         TextAppearance_textColor);
         mTextColorLink = a.getColorStateList(com.android.internal.R.styleable.
                                         TextAppearance_textColorLink);
@@ -79,6 +83,10 @@ public class TextAppearanceSpan extends MetricAffectingSpan {
             case 3:
                 mTypeface = "monospace";
                 break;
+                
+            default:
+                mTypeface = null;
+                break;
         }
 
         a.recycle();
@@ -87,9 +95,11 @@ public class TextAppearanceSpan extends MetricAffectingSpan {
             a = context.obtainStyledAttributes(com.android.internal.R.style.Theme,
                                             com.android.internal.R.styleable.Theme);
 
-            mTextColor = a.getColorStateList(colorList);
+            textColor = a.getColorStateList(colorList);
             a.recycle();
         }
+        
+        mTextColor = textColor;
     }
 
     /**
@@ -103,6 +113,48 @@ public class TextAppearanceSpan extends MetricAffectingSpan {
         mTextSize = size;
         mTextColor = color;
         mTextColorLink = linkColor;
+    }
+
+    public TextAppearanceSpan(Parcel src) {
+        mTypeface = src.readString();
+        mStyle = src.readInt();
+        mTextSize = src.readInt();
+        if (src.readInt() != 0) {
+            mTextColor = ColorStateList.CREATOR.createFromParcel(src);
+        } else {
+            mTextColor = null;
+        }
+        if (src.readInt() != 0) {
+            mTextColorLink = ColorStateList.CREATOR.createFromParcel(src);
+        } else {
+            mTextColorLink = null;
+        }
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.TEXT_APPEARANCE_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mTypeface);
+        dest.writeInt(mStyle);
+        dest.writeInt(mTextSize);
+        if (mTextColor != null) {
+            dest.writeInt(1);
+            mTextColor.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mTextColorLink != null) {
+            dest.writeInt(1);
+            mTextColorLink.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /**

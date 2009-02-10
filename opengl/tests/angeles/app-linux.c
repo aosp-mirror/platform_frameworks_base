@@ -49,7 +49,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
 
 #include "app.h"
 

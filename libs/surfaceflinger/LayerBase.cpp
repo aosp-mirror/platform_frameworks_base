@@ -23,6 +23,9 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 #include "clz.h"
 #include "LayerBase.h"
 #include "LayerBlur.h"
@@ -110,6 +113,12 @@ void LayerBase::commitTransaction(bool skipSize) {
         mDrawingState.w = w;
         mDrawingState.h = h;
     }
+}
+void LayerBase::forceVisibilityTransaction() {
+    // this can be called without SurfaceFlinger.mStateLock, but if we
+    // can atomically increment the sequence number, it doesn't matter.
+    android_atomic_inc(&mCurrentState.sequence);
+    requestTransaction();
 }
 bool LayerBase::requestTransaction() {
     int32_t old = setTransactionFlags(eTransactionNeeded);
@@ -220,10 +229,15 @@ Point LayerBase::getPhysicalSize() const
     return Point(front.w, front.h);
 }
 
+Transform LayerBase::getDrawingStateTransform() const
+{
+    return drawingState().transform;
+}
+
 void LayerBase::validateVisibility(const Transform& planeTransform)
 {
     const Layer::State& s(drawingState());
-    const Transform tr(planeTransform * s.transform);
+    const Transform tr(planeTransform * getDrawingStateTransform());
     const bool transformed = tr.transformed();
    
     const Point size(getPhysicalSize());
@@ -350,6 +364,10 @@ void LayerBase::draw(const Region& inClip) const
             return;
         }        
     }
+
+    // reset GL state
+    glEnable(GL_SCISSOR_TEST);
+
     onDraw(clip);
 
     /*
@@ -391,6 +409,7 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     Rect r;
     Region::iterator iterator(clip);
     if (iterator) {
+        glEnable(GL_SCISSOR_TEST);
         glVertexPointer(2, GL_FIXED, 0, mVertices);
         while (iterator.iterate(&r)) {
             const GLint sy = fbHeight - (r.top + r.height());

@@ -73,7 +73,7 @@ public class TouchUtils {
      */
     @Deprecated
     public static void dragQuarterScreenUp(ActivityInstrumentationTestCase test) {
-        dragQuarterScreenDown(test, test.getActivity());
+        dragQuarterScreenUp(test, test.getActivity());
     }
     
     /**
@@ -269,9 +269,9 @@ public class TouchUtils {
         inst.waitForIdleSync();
 
         eventTime = SystemClock.uptimeMillis();
-        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, 
-                x + (ViewConfiguration.getTouchSlop() / 2.0f),
-                y + (ViewConfiguration.getTouchSlop() / 2.0f), 0);
+        final int touchSlop = ViewConfiguration.get(v.getContext()).getScaledTouchSlop();
+        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE,
+                x + (touchSlop / 2.0f), y + (touchSlop / 2.0f), 0);
         inst.sendPointerSync(event);
         inst.waitForIdleSync();
 
@@ -309,9 +309,9 @@ public class TouchUtils {
         inst.waitForIdleSync();
 
         eventTime = SystemClock.uptimeMillis();
+        final int touchSlop = ViewConfiguration.get(v.getContext()).getScaledTouchSlop();
         event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_CANCEL,
-                x + (ViewConfiguration.getTouchSlop() / 2.0f),
-                y + (ViewConfiguration.getTouchSlop() / 2.0f), 0);
+                x + (touchSlop / 2.0f), y + (touchSlop / 2.0f), 0);
         inst.sendPointerSync(event);
         inst.waitForIdleSync();
 
@@ -345,9 +345,9 @@ public class TouchUtils {
         
 
         eventTime = SystemClock.uptimeMillis();
-        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, 
-                x + (ViewConfiguration.getTouchSlop() / 2.0f),
-                y + (ViewConfiguration.getTouchSlop() / 2.0f), 0);
+        final int touchSlop = ViewConfiguration.get(v.getContext()).getScaledTouchSlop();
+        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE,
+                x + (touchSlop / 2.0f), y + (touchSlop / 2.0f), 0);
         inst.sendPointerSync(event);
         inst.waitForIdleSync();
 
@@ -405,9 +405,9 @@ public class TouchUtils {
         inst.waitForIdleSync();
 
         eventTime = SystemClock.uptimeMillis();
-        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, 
-                x + ViewConfiguration.getTouchSlop() / 2,
-                y + ViewConfiguration.getTouchSlop() / 2, 0);
+        final int touchSlop = ViewConfiguration.get(v.getContext()).getScaledTouchSlop();
+        event = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE,
+                x + touchSlop / 2, y + touchSlop / 2, 0);
         inst.sendPointerSync(event);
         inst.waitForIdleSync();
         

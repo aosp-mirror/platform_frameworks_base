@@ -336,7 +336,7 @@ public class LinearLayout extends ViewGroup {
                    // heightMode is either UNSPECIFIED OR AT_MOST, and this child
                    // wanted to stretch to fill available space. Translate that to
                    // WRAP_CONTENT so that it does not end up with a height of 0
-                   oldHeight = lp.height;
+                   oldHeight = 0;
                    lp.height = LayoutParams.WRAP_CONTENT;
                }
 
@@ -475,8 +475,6 @@ public class LinearLayout extends ViewGroup {
                         matchWidthLocally ? margin : measuredWidth);
 
                 allFillParent = allFillParent && lp.width == LayoutParams.FILL_PARENT;
-                alternativeMaxWidth = Math.max(alternativeMaxWidth,
-                        matchWidthLocally ? margin : measuredWidth);
 
                 mTotalLength += child.getMeasuredHeight() + lp.topMargin +
                         lp.bottomMargin + getNextLocationOffset(child);
@@ -607,7 +605,7 @@ public class LinearLayout extends ViewGroup {
                     // widthMode is either UNSPECIFIED OR AT_MOST, and this child
                     // wanted to stretch to fill available space. Translate that to
                     // WRAP_CONTENT so that it does not end up with a width of 0
-                    oldWidth = lp.width;
+                    oldWidth = 0;
                     lp.width = LayoutParams.WRAP_CONTENT;
                 }
 
@@ -766,8 +764,6 @@ public class LinearLayout extends ViewGroup {
                         matchHeightLocally ? margin : childHeight);
 
                 allFillParent = allFillParent && lp.height == LayoutParams.FILL_PARENT;
-                alternativeMaxHeight = Math.max(alternativeMaxHeight,
-                        matchHeightLocally ? margin : childHeight);
 
                 if (baselineAligned) {
                     final int childBaseline = child.getBaseline();
@@ -803,8 +799,7 @@ public class LinearLayout extends ViewGroup {
                 maxHeight = Math.max(maxHeight, ascent + descent);
             }
         } else {
-            alternativeMaxHeight = Math.max(alternativeMaxHeight,
-                                            weightedMaxHeight);
+            alternativeMaxHeight = Math.max(alternativeMaxHeight, weightedMaxHeight);
         }
 
         if (!allFillParent && heightMode != MeasureSpec.EXACTLY) {

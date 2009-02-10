@@ -72,7 +72,7 @@ public class Selection {
     
         if (ostart != start || oend != stop) {
             text.setSpan(SELECTION_START, start, start,
-                         Spanned.SPAN_POINT_POINT);
+                         Spanned.SPAN_POINT_POINT|Spanned.SPAN_INTERMEDIATE);
             text.setSpan(SELECTION_END, stop, stop,
                          Spanned.SPAN_POINT_POINT);
         }
@@ -417,8 +417,8 @@ public class Selection {
         }
     }
 
-    private static final class START { };
-    private static final class END { };
+    private static final class START implements NoCopySpan { };
+    private static final class END implements NoCopySpan { };
     
     /*
      * Public constants

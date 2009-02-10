@@ -86,6 +86,16 @@ public final class SearchableInfo implements Parcelable {
     private String mSuggestProviderPackage = null;
     private Context mCacheActivityContext = null;   // use during setup only - don't hold memory!
     
+    // Flag values for Searchable_voiceSearchMode
+    private static int VOICE_SEARCH_SHOW_BUTTON = 1;
+    private static int VOICE_SEARCH_LAUNCH_WEB_SEARCH = 2;
+    private static int VOICE_SEARCH_LAUNCH_RECOGNIZER = 4;
+    private int mVoiceSearchMode = 0;
+    private int mVoiceLanguageModeId;       // voiceLanguageModel
+    private int mVoicePromptTextId;         // voicePromptText
+    private int mVoiceLanguageId;           // voiceLanguage
+    private int mVoiceMaxResults;           // voiceMaxResults
+    
     /**
      * Set the default searchable activity (when none is specified).
      */
@@ -420,7 +430,7 @@ public final class SearchableInfo implements Parcelable {
             mSearchInputType = a.getInt(com.android.internal.R.styleable.Searchable_inputType, 
                     InputType.TYPE_CLASS_TEXT |
                     InputType.TYPE_TEXT_FLAG_SEARCH |
-                    InputType.TYPE_TEXT_VARIATION_SEARCH_STRING);
+                    InputType.TYPE_TEXT_VARIATION_NORMAL);
 
             setSearchModeFlags();
             if (DBG_INHIBIT_SUGGESTIONS == 0) {
@@ -435,6 +445,18 @@ public final class SearchableInfo implements Parcelable {
                 mSuggestIntentData = a.getString(
                         com.android.internal.R.styleable.Searchable_searchSuggestIntentData);
             }
+            mVoiceSearchMode = 
+                a.getInt(com.android.internal.R.styleable.Searchable_voiceSearchMode, 0);
+            // TODO this didn't work - came back zero from YouTube
+            mVoiceLanguageModeId = 
+                a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguageModel, 0);
+            mVoicePromptTextId = 
+                a.getResourceId(com.android.internal.R.styleable.Searchable_voicePromptText, 0);
+            mVoiceLanguageId = 
+                a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguage, 0);
+            mVoiceMaxResults = 
+                a.getInt(com.android.internal.R.styleable.Searchable_voiceMaxResults, 0);
+
             a.recycle();
 
             // get package info for suggestions provider (if any)
@@ -462,11 +484,6 @@ public final class SearchableInfo implements Parcelable {
      * Convert searchmode to flags.
      */
     private void setSearchModeFlags() {
-        // decompose searchMode attribute
-        // TODO How do I reconcile these hardcoded values with the flag bits defined in
-        // in attrs.xml?  e.g. android.R.id.filterMode = 0x010200a4 instead of just "1"
-    /*  mFilterMode = (0 != (mSearchMode & 1));  */
-    /*  mQuickStart = (0 != (mSearchMode & 2));  */
         mBadgeLabel = (0 != (mSearchMode & 4));
         mBadgeIcon = (0 != (mSearchMode & 8)) && (mIconId != 0);
         mQueryRewriteFromData = (0 != (mSearchMode & 0x10));
@@ -654,6 +671,59 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
+     * @return true if android:voiceSearchMode="showVoiceSearchButton"
+     */
+    public boolean getVoiceSearchEnabled() {
+        return 0 != (mVoiceSearchMode & VOICE_SEARCH_SHOW_BUTTON);
+    }
+    
+    /**
+     * @return true if android:voiceSearchMode="launchWebSearch"
+     */
+    public boolean getVoiceSearchLaunchWebSearch() {
+        return 0 != (mVoiceSearchMode & VOICE_SEARCH_LAUNCH_WEB_SEARCH);
+    }
+    
+    /**
+     * @return true if android:voiceSearchMode="launchRecognizer"
+     */
+    public boolean getVoiceSearchLaunchRecognizer() {
+        return 0 != (mVoiceSearchMode & VOICE_SEARCH_LAUNCH_RECOGNIZER);
+    }
+    
+    /**
+     * @return the resource Id of the language model string, if specified in the searchable
+     * activity's metadata, or 0 if not specified.  
+     */
+    public int getVoiceLanguageModeId() {
+        return mVoiceLanguageModeId;
+    }
+    
+    /**
+     * @return the resource Id of the voice prompt text string, if specified in the searchable
+     * activity's metadata, or 0 if not specified.  
+     */
+    public int getVoicePromptTextId() {
+        return mVoicePromptTextId;
+    }
+    
+    /**
+     * @return the resource Id of the spoken langauge, if specified in the searchable
+     * activity's metadata, or 0 if not specified.  
+     */
+    public int getVoiceLanguageId() {
+        return mVoiceLanguageId;
+    }
+    
+    /**
+     * @return the max results count, if specified in the searchable
+     * activity's metadata, or 0 if not specified.  
+     */
+    public int getVoiceMaxResults() {
+        return mVoiceMaxResults;
+    }
+    
+    /**
      * Return the resource Id of replacement text for the "Search" button.
      * 
      * @return Returns the resource Id, or 0 if not specified by this package.
@@ -727,6 +797,12 @@ public final class SearchableInfo implements Parcelable {
         }
         
         mSuggestProviderPackage = in.readString();
+        
+        mVoiceSearchMode = in.readInt();
+        mVoiceLanguageModeId = in.readInt();
+        mVoicePromptTextId = in.readInt();
+        mVoiceLanguageId = in.readInt();
+        mVoiceMaxResults = in.readInt();
     }
 
     public int describeContents() {
@@ -764,5 +840,11 @@ public final class SearchableInfo implements Parcelable {
         }
         
         dest.writeString(mSuggestProviderPackage);
+
+        dest.writeInt(mVoiceSearchMode);
+        dest.writeInt(mVoiceLanguageModeId);
+        dest.writeInt(mVoicePromptTextId);
+        dest.writeInt(mVoiceLanguageId);
+        dest.writeInt(mVoiceMaxResults);
     }
 }

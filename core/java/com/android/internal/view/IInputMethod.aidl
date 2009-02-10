@@ -38,9 +38,9 @@ oneway interface IInputMethod {
     
     void unbindInput();
 
-    void startInput(in EditorInfo attribute);
+    void startInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    void restartInput(in EditorInfo attribute);
+    void restartInput(in IInputContext inputContext, in EditorInfo attribute);
 
     void createSession(IInputMethodCallback callback);
     
@@ -48,7 +48,7 @@ oneway interface IInputMethod {
     
     void revokeSession(IInputMethodSession session);
     
-    void showSoftInput(boolean explicit);
+    void showSoftInput(int flags);
     
     void hideSoftInput();
 }

@@ -25,5 +25,5 @@ import android.os.ParcelFileDescriptor;
 interface ISensorService
 {
     ParcelFileDescriptor getDataChanel();
-    boolean enableSensor(IBinder listener, int sensor, int enable);
+    boolean enableSensor(IBinder listener, String name, int sensor, int enable);
 }

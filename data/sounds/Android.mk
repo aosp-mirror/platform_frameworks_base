@@ -86,16 +86,8 @@ ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/CaribbeanIce.ogg
 $(TARGET_OUT)/media/audio/ringtones/CaribbeanIce.ogg : $(LOCAL_PATH)/newwavelabs/CaribbeanIce.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
 
-ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/CrazyDream.ogg
-$(TARGET_OUT)/media/audio/ringtones/CrazyDream.ogg : $(LOCAL_PATH)/newwavelabs/CrazyDream.ogg | $(ACP)
-	$(transform-prebuilt-to-target)
-
 ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/CurveBall.ogg
 $(TARGET_OUT)/media/audio/ringtones/CurveBall.ogg : $(LOCAL_PATH)/newwavelabs/CurveBall.ogg | $(ACP)
-	$(transform-prebuilt-to-target)
-
-ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/DreamTheme.ogg
-$(TARGET_OUT)/media/audio/ringtones/DreamTheme.ogg : $(LOCAL_PATH)/newwavelabs/DreamTheme.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
 
 ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/EtherShake.ogg

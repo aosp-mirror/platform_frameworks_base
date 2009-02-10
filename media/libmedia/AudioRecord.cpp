@@ -128,8 +128,22 @@ status_t AudioRecord::set(
         return BAD_VALUE;
     }
 
-    // TODO: Get input frame count from hardware.
-    int minFrameCount = 1024*2;
+    size_t inputBuffSizeInBytes = -1;
+    if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &inputBuffSizeInBytes)
+        != NO_ERROR) {
+            LOGE("AudioSystem could not query the input buffer size.");
+            return NO_INIT;
+    }
+    if (inputBuffSizeInBytes == 0) {
+        LOGE("Recording parameters are not supported: sampleRate %d, channelCount %d, format %d",
+            sampleRate, channelCount, format);
+        return BAD_VALUE;
+    }
+    int frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
+    
+    // We use 2* size of input buffer for ping pong use of record buffer.
+    int minFrameCount = 2 * inputBuffSizeInBytes / frameSizeInBytes;
+    LOGV("AudioRecord::set() minFrameCount = %d", minFrameCount);
 
     if (frameCount == 0) {
         frameCount = minFrameCount;

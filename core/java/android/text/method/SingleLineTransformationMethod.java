@@ -27,22 +27,24 @@ import android.view.View;
 
 /**
  * This transformation method causes any newline characters (\n) to be
- * displayed as spaces instead of causing line breaks.
+ * displayed as spaces instead of causing line breaks, and causes
+ * carriage return characters (\r) to have no appearance.
  */
 public class SingleLineTransformationMethod
 extends ReplacementTransformationMethod {
-    private static char[] ORIGINAL = new char[] { '\n' };
-    private static char[] REPLACEMENT = new char[] { ' ' };
+    private static char[] ORIGINAL = new char[] { '\n', '\r' };
+    private static char[] REPLACEMENT = new char[] { ' ', '\uFEFF' };
 
     /**
-     * The character to be replaced is \n.
+     * The characters to be replaced are \n and \r.
      */
     protected char[] getOriginal() {
         return ORIGINAL;
     }
 
     /**
-     * The character \n is replaced with is space.
+     * The character \n is replaced with is space;
+     * the character \r is replaced with is FEFF (zero width space).
      */
     protected char[] getReplacement() {
         return REPLACEMENT;

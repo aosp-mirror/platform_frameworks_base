@@ -27,8 +27,8 @@ import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.ILayoutResult.ILayoutViewInfo;
 import com.android.layoutlib.bridge.LayoutResult.LayoutViewInfo;
 import com.android.ninepatch.NinePatch;
-import com.android.tools.layoutlib.create.OverrideMethod;
 import com.android.tools.layoutlib.create.MethodAdapter;
+import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -307,32 +307,33 @@ public final class Bridge implements ILayoutBridge {
                 projectResources.get(BridgeConstants.RES_STYLE),
                 frameworkResources.get(BridgeConstants.RES_STYLE), styleParentMap);
         
-        BridgeContext context = new BridgeContext(projectKey, currentTheme, projectResources,
-                frameworkResources, styleParentMap, customViewLoader, logger);
-        BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
-        context.setBridgeInflater(inflater);
-        
-        IResourceValue windowBackground = null;
-        int screenOffset = 0;
-        if (currentTheme != null) {
-            windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
-            windowBackground = context.resolveResValue(windowBackground);
-
-            screenOffset = getScreenOffset(currentTheme, context);
-        }
-        
-        // we need to make sure the Looper has been initialized for this thread.
-        // this is required for View that creates Handler objects.
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-        
-        BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
-                context, false /* platformResourceFlag */);
-        
-        ViewGroup root = new FrameLayout(context);
-        
+        BridgeContext context = null; 
         try {
+            context = new BridgeContext(projectKey, currentTheme, projectResources,
+                    frameworkResources, styleParentMap, customViewLoader, logger);
+            BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
+            context.setBridgeInflater(inflater);
+            
+            IResourceValue windowBackground = null;
+            int screenOffset = 0;
+            if (currentTheme != null) {
+                windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
+                windowBackground = context.resolveResValue(windowBackground);
+    
+                screenOffset = getScreenOffset(currentTheme, context);
+            }
+            
+            // we need to make sure the Looper has been initialized for this thread.
+            // this is required for View that creates Handler objects.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+            
+            BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
+                    context, false /* platformResourceFlag */);
+            
+            ViewGroup root = new FrameLayout(context);
+        
             View view = inflater.inflate(parser, root);
             
             // set the AttachInfo on the root view.
@@ -381,6 +382,10 @@ public final class Bridge implements ILayoutBridge {
             return new LayoutResult(ILayoutResult.ERROR,
                     t.getClass().getSimpleName() + ": " + t.getMessage());
         } finally {
+            // Make sure to remove static references, otherwise we could not unload the lib
+            BridgeResources.clearSystem();
+            BridgeAssetManager.clearSystem();
+            
             // Remove the global logger
             synchronized (sDefaultLogger) {
                 sLogger = sDefaultLogger;

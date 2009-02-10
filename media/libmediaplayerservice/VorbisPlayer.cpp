@@ -455,12 +455,14 @@ int VorbisPlayer::render() {
                     current_section = 0;
                     numread = ov_read(&mVorbisFile, mAudioBuffer, AUDIOBUFFER_SIZE, &current_section);
                 } else {
-                    sendEvent(MEDIA_PLAYBACK_COMPLETE);
                     mAudioSink->stop();
                     audioStarted = false;
                     mRender = false;
                     mPaused = true;
                     int endpos = ov_time_tell(&mVorbisFile);
+
+                    LOGV("send MEDIA_PLAYBACK_COMPLETE");
+                    sendEvent(MEDIA_PLAYBACK_COMPLETE);
 
                     // wait until we're started again
                     LOGV("playback complete - wait for signal");

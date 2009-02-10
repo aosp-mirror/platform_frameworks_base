@@ -605,7 +605,7 @@ public class WifiManager {
      */
     public int getWifiState() {
         try {
-            return mService.getWifiState();
+            return mService.getWifiEnabledState();
         } catch (RemoteException e) {
             return WIFI_STATE_UNKNOWN;
         }

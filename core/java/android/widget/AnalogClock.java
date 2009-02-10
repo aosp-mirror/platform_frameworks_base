@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.RemoteViews.RemoteView;
 
 import java.util.TimeZone;
 
@@ -35,6 +36,7 @@ import java.util.TimeZone;
  * This widget display an analogic clock with two hands for hours and
  * minutes.
  */
+@RemoteView
 public class AnalogClock extends View {
     private Time mCalendar;
 

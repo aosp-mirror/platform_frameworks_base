@@ -43,7 +43,7 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
       The API key is generated using the MD5 fingerprint of your application certificate. For the purposes of 
       this exercise, you should use the fingerprint of your debug certificate (which cannot be used to release
       your application for Android devices, but will work while developing). See how to 
-      <a href="{@docRoot}guide/topics/geo/mapkey.html#getdebugfingerprint">generate a fingerprint from your 
+      <a href="{@docRoot}guide/topics/location/geo/mapkey.html#getdebugfingerprint">generate a fingerprint from your 
       debug certificate</a>, then <a href="http://code.google.com/android/maps-api-signup.html">register the 
       certificate</a> to retieve an API key.
       Insert the API key as the value of the <code>apiKey</code> attribute. If you do not insert a valid

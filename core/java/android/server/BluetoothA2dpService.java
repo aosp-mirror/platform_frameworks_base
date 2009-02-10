@@ -55,6 +55,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
 
     private static final String A2DP_SINK_ADDRESS = "a2dp_sink_address";
+    private static final String BLUETOOTH_ENABLED = "bluetooth_enabled";
 
     private final Context mContext;
     private final IntentFilter mIntentFilter;
@@ -136,10 +137,28 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                                                       BluetoothA2dp.STATE_DISCONNECTED));
             }
         }
+        mAudioManager.setParameter(BLUETOOTH_ENABLED, "true");
     }
 
     private synchronized void onBluetoothDisable() {
-        mAudioDevices = null;
+        if (mAudioDevices != null) {
+            for (String path : mAudioDevices.keySet()) {
+                switch (mAudioDevices.get(path).state) {
+                    case BluetoothA2dp.STATE_CONNECTING:
+                    case BluetoothA2dp.STATE_CONNECTED:
+                    case BluetoothA2dp.STATE_PLAYING:
+                        disconnectSinkNative(path);
+                        updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+                        break;
+                    case BluetoothA2dp.STATE_DISCONNECTING:
+                        updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+                        break;
+                }
+            }
+            mAudioDevices = null;
+        }
+        mAudioManager.setBluetoothA2dpOn(false);
+        mAudioManager.setParameter(BLUETOOTH_ENABLED, "false");
     }
 
     public synchronized int connectSink(String address) {
@@ -289,6 +308,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
         }
 
+        updateState(path, BluetoothA2dp.STATE_CONNECTING);
         mAudioManager.setParameter(A2DP_SINK_ADDRESS, lookupAddress(path));
         mAudioManager.setBluetoothA2dpOn(true);
         updateState(path, BluetoothA2dp.STATE_CONNECTED);
@@ -309,6 +329,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private synchronized final String lookupAddress(String path) {
         if (mAudioDevices == null) return null;
+        SinkState sink = mAudioDevices.get(path);
+        if (sink == null) {
+            Log.w(TAG, "lookupAddress() called for unknown device " + path);
+            updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+        }
         String address = mAudioDevices.get(path).address;
         if (address == null) Log.e(TAG, "Can't find address for " + path);
         return address;
@@ -349,6 +374,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             intent.putExtra(BluetoothA2dp.SINK_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothA2dp.SINK_STATE, state);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+
+            if ((prevState == BluetoothA2dp.STATE_CONNECTED ||
+                 prevState == BluetoothA2dp.STATE_PLAYING) &&
+                    (state != BluetoothA2dp.STATE_CONNECTED &&
+                     state != BluetoothA2dp.STATE_PLAYING)) {
+                // disconnected
+                intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+                mContext.sendBroadcast(intent);
+            }
         }
     }
 

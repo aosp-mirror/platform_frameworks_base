@@ -104,6 +104,9 @@ interface IWindowManager
     int getKeycodeState(int sw);
     int getKeycodeStateForDevice(int devid, int sw);
     
+    // Report whether the hardware supports the given keys; returns true if successful
+    boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);
+    
     // For testing
     void setInTouchMode(boolean showFocus);
     

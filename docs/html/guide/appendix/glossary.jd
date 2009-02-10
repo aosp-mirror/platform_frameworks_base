@@ -168,7 +168,7 @@ page.title=Glossary
     application's package name, version, components (activities, intent
     filters, services), imported libraries, and describes the various
     activies, and so on. See <a
-    href="{@docRoot}guide/topics/manifest/manifest.html">The
+    href="{@docRoot}guide/topics/manifest/manifest-intro.html">The
     AndroidManifest.xml File</a> for complete information.</dd>
 
     <dt id="ninepatch">Nine-patch / 9-patch / Ninepatch image</dt>

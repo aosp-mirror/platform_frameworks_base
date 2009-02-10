@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -126,8 +127,6 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_APPLICATION_MEDIA
          * @see #TYPE_APPLICATION_SUB_PANEL
          * @see #TYPE_APPLICATION_ATTACHED_DIALOG
-         * @see #TYPE_INPUT_METHOD
-         * @see #TYPE_INPUT_METHOD_DIALOG
          * @see #TYPE_STATUS_BAR
          * @see #TYPE_SEARCH_BAR
          * @see #TYPE_PHONE
@@ -645,6 +644,17 @@ public interface WindowManager extends ViewManager {
          */
         public String packageName = null;
         
+        /**
+         * Specific orientation value for a window.
+         * May be any of the same values allowed
+         * for {@link android.content.pm.ActivityInfo#screenOrientation}. 
+         * If not set, a default value of 
+         * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED} 
+         * will be used.
+         */
+        public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        
+        
         public LayoutParams() {
             super(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
             type = TYPE_APPLICATION;
@@ -722,6 +732,7 @@ public interface WindowManager extends ViewManager {
             out.writeStrongBinder(token);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
+            out.writeInt(screenOrientation);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -755,6 +766,7 @@ public interface WindowManager extends ViewManager {
             token = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            screenOrientation = in.readInt();
         }
     
         public static final int LAYOUT_CHANGED = 1<<0;
@@ -767,6 +779,7 @@ public interface WindowManager extends ViewManager {
         public static final int ALPHA_CHANGED = 1<<7;
         public static final int MEMORY_TYPE_CHANGED = 1<<8;
         public static final int SOFT_INPUT_MODE_CHANGED = 1<<9;
+        public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
     
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
@@ -862,6 +875,10 @@ public interface WindowManager extends ViewManager {
                 changes |= DIM_AMOUNT_CHANGED;
             }
     
+            if (screenOrientation != o.screenOrientation) {
+                screenOrientation = o.screenOrientation;
+                changes |= SCREEN_ORIENTATION_CHANGED;
+            }
             return changes;
         }
     
@@ -906,6 +923,10 @@ public interface WindowManager extends ViewManager {
             if (windowAnimations != 0) {
                 sb.append(" wanim=0x");
                 sb.append(Integer.toHexString(windowAnimations));
+            }
+            if (screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                sb.append("or=");
+                sb.append(screenOrientation);
             }
             sb.append('}');
             return sb.toString();

@@ -35,5 +35,16 @@
     <string name="normal_datetime_edit_text_label">Datetime</string>
     <string name="date_edit_text_label">Date</string>
     <string name="time_edit_text_label">Time</string>
+    <string name="cap_chars_edit_text_label">Cap Chars</string>
+    <string name="cap_words_edit_text_label">Cap Words</string>
+    <string name="multiline_edit_text_label">Multiline</string>
+    <string name="search_edit_text_label">Search (flag)</string>
+    <string name="cap_sentences_edit_text_label">Cap Sentences</string>
+    <string name="auto_complete_edit_text_label">Auto Complete</string>
+    <string name="auto_correct_edit_text_label">Auto Correct</string>
+    <string name="test_dialog">Test Dialog</string>
+    <string name="open_dialog_scrollable">open scrollable dialog</string>
+    <string name="open_dialog_nonscrollable">open nonscrollable dialog</string>
+    
     
 </resources>

@@ -24,7 +24,7 @@ import java.io.IOException;
  * Used to record audio and video. The recording control is based on a
  * simple state machine (see below). 
  * 
- * <p><img src="../../../images/mediarecorder_state_diagram.gif" border="0" />
+ * <p><img src="{@docRoot}images/mediarecorder_state_diagram.gif" border="0" />
  * </p>
  * 
  * <p>A common case of using MediaRecorder to record audio works as follows:
@@ -42,8 +42,8 @@ import java.io.IOException;
  * recorder.release(); // Now the object cannot be reused
  * </pre>
  * 
- * <p>See the <a href="../../../toolbox/apis/media.html">Android Media APIs</a> 
- * page for additional help with using MediaRecorder.
+ * <p>See the <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
+ * documentation for additional help with using MediaRecorder.
  */
 public class MediaRecorder
 {    

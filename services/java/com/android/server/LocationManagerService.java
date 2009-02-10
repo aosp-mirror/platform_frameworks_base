@@ -64,12 +64,14 @@ import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.CellState;
 import com.android.internal.location.GpsLocationProvider;
-import com.android.internal.location.LocationCollector;
-import com.android.internal.location.LocationMasfClient;
-import com.android.internal.location.NetworkLocationProvider;
+import com.android.internal.location.ILocationCollector;
+import com.android.internal.location.INetworkLocationManager;
+import com.android.internal.location.INetworkLocationProvider;
 import com.android.internal.location.TrackProvider;
+import com.android.server.am.BatteryStatsService;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -77,7 +79,8 @@ import com.android.internal.location.TrackProvider;
  *
  * {@hide}
  */
-public class LocationManagerService extends ILocationManager.Stub {
+public class LocationManagerService extends ILocationManager.Stub
+        implements INetworkLocationManager {
     private static final String TAG = "LocationManagerService";
 
     // Minimum time interval between last known location writes, in milliseconds.
@@ -121,13 +124,15 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final Context mContext;
     private GpsLocationProvider mGpsLocationProvider;
-    private NetworkLocationProvider mNetworkLocationProvider;
+    private LocationProviderImpl mNetworkLocationProvider;
+    private INetworkLocationProvider mNetworkLocationInterface;
     private LocationWorkerHandler mLocationHandler;
 
     // Handler messages
     private static final int MESSAGE_HEARTBEAT = 1;
     private static final int MESSAGE_ACQUIRE_WAKE_LOCK = 2;
     private static final int MESSAGE_RELEASE_WAKE_LOCK = 3;
+    private static final int MESSAGE_SET_NETWORK_LOCATION_PROVIDER = 4;
 
     // Alarm manager and wakelock variables
     private final static String ALARM_INTENT = "com.android.location.ALARM_INTENT";
@@ -143,6 +148,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     private boolean mWakeLockNetworkReceived = true;
     private boolean mWifiWakeLockAcquired = false;
     private boolean mCellWakeLockAcquired = false;
+    
+    private final IBatteryStats mBatteryStats;
+    
+    // The calling UID when we are in a clearCallingIdentity/restoreCallingIdentity block, or -1
+    private int mCallingUid = -1;
 
     /**
      * Mapping from listener IBinder/PendingIntent to local Listener wrappers.
@@ -199,10 +209,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int mSignalStrength = -1;
 
     // Location collector
-    private LocationCollector mCollector;
-
-    // Location MASF service
-    private LocationMasfClient mMasfClient;
+    private ILocationCollector mCollector;
 
     // Wifi Manager
     private WifiManager mWifiManager;
@@ -417,15 +424,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void _loadProvidersNoSync() {
         // Attempt to load "real" providers first
-        if (NetworkLocationProvider.isSupported()) {
-            // Create a network location provider
-            mNetworkLocationProvider = new NetworkLocationProvider(mContext, mMasfClient);
-            LocationProviderImpl.addProvider(mNetworkLocationProvider);
-        }
-
         if (GpsLocationProvider.isSupported()) {
             // Create a gps location provider
-            mGpsLocationProvider = new GpsLocationProvider(mContext, mCollector);
+            mGpsLocationProvider = new GpsLocationProvider(mContext);
             LocationProviderImpl.addProvider(mGpsLocationProvider);
         }
 
@@ -509,18 +510,15 @@ public class LocationManagerService extends ILocationManager.Stub {
             Log.d(TAG, "Constructed LocationManager Service");
         }
 
-        // Initialize the LocationMasfClient
-        mMasfClient = new LocationMasfClient(mContext);
-
-        // Create location collector
-        mCollector = new LocationCollector(mMasfClient);
-
         // Alarm manager, needs to be done before calling loadProviders() below
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         // Create a wake lock, needs to be done before calling loadProviders() below
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+        
+        // Battery statistics service to be notified when GPS turns on or off
+        mBatteryStats = BatteryStatsService.getService();
 
         // Load providers
         loadProviders();
@@ -560,10 +558,24 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mWifiManager != null) {
             List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
             if (wifiScanResults != null && wifiScanResults.size() != 0) {
-                if (mNetworkLocationProvider != null) {
-                    mNetworkLocationProvider.updateWifiScanResults(wifiScanResults);
+                if (mNetworkLocationInterface != null) {
+                    mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
                 }
             }
+        }
+    }
+
+    public void setNetworkLocationProvider(INetworkLocationProvider provider) {
+        mLocationHandler.removeMessages(MESSAGE_SET_NETWORK_LOCATION_PROVIDER);
+        Message m = Message.obtain(mLocationHandler, 
+                MESSAGE_SET_NETWORK_LOCATION_PROVIDER, provider);
+        mLocationHandler.sendMessageAtFrontOfQueue(m);
+    }
+
+    public void setLocationCollector(ILocationCollector collector) {
+        mCollector = collector;
+        if (mGpsLocationProvider != null) {
+                mGpsLocationProvider.setLocationCollector(mCollector);
         }
     }
 
@@ -690,7 +702,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             boolean shouldBeEnabled = isAllowedBySettings(name);
 
             // Collection is only allowed when network provider is being used
-            if (p.getName().equals(LocationManager.NETWORK_PROVIDER)) {
+            if (mCollector != null &&
+                    p.getName().equals(LocationManager.NETWORK_PROVIDER)) {
                 mCollector.updateNetworkProviderStatus(shouldBeEnabled);
             }
 
@@ -847,7 +860,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private void _requestLocationUpdates(String provider,
+    private synchronized void _requestLocationUpdates(String provider,
             long minTime, float minDistance, Receiver receiver) {
         Object key = receiver.getKey();
         if (Config.LOGD) {
@@ -864,6 +877,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         String[] packages = getPackageNames();
 
         // so wakelock calls will succeed
+        mCallingUid = getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
             UpdateRecord r = new UpdateRecord(provider, minTime, minDistance, receiver, packages);
@@ -889,12 +903,16 @@ public class LocationManagerService extends ILocationManager.Stub {
                     oldRecord.dispose();
                 }
 
-                if (impl instanceof NetworkLocationProvider) {
-                    ((NetworkLocationProvider) impl).addListener(packages);
-                }
-
                 boolean isProviderEnabled = isAllowedBySettings(provider);
                 if (isProviderEnabled) {
+                    if (provider.equals(LocationManager.GPS_PROVIDER)) {
+                        try {
+                            mBatteryStats.noteRequestGpsOn(mCallingUid);
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Got RemoteException calling noteRequestGpsOff", e);
+                        }
+                    }
+                    
                     long minTimeForProvider = getMinTime(provider);
                     impl.setMinTime(minTimeForProvider);
                     impl.enableLocationTracking(true);
@@ -904,7 +922,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                     mLocationHandler.removeMessages(MESSAGE_HEARTBEAT, provider);
                     Message m = Message.obtain(mLocationHandler, MESSAGE_HEARTBEAT, provider);
                     mLocationHandler.sendMessageAtTime(m, SystemClock.uptimeMillis() + 1000);
-
                 } else {
                     try {
                         // Notify the listener that updates are currently disabled
@@ -919,6 +936,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
+            mCallingUid = -1;
         }
     }
 
@@ -942,13 +960,14 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private void _removeUpdates(Receiver receiver) {
+    private synchronized void _removeUpdates(Receiver receiver) {
         Object key = receiver.getKey();
         if (Config.LOGD) {
             Log.d(TAG, "_removeUpdates: listener = " + key);
         }
 
         // so wakelock calls will succeed
+        mCallingUid = getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLocationListeners) {
@@ -964,14 +983,22 @@ public class LocationManagerService extends ILocationManager.Stub {
                     // Call dispose() on the obsolete update records.
                     for (UpdateRecord record : oldRecords.values()) {
                         if (record.mProvider.equals(LocationManager.NETWORK_PROVIDER)) {
-                            if (mNetworkLocationProvider != null) {
-                                mNetworkLocationProvider.removeListener(record.mPackages);
+                            if (mNetworkLocationInterface != null) {
+                                mNetworkLocationInterface.removeListener(record.mPackages);
                             }
                         }
                         record.dispose();
                     }
                     // Accumulate providers
                     providers.addAll(oldRecords.keySet());
+                }
+                
+                if (providers.contains("gps")) {
+                    try {
+                        mBatteryStats.noteRequestGpsOff(mCallingUid);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Got RemoteException calling noteRequestGpsOff", e);
+                    }
                 }
 
                 mLocationListeners.remove(key);
@@ -1010,6 +1037,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
+            mCallingUid = -1;
         }
     }
 
@@ -1426,7 +1454,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             writeLastKnownLocation(provider, loc);
 
-            if (p instanceof NetworkLocationProvider) {
+            if (p instanceof INetworkLocationProvider) {
                 mWakeLockNetworkReceived = true;
             } else if (p instanceof GpsLocationProvider) {
                 // Gps location received signal is in NetworkStateBroadcastReceiver
@@ -1570,6 +1598,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                     // Update wakelock status so the next alarm is set before releasing wakelock
                     updateWakelockStatus(mScreenOn);
                     releaseWakeLock();
+                } else if (msg.what == MESSAGE_SET_NETWORK_LOCATION_PROVIDER) {
+                    synchronized (LocationManagerService.class) {
+                        Log.d(TAG, "adding network location provider");
+                        mNetworkLocationInterface = 
+                                (INetworkLocationProvider)msg.obj;
+                        mNetworkLocationInterface.addListener(getPackageNames());
+                        mNetworkLocationProvider = 
+                                (LocationProviderImpl)mNetworkLocationInterface;
+                        LocationProviderImpl.addProvider(mNetworkLocationProvider);
+                        updateProviders();
+                    }
                 }
             } catch (Exception e) {
                 // Log, don't crash!
@@ -1590,7 +1629,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLastCellState = new CellState(mTelephonyManager, cellLocation, asu);
 
                 // Notify collector
-                mCollector.updateCellState(mLastCellState);
+                if (mCollector != null) {
+                    mCollector.updateCellState(mLastCellState);
+                }
 
                 // Updates providers
                 List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
@@ -1648,7 +1689,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 boolean plugged = intent.getIntExtra(BATTERY_EXTRA_PLUGGED, 0) != 0;
 
                 // Notify collector battery state
-                mCollector.updateBatteryState(scale, level, plugged);
+                if (mCollector != null) {
+                    mCollector.updateBatteryState(scale, level, plugged);
+                }
             }
         }
     }
@@ -1666,9 +1709,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 // Notify provider and collector of Wifi scan results
-                mCollector.updateWifiScanResults(wifiScanResults);
-                if (mNetworkLocationProvider != null) {
-                    mNetworkLocationProvider.updateWifiScanResults(wifiScanResults);
+                if (mCollector != null) {
+                    mCollector.updateWifiScanResults(wifiScanResults);
+                }
+                if (mNetworkLocationInterface != null) {
+                    mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
                 }
 
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -1702,8 +1747,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 // Notify network provider of current wifi enabled state
-                if (mNetworkLocationProvider != null) {
-                    mNetworkLocationProvider.updateWifiEnabledState(enabled);
+                if (mNetworkLocationInterface != null) {
+                    mNetworkLocationInterface.updateWifiEnabledState(enabled);
                 }
 
             } else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION)) {
@@ -1821,8 +1866,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Notify NetworkLocationProvider
-        if (mNetworkLocationProvider != null) {
-            mNetworkLocationProvider.updateCellLockStatus(mCellWakeLockAcquired);
+        if (mNetworkLocationInterface != null) {
+            mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
         }
 
         // Acquire wifi lock
@@ -1845,6 +1890,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                     && mGpsLocationProvider.isLocationTracking();
         if (gpsActive) {
             mGpsLocationProvider.startNavigating();
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mBatteryStats.noteStartGps(mCallingUid == -1 ? getCallingUid() : mCallingUid);
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException calling noteStartGps on BatteryStatsService", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -1853,6 +1906,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                     && mGpsLocationProvider.isLocationTracking();
         if (gpsActive) {
             mGpsLocationProvider.stopNavigating();
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mBatteryStats.noteStopGps(mCallingUid == -1 ? getCallingUid() : mCallingUid);
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException calling noteStopGps on BatteryStatsService", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -1877,7 +1938,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         if (!mScreenOn) {
-
             // Stop the gps
             stopGps();
         }
@@ -1889,8 +1949,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Notify NetworkLocationProvider
-        if (mNetworkLocationProvider != null) {
-            mNetworkLocationProvider.updateCellLockStatus(mCellWakeLockAcquired);
+        if (mNetworkLocationInterface != null) {
+            mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
         }
 
         // Release wake lock
@@ -1907,14 +1967,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
         String language, String country, String variant, String appName, List<Address> addrs) {
-        try {
-            Locale locale = new Locale(language, country, variant);
-            mMasfClient.reverseGeocode(locale, appName, latitude, longitude, maxResults, addrs);
-            return null;
-        } catch(IOException e) {
-            return e.getMessage();
-        } catch(Exception e) {
-            Log.e(TAG, "getFromLocation got exception:", e);
+        if (mNetworkLocationInterface != null) {
+            return mNetworkLocationInterface.getFromLocation(latitude, longitude, maxResults,
+                    language, country, variant, appName, addrs);
+        } else {
             return null;
         }
     }
@@ -1923,17 +1979,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         double lowerLeftLatitude, double lowerLeftLongitude,
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         String language, String country, String variant, String appName, List<Address> addrs) {
-
-        try {
-            Locale locale = new Locale(language, country, variant);
-            mMasfClient.forwardGeocode(locale, appName, locationName,
-                lowerLeftLatitude, lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, addrs);
-            return null;
-        } catch(IOException e) {
-            return e.getMessage();
-        } catch(Exception e) {
-            Log.e(TAG, "getFromLocationName got exception:", e);
+        if (mNetworkLocationInterface != null) {
+            return mNetworkLocationInterface.getFromLocationName(locationName, lowerLeftLatitude, 
+                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude, maxResults,
+                    language, country, variant, appName, addrs);
+        } else {
             return null;
         }
     }

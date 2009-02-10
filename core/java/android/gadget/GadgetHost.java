@@ -17,14 +17,67 @@
 package android.gadget;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.widget.RemoteViews;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import com.android.internal.gadget.IGadgetHost;
+import com.android.internal.gadget.IGadgetService;
 
 /**
  * GadgetHost provides the interaction with the Gadget Service for apps,
  * like the home screen, that want to embed gadgets in their UI.
  */
 public class GadgetHost {
+
+    static final int HANDLE_UPDATE = 1;
+
+    static Object sServiceLock = new Object();
+    static IGadgetService sService;
+
+    Context mContext;
+    String mPackageName;
+
+    class Callbacks extends IGadgetHost.Stub {
+        public void updateGadget(int gadgetId, RemoteViews views) {
+            Message msg = mHandler.obtainMessage(HANDLE_UPDATE);
+            msg.arg1 = gadgetId;
+            msg.obj = views;
+            msg.sendToTarget();
+        }
+    }
+
+    Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case HANDLE_UPDATE: {
+                    updateGadgetView(msg.arg1, (RemoteViews)msg.obj);
+                    break;
+                }
+            }
+        }
+    };
+
+    int mHostId;
+    Callbacks mCallbacks = new Callbacks();
+    HashMap<Integer,GadgetHostView> mViews = new HashMap();
+
     public GadgetHost(Context context, int hostId) {
+        mContext = context;
+        mHostId = hostId;
+        synchronized (sServiceLock) {
+            if (sService == null) {
+                IBinder b = ServiceManager.getService(Context.GADGET_SERVICE);
+                sService = IGadgetService.Stub.asInterface(b);
+            }
+        }
     }
 
     /**
@@ -32,6 +85,23 @@ public class GadgetHost {
      * becomes visible, i.e. from onStart() in your Activity.
      */
     public void startListening() {
+        int[] updatedIds = null;
+        ArrayList<RemoteViews> updatedViews = new ArrayList();
+        
+        try {
+            if (mPackageName == null) {
+                mPackageName = mContext.getPackageName();
+            }
+            updatedIds = sService.startListening(mCallbacks, mPackageName, mHostId, updatedViews);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+
+        final int N = updatedIds.length;
+        for (int i=0; i<N; i++) {
+            updateGadgetView(updatedIds[i], updatedViews.get(i));
+        }
     }
 
     /**
@@ -39,25 +109,93 @@ public class GadgetHost {
      * no longer visible, i.e. from onStop() in your Activity.
      */
     public void stopListening() {
+        try {
+            sService.stopListening(mHostId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
     }
 
     /**
-     * Stop listening to changes for this gadget.
+     * Get a gadgetId for a host in the calling process.
+     *
+     * @return a gadgetId
      */
-    public void gadgetRemoved(int gadgetId) {
+    public int allocateGadgetId() {
+        try {
+            if (mPackageName == null) {
+                mPackageName = mContext.getPackageName();
+            }
+            return sService.allocateGadgetId(mPackageName, mHostId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
     }
 
     /**
-     * Remove all records about gadget instances from the gadget manager.  Call this when
-     * initializing your database, as it might be because of a data wipe.
+     * Stop listening to changes for this gadget.  
      */
-    public void clearGadgets() {
+    public void deleteGadgetId(int gadgetId) {
+        synchronized (mViews) {
+            mViews.remove(gadgetId);
+            try {
+                sService.deleteGadgetId(gadgetId);
+            }
+            catch (RemoteException e) {
+                throw new RuntimeException("system server dead?", e);
+            }
+        }
+    }
+
+    /**
+     * Remove all records about this host from the gadget manager.
+     * <ul>
+     *   <li>Call this when initializing your database, as it might be because of a data wipe.</li>
+     *   <li>Call this to have the gadget manager release all resources associated with your
+     *   host.  Any future calls about this host will cause the records to be re-allocated.</li>
+     * </ul>
+     */
+    public void deleteHost() {
+        try {
+            sService.deleteHost(mHostId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Remove all records about all hosts for your package.
+     * <ul>
+     *   <li>Call this when initializing your database, as it might be because of a data wipe.</li>
+     *   <li>Call this to have the gadget manager release all resources associated with your
+     *   host.  Any future calls about this host will cause the records to be re-allocated.</li>
+     * </ul>
+     */
+    public static void deleteAllHosts() {
+        try {
+            sService.deleteAllHosts();
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
     }
 
     public final GadgetHostView createView(Context context, int gadgetId, GadgetInfo gadget) {
         GadgetHostView view = onCreateView(context, gadgetId, gadget);
         view.setGadget(gadgetId, gadget);
-        view.updateGadget(null);
+        synchronized (mViews) {
+            mViews.put(gadgetId, view);
+        }
+        RemoteViews views = null;
+        try {
+            views = sService.getGadgetViews(gadgetId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+        view.updateGadget(views);
         return view;
     }
 
@@ -68,5 +206,16 @@ public class GadgetHost {
     protected GadgetHostView onCreateView(Context context, int gadgetId, GadgetInfo gadget) {
         return new GadgetHostView(context);
     }
+
+    void updateGadgetView(int gadgetId, RemoteViews views) {
+        GadgetHostView v;
+        synchronized (mViews) {
+            v = mViews.get(gadgetId);
+        }
+        if (v != null) {
+            v.updateGadget(views);
+        }
+    }
 }
+
 

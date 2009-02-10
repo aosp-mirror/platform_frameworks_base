@@ -93,7 +93,7 @@ public:
         SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
         return canvas->getDevice()->accessBitmap(false).height();
     }
-    
+
     static void setViewport(JNIEnv* env, jobject, SkCanvas* canvas,
                             int width, int height) {
         canvas->setViewport(width, height);
@@ -454,13 +454,32 @@ public:
 #endif
     }
 
-    static void drawBitmap__BitmapFFPaint(JNIEnv* env, jobject,
+    static void drawBitmap__BitmapFFPaint(JNIEnv* env, jobject jcanvas,
                                           SkCanvas* canvas, SkBitmap* bitmap,
                                           jfloat left, jfloat top,
-                                          SkPaint* paint) {
+                                          SkPaint* paint,
+                                          jboolean autoScale, jfloat densityScale) {
         SkScalar left_ = SkFloatToScalar(left);
         SkScalar top_ = SkFloatToScalar(top);
-        canvas->drawBitmap(*bitmap, left_, top_, paint);
+
+        if (!autoScale || densityScale <= 0.0f) {
+            canvas->drawBitmap(*bitmap, left_, top_, paint);
+        } else {
+            canvas->save();
+            SkScalar canvasScale = GraphicsJNI::getCanvasDensityScale(env, jcanvas);
+            SkScalar scale = canvasScale / SkFloatToScalar(densityScale);
+            canvas->scale(scale, scale);
+
+            SkPaint filteredPaint;
+            if (paint) {
+                filteredPaint = *paint;
+            }
+            filteredPaint.setFilterBitmap(true);
+
+            canvas->drawBitmap(*bitmap, left_, top_, &filteredPaint);
+
+            canvas->restore();
+        }
     }
 
     static void doDrawBitmap(JNIEnv* env, SkCanvas* canvas, SkBitmap* bitmap,
@@ -492,7 +511,7 @@ public:
     
     static void drawBitmapArray(JNIEnv* env, jobject, SkCanvas* canvas,
                                 jintArray jcolors, int offset, int stride,
-                                int x, int y, int width, int height,
+                                jfloat x, jfloat y, int width, int height,
                                 jboolean hasAlpha, SkPaint* paint)
     {
         SkBitmap    bitmap;
@@ -508,7 +527,8 @@ public:
             return;
         }
         
-        canvas->drawBitmap(bitmap, SkIntToScalar(x), SkIntToScalar(y), paint);
+        canvas->drawBitmap(bitmap, SkFloatToScalar(x), SkFloatToScalar(y),
+                           paint);
     }
     
     static void drawBitmapMatrix(JNIEnv* env, jobject, SkCanvas* canvas,
@@ -882,13 +902,13 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_drawRoundRect","(ILandroid/graphics/RectF;FFI)V",
         (void*) SkCanvasGlue::drawRoundRect},
     {"native_drawPath","(III)V", (void*) SkCanvasGlue::drawPath},
-    {"native_drawBitmap","(IIFFI)V",
+    {"native_drawBitmap","(IIFFIZF)V",
         (void*) SkCanvasGlue::drawBitmap__BitmapFFPaint},
     {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/RectF;I)V",
         (void*) SkCanvasGlue::drawBitmapRF},
     {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/Rect;I)V",
         (void*) SkCanvasGlue::drawBitmapRR},
-    {"native_drawBitmap", "(I[IIIIIIIZI)V",
+    {"native_drawBitmap", "(I[IIIFFIIZI)V",
     (void*)SkCanvasGlue::drawBitmapArray},
     
     {"nativeDrawBitmapMatrix", "(IIII)V",

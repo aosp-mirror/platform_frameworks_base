@@ -75,6 +75,18 @@ public class Environment {
     public static final String MEDIA_UNMOUNTED = "unmounted";
 
     /**
+     * getExternalStorageState() returns MEDIA_CHECKING if the media is present
+     * and being disk-checked
+     */
+    public static final String MEDIA_CHECKING = "checking";
+
+    /**
+     * getExternalStorageState() returns MEDIA_NOFS if the media is present
+     * but is blank or is using an unsupported filesystem
+     */
+    public static final String MEDIA_NOFS = "nofs";
+
+    /**
      * getExternalStorageState() returns MEDIA_MOUNTED if the media is present
      * and mounted at its mount point with read/write access. 
      */

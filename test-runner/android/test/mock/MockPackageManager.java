@@ -393,4 +393,14 @@ public class MockPackageManager extends PackageManager {
             List<ComponentName> outActivities, String packageName) {
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public String[] getSystemSharedLibraryNames() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean isSafeMode() {
+        throw new UnsupportedOperationException();
+    }
 }

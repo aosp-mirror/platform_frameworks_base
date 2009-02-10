@@ -2,7 +2,7 @@ page.title=What is Android?
 @jd:body
 
 <p>Android is a software stack for mobile devices that includes an operating
-system, middleware and key applications. This beta version of the <a
+system, middleware and key applications. The <a
 href="http://code.google.com/android/download.html">Android SDK</a>
 provides the tools and APIs necessary to begin developing applications on the
 Android platform using the Java programming language.</p>

@@ -51,6 +51,7 @@ public:
         MUSIC           = 3,
         ALARM           = 4,
         NOTIFICATION    = 5,
+        BLUETOOTH_SCO   = 6,
         NUM_STREAM_TYPES
     };
 

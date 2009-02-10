@@ -51,6 +51,9 @@ enum {
     GET_MIC_MUTE,
     IS_MUSIC_ACTIVE,
     SET_PARAMETER,
+    REGISTER_CLIENT,
+    GET_INPUTBUFFERSIZE,
+    WAKE_UP
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -303,6 +306,33 @@ public:
         remote()->transact(SET_PARAMETER, data, &reply);
         return reply.readInt32();
     }
+    
+    virtual void registerClient(const sp<IAudioFlingerClient>& client)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeStrongBinder(client->asBinder());
+        remote()->transact(REGISTER_CLIENT, data, &reply);
+    }
+    
+    virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(sampleRate);
+        data.writeInt32(format);
+        data.writeInt32(channelCount);
+        remote()->transact(GET_INPUTBUFFERSIZE, data, &reply);
+        return reply.readInt32();
+    }
+    
+    virtual void wakeUp()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        remote()->transact(WAKE_UP, data, &reply);
+        return;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -470,6 +500,26 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( setParameter(key, value) );
             return NO_ERROR;
         } break;
+        case REGISTER_CLIENT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient>(data.readStrongBinder());
+            registerClient(client);
+            return NO_ERROR;
+        } break;
+        case GET_INPUTBUFFERSIZE: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            uint32_t sampleRate = data.readInt32();
+            int format = data.readInt32();
+            int channelCount = data.readInt32();
+            reply->writeInt32( getInputBufferSize(sampleRate, format, channelCount) );
+            return NO_ERROR;
+        } break;
+        case WAKE_UP: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            wakeUp();
+            return NO_ERROR;
+        } break;
+
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.Reader;
+import java.io.Closeable;
 
 import android.util.Xml;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class SimplePullParser {
 
     private String mLogTag = null;
     private final XmlPullParser mParser;
+    private Closeable source;
     private String mCurrentStartTag;
 
     /**
@@ -56,6 +58,7 @@ public class SimplePullParser {
             moveToStartDocument(parser);
             mParser = parser;
             mCurrentStartTag = null;
+            source = stream;
         } catch (XmlPullParserException e) {
             throw new ParseException(e);
         }
@@ -68,6 +71,7 @@ public class SimplePullParser {
     public SimplePullParser(XmlPullParser parser) {
         mParser = parser;
         mCurrentStartTag = null;
+        source = null;
     }
 
     /**
@@ -89,6 +93,7 @@ public class SimplePullParser {
             moveToStartDocument(parser);
             mParser = parser;
             mCurrentStartTag = null;
+            source = reader;
         } catch (XmlPullParserException e) {
             throw new ParseException(e);
         }
@@ -171,6 +176,12 @@ public class SimplePullParser {
             }
 
             if (eventType == XmlPullParser.END_DOCUMENT && parentDepth == 0) {
+                // we could just rely on the caller calling close(), which it should, but try
+                // to auto-close for clients that might have missed doing so.
+                if (source != null) {
+                    source.close();
+                    source = null;
+                }
                 return null;
             }
 
@@ -329,6 +340,20 @@ public class SimplePullParser {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse '" + value + "' as a long");
+        }
+    }
+
+    /**
+     * Close this SimplePullParser and any underlying resources (e.g., its InputStream or
+     * Reader source) used by this SimplePullParser.
+     */
+    public void close() {
+        if (source != null) {
+            try {
+                source.close();
+            } catch (IOException ioe) {
+                // ignore
+            }
         }
     }
 

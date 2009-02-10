@@ -60,12 +60,31 @@ import java.util.Arrays;
 
 /**
  * <p>
- * The <code>View</code> class represents the basic UI building block. A view
+ * This class represents the basic building block for user interface components. A View
  * occupies a rectangular area on the screen and is responsible for drawing and
- * event handling. <code>View</code> is the base class for <em>widgets</em>,
- * used to create interactive graphical user interfaces.
+ * event handling. View is the base class for <em>widgets</em>, which are
+ * used to create interactive UI components (buttons, text fields, etc.). The 
+ * {@link android.view.ViewGroup} subclass is the base class for <em>layouts</em>, which
+ * are invisible containers that hold other Views (or other ViewGroups) and define
+ * their layout properties.
  * </p>
  *
+ * <div class="special">
+ * <p>For an introduction to using this class to develop your 
+ * application's user interface, read the Developer Guide documentation on 
+ * <strong><a href="{@docRoot}guide/topics/ui/index.html">User Interface</a></strong>. Special topics
+ * include: 
+ * <br/><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/layout-objects.html">Common Layout Objects</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/binding.html">Binding to Data with AdapterView</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/ui-events.html">Handling UI Events</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
+ * <br/><a href="{@docRoot}guide/topics/ui/how-android-draws.html">How Android Draws Views</a>.
+ * </p>
+ * </div>
+ * 
  * <a name="Using"></a>
  * <h3>Using Views</h3>
  * <p>
@@ -1308,6 +1327,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     static final int HAS_BOUNDS                     = 0x00000010;
     /** {@hide} */
     static final int DRAWN                          = 0x00000020;
+    /**
+     * When this flag is set, this view is running an animation on behalf of its
+     * children and should therefore not cancel invalidate requests, even if they
+     * lie outside of this view's bounds.
+     *
+     * {@hide}
+     */
+    static final int DRAW_ANIMATION                 = 0x00000040;
     /** {@hide} */
     static final int SKIP_DRAW                      = 0x00000080;
     /** {@hide} */
@@ -1352,8 +1379,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Set by {@link #setScrollContainer(boolean)}.
      */
     static final int SCROLL_CONTAINER_ADDED         = 0x00100000;
-
-    // Note: flag 0x00000040 is available
 
     /**
      * The parent this view is attached to.
@@ -1559,6 +1584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     private int mNextFocusDownId = View.NO_ID;
 
     private CheckForLongPress mPendingCheckForLongPress;
+    private UnsetPressedState mUnsetPressedState;
 
     /**
      * Whether the long press's action has been invoked.  The tap's action is invoked on the
@@ -1898,7 +1924,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         initScrollCache();
 
         mScrollCache.fadingEdgeLength = a.getDimensionPixelSize(
-                R.styleable.View_fadingEdgeLength, ViewConfiguration.getFadingEdgeLength());
+                R.styleable.View_fadingEdgeLength,
+                ViewConfiguration.get(mContext).getScaledFadingEdgeLength());
     }
 
     /**
@@ -2013,36 +2040,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             mScrollCache.scrollBar = new ScrollBarDrawable();
         }
 
-        mScrollCache.scrollBarSize = a.getDimensionPixelSize(
+        final ScrollabilityCache scrollabilityCache = mScrollCache;
+
+        scrollabilityCache.scrollBarSize = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.View_scrollbarSize,
-                ViewConfiguration.getScrollBarSize());
+                ViewConfiguration.get(mContext).getScaledScrollBarSize());
 
         Drawable track = a.getDrawable(R.styleable.View_scrollbarTrackHorizontal);
-        mScrollCache.scrollBar.setHorizontalTrackDrawable(track);
+        scrollabilityCache.scrollBar.setHorizontalTrackDrawable(track);
 
         Drawable thumb = a.getDrawable(R.styleable.View_scrollbarThumbHorizontal);
         if (thumb != null) {
-            mScrollCache.scrollBar.setHorizontalThumbDrawable(thumb);
+            scrollabilityCache.scrollBar.setHorizontalThumbDrawable(thumb);
         }
 
         boolean alwaysDraw = a.getBoolean(R.styleable.View_scrollbarAlwaysDrawHorizontalTrack,
                 false);
         if (alwaysDraw) {
-            mScrollCache.scrollBar.setAlwaysDrawHorizontalTrack(true);
+            scrollabilityCache.scrollBar.setAlwaysDrawHorizontalTrack(true);
         }
 
         track = a.getDrawable(R.styleable.View_scrollbarTrackVertical);
-        mScrollCache.scrollBar.setVerticalTrackDrawable(track);
+        scrollabilityCache.scrollBar.setVerticalTrackDrawable(track);
 
         thumb = a.getDrawable(R.styleable.View_scrollbarThumbVertical);
         if (thumb != null) {
-            mScrollCache.scrollBar.setVerticalThumbDrawable(thumb);
+            scrollabilityCache.scrollBar.setVerticalThumbDrawable(thumb);
         }
 
         alwaysDraw = a.getBoolean(R.styleable.View_scrollbarAlwaysDrawVerticalTrack,
                 false);
         if (alwaysDraw) {
-            mScrollCache.scrollBar.setAlwaysDrawVerticalTrack(true);
+            scrollabilityCache.scrollBar.setAlwaysDrawVerticalTrack(true);
         }
 
         // Re-apply user/background padding so that scrollbar(s) get added
@@ -2056,7 +2085,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      */
     private void initScrollCache() {
         if (mScrollCache == null) {
-            mScrollCache = new ScrollabilityCache();
+            mScrollCache = new ScrollabilityCache(ViewConfiguration.get(mContext));
         }
     }
 
@@ -2635,6 +2664,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      */
     public void setVisibility(int visibility) {
         setFlags(visibility, VISIBILITY_MASK);
+        if (mBGDrawable != null) mBGDrawable.setVisible(visibility == VISIBLE, false);
     }
 
     /**
@@ -3410,6 +3440,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     void performCollectViewAttributes(int visibility) {
+        //noinspection PointlessBitwiseExpression
         if (((visibility | mViewFlags) & (VISIBILITY_MASK | KEEP_SCREEN_ON))
                 == (VISIBLE | KEEP_SCREEN_ON)) {
             mAttachInfo.mKeepScreenOn = true;
@@ -3708,10 +3739,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                             }
                         }
 
-                        final UnsetPressedState unsetPressedState = new UnsetPressedState();
-                        if (!post(unsetPressedState)) {
+                        if (mUnsetPressedState == null) {
+                            mUnsetPressedState = new UnsetPressedState();
+                        }
+
+                        if (!post(mUnsetPressedState)) {
                             // If the post failed, unpress right now
-                            unsetPressedState.run();
+                            mUnsetPressedState.run();
                         }
                     }
                     break;
@@ -3734,7 +3768,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     final int y = (int) event.getY();
 
                     // Be lenient about moving outside of buttons
-                    int slop = ViewConfiguration.getTouchSlop();
+                    int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
                     if ((x < 0 - slop) || (x >= getWidth() + slop) ||
                             (y < 0 - slop) || (y >= getHeight() + slop)) {
                         // Outside button
@@ -4413,14 +4447,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @see #invalidate()
      */
     public void postInvalidate() {
-        // We try only with the AttachInfo because there's no point in invalidating
-        // if we are not attached to our window
-        if (mAttachInfo != null) {
-            Message msg = Message.obtain();
-            msg.what = AttachInfo.INVALIDATE_MSG;
-            msg.obj = this;
-            mAttachInfo.mHandler.sendMessage(msg);
-        }
+        postInvalidateDelayed(0);
     }
 
     /**
@@ -4436,16 +4463,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @see #invalidate(Rect)
      */
     public void postInvalidate(int left, int top, int right, int bottom) {
-        // We try only with the AttachInfo because there's no point in invalidating
-        // if we are not attached to our window
-        if (mAttachInfo != null) {
-            Message msg = Message.obtain();
-            msg.what = AttachInfo.INVALIDATE_RECT_MSG;
-            msg.obj = this;
-            msg.arg1 = (left << 16) | (top & 0xFFFF);
-            msg.arg2 = (right << 16) | (bottom & 0xFFFF);
-            mAttachInfo.mHandler.sendMessage(msg);
-        }
+        postInvalidateDelayed(0, left, top, right, bottom);
     }
 
     /**
@@ -4477,16 +4495,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @param right The right coordinate of the rectangle to invalidate.
      * @param bottom The bottom coordinate of the rectangle to invalidate.
      */
-    public void postInvalidateDelayed(long delayMilliseconds, int left, int top
-            , int right, int bottom) {
+    public void postInvalidateDelayed(long delayMilliseconds, int left, int top,
+            int right, int bottom) {
+
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
         if (mAttachInfo != null) {
-            Message msg = Message.obtain();
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            info.target = this;
+            info.left = left;
+            info.top = top;
+            info.right = right;
+            info.bottom = bottom;
+
+            final Message msg = Message.obtain();
             msg.what = AttachInfo.INVALIDATE_RECT_MSG;
-            msg.obj = this;
-            msg.arg1 = (left << 16) | (top & 0xFFFF);
-            msg.arg2 = (right << 16) | (bottom & 0xFFFF);
+            msg.obj = info;
             mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
         }
     }
@@ -4865,7 +4889,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             final boolean drawHorizontalScrollBar =
                 (viewFlags & SCROLLBARS_HORIZONTAL) == SCROLLBARS_HORIZONTAL;
             final boolean drawVerticalScrollBar =
-                (viewFlags & SCROLLBARS_VERTICAL) == SCROLLBARS_VERTICAL;
+                (viewFlags & SCROLLBARS_VERTICAL) == SCROLLBARS_VERTICAL
+                && !isVerticalScrollBarHidden();
 
             if (drawVerticalScrollBar || drawHorizontalScrollBar) {
                 final int width = mRight - mLeft;
@@ -4886,6 +4911,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 }
             }
         }
+    }
+    
+    /**
+     * Override this if the vertical scrollbar needs to be hidden in a subclass, like when 
+     * FastScroller is visible.
+     * @return whether to temporarily hide the vertical scrollbar
+     * @hide
+     */
+    protected boolean isVerticalScrollBarHidden() {
+        return false;
     }
 
     /**
@@ -5022,6 +5057,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if (mPendingCheckForLongPress != null) {
             removeCallbacks(mPendingCheckForLongPress);
         }
+        destroyDrawingCache();
     }
 
     /**
@@ -5408,7 +5444,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
 
             if (width <= 0 || height <= 0 ||
                     (width * height * (opaque ? 2 : 4) >= // Projected bitmap size in bytes
-                            ViewConfiguration.getMaximumDrawingCacheSize())) {
+                            ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
                 if (mDrawingCache != null) {
                     mDrawingCache.recycle();
                 }
@@ -5485,9 +5521,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             final int restoreCount = canvas.save();
             canvas.translate(-mScrollX, -mScrollY);
 
+            mPrivateFlags |= DRAWN;
+
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                mPrivateFlags |= DRAWN;
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
@@ -5616,6 +5653,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
         }
 
+        mPrivateFlags |= DRAWN;                    
+
         /*
          * Draw traversal performs several drawing steps which must be executed
          * in the appropriate order:
@@ -5656,7 +5695,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
         if (!verticalEdges && !horizontalEdges) {
             // Step 3, draw the content
-            mPrivateFlags |= DRAWN;
             onDraw(canvas);
 
             // Step 4, draw the children
@@ -5760,7 +5798,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         // Step 3, draw the content
-        mPrivateFlags |= DRAWN;
         onDraw(canvas);
 
         // Step 4, draw the children
@@ -7671,6 +7708,67 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             void playSoundEffect(int effectId);
         }
 
+        /**
+         * InvalidateInfo is used to post invalidate(int, int, int, int) messages
+         * to a Handler. This class contains the target (View) to invalidate and
+         * the coordinates of the dirty rectangle.
+         *
+         * For performance purposes, this class also implements a pool of up to
+         * POOL_LIMIT objects that get reused. This reduces memory allocations
+         * whenever possible.
+         *
+         * The pool is implemented as a linked list of InvalidateInfo object with
+         * the root pointing to the next available InvalidateInfo. If the root
+         * is null (i.e. when all instances from the pool have been acquired),
+         * then a new InvalidateInfo is created and returned to the caller.
+         *
+         * An InvalidateInfo is sent back to the pool by calling its release()
+         * method. If the pool is full the object is simply discarded.
+         *
+         * This implementation follows the object pool pattern used in the
+         * MotionEvent class.
+         */
+        static class InvalidateInfo {
+            private static final int POOL_LIMIT = 10;
+            private static final Object sLock = new Object();
+
+            private static int sAcquiredCount = 0;
+            private static InvalidateInfo sRoot;
+
+            private InvalidateInfo next;
+
+            View target;
+
+            int left;
+            int top;
+            int right;
+            int bottom;
+
+            static InvalidateInfo acquire() {
+                synchronized (sLock) {
+                    if (sRoot == null) {
+                        return new InvalidateInfo();
+                    }
+
+                    InvalidateInfo info = sRoot;
+                    sRoot = info.next;
+                    sAcquiredCount--;
+
+                    return info;
+                }
+            }
+
+            void release() {
+                synchronized (sLock) {
+                    if (sAcquiredCount < POOL_LIMIT) {
+                        sAcquiredCount++;
+                        next = sRoot;
+                        sRoot = this;
+                    }
+                }
+            }
+        }
+
         final IWindowSession mSession;
 
         final IWindow mWindow;
@@ -7839,18 +7937,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * instances of View.</p>
      */
     private static class ScrollabilityCache {
-        public int fadingEdgeLength = ViewConfiguration.getFadingEdgeLength();
+        public int fadingEdgeLength;
 
-        public int scrollBarSize = ViewConfiguration.getScrollBarSize();
+        public int scrollBarSize;
         public ScrollBarDrawable scrollBar;
 
         public final Paint paint;
         public final Matrix matrix;
         public Shader shader;
 
-        private int mLastColor = 0;
+        private int mLastColor;
 
-        public ScrollabilityCache() {
+        public ScrollabilityCache(ViewConfiguration configuration) {
+            fadingEdgeLength = configuration.getScaledFadingEdgeLength();
+            scrollBarSize = configuration.getScaledScrollBarSize();
+
             paint = new Paint();
             matrix = new Matrix();
             // use use a height of 1, and then wack the matrix each time we

@@ -33,9 +33,12 @@ class JetPlayer {
 
 public:
 
-    static const int JET_USERID_UPDATE           = 1;
-    static const int JET_NUMQUEUEDSEGMENT_UPDATE = 2;
-    static const int JET_PAUSE_UPDATE            = 3;
+    // to keep in sync with the JetPlayer class constants
+    // defined in frameworks/base/media/java/android/media/JetPlayer.java
+    static const int JET_EVENT                   = 1;
+    static const int JET_USERID_UPDATE           = 2;
+    static const int JET_NUMQUEUEDSEGMENT_UPDATE = 3;
+    static const int JET_PAUSE_UPDATE            = 4;
 
     JetPlayer(jobject javaJetPlayer, 
             int maxTracks = 32, 
@@ -44,7 +47,8 @@ public:
     int init();
     int release();
     
-    int openFile(const char* url);
+    int loadFromFile(const char* url);
+    int loadFromFD(const int fd, const long long offset, const long long length);
     int closeFile();
     int play();
     int pause();
@@ -53,6 +57,7 @@ public:
     int setMuteFlags(EAS_U32 muteFlags, bool sync);
     int setMuteFlag(int trackNum, bool muteFlag, bool sync);
     int triggerClip(int clipId);
+    int clearQueue();
 
     void setEventCallback(jetevent_callback callback);
     
@@ -62,7 +67,8 @@ public:
 private:
     static  int         renderThread(void*);
     int                 render();
-    void                fireEventOnStatusChange();
+    void                fireUpdateOnStatusChange();
+    void                fireEventsFromJetQueue();
 
     JetPlayer() {} // no default constructor
     void dump();

@@ -54,7 +54,7 @@ public class ZoomButton extends ImageButton implements OnLongClickListener {
     public ZoomButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mHandler = new Handler();
-        mGestureDetector = new GestureDetector(new SimpleOnGestureListener() {
+        mGestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
                 onLongClick(ZoomButton.this);

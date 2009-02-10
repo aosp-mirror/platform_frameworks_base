@@ -397,7 +397,7 @@ public class FocusFinder {
 
         int numTouchables = touchables.size();
         
-        int edgeSlop = ViewConfiguration.getEdgeSlop();
+        int edgeSlop = ViewConfiguration.get(root.mContext).getScaledEdgeSlop();
         
         Rect closestBounds = new Rect();
         Rect touchableBounds = mOtherRect;

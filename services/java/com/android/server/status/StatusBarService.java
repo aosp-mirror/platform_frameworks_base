@@ -322,9 +322,11 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     public void systemReady() {
+        final StatusBarView view = mStatusBarView;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT,
-                25,
+                view.getContext().getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height),
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
                 WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
@@ -333,7 +335,7 @@ public class StatusBarService extends IStatusBar.Stub
         lp.setTitle("StatusBar");
         lp.windowAnimations = R.style.Animation_StatusBar;
 
-        WindowManagerImpl.getDefault().addView(mStatusBarView, lp);
+        WindowManagerImpl.getDefault().addView(view, lp);
     }
     
     // ================================================================================

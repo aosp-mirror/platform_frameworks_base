@@ -27,6 +27,7 @@ import com.android.internal.R;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
@@ -188,6 +189,12 @@ public class DateFormat {
      */
     public  static final char    YEAR                   =    'y';
 
+
+    private static final Object sLocaleLock = new Object();
+    private static Locale sIs24HourLocale;
+    private static boolean sIs24Hour;
+
+
     /**
      * Returns true if user preference is set to 24-hour format.
      * @param context the context to use for the content resolver
@@ -198,20 +205,34 @@ public class DateFormat {
                 Settings.System.TIME_12_24);
 
         if (value == null) {
+            Locale locale = context.getResources().getConfiguration().locale;
+
+            synchronized (sLocaleLock) {
+                if (sIs24HourLocale != null && sIs24HourLocale.equals(locale)) {
+                    return sIs24Hour;
+                }
+            }
+
             java.text.DateFormat natural =
                 java.text.DateFormat.getTimeInstance(
-                    java.text.DateFormat.LONG,
-                    context.getResources().getConfiguration().locale);
+                    java.text.DateFormat.LONG, locale);
 
             if (natural instanceof SimpleDateFormat) {
                 SimpleDateFormat sdf = (SimpleDateFormat) natural;
                 String pattern = sdf.toPattern();
 
                 if (pattern.indexOf('H') >= 0) {
-                    return true;
+                    value = "24";
                 } else {
-                    return false;
+                    value = "12";
                 }
+            } else {
+                value = "12";
+            }
+
+            synchronized (sLocaleLock) {
+                sIs24HourLocale = locale;
+                sIs24Hour = !value.equals("12");
             }
         }
 

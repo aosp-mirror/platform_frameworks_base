@@ -175,7 +175,7 @@ MapView elements</h3>
 
 <div class="sidebox" style="margin-bottom:.5em;"><p>For complete information
 about getting a Maps API Key, see <a
-href="{@docRoot}guide/developing/mapkey.html">Obtaining a Maps API
+href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a Maps API
 Key</a>.<br></p></div>
 
 <p>If your application uses one or more 

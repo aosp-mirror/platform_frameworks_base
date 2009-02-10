@@ -47,8 +47,6 @@ static jmethodID method_onRemoteDeviceDisappeared;
 static jmethodID method_onRemoteClassUpdated;
 static jmethodID method_onRemoteNameUpdated;
 static jmethodID method_onRemoteNameFailed;
-static jmethodID method_onRemoteAliasChanged;
-static jmethodID method_onRemoteAliasCleared;
 static jmethodID method_onRemoteDeviceConnected;
 static jmethodID method_onRemoteDeviceDisconnectRequested;
 static jmethodID method_onRemoteDeviceDisconnected;
@@ -60,6 +58,8 @@ static jmethodID method_onGetRemoteServiceChannelResult;
 
 static jmethodID method_onPasskeyAgentRequest;
 static jmethodID method_onPasskeyAgentCancel;
+static jmethodID method_onAuthAgentAuthorize;
+static jmethodID method_onAuthAgentCancel;
 
 typedef event_loop_native_data_t native_data_t;
 
@@ -85,7 +85,6 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onRemoteClassUpdated = env->GetMethodID(clazz, "onRemoteClassUpdated", "(Ljava/lang/String;I)V");
     method_onRemoteNameUpdated = env->GetMethodID(clazz, "onRemoteNameUpdated", "(Ljava/lang/String;Ljava/lang/String;)V");
     method_onRemoteNameFailed = env->GetMethodID(clazz, "onRemoteNameFailed", "(Ljava/lang/String;)V");
-    method_onRemoteAliasChanged = env->GetMethodID(clazz, "onRemoteAliasChanged", "(Ljava/lang/String;Ljava/lang/String;)V");
     method_onRemoteDeviceConnected = env->GetMethodID(clazz, "onRemoteDeviceConnected", "(Ljava/lang/String;)V");
     method_onRemoteDeviceDisconnectRequested = env->GetMethodID(clazz, "onRemoteDeviceDisconnectRequested", "(Ljava/lang/String;)V");
     method_onRemoteDeviceDisconnected = env->GetMethodID(clazz, "onRemoteDeviceDisconnected", "(Ljava/lang/String;)V");
@@ -96,6 +95,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 
     method_onPasskeyAgentRequest = env->GetMethodID(clazz, "onPasskeyAgentRequest", "(Ljava/lang/String;I)V");
     method_onPasskeyAgentCancel = env->GetMethodID(clazz, "onPasskeyAgentCancel", "(Ljava/lang/String;)V");
+    method_onAuthAgentAuthorize = env->GetMethodID(clazz, "onAuthAgentAuthorize", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z");
+    method_onAuthAgentCancel = env->GetMethodID(clazz, "onAuthAgentCancel", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     method_onGetRemoteServiceChannelResult = env->GetMethodID(clazz, "onGetRemoteServiceChannelResult", "(Ljava/lang/String;I)V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
@@ -139,12 +140,12 @@ static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
 static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                       void *data);
-static DBusHandlerResult passkey_agent_event_filter(DBusConnection *conn,
-                                                    DBusMessage *msg,
-                                                    void *data);
+static DBusHandlerResult agent_event_filter(DBusConnection *conn,
+                                            DBusMessage *msg,
+                                            void *data);
 
-static const DBusObjectPathVTable passkey_agent_vtable = {
-    NULL, passkey_agent_event_filter, NULL, NULL, NULL, NULL
+static const DBusObjectPathVTable agent_vtable = {
+    NULL, agent_event_filter, NULL, NULL, NULL, NULL
 };
 #endif
 
@@ -193,9 +194,9 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         }
 
         // Add an object handler for passkey agent method calls
-        const char *path = "/android/bluetooth/PasskeyAgent";
+        const char *path = "/android/bluetooth/Agent";
         if (!dbus_connection_register_object_path(nat->conn, path,
-                                                  &passkey_agent_vtable, NULL)) {
+                &agent_vtable, NULL)) {
             LOGE("%s: Can't register object path %s for agent!",
                  __FUNCTION__, path);
             return JNI_FALSE;
@@ -204,7 +205,7 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         // RegisterDefaultPasskeyAgent() will fail until hcid is up, so keep
         // trying for 10 seconds.
         int attempt;
-        for (attempt = 1000; attempt > 0; attempt--) {
+        for (attempt = 0; attempt < 1000; attempt++) {
             DBusMessage *reply = dbus_func_args_error(env, nat->conn, &err,
                     BLUEZ_DBUS_BASE_PATH,
                     "org.bluez.Security", "RegisterDefaultPasskeyAgent",
@@ -213,7 +214,8 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
             if (reply) {
                 // Success
                 dbus_message_unref(reply);
-                return JNI_TRUE;
+                LOGV("Registered agent on attempt %d of 1000\n", attempt);
+                break;
             } else if (dbus_error_has_name(&err,
                     "org.freedesktop.DBus.Error.ServiceUnknown")) {
                 // hcid is still down, retry
@@ -225,9 +227,25 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
                 return JNI_FALSE;
             }
         }
-        LOGE("Time-out trying to call RegisterDefaultPasskeyAgent(), "
-             "is hcid running?");
-        return JNI_FALSE;
+        if (attempt == 1000) {
+            LOGE("Time-out trying to call RegisterDefaultPasskeyAgent(), "
+                 "is hcid running?");
+            return JNI_FALSE;
+        }
+
+        // Now register the Auth agent
+        DBusMessage *reply = dbus_func_args_error(env, nat->conn, &err,
+                BLUEZ_DBUS_BASE_PATH,
+                "org.bluez.Security", "RegisterDefaultAuthorizationAgent",
+                DBUS_TYPE_STRING, &path,
+                DBUS_TYPE_INVALID);
+        if (!reply) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+
+        dbus_message_unref(reply);
+        return JNI_TRUE;
     }
 
 #endif
@@ -243,12 +261,19 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
         DBusError err;
         dbus_error_init(&err);
 
-        const char *path = "/android/bluetooth/PasskeyAgent";
+        const char *path = "/android/bluetooth/Agent";
         DBusMessage *reply =
             dbus_func_args(env, nat->conn, BLUEZ_DBUS_BASE_PATH,
-                           "org.bluez.Security", "UnregisterDefaultPasskeyAgent",
-                           DBUS_TYPE_STRING, &path,
-                           DBUS_TYPE_INVALID);
+                    "org.bluez.Security", "UnregisterDefaultPasskeyAgent",
+                    DBUS_TYPE_STRING, &path,
+                    DBUS_TYPE_INVALID);
+        if (reply) dbus_message_unref(reply);
+
+        reply =
+            dbus_func_args(env, nat->conn, BLUEZ_DBUS_BASE_PATH,
+                    "org.bluez.Security", "UnregisterDefaultAuthorizationAgent",
+                    DBUS_TYPE_STRING, &path,
+                    DBUS_TYPE_INVALID);
         if (reply) dbus_message_unref(reply);
 
         dbus_connection_unregister_object_path(nat->conn, path);
@@ -395,34 +420,6 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         return DBUS_HANDLER_RESULT_HANDLED;
     } else if (dbus_message_is_signal(msg,
                                       "org.bluez.Adapter",
-                                      "RemoteAliasChanged")) {
-        char *c_address, *c_alias;
-        if (dbus_message_get_args(msg, &err,
-                                  DBUS_TYPE_STRING, &c_address,
-                                  DBUS_TYPE_STRING, &c_alias,
-                                  DBUS_TYPE_INVALID)) {
-            LOGV("... address = %s, alias = %s", c_address, c_alias);
-            env->CallVoidMethod(nat->me,
-                                method_onRemoteAliasChanged,
-                                env->NewStringUTF(c_address),
-                                env->NewStringUTF(c_alias));
-        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.Adapter",
-                                      "RemoteAliasCleared")) {
-        char *c_address;
-        if (dbus_message_get_args(msg, &err,
-                                  DBUS_TYPE_STRING, &c_address,
-                                  DBUS_TYPE_INVALID)) {
-            LOGV("... address = %s", c_address);
-            env->CallVoidMethod(nat->me,
-                                method_onRemoteAliasCleared,
-                                env->NewStringUTF(c_address));
-        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.Adapter",
                                       "RemoteDeviceConnected")) {
         char *c_address;
         if (dbus_message_get_args(msg, &err,
@@ -518,9 +515,8 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
 }
 
 // Called by dbus during WaitForAndDispatchEventNative()
-static DBusHandlerResult passkey_agent_event_filter(DBusConnection *conn,
-                                                    DBusMessage *msg,
-                                                    void *data) {
+static DBusHandlerResult agent_event_filter(DBusConnection *conn,
+                                            DBusMessage *msg, void *data) {
     native_data_t *nat = event_loop_nat;
     JNIEnv *env;
 
@@ -573,11 +569,120 @@ static DBusHandlerResult passkey_agent_event_filter(DBusConnection *conn,
         env->CallVoidMethod(nat->me, method_onPasskeyAgentCancel,
                             env->NewStringUTF(address));
 
+        // reply
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+        if (!reply) {
+            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(reply);
         return DBUS_HANDLER_RESULT_HANDLED;
 
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.PasskeyAgent", "Release")) {
-        LOGE("We are no longer the passkey agent!");
+        LOGW("We are no longer the passkey agent!");
+
+        // reply
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+        if (!reply) {
+            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(reply);
+        return DBUS_HANDLER_RESULT_HANDLED;
+    } else if (dbus_message_is_method_call(msg,
+            "org.bluez.AuthorizationAgent", "Authorize")) {
+        const char *adapter;
+        const char *address;
+        const char *service;
+        const char *uuid;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_STRING, &adapter,
+                                   DBUS_TYPE_STRING, &address,
+                                   DBUS_TYPE_STRING, &service,
+                                   DBUS_TYPE_STRING, &uuid,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for Authorize() method", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+
+        LOGV("... address = %s", address);
+        LOGV("... service = %s", service);
+        LOGV("... uuid = %s", uuid);
+
+        bool auth_granted = env->CallBooleanMethod(nat->me,
+                method_onAuthAgentAuthorize, env->NewStringUTF(address),
+                env->NewStringUTF(service), env->NewStringUTF(uuid));
+
+        // reply
+        if (auth_granted) {
+            DBusMessage *reply = dbus_message_new_method_return(msg);
+            if (!reply) {
+                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            }
+            dbus_connection_send(nat->conn, reply, NULL);
+            dbus_message_unref(reply);
+        } else {
+            DBusMessage *reply = dbus_message_new_error(msg,
+                    "org.bluez.Error.Rejected", "Authorization rejected");
+            if (!reply) {
+                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            }
+            dbus_connection_send(nat->conn, reply, NULL);
+            dbus_message_unref(reply);
+        }
+        return DBUS_HANDLER_RESULT_HANDLED;
+    } else if (dbus_message_is_method_call(msg,
+            "org.bluez.AuthorizationAgent", "Cancel")) {
+        const char *adapter;
+        const char *address;
+        const char *service;
+        const char *uuid;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_STRING, &adapter,
+                                   DBUS_TYPE_STRING, &address,
+                                   DBUS_TYPE_STRING, &service,
+                                   DBUS_TYPE_STRING, &uuid,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for Cancel() method", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+
+        LOGV("... address = %s", address);
+        LOGV("... service = %s", service);
+        LOGV("... uuid = %s", uuid);
+
+        env->CallVoidMethod(nat->me,
+                method_onAuthAgentCancel, env->NewStringUTF(address),
+                env->NewStringUTF(service), env->NewStringUTF(uuid));
+
+        // reply
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+        if (!reply) {
+            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(reply);
+        return DBUS_HANDLER_RESULT_HANDLED;
+
+    } else if (dbus_message_is_method_call(msg,
+            "org.bluez.AuthorizationAgent", "Release")) {
+        LOGW("We are no longer the auth agent!");
+
+        // reply
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+        if (!reply) {
+            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        }
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(reply);
+        return DBUS_HANDLER_RESULT_HANDLED;
     } else {
         LOGV("... ignored");
     }
@@ -614,7 +719,8 @@ static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
 #define BOND_RESULT_SUCCESS 0
 #define BOND_RESULT_AUTH_FAILED 1
 #define BOND_RESULT_AUTH_REJECTED 2
-#define BOND_RESULT_REMOTE_DEVICE_DOWN 3
+#define BOND_RESULT_AUTH_CANCELED 3
+#define BOND_RESULT_REMOTE_DEVICE_DOWN 4
 void onCreateBondingResult(DBusMessage *msg, void *user) {
     LOGV(__FUNCTION__);
 
@@ -637,7 +743,11 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
             // happens if either side presses 'cancel' at the pairing dialog.
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_REJECTED;
-        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".ConnectionAttemptFailed")) {
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationCanceled")) {
+            // Not sure if this happens
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_AUTH_CANCELED;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.ConnectionAttemptFailed")) {
             // Other device is not responding at all
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_REMOTE_DEVICE_DOWN;

@@ -799,12 +799,11 @@ final class WebViewCore {
 
                         case TOUCH_EVENT: {
                             TouchEventData ted = (TouchEventData) msg.obj;
-                            if (nativeHandleTouchEvent(ted.mAction, ted.mX,
-                                    ted.mY)) {
-                                Message.obtain(mWebView.mPrivateHandler,
-                                        WebView.PREVENT_TOUCH_ID)
-                                        .sendToTarget();
-                            }
+                            Message.obtain(
+                                    mWebView.mPrivateHandler,
+                                    WebView.PREVENT_TOUCH_ID, ted.mAction,
+                                    nativeHandleTouchEvent(ted.mAction, ted.mX,
+                                            ted.mY) ? 1 : 0).sendToTarget();
                             break;
                         }
 
@@ -1434,10 +1433,15 @@ final class WebViewCore {
         }
     }
 
-    // called by JNI
+    /*  Called by JNI. The coordinates are in doc coordinates, so they need to
+        be scaled before they can be used by the view system, which happens
+        in WebView since it (and its thread) know the current scale factor.
+     */
     private void sendViewInvalidate(int left, int top, int right, int bottom) {
         if (mWebView != null) {
-            mWebView.postInvalidate(left, top, right, bottom);
+            Message.obtain(mWebView.mPrivateHandler,
+                           WebView.INVAL_RECT_MSG_ID,
+                           new Rect(left, top, right, bottom)).sendToTarget();
         }
     }
 

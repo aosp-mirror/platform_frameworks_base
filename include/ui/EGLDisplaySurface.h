@@ -27,7 +27,10 @@
 #include <pixelflinger/pixelflinger.h>
 #include <linux/fb.h>
 
+#include <EGL/egl.h>
+
 struct copybit_device_t;
+struct copybit_image_t;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -44,17 +47,17 @@ public:
     
     int32_t getPageFlipCount() const;
     void    copyFrontToBack(const Region& copyback);
+    void    copyFrontToImage(const copybit_image_t& dst);
+    void    copyBackToImage(const copybit_image_t& dst);
     
+    void        setSwapRectangle(int l, int t, int w, int h);
+
 private:
     static void         hook_incRef(NativeWindowType window);
     static void         hook_decRef(NativeWindowType window);
     static uint32_t     hook_swapBuffers(NativeWindowType window);
-    static void         hook_setSwapRectangle(NativeWindowType window, int l, int t, int w, int h);
-    static uint32_t     hook_nextBuffer(NativeWindowType window);
      
             uint32_t    swapBuffers();
-            uint32_t    nextBuffer();
-            void        setSwapRectangle(int l, int t, int w, int h);
 
             status_t    mapFrameBuffer();
 

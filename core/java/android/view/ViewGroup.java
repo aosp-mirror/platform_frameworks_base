@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RectF;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.EventLog;
@@ -74,6 +75,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // The current transformation to apply on the child being drawn
     private Transformation mChildTransformation;
+    private RectF mInvalidateRegion;
 
     // Target of Motion events
     private View mMotionTarget;
@@ -1199,6 +1201,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         }
 
+        // We will draw our child's animation, let's reset the flag
+        mPrivateFlags &= ~DRAW_ANIMATION;
         mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
 
         boolean more = false;
@@ -1328,8 +1332,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean concatMatrix = false;
 
         if (a != null) {
-            if (!a.isInitialized()) {
+            if (mInvalidateRegion == null) {
+                mInvalidateRegion = new RectF();
+            }
+            final RectF region = mInvalidateRegion;
+
+            final boolean initialized = a.isInitialized();
+            if (!initialized) {
                 a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
+                a.initializeInvalidateRegion(cl, ct, cr, cb);
                 child.onAnimationStart();
             }
 
@@ -1347,10 +1358,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             FLAG_OPTIMIZE_INVALIDATE) {
                         mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
                     } else if ((flags & FLAG_INVALIDATE_REQUIRED) == 0) {
+                        // The child need to draw an animation, potentially offscreen, so
+                        // make sure we do not cancel invalidate requests
+                        mPrivateFlags |= DRAW_ANIMATION;
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+                    a.getInvalidateRegion(cl, ct, cr, cb, region, transformToApply);
+
+                    // The child need to draw an animation, potentially offscreen, so
+                    // make sure we do not cancel invalidate requests
+                    mPrivateFlags |= DRAW_ANIMATION;
+                    // Enlarge the invalidate region to account for rounding errors
+                    // in Animation#getInvalidateRegion(); Using 0.5f is unfortunately
+                    // not enough for some types of animations (e.g. scale down.)
+                    invalidate((int) (region.left - 1.0f), (int) (region.top - 1.0f),
+                            (int) (region.right + 1.0f), (int) (region.bottom + 1.0f));
                 }
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
@@ -1367,7 +1390,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW)) {
+        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
+                (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
         }
 
@@ -1435,10 +1459,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
+        // Clear the flag as early as possible to allow draw() implementations
+        // to call invalidate() successfully when doing animations
+        child.mPrivateFlags |= DRAWN;
+
         if (hasNoCache) {
             // Fast path for layouts with no backgrounds
             if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                child.mPrivateFlags |= DRAWN;
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
@@ -1455,7 +1482,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
             }
-            child.mPrivateFlags |= DRAWN;
             if (ViewRoot.PROFILE_DRAWING) {
                 EventLog.writeEvent(60003, hashCode());
             }
@@ -1922,8 +1948,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         LayoutAnimationController.AnimationParameters animationParams =
                     params.layoutAnimationParameters;
         if (animationParams == null) {
-            animationParams =
-                    new LayoutAnimationController.AnimationParameters();
+            animationParams = new LayoutAnimationController.AnimationParameters();
             params.layoutAnimationParameters = animationParams;
         }
 
@@ -2278,8 +2303,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int[] location = attachInfo.mInvalidateChildLocation;
             location[CHILD_LEFT_INDEX] = child.mLeft;
             location[CHILD_TOP_INDEX] = child.mTop;
+
+            // If the child is drawing an animation, we want to copy this flag onto
+            // ourselves and the parent to make sure the invalidate request goes
+            // through
+            final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
     
             do {
+                if (drawAnimation && parent instanceof View) {
+                    ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                }
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);
         }
@@ -2307,7 +2340,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int left = mLeft;
                 final int top = mTop;
 
-                if (dirty.intersect(0, 0, mRight - left, mBottom - top)) {
+                if (dirty.intersect(0, 0, mRight - left, mBottom - top) ||
+                        (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
 
                     location[CHILD_LEFT_INDEX] = left;

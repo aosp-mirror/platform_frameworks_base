@@ -54,9 +54,6 @@ public class MediaRecorderResetStateUnitTest extends AndroidTestCase implements 
         recorder.reset();
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testReset() {
         mTestTemplate.runTestOnMethod(this);

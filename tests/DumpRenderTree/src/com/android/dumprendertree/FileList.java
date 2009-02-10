@@ -117,9 +117,14 @@ public abstract class FileList extends ListActivity
     {
     	Map map = (Map) l.getItemAtPosition(position);
     	String path = (String)map.get("path");
-    	if (path.length() > 0)
-    	    processFile(path, true);
 
+        if ((new File(path)).isDirectory()) {
+            mPath = path;
+            mFocusFile = null;
+            updateList();
+        } else {
+            processFile(path, false);
+        }
     }
     
     /*
@@ -148,7 +153,7 @@ public abstract class FileList extends ListActivity
     
     protected void setupPath() 
     {
-    	mPath = "/sdcard";
+    	mPath = "/sdcard/android/layout_tests";
     	mBaseLength = mPath.length();
     }
     

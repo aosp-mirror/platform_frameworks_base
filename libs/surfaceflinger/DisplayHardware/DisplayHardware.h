@@ -22,7 +22,7 @@
 #include <ui/PixelFormat.h>
 #include <ui/Region.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
 
 #include "DisplayHardware/DisplayHardwareBase.h"
 
@@ -39,7 +39,6 @@ class DisplayHardware : public DisplayHardwareBase
 {
 public:
     enum {
-        COPY_BACK_EXTENSION     = 0x00000001,
         DIRECT_TEXTURE          = 0x00000002,
         SWAP_RECTANGLE_EXTENSION= 0x00000004,
         COPY_BITS_EXTENSION     = 0x00000008,
@@ -80,6 +79,9 @@ public:
     copybit_device_t* getBlitEngine() const { return mBlitEngine; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
     
+    void copyFrontToImage(const copybit_image_t& front) const;
+    void copyBackToImage(const copybit_image_t& front) const;
+       
     Rect bounds() const {
         return Rect(mWidth, mHeight);
     }

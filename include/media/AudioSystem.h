@@ -99,23 +99,31 @@ public:
     static status_t getOutputSamplingRate(int* samplingRate);
     static status_t getOutputFrameCount(int* frameCount);
     static status_t getOutputLatency(uint32_t* latency);
+    
+    static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount, 
+        size_t* buffSize);
 
     // ----------------------------------------------------------------------------
 
 private:
 
-    class DeathNotifier: public IBinder::DeathRecipient
+    class AudioFlingerClient: public IBinder::DeathRecipient, public BnAudioFlingerClient
     {
     public:
-        DeathNotifier() {      
+        AudioFlingerClient() {      
         }
         
+        // DeathRecipient
         virtual void binderDied(const wp<IBinder>& who);
+        
+        // IAudioFlingerClient
+        virtual void audioOutputChanged(uint32_t frameCount, uint32_t samplingRate, uint32_t latency);
+        
     };
 
-    static sp<DeathNotifier> gDeathNotifier;
+    static sp<AudioFlingerClient> gAudioFlingerClient;
 
-    friend class DeathNotifier;
+    friend class AudioFlingerClient;
 
     static Mutex gLock;
     static sp<IAudioFlinger> gAudioFlinger;
@@ -123,6 +131,13 @@ private:
     static int gOutSamplingRate;
     static int gOutFrameCount;
     static uint32_t gOutLatency;
+    
+    static size_t gInBuffSize;
+    // previous parameters for recording buffer size queries
+    static uint32_t gPrevInSamplingRate;
+    static int gPrevInFormat;
+    static int gPrevInChannelCount;
+
 };
 
 };  // namespace android

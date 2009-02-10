@@ -89,6 +89,19 @@ public class WifiNative {
 
     public native static boolean stopDriverCommand();
 
+    /**
+     * Start filtering out multicast packets, to reduce battery consumption
+     * that would result from processing them, only to discard them.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public native static boolean startPacketFiltering();
+
+    /**
+     * Stop filtering out multicast packets.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public native static boolean stopPacketFiltering();
+
     public native static boolean setPowerModeCommand(int mode);
 
     public native static boolean setNumAllowedChannelsCommand(int numChannels);

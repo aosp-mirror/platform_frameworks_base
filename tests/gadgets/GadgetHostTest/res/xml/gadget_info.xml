@@ -1,0 +1,8 @@
+<gadget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="30dp"
+    android:updatePeriodMillis="3000"
+    android:initialLayout="@layout/test_gadget"
+    android:configure="com.android.tests.gadgethost.TestGadgetConfigure"
+    >
+</gadget-provider>

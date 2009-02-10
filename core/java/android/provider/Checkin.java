@@ -30,9 +30,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
 /**
- * Contract class for {@link android.server.checkin.CheckinProvider}.
+ * Contract class for the checkin provider, used to store events and
+ * statistics that will be uploaded to a checkin server eventually.
  * Describes the exposed database schema, and offers methods to add
  * events and statistics to be uploaded.
+ *
+ * TODO: Move this to vendor/google when we have a home for it.
  *
  * @hide
  */
@@ -56,6 +59,12 @@ public final class Checkin {
 
         /** Valid tag values.  Extend as necessary for your needs. */
         public enum Tag {
+            AUTOTEST_FAILURE,
+            AUTOTEST_SEQUENCE_BEGIN,
+            AUTOTEST_SUITE_BEGIN,
+            AUTOTEST_TEST_BEGIN,
+            AUTOTEST_TEST_FAILURE,
+            AUTOTEST_TEST_SUCCESS,
             BROWSER_BUG_REPORT,
             CARRIER_BUG_REPORT,
             CHECKIN_FAILURE,
@@ -195,8 +204,11 @@ public final class Checkin {
             values.put(Events.TAG, tag.toString());
             if (value != null) values.put(Events.VALUE, value);
             return resolver.insert(Events.CONTENT_URI, values);
+        } catch (IllegalArgumentException e) {  // thrown when provider is unavailable.
+            Log.w(TAG, "Can't log event " + tag + ": " + e);
+            return null;
         } catch (SQLException e) {
-            Log.e(TAG, "Can't log event: " + tag, e);  // Database errors are not fatal.
+            Log.e(TAG, "Can't log event " + tag, e);  // Database errors are not fatal.
             return null;
         }
     }
@@ -218,8 +230,11 @@ public final class Checkin {
             if (count != 0) values.put(Stats.COUNT, count);
             if (sum != 0.0) values.put(Stats.SUM, sum);
             return resolver.insert(Stats.CONTENT_URI, values);
+        } catch (IllegalArgumentException e) {  // thrown when provider is unavailable.
+            Log.w(TAG, "Can't update stat " + tag + ": " + e);
+            return null;
         } catch (SQLException e) {
-            Log.e(TAG, "Can't update stat: " + tag, e);  // Database errors are not fatal.
+            Log.e(TAG, "Can't update stat " + tag, e);  // Database errors are not fatal.
             return null;
         }
     }
@@ -285,4 +300,3 @@ public final class Checkin {
         }
     }
 }
-

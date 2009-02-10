@@ -603,13 +603,17 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (__builtin_expect(result!=NO_ERROR, false)) { 
                 cblk->waitTimeMs += WAIT_PERIOD_MS;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
-                    LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
-                            "user=%08x, server=%08x", cblk->user, cblk->server);
-                    mAudioTrack->start(); // FIXME: Wake up audioflinger
-                    timeout = 1;
+                    // timing out when a loop has been set and we have already written upto loop end
+                    // is a normal condition: no need to wake AudioFlinger up.
+                    if (cblk->user < cblk->loopEnd) {
+                        LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
+                                "user=%08x, server=%08x", cblk->user, cblk->server);
+                        mAudioFlinger->wakeUp();
+                        timeout = 1;
+                    }
                     cblk->waitTimeMs = 0;
                 }
-                ;
+                
                 if (--waitCount == 0) {
                     return TIMED_OUT;
                 }

@@ -91,6 +91,7 @@ public:
     int32_t getFormat() const;
     int32_t getWidthStride() const;
     int32_t getHeightStride() const;
+    int32_t getBufferCount() const;
     status_t getStatus() const;
     
 private:

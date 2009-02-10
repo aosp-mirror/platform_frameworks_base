@@ -129,7 +129,6 @@ extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_FileUtils(JNIEnv *env);
 extern int register_android_os_UEventObserver(JNIEnv* env);
-extern int register_android_os_NetStat(JNIEnv* env);
 extern int register_android_os_MemoryFile(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
@@ -502,6 +501,7 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[PROPERTY_VALUE_MAX];
+    char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
@@ -509,7 +509,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     char* cp;
     bool checkJni = false;
     bool logStdio = false;
-    bool verifyJava = true;
     enum { kEMDefault, kEMIntPortable, kEMIntFast } executionMode = kEMDefault;
 
     blockSigpipe();
@@ -534,15 +533,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         if (propBuf[0] == '1') {
             checkJni = true;
         }
-    }
-
-    property_get("dalvik.vm.verify-bytecode", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        verifyJava = true;
-    } else if (strcmp(propBuf, "false") == 0) {
-        verifyJava = false;
-    } else {
-        /* bad value or not defined; use default */
     }
 
     property_get("dalvik.vm.execution-mode", propBuf, "");
@@ -609,21 +599,49 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     mOptions.add(opt);
 
     /*
-     * Enable or disable bytecode verification.
-     *
-     * We don't optimize classes that haven't been verified, but that only
-     * matters if we do "just-in-time" DEX optimization.
+     * Enable or disable dexopt features, such as bytecode verification and
+     * calculation of register maps for precise GC.
      */
-    if (verifyJava) {
-        opt.optionString = "-Xverify:all";
-        mOptions.add(opt);
-        opt.optionString = "-Xdexopt:verified";
-        mOptions.add(opt);
-    } else {
-        opt.optionString = "-Xverify:none";
-        mOptions.add(opt);
-        opt.optionString = "-Xdexopt:verified";
-        mOptions.add(opt);
+    property_get("dalvik.vm.dexopt-flags", dexoptFlagsBuf, "");
+    if (dexoptFlagsBuf[0] != '\0') {
+        const char* opc;
+        const char* val;
+
+        opc = strstr(dexoptFlagsBuf, "v=");     /* verification */
+        if (opc != NULL) {
+            switch (*(opc+2)) {
+            case 'n':   val = "-Xverify:none";      break;
+            case 'r':   val = "-Xverify:remote";    break;
+            case 'a':   val = "-Xverify:all";       break;
+            default:    val = NULL;                 break;
+            }
+
+            if (val != NULL) {
+                opt.optionString = val;
+                mOptions.add(opt);
+            }
+        }
+
+        opc = strstr(dexoptFlagsBuf, "o=");     /* optimization */
+        if (opc != NULL) {
+            switch (*(opc+2)) {
+            case 'n':   val = "-Xdexopt:none";      break;
+            case 'v':   val = "-Xdexopt:verified";  break;
+            case 'a':   val = "-Xdexopt:all";       break;
+            default:    val = NULL;                 break;
+            }
+
+            if (val != NULL) {
+                opt.optionString = val;
+                mOptions.add(opt);
+            }
+        }
+
+        opc = strstr(dexoptFlagsBuf, "m=y");    /* register map */
+        if (opc != NULL) {
+            opt.optionString = "-Xgenregmap";
+            mOptions.add(opt);
+        }
     }
 
     /* enable debugging; set suspend=y to pause during VM init */
@@ -1066,7 +1084,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_LocalSocketImpl),
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_wifi_WifiManager),
-    REG_JNI(register_android_os_NetStat),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_hardware_Camera),

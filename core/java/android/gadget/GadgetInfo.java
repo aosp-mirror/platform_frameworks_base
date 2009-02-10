@@ -58,6 +58,16 @@ public class GadgetInfo implements Parcelable {
      */
     public ComponentName configure;
 
+    /**
+     * The label to display to the user.
+     */
+    public String label;
+
+    /**
+     * The icon to display for this gadget in the picker list.
+     */
+    public int icon;
+
     public GadgetInfo() {
     }
 
@@ -75,6 +85,8 @@ public class GadgetInfo implements Parcelable {
         if (0 != in.readInt()) {
             this.configure = new ComponentName(in);
         }
+        this.label = in.readString();
+        this.icon = in.readInt();
     }
 
 
@@ -95,6 +107,8 @@ public class GadgetInfo implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        out.writeString(this.label);
+        out.writeInt(this.icon);
     }
 
     public int describeContents() {

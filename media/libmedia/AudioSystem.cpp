@@ -15,6 +15,8 @@
  */
 
 #define LOG_TAG "AudioSystem"
+//#define LOG_NDEBUG 0
+
 #include <utils/Log.h>
 #include <utils/IServiceManager.h>
 #include <media/AudioSystem.h>
@@ -26,12 +28,17 @@ namespace android {
 // client singleton for AudioFlinger binder interface
 Mutex AudioSystem::gLock;
 sp<IAudioFlinger> AudioSystem::gAudioFlinger;
-sp<AudioSystem::DeathNotifier> AudioSystem::gDeathNotifier;
+sp<AudioSystem::AudioFlingerClient> AudioSystem::gAudioFlingerClient;
 audio_error_callback AudioSystem::gAudioErrorCallback = NULL;
 // Cached values
 int AudioSystem::gOutSamplingRate = 0;
 int AudioSystem::gOutFrameCount = 0;
 uint32_t AudioSystem::gOutLatency = 0;
+// Cached values for recording queries
+uint32_t AudioSystem::gPrevInSamplingRate = 16000;
+int AudioSystem::gPrevInFormat = AudioSystem::PCM_16_BIT;
+int AudioSystem::gPrevInChannelCount = 1;
+size_t AudioSystem::gInBuffSize = 0;
 
 
 // establish binder interface to AudioFlinger service
@@ -48,15 +55,16 @@ const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
             LOGW("AudioFlinger not published, waiting...");
             usleep(500000); // 0.5 s
         } while(true);
-        if (gDeathNotifier == NULL) {
-            gDeathNotifier = new DeathNotifier();
+        if (gAudioFlingerClient == NULL) {
+            gAudioFlingerClient = new AudioFlingerClient();
         } else {
             if (gAudioErrorCallback) {
                 gAudioErrorCallback(NO_ERROR);
             }
          }
-        binder->linkToDeath(gDeathNotifier);
+        binder->linkToDeath(gAudioFlingerClient);
         gAudioFlinger = interface_cast<IAudioFlinger>(binder);
+        gAudioFlinger->registerClient(gAudioFlingerClient);
         // Cache frequently accessed parameters 
         gOutFrameCount = (int)gAudioFlinger->frameCount();
         gOutSamplingRate = (int)gAudioFlinger->sampleRate();
@@ -250,7 +258,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate)
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
         if (af == 0) return PERMISSION_DENIED;
         // gOutSamplingRate is updated by get_audio_flinger()
-    }    
+    }
     *samplingRate = gOutSamplingRate;
     
     return NO_ERROR;
@@ -261,7 +269,7 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount)
     if (gOutFrameCount == 0) {
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
         if (af == 0) return PERMISSION_DENIED;
-        // gOutSamplingRate is updated by get_audio_flinger()
+        // gOutFrameCount is updated by get_audio_flinger()
     }
     *frameCount = gOutFrameCount;
     return NO_ERROR;
@@ -279,19 +287,52 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency)
     return NO_ERROR;
 }
 
+status_t AudioSystem::getInputBufferSize(uint32_t sampleRate, int format, int channelCount, 
+    size_t* buffSize)
+{
+    // Do we have a stale gInBufferSize or are we requesting the input buffer size for new values
+    if ((gInBuffSize == 0) || (sampleRate != gPrevInSamplingRate) || (format != gPrevInFormat) 
+        || (channelCount != gPrevInChannelCount)) {
+        // save the request params
+        gPrevInSamplingRate = sampleRate;
+        gPrevInFormat = format; 
+        gPrevInChannelCount = channelCount;
+
+        gInBuffSize = 0;
+        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+        if (af == 0) {
+            return PERMISSION_DENIED;
+        }
+        gInBuffSize = af->getInputBufferSize(sampleRate, format, channelCount);
+    } 
+    *buffSize = gInBuffSize;
+    
+    return NO_ERROR;
+}
+
 // ---------------------------------------------------------------------------
 
-void AudioSystem::DeathNotifier::binderDied(const wp<IBinder>& who) {
+void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {   
     Mutex::Autolock _l(AudioSystem::gLock);
     AudioSystem::gAudioFlinger.clear();
     AudioSystem::gOutSamplingRate = 0;
     AudioSystem::gOutFrameCount = 0;
     AudioSystem::gOutLatency = 0;
+    AudioSystem::gInBuffSize = 0;
     
     if (gAudioErrorCallback) {
         gAudioErrorCallback(DEAD_OBJECT);
     }
     LOGW("AudioFlinger server died!");
+}
+
+void AudioSystem::AudioFlingerClient::audioOutputChanged(uint32_t frameCount, uint32_t samplingRate, uint32_t latency) {
+
+    AudioSystem::gOutFrameCount = frameCount;
+    AudioSystem::gOutSamplingRate = samplingRate;
+    AudioSystem::gOutLatency = latency;
+
+    LOGV("AudioFlinger output changed!");
 }
 
 void AudioSystem::setErrorCallback(audio_error_callback cb) {

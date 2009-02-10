@@ -1,0 +1,76 @@
+page.title=Download the Android SDK
+@jd:body
+
+<p>Please carefully review the Android SDK License Agreement before downloading the SDK.
+The License Agreement constitutes a contract between you and Google with respect to your use of the SDK.</p>
+
+<iframe style="border:1px solid #888;margin:0 0 1em;height:400px;width:95%;" src="terms_body.html">
+</iframe>
+
+<script language="javascript">
+  function verify() {
+    document.getElementById('download_button').disabled = !document.getElementById('checkbox').checked;
+  }
+  function submit() {
+    var location = window.location.href;
+    if (location.indexOf('?v=') != -1) {
+      var filename = location.substring(location.indexOf('=')+1,location.length);
+      if (document.getElementById('checkbox').checked) {
+        document.location = "http://dl.google.com/android/" + filename;
+      }
+      document.getElementById('click_download').setAttribute("href", "http://dl.google.com/android/" + filename);
+      document.getElementById('next_steps').style.display = "block";
+    } else {
+      alert("You have not selected an SDK version. Please return to the Download page");
+    }
+  }
+</script>
+
+  <p>
+    <input type="checkbox" id="checkbox" onclick="verify()" />
+    <label for="checkbox">I agree to the terms of the Android SDK License Agreement.</label>
+  </p>
+  <p>
+    <input type="submit" value="Download" id="download_button" disabled="disabled" onclick="submit()" />
+  </p>
+  <p>
+  <script language="javascript">
+    var loc = window.location.href;
+    if (loc.indexOf('?v=') != -1) {
+      var filename = loc.substring(loc.indexOf('=')+1,loc.length);
+      document.write("File: " + filename);
+    }
+  </script>
+  </p>
+
+<noscript>
+  <p><strong>Please enable Javascript in your browser in order to agree to the terms and download the SDK.</strong></p>
+</noscript>
+
+<div class="special" id="next_steps" style="display:none">
+  <p>Your download should be underway. If not, <a id="click_download">click here to download</a>.</p>
+  <p>Continue your setup with one the following documents:</p>
+  <ul style="margin-top:.5em">
+    <li><a href="installing.html" class="addVersionPath">Installing</a> - If you are
+  installing the Android SDK for the first time.</li>
+    <li><a href="upgrading.html" class="addVersionPath">Upgrading</a> - If you are
+  upgrading from a previously installed version of the Android SDK.</li>
+  </ul>
+</div>
+
+<script language="javascript">
+  var loc = window.location.href;
+  var filename = loc.substring(loc.indexOf('=')+1,loc.length);
+  version = filename.substring(filename.indexOf('.')-1,filename.lastIndexOf('.'));
+  $(".addVersionPath").each(function(i) {
+    var oldHref = $(this).attr("href");
+    $(this).attr({href: "/sdk/" + version + "/" + oldHref});
+  });
+</script>
+
+
+
+
+
+
+

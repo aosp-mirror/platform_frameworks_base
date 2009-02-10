@@ -16,18 +16,12 @@
 
 package android.text.method;
 
-import android.os.Message;
-import android.os.Handler;
 import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
-
-import java.util.HashMap;
 
 /**
  * This is the standard key listener for alphabetic input on qwerty
@@ -442,7 +436,7 @@ public class QwertyKeyListener extends BaseKeyListener {
         return Character.toUpperCase(src.charAt(0)) + src.substring(1);
     }
 
-    /* package */ static class Replaced
+    /* package */ static class Replaced implements NoCopySpan
     {
         public Replaced(char[] text) {
             mText = text;

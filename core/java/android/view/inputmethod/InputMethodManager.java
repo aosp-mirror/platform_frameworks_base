@@ -26,11 +26,14 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRoot;
 
+import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodCallback;
@@ -39,7 +42,11 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Central system API to the overall input method framework (IMF) architecture,
@@ -199,8 +206,7 @@ public final class InputMethodManager {
     // global lock.
     final H mH;
     
-    // The currently active input connection.
-    final MutableInputConnectionWrapper mInputConnectionWrapper;
+    // Our generic input connection if the current target does not have its own.
     final IInputContext mIInputContext;
 
     /**
@@ -208,11 +214,6 @@ public final class InputMethodManager {
      */
     boolean mActive = false;
     
-    /**
-     * The current base input connection, used when mActive is true.
-     */
-    InputConnection mCurrentInputConnection;
-
     // -----------------------------------------------------------
     
     /**
@@ -270,7 +271,7 @@ public final class InputMethodManager {
 
     // -----------------------------------------------------------
     
-    static final int MSG_CHECK_FOCUS = 1;
+    static final int MSG_DUMP = 1;
     
     class H extends Handler {
         H(Looper looper) {
@@ -280,85 +281,55 @@ public final class InputMethodManager {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_CHECK_FOCUS:
-                    checkFocus();
+                case MSG_DUMP: {
+                    HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                    try {
+                        doDump((FileDescriptor)args.arg1,
+                                (PrintWriter)args.arg2, (String[])args.arg3);
+                    } catch (RuntimeException e) {
+                        ((PrintWriter)args.arg2).println("Exception: " + e);
+                    }
+                    synchronized (args.arg4) {
+                        ((CountDownLatch)args.arg4).countDown();
+                    }
                     return;
+                }
             }
         }
     }
     
-    static class NoOpInputConnection implements InputConnection {
-
-        public boolean clearMetaKeyStates(int states) {
-            return false;
+    class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
+        public ControlledInputConnectionWrapper(Looper mainLooper, InputConnection conn) {
+            super(mainLooper, conn);
         }
 
-        public boolean beginBatchEdit() {
-            return false;
-        }
-        
-        public boolean endBatchEdit() {
-            return false;
-        }
-        
-        public boolean commitCompletion(CompletionInfo text) {
-            return false;
-        }
-
-        public boolean commitText(CharSequence text, int newCursorPosition) {
-            return false;
-        }
-
-        public boolean deleteSurroundingText(int leftLength, int rightLength) {
-            return false;
-        }
-
-        public int getCursorCapsMode(int reqModes) {
-            return 0;
-        }
-
-        public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
-            return null;
-        }
-
-        public CharSequence getTextAfterCursor(int n) {
-            return null;
-        }
-
-        public CharSequence getTextBeforeCursor(int n) {
-            return null;
-        }
-
-        public boolean hideStatusIcon() {
-            return false;
-        }
-
-        public boolean performPrivateCommand(String action, Bundle data) {
-            return false;
-        }
-
-        public boolean sendKeyEvent(KeyEvent event) {
-            return false;
-        }
-
-        public boolean setComposingText(CharSequence text, int newCursorPosition) {
-            return false;
-        }
-
-        public boolean finishComposingText() {
-            return false;
-        }
-
-        public boolean showStatusIcon(String packageName, int resId) {
-            return false;
+        public boolean isActive() {
+            return mActive;
         }
     }
     
-    final NoOpInputConnection mNoOpInputConnection = new NoOpInputConnection();
-
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
-        public void setUsingInputMethod(boolean state) {
+        @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+            // No need to check for dump permission, since we only give this
+            // interface to the system.
             
+            CountDownLatch latch = new CountDownLatch(1);
+            HandlerCaller.SomeArgs sargs = new HandlerCaller.SomeArgs();
+            sargs.arg1 = fd;
+            sargs.arg2 = fout;
+            sargs.arg3 = args;
+            sargs.arg4 = latch;
+            mH.sendMessage(mH.obtainMessage(MSG_DUMP, sargs));
+            try {
+                if (!latch.await(5, TimeUnit.SECONDS)) {
+                    fout.println("Timeout waiting for dump");
+                }
+            } catch (InterruptedException e) {
+                fout.println("Interrupted waiting for dump");
+            }
+        }
+        
+        public void setUsingInputMethod(boolean state) {
         }
         
         public void onBindMethod(InputBindResult res) {
@@ -403,62 +374,17 @@ public final class InputMethodManager {
         
         public void setActive(boolean active) {
             mActive = active;
-            mInputConnectionWrapper.setBaseInputConnection(active
-                    ? mCurrentInputConnection : mNoOpInputConnection);
         }
     };    
     
-    final InputConnection mDummyInputConnection = new BaseInputConnection(this) {
-        public boolean beginBatchEdit() {
-            return false;
-        }
-        public boolean endBatchEdit() {
-            return false;
-        }
-        public boolean commitText(CharSequence text, int newCursorPosition) {
-            return false;
-        }
-        public boolean commitCompletion(CompletionInfo text) {
-            return false;
-        }
-        public boolean deleteSurroundingText(int leftLength, int rightLength) {
-            return false;
-        }
-        public ExtractedText getExtractedText(ExtractedTextRequest request,
-                int flags) {
-            return null;
-        }
-        public CharSequence getTextAfterCursor(int n) {
-            return null;
-        }
-        public CharSequence getTextBeforeCursor(int n) {
-            return null;
-        }
-        public int getCursorCapsMode(int reqModes) {
-            return 0;
-        }
-        public boolean clearMetaKeyStates(int states) {
-            return false;
-        }
-        public boolean performPrivateCommand(String action, Bundle data) {
-            return false;
-        }
-        public boolean setComposingText(CharSequence text, int newCursorPosition) {
-            return false;
-        }
-        public boolean finishComposingText() {
-            return false;
-        }
-    };
+    final InputConnection mDummyInputConnection = new BaseInputConnection(this, true);
     
     InputMethodManager(IInputMethodManager service, Looper looper) {
         mService = service;
         mMainLooper = looper;
         mH = new H(looper);
-        mInputConnectionWrapper = new MutableInputConnectionWrapper(mNoOpInputConnection);
-        mIInputContext = new IInputConnectionWrapper(looper,
-                mInputConnectionWrapper);
-        setCurrentInputConnection(mDummyInputConnection);
+        mIInputContext = new ControlledInputConnectionWrapper(looper,
+                mDummyInputConnection);
         
         if (mInstance == null) {
             mInstance = this;
@@ -563,22 +489,12 @@ public final class InputMethodManager {
     }
     
     /**
-     * Record the desired input connection, but only set it if mActive is true.
-     */
-    void setCurrentInputConnection(InputConnection connection) {
-        mCurrentInputConnection = connection;
-        mInputConnectionWrapper.setBaseInputConnection(mActive
-                ? connection : mNoOpInputConnection);
-    }
-    
-    /**
      * Reset all of the state associated with a served view being connected
      * to an input method
      */
     void clearConnectionLocked() {
         mCurrentTextBoxAttribute = null;
         mServedInputConnection = null;
-        setCurrentInputConnection(mDummyInputConnection);
     }
     
     /**
@@ -659,11 +575,18 @@ public final class InputMethodManager {
     }
     
     /**
-     * Flag for {@link #showSoftInput} to indicate that the this is an implicit
+     * Flag for {@link #showSoftInput} to indicate that this is an implicit
      * request to show the input window, not as the result of a direct request
      * by the user.  The window may not be shown in this case.
      */
     public static final int SHOW_IMPLICIT = 0x0001;
+    
+    /**
+     * Flag for {@link #showSoftInput} to indicate that the user has forced
+     * the input method open (such as by long-pressing menu) so it should
+     * not be closed until they explicitly do so.
+     */
+    public static final int SHOW_FORCED = 0x0002;
     
     /**
      * Explicitly request that the current input method's soft input area be
@@ -689,12 +612,27 @@ public final class InputMethodManager {
         }
     }
     
+    /** @hide */
+    public void showSoftInputUnchecked(int flags) {
+        try {
+            mService.showSoftInput(mClient, flags);
+        } catch (RemoteException e) {
+        }
+    }
+    
     /**
      * Flag for {@link #hideSoftInputFromWindow} to indicate that the soft
      * input window should only be hidden if it was not explicitly shown
      * by the user.
      */
     public static final int HIDE_IMPLICIT_ONLY = 0x0001;
+    
+    /**
+     * Flag for {@link #hideSoftInputFromWindow} to indicate that the soft
+     * input window should normally be hidden, unless it was originally
+     * shown with {@link #SHOW_FORCED}.
+     */
+    public static final int HIDE_NOT_ALWAYS = 0x0002;
     
     /**
      * Request to hide the soft input window from the context of the window
@@ -779,6 +717,8 @@ public final class InputMethodManager {
         // do its stuff.
         // Life is good: let's hook everything up!
         EditorInfo tba = new EditorInfo();
+        tba.packageName = view.getContext().getPackageName();
+        tba.fieldId = view.getId();
         InputConnection ic = view.onCreateInputConnection(tba);
         if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
         
@@ -801,22 +741,23 @@ public final class InputMethodManager {
             mCurrentTextBoxAttribute = tba;
             mServedConnecting = false;
             mServedInputConnection = ic;
+            IInputContext servedContext;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
                 mCursorCandStart = -1;
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
-                setCurrentInputConnection(ic);
+                servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic);
             } else {
-                setCurrentInputConnection(mDummyInputConnection);
+                servedContext = null;
             }
             
             try {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
                         + ic + " tba=" + tba + " initial=" + initial);
-                InputBindResult res = mService.startInput(mClient, tba, initial,
-                        mCurMethod == null);
+                InputBindResult res = mService.startInput(mClient,
+                        servedContext, tba, initial, mCurMethod == null);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
@@ -885,10 +826,20 @@ public final class InputMethodManager {
                     + " winFocus=" + view.hasWindowFocus());
             if (mServedView == view) {
                 ic = mServedInputConnection;
-                if (view.hasWindowFocus()) {
+                // The following code would auto-hide the IME if we end up
+                // with no more views with focus.  This can happen, however,
+                // whenever we go into touch mode, so it ends up hiding
+                // at times when we don't really want it to.  For now it
+                // seems better to just turn it all off.
+                if (false && view.hasWindowFocus()) {
                     mLastServedView = view;
-                    mH.removeMessages(MSG_CHECK_FOCUS);
-                    mH.sendEmptyMessage(MSG_CHECK_FOCUS);
+                    Handler vh = view.getHandler();
+                    if (vh != null) {
+                        // This will result in a call to checkFocus() below.
+                        vh.removeMessages(ViewRoot.CHECK_FOCUS);
+                        vh.sendMessage(vh.obtainMessage(ViewRoot.CHECK_FOCUS,
+                                view));
+                    }
                 }
             }
         }
@@ -898,8 +849,14 @@ public final class InputMethodManager {
         }
     }
 
-    void checkFocus() {
+    /**
+     * @hide
+     */
+    public void checkFocus(View view) {
         synchronized (mH) {
+            if (view != mLastServedView) {
+                return;
+            }
             if (DEBUG) Log.v(TAG, "checkFocus: view=" + mServedView
                     + " last=" + mLastServedView);
             if (mServedView == mLastServedView) {
@@ -915,7 +872,7 @@ public final class InputMethodManager {
     
     void closeCurrentInput() {
         try {
-            mService.hideSoftInput(mClient, 0);
+            mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS);
         } catch (RemoteException e) {
         }
     }
@@ -1006,6 +963,32 @@ public final class InputMethodManager {
     }
 
     /**
+     * Call {@link InputMethodSession#appPrivateCommand(String, Bundle)
+     * InputMethodSession.appPrivateCommand()} on the current Input Method.
+     * @param view Optional View that is sending the command, or null if
+     * you want to send the command regardless of the view that is attached
+     * to the input method.
+     * @param action Name of the command to be performed.  This <em>must</em>
+     * be a scoped name, i.e. prefixed with a package name you own, so that
+     * different developers will not create conflicting commands.
+     * @param data Any data to include with the command.
+     */
+    public void sendAppPrivateCommand(View view, String action, Bundle data) {
+        synchronized (mH) {
+            if ((view != null && mServedView != view)
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
+                return;
+            }
+            try {
+                if (DEBUG) Log.v(TAG, "APP PRIVATE COMMAND " + action + ": " + data);
+                mCurMethod.appPrivateCommand(action, data);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+            }
+        }
+    }
+    
+    /**
      * Force switch to a new input method component.  This can only be called
      * from the currently active input method, as validated by the given token.
      * @param token Supplies the identifying token given to an input method
@@ -1048,7 +1031,7 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (DEBUG) Log.d(TAG, "dispatchKeyEvent");
     
-            if (mCurMethod == null || mCurrentTextBoxAttribute == null) {
+            if (mCurMethod == null) {
                 try {
                     callback.finishedEvent(seq, false);
                 } catch (RemoteException e) {
@@ -1115,5 +1098,34 @@ public final class InputMethodManager {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
         }
+    }
+    
+    void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        final Printer p = new PrintWriterPrinter(fout);
+        p.println("Input method client state for " + this + ":");
+        
+        p.println("  mService=" + mService);
+        p.println("  mMainLooper=" + mMainLooper);
+        p.println("  mIInputContext=" + mIInputContext);
+        p.println("  mActive=" + mActive
+                + " mBindSequence=" + mBindSequence
+                + " mCurId=" + mCurId);
+        p.println("  mCurMethod=" + mCurMethod);
+        p.println("  mServedView=" + mServedView);
+        p.println("  mLastServedView=" + mLastServedView);
+        p.println("  mServedConnecting=" + mServedConnecting);
+        if (mCurrentTextBoxAttribute != null) {
+            p.println("  mCurrentTextBoxAttribute:");
+            mCurrentTextBoxAttribute.dump(p, "    ");
+        } else {
+            p.println("  mCurrentTextBoxAttribute: null");
+        }
+        p.println("  mServedInputConnection=" + mServedInputConnection);
+        p.println("  mCompletions=" + mCompletions);
+        p.println("  mCursorRect=" + mCursorRect);
+        p.println("  mCursorSelStart=" + mCursorSelStart
+                + " mCursorSelEnd=" + mCursorSelEnd
+                + " mCursorCandStart=" + mCursorCandStart
+                + " mCursorCandEnd=" + mCursorCandEnd);
     }
 }

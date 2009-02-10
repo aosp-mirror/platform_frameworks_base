@@ -1,0 +1,64 @@
+page.title=Android 1.0 SDK, release 2
+
+sdk.not_latest_version=true
+
+sdk.version=1.0_r2
+sdk.date=November 2008
+
+sdk.win_download=android-sdk-windows-1.0_r2.zip
+sdk.win_bytes=98360564
+sdk.win_checksum=a5e1af8ac145946b4a9627516ad4a711
+
+sdk.mac_download=android-sdk-mac_x86-1.0_r2.zip
+sdk.mac_bytes=93771410
+sdk.mac_checksum=87b99d5e9f59b78363a63200c11498e8
+
+sdk.linux_download=android-sdk-linux_x86-1.0_r2.zip
+sdk.linux_bytes=94186463
+sdk.linux_checksum=a1f3b6d854596f850f5008856d0f380e
+
+
+@jd:body
+
+<h2>Included in this SDK</h2>
+
+<p>This SDK includes some awesome stuff.</p>
+
+
+<h2>System and Software Requirements</h2>
+
+<p>The following systems and development environments are supported by this SDK.</p>
+
+<h4>Supported Operating Systems:</h4>
+<ul>
+  <li>Windows XP or Vista</li>
+  <li>Mac OS X 10.4.8 or later (x86 only)</li>
+  <li>Linux (tested on Linux Ubuntu Dapper Drake)</li>
+</ul>
+
+<h4>Supported Development Environments:</h4>
+<ul>
+  <li>Eclipse IDE
+    <ul>
+      <li><a href="http://www.eclipse.org/downloads/">Eclipse</a> 3.3 (Europa), 3.4 (Ganymede)
+        <ul>
+        <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included in most Eclipse IDE packages) </li>
+        <li><a href="http://www.eclipse.org/webtools">WST</a> (optional, but needed for the Android Editors feature; included in <a href="http://www.eclipse.org/downloads/moreinfo/compare.php">most Eclipse IDE packages</a>)</li>
+        </ul>
+      </li>     
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
+      <li><a href="installing.html#installingplugin">Android Development Tools plugin</a> (optional)</li>
+      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
+    </ul>
+  </li>
+  <li>Other development environments or IDEs
+    <ul>
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
+      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.6.5 or later for Linux and Mac, 1.7 or later for Windows</li>
+      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note"><strong>Note:</strong> If JDK is already installed on your development computer, please take a moment to make sure that it meets the version requirements listed above. In
+particular, note that some Linux distributions may include JDK 1.4 or Gnu Compiler for Java, both of which are not supported for Android development. </p>

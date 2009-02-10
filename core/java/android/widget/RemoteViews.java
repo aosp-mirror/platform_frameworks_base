@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -422,6 +423,131 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling a combination of {@link Drawable#setAlpha(int)},
+     * {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)},
+     * and/or {@link Drawable#setLevel(int)} on the {@link Drawable} of a given view.
+     * <p>
+     * These operations will be performed on the {@link Drawable} returned by the
+     * target {@link View#getBackground()} by default.  If targetBackground is false,
+     * we assume the target is an {@link ImageView} and try applying the operations
+     * to {@link ImageView#getDrawable()}.
+     * <p>
+     * You can omit specific calls by marking their values with null or -1.
+     */
+    private class SetDrawableParameters extends Action {
+        public SetDrawableParameters(int id, boolean targetBackground, int alpha,
+                int colorFilter, PorterDuff.Mode mode, int level) {
+            this.viewId = id;
+            this.targetBackground = targetBackground;
+            this.alpha = alpha;
+            this.colorFilter = colorFilter;
+            this.filterMode = mode;
+            this.level = level;
+        }
+        
+        public SetDrawableParameters(Parcel parcel) {
+            viewId = parcel.readInt();
+            targetBackground = parcel.readInt() != 0;
+            alpha = parcel.readInt();
+            colorFilter = parcel.readInt();
+            boolean hasMode = parcel.readInt() != 0;
+            if (hasMode) {
+                filterMode = PorterDuff.Mode.valueOf(parcel.readString());
+            } else {
+                filterMode = null;
+            }
+            level = parcel.readInt();
+        }
+        
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(targetBackground ? 1 : 0);
+            dest.writeInt(alpha);
+            dest.writeInt(colorFilter);
+            if (filterMode != null) {
+                dest.writeInt(1);
+                dest.writeString(filterMode.toString());
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeInt(level);
+        }
+        
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+            if (target == null) {
+                return;
+            }
+            
+            // Pick the correct drawable to modify for this view
+            Drawable targetDrawable = null;
+            if (targetBackground) {
+                targetDrawable = target.getBackground();
+            } else if (target instanceof ImageView) {
+                ImageView imageView = (ImageView) target;
+                targetDrawable = imageView.getDrawable();
+            }
+            
+            // Perform modifications only if values are set correctly
+            if (alpha != -1) {
+                targetDrawable.setAlpha(alpha);
+            }
+            if (colorFilter != -1 && filterMode != null) {
+                targetDrawable.setColorFilter(colorFilter, filterMode);
+            }
+            if (level != -1) {
+                targetDrawable.setLevel(level);
+            }
+        }
+        
+        int viewId;
+        boolean targetBackground;
+        int alpha;
+        int colorFilter;
+        PorterDuff.Mode filterMode;
+        int level;
+
+        public final static int TAG = 8;
+    }
+    
+    /**
+     * Equivalent to calling {@link android.widget.TextView#setTextColor(int)}.
+     */
+    private class SetTextColor extends Action {
+        public SetTextColor(int id, int color) {
+            this.viewId = id;
+            this.color = color;
+        }
+        
+        public SetTextColor(Parcel parcel) {
+            viewId = parcel.readInt();
+            color = parcel.readInt();
+        }
+        
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(color);
+        }
+        
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+            if (target instanceof TextView) {
+                final TextView textView = (TextView) target;
+                textView.setTextColor(color);
+            }
+        }
+        
+        int viewId;
+        int color;
+
+        public final static int TAG = 9;
+    }
+    
+    /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
      * 
@@ -470,6 +596,12 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case SetOnClickPendingIntent.TAG:
                     mActions.add(new SetOnClickPendingIntent(parcel));
+                    break;
+                case SetDrawableParameters.TAG:
+                    mActions.add(new SetDrawableParameters(parcel));
+                    break;
+                case SetTextColor.TAG:
+                    mActions.add(new SetTextColor(parcel));
                     break;
                 default:
                     throw new ActionException("Tag " + tag + "not found");
@@ -592,6 +724,48 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setOnClickPendingIntent(int viewId, PendingIntent pendingIntent) {
         addAction(new SetOnClickPendingIntent(viewId, pendingIntent));
+    }
+
+    /**
+     * Equivalent to calling a combination of {@link Drawable#setAlpha(int)},
+     * {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)},
+     * and/or {@link Drawable#setLevel(int)} on the {@link Drawable} of a given
+     * view.
+     * <p>
+     * You can omit specific calls by marking their values with null or -1.
+     * 
+     * @param viewId The id of the view that contains the target
+     *            {@link Drawable}
+     * @param targetBackground If true, apply these parameters to the
+     *            {@link Drawable} returned by
+     *            {@link android.view.View#getBackground()}. Otherwise, assume
+     *            the target view is an {@link ImageView} and apply them to
+     *            {@link ImageView#getDrawable()}.
+     * @param alpha Specify an alpha value for the drawable, or -1 to leave
+     *            unchanged.
+     * @param colorFilter Specify a color for a
+     *            {@link android.graphics.ColorFilter} for this drawable, or -1
+     *            to leave unchanged.
+     * @param mode Specify a PorterDuff mode for this drawable, or null to leave
+     *            unchanged.
+     * @param level Specify the level for the drawable, or -1 to leave
+     *            unchanged.
+     */
+    public void setDrawableParameters(int viewId, boolean targetBackground, int alpha,
+            int colorFilter, PorterDuff.Mode mode, int level) {
+        addAction(new SetDrawableParameters(viewId, targetBackground, alpha,
+                colorFilter, mode, level));
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.TextView#setTextColor(int)}.
+     * 
+     * @param viewId The id of the view whose text should change
+     * @param color Sets the text color for all the states (normal, selected,
+     *            focused) to be this color.
+     */
+    public void setTextColor(int viewId, int color) {
+        addAction(new SetTextColor(viewId, color));
     }
 
     /**

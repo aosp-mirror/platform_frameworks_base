@@ -851,6 +851,16 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract List<ApplicationInfo> getInstalledApplications(int flags);
+    
+    /**
+     * Get a list of shared libraries that are available on the
+     * system.
+     * 
+     * @return An array of shared library names that are
+     * available on the system, or null if none are installed.
+     * 
+     */
+    public abstract String[] getSystemSharedLibraryNames();
 
     /**
      * Determine the best action to perform for a given Intent.  This is how
@@ -1608,4 +1618,9 @@ public abstract class PackageManager {
      * the manifest as found in {@link ComponentInfo}.
      */
     public abstract int getApplicationEnabledSetting(String packageName);
+
+    /**
+     * Return whether the device has been booted into safe mode.
+     */
+    public abstract boolean isSafeMode();
 }

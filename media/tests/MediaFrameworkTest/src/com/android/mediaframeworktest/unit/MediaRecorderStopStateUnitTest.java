@@ -54,9 +54,6 @@ public class MediaRecorderStopStateUnitTest extends AndroidTestCase implements M
         recorder.stop();
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testStop() {
         mTestTemplate.runTestOnMethod(this);

@@ -122,7 +122,7 @@ final class ServiceStateTracker extends Handler
     private boolean mZoneDst;
     private long mZoneTime;
     private boolean mGotCountryCode = false;
-    
+
     String mSavedTimeZone;
     long mSavedTime;
     long mSavedAtTime;
@@ -154,7 +154,6 @@ final class ServiceStateTracker extends Handler
     static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
     //***** Events
-    
     static final int EVENT_RADIO_STATE_CHANGED       = 1;
     static final int EVENT_NETWORK_STATE_CHANGED        = 2;
     static final int EVENT_GET_SIGNAL_STRENGTH  = 3;
@@ -174,10 +173,6 @@ final class ServiceStateTracker extends Handler
     static final int EVENT_SET_PREFERRED_NETWORK_TYPE = 20;
     static final int EVENT_RESET_PREFERRED_NETWORK_TYPE = 21;
     static final int EVENT_CHECK_REPORT_GPRS = 22;
-
-    // Event Log Tags
-    private static final int EVENT_LOG_CGREG_FAIL = 50107;
-    private static final int EVENT_DATA_STATE_RADIO_OFF = 50108;
 
   //***** Time Zones
 
@@ -209,7 +204,7 @@ final class ServiceStateTracker extends Handler
         "tg", // Togo
         "uk", // U.K
     };
-        
+
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -230,7 +225,7 @@ final class ServiceStateTracker extends Handler
         cellLoc = new GsmCellLocation();
         newCellLoc = new GsmCellLocation();
 
-        cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);        
+        cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
         cm.registerForRadioStateChanged(this, EVENT_RADIO_STATE_CHANGED, null);
 
         cm.registerForNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED, null);
@@ -238,16 +233,16 @@ final class ServiceStateTracker extends Handler
         cm.setOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, null);
 
         cm.registerForSIMReady(this, EVENT_SIM_READY, null);
-        
+
         // system setting property AIRPLANE_MODE_ON is set in Settings.
         int airplaneMode = Settings.System.getInt(
                 phone.getContext().getContentResolver(),
                 Settings.System.AIRPLANE_MODE_ON, 0);
-        mDesiredPowerState = ! (airplaneMode > 0);        
+        mDesiredPowerState = ! (airplaneMode > 0);
 
         ContentResolver cr = phone.getContext().getContentResolver();
         cr.registerContentObserver(
-                Settings.System.getUriFor(Settings.System.AUTO_TIME), true, 
+                Settings.System.getUriFor(Settings.System.AUTO_TIME), true,
                 mAutoTimeObserver);
         setRssiDefaultValues();
         mNeedToRegForSimLoaded = true;
@@ -272,7 +267,7 @@ final class ServiceStateTracker extends Handler
     void registerForNetworkAttach(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
         networkAttachedRegistrants.add(r);
-        
+
         if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
             r.notifyRegistrant();
         }
@@ -360,7 +355,7 @@ final class ServiceStateTracker extends Handler
     /*package*/ void enableLocationUpdates() {
         cm.setLocationUpdates(true, obtainMessage(EVENT_LOCATION_UPDATES_ENABLED));
     }
-    
+
     /*package*/ void disableLocationUpdates() {
         cm.setLocationUpdates(false, null);
     }
@@ -407,7 +402,7 @@ final class ServiceStateTracker extends Handler
                 pollState();
                 break;
 
-            case EVENT_GET_SIGNAL_STRENGTH: 
+            case EVENT_GET_SIGNAL_STRENGTH:
                 // This callback is called when signal strength is polled
                 // all by itself
 
@@ -418,7 +413,7 @@ final class ServiceStateTracker extends Handler
                 ar = (AsyncResult) msg.obj;
                 onSignalStrengthResult(ar);
                 queueNextSignalStrengthPoll();
-                
+
                 break;
 
             case EVENT_GET_LOC_DONE:
@@ -503,7 +498,7 @@ final class ServiceStateTracker extends Handler
                     getLacAndCid(null);
                 }
                 break;
-            
+
             case EVENT_SET_PREFERRED_NETWORK_TYPE:
                 ar = (AsyncResult) msg.obj;
                 // Don't care the result, only use for dereg network (COPS=2)
@@ -548,7 +543,7 @@ final class ServiceStateTracker extends Handler
                     if (loc != null) cid = loc.getCid();
 
                     EventLog.List val = new EventLog.List(ss.getOperatorNumeric(), cid);
-                    EventLog.writeEvent(EVENT_LOG_CGREG_FAIL, val);
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CGREG_FAIL, val);
                     mReportedGprsNoReg = true;
                 }
                 mStartedGprsRegCheck = false;
@@ -598,7 +593,7 @@ final class ServiceStateTracker extends Handler
                 EventLog.List val = new EventLog.List(
                         dcTracker.getStateInString(),
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
-                EventLog.writeEvent(EVENT_DATA_STATE_RADIO_OFF, val);
+                EventLog.writeEvent(TelephonyEventLog.EVENT_DATA_STATE_RADIO_OFF, val);
             }
             // If it's on and available and we want it off..
             cm.setRadioPower(false, null);
@@ -689,7 +684,7 @@ final class ServiceStateTracker extends Handler
                     if (states.length > 0) {
                         try {
                             regState = Integer.parseInt(states[0]);
-                            
+
                             // states[3] (if present) is the current radio technology
                             if (states.length >= 4 && states[3] != null) {
                                 type = Integer.parseInt(states[3]);
@@ -1038,7 +1033,7 @@ final class ServiceStateTracker extends Handler
                 break;
             }
         }
-        
+
         return guess;
     }
 
@@ -1147,7 +1142,7 @@ final class ServiceStateTracker extends Handler
 
         String simNumeric = SystemProperties.get(PROPERTY_SIM_OPERATOR_NUMERIC, "");
         String  operatorNumeric = s.getOperatorNumeric();
-        
+
         boolean equalsMcc = true;
         try {
             equalsMcc = simNumeric.substring(0, 3).
@@ -1329,7 +1324,7 @@ final class ServiceStateTracker extends Handler
                 }
                 saveNitzTimeZone(zone.getID());
             }
-            
+
             String ignore = SystemProperties.get("gsm.ignore-nitz");
             if (ignore != null && ignore.equals("yes")) {
                 Log.i(LOG_TAG, "NITZ: Not setting clock because gsm.ignore-nitz is set");
@@ -1339,7 +1334,7 @@ final class ServiceStateTracker extends Handler
             if (getAutoTime()) {
                 long millisSinceNitzReceived
                         = SystemClock.elapsedRealtime() - nitzReceiveTime;
-        
+
                 if (millisSinceNitzReceived < 0) {
                     // Sanity check: something is wrong
                     Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
@@ -1347,7 +1342,7 @@ final class ServiceStateTracker extends Handler
                                         + nitz);
                     return;
                 }
-        
+
                 if (millisSinceNitzReceived > Integer.MAX_VALUE) {
                     // If the time is this far off, something is wrong > 24 days!
                     Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
@@ -1355,10 +1350,10 @@ final class ServiceStateTracker extends Handler
                                     + " days");
                     return;
                 }
-        
+
                 // Note: with range checks above, cast to int is safe
                 c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
-        
+
                 Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
                     + " NITZ receive delay(ms): " + millisSinceNitzReceived
                     + " gained(ms): "
@@ -1399,11 +1394,11 @@ final class ServiceStateTracker extends Handler
     /**
      * Set the timezone and send out a sticky broadcast so the system can
      * determine if the timezone was set by the carrier.
-     * 
+     *
      * @param zoneId timezone set by carrier
      */
     private void setAndBroadcastNetworkSetTimeZone(String zoneId) {
-        AlarmManager alarm = 
+        AlarmManager alarm =
             (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
         alarm.setTimeZone(zoneId);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE);
@@ -1414,9 +1409,9 @@ final class ServiceStateTracker extends Handler
     /**
      * Set the time and Send out a sticky broadcast so the system can determine
      * if the time was set by the carrier.
-     * 
+     *
      * @param time time set by network
-     */ 
+     */
     private void setAndBroadcastNetworkSetTime(long time) {
         SystemClock.setCurrentTimeMillis(time);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIME);

@@ -21,8 +21,10 @@
 <android.inputmethodservice.ExtractEditText
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/inputExtractEditText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:gravity="top"
+        android:minLines="1"
         android:inputType="text"
+        android:background="@android:drawable/extract_edit_text"
     >
 </android.inputmethodservice.ExtractEditText>

@@ -25,6 +25,9 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
+#include <utils/IPCThreadState.h>
+#include <utils/IServiceManager.h>
+
 #include <ui/PixelFormat.h>
 #include <ui/EGLDisplaySurface.h>
 
@@ -100,6 +103,15 @@ void LayerBuffer::unregisterBuffers()
         source->unregisterBuffers();
 }
 
+Transform LayerBuffer::getDrawingStateTransform() const
+{
+    Transform tr(LayerBaseClient::getDrawingStateTransform());
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->updateTransform(&tr);
+    return tr;
+}
+
 uint32_t LayerBuffer::doTransaction(uint32_t flags)
 {
     sp<Source> source(getSource());
@@ -132,15 +144,13 @@ void LayerBuffer::onDraw(const Region& clip) const
 /**
  * This creates a "buffer" source for this surface
  */
-status_t LayerBuffer::registerBuffers(int w, int h, int hstride, int vstride,
-        PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
+status_t LayerBuffer::registerBuffers(const ISurface::BufferHeap& buffers)
 {
     Mutex::Autolock _l(mLock);
     if (mSource != 0)
         return INVALID_OPERATION;
 
-    sp<BufferSource> source = new BufferSource(*this, w, h,
-            hstride, vstride, format, memoryHeap);
+    sp<BufferSource> source = new BufferSource(*this, buffers);
 
     status_t result = source->getStatus();
     if (result == NO_ERROR) {
@@ -194,13 +204,39 @@ LayerBuffer::SurfaceBuffer::~SurfaceBuffer()
     mOwner = 0;
 }
 
-status_t LayerBuffer::SurfaceBuffer::registerBuffers(
-        int w, int h, int hs, int vs,
-        PixelFormat format, const sp<IMemoryHeap>& heap)
+status_t LayerBuffer::SurfaceBuffer::onTransact(
+    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+{
+    switch (code) {
+        case REGISTER_BUFFERS:
+        case UNREGISTER_BUFFERS:
+        case CREATE_OVERLAY:
+        {
+            // codes that require permission check
+            IPCThreadState* ipc = IPCThreadState::self();
+            const int pid = ipc->getCallingPid();
+            const int self_pid = getpid();
+            if (LIKELY(pid != self_pid)) {
+                // we're called from a different process, do the real check
+                if (!checkCallingPermission(
+                        String16("android.permission.ACCESS_SURFACE_FLINGER")))
+                {
+                    const int uid = ipc->getCallingUid();
+                    LOGE("Permission Denial: "
+                            "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
+                    return PERMISSION_DENIED;
+                }
+            }
+        }
+    }
+    return LayerBaseClient::Surface::onTransact(code, data, reply, flags);
+}
+
+status_t LayerBuffer::SurfaceBuffer::registerBuffers(const ISurface::BufferHeap& buffers)
 {
     LayerBuffer* owner(getOwner());
     if (owner)
-        return owner->registerBuffers(w, h, hs, vs, format, heap);
+        return owner->registerBuffers(buffers);
     return NO_INIT;
 }
 
@@ -237,23 +273,20 @@ void LayerBuffer::SurfaceBuffer::disown()
 // LayerBuffer::Buffer
 // ============================================================================
 
-LayerBuffer::Buffer::Buffer(const sp<IMemoryHeap>& heap, ssize_t offset,
-        int w, int h, int hs, int vs, int f)
-: mHeap(heap)
+LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
+    : mBufferHeap(buffers)
 {
     NativeBuffer& src(mNativeBuffer);
     src.crop.l = 0;
     src.crop.t = 0;
-    src.crop.r = w;
-    src.crop.b = h;
-    src.img.w = hs ?: w;
-    src.img.h = vs ?: h;
-    src.img.format = f;
+    src.crop.r = buffers.w;
+    src.crop.b = buffers.h;
+    src.img.w = buffers.hor_stride ?: buffers.w;
+    src.img.h = buffers.ver_stride ?: buffers.h;
+    src.img.format = buffers.format;
     src.img.offset = offset;
-    src.img.base   = heap->base();
-    src.img.fd     = heap->heapID();
-    // FIXME: make sure this buffer lies within the heap, in which case, set
-    // mHeap to null
+    src.img.base   = buffers.heap->base();
+    src.img.fd     = buffers.heap->heapID();
 }
 
 LayerBuffer::Buffer::~Buffer()
@@ -283,41 +316,53 @@ void LayerBuffer::Source::postBuffer(ssize_t offset) {
 }
 void LayerBuffer::Source::unregisterBuffers() {
 }
+void LayerBuffer::Source::updateTransform(Transform* tr) const {
+}
 
 // ---------------------------------------------------------------------------
 
 LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
-        int w, int h, int hstride, int vstride,
-        PixelFormat format, const sp<IMemoryHeap>& memoryHeap)
-    : Source(layer), mStatus(NO_ERROR), mTextureName(-1U)
+        const ISurface::BufferHeap& buffers)
+    : Source(layer), mStatus(NO_ERROR), 
+      mBufferSize(0), mTextureName(-1U)
 {
-    if (memoryHeap == NULL) {
+    if (buffers.heap == NULL) {
         // this is allowed, but in this case, it is illegal to receive
         // postBuffer(). The surface just erases the framebuffer with
         // fully transparent pixels.
-        mHeap.clear();
-        mWidth = w;
-        mHeight = h;
+        mBufferHeap = buffers;
         mLayer.setNeedsBlending(false);
         return;
     }
 
-    status_t err = (memoryHeap->heapID() >= 0) ? NO_ERROR : NO_INIT;
+    status_t err = (buffers.heap->heapID() >= 0) ? NO_ERROR : NO_INIT;
     if (err != NO_ERROR) {
+        LOGE("LayerBuffer::BufferSource: invalid heap (%s)", strerror(err));
+        mStatus = err;
+        return;
+    }
+    
+    PixelFormatInfo info;
+    err = getPixelFormatInfo(buffers.format, &info);
+    if (err != NO_ERROR) {
+        LOGE("LayerBuffer::BufferSource: invalid format %d (%s)",
+                buffers.format, strerror(err));
         mStatus = err;
         return;
     }
 
-    // TODO: validate format/parameters
-    mHeap = memoryHeap;
-    mWidth = w;
-    mHeight = h;
-    mHStride = hstride;
-    mVStride = vstride;
-    mFormat = format;
-    PixelFormatInfo info;
-    getPixelFormatInfo(format, &info);
-    mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);
+    if (buffers.hor_stride<0 || buffers.ver_stride<0) {
+        LOGE("LayerBuffer::BufferSource: invalid parameters "
+             "(w=%d, h=%d, xs=%d, ys=%d)", 
+             buffers.w, buffers.h, buffers.hor_stride, buffers.ver_stride);
+        mStatus = BAD_VALUE;
+        return;
+    }
+
+    mBufferHeap = buffers;
+    mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
+    mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
+    mLayer.forceVisibilityTransaction();
 }
 
 LayerBuffer::BufferSource::~BufferSource()
@@ -329,21 +374,24 @@ LayerBuffer::BufferSource::~BufferSource()
 
 void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
 {    
-    sp<IMemoryHeap> heap;
-    int w, h, hs, vs, f;
+    ISurface::BufferHeap buffers;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
-        w = mWidth;
-        h = mHeight;
-        hs= mHStride;
-        vs= mVStride;
-        f = mFormat;
-        heap = mHeap;
+        buffers = mBufferHeap;
+        if (buffers.heap != 0) {
+            const size_t memorySize = buffers.heap->getSize();
+            if ((size_t(offset) + mBufferSize) > memorySize) {
+                LOGE("LayerBuffer::BufferSource::postBuffer() "
+                     "invalid buffer (offset=%d, size=%d, heap-size=%d",
+                     int(offset), int(mBufferSize), int(memorySize));
+                return;
+            }
+        }
     }
 
     sp<Buffer> buffer;
-    if (heap != 0) {
-        buffer = new LayerBuffer::Buffer(heap, offset, w, h, hs, vs, f);
+    if (buffers.heap != 0) {
+        buffer = new LayerBuffer::Buffer(buffers, offset);
         if (buffer->getStatus() != NO_ERROR)
             buffer.clear();
         setBuffer(buffer);
@@ -354,7 +402,7 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
 void LayerBuffer::BufferSource::unregisterBuffers()
 {
     Mutex::Autolock _l(mLock);
-    mHeap.clear();
+    mBufferHeap.heap.clear();
     mBuffer.clear();
     mLayer.invalidate();
 }
@@ -369,6 +417,17 @@ void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
 {
     Mutex::Autolock _l(mLock);
     mBuffer = buffer;
+}
+
+void LayerBuffer::BufferSource::updateTransform(Transform* tr) const
+{
+    uint32_t bufTransform = mBufferHeap.transform;
+    // TODO: handle all transforms
+    if (bufTransform == ISurface::BufferHeap::ROT_90) {
+        Transform rot90;
+        rot90.set(0, -1, 1, 0);
+        *tr = (*tr) * rot90;
+    }
 }
 
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
@@ -452,11 +511,13 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         region_iterator it(clip);
         copybit->set_parameter(copybit, COPYBIT_TRANSFORM, mLayer.getOrientation());
         copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER,
-                s.flags & ISurfaceComposer::eLayerDither ?
-                        COPYBIT_ENABLE : COPYBIT_DISABLE);
+        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+
         err = copybit->stretch(copybit,
                 &dst, &src.img, &drect, &src.crop, &it);
+        if (err != NO_ERROR) {
+            LOGE("copybit failed (%s)", strerror(err));
+        }
     }
 
     if (!can_use_copybit || err) {

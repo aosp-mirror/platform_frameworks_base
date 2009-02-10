@@ -77,10 +77,11 @@ private:
         virtual size_t      bufferSize() const { return 512 * 20; }
         virtual int         channelCount() const { return 2; }
         virtual int         format() const { return AudioSystem::PCM_16_BIT; }
-        virtual uint32_t    latency() const { return ((1000*channelCount()*bufferSize())/frameSize())/sampleRate() + 200; }
+        virtual uint32_t    latency() const { return ((1000*bufferSize())/frameSize())/sampleRate() + 200; }
         virtual status_t    setVolume(float volume) { return INVALID_OPERATION; }
         virtual ssize_t     write(const void* buffer, size_t bytes);
                 status_t    standby();
+                status_t    close();
         virtual status_t    dump(int fd, const Vector<String16>& args);
 
     private:

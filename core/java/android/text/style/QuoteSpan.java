@@ -18,24 +18,41 @@ package android.text.style;
 
 import android.graphics.Paint;
 import android.graphics.Canvas;
-import android.graphics.RectF;
+import android.os.Parcel;
 import android.text.Layout;
+import android.text.ParcelableSpan;
+import android.text.TextUtils;
 
-public class QuoteSpan
-implements LeadingMarginSpan
-{
+public class QuoteSpan implements LeadingMarginSpan, ParcelableSpan {
     private static final int STRIPE_WIDTH = 2;
     private static final int GAP_WIDTH = 2;
 
-    private int mColor = 0xff0000ff;
+    private final int mColor;
 
     public QuoteSpan() {
         super();
+        mColor = 0xff0000ff;
     }
     
     public QuoteSpan(int color) {
-        this();
+        super();
         mColor = color;
+    }
+
+    public QuoteSpan(Parcel src) {
+        mColor = src.readInt();
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.QUOTE_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mColor);
     }
 
     public int getColor() {

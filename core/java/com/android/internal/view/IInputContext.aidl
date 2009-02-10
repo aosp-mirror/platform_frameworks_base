@@ -29,9 +29,9 @@ import com.android.internal.view.IInputContextCallback;
  * {@hide}
  */
  oneway interface IInputContext {
-    void getTextBeforeCursor(int length, int seq, IInputContextCallback callback); 
+    void getTextBeforeCursor(int length, int flags, int seq, IInputContextCallback callback); 
 
-    void getTextAfterCursor(int length, int seq, IInputContextCallback callback);
+    void getTextAfterCursor(int length, int flags, int seq, IInputContextCallback callback);
     
     void getCursorCapsMode(int reqModes, int seq, IInputContextCallback callback);
     
@@ -48,6 +48,10 @@ import com.android.internal.view.IInputContextCallback;
 
     void commitCompletion(in CompletionInfo completion);
 
+    void setSelection(int start, int end);
+    
+    void performContextMenuAction(int id);
+    
     void beginBatchEdit();
     
     void endBatchEdit();

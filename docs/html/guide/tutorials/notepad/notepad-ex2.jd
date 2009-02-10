@@ -1,9 +1,12 @@
 page.title=Notepad Exercise 2
+parent.title=Notepad Tutorial
+parent.link=index.html
 @jd:body
 
 
 <p><em>In this exercise, you will add a second Activity to your notepad application, to let the user
-create, edit, and delete notes. The new Activity assumes responsibility for creating new notes by
+create and edit notes. You will also allow the user to delete existing notes through a context menu. 
+The new Activity assumes responsibility for creating new notes by
 collecting user input and packing it into a return Bundle provided by the intent. This exercise
 demonstrates:</em></p>
 <ul>
@@ -11,6 +14,7 @@ demonstrates:</em></p>
 <li><em>Invoking another Activity asynchronously using <code>startActivityForResult()</code></em></li>
 <li><em>Passing data between Activity in Bundle objects</em></li>
 <li><em>How to use a more advanced screen layout</em></li>
+<li><em>How to create a context menu</em></li>
 </ul>
 
 <div style="float:right;white-space:nowrap">
@@ -51,7 +55,8 @@ Tools</strong> &gt; <strong>Fix Project Properties</strong>.</p>
     </li>
     <li>
       There are also a couple of new overridden methods
-      (<code>onListItemClick()</code> and <code>onActivityResult()</code>)
+      (<code>onCreateContextMenu()</code>, <code>onContextItemSelected()</code>, 
+      <code>onListItemClick()</code> and <code>onActivityResult()</code>)
       which we will be filling in below.
     </li>
 </ul>
@@ -59,59 +64,62 @@ Tools</strong> &gt; <strong>Fix Project Properties</strong>.</p>
 
 <h2>Step 2</h2>
 
-	<p>Add an entry to the menu for deleting a note:</p>
+<div class="sidebox">
+<p>Context menus should always be used when performing actions upon specific elements in the UI.
+When you register a View to a context menu, the context menu is revealed by performing a "long-click"
+on the UI component (press and hold the touchscreen or highlight and hold down the selection key for about two seconds).</p>
+</div>
+
+<p>First, let's create the context menu that will allow users to delete individual notes.
+Open the Notepadv2 class.</p>
+
 <ol>
+    <li>In order for each list item in the ListView to register for the context menu, we call
+    <code>registerForContextMenu()</code> and pass it our ListView. So, at the very end of 
+    the <code>onCreate()</code> method add this line:
+    <pre>registerForContextMenu(getListView());</pre>
+    <p>Because our Activity extends the ListActivity class, <code>getListView()</code> will return us
+    the local ListView object for the Activity. Now, each list item in this ListView will activate the
+    context menu.
     <li>
-      In the <code>onCreateOptionsMenu()</code> method, add a new line:
-      <pre>menu.add(0, DELETE_ID, 0, R.string.menu_delete);</pre>
-    </li>
-    <li>
-      The whole method should now look like this:<br>
+      Now fill in the <code>onCreateContextMenu()</code> method. This callback is similar to the other
+    menu callback used for the options menu. Here, we add just one line, which will add a menu item
+    to delete a note. Call <code>menu.add()</code> like so:
       <pre>
-&#64;Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    menu.add(0, INSERT_ID, 0, R.string.menu_insert);
+public boolean onCreateContextMenu(Menu menu, View v
+        ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
     menu.add(0, DELETE_ID, 0, R.string.menu_delete);
-    return true;
 }</pre>
+    <p>The <code>onCreateContextMenu()</code> callback some passes other information in addition to the Menu object, 
+    such as the View that has been triggered for the menu and
+    an extra object that may contain additional information about the object selected. However, we don't care about
+    these here, because we only have one kind of object in the Activity that uses context menus. In the next
+    step, we'll handle the menu item selection.</p>
     </li>
 </ol>
 
 <h2>Step 3</h2>
-    <p>In the <code>onMenuItemSelected()</code> method, add a new case for 
-    <code>DELETE_ID</code>:</p>
-    <pre>
-mDbHelper.deleteNote(getListView().getSelectedItemId());
-fillData();
-return true;</pre>
-
-  <ol>
-    <li>
-      Here, we use the <code>deleteNote</code> method to remove the note specified by ID.
-      In order to get the ID, we call <code>getListView().getSelectedItemId()</code>.
-    </li>
-    <li>
-      Then we fill the data to keep everything up to date.
-    </li>
-   </ol>
-    <p>
-      The whole method should now look like this:</p>
-      <pre>
-&#64;Override
-public boolean onMenuItemSelected(int featureId, MenuItem item) {
+  <p>Now that the we've registered our ListView for a context menu and defined our context menu item, we need
+  to handle the callback when it is selected. For this, we need to identify the list ID of the
+  selected item, then delete it. So fill in the 
+  <code>onContextItemSelected()</code> method like this:</p>
+<pre>
+public boolean onContextItemSelected(MenuItem item) {
     switch(item.getItemId()) {
-    case INSERT_ID:
-        createNote();
-        return true;
     case DELETE_ID:
-        mDbHelper.deleteNote(getListView().getSelectedItemId());
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        mDbHelper.deleteNote(info.id);
         fillData();
         return true;
     }
-       
-    return super.onMenuItemSelected(featureId, item);
+    return super.onContextItemSelected(item);
 }</pre>
+<p>Here, we retrieve the {@link android.widget.AdapterView.AdapterContextMenuInfo AdapterContextMenuInfo}
+with {@link android.view.MenuItem#getMenuInfo()}. The <var>id</var> field of this object tells us
+the position of the item in the ListView. We then pass this to the <code>deleteNote()</code>
+method of our NotesDbAdapter and the note is deleted. That's it for the context menu &mdash; notes
+can now be deleted.</p>
 
 <h2 style="clear:right;">Step 4</h2>
 <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
@@ -294,8 +302,8 @@ case ACTIVITY_EDIT:
     but that doesn't mean it is even close to the kind of sophistication you will be likely to want
     in real Android applications.</p>
     <p style="padding-left:.5em;font-size:12px;margin:0; padding:.0em .5em .5em 1em;">Creating a
-    good UI is part art and part science, and the rest is work. Mastering <a
-    href="{@docRoot}guide/topics/views/declaring-layout.html">Android layout</a> is an essential part of creating
+    good UI is part art and part science, and the rest is work. Mastery of <a
+    href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a> is an essential part of creating
     a good looking Android application.</p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">Take a look at the 
@@ -570,7 +578,7 @@ protected void onCreate(Bundle savedInstanceState) {
     receive, and more. </p>
     <p style="padding-left:.5em;font-size:12px;margin:0; 
      padding:.0em .5em .5em 1em;">For more information, see the reference document 
-    <a href="{@docRoot}guide/topics/manifest/manifest.html">AndroidManifest.xml</a></p>
+    <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></p>
   </div>  
 
 <p>Finally, the new Activity has to be defined in the manifest file:</p>
@@ -636,5 +644,4 @@ Once you are ready, move on to <a href="notepad-ex3.html">Tutorial
 Exercise 3</a> where you will fix the problems with the back button and lost
 edits by introducing a proper life cycle into the NoteEdit Activity.</p>
 
-<p><a href="index.html">Back to the Tutorial main page...</a>.</p>
 

@@ -55,6 +55,8 @@ android_media_AudioSystem_setVolume(JNIEnv *env, jobject clazz, jint type, jint 
     LOGV("setVolume(%d)", int(volume));
     if (int(type) == AudioTrack::VOICE_CALL) {
         return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, float(volume) / 100.0));
+    } else if (int(type) == AudioTrack::BLUETOOTH_SCO) {
+        return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, float(1.0)));
     } else {
         return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, AudioSystem::linearToLog(volume)));
     }

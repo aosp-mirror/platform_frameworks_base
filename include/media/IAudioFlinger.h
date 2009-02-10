@@ -26,6 +26,7 @@
 #include <utils/IInterface.h>
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
+#include <media/IAudioFlingerClient.h>
 
 
 namespace android {
@@ -107,6 +108,15 @@ public:
     // Temporary interface, do not use
     // TODO: Replace with a more generic key:value get/set mechanism
     virtual     status_t  setParameter(const char* key, const char* value) = 0;
+    
+    // register a current process for audio output change notifications
+    virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
+    
+    // retrieve the audio recording buffer size
+    virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount) = 0;
+    
+    // force AudioFlinger thread out of standby
+    virtual     void        wakeUp() = 0;
 };
 
 

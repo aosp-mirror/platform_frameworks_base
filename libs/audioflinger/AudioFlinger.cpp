@@ -183,6 +183,7 @@ AudioFlinger::~AudioFlinger()
 void AudioFlinger::setOutput(AudioStreamOut* output)
 {
     mRequestedOutput = output;
+    mWaitWorkCV.broadcast();
 }
 
 void AudioFlinger::doSetOutput(AudioStreamOut* output)
@@ -198,6 +199,7 @@ void AudioFlinger::doSetOutput(AudioStreamOut* output)
     mFrameCount = getOutputFrameCount(output);
     mAudioMixer = (output == mA2dpOutput ? mA2dpAudioMixer : mHardwareAudioMixer);
     mOutput = output;
+    notifyOutputChange_l();
 }
 
 size_t AudioFlinger::getOutputFrameCount(AudioStreamOut* output) 
@@ -211,6 +213,8 @@ bool AudioFlinger::streamDisablesA2dp(int streamType)
     return (streamType == AudioTrack::SYSTEM ||
             streamType == AudioTrack::RING ||
             streamType == AudioTrack::ALARM ||
+            streamType == AudioTrack::VOICE_CALL ||
+            streamType == AudioTrack::BLUETOOTH_SCO ||
             streamType == AudioTrack::NOTIFICATION);
 }
 
@@ -344,7 +348,8 @@ bool AudioFlinger::threadLoop()
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
     size_t enabledTracks = 0;
-    nsecs_t standbyTime = systemTime();
+    nsecs_t standbyTime = systemTime();    
+    nsecs_t outputSwitchStandbyTime = 0;
 
     do {
         enabledTracks = 0;
@@ -362,6 +367,11 @@ bool AudioFlinger::threadLoop()
                     mOutput->standby();
                     mStandby = true;
                 }
+                if (outputSwitchStandbyTime) {
+                    AudioStreamOut *output = (mOutput == mHardwareOutput) ? mA2dpOutput : mHardwareOutput;
+                    output->standby();
+                    outputSwitchStandbyTime = 0;
+                }
                 mHardwareStatus = AUDIO_HW_IDLE;
                 // we're about to wait, flush the binder command buffer
                 IPCThreadState::self()->flushCommands();
@@ -375,10 +385,17 @@ bool AudioFlinger::threadLoop()
             if (mRequestedOutput != mOutput) {
 
                 // put current output into standby mode
-                if (mOutput) mOutput->standby();
+                if (mOutput) {
+                    outputSwitchStandbyTime = systemTime() + milliseconds(mOutput->latency());
+                }
 
                 // change output
                 doSetOutput(mRequestedOutput);
+            }
+            if (outputSwitchStandbyTime && systemTime() > outputSwitchStandbyTime) {
+                AudioStreamOut *output = (mOutput == mHardwareOutput) ? mA2dpOutput : mHardwareOutput;
+                output->standby();
+                outputSwitchStandbyTime = 0;
             }
 
             // find out which tracks need to be processed
@@ -481,7 +498,7 @@ bool AudioFlinger::threadLoop()
                     removeActiveTrack(track);
                     if (track->isTerminated()) {
                         mTracks.remove(track);
-                        mAudioMixer->deleteTrackName(track->mName);
+                        deleteTrackName(track->mName);
                     }
                 }
             }  
@@ -512,7 +529,7 @@ bool AudioFlinger::threadLoop()
             // active tracks were late. Sleep a little bit to give
             // them another chance. If we're too late, the audio
             // hardware will zero-fill for us.
-            LOGV("no buffers - usleep(%lu)", sleepTime);
+//            LOGV("no buffers - usleep(%lu)", sleepTime);
             usleep(sleepTime);
             if (sleepTime < kMaxBufferRecoveryInUsecs) {
                 sleepTime += kBufferRecoveryInUsecs;
@@ -802,12 +819,14 @@ status_t AudioFlinger::setStreamVolume(int stream, float value)
 
     mStreamTypes[stream].volume = value;
     status_t ret = NO_ERROR;
-    if (stream == AudioTrack::VOICE_CALL) {
+    if (stream == AudioTrack::VOICE_CALL ||
+        stream == AudioTrack::BLUETOOTH_SCO) {
         AutoMutex lock(mHardwareLock);
         mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
         ret = mAudioHardware->setVoiceVolume(value);
         mHardwareStatus = AUDIO_HW_IDLE;
     }
+
     return ret;
 }
 
@@ -821,7 +840,20 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
     if (uint32_t(stream) >= AudioTrack::NUM_STREAM_TYPES) {
         return BAD_VALUE;
     }
+#ifdef WITH_A2DP
+    if (stream == AudioTrack::MUSIC) 
+    {
+        AutoMutex lock(&mLock);
+        if (mA2dpDisableCount > 0)
+            mMusicMuteSaved = muted;
+        else
+            mStreamTypes[stream].mute = muted;
+    } else {
+        mStreamTypes[stream].mute = muted;
+    }
+#else
     mStreamTypes[stream].mute = muted;
+#endif
     return NO_ERROR;
 }
 
@@ -838,6 +870,12 @@ bool AudioFlinger::streamMute(int stream) const
     if (uint32_t(stream) >= AudioTrack::NUM_STREAM_TYPES) {
         return true;
     }
+#ifdef WITH_A2DP
+    if (stream == AudioTrack::MUSIC && mA2dpDisableCount > 0) 
+    {
+        return mMusicMuteSaved;
+    }
+#endif
     return mStreamTypes[stream].mute;
 }
 
@@ -867,6 +905,59 @@ status_t AudioFlinger::setParameter(const char* key, const char* value)
     }
     mHardwareStatus = AUDIO_HW_IDLE;
     return result;
+}
+
+
+void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
+{
+    Mutex::Autolock _l(mLock);
+
+    sp<IBinder> binder = client->asBinder();
+    if (mNotificationClients.indexOf(binder) < 0) {
+        LOGV("Adding notification client %p", binder.get());
+        binder->linkToDeath(this);
+        mNotificationClients.add(binder);
+    }
+}
+
+
+size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+{
+    return mAudioHardware->getInputBufferSize(sampleRate, format, channelCount);
+}
+
+void AudioFlinger::wakeUp()
+{
+    mWaitWorkCV.broadcast();
+}
+
+void AudioFlinger::binderDied(const wp<IBinder>& who) {
+    Mutex::Autolock _l(mLock);
+
+    IBinder *binder = who.unsafe_get();
+
+    if (binder != NULL) {
+        int index = mNotificationClients.indexOf(binder);
+        if (index >= 0) {
+            LOGV("Removing notification client %p", binder);
+            mNotificationClients.removeAt(index);
+        }
+    }
+}
+
+// must be called with mLock held
+void AudioFlinger::notifyOutputChange_l()
+{
+    size_t size = mNotificationClients.size();
+    uint32_t latency = mOutput->latency();
+    for (size_t i = 0; i < size; i++) {
+        sp<IBinder> binder = mNotificationClients.itemAt(i).promote();
+        if (binder != NULL) {
+            LOGV("Notifying output change to client %p", binder.get());
+            sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient> (binder);
+            client->audioOutputChanged(mFrameCount, mSampleRate, latency);
+        }
+    }
 }
 
 void AudioFlinger::removeClient(pid_t pid)
@@ -920,7 +1011,7 @@ void AudioFlinger::remove_track_l(wp<Track> track, int name)
     if (t!=NULL) {
         t->reset();
     }
-    audioMixer()->deleteTrackName(name);
+    deleteTrackName(name);
     removeActiveTrack(track);
     mWaitWorkCV.broadcast();
 }
@@ -938,7 +1029,7 @@ void AudioFlinger::destroyTrack(const sp<Track>& track)
     if (mActiveTracks.indexOf(track) < 0) {
         LOGV("remove track (%d) and delete from mixer", track->name());
         mTracks.remove(track);
-        audioMixer()->deleteTrackName(keep->name());
+        deleteTrackName(keep->name());
     }
 }
 
@@ -953,9 +1044,11 @@ void AudioFlinger::addActiveTrack(const wp<Track>& t)
         if (mA2dpDisableCount++ == 0 && isA2dpEnabled()) {
             setA2dpEnabled(false);
             mA2dpSuppressed = true;
-            LOGD("mA2dpSuppressed = true\n");
+            mMusicMuteSaved = mStreamTypes[AudioTrack::MUSIC].mute;
+            mStreamTypes[AudioTrack::MUSIC].mute = true;
+            LOGV("mA2dpSuppressed = true, track %d\n", track->name());
         }
-        LOGD("mA2dpDisableCount incremented to %d\n", mA2dpDisableCount);
+        LOGV("mA2dpDisableCount incremented to %d, track %d\n", mA2dpDisableCount, track->name());
     }
 #endif
 }
@@ -969,14 +1062,42 @@ void AudioFlinger::removeActiveTrack(const wp<Track>& t)
     if (streamDisablesA2dp(track->type())) {
         if (mA2dpDisableCount > 0) {
             mA2dpDisableCount--;
+            LOGV("mA2dpDisableCount decremented to %d, track %d\n", mA2dpDisableCount, track->name());
             if (mA2dpDisableCount == 0 && mA2dpSuppressed) {
                 setA2dpEnabled(true);
                 mA2dpSuppressed = false;
-            }
-            LOGD("mA2dpDisableCount decremented to %d\n", mA2dpDisableCount);
+                mStreamTypes[AudioTrack::MUSIC].mute = mMusicMuteSaved;
+                LOGV("mA2dpSuppressed = false, track %d\n", track->name());
+            }   
         } else
             LOGE("mA2dpDisableCount is already zero");
     }
+#endif
+}
+
+int AudioFlinger::getTrackName()
+{
+    // Both mixers must have the same set of track used to avoid mismatches when
+    // switching from A2DP output to hardware output
+    int a2DpName;
+    int hwName;
+#ifdef WITH_A2DP
+    a2DpName = mA2dpAudioMixer->getTrackName();
+#endif
+    hwName = mHardwareAudioMixer->getTrackName();
+    
+    LOGW_IF((a2DpName != hwName), "getTrackName track name mismatch! A2DP %d, HW %d", a2DpName, hwName);
+    
+    return hwName;
+}
+
+void AudioFlinger::deleteTrackName(int name)
+{
+    // Both mixers must have the same set of track used to avoid mismatches when
+    // switching from A2DP output to hardware output
+    mHardwareAudioMixer->deleteTrackName(name);
+#ifdef WITH_A2DP
+    mA2dpAudioMixer->deleteTrackName(name);
 #endif
 }
 
@@ -1022,7 +1143,8 @@ AudioFlinger::TrackBase::TrackBase(
         mFormat(format),
         mFlags(0)
 {
-    mName = audioFlinger->audioMixer()->getTrackName();
+    mName = audioFlinger->getTrackName();
+    LOGV("TrackBase contructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
     if (mName < 0) {
         LOGE("no more track names availlable");
         return;
@@ -1237,14 +1359,14 @@ bool AudioFlinger::Track::isReady() const {
 
 status_t AudioFlinger::Track::start()
 {
-    LOGV("start(%d)", mName);
+    LOGV("start(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
     mAudioFlinger->addTrack(this);
     return NO_ERROR;
 }
 
 void AudioFlinger::Track::stop()
 {
-    LOGV("stop(%d)", mName);
+    LOGV("stop(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
     Mutex::Autolock _l(mAudioFlinger->mLock);
     if (mState > STOPPED) {
         mState = STOPPED;
@@ -1258,7 +1380,7 @@ void AudioFlinger::Track::stop()
 
 void AudioFlinger::Track::pause()
 {
-    LOGV("pause(%d)", mName);
+    LOGV("pause(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
     Mutex::Autolock _l(mAudioFlinger->mLock);
     if (mState == ACTIVE || mState == RESUMING) {
         mState = PAUSING;
@@ -1485,7 +1607,7 @@ AudioFlinger::RecordTrack::RecordTrack(
 
 AudioFlinger::RecordTrack::~RecordTrack()
 {
-    mAudioFlinger->audioMixer()->deleteTrackName(mName);
+    mAudioFlinger->deleteTrackName(mName);
 }
 
 status_t AudioFlinger::RecordTrack::getNextBuffer(AudioBufferProvider::Buffer* buffer)

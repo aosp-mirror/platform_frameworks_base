@@ -76,8 +76,12 @@ class FileLoader extends StreamLoader {
     protected boolean setupStreamAndSendStatus() {
         try {
             if (mIsAsset) {
-                mDataStream = mContext.getAssets().open(mPath,
-                        AssetManager.ACCESS_STREAMING);
+                try {
+                    mDataStream = mContext.getAssets().open(mPath);
+                } catch (java.io.FileNotFoundException ex) {
+                    // try the rest files included in the package
+                    mDataStream = mContext.getAssets().openNonAsset(mPath);
+                }
             } else {
                 if (!mAllowFileAccess) {
                     mHandler.error(EventHandler.FILE_ERROR,

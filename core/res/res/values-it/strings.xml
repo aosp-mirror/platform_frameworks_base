@@ -262,6 +262,10 @@
     <string name="permdesc_reboot">"Consente all\'applicazione di imporre il riavvio del telefono."</string>
     <string name="permlab_mount_unmount_filesystems">"montare e smontare filesystem"</string>
     <string name="permdesc_mount_unmount_filesystems">"Consente montaggio e smontaggio da parte dell\'applicazione dei filesystem degli archivi rimovibili."</string>
+    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
+    <skip />
+    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
+    <skip />
     <string name="permlab_vibrate">"controllare la vibrazione"</string>
     <string name="permdesc_vibrate">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permlab_flashlight">"controllare il flash"</string>
@@ -276,6 +280,10 @@
     <string name="permdesc_locationUpdates">"Consente l\'attivazione/disattivazione delle notifiche di aggiornamento della posizione. Da non usare per normali applicazioni."</string>
     <string name="permlab_checkinProperties">"accedere a proprietà di archiviazione"</string>
     <string name="permdesc_checkinProperties">"Consente l\'accesso di lettura/scrittura alle proprietà caricate dal servizio di archiviazione. Da non usare per normali applicazioni."</string>
+    <!-- no translation found for permlab_bindGadget (2519859363977647275) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (7865866514555126333) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"modificare lo stato del telefono"</string>
     <string name="permdesc_modifyPhoneState">"Consente all\'applicazione di controllare le funzioni telefoniche del dispositivo. Un\'applicazione con questa autorizzazione può cambiare rete, accendere e spegnere il modulo radio del telefono e così via, il tutto automaticamente."</string>
     <string name="permlab_readPhoneState">"leggere lo stato del telefono"</string>
@@ -304,6 +312,10 @@
     <string name="permdesc_writeApnSettings">"Consente a un\'applicazione di modificare le impostazioni APN, come proxy e porta di qualsiasi APN."</string>
     <string name="permlab_changeNetworkState">"cambiare connettività di rete"</string>
     <string name="permdesc_changeNetworkState">"Consente a un\'applicazione di modificare lo stato di connettività di rete."</string>
+    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
+    <skip />
+    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
+    <skip />
     <string name="permlab_accessWifiState">"visualizzare lo stato Wi-Fi"</string>
     <string name="permdesc_accessWifiState">"Consente a un\'applicazione di visualizzare le informazioni relative allo stato della connessione Wi-Fi."</string>
     <string name="permlab_changeWifiState">"cambiare stato Wi-Fi"</string>
@@ -546,12 +558,12 @@
     <!-- no translation found for relative_time (1818557177829411417) -->
     <skip />
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="DAY">dd</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="DAY">dd</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"mezzogiorno"</string>
     <string name="Noon">"Mezzogiorno"</string>
     <string name="midnight">"mezzanotte"</string>
@@ -679,6 +691,8 @@
     <string name="paste">"Incolla"</string>
     <string name="copyUrl">"Copia URL"</string>
     <string name="inputMethod">"Metodo inserimento"</string>
+    <!-- no translation found for addToDictionary (726256909274177272) -->
+    <skip />
     <string name="editTextMenuTitle">"Modifica testo"</string>
     <string name="low_internal_storage_view_title">"Spazio in esaurimento"</string>
     <string name="low_internal_storage_view_text">"Spazio di archiviazione del telefono in esaurimento."</string>
@@ -686,6 +700,8 @@
     <string name="cancel">"Annulla"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Annulla"</string>
+    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
+    <skip />
     <string name="capital_on">"ON"</string>
     <string name="capital_off">"OFF"</string>
     <string name="whichApplication">"Completa l\'azione con"</string>
@@ -709,7 +725,8 @@
     <string name="volume_music">"Volume media"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
     <string name="volume_call">"Volume chiamate"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
+    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
+    <skip />
     <string name="volume_alarm">"Volume allarme"</string>
     <string name="volume_notification">"Volume notifiche"</string>
     <string name="volume_unknown">"Volume"</string>
@@ -745,8 +762,61 @@
     <string name="usb_storage_error_message">"Problema di utilizzo della scheda SD per l\'archiviazione USB."</string>
     <string name="usb_storage_notification_title">"USB collegata"</string>
     <string name="usb_storage_notification_message">"Seleziona per copiare file sul/dal computer in uso."</string>
+    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
+    <skip />
+    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
+    <skip />
+    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
+    <skip />
+    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
+    <skip />
+    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
+    <skip />
     <string name="select_input_method">"Seleziona metodo di inserimento"</string>
     <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"candidati"</u>"u&gt;"</font></string>
+    <!-- no translation found for candidates_style (4333913089637062257) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
+    <skip />
+    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
+    <skip />
+    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
+    <skip />
+    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
+    <skip />
+    <!-- no translation found for activity_list_empty (4168820609403385789) -->
+    <skip />
+    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
+    <skip />
+    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
+    <skip />
+    <!-- no translation found for tutorial_double_tap_to_zoom_message (9111326385548696308) -->
+    <skip />
 </resources>

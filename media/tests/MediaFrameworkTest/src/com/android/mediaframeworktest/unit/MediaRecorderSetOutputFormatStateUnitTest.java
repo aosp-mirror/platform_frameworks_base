@@ -54,9 +54,6 @@ public class MediaRecorderSetOutputFormatStateUnitTest extends AndroidTestCase i
         recorder.setOutputFormat(MediaRecorderStateUnitTestTemplate.OUTPUT_FORMAT);
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testSetOutputFormat() {
         mTestTemplate.runTestOnMethod(this);

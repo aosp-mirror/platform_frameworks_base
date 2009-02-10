@@ -330,7 +330,7 @@ you saw before! After all, the point was to show that the two different
 layout approaches produce identical results.</p>
 
 <p>There's a lot more to creating these XML layouts, but that's as far as we'll go
-here. Read the <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> documentation for more 
+here. Read the <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> documentation for more 
 information on creating layouts.</p>
 
 <div class="special">

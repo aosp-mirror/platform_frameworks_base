@@ -1,37 +1,20 @@
+
 <ul>
-
-  <li><h2>Android 1.0</h2>
+  <li><h2>Latest SDK Release</h2>
     <ul>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Release 1</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.0_r1/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Release 2</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.0_r2/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Download</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/installing.html">Installing</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/upgrading.html">Upgrading</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/requirements.html">System Requirements</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
+    </ul>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
     </ul>
   </li>
-<!-- just a template
-  <li><h2>Android 1.1</h2>
-    <ul>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Release 1</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.1_r1/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.1_r2/index.html">Release 2</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.1_r2/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
--->
-  <li><a href="<?cs var:toroot ?>sdk/terms.html">Terms and Conditions</a></li>
+</ul>
+<ul>
+  <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
+  <li><a href="http://code.google.com/android/download_list.html">Previous SDK Releases</a></li>
 </ul>
 

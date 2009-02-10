@@ -172,7 +172,7 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
 status_t MediaPlayer::setDataSource(const char *url)
 {
     LOGV("setDataSource(%s)", url);
-    status_t err = UNKNOWN_ERROR;
+    status_t err = BAD_VALUE;
     if (url != NULL) {
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
@@ -199,7 +199,7 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
-    if (mPlayer == 0) return UNKNOWN_ERROR;
+    if (mPlayer == 0) return NO_INIT;
     return  mPlayer->setVideoSurface(surface->getISurface());
 }
 
@@ -219,7 +219,7 @@ status_t MediaPlayer::prepare()
 {
     LOGV("prepare");
     Mutex::Autolock _l(mLock);
-    if (mPrepareSync) return UNKNOWN_ERROR;
+    if (mPrepareSync) return -EALREADY;
     mPrepareSync = true;
     status_t ret = prepareAsync_l();
     if (ret != NO_ERROR) return ret;
@@ -253,7 +253,6 @@ status_t MediaPlayer::start()
         status_t ret = mPlayer->start();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             if (mCurrentState == MEDIA_PLAYER_PLAYBACK_COMPLETE) {
                 LOGV("playback completed immediately following start()");
@@ -275,7 +274,6 @@ status_t MediaPlayer::stop()
         status_t ret = mPlayer->stop();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_STOPPED;
         }
@@ -295,7 +293,6 @@ status_t MediaPlayer::pause()
         status_t ret = mPlayer->pause();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_PAUSED;
         }
@@ -422,7 +419,6 @@ status_t MediaPlayer::reset()
         if (ret != NO_ERROR) {
             LOGE("reset() failed with return code (%d)", ret);
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_IDLE;
         }

@@ -26,7 +26,6 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.ClientProtocolException;
@@ -56,7 +55,6 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.net.URI;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import android.util.Log;
 import android.content.ContentResolver;
@@ -347,6 +345,13 @@ public final class AndroidHttpClient implements HttpClient {
         }
 
         /**
+         * Returns true if auth logging is turned on for this configuration.
+         */
+        private boolean isAuthLoggable() {
+            return Log.isLoggable(tag + "-auth", level);
+        }
+
+        /**
          * Prints a message using this configuration.
          */
         private void println(String message) {
@@ -392,7 +397,8 @@ public final class AndroidHttpClient implements HttpClient {
             if (configuration != null
                     && configuration.isLoggable()
                     && request instanceof HttpUriRequest) {
-                configuration.println(toCurl((HttpUriRequest) request));
+                configuration.println(toCurl((HttpUriRequest) request,
+                        configuration.isAuthLoggable()));
             }
         }
     }
@@ -400,12 +406,17 @@ public final class AndroidHttpClient implements HttpClient {
     /**
      * Generates a cURL command equivalent to the given request.
      */
-    private static String toCurl(HttpUriRequest request) throws IOException {
+    private static String toCurl(HttpUriRequest request, boolean logAuthToken) throws IOException {
         StringBuilder builder = new StringBuilder();
 
         builder.append("curl ");
 
         for (Header header: request.getAllHeaders()) {
+            if (!logAuthToken
+                    && (header.getName().equals("Authorization") ||
+                        header.getName().equals("Cookie"))) {
+                continue;
+            }
             builder.append("--header \"");
             builder.append(header.toString().trim());
             builder.append("\" ");

@@ -43,49 +43,6 @@ class Proc implements Serializable {
      */
     static final int MAX_TO_PRELOAD = 100;
 
-    /** Name of system server process. */
-    private static final String SYSTEM_SERVER = "system_server";
-
-    /** Names of non-application processes. */
-    private static final Set<String> NOT_FROM_ZYGOTE
-            = new HashSet<String>(Arrays.asList(
-                    "zygote",
-                    "dexopt",
-                    "unknown",
-                    SYSTEM_SERVER,
-                    "com.android.development",
-                    "app_process" // am
-            ));
-
-    /** Long running services. */
-    private static final Set<String> SERVICES
-            = new HashSet<String>(Arrays.asList(
-                    SYSTEM_SERVER,
-                    "com.android.home",
-// Commented out to make sure DefaultTimeZones gets preloaded.
-//                    "com.android.phone",
-                    "com.google.process.content",
-                    "com.android.process.media"
-            ));
-
-    /**
-     * Classes which we shouldn't load from the Zygote.
-     */
-    static final Set<String> EXCLUDED_CLASSES
-            = new HashSet<String>(Arrays.asList(
-        // Binders
-        "android.app.AlarmManager",
-        "android.app.SearchManager",
-        "android.os.FileObserver",
-        "com.android.server.PackageManagerService$AppDirObserver",
-
-        // Threads
-        "java.lang.ProcessManager",
-
-        // This class was deleted.
-        "java.math.Elementary"
-    ));
-
     /** Parent process. */
     final Proc parent;
 
@@ -139,17 +96,12 @@ class Proc implements Serializable {
     }
 
     /**
-     * Is this a long running process?
-     */
-    boolean isService() {
-        return SERVICES.contains(this.name);
-    }
-
-    /**
      * Returns a list of classes which should be preloaded.
+     * 
+     * @param takeAllClasses forces all classes to be taken (irrespective of ranking)
      */
-    List<LoadedClass> highestRankedClasses() {
-        if (NOT_FROM_ZYGOTE.contains(this.name)) {
+    List<LoadedClass> highestRankedClasses(boolean takeAllClasses) {
+        if (!isApplication()) {
             return Collections.emptyList();
         }
 
@@ -162,23 +114,30 @@ class Proc implements Serializable {
         int timeToSave = totalTimeMicros() * percentageToPreload() / 100;
         int timeSaved = 0;
 
-        boolean service = isService();
+        boolean service = Policy.isService(this.name);
 
         List<LoadedClass> highest = new ArrayList<LoadedClass>();
         for (Operation operation : ranked) {
-            if (highest.size() >= MAX_TO_PRELOAD) {
-                System.out.println(name + " got "
-                        + (timeSaved * 100 / timeToSave) + "% through");
-
-                break;
+            
+            // These are actual ranking decisions, which can be overridden
+            if (!takeAllClasses) {
+                if (highest.size() >= MAX_TO_PRELOAD) {
+                    System.out.println(name + " got " 
+                            + (timeSaved * 100 / timeToSave) + "% through");
+                    break;
+                }
+    
+                if (timeSaved >= timeToSave) {
+                    break;
+                }
             }
 
-            if (timeSaved >= timeToSave) {
-                break;
+            // The remaining rules apply even to wired-down processes
+            if (!Policy.isPreloadableClass(operation.loadedClass.name)) {
+                continue;
             }
-
-            if (EXCLUDED_CLASSES.contains(operation.loadedClass.name)
-                    || !operation.loadedClass.systemClass) {
+            
+            if (!operation.loadedClass.systemClass) {
                 continue;
             }
 
@@ -205,9 +164,13 @@ class Proc implements Serializable {
         return totalTime;
     }
 
-    /** Returns true if this process is an app. */
+    /** 
+     * Returns true if this process is an app.
+     *      
+     * TODO: Replace the hardcoded list with a walk up the parent chain looking for zygote.
+     */
     public boolean isApplication() {
-        return !NOT_FROM_ZYGOTE.contains(name);
+        return Policy.isFromZygote(name);
     }
 
     /**

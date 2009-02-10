@@ -35,7 +35,7 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerScreenshot::typeInfo = LayerBase::typeInfo | 0x20;
+const uint32_t LayerScreenshot::typeInfo = LayerBase::typeInfo | 0x40;
 const char* const LayerScreenshot::typeID = "LayerScreenshot";
 
 // ---------------------------------------------------------------------------

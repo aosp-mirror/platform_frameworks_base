@@ -21,13 +21,10 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.Thread;
-
 /**
  * The Android Bluetooth API is not finalized, and *will* change. Use at your
  * own risk.
- * 
+ *
  * The base RFCOMM (service) connection for a headset or handsfree device.
  *
  * In the future this class will be removed.
@@ -90,7 +87,7 @@ public class HeadsetBase {
 
     /* Create from an already exisiting rfcomm connection */
     public HeadsetBase(PowerManager pm, BluetoothDevice bluetooth, String address, int socketFd,
-                       int rfcommChannel, Handler handler) {
+            int rfcommChannel, Handler handler) {
         mDirection = DIRECTION_INCOMING;
         mConnectTimestamp = System.currentTimeMillis();
         mBluetooth = bluetooth;
@@ -132,30 +129,8 @@ public class HeadsetBase {
      */
     protected void initializeAtParser() {
         mAtParser = new AtParser();
-
-        // Microphone Gain
-        mAtParser.register("+VGM", new AtCommandHandler() {
-            @Override
-            public AtCommandResult handleSetCommand(Object[] args) {
-                // AT+VGM=<gain>    in range [0,15]
-                // Headset/Handsfree is reporting its current gain setting
-                //TODO: sync to android UI
-                //TODO: Send unsolicited +VGM when volume changed on AG
-                return new AtCommandResult(AtCommandResult.OK);
-            }
-        });
-
-        // Speaker Gain
-        mAtParser.register("+VGS", new AtCommandHandler() {
-            @Override
-            public AtCommandResult handleSetCommand(Object[] args) {
-                // AT+VGS=<gain>    in range [0,15]
-                // Headset/Handsfree is reporting its current gain to Android
-                //TODO: sync to AG UI
-                //TODO: Send unsolicited +VGS when volume changed on AG
-                return new AtCommandResult(AtCommandResult.OK);
-            }
-        });
+        //TODO(): Get rid of this as there are no parsers registered. But because of dependencies,
+        //it needs to be done as part of refactoring HeadsetBase and BluetoothHandsfree
     }
 
     public AtParser getAtParser() {

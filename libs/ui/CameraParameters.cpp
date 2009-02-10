@@ -24,6 +24,9 @@
 
 namespace android {
 
+static const char* portrait = "portrait";
+static const char* landscape = "landscape";
+
 CameraParameters::CameraParameters()
                 : mMap()
 {
@@ -180,6 +183,23 @@ int CameraParameters::getPreviewFrameRate() const
 void CameraParameters::setPreviewFormat(const char *format)
 {
     set("preview-format", format);
+}
+
+int CameraParameters::getOrientation() const
+{
+    const char* orientation = get("orientation");
+    if (orientation && !strcmp(orientation, portrait))
+        return CAMERA_ORIENTATION_PORTRAIT;
+    return CAMERA_ORIENTATION_LANDSCAPE;
+}
+
+void CameraParameters::setOrientation(int orientation)
+{
+    if (orientation == CAMERA_ORIENTATION_PORTRAIT) {
+        set("preview-format", portrait);
+    } else {
+        set("preview-format", landscape);
+    }
 }
 
 const char *CameraParameters::getPreviewFormat() const

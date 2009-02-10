@@ -177,13 +177,13 @@ public class Keyboard {
                     parent.mDisplayWidth, parent.mDefaultWidth);
             defaultHeight = getDimensionOrFraction(a, 
                     com.android.internal.R.styleable.Keyboard_keyHeight, 
-                    parent.mDisplayWidth, parent.mDefaultHeight);
-            defaultHorizontalGap = getDimensionOrFraction(a, 
+                    parent.mDisplayHeight, parent.mDefaultHeight);
+            defaultHorizontalGap = getDimensionOrFraction(a,
                     com.android.internal.R.styleable.Keyboard_horizontalGap, 
                     parent.mDisplayWidth, parent.mDefaultHorizontalGap);
             verticalGap = getDimensionOrFraction(a, 
                     com.android.internal.R.styleable.Keyboard_verticalGap, 
-                    parent.mDisplayWidth, parent.mDefaultVerticalGap);
+                    parent.mDisplayHeight, parent.mDefaultVerticalGap);
             a.recycle();
             a = res.obtainAttributes(Xml.asAttributeSet(parser),
                     com.android.internal.R.styleable.Keyboard_Row);
@@ -540,7 +540,6 @@ public class Keyboard {
         row.defaultHorizontalGap = mDefaultHorizontalGap;
         row.verticalGap = mDefaultVerticalGap;
         row.rowEdgeFlags = EDGE_TOP | EDGE_BOTTOM;
-        
         final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
         for (int i = 0; i < characters.length(); i++) {
             char c = characters.charAt(i);

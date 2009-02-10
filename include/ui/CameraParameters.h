@@ -29,6 +29,12 @@ public:
     CameraParameters(const String8 &params) { unflatten(params); }
     ~CameraParameters();
 
+    enum {
+        CAMERA_ORIENTATION_UNKNOWN = 0,
+        CAMERA_ORIENTATION_PORTRAIT = 1,
+        CAMERA_ORIENTATION_LANDSCAPE = 2,
+    };
+
     String8 flatten() const;
     void unflatten(const String8 &params);
 
@@ -56,6 +62,9 @@ public:
     /* picture-format=yuv422|jpeg */
     void setPictureFormat(const char *format);
     const char *getPictureFormat() const;
+
+    int getOrientation() const;
+    void setOrientation(int orientation);
 
     void dump() const;
     status_t dump(int fd, const Vector<String16>& args) const;

@@ -61,112 +61,31 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-/*
-    When USE_SIGBUS_HANDLER is set to 1, a handler for SIGBUS will be
-    installed, which allows us to recover when there is a read error
-    when accessing an mmap'ed file. However, since the kernel folks
-    don't seem to like it when non kernel folks install signal handlers
-    in their own process, this is currently disabled.
-    Without the handler, the process hosting this service will die and
-    then be restarted. This is mostly OK right now because the process is
-    not being shared with any other services, and clients of the service
-    will be notified of its death in their MediaPlayer.onErrorListener
-    callback, assuming they have installed one, and can then attempt to
-    do their own recovery.
-    It does open us up to a DOS attack against the media server, where
-    a malicious application can trivially force the media server to
-    restart continuously.
-*/
-#define USE_SIGBUS_HANDLER 0
-
-// TODO: Temp hack until we can register players
-static const char* MIDI_FILE_EXTS[] =
-{
-        ".mid",
-        ".smf",
-        ".xmf",
-        ".imy",
-        ".rtttl",
-        ".rtx",
-        ".ota"
-};
 
 namespace android {
+
+// TODO: Temp hack until we can register players
+typedef struct {
+    const char *extension;
+    const player_type playertype;
+} extmap;
+extmap FILE_EXTS [] =  {
+        {".mid", SONIVOX_PLAYER},
+        {".midi", SONIVOX_PLAYER},
+        {".smf", SONIVOX_PLAYER},
+        {".xmf", SONIVOX_PLAYER},
+        {".imy", SONIVOX_PLAYER},
+        {".rtttl", SONIVOX_PLAYER},
+        {".rtx", SONIVOX_PLAYER},
+        {".ota", SONIVOX_PLAYER},
+        {".ogg", VORBIS_PLAYER},
+        {".oga", VORBIS_PLAYER},
+};
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
 /* static */ const uint32_t MediaPlayerService::AudioOutput::kAudioVideoDelayMs = 96;
 /* static */ int MediaPlayerService::AudioOutput::mMinBufferCount = 4;
 /* static */ bool MediaPlayerService::AudioOutput::mIsOnEmulator = false;
-
-static struct sigaction oldact;
-static pthread_key_t sigbuskey;
-
-static void sigbushandler(int signal, siginfo_t *info, void *context)
-{
-    char *faultaddr = (char*) info->si_addr;
-    LOGE("SIGBUS at %p\n", faultaddr);
-
-    struct mediasigbushandler* h = (struct mediasigbushandler*) pthread_getspecific(sigbuskey);
-
-    if (h) {
-        if (h->len) {
-            if (faultaddr < h->base || faultaddr >= h->base + h->len) {
-                // outside specified range, call old handler
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-                return;
-            }
-        }
-
-        // no range specified or address was in range
-
-        if (h->handlesigbus) {
-            if (h->handlesigbus(info, h)) {
-                // thread's handler didn't handle the signal
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-            }
-            return;
-        }
-
-        if (h->sigbusvar) {
-            // map in a zeroed out page so the operation can succeed
-            long pagesize = sysconf(_SC_PAGE_SIZE);
-            long pagemask = ~(pagesize - 1);
-            void * pageaddr = (void*) (((long)(faultaddr)) & pagemask);
-
-            void * bar = mmap( pageaddr, pagesize, PROT_READ, MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED, -1, 0);
-            if (bar == MAP_FAILED) {
-                LOGE("couldn't map zero page at %p: %s", pageaddr, strerror(errno));
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-                return;
-            }
-
-            LOGE("setting sigbusvar at %p", h->sigbusvar);
-            *(h->sigbusvar) = 1;
-            return;
-        }
-    }
-
-    LOGE("SIGBUS: no handler, or improperly configured handler (%p)", h);
-
-    if (oldact.sa_flags & SA_SIGINFO) {
-        oldact.sa_sigaction(signal, info, context);
-    } else {
-        oldact.sa_handler(signal);
-    }
-    return;
-}
 
 void MediaPlayerService::instantiate() {
     defaultServiceManager()->addService(
@@ -177,25 +96,10 @@ MediaPlayerService::MediaPlayerService()
 {
     LOGV("MediaPlayerService created");
     mNextConnId = 1;
-
-    pthread_key_create(&sigbuskey, NULL);
-
-
-#if USE_SIGBUS_HANDLER
-    struct sigaction act;
-    memset(&act,0, sizeof act);
-    act.sa_sigaction = sigbushandler;
-    act.sa_flags = SA_SIGINFO;
-    sigaction(SIGBUS, &act, &oldact);
-#endif
 }
 
 MediaPlayerService::~MediaPlayerService()
 {
-#if USE_SIGBUS_HANDLER
-    sigaction(SIGBUS, &oldact, NULL);
-#endif
-    pthread_key_delete(sigbuskey);
     LOGV("MediaPlayerService destroyed");
 }
 
@@ -481,7 +385,7 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
         locator.offset = offset;
         locator.length = length;
         EAS_HANDLE  eashandle;
-        if (EAS_OpenFile(easdata, &locator, &eashandle, NULL) == EAS_SUCCESS) {
+        if (EAS_OpenFile(easdata, &locator, &eashandle) == EAS_SUCCESS) {
             EAS_CloseFile(easdata, eashandle);
             EAS_Shutdown(easdata);
             return SONIVOX_PLAYER;
@@ -498,20 +402,14 @@ static player_type getPlayerType(const char* url)
 
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
-    for (int i = 0; i < NELEM(MIDI_FILE_EXTS); ++i) {
-        int len = strlen(MIDI_FILE_EXTS[i]);
+    for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
+        int len = strlen(FILE_EXTS[i].extension);
         int start = lenURL - len;
         if (start > 0) {
-            if (!strncmp(url + start, MIDI_FILE_EXTS[i], len)) {
-                LOGV("Type is MIDI");
-                return SONIVOX_PLAYER;
+            if (!strncmp(url + start, FILE_EXTS[i].extension, len)) {
+                return FILE_EXTS[i].playertype;
             }
         }
-    }
-
-    if (strcmp(url + strlen(url) - 4, ".ogg") == 0) {
-        LOGV("Type is Vorbis");
-        return VORBIS_PLAYER;
     }
 
     // Fall through to PV
@@ -539,7 +437,6 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
     if (p != NULL) {
         if (p->initCheck() == NO_ERROR) {
             p->setNotifyCallback(cookie, notifyFunc);
-            p->setSigBusHandlerStructTLSKey(sigbuskey);
         } else {
             p.clear();
         }

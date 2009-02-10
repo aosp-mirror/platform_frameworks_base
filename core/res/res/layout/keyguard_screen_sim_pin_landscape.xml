@@ -45,7 +45,7 @@
             android:maxLines="1"
             android:background="@null"
             android:textSize="32sp"
-            android:password="true"
+            android:inputType="textPassword"
             />
 
         <ImageButton android:id="@+id/backspace"

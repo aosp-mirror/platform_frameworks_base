@@ -15,7 +15,9 @@ LOCAL_SRC_FILES:= \
     LayerBlur.cpp \
     LayerBitmap.cpp \
     LayerDim.cpp \
+    LayerOrientationAnim.cpp \
     LayerScreenshot.cpp \
+    OrientationAnimation.cpp \
     RFBServer.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
@@ -38,7 +40,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libcorecg \
 	libsgl \
 	libpixelflinger \
-	libGLES_CM
+	libEGL \
+	libGLESv1_CM
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)

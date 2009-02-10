@@ -24,7 +24,6 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.util.SparseIntArray;
 
 /**
  * For numeric text entry

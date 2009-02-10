@@ -413,7 +413,8 @@ int create_cache_path(char path[PKG_PATH_MAX], const char *src)
     return 0;
 }
 
-static void run_dexopt(int zip_fd, int odex_fd, const char* input_file_name)
+static void run_dexopt(int zip_fd, int odex_fd, const char* input_file_name,
+    const char* dexopt_flags)
 {
     static const char* DEX_OPT_BIN = "/system/bin/dexopt";
     static const int MAX_INT_LEN = 12;      // '-'+10dig+'\0' -OR- 0x+8dig
@@ -424,7 +425,7 @@ static void run_dexopt(int zip_fd, int odex_fd, const char* input_file_name)
     sprintf(odex_num, "%d", odex_fd);
 
     execl(DEX_OPT_BIN, DEX_OPT_BIN, "--zip", zip_num, odex_num, input_file_name,
-        (char*) NULL);
+        dexopt_flags, (char*) NULL);
     LOGE("execl(%s) failed: %s\n", DEX_OPT_BIN, strerror(errno));
 }
 
@@ -465,6 +466,7 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
     struct utimbuf ut;
     struct stat apk_stat, dex_stat;
     char dex_path[PKG_PATH_MAX];
+    char dexopt_flags[PROPERTY_VALUE_MAX];
     char *end;
     int res, zip_fd=-1, odex_fd=-1;
 
@@ -474,6 +476,9 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
     if (strlen(apk_path) >= (PKG_PATH_MAX - 8)) {
         return -1;
     }
+
+    /* platform-specific flags affecting optimization and verification */
+    property_get("dalvik.vm.dexopt-flags", dexopt_flags, "");
 
     strcpy(dex_path, apk_path);
     end = strrchr(dex_path, '.');
@@ -533,8 +538,8 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
             exit(66);
         }
 
-        run_dexopt(zip_fd, odex_fd, apk_path);      /* does not return */
-        exit(67);
+        run_dexopt(zip_fd, odex_fd, apk_path, dexopt_flags);
+        exit(67);   /* only get here on exec failure */
     } else {
         res = wait_dexopt(pid, apk_path);
         if (res != 0) {

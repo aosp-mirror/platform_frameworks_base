@@ -69,8 +69,8 @@ public class BluetoothHeadset {
 
     public static final int RESULT_FAILURE = 0;
     public static final int RESULT_SUCCESS = 1;
-    /** Connection cancelled before completetion. */
-    public static final int RESULT_CANCELLED = 2;
+    /** Connection canceled before completetion. */
+    public static final int RESULT_CANCELED = 2;
 
     /** Default priority for headsets that should be auto-connected */
     public static final int PRIORITY_AUTO = 100;
@@ -318,6 +318,12 @@ public class BluetoothHeadset {
      * @return True if this device might support HSP or HFP.
      */
     public static boolean doesClassMatch(int btClass) {
+        // The render service class is required by the spec for HFP, so is a
+        // pretty good signal
+        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
+            return true;
+        }
+        // Just in case they forgot the render service class
         switch (BluetoothClass.Device.getDevice(btClass)) {
         case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
         case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:

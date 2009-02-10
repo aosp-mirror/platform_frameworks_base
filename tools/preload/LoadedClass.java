@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import java.util.List;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.io.Serializable;
 
 /**
  * A loaded class.
@@ -134,6 +133,7 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
         return name.compareTo(o.name);
     }
 
+    @Override
     public String toString() {
         return name;
     }

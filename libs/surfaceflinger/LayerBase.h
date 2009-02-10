@@ -86,8 +86,8 @@ public:
                 uint32_t        z;
                 uint8_t         alpha;
                 uint8_t         flags;
-                uint8_t         sequence;   // changes when visible regions can change
-                uint8_t         reserved;
+                uint8_t         reserved[2];
+                int32_t         sequence;   // changes when visible regions can change
                 uint32_t        tint;
                 Transform       transform;
                 Region          transparentRegion;
@@ -104,11 +104,11 @@ public:
             
             void commitTransaction(bool skipSize);
             bool requestTransaction();
-
+            void forceVisibilityTransaction();
+            
             uint32_t getTransactionFlags(uint32_t flags);
             uint32_t setTransactionFlags(uint32_t flags);
             
-            void validateVisibility(const Transform& globalTransform);
             Rect visibleBounds() const;
             void drawRegion(const Region& reg) const;
 
@@ -162,7 +162,19 @@ public:
      * the bitmap (as opposed to the size of the drawing state).
      */
     virtual Point getPhysicalSize() const;
-    
+
+    /**
+     * validateVisibility - cache a bunch of things
+     */
+    virtual void validateVisibility(const Transform& globalTransform);
+
+    /**
+     * getDrawingStateTransform - returns the drawing state's transform.
+     * This is used in validateVisibility() and can be use to override or
+     * modify the transform (if so make sure to trigger a transaction).
+     */
+    virtual Transform getDrawingStateTransform() const;
+
     /**
      * lockPageFlip - called each time the screen is redrawn and returns whether
      * the visible regions need to be recomputed (this is a fairly heavy
@@ -320,8 +332,7 @@ public:
             *params = mParams;
         }
 
-        virtual status_t registerBuffers(int w, int h, int hstride, int vstride,
-                PixelFormat format, const sp<IMemoryHeap>& heap) 
+        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers) 
                 { return INVALID_OPERATION; }
         virtual void postBuffer(ssize_t offset) { }
         virtual void unregisterBuffers() { };

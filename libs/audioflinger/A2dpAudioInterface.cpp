@@ -99,6 +99,10 @@ status_t A2dpAudioInterface::setParameter(const char *key, const char *value)
     if (strcmp(key, "a2dp_sink_address") == 0) {        
         return mOutput->setAddress(value);
     }
+    if (strcmp(key, "bluetooth_enabled") == 0 &&
+        strcmp(value, "false") == 0) {
+        return mOutput->close();
+    }
 
     return 0;
 }
@@ -154,8 +158,7 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::set(
 
 A2dpAudioInterface::A2dpAudioStreamOut::~A2dpAudioStreamOut()
 {
-    if (mData)
-        a2dp_cleanup(mData);
+    close();
 }
 
 ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t bytes)
@@ -186,7 +189,8 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
     
     return bytes;
 
-Error:   
+Error:
+    close();
     // Simulate audio output timing in case of error
     usleep(bytes * 1000000 / frameSize() / sampleRate());
 
@@ -213,14 +217,19 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::setAddress(const char* address)
 
     if (strcmp(address, mA2dpAddress)) {
         strcpy(mA2dpAddress, address);
-        
-        if (mInitialized) {
-            a2dp_cleanup(mData);
-            mData = NULL;
-            mInitialized = false;
-        }
+        close();
     }
     
+    return NO_ERROR;
+}
+
+status_t A2dpAudioInterface::A2dpAudioStreamOut::close()
+{
+    if (mData) {
+        a2dp_cleanup(mData);
+        mData = NULL;
+        mInitialized = false;
+    }
     return NO_ERROR;
 }
 

@@ -28,21 +28,21 @@
 namespace android
 {
 
-static void on(JNIEnv *env, jobject clazz)
+static void vibratorOn(JNIEnv *env, jobject clazz, jlong timeout_ms)
 {
-    // LOGI("on\n");
-    vibrator_on();
+    // LOGI("vibratorOn\n");
+    vibrator_on(timeout_ms);
 }
 
-static void off(JNIEnv *env, jobject clazz)
+static void vibratorOff(JNIEnv *env, jobject clazz)
 {
-    // LOGI("off\n");
+    // LOGI("vibratorOff\n");
     vibrator_off();
 }
 
 static JNINativeMethod method_table[] = {
-    { "on", "()V", (void*)on },
-    { "off", "()V", (void*)off }
+    { "vibratorOn", "(J)V", (void*)vibratorOn },
+    { "vibratorOff", "()V", (void*)vibratorOff }
 };
 
 int register_android_os_Vibrator(JNIEnv *env)

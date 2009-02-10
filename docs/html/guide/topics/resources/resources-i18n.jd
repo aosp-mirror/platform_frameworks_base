@@ -120,7 +120,7 @@ the containing file.</p>
     <tr>
         <td><code>res/layout/</code></td>
         <td>XML files that are compiled into screen layouts (or part of a screen).
-            See <a href="{@docRoot}guide/topics/views/declaring-layout.html">Declaring Layout</a></td>
+            See <a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></td>
     </tr>
     <tr>
         <td><code>res/values/</code></td>

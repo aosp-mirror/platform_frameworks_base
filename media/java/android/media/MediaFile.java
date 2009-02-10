@@ -102,13 +102,17 @@ public class MediaFile {
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
         addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");    
-        addFileType("OGG", FILE_TYPE_OGG, "application/ogg");    
+        addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
+        addFileType("OGA", FILE_TYPE_OGG, "application/ogg");
  
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
+        addFileType("MIDI", FILE_TYPE_MID, "audio/midi");
         addFileType("XMF", FILE_TYPE_MID, "audio/midi");
         addFileType("RTTTL", FILE_TYPE_MID, "audio/midi");
         addFileType("SMF", FILE_TYPE_SMF, "audio/sp-midi");
         addFileType("IMY", FILE_TYPE_IMY, "audio/imelody");
+        addFileType("RTX", FILE_TYPE_MID, "audio/midi");
+        addFileType("OTA", FILE_TYPE_MID, "audio/midi");
         
         addFileType("MP4", FILE_TYPE_MP4, "video/mp4");
         addFileType("M4V", FILE_TYPE_M4V, "video/mp4");

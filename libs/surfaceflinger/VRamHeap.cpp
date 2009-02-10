@@ -35,8 +35,6 @@
 #include <utils/MemoryHeapPmem.h>
 #include <utils/MemoryHeapBase.h>
 
-#include <GLES/eglnatives.h>
-
 #include "GPUHardware/GPUHardware.h"
 #include "SurfaceFlinger.h"
 #include "VRamHeap.h"

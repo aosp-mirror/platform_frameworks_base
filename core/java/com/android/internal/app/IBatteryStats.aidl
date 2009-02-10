@@ -22,8 +22,14 @@ interface IBatteryStats {
     BatteryStatsImpl getStatistics();
     void noteStartWakelock(int uid, String name, int type);
     void noteStopWakelock(int uid, String name, int type);
-    void noteStartSensor(int uid, int sensor);
-    void noteStopSensor(int uid, int sensor);
+    void noteStartSensor(int uid, String name, int sensor);
+    void noteStopSensor(int uid, String name, int sensor);
+    void noteRequestGpsOn(int uid);
+    void noteRequestGpsOff(int uid);
+    void noteStartGps(int uid);
+    void noteStopGps(int uid);
+    void noteScreenOn();
+    void noteScreenOff();
     void setOnBattery(boolean onBattery);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();

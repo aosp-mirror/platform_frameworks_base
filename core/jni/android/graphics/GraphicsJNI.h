@@ -38,6 +38,7 @@ public:
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
     static SkPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
+    static SkScalar getCanvasDensityScale(JNIEnv*, jobject canvas);
     
     /** Return the corresponding native config from the java Config enum,
         or kNo_Config if the java object is null.

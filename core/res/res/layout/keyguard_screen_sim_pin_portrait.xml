@@ -54,7 +54,7 @@
             android:layout_height="fill_parent"
             android:maxLines="1"
             android:background="@null"
-            android:password="true"
+            android:inputType="textPassword"
             />
 
         <ImageButton android:id="@+id/backspace"

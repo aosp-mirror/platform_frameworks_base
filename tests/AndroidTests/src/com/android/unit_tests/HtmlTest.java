@@ -61,6 +61,10 @@ public class HtmlTest extends TestCase {
 
         s = new SpannableString("Hello world\n\n\nor something");
         assertEquals(Html.toHtml(s), "<p>Hello world<br></p>\n<p>or something</p>\n");
+
+        assertEquals("foo\nbar", Html.fromHtml("foo<br>bar").toString());
+        assertEquals("foo\nbar", Html.fromHtml("foo<br>\nbar").toString());
+        assertEquals("foo\nbar", Html.fromHtml("foo<br>\n \nbar").toString());
     }
 
     @SmallTest

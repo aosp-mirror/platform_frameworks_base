@@ -122,7 +122,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      *                uses the window manager and theme from this context to
      *                present its UI.
      * @param theme A style resource describing the theme to use for the 
-     * window. See <a href="{@docRoot}reference/available-resources.html#stylesandthemes">Style 
+     * window. See <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Style 
      * and Theme Resources</a> for more information about defining and using 
      * styles.  This theme is applied on top of the current theme in 
      * <var>context</var>.  If 0, the default dialog theme will be used.
@@ -518,7 +518,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     private boolean isOutOfBounds(MotionEvent event) {
         final int x = (int) event.getX();
         final int y = (int) event.getY();
-        final int slop = ViewConfiguration.getWindowTouchSlop();
+        final int slop = ViewConfiguration.get(mContext).getScaledWindowTouchSlop();
         final View decorView = getWindow().getDecorView();
         return (x < -slop) || (y < -slop)
                 || (x > (decorView.getWidth()+slop))

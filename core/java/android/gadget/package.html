@@ -1,4 +1,51 @@
 <body>
-@hide
+{@hide}
+<p>Android allows applications to publish views to be embedded in other applications.  These
+views are called gadgets, and are published by "gadget providers."  The component that can
+contain gadgets is called a "gadget host."  See the links below for more information.
+</p>
+<h3><a href="{@toroot}reference/android/gadget/package-descr.html#providers">Gadget Providers</a></h3>
+<ul>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_manifest">Declaring a gadget in the AndroidManifest</a></li>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_meta_data">Adding the {@link android.gadget.GadgetInfo GadgetInfo} meta-data</a></li>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_GadgetProvider">Using the {@link android.gadget.GadgetProvider GadgetProvider} class</a></li>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_configuration">Gadget Configuration UI</a></li>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_broadcasts">Gadget Broadcast Intents</a></li>
+</ul>
+<h3><a href="{@toroot}reference/android/gadget/package-descr.html#">Gadget Hosts</a></h3>
+<ul>
+  <li><a href="{@toroot}reference/android/gadget/package-descr.html#">asdf</a></li>
+</ul>
+{@more}
+<h2><a name="providers"></a>Gadget Providers</h2>
+<p>Any application can publish gadgets.  All an application needs to do to publish a gadget is
+to have a {@link android.content.BroadcastReceiver} that receives the {@link
+android.gadget.GadgetManager#GADGET_UPDATE_ACTION GadgetManager.GADGET_UPDATE_ACTION} intent,
+and provide some meta-data about the gadget.
+
+<h3><a name="provider_manifest"></a>Declaring a gadget in the AndroidManifest</h3>
+
+<h3><a name="provider_meta_data"></a>Adding the {@link android.gadget.GadgetInfo GadgetInfo} meta-data</h3>
+
+<h3><a name="provider_GadgetProvider"></a>Using the {@link android.gadget.GadgetProvider GadgetProvider} class</h3>
+
+<h3><a name="provider_configuration"></a>Gadget Configuration UI</h3>
+
+<h3><a name="providers_broadcasts"></a>Gadget Broadcast Intents</h3>
+
+<p>{@link GadgetProvider} is just a convenience class.  If you would like to receive the
+gadget broadcasts directly, you can.  By way of example, the implementation of
+{@link GadgetProvider.onReceive} is quite simple:</p>
+
+{@sample frameworks/base/core/java/android/gadget/GadgetProvider.java onReceive}
+
+
+<h2>Gadget Hosts</h3>
+<p>Gadget hosts are the containers in which gadgets can be placed.  Most of the look and feel
+details are left up to the gadget hosts.  For example, the home screen has one way of viewing
+gadgets, but the lock screen could also contain gadgets, and it would have a different way of
+adding, removing and otherwise managing gadgets.</p>
+<p>For more information on implementing your own gadget host, see the
+{@link android.gadget.GadgetHost GadgetHost} class.</p>
 </body>
 

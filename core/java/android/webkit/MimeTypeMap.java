@@ -480,6 +480,7 @@ public /* package */ class MimeTypeMap {
             sMimeTypeMap.loadEntry("video/mpeg", "mpg", false);
             sMimeTypeMap.loadEntry("video/mpeg", "mpe", false);
             sMimeTypeMap.loadEntry("video/mp4", "mp4", false);
+            sMimeTypeMap.loadEntry("video/mpeg", "VOB", false);
             sMimeTypeMap.loadEntry("video/quicktime", "qt", false);
             sMimeTypeMap.loadEntry("video/quicktime", "mov", false);
             sMimeTypeMap.loadEntry("video/vnd.mpegurl", "mxu", false);

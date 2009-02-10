@@ -385,9 +385,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("WMV SeekTo", isSeek);         
     }
     
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @LargeTest
     public void testSoundRecord() throws Exception {
       boolean isRecordered = CodecTest.mediaRecorderRecord(MediaNames.RECORDER_OUTPUT);

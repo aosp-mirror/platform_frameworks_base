@@ -33,7 +33,7 @@ import java.lang.reflect.Modifier;
  * the standard support creating a local implementation of such an object.
  * 
  * <p>Most developers will not implement this class directly, instead using the
- * <a href="{@docRoot}reference/aidl.html">aidl</a> tool to describe the desired
+ * <a href="{@docRoot}guide/developing/tools/aidl.html">aidl</a> tool to describe the desired
  * interface, having it generate the appropriate Binder subclass.  You can,
  * however, derive directly from Binder to implement your own custom RPC
  * protocol or simply instantiate a raw Binder object directly to use as a
@@ -194,18 +194,15 @@ public class Binder implements IBinder {
             return true;
         } else if (code == DUMP_TRANSACTION) {
             ParcelFileDescriptor fd = data.readFileDescriptor();
-            FileOutputStream fout = fd != null
-                    ? new FileOutputStream(fd.getFileDescriptor()) : null;
-            PrintWriter pw = fout != null ? new PrintWriter(fout) : null;
-            if (pw != null) {
-                String[] args = data.readStringArray();
-                dump(fd.getFileDescriptor(), pw, args);
-                pw.flush();
-            }
+            String[] args = data.readStringArray();
             if (fd != null) {
                 try {
-                    fd.close();
-                } catch (IOException e) {
+                    dump(fd.getFileDescriptor(), args);
+                } finally {
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
                 }
             }
             return true;
@@ -213,6 +210,20 @@ public class Binder implements IBinder {
         return false;
     }
 
+    /**
+     * Implemented to call the more convenient version
+     * {@link #dump(FileDescriptor, PrintWriter, String[])}.
+     */
+    public void dump(FileDescriptor fd, String[] args) {
+        FileOutputStream fout = new FileOutputStream(fd);
+        PrintWriter pw = new PrintWriter(fout);
+        try {
+            dump(fd, pw, args);
+        } finally {
+            pw.flush();
+        }
+    }
+    
     /**
      * Print the object's state into the given stream.
      * 
@@ -302,6 +313,17 @@ final class BinderProxy implements IBinder {
             throws RemoteException;
     public native boolean unlinkToDeath(DeathRecipient recipient, int flags);
 
+    public void dump(FileDescriptor fd, String[] args) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeFileDescriptor(fd);
+        data.writeStringArray(args);
+        try {
+            transact(DUMP_TRANSACTION, data, null, 0);
+        } finally {
+            data.recycle();
+        }
+    }
+    
     BinderProxy() {
         mSelf = new WeakReference(this);
     }

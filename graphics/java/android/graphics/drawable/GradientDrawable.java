@@ -106,20 +106,21 @@ public class GradientDrawable extends Drawable {
      */
     public static final int SWEEP_GRADIENT  = 2;
 
-    private final GradientState mGradientState;
+    private GradientState mGradientState;
     
     private final Paint mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Rect        mPadding;
-    private Paint       mStrokePaint;   // optional, set by the caller
+    private Rect mPadding;
+    private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
-    private int         mAlpha = 0xFF;  // modified by the caller
-    private boolean     mDither;
+    private int mAlpha = 0xFF;  // modified by the caller
+    private boolean mDither;
 
-    private final Path  mPath = new Path();
+    private final Path mPath = new Path();
     private final RectF mRect = new RectF();
     
-    private Paint       mLayerPaint;    // internal, used if we use saveLayer()
-    private boolean     mRectIsDirty;   // internal state
+    private Paint mLayerPaint;    // internal, used if we use saveLayer()
+    private boolean mRectIsDirty;   // internal state
+    private boolean mMutated;
 
     /**
      * Controls how the gradient is oriented relative to the drawable's bounds
@@ -791,31 +792,41 @@ public class GradientDrawable extends Drawable {
         return mGradientState;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mGradientState = new GradientState(mGradientState);
+            initializeWithState(mGradientState);
+            mMutated = true;
+        }
+        return this;
+    }
+
     final static class GradientState extends ConstantState {
-        public int          mChangingConfigurations;
-        public int          mShape = RECTANGLE;
-        public int          mGradient = LINEAR_GRADIENT;
-        public Orientation  mOrientation;
-        public int[]        mColors;
-        public float[]      mPositions;
-        public boolean      mHasSolidColor;
-        public int          mSolidColor;
-        public int          mStrokeWidth = -1;   // if >= 0 use stroking.
-        public int          mStrokeColor;
-        public float        mStrokeDashWidth;
-        public float        mStrokeDashGap;
-        public float        mRadius;    // use this if mRadiusArray is null
-        public float[]      mRadiusArray;
-        public Rect         mPadding;
-        public int          mWidth = -1;
-        public int          mHeight = -1;
-        public float        mInnerRadius;
-        public float        mThickness;
-        private float       mCenterX = 0.5f;
-        private float       mCenterY = 0.5f;
-        private float       mGradientRadius = 0.5f;
-        private boolean     mUseLevel;
-        private boolean     mUseLevelForShape;
+        public int mChangingConfigurations;
+        public int mShape = RECTANGLE;
+        public int mGradient = LINEAR_GRADIENT;
+        public Orientation mOrientation;
+        public int[] mColors;
+        public float[] mPositions;
+        public boolean mHasSolidColor;
+        public int mSolidColor;
+        public int mStrokeWidth = -1;   // if >= 0 use stroking.
+        public int mStrokeColor;
+        public float mStrokeDashWidth;
+        public float mStrokeDashGap;
+        public float mRadius;    // use this if mRadiusArray is null
+        public float[] mRadiusArray;
+        public Rect mPadding;
+        public int mWidth = -1;
+        public int mHeight = -1;
+        public float mInnerRadius;
+        public float mThickness;
+        private float mCenterX = 0.5f;
+        private float mCenterY = 0.5f;
+        private float mGradientRadius = 0.5f;
+        private boolean mUseLevel;
+        private boolean mUseLevelForShape;
         
         
         GradientState() {
@@ -825,6 +836,32 @@ public class GradientDrawable extends Drawable {
         GradientState(Orientation orientation, int[] colors) {
             mOrientation = orientation;
             mColors = colors;
+        }
+
+        public GradientState(GradientState state) {
+            mChangingConfigurations = state.mChangingConfigurations;
+            mShape = state.mShape;
+            mGradient = state.mGradient;
+            mOrientation = state.mOrientation;
+            mColors = state.mColors.clone();
+            mPositions = state.mPositions.clone();
+            mHasSolidColor = state.mHasSolidColor;
+            mStrokeWidth = state.mStrokeWidth;
+            mStrokeColor = state.mStrokeColor;
+            mStrokeDashWidth = state.mStrokeDashWidth;
+            mStrokeDashGap = state.mStrokeDashGap;
+            mRadius = state.mRadius;
+            mRadiusArray = state.mRadiusArray.clone();
+            mPadding = new Rect(state.mPadding);
+            mWidth = state.mWidth;
+            mHeight = state.mHeight;
+            mInnerRadius = state.mInnerRadius;
+            mThickness = state.mThickness;
+            mCenterX = state.mCenterX;
+            mCenterY = state.mCenterY;
+            mGradientRadius = state.mGradientRadius;
+            mUseLevel = state.mUseLevel;
+            mUseLevelForShape = state.mUseLevelForShape;
         }
 
         @Override
@@ -895,6 +932,11 @@ public class GradientDrawable extends Drawable {
 
     private GradientDrawable(GradientState state) {
         mGradientState = state;
+        initializeWithState(state);
+        mRectIsDirty = true;
+    }
+
+    private void initializeWithState(GradientState state) {
         if (state.mHasSolidColor) {
             mFillPaint.setColor(state.mSolidColor);
         }
@@ -906,12 +948,11 @@ public class GradientDrawable extends Drawable {
             mStrokePaint.setColor(state.mStrokeColor);
 
             if (state.mStrokeDashWidth != 0.0f) {
-                DashPathEffect e = new DashPathEffect(new float[] {
-                        state.mStrokeDashWidth, state.mStrokeDashGap}, 0);
+                DashPathEffect e = new DashPathEffect(
+                        new float[] { state.mStrokeDashWidth, state.mStrokeDashGap }, 0);
                 mStrokePaint.setPathEffect(e);
             }
         }
-        mRectIsDirty = true;
     }
 }
 

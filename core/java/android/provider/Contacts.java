@@ -932,27 +932,33 @@ public class Contacts {
         }
         
         /**
-         * This looks up the provider category defined in
-         * {@link android.provider.Im.ProviderCategories} from the predefined IM protocol id.
+         * This looks up the provider name defined in
+         * {@link android.provider.Im.ProviderNames} from the predefined IM protocol id.
          * This is used for interacting with the IM application.
-         * 
+         *
          * @param protocol the protocol ID
-         * @return the provider category the IM app uses for the given protocol, or null if no
+         * @return the provider name the IM app uses for the given protocol, or null if no
          * provider is defined for the given protocol
          * @hide
          */
-        public static String lookupProviderCategoryFromId(int protocol) {
+        public static String lookupProviderNameFromId(int protocol) {
             switch (protocol) {
                 case PROTOCOL_GOOGLE_TALK:
-                    return Im.ProviderCategories.GTALK;
+                    return Im.ProviderNames.GTALK;
                 case PROTOCOL_AIM:
-                    return Im.ProviderCategories.AIM;
+                    return Im.ProviderNames.AIM;
                 case PROTOCOL_MSN:
-                    return Im.ProviderCategories.MSN;
+                    return Im.ProviderNames.MSN;
                 case PROTOCOL_YAHOO:
-                    return Im.ProviderCategories.YAHOO;
+                    return Im.ProviderNames.YAHOO;
                 case PROTOCOL_ICQ:
-                    return Im.ProviderCategories.ICQ;
+                    return Im.ProviderNames.ICQ;
+                case PROTOCOL_JABBER:
+                    return Im.ProviderNames.JABBER;
+                case PROTOCOL_SKYPE:
+                    return Im.ProviderNames.SKYPE;
+                case PROTOCOL_QQ:
+                    return Im.ProviderNames.QQ;
             }
             return null;
         }

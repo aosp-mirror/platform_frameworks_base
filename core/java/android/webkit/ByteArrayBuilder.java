@@ -94,6 +94,14 @@ class ByteArrayBuilder {
         return mChunks.isEmpty();
     }
 
+    public synchronized void clear() {
+        Chunk c = getFirstChunk();
+        while (c != null) {
+            releaseChunk(c);
+            c = getFirstChunk();
+        }
+    }
+
     private Chunk appendChunk(int length) {
         if (length < mMinCapacity) {
             length = mMinCapacity;

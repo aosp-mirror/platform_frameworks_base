@@ -19,16 +19,14 @@ package android.app;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.text.TextUtils;
-import android.util.Log;
 import java.util.List;
 
 /**
@@ -617,7 +615,59 @@ public class ActivityManager {
         
         public String pkgList[];
         
+        /**
+         * Constant for {@link #importance}: this process is running the
+         * foreground UI.
+         */
+        public static final int IMPORTANCE_FOREGROUND = 100;
+        
+        /**
+         * Constant for {@link #importance}: this process is running something
+         * that is considered to be actively visible to the user.
+         */
+        public static final int IMPORTANCE_VISIBLE = 200;
+        
+        /**
+         * Constant for {@link #importance}: this process is contains services
+         * that should remain running.
+         */
+        public static final int IMPORTANCE_SERVICE = 300;
+        
+        /**
+         * Constant for {@link #importance}: this process process contains
+         * background code that is expendable.
+         */
+        public static final int IMPORTANCE_BACKGROUND = 400;
+        
+        /**
+         * Constant for {@link #importance}: this process is empty of any
+         * actively running code.
+         */
+        public static final int IMPORTANCE_EMPTY = 500;
+        
+        /**
+         * The relative importance level that the system places on this
+         * process.  May be one of {@link #IMPORTANCE_FOREGROUND},
+         * {@link #IMPORTANCE_VISIBLE}, {@link #IMPORTANCE_SERVICE},
+         * {@link #IMPORTANCE_BACKGROUND}, or {@link #IMPORTANCE_EMPTY}.  These
+         * constants are numbered so that "more important" values are always
+         * smaller than "less important" values.
+         */
+        public int importance;
+        
+        /**
+         * An additional ordering within a particular {@link #importance}
+         * category, providing finer-grained information about the relative
+         * utility of processes within a category.  This number means nothing
+         * except that a smaller values are more recently used (and thus
+         * more important).  Currently an LRU value is only maintained for
+         * the {@link #IMPORTANCE_BACKGROUND} category, though others may
+         * be maintained in the future.
+         */
+        public int lru;
+        
         public RunningAppProcessInfo() {
+            importance = IMPORTANCE_FOREGROUND;
         }
         
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
@@ -634,12 +684,16 @@ public class ActivityManager {
             dest.writeString(processName);
             dest.writeInt(pid);
             dest.writeStringArray(pkgList);
+            dest.writeInt(importance);
+            dest.writeInt(lru);
         }
 
         public void readFromParcel(Parcel source) {
             processName = source.readString();
             pid = source.readInt();
             pkgList = source.readStringArray();
+            importance = source.readInt();
+            lru = source.readInt();
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 
@@ -671,4 +725,37 @@ public class ActivityManager {
             return null;
         }
     }
+    
+    /**
+     * Have the system perform a force stop of everything associated with
+     * the given application package.  All processes that share its uid
+     * will be killed, all services it has running stopped, all activities
+     * removed, etc.  In addition, a {@link Intent#ACTION_PACKAGE_RESTARTED}
+     * broadcast will be sent, so that any of its registered alarms can
+     * be stopped, notifications removed, etc.
+     * 
+     * <p>You must hold the permission
+     * {@link android.Manifest.permission#RESTART_PACKAGES} to be able to
+     * call this method.
+     * 
+     * @param packageName The name of the package to be stopped.
+     */
+    public void restartPackage(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().restartPackage(packageName);
+        } catch (RemoteException e) {
+        }
+    }
+    
+    /**
+     * Get the device configuration attributes.
+     */
+    public ConfigurationInfo getDeviceConfigurationInfo() {
+        try {
+            return ActivityManagerNative.getDefault().getDeviceConfigurationInfo();
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+    
 }

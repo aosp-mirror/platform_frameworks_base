@@ -16,142 +16,157 @@
 
 package com.android.dumprendertree;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
+
 import android.util.Log;
 import android.view.KeyEvent;
 
+import android.os.Bundle;
+import android.os.Message;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.android.dumprendertree.HTMLHostActivity;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase<Menu> {
 
     private final static String LOGTAG = "LayoutTests";
-    private final static String LAYOUT_TESTS_ROOT = "/sdcard/android/layout_tests/";
-
+    private final static int DEFAULT_TIMEOUT_IN_MILLIS = 6000;
+    private static String layoutTestDir = null;
+    private static int mTimeoutInMillis = 0;
+    
     public LayoutTestsAutoTest() {
       super("com.android.dumprendertree", Menu.class);
     }
 
+    // This function writes the result of the layout test to
+    // Am status so that it can be picked up from a script.
+    public void passOrFailCallback(String file, boolean result) {
+      Instrumentation inst = getInstrumentation();
+      Bundle bundle = new Bundle();
+      bundle.putBoolean(file, result);
+      inst.sendStatus(0, bundle);
+    }
+
+    public static void setTimeoutInMillis(int millis) {
+        mTimeoutInMillis = (millis > 0) ? millis : DEFAULT_TIMEOUT_IN_MILLIS;
+    }
+
+    public static void setLayoutTestDir(String name) {
+        if (name == null)
+            throw new AssertionError("Layout test directory cannot be null.");
+      layoutTestDir = HTMLHostActivity.LAYOUT_TESTS_ROOT + name;
+      Log.v("LayoutTestsAutoTest", " Only running the layout tests : " + layoutTestDir);
+    }
+
     // Invokes running of layout tests
     // and waits till it has finished running.
-    public void executeLayoutTests(String folder) {
+    public void executeLayoutTests(boolean resume) {
       Instrumentation inst = getInstrumentation();
-      getActivity().processFile(folder, true);
-
+      
+      {
+          Activity activity = getActivity();
+          Intent intent = new Intent();
+          intent.setClass(activity, HTMLHostActivity.class);
+          intent.putExtra(HTMLHostActivity.RESUME_FROM_CRASH, resume);
+          intent.putExtra(HTMLHostActivity.SINGLE_TEST_MODE, false);
+          intent.putExtra(HTMLHostActivity.TEST_PATH_PREFIX, layoutTestDir);
+          intent.putExtra(HTMLHostActivity.TIMEOUT_IN_MILLIS, mTimeoutInMillis);
+          activity.startActivity(intent);
+      }
+      
       ActivityMonitor htmlHostActivityMonitor =
           inst.addMonitor("com.android.dumprendertree.HTMLHostActivity", null, false);
+
       HTMLHostActivity activity =
-          (HTMLHostActivity) htmlHostActivityMonitor.waitForActivityWithTimeout(6000);
-      
+          (HTMLHostActivity) htmlHostActivityMonitor.waitForActivity();
+
       while (!activity.hasFinishedRunning()) {
           // Poll every 5 seconds to determine if the layout
           // tests have finished running
           try {Thread.sleep(5000); } catch(Exception e){}
       }
-      
+
       // Wait few more seconds so that results are
       // flushed to the /sdcard
       try {Thread.sleep(5000); } catch(Exception e){}
 
-      return ;
+      // Clean up the HTMLHostActivity activity
+      activity.finish();
+    }
+    
+    public void generateTestList() {
+        try {
+            File tests_list = new File(HTMLHostActivity.LAYOUT_TESTS_LIST_FILE);
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
+            findTestsRecursively(bos, layoutTestDir);
+            bos.flush();
+            bos.close();
+       } catch (Exception e) {
+           Log.e(LOGTAG, "Error when creating test list: " + e.getMessage());
+       }
+    }
+
+    private void findTestsRecursively(BufferedOutputStream bos, String dir) throws IOException {
+         Log.v(LOGTAG, "Searching tests under " + dir);
+         
+         File d = new File(dir);
+         if (!d.isDirectory()) {
+             throw new AssertionError("A directory expected, but got " + dir);
+         }
+         
+         String[] files = d.list();
+         for (int i = 0; i < files.length; i++) {
+             String s = dir + "/" + files[i];
+             if (FileFilter.ignoreTest(s)) {
+                 Log.v(LOGTAG, "  Ignoring: " + s);
+                 continue;
+             }
+             if (s.toLowerCase().endsWith(".html") 
+                 || s.toLowerCase().endsWith(".xml")) {
+                 bos.write(s.getBytes());
+                 bos.write('\n');
+                 continue;
+             }
+             
+             File f = new File(s);
+             if (f.isDirectory()) {
+                 findTestsRecursively(bos, s);
+                 continue;
+             }
+             
+             Log.v(LOGTAG, "Skipping " + s);
+        }
     }
     
     // Running all the layout tests at once sometimes
     // causes the dumprendertree to run out of memory.
     // So, additional tests are added to run the tests
     // in chunks.
-    @LargeTest
-    public void testAllLayoutTests() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast");
+    public void startLayoutTests() {
+        try {
+            File tests_list = new File(HTMLHostActivity.LAYOUT_TESTS_LIST_FILE);
+            if (!tests_list.exists())
+              generateTestList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        executeLayoutTests(false);
     }
 
-    @LargeTest
-    public void testLayoutSubset1() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/backgrounds");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/borders");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/box-shadow");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/box-sizing");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/canvas");   
-    }
-
-    @LargeTest
-    public void testLayoutSubset2() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/clip");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/compact");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/cookies");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/css");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/css-generated-content");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/doctypes");
-    }
-
-    @LargeTest  
-    public void testLayoutSubset3() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/dom");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/dynamic");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/encoding");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/events");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/flexbox");
-    }
-
-    @LargeTest  
-    public void testLayoutSubset4() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/forms");     
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/frames");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/gradients");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/history");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/html");
-    }
-
-    @LargeTest  
-    public void testLayoutSubset5() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/images");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/inline");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/inline-block");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/innerHTML");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/invalid");
-    }
-
-    @LargeTest
-    public void testLayoutSubset6() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/js");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/layers");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/leaks");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/lists");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/loader");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/media");
-    }
-
-    @LargeTest
-    public void testLayoutSubset7() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/multicol");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/overflow");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/parser");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/profiler");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/reflections");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/regex");
-    }
-
-    @LargeTest
-    public void testLayoutSubset8() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/repaint");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/replaced");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/runin");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/selectors");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/table");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/text");
-    }
-
-    @LargeTest
-    public void testLayoutSubset9() {
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/tokenizer");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/transforms");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/xpath");
-      executeLayoutTests(LAYOUT_TESTS_ROOT + "fast/xsl");
+    public void resumeLayoutTests() {
+        executeLayoutTests(true);
     }
 }

@@ -59,6 +59,12 @@ status_t Overlay::queueBuffer(overlay_buffer_t buffer)
     return mOverlayData->queueBuffer(mOverlayData, buffer);
 }
 
+int32_t Overlay::getBufferCount() const
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->getBufferCount(mOverlayData);
+}
+
 void* Overlay::getBufferAddress(overlay_buffer_t buffer)
 {
     if (mStatus != NO_ERROR) return NULL;

@@ -18,15 +18,33 @@ package android.text.style;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextPaint;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
+import android.text.TextUtils;
 import android.view.View;
 
-public class URLSpan extends ClickableSpan {
+public class URLSpan extends ClickableSpan implements ParcelableSpan {
 
-    private String mURL;
+    private final String mURL;
 
     public URLSpan(String url) {
         mURL = url;
+    }
+
+    public URLSpan(Parcel src) {
+        mURL = src.readString();
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.URL_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mURL);
     }
 
     public String getURL() {

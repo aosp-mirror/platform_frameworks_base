@@ -16,18 +16,25 @@
 
 package android.graphics;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.io.OutputStream;
+import android.os.Parcelable;
+import android.os.Parcel;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.nio.IntBuffer;
-
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.OutputStream;
 
 public final class Bitmap implements Parcelable {
+    /**
+     * Indicates that the bitmap was created for an unknown pixel density.
+     *
+     * @see Bitmap#getDensityScale()
+     * @see Bitmap#setDensityScale(float)
+     *
+     * @hide pending API council approval 
+     */
+    public static final float DENSITY_SCALE_UNKNOWN = -1.0f;
 
     // Note:  mNativeBitmap is used by FaceDetector_jni.cpp
     // Don't change/rename without updating FaceDetector_jni.cpp
@@ -40,6 +47,9 @@ public final class Bitmap implements Parcelable {
     private boolean mRecycled;
 
     private static volatile Matrix sScaleMatrix;
+
+    private float mDensityScale = DENSITY_SCALE_UNKNOWN;
+    private boolean mAutoScaling;
 
     /**
      * @noinspection UnusedDeclaration
@@ -58,6 +68,104 @@ public final class Bitmap implements Parcelable {
         mNativeBitmap = nativeBitmap;
         mIsMutable = isMutable;
         mNinePatchChunk = ninePatchChunk;
+    }
+
+    /**
+     * <p>Returns the density scale for this bitmap, expressed as a factor of
+     * the default density (160.) For instance, a bitmap designed for
+     * displays with a density of 240 will have a density scale of 1.5 whereas a bitmap
+     * designed for a density of 160 will have a density scale of 1.0.</p>
+     *
+     * <p>The default density scale is {@link #DENSITY_SCALE_UNKNOWN}.</p>
+     *
+     * @return A scaling factor of the default density (160) or {@link #DENSITY_SCALE_UNKNOWN}
+     *         if the scaling factor is unknown.
+     *
+     * @see #setDensityScale(float)
+     * @see #isAutoScalingEnabled()
+     * @see #setAutoScalingEnabled(boolean) 
+     * @see android.util.DisplayMetrics#DEFAULT_DENSITY
+     * @see android.util.DisplayMetrics#density
+     * @see #DENSITY_SCALE_UNKNOWN
+     *
+     * @hide pending API council approval
+     */
+    public float getDensityScale() {
+        return mDensityScale;
+    }
+
+    /**
+     * <p>Specifies the density scale for this bitmap, expressed as a factor of
+     * the default density (160.) For instance, a bitmap designed for
+     * displays with a density of 240 will have a density scale of 1.5 whereas a bitmap
+     * designed for a density of 160 will have a density scale of 1.0.</p>
+     *
+     * @param densityScale The density scaling factor to use with this bitmap or
+     *        {@link #DENSITY_SCALE_UNKNOWN} if the factor is unknown.
+     *
+     * @see #getDensityScale()
+     * @see #isAutoScalingEnabled()
+     * @see #setAutoScalingEnabled(boolean) 
+     * @see android.util.DisplayMetrics#DEFAULT_DENSITY
+     * @see android.util.DisplayMetrics#density
+     * @see #DENSITY_SCALE_UNKNOWN
+     *
+     * @hide pending API council approval
+     */
+    public void setDensityScale(float densityScale) {
+        mDensityScale = densityScale;
+    }
+
+    /**
+     * </p>Indicates whether this bitmap will be automatically be scaled at the
+     * target's density at drawing time. If auto scaling is enabled, this bitmap
+     * will be drawn with the following scale factor:</p>
+     *
+     * <pre>scale = (bitmap density scale factor) / (target density scale factor)</pre>
+     *
+     * <p>Auto scaling is turned off by default. If auto scaling is enabled but the
+     * bitmap has an unknown density scale, then the bitmap will never be automatically
+     * scaled at drawing time.</p>
+     * 
+     * @return True if the bitmap must be scaled at drawing time, false otherwise.
+     *
+     * @see #setAutoScalingEnabled(boolean)
+     * @see #getDensityScale()
+     * @see #setDensityScale(float)
+     *
+     * @hide pending API council approval
+     */
+    public boolean isAutoScalingEnabled() {
+        return mAutoScaling;
+    }
+
+    /**
+     * <p>Enables or disables auto scaling for this bitmap. When auto scaling is enabled,
+     * the bitmap will be scaled at drawing time to accomodate the drawing target's pixel
+     * density. The final scale factor for this bitmap is thus defined:</p>
+     *
+     * <pre>scale = (bitmap density scale factor) / (target density scale factor)</pre>
+     *
+     * <p>If auto scaling is enabled but the bitmap has an unknown density scale, then
+     * the bitmap will never be automatically scaled at drawing time.</p>
+     *
+     * @param autoScalingEnabled True to scale the bitmap at drawing time, false otherwise.
+     *
+     * @hide pending API council approval
+     */
+    public void setAutoScalingEnabled(boolean autoScalingEnabled) {
+        mAutoScaling = autoScalingEnabled;
+    }
+
+    /**
+     * Sets the nine patch chunk.
+     *
+     * @param chunk The definition of the nine patch
+     *
+     * @hide
+     */
+    public void setNinePatchChunk(byte[] chunk) {
+        mNinePatchChunk = chunk;
     }
     
     /**
@@ -126,7 +234,7 @@ public final class Bitmap implements Parcelable {
             throw new IllegalArgumentException("height must be > 0");
         }
     }
-    
+
     public enum Config {
         // these native values must match up with the enum in SkBitmap.h
         ALPHA_8     (2),
@@ -232,7 +340,7 @@ public final class Bitmap implements Parcelable {
 
     public static Bitmap createScaledBitmap(Bitmap src, int dstWidth,
             int dstHeight, boolean filter) {
-        Matrix m = null;
+        Matrix m;
         synchronized (Bitmap.class) {
             // small pool of just 1 matrix
             m = sScaleMatrix;
@@ -279,8 +387,7 @@ public final class Bitmap implements Parcelable {
      * @param width    The number of pixels in each row
      * @param height   The number of rows
      */
-    public static Bitmap createBitmap(Bitmap source, int x, int y,
-                                      int width, int height) {
+    public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height) {
         return createBitmap(source, x, y, width, height, null, false);
     }
     
@@ -301,23 +408,21 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the x, y, width, height values are
      *         outside of the dimensions of the source bitmap.
      */
-    public static Bitmap createBitmap(Bitmap source, int x, int y, int width,
-                                      int height, Matrix m, boolean filter) {
+    public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height,
+            Matrix m, boolean filter) {
+
         checkXYSign(x, y);
         checkWidthHeight(width, height);
         if (x + width > source.getWidth()) {
-            throw new IllegalArgumentException(
-                    "x + width must be <= bitmap.width()");
+            throw new IllegalArgumentException("x + width must be <= bitmap.width()");
         }
         if (y + height > source.getHeight()) {
-            throw new IllegalArgumentException(
-                    "y + height must be <= bitmap.height()");
+            throw new IllegalArgumentException("y + height must be <= bitmap.height()");
         }
 
         // check if we can just return our argument unchanged
-        if (!source.isMutable() && x == 0 && y == 0
-                && width == source.getWidth() && height == source.getHeight()
-                && (m == null || m.isIdentity())) {
+        if (!source.isMutable() && x == 0 && y == 0 && width == source.getWidth() &&
+                height == source.getHeight() && (m == null || m.isIdentity())) {
             return source;
         }
         
@@ -331,8 +436,8 @@ public final class Bitmap implements Parcelable {
         RectF dstR = new RectF(0, 0, width, height);
 
         if (m == null || m.isIdentity()) {
-            bitmap = createBitmap(neww, newh, source.hasAlpha() ?
-                                  Config.ARGB_8888 : Config.RGB_565);
+            bitmap = createBitmap(neww, newh,
+                    source.hasAlpha() ? Config.ARGB_8888 : Config.RGB_565);
             paint = null;   // not needed
         } else {
             /*  the dst should have alpha if the src does, or if our matrix
@@ -343,8 +448,7 @@ public final class Bitmap implements Parcelable {
             m.mapRect(deviceR, dstR);
             neww = Math.round(deviceR.width());
             newh = Math.round(deviceR.height());
-            bitmap = createBitmap(neww, newh, hasAlpha ?
-                                  Config.ARGB_8888 : Config.RGB_565);
+            bitmap = createBitmap(neww, newh, hasAlpha ? Config.ARGB_8888 : Config.RGB_565);
             if (hasAlpha) {
                 bitmap.eraseColor(0);
             }
@@ -358,7 +462,12 @@ public final class Bitmap implements Parcelable {
         }
         canvas.setBitmap(bitmap);
         canvas.drawBitmap(source, srcR, dstR, paint);
-        
+
+        // The new bitmap was created from a known bitmap source so assume that
+        // they use the same density scale
+        bitmap.setDensityScale(source.getDensityScale());
+        bitmap.setAutoScalingEnabled(source.isAutoScalingEnabled());
+
         return bitmap;
     }
     
@@ -371,8 +480,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0
      */
     public static Bitmap createBitmap(int width, int height, Config config) {
-        Bitmap bm = nativeCreate(null, 0, width, width, height,
-                                 config.nativeInt, true);
+        Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
         bm.eraseColor(0);    // start with black/transparent pixels
         return bm;
     }
@@ -395,16 +503,16 @@ public final class Bitmap implements Parcelable {
      *         the color array's length is less than the number of pixels.
      */
     public static Bitmap createBitmap(int colors[], int offset, int stride,
-                                      int width, int height, Config config) {
+            int width, int height, Config config) {
+
         checkWidthHeight(width, height);
         if (Math.abs(stride) < width) {
             throw new IllegalArgumentException("abs(stride) must be >= width");
         }
         int lastScanline = offset + (height - 1) * stride;
         int length = colors.length;
-        if (offset < 0 || (offset + width > length)
-            || lastScanline < 0
-            || (lastScanline + width > length)) {
+        if (offset < 0 || (offset + width > length) || lastScanline < 0 ||
+                (lastScanline + width > length)) {
             throw new ArrayIndexOutOfBoundsException();
         }
         return nativeCreate(colors, offset, stride, width, height,
@@ -425,8 +533,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         the color array's length is less than the number of pixels.
      */
-    public static Bitmap createBitmap(int colors[], int width, int height,
-                                      Config config) {
+    public static Bitmap createBitmap(int colors[], int width, int height, Config config) {
         return createBitmap(colors, 0, width, width, height, config);
     }
 
@@ -474,8 +581,7 @@ public final class Bitmap implements Parcelable {
      * @param stream   The outputstream to write the compressed data.
      * @return true if successfully compressed to the specified stream.
      */
-    public boolean compress(CompressFormat format, int quality,
-                            OutputStream stream) {
+    public boolean compress(CompressFormat format, int quality, OutputStream stream) {
         checkRecycled("Can't compress a recycled bitmap");
         // do explicit check before calling the native method
         if (stream == null) {
@@ -505,6 +611,32 @@ public final class Bitmap implements Parcelable {
         return mHeight == -1 ? mHeight = nativeHeight(mNativeBitmap) : mHeight;
     }
     
+    /**
+     * Convenience method that returns the width of this bitmap divided
+     * by the density scale factor.
+     *
+     * @return The scaled width of this bitmap, according to the density scale factor.
+     *
+     * @hide pending API council approval
+     */
+    public int getScaledWidth() {
+        final float scale = getDensityScale();
+        return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getWidth() / scale);
+    }
+
+    /**
+     * Convenience method that returns the height of this bitmap divided
+     * by the density scale factor.
+     *
+     * @return The scaled height of this bitmap, according to the density scale factor.
+     *
+     * @hide pending API council approval
+     */
+    public int getScaledHeight() {
+        final float scale = getDensityScale();
+        return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getHeight() / scale);
+    }
+
     /**
      * Return the number of bytes between rows in the bitmap's pixels. Note that
      * this refers to the pixels as stored natively by the bitmap. If you call
@@ -836,7 +968,7 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeExtractAlpha(int nativeBitmap,
                                                     int nativePaint,
                                                     int[] offsetXY);
-    
+
     /* package */ final int ni() {
         return mNativeBitmap;
     }

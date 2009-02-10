@@ -92,7 +92,7 @@ public class ListViewTest extends InstrumentationTestCase {
 
         @Override
         public Resources getResources() {
-            return null;
+            return getInstrumentation().getTargetContext().getResources();
         }
 
         @Override

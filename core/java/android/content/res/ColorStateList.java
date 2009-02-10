@@ -304,6 +304,11 @@ public class ColorStateList implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        final int N = mStateSpecs.length;
+        dest.writeInt(N);
+        for (int i=0; i<N; i++) {
+            dest.writeIntArray(mStateSpecs[i]);
+        }
         dest.writeArray(mStateSpecs);
         dest.writeIntArray(mColors);
     }
@@ -315,14 +320,11 @@ public class ColorStateList implements Parcelable {
         }
 
         public ColorStateList createFromParcel(Parcel source) {
-            Object[] o = source.readArray(
-                                    ColorStateList.class.getClassLoader());
-            int[][] stateSpecs = new int[o.length][];
-
-            for (int i = 0; i < o.length; i++) {
-                stateSpecs[i] = (int[]) o[i];
+            final int N = source.readInt();
+            int[][] stateSpecs = new int[N][];
+            for (int i=0; i<N; i++) {
+                stateSpecs[i] = source.createIntArray();
             }
-
             int[] colors = source.createIntArray();
             return new ColorStateList(stateSpecs, colors);
         }

@@ -135,7 +135,9 @@ final class SMSDispatcher extends Handler {
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
     /** Delay before next send attempt on a failed SMS, in milliseconds. */
-    private static final int SEND_RETRY_DELAY = 2000; // ms
+    private static final int SEND_RETRY_DELAY = 2000; 
+    /** single part SMS */
+    private static final int SINGLE_PART_SMS = 1;
 
     /**
      * Message reference for a CONCATENATED_8_BIT_REFERENCE or
@@ -169,15 +171,23 @@ final class SMSDispatcher extends Handler {
             mSmsStamp = new HashMap<String, ArrayList<Long>> ();
         }
 
-        boolean check(String appName) {
+        /**
+         * Check to see if an application allow to send new SMS messages
+         *  
+         * @param appName is the application sending sms
+         * @param smsWaiting is the number of new sms wants to be sent
+         * @return true if application is allowed to send the requested number 
+         *         of new sms messages 
+         */
+        boolean check(String appName, int smsWaiting) {
             if (!mSmsStamp.containsKey(appName)) {
                 mSmsStamp.put(appName, new ArrayList<Long>());
             }
 
-            return isUnderLimit(mSmsStamp.get(appName));
+            return isUnderLimit(mSmsStamp.get(appName), smsWaiting);
         }
 
-        private boolean isUnderLimit(ArrayList<Long> sent) {
+        private boolean isUnderLimit(ArrayList<Long> sent, int smsWaiting) {
             Long ct =  System.currentTimeMillis();
 
             Log.d(TAG, "SMS send size=" + sent.size() + "time=" + ct);
@@ -185,9 +195,11 @@ final class SMSDispatcher extends Handler {
             while (sent.size() > 0 && (ct - sent.get(0)) > mCheckPeriod ) {
                     sent.remove(0);
             }
-
-            if (sent.size() < mMaxAllowed) {
-                sent.add(ct);
+            
+            if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
+                for (int i = 0; i < smsWaiting; i++ ) {
+                    sent.add(ct);
+                }
                 return true;
             }
             return false;
@@ -290,8 +302,11 @@ final class SMSDispatcher extends Handler {
 
         case EVENT_SEND_CONFIRMED_SMS:
             if (mSTracker!=null) {
-                Log.d(TAG, "Ready to send SMS again.");
-                sendSms(mSTracker);
+                if (isMultipartTracker(mSTracker)) {
+                    sendMultipartSms(mSTracker);
+                } else {
+                    sendSms(mSTracker);
+                } 
                 mSTracker = null;
             }
             break;
@@ -786,6 +801,81 @@ final class SMSDispatcher extends Handler {
     void sendMultipartText(String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
 
+        PendingIntent sentIntent = null;
+        
+        
+        int ss = mPhone.getServiceState().getState();
+        
+        if (ss == ServiceState.STATE_IN_SERVICE) {
+            // Only check SMS sending limit while in service
+            if (sentIntents != null && sentIntents.size() > 0) {
+                sentIntent = sentIntents.get(0);
+            }
+            String appName = getAppNameByIntent(sentIntent);
+            if ( !mCounter.check(appName, parts.size())) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("destination", destinationAddress);
+                map.put("scaddress", scAddress);
+                map.put("parts", parts);
+                map.put("sentIntents", sentIntents);
+                map.put("deliveryIntents", deliveryIntents);
+                
+                SmsTracker multipartParameter = new SmsTracker(map, null, null);
+
+                sendMessage(obtainMessage(EVENT_POST_ALERT, multipartParameter));
+                return;
+            }
+        }
+        
+        sendMultipartTextWithPermit(destinationAddress, 
+                scAddress, parts, sentIntents, deliveryIntents);
+    }
+
+    /**
+     * Send a multi-part text based SMS which already passed SMS control check.
+     *
+     * It is the working function for sendMultipartText().
+     * 
+     * @param destinationAddress the address to send the message to
+     * @param scAddress is the service center address or null to use
+     *   the current default SMSC
+     * @param parts an <code>ArrayList</code> of strings that, in order,
+     *   comprise the original message
+     * @param sentIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been sent.
+     *   The result code will be <code>Activity.RESULT_OK<code> for success,
+     *   or one of these errors:
+     *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
+     *   <code>RESULT_ERROR_RADIO_OFF</code>
+     *   <code>RESULT_ERROR_NULL_PDU</code>.
+     * @param deliveryIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been delivered
+     *   to the recipient.  The raw pdu of the status report is in the
+     *   extended data ("pdu").
+     */
+    private void sendMultipartTextWithPermit(String destinationAddress, 
+            String scAddress, ArrayList<String> parts,
+            ArrayList<PendingIntent> sentIntents, 
+            ArrayList<PendingIntent> deliveryIntents) {
+        
+        PendingIntent sentIntent = null;
+        PendingIntent deliveryIntent = null;
+        
+        // check if in service
+        int ss = mPhone.getServiceState().getState();
+        if (ss != ServiceState.STATE_IN_SERVICE) {
+            for (int i = 0, count = parts.size(); i < count; i++) {
+                if (sentIntents != null && sentIntents.size() > i) {
+                    sentIntent = sentIntents.get(i);
+                }
+                SmsTracker tracker = new SmsTracker(null, sentIntent, null);
+                handleNotInService(ss, tracker);
+            }
+            return;
+        }
+
         int ref = ++sConcatenatedRef & 0xff;
 
         for (int i = 0, count = parts.size(); i < count; i++) {
@@ -796,9 +886,7 @@ final class SMSDispatcher extends Handler {
             data[2] = (byte) (i + 1);  // 1-based sequence
             SmsHeader header = new SmsHeader();
             header.add(new SmsHeader.Element(SmsHeader.CONCATENATED_8_BIT_REFERENCE, data));
-            PendingIntent sentIntent = null;
-            PendingIntent deliveryIntent = null;
-
+ 
             if (sentIntents != null && sentIntents.size() > i) {
                 sentIntent = sentIntents.get(i);
             }
@@ -809,10 +897,16 @@ final class SMSDispatcher extends Handler {
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
                     parts.get(i), deliveryIntent != null, header.toByteArray());
 
-            sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
-        }
-    }
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("smsc", pdus.encodedScAddress);
+            map.put("pdu", pdus.encodedMessage);
 
+            SmsTracker tracker = new SmsTracker(map, sentIntent,
+                    deliveryIntent);
+            sendSms(tracker);
+        }        
+    }
+    
     /**
      * Send a SMS
      *
@@ -856,7 +950,7 @@ final class SMSDispatcher extends Handler {
             handleNotInService(ss, tracker);
         } else {
             String appName = getAppNameByIntent(sentIntent);
-            if (mCounter.check(appName)) {
+            if (mCounter.check(appName, SINGLE_PART_SMS)) {
                 sendSms(tracker);
             } else {
                 sendMessage(obtainMessage(EVENT_POST_ALERT, tracker));
@@ -913,6 +1007,41 @@ final class SMSDispatcher extends Handler {
     }
 
     /**
+     * Send the multi-part SMS based on multipart Sms tracker
+     * 
+     * @param tracker holds the multipart Sms tracker ready to be sent
+     */
+    private void sendMultipartSms (SmsTracker tracker) {
+        ArrayList<String> parts;
+        ArrayList<PendingIntent> sentIntents;
+        ArrayList<PendingIntent> deliveryIntents;
+        
+        HashMap map = tracker.mData;
+        
+        String destinationAddress = (String) map.get("destination");
+        String scAddress = (String) map.get("scaddress");
+        
+        parts = (ArrayList<String>) map.get("parts");
+        sentIntents = (ArrayList<PendingIntent>) map.get("sentIntents");
+        deliveryIntents = (ArrayList<PendingIntent>) map.get("deliveryIntents");
+     
+        sendMultipartTextWithPermit(destinationAddress, 
+                scAddress, parts, sentIntents, deliveryIntents);
+
+    }
+    
+    /**
+     * Check if a SmsTracker holds multi-part Sms
+     * 
+     * @param tracker a SmsTracker could hold a multi-part Sms
+     * @return true for tracker holds Multi-parts Sms
+     */
+    private boolean isMultipartTracker (SmsTracker tracker) {
+        HashMap map = tracker.mData;
+        return ( map.get("parts") != null);
+    }
+    
+    /**
      * Keeps track of an SMS that has been sent to the RIL, until it it has
      * successfully been sent, or we're done trying.
      *
@@ -939,7 +1068,7 @@ final class SMSDispatcher extends Handler {
             new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON1) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
                         Log.d(TAG, "click YES to send out sms");
                         sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
                     }

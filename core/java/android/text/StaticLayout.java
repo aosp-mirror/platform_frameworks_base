@@ -576,7 +576,28 @@ extends Layout
                         if (fmbottom > fitbottom)
                             fitbottom = fmbottom;
 
-                        if (c == ' ' || c == '\t') {
+                        /*
+                         * From the Unicode Line Breaking Algorithm:
+                         * (at least approximately)
+                         *  
+                         * .,:; are class IS: breakpoints
+                         *      except when adjacent to digits
+                         * /    is class SY: a breakpoint
+                         *      except when followed by a digit.
+                         * -    is class HY: a breakpoint
+                         *      except when followed by a digit.
+                         *
+                         * Ideographs are class ID: breakpoints when adjacent.
+                         */
+
+                        if (c == ' ' || c == '\t' ||
+                            ((c == '.'  || c == ',' || c == ':' || c == ';') &&
+                             (j - 1 < here || !Character.isDigit(chs[j - 1 - start])) &&
+                             (j + 1 >= next || !Character.isDigit(chs[j + 1 - start]))) ||
+                            ((c == '/' || c == '-') &&
+                             (j + 1 >= next || !Character.isDigit(chs[j + 1 - start]))) ||
+                            (c >= FIRST_CJK && isIdeographic(c) &&
+                             j + 1 < next && isIdeographic(chs[j + 1 - start]))) {
                             okwidth = w;
                             ok = j + 1;
 
@@ -592,6 +613,11 @@ extends Layout
                     } else if (breakOnlyAtSpaces) {
                         if (ok != here) {
                             // Log.e("text", "output ok " + here + " to " +ok);
+
+                            while (ok < next && chs[ok - start] == ' ') {
+                                ok++;
+                            }
+
                             v = out(source,
                                     here, ok,
                                     okascent, okdescent, oktop, okbottom,
@@ -623,6 +649,11 @@ extends Layout
                     } else {
                         if (ok != here) {
                             // Log.e("text", "output ok " + here + " to " +ok);
+
+                            while (ok < next && chs[ok - start] == ' ') {
+                                ok++;
+                            }
+
                             v = out(source,
                                     here, ok,
                                     okascent, okdescent, oktop, okbottom,
@@ -737,6 +768,51 @@ extends Layout
                     widths, bufstart, 0,
                     where, ellipsizedWidth, 0, paint);
         }
+    }
+
+    private static final char FIRST_CJK = '\u2E80';
+    /**
+     * Returns true if the specified character is one of those specified
+     * as being Ideographic (class ID) by the Unicode Line Breaking Algorithm
+     * (http://www.unicode.org/unicode/reports/tr14/), and is therefore OK
+     * to break between a pair of.
+     */
+    private static final boolean isIdeographic(char c) {
+        if (c >= '\u2E80' && c <= '\u2FFF') {
+            return true; // CJK, KANGXI RADICALS, DESCRIPTION SYMBOLS
+        }
+        if (c == '\u3000') {
+            return true; // IDEOGRAPHIC SPACE
+        }
+        if (c >= '\u3040' && c <= '\u309F') {
+            return true; // Hiragana (except small characters)
+        }
+        if (c >= '\u30A0' && c <= '\u30FF') {
+            return true; // Katakana (except small characters)
+        }
+        if (c >= '\u3400' && c <= '\u4DB5') {
+            return true; // CJK UNIFIED IDEOGRAPHS EXTENSION A
+        }
+        if (c >= '\u4E00' && c <= '\u9FBB') {
+            return true; // CJK UNIFIED IDEOGRAPHS
+        }
+        if (c >= '\uF900' && c <= '\uFAD9') {
+            return true; // CJK COMPATIBILITY IDEOGRAPHS
+        }
+        if (c >= '\uA000' && c <= '\uA48F') {
+            return true; // YI SYLLABLES
+        }
+        if (c >= '\uA490' && c <= '\uA4CF') {
+            return true; // YI RADICALS
+        }
+        if (c >= '\uFE62' && c <= '\uFE66') {
+            return true; // SMALL PLUS SIGN to SMALL EQUALS SIGN
+        }
+        if (c >= '\uFF10' && c <= '\uFF19') {
+            return true; // WIDE DIGITS
+        }
+
+        return false;
     }
 
 /*

@@ -18,7 +18,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
 #include <GLES/gl.h>
 
 #include <ui/EGLNativeWindowSurface.h>

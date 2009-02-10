@@ -152,7 +152,7 @@ public class RelativeLayout extends ViewGroup {
 
     private void initFromAttributes(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RelativeLayout);
-        mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, 0);
+        mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();
     }
@@ -263,7 +263,7 @@ public class RelativeLayout extends ViewGroup {
         int right = Integer.MIN_VALUE;
         int bottom = Integer.MIN_VALUE;
 
-        if ((horizontalGravity || verticalGravity) && mIgnoreGravity != 0) {
+        if ((horizontalGravity || verticalGravity) && mIgnoreGravity != View.NO_ID) {
             ignore = findViewById(mIgnoreGravity);
         }
 

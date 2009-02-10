@@ -21,6 +21,9 @@ import com.android.dumprendertree.LayoutTestsAutoTest;
 
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
+import android.util.Log;
+import android.content.Intent;
+import android.os.Bundle;
 
 
 /**
@@ -43,6 +46,23 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
     @Override
     public ClassLoader getLoader() {
         return LayoutTestsAutoRunner.class.getClassLoader();
+    }
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        String path = (String) icicle.get("path");
+        LayoutTestsAutoTest.setLayoutTestDir(path);
+        String timeout_str = (String) icicle.get("timeout");
+        int timeout = 0;  // default value
+        if (timeout_str != null) {
+            try {
+                timeout = Integer.parseInt(timeout_str);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        LayoutTestsAutoTest.setTimeoutInMillis(timeout);
     }
 }
 

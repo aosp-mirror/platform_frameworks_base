@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteFullException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.SubscribedFeeds;
@@ -189,11 +190,15 @@ public class SubscribedFeedsService extends BroadcastReceiver {
 
         // mark the feeds dirty, by setting the accounts to the same value,
         //  which will trigger a sync.
-        ContentValues values = new ContentValues();
-        for (String account : accounts) {
-            values.put(SyncConstValue._SYNC_ACCOUNT, account);
-            contentResolver.update(SubscribedFeeds.Feeds.CONTENT_URI, values,
-                    SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=?", new String[] {account});
+        try {
+            ContentValues values = new ContentValues();
+            for (String account : accounts) {
+                values.put(SyncConstValue._SYNC_ACCOUNT, account);
+                contentResolver.update(SubscribedFeeds.Feeds.CONTENT_URI, values,
+                        SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=?", new String[] {account});
+            }
+        } catch (SQLiteFullException e) {
+            Log.w(TAG, "disk full while trying to mark the feeds as dirty, skipping");
         }
 
         // Schedule a refresh.

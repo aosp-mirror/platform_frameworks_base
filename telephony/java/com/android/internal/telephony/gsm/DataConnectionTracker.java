@@ -16,11 +16,6 @@
 
 package com.android.internal.telephony.gsm;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
-import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_EDGE;
-import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_GPRS;
-import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_UMTS;
-import static com.android.internal.telephony.gsm.ServiceStateTracker.DATA_ACCESS_UNKNOWN;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -31,6 +26,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.INetStatService;
@@ -50,13 +47,10 @@ import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.EventLog.List;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.gsm.PdpConnection.PdpFailCause;
-import android.net.wifi.WifiManager;
-import android.net.NetworkInfo;
-                                                                    
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -128,7 +122,8 @@ final class DataConnectionTracker extends Handler
     Handler mDataConnectionTracker = null;
     private ContentResolver mResolver;
 
-    int txPkts, rxPkts, sentSinceLastRecv, netStatPollPeriod;
+    long txPkts, rxPkts, sentSinceLastRecv;
+    int netStatPollPeriod;
     private int mNoRecvPollCount = 0;
     private boolean mPingTestActive = false;
     // Count of PDP reset attempts; reset when we see incoming,
@@ -161,7 +156,7 @@ final class DataConnectionTracker extends Handler
 
     /** CID of active PDP */
     int cidActive;
-    
+
     /** Currently requested APN type */
     private String mRequestedApnType = Phone.APN_TYPE_DEFAULT;
 
@@ -231,13 +226,6 @@ final class DataConnectionTracker extends Handler
     private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.gprs-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
 
-
-    //***** Tag IDs for EventLog
-    private static final int EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED = 50101;
-    private static final int EVENT_LOG_RADIO_RESET = 50102;
-    private static final int EVENT_LOG_PDP_RESET = 50103;
-    private static final int EVENT_LOG_REREGISTER_NETWORK = 50104;
-    private static final int EVENT_LOG_RADIO_PDP_SETUP_FAIL = 50105;
 
     //***** Event Codes
     static final int EVENT_DATA_SETUP_COMPLETE = 1;
@@ -500,7 +488,7 @@ final class DataConnectionTracker extends Handler
         }
         return true;
     }
-    
+
     private boolean isApnTypeActive(String type) {
         // TODO: to support simultaneous, mActiveApn can be a List instead.
         return mActiveApn != null && mActiveApn.canHandleType(type);
@@ -537,7 +525,7 @@ final class DataConnectionTracker extends Handler
         Log.d(LOG_TAG, "dataEnabled[DEFAULT_APN]=" + dataEnabled[APN_DEFAULT_ID] +
                 " dataEnabled[MMS_APN]=" + dataEnabled[APN_MMS_ID]);
     }
-    
+
     /**
      * Prevent mobile data connections from being established,
      * or once again allow mobile data connections. If the state
@@ -605,7 +593,7 @@ final class DataConnectionTracker extends Handler
     //Retrieve the data roaming setting from the shared preferences.
     public boolean getDataOnRoamingEnabled() {
         try {
-            return Settings.Secure.getInt(phone.getContext().getContentResolver(), 
+            return Settings.Secure.getInt(phone.getContext().getContentResolver(),
                 Settings.Secure.DATA_ROAMING) > 0;
         } catch (SettingNotFoundException snfe) {
             return false;
@@ -636,7 +624,7 @@ final class DataConnectionTracker extends Handler
         stopNetStatPoll();
         phone.notifyDataConnection(Phone.REASON_GPRS_DETACHED);
     }
-    
+
     private void onGprsAttached() {
         if (state == State.CONNECTED) {
             startNetStatPoll();
@@ -746,7 +734,7 @@ final class DataConnectionTracker extends Handler
          * IDLE before the code below runs. If we didn't check
          * for that, future calls to trySetupData would fail,
          * and we would never get out of the DISCONNECTING state.
-         */ 
+         */
         if (!tearDown) {
             setState(State.IDLE);
             phone.notifyDataConnection(reason);
@@ -932,6 +920,16 @@ final class DataConnectionTracker extends Handler
 
             Log.i(LOG_TAG, "PDP connection has dropped. Reconnecting");
 
+            // Add an event log when the network drops PDP
+            int cid = -1;
+            GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+            if (loc != null) cid = loc.getCid();
+
+            EventLog.List val = new EventLog.List(cid,
+                    TelephonyManager.getDefault().getNetworkType());
+
+            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
+
             cleanUpConnection(true, null);
 
             return;
@@ -963,6 +961,16 @@ final class DataConnectionTracker extends Handler
                 } else {
                     Log.i(LOG_TAG, "PDP connection has dropped (active=false case). "
                                     + " Reconnecting");
+
+                    // Log the network drop on the event log.
+                    int cid = -1;
+                    GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+                    if (loc != null) cid = loc.getCid();
+
+                    EventLog.List val = new EventLog.List(cid,
+                            TelephonyManager.getDefault().getNetworkType());
+
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
 
                     cleanUpConnection(true, null);
                 }
@@ -1040,14 +1048,14 @@ final class DataConnectionTracker extends Handler
         if (state == State.CONNECTED) {
             int maxPdpReset = Settings.Gservices.getInt(mResolver,
                     Settings.Gservices.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
-                    DEFAULT_MAX_PDP_RESET_FAIL); 
+                    DEFAULT_MAX_PDP_RESET_FAIL);
             if (mPdpResetCount < maxPdpReset) {
                 mPdpResetCount++;
-                EventLog.writeEvent(EVENT_LOG_PDP_RESET, sentSinceLastRecv);
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_RESET, sentSinceLastRecv);
                 cleanUpConnection(true, Phone.REASON_PDP_RESET);
             } else {
                 mPdpResetCount = 0;
-                EventLog.writeEvent(EVENT_LOG_REREGISTER_NETWORK, sentSinceLastRecv);
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_REREGISTER_NETWORK, sentSinceLastRecv);
                 phone.mSST.reRegisterNetwork(null);
             }
             // TODO: Add increasingly drastic recovery steps, eg,
@@ -1096,8 +1104,8 @@ final class DataConnectionTracker extends Handler
     {
 
         public void run() {
-            int sent, received;
-            int preTxPkts = -1, preRxPkts = -1;
+            long sent, received;
+            long preTxPkts = -1, preRxPkts = -1;
 
             Activity newActivity;
 
@@ -1105,8 +1113,8 @@ final class DataConnectionTracker extends Handler
             preRxPkts = rxPkts;
 
             try {
-                txPkts = netstat.getTxPackets();
-                rxPkts = netstat.getRxPackets();
+                txPkts = netstat.getMobileTxPackets();
+                rxPkts = netstat.getMobileRxPackets();
             } catch (RemoteException e) {
                 txPkts = 0;
                 rxPkts = 0;
@@ -1152,7 +1160,7 @@ final class DataConnectionTracker extends Handler
             if (sentSinceLastRecv >= watchdogTrigger) {
                 // we already have NUMBER_SENT_PACKETS sent without ack
                 if (mNoRecvPollCount == 0) {
-                    EventLog.writeEvent(EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED,
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED,
                             sentSinceLastRecv);
                 }
 
@@ -1220,11 +1228,11 @@ final class DataConnectionTracker extends Handler
         } catch (Exception e) {
             Log.w(LOG_TAG, "exception trying to ping");
         }
-        
+
         if (status == 0) {
             // ping succeeded.  False alarm.  Reset netStatPoll.
             // ("-1" for this event indicates a false alarm)
-            EventLog.writeEvent(EVENT_LOG_PDP_RESET, -1);
+            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_RESET, -1);
             mPdpResetCount = 0;
             sendMessage(obtainMessage(EVENT_START_NETSTAT_POLL));
         } else {
@@ -1335,7 +1343,7 @@ final class DataConnectionTracker extends Handler
             case EVENT_GPRS_ATTACHED:
                 onGprsAttached();
                 break;
-                
+
             case EVENT_ROAMING_ON:
                 if (getDataOnRoamingEnabled()) {
                     trySetupData(Phone.REASON_ROAMING_ON);
@@ -1410,7 +1418,7 @@ final class DataConnectionTracker extends Handler
                         SystemProperties.set("gsm.defaultpdpcontext.active", "false");
                     }
                     notifyDefaultData(reason);
-                    
+
                     // TODO: For simultaneous PDP support, we need to build another
                     // trigger another TRY_SETUP_DATA for the next APN type.  (Note
                     // that the existing connection may service that type, in which
@@ -1421,7 +1429,7 @@ final class DataConnectionTracker extends Handler
                     if(DBG)
                         log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
-                    if (cause == PdpConnection.PdpFailCause.BAD_APN || 
+                    if (cause == PdpConnection.PdpFailCause.BAD_APN ||
                         cause == PdpConnection.PdpFailCause.BAD_PAP_SECRET ||
                         cause == PdpConnection.PdpFailCause.BARRED ||
                         cause == PdpConnection.PdpFailCause.RADIO_ERROR_RETRY ||
@@ -1431,12 +1439,12 @@ final class DataConnectionTracker extends Handler
                         int cid = -1;
                         GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
                         if (loc != null) cid = loc.getCid();
-    
+
                         EventLog.List val = new EventLog.List(
-                            cause.ordinal(), cid, 
-                            TelephonyManager.getDefault().getNetworkType());                    
-                        EventLog.writeEvent(EVENT_LOG_RADIO_PDP_SETUP_FAIL, val);
-                    }                                                    
+                            cause.ordinal(), cid,
+                            TelephonyManager.getDefault().getNetworkType());
+                        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_PDP_SETUP_FAIL, val);
+                    }
                     // No try for permanent failure
                     if (cause.isPermanentFail()) {
                         notifyNoData(cause);
@@ -1575,7 +1583,7 @@ final class DataConnectionTracker extends Handler
             if (cursor != null) {
                 if (cursor.getCount() > 0) {
                     allApns = createApnList(cursor);
-                    // TODO: Figure out where this fits in.  This basically just 
+                    // TODO: Figure out where this fits in.  This basically just
                     // writes the pap-secrets file.  No longer tied to PdpConnection
                     // object.  Not used on current platform (no ppp).
                     //PdpConnection pdp = pdpList.get(pdp_name);
@@ -1622,7 +1630,7 @@ final class DataConnectionTracker extends Handler
     }
 
     /**
-     * Get next apn in waitingApns 
+     * Get next apn in waitingApns
      * @return the first apn found in waitingApns, null if none
      */
     private ApnSetting getNextApn() {

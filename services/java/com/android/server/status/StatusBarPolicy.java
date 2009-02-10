@@ -157,6 +157,7 @@ public class StatusBarPolicy {
     private IconData mBluetoothData;
     private int mBluetoothHeadsetState;
     private int mBluetoothA2dpState;
+    private boolean mBluetoothEnabled;
 
     // wifi
     private static final int[] sWifiSignalImages = new int[] {
@@ -286,7 +287,16 @@ public class StatusBarPolicy {
         mBluetoothData = IconData.makeIcon("bluetooth",
                 null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
         mBluetoothIcon = service.addIcon(mBluetoothData, null);
-        updateBluetooth(null);
+        BluetoothDevice bluetooth =
+                (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetooth != null) {
+            mBluetoothEnabled = bluetooth.isEnabled();
+        } else {
+            mBluetoothEnabled = false;
+        }
+        mBluetoothA2dpState = BluetoothA2dp.STATE_DISCONNECTED;
+        mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
+        mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
 
         // Gps status
         mGpsEnabledIconData = IconData.makeIcon("gps",
@@ -767,30 +777,17 @@ public class StatusBarPolicy {
     }
 
     private final void updateBluetooth(Intent intent) {
-        boolean visible = false;
-        if (intent == null) {  // Initialize
-            BluetoothDevice bluetooth =
-                (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-            if (bluetooth != null) {
-                visible = bluetooth.isEnabled();
-            }
-            mService.setIconVisibility(mBluetoothIcon, visible);
-            return;
-        }
-
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
-        String action = intent.getAction();
 
+        String action = intent.getAction();
         if (action.equals(BluetoothIntent.DISABLED_ACTION)) {
-            visible = false;
+            mBluetoothEnabled = false;
         } else if (action.equals(BluetoothIntent.ENABLED_ACTION)) {
-            visible = true;
+            mBluetoothEnabled = true;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
-            visible = true;
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                     BluetoothHeadset.STATE_ERROR);
         } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
-            visible = true;
             mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
                     BluetoothA2dp.STATE_DISCONNECTED);
         } else {
@@ -805,7 +802,7 @@ public class StatusBarPolicy {
 
         mBluetoothData.iconId = iconId;
         mService.updateIcon(mBluetoothIcon, mBluetoothData, null);
-        mService.setIconVisibility(mBluetoothIcon, visible);
+        mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
     }
 
     private final void updateWifi(Intent intent) {

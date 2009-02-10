@@ -30,7 +30,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 /**
- * Thread for communicating with the mount service daemon via a local socket.
+ * Thread for communicating with the vol service daemon via a local socket.
  * Events received from the daemon are passed to the MountService instance, 
  * and the MountService instance calls MountListener to send commands to the daemon.
  */
@@ -38,39 +38,43 @@ final class MountListener implements Runnable {
 
     private static final String TAG = "MountListener";
 
-    // ** THE FOLLOWING STRING CONSTANTS MUST MATCH VALUES IN system/mountd/mountd.h
+    // ** THE FOLLOWING STRING CONSTANTS MUST MATCH VALUES IN system/vold/
     
-    // socket name for connecting to mountd
-    private static final String MOUNTD_SOCKET = "mountd";
+    // socket name for connecting to vold
+    private static final String VOLD_SOCKET = "vold";
     
-    // mountd commands
-    private static final String MOUNTD_ENABLE_UMS = "enable_ums";
-    private static final String MOUNTD_DISABLE_UMS = "disable_ums";
-    private static final String MOUNTD_SEND_STATUS = "send_status";
-    private static final String MOUNTD_MOUNT_MEDIA = "mount_media:";
-    private static final String MOUNTD_EJECT_MEDIA = "eject_media:";
+    // vold commands
+    private static final String VOLD_CMD_ENABLE_UMS = "enable_ums";
+    private static final String VOLD_CMD_DISABLE_UMS = "disable_ums";
+    private static final String VOLD_CMD_SEND_UMS_STATUS = "send_ums_status";
+    private static final String VOLD_CMD_MOUNT_VOLUME = "mount_volume:";
+    private static final String VOLD_CMD_EJECT_MEDIA = "eject_media:";
+    private static final String VOLD_CMD_FORMAT_MEDIA = "format_media:";
 
-    // mountd events
-    private static final String MOUNTD_UMS_ENABLED = "ums_enabled";
-    private static final String MOUNTD_UMS_DISABLED = "ums_disabled";
-    private static final String MOUNTD_UMS_CONNECTED = "ums_connected";
-    private static final String MOUNTD_UMS_DISCONNECTED = "ums_disconnected";
-    private static final String MOUNTD_MEDIA_REMOVED = "media_removed:";
-    private static final String MOUNTD_MEDIA_UNMOUNTED = "media_unmounted:";
-    private static final String MOUNTD_MEDIA_MOUNTED = "media_mounted:";
-    private static final String MOUNTD_MEDIA_MOUNTED_READ_ONLY = "media_mounted_ro:";
-    private static final String MOUNTD_MEDIA_SHARED = "media_shared:";
-    private static final String MOUNTD_MEDIA_BAD_REMOVAL = "media_bad_removal:";
-    private static final String MOUNTD_MEDIA_UNMOUNTABLE = "media_unmountable:";
-    private static final String MOUNTD_REQUEST_EJECT = "request_eject:";
+    // vold events
+    private static final String VOLD_EVT_UMS_ENABLED = "ums_enabled";
+    private static final String VOLD_EVT_UMS_DISABLED = "ums_disabled";
+    private static final String VOLD_EVT_UMS_CONNECTED = "ums_connected";
+    private static final String VOLD_EVT_UMS_DISCONNECTED = "ums_disconnected";
+
+    private static final String VOLD_EVT_NOMEDIA = "volume_nomedia:";
+    private static final String VOLD_EVT_UNMOUNTED = "volume_unmounted:";
+    private static final String VOLD_EVT_MOUNTED = "volume_mounted:";
+    private static final String VOLD_EVT_MOUNTED_RO = "volume_mounted_ro:";
+    private static final String VOLD_EVT_UMS = "volume_ums";
+    private static final String VOLD_EVT_BAD_REMOVAL = "volume_badremoval:";
+    private static final String VOLD_EVT_DAMAGED = "volume_damaged:";
+    private static final String VOLD_EVT_CHECKING = "volume_checking:";
+    private static final String VOLD_EVT_NOFS = "volume_nofs:";
+    private static final String VOLD_EVT_EJECTING = "volume_ejecting:";
 
     /**
-     * MountService that handles events received from the mount service daemon
+     * MountService that handles events received from the vol service daemon
      */
     private MountService mService;
     
     /**
-     * Stream for sending commands to the mount service daemon.
+     * Stream for sending commands to the vol service daemon.
      */
     private OutputStream mOutputStream;
     
@@ -95,9 +99,9 @@ final class MountListener implements Runnable {
     }
 
     /**
-     * Process and dispatches events received from the mount service daemon
+     * Process and dispatches events received from the vol service daemon
      * 
-     * @param event  An event received from the mount service daemon
+     * @param event  An event received from the vol service daemon
      */
     private void handleEvent(String event) {
         if (Config.LOGD) Log.d(TAG, "handleEvent " + event);
@@ -105,34 +109,38 @@ final class MountListener implements Runnable {
         int colonIndex = event.indexOf(':');
         String path = (colonIndex > 0 ? event.substring(colonIndex + 1) : null);
         
-        if (event.equals(MOUNTD_UMS_ENABLED)) {
+        if (event.equals(VOLD_EVT_UMS_ENABLED)) {
             mUmsEnabled = true;
-        } else if (event.equals(MOUNTD_UMS_DISABLED)) {
+        } else if (event.equals(VOLD_EVT_UMS_DISABLED)) {
             mUmsEnabled = false;
-        } else if (event.equals(MOUNTD_UMS_CONNECTED)) {
+        } else if (event.equals(VOLD_EVT_UMS_CONNECTED)) {
             mUmsConnected = true;
             mService.notifyUmsConnected();
-        } else if (event.equals(MOUNTD_UMS_DISCONNECTED)) {
+        } else if (event.equals(VOLD_EVT_UMS_DISCONNECTED)) {
             mUmsConnected = false;        
             mService.notifyUmsDisconnected();
-        } else if (event.startsWith(MOUNTD_MEDIA_REMOVED)) {
+        } else if (event.startsWith(VOLD_EVT_NOMEDIA)) {
             mService.notifyMediaRemoved(path);
-        } else if (event.startsWith(MOUNTD_MEDIA_UNMOUNTED)) {
+        } else if (event.startsWith(VOLD_EVT_UNMOUNTED)) {
             mService.notifyMediaUnmounted(path);
-        } else if (event.startsWith(MOUNTD_MEDIA_MOUNTED)) {
+        } else if (event.startsWith(VOLD_EVT_CHECKING)) {
+            mService.notifyMediaChecking(path);
+        } else if (event.startsWith(VOLD_EVT_NOFS)) {
+            mService.notifyMediaNoFs(path);
+        } else if (event.startsWith(VOLD_EVT_MOUNTED)) {
             mService.notifyMediaMounted(path, false);
-        } else if (event.startsWith(MOUNTD_MEDIA_MOUNTED_READ_ONLY)) {
+        } else if (event.startsWith(VOLD_EVT_MOUNTED_RO)) {
             mService.notifyMediaMounted(path, true);
-        } else if (event.startsWith(MOUNTD_MEDIA_SHARED)) {
+        } else if (event.startsWith(VOLD_EVT_UMS)) {
             mService.notifyMediaShared(path);
-        } else if (event.startsWith(MOUNTD_MEDIA_BAD_REMOVAL)) {
+        } else if (event.startsWith(VOLD_EVT_BAD_REMOVAL)) {
             mService.notifyMediaBadRemoval(path);
             // also send media eject intent, to notify apps to close any open
             // files on the media.
             mService.notifyMediaEject(path);
-        } else if (event.startsWith(MOUNTD_MEDIA_UNMOUNTABLE)) {
+        } else if (event.startsWith(VOLD_EVT_DAMAGED)) {
             mService.notifyMediaUnmountable(path);
-        } else if (event.startsWith(MOUNTD_REQUEST_EJECT)) {
+        } else if (event.startsWith(VOLD_EVT_EJECTING)) {
             mService.notifyMediaEject(path);
         }    
     }
@@ -156,7 +164,7 @@ final class MountListener implements Runnable {
     private void writeCommand2(String command, String argument) {
         synchronized (this) {
             if (mOutputStream == null) {
-                Log.e(TAG, "No connection to mountd", new IllegalStateException());
+                Log.e(TAG, "No connection to vold", new IllegalStateException());
             } else {
                 StringBuilder builder = new StringBuilder(command);
                 if (argument != null) {
@@ -183,7 +191,7 @@ final class MountListener implements Runnable {
 
         try {
             socket = new LocalSocket();
-            LocalSocketAddress address = new LocalSocketAddress(MOUNTD_SOCKET, 
+            LocalSocketAddress address = new LocalSocketAddress(VOLD_SOCKET, 
                     LocalSocketAddress.Namespace.RESERVED);
 
             socket.connect(address);
@@ -193,7 +201,7 @@ final class MountListener implements Runnable {
 
             byte[] buffer = new byte[100];
 
-            writeCommand(MOUNTD_SEND_STATUS);
+            writeCommand(VOLD_CMD_SEND_UMS_STATUS);
             
             while (true) {
                 int count = inputStream.read(buffer);
@@ -242,7 +250,7 @@ final class MountListener implements Runnable {
          * create tons of throwaway LocalSockets, making
          * system_server GC constantly.
          */
-        Log.e(TAG, "Failed to connect to mountd", new IllegalStateException());
+        Log.e(TAG, "Failed to connect to vold", new IllegalStateException());
         SystemClock.sleep(2000);
     }
 
@@ -283,7 +291,7 @@ final class MountListener implements Runnable {
      * @param enable  true to enable USB mass storage support
      */
     void setMassStorageEnabled(boolean enable) {
-        writeCommand(enable ? MOUNTD_ENABLE_UMS : MOUNTD_DISABLE_UMS);
+        writeCommand(enable ? VOLD_CMD_ENABLE_UMS : VOLD_CMD_DISABLE_UMS);
     }
 
     /**
@@ -297,14 +305,20 @@ final class MountListener implements Runnable {
      * Mount media at given mount point.
      */
     public void mountMedia(String mountPoint) {
-        writeCommand2(MOUNTD_MOUNT_MEDIA, mountPoint);
+        writeCommand2(VOLD_CMD_MOUNT_VOLUME, mountPoint);
     }
 
     /**
      * Unmount media at given mount point.
      */
     public void ejectMedia(String mountPoint) {
-        writeCommand2(MOUNTD_EJECT_MEDIA, mountPoint);
+        writeCommand2(VOLD_CMD_EJECT_MEDIA, mountPoint);
+    }
+
+    /**
+     * Format media at given mount point.
+     */
+    public void formatMedia(String mountPoint) {
+        writeCommand2(VOLD_CMD_FORMAT_MEDIA, mountPoint);
     }
 }
-

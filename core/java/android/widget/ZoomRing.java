@@ -1,0 +1,423 @@
+package android.widget;
+
+import com.android.internal.R;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
+
+/**
+ * @hide
+ */
+public class ZoomRing extends View {
+    
+    // TODO: move to ViewConfiguration?
+    private static final int DOUBLE_TAP_DISMISS_TIMEOUT = ViewConfiguration.getJumpTapTimeout();
+    // TODO: get from theme
+    private static final int DISABLED_ALPHA = 160;
+    
+    private static final String TAG = "ZoomRing";
+
+    // TODO: xml
+    private static final int THUMB_DISTANCE = 63; 
+    
+    /** To avoid floating point calculations, we multiply radians by this value. */
+    public static final int RADIAN_INT_MULTIPLIER = 100000000;
+    /** PI using our multiplier. */
+    public static final int PI_INT_MULTIPLIED = (int) (Math.PI * RADIAN_INT_MULTIPLIER);
+    /** PI/2 using our multiplier. */
+    private static final int HALF_PI_INT_MULTIPLIED = PI_INT_MULTIPLIED / 2;
+
+    private static final int THUMB_GRAB_SLOP = PI_INT_MULTIPLIED / 4;
+    
+    /** The cached X of our center. */
+    private int mCenterX;
+    /** The cached Y of our center. */ 
+    private int mCenterY;
+
+    /** The angle of the thumb (in int radians) */
+    private int mThumbAngle;
+    private boolean mIsThumbAngleValid;
+    private int mThumbCenterX;
+    private int mThumbCenterY;
+    private int mThumbHalfWidth;
+    private int mThumbHalfHeight;
+    
+    private int mCallbackThreshold = Integer.MAX_VALUE;
+    
+    /** The accumulated amount of drag for the thumb (in int radians). */
+    private int mAcculumalatedThumbDrag = 0;
+   
+    /** The inner radius of the track. */
+    private int mBoundInnerRadiusSquared = 0;
+    /** The outer radius of the track. */
+    private int mBoundOuterRadiusSquared = Integer.MAX_VALUE;
+    
+    private int mPreviousWidgetDragX;
+    private int mPreviousWidgetDragY;
+    
+    private boolean mDrawThumb = true;
+    private Drawable mThumbDrawable;
+    
+    private static final int MODE_IDLE = 0;
+    private static final int MODE_DRAG_THUMB = 1;
+    private static final int MODE_MOVE_ZOOM_RING = 2;
+    private static final int MODE_TAP_DRAG = 3;
+    private int mMode;
+
+    private long mPreviousTapTime;
+    
+    private Handler mHandler = new Handler();
+    
+    private Disabler mDisabler = new Disabler();
+    
+    private OnZoomRingCallback mCallback;
+    
+    private boolean mResetThumbAutomatically = true;
+    private int mThumbDragStartAngle;
+    
+    public ZoomRing(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        // TODO get drawable from style instead
+        Resources res = context.getResources();
+        mThumbDrawable = res.getDrawable(R.drawable.zoom_ring_thumb);
+        
+        // TODO: add padding to drawable
+        setBackgroundResource(R.drawable.zoom_ring_track);
+        // TODO get from style
+        setBounds(30, Integer.MAX_VALUE);
+        
+        mThumbHalfHeight = mThumbDrawable.getIntrinsicHeight() / 2;
+        mThumbHalfWidth = mThumbDrawable.getIntrinsicWidth() / 2;
+        
+        mCallbackThreshold = PI_INT_MULTIPLIED / 6;
+    }
+
+    public ZoomRing(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ZoomRing(Context context) {
+        this(context, null);
+    }
+    
+    public void setCallback(OnZoomRingCallback callback) {
+        mCallback = callback;
+    }
+
+    // TODO: rename
+    public void setCallbackThreshold(int callbackThreshold) {
+        mCallbackThreshold = callbackThreshold;
+    }
+
+    // TODO: from XML too
+    public void setBounds(int innerRadius, int outerRadius) {
+        mBoundInnerRadiusSquared = innerRadius * innerRadius;
+        if (mBoundInnerRadiusSquared < innerRadius) {
+            // Prevent overflow
+            mBoundInnerRadiusSquared = Integer.MAX_VALUE;
+        }
+
+        mBoundOuterRadiusSquared = outerRadius * outerRadius;
+        if (mBoundOuterRadiusSquared < outerRadius) {
+            // Prevent overflow
+            mBoundOuterRadiusSquared = Integer.MAX_VALUE;
+        }
+    }
+    
+    public void setThumbAngle(int angle) {
+        mThumbAngle = angle;
+        mThumbCenterX = (int) (Math.cos(1f * angle / RADIAN_INT_MULTIPLIER) * THUMB_DISTANCE)
+                + mCenterX;
+        mThumbCenterY = (int) (Math.sin(1f * angle / RADIAN_INT_MULTIPLIER) * THUMB_DISTANCE)
+                * -1 + mCenterY;
+        invalidate();
+    }
+    
+    public void resetThumbAngle() {
+        if (mResetThumbAutomatically) {
+            setThumbAngle(HALF_PI_INT_MULTIPLIED);
+        }
+    }
+    
+    public void setResetThumbAutomatically(boolean resetThumbAutomatically) {
+        mResetThumbAutomatically = resetThumbAutomatically;
+    }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec),
+                resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec));
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right,
+            int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        
+        // Cache the center point
+        mCenterX = (right - left) / 2;
+        mCenterY = (bottom - top) / 2;
+
+        // Done here since we now have center, which is needed to calculate some
+        // aux info for thumb angle
+        if (mThumbAngle == Integer.MIN_VALUE) {
+            resetThumbAngle();
+        }
+    }
+    
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return handleTouch(event.getAction(), event.getEventTime(),
+                (int) event.getX(), (int) event.getY(), (int) event.getRawX(),
+                (int) event.getRawY());
+    }
+
+    private void resetState() {
+        mMode = MODE_IDLE;
+        mPreviousWidgetDragX = mPreviousWidgetDragY = Integer.MIN_VALUE;
+        mAcculumalatedThumbDrag = 0;
+        mIsThumbAngleValid = false;
+    }
+    
+    public void setTapDragMode(boolean tapDragMode, int x, int y) {
+        resetState();
+        mMode = tapDragMode ? MODE_TAP_DRAG : MODE_IDLE;
+        mIsThumbAngleValid = false;
+        
+        if (tapDragMode && mCallback != null) {
+            onThumbDragStarted(getAngle(x - mCenterX, y - mCenterY));
+        }
+    }
+    
+    public boolean handleTouch(int action, long time, int x, int y, int rawX, int rawY) {
+        switch (action) {
+        
+            case MotionEvent.ACTION_DOWN:
+                if (mPreviousTapTime + DOUBLE_TAP_DISMISS_TIMEOUT >= time) {
+                    if (mCallback != null) {
+                        mCallback.onZoomRingDismissed();
+                    }
+                } else {
+                    mPreviousTapTime = time;
+                }
+                resetState();
+                return true;
+                
+            case MotionEvent.ACTION_MOVE:
+                // Fall through to code below switch
+                break;
+                
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                if (mCallback != null) {
+                    if (mMode == MODE_MOVE_ZOOM_RING) {
+                        mCallback.onZoomRingMovingStopped();
+                    } else if (mMode == MODE_DRAG_THUMB || mMode == MODE_TAP_DRAG) {
+                        onThumbDragStopped(getAngle(x - mCenterX, y - mCenterY));
+                    }
+                }
+                mDisabler.setEnabling(true);
+                return true;
+                
+            default:
+                return false;
+        }
+        
+        // local{X,Y} will be where the center of the widget is (0,0)
+        int localX = x - mCenterX;
+        int localY = y - mCenterY;
+        boolean isTouchingThumb = true;
+        boolean isInBounds = true;
+        int touchAngle = getAngle(localX, localY);
+        
+        int radiusSquared = localX * localX + localY * localY;
+        if (radiusSquared < mBoundInnerRadiusSquared ||
+                radiusSquared > mBoundOuterRadiusSquared) {
+            // Out-of-bounds
+            isTouchingThumb = false;
+            isInBounds = false;
+        }
+        
+        int deltaThumbAndTouch = getDelta(touchAngle, mThumbAngle);
+        int absoluteDeltaThumbAndTouch = deltaThumbAndTouch >= 0 ?
+                deltaThumbAndTouch : -deltaThumbAndTouch;
+        if (isTouchingThumb &&
+                absoluteDeltaThumbAndTouch > THUMB_GRAB_SLOP) {
+            // Didn't grab close enough to the thumb
+            isTouchingThumb = false;
+        }
+        
+        if (mMode == MODE_IDLE) {
+            mMode = isTouchingThumb ? MODE_DRAG_THUMB : MODE_MOVE_ZOOM_RING;
+            
+            if (mCallback != null) {
+                if (mMode == MODE_DRAG_THUMB) {
+                    onThumbDragStarted(touchAngle);
+                } else if (mMode == MODE_MOVE_ZOOM_RING) {
+                    mCallback.onZoomRingMovingStarted();
+                }
+            }
+        }
+        
+        if (mMode == MODE_DRAG_THUMB || mMode == MODE_TAP_DRAG) {
+            if (isInBounds) {
+                onThumbDragged(touchAngle, mIsThumbAngleValid ? deltaThumbAndTouch : 0);
+            } else {
+                mIsThumbAngleValid = false;
+            }
+        } else if (mMode == MODE_MOVE_ZOOM_RING) {
+            onZoomRingMoved(rawX, rawY);
+        }
+        
+        return true;
+    }
+    
+    private int getDelta(int angle1, int angle2) {
+        int delta = angle1 - angle2;
+                
+        // Assume this is a result of crossing over the discontinuous 0 -> 2pi
+        if (delta > PI_INT_MULTIPLIED || delta < -PI_INT_MULTIPLIED) {
+            // Bring both the radians and previous angle onto a continuous range
+            if (angle1 < HALF_PI_INT_MULTIPLIED) {
+                // Same as deltaRadians = (radians + 2PI) - previousAngle
+                delta += PI_INT_MULTIPLIED * 2;
+            } else if (angle2 < HALF_PI_INT_MULTIPLIED) {
+                // Same as deltaRadians = radians - (previousAngle + 2PI)
+                delta -= PI_INT_MULTIPLIED * 2;
+            }
+        }
+       
+        return delta;
+    }
+
+    private void onThumbDragStarted(int startAngle) {
+        mThumbDragStartAngle = startAngle;
+        mCallback.onZoomRingThumbDraggingStarted(startAngle);
+    }
+    
+    private void onThumbDragged(int touchAngle, int deltaAngle) {
+        mAcculumalatedThumbDrag += deltaAngle;
+        if (mAcculumalatedThumbDrag > mCallbackThreshold
+                || mAcculumalatedThumbDrag < -mCallbackThreshold) {
+            if (mCallback != null) {
+                boolean canStillZoom = mCallback.onZoomRingThumbDragged(
+                        mAcculumalatedThumbDrag / mCallbackThreshold,
+                        mAcculumalatedThumbDrag, mThumbDragStartAngle, touchAngle);
+                mDisabler.setEnabling(canStillZoom);
+            }
+            mAcculumalatedThumbDrag = 0;
+        }
+    
+        setThumbAngle(touchAngle);
+        mIsThumbAngleValid = true;
+    }
+    
+    private void onThumbDragStopped(int stopAngle) {
+        mCallback.onZoomRingThumbDraggingStopped(stopAngle);
+    }
+    
+    private void onZoomRingMoved(int x, int y) {
+        if (mPreviousWidgetDragX != Integer.MIN_VALUE) {
+            int deltaX = x - mPreviousWidgetDragX;
+            int deltaY = y - mPreviousWidgetDragY;
+            
+            if (mCallback != null) {
+                mCallback.onZoomRingMoved(deltaX, deltaY);
+            }
+        }
+        
+        mPreviousWidgetDragX = x;
+        mPreviousWidgetDragY = y;
+    }
+    
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        
+        if (!hasWindowFocus && mCallback != null) {
+            mCallback.onZoomRingDismissed();
+        }
+    }
+
+    private int getAngle(int localX, int localY) {
+        int radians = (int) (Math.atan2(localY, localX) * RADIAN_INT_MULTIPLIER);
+
+        // Convert from [-pi,pi] to {0,2pi]
+        if (radians < 0) {
+            return -radians;
+        } else if (radians > 0) {
+            return 2 * PI_INT_MULTIPLIED - radians;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        
+        if (mDrawThumb) {
+            mThumbDrawable.setBounds(mThumbCenterX - mThumbHalfWidth, mThumbCenterY
+                    - mThumbHalfHeight, mThumbCenterX + mThumbHalfWidth, mThumbCenterY
+                    + mThumbHalfHeight);
+            mThumbDrawable.draw(canvas);
+        }
+    }
+
+    private class Disabler implements Runnable {
+        private static final int DELAY = 15;
+        private static final float ENABLE_RATE = 1.05f;
+        private static final float DISABLE_RATE = 0.95f;
+        
+        private int mAlpha = 255;
+        private boolean mEnabling;
+        
+        public int getAlpha() {
+            return mAlpha;
+        }
+
+        public void setEnabling(boolean enabling) {
+            if ((enabling && mAlpha != 255) || (!enabling && mAlpha != DISABLED_ALPHA)) {
+                mEnabling = enabling;
+                post(this);
+            }
+        }
+        
+        public void run() {
+            mAlpha *= mEnabling ? ENABLE_RATE : DISABLE_RATE;
+            if (mAlpha < DISABLED_ALPHA) {
+                mAlpha = DISABLED_ALPHA;
+            } else if (mAlpha > 255) {
+                mAlpha = 255;
+            } else {
+                // Still more to go
+                postDelayed(this, DELAY);
+            }
+            
+            getBackground().setAlpha(mAlpha);
+            invalidate();
+        }
+    }
+    
+    public interface OnZoomRingCallback {
+        void onZoomRingMovingStarted();
+        boolean onZoomRingMoved(int deltaX, int deltaY);
+        void onZoomRingMovingStopped();
+        
+        void onZoomRingThumbDraggingStarted(int startAngle);
+        boolean onZoomRingThumbDragged(int numLevels, int dragAmount, int startAngle, int curAngle);
+        void onZoomRingThumbDraggingStopped(int endAngle);
+        
+        void onZoomRingDismissed();
+    }
+
+}

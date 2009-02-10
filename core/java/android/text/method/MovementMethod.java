@@ -26,6 +26,14 @@ public interface MovementMethod
     public void initialize(TextView widget, Spannable text);
     public boolean onKeyDown(TextView widget, Spannable text, int keyCode, KeyEvent event);
     public boolean onKeyUp(TextView widget, Spannable text, int keyCode, KeyEvent event);
+    
+    /**
+     * If the key listener wants to other kinds of key events, return true,
+     * otherwise return false and the caller (i.e. the widget host)
+     * will handle the key.
+     */
+    public boolean onKeyOther(TextView view, Spannable text, KeyEvent event);
+    
     public void onTakeFocus(TextView widget, Spannable text, int direction);
     public boolean onTrackballEvent(TextView widget, Spannable text,
                                     MotionEvent event);

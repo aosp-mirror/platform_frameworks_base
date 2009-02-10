@@ -15,19 +15,26 @@ import android.util.SparseArray;
 public abstract class BatteryStats {
 
     /**
-     * A constant indicating a partial wake lock.
+     * A constant indicating a partial wake lock timer.
      */
     public static final int WAKE_TYPE_PARTIAL = 0;
 
     /**
-     * A constant indicating a full wake lock.
+     * A constant indicating a full wake lock timer.
      */
     public static final int WAKE_TYPE_FULL = 1;
 
     /**
-     * A constant indicating a window wake lock.
+     * A constant indicating a window wake lock timer.
      */
     public static final int WAKE_TYPE_WINDOW = 2;
+    
+    /**
+     * A constant indicating a sensor timer.
+     * 
+     * {@hide}
+     */
+    public static final int SENSOR = 3;
 
     /**
      * Include all of the data in the stats, including previously saved data.
@@ -48,6 +55,21 @@ public abstract class BatteryStats {
      * Include only the run since the last time the device was unplugged in the stats.
      */
     public static final int STATS_UNPLUGGED = 3;
+    
+    /**
+     * Bump the version on this if the checkin format changes.
+     */
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 1;
+    
+    // TODO: Update this list if you add/change any stats above.
+    private static final String[] STAT_NAMES = { "total", "last", "current", "unplugged" };
+
+    private static final String APK_DATA = "apk";
+    private static final String PROCESS_DATA = "process";
+    private static final String SENSOR_DATA = "sensor";
+    private static final String WAKELOCK_DATA = "wakelock";
+    private static final String NETWORK_DATA = "network";
+    private static final String BATTERY_DATA = "battery";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(8);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -115,8 +137,28 @@ public abstract class BatteryStats {
          * @return a Map from Strings to Uid.Pkg objects.
          */
         public abstract Map<String, ? extends Pkg> getPackageStats();
+        
+        /**
+         * {@hide}
+         */
+        public abstract int getUid();
+        
+        /**
+         * {@hide}
+         */
+        public abstract long getTcpBytesReceived(int which);
+        
+        /**
+         * {@hide}
+         */
+        public abstract long getTcpBytesSent(int which);
 
         public static abstract class Sensor {
+            /**
+             * {@hide}
+             */
+            public abstract String getName();
+            
             public abstract Timer getSensorTime();
         }
 
@@ -200,6 +242,22 @@ public abstract class BatteryStats {
      * Returns the number of times the device has been started.
      */
     public abstract int getStartCount();
+    
+    /**
+     * Returns the time in milliseconds that the screen has been on while the device was
+     * running on battery.
+     * 
+     * {@hide}
+     */
+    public abstract long getBatteryScreenOnTime();
+    
+    /**
+     * Returns the time in milliseconds that the screen has been on while the device was
+     * plugged in.
+     * 
+     * {@hide}
+     */
+    public abstract long getPluggedScreenOnTime();
 
     /**
      * Returns a SparseArray containing the statistics for each uid.
@@ -318,11 +376,14 @@ public abstract class BatteryStats {
      * @param linePrefix a String to be prepended to each line of output.
      * @return the line prefix
      */
-    private final String printWakeLock(StringBuilder sb, Timer timer, long now,
+    private static final String printWakeLock(StringBuilder sb, Timer timer, long now,
         String name, int which, String linePrefix) {
+        
         if (timer != null) {
             // Convert from microseconds to milliseconds with rounding
-            long totalTimeMillis = (timer.getTotalTime(now, which) + 500) / 1000;
+            long totalTimeMicros = timer.getTotalTime(now, which);
+            long totalTimeMillis = (totalTimeMicros + 500) / 1000;
+            
             int count = timer.getCount(which);
             if (totalTimeMillis != 0) {
                 sb.append(linePrefix);
@@ -337,6 +398,184 @@ public abstract class BatteryStats {
         }
         return linePrefix;
     }
+    
+    /**
+     * Checkin version of wakelock printer. Prints simple comma-separated list.
+     * 
+     * @param sb a StringBuilder object.
+     * @param timer a Timer object contining the wakelock times.
+     * @param now the current time in microseconds.
+     * @param name the name of the wakelock.
+     * @param which which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
+     * @param linePrefix a String to be prepended to each line of output.
+     * @return the line prefix
+     */
+    private static final String printWakeLockCheckin(StringBuilder sb, Timer timer, long now,
+        String name, int which, String linePrefix) {
+        long totalTimeMicros = 0;
+        int count = 0;
+        if (timer != null) {
+            totalTimeMicros = timer.getTotalTime(now, which);
+            count = timer.getCount(which); 
+        }
+        sb.append(linePrefix);
+        sb.append((totalTimeMicros + 500) / 1000); // microseconds to milliseconds with rounding
+        sb.append(',');
+        sb.append(name);
+        sb.append(',');
+        sb.append(count);
+        return ",";
+    }
+    
+    /**
+     * Dump a comma-separated line of values for terse checkin mode.
+     * 
+     * @param pw the PageWriter to dump log to
+     * @param category category of data (e.g. "total", "last", "unplugged", "current" )
+     * @param type type of data (e.g. "wakelock", "sensor", "process", "apk" ,  "process", "network")
+     * @param args type-dependent data arguments
+     */
+    private static final void dumpLine(PrintWriter pw, int uid, String category, String type, 
+           Object... args ) {
+        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+        pw.print(uid); pw.print(',');
+        pw.print(category); pw.print(',');
+        pw.print(type); 
+        
+        for (Object arg : args) {  
+            pw.print(','); 
+            pw.print(arg); 
+        }
+        pw.print('\n');
+    }
+    
+    /**
+     * Checkin server version of dump to produce more compact, computer-readable log.
+     * 
+     * NOTE: all times are expressed in 'ms'.
+     * @param fd
+     * @param pw
+     * @param which
+     */
+    private final void dumpCheckinLocked(FileDescriptor fd, PrintWriter pw, int which) {
+        long uSecTime = SystemClock.elapsedRealtime() * 1000;
+        final long uSecNow = getBatteryUptime(uSecTime);
+       
+        StringBuilder sb = new StringBuilder(128);
+        long batteryUptime = computeBatteryUptime(uSecNow, which);
+        long batteryRealtime = computeBatteryRealtime(getBatteryRealtime(uSecTime), which);
+        long elapsedRealtime = computeRealtime(uSecTime, which);
+        long uptime = computeUptime(SystemClock.uptimeMillis() * 1000, which);
+        
+        String category = STAT_NAMES[which];
+        
+        // Dump "battery" stat
+        dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, 
+                which == STATS_TOTAL ? getStartCount() : "N/A",
+                batteryUptime / 1000, 
+                formatRatioLocked(batteryUptime, elapsedRealtime),
+                batteryRealtime / 1000, 
+                formatRatioLocked(batteryRealtime, elapsedRealtime),
+                uptime / 1000,
+                elapsedRealtime / 1000); 
+        
+        SparseArray<? extends Uid> uidStats = getUidStats();
+        final int NU = uidStats.size();
+        for (int iu = 0; iu < NU; iu++) {
+            final int uid = uidStats.keyAt(iu);
+            Uid u = uidStats.valueAt(iu);
+            // Dump Network stats per uid, if any
+            long rx = u.getTcpBytesReceived(which);
+            long tx = u.getTcpBytesSent(which);
+            if (rx > 0 || tx > 0) dumpLine(pw, uid, category, NETWORK_DATA, rx, tx);
+
+            Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
+            if (wakelocks.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent
+                        : wakelocks.entrySet()) {
+                    Uid.Wakelock wl = ent.getValue();
+                    String linePrefix = "";
+                    sb.setLength(0);
+                    linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_FULL), uSecNow,
+                            "full", which, linePrefix);
+                    linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL), uSecNow,
+                            "partial", which, linePrefix);
+                    linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), uSecNow,
+                            "window", which, linePrefix);
+                    
+                    // Only log if we had at lease one wakelock...
+                    if (sb.length() > 0) {
+                       dumpLine(pw, uid, category, WAKELOCK_DATA, ent.getKey(), sb.toString());
+                    }
+                }
+            }
+                
+            Map<Integer, ? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
+            if (sensors.size() > 0)  {
+                for (Map.Entry<Integer, ? extends BatteryStats.Uid.Sensor> ent
+                        : sensors.entrySet()) {
+                    Uid.Sensor se = ent.getValue();
+                    int sensorNumber = ent.getKey();
+                    Timer timer = se.getSensorTime();
+                    if (timer != null) {
+                        // Convert from microseconds to milliseconds with rounding
+                        long totalTime = (timer.getTotalTime(uSecNow, which) + 500) / 1000;
+                        int count = timer.getCount(which);
+                        if (totalTime != 0) {
+                            dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count);
+                        }
+                    } 
+                }
+            }
+
+            Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
+            if (processStats.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Proc> ent
+                        : processStats.entrySet()) {
+                    Uid.Proc ps = ent.getValue();
+    
+                    long userTime = ps.getUserTime(which);
+                    long systemTime = ps.getSystemTime(which);
+                    int starts = ps.getStarts(which);
+    
+                    if (userTime != 0 || systemTime != 0 || starts != 0) {
+                        dumpLine(pw, uid, category, PROCESS_DATA, 
+                                ent.getKey(), // proc
+                                userTime * 10, // cpu time in ms
+                                systemTime * 10, // user time in ms
+                                starts); // process starts
+                    }
+                }
+            }
+
+            Map<String, ? extends BatteryStats.Uid.Pkg> packageStats = u.getPackageStats();
+            if (packageStats.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Pkg> ent
+                        : packageStats.entrySet()) {
+              
+                    Uid.Pkg ps = ent.getValue();
+                    int wakeups = ps.getWakeups(which);
+                    Map<String, ? extends  Uid.Pkg.Serv> serviceStats = ps.getServiceStats();
+                    for (Map.Entry<String, ? extends BatteryStats.Uid.Pkg.Serv> sent
+                            : serviceStats.entrySet()) {
+                        BatteryStats.Uid.Pkg.Serv ss = sent.getValue();
+                        long startTime = ss.getStartTime(uSecNow, which);
+                        int starts = ss.getStarts(which);
+                        int launches = ss.getLaunches(which);
+                        if (startTime != 0 || starts != 0 || launches != 0) {
+                            dumpLine(pw, uid, category, APK_DATA, 
+                                    wakeups, // wakeup alarms
+                                    ent.getKey(), // Apk
+                                    sent.getKey(), // service
+                                    startTime / 1000, // time spent started, in ms
+                                    starts,
+                                    launches);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @SuppressWarnings("unused")
     private final void dumpLocked(FileDescriptor fd, PrintWriter pw, String prefix, int which) {
@@ -344,13 +583,22 @@ public abstract class BatteryStats {
         final long uSecNow = getBatteryUptime(uSecTime);
 
         StringBuilder sb = new StringBuilder(128);
-        if (which == STATS_TOTAL) {
-            pw.println(prefix + "Current and Historic Battery Usage Statistics:");
-            pw.println(prefix + "  System starts: " + getStartCount());
-        } else if (which == STATS_LAST) {
-            pw.println(prefix + "Last Battery Usage Statistics:");
-        } else {
-            pw.println(prefix + "Current Battery Usage Statistics:");
+        switch (which) {
+            case STATS_TOTAL:
+                pw.println(prefix + "Current and Historic Battery Usage Statistics:");
+                pw.println(prefix + "  System starts: " + getStartCount());
+                break;
+            case STATS_LAST:
+                pw.println(prefix + "Last Battery Usage Statistics:");
+                break;
+            case STATS_UNPLUGGED:
+                pw.println(prefix + "Last Unplugged Battery Usage Statistics:");
+                break;
+            case STATS_CURRENT:
+                pw.println(prefix + "Current Battery Usage Statistics:");
+                break;
+            default:
+                throw new IllegalArgumentException("which = " + which);
         }
         long batteryUptime = computeBatteryUptime(uSecNow, which);
         long batteryRealtime = computeBatteryRealtime(getBatteryRealtime(uSecTime), which);
@@ -359,7 +607,7 @@ public abstract class BatteryStats {
 
         pw.println(prefix
                 + "  On battery: " + formatTimeMs(batteryUptime / 1000) + "("
-                + formatRatioLocked(batteryUptime, batteryRealtime)
+                + formatRatioLocked(batteryUptime, elapsedRealtime)
                 + ") uptime, "
                 + formatTimeMs(batteryRealtime / 1000) + "("
                 + formatRatioLocked(batteryRealtime, elapsedRealtime)
@@ -380,6 +628,9 @@ public abstract class BatteryStats {
             Uid u = uidStats.valueAt(iu);
             pw.println(prefix + "  #" + uid + ":");
             boolean uidActivity = false;
+            
+            pw.println(prefix + "    Network: " + u.getTcpBytesReceived(which) + " bytes received, "
+                    + u.getTcpBytesSent(which) + " bytes sent");
 
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
@@ -512,12 +763,30 @@ public abstract class BatteryStats {
      */
     @SuppressWarnings("unused")
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
+        boolean isCheckin = false;
+        if (args != null) {
+            for (String arg : args) {
+                if ("-c".equals(arg)) {
+                    isCheckin = true;
+                    break;
+                }
+            }
+        }
         synchronized (this) {
-            dumpLocked(fd, pw, "", STATS_TOTAL);
-            pw.println("");
-            dumpLocked(fd, pw, "", STATS_LAST);
-            pw.println("");
-            dumpLocked(fd, pw, "", STATS_CURRENT);
+            if (isCheckin) {
+                dumpCheckinLocked(fd, pw, STATS_TOTAL);
+                dumpCheckinLocked(fd, pw, STATS_LAST);
+                dumpCheckinLocked(fd, pw, STATS_UNPLUGGED);
+                dumpCheckinLocked(fd, pw, STATS_CURRENT);
+            } else {
+                dumpLocked(fd, pw, "", STATS_TOTAL);
+                pw.println("");
+                dumpLocked(fd, pw, "", STATS_LAST);
+                pw.println("");
+                dumpLocked(fd, pw, "", STATS_UNPLUGGED);
+                pw.println("");
+                dumpLocked(fd, pw, "", STATS_CURRENT);
+            }
         }
     }
 }

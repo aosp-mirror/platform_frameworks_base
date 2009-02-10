@@ -644,6 +644,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 bool16("bool");
     const String16 integer16("integer");
     const String16 dimen16("dimen");
+    const String16 fraction16("fraction");
     const String16 style16("style");
     const String16 plurals16("plurals");
     const String16 array16("array");
@@ -1022,6 +1023,10 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &dimen16;
                 curType = dimen16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_DIMENSION;
+            } else if (strcmp16(block.getElementName(&len), fraction16.string()) == 0) {
+                curTag = &fraction16;
+                curType = fraction16;
+                curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_FRACTION;
             } else if (strcmp16(block.getElementName(&len), bag16.string()) == 0) {
                 curTag = &bag16;
                 curIsBag = true;

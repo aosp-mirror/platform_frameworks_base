@@ -287,6 +287,24 @@ static jboolean android_net_wifi_stopDriverCommand(JNIEnv* env, jobject clazz)
     return doBooleanCommand("DRIVER STOP", "OK");
 }
 
+static jboolean android_net_wifi_startPacketFiltering(JNIEnv* env, jobject clazz)
+{
+    return doBooleanCommand("DRIVER RXFILTER-ADD 0", "OK")
+	&& doBooleanCommand("DRIVER RXFILTER-ADD 1", "OK")
+	&& doBooleanCommand("DRIVER RXFILTER-START", "OK");
+}
+
+static jboolean android_net_wifi_stopPacketFiltering(JNIEnv* env, jobject clazz)
+{
+    jboolean result = doBooleanCommand("DRIVER RXFILTER-STOP", "OK");
+    if (result) {
+	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 1", "OK");
+	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 0", "OK");
+    }
+
+    return result;
+}
+
 static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
 {
     char reply[256];
@@ -478,6 +496,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanModeCommand", "(Z)Z", (void*) android_net_wifi_setScanModeCommand },
     { "startDriverCommand", "()Z", (void*) android_net_wifi_startDriverCommand },
     { "stopDriverCommand", "()Z", (void*) android_net_wifi_stopDriverCommand },
+    { "startPacketFiltering", "()Z", (void*) android_net_wifi_startPacketFiltering },
+    { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
     { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },

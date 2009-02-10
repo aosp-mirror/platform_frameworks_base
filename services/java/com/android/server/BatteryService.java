@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.util.EventLog;
 import android.util.Log;
@@ -61,8 +62,12 @@ class BatteryService extends Binder {
     
     static final int LOG_BATTERY_LEVEL = 2722;
     static final int LOG_BATTERY_STATUS = 2723;
+    static final int LOG_BATTERY_DISCHARGE_STATUS = 2730;
     
     static final int BATTERY_SCALE = 100;    // battery capacity is a percentage
+
+    // This should probably be exposed in the API, though it's not critical
+    private static final int BATTERY_PLUGGED_NONE = 0;
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
@@ -85,7 +90,10 @@ class BatteryService extends Binder {
     private int mLastBatteryTemperature;
     
     private int mPlugType;
-    private int mLastPlugType;
+    private int mLastPlugType = -1; // Extra state so we can detect first run
+    
+    private long mDischargeStartTime;
+    private int mDischargeStartLevel;
     
     public BatteryService(Context context) {
         mContext = context;
@@ -145,7 +153,7 @@ class BatteryService extends Binder {
         } else if (mUsbOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
         } else {
-            mPlugType = 0;
+            mPlugType = BATTERY_PLUGGED_NONE;
         }
         if (mBatteryStatus != mLastBatteryStatus ||
                 mBatteryHealth != mLastBatteryHealth ||
@@ -155,6 +163,25 @@ class BatteryService extends Binder {
                 mBatteryVoltage != mLastBatteryVoltage ||
                 mBatteryTemperature != mLastBatteryTemperature) {
             
+            if (mPlugType != mLastPlugType) {
+                if (mLastPlugType == BATTERY_PLUGGED_NONE) {
+                    // discharging -> charging
+                    
+                    // There's no value in this data unless we've discharged at least once and the
+                    // battery level has changed; so don't log until it does.
+                    if (mDischargeStartTime != 0 && mDischargeStartLevel != mBatteryLevel) {
+                        long duration = SystemClock.elapsedRealtime() - mDischargeStartTime;
+                        EventLog.writeEvent(LOG_BATTERY_DISCHARGE_STATUS, duration,
+                                mDischargeStartLevel, mBatteryLevel);
+                        // make sure we see a discharge event before logging again
+                        mDischargeStartTime = 0; 
+                    }
+                } else if (mPlugType == BATTERY_PLUGGED_NONE) {
+                    // charging -> discharging or we just powered up
+                    mDischargeStartTime = SystemClock.elapsedRealtime();
+                    mDischargeStartLevel = mBatteryLevel;
+                }
+            }
             if (mBatteryStatus != mLastBatteryStatus ||
                     mBatteryHealth != mLastBatteryHealth ||
                     mBatteryPresent != mLastBatteryPresent ||
@@ -187,7 +214,7 @@ class BatteryService extends Binder {
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         try {
-            mBatteryStats.setOnBattery(mPlugType == 0);
+            mBatteryStats.setOnBattery(mPlugType == BATTERY_PLUGGED_NONE);
         } catch (RemoteException e) {
             // Should never happen.
         }
@@ -233,7 +260,7 @@ class BatteryService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission("android.permission.DUMP")
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             
             pw.println("Permission Denial: can't dump Battery service from from pid="

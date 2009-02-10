@@ -223,7 +223,7 @@ struct Res_value
 {
     // Number of bytes in this structure.
     uint16_t size;
-    
+
     // Always set to 0.
     uint8_t res0;
         
@@ -1131,10 +1131,8 @@ struct ResTable_config
                 && orientation != settings.orientation) {
                 return false;
             }
-            if (settings.density != 0 && density != 0
-                && density != settings.density) {
-                return false;
-            }
+            // Density not taken into account, always match, no matter what
+            // density is specified for the resource
             if (settings.touchscreen != 0 && touchscreen != 0
                 && touchscreen != settings.touchscreen) {
                 return false;
@@ -1464,11 +1462,11 @@ public:
      * @return ssize_t Either a >= 0 table index or a negative error code.
      */
     ssize_t getResource(uint32_t resID, Res_value* outValue, bool mayBeBag=false,
-            uint32_t* outSpecFlags=NULL) const;
+            uint32_t* outSpecFlags=NULL, ResTable_config* outConfig=NULL) const;
 
     inline ssize_t getResource(const ResTable_ref& res, Res_value* outValue,
             uint32_t* outSpecFlags=NULL) const {
-        return getResource(res.ident, outValue, outSpecFlags);
+        return getResource(res.ident, outValue, false, outSpecFlags, NULL);
     }
 
     ssize_t resolveReference(Res_value* inOutValue,

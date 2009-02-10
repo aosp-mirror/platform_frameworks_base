@@ -30,6 +30,7 @@ import com.android.server.status.StatusBarService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -61,7 +62,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.view.IWindowManager;
 import android.view.WindowManager;
-import android.view.inputmethod.DefaultInputMethod;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
@@ -189,6 +189,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     ClientState mCurClient;
     
     /**
+     * The input context last provided by the current client.
+     */
+    IInputContext mCurInputContext;
+    
+    /**
      * The attributes last provided by the current client.
      */
     EditorInfo mCurAttribute;
@@ -214,6 +219,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Set if we were explicitly told to show the input method.
      */
     boolean mShowExplicitlyRequested;
+    
+    /**
+     * Set if we were forced to be shown.
+     */
+    boolean mShowForced;
     
     /**
      * Set if we last told the input method to show itself.
@@ -281,7 +291,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
             } else {
-                Log.e(TAG, "Unexpected intent " + intent);
+                Log.w(TAG, "Unexpected intent " + intent);
             }
 
             // Inform the current client of the change in active status
@@ -290,7 +300,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mCurClient.client.setActive(mScreenOn);
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "Got RemoteException sending 'screen on/off' notification", e);
+                Log.w(TAG, "Got RemoteException sending 'screen on/off' notification to pid "
+                        + mCurClient.pid + " uid " + mCurClient.uid);
             }
         }
     }
@@ -553,10 +564,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 mCurClient.client.setActive(false);
             } catch (RemoteException e) {
-                Log.e(TAG, "Got RemoteException sending setActive(false) notification", e);
+                Log.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
+                        + mCurClient.pid + " uid " + mCurClient.uid);
             }
             mCurClient = null;
         }
+    }
+    
+    private int getShowFlags() {
+        int flags = 0;
+        if (mShowForced) {
+            flags |= InputMethod.SHOW_FORCED
+                    | InputMethod.SHOW_EXPLICIT;
+        } else if (mShowExplicitlyRequested) {
+            flags |= InputMethod.SHOW_EXPLICIT;
+        }
+        return flags;
     }
     
     InputBindResult attachNewInputLocked(boolean initial, boolean needResult) {
@@ -567,16 +590,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         final SessionState session = mCurClient.curSession;
         if (initial) {
-            executeOrSendMessage(session.method, mCaller.obtainMessageOO(
-                    MSG_START_INPUT, session, mCurAttribute));
+            executeOrSendMessage(session.method, mCaller.obtainMessageOOO(
+                    MSG_START_INPUT, session, mCurInputContext, mCurAttribute));
         } else {
-            executeOrSendMessage(session.method, mCaller.obtainMessageOO(
-                    MSG_RESTART_INPUT, session, mCurAttribute));
+            executeOrSendMessage(session.method, mCaller.obtainMessageOOO(
+                    MSG_RESTART_INPUT, session, mCurInputContext, mCurAttribute));
         }
         if (mShowRequested) {
             if (DEBUG) Log.v(TAG, "Attach new input asks to show input");
-            showCurrentInputLocked(mShowExplicitlyRequested
-                    ? 0 : InputMethodManager.SHOW_IMPLICIT);
+            showCurrentInputLocked(getShowFlags());
         }
         return needResult
                 ? new InputBindResult(session.session, mCurId, mCurSeq)
@@ -584,7 +606,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
     
     InputBindResult startInputLocked(IInputMethodClient client,
-            EditorInfo attribute, boolean initial, boolean needResult) {
+            IInputContext inputContext, EditorInfo attribute,
+            boolean initial, boolean needResult) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -622,7 +645,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     cs.client.setActive(mScreenOn);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Got RemoteException sending setActive notification", e);
+                    Log.w(TAG, "Got RemoteException sending setActive notification to pid "
+                            + cs.pid + " uid " + cs.uid);
                 }
             }
         }
@@ -631,6 +655,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurSeq++;
         if (mCurSeq <= 0) mCurSeq = 1;
         mCurClient = cs;
+        mCurInputContext = inputContext;
         mCurAttribute = attribute;
         
         // Check if the input method is changing.
@@ -659,6 +684,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         
         if (mCurToken != null) {
             try {
+                if (DEBUG) Log.v(TAG, "Removing window token: " + mCurToken);
                 mIWindowManager.removeWindowToken(mCurToken);
             } catch (RemoteException e) {
             }
@@ -679,6 +705,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurId = info.getId();
             mCurToken = new Binder();
             try {
+                if (DEBUG) Log.v(TAG, "Adding window token: " + mCurToken);
                 mIWindowManager.addWindowToken(mCurToken,
                         WindowManager.LayoutParams.TYPE_INPUT_METHOD);
             } catch (RemoteException e) {
@@ -686,18 +713,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return new InputBindResult(null, mCurId, mCurSeq);
         } else {
             mCurIntent = null;
-            Log.e(TAG, "Failure connecting to input method service: "
+            Log.w(TAG, "Failure connecting to input method service: "
                     + mCurIntent);
         }
         return null;
     }
     
     public InputBindResult startInput(IInputMethodClient client,
-            EditorInfo attribute, boolean initial, boolean needResult) {
+            IInputContext inputContext, EditorInfo attribute,
+            boolean initial, boolean needResult) {
         synchronized (mMethodMap) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return startInputLocked(client, attribute, initial, needResult);
+                return startInputLocked(client, inputContext, attribute,
+                        initial, needResult);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -712,6 +741,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurClient != null) {
+                    if (DEBUG) Log.v(TAG, "Initiating attach with token: " + mCurToken);
                     executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                             MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                     if (mCurClient != null) {
@@ -817,10 +847,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethodId = id;
             Settings.Secure.putString(mContext.getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, id);
-                    
-            Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
-            intent.putExtra("input_method_id", id);
-            mContext.sendBroadcast(intent);
+
+            if (ActivityManagerNative.isSystemReady()) {
+                Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
+                intent.putExtra("input_method_id", id);
+                mContext.sendBroadcast(intent);
+            }
             unbindCurrentInputLocked();
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -853,10 +885,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if ((flags&InputMethodManager.SHOW_IMPLICIT) == 0) {
             mShowExplicitlyRequested = true;
         }
+        if ((flags&InputMethodManager.SHOW_FORCED) != 0) {
+            mShowExplicitlyRequested = true;
+            mShowForced = true;
+        }
         if (mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIO(
-                    MSG_SHOW_SOFT_INPUT, mShowExplicitlyRequested ? 1 : 0,
-                            mCurMethod));
+                    MSG_SHOW_SOFT_INPUT, getShowFlags(), mCurMethod));
             mInputShown = true;
         }
     }
@@ -884,9 +919,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     
     void hideCurrentInputLocked(int flags) {
         if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
-                && mShowExplicitlyRequested) {
+                && (mShowExplicitlyRequested || mShowForced)) {
             if (DEBUG) Log.v(TAG,
                     "Not hiding: explicit show not cancelled by non-explicit hide");
+            return;
+        }
+        if (mShowForced && (flags&InputMethodManager.HIDE_NOT_ALWAYS) != 0) {
+            if (DEBUG) Log.v(TAG,
+                    "Not hiding: forced show not cancelled by not-always hide");
             return;
         }
         if (mInputShown && mCurMethod != null) {
@@ -896,6 +936,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mInputShown = false;
         mShowRequested = false;
         mShowExplicitlyRequested = false;
+        mShowForced = false;
     }
     
     public void windowGainedFocus(IInputMethodClient client,
@@ -933,7 +974,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // be behind any soft input window, so hide the
                             // soft input window if it is shown.
                             if (DEBUG) Log.v(TAG, "Unspecified window will hide input");
-                            hideCurrentInputLocked(0);
+                            hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS);
                         }
                     } else if (isTextEditor && (softInputMode &
                             WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
@@ -1052,7 +1093,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
             case MSG_SHOW_SOFT_INPUT:
                 try {
-                    ((IInputMethod)msg.obj).showSoftInput(msg.arg1 != 0);
+                    ((IInputMethod)msg.obj).showSoftInput(msg.arg1);
                 } catch (RemoteException e) {
                 }
                 return true;
@@ -1065,6 +1106,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_ATTACH_TOKEN:
                 args = (HandlerCaller.SomeArgs)msg.obj;
                 try {
+                    if (DEBUG) Log.v(TAG, "Sending attach of token: " + args.arg2);
                     ((IInputMethod)args.arg1).attachToken((IBinder)args.arg2);
                 } catch (RemoteException e) {
                 }
@@ -1085,7 +1127,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     SessionState session = (SessionState)args.arg1;
                     setEnabledSessionInMainThread(session);
-                    session.method.startInput((EditorInfo)args.arg2);
+                    session.method.startInput((IInputContext)args.arg2,
+                            (EditorInfo)args.arg3);
                 } catch (RemoteException e) {
                 }
                 return true;
@@ -1094,7 +1137,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     SessionState session = (SessionState)args.arg1;
                     setEnabledSessionInMainThread(session);
-                    session.method.restartInput((EditorInfo)args.arg2);
+                    session.method.restartInput((IInputContext)args.arg2,
+                            (EditorInfo)args.arg3);
                 } catch (RemoteException e) {
                 }
                 return true;
@@ -1128,10 +1172,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         
         PackageManager pm = mContext.getPackageManager();
 
-        Object[][] buildin = {{
-                DefaultInputMethod.class.getName(),
-                DefaultInputMethod.getMetaInfo()}};
-
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(InputMethod.SERVICE_INTERFACE),
                 PackageManager.GET_META_DATA);
@@ -1149,39 +1189,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             if (DEBUG) Log.d(TAG, "Checking " + compName);
-
-            /* Built-in input methods are not currently supported... this will
-             * need to be reworked to bring them back (all input methods must
-             * now be published in a manifest).
-             */
-            /*
-            if (compName.getPackageName().equals(
-                    InputMethodManager.BUILDIN_INPUTMETHOD_PACKAGE)) {
-                // System build-in input methods;
-                String inputMethodName = null;
-                int kbType = 0;
-                String skbName = null;
-
-                for (int j = 0; j < buildin.length; ++j) {
-                    Object[] obj = buildin[j];
-                    if (compName.getClassName().equals(obj[0])) {
-                        InputMethodMetaInfo imp = (InputMethodMetaInfo) obj[1];
-                        inputMethodName = imp.inputMethodName;
-                    }
-                }
-
-                InputMethodMetaInfo p = new InputMethodMetaInfo(compName,
-                        inputMethodName, "");
-
-                list.add(p);
-
-                if (DEBUG) {
-                    Log.d(TAG, "Found a build-in input method " + p);
-                }
-
-                continue;
-            }
-            */
 
             try {
                 InputMethodInfo p = new InputMethodInfo(mContext, ri);
@@ -1386,7 +1393,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission("android.permission.DUMP")
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             
             pw.println("Permission Denial: can't dump InputMethodManager from from pid="
@@ -1395,8 +1402,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
 
+        IInputMethod method;
+        ClientState client;
+        
+        final Printer p = new PrintWriterPrinter(pw);
+        
         synchronized (mMethodMap) {
-            final Printer p = new PrintWriterPrinter(pw);
             p.println("Current Input Method Manager state:");
             int N = mMethodList.size();
             p.println("  Input Methods:");
@@ -1416,17 +1427,40 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mInputMethodIcon=" + mInputMethodIcon);
             p.println("  mInputMethodData=" + mInputMethodData);
             p.println("  mCurrentMethod=" + mCurMethodId);
-            p.println("  mCurSeq=" + mCurSeq + " mCurClient=" + mCurClient);
+            client = mCurClient;
+            p.println("  mCurSeq=" + mCurSeq + " mCurClient=" + client);
             p.println("  mCurId=" + mCurId + " mHaveConnect=" + mHaveConnection
                     + " mBoundToMethod=" + mBoundToMethod);
             p.println("  mCurToken=" + mCurToken);
             p.println("  mCurIntent=" + mCurIntent);
+            method = mCurMethod;
             p.println("  mCurMethod=" + mCurMethod);
             p.println("  mEnabledSession=" + mEnabledSession);
             p.println("  mShowRequested=" + mShowRequested
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
+                    + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
             p.println("  mScreenOn=" + mScreenOn);
+        }
+        
+        if (client != null) {
+            p.println(" ");
+            pw.flush();
+            try {
+                client.client.asBinder().dump(fd, args);
+            } catch (RemoteException e) {
+                p.println("Input method client dead: " + e);
+            }
+        }
+        
+        if (method != null) {
+            p.println(" ");
+            pw.flush();
+            try {
+                method.asBinder().dump(fd, args);
+            } catch (RemoteException e) {
+                p.println("Input method service dead: " + e);
+            }
         }
     }
 }

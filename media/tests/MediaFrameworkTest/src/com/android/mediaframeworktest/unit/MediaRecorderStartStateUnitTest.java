@@ -54,9 +54,6 @@ public class MediaRecorderStartStateUnitTest extends AndroidTestCase implements 
         recorder.start();
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testStart() {
         mTestTemplate.runTestOnMethod(this);

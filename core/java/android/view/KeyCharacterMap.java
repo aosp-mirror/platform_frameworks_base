@@ -18,6 +18,8 @@ package android.view;
 
 import android.text.method.MetaKeyKeyListener;
 import android.util.SparseIntArray;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.SparseArray;
 
@@ -348,6 +350,28 @@ public class KeyCharacterMap
     public int getKeyboardType()
     {
         return getKeyboardType_native(mPointer);
+    }
+
+    /**
+     * Queries the framework about whether any physical keys exist on the
+     * device that are capable of producing the given key codes.
+     */
+    public static boolean deviceHasKey(int keyCode) {
+        int[] codeArray = new int[1];
+        codeArray[0] = keyCode;
+        boolean[] ret = deviceHasKeys(codeArray);
+        return ret[0];
+    }
+    
+    public static boolean[] deviceHasKeys(int[] keyCodes) {
+        boolean[] ret = new boolean[keyCodes.length];
+        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        try {
+            wm.hasKeys(keyCodes, ret);
+        } catch (RemoteException e) {
+            // no fallback; just return the empty array
+        }
+        return ret;
     }
 
     private int mPointer;

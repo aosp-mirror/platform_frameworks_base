@@ -18,7 +18,10 @@ package android.text.style;
 
 import android.graphics.Paint;
 import android.graphics.Canvas;
+import android.os.Parcel;
 import android.text.Layout;
+import android.text.ParcelableSpan;
+import android.text.TextUtils;
 
 public interface LeadingMarginSpan
 extends ParagraphStyle
@@ -30,9 +33,9 @@ extends ParagraphStyle
                                   CharSequence text, int start, int end,
                                   boolean first, Layout layout);
 
-    public static class Standard
-    implements LeadingMarginSpan
-    {
+    public static class Standard implements LeadingMarginSpan, ParcelableSpan {
+        private final int mFirst, mRest;
+        
         public Standard(int first, int rest) {
             mFirst = first;
             mRest = rest;
@@ -40,6 +43,24 @@ extends ParagraphStyle
 
         public Standard(int every) {
             this(every, every);
+        }
+
+        public Standard(Parcel src) {
+            mFirst = src.readInt();
+            mRest = src.readInt();
+        }
+        
+        public int getSpanTypeId() {
+            return TextUtils.LEADING_MARGIN_SPAN;
+        }
+        
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mFirst);
+            dest.writeInt(mRest);
         }
 
         public int getLeadingMargin(boolean first) {
@@ -53,7 +74,5 @@ extends ParagraphStyle
                                       boolean first, Layout layout) {
             ;
         }
-
-        private int mFirst, mRest;
     }
 }

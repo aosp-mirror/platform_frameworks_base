@@ -187,6 +187,9 @@ public class ExpandableListView extends ListView {
     private Drawable mChildDivider;
     private boolean mClipChildDivider;
 
+    // Bounds of the indicator to be drawn
+    private final Rect mIndicatorRect = new Rect();
+
     public ExpandableListView(Context context) {
         this(context, null);
     }
@@ -247,17 +250,16 @@ public class ExpandableListView extends ListView {
 
         final int myB = mBottom; 
         
-        PositionMetadata pos = null;
+        PositionMetadata pos;
         View item;
         Drawable indicator; 
         int t, b;
         
         // Start at a value that is neither child nor group
         int lastItemType = ~(ExpandableListPosition.CHILD | ExpandableListPosition.GROUP);
-        
-        // Bounds of the indicator to be drawn
-        Rect indicatorRect = new Rect();
-        
+
+        final Rect indicatorRect = mIndicatorRect;
+
         // The "child" mentioned in the following two lines is this
         // View's child, not referring to an expandable list's
         // notion of a child (as opposed to a group)
@@ -303,11 +305,11 @@ public class ExpandableListView extends ListView {
                 // Use item's full height + the divider height
                 if (mStackFromBottom) {
                     // See ListView#dispatchDraw
-                    indicatorRect.top = t - mDividerHeight;
+                    indicatorRect.top = t;// - mDividerHeight;
                     indicatorRect.bottom = b;
                 } else {
                     indicatorRect.top = t;
-                    indicatorRect.bottom = b + mDividerHeight;
+                    indicatorRect.bottom = b;// + mDividerHeight;
                 }
                 
                 // Get the indicator (with its state set to the item's state)

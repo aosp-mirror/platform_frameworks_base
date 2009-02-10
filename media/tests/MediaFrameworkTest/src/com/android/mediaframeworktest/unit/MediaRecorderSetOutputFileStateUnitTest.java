@@ -53,9 +53,6 @@ public class MediaRecorderSetOutputFileStateUnitTest extends AndroidTestCase imp
         recorder.setOutputFile(MediaRecorderStateUnitTestTemplate.RECORD_OUTPUT_PATH);
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testSetOutputFile() {
         mTestTemplate.runTestOnMethod(this);

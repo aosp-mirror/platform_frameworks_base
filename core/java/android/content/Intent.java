@@ -504,6 +504,8 @@ import java.util.Set;
  *     <li> {@link #ACTION_PACKAGE_ADDED}
  *     <li> {@link #ACTION_PACKAGE_CHANGED}
  *     <li> {@link #ACTION_PACKAGE_REMOVED}
+ *     <li> {@link #ACTION_PACKAGE_RESTARTED}
+ *     <li> {@link #ACTION_PACKAGE_DATA_CLEARED}
  *     <li> {@link #ACTION_UID_REMOVED}
  *     <li> {@link #ACTION_BATTERY_CHANGED}
  * </ul>
@@ -1107,6 +1109,10 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: A new application package has been installed on the
      * device. The data contains the name of the package.
+     * <p>My include the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
@@ -1114,22 +1120,48 @@ public class Intent implements Parcelable {
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
      * that is being installed does <em>not</em> receive this Intent.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid previously assigned
+     * to the package.
+     * <li> {@link #EXTRA_DATA_REMOVED} is set to true if the entire
+     * application -- data and code -- is being removed.
+     * <li> {@link #EXTRA_REPLACING} is set to true if this will be followed
+     * by an {@link #ACTION_PACKAGE_ADDED} broadcast for the same package.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     /**
      * Broadcast Action: An existing application package has been changed (e.g. a component has been
      * enabled or disabled.  The data contains the name of the package.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     /**
-     * Broadcast Action: The user has restarted a package, all runtime state
+     * Broadcast Action: The user has restarted a package, and all of its
+     * processes have been killed.  All runtime state
      * associated with it (processes, alarms, notifications, etc) should
-     * be remove.  The data contains the name of the package.
+     * be removed.  The data contains the name of the package.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_RESTARTED = "android.intent.action.PACKAGE_RESTARTED";
+    /**
+     * Broadcast Action: The user has cleared the data of a package.  This should
+     * be preceded by {@link #ACTION_PACKAGE_RESTARTED}, after which all of
+     * its persistent data is erased and this broadcast sent.  The data contains
+     * the name of the package.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
     /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
@@ -1227,7 +1259,6 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action:  External media is present, and being disk-checked
      * The path to the mount point for the checking media is contained in the Intent.mData field.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_CHECKING = "android.intent.action.MEDIA_CHECKING";
@@ -1235,7 +1266,6 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action:  External media is present, but is using an incompatible fs (or is blank)
      * The path to the mount point for the checking media is contained in the Intent.mData field.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_NOFS = "android.intent.action.MEDIA_NOFS";
@@ -1656,6 +1686,22 @@ public class Intent implements Parcelable {
     public static final String EXTRA_UID = "android.intent.extra.UID";
 
     /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
+     * intents to indicate whether this represents a full uninstall (removing
+     * both the code and its data) or a partial uninstall (leaving its data,
+     * implying that this is an update).
+     */
+    public static final String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
+    
+    /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
+     * intents to indicate that this is a replacement of the package, so this
+     * broadcast will immediately be followed by an add broadcast for a
+     * different version of the same package.
+     */
+    public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
+    
+    /**
      * Used as an int extra field in {@link android.app.AlarmManager} intents
      * to tell the application being invoked how many pending alarms are being
      * delievered with the intent.  For one-shot alarms this will always be 1.
@@ -1770,8 +1816,8 @@ public class Intent implements Parcelable {
      * Intent, resulting in the stack now being: A, B.
      *
      * <p>The currently running instance of task B in the above example will
-     * either receiving the new intent you are starting here in its
-     * onNewIntent() method, or be itself finished and restarting with the
+     * either receive the new intent you are starting here in its
+     * onNewIntent() method, or be itself finished and restarted with the
      * new intent.  If it has declared its launch mode to be "multiple" (the
      * default) it will be finished and re-created; for all other launch modes
      * it will receive the Intent in the current instance.
@@ -1855,7 +1901,7 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
     /**
-     * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaving}
+     * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaveHint}
      * callback from occurring on the current frontmost activity before it is
      * paused as the newly-started activity is brought to the front.
      * 
@@ -1871,12 +1917,39 @@ public class Intent implements Parcelable {
      * activity does not think the user has acknowledged its notification. 
      */
     public static final int FLAG_ACTIVITY_NO_USER_ACTION = 0x00040000;
-
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will cause the launched activity to be brought to the front of its
+     * task's history stack if it is already running.
+     * 
+     * <p>For example, consider a task consisting of four activities: A, B, C, D.
+     * If D calls startActivity() with an Intent that resolves to the component
+     * of activity B, then B will be brought to the front of the history stack,
+     * with this resulting order:  A, C, D, B.
+     * 
+     * This flag will be ignored if {@link #FLAG_ACTIVITY_CLEAR_TOP} is also
+     * specified. 
+     */
+    public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 0X00020000;
     /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */
     public static final int FLAG_RECEIVER_REGISTERED_ONLY = 0x40000000;
+    /**
+     * If set, when sending a broadcast <i>before boot has completed</i> only
+     * registered receivers will be called -- no BroadcastReceiver components
+     * will be launched.  Sticky intent state will be recorded properly even
+     * if no receivers wind up being called.  If {@link #FLAG_RECEIVER_REGISTERED_ONLY}
+     * is specified in the broadcast intent, this flag is unnecessary.
+     * 
+     * <p>This flag is only for use by system sevices as a convenience to
+     * avoid having to implement a more complex mechanism around detection
+     * of boot completion.
+     * 
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x20000000;
 
     // ---------------------------------------------------------------------
 

@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+
 import com.android.internal.telephony.SimCard;
 import android.test.AndroidTestCase;
 import android.view.View;
@@ -112,6 +113,11 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         }
 
         /** {@inheritDoc} */
+        public boolean needsInput() {
+            return false;
+        }
+        
+        /** {@inheritDoc} */
         public void onPause() {
             mOnPauseCount++;
         }
@@ -149,8 +155,9 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
 
 
-        private TestableLockPatternKeyguardView(Context context, KeyguardUpdateMonitor updateMonitor, LockPatternUtils lockPatternUtils) {
-            super(context, updateMonitor, lockPatternUtils);
+        private TestableLockPatternKeyguardView(Context context, KeyguardUpdateMonitor updateMonitor,
+                LockPatternUtils lockPatternUtils, KeyguardWindowController controller) {
+            super(context, updateMonitor, lockPatternUtils, controller);
         }
 
         @Override
@@ -214,7 +221,11 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         mUpdateMonitor = new MockUpdateMonitor(getContext());
         mLockPatternUtils = new MockLockPatternUtils();
 
-        mLPKV = new TestableLockPatternKeyguardView(getContext(), mUpdateMonitor, mLockPatternUtils);
+        mLPKV = new TestableLockPatternKeyguardView(getContext(), mUpdateMonitor,
+                mLockPatternUtils, new KeyguardWindowController() {
+            public void setNeedsInput(boolean needsInput) {
+            }
+        });
         mKeyguardViewCallback = new MockKeyguardCallback();
         mLPKV.setCallback(mKeyguardViewCallback);
     }

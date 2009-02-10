@@ -20,16 +20,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         >
-    
+
     <TextView android:id="@+id/message"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             />
-            
+
 	<EditText android:id="@+id/value"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:inputType="text"
             android:selectAllOnFocus="true"
             android:scrollHorizontally="true"
             android:layout_marginTop="6dip"

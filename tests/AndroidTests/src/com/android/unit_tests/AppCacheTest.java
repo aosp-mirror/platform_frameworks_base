@@ -44,7 +44,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 
 public class AppCacheTest extends AndroidTestCase {
-    private static final boolean localLOGV = true;
+    private static final boolean localLOGV = false;
     public static final String TAG="AppCacheTest";
     public final long MAX_WAIT_TIME=60*1000;
     public final long WAIT_TIME_INCR=10*1000;
@@ -591,6 +591,20 @@ public class AppCacheTest extends AndroidTestCase {
         //confirm result
         if(localLOGV) Log.i(TAG, "code="+stats.codeSize+", data="+stats.dataSize+
                 ", cache="+stats.cacheSize);
+    }
+    
+    @SmallTest
+    public void testGetSystemSharedLibraryNames() throws Exception {
+        try {
+            String[] sharedLibs = getPm().getSystemSharedLibraryNames();
+            if (localLOGV) {
+                for (String str : sharedLibs) {
+                    Log.i(TAG, str);
+                }
+            }
+        } catch (RemoteException e) {
+            fail("Failed invoking getSystemSharedLibraryNames with exception:" + e);
+        }   
     }
     
     class FreeStorageReceiver extends BroadcastReceiver {

@@ -71,10 +71,11 @@ static inline int max(int v1, int v2)
 
 EventHub::device_t::device_t(int32_t _id, const char* _path)
     : id(_id), path(_path), classes(0)
-    , layoutMap(new KeyLayoutMap()), next(NULL) {
+    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
+    delete [] keyBitmask;
     delete layoutMap;
 }
 
@@ -403,6 +404,36 @@ bool EventHub::openPlatformInput(void)
     return true;
 }
 
+/*
+ * Inspect the known devices to determine whether physical keys exist for the given
+ * framework-domain key codes.
+ */
+bool EventHub::hasKeys(size_t numCodes, int32_t* keyCodes, uint8_t* outFlags) {
+    for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
+        outFlags[codeIndex] = 0;
+
+        // check each available hardware device for support for this keycode
+        Vector<int32_t> scanCodes;
+        for (int n = 0; (n < mFDCount) && (outFlags[codeIndex] == 0); n++) {
+            if (mDevices[n]) {
+                status_t err = mDevices[n]->layoutMap->findScancodes(keyCodes[codeIndex], &scanCodes);
+                if (!err) {
+                    // check the possible scan codes identified by the layout map against the
+                    // map of codes actually emitted by the driver
+                    for (size_t sc = 0; sc < scanCodes.size(); sc++) {
+                        if (test_bit(scanCodes[sc], mDevices[n]->keyBitmask)) {
+                            outFlags[codeIndex] = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
 // ----------------------------------------------------------------------------
 
 int EventHub::open_device(const char *deviceName)
@@ -525,6 +556,16 @@ int EventHub::open_device(const char *deviceName)
                     device->classes |= CLASS_ALPHAKEY;
                 }
                 break;
+            }
+        }
+        if ((device->classes & CLASS_KEYBOARD) != 0) {
+            device->keyBitmask = new uint8_t[(KEY_MAX+1)/8];
+            if (device->keyBitmask != NULL) {
+                memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
+            } else {
+                delete device;
+                LOGE("out of memory allocating key bitmask");
+                return -1;
             }
         }
     }

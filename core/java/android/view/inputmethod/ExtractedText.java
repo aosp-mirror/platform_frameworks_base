@@ -19,6 +19,22 @@ public class ExtractedText implements Parcelable {
     public int startOffset;
     
     /**
+     * If the content is a report of a partial text change, this is the
+     * offset where the change starts and it runs until
+     * {@link #partialEndOffset}.  If the content is the full text, this
+     * field is -1.
+     */
+    public int partialStartOffset;
+    
+    /**
+     * If the content is a report of a partial text change, this is the offset
+     * where the change ends.  Note that the actual text may be larger or
+     * smaller than the difference between this and {@link #partialEndOffset},
+     * meaning a reduction or increase, respectively, in the total text.
+     */
+    public int partialEndOffset;
+    
+    /**
      * The offset where the selection currently starts within the extracted
      * text.  The real selection start position is at
      * <var>startOffset</var>+<var>selectionStart</var>.
@@ -52,6 +68,8 @@ public class ExtractedText implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         TextUtils.writeToParcel(text, dest, flags);
         dest.writeInt(startOffset);
+        dest.writeInt(partialStartOffset);
+        dest.writeInt(partialEndOffset);
         dest.writeInt(selectionStart);
         dest.writeInt(selectionEnd);
         dest.writeInt(flags);
@@ -65,6 +83,8 @@ public class ExtractedText implements Parcelable {
             ExtractedText res = new ExtractedText();
             res.text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             res.startOffset = source.readInt();
+            res.partialStartOffset = source.readInt();
+            res.partialEndOffset = source.readInt();
             res.selectionStart = source.readInt();
             res.selectionEnd = source.readInt();
             res.flags = source.readInt();

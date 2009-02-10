@@ -84,6 +84,7 @@ public final class BridgeContext extends Context {
 
     private final IProjectCallback mProjectCallback;
     private final ILayoutLog mLogger;
+    private BridgeContentResolver mContentResolver;
 
     /**
      * @param projectKey
@@ -107,9 +108,11 @@ public final class BridgeContext extends Context {
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
         
-        mResources = new BridgeResources(
+
+        AssetManager assetManager = BridgeAssetManager.initSystem();
+        mResources = BridgeResources.initSystem(
                 this,
-                new BridgeAssetManager(),
+                assetManager,
                 metrics,
                 config,
                 customViewLoader);
@@ -167,6 +170,12 @@ public final class BridgeContext extends Context {
     public Object getSystemService(String service) {
         if (LAYOUT_INFLATER_SERVICE.equals(service)) {
             return mInflater;
+        }
+        
+        // AutoCompleteTextView and MultiAutoCompleteTextView want a window 
+        // service. We don't have any but it's not worth an exception.
+        if (WINDOW_SERVICE.equals(service)) {
+            return null;
         }
 
         throw new UnsupportedOperationException("Unsupported Service: " + service);
@@ -899,8 +908,10 @@ public final class BridgeContext extends Context {
 
     @Override
     public ContentResolver getContentResolver() {
-        // TODO Auto-generated method stub
-        return null;
+        if (mContentResolver == null) {
+            mContentResolver = new BridgeContentResolver(this);
+        }
+        return mContentResolver;
     }
 
     @Override

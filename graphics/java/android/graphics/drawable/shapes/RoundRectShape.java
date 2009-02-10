@@ -105,4 +105,15 @@ public class RoundRectShape extends RectShape {
             }
         }
     }
+
+    @Override
+    public RoundRectShape clone() throws CloneNotSupportedException {
+        RoundRectShape shape = (RoundRectShape) super.clone();
+        shape.mOuterRadii = mOuterRadii.clone();
+        shape.mInnerRadii = mInnerRadii.clone();
+        shape.mInset = new RectF(mInset);
+        shape.mInnerRect = new RectF(mInnerRect);
+        shape.mPath = new Path(mPath);
+        return shape;
+    }
 }

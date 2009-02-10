@@ -118,7 +118,7 @@ protected:
 class SoundChannel : public SoundEvent {
 public:
     enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
-    SoundChannel() : mAudioTrack(0), mState(IDLE), mNumChannels(1), mPos(0) {}
+    SoundChannel() : mAudioTrack(0), mState(IDLE), mNumChannels(1), mPos(0), mToggle(0) {}
     ~SoundChannel();
     void init(SoundPool* soundPool);
     void play(const sp<Sample>& sample, int channelID, float leftVolume, float rightVolume,
@@ -151,6 +151,7 @@ private:
     int                 mNumChannels;
     int                 mPos;
     int                 mAudioBufferSize;
+    unsigned long       mToggle;
 };
 
 // application object for managing a pool of sounds
@@ -215,8 +216,6 @@ private:
     int                     mAllocated;
     int                     mNextSampleID;
     int                     mNextChannelID;
-    int                     mFrameCount;
-    int                     mSampleRate;
     bool                    mQuit;
 };
 

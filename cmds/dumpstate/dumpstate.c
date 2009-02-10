@@ -224,6 +224,8 @@ int main(int argc, char *argv[]) {
         }
         if (compress)
             strcat(path, ".gz");
+        else
+            strcat(path, ".txt");
 
         /* ensure that all directories in the path exist */ 
         create_directories(path);

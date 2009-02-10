@@ -273,6 +273,7 @@ public final class Sync {
         public static final int ERROR_CONFLICT = 5;
         public static final int ERROR_TOO_MANY_DELETIONS = 6;
         public static final int ERROR_TOO_MANY_RETRIES = 7;
+        public static final int ERROR_INTERNAL = 8;
 
         // The MESG column will contain one of these or one of the Error types.
         public static final String MESG_SUCCESS = "success";
@@ -292,6 +293,7 @@ public final class Sync {
                 case ERROR_CONFLICT: return "conflict detected";
                 case ERROR_TOO_MANY_DELETIONS: return "too many deletions";
                 case ERROR_TOO_MANY_RETRIES: return "too many retries";
+                case ERROR_INTERNAL: return "internal error";
                 default: return "unknown error";
             }
         }
@@ -491,11 +493,6 @@ public final class Sync {
         /** controls whether or not the device listens for sync tickles */
         public static final String SETTING_LISTEN_FOR_TICKLES = "listen_for_tickles";
 
-        /** controls whether or not the device connect to Google in background for various
-         *  stuff, including GTalk, checkin, Market and data sync ...
-         */
-        public static final String SETTING_BACKGROUND_DATA = "background_data";
-
         /** controls whether or not the individual provider is synced when tickles are received */
         public static final String SETTING_SYNC_PROVIDER_PREFIX = "sync_provider_";
 
@@ -572,18 +569,6 @@ public final class Sync {
             putBoolean(contentResolver, SETTING_LISTEN_FOR_TICKLES, flag);
         }
 
-        /**
-         * A convenience method to set whether or not the device should connect to Google
-         * in background.
-         *
-         * @param contentResolver the ContentResolver to use to access the settings table
-         * @param flag true if it should connect.
-         */
-        static public void setBackgroundData(ContentResolver contentResolver,
-                boolean flag) {
-            putBoolean(contentResolver, SETTING_BACKGROUND_DATA, flag);
-        }
-
         public static class QueryMap extends ContentQueryMap {
             private ContentResolver mContentResolver;
 
@@ -629,24 +614,6 @@ public final class Sync {
              */
             public boolean getListenForNetworkTickles() {
                 return getBoolean(SETTING_LISTEN_FOR_TICKLES, true);
-            }
-
-            /**
-             * Set whether or not the device should connect to Google in background
-             *
-             * @param flag true if it should
-             */
-            public void setBackgroundData(boolean flag) {
-                Settings.setBackgroundData(mContentResolver, flag);
-            }
-
-            /**
-             * Check if the device should connect to Google in background.
-
-             * @return true if it should
-             */
-            public boolean getBackgroundData() {
-                return getBoolean(SETTING_BACKGROUND_DATA, true);
             }
 
             /**

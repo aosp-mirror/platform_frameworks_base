@@ -142,8 +142,6 @@ public class FrameworkInstrumentationTestRunner extends InstrumentationTestRunne
 <p> Next, in an appropriate <code>AndroidManifest.xml</code>, define the instrumentation for the derived class with the appropriate <code>android:targetPackage</code> set.  For example, the snippet below defines the instrumentation runner for the framework tests.</p>
 
 <pre>
-&lt;uses-permission android:name="android.permission.RUN_INSTRUMENTATION" /&gt;
-
 &lt;instrumentation android:name="android.tests.FrameworkInstrumentationTestRunner"
                  android:targetPackage="com.google.android.frameworktest"
                  android:label="framework instrumentation test runner" /&gt;

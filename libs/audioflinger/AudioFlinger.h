@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include <media/IAudioFlinger.h>
+#include <media/IAudioFlingerClient.h>
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/AudioTrack.h>
@@ -54,7 +55,7 @@ class AudioBuffer;
 
 static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
-class AudioFlinger : public BnAudioFlinger, protected Thread
+class AudioFlinger : public BnAudioFlinger, protected Thread, public IBinder::DeathRecipient 
 {
 public:
     static void instantiate();
@@ -108,6 +109,15 @@ public:
     virtual     bool        isMusicActive() const;
 
     virtual     status_t    setParameter(const char* key, const char* value);
+
+    virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
+    
+    virtual     size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
+    
+    virtual     void        wakeUp();
+    
+    // IBinder::DeathRecipient
+    virtual     void        binderDied(const wp<IBinder>& who);
 
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
@@ -314,7 +324,7 @@ private:
         virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer);
 
         bool isMuted() const {
-            return mMute;
+            return (mMute || mAudioFlinger->mStreamTypes[mStreamType].mute);
         }
 
         bool isPausing() const {
@@ -382,6 +392,8 @@ private:
                 void        destroyTrack(const sp<Track>& track);
                 void        addActiveTrack(const wp<Track>& track);
                 void        removeActiveTrack(const wp<Track>& track);
+                int         getTrackName();
+                void        deleteTrackName(int name);
 
                 AudioMixer* audioMixer() {
                     return mAudioMixer;
@@ -460,6 +472,8 @@ private:
                 status_t    startRecord(RecordTrack* recordTrack);
                 void        stopRecord(RecordTrack* recordTrack);
 
+                void notifyOutputChange_l();
+
     mutable     Mutex                                       mHardwareLock;
     mutable     Mutex                                       mLock;
     mutable     Condition                                   mWaitWorkCV;
@@ -494,6 +508,8 @@ private:
                 bool                                mInWrite;
                 int                                 mA2dpDisableCount;
                 bool                                mA2dpSuppressed;
+                bool                                mMusicMuteSaved;
+                SortedVector< wp<IBinder> >         mNotificationClients;
 };
 
 // ----------------------------------------------------------------------------

@@ -34,7 +34,8 @@ import android.view.MotionEvent;
  */
 class FastScroller {
    
-    
+    // Minimum number of pages to justify showing a fast scroll thumb
+    private static int MIN_PAGES = 4;
     // Scroll thumb not showing
     private static final int STATE_NONE = 0;
     // Not implemented yet - fade-in transition
@@ -154,6 +155,10 @@ class FastScroller {
         setState(STATE_NONE);
     }
     
+    boolean isVisible() {
+        return !(mState == STATE_NONE);
+    }
+    
     public void draw(Canvas canvas) {
         
         if (mState == STATE_NONE) {
@@ -214,7 +219,13 @@ class FastScroller {
     
     void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, 
             int totalItemCount) {
-        
+        // Are there enough pages to require fast scroll?
+        if (visibleItemCount > 0 && totalItemCount / visibleItemCount < MIN_PAGES) {
+            if (mState != STATE_NONE) {
+                setState(STATE_NONE);
+            }
+            return;
+        }
         if (totalItemCount - visibleItemCount > 0 && mState != STATE_DRAGGING ) {
             mThumbY = ((mList.getHeight() - mThumbH) * firstVisibleItem) 
                     / (totalItemCount - visibleItemCount);

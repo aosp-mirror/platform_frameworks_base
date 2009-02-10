@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 /**
@@ -223,6 +224,9 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
      * @return The {@link Preference} with the key, or null.
      */
     public Preference findPreference(CharSequence key) {
+        if (TextUtils.equals(getKey(), key)) {
+            return this;
+        }
         final int preferenceCount = getPreferenceCount();
         for (int i = 0; i < preferenceCount; i++) {
             final Preference preference = getPreference(i);

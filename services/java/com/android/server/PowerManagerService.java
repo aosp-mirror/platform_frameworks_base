@@ -486,8 +486,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     public void acquireWakeLock(int flags, IBinder lock, String tag) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        synchronized (mLocks) {
-            acquireWakeLockLocked(flags, lock, tag);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLocks) {
+                acquireWakeLockLocked(flags, lock, tag);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -572,12 +577,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
 
         if (acquireType >= 0) {
+            long origId = Binder.clearCallingIdentity();
             try {
-                long origId = Binder.clearCallingIdentity();
                 mBatteryStats.noteStartWakelock(acquireUid, acquireName, acquireType);
-                Binder.restoreCallingIdentity(origId);
             } catch (RemoteException e) {
                 // Ignore
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
     }
@@ -627,12 +633,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         releaseType = wl.monitorType;
 
         if (releaseType >= 0) {
+            long origId = Binder.clearCallingIdentity();
             try {
-                long origId = Binder.clearCallingIdentity();
                 mBatteryStats.noteStopWakelock(releaseUid, releaseName, releaseType);
-                Binder.restoreCallingIdentity(origId);
             } catch (RemoteException e) {
                 // Ignore
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
     }
@@ -757,7 +764,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump PowerManager from from pid="
                     + Binder.getCallingPid()
@@ -960,8 +967,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
                 }
                 if (mContext != null) {
-                    mContext.sendOrderedBroadcast(mScreenOnIntent, null,
-                            mScreenOnBroadcastDone, mHandler, 0, null, null);
+                    if (ActivityManagerNative.isSystemReady()) {
+                        mContext.sendOrderedBroadcast(mScreenOnIntent, null,
+                                mScreenOnBroadcastDone, mHandler, 0, null, null);
+                    }
                 } else {
                     synchronized (mLocks) {
                         EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 2,
@@ -1232,6 +1241,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     }
                     if (reallyTurnScreenOn) {
                         err = Power.setScreenState(true);
+                        long identity = Binder.clearCallingIdentity();
+                        try {
+                            mBatteryStats.noteScreenOn();
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     } else {
                         Power.setScreenState(false);
                         // But continue as if we really did turn the screen on...
@@ -1250,6 +1267,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     }
                 } else {
                     mScreenOffTime = SystemClock.elapsedRealtime();
+                    long identity = Binder.clearCallingIdentity();
+                    try {
+                        mBatteryStats.noteScreenOff();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException calling noteScreenOff on BatteryStatsService", e);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                     if (!mScreenBrightness.animating) {
                         err = turnScreenOffLocked(becauseOfUser);
                     } else {

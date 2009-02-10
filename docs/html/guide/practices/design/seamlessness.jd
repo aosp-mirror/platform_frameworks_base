@@ -164,7 +164,7 @@ interface they've come to expect. When designing your UIs, you should try and
 avoid rolling your own as much as possible. Instead, use a Theme. You
 can override or extend those parts of the theme that you need to, but at least
 you're starting from the same UI base as all the other applications. For all
-the details, read <a href="{@docRoot}guide/topics/views/themes.html">Applying Styles and Themes</a>.</p>
+the details, read <a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
 
 <h2 id="flexui">Design Your UI to Work with Multiple Screen Resolutions</h2>
 
@@ -208,7 +208,6 @@ option</a> when starting the emulator.</p>
 
 <h2 id="keyboard">Don't Assume Touchscreen or Keyboard</h2>
 
-Keyboad Different Keystrokes for Different Folks</h2>
 <p>
 Android will support a variety of handset form-factors.  That's a fancy way of
 saying that some Android devices will have full "QWERTY" keyboards, while
@@ -220,8 +219,6 @@ about specific keyboard layouts -- unless, of course, you're really interested
 in restricting your application so that it can only be used on those devices.
 </p>
 
-<h2 id="network">Assume the Network is Slow</h2>
-<h2 id="keyboard">Don't Assume Touchscreen or Keyboard</h2>
 <h2 id="battery">Do Conserve the Device Battery</h2>
 <p>
 A mobile device isn't very mobile if it's constantly plugged into the

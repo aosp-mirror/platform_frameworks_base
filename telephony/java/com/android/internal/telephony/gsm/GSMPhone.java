@@ -108,6 +108,8 @@ public class GSMPhone extends PhoneBase {
     SimPhoneBookInterfaceManager mSimPhoneBookIntManager;
     SimSmsInterfaceManager mSimSmsIntManager;
     PhoneSubInfo mSubInfo;
+    boolean mDnsCheckDisabled = false;
+
 
     Registrant mPostDialHandler;
 
@@ -1149,6 +1151,22 @@ public class GSMPhone extends PhoneBase {
 
     public List<PdpConnection> getCurrentPdpList () {
         return mDataConnection.getAllPdps();
+    }
+
+    /**
+     * Disables the DNS check (i.e., allows "0.0.0.0").
+     * Useful for lab testing environment.
+     * @param b true disables the check, false enables.
+     */
+    public void disableDnsCheck(boolean b) {
+        mDnsCheckDisabled = b;
+    }
+
+    /**
+     * Returns true if the DNS check is currently disabled.
+     */
+    public boolean isDnsCheckDisabled() {
+        return mDnsCheckDisabled;
     }
 
     public void updateServiceLocation(Message response) {

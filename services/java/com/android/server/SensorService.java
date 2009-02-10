@@ -105,17 +105,17 @@ class SensorService extends ISensorService.Stub {
         return _sensors_control_open();
     }
     
-    public boolean enableSensor(IBinder binder, int sensor, int enable)
+    public boolean enableSensor(IBinder binder, String name, int sensor, int enable)
              throws RemoteException {
-        if (localLOGV) Log.d(TAG, "enableSensor " + sensor + " " + enable);
+        if (localLOGV) Log.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
         
         // Inform battery statistics service of status change
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         if (enable == SENSOR_DISABLE) {
-            mBatteryStats.noteStopSensor(uid, sensor);
+            mBatteryStats.noteStopSensor(uid, name, sensor);
         } else {
-            mBatteryStats.noteStartSensor(uid, sensor);
+            mBatteryStats.noteStartSensor(uid, name, sensor);
         }
         Binder.restoreCallingIdentity(identity);
 

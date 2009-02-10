@@ -369,7 +369,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private int mLastTouchMode = TOUCH_MODE_UNKNOWN;
 
-    // TODO: REMOVE WHEN WE'RE DONE WITH PROFILING
     private static final boolean PROFILE_SCROLLING = false;
     private boolean mScrollProfilingStarted = false;
 
@@ -422,6 +421,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Helper object that renders and controls the fast scroll thumb.
      */
     private FastScroller mFastScroller;
+
+    private int mTouchSlop;
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -557,6 +558,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @ViewDebug.ExportedProperty
     public boolean isFastScrollEnabled() {
         return mFastScrollEnabled;
+    }
+    
+    /**
+     * If fast scroll is visible, then don't draw the vertical scrollbar.
+     * @hide 
+     */
+    @Override
+    protected boolean isVerticalScrollBarHidden() {
+        return mFastScroller != null ? mFastScroller.isVisible() : false;
     }
 
     /**
@@ -696,6 +706,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
         setScrollingCacheEnabled(true);
+
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
     }
 
     private void useDefaultSelector() {
@@ -1758,8 +1770,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Check if we have moved far enough that it looks more like a
         // scroll than a tap
         final int distance = Math.abs(deltaY);
-        int touchSlop = ViewConfiguration.getTouchSlop();
-        if (distance > touchSlop) {
+        if (distance > mTouchSlop) {
             createScrollingCache();
             mTouchMode = TOUCH_MODE_SCROLL;
             mMotionCorrection = deltaY;
@@ -1979,8 +1990,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 velocityTracker.computeCurrentVelocity(1000);
                 int initialVelocity = (int)velocityTracker.getYVelocity();
 
-                if ((Math.abs(initialVelocity) > ViewConfiguration.getMinimumFlingVelocity()) &&
-                        (getChildCount() > 0)){
+                if ((Math.abs(initialVelocity) >
+                        ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity()) &&
+                        (getChildCount() > 0)) {
                     if (mFlingRunnable == null) {
                         mFlingRunnable = new FlingRunnable();
                     }
@@ -2714,7 +2726,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             int screenHeight = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
             final int[] xy = new int[2];
             getLocationOnScreen(xy);
-            int bottomGap = screenHeight - xy[1] - getHeight() + 20;
+            // TODO: The 20 below should come from the theme and be expressed in dip
+            final float scale = getContext().getResources().getDisplayMetrics().density;
+            int bottomGap = screenHeight - xy[1] - getHeight() + (int) (scale * 20);
             mPopup.showAtLocation(this, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL,
                     xy[0], bottomGap);
             // Make sure we get focus if we are showing the popup

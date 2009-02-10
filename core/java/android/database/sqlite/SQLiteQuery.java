@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.database.CursorWindow;
+import android.os.SystemClock;
 
 /**
  * A SQLite program that represents a query that reads the resulting rows into a CursorWindow.
@@ -55,12 +56,14 @@ public class SQLiteQuery extends SQLiteProgram {
      * Reads rows into a buffer. This method acquires the database lock.
      * 
      * @param window The window to fill into
-     * @param startPos The position to start reading rows from
      * @return number of total rows in the query
      */
     /* package */ int fillWindow(CursorWindow window,  
             int maxRead, int lastPos) {
         mDatabase.lock();
+
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
         try {
             acquireReference();
             try {
@@ -68,8 +71,13 @@ public class SQLiteQuery extends SQLiteProgram {
                 // if the start pos is not equal to 0, then most likely window is 
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
-                return native_fill_window(window, window.getStartPosition(), mOffsetIndex, 
+                int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
                         maxRead, lastPos);
+                if (logStats) {
+                    mDatabase.logTimeStat(true /* read */, startTime,
+                            SystemClock.elapsedRealtime());
+                }
+                return numRows;
             } catch (IllegalStateException e){
                 // simply ignore it
                 return 0;

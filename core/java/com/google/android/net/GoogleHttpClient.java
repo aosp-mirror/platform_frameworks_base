@@ -16,18 +16,28 @@
 
 package com.google.android.net;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.net.http.AndroidHttpClient;
+import android.os.Build;
+import android.os.NetStat;
+import android.os.SystemClock;
+import android.provider.Checkin;
+import android.util.Config;
+import android.util.Log;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
-import org.apache.http.impl.client.RequestWrapper;
-import org.apache.http.impl.client.EntityEnclosingRequestWrapper;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.EntityEnclosingRequestWrapper;
+import org.apache.http.impl.client.RequestWrapper;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
@@ -35,25 +45,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.os.SystemClock;
-import android.os.Build;
-import android.net.http.AndroidHttpClient;
-import android.provider.Checkin;
-import android.util.Config;
-import android.util.Log;
-
 /**
  * {@link AndroidHttpClient} wrapper that uses {@link UrlRules} to rewrite URLs
  * and otherwise tweak HTTP requests.
  */
 public class GoogleHttpClient implements HttpClient {
-    private static final String TAG = "GoogleHttpClient";
 
-    private final AndroidHttpClient mClient;
-    private final ContentResolver mResolver;
-    private final String mUserAgent;
+    private static final String TAG = "GoogleHttpClient";    
 
     /** Exception thrown when a request is blocked by the URL rules. */
     public static class BlockedRequestException extends IOException {
@@ -63,6 +61,10 @@ public class GoogleHttpClient implements HttpClient {
             mRule = rule;
         }
     }
+    
+    private final AndroidHttpClient mClient;
+    private final ContentResolver mResolver;
+    private final String mUserAgent;
 
     /**
      * Create an HTTP client.  Normally one client is shared throughout an app.
@@ -120,8 +122,37 @@ public class GoogleHttpClient implements HttpClient {
         String code = "Error";
         long start = SystemClock.elapsedRealtime();
         try {
-            HttpResponse response = mClient.execute(request, context);
-            code = Integer.toString(response.getStatusLine().getStatusCode());
+            HttpResponse response;
+            // TODO: if we're logging network stats, and if the apache library is configured
+            // to follow redirects, count each redirect as an additional round trip.
+
+            // see if we're logging network stats.
+            boolean logNetworkStats = NetworkStatsEntity.shouldLogNetworkStats();
+
+            if (logNetworkStats) {
+                int uid = android.os.Process.myUid();
+                long startTx = NetStat.getUidTxBytes(uid);
+                long startRx = NetStat.getUidRxBytes(uid);
+
+                response = mClient.execute(request, context);
+                code = Integer.toString(response.getStatusLine().getStatusCode());
+
+                HttpEntity origEntity = response == null ? null : response.getEntity();
+                if (origEntity != null) {
+                    // yeah, we compute the same thing below.  we do need to compute this here
+                    // so we can wrap the HttpEntity in the response.
+                    long now = SystemClock.elapsedRealtime();
+                    long elapsed = now - start;
+                    NetworkStatsEntity entity = new NetworkStatsEntity(origEntity,
+                            mUserAgent, uid, startTx, startRx,
+                            elapsed /* response latency */, now /* processing start time */);
+                    response.setEntity(entity);
+                }
+            } else {
+                response = mClient.execute(request, context);
+                code = Integer.toString(response.getStatusLine().getStatusCode());
+            }
+
             return response;
         } catch (IOException e) {
             code = "IOException";

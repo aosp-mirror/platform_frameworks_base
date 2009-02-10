@@ -54,9 +54,6 @@ public class MediaRecorderSetAudioEncoderStateUnitTest extends AndroidTestCase i
         recorder.setAudioEncoder(MediaRecorderStateUnitTestTemplate.AUDIO_ENCODER);
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testSetAudioEncoder() {
         mTestTemplate.runTestOnMethod(this);

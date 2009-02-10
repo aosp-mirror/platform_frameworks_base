@@ -18,12 +18,32 @@ package com.android.internal.gadget;
 
 import android.content.ComponentName;
 import android.gadget.GadgetInfo;
+import com.android.internal.gadget.IGadgetHost;
+import android.widget.RemoteViews;
 
 /** {@hide} */
 interface IGadgetService {
-    int allocateGadgetId(String hostPackage);
+    
+    //
+    // for GadgetHost
+    //
+    int[] startListening(IGadgetHost host, String packageName, int hostId,
+            out List<RemoteViews> updatedViews);
+    void stopListening(int hostId);
+    int allocateGadgetId(String packageName, int hostId);
     void deleteGadgetId(int gadgetId);
-    void bindGadgetId(int gadgetId, in ComponentName provider);
-    GadgetInfo getGadgetInfo(int gadgetId);
+    void deleteHost(int hostId);
+    void deleteAllHosts();
+    RemoteViews getGadgetViews(int gadgetId);
+
+    //
+    // for GadgetManager
+    //
+    void updateGadgetIds(in int[] gadgetIds, in RemoteViews views);
+    void updateGadgetProvider(in ComponentName provider, in RemoteViews views);
     List<GadgetInfo> getInstalledProviders();
+    GadgetInfo getGadgetInfo(int gadgetId);
+    void bindGadgetId(int gadgetId, in ComponentName provider);
+
 }
+

@@ -51,11 +51,46 @@ public final class BridgeResources extends Resources {
     private IProjectCallback mProjectCallback;
     private boolean[] mPlatformResourceFlag = new boolean[1];
     
-    public BridgeResources(BridgeContext context, AssetManager assets, DisplayMetrics metrics,
-            Configuration config, IProjectCallback projetCallback) {
+    /**
+     * This initializes the static field {@link Resources#mSystem} which is used
+     * by methods who get global resources using {@link Resources#getSystem()}.
+     * <p/>
+     * They will end up using our bridge resources.
+     * <p/>
+     * {@link Bridge} calls this method after setting up a new bridge.
+     */
+    /*package*/ static Resources initSystem(BridgeContext context, 
+            AssetManager assets,
+            DisplayMetrics metrics,
+            Configuration config,
+            IProjectCallback projectCallback) {
+        if (!(Resources.mSystem instanceof BridgeResources)) {
+            Resources.mSystem = new BridgeResources(context,
+                    assets,
+                    metrics,
+                    config,
+                    projectCallback);
+        }
+        return Resources.mSystem;
+    }
+    
+    /**
+     * Clears the static {@link Resources#mSystem} to make sure we don't leave objects
+     * around that would prevent us from unloading the library.
+     */
+    /*package*/ static void clearSystem() {
+        if (Resources.mSystem instanceof BridgeResources) {
+            ((BridgeResources)(Resources.mSystem)).mContext = null;
+            ((BridgeResources)(Resources.mSystem)).mProjectCallback = null;
+        }
+        Resources.mSystem = null;
+    }
+
+    private BridgeResources(BridgeContext context, AssetManager assets, DisplayMetrics metrics,
+            Configuration config, IProjectCallback projectCallback) {
         super(assets, metrics, config);
         mContext = context;
-        mProjectCallback = projetCallback;
+        mProjectCallback = projectCallback;
     }
     
     public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile) {

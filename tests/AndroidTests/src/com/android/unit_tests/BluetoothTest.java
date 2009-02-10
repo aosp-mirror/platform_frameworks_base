@@ -336,7 +336,6 @@ public class BluetoothTest extends AndroidTestCase {
             filter.addAction(BluetoothIntent.ENABLED_ACTION);
             filter.addAction(BluetoothIntent.DISABLED_ACTION);
             filter.addAction(BluetoothIntent.NAME_CHANGED_ACTION);
-            filter.addAction(BluetoothIntent.MODE_CHANGED_ACTION);
             filter.addAction(BluetoothIntent.DISCOVERY_STARTED_ACTION);
             filter.addAction(BluetoothIntent.DISCOVERY_COMPLETED_ACTION);
             filter.addAction(BluetoothIntent.PAIRING_REQUEST_ACTION);
@@ -349,8 +348,6 @@ public class BluetoothTest extends AndroidTestCase {
             filter.addAction(BluetoothIntent.REMOTE_DEVICE_DISCONNECTED_ACTION);
             filter.addAction(BluetoothIntent.REMOTE_NAME_UPDATED_ACTION);
             filter.addAction(BluetoothIntent.REMOTE_NAME_FAILED_ACTION);
-            filter.addAction(BluetoothIntent.REMOTE_ALIAS_CHANGED_ACTION);
-            filter.addAction(BluetoothIntent.REMOTE_ALIAS_CLEARED_ACTION);
             filter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
             filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
             getContext().registerReceiver(
@@ -384,16 +381,6 @@ public class BluetoothTest extends AndroidTestCase {
             String name = intent.getStringExtra(BluetoothIntent.NAME);
             if (name != null) {
                 msg += " name=" + name;
-            }
-
-            String alias = intent.getStringExtra(BluetoothIntent.ALIAS);
-            if (alias != null) {
-                msg += " alias=" + alias;
-            }
-
-            int mode = intent.getIntExtra(BluetoothIntent.MODE, -10);
-            if (mode != -10) {
-                msg += " mode=" + mode;
             }
 
             int state = intent.getIntExtra(BluetoothIntent.HEADSET_STATE, -10);

@@ -43,9 +43,12 @@ public class Menu extends FileList {
     
     void processFile(String filename, boolean selection)
     {
-        Intent result = new Intent(null, Uri.parse(filename));
+        Intent result = new Intent();
         result.setClass(this, HTMLHostActivity.class);
-        result.putExtra("ReturnWhenFinished", selection);
+        result.putExtra(HTMLHostActivity.RESUME_FROM_CRASH, false);
+        result.putExtra(HTMLHostActivity.SINGLE_TEST_MODE, true);
+        result.putExtra(HTMLHostActivity.TEST_PATH_PREFIX, filename);
+        result.putExtra(HTMLHostActivity.TIMEOUT_IN_MILLIS, 8000);
         startActivity(result);
     }
    

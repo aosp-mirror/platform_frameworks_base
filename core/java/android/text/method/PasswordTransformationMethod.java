@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.view.View;
 import android.text.Editable;
 import android.text.GetChars;
+import android.text.NoCopySpan;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.Selection;
@@ -249,7 +250,8 @@ implements TransformationMethod, TextWatcher
      * Used to stash a reference back to the View in the Editable so we
      * can use it to check the settings.
      */
-    private static class ViewReference extends WeakReference<View> {
+    private static class ViewReference extends WeakReference<View>
+            implements NoCopySpan {
         public ViewReference(View v) {
             super(v);
         }

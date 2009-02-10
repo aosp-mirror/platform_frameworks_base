@@ -177,11 +177,12 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mUseGL;
     boolean mGlWanted;
 
+    final ViewConfiguration mViewConfiguration;    
+
     /**
      * see {@link #playSoundEffect(int)}
      */
     AudioManager mAudioManager;
-
 
 
     public ViewRoot(Context context) {
@@ -224,6 +225,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mSurface = new Surface();
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
+        mViewConfiguration = ViewConfiguration.get(context);
     }
 
     @Override
@@ -1101,6 +1103,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                     canvas.translate(0, -yoff);
+                    mView.mPrivateFlags |= View.DRAWN;
                     mView.draw(canvas);
                     canvas.translate(0, yoff);
 
@@ -1139,6 +1142,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             Canvas canvas;
             try {
                 canvas = surface.lockCanvas(dirty);
+                // TODO: Do this in native
+                canvas.setDensityScale(mView.getResources().getDisplayMetrics().density);
             } catch (Surface.OutOfResourcesException e) {
                 Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
                 // TODO: we should ask the window manager to do something!
@@ -1175,6 +1180,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 dirty.setEmpty();
                 mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 canvas.translate(0, -yoff);
+                mView.mPrivateFlags |= View.DRAWN;                    
                 mView.draw(canvas);
                 canvas.translate(0, yoff);
 
@@ -1197,6 +1203,23 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (LOCAL_LOGV) {
                 Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
             }
+            
+        } else if (mWidth == 0 || mHeight == 0) {
+            // This is a special case where a window dimension is 0 -- we
+            // normally wouldn't draw anything because we have an empty
+            // dirty rect, but the surface flinger may be waiting for us to
+            // draw the window before it stops freezing the screen, so we
+            // need to diddle it like this to keep it from getting stuck.
+            Canvas canvas;
+            try {
+                canvas = surface.lockCanvas(dirty);
+            } catch (Surface.OutOfResourcesException e) {
+                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
+                // TODO: we should ask the window manager to do something!
+                // for now we just do nothing
+                return;
+            }
+            surface.unlockCanvasAndPost(canvas);
         }
         
         if (scrolling) {
@@ -1414,6 +1437,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int FINISHED_EVENT = 1010;
     public final static int DISPATCH_KEY_FROM_IME = 1011;
     public final static int FINISH_INPUT_CONNECTION = 1012;
+    public final static int CHECK_FOCUS = 1013;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1422,11 +1446,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             ((View) msg.obj).invalidate();
             break;
         case View.AttachInfo.INVALIDATE_RECT_MSG:
-            int left = msg.arg1 >>> 16;
-            int top = msg.arg1 & 0xFFFF;
-            int right = msg.arg2 >>> 16;
-            int bottom = msg.arg2 & 0xFFFF;
-            ((View) msg.obj).invalidate(left, top, right, bottom);
+            final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
+            info.target.invalidate(info.left, info.top, info.right, info.bottom);
+            info.release();
             break;
         case DO_TRAVERSAL:
             if (mProfile) {
@@ -1478,7 +1500,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     event.offsetLocation(0, mCurScrollY);
                     handled = mView.dispatchTouchEvent(event);
                     if (!handled && isDown) {
-                        int edgeSlop = ViewConfiguration.getEdgeSlop();
+                        int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
 
                         final int edgeFlags = event.getEdgeFlags();
                         int direction = View.FOCUS_UP;
@@ -1615,7 +1637,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             dispatchDetachedFromWindow();
             break;
         case DISPATCH_KEY_FROM_IME:
-            if (LOCAL_LOGV) Log.v(
+            if (true) Log.v(
                 "ViewRoot", "Dispatching key "
                 + msg.obj + " from IME to " + mView);
             deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
@@ -1624,6 +1646,12 @@ public final class ViewRoot extends Handler implements ViewParent,
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
                 imm.reportFinishInputConnection((InputConnection)msg.obj);
+            }
+        } break;
+        case CHECK_FOCUS: {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.checkFocus((View)msg.obj);
             }
         } break;
         }
@@ -2042,8 +2070,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
     
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
-        boolean handled = false;
-        handled = mView.dispatchKeyEventPreIme(event);
+        // If mView is null, we just consume the key event because it doesn't
+        // make sense to do anything else with it.
+        boolean handled = mView != null
+                ? mView.dispatchKeyEventPreIme(event) : true;
         if (handled) {
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
@@ -2061,7 +2091,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (WindowManager.LayoutParams.mayUseInputMethod(
                 mWindowAttributes.flags)) {
             InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null && mView != null && imm.isActive()) {
+            if (imm != null && mView != null) {
                 int seq = enqueuePendingEvent(event, sendDone);
                 if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
                         + seq + " event=" + event);
@@ -2748,7 +2778,6 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             synchronized (mActions) {
                 final ArrayList<HandlerAction> actions = mActions;
-                final int count = actions.size();
 
                 while (actions.remove(handlerAction)) {
                     // Keep going
@@ -2776,7 +2805,20 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             @Override
             public boolean equals(Object o) {
-                return action.equals(o);
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                HandlerAction that = (HandlerAction) o;
+
+                return !(action != null ? !action.equals(that.action) : that.action != null);
+
+            }
+
+            @Override
+            public int hashCode() {
+                int result = action != null ? action.hashCode() : 0;
+                result = 31 * result + (int) (delay ^ (delay >>> 32));
+                return result;
             }
         }
     }

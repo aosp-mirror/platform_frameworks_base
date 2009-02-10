@@ -35,8 +35,7 @@ import android.test.suitebuilder.annotation.Suppress;
 
 
 /**
- * Junit / Instrumentation test case for the media recorder api
- 
+ * Junit / Instrumentation test case for the media recorder api 
  */  
 public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {    
     private String TAG = "MediaRecorderTest";
@@ -60,12 +59,12 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
  
     private void recordVideo(int frameRate, int width, int height, 
-            int videoFormat, int outFormat, String outFile, boolean videoOnly){
+            int videoFormat, int outFormat, String outFile, boolean videoOnly) {
         Log.v(TAG,"startPreviewAndPrepareRecording");
-        try{
-            if (!videoOnly){
+        try {
+            if (!videoOnly) {
                 Log.v(TAG, "setAudioSource");
-                //mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             }
             mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
             mRecorder.setOutputFormat(outFormat);
@@ -75,8 +74,8 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             mRecorder.setVideoSize(width, height);
             Log.v(TAG, "setEncoder");
             mRecorder.setVideoEncoder(videoFormat);
-            if (!videoOnly){
-               // mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            if (!videoOnly) {
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
             mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
             Log.v(TAG, "setPreview");
@@ -88,16 +87,57 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             Thread.sleep(MediaNames.RECORDED_TIME);
             Log.v(TAG, "stop");
             mRecorder.stop();
-            mRecorder.reset();
             mRecorder.release();
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.v("record video failed ", e.toString());
+            mRecorder.release();
         }
     }
     
-    private void getOutputVideoProperty(String outputFilePath){
+    
+    private boolean invalidRecordSetting(int frameRate, int width, int height, 
+            int videoFormat, int outFormat, String outFile, boolean videoOnly) {
+        try {
+            if (!videoOnly) {
+                Log.v(TAG, "setAudioSource");
+                mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            }
+            mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+            mRecorder.setOutputFormat(outFormat);
+            Log.v(TAG, "output format " + outFormat);          
+            mRecorder.setOutputFile(outFile);
+            mRecorder.setVideoFrameRate(frameRate);
+            mRecorder.setVideoSize(width, height);
+            Log.v(TAG, "setEncoder");
+            mRecorder.setVideoEncoder(videoFormat);
+            if (!videoOnly) {
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            }
+            mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+            Log.v(TAG, "setPreview");
+            mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+            Log.v(TAG, "prepare");
+            mRecorder.prepare();
+            Log.v(TAG, "start");
+            mRecorder.start();
+            Thread.sleep(MediaNames.RECORDED_TIME);
+            Log.v(TAG, "stop");
+            mRecorder.stop();
+            mRecorder.release();
+        } catch (Exception e) {
+            Log.v("record video failed ", e.toString());
+            mRecorder.release();
+            Log.v(TAG, "reset and release");
+            return true;
+        }
+        return false;
+    }
+    
+    
+    
+    private void getOutputVideoProperty(String outputFilePath) {
         MediaPlayer mediaPlayer = new MediaPlayer();
-        try{
+        try {
             mediaPlayer.setDataSource(outputFilePath);
             Log.v(TAG, "file Path = " + outputFilePath);
             mediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
@@ -111,19 +151,20 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             mediaPlayer.release();    
         } catch (Exception e) {
             Log.v(TAG, e.toString());
+            mediaPlayer.release();
         }       
     }
     
-    private void removeFile(String filePath){
+    private void removeFile(String filePath) {
         File fileRemove = new File(filePath);
         fileRemove.delete();     
     }
     
-    private boolean validateVideo(String filePath, int width, int height){
+    private boolean validateVideo(String filePath, int width, int height) {
         boolean validVideo = false;
         getOutputVideoProperty(filePath);
         if (mOutputVideoWidth == width && mOutputVideoHeight == height &&
-                mOutputDuration > MediaNames.VALID_VIDEO_DURATION ){
+                mOutputDuration > MediaNames.VALID_VIDEO_DURATION ) {
             validVideo = true;
         }
         Log.v(TAG, "width = " + mOutputVideoWidth + " height = " + mOutputVideoHeight + " Duration = " + mOutputDuration);
@@ -143,7 +184,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
     
     //Format: QVGA h263
-    @Suppress
+    @LargeTest
     public void testQVGAH263() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 320, 240, MediaRecorder.VideoEncoder.H263, 
@@ -153,7 +194,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
     
     //Format: SQVGA h263
-    @Suppress
+    @LargeTest
     public void testSQVGAH263() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 240, 160, MediaRecorder.VideoEncoder.H263, 
@@ -184,14 +225,12 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
       
     
    
-    @Suppress
+    @LargeTest
     public void testVideoOnly() throws Exception {       
         boolean videoRecordedResult = false;
-        for (int i=0; i< 10; i++){
         recordVideo(15, 176, 144, MediaRecorder.VideoEncoder.H263, 
                MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);      
         videoRecordedResult = validateVideo(MediaNames.RECORDED_VIDEO_3GP, 176, 144);
-        }
         assertTrue("QCIFH263 Video Only", videoRecordedResult);
     }
     
@@ -204,7 +243,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         assertTrue("PortraitH263", videoRecordedResult);
     }
     
-    @LargeTest
+    @Suppress
     public void testHVGAMP4() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 480, 320, MediaRecorder.VideoEncoder.MPEG_4_SP, 
@@ -242,7 +281,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }    
     
     
-    //Format: CIF h263
+    //Format: CIF MP4
     @LargeTest
     public void testCIFMP4() throws Exception {       
         boolean videoRecordedResult = false;
@@ -253,14 +292,14 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
     
     
-    //Format: CIF h263 outputforma 3gpp
+    //Format: CIF MP4 output format 3gpp
     @LargeTest
     public void testCIFMP43GPP() throws Exception {       
         boolean videoRecordedResult = false;
         recordVideo(15, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP, 
                MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
         videoRecordedResult = validateVideo(MediaNames.RECORDED_VIDEO_3GP, 352, 288);
-        assertTrue("CIFH263", videoRecordedResult);
+        assertTrue("CIFMP4 3GPP", videoRecordedResult);
     }
     
     @LargeTest
@@ -270,6 +309,30 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
                MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
         videoRecordedResult = validateVideo(MediaNames.RECORDED_VIDEO_3GP, 176, 144);
         assertTrue("QCIFH263 3GPP", videoRecordedResult);
+    }
+    
+    @LargeTest
+    public void testInvalidVideoPath() throws Exception {       
+        boolean isTestInvalidVideoPathSuccessful = false;
+        isTestInvalidVideoPathSuccessful = invalidRecordSetting(15, 176, 144, MediaRecorder.VideoEncoder.H263, 
+               MediaRecorder.OutputFormat.THREE_GPP, MediaNames.INVALD_VIDEO_PATH, false);      
+        assertTrue("Invalid outputFile Path", isTestInvalidVideoPathSuccessful);
+    }
+    
+    @Suppress
+    public void testInvalidVideoSize() throws Exception {       
+        boolean isTestInvalidVideoSizeSuccessful = false;
+        isTestInvalidVideoSizeSuccessful = invalidRecordSetting(15, 800, 600, MediaRecorder.VideoEncoder.H263, 
+               MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
+        assertTrue("Invalid video Size", isTestInvalidVideoSizeSuccessful);
+    }
+    
+    @LargeTest
+    public void testInvalidFrameRate() throws Exception {       
+        boolean isTestInvalidFrameRateSuccessful = false;
+        isTestInvalidFrameRateSuccessful = invalidRecordSetting(50, 176, 144, MediaRecorder.VideoEncoder.H263, 
+               MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
+        assertTrue("Invalid FrameRate", isTestInvalidFrameRateSuccessful);
     }
     
 }

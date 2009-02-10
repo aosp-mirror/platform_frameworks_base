@@ -123,7 +123,7 @@ class SyncManager {
 
     private static final String SYNC_WAKE_LOCK = "SyncManagerSyncWakeLock";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
-    
+
     private Context mContext;
     private ContentResolver mContentResolver;
 
@@ -249,7 +249,7 @@ class SyncManager {
         mSyncQueue = new SyncQueue(mSyncStorageEngine);
 
         mContext = context;
-        
+
         mSyncThread = new HandlerThread("SyncHandlerThread", Process.THREAD_PRIORITY_BACKGROUND);
         mSyncThread.start();
         mSyncHandler = new SyncHandler(mSyncThread.getLooper());
@@ -489,7 +489,7 @@ class SyncManager {
         // Require the precise value "yes" to discourage accidental activation.
         return "yes".equals(SystemProperties.get("ro.config.sync"));
     }
-    
+
     /**
      * Initiate a sync. This can start a sync for all providers
      * (pass null to url, set onlyTicklable to false), only those
@@ -515,7 +515,7 @@ class SyncManager {
 *          syncs of a specific provider. Can be null. Is ignored
 *          if the url is null.
      * @param delay how many milliseconds in the future to wait before performing this
-     *   sync. -1 means to make this the next sync to perform. 
+     *   sync. -1 means to make this the next sync to perform.
      */
     public void scheduleSync(Uri url, Bundle extras, long delay) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
@@ -694,7 +694,7 @@ class SyncManager {
     class SyncHandlerMessagePayload {
         public final ActiveSyncContext activeSyncContext;
         public final SyncResult syncResult;
-        
+
         SyncHandlerMessagePayload(ActiveSyncContext syncContext, SyncResult syncResult) {
             this.activeSyncContext = syncContext;
             this.syncResult = syncResult;
@@ -740,7 +740,7 @@ class SyncManager {
         if (newDelayInMs > maxSyncRetryTimeInSeconds * 1000) {
             newDelayInMs = maxSyncRetryTimeInSeconds * 1000;
         }
-        
+
         SyncOperation rescheduledSyncOperation = new SyncOperation(syncOperation);
         rescheduledSyncOperation.setDelay(newDelayInMs);
         scheduleSyncOperation(rescheduledSyncOperation);
@@ -786,7 +786,7 @@ class SyncManager {
             // key than the one we are scheduling.
             if (!activeIsExpedited && !hasSameKey) {
                 rescheduleImmediately(activeSyncContext.mSyncOperation);
-                sendSyncFinishedOrCanceledMessage(activeSyncContext, 
+                sendSyncFinishedOrCanceledMessage(activeSyncContext,
                         null /* no result since this is a cancel */);
             }
         }
@@ -1323,7 +1323,7 @@ class SyncManager {
         public SyncHandler(Looper looper) {
             super(looper);
         }
-        
+
         public void handleMessage(Message msg) {
             handleSyncHandlerMessage(msg);
         }
@@ -1462,6 +1462,9 @@ class SyncManager {
             // start it, otherwise just get out.
             SyncOperation syncOperation;
             final Sync.Settings.QueryMap syncSettings = getSyncSettings();
+            final ConnectivityManager connManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            final boolean backgroundDataSetting = connManager.getBackgroundDataSetting();
             synchronized (mSyncQueue) {
                 while (true) {
                     syncOperation = mSyncQueue.head();
@@ -1484,10 +1487,10 @@ class SyncManager {
                     // skip the sync if it isn't a force and the settings are off for this provider
                     final boolean force = syncOperation.extras.getBoolean(
                             ContentResolver.SYNC_EXTRAS_FORCE, false);
-                    if (!force && (!syncSettings.getBackgroundData()
+                    if (!force && (!backgroundDataSetting
                             || !syncSettings.getListenForNetworkTickles()
                             || !syncSettings.getSyncProviderAutomatically(
-                            syncOperation.authority))) {
+                                    syncOperation.authority))) {
                         if (isLoggable) {
                             Log.v(TAG, "runStateIdle: sync off, dropping " + syncOperation);
                         }
@@ -1669,7 +1672,7 @@ class SyncManager {
          * @param syncResult the SyncResult from which to read
          * @return the most "serious" error set in the SyncResult
          * @throws IllegalStateException if the SyncResult does not indicate any errors.
-         *   If SyncResult.error() is true then it is safe to call this.   
+         *   If SyncResult.error() is true then it is safe to call this.
          */
         private int syncResultToErrorNumber(SyncResult syncResult) {
             if (syncResult.syncAlreadyInProgress) return History.ERROR_SYNC_ALREADY_IN_PROGRESS;
@@ -1679,7 +1682,8 @@ class SyncManager {
             if (syncResult.stats.numConflictDetectedExceptions > 0) return History.ERROR_CONFLICT;
             if (syncResult.tooManyDeletions) return History.ERROR_TOO_MANY_DELETIONS;
             if (syncResult.tooManyRetries) return History.ERROR_TOO_MANY_RETRIES;
-            throw new IllegalStateException("we are not in an error state, " + toString());
+            if (syncResult.databaseError) return History.ERROR_INTERNAL;
+            throw new IllegalStateException("we are not in an error state, " + syncResult);
         }
 
         private void manageSyncNotification() {
@@ -1717,7 +1721,7 @@ class SyncManager {
                 if (mSyncNotificationInfo.isActive) {
                     shouldInstall = shouldCancel;
                 } else {
-                    final boolean timeToShowNotification = 
+                    final boolean timeToShowNotification =
                             now > mSyncNotificationInfo.startTime + SYNC_NOTIFICATION_DELAY;
                     final boolean syncIsForced = syncOperation.extras
                             .getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false);
@@ -1769,7 +1773,7 @@ class SyncManager {
             if (!mDataConnectionIsConnected) return;
             if (mAccounts == null) return;
             if (mStorageIsLow) return;
-            
+
             // Compute the alarm fire time:
             // - not syncing: time of the next sync operation
             // - syncing, no notification: time from sync start to notification create time
@@ -1850,12 +1854,12 @@ class SyncManager {
             clickIntent.putExtra("account", account);
             clickIntent.putExtra("provider", authority);
             clickIntent.putExtra("numDeletes", numDeletes);
-            
+
             if (!isActivityAvailable(clickIntent)) {
                 Log.w(TAG, "No activity found to handle too many deletes.");
                 return;
             }
-            
+
             final PendingIntent pendingIntent = PendingIntent
                     .getActivity(mContext, 0, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -1877,7 +1881,7 @@ class SyncManager {
 
         /**
          * Checks whether an activity exists on the system image for the given intent.
-         * 
+         *
          * @param intent The intent for an activity.
          * @return Whether or not an activity exists.
          */
@@ -1892,10 +1896,10 @@ class SyncManager {
                     return true;
                 }
             }
-            
+
             return false;
         }
-        
+
         public long insertStartSyncEvent(SyncOperation syncOperation) {
             final int source = syncOperation.syncSource;
             final long now = System.currentTimeMillis();

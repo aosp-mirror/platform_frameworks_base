@@ -30,67 +30,67 @@ your strings.xml file.</p>
 <div>
 
 <div class="view">
-<a href="hello-linearlayout.html">LinearLayout<br/>
-<img src="images/hello-linearlayout.png" height="285" width="200" /></a>
+<a href="hello-linearlayout.html">LinearLayout</a><br/>
+<a href="hello-linearlayout.html"><img src="images/hello-linearlayout.png" height="285" width="200" /></a>
 </div>
 <div class="view">
-<a href="hello-relativelayout.html">RelativeLayout<br/>
-<img src="images/hello-relativelayout.png" height="285" width="200" /></a>
+<a href="hello-relativelayout.html">RelativeLayout</a><br/>
+<a href="hello-relativelayout.html"><img src="images/hello-relativelayout.png" height="285" width="200" /></a>
 </div>
 <div class="view">
-<a href="hello-tablelayout.html">TableLayout<br/>
-<img src="images/hello-tablelayout.png" height="285" width="200" /></a>
-</div>
-
-<div class="view">
-<a href="hello-datepicker.html">DatePicker<br/>
-<img src="images/hello-datepicker.png" height="285" width="200" /></a>
+<a href="hello-tablelayout.html">TableLayout</a><br/>
+<a href="hello-tablelayout.html"><img src="images/hello-tablelayout.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-timepicker.html">TimePicker<br/>
-<img src="images/hello-timepicker.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-formstuff.html">Form Stuff<br/>
-<img src="images/hello-formstuff.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-spinner.html">Spinner<br/>
-<img src="images/hello-spinner.png" height="285" width="200" /></a>
+<a href="hello-datepicker.html">DatePicker</a><br/>
+<a href="hello-datepicker.html"><img src="images/hello-datepicker.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-autocomplete.html">AutoComplete<br/>
-<img src="images/hello-autocomplete.png" height="285" width="200" /></a>
+<a href="hello-timepicker.html">TimePicker</a><br/>
+<a href="hello-timepicker.html"><img src="images/hello-timepicker.png" height="285" width="200" /></a>
 </div>
 <div class="view">
-<a href="hello-listview.html">ListView<br/>
-<img src="images/hello-listview.png" height="285" width="200" /></a>
+<a href="hello-formstuff.html">Form Stuff</a><br/>
+<a href="hello-formstuff.html"><img src="images/hello-formstuff.png" height="285" width="200" /></a>
 </div>
 <div class="view">
-<a href="hello-gridview.html">GridView<br/>
-<img src="images/hello-gridview.png" height="285" width="200" /></a>
-</div>
-
-<div class="view">
-<a href="hello-gallery.html">Gallery<br/>
-<img src="images/hello-gallery.png" height="285" width="200" /></a>
+<a href="hello-spinner.html">Spinner</a><br/>
+<a href="hello-spinner.html"><img src="images/hello-spinner.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-tabwidget.html">TabWidget<br/>
-<img src="images/hello-tabwidget.png" height="285" width="200" /></a>
+<a href="hello-autocomplete.html">AutoComplete</a><br/>
+<a href="hello-autocomplete.html"><img src="images/hello-autocomplete.png" height="285" width="200" /></a>
+</div>
+<div class="view">
+<a href="hello-listview.html">ListView</a><br/>
+<a href="hello-listview.html"><img src="images/hello-listview.png" height="285" width="200" /></a>
+</div>
+<div class="view">
+<a href="hello-gridview.html">GridView</a><br/>
+<a href="hello-gridview.html"><img src="images/hello-gridview.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-mapview.html">MapView<br/>
-<img src="images/hello-mapview.png" height="285" width="200" /></a>
+<a href="hello-gallery.html">Gallery</a><br/>
+<a href="hello-gallery.html"><img src="images/hello-gallery.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-webview.html">WebView<br/>
-<img src="images/hello-webview.png" height="285" width="200" /></a>
+<a href="hello-tabwidget.html">TabWidget</a><br/>
+<a href="hello-tabwidget.html"><img src="images/hello-tabwidget.png" height="285" width="200" /></a>
+</div>
+
+<div class="view">
+<a href="hello-mapview.html">MapView</a><br/>
+<a href="hello-mapview.html"><img src="images/hello-mapview.png" height="285" width="200" /></a>
+</div>
+
+<div class="view">
+<a href="hello-webview.html">WebView</a><br/>
+<a href="hello-webview.html"><img src="images/hello-webview.png" height="285" width="200" /></a>
 </div>
 
 <!--

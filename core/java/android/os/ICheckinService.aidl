@@ -26,6 +26,9 @@ import android.os.IParentalControlCallback;
  * {@hide}
  */
 interface ICheckinService {
+    /** Synchronously attempt a checkin with the server, return true on success. */
+    boolean checkin();
+
     /** Direct submission of crash data; returns after writing the crash. */
     void reportCrashSync(in byte[] crashData);
 

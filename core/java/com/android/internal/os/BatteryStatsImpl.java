@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.NetStat;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
@@ -28,9 +29,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -39,12 +40,14 @@ import java.util.Map;
  * otherwise.
  */
 public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
+    
+    private static final String TAG = "BatteryStatsImpl";
 
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 13;
+    private static final int VERSION = 15;
 
     private final File mFile;
     private final File mBackupFile;
@@ -77,7 +80,11 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
     long mRealtime;
     long mRealtimeStart;
     long mLastRealtime;
-
+    
+    boolean mScreenOn;
+    long mLastScreenOnTimeMillis;
+    long mBatteryScreenOnTimeMillis;
+    long mPluggedScreenOnTimeMillis;
     /**
      * These provide time bases that discount the time the device is plugged
      * in to power.
@@ -87,6 +94,11 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
     long mTrackBatteryUptimeStart;
     long mTrackBatteryPastRealtime;
     long mTrackBatteryRealtimeStart;
+    
+    long mUnpluggedBatteryUptime;
+    long mUnpluggedBatteryRealtime;
+    
+    HashSet<Integer> mGpsRequesters = new HashSet<Integer>();
 
     long mLastWriteTime = 0; // Milliseconds
 
@@ -255,14 +267,13 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             long realtime = SystemClock.elapsedRealtime() * 1000; 
             long heldTime = stats.getBatteryUptimeLocked(realtime) - mUpdateTime;
             if (heldTime > 0) {
-                mTotalTime += (heldTime * 1000) / mCount;
+                mTotalTime += heldTime / mCount;
             }
             mUpdateTime = stats.getBatteryUptimeLocked(realtime);
         }
 
         private long computeRunTimeLocked(long curBatteryUptime) {
-            return mTotalTime +
-                (mNesting > 0 ? ((curBatteryUptime * 1000) - mUpdateTime) / mCount : 0);
+            return mTotalTime + (mNesting > 0 ? (curBatteryUptime - mUpdateTime) / mCount : 0);
         }
 
         void writeSummaryFromParcelLocked(Parcel out, long curBatteryUptime) {
@@ -281,6 +292,15 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             mCount = mLoadedCount = in.readInt();
             mLastCount = in.readInt();
             mNesting = 0;
+        }
+    }
+    
+    public void unplugTcpCounters() {
+        final int NU = mUidStats.size();
+        for (int iu = 0; iu < NU; iu++) {
+            Uid u = mUidStats.valueAt(iu);
+            u.mTcpBytesReceivedAtLastUnplug = u.getTcpBytesReceived(STATS_TOTAL);
+            u.mTcpBytesSentAtLastUnplug = u.getTcpBytesSent(STATS_TOTAL);
         }
     }
     
@@ -305,6 +325,69 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         }
     }
     
+    public void noteStartGps(int uid) {
+        mGpsRequesters.add(uid);
+        mUidStats.get(uid).noteStartGps();
+    }
+    
+    public void noteStopGps(int uid) {
+        mGpsRequesters.remove(uid);
+        mUidStats.get(uid).noteStopGps();
+    }
+    
+    public void noteRequestGpsOn(int uid) {
+        mGpsRequesters.add(uid);
+        mUidStats.get(uid).noteStartGps();
+    }
+    
+    public void noteRequestGpsOff(int uid) {
+        mGpsRequesters.remove(uid);
+        mUidStats.get(uid).noteStopGps();
+    }
+    
+    /**
+     * When the device screen or battery state changes, update the appropriate "screen on time"
+     * counter.
+     */
+    private void updateScreenOnTime(boolean screenOn) {
+        if (!mScreenOn) {
+            Log.w(TAG, "updateScreenOnTime without mScreenOn, ignored");
+            return;
+        }
+        long now = SystemClock.elapsedRealtime();
+        long elapsed = now - mLastScreenOnTimeMillis;
+        if (mOnBattery) {
+            mBatteryScreenOnTimeMillis += elapsed;
+        } else {
+            mPluggedScreenOnTimeMillis += elapsed;
+        }
+        if (screenOn) {
+            mLastScreenOnTimeMillis = now;
+        }
+    }
+    
+    public void noteScreenOn() {
+        mScreenOn = true;
+        mLastScreenOnTimeMillis = SystemClock.elapsedRealtime();
+    }
+    
+    public void noteScreenOff() {
+        if (!mScreenOn) {
+            Log.w(TAG, "noteScreenOff without mScreenOn, ignored");
+            return;
+        }
+        updateScreenOnTime(false);
+        mScreenOn = false;
+    }
+    
+    @Override public long getBatteryScreenOnTime() {
+        return mBatteryScreenOnTimeMillis;
+    }
+    
+    @Override public long getPluggedScreenOnTime() {
+        return mPluggedScreenOnTimeMillis;
+    }
+    
     @Override
     public SparseArray<? extends BatteryStats.Uid> getUidStats() {
         return mUidStats;
@@ -314,6 +397,14 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
      * The statistics associated with a particular uid.
      */
     public final class Uid extends BatteryStats.Uid {
+        
+        final int mUid;
+        long mLoadedTcpBytesReceived;
+        long mLoadedTcpBytesSent;
+        long mTcpBytesReceivedAtLastUnplug;
+        long mTcpBytesSentAtLastUnplug;
+        
+        private final byte[] mBuf = new byte[16];
 
         /**
          * The statistics we have collected for this uid's wake locks.
@@ -334,6 +425,10 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
          * The statistics we have collected for this uid's processes.
          */
         final HashMap<String, Pkg> mPackageStats = new HashMap<String, Pkg>();
+        
+        public Uid(int uid) {
+            mUid = uid;
+        }
 
         @Override
         public Map<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
@@ -354,6 +449,42 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         public Map<String, ? extends BatteryStats.Uid.Pkg> getPackageStats() {
             return mPackageStats;
         }
+        
+        public int getUid() {
+            return mUid;
+        }
+        
+        public long getTcpBytesReceived(int which) {
+            long current = NetStat.getUidRxBytes(mUid);
+            
+            if (which == STATS_CURRENT) {
+                return current;
+            } else if (which == STATS_LAST) {
+                return mLoadedTcpBytesReceived;
+            } else if (which == STATS_UNPLUGGED) {
+                return current - mTcpBytesReceivedAtLastUnplug;
+            } else if (which == STATS_TOTAL) {
+                return mLoadedTcpBytesReceived + current;
+            } else {
+                throw new IllegalArgumentException("which = " + which);
+            }
+        }
+        
+        public long getTcpBytesSent(int which) {
+            long current = NetStat.getUidTxBytes(mUid);
+
+            if (which == STATS_CURRENT) {
+                return current;
+            } else if (which == STATS_LAST) {
+                return mLoadedTcpBytesSent;
+            } else if (which == STATS_UNPLUGGED) {
+                return current - mTcpBytesSentAtLastUnplug;
+            } else if (which == STATS_TOTAL) {
+                return mLoadedTcpBytesSent + current;
+            } else {
+                throw new IllegalArgumentException("which = " + which);
+            }
+        }
 
         void writeToParcelLocked(Parcel out) {
             out.writeInt(mWakelockStats.size());
@@ -366,6 +497,7 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             out.writeInt(mSensorStats.size());
             for (Map.Entry<Integer, Uid.Sensor> sensorEntry : mSensorStats.entrySet()) {
                 out.writeInt(sensorEntry.getKey());
+                out.writeString(sensorEntry.getValue().getName());
                 Uid.Sensor sensor = sensorEntry.getValue();
                 sensor.writeToParcelLocked(out);
             }
@@ -383,6 +515,11 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
                 Uid.Pkg pkg = pkgEntry.getValue();
                 pkg.writeToParcelLocked(out);
             }
+            
+            out.writeLong(mLoadedTcpBytesReceived);
+            out.writeLong(mLoadedTcpBytesSent);
+            out.writeLong(mTcpBytesReceivedAtLastUnplug);
+            out.writeLong(mTcpBytesSentAtLastUnplug);
         }
 
         void readFromParcelLocked(Parcel in) {
@@ -399,7 +536,8 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             mSensorStats.clear();
             for (int k = 0; k < numSensors; k++) {
                 int sensorNumber = in.readInt();
-                Uid.Sensor sensor = new Sensor();
+                String name = in.readString();
+                Uid.Sensor sensor = new Sensor(name);
                 sensor.readFromParcelLocked(in);
                 mSensorStats.put(sensorNumber, sensor);
             }
@@ -421,6 +559,11 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
                 pkg.readFromParcelLocked(in);
                 mPackageStats.put(packageName, pkg);
             }
+            
+            mLoadedTcpBytesReceived = in.readLong();
+            mLoadedTcpBytesSent = in.readLong();
+            mTcpBytesReceivedAtLastUnplug = in.readLong();
+            mTcpBytesSentAtLastUnplug = in.readLong();
         }
 
         /**
@@ -499,7 +642,13 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         }
 
         public final class Sensor extends BatteryStats.Uid.Sensor {
+            static final int GPS = -10000; // Treat GPS as a sensor
+            final String mName;
             Timer sensorTime;
+            
+            public Sensor(String name) {
+                mName = name;
+            }
 
             private Timer readTimerFromParcel(Parcel in) {
                 if (in.readInt() == 0) {
@@ -529,6 +678,10 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             @Override
             public Timer getSensorTime() {
                 return sensorTime;
+            }
+            
+            public String getName() {
+                return mName;
             }
         }
 
@@ -1039,19 +1192,19 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             }
         }
 
-        public Timer getSensorTimerLocked(int sensor, boolean create) {
+        public Timer getSensorTimerLocked(String name, int sensor, boolean create) {
             Integer sId = Integer.valueOf(sensor);
             Sensor se = mSensorStats.get(sId);
             if (se == null) {
                 if (!create) {
                     return null;
                 }
-                se = new Sensor();
+                se = new Sensor(name);
                 mSensorStats.put(sId, se);
             }
             Timer t = se.sensorTime;
             if (t == null) {
-                t = new Timer(0, mSensorTimers);
+                t = new Timer(BatteryStats.SENSOR, mSensorTimers);
                 se.sensorTime = t;
             }
             return t;
@@ -1071,19 +1224,33 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             }
         }
         
-        public void noteStartSensor(int sensor) {
-            Timer t = getSensorTimerLocked(sensor, true);
+        public void noteStartSensor(String name, int sensor) {
+            Timer t = getSensorTimerLocked(name, sensor, true);
             if (t != null) {
                 t.startRunningLocked(BatteryStatsImpl.this);
             }            
         }
 
-        public void noteStopSensor(int sensor) {
+        public void noteStopSensor(String name, int sensor) {
             // Don't create a timer if one doesn't already exist
-            Timer t = getSensorTimerLocked(sensor, false);
+            Timer t = getSensorTimerLocked(name, sensor, false);
             if (t != null) {
                 t.stopRunningLocked(BatteryStatsImpl.this);
             }            
+        }
+        
+        public void noteStartGps() {
+            Timer t = getSensorTimerLocked("GPS", Sensor.GPS, true);
+            if (t != null) {
+                t.startRunningLocked(BatteryStatsImpl.this);
+            }  
+        }
+        
+        public void noteStopGps() {
+            Timer t = getSensorTimerLocked("GPS", Sensor.GPS, false);
+            if (t != null) {
+                t.stopRunningLocked(BatteryStatsImpl.this);
+            }  
         }
 
         public BatteryStatsImpl getBatteryStats() {
@@ -1100,6 +1267,9 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         mTrackBatteryPastRealtime = 0;
         mUptimeStart = mTrackBatteryUptimeStart = SystemClock.uptimeMillis() * 1000;
         mRealtimeStart = mTrackBatteryRealtimeStart = SystemClock.elapsedRealtime() * 1000;
+        
+        mUnpluggedBatteryUptime = getBatteryUptimeLocked(mUptimeStart);
+        mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(mRealtimeStart);
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -1119,13 +1289,21 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
     public void setOnBattery(boolean onBattery) {
         synchronized(this) {
             if (mOnBattery != onBattery) {
+                if (mScreenOn) {
+                    updateScreenOnTime(true);
+                }
+                
                 long uptime = SystemClock.uptimeMillis() * 1000;
                 long mSecRealtime = SystemClock.elapsedRealtime();
                 long realtime = mSecRealtime * 1000;
                 if (onBattery) {
-                    mTrackBatteryUptimeStart = uptime;
-                    mTrackBatteryRealtimeStart = realtime;
+                    mTrackBatteryUptimeStart = getBatteryUptime(uptime);
+                    mTrackBatteryRealtimeStart = getBatteryRealtime(realtime);
+                    unplugTcpCounters();
                     unplugTimers();
+                    
+                    mUnpluggedBatteryUptime = getBatteryUptime(uptime);
+                    mUnpluggedBatteryRealtime = getBatteryRealtime(realtime);
                 } else {
                     mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
                     mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
@@ -1172,14 +1350,16 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
 
     @Override
     public long computeBatteryUptime(long curTime, int which) {
+        long uptime = getBatteryUptime(curTime);
         switch (which) {
         case STATS_TOTAL:
-            return mBatteryUptime + getBatteryUptime(curTime);
+            return mBatteryUptime + uptime;
         case STATS_LAST:
             return mBatteryLastUptime;
         case STATS_CURRENT:
+            return uptime;
         case STATS_UNPLUGGED:
-            return getBatteryUptime(curTime);
+            return uptime - mUnpluggedBatteryUptime;
         }
         return 0;
     }
@@ -1192,8 +1372,9 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         case STATS_LAST:
             return mBatteryLastRealtime;
         case STATS_CURRENT:
-        case STATS_UNPLUGGED:
             return getBatteryRealtimeLocked(curTime);
+        case STATS_UNPLUGGED:
+            return getBatteryRealtimeLocked(curTime) - mUnpluggedBatteryRealtime;
         }
         return 0;
     }
@@ -1234,7 +1415,7 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
     public Uid getUidStatsLocked(int uid) {
         Uid u = mUidStats.get(uid);
         if (u == null) {
-            u = new Uid();
+            u = new Uid(uid);
             mUidStats.put(uid, u);
         }
         return u;
@@ -1246,7 +1427,7 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
     public void removeUidStatsLocked(int uid) {
         mUidStats.remove(uid);
     }
-
+    
     /**
      * Retrieve the statistics object for a particular process, creating
      * if needed.
@@ -1388,15 +1569,21 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         mRealtime = in.readLong();
         mLastRealtime = in.readLong();
         mStartCount++;
+        
+        if (version >= 14) {
+            mBatteryScreenOnTimeMillis = in.readLong();
+            mPluggedScreenOnTimeMillis = in.readLong();
+            mScreenOn = false;
+        }
 
         final int NU = in.readInt();
-        for (int iu=0; iu<NU; iu++) {
+        for (int iu = 0; iu < NU; iu++) {
             int uid = in.readInt();
-            Uid u = new Uid();
+            Uid u = new Uid(uid);
             mUidStats.put(uid, u);
 
             int NW = in.readInt();
-            for (int iw=0; iw<NW; iw++) {
+            for (int iw = 0; iw < NW; iw++) {
                 String wlName = in.readString();
                 if (in.readInt() != 0) {
                     u.getWakeTimerLocked(wlName, WAKE_TYPE_FULL).readSummaryFromParcelLocked(in);
@@ -1411,16 +1598,21 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
 
             if (version >= 12) {
                 int NSE = in.readInt();
-                for (int is=0; is<NSE; is++) {
+                for (int is = 0; is < NSE; is++) {
                     int seNumber = in.readInt();
+                    String seName = "<unknown>";
+                    if (version >= 14) {
+                        seName = in.readString();
+                    }
                     if (in.readInt() != 0) {
-                        u.getSensorTimerLocked(seNumber, true).readSummaryFromParcelLocked(in);
+                        u.getSensorTimerLocked(seName, seNumber, true)
+                                .readSummaryFromParcelLocked(in);
                     }
                 }
             }
 
             int NP = in.readInt();
-            for (int ip=0; ip<NP; ip++) {
+            for (int ip = 0; ip < NP; ip++) {
                 String procName = in.readString();
                 Uid.Proc p = u.getProcessStatsLocked(procName);
                 p.mUserTime = p.mLoadedUserTime = in.readLong();
@@ -1432,13 +1624,13 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
             }
 
             NP = in.readInt();
-            for (int ip=0; ip<NP; ip++) {
+            for (int ip = 0; ip < NP; ip++) {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
                 p.mWakeups = p.mLoadedWakeups = in.readInt();
                 p.mLastWakeups = in.readInt();
                 final int NS = in.readInt();
-                for (int is=0; is<NS; is++) {
+                for (int is = 0; is < NS; is++) {
                     String servName = in.readString();
                     Uid.Pkg.Serv s = u.getServiceStatsLocked(pkgName, servName);
                     s.mStartTime = s.mLoadedStartTime = in.readLong();
@@ -1448,6 +1640,11 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
                     s.mLaunches = s.mLoadedLaunches = in.readInt();
                     s.mLastLaunches = in.readInt();
                 }
+            }
+
+            if (version >= 14) {
+                u.mLoadedTcpBytesReceived = in.readLong();
+                u.mLoadedTcpBytesSent = in.readLong();
             }
         }
     }
@@ -1474,10 +1671,13 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         out.writeLong(computeUptime(NOW_SYS, STATS_CURRENT));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_TOTAL));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_CURRENT));
+        
+        out.writeLong(mBatteryScreenOnTimeMillis);
+        out.writeLong(mPluggedScreenOnTimeMillis);
 
         final int NU = mUidStats.size();
         out.writeInt(NU);
-        for (int iu=0; iu<NU; iu++) {
+        for (int iu = 0; iu < NU; iu++) {
             out.writeInt(mUidStats.keyAt(iu));
             Uid u = mUidStats.valueAt(iu);
 
@@ -1516,6 +1716,7 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
                     : u.mSensorStats.entrySet()) {
                     out.writeInt(ent.getKey());
                     Uid.Sensor se = ent.getValue();
+                    out.writeString(se.getName());
                     if (se.sensorTime != null) {
                         out.writeInt(1);
                         se.sensorTime.writeSummaryFromParcelLocked(out, NOW);
@@ -1568,6 +1769,9 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
                     }
                 }
             }
+            
+            out.writeLong(u.getTcpBytesReceived(STATS_TOTAL));
+            out.writeLong(u.getTcpBytesSent(STATS_TOTAL));
         }
     }
 
@@ -1586,6 +1790,9 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         mBatteryLastUptime = in.readLong();
         mBatteryRealtime = in.readLong();
         mBatteryLastRealtime = in.readLong();
+        mBatteryScreenOnTimeMillis = in.readLong();
+        mPluggedScreenOnTimeMillis = in.readLong();
+        mScreenOn = false;
         mUptime = in.readLong();
         mUptimeStart = in.readLong();
         mLastUptime = in.readLong();
@@ -1606,10 +1813,10 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         int numUids = in.readInt();
         mUidStats.clear();
         for (int i = 0; i < numUids; i++) {
-            int key = in.readInt();
-            Uid uid = new Uid();
-            uid.readFromParcelLocked(in);
-            mUidStats.append(key, uid);
+            int uid = in.readInt();
+            Uid u = new Uid(uid);
+            u.readFromParcelLocked(in);
+            mUidStats.append(uid, u);
         }
     }
 
@@ -1625,6 +1832,8 @@ public final class BatteryStatsImpl extends BatteryStats implements Parcelable {
         out.writeLong(mBatteryLastUptime);
         out.writeLong(mBatteryRealtime);
         out.writeLong(mBatteryLastRealtime);
+        out.writeLong(mBatteryScreenOnTimeMillis);
+        out.writeLong(mPluggedScreenOnTimeMillis);
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
         out.writeLong(mLastUptime);

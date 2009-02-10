@@ -32,6 +32,21 @@ import android.view.KeyEvent;
  */
 public interface InputConnection {
     /**
+     * Flag for use with {@link #getTextAfterCursor} and
+     * {@link #getTextBeforeCursor} to have style information returned along
+     * with the text.  If not set, you will receive only the raw text.  If
+     * set, you may receive a complex CharSequence of both text and style
+     * spans.
+     */
+    static final int GET_TEXT_WITH_STYLES = 0x0001;
+    
+    /**
+     * Flag for use with {@link #getExtractedText} to indicate you would
+     * like to receive updates when the extracted text changes.
+     */
+    public static final int GET_EXTRACTED_TEXT_MONITOR = 0x0001;
+    
+    /**
      * Get <var>n</var> characters of text before the current cursor position.
      * 
      * <p>This method may fail either if the input connection has become invalid
@@ -40,11 +55,13 @@ public interface InputConnection {
      * In either case, a null is returned.
      * 
      * @param n The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is
+     * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * 
      * @return Returns the text before the cursor position; the length of the
      * returned text might be less than <var>n</var>.
      */
-    public CharSequence getTextBeforeCursor(int n);
+    public CharSequence getTextBeforeCursor(int n, int flags);
 
     /**
      * Get <var>n</var> characters of text after the current cursor position.
@@ -55,11 +72,13 @@ public interface InputConnection {
      * In either case, a null is returned.
      * 
      * @param n The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is
+     * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * 
      * @return Returns the text after the cursor position; the length of the
      * returned text might be less than <var>n</var>.
      */
-    public CharSequence getTextAfterCursor(int n);
+    public CharSequence getTextAfterCursor(int n, int flags);
 
     /**
      * Retrieve the current capitalization mode in effect at the current
@@ -82,8 +101,6 @@ public interface InputConnection {
      */
     public int getCursorCapsMode(int reqModes);
     
-    public static final int EXTRACTED_TEXT_MONITOR = 0x0001;
-    
     /**
      * Retrieve the current text in the input connection's editor, and monitor
      * for any changes to it.  This function returns with the current text,
@@ -97,7 +114,7 @@ public interface InputConnection {
      * 
      * @param request Description of how the text should be returned.
      * @param flags Additional options to control the client, either 0 or
-     * {@link #EXTRACTED_TEXT_MONITOR}.
+     * {@link #GET_EXTRACTED_TEXT_MONITOR}.
      * 
      * @return Returns an ExtractedText object describing the state of the
      * text view and containing the extracted text itself.
@@ -141,7 +158,7 @@ public interface InputConnection {
 
     /**
      * Have the text editor finish whatever composing text is currently
-     * active.  This simple leaves the text as-is, removing any special
+     * active.  This simply leaves the text as-is, removing any special
      * composing styling or other state that was around it.  The cursor
      * position remains unchanged.
      */
@@ -176,6 +193,22 @@ public interface InputConnection {
      */
     public boolean commitCompletion(CompletionInfo text);
 
+    /**
+     * Set the selection of the text editor.  To set the cursor position,
+     * start and end should have the same value.
+     */
+    public boolean setSelection(int start, int end);
+    
+    /**
+     * Perform a context menu action on the field.  The given id may be one of:
+     * {@link android.R.id#selectAll},
+     * {@link android.R.id#startSelectingText}, {@link android.R.id#stopSelectingText},
+     * {@link android.R.id#cut}, {@link android.R.id#copy},
+     * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
+     * or {@link android.R.id#switchInputMethod}
+     */
+    public boolean performContextMenuAction(int id);
+    
     /**
      * Tell the editor that you are starting a batch of editor operations.
      * The editor will try to avoid sending you updates about its state

@@ -27,10 +27,10 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16sp"
-        android:layout_marginRight="6sp"
-        android:layout_marginTop="6sp"
-        android:layout_marginBottom="6sp"
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="6dip"
+        android:layout_marginTop="6dip"
+        android:layout_marginBottom="6dip"
         android:layout_weight="1">
     
         <TextView android:id="@+android:id/title"

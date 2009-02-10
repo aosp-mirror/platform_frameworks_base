@@ -115,4 +115,22 @@ class Operation implements Serializable {
         }
         return microsInt;
     }
+    
+    /**
+     * Primarily for debugger support
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(type.toString());
+        sb.append(' ');
+        sb.append(loadedClass.toString());
+        if (subops.size() > 0) {
+            sb.append(" (");
+            sb.append(subops.size());
+            sb.append(" sub ops)");
+        }
+        return sb.toString();
+    }
+
 }

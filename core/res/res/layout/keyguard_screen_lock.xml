@@ -71,7 +71,7 @@
             android:layout_width="fill_parent"
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
-            android:background="@android:drawable/divider_horizontal_bright"/>
+            android:background="@android:drawable/divider_horizontal_dark"/>
 
         <!-- time and date -->
         <TextView android:id="@+id/time"
@@ -91,7 +91,7 @@
             android:layout_width="fill_parent"
             android:layout_height="1dip"
             android:layout_marginBottom="8dip"
-            android:background="@android:drawable/divider_horizontal_bright"
+            android:background="@android:drawable/divider_horizontal_dark"
                 />
 
         <!-- battery info -->
@@ -125,7 +125,7 @@
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
             android:layout_marginBottom="8dip"
-            android:background="@android:drawable/divider_horizontal_bright"
+            android:background="@android:drawable/divider_horizontal_dark"
                 />
 
         <!-- next alarm info -->
@@ -160,7 +160,7 @@
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
             android:layout_marginBottom="8dip"
-            android:background="@android:drawable/divider_horizontal_bright"/>
+            android:background="@android:drawable/divider_horizontal_dark"/>
 
         <!-- lock icon with 'screen locked' message
              (shown when SIM card is present) -->
@@ -194,6 +194,7 @@
         <TextView android:id="@+id/lockInstructions"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dip"
                   android:gravity="center"
                   android:textSize="14sp"/>
 
@@ -206,7 +207,6 @@
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
             android:layout_marginBottom="5dip"
-            android:layout_marginTop="5dip"
             android:drawableTop="@drawable/ic_emergency"
             android:drawablePadding="3dip"
             android:text="@android:string/lockscreen_emergency_call"

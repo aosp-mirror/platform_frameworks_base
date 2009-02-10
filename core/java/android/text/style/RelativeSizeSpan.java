@@ -16,16 +16,34 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
-public class RelativeSizeSpan extends MetricAffectingSpan {
+public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableSpan {
 
-	private float mProportion;
+	private final float mProportion;
 
 	public RelativeSizeSpan(float proportion) {
 		mProportion = proportion;
 	}
+
+    public RelativeSizeSpan(Parcel src) {
+        mProportion = src.readFloat();
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.RELATIVE_SIZE_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeFloat(mProportion);
+    }
 
 	public float getSizeChange() {
 		return mProportion;

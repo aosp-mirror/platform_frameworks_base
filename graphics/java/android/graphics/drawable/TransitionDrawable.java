@@ -63,7 +63,9 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     private int mFrom;
     private int mTo;
     private int mDuration;
-    private TransitionState mState;
+    private int mOriginalDuration;
+    private int mAlpha = 0;
+    private boolean mCrossFade;
 
     /**
      * Create a new transition drawable with the specified list of layers. At least
@@ -85,12 +87,10 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
 
     private TransitionDrawable(TransitionState state) {
         super(state);
-        mState = state;
     }
 
     private TransitionDrawable(TransitionState state, Drawable[] layers) {
         super(layers, state);
-        mState = state;
     }
 
     @Override
@@ -106,8 +106,8 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     public void startTransition(int durationMillis) {
         mFrom = 0;
         mTo = 255;
-        mState.mAlpha = 0;
-        mState.mDuration = mDuration = durationMillis;
+        mAlpha = 0;
+        mDuration = mOriginalDuration = durationMillis;
         mReverse = false;
         mTransitionState = TRANSITION_STARTING;
         invalidateSelf();
@@ -117,7 +117,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * Show only the first layer.
      */
     public void resetTransition() {
-        mState.mAlpha = 0;
+        mAlpha = 0;
         mTransitionState = TRANSITION_NONE;
         invalidateSelf();
     }
@@ -133,36 +133,35 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     public void reverseTransition(int duration) {
         final long time = SystemClock.uptimeMillis();
         // Animation is over
-        if (time - mStartTimeMillis > mState.mDuration) {
-            if (mState.mAlpha == 0) {
+        if (time - mStartTimeMillis > mDuration) {
+            if (mAlpha == 0) {
                 mFrom = 0;
                 mTo = 255;
-                mState.mAlpha = 0;
+                mAlpha = 0;
                 mReverse = false;
             } else {
                 mFrom = 255;
                 mTo = 0;
-                mState.mAlpha = 255;
+                mAlpha = 255;
                 mReverse = true;
             }
-            mDuration = mState.mDuration = duration;
+            mDuration = mOriginalDuration = duration;
             mTransitionState = TRANSITION_STARTING;
             invalidateSelf();
             return;
         }
 
         mReverse = !mReverse;
-        mFrom = mState.mAlpha;
+        mFrom = mAlpha;
         mTo = mReverse ? 0 : 255;
         mDuration = (int) (mReverse ? time - mStartTimeMillis :
-                mState.mDuration - (time - mStartTimeMillis));
+                mOriginalDuration - (time - mStartTimeMillis));
         mTransitionState = TRANSITION_STARTING;
     }
 
     @Override
     public void draw(Canvas canvas) {
         boolean done = true;
-        final TransitionState state = mState;
 
         switch (mTransitionState) {
             case TRANSITION_STARTING:
@@ -177,14 +176,14 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
                             (SystemClock.uptimeMillis() - mStartTimeMillis) / mDuration;
                     done = normalized >= 1.0f;
                     normalized = Math.min(normalized, 1.0f);
-                    state.mAlpha = (int) (mFrom  + (mTo - mFrom) * normalized);
+                    mAlpha = (int) (mFrom  + (mTo - mFrom) * normalized);
                 }
                 break;
         }
       
-        final int alpha = state.mAlpha;
-        final boolean crossFade = state.mCrossFade;
-        final Rec[] array = mLayerState.mArray;
+        final int alpha = mAlpha;
+        final boolean crossFade = mCrossFade;
+        final ChildDrawable[] array = mLayerState.mChildren;
         Drawable d;
 
         d = array[0].mDrawable;
@@ -217,7 +216,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * @param enabled True to enable cross fading, false otherwise.
      */
     public void setCrossFadeEnabled(boolean enabled) {
-        mState.mCrossFade = enabled;
+        mCrossFade = enabled;
     }
 
     /**
@@ -226,14 +225,10 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * @return True if cross fading is enabled, false otherwise.
      */
     public boolean isCrossFadeEnabled() {
-        return mState.mCrossFade;
+        return mCrossFade;
     }
 
     static class TransitionState extends LayerState {
-        int mAlpha = 0;
-        int mDuration;
-        boolean mCrossFade;
-
         TransitionState(TransitionState orig, TransitionDrawable owner) {
             super(orig, owner);
         }

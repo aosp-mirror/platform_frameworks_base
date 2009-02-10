@@ -28,15 +28,24 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * An object that draws primitive shapes. 
+ * A Drawable object that draws primitive shapes. 
  * A ShapeDrawable takes a {@link android.graphics.drawable.shapes.Shape}
  * object and manages its presence on the screen. If no Shape is given, then
  * the ShapeDrawable will default to a 
  * {@link android.graphics.drawable.shapes.RectShape}.
+ *
+ * @attr ref android.R.styleable#ShapeDrawablePadding_left
+ * @attr ref android.R.styleable#ShapeDrawablePadding_top
+ * @attr ref android.R.styleable#ShapeDrawablePadding_right
+ * @attr ref android.R.styleable#ShapeDrawablePadding_bottom
+ * @attr ref android.R.styleable#ShapeDrawable_color
+ * @attr ref android.R.styleable#ShapeDrawable_width
+ * @attr ref android.R.styleable#ShapeDrawable_height
  */
 public class ShapeDrawable extends Drawable {
     private ShapeState mShapeState;
-    
+    private boolean mMutated;
+
     /**
      * ShapeDrawable constructor.
      */
@@ -332,6 +341,21 @@ public class ShapeDrawable extends Drawable {
     public ConstantState getConstantState() {
         mShapeState.mChangingConfigurations = super.getChangingConfigurations();
         return mShapeState;
+    }
+
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mShapeState.mPaint = new Paint(mShapeState.mPaint);
+            mShapeState.mPadding = new Rect(mShapeState.mPadding);
+            try {
+                mShapeState.mShape = mShapeState.mShape.clone();
+            } catch (CloneNotSupportedException e) {
+                return null;
+            }
+            mMutated = true;
+        }
+        return this;
     }
 
     /**

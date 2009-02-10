@@ -252,10 +252,7 @@ public class TelephonyManager {
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
        try {
-           ITelephony tel = getITelephony(); 
-           if (tel != null) {
-               return tel.getNeighboringCellInfo();
-           }
+           return getITelephony().getNeighboringCellInfo();
        } catch (RemoteException ex) {
        }
        return null;
@@ -683,7 +680,8 @@ public class TelephonyManager {
     public void listen(PhoneStateListener listener, int events) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         try {
-            mRegistry.listen(pkgForDebug, listener.callback, events, true);
+            Boolean notifyNow = (getITelephony() != null);
+            mRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
         }

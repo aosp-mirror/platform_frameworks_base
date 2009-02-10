@@ -23,6 +23,9 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 #include "BlurFilter.h"
 #include "LayerBlur.h"
 #include "SurfaceFlinger.h"

@@ -1,4 +1,6 @@
 page.title=Common Tasks and How to Do Them in Android
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
 @jd:body
 
 <ul>
@@ -81,7 +83,7 @@ want to look at the sample code included with the Android SDK, in the
         and required files and syntax details for each is given in <a href="#filelist">File
         List for an Android Application</a>. </li>
     <li><strong>Design your user interface</strong> &nbsp;&nbsp;See <a
-    href="{@docRoot}guide/topics/views/index.html">Implementing a UI</a> for
+    href="{@docRoot}guide/topics/ui/index.html">User Interface</a> for
     details on elements of the Android screen. </li>
     <li><strong>Implement your Activity </strong>(this page)<strong>&nbsp;&nbsp; </strong> You
         will create one class/file for each screen in your application. Screens will
@@ -200,7 +202,7 @@ startActivity(myIntent);    </pre>
 <p>Android defines a number of standard values, for instance the action constants
     defined by {@link android.content.Intent}. You can define custom values, but
     both the caller and handler must use them. See the &lt;intent-filter&gt;
-    tag description in <a href="{@docRoot}guide/topics/manifest/manifest.html">The AndroidManifest.xml
+    tag description in <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml
     File</a> for more information on the manifest syntax for the handling
     application. </p>
 <a name="returningaresult" id="returningaresult"></a><h3>Returning a Result from a Screen</h3>
@@ -267,7 +269,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
     {@link android.app.Activity#finishActivity(int) Activity.finishActivity()}
     on any screens that it opens to close them. </p>
 <a name="listening" id="listening"></a><h2>Listening for Button Clicks</h2>
-<p>Button click and other UI event capturing are covered in <a href="{@docRoot}guide/topics/views/ui-events.html">Handling UI Events</a> on the UI Design page.</p>
+<p>Button click and other UI event capturing are covered in <a href="{@docRoot}guide/topics/ui/ui-events.html">Handling UI Events</a> on the UI Design page.</p>
 <a name="configurewindowproperties" id="configurewindowproperties"></a><h2>Configuring General Window Properties</h2>
 <p>You can set a number of general window properties, such as whether to display
     a title, whether the window is floating, and whether it displays an icon, by
@@ -527,174 +529,8 @@ focus to the notification before they can interact with it.</p>
     which enables a  dialog box with an embedded progress bar to send a &quot;I'm working
     on it&quot; notification to the user. </p>
 <a name="addmenuitems" id="addmenuitems"></a><h2>Adding Items to the Screen Menu</h2>
-<p>Every Android screen has a default menu with default options, such as adding the
-    activity to the favorites menu. You can add your own menu entries to the default
-    menu options by implementing {@link android.app.Activity#onCreateOptionsMenu(android.view.Menu)
-    Activity.onCreateOptionsMenu} or {@link android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
-    Activity.onPrepareOptionsMenu()}, and adding {@link android.view.MenuItem Item}
-    objects to the {@link android.view.Menu Menu} passed in. To handle clicks
-    implement {@link android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-    Activity.onOptionsItemSelected()} to handle the click in your Activity class.
-    You may also pass the Item object a handler class that implements the 
-    Runnable class (a handler) but this is less efficient and discouraged.</p>
-<p>An application receives a callback at startup time to enable it to populate its
-    menu. Additionally, it receives callbacks each time the user displays the options
-    menu to let you perform some contextual modifications on the menu. To populate
-    the menu on startup, override {@link android.app.Activity#onCreateOptionsMenu(android.view.Menu)
-    Activity.onCreateOptionsMenu}; to populate it when the menu is called (somewhat
-    less efficient), you can override {@link android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
-    Activity.onPrepareOptionsMenu()}. Each Activity has its own menu list.</p>
-<p>Menu items are displayed in the order added, though you can group them as described
-    in the {@link android.view.Menu#add Menu.add} documentation.
-    The following code snippet adds three items to the default menu options and handles
-    them through the overridden Activity.onOptionsItemSelected() method. 
-    You can show or hide menu items by calling {@link android.view.MenuItem#setVisible(
-    boolean) setVisible()} or {@link android.view.Menu#setGroupVisible(int,
-    boolean) setGroupVisible()}. 
-</p>
-</p>
-<pre>// Called only the first time the options menu is displayed.
-// Create the menu entries.
-// Menu adds items in the order shown.
-&#064;Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    
-    // Parameters for menu.add are:
-    // group -- Not used here.
-    // id -- Used only when you want to handle and identify the click yourself.
-    // title
-    menu.add(0, 0, &quot;Zoom&quot;);
-    menu.add(0, 1, &quot;Settings&quot;);
-    menu.add(0, 2, &quot;Other&quot;);
-    return true;
-}
+<p>See <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>.</p>
 
-// Activity callback that lets your handle the selection in the class.
-// Return true to indicate that you&#39;ve got it, false to indicate
-// that it should be handled by a declared handler object for that
-// item (handler objects are discouraged for reasons of efficiency).
-&#064;Override
-public boolean onOptionsItemSelected(MenuItem item){
-    switch (item.getId()) {
-    case 0:
-        showAlert(&quot;Menu Item Clicked&quot;, &quot;Zoom&quot;, &quot;ok&quot;, null, false, null);
-        return true;
-    case 1:
-        showAlert(&quot;Menu Item Clicked&quot;, &quot;Settings&quot;, &quot;ok&quot;, null, false, null);
-        return true;
-    case 2:
-        showAlert(&quot;Menu Item Clicked&quot;, &quot;Other&quot;, &quot;ok&quot;, null, false, null);
-        return true;
-    }
-    return false;
-}
-</pre>
-<a name="menukeyshortcuts" id="menukeyshortcuts"></a>
-<p>You can add key shortcuts by calling the 
-    MenuItem.setAlphabeticShortcut() or 
-    MenuItem.setNumericShortcut() methods, as demonstrated here to add a &quot;c&quot; shortcut
-    to a menu item:</p>
-<pre>thisItem.setAlphabeticShortcut('c'); </pre>
-<h3>Adding Submenus<a name="submenus" id="submenus"></a></h3>
-<p>Add a submenu by calling {@link android.view.Menu#addSubMenu
-    Menu.addSubMenu()}, which returns a SubMenu object. You can then add additional
-    items to this menu. Menus can only be one level deep, and you can customize the
-    appearance of the submenu menu item. </p>
-<pre>
-&#64;Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-        
-    // Parameters for menu.add are:
-    // group -- Not used here.
-    // id -- Used only when you want to handle and identify the click yourself.
-    // title
-    menu.add(0, 0, "Send message");
-    menu.add(0, 1, "Settings");
-    menu.add(0, 2, "Local handler");
-    menu.add(0, 3, "Launch contact picker");
-
-    // Add our submenu.
-    SubMenu sub = menu.addSubMenu(1, 4, "Days of the week");
-    sub.add(0, 5, "Monday");
-    sub.add(0, 6, "Tuesday");
-    sub.add(0, 7, "Wednesday");
-    sub.add(0, 8, "Thursday");
-    sub.add(0, 9, "Friday");
-    sub.add(0, 10, "Saturday");
-    sub.add(0, 11, "Sunday");
-    return true;
-}
-</pre>
-<h3><strong>Adding yourself to menus on other applications</strong></h3>
-<a name="addingtoothermenus" id="addingtoothermenus"></a>
-<p>You can also advertise your Activity's services so that other Activities can add
-    your activity to their own option menu. For example, suppose you implement a
-    new image handling tool that shrinks an image to a smaller size 
-    and you would like to offer this as a menu option to any other Activity that
-    handles pictures. To do this, you would exposes your capabilities inside an intent
-    filter in your manifest. If another application that handles photos asks Android
-    for any Activities that can perform actions on pictures, Android will perform
-    intent resolution, find your Activity, and add it to the other Activity's options
-    menu. </p>
-<h4><strong>The offering application </strong></h4>
-<p>The application offering the service must include an <code>&lt;intent-filter&gt;</code> element
-    in the manifest, inside the <code>&lt;activity&gt;</code> tag of the offering
-    Activity. The intent filter includes all the details describing what it can do,
-    such as a <code>&lt;type&gt;</code> element that describes the MIME type of data
-    that it can handle, a custom <code>&lt;action&gt;</code> value that describes
-    what your handling application can do (this is so that when it receives the Intent
-    on opening it knows what it is expected to do), and most important, include a <code>&lt;category&gt;</code> filter
-    with the value <code>android.intent.category.ALTERNATIVE </code>and/or <code>android.intent.category.SELECTED_ALTERNATIVE</code> (SELECTED_ALTERNATIVE
-    is used to handle only the currently selected element on the screen, rather than
-    the whole Activity intent.</p>
-<p>Here's an example of a snip of a manifest that advertises picture shrinking technology
-    for both selected items and the whole screen. </p>
-<pre>&lt;activity class=&quot;PictureShrink&quot;&gt;                 &lt;!-- Handling class --&gt;
-    &lt;intent-filter label=&quot;Shrink picture&quot;&gt;      &lt;!-- Menu label to display --&gt;
-        &lt;action android:name=&quot;com.example.sampleapp.SHRINK_IT&quot; /&gt;
-        &lt;data android:name=&quot;image/*&quot; /&gt;                 &lt;!-- MIME type for generic images --&gt;
-        &lt;category android:name=&quot;android.intent.category.ALTERNATIVE &quot; /&gt;
-        &lt;category android:name=&quot;android.intent.category.SELECTED_ALTERNATIVE&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;</pre>
-<h4><strong>The menu-displaying application</strong></h4>
-<p>An application that wants to display a menu that includes any additional external
-    services must, first of all, handle its menu creation callback. As part of that
-    callback it creates an intent with the category Intent.ALTERNATIVE_CATEGORY and/or
-    Intent.SELECTED_ALTERNATIVE, the MIME type currently selected, and any other
-    requirements, the same way as it would satisfy an intent filter to open a new
-    Activity. It then calls menu.addIntentOptions() to have Android search for and
-    add any services meeting those requirements. It can optionally add additional
-    custom menu items of its own. </p>
-<p>You should implement SELECTED_ALTERNATIVE in onPrepareOptionsMenu() rather than
-    onCreateOptionsMenu(), because the user's selection can change after the application
-    is launched. </p>
-<p>Here's a code snippet demonstrating how a picture application would search for
-    additional services to display on its menu.</p>
-<pre>&#064;Override public boolean
-onCreateOptionsMenu(Menu menu){
-    super.onCreateOptionsMenu(menu);
-
-    // Create an Intent that describes the requirements to fulfill to be included
-    // in our menu. The offering app must include a category value of Intent.ALTERNATIVE_CATEGORY. 
-    Intent intent = new Intent(null, getIntent().getData());
-    intent.addCategory(Intent.ALTERNATIVE_CATEGORY);
-        
-    // Search for, and populate the menu with, acceptable offering applications.
-    menu.addIntentOptions(
-         0,      // Group
-         0,      // Any unique IDs we might care to add.
-         MySampleClass.class.getName(),  // Name of the class displaying the menu--here, its this class. 
-         null,   // No specifics.
-         intent, // Previously created intent that describes our requirements.
-         0,      // No flags.
-         null);  // No specifics.
-
-    return true;
-}</pre>
-<p>&nbsp;</p>
 <a name="webpage" id="webpage"></a><h2>Display a Web Page</h2>
 <p>Use the {@link android.webkit.WebView webkit.WebView} object. </p>
 <a name="binding" id="binding"></a><h2>Binding to Data</h2>
@@ -878,7 +714,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
             where they can be launched (from the main program menu or elsewhere),
             any content providers it implements and what kind of data they handle,
             where the implementation classes are, and other application-wide
-            information. Syntax details for this file are described in <a href="{@docRoot}guide/topics/manifest/manifest.html">The AndroidManifest.xml File</a>.</td>
+            information. Syntax details for this file are described in <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>.</td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;src/<br />
@@ -922,7 +758,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
         <td valign="top">(<em>optional</em>) Holds all the XML files describing screens or parts
             of screens. Although you could create a screen in Java, defining them
             in XML files is typically easier. A layout file is similar in concept
-            to an HTML file that describes the screen layout and components. See <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> for more information about designing screens, and <a href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Available Resource Types</a> for the syntax of these files.</td>
+            to an HTML file that describes the screen layout and components. See <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> for more information about designing screens, and <a href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Available Resource Types</a> for the syntax of these files.</td>
     </tr>
     <tr>
         <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values/<br />

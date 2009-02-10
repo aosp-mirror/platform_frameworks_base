@@ -35,7 +35,8 @@ interface IInputMethodManager {
     void removeClient(in IInputMethodClient client);
             
     InputBindResult startInput(in IInputMethodClient client,
-            in EditorInfo attribute, boolean initial, boolean needResult);
+            IInputContext inputContext, in EditorInfo attribute,
+            boolean initial, boolean needResult);
     void finishInput(in IInputMethodClient client);
     void showSoftInput(in IInputMethodClient client, int flags);
     void hideSoftInput(in IInputMethodClient client, int flags);

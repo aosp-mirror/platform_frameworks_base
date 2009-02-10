@@ -90,7 +90,7 @@
 
     <com.android.server.status.DateView android:id="@+id/date"
         android:layout_width="wrap_content"
-        android:layout_height="25dp"
+        android:layout_height="fill_parent"
         android:singleLine="true"
         android:textSize="16sp"
         android:textStyle="bold"

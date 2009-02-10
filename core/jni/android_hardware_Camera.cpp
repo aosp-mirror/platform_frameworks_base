@@ -259,7 +259,7 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     } else {
         callback_flag = FRAME_CALLBACK_FLAG_NOOP;
     }
-    c->setFrameCallback(installed ? preview_callback : NULL, cookie, callback_flag);
+    c->setPreviewCallback(installed ? preview_callback : NULL, cookie, callback_flag);
 }
 
 static void autofocus_callback_impl(bool success, void *cookie)

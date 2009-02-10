@@ -186,9 +186,7 @@ void Layer::onDraw(const Region& clip) const
         copybit_device_t* copybit = mFlinger->getBlitEngine();
         copybit->set_parameter(copybit, COPYBIT_TRANSFORM, getOrientation());
         copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER,
-                s.flags & ISurfaceComposer::eLayerDither ?
-                        COPYBIT_ENABLE : COPYBIT_DISABLE);
+        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
 
         region_iterator it(clip);
         err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);

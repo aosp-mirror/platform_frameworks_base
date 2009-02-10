@@ -1267,7 +1267,7 @@ public class Instrumentation {
     }
     
     /**
-     * Perform calling of an activity's {@link Activity#onUserLeaving} method.
+     * Perform calling of an activity's {@link Activity#onUserLeaveHint} method.
      * The default implementation simply calls through to that method.
      * 
      * @param activity The activity being notified that the user has navigated away

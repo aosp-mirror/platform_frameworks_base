@@ -90,7 +90,7 @@ If you are having trouble downloading the ADT plugin after following the steps a
 If you are still unable to use Eclipse to download the ADT plugin, follow these steps to download and install the plugin from your computer:
 </p>
 <ol>
-<li><a href="adt_download.html">Download the ADT zip file</a> (do not unpack it).
+<li><a href="{@docRoot}sdk/adt_download.html">Download the ADT zip file</a> (do not unpack it).
 <li>Follow steps 1 and 2 in the default install instructions (above).
 <li>In Eclipse 3.3, click <strong>New Archive Site...</strong>. <br/>
     In Eclipse 3.4, click <strong>Add Site...</strong>, then <strong>Archive...</strong>

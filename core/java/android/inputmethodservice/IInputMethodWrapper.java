@@ -8,6 +8,8 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputConnectionWrapper;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -17,6 +19,11 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implements the internal IInputMethod interface to convert incoming calls
@@ -28,6 +35,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final String TAG = "InputMethodWrapper";
     private static final boolean DEBUG = false;
     
+    private static final int DO_DUMP = 1;
     private static final int DO_ATTACH_TOKEN = 10;
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
@@ -39,8 +47,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
    
+    final AbstractInputMethodService mTarget;
     final HandlerCaller mCaller;
     final InputMethod mInputMethod;
+    
+    static class Notifier {
+        boolean notified;
+    }
     
     // NOTE: we should have a cache of these.
     static class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
@@ -64,7 +77,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
     
-    public IInputMethodWrapper(Context context, InputMethod inputMethod) {
+    public IInputMethodWrapper(AbstractInputMethodService context,
+            InputMethod inputMethod) {
+        mTarget = context;
         mCaller = new HandlerCaller(context, this);
         mInputMethod = inputMethod;
     }
@@ -75,6 +90,20 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     public void executeMessage(Message msg) {
         switch (msg.what) {
+            case DO_DUMP: {
+                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                try {
+                    mTarget.dump((FileDescriptor)args.arg1,
+                            (PrintWriter)args.arg2, (String[])args.arg3);
+                } catch (RuntimeException e) {
+                    ((PrintWriter)args.arg2).println("Exception: " + e);
+                }
+                synchronized (args.arg4) {
+                    ((CountDownLatch)args.arg4).countDown();
+                }
+                return;
+            }
+            
             case DO_ATTACH_TOKEN: {
                 mInputMethod.attachToken((IBinder)msg.obj);
                 return;
@@ -86,12 +115,22 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_UNSET_INPUT_CONTEXT:
                 mInputMethod.unbindInput();
                 return;
-            case DO_START_INPUT:
-                mInputMethod.startInput((EditorInfo)msg.obj);
+            case DO_START_INPUT: {
+                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                IInputContext inputContext = (IInputContext)args.arg1;
+                InputConnection ic = inputContext != null
+                        ? new InputConnectionWrapper(inputContext) : null;
+                mInputMethod.startInput(ic, (EditorInfo)args.arg2);
                 return;
-            case DO_RESTART_INPUT:
-                mInputMethod.restartInput((EditorInfo)msg.obj);
+            }
+            case DO_RESTART_INPUT: {
+                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                IInputContext inputContext = (IInputContext)args.arg1;
+                InputConnection ic = inputContext != null
+                        ? new InputConnectionWrapper(inputContext) : null;
+                mInputMethod.restartInput(ic, (EditorInfo)args.arg2);
                 return;
+            }
             case DO_CREATE_SESSION: {
                 mInputMethod.createSession(new InputMethodSessionCallbackWrapper(
                         mCaller.mContext, (IInputMethodCallback)msg.obj));
@@ -105,8 +144,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 mInputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT:
-                mInputMethod.showSoftInput(
-                        msg.arg1 != 0 ? InputMethod.SHOW_EXPLICIT : 0);
+                mInputMethod.showSoftInput(msg.arg1);
                 return;
             case DO_HIDE_SOFT_INPUT:
                 mInputMethod.hideSoftInput();
@@ -115,6 +153,28 @@ class IInputMethodWrapper extends IInputMethod.Stub
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
     
+    @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (mTarget.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            
+            fout.println("Permission Denial: can't dump InputMethodManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        CountDownLatch latch = new CountDownLatch(1);
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOO(DO_DUMP,
+                fd, fout, args, latch));
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                fout.println("Timeout waiting for dump");
+            }
+        } catch (InterruptedException e) {
+            fout.println("Interrupted waiting for dump");
+        }
+    }
+
     public void attachToken(IBinder token) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_ATTACH_TOKEN, token));
     }
@@ -130,12 +190,14 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_UNSET_INPUT_CONTEXT));
     }
 
-    public void startInput(EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_INPUT, attribute));
+    public void startInput(IInputContext inputContext, EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_START_INPUT,
+                inputContext, attribute));
     }
 
-    public void restartInput(EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_RESTART_INPUT, attribute));
+    public void restartInput(IInputContext inputContext, EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_RESTART_INPUT,
+                inputContext, attribute));
     }
 
     public void createSession(IInputMethodCallback callback) {
@@ -163,9 +225,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
     
-    public void showSoftInput(boolean explicit) {
+    public void showSoftInput(int flags) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_SHOW_SOFT_INPUT,
-                explicit ? 1 : 0));
+                flags));
     }
     
     public void hideSoftInput() {

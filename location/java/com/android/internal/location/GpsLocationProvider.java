@@ -164,16 +164,15 @@ public class GpsLocationProvider extends LocationProviderImpl {
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000; 
 
-    private LocationCollector mCollector;
+    private ILocationCollector mCollector;
 
     public static boolean isSupported() {
         return native_is_supported();
     }
 
-    public GpsLocationProvider(Context context, LocationCollector collector) {
+    public GpsLocationProvider(Context context) {
         super(LocationManager.GPS_PROVIDER);
         mContext = context;
-        mCollector = collector;
 
         mProperties = new Properties();
         try {
@@ -183,8 +182,12 @@ public class GpsLocationProvider extends LocationProviderImpl {
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
         } catch (IOException e) {
-            Log.e(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE, e);
+            Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
+    }
+
+    public void setLocationCollector(ILocationCollector collector) {
+        mCollector = collector;
     }
 
     /**
@@ -623,7 +626,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
             }
 
             // Send to collector
-            if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+            if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG
+                    && mCollector != null) {
                 mCollector.updateLocation(mLocation);
             }
         }
@@ -644,7 +648,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
         if (Config.LOGV) Log.v(TAG, "reportStatus status: " + status);
 
         boolean wasNavigating = mNavigating;
-        mNavigating = (status == GPS_STATUS_SESSION_BEGIN || status == GPS_STATUS_ENGINE_ON);
+        mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
 
         if (wasNavigating != mNavigating) {
             synchronized(mListeners) {

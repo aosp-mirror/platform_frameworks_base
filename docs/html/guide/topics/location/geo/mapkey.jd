@@ -1,28 +1,210 @@
-page.title=Obtaining a MapView API Key
+page.title=Obtaining a Maps API Key
 @jd:body
 
-<p>{@link-fixme com.google.android.maps.MapView} is a very useful class that lets you easily integrate Google Maps into your application. It provides built-in map downloading, rendering, and caching, as well as a variety of display options and controls. It provides a wrapper around the Google Maps API that lets your application request and manipulate Google Maps data through class methods, and it lets you work with Maps data as you would other types of Views. </p>
+<div class="sidebox"><p>To register for a Maps API Key, read this document and then go to the <a href="http://code.google.com/android/maps-api-signup.html">Android Maps API Key Signup</a> page.</p>
 
-<p>Because MapView gives you access to Google Maps data, you need to register your application with the Google Maps service and agree to the applicable Terms of Service, before your MapView will be able to obtain data from Google Maps. This will apply whether you are developing your application on the emulator or preparing your application for deployment to mobile devices. </p>
+</div>
 
-<p>Registering your application is simple, and has two parts: </p>
+<p>com.google.android.maps.MapView is a very useful class that lets you easily integrate Google Maps into your application. It provides built-in map downloading, rendering, and caching of Maps tiles, as well as a variety of display options and controls. It provides a wrapper around the Google Maps API that lets your application request and manipulate Google Maps data through class methods, and it lets you work with Maps data as you would other types of Views. </p>
+
+<p>Because MapView gives you access to Google Maps data, you need to register with the Google Maps service and agree to the applicable Terms of Service before your MapView will be able to obtain data from Google Maps. This will apply whether you are developing your application on the emulator or preparing your application for deployment to mobile devices. </p>
+
+<p>Registering for a Maps API Key is simple, free, and has two parts: </p>
 
 <ol>
-<li>Registering a public key fingerprint from the certificate that you will use to sign the .apk. The registration service then provides you a Maps API Key that is associated with your application's signer certificate. </li>
-<li>Adding the Maps API Key to a special attribute of the MapView element &mdash; <code>android:apiKey</code>. You can use the same Maps API Key for any MapView in any application, provided that the application's .apk is signed with the certificate whose fingerprint you registered with the service. </li>
+<li>Registering the MD5 fingerprint of the certificate that you will use to sign your application. The Maps registration service then provides you a Maps API Key that is associated with your application's signer certificate. </li>
+<li>Adding a reference to the Maps API Key in each MapView, whether declared in XML or instantiated directly from code. You can use the same Maps API Key for any MapView in any Android application, provided that the application is signed with the certificate whose fingerprint you registered with the service. </li>
 </ol>
 
-<p>Once you have registered your application as described above, your MapView will be able to retrieve data from the Google Maps servers. </p>
+<p>During registration, you also need to agree to the Maps API Terms of Service, which describe how your application can use the Maps data. In general, the terms of service are permissive and place few restrictions on how you can use the data. For example, the terms allow you to build "friend finder" type applications. </p>
 
-<div class="special">
-<p>The MapView registration service is not yet active and Google Maps is not yet enforcing the Maps API Key requirement. The registration service will be activated soon, so that MapViews in any application deployed to a mobile device will require registration and a valid Maps API Key.</p>
+<p>The sections below describe how to obtain your Maps API Key and how to reference it from your MapView elements. </p>
 
-<p>As soon as the registration service becomes available, this page (<a href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.google.com/android/toolbox/apis/mapkey.html</a>) will be updated with details about how and where to register and how to add your Maps API Key to your application. </p>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#getfingerprint">Getting the MD5 Fingerprint of Your Signing Certificate</a></li>
+<li><a href="#getdebugfingerprint">Getting the MD5 Fingerprint of the SDK Debug Certificate</a></li>
+<li><a href="#registering">Registering the Certificate Fingerprint with the Google Maps Service</a></li>
+<li><a href="#addingkey">Adding the Maps API Key to your Application</a></li>
+<li><a href="#finalsteps">Final Steps to Enable MapView Elements</a></li>
+</ul>
 
-<p>In the meantime, you can continue developing your MapView without registration, provided that you:</p>
-<ol type="a">
-<li>Add the attribute "android:apiKey" to the MapView element in your layout XML, with any value. Or</li>
-<li>Include an arbitrary string in the <code>apikey</code> parameter of the MapView constructor, if creating the MapView programmatically. </li>
+<h2 id="overview">Overview</h2>
+
+<p>MapView objects are views that display Maps tiles downloaded from the Google Maps service. To ensure that applications use Maps data in an appropriate manner, the Google Maps service requires application developers to register with the service, agreeing to the Terms of Service and supplying an MD5 fingerprint of the certificate(s) that they will use to sign applications. For each registered certificate fingerprint, the service then provides the developer with a Maps API Key &mdash; an alphanumeric string that uniquely identifies the certificate and developer registered with the service.  </p>
+
+<p>The Google Maps service also requires that each MapView identify itself to the service using a Maps API Key. Before providing Maps tiles to a MapView, the service checks the Maps API Key supplied by the MapView to ensure that it:</p>
+<ul>
+<li>References a certificate/developer registered with the service, and </li>
+<li>References a certificate that matches the certificate with which the application (containing the MapView) was signed. </li>
+</ul>
+
+<p>Unless both conditions are met, the service does not provide Maps tiles to the MapView. </p>
+
+<p>Each MapView object in your application must reference a Maps API Key. Since the Key is associated with a certificate, all Mapview elements in an application should reference the same Key. Going a step further, all MapView elements in all applications that you sign with the same certificate should reference the same Key. </p>
+
+<p>On the other hand, you can register for multiple Maps API Keys, each being associated with a specific certificate. You would want to do this if, for example, you were developing several independent applications that you will sign using different certificates. In this case, note that all MapView elements in a given application can reference the same Maps API Key, but <em>must</em> reference the Key that is associated with the certificate used to sign the application. </p>
+
+<p>Because MapView elements must refer to a Maps API Key, you need to register your certificate and receive a Key before you can make use of MapView elements in your application. To make it easier for you to get started using MapView elements, you are welcome to register the debug certificate generated by the SDK tools and receive a temporary Maps API Key. The details of how to do that are given below. </p>
+
+<p>When you are preparing to release your application, however, note that you <em>must</em> sign your application with a suitable cryptographic key, rather than the SDK debug key. That means that you will also need to register your application's release certificate with the Google Maps service. After you've done so, you will receive a new Maps API Key that is uniquely associated with your release certificate. To enable the MapView elements in your application to work after release, you must remember to change the Maps API Key for all MapViews in your application so that they refer to the Key associated with your release certificate (rather than your debug certificate). </p>
+
+<p>To summarize, the important points to understand about MapViews and the Maps API Key are: </p>
+
+<ul>
+<li>To display Maps data in a MapView, you need to register for a Maps API Key</li>
+<li>Each Maps API Key is uniquely associated with a specific certificate, based on an MD5 fingerprint of the certificate </li>
+<li>Each MapView must reference a Maps API Key, and the Key referenced must be registered to the certificate used to sign the application</li>
+<li>All MapView elements in an application can reference the same Maps API Key</li>
+<li>You can register multiple certificates under your developer identity</li>
+<li>You can get a temporary Maps API Key based on your debug certificate, but before you publish your application, you must register for a new Key based on your release certificate and update references in your MapViews accordingly</li>
+</ul>
+
+<h2 id="getfingerprint">Getting the MD5 Fingerprint of Your Signing Certificate</h2>
+
+<div class="sidebox">
+For more information about using Keytool and Jarsigner to sign your application, see <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.
+</div>
+
+<p>To register for a Maps API Key, you need to provide an MD5 fingerprint of the certificate that you will use to sign your application. </p>
+
+<p>Before you visit the registration page, use Keytool to generate the fingerprint of the appropriate certificate. 
+
+<p>First, determine which key you will use to sign your application at release and make sure of the path to the keystore that contains it.</p>
+
+<p>Next, run Keytool with the <code>-list</code> option, against the target keystore and key alias. The table below lists the options you should use.</p>
+
+<table>
+<tr>
+<th>Keytool Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>-list</code></td><td>Print an MD5 fingerprint of a certificate.</td>
+</tr>
+<tr>
+<td><code>-keystore&nbsp;&lt;keystore-name&gt;.keystore</code></td><td>The name of the keystore containing the target key.</td>
+</tr>
+<tr>
+<td><code>-storepass &lt;password&gt;</code></td><td><p>A password for the
+keystore.</p><p>As a security precaution, do not include this option 
+in your command line unless you are working at a secure computer.
+If not supplied, Keytool prompts you to enter the password. In this 
+way, your password is not stored in your shell history.</p></td>
+</tr>
+<tr>
+<td><code>-alias &lt;alias_name&gt;</code></td><td>The alias for the key for which to generate the MD5 certificate fingerprint.</td>
+</tr>
+<tr>
+<td><code>-keypass &lt;password&gt;</code></td><td><p>The password for the key.</p>
+<p>As a security precaution, do not include this option 
+in your command line unless you are working at a secure computer.
+If not supplied, Keytool prompts you to enter the password. In this 
+way, your password is not stored in your shell history.</p></td>
+</tr>
+</table>
+
+<p>Here's an example of a Keytool command that generates an MD5 certificate fingerprint for the key <code>alias_name</code> in the keystore <code>my-release-key.keystore</code>:</p>
+
+<pre>$ keytool -list -alias alias_name -keystore my-release-key.keystore</pre>
+
+<p>Keytool will prompt you to enter passwords for the keystore and key. As output of the command, Keytool prints the fingerprint to the shell. For example:</p>
+
+<pre>Certificate fingerprint (MD5): 94:1E:43:49:87:73:BB:E6:A6:88:D7:20:F1:8E:B5:98</pre>
+
+<p>Note that, if you happen to forget your Maps API Key, you can repeat the process described above and register the fingerprint again. The server will give you the same key for the specified certificate fingerprint.</p>
+
+<p>Once you have the fingerprint, you can go to the Maps API registration site, described next.</p>
+
+<h2 id="getdebugfingerprint">Getting the MD5 Fingerprint of the SDK Debug Certificate</h2>
+
+<p>While you are developing and debugging your application, you will likely be
+sigining your application in debug mode &mdash; that is, the SDK build tools
+will automatically sign your application using the debug certificate. To let
+your MapView elements properly display Maps data during this period, you should
+obtain a temporary Maps API Key registered to the debug certificate. To do so,
+you first need to get the MD5 fingerprint of the debug certificate. When
+you are ready to release your application, you must register your release
+certificate with the Google Maps service and obtain a new Maps API Key. You must
+then change the MapView elements in your application to reference the new API
+key. </p>
+
+<p>To generate an MD5 fingerprint of the debug certificate, first locate the debug keystore. The location at which the SDK tools create the default debug keystore varies by platform: </p>
+
+<ul>
+<li>Windows Vista: <code>C:\Users\&lt;user&gt;\AppData\Local\Android\debug.keystore</code></li>
+<li>Windows XP: <code>C:\Documents and Settings\&lt;user&gt;\Local Settings\Application&nbsp;Data\Android\debug.keystore</code></li>
+<li>OS X and Linux: <code>~/.android/debug.keystore</code></li>
+</ul>
+
+<p>If you are using Eclipse/ADT and are unsure where the debug keystore is located, you can select <strong>Windows</strong> &gt; <strong>Prefs</strong> &gt; <strong>Android</strong> &gt; <strong>Build</strong> to check the full path, which you can then paste into a file explorer to locate the directory containing the keystore.</p>
+
+<p>Once you have located the keystore, use this Keytool command to get the MD5 fingerprint of the debug certificate:</p>
+
+<pre>$ keytool -list -alias androiddebugkey \
+-keystore &lt;path_to_debug_keystore&gt;.keystore \
+-storepass android -keypass android</pre>
+
+<h2 id="registering">Registering the Certificate Fingerprint with the Google Maps Service</h2>
+
+<p>When you are ready to register for a Maps API Key, load this page in a browser: </p>
+
+<p><a href="http://code.google.com/android/maps-api-signup.html">http://code.google.com/android/maps-api-signup.html</a></p>
+
+<p>To register for a Maps API Key, follow these steps:</p>
+
+<ol>
+<li>If you don't have a Google account, use the link on the page to set one up. </li>
+<li>Read the Android Maps API Terms of Service carefully. If you agree to the terms, indicate so using the checkbox on the screen. </li>
+<li>Paste the MD5 certificate fingerprint of the certificate that you are registering into the appropriate form field.</li>
+<li>Click "Generate API Key"</li>
 </ol>
 
-<p>When the Maps API Key checking is activated in the service, any MapViews that do not have a properly registered apiKey will stop working.  The map data (tile images) of the MapView will never load (even if the device is on the network). In this case, go to the page linked above and read about how to register your certificate fingerprint and obtain a Maps API Key. </p>
+<p>The server will handle your request, associating the fingerprint with your developer identity and generating a unique Maps API Key, then returning a results page that gives you your Key string. </p>
+
+<p>To use the Maps API Key string, copy and paste it into your code as described in the next section.</p>
+
+<h2 id="addingkey">Adding the Maps API Key to your Application</h2>
+
+<p>Once you've registered with the Google Maps service and have obtained a Maps API Key, you must add it to your application's MapView objects, so that the Maps server will allow them to download Maps tiles. </p>
+
+<p>For <code>&lt;MapView&gt;</code> elements declared in XML layout files, add the Maps API Key as the value of a special attribute &mdash; <code>android:apiKey</code>. For example: </li>
+
+<pre>&lt;com.google.android.maps.MapView
+ android:layout_width="fill_parent"
+ android:layout_height="fill_parent"
+ android:enabled="true"
+ android:clickable="true"
+ android:apiKey="example_Maps_ApiKey_String"
+ /&gt;</pre>
+</li>
+
+<p>For MapView objects instantiated directly from code, pass the Maps API Key string as a parameter in the constructor. For example: </p>
+
+<pre>mMapView = new MapView(this, "example_Maps_ApiKey_String");</pre> 
+
+<p>For more information about MapView, see the MapView class Documentation. </p>
+
+<h2 id="finalsteps">Final Steps to Enable MapView Elements</h2>
+
+<p>If you've added the Maps API Key to the MapViews in your application, here are the final steps to enable the MapView elements to run properly:</p>
+
+<ul>
+<li>Make sure that you added a <code>&lt;uses-library&gt;</code> element referencing the external <code>com.google.android.maps</code> library. The element must be a child of the <code>&lt;application&gt;</code> element in the application's manifest. For example: 
+
+<p><pre>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ package="com.example.package.name"&gt;
+ ...
+ &lt;application android:name="MyApplication" &gt;
+   &lt;uses-library android:name="com.google.android.maps" /&gt;
+ ...
+ &lt;/application&gt;</pre></p></li>
+
+<li>Sign your application with the certificate that corresponds to the Maps API Key referenced in your MapView elements. </li>
+
+</ul>
+
+<div class="special"><p>Note that, when you are ready to publish your application, you must get a Maps API Key that is based on the certificate that you will use to sign the application for release. You must then change the Maps API Key string referenced by all of your MapView elements, so that they reference the new Key. </p></div>
+
+
+

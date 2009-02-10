@@ -26,7 +26,8 @@
 #include <ui/ISurfaceComposer.h>
 #include <ui/SurfaceComposerClient.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
 
 #include "Barrier.h"
 
@@ -35,6 +36,7 @@ class SkBitmap;
 namespace android {
 
 class AssetManager;
+class EGLNativeWindowSurface;
 
 // ---------------------------------------------------------------------------
 
@@ -74,6 +76,7 @@ private:
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
     sp<Surface> mFlingerSurface;
+    sp<EGLNativeWindowSurface> mNativeWindowSurface;
     Barrier mBarrier;
 };
 

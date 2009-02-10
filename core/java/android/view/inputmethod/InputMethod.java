@@ -113,12 +113,15 @@ public interface InputMethod {
      * is ready for this input method to process received events and send result
      * text back to the application.
      * 
-     * @param attribute The attribute of the text box (typically, a EditText)
+     * @param inputConnection Optional specific input connection for
+     * communicating with the text box; if null, you should use the generic
+     * bound input connection.
+     * @param info Information about the text box (typically, an EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
-    public void startInput(EditorInfo attribute);
+    public void startInput(InputConnection inputConnection, EditorInfo info);
 
     /**
      * This method is called when the state of this input method needs to be
@@ -128,12 +131,15 @@ public interface InputMethod {
      * Typically, this method is called when the input focus is moved from one
      * text box to another.
      * 
+     * @param inputConnection Optional specific input connection for
+     * communicating with the text box; if null, you should use the generic
+     * bound input connection.
      * @param attribute The attribute of the text box (typically, a EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
-    public void restartInput(EditorInfo attribute);
+    public void restartInput(InputConnection inputConnection, EditorInfo attribute);
 
     /**
      * Create a new {@link InputMethodSession} that can be handed to client
@@ -171,6 +177,13 @@ public interface InputMethod {
      * in the UI.
      */
     public static final int SHOW_EXPLICIT = 0x00001;
+    
+    /**
+     * Flag for {@link #showSoftInput(int)}: this show has been forced to
+     * happen by the user.  If set, the input method should remain visible
+     * until deliberated dismissed by the user in its UI.
+     */
+    public static final int SHOW_FORCED = 0x00002;
     
     /**
      * Request that any soft input part of the input method be shown to the user.

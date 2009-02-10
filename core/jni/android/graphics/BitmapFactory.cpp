@@ -1,3 +1,5 @@
+#define LOG_TAG "BitmapFactory"
+
 #include "SkImageDecoder.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
@@ -481,6 +483,48 @@ static void nativeRequestCancel(JNIEnv*, jobject joptions) {
     (void)AutoDecoderCancel::RequestCancel(joptions);
 }
 
+static jbyteArray nativeScaleNinePatch(JNIEnv* env, jobject, jbyteArray chunkObject, jfloat scale,
+        jobject padding) {
+
+    jbyte* array = env->GetByteArrayElements(chunkObject, 0);
+    if (array != NULL) {
+        size_t chunkSize = env->GetArrayLength(chunkObject);
+        void* storage = alloca(chunkSize);
+        android::Res_png_9patch* chunk = static_cast<android::Res_png_9patch*>(storage);
+        memcpy(chunk, array, chunkSize);
+        android::Res_png_9patch::deserialize(chunk);
+
+        chunk->paddingLeft = int(chunk->paddingLeft * scale + 0.5f);
+        chunk->paddingTop = int(chunk->paddingTop * scale + 0.5f);
+        chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
+        chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
+
+        for (int i = 0; i < chunk->numXDivs; i++) {
+            chunk->xDivs[i] = int(chunk->xDivs[i] * scale + 0.5f);
+            if (i > 0 && chunk->xDivs[i] == chunk->xDivs[i - 1]) {
+                chunk->xDivs[i]++;
+            }
+        }
+
+        for (int i = 0; i < chunk->numYDivs; i++) {
+            chunk->yDivs[i] = int(chunk->yDivs[i] * scale + 0.5f);            
+            if (i > 0 && chunk->yDivs[i] == chunk->yDivs[i - 1]) {
+                chunk->yDivs[i]++;
+            }
+        }
+
+        memcpy(array, chunk, chunkSize);
+
+        if (padding) {
+            GraphicsJNI::set_jrect(env, padding, chunk->paddingLeft, chunk->paddingTop,
+                    chunk->paddingRight, chunk->paddingBottom);
+        }
+
+        env->ReleaseByteArrayElements(chunkObject, array, 0);
+    }
+    return chunkObject;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
@@ -502,7 +546,13 @@ static JNINativeMethod gMethods[] = {
     {   "nativeDecodeByteArray",
         "([BIILandroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeByteArray
+    },
+
+    {   "nativeScaleNinePatch",
+        "([BFLandroid/graphics/Rect;)[B",
+        (void*)nativeScaleNinePatch
     }
+
 };
 
 static JNINativeMethod gOptionsMethods[] = {

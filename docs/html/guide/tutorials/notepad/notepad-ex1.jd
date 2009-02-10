@@ -1,4 +1,6 @@
 page.title=Notepad Exercise 1
+parent.title=Notepad Tutorial
+parent.link=index.html
 @jd:body
 
 
@@ -584,5 +586,4 @@ the zip file to compare with your own.</p>
 
 <p>Once you are ready, move on to <a href="notepad-ex2.html">Tutorial
 Exercise 2</a> to add the ability to create, edit and delete notes.</p>
-<p><a href="index.html">Back to the Tutorial main page...</a></p>
 

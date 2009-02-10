@@ -187,6 +187,24 @@ bool CameraHardwareStub::previewEnabled() {
     return mPreviewThread != 0;
 }
 
+status_t CameraHardwareStub::startRecording(recording_callback cb, void* user)
+{
+    return UNKNOWN_ERROR;
+}
+
+void CameraHardwareStub::stopRecording()
+{
+}
+
+bool CameraHardwareStub::recordingEnabled()
+{
+    return false;
+}
+
+void CameraHardwareStub::releaseRecordingFrame(const sp<IMemory>& mem)
+{
+}
+
 // ---------------------------------------------------------------------------
 
 int CameraHardwareStub::beginAutoFocusThread(void *cookie)

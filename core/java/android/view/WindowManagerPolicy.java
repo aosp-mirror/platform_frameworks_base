@@ -289,16 +289,18 @@ public interface WindowManagerPolicy {
          * Can be called by the policy to force a window to be hidden,
          * regardless of whether the client or window manager would like
          * it shown.  Must be called with the window manager lock held.
+         * Returns true if {@link #showLw} was last called for the window.
          */
-        public void hideLw(boolean doAnimation);
+        public boolean hideLw(boolean doAnimation);
         
         /**
          * Can be called to undo the effect of {@link #hideLw}, allowing a
          * window to be shown as long as the window manager and client would
          * also like it to be shown.  Must be called with the window manager
          * lock held.
+         * Returns true if {@link #hideLw} was last called for the window.
          */
-        public void showLw(boolean doAnimation);
+        public boolean showLw(boolean doAnimation);
     }
 
     /** No transition happening. */
@@ -735,10 +737,17 @@ public interface WindowManagerPolicy {
      * ActivityInfo.SCREEN_ORIENTATION_PORTRAIT}), return a surface
      * rotation.
      */
-    public int rotationForOrientation(int orientation);
+    public int rotationForOrientation(int orientation, int lastRotation,
+            boolean displayEnabled);
     
     /**
-     * Called when the system is mostly done booting
+     * Called when the system is mostly done booting to dentermine whether
+     * the system should go into safe mode.
+     */
+    public boolean detectSafeMode();
+    
+    /**
+     * Called when the system is mostly done booting.
      */
     public void systemReady();
 

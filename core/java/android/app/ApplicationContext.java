@@ -1630,6 +1630,15 @@ class ApplicationContext extends Context {
         }
 
         @Override
+        public String[] getSystemSharedLibraryNames() {
+             try {
+                 return mPM.getSystemSharedLibraryNames();
+             } catch (RemoteException e) {
+                 throw new RuntimeException("Package manager has died", e);
+             }
+        }
+
+        @Override
         public int checkPermission(String permName, String pkgName) {
             try {
                 return mPM.checkPermission(permName, pkgName);
@@ -1972,6 +1981,18 @@ class ApplicationContext extends Context {
                 String appPackageName) throws NameNotFoundException {
             return getResourcesForApplication(
                 getApplicationInfo(appPackageName, 0));
+        }
+
+        int mCachedSafeMode = -1;
+        @Override public boolean isSafeMode() {
+            try {
+                if (mCachedSafeMode < 0) {
+                    mCachedSafeMode = mPM.isSafeMode() ? 1 : 0;
+                }
+                return mCachedSafeMode != 0;
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
         }
 
         static void configurationChanged() {

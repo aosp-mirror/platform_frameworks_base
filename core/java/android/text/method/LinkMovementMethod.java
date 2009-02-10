@@ -252,5 +252,5 @@ extends ScrollingMovementMethod
     }
 
     private static LinkMovementMethod sInstance;
-    private static Object FROM_BELOW = new Object();
+    private static Object FROM_BELOW = new NoCopySpan.Concrete();
 }

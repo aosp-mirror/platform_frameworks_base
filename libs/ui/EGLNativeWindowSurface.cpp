@@ -28,7 +28,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/Rect.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
 
 #include <pixelflinger/format.h>
 
@@ -48,8 +48,6 @@ EGLNativeWindowSurface::EGLNativeWindowSurface(const sp<Surface>& surface)
     egl_native_window_t::incRef = &EGLNativeWindowSurface::hook_incRef;
     egl_native_window_t::decRef = &EGLNativeWindowSurface::hook_decRef;
     egl_native_window_t::swapBuffers = &EGLNativeWindowSurface::hook_swapBuffers;
-    egl_native_window_t::nextBuffer = &EGLNativeWindowSurface::hook_nextBuffer;
-    egl_native_window_t::setSwapRectangle = &EGLNativeWindowSurface::hook_setSwapRectangle;
     egl_native_window_t::connect = &EGLNativeWindowSurface::hook_connect;
     egl_native_window_t::disconnect = &EGLNativeWindowSurface::hook_disconnect;
     
@@ -98,18 +96,6 @@ uint32_t EGLNativeWindowSurface::hook_swapBuffers(NativeWindowType window)
     return that->swapBuffers();
 }
 
-uint32_t EGLNativeWindowSurface::hook_nextBuffer(NativeWindowType window)
-{
-    EGLNativeWindowSurface* that = static_cast<EGLNativeWindowSurface*>(window);
-    return that->nextBuffer();
-}
-
-void EGLNativeWindowSurface::hook_setSwapRectangle(NativeWindowType window, int l, int t, int w, int h)
-{
-    EGLNativeWindowSurface* that = static_cast<EGLNativeWindowSurface*>(window);
-    that->setSwapRectangle(l, t, w, h);
-}
-
 void EGLNativeWindowSurface::setSwapRectangle(int l, int t, int w, int h)
 {
     mSurface->setSwapRectangle(Rect(l, t, l+w, t+h));
@@ -135,17 +121,6 @@ uint32_t EGLNativeWindowSurface::swapBuffers()
         egl_native_window_t::format = info.format;
         return EGL_NATIVES_FLAG_SIZE_CHANGED;
     }
-    return 0;
-}
-
-uint32_t EGLNativeWindowSurface::nextBuffer()
-{
-    const sp<Surface>& surface(mSurface);
-    Surface::SurfaceInfo info;
-    surface->nextBuffer(&info);
-    // update the address of the buffer to draw to next
-    egl_native_window_t::base   = intptr_t(info.base);
-    egl_native_window_t::offset = intptr_t(info.bits) - intptr_t(info.base);
     return 0;
 }
 

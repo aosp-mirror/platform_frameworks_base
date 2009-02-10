@@ -59,9 +59,6 @@ public class MediaRecorderPrepareStateUnitTest extends AndroidTestCase implement
         }
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @MediumTest
     public void testPrepare() {
         mTestTemplate.runTestOnMethod(this);

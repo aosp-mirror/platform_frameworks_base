@@ -318,9 +318,16 @@ public class LayoutAnimationController {
      * @see #getDelayForView(android.view.View)
      */
     public final Animation getAnimationForView(View view) {
-        final long delay = getDelayForView(view);
+        final long delay = getDelayForView(view) + mAnimation.getStartOffset();
         mMaxDelay = Math.max(mMaxDelay, delay);
-        return new DelayedAnimation(delay, mAnimation);
+
+        try {
+            final Animation animation = mAnimation.clone();
+            animation.setStartOffset(delay);
+            return animation;
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
     }
 
     /**
@@ -424,150 +431,5 @@ public class LayoutAnimationController {
          * containing view group.
          */
         public int index;
-    }
-
-    /**
-     * Encapsulates an animation and delays its start offset by a specified
-     * amount. This allows to reuse the same base animation for various views
-     * and get the effect of running multiple instances of the animation at
-     * different times.
-     */
-    private static class DelayedAnimation extends Animation {
-        private final long mDelay;
-        private final Animation mAnimation;
-
-        /**
-         * Creates a new delayed animation that will delay the controller's
-         * animation by the specified delay in milliseconds.
-         *
-         * @param delay the delay in milliseconds by which to offset the
-         * @param animation the animation to delay
-         */
-        private DelayedAnimation(long delay, Animation animation) {
-            mDelay = delay;
-            mAnimation = animation;
-        }
-
-        @Override
-        public boolean isInitialized() {
-            return mAnimation.isInitialized();
-        }
-
-        @Override
-        public void initialize(int width, int height, int parentWidth, int parentHeight) {
-            mAnimation.initialize(width, height, parentWidth, parentHeight);
-        }
-
-        @Override
-        public void reset() {
-            mAnimation.reset();
-        }
-
-        @Override
-        public boolean getTransformation(long currentTime, Transformation outTransformation) {
-            final long oldOffset = mAnimation.getStartOffset();
-            final boolean isSet = mAnimation instanceof AnimationSet;
-            if (isSet) {
-                AnimationSet set = ((AnimationSet) mAnimation);
-                set.saveChildrenStartOffset(mDelay);
-            }
-            mAnimation.setStartOffset(oldOffset + mDelay);
-
-            boolean result = mAnimation.getTransformation(currentTime,
-                    outTransformation);
-            
-            if (isSet) {
-                AnimationSet set = ((AnimationSet) mAnimation);
-                set.restoreChildrenStartOffset();
-            }
-            mAnimation.setStartOffset(oldOffset);
-
-            return result;
-        }
-
-        @Override
-        public void setStartTime(long startTimeMillis) {
-            mAnimation.setStartTime(startTimeMillis);
-        }
-
-        @Override
-        public long getStartTime() {
-            return mAnimation.getStartTime();
-        }
-
-        @Override
-        public void setInterpolator(Interpolator i) {
-            mAnimation.setInterpolator(i);
-        }
-
-        @Override
-        public void setStartOffset(long startOffset) {
-            mAnimation.setStartOffset(startOffset);
-        }
-
-        @Override
-        public void setDuration(long durationMillis) {
-            mAnimation.setDuration(durationMillis);
-        }
-
-        @Override
-        public void scaleCurrentDuration(float scale) {
-            mAnimation.scaleCurrentDuration(scale);
-        }
-
-        @Override
-        public void setRepeatMode(int repeatMode) {
-            mAnimation.setRepeatMode(repeatMode);
-        }
-
-        @Override
-        public void setFillBefore(boolean fillBefore) {
-            mAnimation.setFillBefore(fillBefore);
-        }
-
-        @Override
-        public void setFillAfter(boolean fillAfter) {
-            mAnimation.setFillAfter(fillAfter);
-        }
-
-        @Override
-        public Interpolator getInterpolator() {
-            return mAnimation.getInterpolator();
-        }
-
-        @Override
-        public long getDuration() {
-            return mAnimation.getDuration();
-        }
-
-        @Override
-        public long getStartOffset() {
-            return mAnimation.getStartOffset() + mDelay;
-        }
-
-        @Override
-        public int getRepeatMode() {
-            return mAnimation.getRepeatMode();
-        }
-
-        @Override
-        public boolean getFillBefore() {
-            return mAnimation.getFillBefore();
-        }
-
-        @Override
-        public boolean getFillAfter() {
-            return mAnimation.getFillAfter();
-        }
-
-        @Override
-        public boolean willChangeTransformationMatrix() {
-            return mAnimation.willChangeTransformationMatrix();
-        }
-
-        @Override
-        public boolean willChangeBounds() {
-            return mAnimation.willChangeBounds();
-        }
     }
 }

@@ -110,7 +110,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private Validator mValidator = null;
 
+    private boolean mBlockCompletion;
+
     private AutoCompleteTextView.ListSelectorHider mHideSelector;
+
+    // Indicates whether this AutoCompleteTextView is attached to a window or not
+    // The widget is attached to a window when mAttachCount > 0
+    private int mAttachCount;
 
     public AutoCompleteTextView(Context context) {
         this(context, null);
@@ -145,19 +151,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
                 R.layout.simple_dropdown_hint);
 
-        // A little trickiness for backwards compatibility: if the app
-        // didn't specify an explicit content type, then we will fill in the
-        // auto complete flag for them.
-        int contentType = a.getInt(
-                R.styleable.AutoCompleteTextView_inputType,
-                EditorInfo.TYPE_NULL);
-        if (contentType == EditorInfo.TYPE_NULL) {
-            contentType = getInputType();
-            if ((contentType&EditorInfo.TYPE_MASK_CLASS)
-                    == EditorInfo.TYPE_CLASS_TEXT) {
-                contentType |= EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE;
-                setRawInputType(contentType);
-            }
+        // Always turn on the auto complete input type flag, since it
+        // makes no sense to use this widget without it.
+        int inputType = getInputType();
+        if ((inputType&EditorInfo.TYPE_MASK_CLASS)
+                == EditorInfo.TYPE_CLASS_TEXT) {
+            inputType |= EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+            setRawInputType(inputType);
         }
 
         a.recycle();
@@ -300,6 +300,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     /**
      * <p>Changes the list of data used for auto completion. The provided list
      * must be a filterable list adapter.</p>
+     * 
+     * <p>The caller is still responsible for managing any resources used by the adapter.
+     * Notably, when the AutoCompleteTextView is closed or released, the adapter is not notified.
+     * A common case is the use of {@link android.widget.CursorAdapter}, which
+     * contains a {@link android.database.Cursor} that must be closed.  This can be done
+     * automatically (see 
+     * {@link android.app.Activity#startManagingCursor(android.database.Cursor) 
+     * startManagingCursor()}),
+     * or by manually closing the cursor when the AutoCompleteTextView is dismissed.</p>
      *
      * @param adapter the adapter holding the auto completion data
      *
@@ -368,7 +377,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                                     && keyCode != KeyEvent.KEYCODE_DPAD_CENTER))) {
                 int curIndex = mDropDownList.getSelectedItemPosition();
                 boolean consumed;
-                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= 0) {
+                final boolean below = !mPopup.isAboveAnchor();
+                if ((below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= 0) ||
+                        (!below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN && curIndex >=
+                        mDropDownList.getAdapter().getCount() - 1)) {
                     // When the selection is at the top, we block the key
                     // event to prevent focus from moving.
                     mDropDownList.hideSelector();
@@ -409,13 +421,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                             return true;
                     }
                 } else {
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                         // when the selection is at the bottom, we block the
                         // event to avoid going to the next focusable widget
                         Adapter adapter = mDropDownList.getAdapter();
                         if (adapter != null && curIndex == adapter.getCount() - 1) {
                             return true;
                         }
+                    } else if (!below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex == 0) {
+                        return true;
                     }
                 }
             }
@@ -462,6 +476,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     void doBeforeTextChanged() {
+        if (mBlockCompletion) return;
+
         // when text is changed, inserted or deleted, we attempt to show
         // the drop down
         mOpenBefore = isPopupShowing();
@@ -469,6 +485,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     void doAfterTextChanged() {
+        if (mBlockCompletion) return;
+
         // if the list was open before the keystroke, but closed afterwards,
         // then something in the keystroke processing (an input filter perhaps)
         // called performCompletion() and we shouldn't do any more processing.
@@ -579,9 +597,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         performCompletion(null, -1, -1);
     }
 
-    @Override public void onCommitCompletion(CompletionInfo completion) {
+    @Override
+    public void onCommitCompletion(CompletionInfo completion) {
         if (isPopupShowing()) {
+            mBlockCompletion = true;
             replaceText(completion.getText());
+            mBlockCompletion = false;
+
             if (mItemClickListener != null) {
                 final DropDownListView list = mDropDownList;
                 // Note that we don't have a View here, so we will need to
@@ -604,7 +626,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 Log.w(TAG, "performCompletion: no selected item");
                 return;
             }
+
+            mBlockCompletion = true;
             replaceText(convertSelectionToString(selectedItem));
+            mBlockCompletion = false;            
 
             if (mItemClickListener != null) {
                 final DropDownListView list = mDropDownList;
@@ -619,6 +644,14 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
 
         dismissDropDown();
+    }
+    
+    /**
+     * Identifies whether the view is currently performing a text completion, so subclasses
+     * can decide whether to respond to text changed events.
+     */
+    public boolean isPerformingCompletion() {
+        return mBlockCompletion;
     }
 
     /**
@@ -636,6 +669,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     public void onFilterComplete(int count) {
+        if (mAttachCount <= 0) return;
+
         /*
          * This checks enoughToFilter() again because filtering requests
          * are asynchronous, so the result may come back after enough text
@@ -671,8 +706,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mAttachCount++;
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         dismissDropDown();
+        mAttachCount--;
         super.onDetachedFromWindow();
     }
 
@@ -694,7 +736,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         boolean result = super.setFrame(l, t, r, b);
 
         if (mPopup.isShowing()) {
-            mPopup.update(this, getMeasuredWidth() - mPaddingLeft - mPaddingRight, -1);
+            mPopup.update(this, r - l, -1);
         }
 
         return result;
@@ -707,10 +749,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         int height = buildDropDown();
         if (mPopup.isShowing()) {
             mPopup.update(this, mDropDownHorizontalOffset, mDropDownVerticalOffset,
-                    getMeasuredWidth() - mPaddingLeft - mPaddingRight, height);
+                    getWidth(), height);
         } else {
             mPopup.setWindowLayoutMode(0, ViewGroup.LayoutParams.WRAP_CONTENT);
-            mPopup.setWidth(getMeasuredWidth() - mPaddingLeft - mPaddingRight);
+            mPopup.setWidth(getWidth());
             mPopup.setHeight(height);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setOutsideTouchable(true);
@@ -739,7 +781,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 int N = mAdapter.getCount();
                 if (N > 20) N = 20;
                 CompletionInfo[] completions = new CompletionInfo[N];
-                for (int i=0; i<N; i++) {
+                for (int i = 0; i < N; i++) {
                     Object item = mAdapter.getItem(i);
                     long id = mAdapter.getItemId(i);
                     completions[i] = new CompletionInfo(id, i,
@@ -783,7 +825,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
                 // measure the hint's height to find how much more vertical space
                 // we need to add to the drop down's height
-                int widthSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.AT_MOST);
+                int widthSpec = MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.AT_MOST);
                 int heightSpec = MeasureSpec.UNSPECIFIED;
                 hintView.measure(widthSpec, heightSpec);
 
@@ -807,8 +849,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
 
         // Max height available on the screen for a popup anchored to us
-        final int maxHeight = mPopup.getMaxAvailableHeight(this);
-        otherHeights += dropDownView.getPaddingTop() + dropDownView.getPaddingBottom();
+        final int maxHeight = mPopup.getMaxAvailableHeight(this, mDropDownVerticalOffset);
+        //otherHeights += dropDownView.getPaddingTop() + dropDownView.getPaddingBottom();
 
         return mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;

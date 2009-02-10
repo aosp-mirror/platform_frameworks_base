@@ -21,7 +21,8 @@ public class HandlerCaller {
         
         public Object arg1;
         public Object arg2;
-        Object arg3;
+        public Object arg3;
+        public Object arg4;
         public int argi1;
         public int argi2;
         public int argi3;
@@ -146,6 +147,16 @@ public class HandlerCaller {
         args.arg1 = arg1;
         args.arg2 = arg2;
         args.arg3 = arg3;
+        return mH.obtainMessage(what, 0, 0, args);
+    }
+    
+    public Message obtainMessageOOOO(int what, Object arg1, Object arg2,
+            Object arg3, Object arg4) {
+        SomeArgs args = obtainArgs();
+        args.arg1 = arg1;
+        args.arg2 = arg2;
+        args.arg3 = arg3;
+        args.arg4 = arg4;
         return mH.obtainMessage(what, 0, 0, args);
     }
     

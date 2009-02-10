@@ -235,6 +235,35 @@ public final class Settings {
             "android.settings.LOCALE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to configure input methods, in particular
+     * allowing the user to enable input methods.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INPUT_METHOD_SETTINGS =
+            "android.settings.INPUT_METHOD_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to manage the user input dictionary.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_USER_DICTIONARY_SETTINGS =
+            "android.settings.USER_DICTIONARY_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of application-related settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -1233,6 +1262,13 @@ public final class Settings {
         public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
 
         /**
+         * Scaling factor for normal window animations. Setting to 0 will disable window
+         * animations.
+         * @hide
+         */
+        public static final String FANCY_IME_ANIMATIONS = "fancy_ime_animations";
+
+        /**
          * Control whether the accelerometer will be used to change screen
          * orientation.  If 0, it will not be used unless explicitly requested
          * by the application; if 1, it will be used by default unless explicitly
@@ -2008,6 +2044,14 @@ public final class Settings {
          */
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
             "wifi_mobile_data_transition_wakelock_timeout_ms";
+
+        /**
+         * Whether background data usage is allowed by the user. See
+         * ConnectivityManager for more info.
+         * 
+         * @hide pending API council
+         */
+        public static final String BACKGROUND_DATA = "background_data";
     }
     
     /**
@@ -2130,6 +2174,11 @@ public final class Settings {
          * Event tags from the kernel event log to upload during checkin.
          */
         public static final String CHECKIN_EVENTS = "checkin_events";
+        
+        /**
+         * Event tags for list of services to upload during checkin.
+         */
+        public static final String CHECKIN_DUMPSYS_LIST = "checkin_dumpsys_list";
 
         /**
          * The interval (in seconds) between periodic checkin attempts.
@@ -2704,8 +2753,27 @@ public final class Settings {
          * Speech encoding used with voice search on WIFI networks. To be factored out of this class.
          */
         public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
-        
-        
+
+        /**
+         * Prefix for rules that launch automatic instrumentation test cycles.
+         * The format is the InstrumentationTestRunner (or compatible) package and class,
+         * followed optionally by space-separated key value pairs to pass to it.
+         */
+        public static final String AUTOTEST_PREFIX = "autotest:";
+
+        /**
+         * Interval between synchronous checkins forced by the automatic test runner.
+         * If you set this to a value smaller than CHECKIN_INTERVAL, then the test runner's
+         * frequent checkins will prevent asynchronous background checkins from interfering
+         * with any performance measurements.
+         */
+        public static final String AUTOTEST_CHECKIN_SECONDS = "autotest_checkin_seconds";
+
+        /**
+         * Interval between reboots forced by the automatic test runner.
+         */
+        public static final String AUTOTEST_REBOOT_SECONDS = "autotest_reboot_seconds";
+
         /**
          * @deprecated
          * @hide
@@ -2912,9 +2980,10 @@ public final class Settings {
          * 
          * @param context A context.
          * @param cursor A cursor pointing to the row whose title should be
-         *            returned. The cursor must contain at least the
-         *            {@link #TITLE} and {@link #INTENT} columns.
-         * @return A title that is localized and can be displayed to the user.
+         *        returned. The cursor must contain at least the {@link #TITLE}
+         *        and {@link #INTENT} columns.
+         * @return A title that is localized and can be displayed to the user,
+         *         or the empty string if one could not be found.
          */
         public static CharSequence getTitle(Context context, Cursor cursor) {
             int titleColumn = cursor.getColumnIndex(TITLE);
@@ -2943,7 +3012,7 @@ public final class Settings {
             
             PackageManager packageManager = context.getPackageManager();
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
-            return info.loadLabel(packageManager);
+            return info != null ? info.loadLabel(packageManager) : "";
         }
     }
 

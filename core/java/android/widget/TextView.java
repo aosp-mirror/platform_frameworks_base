@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -42,6 +43,7 @@ import android.text.GraphicsOperations;
 import android.text.ClipboardManager;
 import android.text.InputFilter;
 import android.text.Layout;
+import android.text.ParcelableSpan;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -69,7 +71,6 @@ import android.text.method.TransformationMethod;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
-import android.text.style.UpdateLayout;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -168,6 +169,9 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
+    static final String TAG = "TextView";
+    static final boolean DEBUG_EXTRACT = false;
+    
     private static int PRIORITY = 100;
 
     private ColorStateList mTextColor;
@@ -177,6 +181,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mCurHintTextColor;
     private boolean mFreezesText;
     private boolean mFrozenWithFocus;
+
+    private boolean mEatTouchRelease = false;
+    private boolean mScrolled = false;
 
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
@@ -213,6 +220,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CharSequence mError;
     private boolean mErrorWasChanged;
     private PopupWindow mPopup;
+    /**
+     * This flag is set if the TextView tries to display an error before it
+     * is attached to the window (so its position is still unknown).
+     * It causes the error to be shown later, when onAttachedToWindow()
+     * is called.
+     */
+    private boolean mShowErrorAfterAttach;
 
     private CharWrapper mCharWrapper = null;
 
@@ -235,7 +249,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float[] mTmpOffset = new float[2];
         ExtractedTextRequest mExtracting;
         final ExtractedText mTmpExtracted = new ExtractedText();
-        boolean mBatchEditing;
+        int mBatchEditNesting;
+        boolean mCursorChanged;
+        boolean mContentChanged;
+        int mChangedStart, mChangedEnd, mChangedDelta;
     }
     InputMethodState mInputMethodState;
 
@@ -2342,9 +2359,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets the string value of the TextView. TextView <em>does not</em> accept
      * HTML-like formatting, which you can do with text strings in XML resource files.
      * To style your strings, attach android.text.style.* objects to a
-     * {@link android.text.SpannableString SpannableString}, or see
-     * <a href="{@docRoot}reference/available-resources.html#stringresources">
-     * String Resources</a> for an example of setting formatted text in the XML resource file.
+     * {@link android.text.SpannableString SpannableString}, or see the
+     * <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">
+     * Available Resource Types</a> documentation for an example of setting 
+     * formatted text in the XML resource file.
      *
      * @attr ref android.R.styleable#TextView_text
      */
@@ -2698,20 +2716,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setInputType(int type) {
         setInputType(type, false);
-        if ((type&(EditorInfo.TYPE_MASK_CLASS
+        final boolean isPassword = (type&(EditorInfo.TYPE_MASK_CLASS
                 |EditorInfo.TYPE_MASK_VARIATION))
                 == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
+                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+        boolean forceUpdate = false;
+        if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceByIndex(MONOSPACE, 0);
+        } else if (mTransformation == PasswordTransformationMethod.getInstance()) {
+            // We need to clean up if we were previously in password mode.
+            setTypefaceByIndex(-1, -1);
+            forceUpdate = true;
         }
+        
         boolean multiLine = (type&(EditorInfo.TYPE_MASK_CLASS
                         | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) ==
                 (EditorInfo.TYPE_CLASS_TEXT
                         | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
-        if (mSingleLine == multiLine) {
-            setSingleLine(!multiLine);
+        
+        // We need to update the single line mode if it has changed or we
+        // were previously in password mode.
+        if (mSingleLine == multiLine || forceUpdate) {
+            // Change single line mode, but only change the transformation if
+            // we are not in password mode.
+            applySingleLine(!multiLine, !isPassword);
         }
+        
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null) imm.restartInput(this);
     }
@@ -2814,7 +2845,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * given integer is the resource ID of an XML resource holding an
      * {@link android.R.styleable#InputExtras &lt;input-extras&gt;} XML tree.
      *
-     * @see #getInputExtras()
+     * @see #getInputExtras(boolean) 
      * @see EditorInfo#extras
      * @attr ref android.R.styleable#TextView_editorExtras
      */
@@ -2832,7 +2863,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param create If true, the extras will be created if they don't already
      * exist.  Otherwise, null will be returned if none have been created.
-     * @see #setInputExtras(int)
+     * @see #setInputExtras(int)View
      * @see EditorInfo#extras
      * @attr ref android.R.styleable#TextView_editorExtras
      */
@@ -2916,6 +2947,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void showError() {
+        if (getWindowToken() == null) {
+            mShowErrorAfterAttach = true;
+            return;
+        }
+
         if (mPopup == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
             TextView err = (TextView) inflater.inflate(com.android.internal.R.layout.textview_hint,
@@ -2979,6 +3015,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mPopup.dismiss();
             }
         }
+
+        mShowErrorAfterAttach = false;
     }
 
     private void chooseSize(PopupWindow pop, CharSequence text, TextView tv) {
@@ -3269,6 +3307,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (mShowErrorAfterAttach) {
+            showError();
+            mShowErrorAfterAttach = false;
+        }
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
@@ -3308,6 +3356,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected int getRightPaddingOffset() {
         return (int) Math.max(0, mShadowDx + mShadowRadius);
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        final boolean verified = super.verifyDrawable(who);
+        if (!verified && mDrawables != null) {
+            return who == mDrawables.mDrawableLeft || who == mDrawables.mDrawableTop ||
+                    who == mDrawables.mDrawableRight || who == mDrawables.mDrawableBottom;
+        }
+        return verified;
     }
 
     @Override
@@ -3505,38 +3563,48 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         */
 
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (highlight != null && mInputMethodState != null
-                && !mInputMethodState.mBatchEditing && imm != null) {
-            if (imm.isActive(this)) {
-                int candStart = -1;
-                int candEnd = -1;
-                if (mText instanceof Spannable) {
-                    Spannable sp = (Spannable)mText;
-                    candStart = EditableInputConnection.getComposingSpanStart(sp);
-                    candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null && ims.mBatchEditNesting == 0) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                if (imm.isActive(this)) {
+                    boolean reported = false;
+                    if (ims.mContentChanged) {
+                        // We are in extract mode and the content has changed
+                        // in some way... just report complete new text to the
+                        // input method.
+                        reported = reportExtractedText();
+                    }
+                    if (!reported && highlight != null) {
+                        int candStart = -1;
+                        int candEnd = -1;
+                        if (mText instanceof Spannable) {
+                            Spannable sp = (Spannable)mText;
+                            candStart = EditableInputConnection.getComposingSpanStart(sp);
+                            candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                        }
+                        imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
+                    }
                 }
-                imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
-            }
-            
-            if (imm.isWatchingCursor(this)) {
-                final InputMethodState ims = mInputMethodState;
-                highlight.computeBounds(ims.mTmpRectF, true);
-                ims.mTmpOffset[0] = ims.mTmpOffset[1] = 0;
-
-                canvas.getMatrix().mapPoints(ims.mTmpOffset);
-                ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
-
-                ims.mTmpRectF.offset(0, voffsetCursor - voffsetText);
-
-                ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
-                        (int)(ims.mTmpRectF.top + 0.5),
-                        (int)(ims.mTmpRectF.right + 0.5),
-                        (int)(ims.mTmpRectF.bottom + 0.5));
-
-                imm.updateCursor(this,
-                        ims.mCursorRectInWindow.left, ims.mCursorRectInWindow.top,
-                        ims.mCursorRectInWindow.right, ims.mCursorRectInWindow.bottom);
+                
+                if (imm.isWatchingCursor(this) && highlight != null) {
+                    highlight.computeBounds(ims.mTmpRectF, true);
+                    ims.mTmpOffset[0] = ims.mTmpOffset[1] = 0;
+    
+                    canvas.getMatrix().mapPoints(ims.mTmpOffset);
+                    ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
+    
+                    ims.mTmpRectF.offset(0, voffsetCursor - voffsetText);
+    
+                    ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
+                            (int)(ims.mTmpRectF.top + 0.5),
+                            (int)(ims.mTmpRectF.right + 0.5),
+                            (int)(ims.mTmpRectF.bottom + 0.5));
+    
+                    imm.updateCursor(this,
+                            ims.mCursorRectInWindow.left, ims.mCursorRectInWindow.top,
+                            ims.mCursorRectInWindow.right, ims.mCursorRectInWindow.bottom);
+                }
             }
         }
 
@@ -3634,7 +3702,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        int which = doKeyDown(keyCode, event);
+        int which = doKeyDown(keyCode, event, null);
         if (which == 0) {
             // Go through default dispatching.
             return super.onKeyDown(keyCode, event);
@@ -3647,12 +3715,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
 
-        int which = doKeyDown(keyCode, down);
+        int which = doKeyDown(keyCode, down, event);
         if (which == 0) {
             // Go through default dispatching.
             return super.onKeyMultiple(keyCode, repeatCount, event);
         }
+        if (which == -1) {
+            // Consumed the whole thing.
+            return true;
+        }
 
+        repeatCount--;
+        
         // We are going to dispatch the remaining events to either the input
         // or movement method.  To do this, we will just send a repeated stream
         // of down and up events until we have done the complete repeatCount.
@@ -3680,7 +3754,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return true;
     }
 
-    private int doKeyDown(int keyCode, KeyEvent event) {
+    /**
+     * Returns true if pressing ENTER in this field advances focus instead
+     * of inserting the character.  This is true mostly in single-line fields,
+     * but also in mail addresses and subjects which will display on multiple
+     * lines but where it doesn't make sense to insert newlines.
+     */
+    private boolean advanceFocusOnEnter() {
+        if (mInput == null) {
+            return false;
+        }
+
+        if (mSingleLine) {
+            return true;
+        }
+
+        if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
+            int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
+
+            if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
         if (!isEnabled()) {
             return 0;
         }
@@ -3688,7 +3789,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
-                if (mSingleLine && mInput != null) {
+                if (advanceFocusOnEnter()) {
                     return 0;
                 }
         }
@@ -3702,20 +3803,63 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              */
             mErrorWasChanged = false;
 
-            if (mInput.onKeyDown(this, (Editable) mText, keyCode, event)) {
-                if (mError != null && !mErrorWasChanged) {
-                    setError(null, null);
+            boolean doDown = true;
+            if (otherEvent != null) {
+                try {
+                    beginBatchEdit();
+                    boolean handled = mInput.onKeyOther(this, (Editable) mText,
+                            otherEvent);
+                    if (mError != null && !mErrorWasChanged) {
+                        setError(null, null);
+                    }
+                    doDown = false;
+                    if (handled) {
+                        return -1;
+                    }
+                } catch (AbstractMethodError e) {
+                    // onKeyOther was added after 1.0, so if it isn't
+                    // implemented we need to try to dispatch as a regular down.
+                } finally {
+                    endBatchEdit();
                 }
-                return 1;
+            }
+            
+            if (doDown) {
+                beginBatchEdit();
+                if (mInput.onKeyDown(this, (Editable) mText, keyCode, event)) {
+                    endBatchEdit();
+                    if (mError != null && !mErrorWasChanged) {
+                        setError(null, null);
+                    }
+                    return 1;
+                }
+                endBatchEdit();
             }
         }
 
         // bug 650865: sometimes we get a key event before a layout.
         // don't try to move around if we don't know the layout.
 
-        if (mMovement != null && mLayout != null)
-            if (mMovement.onKeyDown(this, (Spannable)mText, keyCode, event))
-                return 2;
+        if (mMovement != null && mLayout != null) {
+            boolean doDown = true;
+            if (otherEvent != null) {
+                try {
+                    boolean handled = mMovement.onKeyOther(this, (Editable) mText,
+                            otherEvent);
+                    doDown = false;
+                    if (handled) {
+                        return -1;
+                    }
+                } catch (AbstractMethodError e) {
+                    // onKeyOther was added after 1.0, so if it isn't
+                    // implemented we need to try to dispatch as a regular down.
+                }
+            }
+            if (doDown) {
+                if (mMovement.onKeyDown(this, (Spannable)mText, keyCode, event))
+                    return 2;
+            }
+        }
 
         return 0;
     }
@@ -3728,8 +3872,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                /*
+                 * If there is a click listener, just call through to
+                 * super, which will invoke it.
+                 *
+                 * If there isn't a click listener, try to show the soft
+                 * input method.  (It will also
+                 * call performClick(), but that won't do anything in
+                 * this case.)
+                 */
+                if (mOnClickListener == null) {
+                    if (mMovement != null && mText instanceof Editable
+                            && mLayout != null && onCheckIsTextEditor()) {
+                        InputMethodManager imm = (InputMethodManager)
+                                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(this, 0);
+                    }
+                }
+                return super.onKeyUp(keyCode, event);
+                
             case KeyEvent.KEYCODE_ENTER:
-                if (mSingleLine && mInput != null) {
+                if (advanceFocusOnEnter()) {
                     /*
                      * If there is a click listener, just call through to
                      * super, which will invoke it.
@@ -3803,14 +3966,56 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * If this TextView contains editable content, extract a portion of it
      * based on the information in <var>request</var> in to <var>outText</var>.
-     * @return Returns true if the text is editable and was successfully
-     * extracted, else false.
+     * @return Returns true if the text was successfully extracted, else false.
      */
     public boolean extractText(ExtractedTextRequest request,
             ExtractedText outText) {
-        Editable content = getEditableText();
+        return extractTextInternal(request, -1, -1, -1, outText);
+    }
+    
+    boolean extractTextInternal(ExtractedTextRequest request,
+            int partialStartOffset, int partialEndOffset, int delta,
+            ExtractedText outText) {
+        final CharSequence content = mText;
         if (content != null) {
-            outText.text = content.subSequence(0, content.length());
+            final int N = content.length();
+            if (partialStartOffset < 0) {
+                outText.partialStartOffset = outText.partialEndOffset = -1;
+                partialStartOffset = 0;
+                partialEndOffset = N;
+            } else {
+                // Adjust offsets to ensure we contain full spans.
+                if (content instanceof Spanned) {
+                    Spanned spanned = (Spanned)content;
+                    Object[] spans = spanned.getSpans(partialStartOffset,
+                            partialEndOffset, ParcelableSpan.class);
+                    int i = spans.length;
+                    while (i > 0) {
+                        i--;
+                        int j = spanned.getSpanStart(spans[i]);
+                        if (j < partialStartOffset) partialStartOffset = j;
+                        j = spanned.getSpanEnd(spans[i]);
+                        if (j > partialEndOffset) partialEndOffset = j;
+                    }
+                }
+                outText.partialStartOffset = partialStartOffset;
+                outText.partialEndOffset = partialEndOffset;
+                // Now use the delta to determine the actual amount of text
+                // we need.
+                partialEndOffset += delta;
+                if (partialEndOffset > N) {
+                    partialEndOffset = N;
+                } else if (partialEndOffset < 0) {
+                    partialEndOffset = 0;
+                }
+            }
+            if ((request.flags&InputConnection.GET_TEXT_WITH_STYLES) != 0) {
+                outText.text = content.subSequence(partialStartOffset,
+                        partialEndOffset);
+            } else {
+                outText.text = TextUtils.substring(content, partialStartOffset,
+                        partialEndOffset);
+            }
             outText.startOffset = 0;
             outText.selectionStart = Selection.getSelectionStart(content);
             outText.selectionEnd = Selection.getSelectionEnd(content);
@@ -3819,18 +4024,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
     
-    void reportExtractedText() {
-        if (mInputMethodState != null) {
+    boolean reportExtractedText() {
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null && ims.mContentChanged) {
+            ims.mContentChanged = false;
             final ExtractedTextRequest req = mInputMethodState.mExtracting;
             if (req != null) {
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
-                    if (extractText(req, mInputMethodState.mTmpExtracted)) {
+                    if (DEBUG_EXTRACT) Log.v(TAG, "Retrieving extracted start="
+                            + ims.mChangedStart + " end=" + ims.mChangedEnd
+                            + " delta=" + ims.mChangedDelta);
+                    if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
+                            ims.mChangedDelta, ims.mTmpExtracted)) {
+                        if (DEBUG_EXTRACT) Log.v(TAG, "Reporting extracted start="
+                                + ims.mTmpExtracted.partialStartOffset
+                                + " end=" + ims.mTmpExtracted.partialEndOffset
+                                + ": " + ims.mTmpExtracted.text);
                         imm.updateExtractedText(this, req.token,
                                 mInputMethodState.mTmpExtracted);
+                        return true;
                     }
                 }
             }
+        }
+        return false;
+    }
+    
+    /**
+     * This is used to remove all style-impacting spans from text before new
+     * extracted text is being replaced into it, so that we don't have any
+     * lingering spans applied during the replace.
+     */
+    static void removeParcelableSpans(Spannable spannable, int start, int end) {
+        Object[] spans = spannable.getSpans(start, end, ParcelableSpan.class);
+        int i = spans.length;
+        while (i > 0) {
+            i--;
+            spannable.removeSpan(spans[i]);
         }
     }
     
@@ -3839,7 +4070,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * returned by {@link #extractText(ExtractedTextRequest, ExtractedText)}.
      */
     public void setExtractedText(ExtractedText text) {
-        setText(text.text, TextView.BufferType.EDITABLE);
+        Editable content = getEditableText();
+        if (content == null) {
+            setText(text.text, TextView.BufferType.EDITABLE);
+        } else if (text.partialStartOffset < 0) {
+            removeParcelableSpans(content, 0, content.length());
+            content.replace(0, content.length(), text.text);
+        } else {
+            final int N = content.length();
+            int start = text.partialStartOffset;
+            if (start > N) start = N;
+            int end = text.partialEndOffset;
+            if (end > N) end = N;
+            removeParcelableSpans(content, start, end);
+            content.replace(start, end, text.text);
+        }
         Selection.setSelection((Spannable)getText(),
                 text.selectionStart, text.selectionEnd);
     }
@@ -3866,36 +4111,91 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCommitCompletion(CompletionInfo text) {
     }
 
+    public void beginBatchEdit() {
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null) {
+            int nesting = ++ims.mBatchEditNesting;
+            if (nesting == 1) {
+                ims.mCursorChanged = false;
+                ims.mChangedDelta = 0;
+                if (ims.mContentChanged) {
+                    // We already have a pending change from somewhere else,
+                    // so turn this into a full update.
+                    ims.mChangedStart = 0;
+                    ims.mChangedEnd = mText.length();
+                } else {
+                    ims.mChangedStart = -1;
+                    ims.mChangedEnd = -1;
+                    ims.mContentChanged = false;
+                }
+                onBeginBatchEdit();
+            }
+        }
+    }
+    
+    public void endBatchEdit() {
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null) {
+            int nesting = --ims.mBatchEditNesting;
+            if (nesting == 0) {
+                finishBatchEdit(ims);
+            }
+        }
+    }
+    
+    void ensureEndedBatchEdit() {
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null && ims.mBatchEditNesting != 0) {
+            ims.mBatchEditNesting = 0;
+            finishBatchEdit(ims);
+        }
+    }
+    
+    void finishBatchEdit(final InputMethodState ims) {
+        onEndBatchEdit();
+        
+        if (ims.mContentChanged) {
+            updateAfterEdit();
+            reportExtractedText();
+        } else if (ims.mCursorChanged) {
+            // Cheezy way to get us to report the current cursor location.
+            invalidateCursor();
+        }
+    }
+    
+    void updateAfterEdit() {
+        invalidate();
+        int curs = Selection.getSelectionStart(mText);
+
+        if (curs >= 0 || (mGravity & Gravity.VERTICAL_GRAVITY_MASK) ==
+                             Gravity.BOTTOM) {
+            registerForPreDraw();
+        }
+
+        if (curs >= 0) {
+            mHighlightPathBogus = true;
+
+            if (isFocused()) {
+                mShowCursor = SystemClock.uptimeMillis();
+                makeBlink();
+            }
+        }
+        
+        checkForResize();
+    }
+    
     /**
      * Called by the framework in response to a request to begin a batch
-     * of edit operations from the current input method, as a result of
-     * it calling {@link InputConnection#beginBatchEdit
-     * InputConnection.beginBatchEdit()}.  The default implementation sets
-     * up the TextView's internal state to take care of this; if overriding
-     * you should call through to the super class.
+     * of edit operations through a call to link {@link #beginBatchEdit()}.
      */
     public void onBeginBatchEdit() {
-        if (mInputMethodState != null) {
-            // XXX we should be smarter here, such as not doing invalidates
-            // until all edits are done.
-            mInputMethodState.mBatchEditing = true;
-        }
     }
     
     /**
      * Called by the framework in response to a request to end a batch
-     * of edit operations from the current input method, as a result of
-     * it calling {@link InputConnection#endBatchEdit
-     * InputConnection.endBatchEdit()}.  The default implementation sets
-     * up the TextView's internal state to take care of this; if overriding
-     * you should call through to the super class.
+     * of edit operations through a call to link {@link #endBatchEdit}.
      */
     public void onEndBatchEdit() {
-        if (mInputMethodState != null) {
-            mInputMethodState.mBatchEditing = false;
-            // Cheezy way to get us to report the current cursor location.
-            invalidateCursor();
-        }
     }
     
     /**
@@ -4542,9 +4842,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns true if anything changed.
+     * Move the point, specified by the offset, into the view if it is needed.
+     * This has to be called after layout. Returns true if anything changed.
      */
-    private boolean bringPointIntoView(int offset) {
+    public boolean bringPointIntoView(int offset) {
         boolean changed = false;
 
         int line = mLayout.getLineForOffset(offset);
@@ -4794,7 +5095,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_singleLine
      */
     public void setSingleLine(boolean singleLine) {
-        mSingleLine = singleLine;
         if ((mInputType&EditorInfo.TYPE_MASK_CLASS)
                 == EditorInfo.TYPE_CLASS_TEXT) {
             if (singleLine) {
@@ -4803,19 +5103,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
             }
         }
+        applySingleLine(singleLine, true);
+    }
 
+    private void applySingleLine(boolean singleLine, boolean applyTransformation) {
+        mSingleLine = singleLine;
         if (singleLine) {
             setLines(1);
             setHorizontallyScrolling(true);
-            setTransformationMethod(SingleLineTransformationMethod.
-                                    getInstance());
+            if (applyTransformation) {
+                setTransformationMethod(SingleLineTransformationMethod.
+                                        getInstance());
+            }
         } else {
             setMaxLines(Integer.MAX_VALUE);
             setHorizontallyScrolling(false);
-            setTransformationMethod(null);
+            if (applyTransformation) {
+                setTransformationMethod(null);
+            }
         }
     }
-
+    
     /**
      * Causes words in the text that are longer than the view is wide
      * to be ellipsized instead of broken in the middle.  You may also
@@ -4938,6 +5246,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float mScroll;
 
         Marquee(TextView v) {
+            final float density = v.getContext().getResources().getDisplayMetrics().density;
+            mScrollUnit = (MARQUEE_PIXELS_PER_SECOND * density) / (float) MARQUEE_RESOLUTION;
             mView = new WeakReference<TextView>(v);
         }
 
@@ -5006,7 +5316,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (textView != null && textView.mLayout != null) {
                 mStatus = MARQUEE_STARTING;
                 mScroll = 0.0f;
-                mScrollUnit = MARQUEE_PIXELS_PER_SECOND / (float) MARQUEE_RESOLUTION;
                 mMaxScroll = textView.mLayout.getLineWidth(0) - (textView.getWidth() -
                         textView.getCompoundPaddingLeft() - textView.getCompoundPaddingRight());
                 textView.invalidate();
@@ -5045,6 +5354,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                  int start, int before, int after) {
     }
 
+    /**
+     * This method is called when the selection has changed, in case any
+     * subclasses would like to know.
+     * 
+     * @param selStart The new selection start location.
+     * @param selEnd The new selection end location.
+     */
+    protected void onSelectionChanged(int selStart, int selEnd) {
+    }
+    
     /**
      * Adds a TextWatcher to the list of those whose methods are called
      * whenever this TextView's text changes.
@@ -5123,26 +5442,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     void handleTextChanged(CharSequence buffer, int start,
             int before, int after) {
-        invalidate();
-
-        int curs = Selection.getSelectionStart(buffer);
-
-        if (curs >= 0 || (mGravity & Gravity.VERTICAL_GRAVITY_MASK) ==
-                             Gravity.BOTTOM) {
-            registerForPreDraw();
+        final InputMethodState ims = mInputMethodState;
+        if (ims == null || ims.mBatchEditNesting == 0) {
+            updateAfterEdit();
         }
-
-        if (curs >= 0) {
-            mHighlightPathBogus = true;
-
-            if (isFocused()) {
-                mShowCursor = SystemClock.uptimeMillis();
-                makeBlink();
+        if (ims != null) {
+            ims.mContentChanged = true;
+            if (ims.mChangedStart < 0) {
+                ims.mChangedStart = start;
+                ims.mChangedEnd = start+before;
+            } else {
+                if (ims.mChangedStart > start) ims.mChangedStart = start;
+                if (ims.mChangedEnd < (start+before)) ims.mChangedEnd = start+before;
             }
+            ims.mChangedDelta += after-before;
         }
-
-        checkForResize();
-
+        
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
     }
@@ -5151,19 +5466,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void spanChange(Spanned buf, Object what, int o, int n) {
+    void spanChange(Spanned buf, Object what, int oldStart, int newStart,
+            int oldEnd, int newEnd) {
         // XXX Make the start and end move together if this ends up
         // spending too much time invalidating.
 
+        boolean selChanged = false;
+        int newSelStart=-1, newSelEnd=-1;
+        
+        final InputMethodState ims = mInputMethodState;
+        
         if (what == Selection.SELECTION_END) {
             mHighlightPathBogus = true;
+            selChanged = true;
+            newSelEnd = newStart;
 
             if (!isFocused()) {
                 mSelectionMoved = true;
             }
 
-            if (o >= 0 || n >= 0) {
-                invalidateCursor(Selection.getSelectionStart(buf), o, n);
+            if (oldStart >= 0 || newStart >= 0) {
+                invalidateCursor(Selection.getSelectionStart(buf), oldStart, newStart);
                 registerForPreDraw();
 
                 if (isFocused()) {
@@ -5175,28 +5498,81 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (what == Selection.SELECTION_START) {
             mHighlightPathBogus = true;
+            selChanged = true;
+            newSelStart = newStart;
 
             if (!isFocused()) {
                 mSelectionMoved = true;
             }
 
-            if (o >= 0 || n >= 0) {
-                invalidateCursor(Selection.getSelectionEnd(buf), o, n);
+            if (oldStart >= 0 || newStart >= 0) {
+                int end = Selection.getSelectionEnd(buf);
+                invalidateCursor(end, oldStart, newStart);
             }
         }
 
+        if (selChanged) {
+            if ((buf.getSpanFlags(what)&Spanned.SPAN_INTERMEDIATE) == 0) {
+                if (newSelStart < 0) {
+                    newSelStart = Selection.getSelectionStart(buf);
+                }
+                if (newSelEnd < 0) {
+                    newSelEnd = Selection.getSelectionEnd(buf);
+                }
+                onSelectionChanged(newSelStart, newSelEnd);
+            }
+        }
+        
         if (what instanceof UpdateAppearance ||
             what instanceof ParagraphStyle) {
-            invalidate();
-            mHighlightPathBogus = true;
-            checkForResize();
+            if (ims == null || ims.mBatchEditNesting == 0) {
+                invalidate();
+                mHighlightPathBogus = true;
+                checkForResize();
+            } else {
+                ims.mContentChanged = true;
+            }
         }
 
         if (MetaKeyKeyListener.isMetaTracker(buf, what)) {
             mHighlightPathBogus = true;
 
             if (Selection.getSelectionStart(buf) >= 0) {
-                invalidateCursor();
+                if (ims == null || ims.mBatchEditNesting == 0) {
+                    invalidateCursor();
+                } else {
+                    ims.mCursorChanged = true;
+                }
+            }
+        }
+        
+        if (what instanceof ParcelableSpan) {
+            // If this is a span that can be sent to a remote process,
+            // the current extract editor would be interested in it.
+            if (ims != null && ims.mExtracting != null) {
+                if (ims.mBatchEditNesting != 0) {
+                    if (oldStart >= 0) {
+                        if (ims.mChangedStart > oldStart) {
+                            ims.mChangedStart = oldStart;
+                        }
+                        if (ims.mChangedStart > oldEnd) {
+                            ims.mChangedStart = oldEnd;
+                        }
+                    }
+                    if (newStart >= 0) {
+                        if (ims.mChangedStart > newStart) {
+                            ims.mChangedStart = newStart;
+                        }
+                        if (ims.mChangedStart > newEnd) {
+                            ims.mChangedStart = newEnd;
+                        }
+                    }
+                } else {
+                    if (DEBUG_EXTRACT) Log.v(TAG, "Span change outside of batch: "
+                            + oldStart + "-" + oldEnd + ","
+                            + newStart + "-" + newEnd + what);
+                    ims.mContentChanged = true;
+                }
             }
         }
     }
@@ -5205,36 +5581,45 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     implements TextWatcher, SpanWatcher {
         public void beforeTextChanged(CharSequence buffer, int start,
                                       int before, int after) {
+            if (DEBUG_EXTRACT) Log.v(TAG, "beforeTextChanged start=" + start
+                    + " before=" + before + " after=" + after + ": " + buffer);
             TextView.this.sendBeforeTextChanged(buffer, start, before, after);
         }
 
         public void onTextChanged(CharSequence buffer, int start,
                                   int before, int after) {
+            if (DEBUG_EXTRACT) Log.v(TAG, "onTextChanged start=" + start
+                    + " before=" + before + " after=" + after + ": " + buffer);
             TextView.this.handleTextChanged(buffer, start, before, after);
         }
 
         public void afterTextChanged(Editable buffer) {
+            if (DEBUG_EXTRACT) Log.v(TAG, "afterTextChanged: " + buffer);
             TextView.this.sendAfterTextChanged(buffer);
 
             if (MetaKeyKeyListener.getMetaState(buffer,
                                  MetaKeyKeyListener.META_SELECTING) != 0) {
                 MetaKeyKeyListener.stopSelecting(TextView.this, buffer);
             }
-
-            TextView.this.reportExtractedText();
         }
 
         public void onSpanChanged(Spannable buf,
                                   Object what, int s, int e, int st, int en) {
-            TextView.this.spanChange(buf, what, s, st);
+            if (DEBUG_EXTRACT) Log.v(TAG, "onSpanChanged s=" + s + " e=" + e
+                    + " st=" + st + " en=" + en + " what=" + what + ": " + buf);
+            TextView.this.spanChange(buf, what, s, st, e, en);
         }
 
         public void onSpanAdded(Spannable buf, Object what, int s, int e) {
-            TextView.this.spanChange(buf, what, -1, s);
+            if (DEBUG_EXTRACT) Log.v(TAG, "onSpanAdded s=" + s + " e=" + e
+                    + " what=" + what + ": " + buf);
+            TextView.this.spanChange(buf, what, -1, s, -1, e);
         }
 
         public void onSpanRemoved(Spannable buf, Object what, int s, int e) {
-            TextView.this.spanChange(buf, what, s, -1);
+            if (DEBUG_EXTRACT) Log.v(TAG, "onSpanRemoved s=" + s + " e=" + e
+                    + " what=" + what + ": " + buf);
+            TextView.this.spanChange(buf, what, s, -1, e, -1);
         }
     }
 
@@ -5258,6 +5643,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         mShowCursor = SystemClock.uptimeMillis();
 
+        ensureEndedBatchEdit();
+        
         if (focused) {
             int selStart = getSelectionStart();
             int selEnd = getSelectionEnd();
@@ -5362,22 +5749,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final boolean superResult = super.onTouchEvent(event);
 
+        final int action = event.getAction();
+        
         /*
          * Don't handle the release after a long press, because it will
          * move the selection away from whatever the menu action was
          * trying to affect.
          */
-        if (mEatTouchRelease && event.getAction() == MotionEvent.ACTION_UP) {
+        if (mEatTouchRelease && action == MotionEvent.ACTION_UP) {
             mEatTouchRelease = false;
             return superResult;
         }
 
-        if (mMovement != null && mText instanceof Spannable &&
-            mLayout != null) {
+        if (mMovement != null && mText instanceof Spannable && mLayout != null) {
+            
+            if (action == MotionEvent.ACTION_DOWN) {
+                mScrolled = false;
+            }
+            
             boolean moved = mMovement.onTouchEvent(this, (Spannable) mText, event);
 
             if (mText instanceof Editable && onCheckIsTextEditor()) {
-                if (event.getAction() == MotionEvent.ACTION_UP && isFocused()) {
+                if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(this, 0);
@@ -5392,6 +5785,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return superResult;
     }
 
+    @Override
+    public void cancelLongPress() {
+        super.cancelLongPress();
+        mScrolled = true;
+    }
+    
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
         if (mMovement != null && mText instanceof Spannable &&
@@ -5568,28 +5967,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
         case KeyEvent.KEYCODE_A:
             if (canSelectAll()) {
-                return onMenu(ID_SELECT_ALL);
+                return onTextContextMenuItem(ID_SELECT_ALL);
             }
 
             break;
 
         case KeyEvent.KEYCODE_X:
             if (canCut()) {
-                return onMenu(ID_CUT);
+                return onTextContextMenuItem(ID_CUT);
             }
 
             break;
 
         case KeyEvent.KEYCODE_C:
             if (canCopy()) {
-                return onMenu(ID_COPY);
+                return onTextContextMenuItem(ID_COPY);
             }
 
             break;
 
         case KeyEvent.KEYCODE_V:
             if (canPaste()) {
-                return onMenu(ID_PASTE);
+                return onTextContextMenuItem(ID_PASTE);
             }
 
             break;
@@ -5655,6 +6054,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    /**
+     * Returns a word to add to the dictionary from the context menu,
+     * or null if there is no cursor or no word at the cursor.
+     */
+    private String getWordForDictionary() {
+        int end = getSelectionEnd();
+
+        if (end < 0) {
+            return null;
+        }
+
+        int start = end;
+        char c;
+        int len = mText.length();
+
+        while (start > 0 && (((c = mTransformed.charAt(start - 1)) == '\'') ||
+                             (Character.isLetterOrDigit(c)))) {
+            start--;
+        }
+
+        while (end < len && (((c = mTransformed.charAt(end)) == '\'') ||
+                             (Character.isLetterOrDigit(c)))) {
+            end++;
+        }
+
+        if (start == end) {
+            return null;
+        }
+
+        return TextUtils.substring(mTransformed, start, end);
+    }
+
     @Override
     protected void onCreateContextMenu(ContextMenu menu) {
         super.onCreateContextMenu(menu);
@@ -5696,7 +6127,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     setOnMenuItemClickListener(handler);
                 added = true;
             } else {
-                menu.add(0, ID_SELECT_TEXT, 0,
+                menu.add(0, ID_START_SELECTING_TEXT, 0,
                         com.android.internal.R.string.selectText).
                     setOnMenuItemClickListener(handler);
                 added = true;
@@ -5755,11 +6186,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null && imm.isActive(this)) {
-            menu.add(1, ID_SWITCH_IME, 0, com.android.internal.R.string.inputMethod).
+        if (isInputMethodTarget()) {
+            menu.add(1, ID_SWITCH_INPUT_METHOD, 0, com.android.internal.R.string.inputMethod).
                     setOnMenuItemClickListener(handler);
             added = true;
+        }
+
+        String word = getWordForDictionary();
+        if (word != null) {
+            menu.add(1, ID_ADD_TO_DICTIONARY, 0,
+                     getContext().getString(com.android.internal.R.string.addToDictionary, word)).
+                    setOnMenuItemClickListener(handler);
+            added = true;
+
         }
 
         if (added) {
@@ -5767,22 +6206,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private static final int ID_SELECT_ALL = com.android.internal.R.id.selectAll;
-    private static final int ID_SELECT_TEXT = com.android.internal.R.id.selectText;
-    private static final int ID_STOP_SELECTING_TEXT = com.android.internal.R.id.stopSelectingText;
-    private static final int ID_CUT = com.android.internal.R.id.cut;
-    private static final int ID_COPY = com.android.internal.R.id.copy;
-    private static final int ID_PASTE = com.android.internal.R.id.paste;
-    private static final int ID_COPY_URL = com.android.internal.R.id.copyUrl;
-    private static final int ID_SWITCH_IME = com.android.internal.R.id.inputMethod;
+    /**
+     * Returns whether this text view is a current input method target.  The
+     * default implementation just checks with {@link InputMethodManager}.
+     */
+    public boolean isInputMethodTarget() {
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        return imm != null && imm.isActive(this);
+    }
+    
+    private static final int ID_SELECT_ALL = android.R.id.selectAll;
+    private static final int ID_START_SELECTING_TEXT = android.R.id.startSelectingText;
+    private static final int ID_STOP_SELECTING_TEXT = android.R.id.stopSelectingText;
+    private static final int ID_CUT = android.R.id.cut;
+    private static final int ID_COPY = android.R.id.copy;
+    private static final int ID_PASTE = android.R.id.paste;
+    private static final int ID_COPY_URL = android.R.id.copyUrl;
+    private static final int ID_SWITCH_INPUT_METHOD = android.R.id.switchInputMethod;
+    private static final int ID_ADD_TO_DICTIONARY = android.R.id.addToDictionary;
 
     private class MenuHandler implements MenuItem.OnMenuItemClickListener {
         public boolean onMenuItemClick(MenuItem item) {
-            return onMenu(item.getItemId());
+            return onTextContextMenuItem(item.getItemId());
         }
     }
 
-    private boolean onMenu(int id) {
+    /**
+     * Called when a context menu option for the text view is selected.  Currently
+     * this will be one of: {@link android.R.id#selectAll},
+     * {@link android.R.id#startSelectingText}, {@link android.R.id#stopSelectingText},
+     * {@link android.R.id#cut}, {@link android.R.id#copy},
+     * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
+     * or {@link android.R.id#switchInputMethod}.
+     */
+    public boolean onTextContextMenuItem(int id) {
         int selStart = getSelectionStart();
         int selEnd = getSelectionEnd();
 
@@ -5807,10 +6264,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (id) {
             case ID_SELECT_ALL:
                 Selection.setSelection((Spannable) mText, 0,
-                                        mText.length());
+                        mText.length());
                 return true;
 
-            case ID_SELECT_TEXT:
+            case ID_START_SELECTING_TEXT:
                 MetaKeyKeyListener.startSelecting(this, (Spannable) mText);
                 return true;
 
@@ -5865,11 +6322,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 return true;
 
-            case ID_SWITCH_IME:
+            case ID_SWITCH_INPUT_METHOD:
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
                     imm.showInputMethodPicker();
                 }
+                return true;
+
+            case ID_ADD_TO_DICTIONARY:
+                String word = getWordForDictionary();
+
+                if (word != null) {
+                    Intent i = new Intent("com.android.settings.USER_DICTIONARY_INSERT");
+                    i.putExtra("word", word);
+                    getContext().startActivity(i);
+                }
+
                 return true;
             }
 
@@ -5884,8 +6352,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         return false;
     }
-
-    private boolean mEatTouchRelease = false;
 
     @ViewDebug.ExportedProperty
     private CharSequence            mText;

@@ -77,7 +77,9 @@ public class TouchDelegate {
      * actual extent.
      */
     public static final int TO_RIGHT = 8;
-    
+
+    private int mSlop;
+
     /**
      * Constructor
      * 
@@ -87,10 +89,10 @@ public class TouchDelegate {
      */
     public TouchDelegate(Rect bounds, View delegateView) {
         mBounds = bounds;
-        
-        int slop = ViewConfiguration.getTouchSlop();
+
+        mSlop = ViewConfiguration.get(delegateView.getContext()).getScaledTouchSlop();
         mSlopBounds = new Rect(bounds);
-        mSlopBounds.inset(-slop, -slop);
+        mSlopBounds.inset(-mSlop, -mSlop);
         mDelegateView = delegateView;
     }
 
@@ -141,7 +143,7 @@ public class TouchDelegate {
             } else {
                 // Offset event coordinates to be outside the target view (in case it does
                 // something like tracking pressed state)
-                int slop = ViewConfiguration.getTouchSlop();
+                int slop = mSlop;
                 event.setLocation(-(slop * 2), -(slop * 2));
             }
             handled = delegateView.dispatchTouchEvent(event);

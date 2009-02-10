@@ -15,26 +15,22 @@
  */
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * Parses and analyzes a log, pulling our PRELOAD information. If you have
  * an emulator or device running in the background, this class will use it
  * to measure and record the memory usage of each class.
+ * 
+ * TODO: Should analyze lines and select substring dynamically (instead of hardcoded 19)
  */
 public class Compile {
 
-    public static void main(String[] args)
-            throws IOException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException {
+    public static void main(String[] args) throws IOException {
         if (args.length != 2) {
             System.err.println("Usage: Compile [log file] [output file]");
             System.exit(0);
@@ -48,10 +44,17 @@ public class Compile {
                 new FileInputStream(args[0])));
 
         String line;
+        int lineNumber = 0;
         while ((line = in.readLine()) != null) {
+            lineNumber++;
             if (line.startsWith("I/PRELOAD")) {
-                line = line.substring(19);
-                records.add(new Record(line));
+                try {
+                    String clipped = line.substring(19);
+                    records.add(new Record(clipped, lineNumber));
+                } catch (RuntimeException e) {
+                    throw new RuntimeException(
+                            "Exception while recording line " + lineNumber + ": " + line, e);
+                }
             }
         }
 

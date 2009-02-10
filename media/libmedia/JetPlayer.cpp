@@ -214,12 +214,15 @@ int JetPlayer::render() {
             }
             p += count * pLibConfig->numChannels;
             num_output += count * pLibConfig->numChannels * sizeof(EAS_PCM);
+            
+             // send events that were generated (if any) to the event callback
+            fireEventsFromJetQueue();
         }
 
         // update playback state
         //LOGV("JetPlayer::render(): updating state");
         JET_Status(mEasData, &mJetStatus);
-        fireEventOnStatusChange();
+        fireUpdateOnStatusChange();
         mPaused = mJetStatus.paused;
 
         mMutex.unlock(); // UNLOCK ]]]]]]]] -----------------------------------
@@ -261,9 +264,9 @@ threadExit:
 
 
 //-------------------------------------------------------------------------------------------------
-// fire up an event if any of the status fields has changed
+// fire up an update if any of the status fields has changed
 // precondition: mMutex locked
-void JetPlayer::fireEventOnStatusChange()
+void JetPlayer::fireUpdateOnStatusChange()
 {
     if(  (mJetStatus.currentUserID      != mPreviousJetStatus.currentUserID)
        ||(mJetStatus.segmentRepeatCount != mPreviousJetStatus.segmentRepeatCount) ) {
@@ -303,9 +306,31 @@ void JetPlayer::fireEventOnStatusChange()
 
 
 //-------------------------------------------------------------------------------------------------
-int JetPlayer::openFile(const char* path)
+// fire up all the JET events in the JET engine queue (until the queue is empty)
+// precondition: mMutex locked
+void JetPlayer::fireEventsFromJetQueue()
 {
-    LOGV("JetPlayer::openFile(): path=%s", path);
+    if(!mEventCallback) {
+        // no callback, just empty the event queue
+        while (JET_GetEvent(mEasData, NULL, NULL)) { }
+        return;
+    }
+    
+    EAS_U32 rawEvent;
+    while (JET_GetEvent(mEasData, &rawEvent, NULL)) {
+        mEventCallback(
+            JetPlayer::JET_EVENT,
+            rawEvent,
+            -1,
+            mJavaJetPlayerRef);
+    }
+}
+
+
+//-------------------------------------------------------------------------------------------------
+int JetPlayer::loadFromFile(const char* path)
+{
+    LOGV("JetPlayer::loadFromFile(): path=%s", path);
 
     Mutex::Autolock lock(mMutex);
 
@@ -325,6 +350,29 @@ int JetPlayer::openFile(const char* path)
         mState = EAS_STATE_OPEN;
     return( result );
 }
+
+
+//-------------------------------------------------------------------------------------------------
+int JetPlayer::loadFromFD(const int fd, const long long offset, const long long length)
+{
+    LOGV("JetPlayer::loadFromFD(): fd=%d offset=%lld length=%lld", fd, offset, length);
+    
+    Mutex::Autolock lock(mMutex);
+
+    mEasJetFileLoc = (EAS_FILE_LOCATOR) malloc(sizeof(EAS_FILE));
+    mEasJetFileLoc->fd = fd;
+    mEasJetFileLoc->offset = offset;
+    mEasJetFileLoc->length = length;
+    mEasJetFileLoc->path = NULL;
+    
+    EAS_RESULT result = JET_OpenFile(mEasData, mEasJetFileLoc);
+    if(result != EAS_SUCCESS)
+        mState = EAS_STATE_ERROR;
+    else
+        mState = EAS_STATE_OPEN;
+    return( result );
+}
+
 
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::closeFile()
@@ -348,7 +396,7 @@ int JetPlayer::play()
     JET_Status(mEasData, &mJetStatus);
     this->dumpJetStatus(&mJetStatus);
     
-    fireEventOnStatusChange();
+    fireUpdateOnStatusChange();
 
     // wake up render thread
     LOGV("JetPlayer::play(): wakeup render thread");
@@ -368,7 +416,7 @@ int JetPlayer::pause()
 
     JET_Status(mEasData, &mJetStatus);
     this->dumpJetStatus(&mJetStatus);
-    fireEventOnStatusChange();
+    fireUpdateOnStatusChange();
 
 
     return result;
@@ -405,6 +453,14 @@ int JetPlayer::triggerClip(int clipId)
     LOGV("JetPlayer::triggerClip clipId=%d", clipId);
     Mutex::Autolock lock(mMutex);
     return JET_TriggerClip(mEasData, clipId);
+}
+
+//-------------------------------------------------------------------------------------------------
+int JetPlayer::clearQueue()
+{
+    LOGV("JetPlayer::clearQueue");
+    Mutex::Autolock lock(mMutex);
+    return JET_Clear_Queue(mEasData);
 }
 
 //-------------------------------------------------------------------------------------------------

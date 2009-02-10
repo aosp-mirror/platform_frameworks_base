@@ -97,10 +97,6 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
         LOGE("Unable to marshal AudioFlinger");
         return;
     }
-    if (AudioSystem::getOutputFrameCount(&mBufferSize) != NO_ERROR) {
-        LOGE("Unable to marshal AudioFlinger");
-        return;
-    }
     mStreamType = streamType;
     mVolume = volume;
     mpAudioTrack = 0;
@@ -275,9 +271,9 @@ bool ToneGenerator::initAudioTrack() {
         mpAudioTrack = 0;
     }
 
-   // Open audio track in mono, PCM 16bit, default sampling rate, 2 buffers of
+   // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack
-            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, NUM_PCM_BUFFERS*mBufferSize, 0, audioCallback, this, mBufferSize);
+            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, 0, 0, audioCallback, this, 0);
 
     if (mpAudioTrack == 0) {
         LOGE("AudioTrack allocation failed");

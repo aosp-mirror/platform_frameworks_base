@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Printer;
 
 /**
  * An EditorInfo describes several attributes of a text editing object
@@ -21,7 +22,7 @@ public class EditorInfo implements InputType, Parcelable {
      * @see #TYPE_MASK_VARIATION
      * @see #TYPE_MASK_FLAGS
      */
-    public int inputType = TYPE_CLASS_TEXT;
+    public int inputType = TYPE_NULL;
 
     /**
      * A string supplying additional information about the content type that
@@ -71,6 +72,26 @@ public class EditorInfo implements InputType, Parcelable {
     public CharSequence label;
     
     /**
+     * Name of the package that owns this editor.
+     */
+    public String packageName;
+    
+    /**
+     * Identifier for the editor's field.  This is optional, and may be
+     * 0.  By default it is filled in with the result of
+     * {@link android.view.View#getId() View.getId()} on the View that
+     * is being edited.
+     */
+    public int fieldId;
+    
+    /**
+     * Additional name for the editor's field.  This can supply additional
+     * name information for the field.  By default it is null.  The actual
+     * contents have no meaning.
+     */
+    public String fieldName;
+    
+    /**
      * Any extra data to supply to the input method.  This is for extended
      * communication with specific input methods; the name fields in the
      * bundle should be scoped (such as "com.mydomain.im.SOME_FIELD") so
@@ -79,6 +100,24 @@ public class EditorInfo implements InputType, Parcelable {
      * attribute of a TextView.
      */
     public Bundle extras;
+    
+    /**
+     * Write debug output of this object.
+     */
+    public void dump(Printer pw, String prefix) {
+        pw.println(prefix + "inputType=0x" + Integer.toHexString(inputType)
+                + " privateContentType=" + privateContentType);
+        pw.println(prefix + "initialSelStart=" + initialSelStart
+                + " initialSelEnd=" + initialSelEnd
+                + " initialCapsMode=0x"
+                + Integer.toHexString(initialCapsMode));
+        pw.println(prefix + "hintText=" + hintText
+                + " label=" + label);
+        pw.println(prefix + "packageName=" + packageName
+                + " fieldId=" + fieldId
+                + " fieldName=" + fieldName);
+        pw.println(prefix + "extras=" + extras);
+    }
     
     /**
      * Used to package this object into a {@link Parcel}.
@@ -94,6 +133,9 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(initialCapsMode);
         TextUtils.writeToParcel(hintText, dest, flags);
         TextUtils.writeToParcel(label, dest, flags);
+        dest.writeString(packageName);
+        dest.writeInt(fieldId);
+        dest.writeString(fieldName);
         dest.writeBundle(extras);
     }
 
@@ -110,6 +152,9 @@ public class EditorInfo implements InputType, Parcelable {
             res.initialCapsMode = source.readInt();
             res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            res.packageName = source.readString();
+            res.fieldId = source.readInt();
+            res.fieldName = source.readString();
             res.extras = source.readBundle();
             return res;
         }

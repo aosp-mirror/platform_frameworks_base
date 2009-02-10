@@ -65,6 +65,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     public BatteryStatsImpl getStatistics() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
         return mStats;
     }
     
@@ -82,17 +84,59 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStartSensor(int uid, int sensor) {
+    public void noteStartSensor(int uid, String name, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStartSensor(sensor);
+            mStats.getUidStatsLocked(uid).noteStartSensor(name, sensor);
         }
     }
     
-    public void noteStopSensor(int uid, int sensor) {
+    public void noteStopSensor(int uid, String name, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.getUidStatsLocked(uid).noteStopSensor(sensor);
+            mStats.getUidStatsLocked(uid).noteStopSensor(name, sensor);
+        }
+    }
+    
+    public void noteStartGps(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStartGps(uid);
+        }
+    }
+    
+    public void noteStopGps(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStopGps(uid);
+        }
+    }
+    
+    public void noteRequestGpsOn(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteRequestGpsOn(uid);
+        }
+    }
+    
+    public void noteRequestGpsOff(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteRequestGpsOff(uid);
+        }
+    }
+    
+    public void noteScreenOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScreenOn();
+        }
+    }
+    
+    public void noteScreenOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScreenOff();
         }
     }
 
@@ -106,10 +150,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     public long getAwakeTimeBattery() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
         return mStats.getAwakeTimeBattery();
     }
 
     public long getAwakeTimePlugged() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
         return mStats.getAwakeTimePlugged();
     }
 
@@ -117,7 +165,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
         }
-        mContext.enforcePermission(android.Manifest.permission.BATTERY_STATS,
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
     

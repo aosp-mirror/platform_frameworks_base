@@ -741,7 +741,7 @@ public class SensorManager extends IRotationWatcher.Stub
      */
     @Deprecated
     public void unregisterListener(SensorListener listener) {
-        unregisterListener(listener, SENSOR_ALL);
+        unregisterListener(listener, SENSOR_ALL | SENSOR_ORIENTATION_RAW);
     }
 
     /**
@@ -829,9 +829,11 @@ public class SensorManager extends IRotationWatcher.Stub
                     }
                 }
 
+                String name = sensor.getName();
+                int handle = sensor.getHandle();
                 if (l == null) {
                     l = new ListenerDelegate(listener, sensor, handler);
-                    result = mSensorService.enableSensor(l, sensor.getHandle(), delay);
+                    result = mSensorService.enableSensor(l, name, handle, delay);
                     if (result) {
                         sListeners.add(l);
                         sListeners.notify();
@@ -840,7 +842,7 @@ public class SensorManager extends IRotationWatcher.Stub
                         sSensorThread.startLocked(mSensorService);
                     }
                 } else {
-                    result = mSensorService.enableSensor(l, sensor.getHandle(), delay);
+                    result = mSensorService.enableSensor(l, name, handle, delay);
                     if (result) {
                         l.addSensor(sensor);
                     }
@@ -861,8 +863,9 @@ public class SensorManager extends IRotationWatcher.Stub
                     ListenerDelegate l = sListeners.get(i);
                     if (l.getListener() == listener) {
                         // disable these sensors
+                        String name = sensor.getName();
                         int handle = sensor.getHandle();
-                        mSensorService.enableSensor(l, handle, SENSOR_DISABLE);
+                        mSensorService.enableSensor(l, name, handle, SENSOR_DISABLE);
                         // if we have no more sensors enabled on this listener,
                         // take it off the list.
                         if (l.removeSensor(sensor) == 0) {
@@ -886,7 +889,9 @@ public class SensorManager extends IRotationWatcher.Stub
                     if (l.getListener() == listener) {
                         // disable all sensors for this listener
                         for (Sensor sensor : l.getSensors()) {
-                            mSensorService.enableSensor(l, sensor.getHandle(), SENSOR_DISABLE);
+                            String name = sensor.getName();
+                            int handle = sensor.getHandle();
+                            mSensorService.enableSensor(l, name, handle, SENSOR_DISABLE);
                         }
                         sListeners.remove(i);
                         break;

@@ -16,14 +16,16 @@
 
 package com.android.dumprendertree;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
-import java.util.Stack;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -38,14 +40,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.os.*;
-import android.test.TestRecorder;
 
-// SQLite3 in android has a bunch of bugs which
-// is causing TestRecorder to not record the results
-// properly. This class is a wrapper around it and records
-// results in a file as well.
-class TestRecorderV2 extends TestRecorder {
-    @Override
+// TestRecorder creates two files, one for passing tests
+// and another for failing tests and writes the paths to
+// layout tests one line at a time. TestRecorder does not
+// have ability to clear the results.
+class TestRecorder {
     public void passed(String layout_file) {
       try {
           mBufferedOutputPassedStream.write(layout_file.getBytes());
@@ -54,72 +54,68 @@ class TestRecorderV2 extends TestRecorder {
       } catch(Exception e) {
           e.printStackTrace();
       }
-      super.passed(layout_file);
    }
 
-    @Override
     public void failed(String layout_file, String reason) {
       try {
           mBufferedOutputFailedStream.write(layout_file.getBytes());
+          mBufferedOutputFailedStream.write(" : ".getBytes());
+          mBufferedOutputFailedStream.write(reason.getBytes());
           mBufferedOutputFailedStream.write('\n');
           mBufferedOutputFailedStream.flush();
       } catch(Exception e) {
           e.printStackTrace();
       }
-      super.failed(layout_file, reason);
     }
 
-    public TestRecorderV2() {
-      super();
+    public void nontext(String layout_file) {
       try {
-      File resultsPassedFile = new File("/sdcard/layout_test_presults.txt");
-      File resultsFailedFile = new File("/sdcard/layout_test_fresults.txt");
+          mBufferedOutputNontextStream.write(layout_file.getBytes());
+          mBufferedOutputNontextStream.write('\n');
+          mBufferedOutputNontextStream.flush();
+      } catch(Exception e) {
+          e.printStackTrace();
+      }
+    }
+
+    public TestRecorder(boolean resume) {
+      try {
+      File resultsPassedFile = new File("/sdcard/layout_tests_passed.txt");
+      File resultsFailedFile = new File("/sdcard/layout_tests_failed.txt");
+      File resultsNontextFile = new File("/sdcard/layout_tests_nontext.txt");
  
       mBufferedOutputPassedStream =
-          new BufferedOutputStream(new FileOutputStream(resultsPassedFile, true));
+          new BufferedOutputStream(new FileOutputStream(resultsPassedFile, resume));
       mBufferedOutputFailedStream =
-          new BufferedOutputStream(new FileOutputStream(resultsFailedFile, true));
- 
+          new BufferedOutputStream(new FileOutputStream(resultsFailedFile, resume));
+      mBufferedOutputNontextStream =
+          new BufferedOutputStream(new FileOutputStream(resultsNontextFile, resume));
       } catch (Exception e) {
           e.printStackTrace();
       }
     }
-    
-    protected void finalize() throws Throwable {
-        mBufferedOutputPassedStream.flush();
-        mBufferedOutputFailedStream.flush();
-        mBufferedOutputPassedStream.close();
-        mBufferedOutputFailedStream.close();
-    }
 
-    private static BufferedOutputStream mBufferedOutputPassedStream;
-    private static BufferedOutputStream mBufferedOutputFailedStream;
+    public void close() {
+        try {
+            mBufferedOutputPassedStream.close();
+            mBufferedOutputFailedStream.close();
+            mBufferedOutputNontextStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private BufferedOutputStream mBufferedOutputPassedStream;
+    private BufferedOutputStream mBufferedOutputFailedStream;
+    private BufferedOutputStream mBufferedOutputNontextStream;
 }
 
 public class HTMLHostActivity extends Activity 
      implements LayoutTestController {
- 
-    private TestRecorderV2 mResultRecorder = new TestRecorderV2();
-    private HTMLHostCallbackInterface mCallback = null;
-    private CallbackProxy mCallbackProxy;
-
-    public class FileEntry {
-        public FileEntry(String path, int index) {
-            mPath = path; mIndex=index;
-        }
-        String mPath;
-        int mIndex;
-    }
 
     public class AsyncHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_DUMP) {
-                this.removeMessages(MSG_TIMEOUT);
-                mTimedOut = false;
-                requestWebKitData();
-                return;
-            } else if (msg.what == MSG_TIMEOUT) {
+            if (msg.what == MSG_TIMEOUT) {
                 mTimedOut = true;
                 requestWebKitData();
                 return;
@@ -127,21 +123,24 @@ public class HTMLHostActivity extends Activity
                 HTMLHostActivity.this.dump(mTimedOut, (String)msg.obj);
                 return;
             }
-            
+
             super.handleMessage(msg);
         }
-
-        void requestWebKitData() {
-            Message callback = obtainMessage(MSG_WEBKIT_DATA);
-            if (dumpAsText) { 
-                mWebView.documentAsText(callback);
-            } else {
-                mWebView.externalRepresentation(callback);
-            }
-        }
-
     }
 
+    public void requestWebKitData() {
+        Message callback = mHandler.obtainMessage(MSG_WEBKIT_DATA);
+        
+        if (mRequestedWebKitData)
+            throw new AssertionError("Requested webkit data twice: " + mWebView.getUrl());
+        
+        mRequestedWebKitData = true;
+        if (mDumpAsText) { 
+            mWebView.documentAsText(callback);
+        } else {
+            mWebView.externalRepresentation(callback);
+        }
+    }
     // Activity methods
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -153,8 +152,9 @@ public class HTMLHostActivity extends Activity
         mWebView = new WebView(this);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebChromeClient(mChromeClient);
-        eventSender = new WebViewEventSender(mWebView);
-        mCallbackProxy = new CallbackProxy(eventSender, this);
+        mEventSender = new WebViewEventSender(mWebView);
+        mCallbackProxy = new CallbackProxy(mEventSender, this);
+        mFinishedRunning = false;
 
         mWebView.addJavascriptInterface(mCallbackProxy, "layoutTestController");
         mWebView.addJavascriptInterface(mCallbackProxy, "eventSender");
@@ -168,32 +168,99 @@ public class HTMLHostActivity extends Activity
         super.onRestoreInstanceState(savedInstanceState);
     }
 
+    private void getTestList() {
+        // Read test list.
+        try {
+            BufferedReader inReader = new BufferedReader(new FileReader(LAYOUT_TESTS_LIST_FILE));
+            String line = inReader.readLine();
+            while (line != null) {
+                if (line.startsWith(mTestPathPrefix))
+                    mTestList.add(line);
+                line = inReader.readLine();
+            }
+            inReader.close();
+            Log.v(LOGTAG, "Test list has " + mTestList.size() + " test(s).");
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Error while reading test list : " + e.getMessage());
+        }
+    }
+    
+    private void resumeTestList() {
+        // read out the test name it stoped last time.
+        try {
+            BufferedReader inReader = new BufferedReader(new FileReader(TEST_STATUS_FILE));
+            String line = inReader.readLine();
+            for (int i = 0; i < mTestList.size(); i++) {
+                if (mTestList.elementAt(i).equals(line)) {
+                    mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
+                    break;
+                }
+            }
+            inReader.close();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Error reading " + TEST_STATUS_FILE);
+        }
+    }
+    
+    private void clearTestStatus() {
+        // Delete TEST_STATUS_FILE
+        try {
+            File f = new File(TEST_STATUS_FILE);
+            if (f.delete())
+                Log.v(LOGTAG, "Deleted " + TEST_STATUS_FILE);
+            else
+                Log.e(LOGTAG, "Fail to delete " + TEST_STATUS_FILE);
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Fail to delete " + TEST_STATUS_FILE + " : " + e.getMessage());
+        }
+    }
+    
+    private void updateTestStatus(String s) {
+        // Write TEST_STATUS_FILE
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(TEST_STATUS_FILE));
+            bos.write(s.getBytes());
+            bos.close();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Cannot update file " + TEST_STATUS_FILE);
+        }
+    }
+    
     protected void onResume() {
         super.onResume();
-        if (mProcessStack == null || mProcessStack.isEmpty() ) {
-            mOutstandingLoads = 0;
-            dumpAsText = false;
-            pageComplete = false;
-
-            mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-
-            mFinishedStack = new Stack();
-
+        if (mTestList == null)
+            mTestList = new Vector<String>();
+        
+        if (mTestList.isEmpty()) {
+            // Read settings
             Intent intent = getIntent();
-            if (intent.getData() != null) {
-                File f = new File(intent.getData().toString());
+            mTestPathPrefix = intent.getStringExtra(TEST_PATH_PREFIX);
+            mSingleTestMode = intent.getBooleanExtra(SINGLE_TEST_MODE, false);
+            boolean resume = intent.getBooleanExtra(RESUME_FROM_CRASH, false);
+            mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 8000);
+            
+            mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+            
+            if (mTestPathPrefix == null)
+                throw new AssertionError("mTestPathPrefix cannot be null");
+            
+            Log.v(LOGTAG, "Run tests with prefix: " + mTestPathPrefix);
 
-                if (f.isDirectory()) {
-                    mProcessStack = new Vector();
-                    mProcessStack.add(new FileEntry(intent.getData().toString(), 0));
-                    Log.v(LOGTAG, "Initial dir: "+intent.getData().toString());
-                    loadNextPage();
-                } else {
-                    mCurrentFile = intent.getData().toString();
-                    mWebView.loadUrl("file://"+intent.getData().toString());
-                }
-
+            mResultRecorder = new TestRecorder(resume);
+            
+            if (!resume)
+                clearTestStatus();
+            
+            if (!mSingleTestMode) {
+                getTestList();
+                if (resume)
+                    resumeTestList();
+            } else {
+                mTestList.add(mTestPathPrefix);
             }
+            
+            if (!mTestList.isEmpty())
+                runTestAtIndex(0);
             else
                 mWebView.loadUrl("about:");
         }
@@ -206,8 +273,16 @@ public class HTMLHostActivity extends Activity
 
     protected void onDestroy() {
         super.onDestroy();
+        mResultRecorder.close();
         mWebView.destroy();
         mWebView = null;
+    }
+    
+    public void onLowMemory() {
+        super.onLowMemory();
+        // Simulate a crash
+        Log.e(LOGTAG, "Low memory, killing self");
+        System.exit(1);
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -216,82 +291,51 @@ public class HTMLHostActivity extends Activity
         return super.dispatchKeyEvent(event);
     }
 
-    // Functions
-    
-    protected void loadNextPage() {
-        dumpAsText = false;
-        pageComplete = false;
-        dumpTitleChanges = false;
-        eventSender.resetMouse();
-        while (!mProcessStack.isEmpty()) {
-            FileEntry fe = (FileEntry)mProcessStack.remove(0);
-            if (fe.mIndex == 0) {
-                System.out.println();
-                System.out.print(fe.mPath);
-            }
-            Log.v(LOGTAG, "Processing dir: "+fe.mPath+" size: "+mProcessStack.size());
-            File f = new File(fe.mPath);
-            String [] files = f.list();
-            for (int i = fe.mIndex; i < files.length; i++) {
-                if (FileFilter.ignoreTest(files[i])) {
-                    continue;
-                }
-                File c = new File(f.getPath(), files[i]);
-                if (c.isDirectory()) {
-                    Log.v(LOGTAG, "Adding dir: "+fe.mPath+"/"+files[i]);
-                    mProcessStack.add(new FileEntry(fe.mPath+"/"+files[i], 0));
-                } else if (files[i].toLowerCase().endsWith("ml")) {
-                    mProcessStack.add(0, new FileEntry(fe.mPath, i+1));
-                    mCurrentFile = fe.mPath+"/"+files[i];
-                    Log.e(LOGTAG, "Processing: "+mCurrentFile);
-                    mWebView.loadUrl("file://"+mCurrentFile);
+    // Run a test at specified index in the test list.
+    // Stops activity if run out of tests.
+    protected void runTestAtIndex(int testIndex) {
+        mTestIndex = testIndex;
+        
+        resetTestStatus();
 
-                    // Create a timeout timer
-                    Message m = mHandler.obtainMessage(MSG_TIMEOUT);
-                    // Some tests can take up to 5secs to run.
-                    mHandler.sendMessageDelayed(m, 6000); 
-                    return;
-                }
-            }
-            Log.v(LOGTAG, "Finished dir: "+fe.mPath+" size: "+mProcessStack.size()); 
-        }
-        // If we got to here, then we must have finished completely
-        finished();
-    }
-    
-    public void scheduleDump() {
-        // Only schedule if we really are ready
-        if (waitToDump || mOutstandingLoads > 0 || mDumpRequested) {
+        if (testIndex == mTestList.size()) {
+            finished();
             return;
         }
-        mDumpRequested = true;
-        mHandler.obtainMessage(MSG_DUMP).sendToTarget();
+        String s = mTestList.elementAt(testIndex);
+        if (!mSingleTestMode)
+            updateTestStatus(s);
+        
+        Log.v(LOGTAG, "  Running test: "+s);
+        mWebView.loadUrl("file://"+s);
+        
+        if (!mSingleTestMode) {
+            // Create a timeout timer
+            Message m = mHandler.obtainMessage(MSG_TIMEOUT);
+            mHandler.sendMessageDelayed(m, mTimeoutInMillis);
+        }
     }
-    
+
     // Dump the page
     public void dump(boolean timeout, String webkitData) {
-        mDumpRequested = false;
-        System.out.print('.');
-
-        // remove the extension
-        String resultFile = mCurrentFile.substring(0, mCurrentFile.lastIndexOf('.'));
-
-        // store the finished file on the stack so that we can do a diff at the end.
-        mFinishedStack.push(resultFile);
+        String currentTest = mTestList.elementAt(mTestIndex);
+        String resultFile = currentTest.substring(0, currentTest.lastIndexOf('.'));
 
         // dumpAsText version can be directly compared to expected results
-        if (dumpAsText) {
+        if (mDumpAsText) {
             resultFile += "-results.txt";
         } else {
             resultFile += "-android-results.txt";
         }
+
         try {
             FileOutputStream os = new FileOutputStream(resultFile);
             if (timeout) {
-                Log.i("Layout test: Timeout", resultFile);
-                os.write("**Test timeout\n".getBytes());
+                Log.w("Layout test: Timeout", resultFile);
+                os.write(TIMEOUT_STR.getBytes());
+                os.write('\n');
             }
-            if (dumpTitleChanges)
+            if (mDumpTitleChanges)
                 os.write(mTitleChanges.toString().getBytes());
             if (mDialogStrings != null)
                 os.write(mDialogStrings.toString().getBytes());
@@ -305,18 +349,15 @@ public class HTMLHostActivity extends Activity
             ex.printStackTrace();
         }
 
-        if (mProcessStack != null)
-            loadNextPage();
-        else
-            finished();
+        processResult(timeout, currentTest);
+        runTestAtIndex(mTestIndex + 1);
     }
 
     // Wrap up
     public void failedCase(String file, String reason) {
-        Log.i("Layout test:", file + " failed" + reason);
+        Log.w("Layout test: ", file + " failed " + reason);
         mResultRecorder.failed(file, reason);
- 
-        file = file + ".html";
+
         String bugNumber = FileFilter.isKnownBug(file);
         if (bugNumber != null) {
             System.out.println("FAIL known:"+bugNumber+ " "+file+reason);
@@ -327,13 +368,11 @@ public class HTMLHostActivity extends Activity
         }
         System.out.println("FAIL: "+file+reason);        
     }
- 
+
     public void passedCase(String file) {
-        // Add the result to the sqlite database
-        Log.i("Layout test:", file + " passed");
+        Log.v("Layout test:", file + " passed");
         mResultRecorder.passed(file);
 
-        file = file + ".html";
         String bugNumber = FileFilter.isKnownBug(file);
         if (bugNumber != null) {
             System.out.println("Bug Fixed: "+bugNumber+ " "+file);
@@ -345,90 +384,105 @@ public class HTMLHostActivity extends Activity
             return;
         }
     }
+
+    public void nontextCase(String file) {
+        Log.v("Layout test:", file + " nontext");
+        mResultRecorder.nontext(file);
+    }
  
     public void setCallback(HTMLHostCallbackInterface callback) {
         mCallback = callback;
     }
-        
-    public void finished() {
-        int passed = 0;
-        while (!mFinishedStack.empty()) {
-            Log.v(LOGTAG, "Comparing dump and reference");
-            String file = (String)mFinishedStack.pop();
 
-            // Only check results that we can check, ie dumpAsText results
-            String dumpFile = file + "-results.txt";
-            File f = new File(dumpFile);
-            if (f.exists()) {
-                try {
-                    FileInputStream fr = new FileInputStream(file+"-results.txt");
-                    FileInputStream fe = new FileInputStream(file+"-expected.txt");
-                    
-                    mResultRecorder.started(file);
-                    
-                    // If the length is different then they are different
-                    int diff = fe.available() - fr.available();
-                    if (diff > 1 || diff < 0) {
-                        failedCase(file, " different length");
-                        fr.close();
-                        fe.close();
-                        
-                        mResultRecorder.finished(file);                        
-                        continue;
-                    }
-                    byte[] br = new byte[fr.available()];
-                    byte[] be = new byte[fe.available()];
-                    fr.read(br);
-                    fe.read(be);
-                    boolean fail = false;
-                    for (int i = 0; i < br.length; i++) {
-                        if (br[i] != be[i]) {
-                            failedCase(file, "  @offset: "+i);
-                            fail = true;
-                            break;
-                        }
-                    }
-                    if (br.length != be.length && be[be.length-1] == '\n') {
-                        Log.d(LOGTAG, "Extra new line being ignore:" + file);
-                    }
+    public void processResult(boolean timeout, String test_path) {
+        Log.v(LOGTAG, "  Processing result: " + test_path);
+        // remove the extension
+        String short_file = test_path.substring(0, test_path.lastIndexOf('.'));
+        if (timeout) {
+            failedCase(test_path, "TIMEDOUT");
+            return;
+        }
+        // Only check results that we can check, ie dumpAsText results
+        String dumpFile = short_file + "-results.txt";
+        File f = new File(dumpFile);
+        if (f.exists()) {
+            try {
+                FileInputStream fr = new FileInputStream(short_file+"-results.txt");
+                FileInputStream fe = new FileInputStream(short_file+"-expected.txt");
+              
+                // If the length is different then they are different
+                int diff = fe.available() - fr.available();
+                if (diff > 1 || diff < 0) {
+                    failedCase(test_path, " different length");
                     fr.close();
                     fe.close();
-                    if (!fail) {
-                       passed++;
-                       passedCase(file);
-                    }
-                } catch (FileNotFoundException ex) {
-                    // TODO do something here
-                } catch (IOException ex) {
-                    // Failed on available() or read()
+                    return;
                 }
-                mResultRecorder.finished(file);
+                byte[] br = new byte[fr.available()];
+                byte[] be = new byte[fe.available()];
+                fr.read(br);
+                fe.read(be);
+                boolean fail = false;
+                for (int i = 0; i < br.length; i++) {
+                    if (br[i] != be[i]) {
+                        failedCase(test_path, "  @offset: "+i);
+                        fr.close();
+                        fe.close();
+                        return;
+                    }
+                }
+                if (br.length != be.length && be[be.length-1] == '\n') {
+                    Log.d(LOGTAG, "Extra new line being ignore:" + test_path);
+                }
+                fr.close();
+                fe.close();
+                passedCase(test_path);
+            } catch (FileNotFoundException ex) {
+              // TODO do something here
+            } catch (IOException ex) {
+              // Failed on available() or read()
             }
-        }                        
+            
+            return;
+        }
         
-        if (mCallback != null) {        
+        File nontext_result = new File(short_file + "-android-results.txt");
+        if (nontext_result.exists())
+            mResultRecorder.nontext(test_path);
+    }
+    
+    public void finished() {
+        if (mCallback != null) {
             mCallback.waitForFinish();
-        }  
-        
+        }
+
+        mFinishedRunning = true;
         finish();
     }
     
     // LayoutTestController Functions
     public void dumpAsText() {
-        dumpAsText = true;
-        String url = mWebView.getUrl();
-        Log.v(LOGTAG, "dumpAsText called:"+url);
-        if (url.length() > 60)
-            url = url.substring(60);
+        mDumpAsText = true;
+        if (mWebView != null) {
+            String url = mWebView.getUrl();
+            Log.v(LOGTAG, "dumpAsText called: "+url);
+        }
     }
 
     public void waitUntilDone() {
-        waitToDump = true;
+        mWaitUntilDone = true;
+        String url = mWebView.getUrl();
+        Log.v(LOGTAG, "waitUntilDone called: " + url);
     }
     public void notifyDone() {
-        waitToDump = false;
-        mChromeClient.onProgressChanged(mWebView, 100);
+        String url = mWebView.getUrl();
+        Log.v(LOGTAG, "notifyDone called: " + url);
+        if (mWaitUntilDone) {
+            mWaitUntilDone = false;
+            mChromeClient.onProgressChanged(mWebView, 100);
+        }
     }
+    
     public void display() {
         mWebView.invalidate();
     }
@@ -461,18 +515,17 @@ public class HTMLHostActivity extends Activity
     }
 
     public void dumpTitleChanges() {
-        if (!dumpTitleChanges) {
+        if (!mDumpTitleChanges) {
             mTitleChanges = new StringBuffer();
         }
-        dumpTitleChanges = true;
+        mDumpTitleChanges = true;
     }
 
     public void keepWebHistory() {
-        if (!keepWebHistory) {
+        if (!mKeepWebHistory) {
             mWebHistory = new Vector();
         }
-        keepWebHistory = true;
-
+        mKeepWebHistory = true;
     }
 
     public void queueBackNavigation(int howfar) {
@@ -491,7 +544,7 @@ public class HTMLHostActivity extends Activity
     }
 
     public void queueReload() {
-        mWebView.reload();      
+        mWebView.reload();
     }
 
     public void queueScript(String scriptToRunInCurrentContext) {
@@ -520,33 +573,36 @@ public class HTMLHostActivity extends Activity
     }
 
     public void testRepaint() {
-        mWebView.invalidate();     
+        mWebView.invalidate();
     }
 
     // Instrumentation calls this to find
     // if the activity has finished running the layout tests
+    // TODO(fqian): need to sync on mFinisheRunning
     public boolean hasFinishedRunning() {
-        if( mProcessStack == null || mFinishedStack == null)
-            return false;
-
-        if (mProcessStack.isEmpty() && mFinishedStack.empty()) {
-            return true;
-        }
-
-        return false;
+        return mFinishedRunning;
     }
-
+    
     private final WebChromeClient mChromeClient = new WebChromeClient() {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             if (newProgress == 100) {
-                pageComplete = true;
-                String url = mWebView.getUrl();
-                if (url != null) {
+                if (!mSingleTestMode && !mTimedOut && !mWaitUntilDone && !mRequestedWebKitData) {
+                    String url = mWebView.getUrl();
                     Log.v(LOGTAG, "Finished: "+ url);
-                    if (url.length() > 60)
-                        url = url.substring(60);
-                    scheduleDump();
+                    mHandler.removeMessages(MSG_TIMEOUT);
+                    requestWebKitData();
+                } else {
+                    String url = mWebView.getUrl();
+                    if (mSingleTestMode) {
+                        Log.v(LOGTAG, "Single test mode: " + url);
+                    } else if (mTimedOut) {
+                        Log.v(LOGTAG, "Timed out before finishing: " + url);
+                    } else if (mWaitUntilDone) {
+                        Log.v(LOGTAG, "Waiting for notifyDone: " + url);
+                    } else if (mRequestedWebKitData) {
+                        Log.v(LOGTAG, "Requested webkit data ready: " + url);
+                    }
                 }
             }
         }
@@ -556,7 +612,7 @@ public class HTMLHostActivity extends Activity
             if (title.length() > 30)
                 title = "..."+title.substring(title.length()-30);
             setTitle(title);
-            if (dumpTitleChanges) {
+            if (mDumpTitleChanges) {
                 mTitleChanges.append("TITLE CHANGED: ");
                 mTitleChanges.append(title);
                 mTitleChanges.append("\n");
@@ -572,36 +628,90 @@ public class HTMLHostActivity extends Activity
             mDialogStrings.append("ALERT: ");
             mDialogStrings.append(message);
             mDialogStrings.append('\n');
-            return false;
+            result.confirm();
+            return true;
+        }
+        
+        @Override
+        public boolean onJsConfirm(WebView view, String url, String message,
+                JsResult result) {
+            if (mDialogStrings == null) {
+                mDialogStrings = new StringBuffer();
+            }
+            mDialogStrings.append("CONFIRM: ");
+            mDialogStrings.append(message);
+            mDialogStrings.append('\n');
+            result.confirm();
+            return true;
+        }
+        
+        @Override
+        public boolean onJsPrompt(WebView view, String url, String message,
+                String defaultValue, JsPromptResult result) {
+            if (mDialogStrings == null) {
+                mDialogStrings = new StringBuffer();
+            }
+            mDialogStrings.append("PROMPT: ");
+            mDialogStrings.append(message);
+            mDialogStrings.append(", default text: ");
+            mDialogStrings.append(defaultValue);
+            mDialogStrings.append('\n');
+            result.confirm();
+            return true;
         }
     };
-
+    
+    private void resetTestStatus() {
+        mWaitUntilDone = false;
+        mDumpAsText = false;
+        mTimedOut = false;
+        mDumpTitleChanges = false;
+        mRequestedWebKitData = false;
+        mEventSender.resetMouse();
+    }
+    
+    private TestRecorder mResultRecorder;
+    private HTMLHostCallbackInterface mCallback = null;
+    private CallbackProxy mCallbackProxy;
+    
     private WebView mWebView;
-    private WebViewEventSender eventSender;
-    private Vector mProcessStack;
-    private Stack mFinishedStack;
-    static final String LOGTAG="DumpRenderTree";
-    private String mCurrentFile;
-    private int mOutstandingLoads;
+    private WebViewEventSender mEventSender;
+    
+    private Vector<String> mTestList;
+    private int mTestIndex;
+
+    private int mTimeoutInMillis;
+    private String mTestPathPrefix;
+    private boolean mSingleTestMode;
+    
     private AsyncHandler mHandler;
-    private boolean mDumpRequested;
-
-    private boolean dumpAsText;
-    private boolean waitToDump;
-    private boolean pageComplete;
-
-    private boolean dumpTitleChanges;
-    private StringBuffer mTitleChanges;
-
-    private StringBuffer mDialogStrings;
-
-    private boolean keepWebHistory;
-    private Vector mWebHistory;
+    private boolean mFinishedRunning;
 
     private boolean mTimedOut;
+    private boolean mRequestedWebKitData;
+    private boolean mDumpAsText;
+    private boolean mWaitUntilDone;
+    private boolean mDumpTitleChanges;
+    
+    private StringBuffer mTitleChanges;
+    private StringBuffer mDialogStrings;
 
-    static final int MSG_DUMP = 0;
-    static final int MSG_TIMEOUT = 1;
-    static final int MSG_WEBKIT_DATA = 2;
+    private boolean mKeepWebHistory;
+    private Vector mWebHistory;
 
+    static final String TIMEOUT_STR = "**Test timeout";
+    
+    static final int MSG_TIMEOUT = 0;
+    static final int MSG_WEBKIT_DATA = 1;
+
+    static final String LOGTAG="DumpRenderTree";
+
+    static final String LAYOUT_TESTS_ROOT = "/sdcard/android/layout_tests/";
+    static final String LAYOUT_TESTS_LIST_FILE = "/sdcard/layout_tests_list.txt";
+    static final String TEST_STATUS_FILE = "/sdcard/running_test.txt";
+    
+    static final String RESUME_FROM_CRASH = "ResumeFromCrash";
+    static final String TEST_PATH_PREFIX = "TestPathPrefix";
+    static final String TIMEOUT_IN_MILLIS = "TimeoutInMillis";
+    static final String SINGLE_TEST_MODE = "SingleTestMode";
 }

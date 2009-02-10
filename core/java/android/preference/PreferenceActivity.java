@@ -103,8 +103,6 @@ public abstract class PreferenceActivity extends ListActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-    
         setContentView(com.android.internal.R.layout.preference_list_content);
         
         mPreferenceManager = onCreatePreferenceManager();
@@ -214,6 +212,11 @@ public abstract class PreferenceActivity extends ListActivity implements
     public void setPreferenceScreen(PreferenceScreen preferenceScreen) {
         if (mPreferenceManager.setPreferences(preferenceScreen) && preferenceScreen != null) {
             postBindPreferences();
+            CharSequence title = getPreferenceScreen().getTitle();
+            // Set the title of the activity
+            if (title != null) {
+                setTitle(title);
+            }
         }
     }
     

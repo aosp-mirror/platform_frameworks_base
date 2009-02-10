@@ -471,34 +471,40 @@ public final class Downloads implements BaseColumns {
     public static final int STATUS_UNHANDLED_REDIRECT = 493;
 
     /**
-     * This download couldn't be completed because there were
-     * too many redirects.
-     */
-    public static final int STATUS_TOO_MANY_REDIRECTS = 494;
-
-    /**
      * This download couldn't be completed because of an
      * unspecified unhandled HTTP code.
      */
-    public static final int STATUS_UNHANDLED_HTTP_CODE = 495;
+    public static final int STATUS_UNHANDLED_HTTP_CODE = 494;
 
     /**
      * This download couldn't be completed because of an
      * error receiving or processing data at the HTTP level.
      */
-    public static final int STATUS_HTTP_DATA_ERROR = 496;
+    public static final int STATUS_HTTP_DATA_ERROR = 495;
 
     /**
-     * This download is visible and shows in the notifications while
-     * in progress and after completion.
+     * This download couldn't be completed because of an
+     * HttpException while setting up the request.
      */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 0;
+    public static final int STATUS_HTTP_EXCEPTION = 496;
+
+    /**
+     * This download couldn't be completed because there were
+     * too many redirects.
+     */
+    public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
     /**
      * This download is visible but only shows in the notifications
      * while it's in progress.
      */
-    public static final int VISIBILITY_VISIBLE = 1;
+    public static final int VISIBILITY_VISIBLE = 0;
+
+    /**
+     * This download is visible and shows in the notifications while
+     * in progress and after completion.
+     */
+    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
 
     /**
      * This download doesn't show in the UI or in the notifications.

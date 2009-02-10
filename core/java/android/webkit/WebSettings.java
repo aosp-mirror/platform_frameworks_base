@@ -316,10 +316,15 @@ public class WebSettings {
             buffer.append("en");
         }
         
-        final String device = Build.DEVICE;
-        if (device.length() > 0) {
+        final String model = Build.MODEL;
+        if (model.length() > 0) {
             buffer.append("; ");
-            buffer.append(device);
+            buffer.append(model);
+        }
+        final String id = Build.ID;
+        if (id.length() > 0) {
+            buffer.append(" Build/");
+            buffer.append(id);
         }
         final String base = mContext.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
