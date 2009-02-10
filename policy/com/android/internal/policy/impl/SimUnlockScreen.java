@@ -93,6 +93,11 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     }
 
     /** {@inheritDoc} */
+    public boolean needsInput() {
+        return true;
+    }
+    
+    /** {@inheritDoc} */
     public void onPause() {
 
     }

@@ -53,6 +53,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private static final String TAG = "LockPatternKeyguardView";
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final KeyguardWindowController mWindowController;
+    
     private View mLockScreen;
     private View mUnlockScreen;
 
@@ -147,7 +149,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public LockPatternKeyguardView(
             Context context,
             KeyguardUpdateMonitor updateMonitor,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils,
+            KeyguardWindowController controller) {
         super(context);
         
         asyncCheckForAccount();
@@ -157,6 +160,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
+        mWindowController = controller;
 
         mMode = getInitialMode();
         
@@ -417,6 +421,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         goneScreen.setVisibility(View.GONE);
         visibleScreen.setVisibility(View.VISIBLE);
 
+        mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
+        
         if (!visibleScreen.requestFocus()) {
             throw new IllegalStateException("keyguard screen must be able to take "
                     + "focus when shown " + visibleScreen.getClass().getCanonicalName());

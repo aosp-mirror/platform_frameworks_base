@@ -351,6 +351,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
 
     /** {@inheritDoc} */
+    public boolean needsInput() {
+        return false;
+    }
+    
+    /** {@inheritDoc} */
     public void onPause() {
 
     }

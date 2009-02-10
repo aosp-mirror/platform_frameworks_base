@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.policy.PolicyManager;
@@ -138,13 +139,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
+    // Vibrator pattern for indicating when the orientation has changed
+    private static final long[] VIBE_PATTERN = {0, 1, 40, 41};
+    
     Context mContext;
     IWindowManager mWindowManager;
     LocalPowerManager mPowerManager;
+    Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
 
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
     
+    boolean mSafeMode;
     WindowState mStatusBar = null;
     WindowState mSearchBar = null;
     WindowState mKeyguard = null;
@@ -732,6 +738,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return keyguardIsShowingTq() || inKeyguardRestrictedKeyInputMode();
     }
 
+    private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
+            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+            WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
+        };
+
     /** {@inheritDoc} */
     public boolean interceptKeyTi(WindowState win, int code, int metaKeys, boolean down, 
             int repeatCount) {
@@ -739,7 +750,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (false) {
             Log.d(TAG, "interceptKeyTi code=" + code + " down=" + down + " repeatCount="
-                    + repeatCount + " keyguardOn=" + keyguardOn);
+                    + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed);
         }
 
         // Clear a pending HOME longpress if the user releases Home
@@ -795,14 +806,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // right now to interact with applications.
             WindowManager.LayoutParams attrs = win != null ? win.getAttrs() : null;
             if (attrs != null) {
-                int type = attrs.type;
-                if (type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
-                        && type <= WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
-                    // Only do this once, so home-key-longpress doesn't close itself
-                    if (repeatCount == 0 && down) {
-                		sendCloseSystemWindows();
-                    }
+                final int type = attrs.type;
+                if (type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG) {
+                    // the "app" is keyguard, so give it the key
                     return false;
+                }
+                final int typeCount = WINDOW_TYPES_WHERE_HOME_DOESNT_WORK.length;
+                for (int i=0; i<typeCount; i++) {
+                    if (type == WINDOW_TYPES_WHERE_HOME_DOESNT_WORK[i]) {
+                        // don't do anything, but also don't pass it to the app
+                        return true;
+                    }
                 }
             }
             
@@ -1160,29 +1175,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             && win.fillsScreenLw(mW, mH, true)
             && win.isVisibleLw()) {
             mTopFullscreenOpaqueWindowState = win;
-        } else if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
+        } else if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0
+                && win.isVisibleLw()) {
             mForceStatusBar = true;
         }
     }
 
     /** {@inheritDoc} */
     public boolean finishAnimationLw() {
+        boolean changed = false;
         if (mStatusBar != null) {
             if (mForceStatusBar) {
-                mStatusBar.showLw(true);
+                changed |= mStatusBar.showLw(true);
             } else if (mTopFullscreenOpaqueWindowState != null) {
                WindowManager.LayoutParams lp =
                    mTopFullscreenOpaqueWindowState.getAttrs();
                boolean hideStatusBar =
                    (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
                if (hideStatusBar) {
-                   mStatusBar.hideLw(true);
+                   changed |= mStatusBar.hideLw(true);
                } else {
-                   mStatusBar.showLw(true);
+                   changed |= mStatusBar.showLw(true);
                }
            }
         }
-       return false;
+       return changed;
     }
 
     /** {@inheritDoc} */
@@ -1416,10 +1433,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         public void run() {
-            Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-            intent.putExtra(Intent.EXTRA_KEY_EVENT, mKeyEvent);
-            mContext.sendOrderedBroadcast(intent, null, mBroadcastDone,
-                    mHandler, Activity.RESULT_OK, null, null);
+            if (ActivityManagerNative.isSystemReady()) {
+                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                intent.putExtra(Intent.EXTRA_KEY_EVENT, mKeyEvent);
+                mContext.sendOrderedBroadcast(intent, null, mBroadcastDone,
+                        mHandler, Activity.RESULT_OK, null, null);
+            }
         }
     }
 
@@ -1501,19 +1520,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         sendCloseSystemWindows();
     }
 
-    private void sendCloseSystemWindows() {
-        sendCloseSystemWindows(null);
+    void sendCloseSystemWindows() {
+        sendCloseSystemWindows(mContext, null);
     }
 
-    private void sendCloseSystemWindows(String reason) {
-        Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        if (reason != null) {
-            intent.putExtra(SYSTEM_DIALOG_REASON_KEY, reason);
+    void sendCloseSystemWindows(String reason) {
+        sendCloseSystemWindows(mContext, reason);
+    }
+
+    static void sendCloseSystemWindows(Context context, String reason) {
+        if (ActivityManagerNative.isSystemReady()) {
+            Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            if (reason != null) {
+                intent.putExtra(SYSTEM_DIALOG_REASON_KEY, reason);
+            }
+            context.sendBroadcast(intent);
         }
-        mContext.sendBroadcast(intent);
     }
 
-    public int rotationForOrientation(int orientation) {
+    public int rotationForOrientation(int orientation, int lastRotation,
+            boolean displayEnabled) {
         switch (orientation) {
             case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
                 //always return landscape if orientation set to landscape
@@ -1530,18 +1556,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             if (useSensorForOrientation()) {
                 // If the user has enabled auto rotation by default, do it.
-                return mSensorRotation >= 0 ? mSensorRotation : Surface.ROTATION_0;
+                int rotation = mSensorRotation >= 0 ? mSensorRotation : Surface.ROTATION_0;
+                if (displayEnabled && rotation != lastRotation) {
+                    mVibrator.vibrate(VIBE_PATTERN, -1);
+                }
+                return rotation;
             }
             return Surface.ROTATION_0;
+        }
+    }
+
+    public boolean detectSafeMode() {
+        try {
+            int menuState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_MENU);
+            mSafeMode = menuState > 0;
+            Log.i(TAG, "Menu key state: " + menuState + " safeMode=" + mSafeMode);
+            return mSafeMode;
+        } catch (RemoteException e) {
+            // Doom! (it's also local)
+            throw new RuntimeException("window manager dead");
         }
     }
     
     /** {@inheritDoc} */
     public void systemReady() {
         try {
-            int menuState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_MENU);
-            Log.i(TAG, "Menu key state: " + menuState);
-            if (menuState > 0) {
+            if (mSafeMode) {
                 // If the user is holding the menu key code, then we are
                 // going to boot into safe mode.
                 ActivityManagerNative.getDefault().enterSafeMode();
@@ -1550,11 +1590,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardMediator.onSystemReady();
             android.os.SystemProperties.set("dev.bootcomplete", "1"); 
             updateOrientationListener();
+            mVibrator = new Vibrator();
         } catch (RemoteException e) {
             // Ignore
         }
     }
-    
+   
+
     /** {@inheritDoc} */
     public void enableScreenAfterBoot() {
         readLidState();

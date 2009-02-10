@@ -230,6 +230,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public void onKeyboardChange(boolean isKeyboardOpen) {}
 
     /** {@inheritDoc} */
+    public boolean needsInput() {
+        return false;
+    }
+    
+    /** {@inheritDoc} */
     public void onPause() {
         if (mCountdownTimer != null) {
             mCountdownTimer.cancel();

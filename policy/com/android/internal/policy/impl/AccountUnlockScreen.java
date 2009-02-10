@@ -28,8 +28,10 @@ import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,7 +49,7 @@ import android.widget.TextView;
  * IAccountsService.
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        View.OnClickListener, ServiceConnection {
+        View.OnClickListener, ServiceConnection, TextWatcher {
 
 
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
@@ -87,8 +89,10 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mLogin = (EditText) findViewById(R.id.login);
         mLogin.setFilters(new InputFilter[] { new LoginFilter.UsernameFilterGeneric() } );
+        mLogin.addTextChangedListener(this);
 
         mPassword = (EditText) findViewById(R.id.password);
+        mPassword.addTextChangedListener(this);
 
         mOk = (Button) findViewById(R.id.ok);
         mOk.setOnClickListener(this);
@@ -105,6 +109,16 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         }
     }
 
+    public void afterTextChanged(Editable s) {
+    }
+
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        mCallback.pokeWakelock();
+    }
+
     @Override
     protected boolean onRequestFocusInDescendants(int direction,
             Rect previouslyFocusedRect) {
@@ -112,6 +126,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         return mLogin.requestFocus(direction, previouslyFocusedRect);
     }
 
+    /** {@inheritDoc} */
+    public boolean needsInput() {
+        return true;
+    }
+    
     /** {@inheritDoc} */
     public void onPause() {
 
@@ -132,6 +151,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void onClick(View v) {
+        mCallback.pokeWakelock();
         if (v == mOk) {
             if (checkPassword()) {
                 // clear out forgotten password
