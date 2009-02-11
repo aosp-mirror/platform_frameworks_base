@@ -70,10 +70,10 @@ void LayerScreenshot::onDraw(const Region& clip) const
             const size_t size = w * h * Bpp;
             int32_t cfg = SkBitmap::kNo_Config;
             switch (fbFormat) {
-                case PIXEL_FORMAT_RGBA_4444: cfg = SkBitmap::kARGB_4444_Config;
-                case PIXEL_FORMAT_RGBA_8888: cfg = SkBitmap::kARGB_8888_Config;
-                case PIXEL_FORMAT_RGB_565:   cfg = SkBitmap::kRGB_565_Config;
-                case PIXEL_FORMAT_A_8:       cfg = SkBitmap::kA8_Config;
+                case PIXEL_FORMAT_RGBA_4444: cfg = SkBitmap::kARGB_4444_Config; break;
+                case PIXEL_FORMAT_RGBA_8888: cfg = SkBitmap::kARGB_8888_Config; break;
+                case PIXEL_FORMAT_RGB_565:   cfg = SkBitmap::kRGB_565_Config; break;
+                case PIXEL_FORMAT_A_8:       cfg = SkBitmap::kA8_Config; break;
             }
             reply->writeInt32(0);
             reply->writeInt32(cfg);
