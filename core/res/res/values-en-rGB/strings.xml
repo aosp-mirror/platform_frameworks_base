@@ -249,7 +249,7 @@
     <string name="permlab_accessSurfaceFlinger">"access SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"Allows application to use SurfaceFlinger low-level features."</string>
     <string name="permlab_readFrameBuffer">"read frame buffer"</string>
-    <string name="permdesc_readFrameBuffer">"Allows application to use read the content of the frame buffer."</string>
+    <string name="permdesc_readFrameBuffer">"Allows application to read the content of the frame buffer."</string>
     <string name="permlab_modifyAudioSettings">"change your audio settings"</string>
     <string name="permdesc_modifyAudioSettings">"Allows application to modify global audio settings such as volume and routing."</string>
     <string name="permlab_recordAudio">"record audio"</string>
