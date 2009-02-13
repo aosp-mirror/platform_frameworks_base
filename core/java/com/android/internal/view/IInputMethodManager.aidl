@@ -47,7 +47,7 @@ interface IInputMethodManager {
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void setInputMethod(in IBinder token, String id);
     void hideMySoftInput(in IBinder token, int flags);
-    void updateStatusIcon(int iconId, String iconPackage);
+    void updateStatusIcon(in IBinder token, String packageName, int iconId);
     
     boolean setInputMethodEnabled(String id, boolean enabled);
 }

@@ -16,9 +16,7 @@ LOCAL_SRC_FILES:= \
     LayerBitmap.cpp \
     LayerDim.cpp \
     LayerOrientationAnim.cpp \
-    LayerScreenshot.cpp \
     OrientationAnimation.cpp \
-    RFBServer.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
     Transform.cpp \

@@ -260,19 +260,8 @@ public class WebView extends AbsoluteLayout
     // Whether we are in the drag tap mode, which exists starting at the second
     // tap's down, through its move, and includes its up. These events should be
     // given to the method on the zoom controller.
-    private boolean mInZoomTapDragMode;
-    
-    // The event time of the previous touch up. 
-    private long mPreviousUpTime;
-    
-    private Runnable mRemoveReleaseSingleTap = new Runnable() {
-        public void run() {
-            mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-            mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-        }
-    };
-    
+    private boolean mInZoomTapDragMode = false;
+
     // Whether to prevent drag during touch. The initial value depends on
     // mForwardTouchEvents. If WebCore wants touch events, we assume it will
     // take control of touch events unless it says no for touch down event.
@@ -517,6 +506,11 @@ public class WebView extends AbsoluteLayout
     
     private ZoomRingController mZoomRingController;
 
+    // These keep track of the center point of the zoom ring.  They are used to
+    // determine the point around which we should zoom.
+    private float mZoomCenterX;
+    private float mZoomCenterY;
+
     private ZoomRingController.OnZoomListener mZoomListener =
             new ZoomRingController.OnZoomListener() {
         
@@ -554,12 +548,9 @@ public class WebView extends AbsoluteLayout
                     deltaZoomLevel == 0) {
                 return false;
             }
-            
-            int deltaX = centerX - getViewWidth() / 2;
-            int deltaY = centerY - getViewHeight() / 2;
+            mZoomCenterX = (float) centerX;
+            mZoomCenterY = (float) centerY;
 
-            pinScrollBy(deltaX, deltaY, false, 0);
-            
             while (deltaZoomLevel != 0) {
                 if (deltaZoomLevel > 0) {
                     if (!zoomIn()) return false;
@@ -569,15 +560,16 @@ public class WebView extends AbsoluteLayout
                     deltaZoomLevel++;
                 }
             }
-            
-            pinScrollBy(-deltaX, -deltaY, false, 0);
-                    
+
             return true;
         }
         
         public void onSimpleZoom(boolean zoomIn) {
-            if (zoomIn) zoomIn();
-            else zoomOut();
+            if (zoomIn) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
         }
     };
     
@@ -1586,8 +1578,8 @@ public class WebView extends AbsoluteLayout
                 int oldX = mScrollX;
                 int oldY = mScrollY;
                 float ratio = scale * mInvActualScale;   // old inverse
-                float sx = ratio * oldX + (ratio - 1) * getViewWidth() * 0.5f;
-                float sy = ratio * oldY + (ratio - 1) * getViewHeight() * 0.5f;
+                float sx = ratio * oldX + (ratio - 1) * mZoomCenterX;
+                float sy = ratio * oldY + (ratio - 1) * mZoomCenterY;
 
                 // now update our new scale and inverse
                 if (scale != mActualScale && !mPreviewZoomOnly) {
@@ -2264,8 +2256,8 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
             }
             float scale = (mActualScale - zoomScale) * mInvActualScale;
-            float tx = scale * ((getLeft() + getRight()) * 0.5f + mScrollX);
-            float ty = scale * ((getTop() + getBottom()) * 0.5f + mScrollY);
+            float tx = scale * (mZoomCenterX + mScrollX);
+            float ty = scale * (mZoomCenterY + mScrollY);
 
             // this block pins the translate to "legal" bounds. This makes the
             // animation a bit non-obvious, but it means we won't pop when the
@@ -3025,8 +3017,8 @@ public class WebView extends AbsoluteLayout
                             (keyCode == KeyEvent.KEYCODE_7) ? 1 : 0, 0);
                     break;
                 case KeyEvent.KEYCODE_9:
-                    debugDump();
-                    break;
+                    nativeInstrumentReport();
+                    return true;
             }
         }
 
@@ -3161,6 +3153,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void emulateShiftHeld() {
+        mExtendSelection = false;
         mShiftIsPressed = true;
     }
 
@@ -3176,6 +3169,7 @@ public class WebView extends AbsoluteLayout
                 mWebViewCore.sendMessage(EventHub.GET_SELECTION, selection);
                 copiedSomething = true;
             }
+            mExtendSelection = false;
         }
         mShiftIsPressed = false;
         if (mTouchMode == TOUCH_SELECT_MODE) {
@@ -3218,6 +3212,11 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * @deprecated WebView should not have implemented
+     * ViewTreeObserver.OnGlobalFocusChangeListener.  This method
+     * does nothing now.
+     */
     @Deprecated
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
     }
@@ -3281,7 +3280,11 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
-
+        // Center zooming to the center of the screen.  This is appropriate for
+        // this case of zooming, and it also sets us up properly if we remove
+        // the new zoom ring controller
+        mZoomCenterX = getViewWidth() * .5f;
+        mZoomCenterY = getViewHeight() * .5f;
         // we always force, in case our height changed, in which case we still
         // want to send the notification over to webkit
         setNewZoomScale(mActualScale, true);
@@ -3342,25 +3345,12 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
-        if (mZoomRingController.isVisible()) {
-            if (mInZoomTapDragMode) {
-                mZoomRingController.handleDoubleTapEvent(ev);
-                if (ev.getAction() == MotionEvent.ACTION_UP) {
-                    // Just released the second tap, no longer in tap-drag mode
-                    mInZoomTapDragMode = false;
-                }
-                return true;
-            } else {
-                // TODO: properly do this.
-                /*
-                 * When the zoom widget is showing, the user can tap outside of
-                 * it to dismiss it. Furthermore, he can drag outside of it to
-                 * pan the browser. However, we do not want a tap on a link to
-                 * open the link.
-                 */
-                post(mRemoveReleaseSingleTap);
-                // Continue through to normal processing
+        if (mZoomRingController.isVisible() && mInZoomTapDragMode) {
+            if (ev.getAction() == MotionEvent.ACTION_UP) {
+                // Just released the second tap, no longer in tap-drag mode
+                mInZoomTapDragMode = false;
             }
+            return mZoomRingController.handleDoubleTapEvent(ev);
         }
 
         int action = ev.getAction();
@@ -3418,21 +3408,19 @@ public class WebView extends AbsoluteLayout
                             , viewToContent(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
                 } else if (!ZoomRingController.useOldZoom(mContext) &&
-                        eventTime - mPreviousUpTime < DOUBLE_TAP_TIMEOUT &&
-                        getSettings().supportZoom() &&
-                        mMinZoomScale < mMaxZoomScale) {
+                        mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     // Found doubletap, invoke the zoom controller
-                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                    mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                     mZoomRingController.setVisible(true);
                     mInZoomTapDragMode = true;
-                    mZoomRingController.handleDoubleTapEvent(ev);
+                    return mZoomRingController.handleDoubleTapEvent(ev);
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
                 }
-                if (mTouchMode == TOUCH_INIT_MODE) {
+                // don't trigger the link if zoom ring is visible
+                if (mTouchMode == TOUCH_INIT_MODE
+                        && !mZoomRingController.isVisible()) {
                     mPrivateHandler.sendMessageDelayed(mPrivateHandler
                             .obtainMessage(SWITCH_TO_SHORTPRESS), TAP_TIMEOUT);
                 }
@@ -3485,9 +3473,6 @@ public class WebView extends AbsoluteLayout
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                     }
 
-                    // Prevent double-tap from being invoked
-                    mPreviousUpTime = 0;
-                    
                     // if it starts nearly horizontal or vertical, enforce it
                     int ax = Math.abs(deltaX);
                     int ay = Math.abs(deltaY);
@@ -3597,6 +3582,10 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_UP: {
                 switch (mTouchMode) {
                     case TOUCH_INIT_MODE: // tap
+                        if (mZoomRingController.isVisible()) {
+                            // don't trigger the link if zoom ring is visible
+                            break;
+                        }
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         if (getSettings().supportZoom()
                                 && (mMinZoomScale < mMaxZoomScale)) {
@@ -3611,7 +3600,7 @@ public class WebView extends AbsoluteLayout
                         break;
                     case TOUCH_SELECT_MODE:
                         commitCopy();
-                        mTouchSelection = mExtendSelection = false;
+                        mTouchSelection = false;
                         break;
                     case SCROLL_ZOOM_ANIMATION_IN:
                     case SCROLL_ZOOM_ANIMATION_OUT:
@@ -3679,7 +3668,6 @@ public class WebView extends AbsoluteLayout
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
-                mPreviousUpTime = eventTime;
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
@@ -4110,6 +4098,14 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @hide pending API council? Assuming we make ZoomRingController itself
+     *       public, which I think we will.
+     */
+    public ZoomRingController getZoomRingController() {
+        return mZoomRingController;    
+    }
+    
+    /**
      * Perform zoom in in the webview
      * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
      */
@@ -4193,16 +4189,15 @@ public class WebView extends AbsoluteLayout
             return;
         }
         switchOutDrawHistory();
-        // FIXME: we don't know if the current (x,y) is on a focus node or
-        // not -- so playing the sound effect here is premature
-        if (nativeUpdateFocusNode()) {
-            playSoundEffect(SoundEffectConstants.CLICK);
-        }
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
         int contentSize = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         nativeMotionUp(contentX, contentY, contentSize, true);
+        if (nativeUpdateFocusNode() && !mFocusNode.mIsTextField
+                && !mFocusNode.mIsTextArea) {
+            playSoundEffect(SoundEffectConstants.CLICK);
+        }
     }
 
     @Override
@@ -5013,6 +5008,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeUpdateFocusNode();
     private native Rect     nativeGetFocusRingBounds();
     private native Rect     nativeGetNavBounds();
+    private native void     nativeInstrumentReport();
     private native void     nativeMarkNodeInvalid(int node);
     private native void     nativeMotionUp(int x, int y, int slop, boolean isClick);
     // returns false if it handled the key

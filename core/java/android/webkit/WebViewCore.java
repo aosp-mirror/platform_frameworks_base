@@ -330,8 +330,7 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSaveDocumentState(int frame, int node, int x,
-            int y);
+    private native void nativeSaveDocumentState(int frame);
 
     private native void nativeSetFinalFocus(int framePtr, int nodePtr, int x,
             int y, boolean block);
@@ -777,8 +776,7 @@ final class WebViewCore {
 
                         case SAVE_DOCUMENT_STATE: {
                             FocusData fDat = (FocusData) msg.obj;
-                            nativeSaveDocumentState(fDat.mFrame, fDat.mNode,
-                                    fDat.mX, fDat.mY);
+                            nativeSaveDocumentState(fDat.mFrame);
                             break;
                         }
 

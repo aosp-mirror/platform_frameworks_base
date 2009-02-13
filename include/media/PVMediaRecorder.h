@@ -43,6 +43,7 @@ public:
     status_t setCamera(const sp<ICamera>& camera);
     status_t setPreviewSurface(const sp<ISurface>& surface);
     status_t setOutputFile(const char *path);
+    status_t setOutputFile(int fd, int64_t offset, int64_t length);
     status_t prepare();
     status_t start();
     status_t stop();

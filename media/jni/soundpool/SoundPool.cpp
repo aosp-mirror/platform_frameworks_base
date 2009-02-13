@@ -491,10 +491,11 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     // initialize track
     int afFrameCount;
     int afSampleRate;
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+    int streamType = mSoundPool->streamType();
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
         afFrameCount = kDefaultFrameCount;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         afSampleRate = kDefaultSampleRate;
     }
     int numChannels = sample->numChannels();
@@ -522,10 +523,10 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     void *userData = (void *)((unsigned long)this | toggle);
     
 #ifdef USE_SHARED_MEM_BUFFER
-    newTrack = new AudioTrack(mSoundPool->streamType(), sampleRate, sample->format(),
+    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
             numChannels, sample->getIMemory(), 0, callback, userData);
 #else
-    newTrack = new AudioTrack(mSoundPool->streamType(), sampleRate, sample->format(),
+    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
             numChannels, frameCount, 0, callback, userData, bufferFrames);
 #endif
     if (newTrack->initCheck() != NO_ERROR) {

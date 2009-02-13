@@ -17,21 +17,30 @@ import com.android.imftest.R;
  */
 public class BottomEditTextActivityPanScan extends Activity 
 {
-    private LayoutInflater mInflater;
+    private View mRootView;
+    private View mDefaultFocusedView;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
         
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
+        mRootView = new LinearLayout(this);
+        ((LinearLayout) mRootView).setOrientation(LinearLayout.VERTICAL);
         
-        mInflater = getLayoutInflater();
-        
-        View view = mInflater.inflate(R.layout.one_edit_text_activity, layout, false);
-        layout.addView(view);
+        View view = getLayoutInflater().inflate(R.layout.one_edit_text_activity, ((LinearLayout) mRootView), false);
+        mDefaultFocusedView = view.findViewById(R.id.dialog_edit_text);
+        ((LinearLayout) mRootView).addView(view);
        
-        setContentView(layout);
+        setContentView(mRootView);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }  
+
+    public View getRootView() {
+        return mRootView;
+    }
+    
+    public View getDefaultFocusedView() {
+        return mDefaultFocusedView;
+    }
 }

@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".samples.AppAdjustmentBigEditTextNonScrollablePanScan" android:label="Big ET !Scroll Pan/Scan">
+        <activity android:name=".samples.BigEditTextActivityNonScrollablePanScan" android:label="Big ET !Scroll Pan/Scan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".samples.AppAdjustmentBigEditTextNonScrollableResize" android:label="Big ET !Scroll Resize">
+        <activity android:name=".samples.BigEditTextActivityNonScrollableResize" android:label="Big ET !Scroll Resize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,7 +43,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".samples.AppAdjustmentBigEditTextScrollablePanScan" android:label="Big ET Scroll Pan/Scan">
+        <activity android:name=".samples.BigEditTextActivityScrollablePanScan" android:label="Big ET Scroll Pan/Scan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".samples.AppAdjustmentBigEditTextScrollableResize" android:label="Big ET Scroll Resize">
+        <activity android:name=".samples.BigEditTextActivityScrollableResize" android:label="Big ET Scroll Resize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -59,7 +59,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".samples.AppAdjustmentEditTextDialog" android:label="ET Dialog">
+        <activity android:name=".samples.EditTextActivityDialog" android:label="ET Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -130,14 +130,6 @@
                 <category android:name="android.intent.category.IMF_TEST" />
             </intent-filter>
         </activity>   
-          
-        <activity android:name=".samples.OneEditTextActivityLandscape" android:label="OneEditTextActivityLandscape" android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.IMF_TEST" />
-            </intent-filter>
-        </activity>  
         
         <activity android:name=".samples.DialogActivity" android:label="DialogActivity" android:screenOrientation="portrait">
             <intent-filter>

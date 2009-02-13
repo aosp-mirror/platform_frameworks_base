@@ -55,7 +55,7 @@ static status_t STATE_OPEN = 2;
 
 VorbisPlayer::VorbisPlayer() :
     mAudioBuffer(NULL), mPlayTime(-1), mDuration(-1), mState(STATE_ERROR),
-    mStreamType(AudioTrack::MUSIC), mLoop(false), mAndroidLoop(false),
+    mStreamType(AudioSystem::MUSIC), mLoop(false), mAndroidLoop(false),
     mExit(false), mPaused(false), mRender(false), mRenderTid(-1)
 {
     LOGV("constructor\n");

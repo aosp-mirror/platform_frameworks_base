@@ -37,7 +37,7 @@ ISurface::BufferHeap::BufferHeap(uint32_t w, uint32_t h,
         int32_t hor_stride, int32_t ver_stride,
         PixelFormat format, const sp<IMemoryHeap>& heap)
     : w(w), h(h), hor_stride(hor_stride), ver_stride(ver_stride),
-      format(format), heap(heap) 
+      format(format), transform(0), flags(0), heap(heap) 
 {
 }
 

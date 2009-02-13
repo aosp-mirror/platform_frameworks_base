@@ -1,41 +1,126 @@
 <body>
-{@hide}
 <p>Android allows applications to publish views to be embedded in other applications.  These
 views are called gadgets, and are published by "gadget providers."  The component that can
-contain gadgets is called a "gadget host."  See the links below for more information.
+contain gadgets is called a "gadget host."
 </p>
-<h3><a href="{@toroot}reference/android/gadget/package-descr.html#providers">Gadget Providers</a></h3>
+<h3><a href="package-descr.html#providers">Gadget Providers</a></h3>
 <ul>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_manifest">Declaring a gadget in the AndroidManifest</a></li>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_meta_data">Adding the {@link android.gadget.GadgetInfo GadgetInfo} meta-data</a></li>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_GadgetProvider">Using the {@link android.gadget.GadgetProvider GadgetProvider} class</a></li>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_configuration">Gadget Configuration UI</a></li>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#provider_broadcasts">Gadget Broadcast Intents</a></li>
+  <li><a href="package-descr.html#provider_manifest">Declaring a gadget in the AndroidManifest</a></li>
+  <li><a href="package-descr.html#provider_meta_data">Adding the GadgetProviderInfo meta-data</a></li>
+  <li><a href="package-descr.html#provider_GadgetProvider">Using the GadgetProvider class</a></li>
+  <li><a href="package-descr.html#provider_configuration">Gadget Configuration UI</a></li>
+  <li><a href="package-descr.html#provider_broadcasts">Gadget Broadcast Intents</a></li>
 </ul>
-<h3><a href="{@toroot}reference/android/gadget/package-descr.html#">Gadget Hosts</a></h3>
-<ul>
-  <li><a href="{@toroot}reference/android/gadget/package-descr.html#">asdf</a></li>
-</ul>
+<h3><a href="package-descr.html#">Gadget Hosts</a></h3>
+
+
 {@more}
+
+
 <h2><a name="providers"></a>Gadget Providers</h2>
-<p>Any application can publish gadgets.  All an application needs to do to publish a gadget is
+<p>
+Any application can publish gadgets.  All an application needs to do to publish a gadget is
 to have a {@link android.content.BroadcastReceiver} that receives the {@link
-android.gadget.GadgetManager#GADGET_UPDATE_ACTION GadgetManager.GADGET_UPDATE_ACTION} intent,
-and provide some meta-data about the gadget.
+android.gadget.GadgetManager#ACTION_GADGET_UPDATE GadgetManager.ACTION_GADGET_UPDATE} intent,
+and provide some meta-data about the gadget.  Android provides the
+{@link android.gadget.GadgetProvider} class, which extends BroadcastReceiver, as a convenience
+class to aid in handling the broadcasts.
 
 <h3><a name="provider_manifest"></a>Declaring a gadget in the AndroidManifest</h3>
 
-<h3><a name="provider_meta_data"></a>Adding the {@link android.gadget.GadgetInfo GadgetInfo} meta-data</h3>
+<p>
+First, declare the {@link android.content.BroadcastReceiver} in your application's
+<code>AndroidManifest.xml</code> file.
+
+{@sample frameworks/base/tests/gadgets/GadgetHostTest/AndroidManifest.xml GadgetProvider}
+
+<p>
+The <b><code>&lt;receiver&gt;</b> element has the following attributes:
+<ul>
+  <li><b><code>android:name</code> -</b> which specifies the
+        {@link android.content.BroadcastReceiver} or {@link android.gadget.GadgetProvider}
+        class.</li>
+  <li><b><code>android:label</code> -</b> which specifies the string resource that
+        will be shown by the gadget picker as the label.</li>
+  <li><b><code>android:icon</code> -</b> which specifies the drawable resource that
+        will be shown by the gadget picker as the icon.</li>
+</ul>
+
+<p>
+The <b><code>&lt;intent-filter&gt;</b> element tells the {@link android.content.pm.PackageManager}
+that this {@link android.content.BroadcastReceiver} receives the {@link
+android.gadget.GadgetManager#ACTION_GADGET_UPDATE GadgetManager.ACTION_GADGET_UPDATE} broadcast.
+The gadget manager will send other broadcasts directly to your gadget provider as required.
+It is only necessary to explicitly declare that you accept the {@link
+android.gadget.GadgetManager#ACTION_GADGET_UPDATE GadgetManager.ACTION_GADGET_UPDATE} broadcast.
+
+<p>
+The <b><code>&lt;meta-data&gt;</code></b> element tells the gadget manager which xml resource to
+read to find the {@link android.gadget.GadgetProviderInfo} for your gadget provider.  It has the following
+attributes:
+<ul>
+  <li><b><code>android:name="android.gadget.provider"</code> -</b> identifies this meta-data
+        as the {@link android.gadget.GadgetProviderInfo} descriptor.</li>
+  <li><b><code>android:resource</code> -</b> is the xml resource to use as that descriptor.</li>
+</ul>
+
+
+<h3><a name="provider_meta_data"></a>Adding the {@link android.gadget.GadgetProviderInfo GadgetProviderInfo} meta-data</h3>
+
+<p>
+For a gadget, the values in the {@link android.gadget.GadgetProviderInfo} structure are supplied
+in an XML resource.  In the example above, the xml resource is referenced with
+<code>android:resource="@xml/gadget_info"</code>.  That XML file would go in your application's
+directory at <code>res/xml/gadget_info.xml</code>.  Here is a simple example.
+
+{@sample frameworks/base/tests/gadgets/GadgetHostTest/res/xml/gadget_info.xml GadgetProviderInfo}
+
+<p>
+The attributes are as documented in the {@link android.gadget.GadgetProviderInfo GagetInfo} class.  (86400000 milliseconds means once per day)
+
 
 <h3><a name="provider_GadgetProvider"></a>Using the {@link android.gadget.GadgetProvider GadgetProvider} class</h3>
 
+<p>The GadgetProvider class is the easiest way to handle the gadget provider intent broadcasts.
+See the <code>src/com/example/android/apis/gadget/ExampleGadgetProvider.java</code>
+sample class in ApiDemos for an example.
+
+<p class="note">Keep in mind that since the the GadgetProvider is a BroadcastReceiver,
+your process is not guaranteed to keep running after the callback methods return.  See
+<a href="../../../guide/topics/fundamentals.html#broadlife">Application Fundamentals &gt;
+Broadcast Receiver Lifecycle</a> for more information.
+
+
+
 <h3><a name="provider_configuration"></a>Gadget Configuration UI</h3>
+
+<p>
+Gadget hosts have the ability to start a configuration activity when a gadget is instantiated.
+The activity should be declared as normal in AndroidManifest.xml, and it should be listed in
+the GadgetProviderInfo XML file in the <code>android:configure</code> attribute.
+
+<p>The activity you specified will be launched with the {@link
+android.gadget.GadgetManager#ACTION_GADGET_CONFIGURE} action.  See the documentation for that
+action for more info.
+
+<p>See the <code>src/com/example/android/apis/gadget/ExampleGadgetConfigure.java</code>
+sample class in ApiDemos for an example.
+
+
 
 <h3><a name="providers_broadcasts"></a>Gadget Broadcast Intents</h3>
 
-<p>{@link GadgetProvider} is just a convenience class.  If you would like to receive the
-gadget broadcasts directly, you can.  By way of example, the implementation of
-{@link GadgetProvider.onReceive} is quite simple:</p>
+<p>{@link android.gadget.GadgetProvider} is just a convenience class.  If you would like
+to receive the gadget broadcasts directly, you can.  The four intents you need to care about are:
+<ul>
+  <li>{@link android.gadget.GadgetManager#ACTION_GADGET_UPDATE}</li>
+  <li>{@link android.gadget.GadgetManager#ACTION_GADGET_DELETED}</li>
+  <li>{@link android.gadget.GadgetManager#ACTION_GADGET_ENABLED}</li>
+  <li>{@link android.gadget.GadgetManager#ACTION_GADGET_DISABLED}</li>
+</ul>
+
+<p>By way of example, the implementation of
+{@link android.gadget.GadgetProvider#onReceive} is quite simple:</p>
 
 {@sample frameworks/base/core/java/android/gadget/GadgetProvider.java onReceive}
 

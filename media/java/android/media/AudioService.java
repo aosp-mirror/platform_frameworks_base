@@ -349,9 +349,9 @@ public class AudioService extends IAudioService.Stub {
         // If either the client forces allowing ringer modes for this adjustment,
         // or the stream type is one that is affected by ringer modes
         if ((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0
-                || isStreamAffectedByRingerMode(streamType)) {
+                || streamType == AudioManager.STREAM_RING) {
             // Check if the ringer mode changes with this volume adjustment. If
-            // it does, it will handle adjusting the volome, so we won't below
+            // it does, it will handle adjusting the volume, so we won't below
             adjustVolume = checkForRingerModeChange(oldIndex, direction);
         }
 

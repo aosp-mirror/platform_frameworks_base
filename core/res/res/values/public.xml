@@ -1001,6 +1001,9 @@
   <public type="attr" name="content" id="0x0101025b" />
   <public type="attr" name="animateOnClick" id="0x0101025c" />
   <public type="attr" name="configure" id="0x0101025d" />
+  <public type="attr" name="hapticFeedbackEnabled" id="0x0101025e" />
+  <public type="attr" name="innerRadius" id="0x0101025f" />
+  <public type="attr" name="thickness" id="0x01010260" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the

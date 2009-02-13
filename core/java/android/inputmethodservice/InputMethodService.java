@@ -206,6 +206,8 @@ public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
     static final boolean DEBUG = false;
     
+    InputMethodManager mImm;
+    
     LayoutInflater mInflater;
     View mRootView;
     SoftInputWindow mWindow;
@@ -293,6 +295,8 @@ public class InputMethodService extends AbstractInputMethodService {
             mInputConnection = binding.getConnection();
             if (DEBUG) Log.v(TAG, "bindInput(): binding=" + binding
                     + " ic=" + mInputConnection);
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) ic.reportFullscreenMode(mIsFullscreen);
             initialize();
             onBindInput();
         }
@@ -423,7 +427,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * of the application behind.  This value is relative to the top edge
          * of the input method window.
          */
-        int contentTopInsets;
+        public int contentTopInsets;
         
         /**
          * This is the top part of the UI that is visibly covering the
@@ -436,7 +440,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * needed to make the focus visible.  This value is relative to the top edge
          * of the input method window.
          */
-        int visibleTopInsets;
+        public int visibleTopInsets;
         
         /**
          * Option for {@link #touchableInsets}: the entire window frame
@@ -469,6 +473,7 @@ public class InputMethodService extends AbstractInputMethodService {
     
     @Override public void onCreate() {
         super.onCreate();
+        mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this);
@@ -554,7 +559,6 @@ public class InputMethodService extends AbstractInputMethodService {
         boolean visible = mWindowVisible;
         boolean showingInput = mShowInputRequested;
         boolean showingForced = mShowInputForced;
-        boolean showingCandidates = mCandidatesVisibility == View.VISIBLE;
         initViews();
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
@@ -576,9 +580,6 @@ public class InputMethodService extends AbstractInputMethodService {
             } else {
                 // Otherwise just put it back for its candidates.
                 showWindow(false);
-            }
-            if (showingCandidates) {
-                setCandidatesViewShown(true);
             }
         }
     }
@@ -670,6 +671,8 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
             mIsFullscreen = isFullscreen;
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) ic.reportFullscreenMode(isFullscreen);
             mFullscreenApplied = true;
             initialize();
             Drawable bg = onCreateBackgroundDrawable();
@@ -860,12 +863,14 @@ public class InputMethodService extends AbstractInputMethodService {
         return isFullscreenMode() ? View.GONE : View.INVISIBLE;
     }
     
-    public void setStatusIcon(int iconResId) {
+    public void showStatusIcon(int iconResId) {
         mStatusIcon = iconResId;
-        InputConnection ic = getCurrentInputConnection();
-        if (ic != null && mWindowVisible) {
-            ic.showStatusIcon(getPackageName(), iconResId);
-        }
+        mImm.showStatusIcon(mToken, getPackageName(), iconResId);
+    }
+    
+    public void hideStatusIcon() {
+        mStatusIcon = 0;
+        mImm.hideStatusIcon(mToken);
     }
     
     /**
@@ -876,8 +881,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param id Unique identifier of the new input method ot start.
      */
     public void switchInputMethod(String id) {
-        ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE))
-                .setInputMethod(mToken, id);
+        mImm.setInputMethod(mToken, id);
     }
     
     public void setExtractView(View view) {
@@ -1149,14 +1153,8 @@ public class InputMethodService extends AbstractInputMethodService {
         
         if (!wasVisible) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
+            onWindowShown();
             mWindow.show();
-        }
-        
-        if (!wasVisible || !wasCreated) {
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                ic.showStatusIcon(getPackageName(), mStatusIcon);
-            }
         }
     }
     
@@ -1173,11 +1171,23 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mWindowVisible) {
             mWindow.hide();
             mWindowVisible = false;
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                ic.hideStatusIcon();
-            }
+            onWindowHidden();
         }
+    }
+    
+    /**
+     * Called when the input method window has been shown to the user, after
+     * previously not being visible.  This is done after all of the UI setup
+     * for the window has occurred (creating its views etc).
+     */
+    public void onWindowShown() {
+    }
+    
+    /**
+     * Called when the input method window has been hidden from the user,
+     * after previously being visible.
+     */
+    public void onWindowHidden() {
     }
     
     /**
@@ -1341,8 +1351,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * InputMethodManager.HIDE_IMPLICIT_ONLY} bit set.
      */
     public void dismissSoftInput(int flags) {
-        ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE))
-                .hideSoftInputFromInputMethod(mToken, flags);
+        mImm.hideSoftInputFromInputMethod(mToken, flags);
     }
     
     /**
@@ -1447,17 +1456,19 @@ public class InputMethodService extends AbstractInputMethodService {
                         return true;
                     }
                 } else {
-                    KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
-                    if (movement.onKeyDown(eet,
-                            (Spannable)eet.getText(), keyCode, down)) {
-                        KeyEvent up = new KeyEvent(event, KeyEvent.ACTION_UP);
-                        movement.onKeyUp(eet,
-                                (Spannable)eet.getText(), keyCode, up);
-                        while (--count > 0) {
-                            movement.onKeyDown(eet,
-                                    (Spannable)eet.getText(), keyCode, down);
+                    if (!movement.onKeyOther(eet, (Spannable)eet.getText(), event)) {
+                        KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
+                        if (movement.onKeyDown(eet,
+                                (Spannable)eet.getText(), keyCode, down)) {
+                            KeyEvent up = new KeyEvent(event, KeyEvent.ACTION_UP);
                             movement.onKeyUp(eet,
                                     (Spannable)eet.getText(), keyCode, up);
+                            while (--count > 0) {
+                                movement.onKeyDown(eet,
+                                        (Spannable)eet.getText(), keyCode, down);
+                                movement.onKeyUp(eet,
+                                        (Spannable)eet.getText(), keyCode, up);
+                            }
                         }
                     }
                 }
@@ -1593,5 +1604,9 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mExtractedToken=" + mExtractedToken);
         p.println("  mIsInputViewShown=" + mIsInputViewShown
                 + " mStatusIcon=" + mStatusIcon);
+        p.println("Last computed insets:");
+        p.println("  contentTopInsets=" + mTmpInsets.contentTopInsets
+                + " visibleTopInsets=" + mTmpInsets.visibleTopInsets
+                + " touchableInsets=" + mTmpInsets.touchableInsets);
     }
 }

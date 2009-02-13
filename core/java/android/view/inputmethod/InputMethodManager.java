@@ -214,6 +214,11 @@ public final class InputMethodManager {
      */
     boolean mActive = false;
     
+    /**
+     * As reported by IME through InputConnection.
+     */
+    boolean mFullscreenMode;
+    
     // -----------------------------------------------------------
     
     /**
@@ -374,6 +379,7 @@ public final class InputMethodManager {
         
         public void setActive(boolean active) {
             mActive = active;
+            mFullscreenMode = false;
         }
     };    
     
@@ -443,14 +449,36 @@ public final class InputMethodManager {
         }
     }
 
-    public void updateStatusIcon(int iconId, String iconPackage) {
+    public void showStatusIcon(IBinder imeToken, String packageName, int iconId) {
         try {
-            mService.updateStatusIcon(iconId, iconPackage);
+            mService.updateStatusIcon(imeToken, packageName, iconId);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public void hideStatusIcon(IBinder imeToken) {
+        try {
+            mService.updateStatusIcon(imeToken, null, 0);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** @hide */
+    public void setFullscreenMode(boolean enabled) {
+        mFullscreenMode = true;
+    }
+    
+    /**
+     * Allows you to discover whether the attached input method is running
+     * in fullscreen mode.  Return true if it is fullscreen, entirely covering
+     * your UI, else returns false.
+     */
+    public boolean isFullscreenMode() {
+        return mFullscreenMode;
+    }
+    
     /**
      * Return true if the given view is the currently active view for the
      * input method.
@@ -503,7 +531,6 @@ public final class InputMethodManager {
     void finishInputLocked() {
         if (mServedView != null) {
             if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
-            updateStatusIcon(0, null);
             
             if (mCurrentTextBoxAttribute != null) {
                 try {

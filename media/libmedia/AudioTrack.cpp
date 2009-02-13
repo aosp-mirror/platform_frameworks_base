@@ -128,22 +128,21 @@ status_t AudioTrack::set(
        return NO_INIT;
     }
     int afSampleRate;
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         return NO_INIT;
     }
     int afFrameCount;
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
         return NO_INIT;
     }
     uint32_t afLatency;
-    if (AudioSystem::getOutputLatency(&afLatency) != NO_ERROR) {
+    if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
         return NO_INIT;
     }
 
-
     // handle default values first.
-    if (streamType == DEFAULT) {
-        streamType = MUSIC;
+    if (streamType == AudioSystem::DEFAULT) {
+        streamType = AudioSystem::MUSIC;
     }
     if (sampleRate == 0) {
         sampleRate = afSampleRate;
@@ -260,7 +259,7 @@ status_t AudioTrack::set(
     mMarkerPosition = 0;
     mNewPosition = 0;
     mUpdatePeriod = 0;
-    
+
     return NO_ERROR;
 }
 
@@ -434,7 +433,7 @@ void AudioTrack::setSampleRate(int rate)
 {
     int afSamplingRate;
 
-    if (AudioSystem::getOutputSamplingRate(&afSamplingRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSamplingRate, mStreamType) != NO_ERROR) {
         return;
     }
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.

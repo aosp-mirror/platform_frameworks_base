@@ -169,13 +169,6 @@ public:
     virtual void validateVisibility(const Transform& globalTransform);
 
     /**
-     * getDrawingStateTransform - returns the drawing state's transform.
-     * This is used in validateVisibility() and can be use to override or
-     * modify the transform (if so make sure to trigger a transaction).
-     */
-    virtual Transform getDrawingStateTransform() const;
-
-    /**
      * lockPageFlip - called each time the screen is redrawn and returns whether
      * the visible regions need to be recomputed (this is a fairly heavy
      * operation, so this should be set only if needed). Typically this is used
@@ -200,10 +193,15 @@ public:
      * needsBlending - true if this surface needs blending
      */
     virtual bool needsBlending() const  { return false; }
-    
+
     /**
-     * isSecure - true if this surface is secure, that is if it prevents a
-     * screenshot to be taken,
+     * transformed -- true is this surface needs a to be transformed
+     */
+    virtual bool transformed() const    { return mTransformed; }
+
+    /**
+     * isSecure - true if this surface is secure, that is if it prevents
+     * screenshots or vns servers.
      */
     virtual bool isSecure() const       { return false; }
 
@@ -222,7 +220,6 @@ public:
     }
 
     int32_t  getOrientation() const { return mOrientation; }
-    bool transformed() const    { return mTransformed; }
     int  tx() const             { return mLeft; }
     int  ty() const             { return mTop; }
     
@@ -233,7 +230,9 @@ protected:
           GLuint createTexture() const;
     
           void drawWithOpenGL(const Region& clip,
-                  GLint textureName, const GGLSurface& surface) const;
+                  GLint textureName,
+                  const GGLSurface& surface,
+                  int transform = 0) const;
 
           void clearWithOpenGL(const Region& clip) const;
 

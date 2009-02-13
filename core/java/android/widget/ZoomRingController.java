@@ -17,14 +17,17 @@
 package android.widget;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -42,6 +45,7 @@ import android.view.animation.DecelerateInterpolator;
 
 /**
  * TODO: Docs
+ * 
  * @hide
  */
 public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
@@ -222,7 +226,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     public ZoomRingController(Context context, View ownerView) {
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        
+
         mOwnerView = ownerView;
         
         mZoomRing = new ZoomRing(context);
@@ -437,7 +441,15 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                     
                         case MotionEvent.ACTION_UP:
                             mTouchMode = TOUCH_MODE_IDLE;
+                            
+                            /*
+                             * This is a power-user feature that only shows the
+                             * zoom while the user is performing the tap-drag.
+                             * That means once it is released, the zoom ring
+                             * should disappear.
+                             */  
                             mZoomRing.setTapDragMode(false, (int) event.getX(), (int) event.getY());
+                            dismissZoomRingDelayed(0);
                             break;
                     }
                     break;
@@ -560,10 +572,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mZoomRing.handleTouch(event.getAction(), event.getEventTime(), x, y, rawX, rawY);
     }
     
+    public void onZoomRingSetMovableHintVisible(boolean visible) {
+        setPanningArrowsVisible(visible); 
+    }
+
     public void onZoomRingMovingStarted() {
         mHandler.removeMessages(MSG_DISMISS_ZOOM_RING);
         mScroller.abortAnimation();
-        setPanningArrowsVisible(true); 
     }
     
     private void setPanningArrowsVisible(boolean visible) {
@@ -641,8 +656,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         }
     }
     
-    public boolean onZoomRingThumbDragged(int numLevels, int dragAmount, int startAngle,
-            int curAngle) {
+    public boolean onZoomRingThumbDragged(int numLevels, int startAngle, int curAngle) {
         if (mCallback != null) {
             int deltaZoomLevel = -numLevels;
             int globalZoomCenterX = mContainerLayoutParams.x + mZoomRing.getLeft() +
@@ -650,7 +664,8 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             int globalZoomCenterY = mContainerLayoutParams.y + mZoomRing.getTop() +
                     mZoomRingHeight / 2;
             
-            return mCallback.onDragZoom(deltaZoomLevel, globalZoomCenterX - mOwnerViewBounds.left,
+            return mCallback.onDragZoom(deltaZoomLevel,
+                    globalZoomCenterX - mOwnerViewBounds.left,
                     globalZoomCenterY - mOwnerViewBounds.top,
                     (float) startAngle / ZoomRing.RADIAN_INT_MULTIPLIER,
                     (float) curAngle / ZoomRing.RADIAN_INT_MULTIPLIER);
@@ -719,6 +734,45 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         ensureZoomRingIsCentered();
     }
 
+    /**
+     * Shows a "tutorial" (some text) to the user teaching her the new zoom
+     * invocation method.
+     * <p>
+     * It checks the global system setting to ensure this has not been seen
+     * before. Furthermore, if the application does not have privilege to write
+     * to the system settings, it will store this bit locally in a shared
+     * preference.
+     * 
+     * @hide This should only be used by our main apps--browser, maps, and
+     *       gallery
+     */
+    public static void showZoomTutorialOnce(Context context) {
+        ContentResolver cr = context.getContentResolver();
+        if (Settings.System.getInt(cr, SETTING_NAME_SHOWN_TOAST, 0) == 1) {
+            return;
+        }
+        
+        SharedPreferences sp = context.getSharedPreferences("_zoom", Context.MODE_PRIVATE);
+        if (sp.getInt(SETTING_NAME_SHOWN_TOAST, 0) == 1) {
+            return;
+        }
+        
+        try {
+            Settings.System.putInt(cr, SETTING_NAME_SHOWN_TOAST, 1);
+        } catch (SecurityException e) {
+            /*
+             * The app does not have permission to clear this global flag, make
+             * sure the user does not see the message when he comes back to this
+             * same app at least.
+             */
+            sp.edit().putInt(SETTING_NAME_SHOWN_TOAST, 1).commit();
+        }
+
+        Toast.makeText(context,
+                com.android.internal.R.string.tutorial_double_tap_to_zoom_message_short,
+                Toast.LENGTH_LONG).show();
+    }
+    
     private class Panner implements Runnable {
         private static final int RUN_DELAY = 15;
         private static final float STOP_SLOWDOWN = 0.8f;

@@ -879,15 +879,6 @@ public final class Settings {
         public static final String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
 
         /**
-         * The interval in milliseconds after which Wi-Fi is considered idle.
-         * When idle, it is possible for the device to be switched from Wi-Fi to
-         * the mobile data network.
-         * 
-         * @hide pending API Council approval
-         */
-        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
-
-        /**
          * The policy for deciding when Wi-Fi should go to sleep (which will in
          * turn switch to using the mobile data as an Internet connection).
          * <p>
@@ -1287,6 +1278,12 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
+        
+        /**
+         * Whether the haptic feedback (long presses, ...) are enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
         
         // Settings moved to Settings.Secure
 
@@ -2730,6 +2727,13 @@ public final class Settings {
          */
         public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
                 "gprs_register_check_period_ms";
+
+        /**
+         * The interval in milliseconds after which Wi-Fi is considered idle.
+         * When idle, it is possible for the device to be switched from Wi-Fi to
+         * the mobile data network.
+         */
+        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
 
         /**
          * Screen timeout in milliseconds corresponding to the

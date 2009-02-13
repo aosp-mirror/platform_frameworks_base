@@ -93,7 +93,7 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
 
     mState = TONE_IDLE;
 
-    if (AudioSystem::getOutputSamplingRate(&mSamplingRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&mSamplingRate, streamType) != NO_ERROR) {
         LOGE("Unable to marshal AudioFlinger");
         return;
     }
@@ -182,7 +182,7 @@ bool ToneGenerator::startTone(int toneType) {
             mLock.lock();
             if (mState == TONE_STARTING) {
                 if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR) {
-                    LOGE("--- timed out");
+                    LOGE("--- Immediate start timed out");
                     mState = TONE_IDLE;
                 }
             }
@@ -200,7 +200,7 @@ bool ToneGenerator::startTone(int toneType) {
             }
             LOGV("cond received");
         } else {
-            LOGE("--- timed out");
+            LOGE("--- Delayed start timed out");
             mState = TONE_IDLE;
         }
     }
@@ -235,7 +235,7 @@ void ToneGenerator::stopTone() {
         if (lStatus == NO_ERROR) {
             LOGV("track stop complete, time %d", (unsigned int)(systemTime()/1000000));
         } else {
-            LOGE("--- timed out");
+            LOGE("--- Stop timed out");
             mState = TONE_IDLE;
             mpAudioTrack->stop();
         }

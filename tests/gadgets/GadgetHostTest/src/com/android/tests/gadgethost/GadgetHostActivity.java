@@ -23,7 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.gadget.GadgetHost;
 import android.gadget.GadgetHostView;
-import android.gadget.GadgetInfo;
+import android.gadget.GadgetProviderInfo;
 import android.gadget.GadgetManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -73,14 +73,13 @@ public class GadgetHostActivity extends Activity
     };
 
     void discoverGadget(int requestCode) {
-        Intent intent = new Intent(GadgetManager.GADGET_PICK_ACTION);
-        intent.putExtra(GadgetManager.EXTRA_HOST_ID, HOST_ID);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_PICK);
         intent.putExtra(GadgetManager.EXTRA_GADGET_ID, mHost.allocateGadgetId());
         startActivityForResult(intent, requestCode);
     }
 
     void configureGadget(int requestCode, int gadgetId, ComponentName configure) {
-        Intent intent = new Intent(GadgetManager.GADGET_CONFIGURE_ACTION);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_CONFIGURE);
         intent.setComponent(configure);
         intent.putExtra(GadgetManager.EXTRA_GADGET_ID, gadgetId);
         SharedPreferences.Editor prefs = getPreferences(0).edit();
@@ -89,11 +88,13 @@ public class GadgetHostActivity extends Activity
         startActivityForResult(intent, requestCode);
     }
 
-    void handleGadgetPickResult(int resultCode, Intent data) {
-        Bundle extras = data.getExtras();
+    void handleGadgetPickResult(int resultCode, Intent intent) {
+        // BEGIN_INCLUDE(getExtra_EXTRA_GADGET_ID)
+        Bundle extras = intent.getExtras();
         int gadgetId = extras.getInt(GadgetManager.EXTRA_GADGET_ID);
+        // END_INCLUDE(getExtra_EXTRA_GADGET_ID)
         if (resultCode == RESULT_OK) {
-            GadgetInfo gadget = mGadgetManager.getGadgetInfo(gadgetId);
+            GadgetProviderInfo gadget = mGadgetManager.getGadgetInfo(gadgetId);
 
             if (gadget.configure != null) {
                 // configure the gadget if we should
@@ -115,14 +116,14 @@ public class GadgetHostActivity extends Activity
             return;
         }
         if (resultCode == RESULT_OK) {
-            GadgetInfo gadget = mGadgetManager.getGadgetInfo(gadgetId);
+            GadgetProviderInfo gadget = mGadgetManager.getGadgetInfo(gadgetId);
             addGadgetView(gadgetId, gadget);
         } else {
             mHost.deleteGadgetId(gadgetId);
         }
     }
 
-    void addGadgetView(int gadgetId, GadgetInfo gadget) {
+    void addGadgetView(int gadgetId, GadgetProviderInfo gadget) {
         // Inflate the gadget's RemoteViews
         GadgetHostView view = mHost.createView(this, gadgetId, gadget);
 
@@ -188,11 +189,10 @@ public class GadgetHostActivity extends Activity
     }
 
     GadgetHost mHost = new GadgetHost(this, HOST_ID) {
-        protected GadgetHostView onCreateView(Context context, int gadgetId, GadgetInfo gadget) {
+        protected GadgetHostView onCreateView(Context context, int gadgetId, GadgetProviderInfo gadget) {
             return new MyGadgetView(gadgetId);
         }
     };
-
 }
 
 

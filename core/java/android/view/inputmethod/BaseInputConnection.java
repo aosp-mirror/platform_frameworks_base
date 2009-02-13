@@ -371,6 +371,14 @@ public class BaseInputConnection implements InputConnection {
         if (DEBUG) Log.v(TAG, "setSelection " + start + ", " + end);
         final Editable content = getEditable();
         if (content == null) return false;
+        int len = content.length();
+        if (start > len || end > len) {
+            // If the given selection is out of bounds, just ignore it.
+            // Most likely the text was changed out from under the IME,
+            // the the IME is going to have to update all of its state
+            // anyway.
+            return true;
+        }
         Selection.setSelection(content, start, end);
         return true;
     }
@@ -396,20 +404,10 @@ public class BaseInputConnection implements InputConnection {
     }
     
     /**
-     * Provides standard implementation for hiding the status icon associated
-     * with the current input method.
+     * Updates InputMethodManager with the current fullscreen mode.
      */
-    public boolean hideStatusIcon() {
-        mIMM.updateStatusIcon(0, null);
-        return true;
-    }
-    
-    /**
-     * Provides standard implementation for showing the status icon associated
-     * with the current input method.
-     */
-    public boolean showStatusIcon(String packageName, int resId) {
-        mIMM.updateStatusIcon(resId, packageName);
+    public boolean reportFullscreenMode(boolean enabled) {
+        mIMM.setFullscreenMode(enabled);
         return true;
     }
     
@@ -420,7 +418,11 @@ public class BaseInputConnection implements InputConnection {
         
         Editable content = getEditable();
         if (content != null) {
-            if (content.length() == 1) {
+            final int N = content.length();
+            if (N == 0) {
+                return;
+            }
+            if (N == 1) {
                 // If it's 1 character, we have a chance of being
                 // able to generate normal key events...
                 if (mKeyCharacterMap == null) {

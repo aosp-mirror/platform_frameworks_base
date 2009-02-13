@@ -340,7 +340,7 @@ android.view.TouchDelegate
 android.view.VelocityTracker
 android.view.View
 android.view.View$AttachInfo
-android.view.View$AttachInfo$SoundEffectPlayer
+android.view.View$AttachInfo$Callbacks
 android.view.View$BaseSavedState$1
 android.view.View$MeasureSpec
 android.view.View$ScrollabilityCache

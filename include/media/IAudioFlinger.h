@@ -65,11 +65,11 @@ public:
     /* query the audio hardware state. This state never changes,
      * and therefore can be cached.
      */
-    virtual     uint32_t    sampleRate() const = 0;
-    virtual     int         channelCount() const = 0;
-    virtual     int         format() const = 0;
-    virtual     size_t      frameCount() const = 0;
-    virtual     uint32_t    latency() const = 0;
+    virtual     uint32_t    sampleRate(int output) const = 0;
+    virtual     int         channelCount(int output) const = 0;
+    virtual     int         format(int output) const = 0;
+    virtual     size_t      frameCount(int output) const = 0;
+    virtual     uint32_t    latency(int output) const = 0;
 
     /* set/get the audio hardware state. This will probably be used by
      * the preference panel, mostly.
@@ -117,6 +117,9 @@ public:
     
     // force AudioFlinger thread out of standby
     virtual     void        wakeUp() = 0;
+
+    // is A2DP output enabled
+    virtual     bool        isA2dpEnabled() const = 0;
 };
 
 

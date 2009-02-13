@@ -38,13 +38,11 @@ public:
     {
     }
 
-    void audioOutputChanged(uint32_t frameCount, uint32_t samplingRate, uint32_t latency)
+    void a2dpEnabledChanged(bool enabled)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlingerClient::getInterfaceDescriptor());
-        data.writeInt32(frameCount);
-        data.writeInt32(samplingRate);
-        data.writeInt32(latency);
+        data.writeInt32((int)enabled);
         remote()->transact(AUDIO_OUTPUT_CHANGED, data, &reply);
     }
 };
@@ -65,10 +63,8 @@ status_t BnAudioFlingerClient::onTransact(
     switch(code) {
         case AUDIO_OUTPUT_CHANGED: {
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
-            uint32_t frameCount = data.readInt32();
-            uint32_t samplingRate = data.readInt32();
-            uint32_t latency = data.readInt32();
-            audioOutputChanged(frameCount, samplingRate, latency);
+            bool enabled = (bool)data.readInt32();
+            a2dpEnabledChanged(enabled);
             return NO_ERROR;
         } break;
         default:

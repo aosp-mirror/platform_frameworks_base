@@ -339,7 +339,11 @@ public class AudioRecord
      * Releases the native AudioRecord resources.
      */
     public void release() {
-        stop();
+        try {
+            stop();
+        } catch(IllegalStateException ise) { 
+            // don't raise an exception, we're releasing the resources.
+        }
         native_release();
         mState = STATE_UNINITIALIZED;
     }
@@ -426,6 +430,56 @@ public class AudioRecord
      */
     public int getPositionNotificationPeriod() {
         return native_get_pos_update_period();
+    }
+    
+    /**
+     * {@hide}
+     * Returns the minimum buffer size required for the successful creation of an AudioRecord
+     * object.
+     * @param sampleRateInHz the sample rate expressed in Hertz.
+     * @param channelConfig describes the configuration of the audio channels. 
+     *   See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO} and
+     *   {@link AudioFormat#CHANNEL_CONFIGURATION_STEREO}
+     * @param audioFormat the format in which the audio data is represented. 
+     *   See {@link AudioFormat#ENCODING_PCM_16BIT}.
+     * @return {@link #ERROR_BAD_VALUE} if the recording parameters are not supported by the 
+     *  hardware, or an invalid parameter was passed,
+     *  or {@link #ERROR} if the implementation was unable to query the hardware for its 
+     *  output properties, 
+     *   or the minimum buffer size expressed in of bytes.
+     */
+    static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
+        int channelCount = 0;
+        switch(channelConfig) {
+        case AudioFormat.CHANNEL_CONFIGURATION_DEFAULT:
+        case AudioFormat.CHANNEL_CONFIGURATION_MONO:
+            channelCount = 1;
+            break;
+        case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
+            channelCount = 2;
+            break;
+        case AudioFormat.CHANNEL_CONFIGURATION_INVALID:
+        default:
+            loge("getMinBufferSize(): Invalid channel configuration.");
+            return AudioRecord.ERROR_BAD_VALUE;
+        }
+        
+        // PCM_8BIT is not supported at the moment
+        if (audioFormat != AudioFormat.ENCODING_PCM_16BIT) {
+            loge("getMinBufferSize(): Invalid audio format.");
+            return AudioRecord.ERROR_BAD_VALUE;
+        }
+        
+        int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
+        if (size == 0) {
+            return AudioRecord.ERROR_BAD_VALUE;
+        } 
+        else if (size == -1) {
+            return AudioRecord.ERROR;
+        }
+        else {
+            return size;
+        }
     }
 
 
@@ -699,6 +753,9 @@ public class AudioRecord
     
     private native final int native_set_pos_update_period(int updatePeriod);
     private native final int native_get_pos_update_period();
+    
+    static private native final int native_get_min_buff_size(
+            int sampleRateInHz, int channelCount, int audioFormat);
 
     
     //---------------------------------------------------------

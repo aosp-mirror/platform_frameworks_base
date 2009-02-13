@@ -818,7 +818,7 @@ Exit:
 MediaPlayerService::AudioOutput::AudioOutput()
 {
     mTrack = 0;
-    mStreamType = AudioTrack::MUSIC;
+    mStreamType = AudioSystem::MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
     mLatency = 0;
@@ -900,15 +900,15 @@ status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelC
     int afFrameCount;
     int frameCount;
 
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
 
-    frameCount = (sampleRate*afFrameCount)/afSampleRate;
-    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount*bufferCount);
+    frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
+    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount);
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
         LOGE("Unable to create audio track");
         delete t;

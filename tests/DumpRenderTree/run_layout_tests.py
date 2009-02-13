@@ -48,6 +48,86 @@ def CountLineNumber(filename):
   fp.close()
   return lines
 
+def DumpRenderTreeFinished(adb_cmd):
+  """ Check if DumpRenderTree finished running tests
+  
+  Args:
+    output: adb_cmd string
+  """
+  
+  # pull /sdcard/running_test.txt, if the content is "#DONE", it's done
+  shell_cmd_str = adb_cmd + " shell cat /sdcard/running_test.txt"
+  adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+  return adb_output.strip() == "#DONE"
+
+def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
+   """ Given two result files, generate diff and
+       write to diff_results file. All arguments are absolute paths
+       to files.
+   """
+   old_file = open(old_results, "r")
+   new_file = open(new_results, "r")
+   diff_file = open(diff_results, "a") 
+
+   # Read lines from each file
+   ndict = new_file.readlines()
+   cdict = old_file.readlines()
+
+   # Write marker to diff file
+   diff_file.writelines(marker + "\n")
+   diff_file.writelines("###############\n")
+
+   # Strip reason from result lines
+   if strip_reason is True:
+     for i in range(0, len(ndict)):
+       ndict[i] = ndict[i].split(' ')[0] + "\n"
+     for i in range(0, len(cdict)):
+       cdict[i] = cdict[i].split(' ')[0] + "\n"
+
+   # Find results in new_results missing in old_results
+   new_count=0
+   for line in ndict:
+     if line not in cdict:
+       diff_file.writelines("+ " + line)
+       new_count += 1
+
+   # Find results in old_results missing in new_results
+   missing_count=0
+   for line in cdict:
+     if line not in ndict:
+       diff_file.writelines("- " + line)
+       missing_count += 1
+
+   logging.info(marker + "  >>> " + str(new_count) + " new, " + str(missing_count) + " misses")
+
+   diff_file.writelines("\n\n")
+
+   old_file.close()
+   new_file.close()
+   diff_file.close()
+   return
+
+def CompareResults(ref_dir, results_dir):
+  """Compare results in two directories
+
+  Args:
+    ref_dir: the reference directory having layout results as references
+    results_dir: the results directory
+  """
+  logging.info("Comparing results to " + ref_dir)
+
+  diff_result = os.path.join(results_dir, "layout_tests_diff.txt") 
+  if os.path.exists(diff_result):
+    os.remove(diff_result)
+
+  files=["passed", "failed", "nontext", "crashed"]
+  for f in files:
+    result_file_name = "layout_tests_" + f + ".txt"
+    DiffResults(f, os.path.join(results_dir, result_file_name),
+                os.path.join(ref_dir, result_file_name), diff_result,
+                f == "failed")
+  logging.info("Detailed diffs are in " + diff_result)
+
 def main(options, args):
   """Run the tests. Will call sys.exit when complete.
   
@@ -84,7 +164,7 @@ def main(options, args):
        sys.exit(1)
 
 
-  logging.info("Starting tests")
+  logging.info("Running tests")
 
   # Count crashed tests.
   crashed_tests = []
@@ -98,7 +178,7 @@ def main(options, args):
   # Call LayoutTestsAutoTest::startLayoutTests.
   shell_cmd_str = adb_cmd + " shell am instrument -e class com.android.dumprendertree.LayoutTestsAutoTest#startLayoutTests -e path \"" + path + "\" -e timeout " + timeout_ms + " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-  while adb_output.find('Process crashed') != -1:
+  while not DumpRenderTreeFinished(adb_cmd):
     # Get the running_test.txt
     logging.error("DumpRenderTree crashed, output:\n" + adb_output)
 
@@ -118,8 +198,8 @@ def main(options, args):
     logging.error("Error happened : " + adb_output)
     sys.exit(1)
 
-  logging.info("Done");
   logging.debug(adb_output);
+  logging.info("Done\n");
 
   # Pull results from /sdcard
   results_dir = options.results_directory
@@ -152,8 +232,21 @@ def main(options, args):
   nontext_tests = CountLineNumber(results_dir + "/layout_tests_nontext.txt")
   logging.info(str(nontext_tests) + " no dumpAsText")
 
-  logging.info("Results are stored under: " + results_dir)
+  logging.info("Results are stored under: " + results_dir + "\n")
 
+  # Comparing results to references to find new fixes and regressions.
+  results_dir = os.path.abspath(options.results_directory)
+  ref_dir = options.ref_directory
+
+  # if ref_dir is null, cannonify ref_dir to the script dir.
+  if not ref_dir:
+    script_self = sys.argv[0]
+    script_dir = os.path.dirname(script_self)
+    ref_dir = os.path.join(script_dir, "results")
+
+  ref_dir = os.path.abspath(ref_dir)
+
+  CompareResults(ref_dir, results_dir)
 
 if '__main__' == __name__:
   option_parser = optparse.OptionParser()
@@ -171,6 +264,11 @@ if '__main__' == __name__:
                            help="pass options to adb, such as -d -e, etc");
   option_parser.add_option("", "--results-directory",
                            default="layout-test-results",
-                           help="directory name under which results are stored.")
+                           help="directory which results are stored.")
+  option_parser.add_option("", "--ref-directory",
+                           default=None,
+                           dest="ref_directory",
+                           help="directory where reference results are stored.")
+
   options, args = option_parser.parse_args();
   main(options, args)

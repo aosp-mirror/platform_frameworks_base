@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -548,6 +550,54 @@ public class RemoteViews implements Parcelable, Filter {
     }
     
     /**
+     * Equivalent to calling {@link android.widget.ViewFlipper#startFlipping()}
+     * or {@link android.widget.ViewFlipper#stopFlipping()} along with
+     * {@link android.widget.ViewFlipper#setFlipInterval(int)}.
+     */
+    private class SetFlipping extends Action {
+        public SetFlipping(int id, boolean flipping, int milliseconds) {
+            this.viewId = id;
+            this.flipping = flipping;
+            this.milliseconds = milliseconds;
+        }
+        
+        public SetFlipping(Parcel parcel) {
+            viewId = parcel.readInt();
+            flipping = parcel.readInt() != 0;
+            milliseconds = parcel.readInt();
+        }
+        
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(flipping ? 1 : 0);
+            dest.writeInt(milliseconds);
+        }
+        
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+            if (target instanceof ViewFlipper) {
+                final ViewFlipper flipper = (ViewFlipper) target;
+                if (milliseconds != -1) {
+                    flipper.setFlipInterval(milliseconds);
+                }
+                if (flipping) {
+                    flipper.startFlipping();
+                } else {
+                    flipper.stopFlipping();
+                }
+            }
+        }
+        
+        int viewId;
+        boolean flipping;
+        int milliseconds;
+
+        public final static int TAG = 10;
+    }
+
+    /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
      * 
@@ -602,6 +652,9 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case SetTextColor.TAG:
                     mActions.add(new SetTextColor(parcel));
+                    break;
+                case SetFlipping.TAG:
+                    mActions.add(new SetFlipping(parcel));
                     break;
                 default:
                     throw new ActionException("Tag " + tag + "not found");
@@ -766,6 +819,22 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setTextColor(int viewId, int color) {
         addAction(new SetTextColor(viewId, color));
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.ViewFlipper#startFlipping()}
+     * or {@link android.widget.ViewFlipper#stopFlipping()} along with
+     * {@link android.widget.ViewFlipper#setFlipInterval(int)}.
+     * 
+     * @param viewId The id of the view to apply changes to
+     * @param flipping True means we should
+     *            {@link android.widget.ViewFlipper#startFlipping()}, otherwise
+     *            {@link android.widget.ViewFlipper#stopFlipping()}.
+     * @param milliseconds How long to wait before flipping to the next view, or
+     *            -1 to leave unchanged.
+     */
+    public void setFlipping(int viewId, boolean flipping, int milliseconds) {
+        addAction(new SetFlipping(viewId, flipping, milliseconds));
     }
 
     /**

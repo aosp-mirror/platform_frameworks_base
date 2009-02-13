@@ -84,7 +84,7 @@ Point LayerOrientationAnim::getPhysicalSize() const
 void LayerOrientationAnim::validateVisibility(const Transform&)
 {
     const Layer::State& s(drawingState());
-    const Transform tr(getDrawingStateTransform());
+    const Transform tr(s.transform);
     const Point size(getPhysicalSize());
     uint32_t w = size.x;
     uint32_t h = size.y;

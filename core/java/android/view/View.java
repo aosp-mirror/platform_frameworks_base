@@ -836,6 +836,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public static final int SOUND_EFFECTS_ENABLED = 0x08000000;
 
     /**
+     * View flag indicating whether this view should have haptic feedback
+     * enabled for events such as long presses.
+     */
+    public static final int HAPTIC_FEEDBACK_ENABLED = 0x10000000;
+
+    /**
      * Use with {@link #focusSearch}. Move focus to the previous selectable
      * item.
      */
@@ -1637,6 +1643,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
+        mViewFlags = SOUND_EFFECTS_ENABLED|HAPTIC_FEEDBACK_ENABLED;
         ++sInstanceCount;
     }
 
@@ -1702,9 +1709,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         int y = 0;
 
         int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
-
-        viewFlagValues |= SOUND_EFFECTS_ENABLED;
-        viewFlagMasks |= SOUND_EFFECTS_ENABLED;
 
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
@@ -1800,6 +1804,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     if (!a.getBoolean(attr, true)) {
                         viewFlagValues &= ~SOUND_EFFECTS_ENABLED;
                         viewFlagMasks |= SOUND_EFFECTS_ENABLED;
+                    }
+                case com.android.internal.R.styleable.View_hapticFeedbackEnabled:
+                    if (!a.getBoolean(attr, true)) {
+                        viewFlagValues &= ~HAPTIC_FEEDBACK_ENABLED;
+                        viewFlagMasks |= HAPTIC_FEEDBACK_ENABLED;
                     }
                 case R.styleable.View_scrollbars:
                     final int scrollbars = a.getInt(attr, SCROLLBARS_NONE);
@@ -2181,6 +2190,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
         if (!handled) {
             handled = showContextMenu();
+        }
+        if (handled) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         }
         return handled;
     }
@@ -2742,7 +2754,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Set whether this view should have sound effects enabled for events such as
      * clicking and touching.
      *
-     * You may wish to disable sound effects for a view if you already play sounds,
+     * <p>You may wish to disable sound effects for a view if you already play sounds,
      * for instance, a dial key that plays dtmf tones.
      *
      * @param soundEffectsEnabled whether sound effects are enabled for this view.
@@ -2765,6 +2777,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     @ViewDebug.ExportedProperty
     public boolean isSoundEffectsEnabled() {
         return SOUND_EFFECTS_ENABLED == (mViewFlags & SOUND_EFFECTS_ENABLED);
+    }
+
+    /**
+     * Set whether this view should have haptic feedback for events such as
+     * long presses.
+     *
+     * <p>You may wish to disable haptic feedback if your view already controls
+     * its own haptic feedback.
+     *
+     * @param hapticFeedbackEnabled whether haptic feedback enabled for this view.
+     * @see #isHapticFeedbackEnabled()
+     * @see #performHapticFeedback(int)
+     * @attr ref android.R.styleable#View_hapticFeedbackEnabled
+     */
+    public void setHapticFeedbackEnabled(boolean hapticFeedbackEnabled) {
+        setFlags(hapticFeedbackEnabled ? HAPTIC_FEEDBACK_ENABLED: 0, HAPTIC_FEEDBACK_ENABLED);
+    }
+
+    /**
+     * @return whether this view should have haptic feedback enabled for events
+     * long presses.
+     *
+     * @see #setHapticFeedbackEnabled(boolean)
+     * @see #performHapticFeedback(int)
+     * @attr ref android.R.styleable#View_hapticFeedbackEnabled
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isHapticFeedbackEnabled() {
+        return HAPTIC_FEEDBACK_ENABLED == (mViewFlags & HAPTIC_FEEDBACK_ENABLED);
     }
 
     /**
@@ -7312,20 +7353,57 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     /**
      * Play a sound effect for this view.
      *
-     * The framework will play sound effects for some built in actions, such as
+     * <p>The framework will play sound effects for some built in actions, such as
      * clicking, but you may wish to play these effects in your widget,
      * for instance, for internal navigation.
      *
-     * The sound effect will only be played if sound effects are enabled by the user, and
+     * <p>The sound effect will only be played if sound effects are enabled by the user, and
      * {@link #isSoundEffectsEnabled()} is true.
      *
      * @param soundConstant One of the constants defined in {@link SoundEffectConstants}
      */
-    protected void playSoundEffect(int soundConstant) {
-        if (mAttachInfo == null || mAttachInfo.mSoundEffectPlayer == null || !isSoundEffectsEnabled()) {
+    public void playSoundEffect(int soundConstant) {
+        if (mAttachInfo == null || mAttachInfo.mRootCallbacks == null || !isSoundEffectsEnabled()) {
             return;
         }
-        mAttachInfo.mSoundEffectPlayer.playSoundEffect(soundConstant);
+        mAttachInfo.mRootCallbacks.playSoundEffect(soundConstant);
+    }
+
+    /**
+     * Provide haptic feedback to the user for this view.
+     *
+     * <p>The framework will provide haptic feedback for some built in actions,
+     * such as long presses, but you may wish to provide feedback for your
+     * own widget.
+     *
+     * <p>The feedback will only be performed if
+     * {@link #isHapticFeedbackEnabled()} is true.
+     *
+     * @param feedbackConstant One of the constants defined in
+     * {@link HapticFeedbackConstants}
+     */
+    public boolean performHapticFeedback(int feedbackConstant) {
+        return performHapticFeedback(feedbackConstant, 0);
+    }
+
+    /**
+     * Like {@link #performHapticFeedback(int)}, with additional options.
+     *
+     * @param feedbackConstant One of the constants defined in
+     * {@link HapticFeedbackConstants}
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     */
+    public boolean performHapticFeedback(int feedbackConstant, int flags) {
+        if (mAttachInfo == null) {
+            return false;
+        }
+        if ((flags&HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
+                && !isHapticFeedbackEnabled()) {
+            return false;
+        }
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(
+                feedbackConstant,
+                (flags&HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0);
     }
 
     /**
@@ -7704,8 +7782,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      */
     static class AttachInfo {
 
-        interface SoundEffectPlayer {
+        interface Callbacks {
             void playSoundEffect(int effectId);
+            boolean performHapticFeedback(int effectId, boolean always);
         }
 
         /**
@@ -7775,7 +7854,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
 
         final IBinder mWindowToken;
 
-        final SoundEffectPlayer mSoundEffectPlayer;
+        final Callbacks mRootCallbacks;
 
         /**
          * The top view of the hierarchy.
@@ -7922,12 +8001,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * @param handler the events handler the view must use
          */
         AttachInfo(IWindowSession session, IWindow window,
-                Handler handler, SoundEffectPlayer effectPlayer) {
+                Handler handler, Callbacks effectPlayer) {
             mSession = session;
             mWindow = window;
             mWindowToken = window.asBinder();
             mHandler = handler;
-            mSoundEffectPlayer = effectPlayer;
+            mRootCallbacks = effectPlayer;
         }
     }
 

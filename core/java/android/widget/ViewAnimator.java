@@ -28,6 +28,9 @@ import android.view.animation.AnimationUtils;
 /**
  * Base class for a {@link FrameLayout} container that will perform animations
  * when switching between its views.
+ *
+ * @attr ref android.R.styleable#ViewAnimator_inAnimation
+ * @attr ref android.R.styleable#ViewAnimator_outAnimation
  */
 public class ViewAnimator extends FrameLayout {
 

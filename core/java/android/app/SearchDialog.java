@@ -835,9 +835,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // also guard against possible race conditions (late arrival after dismiss)
         if (mSearchable != null) {
             handled = doSuggestionsKey(v, keyCode, event);
-            if (!handled) {
-                handled = refocusingKeyListener(v, keyCode, event);
-            }
         }
         return handled;
     }
@@ -1024,6 +1021,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @param jamQuery True means to set the query, false means to reset it to the user's choice
      */
     private void jamSuggestionQuery(boolean jamQuery, AdapterView<?> parent, int position) {
+        // quick check against race conditions
+        if (mSearchable == null) {
+            return;
+        }
+        
         mSuggestionsAdapter.setNonUserQuery(true);       // disables any suggestions processing
         if (jamQuery) {
             CursorAdapter ca = getSuggestionsAdapter(parent);

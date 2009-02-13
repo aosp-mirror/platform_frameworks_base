@@ -47,11 +47,8 @@ public class DatePicker extends FrameLayout {
     /* UI Components */
     private final NumberPicker mDayPicker;
     private final NumberPicker mMonthPicker;
-    private final NumberPicker mYearPicker;    
-    
-    private final int mStartYear;
-    private final int mEndYear;
-    
+    private final NumberPicker mYearPicker;
+
     /**
      * How we notify users the date has changed.
      */
@@ -87,12 +84,9 @@ public class DatePicker extends FrameLayout {
     public DatePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        LayoutInflater inflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.date_picker,
-            this, // we are the parent
-            true);
-        
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.date_picker, this, true);
+
         mDayPicker = (NumberPicker) findViewById(R.id.day);
         mDayPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         mDayPicker.setSpeed(100);
@@ -134,20 +128,17 @@ public class DatePicker extends FrameLayout {
         });
         
         // attributes
-        TypedArray a = context
-                .obtainStyledAttributes(attrs, R.styleable.DatePicker);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker);
 
-        mStartYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
-        mEndYear = a.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
+        int mStartYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
+        int mEndYear = a.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
         mYearPicker.setRange(mStartYear, mEndYear);
         
         a.recycle();
         
         // initialize to current date
         Calendar cal = Calendar.getInstance();
-        init(cal.get(Calendar.YEAR), 
-                cal.get(Calendar.MONTH), 
-                cal.get(Calendar.DAY_OF_MONTH), null);
+        init(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), null);
         
         // re-order the number pickers to match the current date format
         reorderPickers();

@@ -121,6 +121,17 @@ status_t MediaRecorderClient::setOutputFile(const char* path)
     return mRecorder->setOutputFile(path);
 }
 
+status_t MediaRecorderClient::setOutputFile(int fd, int64_t offset, int64_t length)
+{
+    LOGV("setOutputFile(%d, %lld, %lld)", fd, offset, length);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setOutputFile(fd, offset, length);
+}
+
 status_t MediaRecorderClient::setVideoSize(int width, int height)
 {
     LOGV("setVideoSize(%dx%d)", width, height);

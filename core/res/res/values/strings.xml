@@ -2263,8 +2263,7 @@
     <string name="permdesc_pkgUsageStats">Allows the modification of collected component usage statistics. Not for use by normal applications.</string>
 
     <!-- Shown in the tutorial for double tap to zoom. -->
-    <string name="tutorial_double_tap_to_zoom_message">Congratulations on downloading the Android software update.  This update includes a number of great new features for you to enjoy.  One major improvement we've made is to how you zoom.  Now, when you want to zoom, just double tap on the screen.  This will bring up a zoom widget.  Drag the widget's handle clockwise to zoom in, and counter-clockwise to zoom out.</string>
-
+    <string name="tutorial_double_tap_to_zoom_message_short">Double tap to zoom</string>
 </resources>
 
 

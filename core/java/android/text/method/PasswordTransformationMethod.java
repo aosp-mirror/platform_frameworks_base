@@ -105,8 +105,10 @@ implements TransformationMethod, TextWatcher
                         sp.removeSpan(old[i]);
                     }
 
-                    sp.setSpan(new Visible(sp, this), start, start + count,
-                               Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    if (count == 1) {
+                        sp.setSpan(new Visible(sp, this), start, start + count,
+                                   Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
                 }
             }
         }

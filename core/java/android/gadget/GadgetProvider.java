@@ -55,7 +55,7 @@ public class GadgetProvider extends BroadcastReceiver {
         // Protect against rogue update broadcasts (not really a security issue,
         // just filter bad broacasts out so subclasses are less likely to crash).
         String action = intent.getAction();
-        if (GadgetManager.GADGET_UPDATE_ACTION.equals(action)) {
+        if (GadgetManager.ACTION_GADGET_UPDATE.equals(action)) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 int[] gadgetIds = extras.getIntArray(GadgetManager.EXTRA_GADGET_IDS);
@@ -64,7 +64,7 @@ public class GadgetProvider extends BroadcastReceiver {
                 }
             }
         }
-        else if (GadgetManager.GADGET_DELETED_ACTION.equals(action)) {
+        else if (GadgetManager.ACTION_GADGET_DELETED.equals(action)) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 int[] gadgetIds = extras.getIntArray(GadgetManager.EXTRA_GADGET_IDS);
@@ -73,102 +73,81 @@ public class GadgetProvider extends BroadcastReceiver {
                 }
             }
         }
-        else if (GadgetManager.GADGET_ENABLED_ACTION.equals(action)) {
+        else if (GadgetManager.ACTION_GADGET_ENABLED.equals(action)) {
             this.onEnabled(context);
         }
-        else if (GadgetManager.GADGET_DISABLED_ACTION.equals(action)) {
+        else if (GadgetManager.ACTION_GADGET_DISABLED.equals(action)) {
             this.onDisabled(context);
         }
     }
     // END_INCLUDE(onReceive)
     
     /**
-     * Called in response to the {@link GadgetManager#GADGET_UPDATE_ACTION} broadcast when
+     * Called in response to the {@link GadgetManager#ACTION_GADGET_UPDATE} broadcast when
      * this gadget provider is being asked to provide {@link android.widget.RemoteViews RemoteViews}
      * for a set of gadgets.  Override this method to implement your own gadget functionality.
      *
      * {@more}
-     * <p class="note">If you want this method called, you must declare in an intent-filter in
-     * your AndroidManifest.xml file that you accept the GADGET_UPDATE_ACTION intent action.
-     * For example:
-     * <font color=red>TODO: SAMPLE CODE GOES HERE</font>
-     * </p>
      * 
      * @param context   The {@link android.content.Context Context} in which this receiver is
      *                  running.
      * @param gadgetManager A {@link GadgetManager} object you can call {@link
-     *                  GadgetManager#updateGadgets} on.
+     *                  GadgetManager#updateGadget} on.
      * @param gadgetIds The gadgetsIds for which an update is needed.  Note that this
      *                  may be all of the gadget instances for this provider, or just
      *                  a subset of them.
      *
-     * @see GadgetManager#GADGET_UPDATE_ACTION
+     * @see GadgetManager#ACTION_GADGET_UPDATE
      */
     public void onUpdate(Context context, GadgetManager gadgetManager, int[] gadgetIds) {
     }
     
     /**
-     * Called in response to the {@link GadgetManager#GADGET_DELETED_ACTION} broadcast when
+     * Called in response to the {@link GadgetManager#ACTION_GADGET_DELETED} broadcast when
      * one or more gadget instances have been deleted.  Override this method to implement
      * your own gadget functionality.
      *
      * {@more}
-     * <p class="note">If you want this method called, you must declare in an intent-filter in
-     * your AndroidManifest.xml file that you accept the GADGET_DELETED_ACTION intent action.
-     * For example:
-     * <font color=red>TODO: SAMPLE CODE GOES HERE</font>
-     * </p>
      * 
      * @param context   The {@link android.content.Context Context} in which this receiver is
      *                  running.
      * @param gadgetIds The gadgetsIds that have been deleted from their host.
      *
-     * @see GadgetManager#GADGET_DELETED_ACTION
+     * @see GadgetManager#ACTION_GADGET_DELETED
      */
     public void onDeleted(Context context, int[] gadgetIds) {
     }
 
     /**
-     * Called in response to the {@link GadgetManager#GADGET_ENABLED_ACTION} broadcast when
+     * Called in response to the {@link GadgetManager#ACTION_GADGET_ENABLED} broadcast when
      * the a gadget for this provider is instantiated.  Override this method to implement your
      * own gadget functionality.
      *
      * {@more}
      * When the last gadget for this provider is deleted,
-     * {@link GadgetManager#GADGET_DISABLED_ACTION} is sent and {@link #onDisabled}
-     * is called.  If after that, a gadget for this provider is created again, onEnabled() will
-     * be called again.
+     * {@link GadgetManager#ACTION_GADGET_DISABLED} is sent by the gadget manager, and
+     * {@link #onDisabled} is called.  If after that, a gadget for this provider is created
+     * again, onEnabled() will be called again.
      *
-     * <p class="note">If you want this method called, you must declare in an intent-filter in
-     * your AndroidManifest.xml file that you accept the GADGET_ENABLED_ACTION intent action.
-     * For example:
-     * <font color=red>TODO: SAMPLE CODE GOES HERE</font>
-     * </p>
-     * 
      * @param context   The {@link android.content.Context Context} in which this receiver is
      *                  running.
      *
-     * @see GadgetManager#GADGET_ENABLED_ACTION
+     * @see GadgetManager#ACTION_GADGET_ENABLED
      */
     public void onEnabled(Context context) {
     }
 
     /**
-     * Called in response to the {@link GadgetManager#GADGET_DISABLED_ACTION} broadcast, which
+     * Called in response to the {@link GadgetManager#ACTION_GADGET_DISABLED} broadcast, which
      * is sent when the last gadget instance for this provider is deleted.  Override this method
      * to implement your own gadget functionality.
      *
      * {@more}
-     * <p class="note">If you want this method called, you must declare in an intent-filter in
-     * your AndroidManifest.xml file that you accept the GADGET_DISABLED_ACTION intent action.
-     * For example:
-     * <font color=red>TODO: SAMPLE CODE GOES HERE</font>
-     * </p>
      * 
      * @param context   The {@link android.content.Context Context} in which this receiver is
      *                  running.
      *
-     * @see GadgetManager#GADGET_DISABLED_ACTION
+     * @see GadgetManager#ACTION_GADGET_DISABLED
      */
     public void onDisabled(Context context) {
     }

@@ -96,7 +96,7 @@ int JetPlayer::init()
 
     // create the output AudioTrack
     mAudioTrack = new AudioTrack();
-    mAudioTrack->set(AudioTrack::MUSIC,  //TODO parametrize this
+    mAudioTrack->set(AudioSystem::MUSIC,  //TODO parametrize this
             pLibConfig->sampleRate,
             1, // format = PCM 16bits per sample,
             pLibConfig->numChannels,

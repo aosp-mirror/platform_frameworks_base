@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.text.*;
 import android.widget.TextView;
@@ -185,15 +186,9 @@ implements MovementMethod
         if (code != KeyEvent.KEYCODE_UNKNOWN
                 && event.getAction() == KeyEvent.ACTION_MULTIPLE) {
             int repeat = event.getRepeatCount();
-            boolean first = true;
             boolean handled = false;
             while ((--repeat) > 0) {
-                if (first && executeDown(view, text, code)) {
-                    handled = true;
-                    MetaKeyKeyListener.adjustMetaAfterKeypress(text);
-                    MetaKeyKeyListener.resetLockedMeta(text);
-                }
-                first = false;
+                handled |= executeDown(view, text, code);
             }
             return handled;
         }

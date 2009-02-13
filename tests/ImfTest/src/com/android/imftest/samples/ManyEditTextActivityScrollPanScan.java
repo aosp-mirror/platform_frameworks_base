@@ -20,26 +20,33 @@ import com.android.internal.R;
  */
 public class ManyEditTextActivityScrollPanScan extends Activity 
 {
-   private ScrollView mScrollView;
-   @Override
-   public void onCreate(Bundle savedInstanceState) 
-   {
-       super.onCreate(savedInstanceState);
-       mScrollView = new ScrollView(this);
-       
-       LinearLayout layout = new LinearLayout(this);
-       layout.setOrientation(LinearLayout.VERTICAL);
-       
-       String string = new String();
-       for (int i=0; i<12; i++) 
-       {
-           final EditText editText = new EditText(this);
-           editText.setText(string.valueOf(i));
-           layout.addView(editText);
-       }
+    public static final int NUM_EDIT_TEXTS = 12;
 
-       mScrollView.addView(layout);
-       setContentView(mScrollView);
-       this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-    }  
+    private View mRootView;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+        mRootView = new ScrollView(this);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        for (int i=0; i<NUM_EDIT_TEXTS; i++) 
+        {
+            final EditText editText = new EditText(this);
+            editText.setText(String.valueOf(i));
+            editText.setId(i);
+            layout.addView(editText);
+        }
+
+        ((ScrollView) mRootView).addView(layout);
+        setContentView(mRootView);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    }   
+
+    public View getRootView() {
+        return mRootView;
+    }
 }

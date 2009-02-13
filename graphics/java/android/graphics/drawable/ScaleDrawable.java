@@ -63,6 +63,13 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    /**
+     * Returns the drawable scaled by this ScaleDrawable.
+     */
+    public Drawable getDrawable() {
+        return mScaleState.mDrawable;
+    }
+
     private static float getPercent(TypedArray a, int name) {
         String s = a.getString(name);
         if (s != null) {

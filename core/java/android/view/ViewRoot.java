@@ -61,7 +61,7 @@ import static javax.microedition.khronos.opengles.GL10.*;
  */
 @SuppressWarnings({"EmptyCatchBlock"})
 public final class ViewRoot extends Handler implements ViewParent,
-        View.AttachInfo.SoundEffectPlayer {
+        View.AttachInfo.Callbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
     @SuppressWarnings({"ConstantConditionalExpression"})
@@ -1637,7 +1637,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             dispatchDetachedFromWindow();
             break;
         case DISPATCH_KEY_FROM_IME:
-            if (true) Log.v(
+            if (LOCAL_LOGV) Log.v(
                 "ViewRoot", "Dispatching key "
                 + msg.obj + " from IME to " + mView);
             deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
@@ -2232,6 +2232,17 @@ public final class ViewRoot extends Handler implements ViewParent,
             default:
                 throw new IllegalArgumentException("unknown effect id " + effectId +
                         " not defined in " + SoundEffectConstants.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean performHapticFeedback(int effectId, boolean always) {
+        try {
+            return sWindowSession.performHapticFeedback(mWindow, effectId, always);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

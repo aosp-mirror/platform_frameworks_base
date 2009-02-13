@@ -53,20 +53,13 @@
 #include "LayerDim.h"
 #include "LayerBitmap.h"
 #include "LayerOrientationAnim.h"
-#include "LayerScreenshot.h"
 #include "OrientationAnimation.h"
 #include "SurfaceFlinger.h"
-#include "RFBServer.h"
 #include "VRamHeap.h"
 
 #include "DisplayHardware/DisplayHardware.h"
 #include "GPUHardware/GPUHardware.h"
 
-
-// the VNC server even on local ports presents a significant
-// thread as it can allow an application to control and "see" other
-// applications, de-facto bypassing security permissions.
-#define ENABLE_VNC_SERVER   0
 
 #define DISPLAY_COUNT       1
 
@@ -460,9 +453,6 @@ status_t SurfaceFlinger::readyToRun()
     if (mDebugNoBootAnimation == false)
         mBootAnimation = new BootAnimation(this);
 
-    if (ENABLE_VNC_SERVER)
-        mRFBServer = new RFBServer(w, h, f);
-
     return NO_ERROR;
 }
 
@@ -570,18 +560,6 @@ void SurfaceFlinger::postFramebuffer()
 
         if (UNLIKELY(mDebugFps)) {
             debugShowFPS();
-        }
-
-        if (UNLIKELY(ENABLE_VNC_SERVER &&
-                mRFBServer!=0 && mRFBServer->isConnected())) {
-            if (!mSecureFrameBuffer) {
-                GGLSurface fb;
-                // backbufer, is going to become the front buffer really soon
-                hw.getDisplaySurface(&fb);
-                if (LIKELY(fb.data != 0)) {
-                    mRFBServer->frameBufferUpdated(fb, mInvalidRegion);
-                }
-            }
         }
 
         hw.flip(mInvalidRegion);
@@ -1571,55 +1549,17 @@ status_t SurfaceFlinger::onTransact(
 
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
-        if (code == 1012) {
-            // take screen-shot of the front buffer
-            if (UNLIKELY(checkCallingPermission(
-                    String16("android.permission.READ_FRAME_BUFFER")) == false))
-            { // not allowed
-                LOGE("Permission Denial: "
-                        "can't take screenshots from pid=%d, uid=%d\n",
-                        IPCThreadState::self()->getCallingPid(),
-                        IPCThreadState::self()->getCallingUid());
-                return PERMISSION_DENIED;
-            }
-
-            if (UNLIKELY(mSecureFrameBuffer)) {
-                LOGE("A secure window is on screen: "
-                        "can't take screenshots from pid=%d, uid=%d\n",
-                        IPCThreadState::self()->getCallingPid(),
-                        IPCThreadState::self()->getCallingUid());
-                return PERMISSION_DENIED;
-            }
-
-            LOGI("Taking a screenshot...");
-
-            LayerScreenshot* l = new LayerScreenshot(this, 0);
-
-            Mutex::Autolock _l(mStateLock);
-            const DisplayHardware& hw(graphicPlane(0).displayHardware());
-            l->initStates(hw.getWidth(), hw.getHeight(), 0);
-            l->setLayer(INT_MAX);
-
-            addLayer_l(l);
-            setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
-
-            l->takeScreenshot(mStateLock, reply);
-
-            removeLayer_l(l);
-            setTransactionFlags(eTransactionNeeded);
-            return NO_ERROR;
-        } else {
-            // HARDWARE_TEST stuff...
-            if (UNLIKELY(checkCallingPermission(
-                    String16("android.permission.HARDWARE_TEST")) == false))
-            { // not allowed
-                LOGE("Permission Denial: pid=%d, uid=%d\n",
-                        IPCThreadState::self()->getCallingPid(),
-                        IPCThreadState::self()->getCallingUid());
-                return PERMISSION_DENIED;
-            }
-            int n;
-            switch (code) {
+        // HARDWARE_TEST stuff...
+        if (UNLIKELY(checkCallingPermission(
+                String16("android.permission.HARDWARE_TEST")) == false))
+        { // not allowed
+            LOGE("Permission Denial: pid=%d, uid=%d\n",
+                    IPCThreadState::self()->getCallingPid(),
+                    IPCThreadState::self()->getCallingUid());
+            return PERMISSION_DENIED;
+        }
+        int n;
+        switch (code) {
             case 1000: // SHOW_CPU
                 n = data.readInt32();
                 mDebugCpu = n ? 1 : 0;
@@ -1652,8 +1592,8 @@ status_t SurfaceFlinger::onTransact(
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
                 mDirtyRegion.set(hw.bounds()); // careful that's not thread-safe
                 signalEvent();
-                }
-                return NO_ERROR;
+            }
+            return NO_ERROR;
             case 1005: // ask GPU revoke
                 mGPU->friendlyRevoke();
                 return NO_ERROR;
@@ -1669,13 +1609,12 @@ status_t SurfaceFlinger::onTransact(
                 reply->writeInt32(mDebugRegion);
                 reply->writeInt32(mDebugBackground);
                 return NO_ERROR;
-            case 1013: { // screenshot
+            case 1013: {
                 Mutex::Autolock _l(mStateLock);
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
                 reply->writeInt32(hw.getPageFlipCount());
             }
             return NO_ERROR;
-            }
         }
     }
     return err;
@@ -1829,10 +1768,33 @@ void GraphicPlane::setTransform(const Transform& tr) {
     mGlobalTransform = mOrientationTransform * mTransform;
 }
 
+status_t GraphicPlane::orientationToTransfrom(
+        int orientation, int w, int h, Transform* tr)
+{    
+    float a, b, c, d, x, y;
+    switch (orientation) {
+    case ISurfaceComposer::eOrientationDefault:
+        a=1; b=0; c=0; d=1; x=0; y=0;
+        break;
+    case ISurfaceComposer::eOrientation90:
+        a=0; b=-1; c=1; d=0; x=w; y=0;
+        break;
+    case ISurfaceComposer::eOrientation180:
+        a=-1; b=0; c=0; d=-1; x=w; y=h;
+        break;
+    case ISurfaceComposer::eOrientation270:
+        a=0; b=1; c=-1; d=0; x=0; y=h;
+        break;
+    default:
+        return BAD_VALUE;
+    }
+    tr->set(a, b, c, d);
+    tr->set(x, y);
+    return NO_ERROR;
+}
+
 status_t GraphicPlane::setOrientation(int orientation)
 {
-    float a, b, c, d, x, y;
-
     const DisplayHardware& hw(displayHardware());
     const float w = hw.getWidth();
     const float h = hw.getHeight();
@@ -1846,30 +1808,21 @@ status_t GraphicPlane::setOrientation(int orientation)
 
     // If the rotation can be handled in hardware, this is where
     // the magic should happen.
-
-    switch (orientation) {
-    case ISurfaceComposer::eOrientation90:
-        a=0; b=-1; c=1; d=0; x=w; y=0;
-        break;
-    case ISurfaceComposer::eOrientation180:
-        a=-1; b=0; c=0; d=-1; x=w; y=h;
-        break;
-    case ISurfaceComposer::eOrientation270:
-        a=0; b=1; c=-1; d=0; x=0; y=h;
-        break;
-    case 42: {
+    if (UNLIKELY(orientation == 42)) {
+        float a, b, c, d, x, y;
         const float r = (3.14159265f / 180.0f) * 42.0f;
         const float si = sinf(r);
         const float co = cosf(r);
         a=co; b=-si; c=si; d=co;
         x = si*(h*0.5f) + (1-co)*(w*0.5f);
         y =-si*(w*0.5f) + (1-co)*(h*0.5f);
-    } break;
-    default:
-        return BAD_VALUE;
+        mOrientationTransform.set(a, b, c, d);
+        mOrientationTransform.set(x, y);
+    } else {
+        GraphicPlane::orientationToTransfrom(orientation, w, h,
+                &mOrientationTransform);
     }
-    mOrientationTransform.set(a, b, c, d);
-    mOrientationTransform.set(x, y);
+    
     mGlobalTransform = mOrientationTransform * mTransform;
     return NO_ERROR;
 }

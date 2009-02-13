@@ -789,6 +789,12 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
+        public boolean performHapticFeedback(IWindow window, int effectId, boolean always) {
+            // pass for now.
+            return false;
+        }
+        
+        @SuppressWarnings("unused")
         public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
             // pass for now.
             return null;

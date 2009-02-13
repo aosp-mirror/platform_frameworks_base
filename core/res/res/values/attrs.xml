@@ -1056,6 +1056,10 @@
              enabled for events such as clicking and touching. -->
         <attr name="soundEffectsEnabled" format="boolean" />
 
+        <!-- Boolean that controls whether a view should have haptic feedback
+             enabled for events such as long presses. -->
+        <attr name="hapticFeedbackEnabled" format="boolean" />
+
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2035,8 +2039,18 @@
             <enum name="line" value="2" />
             <enum name="ring" value="3" />
         </attr>
+        <!-- Inner radius of the ring expressed as a ratio of the ring's width. For instance,
+             if innerRadiusRatio=9, then the inner radius equals the ring's width divided by 9.
+             This value is ignored if innerRadius is defined. Default value is 9. -->
         <attr name="innerRadiusRatio" format="float" />
+        <!-- Thickness of the ring expressed as a ratio of the ring's width. For instance,
+             if thicknessRatio=3, then the thickness equals the ring's width divided by 3.
+             This value is ignored if innerRadius is defined. Default value is 3. -->
         <attr name="thicknessRatio" format="float" />
+        <!-- Inner radius of the ring. When defined, innerRadiusRatio is ignored. -->
+        <attr name="innerRadius" format="dimension" />
+        <!-- Thickness of the ring. When defined, thicknessRatio is ignored. -->
+        <attr name="thickness" format="dimension" />
         <attr name="useLevel" />
     </declare-styleable>
     

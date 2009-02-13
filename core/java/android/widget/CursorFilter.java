@@ -60,11 +60,10 @@ class CursorFilter extends Filter {
     }
 
     @Override
-    protected void publishResults(CharSequence constraint,
-            FilterResults results) {
+    protected void publishResults(CharSequence constraint, FilterResults results) {
         Cursor oldCursor = mClient.getCursor();
         
-        if (results.values != oldCursor) {
+        if (results.values != null && results.values != oldCursor) {
             mClient.changeCursor((Cursor) results.values);
         }
     }

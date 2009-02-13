@@ -58,7 +58,7 @@ static const S_EAS_LIB_CONFIG* pLibConfig = NULL;
 MidiFile::MidiFile() :
     mEasData(NULL), mEasHandle(NULL), mAudioBuffer(NULL),
     mPlayTime(-1), mDuration(-1), mState(EAS_STATE_ERROR),
-    mStreamType(AudioTrack::MUSIC), mLoop(false), mExit(false),
+    mStreamType(AudioSystem::MUSIC), mLoop(false), mExit(false),
     mPaused(false), mRender(false), mTid(-1)
 {
     LOGV("constructor");

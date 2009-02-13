@@ -1084,6 +1084,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mPreviewPopup.isShowing()) {
             mPreviewPopup.dismiss();
         }
+        mHandler.removeMessages(MSG_REPEAT);
+        mHandler.removeMessages(MSG_LONGPRESS);
+        mHandler.removeMessages(MSG_SHOW_PREVIEW);
+        
         dismissPopupKeyboard();
     }
     

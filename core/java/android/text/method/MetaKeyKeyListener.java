@@ -287,10 +287,10 @@ public abstract class MetaKeyKeyListener {
     }
 
     public static void clearMetaKeyState(Editable content, int states) {
-        if ((states&META_SHIFT_ON) != 0) resetLock(content, CAP);
-        if ((states&META_ALT_ON) != 0) resetLock(content, ALT);
-        if ((states&META_SYM_ON) != 0) resetLock(content, SYM);
-        if ((states&META_SELECTING) != 0) resetLock(content, SELECTING);
+        if ((states&META_SHIFT_ON) != 0) content.removeSpan(CAP);
+        if ((states&META_ALT_ON) != 0) content.removeSpan(ALT);
+        if ((states&META_SYM_ON) != 0) content.removeSpan(SYM);
+        if ((states&META_SELECTING) != 0) content.removeSpan(SELECTING);
     }
 
     /**

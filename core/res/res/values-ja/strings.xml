@@ -558,12 +558,12 @@
     <!-- no translation found for relative_time (1818557177829411417) -->
     <skip />
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>\'日\'"</string>
-    <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>\'日\'"</string>
-    <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">d</xliff:g>\'日\'"</string>
-    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">d</xliff:g>\'日\'"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>'\'\'年\'\''<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>'\'\'日\'\''"</string>
+    <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>'\'\'年\'\''<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>'\'\'日\'\''"</string>
+    <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>'\'\'年\'\''<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">d</xliff:g>'\'\'日\'\''"</string>
+    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>'\'\'年\'\''<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">d</xliff:g>'\'\'日\'\''"</string>
+    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"正午"</string>
     <string name="Noon">"正午"</string>
     <string name="midnight">"午前0時"</string>
@@ -573,7 +573,8 @@
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年 <xliff:g id="MONTH">%B</xliff:g>"</string>
+    <!-- no translation found for month_year (9219019380312413367) -->
+    <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日"</string>
@@ -816,6 +817,5 @@
     <skip />
     <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
     <skip />
-    <!-- no translation found for tutorial_double_tap_to_zoom_message (9111326385548696308) -->
     <skip />
 </resources>

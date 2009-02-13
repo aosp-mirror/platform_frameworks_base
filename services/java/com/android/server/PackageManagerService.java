@@ -3219,12 +3219,15 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "Observer no longer exists.");
                     }
                 }
-                // There appears to be a subtle deadlock condition if the sendPackageBroadcast call appears
-                // in the synchronized block above.
+                // There appears to be a subtle deadlock condition if the sendPackageBroadcast
+                // call appears in the synchronized block above.
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                     res.removedInfo.sendBroadcast(false, true);
                     Bundle extras = new Bundle(1);
                     extras.putInt(Intent.EXTRA_UID, res.uid);
+                    if (res.removedInfo.removedPackage != null) {
+                        extras.putBoolean(Intent.EXTRA_REPLACING, true);
+                    }
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                          res.pkg.applicationInfo.packageName,
                                          extras);

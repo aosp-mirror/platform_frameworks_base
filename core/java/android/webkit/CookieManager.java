@@ -171,6 +171,10 @@ public final class CookieManager {
         boolean pathMatch(String urlPath) {
             if (urlPath.startsWith(path)) {
                 int len = path.length();
+                if (len == 0) {
+                    Log.w(LOGTAG, "Empty cookie path");
+                    return false;
+                }
                 int urlLen = urlPath.length();
                 if (path.charAt(len-1) != PATH_DELIM && urlLen > len) {
                     // make sure /wee doesn't match /we
@@ -864,7 +868,10 @@ public final class CookieManager {
                                     "illegal format for max-age: " + value);
                         }
                     } else if (name.equals(PATH)) {
-                        cookie.path = value;
+                        // only allow non-empty path value
+                        if (value.length() > 0) {
+                            cookie.path = value;
+                        }
                     } else if (name.equals(DOMAIN)) {
                         int lastPeriod = value.lastIndexOf(PERIOD);
                         if (lastPeriod == 0) {

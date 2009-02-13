@@ -925,7 +925,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(Integer.toHexString(windowAnimations));
             }
             if (screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                sb.append("or=");
+                sb.append(" or=");
                 sb.append(screenOrientation);
             }
             sb.append('}');

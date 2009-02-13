@@ -19,7 +19,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
-#include "utils/logger.h"
+#include "cutils/logger.h"
 
 #define END_DELIMITER '\n'
 #define INT_BUFFER_SIZE (sizeof(jbyte)+sizeof(jint)+sizeof(END_DELIMITER))

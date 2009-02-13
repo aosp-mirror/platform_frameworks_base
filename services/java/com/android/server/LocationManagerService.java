@@ -132,7 +132,7 @@ public class LocationManagerService extends ILocationManager.Stub
     private static final int MESSAGE_HEARTBEAT = 1;
     private static final int MESSAGE_ACQUIRE_WAKE_LOCK = 2;
     private static final int MESSAGE_RELEASE_WAKE_LOCK = 3;
-    private static final int MESSAGE_SET_NETWORK_LOCATION_PROVIDER = 4;
+    private static final int MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER = 4;
 
     // Alarm manager and wakelock variables
     private final static String ALARM_INTENT = "com.android.location.ALARM_INTENT";
@@ -565,11 +565,19 @@ public class LocationManagerService extends ILocationManager.Stub
         }
     }
 
-    public void setNetworkLocationProvider(INetworkLocationProvider provider) {
-        mLocationHandler.removeMessages(MESSAGE_SET_NETWORK_LOCATION_PROVIDER);
+    public void setInstallCallback(InstallCallback callback) {
+        mLocationHandler.removeMessages(MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER);
         Message m = Message.obtain(mLocationHandler, 
-                MESSAGE_SET_NETWORK_LOCATION_PROVIDER, provider);
+                MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER, callback);
         mLocationHandler.sendMessageAtFrontOfQueue(m);
+    }
+
+    public void setNetworkLocationProvider(INetworkLocationProvider provider) {
+        mNetworkLocationInterface = provider;
+        provider.addListener(getPackageNames());
+        mNetworkLocationProvider = (LocationProviderImpl)provider;
+        LocationProviderImpl.addProvider(mNetworkLocationProvider);
+        updateProviders();
     }
 
     public void setLocationCollector(ILocationCollector collector) {
@@ -1598,16 +1606,12 @@ public class LocationManagerService extends ILocationManager.Stub
                     // Update wakelock status so the next alarm is set before releasing wakelock
                     updateWakelockStatus(mScreenOn);
                     releaseWakeLock();
-                } else if (msg.what == MESSAGE_SET_NETWORK_LOCATION_PROVIDER) {
+                } else if (msg.what == MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER) {
                     synchronized (LocationManagerService.class) {
-                        Log.d(TAG, "adding network location provider");
-                        mNetworkLocationInterface = 
-                                (INetworkLocationProvider)msg.obj;
-                        mNetworkLocationInterface.addListener(getPackageNames());
-                        mNetworkLocationProvider = 
-                                (LocationProviderImpl)mNetworkLocationInterface;
-                        LocationProviderImpl.addProvider(mNetworkLocationProvider);
-                        updateProviders();
+                        Log.d(TAG, "installing network location provider");
+                        INetworkLocationManager.InstallCallback callback =
+                                (INetworkLocationManager.InstallCallback)msg.obj;
+                        callback.installNetworkLocationProvider(mContext, LocationManagerService.this);
                     }
                 }
             } catch (Exception e) {

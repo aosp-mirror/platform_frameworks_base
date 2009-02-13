@@ -38,6 +38,7 @@ public:
     virtual	status_t		setVideoEncoder(int ve) = 0;
     virtual	status_t		setAudioEncoder(int ae) = 0;
     virtual	status_t		setOutputFile(const char* path) = 0;
+    virtual	status_t		setOutputFile(int fd, int64_t offset, int64_t length) = 0;
     virtual	status_t		setVideoSize(int width, int height) = 0;
     virtual	status_t		setVideoFrameRate(int frames_per_second) = 0;
     virtual	status_t		prepare() = 0;

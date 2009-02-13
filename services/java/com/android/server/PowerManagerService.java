@@ -1001,11 +1001,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             else {
-                synchronized (mLocks) {
-                    EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 4,
-                            mBroadcastWakeLock.mCount);
-                    mBroadcastWakeLock.release();
-                }
+                // If we're in this case, then this handler is running for a previous
+                // paired transaction.  mBroadcastWakeLock will already have been released
+                // in sendNotificationLocked.
             }
         }
     };

@@ -53,7 +53,8 @@ enum {
     SET_PARAMETER,
     REGISTER_CLIENT,
     GET_INPUTBUFFERSIZE,
-    WAKE_UP
+    WAKE_UP,
+    IS_A2DP_ENABLED
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -123,42 +124,47 @@ public:
         return interface_cast<IAudioRecord>(reply.readStrongBinder());
     }
 
-    virtual uint32_t sampleRate() const
+    virtual uint32_t sampleRate(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
         remote()->transact(SAMPLE_RATE, data, &reply);
         return reply.readInt32();
     }
 
-    virtual int channelCount() const
+    virtual int channelCount(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
         remote()->transact(CHANNEL_COUNT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual int format() const
+    virtual int format(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
         remote()->transact(FORMAT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual size_t frameCount() const
+    virtual size_t frameCount(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
         remote()->transact(FRAME_COUNT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual uint32_t latency() const
+    virtual uint32_t latency(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
         remote()->transact(LATENCY, data, &reply);
         return reply.readInt32();
     }
@@ -333,6 +339,14 @@ public:
         remote()->transact(WAKE_UP, data, &reply);
         return;
     }
+
+    virtual bool isA2dpEnabled() const
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        remote()->transact(IS_A2DP_ENABLED, data, &reply);
+        return (bool)reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -385,27 +399,32 @@ status_t BnAudioFlinger::onTransact(
         } break;
         case SAMPLE_RATE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( sampleRate() );
+            int output = data.readInt32();
+            reply->writeInt32( sampleRate(output) );
             return NO_ERROR;
         } break;
         case CHANNEL_COUNT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( channelCount() );
+            int output = data.readInt32();
+            reply->writeInt32( channelCount(output) );
             return NO_ERROR;
         } break;
         case FORMAT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( format() );
+            int output = data.readInt32();
+            reply->writeInt32( format(output) );
             return NO_ERROR;
         } break;
         case FRAME_COUNT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( frameCount() );
+            int output = data.readInt32();
+            reply->writeInt32( frameCount(output) );
             return NO_ERROR;
         } break;
         case LATENCY: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( latency() );
+            int output = data.readInt32();
+            reply->writeInt32( latency(output) );
             return NO_ERROR;
         } break;
          case SET_MASTER_VOLUME: {
@@ -519,7 +538,11 @@ status_t BnAudioFlinger::onTransact(
             wakeUp();
             return NO_ERROR;
         } break;
-
+        case IS_A2DP_ENABLED: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            reply->writeInt32( (int)isA2dpEnabled() );
+            return NO_ERROR;
+        } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

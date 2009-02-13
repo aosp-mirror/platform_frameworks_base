@@ -87,10 +87,13 @@ public class WifiService extends IWifiManager.Stub {
 
     private final LockList mLocks = new LockList();
     /**
-     * See {@link Settings.System#WIFI_IDLE_MS}. This is the default value if a
-     * Settings.System value is not present.
+     * See {@link Settings.Gservices#WIFI_IDLE_MS}. This is the default value if a
+     * Settings.Gservices value is not present. This timeout value is chosen as
+     * the approximate point at which the battery drain caused by Wi-Fi
+     * being enabled but not active exceeds the battery drain caused by
+     * re-establishing a connection to the mobile data network.
      */
-    private static final long DEFAULT_IDLE_MILLIS = 2 * 60 * 1000; /* 2 minutes */
+    private static final long DEFAULT_IDLE_MILLIS = 15 * 60 * 1000; /* 15 minutes */
 
     private static final String WAKELOCK_TAG = "WifiService";
 
@@ -101,7 +104,7 @@ public class WifiService extends IWifiManager.Stub {
      * provides a bit of extra margin.
      * <p>
      * See {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}.
-     * This is the default value if a Settings.System value is not present.
+     * This is the default value if a Settings.Secure value is not present.
      */
     private static final int DEFAULT_WAKELOCK_TIMEOUT = 8000;
 
@@ -1364,7 +1367,7 @@ public class WifiService extends IWifiManager.Stub {
      * in the current regulatory domain. This method should be used only
      * if the correct number of channels cannot be determined automatically
      * for some reason. If the operation is successful, the new value is
-     * persisted as a System setting.
+     * persisted as a Secure setting.
      * @param numChannels the number of allowed channels. Must be greater than 0
      * and less than or equal to 16.
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
@@ -1446,8 +1449,8 @@ public class WifiService extends IWifiManager.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            long idleMillis = Settings.System.getLong(mContext.getContentResolver(),
-                                                  Settings.System.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
+            long idleMillis = Settings.Gservices.getLong(mContext.getContentResolver(),
+                                                  Settings.Gservices.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
             int stayAwakeConditions =
                     Settings.System.getInt(mContext.getContentResolver(),
                                            Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);

@@ -395,7 +395,11 @@ public class AudioTrack
     public void release() {
         // even though native_release() stops the native AudioTrack, we need to stop
         // AudioTrack subclasses too.
-        stop();
+        try {
+            stop();
+        } catch(IllegalStateException ise) { 
+            // don't raise an exception, we're releasing the resources.
+        }
         native_release();
         mState = STATE_UNINITIALIZED;
     }

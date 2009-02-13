@@ -34,13 +34,13 @@ public class TestGadgetProvider extends BroadcastReceiver {
         String action = intent.getAction();
         Log.d(TAG, "intent=" + intent);
 
-        if (GadgetManager.GADGET_ENABLED_ACTION.equals(action)) {
+        if (GadgetManager.ACTION_GADGET_ENABLED.equals(action)) {
             Log.d(TAG, "ENABLED");
         }
-        else if (GadgetManager.GADGET_DISABLED_ACTION.equals(action)) {
+        else if (GadgetManager.ACTION_GADGET_DISABLED.equals(action)) {
             Log.d(TAG, "DISABLED");
         }
-        else if (GadgetManager.GADGET_UPDATE_ACTION.equals(action)) {
+        else if (GadgetManager.ACTION_GADGET_UPDATE.equals(action)) {
             Log.d(TAG, "UPDATE");
             Bundle extras = intent.getExtras();
             int[] gadgetIds = extras.getIntArray(GadgetManager.EXTRA_GADGET_IDS);

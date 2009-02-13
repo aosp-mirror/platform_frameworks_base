@@ -262,7 +262,7 @@ public class TextUtilsTest extends TestCase {
         Map<String, String> fixes = Maps.newHashMap();
         fixes.put("a", "<a@gmail.com>");
         fixes.put("a b", "<ab@gmail.com>");
-        fixes.put("a@b", "<a@gmail.com>");
+        fixes.put("a@b", "<a@b>");
         
         for (Map.Entry<String, String> e : fixes.entrySet()) {
             assertEquals(e.getValue(), validator.fixText(e.getKey()).toString());

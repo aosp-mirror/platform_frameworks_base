@@ -21,60 +21,88 @@ import android.os.Parcelable;
 import android.content.ComponentName;
 
 /**
- * Describes the meta data for an installed gadget.
+ * Describes the meta data for an installed gadget provider.  The fields in this class
+ * correspond to the fields in the <code>&lt;gadget-provider&gt;</code> xml tag.
  */
-public class GadgetInfo implements Parcelable {
+public class GadgetProviderInfo implements Parcelable {
     /**
      * Identity of this gadget component.  This component should be a {@link
      * android.content.BroadcastReceiver}, and it will be sent the Gadget intents
      * {@link android.gadget as described in the gadget package documentation}.
+     *
+     * <p>This field corresponds to the <code>android:name</code> attribute in
+     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      */
     public ComponentName provider;
 
     /**
      * Minimum width of the gadget, in dp.
+     *
+     * <p>This field corresponds to the <code>android:minWidth</code> attribute in
+     * the gadget meta-data file.
      */
     public int minWidth;
 
     /**
      * Minimum height of the gadget, in dp.
+     *
+     * <p>This field corresponds to the <code>android:minHeight</code> attribute in
+     * the gadget meta-data file.
      */
     public int minHeight;
 
     /**
      * How often, in milliseconds, that this gadget wants to be updated.
      * The gadget manager may place a limit on how often a gadget is updated.
+     *
+     * <p>This field corresponds to the <code>android:updatePeriodMillis</code> attribute in
+     * the gadget meta-data file.
      */
     public int updatePeriodMillis;
 
     /**
      * The resource id of the initial layout for this gadget.  This should be
      * displayed until the RemoteViews for the gadget is available.
+     *
+     * <p>This field corresponds to the <code>android:initialLayout</code> attribute in
+     * the gadget meta-data file.
      */
     public int initialLayout;
 
     /**
      * The activity to launch that will configure the gadget.
+     *
+     * <p>This class name of field corresponds to the <code>android:configure</code> attribute in
+     * the gadget meta-data file.  The package name always corresponds to the package containing
+     * the gadget provider.
      */
     public ComponentName configure;
 
     /**
-     * The label to display to the user.
+     * The label to display to the user in the gadget picker.  If not supplied in the
+     * xml, the application label will be used.
+     *
+     * <p>This field corresponds to the <code>android:label</code> attribute in
+     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      */
     public String label;
 
     /**
-     * The icon to display for this gadget in the picker list.
+     * The icon to display for this gadget in the gadget picker.  If not supplied in the
+     * xml, the application icon will be used.
+     *
+     * <p>This field corresponds to the <code>android:icon</code> attribute in
+     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      */
     public int icon;
 
-    public GadgetInfo() {
+    public GadgetProviderInfo() {
     }
 
     /**
-     * Unflatten the GadgetInfo from a parcel.
+     * Unflatten the GadgetProviderInfo from a parcel.
      */
-    public GadgetInfo(Parcel in) {
+    public GadgetProviderInfo(Parcel in) {
         if (0 != in.readInt()) {
             this.provider = new ComponentName(in);
         }
@@ -116,24 +144,24 @@ public class GadgetInfo implements Parcelable {
     }
 
     /**
-     * Parcelable.Creator that instantiates GadgetInfo objects
+     * Parcelable.Creator that instantiates GadgetProviderInfo objects
      */
-    public static final Parcelable.Creator<GadgetInfo> CREATOR
-            = new Parcelable.Creator<GadgetInfo>()
+    public static final Parcelable.Creator<GadgetProviderInfo> CREATOR
+            = new Parcelable.Creator<GadgetProviderInfo>()
     {
-        public GadgetInfo createFromParcel(Parcel parcel)
+        public GadgetProviderInfo createFromParcel(Parcel parcel)
         {
-            return new GadgetInfo(parcel);
+            return new GadgetProviderInfo(parcel);
         }
 
-        public GadgetInfo[] newArray(int size)
+        public GadgetProviderInfo[] newArray(int size)
         {
-            return new GadgetInfo[size];
+            return new GadgetProviderInfo[size];
         }
     };
 
     public String toString() {
-        return "GadgetInfo(provider=" + this.provider + ")";
+        return "GadgetProviderInfo(provider=" + this.provider + ")";
     }
 }
 

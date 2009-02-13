@@ -16,4 +16,4 @@
 
 package android.gadget;
 
-parcelable GadgetInfo;
+parcelable GadgetProviderInfo;

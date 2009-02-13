@@ -135,7 +135,7 @@ public class AudioManager {
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
     /** The audio stream for system sounds */
     public static final int STREAM_SYSTEM = AudioSystem.STREAM_SYSTEM;
-    /** The audio stream for the phone ring and message alerts */
+    /** The audio stream for the phone ring */
     public static final int STREAM_RING = AudioSystem.STREAM_RING;
     /** The audio stream for music playback */
     public static final int STREAM_MUSIC = AudioSystem.STREAM_MUSIC;
@@ -214,14 +214,13 @@ public class AudioManager {
     /**
      * Whether to include ringer modes as possible options when changing volume.
      * For example, if true and volume level is 0 and the volume is adjusted
-     * with {@link #ADJUST_LOWER}, then the ringer mode may switch the silent
-     * or vibrate mode.
+     * with {@link #ADJUST_LOWER}, then the ringer mode may switch the silent or
+     * vibrate mode.
      * <p>
-     * By default this is on for stream types that are affected by the ringer
-     * mode (for example, the ring stream type). If this flag is included, this
-     * behavior will be present regardless of the stream type being affected by
-     * the ringer mode.
-     *
+     * By default this is on for the ring stream. If this flag is included,
+     * this behavior will be present regardless of the stream type being
+     * affected by the ringer mode.
+     * 
      * @see #adjustVolume(int, int)
      * @see #adjustStreamVolume(int, int, int)
      */

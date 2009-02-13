@@ -55,8 +55,10 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -97,6 +99,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     
     static final int MSG_UNBIND_METHOD = 3000;
     static final int MSG_BIND_METHOD = 3010;
+    
+    static final long TIME_TO_RECONNECT = 10*1000;
+    
+    static final int LOG_IMF_FORCE_RECONNECT_IME = 32000;
     
     final Context mContext;
     final Handler mHandler;
@@ -246,6 +252,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * to.
      */
     IInputMethod mCurMethod;
+    
+    /**
+     * Time that we last initiated a bind to the input method, to determine
+     * if we should try to disconnect and reconnect to it.
+     */
+    long mLastBindTime;
     
     /**
      * Have we called mCurMethod.bindInput()?
@@ -486,7 +498,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void systemReady() {
-        
     }
     
     public List<InputMethodInfo> getInputMethodList() {
@@ -571,13 +582,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
     
-    private int getShowFlags() {
+    private int getImeShowFlags() {
         int flags = 0;
         if (mShowForced) {
             flags |= InputMethod.SHOW_FORCED
                     | InputMethod.SHOW_EXPLICIT;
         } else if (mShowExplicitlyRequested) {
             flags |= InputMethod.SHOW_EXPLICIT;
+        }
+        return flags;
+    }
+    
+    private int getAppShowFlags() {
+        int flags = 0;
+        if (mShowForced) {
+            flags |= InputMethodManager.SHOW_FORCED;
+        } else if (!mShowExplicitlyRequested) {
+            flags |= InputMethodManager.SHOW_IMPLICIT;
         }
         return flags;
     }
@@ -598,7 +619,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         if (mShowRequested) {
             if (DEBUG) Log.v(TAG, "Attach new input asks to show input");
-            showCurrentInputLocked(getShowFlags());
+            showCurrentInputLocked(getAppShowFlags());
         }
         return needResult
                 ? new InputBindResult(session.session, mCurId, mCurSeq)
@@ -666,20 +687,42 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return attachNewInputLocked(initial, needResult);
             }
             if (mHaveConnection) {
-                if (mCurMethod != null && !cs.sessionRequested) {
-                    cs.sessionRequested = true;
-                    if (DEBUG) Log.v(TAG, "Creating new session for client " + cs);
-                    executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                            MSG_CREATE_SESSION, mCurMethod,
-                            new MethodCallback(mCurMethod)));
+                if (mCurMethod != null) {
+                    if (!cs.sessionRequested) {
+                        cs.sessionRequested = true;
+                        if (DEBUG) Log.v(TAG, "Creating new session for client " + cs);
+                        executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
+                                MSG_CREATE_SESSION, mCurMethod,
+                                new MethodCallback(mCurMethod)));
+                    }
+                    // Return to client, and we will get back with it when
+                    // we have had a session made for it.
+                    return new InputBindResult(null, mCurId, mCurSeq);
+                } else if (SystemClock.uptimeMillis()
+                        < (mLastBindTime+TIME_TO_RECONNECT)) {
+                    // In this case we have connected to the service, but
+                    // don't yet have its interface.  If it hasn't been too
+                    // long since we did the connection, we'll return to
+                    // the client and wait to get the service interface so
+                    // we can report back.  If it has been too long, we want
+                    // to fall through so we can try a disconnect/reconnect
+                    // to see if we can get back in touch with the service.
+                    return new InputBindResult(null, mCurId, mCurSeq);
+                } else {
+                    EventLog.writeEvent(LOG_IMF_FORCE_RECONNECT_IME, mCurMethodId,
+                            SystemClock.uptimeMillis()-mLastBindTime, 0);
                 }
-                return new InputBindResult(null, mCurId, mCurSeq);
             }
         }
         
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+        }
+        
+        if (mHaveConnection) {
+            mContext.unbindService(this);
+            mHaveConnection = false;
         }
         
         if (mCurToken != null) {
@@ -691,16 +734,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurToken = null;
         }
         
-        if (mHaveConnection) {
-            mContext.unbindService(this);
-            mHaveConnection = false;
-        }
-        
         clearCurMethod();
         
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
         if (mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE)) {
+            mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
             mCurToken = new Binder();
@@ -758,7 +797,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     void onSessionCreated(IInputMethod method, IInputMethodSession session) {
         synchronized (mMethodMap) {
-            if (mCurMethod == method) {
+            if (mCurMethod != null && method != null
+                    && mCurMethod.asBinder() == method.asBinder()) {
                 if (mCurClient != null) {
                     mCurClient.curSession = new SessionState(mCurClient,
                             method, session);
@@ -781,6 +821,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mCurMethod = null;
         }
+        mStatusBar.setIconVisibility(mInputMethodIcon, false);
     }
     
     public void onServiceDisconnected(ComponentName name) {
@@ -790,6 +831,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (mCurMethod != null && mCurIntent != null
                     && name.equals(mCurIntent.getComponent())) {
                 clearCurMethod();
+                // We consider this to be a new bind attempt, since the system
+                // should now try to restart the service for us.
+                mLastBindTime = SystemClock.uptimeMillis();
                 mShowRequested = mInputShown;
                 mInputShown = false;
                 if (mCurClient != null) {
@@ -800,23 +844,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public void updateStatusIcon(int iconId, String iconPackage) {
-        if (iconId == 0) {
-            Log.d(TAG, "hide the small icon for the input method");
-            mStatusBar.setIconVisibility(mInputMethodIcon, false);
-        } else {
-            Log.d(TAG, "show a small icon for the input method");
-
-            if (iconPackage != null
-                    && iconPackage
-                            .equals(InputMethodManager.BUILDIN_INPUTMETHOD_PACKAGE)) {
-                iconPackage = null;
+    public void updateStatusIcon(IBinder token, String packageName, int iconId) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (token == null || mCurToken != token) {
+                Log.w(TAG, "Ignoring setInputMethod of token: " + token);
+                return;
             }
-
-            mInputMethodData.iconId = iconId;
-            mInputMethodData.iconPackage = iconPackage;
-            mStatusBar.updateIcon(mInputMethodIcon, mInputMethodData, null);
-            mStatusBar.setIconVisibility(mInputMethodIcon, true);
+            
+            synchronized (mMethodMap) {
+                if (iconId == 0) {
+                    if (DEBUG) Log.d(TAG, "hide the small icon for the input method");
+                    mStatusBar.setIconVisibility(mInputMethodIcon, false);
+                } else if (packageName != null) {
+                    if (DEBUG) Log.d(TAG, "show a small icon for the input method");
+                    mInputMethodData.iconId = iconId;
+                    mInputMethodData.iconPackage = packageName;
+                    mStatusBar.updateIcon(mInputMethodIcon, mInputMethodData, null);
+                    mStatusBar.setIconVisibility(mInputMethodIcon, true);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -860,23 +909,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
     
     public void showSoftInput(IInputMethodClient client, int flags) {
-        synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
-                try {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                        Log.w(TAG, "Ignoring showSoftInput of: " + client);
-                        return;
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mMethodMap) {
+                if (mCurClient == null || client == null
+                        || mCurClient.client.asBinder() != client.asBinder()) {
+                    try {
+                        // We need to check if this is the current client with
+                        // focus in the window manager, to allow this call to
+                        // be made before input is started in it.
+                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
+                            Log.w(TAG, "Ignoring showSoftInput of: " + client);
+                            return;
+                        }
+                    } catch (RemoteException e) {
                     }
-                } catch (RemoteException e) {
                 }
+    
+                if (DEBUG) Log.v(TAG, "Client requesting input be shown");
+                showCurrentInputLocked(flags);
             }
-
-            if (DEBUG) Log.v(TAG, "Client requesting input be shown");
-            showCurrentInputLocked(flags);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
     
@@ -891,29 +945,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         if (mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIO(
-                    MSG_SHOW_SOFT_INPUT, getShowFlags(), mCurMethod));
+                    MSG_SHOW_SOFT_INPUT, getImeShowFlags(), mCurMethod));
             mInputShown = true;
+        } else if (mHaveConnection && SystemClock.uptimeMillis()
+                < (mLastBindTime+TIME_TO_RECONNECT)) {
+            // The client has asked to have the input method shown, but
+            // we have been sitting here too long with a connection to the
+            // service and no interface received, so let's disconnect/connect
+            // to try to prod things along.
+            EventLog.writeEvent(LOG_IMF_FORCE_RECONNECT_IME, mCurMethodId,
+                    SystemClock.uptimeMillis()-mLastBindTime,1);
+            mContext.unbindService(this);
+            mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE);
         }
     }
     
     public void hideSoftInput(IInputMethodClient client, int flags) {
-        synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
-                try {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                        Log.w(TAG, "Ignoring hideSoftInput of: " + client);
-                        return;
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mMethodMap) {
+                if (mCurClient == null || client == null
+                        || mCurClient.client.asBinder() != client.asBinder()) {
+                    try {
+                        // We need to check if this is the current client with
+                        // focus in the window manager, to allow this call to
+                        // be made before input is started in it.
+                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
+                            Log.w(TAG, "Ignoring hideSoftInput of: " + client);
+                            return;
+                        }
+                    } catch (RemoteException e) {
                     }
-                } catch (RemoteException e) {
                 }
+    
+                if (DEBUG) Log.v(TAG, "Client requesting input be hidden");
+                hideCurrentInputLocked(flags);
             }
-
-            if (DEBUG) Log.v(TAG, "Client requesting input be hidden");
-            hideCurrentInputLocked(flags);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
     
@@ -942,70 +1011,75 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void windowGainedFocus(IInputMethodClient client,
             boolean viewHasFocus, boolean isTextEditor, int softInputMode,
             boolean first, int windowFlags) {
-        synchronized (mMethodMap) {
-            if (DEBUG) Log.v(TAG, "windowGainedFocus: " + client.asBinder()
-                    + " viewHasFocus=" + viewHasFocus
-                    + " isTextEditor=" + isTextEditor
-                    + " softInputMode=#" + Integer.toHexString(softInputMode)
-                    + " first=" + first + " flags=#"
-                    + Integer.toHexString(windowFlags));
-            
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
-                try {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                        Log.w(TAG, "Ignoring focus gain of: " + client);
-                        return;
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mMethodMap) {
+                if (DEBUG) Log.v(TAG, "windowGainedFocus: " + client.asBinder()
+                        + " viewHasFocus=" + viewHasFocus
+                        + " isTextEditor=" + isTextEditor
+                        + " softInputMode=#" + Integer.toHexString(softInputMode)
+                        + " first=" + first + " flags=#"
+                        + Integer.toHexString(windowFlags));
+                
+                if (mCurClient == null || client == null
+                        || mCurClient.client.asBinder() != client.asBinder()) {
+                    try {
+                        // We need to check if this is the current client with
+                        // focus in the window manager, to allow this call to
+                        // be made before input is started in it.
+                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
+                            Log.w(TAG, "Ignoring focus gain of: " + client);
+                            return;
+                        }
+                    } catch (RemoteException e) {
                     }
-                } catch (RemoteException e) {
+                }
+    
+                switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
+                        if (!isTextEditor || (softInputMode &
+                                WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                                != WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                            if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
+                                // There is no focus view, and this window will
+                                // be behind any soft input window, so hide the
+                                // soft input window if it is shown.
+                                if (DEBUG) Log.v(TAG, "Unspecified window will hide input");
+                                hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS);
+                            }
+                        } else if (isTextEditor && (softInputMode &
+                                WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                                == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                                && (softInputMode &
+                                        WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                            // There is a focus view, and we are navigating forward
+                            // into the window, so show the input window for the user.
+                            if (DEBUG) Log.v(TAG, "Unspecified window will show input");
+                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
+                        }
+                        break;
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+                        // Do nothing.
+                        break;
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                        if (DEBUG) Log.v(TAG, "Window asks to hide input");
+                        hideCurrentInputLocked(0);
+                        break;
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+                        if ((softInputMode &
+                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                            if (DEBUG) Log.v(TAG, "Window asks to show input going forward");
+                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
+                        }
+                        break;
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                        if (DEBUG) Log.v(TAG, "Window asks to always show input");
+                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
+                        break;
                 }
             }
-
-            switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                    if (!isTextEditor || (softInputMode &
-                            WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                            != WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                        if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
-                            // There is no focus view, and this window will
-                            // be behind any soft input window, so hide the
-                            // soft input window if it is shown.
-                            if (DEBUG) Log.v(TAG, "Unspecified window will hide input");
-                            hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS);
-                        }
-                    } else if (isTextEditor && (softInputMode &
-                            WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                            == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                            && (softInputMode &
-                                    WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                        // There is a focus view, and we are navigating forward
-                        // into the window, so show the input window for the user.
-                        if (DEBUG) Log.v(TAG, "Unspecified window will show input");
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
-                    }
-                    break;
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
-                    // Do nothing.
-                    break;
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                    if (DEBUG) Log.v(TAG, "Window asks to hide input");
-                    hideCurrentInputLocked(0);
-                    break;
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
-                    if ((softInputMode &
-                            WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                        if (DEBUG) Log.v(TAG, "Window asks to show input going forward");
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
-                    }
-                    break;
-                case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                    if (DEBUG) Log.v(TAG, "Window asks to always show input");
-                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT);
-                    break;
-            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
     
@@ -1022,7 +1096,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public void setInputMethod(IBinder token, String id) {
         synchronized (mMethodMap) {
-            if (mCurToken == null) {
+            if (token == null) {
                 if (mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.WRITE_SECURE_SETTINGS)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -1032,19 +1106,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             } else if (mCurToken != token) {
                 Log.w(TAG, "Ignoring setInputMethod of token: " + token);
+                return;
             }
 
-            setInputMethodLocked(id);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                setInputMethodLocked(id);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
     public void hideMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
-            if (mCurToken == null || mCurToken != token) {
+            if (token == null || mCurToken != token) {
                 Log.w(TAG, "Ignoring hideInputMethod of token: " + token);
+                return;
             }
 
-            hideCurrentInputLocked(flags);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                hideCurrentInputLocked(flags);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -1209,7 +1295,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     
     // ----------------------------------------------------------------------
     
-    public void showInputMethodMenu() {
+    void showInputMethodMenu() {
         if (DEBUG) Log.v(TAG, "Show switching menu");
 
         hideInputMethodMenu();
@@ -1309,83 +1395,88 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + android.Manifest.permission.WRITE_SECURE_SETTINGS);
             }
             
-            // Make sure this is a valid input method.
-            InputMethodInfo imm = mMethodMap.get(id);
-            if (imm == null) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                // Make sure this is a valid input method.
+                InputMethodInfo imm = mMethodMap.get(id);
                 if (imm == null) {
-                    throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
-                }
-            }
-            
-            StringBuilder builder = new StringBuilder(256);
-            
-            boolean removed = false;
-            String firstId = null;
-            
-            // Look through the currently enabled input methods.
-            String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_INPUT_METHODS);
-            if (enabledStr != null) {
-                final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-                splitter.setString(enabledStr);
-                while (splitter.hasNext()) {
-                    String curId = splitter.next();
-                    if (curId.equals(id)) {
-                        if (enabled) {
-                            // We are enabling this input method, but it is
-                            // already enabled.  Nothing to do.  The previous
-                            // state was enabled.
-                            return true;
-                        }
-                        // We are disabling this input method, and it is
-                        // currently enabled.  Skip it to remove from the
-                        // new list.
-                        removed = true;
-                    } else if (!enabled) {
-                        // We are building a new list of input methods that
-                        // doesn't contain the given one.
-                        if (firstId == null) firstId = curId;
-                        if (builder.length() > 0) builder.append(':');
-                        builder.append(curId);
+                    if (imm == null) {
+                        throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
                     }
                 }
-            }
-            
-            if (!enabled) {
-                if (!removed) {
-                    // We are disabling the input method but it is already
-                    // disabled.  Nothing to do.  The previous state was
-                    // disabled.
-                    return false;
+                
+                StringBuilder builder = new StringBuilder(256);
+                
+                boolean removed = false;
+                String firstId = null;
+                
+                // Look through the currently enabled input methods.
+                String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_INPUT_METHODS);
+                if (enabledStr != null) {
+                    final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
+                    splitter.setString(enabledStr);
+                    while (splitter.hasNext()) {
+                        String curId = splitter.next();
+                        if (curId.equals(id)) {
+                            if (enabled) {
+                                // We are enabling this input method, but it is
+                                // already enabled.  Nothing to do.  The previous
+                                // state was enabled.
+                                return true;
+                            }
+                            // We are disabling this input method, and it is
+                            // currently enabled.  Skip it to remove from the
+                            // new list.
+                            removed = true;
+                        } else if (!enabled) {
+                            // We are building a new list of input methods that
+                            // doesn't contain the given one.
+                            if (firstId == null) firstId = curId;
+                            if (builder.length() > 0) builder.append(':');
+                            builder.append(curId);
+                        }
+                    }
                 }
-                // Update the setting with the new list of input methods.
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
-                // We the disabled input method is currently selected, switch
-                // to another one.
-                String selId = Settings.Secure.getString(mContext.getContentResolver(),
-                        Settings.Secure.DEFAULT_INPUT_METHOD);
-                if (id.equals(selId)) {
+                
+                if (!enabled) {
+                    if (!removed) {
+                        // We are disabling the input method but it is already
+                        // disabled.  Nothing to do.  The previous state was
+                        // disabled.
+                        return false;
+                    }
+                    // Update the setting with the new list of input methods.
                     Settings.Secure.putString(mContext.getContentResolver(),
-                            Settings.Secure.DEFAULT_INPUT_METHOD,
-                            firstId != null ? firstId : "");
+                            Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
+                    // We the disabled input method is currently selected, switch
+                    // to another one.
+                    String selId = Settings.Secure.getString(mContext.getContentResolver(),
+                            Settings.Secure.DEFAULT_INPUT_METHOD);
+                    if (id.equals(selId)) {
+                        Settings.Secure.putString(mContext.getContentResolver(),
+                                Settings.Secure.DEFAULT_INPUT_METHOD,
+                                firstId != null ? firstId : "");
+                    }
+                    // Previous state was enabled.
+                    return true;
                 }
-                // Previous state was enabled.
-                return true;
+                
+                // Add in the newly enabled input method.
+                if (enabledStr == null || enabledStr.length() == 0) {
+                    enabledStr = id;
+                } else {
+                    enabledStr = enabledStr + ':' + id;
+                }
+                
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
+                
+                // Previous state was disabled.
+                return false;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-            
-            // Add in the newly enabled input method.
-            if (enabledStr == null || enabledStr.length() == 0) {
-                enabledStr = id;
-            } else {
-                enabledStr = enabledStr + ':' + id;
-            }
-            
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
-            
-            // Previous state was disabled.
-            return false;
         }
     }
     

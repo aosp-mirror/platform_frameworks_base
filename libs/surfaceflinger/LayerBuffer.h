@@ -46,7 +46,7 @@ class LayerBuffer : public LayerBaseClient
         virtual void onVisibilityResolved(const Transform& planeTransform);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual void updateTransform(Transform* tr) const;
+        virtual bool transformed() const;
     protected:
         LayerBuffer& mLayer;
     };
@@ -68,7 +68,7 @@ public:
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
-    virtual Transform getDrawingStateTransform() const;
+    virtual bool transformed() const;
 
     status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
@@ -116,10 +116,10 @@ private:
         sp<Buffer> getBuffer() const;
         void setBuffer(const sp<Buffer>& buffer);
 
-        virtual void updateTransform(Transform* tr) const; 
         virtual void onDraw(const Region& clip) const;
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
+        virtual bool transformed() const;
     private:
         mutable Mutex   mLock;
         sp<Buffer>      mBuffer;

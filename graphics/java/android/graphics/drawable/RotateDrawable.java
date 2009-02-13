@@ -88,6 +88,13 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         canvas.restoreToCount(saveCount);
     }
 
+    /**
+     * Returns the drawable rotated by this RotateDrawable.
+     */
+    public Drawable getDrawable() {
+        return mState.mDrawable;
+    }
+
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations()

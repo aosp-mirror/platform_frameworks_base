@@ -26,6 +26,8 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <hardware/hardware.h>
+
 #include "clz.h"
 #include "LayerBase.h"
 #include "LayerBlur.h"
@@ -229,15 +231,10 @@ Point LayerBase::getPhysicalSize() const
     return Point(front.w, front.h);
 }
 
-Transform LayerBase::getDrawingStateTransform() const
-{
-    return drawingState().transform;
-}
-
 void LayerBase::validateVisibility(const Transform& planeTransform)
 {
     const Layer::State& s(drawingState());
-    const Transform tr(planeTransform * getDrawingStateTransform());
+    const Transform tr(planeTransform * s.transform);
     const bool transformed = tr.transformed();
    
     const Point size(getPhysicalSize());
@@ -420,7 +417,7 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
 }
 
 void LayerBase::drawWithOpenGL(const Region& clip,
-        GLint textureName, const GGLSurface& t) const
+        GLint textureName, const GGLSurface& t, int transform) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
@@ -492,6 +489,12 @@ void LayerBase::drawWithOpenGL(const Region& clip,
 
             glMatrixMode(GL_TEXTURE);
             glLoadIdentity();
+            
+            if (transform == HAL_TRANSFORM_ROT_90) {
+                glTranslatef(0, 1, 0);
+                glRotatef(-90, 0, 0, 1);
+            }
+
             if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
                 // find the smallest power-of-two that will accommodate our surface
                 GLuint tw = 1 << (31 - clz(t.width));

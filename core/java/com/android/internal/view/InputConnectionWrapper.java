@@ -322,18 +322,9 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public boolean hideStatusIcon() {
+    public boolean reportFullscreenMode(boolean enabled) {
         try {
-            mIInputContext.showStatusIcon(null, 0);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    public boolean showStatusIcon(String packageName, int resId) {
-        try {
-            mIInputContext.showStatusIcon(packageName, resId);
+            mIInputContext.reportFullscreenMode(enabled);
             return true;
         } catch (RemoteException e) {
             return false;

@@ -29,8 +29,27 @@ class AudioSystem
 {
 public:
 
+    enum stream_type {
+        DEFAULT         =-1,
+        VOICE_CALL      = 0,
+        SYSTEM          = 1,
+        RING            = 2,
+        MUSIC           = 3,
+        ALARM           = 4,
+        NOTIFICATION    = 5,
+        BLUETOOTH_SCO   = 6,
+        NUM_STREAM_TYPES
+    };
+
+    enum audio_output_type {
+        AUDIO_OUTPUT_DEFAULT      =-1,
+        AUDIO_OUTPUT_HARDWARE     = 0,
+        AUDIO_OUTPUT_A2DP         = 1,
+        NUM_AUDIO_OUTPUT_TYPES
+    };
+
     enum audio_format {
-        DEFAULT = 0,
+        FORMAT_DEFAULT = 0,
         PCM_16_BIT,
         PCM_8_BIT,
         INVALID_FORMAT
@@ -96,9 +115,11 @@ public:
     static float linearToLog(int volume);
     static int logToLinear(float volume);
 
-    static status_t getOutputSamplingRate(int* samplingRate);
-    static status_t getOutputFrameCount(int* frameCount);
-    static status_t getOutputLatency(uint32_t* latency);
+    static status_t getOutputSamplingRate(int* samplingRate, int stream = DEFAULT);
+    static status_t getOutputFrameCount(int* frameCount, int stream = DEFAULT);
+    static status_t getOutputLatency(uint32_t* latency, int stream = DEFAULT);
+
+    static bool routedToA2dpOutput(int streamType);
     
     static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount, 
         size_t* buffSize);
@@ -117,9 +138,10 @@ private:
         virtual void binderDied(const wp<IBinder>& who);
         
         // IAudioFlingerClient
-        virtual void audioOutputChanged(uint32_t frameCount, uint32_t samplingRate, uint32_t latency);
+        virtual void a2dpEnabledChanged(bool enabled);
         
     };
+    static int getOutput(int streamType);
 
     static sp<AudioFlingerClient> gAudioFlingerClient;
 
@@ -128,9 +150,10 @@ private:
     static Mutex gLock;
     static sp<IAudioFlinger> gAudioFlinger;
     static audio_error_callback gAudioErrorCallback;
-    static int gOutSamplingRate;
-    static int gOutFrameCount;
-    static uint32_t gOutLatency;
+    static int gOutSamplingRate[NUM_AUDIO_OUTPUT_TYPES];
+    static int gOutFrameCount[NUM_AUDIO_OUTPUT_TYPES];
+    static uint32_t gOutLatency[NUM_AUDIO_OUTPUT_TYPES];
+    static bool gA2dpEnabled;
     
     static size_t gInBuffSize;
     // previous parameters for recording buffer size queries

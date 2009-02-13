@@ -24,6 +24,8 @@ import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetoothDeviceCallback;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -48,8 +50,32 @@ class BluetoothEventLoop {
     private BluetoothDeviceService mBluetoothService;
     private Context mContext;
 
+    private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
+
+    // The time (in millisecs) to delay the pairing attempt after the first
+    // auto pairing attempt fails. We use an exponential delay with
+    // INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY as the initial value and
+    // MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY as the max value.
+    private static final long INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 3000;
+    private static final long MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 12000;
+
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY:
+                String address = (String)msg.obj;
+                if (address != null) {
+                    mBluetoothService.createBond(address);
+                    return;
+                }
+                break;
+            }
+        }
+    };
 
     static { classInitNative(); }
     private static native void classInitNative();
@@ -149,16 +175,6 @@ class BluetoothEventLoop {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
-    private void onPairingRequest() {
-        Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
-        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-    }
-    
-    private void onPairingCancel() {
-        Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
-        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-    }
-
     private void onRemoteDeviceFound(String address, int deviceClass, short rssi) {
         Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
@@ -214,10 +230,53 @@ class BluetoothEventLoop {
         address = address.toUpperCase();
         if (result == BluetoothError.SUCCESS) {
             mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
+            if (mBluetoothService.getBondState().isAutoPairingAttemptsInProgress(address)) {
+                mBluetoothService.getBondState().clearPinAttempts(address);
+            }
+        } else if (result == BluetoothDevice.UNBOND_REASON_AUTH_FAILED &&
+                mBluetoothService.getBondState().getAttempt(address) == 1) {
+            mBluetoothService.getBondState().addAutoPairingFailure(address);
+            pairingAttempt(address, result);
+        } else if (result == BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN &&
+                mBluetoothService.getBondState().isAutoPairingAttemptsInProgress(address)) {
+            pairingAttempt(address, result);
         } else {
             mBluetoothService.getBondState().setBondState(address,
                                                           BluetoothDevice.BOND_NOT_BONDED, result);
+            if (mBluetoothService.getBondState().isAutoPairingAttemptsInProgress(address)) {
+                mBluetoothService.getBondState().clearPinAttempts(address);
+            }
         }
+    }
+
+    private void pairingAttempt(String address, int result) {
+        // This happens when our initial guess of "0000" as the pass key
+        // fails. Try to create the bond again and display the pin dialog
+        // to the user. Use back-off while posting the delayed
+        // message. The initial value is
+        // INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY and the max value is
+        // MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY. If the max value is
+        // reached, display an error to the user.
+        int attempt = mBluetoothService.getBondState().getAttempt(address);
+        if (attempt * INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY >
+                    MAX_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY) {
+            mBluetoothService.getBondState().clearPinAttempts(address);
+            mBluetoothService.getBondState().setBondState(address,
+                    BluetoothDevice.BOND_NOT_BONDED, result);
+            return;
+        }
+
+        Message message = mHandler.obtainMessage(EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY);
+        message.obj = address;
+        boolean postResult =  mHandler.sendMessageDelayed(message,
+                                        attempt * INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY);
+        if (!postResult) {
+            mBluetoothService.getBondState().clearPinAttempts(address);
+            mBluetoothService.getBondState().setBondState(address,
+                    BluetoothDevice.BOND_NOT_BONDED, result);
+            return;
+        }
+        mBluetoothService.getBondState().attempt(address);
     }
 
     private void onBondingCreated(String address) {
@@ -253,12 +312,12 @@ class BluetoothEventLoop {
             case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
             case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
             case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
-                if (mBluetoothService.getBondState().getAttempt(address) < 1) {
+                if (!mBluetoothService.getBondState().hasAutoPairingFailed(address)) {
                     mBluetoothService.getBondState().attempt(address);
                     mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes("0000"));
                     return;
                 }
-            }
+           }
         }
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);

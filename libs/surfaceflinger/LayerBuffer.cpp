@@ -103,15 +103,6 @@ void LayerBuffer::unregisterBuffers()
         source->unregisterBuffers();
 }
 
-Transform LayerBuffer::getDrawingStateTransform() const
-{
-    Transform tr(LayerBaseClient::getDrawingStateTransform());
-    sp<Source> source(getSource());
-    if (source != 0)
-        source->updateTransform(&tr);
-    return tr;
-}
-
 uint32_t LayerBuffer::doTransaction(uint32_t flags)
 {
     sp<Source> source(getSource());
@@ -139,6 +130,14 @@ void LayerBuffer::onDraw(const Region& clip) const
     } else {
         clearWithOpenGL(clip);
     }
+}
+
+bool LayerBuffer::transformed() const
+{
+    sp<Source> source(getSource());
+    if (LIKELY(source != 0))
+        return source->transformed();
+    return false;
 }
 
 /**
@@ -316,7 +315,8 @@ void LayerBuffer::Source::postBuffer(ssize_t offset) {
 }
 void LayerBuffer::Source::unregisterBuffers() {
 }
-void LayerBuffer::Source::updateTransform(Transform* tr) const {
+bool LayerBuffer::Source::transformed() const {
+    return mLayer.mTransformed; 
 }
 
 // ---------------------------------------------------------------------------
@@ -363,6 +363,7 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
     mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
     mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
     mLayer.forceVisibilityTransaction();
+    
 }
 
 LayerBuffer::BufferSource::~BufferSource()
@@ -419,15 +420,9 @@ void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
     mBuffer = buffer;
 }
 
-void LayerBuffer::BufferSource::updateTransform(Transform* tr) const
+bool LayerBuffer::BufferSource::transformed() const
 {
-    uint32_t bufTransform = mBufferHeap.transform;
-    // TODO: handle all transforms
-    if (bufTransform == ISurface::BufferHeap::ROT_90) {
-        Transform rot90;
-        rot90.set(0, -1, 1, 0);
-        *tr = (*tr) * rot90;
-    }
+    return mBufferHeap.transform ? true : Source::transformed(); 
 }
 
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
@@ -476,7 +471,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
             if (UNLIKELY(mTemporaryDealer == 0)) {
                 // allocate a memory-dealer for this the first time
                 mTemporaryDealer = mLayer.mFlinger->getSurfaceHeapManager()
-                ->createHeap(ISurfaceComposer::eHardware);
+                    ->createHeap(ISurfaceComposer::eHardware);
                 mTempBitmap.init(mTemporaryDealer);
             }
 
@@ -506,10 +501,23 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         copybit_image_t dst;
         hw.getDisplaySurface(&dst);
         const copybit_rect_t& drect
-        = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+            = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
         const State& s(mLayer.drawingState());
         region_iterator it(clip);
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, mLayer.getOrientation());
+        
+        // pick the right orientation for this buffer
+        int orientation = mLayer.getOrientation();
+        if (UNLIKELY(mBufferHeap.transform)) {
+            Transform rot90;
+            GraphicPlane::orientationToTransfrom(
+                    ISurfaceComposer::eOrientation90, 0, 0, &rot90);
+            const Transform& planeTransform(mLayer.graphicPlane(0).transform());
+            const Layer::State& s(mLayer.drawingState());
+            Transform tr(planeTransform * s.transform * rot90);
+            orientation = tr.getOrientation();
+        }
+        
+        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
         copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
         copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
 
@@ -536,9 +544,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
         const Region dirty(Rect(t.width, t.height));
         mLayer.loadTexture(dirty, mTextureName, t, w, h);
-        mLayer.drawWithOpenGL(clip, mTextureName, t);
+        mLayer.drawWithOpenGL(clip, mTextureName, t, mBufferHeap.transform);
     }
 }
+
 
 // ---------------------------------------------------------------------------
 

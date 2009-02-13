@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class AppAdjustmentEditTextDialog extends Activity {
+public class EditTextActivityDialog extends Activity {
     
     private static final int SCROLLABLE_DIALOG_ID = 0;
     private static final int NONSCROLLABLE_DIALOG_ID = 1;
@@ -75,18 +75,18 @@ public class AppAdjustmentEditTextDialog extends Activity {
         EditText editText;
         
         if (scrollable) {
-            layout = new ScrollView(AppAdjustmentEditTextDialog.this);
+            layout = new ScrollView(EditTextActivityDialog.this);
             ((ScrollView) layout).setMinimumHeight(mLayout.getHeight());
             
             ((ScrollView) layout).addView((
-                    LinearLayout) View.inflate(AppAdjustmentEditTextDialog.this, 
+                    LinearLayout) View.inflate(EditTextActivityDialog.this, 
                     R.layout.dialog_edit_text_no_scroll, null));
         } else {
-            layout = View.inflate(AppAdjustmentEditTextDialog.this, 
+            layout = View.inflate(EditTextActivityDialog.this, 
                     R.layout.dialog_edit_text_no_scroll, null);
         }
         
-        Dialog d = new Dialog(AppAdjustmentEditTextDialog.this);
+        Dialog d = new Dialog(EditTextActivityDialog.this);
         d.setTitle(getString(R.string.test_dialog));
         d.setCancelable(true);
         d.setContentView(layout);

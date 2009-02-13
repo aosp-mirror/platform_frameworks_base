@@ -38,68 +38,142 @@ public class GadgetManager {
     static final String TAG = "GadgetManager";
 
     /**
-     * Send this when you want to pick a gadget to display.
+     * Send this from your gadget host activity when you want to pick a gadget to display.
+     * The gadget picker activity will be launched.
+     * <p>
+     * You must supply the following extras:
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_GADGET_ID}</td>
+     *     <td>A newly allocated gadgetId, which will be bound to the gadget provider
+     *         once the user has selected one.</td>
+     *  </tr>
+     * </table>
      *
      * <p>
      * The system will respond with an onActivityResult call with the following extras in
      * the intent:
-     * <ul>
-     *   <li><b>gadgetIds</b></li>
-     *   <li><b>hostId</b></li>
-     * </ul>
-     * TODO: Add constants for these.
-     * TODO: Where does this go?
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_GADGET_ID}</td>
+     *     <td>The gadgetId that you supplied in the original intent.</td>
+     *  </tr>
+     * </table>
+     * <p>
+     * When you receive the result from the gadget pick activity, if the resultCode is
+     * {@link android.app.Activity#RESULT_OK}, a gadget has been selected.  You should then
+     * check the GadgetProviderInfo for the returned gadget, and if it has one, launch its configuration
+     * activity.  If {@link android.app.Activity#RESULT_CANCELED} is returned, you should delete
+     * the gadgetId.
+     *
+     * @see #ACTION_GADGET_CONFIGURE
      */
-    public static final String GADGET_PICK_ACTION = "android.gadget.action.PICK_GADGET";
+    public static final String ACTION_GADGET_PICK = "android.gadget.action.GADGET_PICK";
 
+    /**
+     * Sent when it is time to configure your gadget while it is being added to a host.
+     * This action is not sent as a broadcast to the gadget provider, but as a startActivity
+     * to the activity specified in the {@link GadgetProviderInfo GadgetProviderInfo meta-data}.
+     *
+     * <p>
+     * The intent will contain the following extras:
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_GADGET_ID}</td>
+     *     <td>The gadgetId to configure.</td>
+     *  </tr>
+     * </table>
+     *
+     * <p>If you return {@link android.app.Activity#RESULT_OK} using
+     * {@link android.app.Activity#setResult Activity.setResult()}, the gadget will be added,
+     * and you will receive an {@link #ACTION_GADGET_UPDATE} broadcast for this gadget.
+     * If you return {@link android.app.Activity#RESULT_CANCELED}, the host will cancel the add
+     * and not display this gadget, and you will receive a {@link #ACTION_GADGET_DELETED} broadcast.
+     */
+    public static final String ACTION_GADGET_CONFIGURE = "android.gadget.action.GADGET_CONFIGURE";
+
+    /**
+     * An intent extra that contains one gadgetId.
+     * <p>
+     * The value will be an int that can be retrieved like this:
+     * {@sample frameworks/base/tests/gadgets/GadgetHostTest/src/com/android/tests/gadgethost/GadgetHostActivity.java getExtra_EXTRA_GADGET_ID}
+     */
     public static final String EXTRA_GADGET_ID = "gadgetId";
+
+    /**
+     * An intent extra that contains multiple gadgetIds.
+     * <p>
+     * The value will be an int array that can be retrieved like this:
+     * {@sample frameworks/base/tests/gadgets/GadgetHostTest/src/com/android/tests/gadgethost/TestGadgetProvider.java getExtra_EXTRA_GADGET_IDS}
+     */
     public static final String EXTRA_GADGET_IDS = "gadgetIds";
-    public static final String EXTRA_HOST_ID = "hostId";
+
+    /**
+     * A sentiel value that the gadget manager will never return as a gadgetId.
+     */
+    public static final int INVALID_GADGET_ID = 0;
 
     /**
      * Sent when it is time to update your gadget.
      *
      * <p>This may be sent in response to a new instance for this gadget provider having
-     * been instantiated, the requested {@link GadgetInfo#updatePeriodMillis update interval}
+     * been instantiated, the requested {@link GadgetProviderInfo#updatePeriodMillis update interval}
      * having lapsed, or the system booting.
-     */
-    public static final String GADGET_UPDATE_ACTION = "android.gadget.action.GADGET_UPDATE";
-
-    /**
-     * Sent when it is time to configure your gadget.  This action is not sent as a broadcast
-     * to the gadget provider, but as a startActivity to the activity specified in the
-     * {@link GadgetInfo GadgetInfo meta-data}.
      *
-     * <p>The {@link #EXTRA_GADGET_ID} extra contains the gadget ID.
+     * <p>
+     * The intent will contain the following extras:
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_GADGET_IDS}</td>
+     *     <td>The gadgetIds to update.  This may be all of the gadgets created for this
+     *     provider, or just a subset.  The system tries to send updates for as few gadget
+     *     instances as possible.</td>
+     *  </tr>
+     * </table>
+     * 
+     * @see GadgetProvider#onUpdate GadgetProvider.onUpdate(Context context, GadgetManager gadgetManager, int[] gadgetIds)
      */
-    public static final String GADGET_CONFIGURE_ACTION = "android.gadget.action.GADGET_CONFIGURE";
+    public static final String ACTION_GADGET_UPDATE = "android.gadget.action.GADGET_UPDATE";
 
     /**
-     * Sent when the gadget is added to a host for the first time.  This broadcast is sent at
-     * boot time if there is a gadget host installed with an instance for this provider.
+     * Sent when an instance of a gadget is deleted from its host.
+     *
+     * @see GadgetProvider#onDeleted GadgetProvider.onDeleted(Context context, int[] gadgetIds)
      */
-    public static final String GADGET_ENABLED_ACTION = "android.gadget.action.GADGET_ENABLED";
+    public static final String ACTION_GADGET_DELETED = "android.gadget.action.GADGET_DELETED";
 
     /**
-     * Sent when an instances of a gadget is deleted from the host.
+     * Sent when an instance of a gadget is removed from the last host.
+     * 
+     * @see GadgetProvider#onEnabled GadgetProvider.onEnabled(Context context)
      */
-    public static final String GADGET_DELETED_ACTION = "android.gadget.action.GADGET_DELETED";
+    public static final String ACTION_GADGET_DISABLED = "android.gadget.action.GADGET_DISABLED";
 
     /**
-     * Sent when the gadget is removed from the last host.
+     * Sent when an instance of a gadget is added to a host for the first time.
+     * This broadcast is sent at boot time if there is a gadget host installed with
+     * an instance for this provider.
+     * 
+     * @see GadgetProvider#onEnabled GadgetProvider.onEnabled(Context context)
      */
-    public static final String GADGET_DISABLED_ACTION = "android.gadget.action.GADGET_DISABLED";
+    public static final String ACTION_GADGET_ENABLED = "android.gadget.action.GADGET_ENABLED";
 
     /**
      * Field for the manifest meta-data tag.
+     *
+     * @see GadgetProviderInfo
      */
-    public static final String GADGET_PROVIDER_META_DATA = "android.gadget.provider";
+    public static final String META_DATA_GADGET_PROVIDER = "android.gadget.provider";
 
     static WeakHashMap<Context, WeakReference<GadgetManager>> sManagerCache = new WeakHashMap();
     static IGadgetService sService;
     
     Context mContext;
 
+    /**
+     * Get the GadgetManager instance to use for the supplied {@link android.content.Context
+     * Context} object.
+     */
     public static GadgetManager getInstance(Context context) {
         synchronized (sManagerCache) {
             if (sService == null) {
@@ -125,9 +199,11 @@ public class GadgetManager {
     }
 
     /**
-     * Call this with the new RemoteViews for your gadget whenever you need to.
+     * Set the RemoteViews to use for the specified gadgetIds.
      *
      * <p>
+     * It is okay to call this method both inside an {@link #ACTION_GADGET_UPDATE} broadcast,
+     * and outside of the handler.
      * This method will only work when called from the uid that owns the gadget provider.
      *
      * @param gadgetIds     The gadget instances for which to set the RemoteViews.
@@ -143,9 +219,26 @@ public class GadgetManager {
     }
 
     /**
-     * Call this with the new RemoteViews for your gadget whenever you need to.
+     * Set the RemoteViews to use for the specified gadgetId.
      *
      * <p>
+     * It is okay to call this method both inside an {@link #ACTION_GADGET_UPDATE} broadcast,
+     * and outside of the handler.
+     * This method will only work when called from the uid that owns the gadget provider.
+     *
+     * @param gadgetId      The gadget instance for which to set the RemoteViews.
+     * @param views         The RemoteViews object to show.
+     */
+    public void updateGadget(int gadgetId, RemoteViews views) {
+        updateGadget(new int[] { gadgetId }, views);
+    }
+
+    /**
+     * Set the RemoteViews to use for all gadget instances for the supplied gadget provider.
+     *
+     * <p>
+     * It is okay to call this method both inside an {@link #ACTION_GADGET_UPDATE} broadcast,
+     * and outside of the handler.
      * This method will only work when called from the uid that owns the gadget provider.
      *
      * @param provider      The {@link ComponentName} for the {@link
@@ -165,7 +258,7 @@ public class GadgetManager {
     /**
      * Return a list of the gadget providers that are currently installed.
      */
-    public List<GadgetInfo> getInstalledProviders() {
+    public List<GadgetProviderInfo> getInstalledProviders() {
         try {
             return sService.getInstalledProviders();
         }
@@ -175,12 +268,12 @@ public class GadgetManager {
     }
 
     /**
-     * Get the available info about the gadget.  If the gadgetId has not been bound yet,
-     * this method will return null.
+     * Get the available info about the gadget.
      *
-     * TODO: throws GadgetNotFoundException ??? if not valid
+     * @return A gadgetId.  If the gadgetId has not been bound to a provider yet, or
+     * you don't have access to that gadgetId, null is returned.
      */
-    public GadgetInfo getGadgetInfo(int gadgetId) {
+    public GadgetProviderInfo getGadgetInfo(int gadgetId) {
         try {
             return sService.getGadgetInfo(gadgetId);
         }
@@ -190,7 +283,14 @@ public class GadgetManager {
     }
 
     /**
-     * Set the component for a given gadgetId.  You need the GADGET_LIST permission.
+     * Set the component for a given gadgetId.
+     *
+     * <p class="note">You need the GADGET_LIST permission.  This method is to be used by the
+     * gadget picker.
+     *
+     * @param gadgetId     The gadget instance for which to set the RemoteViews.
+     * @param provider      The {@link android.content.BroadcastReceiver} that will be the gadget
+     *                      provider for this gadget.
      */
     public void bindGadgetId(int gadgetId, ComponentName provider) {
         try {

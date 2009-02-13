@@ -18,7 +18,6 @@ package android.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -31,9 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -145,17 +142,6 @@ public abstract class LauncherActivity extends ListActivity {
             return view;
         }
 
-        private char getCandidateLetter(ResolveInfo info) {
-            PackageManager pm = LauncherActivity.this.getPackageManager();
-            CharSequence label = info.loadLabel(pm);
-
-            if (label == null) {
-                label = info.activityInfo.name;
-            }
-
-            return Character.toLowerCase(label.charAt(0));
-        }
-
         private void bindView(View view, ListItem item) {
             TextView text = (TextView) view;
             text.setText(item.label);
@@ -191,7 +177,6 @@ public abstract class LauncherActivity extends ListActivity {
                         results.count = list.size();
                     }
                 } else {
-                    final PackageManager pm = LauncherActivity.this.getPackageManager();
                     final String prefixString = prefix.toString().toLowerCase();
 
                     ArrayList<ListItem> values = mOriginalValues;
@@ -243,8 +228,6 @@ public abstract class LauncherActivity extends ListActivity {
         private int mIconWidth = -1;
         private int mIconHeight = -1;
 
-        private final Paint mPaint = new Paint();
-        private final Rect mBounds = new Rect();
         private final Rect mOldBounds = new Rect();
         private Canvas mCanvas = new Canvas();
         

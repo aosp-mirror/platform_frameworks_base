@@ -17,11 +17,12 @@
 package com.android.internal.gadget;
 
 import android.content.ComponentName;
-import android.gadget.GadgetInfo;
+import android.gadget.GadgetProviderInfo;
 import android.widget.RemoteViews;
 
 /** {@hide} */
 oneway interface IGadgetHost {
     void updateGadget(int gadgetId, in RemoteViews views);
+    void providerChanged(int gadgetId, in GadgetProviderInfo info);
 }
 

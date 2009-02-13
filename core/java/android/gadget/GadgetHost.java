@@ -38,6 +38,7 @@ import com.android.internal.gadget.IGadgetService;
 public class GadgetHost {
 
     static final int HANDLE_UPDATE = 1;
+    static final int HANDLE_PROVIDER_CHANGED = 2;
 
     static Object sServiceLock = new Object();
     static IGadgetService sService;
@@ -52,6 +53,13 @@ public class GadgetHost {
             msg.obj = views;
             msg.sendToTarget();
         }
+
+        public void providerChanged(int gadgetId, GadgetProviderInfo info) {
+            Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED);
+            msg.arg1 = gadgetId;
+            msg.obj = info;
+            msg.sendToTarget();
+        }
     }
 
     Handler mHandler = new Handler() {
@@ -59,6 +67,10 @@ public class GadgetHost {
             switch (msg.what) {
                 case HANDLE_UPDATE: {
                     updateGadgetView(msg.arg1, (RemoteViews)msg.obj);
+                    break;
+                }
+                case HANDLE_PROVIDER_CHANGED: {
+                    onProviderChanged(msg.arg1, (GadgetProviderInfo)msg.obj);
                     break;
                 }
             }
@@ -183,7 +195,8 @@ public class GadgetHost {
         }
     }
 
-    public final GadgetHostView createView(Context context, int gadgetId, GadgetInfo gadget) {
+    public final GadgetHostView createView(Context context, int gadgetId,
+            GadgetProviderInfo gadget) {
         GadgetHostView view = onCreateView(context, gadgetId, gadget);
         view.setGadget(gadgetId, gadget);
         synchronized (mViews) {
@@ -203,8 +216,15 @@ public class GadgetHost {
      * Called to create the GadgetHostView.  Override to return a custom subclass if you
      * need it.  {@more}
      */
-    protected GadgetHostView onCreateView(Context context, int gadgetId, GadgetInfo gadget) {
+    protected GadgetHostView onCreateView(Context context, int gadgetId,
+            GadgetProviderInfo gadget) {
         return new GadgetHostView(context);
+    }
+    
+    /**
+     * Called when the gadget provider for a gadget has been upgraded to a new apk.
+     */
+    protected void onProviderChanged(int gadgetId, GadgetProviderInfo gadget) {
     }
 
     void updateGadgetView(int gadgetId, RemoteViews views) {

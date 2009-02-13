@@ -248,7 +248,33 @@ status_t MediaRecorder::setOutputFile(const char* path)
 
     status_t ret = mMediaRecorder->setOutputFile(path);
     if (OK != ret) {
-        LOGV("setAudioEncoder failed: %d", ret);
+        LOGV("setOutputFile failed: %d", ret);
+        mCurrentState = MEDIA_RECORDER_ERROR;
+        return UNKNOWN_ERROR;
+    }
+    mIsOutputFileSet = true;
+    return ret;
+}
+
+status_t MediaRecorder::setOutputFile(int fd, int64_t offset, int64_t length)
+{
+    LOGV("setOutputFile(%d, %lld, %lld)", fd, offset, length);
+    if(mMediaRecorder == NULL) {
+        LOGE("media recorder is not initialized yet");
+        return INVALID_OPERATION;
+    }
+    if (mIsOutputFileSet) {
+        LOGE("output file has already been set");
+        return INVALID_OPERATION;
+    }
+    if (!(mCurrentState & MEDIA_RECORDER_DATASOURCE_CONFIGURED)) {
+        LOGE("setOutputFile called in an invalid state(%d)", mCurrentState);
+        return INVALID_OPERATION;
+    }
+
+    status_t ret = mMediaRecorder->setOutputFile(fd, offset, length);
+    if (OK != ret) {
+        LOGV("setOutputFile failed: %d", ret);
         mCurrentState = MEDIA_RECORDER_ERROR;
         return UNKNOWN_ERROR;
     }
@@ -306,7 +332,7 @@ status_t MediaRecorder::prepare()
         return INVALID_OPERATION;
     }
     if (!(mCurrentState & MEDIA_RECORDER_DATASOURCE_CONFIGURED)) {
-        LOGE("setVideoFrameRate called in an invalid state: %d", mCurrentState);
+        LOGE("prepare called in an invalid state: %d", mCurrentState);
         return INVALID_OPERATION;
     }
 
@@ -328,7 +354,7 @@ status_t MediaRecorder::getMaxAmplitude(int* max)
         return INVALID_OPERATION;
     }
     if (mCurrentState & MEDIA_RECORDER_ERROR) {
-        LOGE("setVideoFrameRate called in an invalid state: %d", mCurrentState);
+        LOGE("getMaxAmplitude called in an invalid state: %d", mCurrentState);
         return INVALID_OPERATION;
     }
 

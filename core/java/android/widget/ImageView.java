@@ -48,6 +48,7 @@ import android.widget.RemoteViews.RemoteView;
  * @attr ref android.R.styleable#ImageView_maxHeight
  * @attr ref android.R.styleable#ImageView_tint
  * @attr ref android.R.styleable#ImageView_scaleType
+ * @attr ref android.R.styleable#ImageView_cropToPadding
  */
 @RemoteView
 public class ImageView extends View {

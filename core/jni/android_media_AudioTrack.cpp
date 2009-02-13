@@ -72,6 +72,7 @@ class AudioTrackJniStorage {
         sp<MemoryHeapBase>         mMemHeap;
         sp<MemoryBase>             mMemBase;
         audiotrack_callback_cookie mCallbackData;
+        int                        mStreamType;
 
     AudioTrackJniStorage() {
     }
@@ -168,11 +169,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     int afSampleRate;
     int afFrameCount;
 
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
         LOGE("Error creating AudioTrack: Could not get AudioSystem frame count.");
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         LOGE("Error creating AudioTrack: Could not get AudioSystem sampling rate.");
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
@@ -183,21 +184,21 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     }
     
     // check the stream type
-    AudioTrack::stream_type atStreamType;
+    AudioSystem::stream_type atStreamType;
     if (streamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        atStreamType = AudioTrack::VOICE_CALL;
+        atStreamType = AudioSystem::VOICE_CALL;
     } else if (streamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        atStreamType = AudioTrack::SYSTEM;
+        atStreamType = AudioSystem::SYSTEM;
     } else if (streamType == javaAudioTrackFields.STREAM_RING) {
-        atStreamType = AudioTrack::RING;
+        atStreamType = AudioSystem::RING;
     } else if (streamType == javaAudioTrackFields.STREAM_MUSIC) {
-        atStreamType = AudioTrack::MUSIC;
+        atStreamType = AudioSystem::MUSIC;
     } else if (streamType == javaAudioTrackFields.STREAM_ALARM) {
-        atStreamType = AudioTrack::ALARM;
+        atStreamType = AudioSystem::ALARM;
     } else if (streamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        atStreamType = AudioTrack::NOTIFICATION;
+        atStreamType = AudioSystem::NOTIFICATION;
     } else if (streamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        atStreamType = AudioTrack::BLUETOOTH_SCO;
+        atStreamType = AudioSystem::BLUETOOTH_SCO;
     } else {
         LOGE("Error creating AudioTrack: unknown stream type.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
@@ -237,6 +238,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     lpJniStorage->mCallbackData.audioTrack_class = (jclass)env->NewGlobalRef(clazz);
     // we use a weak reference so the AudioTrack object can be garbage collected.
     lpJniStorage->mCallbackData.audioTrack_ref = env->NewGlobalRef(weak_this);
+    
+    lpJniStorage->mStreamType = atStreamType;
     
     // create the native AudioTrack object
     AudioTrack* lpTrack = new AudioTrack();
@@ -656,8 +659,14 @@ static jint android_media_AudioTrack_reload(JNIEnv *env,  jobject thiz) {
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobject thiz) {
-    int afSamplingRate;
-    if (AudioSystem::getOutputSamplingRate(&afSamplingRate) != NO_ERROR) {
+    int afSamplingRate;    
+    AudioTrackJniStorage* lpJniStorage = (AudioTrackJniStorage *)env->GetIntField(
+        thiz, javaAudioTrackFields.jniData);
+    if (lpJniStorage == NULL) {
+        return DEFAULT_OUTPUT_SAMPLE_RATE;
+    }
+
+    if (AudioSystem::getOutputSamplingRate(&afSamplingRate, lpJniStorage->mStreamType) != NO_ERROR) {
         return DEFAULT_OUTPUT_SAMPLE_RATE;
     } else {
         return afSamplingRate;

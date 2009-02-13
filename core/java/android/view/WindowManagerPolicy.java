@@ -771,4 +771,15 @@ public interface WindowManagerPolicy {
     public boolean isCheekPressedAgainstScreen(MotionEvent ev);
     
     public void setCurrentOrientation(int newOrientation);
+    
+    /**
+     * Call from application to perform haptic feedback on its window.
+     */
+    public boolean performHapticFeedback(WindowState win, int effectId, boolean always);
+    
+    /**
+     * Called when we have stopped keeping the screen on because a window
+     * requesting this is no longer visible.
+     */
+    public void screenOnStopped();
 }

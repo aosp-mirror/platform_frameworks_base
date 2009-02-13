@@ -31,9 +31,10 @@ import android.content.pm.PackageItemInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.gadget.GadgetManager;
-import android.gadget.GadgetInfo;
+import android.gadget.GadgetProviderInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -78,7 +79,7 @@ class GadgetService extends IGadgetService.Stub
 
     static class Provider {
         int uid;
-        GadgetInfo info;
+        GadgetProviderInfo info;
         ArrayList<GadgetId> instances = new ArrayList();
         PendingIntent broadcast;
         
@@ -106,7 +107,7 @@ class GadgetService extends IGadgetService.Stub
     PackageManager mPackageManager;
     AlarmManager mAlarmManager;
     ArrayList<Provider> mInstalledProviders = new ArrayList();
-    int mNextGadgetId = 1;
+    int mNextGadgetId = GadgetManager.INVALID_GADGET_ID + 1;
     ArrayList<GadgetId> mGadgetIds = new ArrayList();
     ArrayList<Host> mHosts = new ArrayList();
 
@@ -128,7 +129,6 @@ class GadgetService extends IGadgetService.Stub
         // update the provider list.
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
@@ -148,7 +148,7 @@ class GadgetService extends IGadgetService.Stub
             int N = mInstalledProviders.size();
             pw.println("Providers: (size=" + N + ")");
             for (int i=0; i<N; i++) {
-                GadgetInfo info = mInstalledProviders.get(i).info;
+                GadgetProviderInfo info = mInstalledProviders.get(i).info;
                 pw.println("  [" + i + "] provder=" + info.provider
                         + " min=(" + info.minWidth + "x" + info.minHeight + ")"
                         + " updatePeriodMillis=" + info.updatePeriodMillis
@@ -265,7 +265,7 @@ class GadgetService extends IGadgetService.Stub
         if (p != null) {
             p.instances.remove(id);
             // send the broacast saying that this gadgetId has been deleted
-            Intent intent = new Intent(GadgetManager.GADGET_DELETED_ACTION);
+            Intent intent = new Intent(GadgetManager.ACTION_GADGET_DELETED);
             intent.setComponent(p.info.provider);
             intent.putExtra(GadgetManager.EXTRA_GADGET_ID, id.gadgetId);
             mContext.sendBroadcast(intent);
@@ -274,7 +274,7 @@ class GadgetService extends IGadgetService.Stub
                 cancelBroadcasts(p);
 
                 // send the broacast saying that the provider is not in use any more
-                intent = new Intent(GadgetManager.GADGET_DISABLED_ACTION);
+                intent = new Intent(GadgetManager.ACTION_GADGET_DISABLED);
                 intent.setComponent(p.info.provider);
                 mContext.sendBroadcast(intent);
             }
@@ -331,7 +331,7 @@ class GadgetService extends IGadgetService.Stub
         }
     }
 
-    public GadgetInfo getGadgetInfo(int gadgetId) {
+    public GadgetProviderInfo getGadgetInfo(int gadgetId) {
         synchronized (mGadgetIds) {
             GadgetId id = lookupGadgetIdLocked(gadgetId);
             if (id != null) {
@@ -351,10 +351,10 @@ class GadgetService extends IGadgetService.Stub
         }
     }
 
-    public List<GadgetInfo> getInstalledProviders() {
+    public List<GadgetProviderInfo> getInstalledProviders() {
         synchronized (mGadgetIds) {
             final int N = mInstalledProviders.size();
-            ArrayList<GadgetInfo> result = new ArrayList(N);
+            ArrayList<GadgetProviderInfo> result = new ArrayList(N);
             for (int i=0; i<N; i++) {
                 result.add(mInstalledProviders.get(i).info);
             }
@@ -364,7 +364,7 @@ class GadgetService extends IGadgetService.Stub
 
     public void updateGadgetIds(int[] gadgetIds, RemoteViews views) {
         if (gadgetIds == null) {
-            throw new IllegalArgumentException("bad gadgetIds");
+            return;
         }
         if (gadgetIds.length == 0) {
             return;
@@ -408,7 +408,7 @@ class GadgetService extends IGadgetService.Stub
                     // the lock is held, but this is a oneway call
                     id.host.callbacks.updateGadget(id.gadgetId, views);
                 } catch (RemoteException e) {
-                    // It failed, remove the callback. No need to prune because
+                    // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
                     id.host.callbacks = null;
                 }
@@ -524,10 +524,7 @@ class GadgetService extends IGadgetService.Stub
     void getGadgetList() {
         PackageManager pm = mPackageManager;
 
-        // TODO: We have these as different actions.  I wonder if it makes more sense to
-        // have like a GADGET_ACTION, and then subcommands.  It's kind of arbitrary that
-        // we look for GADGET_UPDATE_ACTION and not any of the other gadget actions.
-        Intent intent = new Intent(GadgetManager.GADGET_UPDATE_ACTION);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
         List<ResolveInfo> broadcastReceivers = pm.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
@@ -538,11 +535,14 @@ class GadgetService extends IGadgetService.Stub
         }
     }
 
-    void addProviderLocked(ResolveInfo ri) {
-        Provider p = parseGadgetInfoXml(new ComponentName(ri.activityInfo.packageName,
+    boolean addProviderLocked(ResolveInfo ri) {
+        Provider p = parseProviderInfoXml(new ComponentName(ri.activityInfo.packageName,
                     ri.activityInfo.name), ri);
         if (p != null) {
             mInstalledProviders.add(p);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -568,16 +568,18 @@ class GadgetService extends IGadgetService.Stub
     }
 
     void sendEnableIntentLocked(Provider p) {
-        Intent intent = new Intent(GadgetManager.GADGET_ENABLED_ACTION);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_ENABLED);
         intent.setComponent(p.info.provider);
         mContext.sendBroadcast(intent);
     }
 
     void sendUpdateIntentLocked(Provider p, int[] gadgetIds) {
-        Intent intent = new Intent(GadgetManager.GADGET_UPDATE_ACTION);
-        intent.putExtra(GadgetManager.EXTRA_GADGET_IDS, gadgetIds);
-        intent.setComponent(p.info.provider);
-        mContext.sendBroadcast(intent);
+        if (gadgetIds != null && gadgetIds.length > 0) {
+            Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
+            intent.putExtra(GadgetManager.EXTRA_GADGET_IDS, gadgetIds);
+            intent.setComponent(p.info.provider);
+            mContext.sendBroadcast(intent);
+        }
     }
 
     void registerForBroadcastsLocked(Provider p, int[] gadgetIds) {
@@ -587,7 +589,7 @@ class GadgetService extends IGadgetService.Stub
             // PendingIntent.getBroadcast will update the extras.
             boolean alreadyRegistered = p.broadcast != null;
             int instancesSize = p.instances.size();
-            Intent intent = new Intent(GadgetManager.GADGET_UPDATE_ACTION);
+            Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
             intent.putExtra(GadgetManager.EXTRA_GADGET_IDS, gadgetIds);
             intent.setComponent(p.info.provider);
             long token = Binder.clearCallingIdentity();
@@ -614,16 +616,16 @@ class GadgetService extends IGadgetService.Stub
         return gadgetIds;
     }
 
-    private Provider parseGadgetInfoXml(ComponentName component, ResolveInfo ri) {
+    private Provider parseProviderInfoXml(ComponentName component, ResolveInfo ri) {
         Provider p = null;
 
         ActivityInfo activityInfo = ri.activityInfo;
         XmlResourceParser parser = null;
         try {
             parser = activityInfo.loadXmlMetaData(mPackageManager,
-                    GadgetManager.GADGET_PROVIDER_META_DATA);
+                    GadgetManager.META_DATA_GADGET_PROVIDER);
             if (parser == null) {
-                Log.w(TAG, "No " + GadgetManager.GADGET_PROVIDER_META_DATA + " meta-data for "
+                Log.w(TAG, "No " + GadgetManager.META_DATA_GADGET_PROVIDER + " meta-data for "
                         + "gadget provider '" + component + '\'');
                 return null;
             }
@@ -644,7 +646,7 @@ class GadgetService extends IGadgetService.Stub
             }
 
             p = new Provider();
-            GadgetInfo info = p.info = new GadgetInfo();
+            GadgetProviderInfo info = p.info = new GadgetProviderInfo();
 
             info.provider = component;
             p.uid = activityInfo.applicationInfo.uid;
@@ -672,6 +674,7 @@ class GadgetService extends IGadgetService.Stub
             // of what a client process passes to us should not be fatal for the
             // system process.
             Log.w(TAG, "XML parsing failed for gadget provider '" + component + '\'', e);
+            return null;
         } finally {
             if (parser != null) parser.close();
         }
@@ -979,20 +982,26 @@ class GadgetService extends IGadgetService.Stub
                 
                 if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
                     synchronized (mGadgetIds) {
-                        addProvidersForPackageLocked(pkgName);
-                        saveStateLocked();
-                    }
-                }
-                else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                    synchronized (mGadgetIds) {
-                        updateProvidersForPackageLocked(pkgName);
+                        Bundle extras = intent.getExtras();
+                        if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                            // The package was just upgraded
+                            updateProvidersForPackageLocked(pkgName);
+                        } else {
+                            // The package was just added
+                            addProvidersForPackageLocked(pkgName);
+                        }
                         saveStateLocked();
                     }
                 }
                 else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    synchronized (mGadgetIds) {
-                        removeProvidersForPackageLocked(pkgName);
-                        saveStateLocked();
+                    Bundle extras = intent.getExtras();
+                    if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                        // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
+                    } else {
+                        synchronized (mGadgetIds) {
+                            removeProvidersForPackageLocked(pkgName);
+                            saveStateLocked();
+                        }
                     }
                 }
             }
@@ -1002,7 +1011,7 @@ class GadgetService extends IGadgetService.Stub
     // TODO: If there's a better way of matching an intent filter against the
     // packages for a given package, use that.
     void addProvidersForPackageLocked(String pkgName) {
-        Intent intent = new Intent(GadgetManager.GADGET_UPDATE_ACTION);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
@@ -1021,7 +1030,7 @@ class GadgetService extends IGadgetService.Stub
     // packages for a given package, use that.
     void updateProvidersForPackageLocked(String pkgName) {
         HashSet<String> keep = new HashSet();
-        Intent intent = new Intent(GadgetManager.GADGET_UPDATE_ACTION);
+        Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
@@ -1031,17 +1040,53 @@ class GadgetService extends IGadgetService.Stub
             ResolveInfo ri = broadcastReceivers.get(i);
             ActivityInfo ai = ri.activityInfo;
             if (pkgName.equals(ai.packageName)) {
-                Provider p = lookupProviderLocked(new ComponentName(ai.packageName, ai.name));
+                ComponentName component = new ComponentName(ai.packageName, ai.name);
+                Provider p = lookupProviderLocked(component);
                 if (p == null) {
-                    addProviderLocked(ri);
+                    if (addProviderLocked(ri)) {
+                        keep.add(ai.name);
+                    }
+                } else {
+                    Provider parsed = parseProviderInfoXml(component, ri);
+                    if (parsed != null) {
+                        keep.add(ai.name);
+                        // Use the new GadgetProviderInfo.
+                        GadgetProviderInfo oldInfo = p.info;
+                        p.info = parsed.info;
+                        // If it's enabled
+                        final int M = p.instances.size();
+                        if (M > 0) {
+                            int[] gadgetIds = getGadgetIds(p);
+                            // Reschedule for the new updatePeriodMillis (don't worry about handling
+                            // it specially if updatePeriodMillis didn't change because we just sent
+                            // an update, and the next one will be updatePeriodMillis from now).
+                            cancelBroadcasts(p);
+                            registerForBroadcastsLocked(p, gadgetIds);
+                            // If it's currently showing, call back with the new GadgetProviderInfo.
+                            for (int j=0; j<M; j++) {
+                                GadgetId id = p.instances.get(j);
+                                if (id.host != null && id.host.callbacks != null) {
+                                    try {
+                                        id.host.callbacks.providerChanged(id.gadgetId, p.info);
+                                    } catch (RemoteException ex) {
+                                        // It failed; remove the callback. No need to prune because
+                                        // we know that this host is still referenced by this
+                                        // instance.
+                                        id.host.callbacks = null;
+                                    }
+                                }
+                            }
+                            // Now that we've told the host, push out an update.
+                            sendUpdateIntentLocked(p, gadgetIds);
+                        }
+                    }
                 }
-                keep.add(ai.name);
             }
         }
 
         // prune the ones we don't want to keep
         N = mInstalledProviders.size();
-        for (int i=0; i<N; i++) {
+        for (int i=N-1; i>=0; i--) {
             Provider p = mInstalledProviders.get(i);
             if (pkgName.equals(p.info.provider.getPackageName())
                     && !keep.contains(p.info.provider.getClassName())) {
@@ -1052,7 +1097,7 @@ class GadgetService extends IGadgetService.Stub
 
     void removeProvidersForPackageLocked(String pkgName) {
         int N = mInstalledProviders.size();
-        for (int i=0; i<N; i++) {
+        for (int i=N-1; i>=0; i--) {
             Provider p = mInstalledProviders.get(i);
             if (pkgName.equals(p.info.provider.getPackageName())) {
                 removeProviderLocked(i, p);
@@ -1064,7 +1109,7 @@ class GadgetService extends IGadgetService.Stub
         // By now, we have removed any gadgets that were in any hosts here,
         // so we don't need to worry about sending DISABLE broadcasts to them.
         N = mHosts.size();
-        for (int i=0; i<N; i++) {
+        for (int i=N-1; i>=0; i--) {
             Host host = mHosts.get(i);
             if (pkgName.equals(host.packageName)) {
                 deleteHostLocked(host);

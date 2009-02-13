@@ -159,7 +159,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int LOG_AM_BROADCAST_DISCARD_APP = 30025;
     static final int LOG_AM_CREATE_SERVICE = 30030;
     static final int LOG_AM_DESTROY_SERVICE = 30031;
-
+    static final int LOG_AM_PROCESS_CRASHED_TOO_MUCH = 30032;
+    static final int LOG_AM_DROP_PROCESS = 30033;
+    static final int LOG_AM_SERVICE_CRASHED_TOO_MUCH = 30034;
+    static final int LOG_AM_SCHEDULE_SERVICE_RESTART = 30035;
+    static final int LOG_AM_PROVIDER_LOST_PROCESS = 30036;
+    
     static final int LOG_BOOT_PROGRESS_AMS_READY = 3040;
     static final int LOG_BOOT_PROGRESS_ENABLE_SCREEN = 3050;
 
@@ -1787,7 +1792,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void startPausingLocked(boolean userLeaving) {
+    private final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
         if (mPausingActivity != null) {
             RuntimeException e = new RuntimeException();
             Log.e(TAG, "Trying to pause when pause is already pending for "
@@ -1840,9 +1845,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (mPausingActivity != null) {
             // Have the window manager pause its key dispatching until the new
-            // activity has started...
-            prev.pauseKeyDispatchingLocked();
-            
+            // activity has started.  If we're pausing the activity just because
+            // the screen is being turned off and the UI is sleeping, don't interrupt
+            // key dispatch; the same activity will pick it up again on wakeup.
+            if (!uiSleeping) {
+                prev.pauseKeyDispatchingLocked();
+            } else {
+                if (DEBUG_PAUSE) Log.v(TAG, "Key dispatch not paused for screen off");
+            }
+
             // Schedule a pause timeout in case the app doesn't respond.
             // We don't give it much time because this directly impacts the
             // responsiveness seen by the user.
@@ -2188,7 +2199,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // can be resumed...
         if (mResumedActivity != null) {
             if (DEBUG_SWITCH) Log.v(TAG, "Skip resume: need to start pausing");
-            startPausingLocked(userLeaving);
+            startPausingLocked(userLeaving, false);
             return true;
         }
 
@@ -2605,8 +2616,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.app.thread.scheduleNewIntent(ar, r);
                 sent = true;
             } catch (Exception e) {
-                Log.w(TAG,
-                      "Exception thrown sending new intent to " + r, e);
+                Log.w(TAG, "Exception thrown sending new intent to " + r, e);
             }
         }
         if (!sent) {
@@ -3456,7 +3466,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mPausingActivity == null) {
                 if (DEBUG_PAUSE) Log.v(TAG, "Finish needs to pause: " + r);
                 if (DEBUG_USER_LEAVING) Log.v(TAG, "finish() => pause with userLeaving=false");
-                startPausingLocked(false);
+                startPausingLocked(false, false);
             }
 
         } else if (r.state != ActivityState.PAUSING) {
@@ -3590,9 +3600,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.app.thread.scheduleSendResult(r, list);
                 return;
             } catch (Exception e) {
-                Log.w(TAG,
-                      "Exception thrown sending result to " + r,
-                      e);
+                Log.w(TAG, "Exception thrown sending result to " + r, e);
             }
         }
 
@@ -3778,8 +3786,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         r.configChangeFlags = 0;
         
         if (!mLRUActivities.remove(r)) {
-            Log.w(TAG, "Activity " + r
-                  + " being finished, but not in LRU list");
+            Log.w(TAG, "Activity " + r + " being finished, but not in LRU list");
         }
         
         return removedFromHistory;
@@ -4217,7 +4224,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
-                    Log.w(TAG, "Invalid packageName:"+packageName);
+                    Log.w(TAG, "Invalid packageName:" + packageName);
                     return false;
                 }
                 if (uid == pkgUid || checkComponentPermission(
@@ -4270,7 +4277,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
-                    Log.w(TAG, "Invalid packageName:"+packageName);
+                    Log.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
                 restartPackageLocked(packageName, pkgUid);
@@ -4423,6 +4430,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app == null) {
             Log.w(TAG, "No pending application record for pid " + pid
                     + " (IApplicationThread " + thread + "); dropping process");
+            EventLog.writeEvent(LOG_AM_DROP_PROCESS, pid);
             if (pid > 0 && pid != MY_PID) {
                 Process.killProcess(pid);
             } else {
@@ -6579,10 +6587,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (caller != null) {
                 r = getRecordForAppLocked(caller);
                 if (r == null) {
-                throw new SecurityException(
-                        "Unable to find app for caller " + caller
-                      + " (pid=" + Binder.getCallingPid()
-                      + ") when getting content provider " + name);
+                    throw new SecurityException(
+                            "Unable to find app for caller " + caller
+                          + " (pid=" + Binder.getCallingPid()
+                          + ") when getting content provider " + name);
                 }
             }
 
@@ -6739,6 +6747,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + cpi.applicationInfo.packageName + "/"
                             + cpi.applicationInfo.uid + " for provider "
                             + name + ": launching app became null");
+                    EventLog.writeEvent(LOG_AM_PROVIDER_LOST_PROCESS,
+                            cpi.applicationInfo.packageName,
+                            cpi.applicationInfo.uid, name);
+                    return null;
                 }
                 try {
                     cpr.wait();
@@ -6844,9 +6856,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 ContentProviderRecord dst =
                     (ContentProviderRecord)r.pubProviders.get(src.info.name);
                 if (dst != null) {
-                    dst.provider = src.provider;
-                    dst.app = r;
-
                     mProvidersByClass.put(dst.info.name, dst);
                     String names[] = dst.info.authority.split(";");
                     for (int j = 0; j < names.length; j++) {
@@ -6863,6 +6872,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                     }
                     synchronized (dst) {
+                        dst.provider = src.provider;
+                        dst.app = r;
                         dst.notifyAll();
                     }
                     updateOomAdjLocked(r);
@@ -6993,7 +7004,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mPausingActivity == null) {
                 if (DEBUG_PAUSE) Log.v(TAG, "Sleep needs to pause...");
                 if (DEBUG_USER_LEAVING) Log.v(TAG, "Sleep => pause with userLeaving=false");
-                startPausingLocked(false);
+                startPausingLocked(false, true);
             }
         }
     }
@@ -7499,6 +7510,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // This process loses!
             Log.w(TAG, "Process " + app.info.processName
                     + " has crashed too many times: killing!");
+            EventLog.writeEvent(LOG_AM_PROCESS_CRASHED_TOO_MUCH,
+                    app.info.processName, app.info.uid);
             killServicesLocked(app, false);
             for (int i=mHistory.size()-1; i>=0; i--) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(i);
@@ -8429,6 +8442,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (sr.crashCount >= 2) {
                     Log.w(TAG, "Service crashed " + sr.crashCount
                             + " times, stopping: " + sr);
+                    EventLog.writeEvent(LOG_AM_SERVICE_CRASHED_TOO_MUCH,
+                            sr.crashCount, sr.shortName, app.pid);
                     bringDownServiceLocked(sr, true);
                 } else if (!allowRestart) {
                     bringDownServiceLocked(sr, true);
@@ -8447,7 +8462,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final void removeDyingProviderLocked(ProcessRecord proc,
             ContentProviderRecord cpr) {
-        cpr.launchingApp = null;
+        synchronized (cpr) {
+            cpr.launchingApp = null;
+            cpr.notifyAll();
+        }
         
         mProvidersByClass.remove(cpr.info.name);
         String names[] = cpr.info.authority.split(";");
@@ -8529,6 +8547,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             break;
                         }
                     }
+                } else {
+                    i = NL;
                 }
 
                 if (i >= NL) {
@@ -8602,7 +8622,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mProcessesOnHold.remove(app);
 
         if (restart) {
-            // We have component that still need to be running in the
+            // We have components that still need to be running in the
             // process, so re-launch it.
             mProcessNames.put(app.processName, app.info.uid, app);
             startProcessLocked(app, "restart", app.processName);
@@ -8952,6 +8972,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
         Log.w(TAG, "Scheduling restart of crashed service "
                 + r.shortName + " in " + r.restartDelay + "ms");
+        EventLog.writeEvent(LOG_AM_SCHEDULE_SERVICE_RESTART,
+                r.shortName, r.restartDelay);
 
         Message msg = Message.obtain();
         msg.what = SERVICE_ERROR_MSG;
@@ -11660,7 +11682,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
                 // We can finish this one if we have its icicle saved and
                 // it is not persistent.
-                if ((r.haveState || !r.stateNotNeeded)
+                if ((r.haveState || !r.stateNotNeeded) && !r.visible
                         && r.stopped && !r.persistent && !r.finishing) {
                     final int origSize = mLRUActivities.size();
                     destroyActivityLocked(r, true);

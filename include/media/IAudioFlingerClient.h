@@ -32,7 +32,7 @@ public:
     DECLARE_META_INTERFACE(AudioFlingerClient);
 
     // Notifies a change of audio output from/to hardware to/from A2DP.
-    virtual void audioOutputChanged(uint32_t frameCount, uint32_t samplingRate, uint32_t latency) = 0;
+    virtual void a2dpEnabledChanged(bool enabled) = 0;
 
 };
 

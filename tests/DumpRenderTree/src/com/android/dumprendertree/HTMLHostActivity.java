@@ -68,9 +68,12 @@ class TestRecorder {
       }
     }
 
-    public void nontext(String layout_file) {
+    public void nontext(String layout_file, boolean has_results) {
       try {
           mBufferedOutputNontextStream.write(layout_file.getBytes());
+          if (has_results) {
+              mBufferedOutputNontextStream.write(" : has expected results".getBytes());
+          }
           mBufferedOutputNontextStream.write('\n');
           mBufferedOutputNontextStream.flush();
       } catch(Exception e) {
@@ -299,6 +302,9 @@ public class HTMLHostActivity extends Activity
         resetTestStatus();
 
         if (testIndex == mTestList.size()) {
+            if (!mSingleTestMode) {
+                updateTestStatus("#DONE");
+            }
             finished();
             return;
         }
@@ -385,9 +391,9 @@ public class HTMLHostActivity extends Activity
         }
     }
 
-    public void nontextCase(String file) {
+    public void nontextCase(String file, boolean has_expected_results) {
         Log.v("Layout test:", file + " nontext");
-        mResultRecorder.nontext(file);
+        mResultRecorder.nontext(file, has_expected_results);
     }
  
     public void setCallback(HTMLHostCallbackInterface callback) {
@@ -447,8 +453,11 @@ public class HTMLHostActivity extends Activity
         }
         
         File nontext_result = new File(short_file + "-android-results.txt");
-        if (nontext_result.exists())
-            mResultRecorder.nontext(test_path);
+        if (nontext_result.exists()) {
+            // Check if the test has expected results.
+            File expected = new File(short_file + "-expected.txt");
+            nontextCase(test_path, expected.exists());
+        }
     }
     
     public void finished() {

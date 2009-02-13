@@ -1112,6 +1112,8 @@ public class Intent implements Parcelable {
      * <p>My include the following extras:
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
+     * <li> {@link #EXTRA_REPLACING} is set to true if this is following
+     * an {@link #ACTION_PACKAGE_REMOVED} broadcast for the same package.
      * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

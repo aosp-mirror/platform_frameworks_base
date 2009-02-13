@@ -56,13 +56,11 @@ import com.android.internal.view.IInputContextCallback;
     
     void endBatchEdit();
     
+    void reportFullscreenMode(boolean enabled);
+    
     void sendKeyEvent(in KeyEvent event);
     
     void clearMetaKeyStates(int states);
     
     void performPrivateCommand(String action, in Bundle data);
-    
-    void showStatusIcon(String packageName, int resId);
-
-    void hideStatusIcon();
 }

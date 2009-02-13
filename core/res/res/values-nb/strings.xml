@@ -262,10 +262,8 @@
     <string name="permdesc_reboot">"Lar applikasjonen tvinge telefonen til å starte på nytt."</string>
     <string name="permlab_mount_unmount_filesystems">"montere og avmontere filsystemer"</string>
     <string name="permdesc_mount_unmount_filesystems">"Lar applikasjonen montere og avmontere filsystemer for uttagbar lagring."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
-    <skip />
-    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems">"formatere ekstern lagringsplass"</string>
+    <string name="permdesc_mount_format_filesystems">"Lar applikasjonen formatere ekstern lagringsplass."</string>
     <string name="permlab_vibrate">"kontrollere vibratoren"</string>
     <string name="permdesc_vibrate">"Lar applikasjonen kontrollere vibratoren."</string>
     <string name="permlab_flashlight">"kontrollere lommelykten"</string>
@@ -280,10 +278,8 @@
     <string name="permdesc_locationUpdates">"Lar applikasjonen slå av/på varsling om plasseringsendringer fra radioen. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_checkinProperties">"få tilgang til egenskaper for innsjekking"</string>
     <string name="permdesc_checkinProperties">"Gir lese- og skrivetilgang til egenskaper lastet opp av innsjekkingstjenesten. Ikke ment for vanlige applikasjoner."</string>
-    <!-- no translation found for permlab_bindGadget (2519859363977647275) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (7865866514555126333) -->
-    <skip />
+    <string name="permlab_bindGadget">"velg gadgeter"</string>
+    <string name="permdesc_bindGadget">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_modifyPhoneState">"endre telefontilstand"</string>
     <string name="permdesc_modifyPhoneState">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
     <string name="permlab_readPhoneState">"lese telefontilstand"</string>
@@ -312,10 +308,8 @@
     <string name="permdesc_writeApnSettings">"Lar applikasjonen to endre APN-innstillinger slik som mellomtjener eller port for hvilket som helst aksesspunkt."</string>
     <string name="permlab_changeNetworkState">"endre nettverkskonnektivitet"</string>
     <string name="permdesc_changeNetworkState">"Lar applikasjonen endre tilstanden til nettverkskonnektivitet."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
-    <skip />
+    <string name="permlab_changeBackgroundDataSetting">"endre innstilling for bakgrunnsdata"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Lar applikasjonen endre innstillingen for bakgrunnsdata."</string>
     <string name="permlab_accessWifiState">"se tilstand for trådløse nettverk"</string>
     <string name="permdesc_accessWifiState">"Lar applikasjonen få se informasjon om tilstanden til de trådløse nettene."</string>
     <string name="permlab_changeWifiState">"endre tilstand for trådløse nettverk"</string>
@@ -336,14 +330,10 @@
     <string name="permdesc_subscribedFeedsRead">"Lar applikasjonen hente detaljer om hvilke nyhetskilder som synkroniseres."</string>
     <string name="permlab_subscribedFeedsWrite">"endre abonnement på nyhetskilder"</string>
     <string name="permdesc_subscribedFeedsWrite">"Lar applikasjonen redigere hvilke nyhetskilder som synkroniseres. Dette kan gi en ondsinnet applikasjon tilgang til å endre hvilke nyhetskilder som synkroniseres."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"lese brukerdefinert ordliste"</string>
+    <string name="permdesc_readDictionary">"Lar applikasjonen lese private ord, navn og uttrykk som brukeren har lagret i den brukerdefinerte ordlisten."</string>
+    <string name="permlab_writeDictionary">"skrive til brukerdefinert ordliste"</string>
+    <string name="permdesc_writeDictionary">"Lar applikasjonen skrive nye ord til den brukerdefinerte ordlisten."</string>
   <string-array name="phoneTypes">
     <item>"Hjemme"</item>
     <item>"Mobil"</item>
@@ -440,12 +430,9 @@
     <string name="factorytest_not_system">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
     <string name="factorytest_no_action">"No package was found that provides the FACTORY_TEST action."</string>
     <string name="factorytest_reboot">"Reboot"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"Siden \\\'<xliff:g id="TITLE">%s</xliff:g>\\\' sier:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
     <string name="save_password_label">"Bekreft"</string>
     <string name="save_password_message">"Ønsker du at nettleseren skal huske dette passordet?"</string>
     <string name="save_password_notnow">"Ikke nå"</string>
@@ -569,17 +556,15 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'., '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'., \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'. \\\'\'\\\'\''<xliff:g id="MONTH">MMMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\', \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'. \\\'\'\\\'\''<xliff:g id="MONTH">MMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>'\\\'\'\\\'\':\\\'\'\\\'\''<xliff:g id="MINUTE">mm</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>'\\\'\'\\\'\':\\\'\'\\\'\''<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"middag"</string>
     <string name="Noon">"Middag"</string>
     <string name="midnight">"midnatt"</string>
@@ -596,18 +581,14 @@
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <!-- no translation found for same_year_wday1_mdy1_wday2_mdy2 (1345612987720788874) -->
-    <skip />
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <!-- no translation found for same_year_mdy1_time1_mdy2_time2 (2959466512848524124) -->
-    <skip />
-    <!-- no translation found for same_year_wday1_mdy1_time1_wday2_mdy2_time2 (5129735426508861428) -->
-    <skip />
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>."</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>."</string>
-    <!-- no translation found for numeric_mdy1_mdy2 (3933951218078638018) -->
-    <skip />
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>. <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>. <xliff:g id="TIME2">%10$s</xliff:g>"</string>
@@ -711,8 +692,7 @@
     <string name="paste">"Lim inn"</string>
     <string name="copyUrl">"Kopier URL"</string>
     <string name="inputMethod">"Inndatametode"</string>
-    <!-- no translation found for addToDictionary (726256909274177272) -->
-    <skip />
+    <string name="addToDictionary">"Legg \\\"%s\\\" til ordlisten"</string>
     <string name="editTextMenuTitle">"Rediger tekst"</string>
     <string name="low_internal_storage_view_title">"Lite plass"</string>
     <string name="low_internal_storage_view_text">"Det begynner å bli lite lagringsplass på telefonen."</string>
@@ -720,8 +700,7 @@
     <string name="cancel">"Avbryt"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Avbryt"</string>
-    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
-    <skip />
+    <string name="dialog_alert_title">"Merk"</string>
     <string name="capital_on">"På"</string>
     <string name="capital_off">"Av"</string>
     <string name="whichApplication">"Complete action using"</string>
@@ -745,8 +724,7 @@
     <string name="volume_music">"Medievolum"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Spiller over Bluetooth"</string>
     <string name="volume_call">"Samtalevolum"</string>
-    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
-    <skip />
+    <string name="volume_bluetooth_call">"Bluetooth-samtalevolum"</string>
     <string name="volume_alarm">"Alarmvolum"</string>
     <string name="volume_notification">"Varslingsvolum"</string>
     <string name="volume_unknown">"Volum"</string>
@@ -766,7 +744,7 @@
     <string name="select_character">"Sett inn tegn"</string>
     <string name="sms_control_default_app_name">"Ukjent applikasjon"</string>
     <string name="sms_control_title">"Sending SMS messages"</string>
-    <string name="sms_control_message">"A large number of SMS messages are being sent. Select \\\"OK\\\" to continue, or \\\"Cancel\\\" to stop sending."</string>
+    <string name="sms_control_message">"A large number of SMS messages are being sent. Select \\\\\\\"OK\\\\\\\" to continue, or \\\\\\\"Cancel\\\\\\\" to stop sending."</string>
     <string name="sms_control_yes">"OK"</string>
     <string name="sms_control_no">"Avbryt"</string>
     <string name="date_time_set">"Lagre"</string>
@@ -776,67 +754,39 @@
     <string name="perms_show_all"><b>"Vis alle"</b></string>
     <string name="googlewebcontenthelper_loading">"Laster inn…"</string>
     <string name="usb_storage_title">"USB koblet til"</string>
-    <string name="usb_storage_message">"Du har koblet telefonen til en datamaskin via USB. Velg \\\"Monter\\\" dersom du ønsker å kopiere filer mellom datmaskinen og minnekortet i telefonen."</string>
+    <string name="usb_storage_message">"Du har koblet telefonen til en datamaskin via USB. Velg \\\\\\\"Monter\\\\\\\" dersom du ønsker å kopiere filer mellom datmaskinen og minnekortet i telefonen."</string>
     <string name="usb_storage_button_mount">"Monter"</string>
     <string name="usb_storage_button_unmount">"Ikke monter"</string>
     <string name="usb_storage_error_message">"Det oppsto et problem med å bruke minnekortet ditt for USB-lagring."</string>
     <string name="usb_storage_notification_title">"USB tilkoblet"</string>
     <string name="usb_storage_notification_message">"Velg om du ønsker å kopiere filer til/fra en datamaskin."</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
-    <skip />
-    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
-    <skip />
-    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
-    <skip />
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
+    <string name="usb_storage_stop_notification_title">"Slå av USB-lagring"</string>
+    <string name="usb_storage_stop_notification_message">"Velg for å slå av USB-lagring."</string>
+    <string name="usb_storage_stop_title">"Slå av USB-lagring"</string>
+    <string name="usb_storage_stop_message">"Før du slår av USB-lagring, sjekk at du har avmontert enheten i USB-verten. Velg «slå av» for å slå av USB-lagring."</string>
+    <string name="usb_storage_stop_button_mount">"Slå av"</string>
+    <string name="usb_storage_stop_button_unmount">"Avbryt"</string>
+    <string name="usb_storage_stop_error_message">"Det oppsto et problem under avslutningen av USB-lagring. Sjekk at USB-verten har avmontert og prøv igjen."</string>
+    <string name="extmedia_format_title">"Formatere minnekort"</string>
+    <string name="extmedia_format_message">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
+    <string name="extmedia_format_button_format">"Format"</string>
     <string name="select_input_method">"Velg inndatametode"</string>
     <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
-    <!-- unknown quoting pattern: original -1, translation 1 -->
-    <string name="candidates_style">"TAG_FONT"<u>"kandidater"</u>"u&amp;gt;CLOSE_FONT"</string>
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
-    <skip />
-    <!-- no translation found for activity_list_empty (4168820609403385789) -->
-    <skip />
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
-    <skip />
-    <!-- no translation found for tutorial_double_tap_to_zoom_message (9111326385548696308) -->
-    <skip />
+    <string name="candidates_style">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
+    <string name="ext_media_checking_notification_title">"Forbereder minnekort"</string>
+    <string name="ext_media_checking_notification_message">"Sjekker for feil"</string>
+    <string name="ext_media_nofs_notification_title">"Tomt minnekort"</string>
+    <string name="ext_media_nofs_notification_message">"Minnekortet er tomt eller bruker et ustøttet filsystem."</string>
+    <string name="ext_media_unmountable_notification_title">"Skadet minnekort"</string>
+    <string name="ext_media_unmountable_notification_message">"Minnekortet er skadet. Det kan være du må formatere kortet."</string>
+    <string name="ext_media_badremoval_notification_title">"Minnekortet ble tatt ut uventet"</string>
+    <string name="ext_media_badremoval_notification_message">"Avmonter minnekortet før det tas ut, for å unngå datatap."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Trygt å ta ut minnekort"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Minnekortet kan nå trygt tas ut."</string>
+    <string name="ext_media_nomedia_notification_title">"Minnekortet ble tatt ut"</string>
+    <string name="ext_media_nomedia_notification_message">"Minnekortet ble tatt ut. Sett inn et nytt minnekort for å øke lagringsplassen."</string>
+    <string name="activity_list_empty">"Fant ingen tilsvarende aktiviteter"</string>
+    <string name="permlab_pkgUsageStats">"oppdater statistikk over komponentbruk"</string>
+    <string name="permdesc_pkgUsageStats">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
 </resources>

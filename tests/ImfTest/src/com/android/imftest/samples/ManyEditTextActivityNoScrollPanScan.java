@@ -20,22 +20,31 @@ import com.android.internal.R;
  */
 public class ManyEditTextActivityNoScrollPanScan extends Activity 
 {
-   @Override
-   public void onCreate(Bundle savedInstanceState) 
-   {
-       super.onCreate(savedInstanceState);
-                
-       LinearLayout layout = new LinearLayout(this);
-       layout.setOrientation(LinearLayout.VERTICAL);
-       
-       String string = new String();
-       for (int i=0; i<9; i++) 
-       {
-           final EditText editText = new EditText(this);
-           editText.setText(string.valueOf(i));
-           layout.addView(editText);
-       }
-       setContentView(layout);
-       this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    public static final int NUM_EDIT_TEXTS = 9;
+
+    private View mRootView;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+
+        mRootView = new LinearLayout(this);
+        ((LinearLayout) mRootView).setOrientation(LinearLayout.VERTICAL);
+
+        for (int i=0; i<NUM_EDIT_TEXTS; i++) 
+        {
+            final EditText editText = new EditText(this);
+            editText.setText(String.valueOf(i));
+            editText.setId(i);
+            ((LinearLayout) mRootView).addView(editText);
+        }
+        setContentView(mRootView);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }  
+
+    public View getRootView() {
+        return mRootView;
+    }
+
 }

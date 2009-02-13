@@ -25,8 +25,8 @@
 package android.server;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;  // just for dump()
 import android.bluetooth.BluetoothError;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetoothDevice;
 import android.bluetooth.IBluetoothDeviceCallback;
@@ -35,23 +35,20 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.RemoteException;
-import android.provider.Settings;
-import android.util.Log;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemService;
+import android.provider.Settings;
+import android.util.Log;
 
-import java.io.IOException;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BluetoothDeviceService extends IBluetoothDevice.Stub {
@@ -119,7 +116,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     public synchronized boolean disable() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        
+
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
@@ -229,9 +226,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         long origCallerIdentityToken = Binder.clearCallingIdentity();
         Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.BLUETOOTH_ON,
                 bluetoothOn ? 1 : 0);
-        Binder.restoreCallingIdentity(origCallerIdentityToken);        
+        Binder.restoreCallingIdentity(origCallerIdentityToken);
     }
-    
+
     private native int enableNative();
     private native int disableNative();
 
@@ -247,6 +244,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     public class BondState {
         private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
         private final HashMap<String, Integer> mPinAttempt = new HashMap<String, Integer>();
+        private final ArrayList<String> mAutoPairingFailures = new ArrayList<String>();
 
         public synchronized void loadBondState() {
             if (!mIsEnabled) {
@@ -281,8 +279,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             intent.putExtra(BluetoothIntent.BOND_PREVIOUS_STATE, oldState);
             if (state == BluetoothDevice.BOND_NOT_BONDED) {
                 if (reason <= 0) {
-                    Log.w(TAG, "setBondState() called to unbond device with invalid reason code " +
-                          "Setting reason = BOND_RESULT_REMOVED");
+                    Log.w(TAG, "setBondState() called to unbond device, but reason code is " +
+                          "invalid. Overriding reason code with BOND_RESULT_REMOVED");
                     reason = BluetoothDevice.UNBOND_REASON_REMOVED;
                 }
                 intent.putExtra(BluetoothIntent.REASON, reason);
@@ -290,11 +288,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             } else {
                 mState.put(address, state);
             }
-            if (state == BluetoothDevice.BOND_BONDING) {
-                mPinAttempt.put(address, Integer.valueOf(0));
-            } else {
-                mPinAttempt.remove(address);
-            }
+
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         }
 
@@ -316,6 +310,24 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             return result.toArray(new String[result.size()]);
         }
 
+        public synchronized void addAutoPairingFailure(String address) {
+            if (!mAutoPairingFailures.contains(address)) {
+                mAutoPairingFailures.add(address);
+            }
+        }
+
+        public synchronized boolean isAutoPairingAttemptsInProgress(String address) {
+            return getAttempt(address) != 0;
+        }
+
+        public synchronized void clearPinAttempts(String address) {
+            mPinAttempt.remove(address);
+        }
+
+        public synchronized boolean hasAutoPairingFailed(String address) {
+            return mAutoPairingFailures.contains(address);
+        }
+
         public synchronized int getAttempt(String address) {
             Integer attempt = mPinAttempt.get(address);
             if (attempt == null) {
@@ -326,10 +338,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
         public synchronized void attempt(String address) {
             Integer attempt = mPinAttempt.get(address);
+            int newAttempt;
             if (attempt == null) {
-                return;
+                newAttempt = 1;
+            } else {
+                newAttempt = attempt.intValue() + 1;
             }
-            mPinAttempt.put(address, new Integer(attempt.intValue() + 1));
+            mPinAttempt.put(address, new Integer(newAttempt));
         }
 
     }
@@ -508,7 +523,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             return false;
         }
         address = address.toUpperCase();
-        if (mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
+
+        // Check for bond state only if we are not performing auto
+        // pairing exponential back-off attempts.
+        if (!mBondState.isAutoPairingAttemptsInProgress(address) &&
+            mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
             return false;
         }
 

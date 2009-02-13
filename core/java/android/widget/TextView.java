@@ -3844,7 +3844,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean doDown = true;
             if (otherEvent != null) {
                 try {
-                    boolean handled = mMovement.onKeyOther(this, (Editable) mText,
+                    boolean handled = mMovement.onKeyOther(this, (Spannable) mText,
                             otherEvent);
                     doDown = false;
                     if (handled) {

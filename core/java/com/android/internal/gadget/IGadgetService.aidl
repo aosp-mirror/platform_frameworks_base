@@ -17,7 +17,7 @@
 package com.android.internal.gadget;
 
 import android.content.ComponentName;
-import android.gadget.GadgetInfo;
+import android.gadget.GadgetProviderInfo;
 import com.android.internal.gadget.IGadgetHost;
 import android.widget.RemoteViews;
 
@@ -41,8 +41,8 @@ interface IGadgetService {
     //
     void updateGadgetIds(in int[] gadgetIds, in RemoteViews views);
     void updateGadgetProvider(in ComponentName provider, in RemoteViews views);
-    List<GadgetInfo> getInstalledProviders();
-    GadgetInfo getGadgetInfo(int gadgetId);
+    List<GadgetProviderInfo> getInstalledProviders();
+    GadgetProviderInfo getGadgetInfo(int gadgetId);
     void bindGadgetId(int gadgetId, in ComponentName provider);
 
 }

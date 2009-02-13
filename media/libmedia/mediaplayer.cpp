@@ -82,7 +82,7 @@ MediaPlayer::MediaPlayer()
     mListener = NULL;
     mCookie = NULL;
     mDuration = -1;
-    mStreamType = AudioTrack::MUSIC;
+    mStreamType = AudioSystem::MUSIC;
     mCurrentPosition = -1;
     mSeekPosition = -1;
     mCurrentState = MEDIA_PLAYER_IDLE;

@@ -1142,6 +1142,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         // Stop DHCP
         if (mDhcpTarget != null) {
             mDhcpTarget.setCancelCallback(true);
+            mDhcpTarget.removeMessages(EVENT_DHCP_START);
         }
         if (!NetworkUtils.stopDhcp(mInterfaceName)) {
             Log.e(TAG, "Could not stop DHCP");

@@ -19,6 +19,10 @@ package android.media;
 import android.view.Surface;
 import android.hardware.Camera;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileDescriptor;
+import android.util.Log;
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -50,6 +54,7 @@ public class MediaRecorder
     static {
         System.loadLibrary("media_jni");
     }
+    private final static String TAG = "MediaRecorder";
     
     // The two fields below are accessed by native methods
     @SuppressWarnings("unused")
@@ -57,7 +62,10 @@ public class MediaRecorder
     
     @SuppressWarnings("unused")
     private Surface mSurface;
-    
+
+    private String mPath;
+    private FileDescriptor mFd;
+
     /**
      * Default constructor.
      */
@@ -71,8 +79,6 @@ public class MediaRecorder
      * the camera object. Must call before prepare().
      * 
      * @param c the Camera to use for recording
-     * FIXME: Temporarily hidden until API approval
-     * @hide
      */
     public native void setCamera(Camera c);
 
@@ -104,7 +110,6 @@ public class MediaRecorder
     /**
      * Defines the video source. These constants are used with 
      * {@link MediaRecorder#setVideoSource(int)}.
-     * @hide
      */
     public final class VideoSource {
       /* Do not change these values without updating their counterparts
@@ -152,7 +157,6 @@ public class MediaRecorder
     /**
      * Defines the video encoding. These constants are used with 
      * {@link MediaRecorder#setVideoEncoder(int)}.
-     * @hide
      */
     public final class VideoEncoder {
       /* Do not change these values without updating their counterparts
@@ -187,7 +191,6 @@ public class MediaRecorder
      * @param video_source the video source to use
      * @throws IllegalStateException if it is called after setOutputFormat()
      * @see android.media.MediaRecorder.VideoSource
-     * @hide
      */ 
     public native void setVideoSource(int video_source)
             throws IllegalStateException;
@@ -214,7 +217,6 @@ public class MediaRecorder
      * @param height the height of the video to be captured
      * @throws IllegalStateException if it is called after 
      * prepare() or before setOutputFormat()
-     * @hide
      */
     public native void setVideoSize(int width, int height)
             throws IllegalStateException;
@@ -227,7 +229,10 @@ public class MediaRecorder
      * @param rate the number of frames per second of video to capture
      * @throws IllegalStateException if it is called after 
      * prepare() or before setOutputFormat().
-     * @hide
+     *
+     * NOTE: On some devices that have auto-frame rate, this sets the
+     * maximum frame rate, not a constant frame rate. Actual frame rate
+     * will vary according to lighting conditions.
      */
     public native void setVideoFrameRate(int rate) throws IllegalStateException;
 
@@ -253,21 +258,43 @@ public class MediaRecorder
      * @throws IllegalStateException if it is called before
      * setOutputFormat() or after prepare()
      * @see android.media.MediaRecorder.VideoEncoder
-     * @hide
      */ 
     public native void setVideoEncoder(int video_encoder)
             throws IllegalStateException;
 
     /**
-     * Sets the path of the output file to be produced. Call this after
+     * Pass in the file descriptor of the file to be written. Call this after
      * setOutputFormat() but before prepare().
      * 
-     * @param path The pathname to use()
+     * @param fd an open file descriptor to be written into.
      * @throws IllegalStateException if it is called before
      * setOutputFormat() or after prepare()
      */ 
-    public native void setOutputFile(String path) throws IllegalStateException;
+    public void setOutputFile(FileDescriptor fd) throws IllegalStateException
+    {
+        mPath = null;
+        mFd = fd;
+    }
   
+    /**
+     * Sets the path of the output file to be produced. Call this after
+     * setOutputFormat() but before prepare().
+     * 
+     * @param path The pathname to use.
+     * @throws IllegalStateException if it is called before
+     * setOutputFormat() or after prepare()
+     */ 
+    public void setOutputFile(String path) throws IllegalStateException
+    {
+        mFd = null;
+        mPath = path;
+    }
+  
+    // native implementation
+    private native void _setOutputFile(FileDescriptor fd, long offset, long length)
+        throws IllegalStateException, IOException;
+    private native void _prepare() throws IllegalStateException, IOException;
+
     /**
      * Prepares the recorder to begin capturing and encoding data. This method
      * must be called after setting up the desired audio and video sources,
@@ -277,7 +304,18 @@ public class MediaRecorder
      * start() or before setOutputFormat().
      * @throws IOException if prepare fails otherwise.
      */
-    public native void prepare() throws IllegalStateException, IOException;
+    public void prepare() throws IllegalStateException, IOException
+    {
+        if (mPath != null) {
+            FileOutputStream f = new FileOutputStream(mPath);
+            _setOutputFile(f.getFD(), 0, 0);
+        } else if (mFd != null) {
+            _setOutputFile(mFd, 0, 0);
+        } else {
+            throw new IOException("No valid output file");
+        }
+        _prepare();
+    }
 
     /**
      * Begins capturing and encoding data to the file specified with 

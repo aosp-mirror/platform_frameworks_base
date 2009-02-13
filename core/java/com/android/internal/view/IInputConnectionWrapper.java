@@ -32,8 +32,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_DELETE_SURROUNDING_TEXT = 80;
     private static final int DO_BEGIN_BATCH_EDIT = 90;
     private static final int DO_END_BATCH_EDIT = 95;
-    private static final int DO_HIDE_STATUS_ICON = 100;
-    private static final int DO_SHOW_STATUS_ICON = 110;
+    private static final int DO_REPORT_FULLSCREEN_MODE = 100;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
         
@@ -133,12 +132,8 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessage(DO_END_BATCH_EDIT));
     }
 
-    public void hideStatusIcon() {
-        dispatchMessage(obtainMessage(DO_HIDE_STATUS_ICON));
-    }
-
-    public void showStatusIcon(String packageName, int resId) {
-        dispatchMessage(obtainMessageIO(DO_SHOW_STATUS_ICON, resId, packageName));
+    public void reportFullscreenMode(boolean enabled) {
+        dispatchMessage(obtainMessageII(DO_REPORT_FULLSCREEN_MODE, enabled ? 1 : 0, 0));
     }
 
     public void performPrivateCommand(String action, Bundle data) {
@@ -323,22 +318,13 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                 ic.endBatchEdit();
                 return;
             }
-            case DO_HIDE_STATUS_ICON: {
-                InputConnection ic = mInputConnection.get();
-                if (ic == null || !isActive()) {
-                    Log.w(TAG, "hideStatusIcon on inactive InputConnection");
-                    return;
-                }
-                ic.hideStatusIcon();
-                return;
-            }
-            case DO_SHOW_STATUS_ICON: {
+            case DO_REPORT_FULLSCREEN_MODE: {
                 InputConnection ic = mInputConnection.get();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "showStatusIcon on inactive InputConnection");
                     return;
                 }
-                ic.showStatusIcon((String)msg.obj, msg.arg1);
+                ic.reportFullscreenMode(msg.arg1 != 1);
                 return;
             }
             case DO_PERFORM_PRIVATE_COMMAND: {

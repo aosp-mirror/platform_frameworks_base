@@ -167,7 +167,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
-	frameworks/base/core/java/android/gadget/GadgetInfo.aidl \
+	frameworks/base/core/java/android/gadget/GadgetProviderInfo.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \

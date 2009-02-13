@@ -2,6 +2,7 @@ package com.android.imftest.samples;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Debug;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,21 +21,36 @@ import com.android.internal.R;
  */
 public class OneEditTextActivityNotSelected extends Activity 
 {
-   @Override
-   public void onCreate(Bundle savedInstanceState) 
-   {
-       super.onCreate(savedInstanceState);
-                
-       LinearLayout layout = new LinearLayout(this);
-       layout.setOrientation(LinearLayout.VERTICAL);
-       
-       final EditText editText = new EditText(this);
-       final TextView textView = new TextView(this);
-       textView.setText("The focus is here.");
-       layout.addView(editText);
-       layout.addView(textView);
-  
-       setContentView(layout);
-       textView.requestFocus();
+    private View mRootView;
+    private View mDefaultFocusedView;
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        mRootView = new ScrollView(this);
+
+        EditText editText = new EditText(this);
+        Button button = new Button(this);
+        button.setText("The focus is here.");
+        button.setFocusableInTouchMode(true);
+        button.requestFocus();
+        mDefaultFocusedView = button;
+        layout.addView(button);
+        layout.addView(editText);
+
+        ((ScrollView) mRootView).addView(layout);
+        setContentView(mRootView);
     }  
+
+    public View getRootView() {
+        return mRootView;
+    }
+    
+    public View getDefaultFocusedView() {
+        return mDefaultFocusedView;
+    }
 }

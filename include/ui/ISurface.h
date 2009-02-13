@@ -25,6 +25,8 @@
 #include <utils/RefBase.h>
 #include <ui/PixelFormat.h>
 
+#include <hardware/hardware.h>
+
 namespace android {
 
 typedef int32_t    SurfaceID;
@@ -49,16 +51,8 @@ public:
     class BufferHeap {
     public:
         enum {
-            /* flip source image horizontally */
-            FLIP_H    = 0x01,
-            /* flip source image vertically */
-            FLIP_V    = 0x02,
             /* rotate source image 90 degrees */
-            ROT_90    = 0x04,
-            /* rotate source image 180 degrees */
-            ROT_180   = 0x03,
-            /* rotate source image 270 degrees */
-            ROT_270   = 0x07,
+            ROT_90    = HAL_TRANSFORM_ROT_90,
         };
         BufferHeap();
         

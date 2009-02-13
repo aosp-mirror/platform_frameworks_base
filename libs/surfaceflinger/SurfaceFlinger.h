@@ -58,7 +58,6 @@ class Layer;
 class LayerBuffer;
 class LayerOrientationAnim;
 class OrientationAnimation;
-class RFBServer;
 class SurfaceHeapManager;
 
 typedef int32_t ClientID;
@@ -112,6 +111,8 @@ private:
 class GraphicPlane
 {
 public:
+    static status_t orientationToTransfrom(int orientation, int w, int h,
+            Transform* tr);
 
                                 GraphicPlane();
                                 ~GraphicPlane();
@@ -344,7 +345,6 @@ private:
                 sp<GPUHardwareInterface>    mGPU;
                 GLuint                      mWormholeTexName;
                 sp<BootAnimation>           mBootAnimation;
-                sp<RFBServer>               mRFBServer;
                 nsecs_t                     mBootTime;
                 
                 // Can only accessed from the main thread, these members

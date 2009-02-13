@@ -6,6 +6,7 @@ results to a file.
 
 import optparse
 import os
+import sys
 
 def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
    """ Given two result files, generate diff and
@@ -45,7 +46,7 @@ def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
        diff_file.writelines("- " + line)
        missing_count += 1
 
-   print marker + "  >>> New = " + str(new_count) + " , Missing = " + str(missing_count) 
+   print marker + "  >>> added " + str(new_count) + " tests, removed " + str(missing_count) + " tests" 
 
    diff_file.writelines("\n\n")
 
@@ -55,24 +56,32 @@ def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
    return
 
 def main(options, args):
-  results_dir = options.results_directory
+  results_dir = os.path.abspath(options.results_directory)
   ref_dir = options.ref_directory
-  if os.path.exists(results_dir + "/layout_tests_diff.txt"):
-    os.remove(results_dir + "/layout_tests_diff.txt")
 
-  files=["passed", "nontext", "crashed"]
+  # if ref_dir is null, cannonify ref_dir to the script dir.
+  if not ref_dir:
+    script_self = sys.argv[0]
+    script_dir = os.path.dirname(script_self)
+    ref_dir = os.path.join(script_dir, "results")
+
+  ref_dir = os.path.abspath(ref_dir)
+
+  diff_result = os.path.join(results_dir, "layout_tests_diff.txt") 
+  if os.path.exists(diff_result):
+    os.remove(diff_result)
+
+  files=["passed", "failed", "nontext", "crashed"]
   for f in files:
-    DiffResults(f, results_dir + "layout_tests_" + f + ".txt",
-              ref_dir + "layout_tests_" + f + ".txt", results_dir + "layout_tests_diff.txt", False)
-
-  for f in ["failed"]:
-    DiffResults(f, results_dir + "layout_tests_" + f + ".txt",
-              ref_dir + "layout_tests_" + f + ".txt", results_dir + "layout_tests_diff.txt", True)
+    result_file_name = "layout_tests_" + f + ".txt"
+    DiffResults(f, os.path.join(results_dir, result_file_name),
+                os.path.join(ref_dir, result_file_name), diff_result,
+                f == "failed")
 
 if '__main__' == __name__:
   option_parser = optparse.OptionParser()
   option_parser.add_option("", "--ref-directory",
-                           default="results/",
+                           default=None,
                            dest="ref_directory",
                            help="directory name under which results are stored.")
 

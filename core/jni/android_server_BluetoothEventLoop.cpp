@@ -751,6 +751,10 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
             // Other device is not responding at all
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_REMOTE_DEVICE_DOWN;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AlreadyExists")) {
+            // already bonded
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_SUCCESS;
         } else {
             LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
             result = BOND_RESULT_ERROR;

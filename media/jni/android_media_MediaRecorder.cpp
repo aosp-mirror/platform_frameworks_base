@@ -143,25 +143,17 @@ android_media_MediaRecorder_setAudioEncoder(JNIEnv *env, jobject thiz, jint ae)
 }
 
 static void
-android_media_MediaRecorder_setOutputFile(JNIEnv *env, jobject thiz, jstring path)
+android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     LOGV("setOutputFile");
+    if (fileDescriptor == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
     MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
-
-    if (path == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "Path is a NULL pointer");
-        return;
-    }
-    const char *pathStr = env->GetStringUTFChars(path, NULL);
-    if (pathStr == NULL) {  // Out of memory
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
-        return;
-    }
-    status_t opStatus = mr->setOutputFile(pathStr);
-
-    // Make sure that local ref is released before a potential exception
-    env->ReleaseStringUTFChars(path, pathStr);
-    process_media_recorder_call(env, opStatus, "java/lang/RuntimeException", "setOutputFile failed.");
+    status_t opStatus = mr->setOutputFile(fd, offset, length);
+    process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
 }
 
 static void
@@ -273,23 +265,23 @@ android_media_MediaRecorder_native_finalize(JNIEnv *env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"setCamera",            "(Landroid/hardware/Camera;)V",(void *)android_media_MediaRecorder_setCamera},
-    {"setVideoSource",       "(I)V",                    (void *)android_media_MediaRecorder_setVideoSource},
-    {"setAudioSource",       "(I)V",                    (void *)android_media_MediaRecorder_setAudioSource},
-    {"setOutputFormat",      "(I)V",                    (void *)android_media_MediaRecorder_setOutputFormat},
-    {"setVideoEncoder",      "(I)V",                    (void *)android_media_MediaRecorder_setVideoEncoder},
-    {"setAudioEncoder",      "(I)V",                    (void *)android_media_MediaRecorder_setAudioEncoder},
-    {"setOutputFile",        "(Ljava/lang/String;)V",   (void *)android_media_MediaRecorder_setOutputFile},
-    {"setVideoSize",         "(II)V",                   (void *)android_media_MediaRecorder_setVideoSize},
-    {"setVideoFrameRate",    "(I)V",                    (void *)android_media_MediaRecorder_setVideoFrameRate},
-    {"prepare",              "()V",                     (void *)android_media_MediaRecorder_prepare},
-    {"getMaxAmplitude",      "()I",                     (void *)android_media_MediaRecorder_native_getMaxAmplitude},
-    {"start",                "()V",                     (void *)android_media_MediaRecorder_start},
-    {"stop",                 "()V",                     (void *)android_media_MediaRecorder_stop},
-    {"reset",                "()V",                     (void *)android_media_MediaRecorder_reset},
-    {"release",              "()V",                     (void *)android_media_MediaRecorder_release},
-    {"native_setup",         "()V",                     (void *)android_media_MediaRecorder_native_setup},
-    {"native_finalize",      "()V",                     (void *)android_media_MediaRecorder_native_finalize},
+    {"setCamera",            "(Landroid/hardware/Camera;)V",    (void *)android_media_MediaRecorder_setCamera},
+    {"setVideoSource",       "(I)V",                            (void *)android_media_MediaRecorder_setVideoSource},
+    {"setAudioSource",       "(I)V",                            (void *)android_media_MediaRecorder_setAudioSource},
+    {"setOutputFormat",      "(I)V",                            (void *)android_media_MediaRecorder_setOutputFormat},
+    {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
+    {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
+    {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
+    {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
+    {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},
+    {"_prepare",             "()V",                             (void *)android_media_MediaRecorder_prepare},
+    {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
+    {"start",                "()V",                             (void *)android_media_MediaRecorder_start},
+    {"stop",                 "()V",                             (void *)android_media_MediaRecorder_stop},
+    {"reset",                "()V",                             (void *)android_media_MediaRecorder_reset},
+    {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
+    {"native_setup",         "()V",                             (void *)android_media_MediaRecorder_native_setup},
+    {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
 static const char* const kClassPathName = "android/media/MediaRecorder";

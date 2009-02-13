@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 /**
  * <p>A filter constrains data with a filtering pattern.</p>
@@ -36,6 +37,8 @@ import android.os.Message;
  * @see android.widget.Filterable
  */
 public abstract class Filter {
+    private static final String LOG_TAG = "Filter";
+    
     private static final String THREAD_NAME = "Filter";
     private static final int FILTER_TOKEN = 0xD0D0F00D;
     private static final int FINISH_TOKEN = 0xDEADBEEF;
@@ -221,6 +224,9 @@ public abstract class Filter {
                     RequestArguments args = (RequestArguments) msg.obj;
                     try {
                         args.results = performFiltering(args.constraint);
+                    } catch (Exception e) {
+                        args.results = new FilterResults();
+                        Log.w(LOG_TAG, "An exception occured during performFiltering()!", e);
                     } finally {
                         message = mResultHandler.obtainMessage(what);
                         message.obj = args;

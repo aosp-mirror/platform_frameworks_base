@@ -267,6 +267,13 @@ public interface InputConnection {
     public boolean clearMetaKeyStates(int states);
     
     /**
+     * Called by the IME to tell the client when it switches between fullscreen
+     * and normal modes.  This will normally be called for you by the standard
+     * implementation of {@link android.inputmethodservice.InputMethodService}.
+     */
+    public boolean reportFullscreenMode(boolean enabled);
+    
+    /**
      * API to send private commands from an input method to its connected
      * editor.  This can be used to provide domain-specific features that are
      * only known between certain input methods and their clients.  Note that
@@ -284,23 +291,4 @@ public interface InputConnection {
      * valid.
      */
     public boolean performPrivateCommand(String action, Bundle data);
-    
-    /**
-     * Show an icon in the status bar.
-     * 
-     * @param packageName The package holding the icon resource to be shown.
-     * @param resId The resource id of the icon to show.
-     *        
-     * @return Returns true on success, false if the input connection is no longer
-     * valid.
-     */
-    public boolean showStatusIcon(String packageName, int resId);
-    
-    /**
-     * Hide the icon shown in the status bar.
-     *        
-     * @return Returns true on success, false if the input connection is no longer
-     * valid.
-     */
-    public boolean hideStatusIcon();
 }

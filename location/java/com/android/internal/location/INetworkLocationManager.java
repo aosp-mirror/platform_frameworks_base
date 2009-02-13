@@ -16,6 +16,8 @@
 
 package com.android.internal.location;
 
+import android.content.Context;
+
 /**
  * Used to register network location and collection services 
  * with the Location Manager Service.
@@ -23,6 +25,13 @@ package com.android.internal.location;
  * {@hide}
  */
 public interface INetworkLocationManager {
+
+    /* callback to allow installation to occur in Location Manager's thread */
+    public interface InstallCallback {
+        void installNetworkLocationProvider(Context context, INetworkLocationManager manager);
+    }
+    
+    void setInstallCallback(InstallCallback callback);
     void setNetworkLocationProvider(INetworkLocationProvider provider);
     void setLocationCollector(ILocationCollector collector);
 }
