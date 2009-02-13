@@ -46,6 +46,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -164,6 +165,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 case MSG_MENU_LONG_PRESS: {
                     if (mPanelChordingKey == 0) return;
                     mPanelChordingKey = 0;
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm != null) {
@@ -173,6 +175,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 case MSG_CALL_LONG_PRESS: {
                     if (!mKeycodeCallTimeoutActive) return;
                     mKeycodeCallTimeoutActive = false;
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     // launch the VoiceDialer
                     Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -186,6 +189,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 case MSG_CAMERA_LONG_PRESS: {
                     if (!mKeycodeCameraTimeoutActive) return;
                     mKeycodeCameraTimeoutActive = false;
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     // Broadcast an intent that the Camera button was longpressed
                     Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, (KeyEvent) msg.obj);

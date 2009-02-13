@@ -48,6 +48,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -86,11 +87,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+import android.view.WindowManagerPolicy.WindowState;
 import android.media.IAudioService;
 import android.media.AudioManager;
-
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.
@@ -139,8 +138,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
-    // Vibrator pattern for indicating when the orientation has changed
-    private static final long[] VIBE_PATTERN = {0, 1, 40, 41};
+    // Vibrator pattern for haptic feedback of a long press.
+    private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 40, 41};
+    // Vibrator pattern for haptic feedback of a zoom ring tick
+    private static final long[] ZOOM_RING_TICK_VIBE_PATTERN = {0, 1, 40, 41};
     
     Context mContext;
     IWindowManager mWindowManager;
@@ -276,7 +277,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // it needs to call back and get the sensor orientation.
                     mSensorRotation = rotation;
                     try {
-                        mWindowManager.setRotation(USE_LAST_ROTATION, false);
+                        mWindowManager.setRotation(rotation, false);
                     } catch (RemoteException e) {
                         // Ignore
                     }
@@ -293,6 +294,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mAccelerometerDefault != 0 && (
                 mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
                 mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean needSensorRunning() {
+        if(mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+            // If the application has explicitly requested to follow the
+            // orientation, then we need to turn the sensor or.
+            return true;
+        }
+        if (mAccelerometerDefault != 0) {
+            // If the setting for using the sensor by default is enabled, then
+            // we will always leave it on.  Note that the user could go to
+            // a window that forces an orientation that does not use the
+            // sensor and in theory we could turn it off... however, when next
+            // turning it on we won't have a good value for the current
+            // orientation for a little bit, which can cause orientation
+            // changes to lag, so we'd like to keep it always on.  (It will
+            // still be turned off when the screen is off.)
             return true;
         }
         return false;
@@ -316,12 +337,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ", SensorEnabled="+mOrientationSensorEnabled);
         boolean disable = true;
         if(mScreenOn) {
-            if(useSensorForOrientation()) {
+            if(needSensorRunning()) {
                 disable = false;
                 //enable listener if not already enabled
                 if(!mOrientationSensorEnabled) {
                     mOrientationListener.enable();
                     if(localLOGV) Log.i(TAG, "Enabling listeners");
+                    // We haven't had the sensor on, so don't yet know
+                    // the rotation.
+                    mSensorRotation = -1;
                     mOrientationSensorEnabled = true;
                 }
             } 
@@ -330,6 +354,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if(disable && mOrientationSensorEnabled) {
             mOrientationListener.disable();
             if(localLOGV) Log.i(TAG, "Disabling listeners");
+            mSensorRotation = -1;
             mOrientationSensorEnabled = false;
         }
     }
@@ -337,6 +362,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Runnable mEndCallLongPress = new Runnable() {
         public void run() {
             mShouldTurnOffOnKeyUp = false;
+            performHapticFeedback(null, HapticFeedbackConstants.LONG_PRESS, false);
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
             showGlobalActionsDialog();
         }
@@ -370,6 +396,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              * the user lets go of the home key
              */
             mHomePressed = false;
+            performHapticFeedback(null, HapticFeedbackConstants.LONG_PRESS, false);
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
             showRecentAppsDialog();
         }
@@ -477,16 +504,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         config.hardKeyboardHidden = lidOpen
             ? Configuration.KEYBOARDHIDDEN_NO
             : Configuration.KEYBOARDHIDDEN_YES;
-        if (keyguardIsShowingTq()) {
-            if (mLidOpen) {
-                // only do this if it's opening -- closing the device shouldn't turn it
-                // off, but it also shouldn't turn it on.
-                mKeyguardMediator.pokeWakelock();
-            }
-        } else {
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                    LocalPowerManager.OTHER_EVENT);
-        }
     }
     
     public boolean isCheekPressedAgainstScreen(MotionEvent ev) {
@@ -595,11 +612,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         win.setType(
             WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+        // Force the window flags: this is a fake window, so it is not really
+        // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
+        // flag because we do know that the next window will take input
+        // focus, so we want to get the IME window up on top of us right away.
         win.setFlags(
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
         win.setLayout(WindowManager.LayoutParams.FILL_PARENT,
                             WindowManager.LayoutParams.FILL_PARENT);
@@ -965,7 +988,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = vf.bottom = displayHeight;
             
             mStatusBar.computeFrameLw(pf, df, vf, vf);
-            if (mStatusBar.isDisplayedLw()) {
+            if (mStatusBar.isVisibleLw()) {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
                 mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
@@ -1210,6 +1233,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // lid changed state
                     mLidOpen = event.value == 0;
                     updateRotation();
+                    if (keyguardIsShowingTq()) {
+                        if (mLidOpen) {
+                            // only do this if it's opening -- closing the device shouldn't turn it
+                            // off, but it also shouldn't turn it on.
+                            mKeyguardMediator.pokeWakelock();
+                        }
+                    } else {
+                        // Light up the keyboard if we are sliding up.
+                        if (mLidOpen) {
+                            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                                    LocalPowerManager.BUTTON_EVENT);
+                        } else {
+                            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                                    LocalPowerManager.OTHER_EVENT);
+                        }
+                    }
                 }
         }
         return false;
@@ -1556,11 +1595,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             if (useSensorForOrientation()) {
                 // If the user has enabled auto rotation by default, do it.
-                int rotation = mSensorRotation >= 0 ? mSensorRotation : Surface.ROTATION_0;
-                if (displayEnabled && rotation != lastRotation) {
-                    mVibrator.vibrate(VIBE_PATTERN, -1);
-                }
-                return rotation;
+                return mSensorRotation >= 0 ? mSensorRotation : lastRotation;
             }
             return Surface.ROTATION_0;
         }
@@ -1617,22 +1652,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException e) {
             // Ignore
         }
-        if (keyguardIsShowingTq()) {
-            if (mLidOpen) {
-                // only do this if it's opening -- closing the device shouldn't turn it
-                // off, but it also shouldn't turn it on.
-                mKeyguardMediator.pokeWakelock();
-            }
-        } else {
-            // Light up the keyboard if we are sliding up.
-            if (mLidOpen) {
-                mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                        LocalPowerManager.BUTTON_EVENT);
-            } else {
-                mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                        LocalPowerManager.OTHER_EVENT);
-            }
-        }
     }
 
     /**
@@ -1666,6 +1685,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if(newOrientation != mCurrentAppOrientation) {
             mCurrentAppOrientation = newOrientation;
             updateOrientationListener();
+        }
+    }
+    
+    public boolean performHapticFeedback(WindowState win, int effectId, boolean always) {
+        if (!always && Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0) {
+            return false;
+        }
+        switch (effectId) {
+            case HapticFeedbackConstants.LONG_PRESS:
+                mVibrator.vibrate(LONG_PRESS_VIBE_PATTERN, -1);
+                return true;
+            case HapticFeedbackConstants.ZOOM_RING_TICK:
+                mVibrator.vibrate(ZOOM_RING_TICK_VIBE_PATTERN, -1);
+        }
+        return false;
+    }
+    
+    public void screenOnStopped() {
+        if (!mKeyguardMediator.isShowing()) {
+            long curTime = SystemClock.uptimeMillis();
+            mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
         }
     }
 }
