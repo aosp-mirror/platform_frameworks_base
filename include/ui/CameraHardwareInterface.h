@@ -20,6 +20,7 @@
 #include <utils/IMemory.h>
 #include <utils/RefBase.h>
 #include <ui/CameraParameters.h>
+#include <ui/Overlay.h>
 
 namespace android {
 
@@ -89,6 +90,11 @@ public:
      * call back parameter may be null.
      */
     virtual status_t    startPreview(preview_callback cb, void* user) = 0;
+    /**
+     * Only used if overlays are used for camera preview.
+     */
+    virtual bool useOverlay() {return false;}
+    virtual status_t setOverlay(const sp<Overlay> &overlay) {return BAD_VALUE;}
 
     /**
      * Stop a previously started preview.

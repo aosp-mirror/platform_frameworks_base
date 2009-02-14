@@ -159,6 +159,7 @@ private:
                     sp<ICameraClient>           mCameraClient;
                     sp<CameraHardwareInterface> mHardware;
                     pid_t                       mClientPid;
+                    bool                        mUseOverlay;
     };
 
 // ----------------------------------------------------------------------------

@@ -158,6 +158,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mCameraClient = cameraClient;
     mClientPid = clientPid;
     mHardware = openCameraHardware();
+    mUseOverlay = mHardware->useOverlay();
 
     // Callback is disabled by default
     mFrameCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
@@ -233,7 +234,7 @@ CameraService::Client::~Client()
 {
     // tear down client
     LOGD("Client E destructor");
-    if (mSurface != 0) {
+    if (mSurface != 0 && !mUseOverlay) {
 #if HAVE_ANDROID_OS
         pthread_t thr;
         // We unregister the buffers in a different thread because binder does
@@ -288,7 +289,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
     Mutex::Autolock surfaceLock(mSurfaceLock);
     // asBinder() is safe on NULL (returns NULL)
     if (surface->asBinder() != mSurface->asBinder()) {
-        if (mSurface != 0) {
+        if (mSurface != 0 && !mUseOverlay) {
             LOGD("clearing old preview surface %p", mSurface.get());
             mSurface->unregisterBuffers();
         }
@@ -341,17 +342,39 @@ status_t CameraService::Client::startPreview()
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
     debug_frame_cnt = 0;
 #endif
-
-    status_t ret = mHardware->startPreview(previewCallback,
-                                           mCameraService.get());
-    if (ret == NO_ERROR) {
-        mSurface->unregisterBuffers();
-        mSurface->registerBuffers(w,h,w,h,
-                                  PIXEL_FORMAT_YCbCr_420_SP,
-                                  mHardware->getPreviewHeap());
+    status_t ret;
+    if (mUseOverlay) {
+        const char *format = params.getPreviewFormat();
+        int fmt;
+        LOGD("Use Overlays");
+        if (!strcmp(format, "yuv422i"))
+            fmt = OVERLAY_FORMAT_YCbCr_422_I;
+        else if (!strcmp(format, "rgb565"))
+            fmt = OVERLAY_FORMAT_RGB_565;
+        else {
+            LOGE("Invalid preview format for overlays");
+            return -EINVAL;
+        }
+        sp<OverlayRef> ref = mSurface->createOverlay(w, h, fmt);
+        ret = mHardware->setOverlay(new Overlay(ref));
+        if (ret != NO_ERROR) {
+            LOGE("mHardware->setOverlay() failed with status %d\n", ret);
+            return ret;
+        }
+        ret = mHardware->startPreview(NULL, mCameraService.get());
+        if (ret != NO_ERROR)
+            LOGE("mHardware->startPreview() failed with status %d\n", ret);
+    } else {
+        LOGD("Don't use Overlays");
+        ret = mHardware->startPreview(previewCallback,
+                                               mCameraService.get());
+        if (ret == NO_ERROR) {
+            mSurface->unregisterBuffers();
+            mSurface->registerBuffers(w, h, w, h, PIXEL_FORMAT_YCbCr_420_SP,
+                                      mHardware->getPreviewHeap());
+        }
+        else LOGE("mHardware->startPreview() failed with status %d\n", ret);
     }
-    else LOGE("mHardware->startPreview() failed with status %d\n",
-              ret);
 
     return ret;
 }
@@ -372,7 +395,7 @@ void CameraService::Client::stopPreview()
     mHardware->stopPreview();
     LOGD("stopPreview(), hardware stopped OK");
 
-    if (mSurface != 0) {
+    if (mSurface != 0 && !mUseOverlay) {
         mSurface->unregisterBuffers();
     }
     mPreviewBuffer.clear();
@@ -520,7 +543,7 @@ status_t CameraService::Client::takePicture()
         return INVALID_OPERATION;
     }
 
-    if (mSurface != NULL)
+    if (mSurface != NULL && !mUseOverlay)
         mSurface->unregisterBuffers();
 
     return mHardware->takePicture(shutterCallback,
@@ -573,7 +596,7 @@ void CameraService::Client::yuvPictureCallback(const sp<IMemory>& mem,
     params.getPictureSize(&w, &h);
 
 //  Mutex::Autolock clientLock(client->mLock);
-    if (client->mSurface != 0) {
+    if (client->mSurface != 0 && !client->mUseOverlay) {
         client->mSurface->unregisterBuffers();
         client->mSurface->registerBuffers(w,h,w,h,
                                           PIXEL_FORMAT_YCbCr_420_SP, heap);
@@ -880,5 +903,3 @@ status_t CameraService::onTransact(
 #endif // DEBUG_HEAP_LEAKS
 
 }; // namespace android
-
-
