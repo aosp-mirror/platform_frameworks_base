@@ -16,14 +16,10 @@
 
 package com.android.internal.policy.impl;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.CountDownTimer;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -304,8 +300,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     mCallback.reportFailedPatternAttempt();
                 }
                 if (mFailedPatternAttemptsSinceLastTimeout >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
-                    long deadline = SystemClock.elapsedRealtime() + LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS;
-                    mLockPatternUtils.setLockoutAttemptDeadline(deadline);
+                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                     return;
                 }

@@ -56,6 +56,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
 
+    /**
+     * The amount of millis to stay awake once this screen detects activity
+     */
+    private static final int AWAKE_POKE_MILLIS = 30000;
+
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
     private IAccountsService mAccountsService;
@@ -116,7 +121,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     }
 
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        mCallback.pokeWakelock();
+        mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
     }
 
     @Override

@@ -52,7 +52,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.OrientationListener;
+import android.view.WindowOrientationListener;
 import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.View;
@@ -141,7 +141,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of a long press.
     private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 40, 41};
     // Vibrator pattern for haptic feedback of a zoom ring tick
-    private static final long[] ZOOM_RING_TICK_VIBE_PATTERN = {0, 1, 40, 41};
+    private static final long[] ZOOM_RING_TICK_VIBE_PATTERN = {0, 10};
     
     Context mContext;
     IWindowManager mWindowManager;
@@ -254,33 +254,47 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     
-    class MyOrientationListener extends OrientationListener {
-
+    class MyOrientationListener extends WindowOrientationListener {
+        private static final int _LOWER_THRESHOLD = 30;
+        private static final int _UPPER_THRESHOLD = 60;
+        
         MyOrientationListener(Context context) {
             super(context);
         }
         
         @Override
         public void onOrientationChanged(int orientation) {
-            // ignore orientation changes unless the value is in a range that
-            // matches portrait or landscape
-            // portrait range is 270+45 to 359 and 0 to 45
-            // landscape range is 270-45 to 270+45
-            if ((orientation >= 0 && orientation <= 45) || (orientation >= 270 - 45)) {
-                int rotation =  (orientation >= 270 - 45
-                        && orientation <= 270 + 45)
+            // ignore orientation changes unless the value is in a range 
+            // When switching from portrait to landscape try to use a lower threshold limit
+            // Use upper threshold limit when switching from landscape to portrait
+            // this is to delay the switch as much as we can
+            int rotation;
+            int threshold = (mSensorRotation == Surface.ROTATION_90) ? _UPPER_THRESHOLD :
+                    _LOWER_THRESHOLD;
+            
+            if ((orientation >= 0 && orientation <= _UPPER_THRESHOLD) ||
+                    (orientation >= 270 - _LOWER_THRESHOLD)) {
+                rotation =  (orientation >= 270 - _LOWER_THRESHOLD
+                        && orientation <= 270 + threshold)
                         ? Surface.ROTATION_90 : Surface.ROTATION_0;
-                if (rotation != mSensorRotation) {
-                	if(localLOGV) Log.i(TAG, "onOrientationChanged, rotation changed from "+rotation+" to "+mSensorRotation);
-                    // Update window manager.  The lid rotation hasn't changed,
-                    // but we want it to re-evaluate the final rotation in case
-                    // it needs to call back and get the sensor orientation.
-                    mSensorRotation = rotation;
-                    try {
-                        mWindowManager.setRotation(rotation, false);
-                    } catch (RemoteException e) {
-                        // Ignore
-                    }
+            } else if (orientation == WindowOrientationListener.ORIENTATION_FLAT) {
+                // return portrait 
+                rotation = Surface.ROTATION_0;
+            } else {
+                // ignore orientation value
+                return;
+            }
+            // Send updates based on orientation value
+            if (rotation != mSensorRotation) {
+                if(localLOGV) Log.i(TAG, "onOrientationChanged, rotation changed from "+rotation+" to "+mSensorRotation);
+                // Update window manager.  The lid rotation hasn't changed,
+                // but we want it to re-evaluate the final rotation in case
+                // it needs to call back and get the sensor orientation.
+                mSensorRotation = rotation;
+                try {
+                    mWindowManager.setRotation(rotation, false);
+                } catch (RemoteException e) {
+                    // Ignore
                 }
             }
         }                                      
@@ -1355,6 +1369,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean isWakeKey = isWakeKeyTq(event);
         final boolean keyguardShowing = keyguardIsShowingTq();
 
+        if (false) {
+            Log.d(TAG, "interceptKeyTq event=" + event + " keycode=" + event.keycode
+                  + " screenIsOn=" + screenIsOn + " keyguardShowing=" + keyguardShowing);
+        }
+
         if (keyguardShowing) {
             if (screenIsOn) {
                 // when the screen is on, always give the event to the keyguard
@@ -1457,6 +1476,65 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             code, 0);
                     mBroadcastWakeLock.acquire();
                     mHandler.post(new PassHeadsetKey(keyEvent));
+                }
+            } else if (code == KeyEvent.KEYCODE_CALL) {
+                // If an incoming call is ringing, answer it!
+                // (We handle this key here, rather than in the InCallScreen, to make
+                // sure we'll respond to the key even if the InCallScreen hasn't come to
+                // the foreground yet.)
+
+                // We answer the call on the DOWN event, to agree with
+                // the "fallback" behavior in the InCallScreen.
+                if (down) {
+                    try {
+                        ITelephony phoneServ = getPhoneInterface();
+                        if (phoneServ != null) {
+                            if (phoneServ.isRinging()) {
+                                Log.i(TAG, "interceptKeyTq:"
+                                      + " CALL key-down while ringing: Answer the call!");
+                                phoneServ.answerRingingCall();
+
+                                // And *don't* pass this key thru to the current activity
+                                // (which is presumably the InCallScreen.)
+                                result &= ~ACTION_PASS_TO_USER;
+                            }
+                        } else {
+                            Log.w(TAG, "CALL button: Unable to find ITelephony interface");
+                        }
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "CALL button: RemoteException from getPhoneInterface()", ex);
+                    }
+                }
+            } else if ((code == KeyEvent.KEYCODE_VOLUME_UP)
+                       || (code == KeyEvent.KEYCODE_VOLUME_DOWN)) {
+                // If an incoming call is ringing, either VOLUME key means
+                // "silence ringer".  We handle these keys here, rather than
+                // in the InCallScreen, to make sure we'll respond to them
+                // even if the InCallScreen hasn't come to the foreground yet.
+
+                // Look for the DOWN event here, to agree with the "fallback"
+                // behavior in the InCallScreen.
+                if (down) {
+                    try {
+                        ITelephony phoneServ = getPhoneInterface();
+                        if (phoneServ != null) {
+                            if (phoneServ.isRinging()) {
+                                Log.i(TAG, "interceptKeyTq:"
+                                      + " VOLUME key-down while ringing: Silence ringer!");
+                                // Silence the ringer.  (It's safe to call this
+                                // even if the ringer has already been silenced.)
+                                phoneServ.silenceRinger();
+
+                                // And *don't* pass this key thru to the current activity
+                                // (which is probably the InCallScreen.)
+                                result &= ~ACTION_PASS_TO_USER;
+                            }
+                        } else {
+                            Log.w(TAG, "VOLUME button: Unable to find ITelephony interface");
+                        }
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "VOLUME button: RemoteException from getPhoneInterface()", ex);
+                    }
                 }
             }
         }
