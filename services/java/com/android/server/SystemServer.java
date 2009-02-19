@@ -181,6 +181,7 @@ class ServerThread extends Thread {
 
         StatusBarService statusBar = null;
         InputMethodManagerService imm = null;
+        GadgetService gadget = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -309,7 +310,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Starting Gadget Service");
-                ServiceManager.addService(Context.GADGET_SERVICE, new GadgetService(context));
+                gadget = new GadgetService(context);
+                ServiceManager.addService(Context.GADGET_SERVICE, gadget);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Gadget Service", e);
             }
@@ -336,6 +338,9 @@ class ServerThread extends Thread {
         try {
             pm.systemReady();
         } catch (RemoteException e) {
+        }
+        if (gadget != null) {
+            gadget.systemReady(safeMode);
         }
 
         // After making the following code, third party code may be running...

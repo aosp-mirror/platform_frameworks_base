@@ -84,6 +84,7 @@ public class DatabaseUtils {
             code = 9;
         } else {
             reply.writeException(e);
+            Log.e(TAG, "Writing exception to parcel", e);
             return;
         }
         reply.writeInt(code);

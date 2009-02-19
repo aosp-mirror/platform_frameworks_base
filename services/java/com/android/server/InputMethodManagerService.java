@@ -1062,6 +1062,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // Do nothing.
                         break;
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                        if ((softInputMode &
+                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                            if (DEBUG) Log.v(TAG, "Window asks to hide input going forward");
+                            hideCurrentInputLocked(0);
+                        }
+                        break;
+                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
                         if (DEBUG) Log.v(TAG, "Window asks to hide input");
                         hideCurrentInputLocked(0);
                         break;

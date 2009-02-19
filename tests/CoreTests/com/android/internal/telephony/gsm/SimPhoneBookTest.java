@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.core.TestHandler;
 import android.os.ServiceManager;
 import android.test.suitebuilder.annotation.Suppress;
 
@@ -48,21 +47,21 @@ public class SimPhoneBookTest extends TestCase {
         AdnRecord originalAdn = null;
         // We need to maintain the state of the SIM before and after the test.
         // Since this test doesn't mock the SIM we try to get a valid ADN record,
-        // for 3 tries and if this fails, we bail out. 
+        // for 3 tries and if this fails, we bail out.
         for (adnIndex = 3 ; adnIndex >= 1; adnIndex--) {
             listIndex = adnIndex - 1; // listIndex is zero based.
             originalAdn = adnRecordList.get(listIndex);
             assertNotNull("Original Adn is Null.", originalAdn);
             assertNotNull("Original Adn alpha tag is null.", originalAdn.getAlphaTag());
             assertNotNull("Original Adn number is null.", originalAdn.getNumber());
-            
-            if (originalAdn.getNumber().length() > 0 &&  
-                originalAdn.getAlphaTag().length() > 0) {   
+
+            if (originalAdn.getNumber().length() > 0 &&
+                originalAdn.getAlphaTag().length() > 0) {
                 break;
             }
         }
         if (adnIndex == 0) return;
-        
+
         AdnRecord emptyAdn = new AdnRecord("", "");
         AdnRecord firstAdn = new AdnRecord("John", "4085550101");
         AdnRecord secondAdn = new AdnRecord("Andy", "6505550102");

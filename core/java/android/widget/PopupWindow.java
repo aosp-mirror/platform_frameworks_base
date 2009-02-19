@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -32,6 +34,8 @@ import android.os.IBinder;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+
+import java.lang.ref.WeakReference;
 
 /**
  * <p>A popup window that can be used to display an arbitrary view. The popup
@@ -109,7 +113,23 @@ public class PopupWindow {
     private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
         com.android.internal.R.attr.state_above_anchor
     };
-    
+
+    private WeakReference<View> mAnchor;
+    private OnScrollChangedListener mOnScrollChangedListener =
+        new OnScrollChangedListener() {
+            public void onScrollChanged() {
+                View anchor = mAnchor.get();
+                if (anchor != null && mPopupView != null) {
+                    WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                            mPopupView.getLayoutParams();
+
+                    mAboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff);
+                    update(p.x, p.y, -1, -1, true);
+                }
+            }
+        };
+    private int mAnchorXoff, mAnchorYoff;
+
     /**
      * <p>Create a new empty, non focusable popup window of dimension (0,0).</p>
      *
@@ -579,6 +599,8 @@ public class PopupWindow {
             return;
         }
 
+        unregisterForScrollChanged();
+
         mIsShowing = true;
         mIsDropdown = false;
 
@@ -617,6 +639,8 @@ public class PopupWindow {
      * the popup in its entirety, this method tries to find a parent scroll
      * view to scroll. If no parent scroll view can be scrolled, the bottom-left
      * corner of the popup is pinned at the top left corner of the anchor view.</p>
+     * <p>If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.</p>
      *
      * @param anchor the view on which to pin the popup window
      *
@@ -626,6 +650,8 @@ public class PopupWindow {
         if (isShowing() || mContentView == null) {
             return;
         }
+
+        registerForScrollChanged(anchor, xoff, yoff);
 
         mIsShowing = true;
         mIsDropdown = true;
@@ -894,6 +920,8 @@ public class PopupWindow {
      */
     public void dismiss() {
         if (isShowing() && mPopupView != null) {
+            unregisterForScrollChanged();
+
             mWindowManager.removeView(mPopupView);
             if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                 ((ViewGroup) mPopupView).removeView(mContentView);
@@ -962,6 +990,25 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(int x, int y, int width, int height) {
+        update(x, y, width, height, false);
+    }
+
+    /**
+     * <p>Updates the position and the dimension of the popup window. Width and
+     * height can be set to -1 to update location only.  Calling this function
+     * also updates the window with the current popup state as
+     * described for {@link #update()}.</p>
+     *
+     * @param x the new x location
+     * @param y the new y location
+     * @param width the new width, can be -1 to ignore
+     * @param height the new height, can be -1 to ignore
+     * @param force reposition the window even if the specified position
+     *              already seems to correspond to the LayoutParams
+     * 
+     * @hide pending API council approval
+     */
+    public void update(int x, int y, int width, int height, boolean force) {
         if (width != -1) {
             mLastWidth = width;
             setWidth(width);
@@ -979,7 +1026,7 @@ public class PopupWindow {
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                 mPopupView.getLayoutParams();
 
-        boolean update = false;
+        boolean update = force;
 
         final int finalWidth = mWidthMode < 0 ? mWidthMode : mLastWidth;
         if (width != -1 && p.width != finalWidth) {
@@ -1039,6 +1086,8 @@ public class PopupWindow {
      * height can be set to -1 to update location only.  Calling this function
      * also updates the window with the current popup state as
      * described for {@link #update()}.</p>
+     * <p>If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.</p>
      *
      * @param anchor the popup's anchor view
      * @param xoff x offset from the view's left edge
@@ -1049,6 +1098,12 @@ public class PopupWindow {
     public void update(View anchor, int xoff, int yoff, int width, int height) {
         if (!isShowing() || mContentView == null) {
             return;
+        }
+
+        WeakReference<View> oldAnchor = mAnchor;
+        if (oldAnchor == null || oldAnchor.get() != anchor ||
+            mAnchorXoff != xoff || mAnchorYoff != yoff) {
+            registerForScrollChanged(anchor, xoff, yoff);
         }
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
@@ -1065,10 +1120,10 @@ public class PopupWindow {
             mPopupHeight = height;
         }
         
-        findDropDownPosition(anchor, p, xoff, yoff);
+        mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
         update(p.x, p.y, width, height);
     }
-    
+
     /**
      * Listener that is called when this popup window is dismissed.
      */
@@ -1078,7 +1133,33 @@ public class PopupWindow {
          */
         public void onDismiss();
     }
-    
+
+    private void unregisterForScrollChanged() {
+        WeakReference<View> anchorRef = mAnchor;
+        View anchor = null;
+        if (anchorRef != null) {
+            anchor = anchorRef.get();
+        }
+        if (anchor != null) {
+            ViewTreeObserver vto = anchor.getViewTreeObserver();
+            vto.removeOnScrollChangedListener(mOnScrollChangedListener);
+        }
+        mAnchor = null;
+    }
+
+    private void registerForScrollChanged(View anchor, int xoff, int yoff) {
+        unregisterForScrollChanged();
+
+        mAnchor = new WeakReference<View>(anchor);
+        ViewTreeObserver vto = anchor.getViewTreeObserver();
+        if (vto != null) {
+            vto.addOnScrollChangedListener(mOnScrollChangedListener);
+        }
+
+        mAnchorXoff = xoff;
+        mAnchorYoff = yoff;
+    }
+
     private class PopupViewContainer extends FrameLayout {
 
         public PopupViewContainer(Context context) {

@@ -33,6 +33,7 @@ import android.util.Config;
 import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
+import android.util.DisplayMetrics;
 import android.view.View.MeasureSpec;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -184,6 +185,7 @@ public final class ViewRoot extends Handler implements ViewParent,
      */
     AudioManager mAudioManager;
 
+    private final float mDensity;
 
     public ViewRoot(Context context) {
         super();
@@ -226,6 +228,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
+        mDensity = context.getResources().getDisplayMetrics().density;
     }
 
     @Override
@@ -1077,6 +1080,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         scrollToRectOrFocus(null, false);
+
+        if (mAttachInfo.mViewScrollChanged) {
+            mAttachInfo.mViewScrollChanged = false;
+            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
+        }
         
         int yoff;
         final boolean scrolling = mScroller != null
@@ -1090,7 +1098,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             mCurScrollY = yoff;
             fullRedrawNeeded = true;
         }
-        
+
         Rect dirty = mDirty;
         if (mUseGL) {
             if (!dirty.isEmpty()) {
@@ -1126,7 +1134,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
-
         if (fullRedrawNeeded)
             dirty.union(0, 0, mWidth, mHeight);
 
@@ -1138,22 +1145,22 @@ public final class ViewRoot extends Handler implements ViewParent,
                     + surface + " surface.isValid()=" + surface.isValid());
         }
 
-        if (!dirty.isEmpty()) {
-            Canvas canvas;
-            try {
-                canvas = surface.lockCanvas(dirty);
-                // TODO: Do this in native
-                canvas.setDensityScale(mView.getResources().getDisplayMetrics().density);
-            } catch (Surface.OutOfResourcesException e) {
-                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
-                // TODO: we should ask the window manager to do something!
-                // for now we just do nothing
-                return;
-            }
+        Canvas canvas;
+        try {
+            canvas = surface.lockCanvas(dirty);
+            // TODO: Do this in native
+            canvas.setDensityScale(mDensity);
+        } catch (Surface.OutOfResourcesException e) {
+            Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
+            // TODO: we should ask the window manager to do something!
+            // for now we just do nothing
+            return;
+        }
 
-            long startTime;
+        try {
+            if (!dirty.isEmpty()) {
+                long startTime;
 
-            try {
                 if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                     Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
                             + canvas.getWidth() + ", h=" + canvas.getHeight());
@@ -1169,7 +1176,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // properly re-composite its drawing on a transparent
                 // background. This automatically respects the clip/dirty region
                 if (!canvas.isOpaque()) {
-                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                    canvas.drawColor(0xff0000ff, PorterDuff.Mode.CLEAR);
                 } else if (yoff != 0) {
                     // If we are applying an offset, we need to clear the area
                     // where the offset doesn't appear to avoid having garbage
@@ -1192,34 +1199,17 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sDrawTime = now;
                 }
 
-            } finally {
-                surface.unlockCanvasAndPost(canvas);
-            }
-
-            if (PROFILE_DRAWING) {
-                EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-            }
-
-            if (LOCAL_LOGV) {
-                Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
+                if (PROFILE_DRAWING) {
+                    EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+                }
             }
             
-        } else if (mWidth == 0 || mHeight == 0) {
-            // This is a special case where a window dimension is 0 -- we
-            // normally wouldn't draw anything because we have an empty
-            // dirty rect, but the surface flinger may be waiting for us to
-            // draw the window before it stops freezing the screen, so we
-            // need to diddle it like this to keep it from getting stuck.
-            Canvas canvas;
-            try {
-                canvas = surface.lockCanvas(dirty);
-            } catch (Surface.OutOfResourcesException e) {
-                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
-                // TODO: we should ask the window manager to do something!
-                // for now we just do nothing
-                return;
-            }
+        } finally {
             surface.unlockCanvasAndPost(canvas);
+        }
+
+        if (LOCAL_LOGV) {
+            Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
         }
         
         if (scrolling) {
@@ -1401,13 +1391,21 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     void dispatchDetachedFromWindow() {
         if (Config.LOGV) Log.v("ViewRoot", "Detaching in " + this + " of " + mSurface);
+
         if (mView != null) {
             mView.dispatchDetachedFromWindow();
         }
+
         mView = null;
         mAttachInfo.mRootView = null;
+
         if (mUseGL) {
             destroyGL();
+        }
+
+        try {
+            sWindowSession.remove(mWindow);
+        } catch (RemoteException e) {
         }
     }
     
@@ -1609,16 +1607,20 @@ public final class ViewRoot extends Handler implements ViewParent,
                         }
                     }
                 }
+                
+                InputMethodManager imm = InputMethodManager.peekInstance();
                 if (mView != null) {
+                    if (hasWindowFocus && imm != null) {
+                        imm.startGettingWindowFocus();
+                    }
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
                 }
                 
                 // Note: must be done after the focus change callbacks,
                 // so all of the view state is set up correctly.
                 if (hasWindowFocus) {
-                    InputMethodManager imm = InputMethodManager.peekInstance();
                     if (imm != null) {
-                        imm.onWindowFocus(mView.findFocus(),
+                        imm.onWindowFocus(mView, mView.findFocus(),
                                 mWindowAttributes.softInputMode,
                                 !mHasHadWindowFocus, mWindowAttributes.flags);
                     }
@@ -2289,10 +2291,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             if (mAdded) {
                 mAdded = false;
-                try {
-                    sWindowSession.remove(mWindow);
-                } catch (RemoteException e) {
-                }
                 if (immediate) {
                     dispatchDetachedFromWindow();
                 } else if (mView != null) {

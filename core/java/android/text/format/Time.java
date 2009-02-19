@@ -394,6 +394,7 @@ public class Time {
      *
      * @param s the string to parse
      * @return true if the resulting time value is in UTC time
+     * @throws android.util.TimeFormatException if s cannot be parsed.
      */
     public boolean parse(String s) {
         if (nativeParse(s)) {

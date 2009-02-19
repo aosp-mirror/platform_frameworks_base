@@ -70,7 +70,16 @@ public:
         ROUTE_BLUETOOTH_SCO  = (1 << 2),
         ROUTE_HEADSET        = (1 << 3),
         ROUTE_BLUETOOTH_A2DP = (1 << 4),
-        ROUTE_ALL       = 0xFFFFFFFF
+        ROUTE_ALL            = -1UL,
+    };
+
+    enum audio_in_acoustics {
+        AGC_ENABLE    = 0x0001,
+        AGC_DISABLE   = 0,
+        NS_ENABLE     = 0x0002,
+        NS_DISABLE    = 0,
+        TX_IIR_ENABLE = 0x0004,
+        TX_DISABLE    = 0
     };
 
     /* These are static methods to control the system-wide AudioFlinger

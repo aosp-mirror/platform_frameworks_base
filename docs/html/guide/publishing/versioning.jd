@@ -125,7 +125,7 @@ applications use the
 {@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)} 
 method of {@link android.content.pm.PackageManager PackageManager}. </p>
 
-<h2 id="#minsdkversion">Specifying Minimum System API Version</h2>.
+<h2 id="minsdkversion">Specifying Minimum System API Version</h2>
 
 <p>If your application requires a specific minimum version of the Android
 platform, you can specify that version as an API Level identifier 

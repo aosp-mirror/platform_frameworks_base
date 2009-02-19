@@ -2321,6 +2321,13 @@ public final class Settings {
         public static final String GMAIL_SEND_IMMEDIATELY = "gmail_send_immediately";
 
         /**
+         * Controls whether gmail buffers server responses.  Possible values are "memory", for a
+         * memory-based buffer, or "file", for a temp-file-based buffer.  All other values
+         * (including not set) disable buffering.
+         */
+        public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
+
+        /**
          * Hostname of the GTalk server.
          */
         public static final String GTALK_SERVICE_HOSTNAME = "gtalk_hostname";

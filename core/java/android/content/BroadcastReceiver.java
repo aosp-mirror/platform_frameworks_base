@@ -79,7 +79,7 @@ import android.util.Log;
  * <p>The BroadcastReceiver class (when launched as a component through
  * a manifest's {@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}
  * tag) is an important part of an
- * <a href="{@docRoot}intro/lifecycle.html">application's overall lifecycle</a>.</p>
+ * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">application's overall lifecycle</a>.</p>
  * 
  * <p>Topics covered here:
  * <ol>
@@ -135,7 +135,7 @@ import android.util.Log;
  * tag in their <code>AndroidManifest.xml</code>) will be able to send an
  * Intent to the receiver.
  * 
- * <p>See the <a href="{@docRoot}devel/security.html">Security Model</a>
+ * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
  * document for more information on permissions and security in general.
  * 
  * <a name="ProcessLifecycle"></a>

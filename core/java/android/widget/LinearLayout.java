@@ -136,6 +136,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#LinearLayout_baselineAligned
      */
+    @android.view.RemotableViewMethod
     public void setBaselineAligned(boolean baselineAligned) {
         mBaselineAligned = baselineAligned;
     }
@@ -208,6 +209,7 @@ public class LinearLayout extends ViewGroup {
      * 
      * @attr ref android.R.styleable#LinearLayout_baselineAlignedChildIndex
      */
+    @android.view.RemotableViewMethod
     public void setBaselineAlignedChildIndex(int i) {
         if ((i < 0) || (i >= getChildCount())) {
             throw new IllegalArgumentException("base aligned child index out "
@@ -265,6 +267,7 @@ public class LinearLayout extends ViewGroup {
      *        to 0.0f if the weight sum should be computed from the children's
      *        layout_weight
      */
+    @android.view.RemotableViewMethod
     public void setWeightSum(float weightSum) {
         mWeightSum = Math.max(0.0f, weightSum);
     }
@@ -1149,6 +1152,7 @@ public class LinearLayout extends ViewGroup {
      * 
      * @attr ref android.R.styleable#LinearLayout_gravity
      */
+    @android.view.RemotableViewMethod
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
             if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
@@ -1164,6 +1168,7 @@ public class LinearLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
         final int gravity = horizontalGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != gravity) {
@@ -1172,6 +1177,7 @@ public class LinearLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setVerticalGravity(int verticalGravity) {
         final int gravity = verticalGravity & Gravity.VERTICAL_GRAVITY_MASK;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != gravity) {

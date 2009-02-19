@@ -34,7 +34,7 @@
             <li><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">Available Resource Types</a></li>
           </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">Intents and Intent Filtering</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">Intents and Intent Filters</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">Data Storage</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">Content Providers</a></li>
 <!--  <li><a style="color:gray;">Notifications</a></li> -->
@@ -147,14 +147,29 @@
     </ul>
 </li>
 
-<li><h2>Tutorials</h2>
+<li><h2>Tutorials and Sample Code</h2>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/tutorials/hello-world.html">Hello World</a></li>
       <li><a href="<?cs var:toroot ?>guide/tutorials/views/index.html">Hello Views</a></li>
-      <li><a href="<?cs var:toroot ?>guide/tutorials/notepad/index.html">Notepad</a></li>
-      <li><a href="<?cs var:toroot ?>guide/samples/index.html">Sample Code</a></li>
+      <li><a href="<?cs var:toroot ?>guide/tutorials/notepad/index.html">Notepad Tutorial</a></li>
+    </ul>
+    <ul>
+    <?cs if:android.whichdoc != "online" ?>
+      <li><a href="<?cs var:toroot ?>../samples">Sample Code &raquo;</a></li>
+    <?cs else ?>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/samples/index.html">Sample Code</a></div>
+	  <ul>
+            <li><a href="<?cs var:toroot ?>guide/samples/ApiDemos/index.html">API Demos</a></li>
+            <li><a href="<?cs var:toroot ?>guide/samples/LunarLander/index.html">Lunar Lander</a></li>
+            <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">NotePad</a></li>
+          </ul>
+      </li>
+    <?cs /if ?>
     </ul>
 </li>
+
+
 
 <li><h2>Appendix</h2>
     <ul>

@@ -51,9 +51,9 @@ struct fields_t {
 
 static fields_t fields;
 static Mutex sLock;
+static jclass sCameraClass;
 
 struct callback_cookie {
-    jclass      camera_class;
     jobject     camera_ref;
 };
 
@@ -87,7 +87,7 @@ static void err_callback(status_t err, void *cookie)
     }
     LOGV("err_callback: camera_ref=%x, cookie=%x", (int)c->camera_ref, (int)cookie);
 
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kErrorCallback, error, 0, NULL);
 }
 
@@ -115,7 +115,6 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
         jniThrowException(env, "java/lang/Exception", NULL);
         return;
     }
-    cookie->camera_class = (jclass)env->NewGlobalRef(clazz);
 
     // We use a weak reference so the Camera object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
@@ -157,7 +156,6 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 
         if (cookie) {
             env->DeleteGlobalRef(cookie->camera_ref);
-            env->DeleteGlobalRef(cookie->camera_class);
             delete cookie;
             env->SetIntField(thiz, fields.listener_context, 0);
         }
@@ -207,7 +205,7 @@ static void preview_callback(const sp<IMemory>& mem, void *cookie)
 
     obj = array;
 
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kPreviewCallback, arg1, arg2, obj);
     env->DeleteLocalRef(array);
 }
@@ -270,12 +268,10 @@ static void autofocus_callback_impl(bool success, void *cookie)
         return;
     }
     callback_cookie *c = (callback_cookie *)cookie;
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kAutoFocusCallback,
                               success, 0, NULL);
 }
-
-
 
 static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
 {
@@ -301,7 +297,7 @@ static void jpeg_callback(const sp<IMemory>& mem, void *cookie)
     jobject obj = NULL;
 
     if (mem == NULL) {
-        env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+        env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                                   c->camera_ref, kJpegCallback, arg1, arg2, NULL);
         return;
     }
@@ -331,7 +327,7 @@ static void jpeg_callback(const sp<IMemory>& mem, void *cookie)
 
     obj = array;
 
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kJpegCallback, arg1, arg2, obj);
     env->DeleteLocalRef(array);
 }
@@ -344,7 +340,7 @@ static void shutter_callback_impl(void *cookie)
         return;
     }
     callback_cookie *c = (callback_cookie *)cookie;
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kShutterCallback, 0, 0, NULL);
 }
 
@@ -357,7 +353,7 @@ static void raw_callback(const sp<IMemory>& mem __attribute__((unused)),
         return;
     }
     callback_cookie *c = (callback_cookie *)cookie;
-    env->CallStaticVoidMethod(c->camera_class, fields.post_event,
+    env->CallStaticVoidMethod(sCameraClass, fields.post_event,
                               c->camera_ref, kRawCallback, 0, 0, NULL);
 }
 
@@ -524,6 +520,7 @@ int register_android_hardware_Camera(JNIEnv *env)
         return -1;
 
     jclass clazz = env->FindClass("android/hardware/Camera");
+    sCameraClass = (jclass)env->NewGlobalRef(clazz);
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {

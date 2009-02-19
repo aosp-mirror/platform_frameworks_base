@@ -113,9 +113,9 @@ class SensorService extends ISensorService.Stub {
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         if (enable == SENSOR_DISABLE) {
-            mBatteryStats.noteStopSensor(uid, name, sensor);
+            mBatteryStats.noteStopSensor(uid, sensor);
         } else {
-            mBatteryStats.noteStartSensor(uid, name, sensor);
+            mBatteryStats.noteStartSensor(uid, sensor);
         }
         Binder.restoreCallingIdentity(identity);
 

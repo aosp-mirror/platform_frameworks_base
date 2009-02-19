@@ -278,6 +278,9 @@ status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
         mA2dpMixerThread->dump(fd, args);
 #endif
 
+        // dump record client
+        if (mAudioRecordThread != 0) mAudioRecordThread->dump(fd, args);
+
         if (mAudioHardware) {
             mAudioHardware->dumpState(fd, args);
         }
@@ -1155,7 +1158,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             // active tracks were late. Sleep a little bit to give
             // them another chance. If we're too late, the audio
             // hardware will zero-fill for us.
-//            LOGV("no buffers - usleep(%lu)", sleepTime);
+            //LOGV("no buffers - usleep(%lu)", sleepTime);
             usleep(sleepTime);
             if (sleepTime < kMaxBufferRecoveryInUsecs) {
                 sleepTime += kBufferRecoveryInUsecs;
@@ -1223,6 +1226,11 @@ sp<AudioFlinger::MixerThread::Track>  AudioFlinger::MixerThread::createTrack(
 
         track = new Track(this, client, streamType, sampleRate, format,
                 channelCount, frameCount, sharedBuffer);
+        if (track->getCblk() == NULL) {
+            track.clear();
+            lStatus = NO_MEMORY;
+            goto Exit;
+        }
         mTracks.add(track);
         lStatus = NO_ERROR;
     }
@@ -1506,6 +1514,7 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
             int format,
             int channelCount,
             int frameCount,
+            uint32_t flags,
             const sp<IMemory>& sharedBuffer)
     :   RefBase(),
         mMixerThread(mixerThread),
@@ -1515,7 +1524,7 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
         mState(IDLE),
         mClientTid(-1),
         mFormat(format),
-        mFlags(0)
+        mFlags(flags & ~SYSTEM_FLAGS_MASK)
 {
     mName = mixerThread->getTrackName();
     LOGV("TrackBase contructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
@@ -1525,7 +1534,6 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
     }
 
     LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
-
 
     // LOGD("Creating track with %d buffers @ %d bytes", bufferCount, bufferSize);
    size_t size = sizeof(audio_track_cblk_t);
@@ -1614,7 +1622,7 @@ void AudioFlinger::MixerThread::TrackBase::reset() {
     cblk->server = 0;
     cblk->userBase = 0;
     cblk->serverBase = 0;
-    mFlags = 0;
+    mFlags &= (uint32_t)(~SYSTEM_FLAGS_MASK);
     LOGV("TrackBase::reset");
 }
 
@@ -1659,7 +1667,7 @@ AudioFlinger::MixerThread::Track::Track(
             int channelCount,
             int frameCount,
             const sp<IMemory>& sharedBuffer)
-    :   TrackBase(mixerThread, client, streamType, sampleRate, format, channelCount, frameCount, sharedBuffer)
+    :   TrackBase(mixerThread, client, streamType, sampleRate, format, channelCount, frameCount, 0, sharedBuffer)
 {
     mVolume[0] = 1.0f;
     mVolume[1] = 1.0f;
@@ -1836,10 +1844,11 @@ AudioFlinger::MixerThread::RecordTrack::RecordTrack(
             uint32_t sampleRate,
             int format,
             int channelCount,
-            int frameCount)
+            int frameCount,
+            uint32_t flags)
     :   TrackBase(mixerThread, client, streamType, sampleRate, format,
-            channelCount, frameCount, 0),
-            mOverflow(false)
+                  channelCount, frameCount, flags, 0),
+        mOverflow(false)
 {
 }
 
@@ -2232,7 +2241,12 @@ sp<IAudioRecord> AudioFlinger::openRecord(
 
     // create new record track and pass to record thread
     recordTrack = new MixerThread::RecordTrack(mHardwareMixerThread, client, streamType, sampleRate,
-            format, channelCount, frameCount);
+                                               format, channelCount, frameCount, flags);
+    if (recordTrack->getCblk() == NULL) {
+        recordTrack.clear();
+        lStatus = NO_MEMORY;
+        goto Exit;
+    }
 
     // return to handle to client
     recordHandle = new RecordHandle(recordTrack);
@@ -2323,15 +2337,17 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                     input = 0;
                 }
                 mRecordTrack.clear();
+                mStopped.signal();
 
                 mWaitWorkCV.wait(mLock);
                
                 LOGV("AudioRecordThread: loop starting");
                 if (mRecordTrack != 0) {
                     input = mAudioHardware->openInputStream(mRecordTrack->format(), 
-                                            mRecordTrack->channelCount(), 
-                                            mRecordTrack->sampleRate(), 
-                                            &mStartStatus);
+                                    mRecordTrack->channelCount(), 
+                                    mRecordTrack->sampleRate(), 
+                                    &mStartStatus,
+                                    (AudioSystem::audio_in_acoustics)(mRecordTrack->mFlags >> 16));
                     if (input != 0) {
                         inBufferSize = input->bufferSize();
                         inFrameCount = inBufferSize/input->frameSize();                        
@@ -2347,12 +2363,13 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                 mWaitWorkCV.signal();
             }
             mLock.unlock();
-        } else if (mRecordTrack != 0){
+        } else if (mRecordTrack != 0) {
 
             buffer.frameCount = inFrameCount;
             if (LIKELY(mRecordTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 LOGV("AudioRecordThread read: %d frames", buffer.frameCount);
-                if (input->read(buffer.raw, inBufferSize) < 0) {
+                ssize_t bytesRead = input->read(buffer.raw, inBufferSize);
+                if (bytesRead < 0) {
                     LOGE("Error reading audio input");
                     sleep(1);
                 }
@@ -2407,6 +2424,7 @@ void AudioFlinger::AudioRecordThread::stop(MixerThread::RecordTrack* recordTrack
     AutoMutex lock(&mLock);
     if (mActive && (recordTrack == mRecordTrack.get())) {
         mActive = false;
+        mStopped.wait(mLock);
     }
 }
 
@@ -2421,6 +2439,22 @@ void AudioFlinger::AudioRecordThread::exit()
     requestExitAndWait();
 }
 
+status_t AudioFlinger::AudioRecordThread::dump(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+    pid_t pid = 0;
+
+    if (mRecordTrack != 0 && mRecordTrack->mClient != 0) {
+        snprintf(buffer, SIZE, "Record client pid: %d\n", mRecordTrack->mClient->pid());
+        result.append(buffer);
+    } else {
+        result.append("No record client\n");
+    }
+    write(fd, result.string(), result.size());
+    return NO_ERROR;
+}
 
 status_t AudioFlinger::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)

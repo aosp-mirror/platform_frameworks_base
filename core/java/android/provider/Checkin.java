@@ -97,6 +97,7 @@ public final class Checkin {
             SETUP_RETRIES_EXHAUSTED,
             SETUP_SERVER_ERROR,
             SETUP_SERVER_TIMEOUT,
+            SETUP_NO_DATA_NETWORK,
             SYSTEM_APP_NOT_RESPONDING,
             SYSTEM_BOOT,
             SYSTEM_LAST_KMSG,

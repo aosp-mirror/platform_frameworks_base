@@ -932,29 +932,53 @@ public class AudioManager {
      */
     public static final int FX_KEY_CLICK = 0;
     /**
-     * Focuse has moved up
+     * Focus has moved up
      * @see #playSoundEffect(int)
      */
     public static final int FX_FOCUS_NAVIGATION_UP = 1;
     /**
-     * Focuse has moved down
+     * Focus has moved down
      * @see #playSoundEffect(int)
      */
     public static final int FX_FOCUS_NAVIGATION_DOWN = 2;
     /**
-     * Focuse has moved left
+     * Focus has moved left
      * @see #playSoundEffect(int)
      */
     public static final int FX_FOCUS_NAVIGATION_LEFT = 3;
     /**
-     * Focuse has moved right
+     * Focus has moved right
      * @see #playSoundEffect(int)
      */
     public static final int FX_FOCUS_NAVIGATION_RIGHT = 4;
     /**
+     * IME standard keypress sound
+     * @see #playSoundEffect(int)
+     * @hide FIXME: Unhide before release
+     */
+    public static final int FX_KEYPRESS_STANDARD = 5;
+    /**
+     * IME spacebar keypress sound
+     * @see #playSoundEffect(int)
+     * @hide FIXME: Unhide before release
+     */
+    public static final int FX_KEYPRESS_SPACEBAR = 6;
+    /**
+     * IME delete keypress sound
+     * @see #playSoundEffect(int)
+     * @hide FIXME: Unhide before release
+     */
+    public static final int FX_KEYPRESS_DELETE = 7;
+    /**
+     * IME return_keypress sound
+     * @see #playSoundEffect(int)
+     * @hide FIXME: Unhide before release
+     */
+    public static final int FX_KEYPRESS_RETURN = 8;
+    /**
      * @hide Number of sound effects
      */
-    public static final int NUM_SOUND_EFFECTS = 5;
+    public static final int NUM_SOUND_EFFECTS = 9;
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
@@ -964,6 +988,13 @@ public class AudioManager {
      *            {@link #FX_FOCUS_NAVIGATION_DOWN},
      *            {@link #FX_FOCUS_NAVIGATION_LEFT},
      *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
+     *            FIXME: include links before release
+     *            {link #FX_KEYPRESS_STANDARD},
+     *            {link #FX_KEYPRESS_SPACEBAR},
+     *            {link #FX_KEYPRESS_DELETE},
+     *            {link #FX_KEYPRESS_RETURN},
+     * NOTE: This version uses the UI settings to determine
+     * whether sounds are heard or not.
      */
     public void  playSoundEffect(int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
@@ -977,6 +1008,37 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             service.playSoundEffect(effectType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in playSoundEffect"+e);
+        }
+    }
+
+    /**
+     * Plays a sound effect (Key clicks, lid open/close...)
+     * @param effectType The type of sound effect. One of
+     *            {@link #FX_KEY_CLICK},
+     *            {@link #FX_FOCUS_NAVIGATION_UP},
+     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
+     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
+     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
+     *            FIXME: include links before release
+     *            {link #FX_KEYPRESS_STANDARD},
+     *            {link #FX_KEYPRESS_SPACEBAR},
+     *            {link #FX_KEYPRESS_DELETE},
+     *            {link #FX_KEYPRESS_RETURN},
+     * @param volume Sound effect volume
+     * NOTE: This version is for applications that have their own
+     * settings panel for enabling and controlling volume.
+     *  @hide FIXME: Unhide before release
+     */
+    public void  playSoundEffect(int effectType, float volume) {
+        if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
+            return;
+        }
+
+        IAudioService service = getService();
+        try {
+            service.playSoundEffectVolume(effectType, volume);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in playSoundEffect"+e);
         }

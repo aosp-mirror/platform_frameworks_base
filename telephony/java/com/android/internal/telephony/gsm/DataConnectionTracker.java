@@ -559,6 +559,14 @@ final class DataConnectionTracker extends Handler
     }
 
     /**
+     * Simply tear down data connections due to radio off 
+     * and don't setup again.
+     */
+    public void cleanConnectionBeforeRadioOff() {
+        cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
+    }
+    
+    /**
      * Report the current state of data connectivity (enabled or disabled) for
      * the default APN.
      * @return {@code false} if data connectivity has been explicitly disabled,
@@ -1257,6 +1265,23 @@ final class DataConnectionTracker extends Handler
         return (shouldPost && cause != PdpConnection.PdpFailCause.UNKNOWN);
     }
 
+    /**
+     * Return true if data connection need to be setup after disconnected due to
+     * reason.
+     * 
+     * @param reason the reason why data is disconnected
+     * @return true if try setup data connection is need for this reason 
+     */
+    private boolean retryAfterDisconnected(String reason) {
+        boolean retry = true;
+        
+        if ( Phone.REASON_RADIO_TURNED_OFF.equals(reason) ||
+             Phone.REASON_DATA_DISABLED.equals(reason) ) { 
+            retry = false;
+        }
+        return retry;
+    }
+    
     private void reconnectAfterFail(PdpFailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
             Log.d(LOG_TAG, "PDP activate failed. Scheduling next attempt for "
@@ -1475,7 +1500,9 @@ final class DataConnectionTracker extends Handler
                 setState(State.IDLE);
                 phone.notifyDataConnection(reason);
                 mActiveApn = null;
-                trySetupData(reason);
+                if ( retryAfterDisconnected(reason) ) {
+                    trySetupData(reason);
+                }
                 break;
 
             case EVENT_PDP_STATE_CHANGED:

@@ -163,7 +163,7 @@ public class GestureDetector {
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
     // TODO make new double-tap timeout, and define its events (i.e. either time
     // between down-down or time between up-down)
-    private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getJumpTapTimeout();
+    private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     
     // constants for Message.what used by GestureHandler below
     private static final int SHOW_PRESS = 1;
@@ -174,11 +174,13 @@ public class GestureDetector {
     private final OnGestureListener mListener;
     private OnDoubleTapListener mDoubleTapListener;
 
+    private boolean mStillDown;
     private boolean mInLongPress;
     private boolean mAlwaysInTapRegion;
     private boolean mAlwaysInBiggerTapRegion;
 
     private MotionEvent mCurrentDownEvent;
+    private MotionEvent mPreviousUpEvent;
     
     /**
      * True when the user is still touching for the second tap (down, move, and
@@ -217,7 +219,8 @@ public class GestureDetector {
                 break;
                 
             case TAP:
-                if (mDoubleTapListener != null) {
+                // If the user's finger is still down, do not count it as a tap
+                if (mDoubleTapListener != null && !mStillDown) {
                     mDoubleTapListener.onSingleTapConfirmed(mCurrentDownEvent);
                 }
                 break;
@@ -378,8 +381,10 @@ public class GestureDetector {
         switch (action) {
         case MotionEvent.ACTION_DOWN:
             if (mDoubleTapListener != null) {
-                mHandler.removeMessages(TAP);
-                if (mCurrentDownEvent != null && isConsideredDoubleTap(mCurrentDownEvent, ev)) {
+                boolean hadTapMessage = mHandler.hasMessages(TAP);
+                if (hadTapMessage) mHandler.removeMessages(TAP);
+                if ((mCurrentDownEvent != null) && (mPreviousUpEvent != null) && hadTapMessage &&
+                        isConsideredDoubleTap(mCurrentDownEvent, mPreviousUpEvent, ev)) {
                     // This is a second tap
                     mIsDoubleTapping = true;
                     handled = mDoubleTapListener.onDoubleTapEvent(ev);  
@@ -394,6 +399,7 @@ public class GestureDetector {
             mCurrentDownEvent = MotionEvent.obtain(ev);
             mAlwaysInTapRegion = true;
             mAlwaysInBiggerTapRegion = true;
+            mStillDown = true;
             mInLongPress = false;
             
             if (mIsLongpressEnabled) {
@@ -422,6 +428,7 @@ public class GestureDetector {
                     mLastMotionX = x;
                     mLastMotionY = y;
                     mAlwaysInTapRegion = false;
+                    mHandler.removeMessages(TAP);
                     mHandler.removeMessages(SHOW_PRESS);
                     mHandler.removeMessages(LONG_PRESS);
                 }
@@ -436,6 +443,7 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_UP:
+            mStillDown = false;
             MotionEvent currentUpEvent = MotionEvent.obtain(ev);
             if (mIsDoubleTapping) {
                 handled = mDoubleTapListener.onDoubleTapEvent(ev);
@@ -461,6 +469,7 @@ public class GestureDetector {
                     handled = mListener.onFling(mCurrentDownEvent, currentUpEvent, velocityX, velocityY);
                 }
             }
+            mPreviousUpEvent = MotionEvent.obtain(ev);
             mVelocityTracker.recycle();
             mVelocityTracker = null;
             mHandler.removeMessages(SHOW_PRESS);
@@ -472,6 +481,7 @@ public class GestureDetector {
             mHandler.removeMessages(TAP);
             mVelocityTracker.recycle();
             mVelocityTracker = null;
+            mStillDown = false;
             if (mInLongPress) {
                 mInLongPress = false;
                 break;
@@ -480,12 +490,13 @@ public class GestureDetector {
         return handled;
     }
 
-    private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent secondDown) {
+    private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent firstUp,
+            MotionEvent secondDown) {
         if (!mAlwaysInBiggerTapRegion) {
             return false;
         }
         
-        if (secondDown.getEventTime() - firstDown.getEventTime() > DOUBLE_TAP_TIMEOUT) {
+        if (secondDown.getEventTime() - firstUp.getEventTime() > DOUBLE_TAP_TIMEOUT) {
             return false;
         }
 
@@ -495,6 +506,7 @@ public class GestureDetector {
     }
     
     private void dispatchLongPress() {
+        mHandler.removeMessages(TAP);
         mInLongPress = true;
         mListener.onLongPress(mCurrentDownEvent);
     }

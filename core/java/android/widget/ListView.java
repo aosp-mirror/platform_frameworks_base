@@ -2179,6 +2179,10 @@ public class ListView extends AbsListView {
                 && !isViewAncestorOf(selectedView, this)) {
             selectedView = null;
             hideSelector();
+
+            // but we don't want to set the ressurect position (that would make subsequent
+            // unhandled key events bring back the item we just scrolled off!)
+            mResurrectToPosition = INVALID_POSITION;
         }
 
         if (needToRedraw) {

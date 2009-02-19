@@ -271,6 +271,11 @@ final class WebViewCore {
     static native String nativeFindAddress(String addr);
 
     /**
+     * Rebuild the nav cache if the dom changed.
+     */
+    private native void nativeCheckNavCache();
+
+    /**
      * Empty the picture set.
      */
     private native void nativeClearContent();
@@ -317,7 +322,7 @@ final class WebViewCore {
         should this be called nativeSetViewPortSize?
     */
     private native void nativeSetSize(int width, int height, int screenWidth,
-            float scale);
+            float scale, int realScreenWidth, int screenHeight);
 
     private native int nativeGetContentMinPrefWidth();
     
@@ -501,6 +506,51 @@ final class WebViewCore {
         int mY;
     }
 
+        static final String[] HandlerDebugString = {
+            "LOAD_URL", // = 100;
+            "STOP_LOADING", // = 101;
+            "RELOAD", // = 102;
+            "KEY_DOWN", // = 103;
+            "KEY_UP", // = 104;
+            "VIEW_SIZE_CHANGED", // = 105;
+            "GO_BACK_FORWARD", // = 106;
+            "SET_SCROLL_OFFSET", // = 107;
+            "RESTORE_STATE", // = 108;
+            "PAUSE_TIMERS", // = 109;
+            "RESUME_TIMERS", // = 110;
+            "CLEAR_CACHE", // = 111;
+            "CLEAR_HISTORY", // = 112;
+            "SET_SELECTION", // = 113;
+            "REPLACE_TEXT", // = 114;
+            "PASS_TO_JS", // = 115;
+            "SET_GLOBAL_BOUNDS", // = 116;
+            "UPDATE_CACHE_AND_TEXT_ENTRY", // = 117;
+            "CLICK", // = 118;
+            "119",
+            "DOC_HAS_IMAGES", // = 120;
+            "SET_SNAP_ANCHOR", // = 121;
+            "DELETE_SELECTION", // = 122;
+            "LISTBOX_CHOICES", // = 123;
+            "SINGLE_LISTBOX_CHOICE", // = 124;
+            "125",
+            "SET_BACKGROUND_COLOR", // = 126;
+            "UNBLOCK_FOCUS", // = 127;
+            "SAVE_DOCUMENT_STATE", // = 128;
+            "GET_SELECTION", // = 129;
+            "WEBKIT_DRAW", // = 130;
+            "SYNC_SCROLL", // = 131;
+            "REFRESH_PLUGINS", // = 132;
+            "SPLIT_PICTURE_SET", // = 133;
+            "CLEAR_CONTENT", // = 134;
+            "SET_FINAL_FOCUS", // = 135;
+            "SET_KIT_FOCUS", // = 136;
+            "REQUEST_FOCUS_HREF", // = 137;
+            "ADD_JS_INTERFACE", // = 138;
+            "LOAD_DATA", // = 139;
+            "TOUCH_UP", // = 140;
+            "TOUCH_EVENT", // = 141;
+        };
+
     class EventHub {
         // Message Ids
         static final int LOAD_URL = 100;
@@ -595,6 +645,11 @@ final class WebViewCore {
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
+                    if (LOGV_ENABLED) {
+                        Log.v(LOGTAG, msg.what < LOAD_URL || msg.what 
+                                > TOUCH_EVENT ? Integer.toString(msg.what)
+                                : HandlerDebugString[msg.what - LOAD_URL]);
+                    }
                     switch (msg.what) {
                         case WEBKIT_DRAW:
                             webkitDraw();
@@ -675,7 +730,7 @@ final class WebViewCore {
 
                         case VIEW_SIZE_CHANGED:
                             viewSizeChanged(msg.arg1, msg.arg2,
-                                    ((Float) msg.obj).floatValue());
+                                    ((Integer) msg.obj).intValue());
                             break;
 
                         case SET_SCROLL_OFFSET:
@@ -1131,12 +1186,22 @@ final class WebViewCore {
     private int mCurrentViewWidth = 0;
     private int mCurrentViewHeight = 0;
 
+    // Define a minimum screen width so that we won't wrap the paragraph to one
+    // word per line during zoom-in.
+    private static final int MIN_SCREEN_WIDTH = 160;
+
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(int w, int h, float scale) {
+    private void viewSizeChanged(int w, int h, int viewWidth) {
         if (LOGV_ENABLED) Log.v(LOGTAG, "CORE onSizeChanged");
+        if (w == 0) {
+            Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
+            return;
+        }
+        float scale = (float) viewWidth / w;
         if (mSettings.getUseWideViewPort()
                 && (w < mViewportWidth || mViewportWidth == -1)) {
             int width = mViewportWidth;
+            int screenWidth = Math.max(w, MIN_SCREEN_WIDTH);
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() == 
                         WebSettings.LayoutAlgorithm.NORMAL) {
@@ -1154,12 +1219,21 @@ final class WebViewCore {
                      * In the worse case, the native width will be adjusted when
                      * next zoom or screen orientation change happens.
                      */
-                    width = Math.max(w, nativeGetContentMinPrefWidth());
+                    int minContentWidth = nativeGetContentMinPrefWidth();
+                    if (minContentWidth > WebView.MAX_FLOAT_CONTENT_WIDTH) {
+                        // keep the same width and screen width so that there is 
+                        // no reflow when zoom-out
+                        width = minContentWidth;
+                        screenWidth = Math.min(screenWidth, viewWidth);
+                    } else {
+                        width = Math.max(w, minContentWidth);
+                    }
                 }
             }
-            nativeSetSize(width, Math.round((float) width * h / w), w, scale);
+            nativeSetSize(width, Math.round((float) width * h / w),
+                    screenWidth, scale, w, h);
         } else {
-            nativeSetSize(w, h, w, scale);
+            nativeSetSize(w, h, w, scale, w, h);
         }
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
@@ -1219,7 +1293,9 @@ final class WebViewCore {
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
+                    WebView.NEW_PICTURE_MSG_ID, nativeGetContentMinPrefWidth(),
+                    0, draw).sendToTarget();
+            nativeCheckNavCache();
             if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {
                 // as we have the new picture, try to sync the scroll position
                 Message.obtain(mWebView.mPrivateHandler,
@@ -1324,7 +1400,9 @@ final class WebViewCore {
         for (int i = 0; i < size; i++) {
             list.getItemAtIndex(i).inflate(mBrowserFrame.mNativeFrame);
         }
+        mBrowserFrame.mLoadInitFromJava = true;
         list.restoreIndex(mBrowserFrame.mNativeFrame, index);
+        mBrowserFrame.mLoadInitFromJava = false;
     }
 
     //-------------------------------------------------------------------------
@@ -1349,14 +1427,15 @@ final class WebViewCore {
     }
     
     // called by JNI
-    private void contentScrollBy(int dx, int dy) {
+    private void contentScrollBy(int dx, int dy, boolean animate) {
         if (!mBrowserFrame.firstLayoutDone()) {
             // Will this happen? If yes, we need to do something here.
             return;
         }
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_BY_MSG_ID, dx, dy).sendToTarget();
+                    WebView.SCROLL_BY_MSG_ID, dx, dy, 
+                    new Boolean(animate)).sendToTarget();
         }
     }
 
@@ -1461,7 +1540,7 @@ final class WebViewCore {
             // current scale
             mEventHub.sendMessage(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, mWebView.mLastWidthSent,
-                    mWebView.mLastHeightSent, -1.0f));
+                    mWebView.mLastHeightSent, new Integer(-1)));
         }
 
         mBrowserFrame.didFirstLayout();

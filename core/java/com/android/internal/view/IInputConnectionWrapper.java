@@ -1,7 +1,5 @@
 package com.android.internal.view;
 
-import com.android.internal.view.IInputContext;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -324,7 +322,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     Log.w(TAG, "showStatusIcon on inactive InputConnection");
                     return;
                 }
-                ic.reportFullscreenMode(msg.arg1 != 1);
+                ic.reportFullscreenMode(msg.arg1 == 1);
                 return;
             }
             case DO_PERFORM_PRIVATE_COMMAND: {

@@ -2674,6 +2674,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
      * @attr ref android.R.styleable#View_visibility
      */
+    @RemotableViewMethod
     public void setVisibility(int visibility) {
         setFlags(visibility, VISIBILITY_MASK);
         if (mBGDrawable != null) mBGDrawable.setVisible(visibility == VISIBLE, false);
@@ -4016,6 +4017,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         mBackgroundSizeChanged = true;
+
+        final AttachInfo ai = mAttachInfo;
+        if (ai != null) {
+            ai.mViewScrollChanged = true;
+        }
     }
 
     /**
@@ -7946,6 +7952,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * Set if the visibility of any views has changed.
          */
         boolean mViewVisibilityChanged;
+
+        /**
+         * Set to true if a view has been scrolled.
+         */
+        boolean mViewScrollChanged;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

@@ -64,9 +64,6 @@ ALL_PREBUILT += $(TARGET_OUT)/media/audio/ringtones/Ring_Synth_02.ogg
 $(TARGET_OUT)/media/audio/ringtones/Ring_Synth_02.ogg : $(LOCAL_PATH)/Ring_Synth_02.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
 
-ALL_PREBUILT += $(TARGET_OUT)/sounds/test.mid
-$(TARGET_OUT)/sounds/test.mid : $(LOCAL_PATH)/test.mid | $(ACP)
-	$(transform-prebuilt-to-target)
 #
 # --- New Wave Labs ringtones
 #
@@ -204,10 +201,6 @@ ALL_PREBUILT += $(TARGET_OUT)/media/audio/notifications/Voila.ogg
 $(TARGET_OUT)/media/audio/notifications/Voila.ogg : $(LOCAL_PATH)/newwavelabs/Voila.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
 
-ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/Effect_Tick.ogg
-$(TARGET_OUT)/media/audio/ui/Effect_Tick.ogg : $(LOCAL_PATH)/Effect_Tick.ogg | $(ACP)
-	$(transform-prebuilt-to-target)
-
 ALL_PREBUILT += $(TARGET_OUT)/media/audio/notifications/Beat_Box_Android.ogg
 $(TARGET_OUT)/media/audio/notifications/Beat_Box_Android.ogg : $(LOCAL_PATH)/notifications/Beat_Box_Android.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
@@ -223,3 +216,25 @@ $(TARGET_OUT)/media/audio/notifications/TaDa.ogg : $(LOCAL_PATH)/notifications/T
 ALL_PREBUILT += $(TARGET_OUT)/media/audio/notifications/Tinkerbell.ogg
 $(TARGET_OUT)/media/audio/notifications/Tinkerbell.ogg : $(LOCAL_PATH)/notifications/Tinkerbell.ogg | $(ACP)
 	$(transform-prebuilt-to-target)
+
+# UI effects
+ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/Effect_Tick.ogg
+$(TARGET_OUT)/media/audio/ui/Effect_Tick.ogg : $(LOCAL_PATH)/effects/Effect_Tick.ogg | $(ACP)
+	$(transform-prebuilt-to-target)
+
+ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/KeypressStandard.ogg
+$(TARGET_OUT)/media/audio/ui/KeypressStandard.ogg : $(LOCAL_PATH)/effects/KeypressStandard.ogg | $(ACP)
+	$(transform-prebuilt-to-target)
+
+ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/KeypressSpacebar.ogg
+$(TARGET_OUT)/media/audio/ui/KeypressSpacebar.ogg : $(LOCAL_PATH)/effects/KeypressSpacebar.ogg | $(ACP)
+	$(transform-prebuilt-to-target)
+
+ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/KeypressDelete.ogg
+$(TARGET_OUT)/media/audio/ui/KeypressDelete.ogg : $(LOCAL_PATH)/effects/KeypressDelete.ogg | $(ACP)
+	$(transform-prebuilt-to-target)
+
+ALL_PREBUILT += $(TARGET_OUT)/media/audio/ui/KeypressReturn.ogg
+$(TARGET_OUT)/media/audio/ui/KeypressReturn.ogg : $(LOCAL_PATH)/effects/KeypressReturn.ogg | $(ACP)
+	$(transform-prebuilt-to-target)
+

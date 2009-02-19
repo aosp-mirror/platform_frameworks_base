@@ -102,12 +102,16 @@ public class AudioService extends IAudioService.Stub {
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
-    private static final float SOUND_EFFECT_VOLUME = 1.0f;
+    private static final int SOUND_EFFECT_VOLUME = 1000;
 
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
     private static final String[] SOUND_EFFECT_FILES = new String[] {
-        "Effect_Tick.ogg"
+        "Effect_Tick.ogg",
+        "KeypressStandard.ogg",
+        "KeypressSpacebar.ogg",
+        "KeypressDelete.ogg",
+        "KeypressReturn.ogg"
     };
 
     /* Sound effect file name mapping sound effect id (AudioManager.FX_xxx) to
@@ -118,7 +122,11 @@ public class AudioService extends IAudioService.Stub {
         {0, -1},  // FX_FOCUS_NAVIGATION_UP
         {0, -1},  // FX_FOCUS_NAVIGATION_DOWN
         {0, -1},  // FX_FOCUS_NAVIGATION_LEFT
-        {0, -1}   // FX_FOCUS_NAVIGATION_RIGHT
+        {0, -1},  // FX_FOCUS_NAVIGATION_RIGHT
+        {1, -1},  // FX_KEYPRESS_STANDARD
+        {2, -1},  // FX_KEYPRESS_SPACEBAR
+        {3, -1},  // FX_FOCUS_DELETE
+        {4, -1}   // FX_FOCUS_RETURN
     };
 
     private AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
@@ -180,9 +188,7 @@ public class AudioService extends IAudioService.Stub {
         readAudioSettings();
         mMediaServerOk = true;
         AudioSystem.setErrorCallback(mAudioSystemCallback);
-        if (Settings.System.getInt(mContentResolver, Settings.System.SOUND_EFFECTS_ENABLED, 0) == 1) {
-            loadSoundEffects();
-        }
+        loadSoundEffects();
     }
 
     private void createAudioSystemThread() {
@@ -648,8 +654,15 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#playSoundEffect(int) */
     public void playSoundEffect(int effectType) {
-        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP, effectType, 0,
-                null, 0);
+        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
+                effectType, SOUND_EFFECT_VOLUME, null, 0);
+    }
+
+    /** @see AudioManager#playSoundEffect(int, float) */
+    /* @hide FIXME: unhide before release */
+    public void playSoundEffectVolume(int effectType, float volume) {
+        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
+                effectType, (int) (volume * 1000), null, 0);
     }
 
     /**
@@ -1113,15 +1126,15 @@ public class AudioService extends IAudioService.Stub {
             System.putInt(mContentResolver, System.VIBRATE_ON, mVibrateSetting);
         }
 
-        private void playSoundEffect(int effectType) {
+        private void playSoundEffect(int effectType, int volume) {
             synchronized (mSoundEffectsLock) {
                 if (mSoundPool == null) {
                     return;
                 }
 
                 if (SOUND_EFFECT_FILES_MAP[effectType][1] > 0) {
-                    mSoundPool.play(SOUND_EFFECT_FILES_MAP[effectType][1], SOUND_EFFECT_VOLUME, SOUND_EFFECT_VOLUME,
-                            0, 0, 1.0f);
+                    float v = (float) volume / 1000.0f;
+                    mSoundPool.play(SOUND_EFFECT_FILES_MAP[effectType][1], v, v, 0, 0, 1.0f);
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     if (mediaPlayer != null) {
@@ -1214,7 +1227,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_PLAY_SOUND_EFFECT:
-                    playSoundEffect(msg.arg1);
+                    playSoundEffect(msg.arg1, msg.arg2);
                     break;
             }
         }

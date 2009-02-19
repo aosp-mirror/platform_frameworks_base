@@ -499,8 +499,6 @@ com.android.internal.logging.AndroidConfig
 com.android.internal.logging.AndroidHandler
 com.android.internal.os.AndroidPrintStream
 com.android.internal.os.BinderInternal$GcWatcher
-com.android.internal.os.HandlerHelper
-com.android.internal.os.HandlerThread
 com.android.internal.os.LoggingPrintStream
 com.android.internal.os.LoggingPrintStream$1
 com.android.internal.os.RuntimeInit

@@ -159,6 +159,9 @@ public class KeyboardView extends View implements View.OnClickListener {
     private static final int MSG_REPEAT = 3;
     private static final int MSG_LONGPRESS = 4;
     
+    private static final int DELAY_BEFORE_PREVIEW = 70;
+    private static final int DELAY_AFTER_PREVIEW = 60;
+    
     private int mVerticalCorrection;
     private int mProximityThreshold;
 
@@ -219,7 +222,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SHOW_PREVIEW:
-                    mPreviewText.setVisibility(VISIBLE);
+                    showKey(msg.arg1);
                     break;
                 case MSG_REMOVE_PREVIEW:
                     mPreviewText.setVisibility(INVISIBLE);
@@ -234,7 +237,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     openPopupIfRequired((MotionEvent) msg.obj);
                     break;
             }
-            
         }
     };
 
@@ -533,10 +535,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             dimensionSum += Math.min(key.width, key.height) + key.gap;
         }
         if (dimensionSum < 0 || length == 0) return;
-        mProximityThreshold = (int) (dimensionSum * 1.5f / length);
+        mProximityThreshold = (int) (dimensionSum * 1.4f / length);
         mProximityThreshold *= mProximityThreshold; // Square it
     }
-    
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -647,9 +649,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         int closestKey = NOT_A_KEY;
         int closestKeyDist = mProximityThreshold + 1;
         java.util.Arrays.fill(mDistances, Integer.MAX_VALUE);
-        final int keyCount = keys.length;
+        int [] nearestKeyIndices = mKeyboard.getNearestKeys(x, y);
+        final int keyCount = nearestKeyIndices.length;
         for (int i = 0; i < keyCount; i++) {
-            final Key key = keys[i];
+            final Key key = keys[nearestKeyIndices[i]];
             int dist = 0;
             boolean isInside = key.isInside(x,y);
             if (((mProximityCorrectOn 
@@ -660,7 +663,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 final int nCodes = key.codes.length;
                 if (dist < closestKeyDist) {
                     closestKeyDist = dist;
-                    closestKey = i;
+                    closestKey = nearestKeyIndices[i];
                 }
                 
                 if (allKeys == null) continue;
@@ -674,9 +677,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                                 allKeys.length - j - nCodes);
                         for (int c = 0; c < nCodes; c++) {
                             allKeys[j + c] = key.codes[c];
-                            if (shifted) {
-                                //allKeys[j + c] = Character.toUpperCase(key.codes[c]);
-                            }
                             mDistances[j + c] = dist;
                         }
                         break;
@@ -685,7 +685,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             }
             
             if (isInside) {
-                primaryIndex = i;
+                primaryIndex = nearestKeyIndices[i];
             }
         }
         if (primaryIndex == NOT_A_KEY) {
@@ -696,7 +696,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private void detectAndSendKey(int x, int y, long eventTime) {
         int index = mCurrentKey;
-        if (index != NOT_A_KEY) {
+        if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
             if (key.text != null) {
                 for (int i = 0; i < key.text.length(); i++) {
@@ -763,69 +763,82 @@ public class KeyboardView extends View implements View.OnClickListener {
             if (previewPopup.isShowing()) {
                 if (keyIndex == NOT_A_KEY) {
                     mHandler.sendMessageDelayed(mHandler
-                            .obtainMessage(MSG_REMOVE_PREVIEW), 60);
+                            .obtainMessage(MSG_REMOVE_PREVIEW), 
+                            DELAY_AFTER_PREVIEW);
                 }
             }
             if (keyIndex != NOT_A_KEY) {
-                Key key = keys[keyIndex];
-                if (key.icon != null) {
-                    mPreviewText.setCompoundDrawables(null, null, null, 
-                            key.iconPreview != null ? key.iconPreview : key.icon);
-                    mPreviewText.setText(null);
+                if (previewPopup.isShowing() && mPreviewText.getVisibility() == VISIBLE) {
+                    // Show right away, if it's already visible and finger is moving around
+                    showKey(keyIndex);
                 } else {
-                    mPreviewText.setCompoundDrawables(null, null, null, null);
-                    mPreviewText.setText(getPreviewText(key));
-                    if (key.label.length() > 1 && key.codes.length < 2) {
-                        mPreviewText.setTextSize(mLabelTextSize);
-                        mPreviewText.setTypeface(Typeface.DEFAULT_BOLD);
-                    } else {
-                        mPreviewText.setTextSize(mPreviewTextSizeLarge);
-                        mPreviewText.setTypeface(Typeface.DEFAULT);
-                    }
+                    mHandler.sendMessageDelayed(
+                            mHandler.obtainMessage(MSG_SHOW_PREVIEW, keyIndex, 0), 
+                            DELAY_BEFORE_PREVIEW);
                 }
-                mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 
-                        MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-                int popupWidth = Math.max(mPreviewText.getMeasuredWidth(), key.width 
-                        + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight());
-                final int popupHeight = mPreviewHeight;
-                LayoutParams lp = mPreviewText.getLayoutParams();
-                if (lp != null) {
-                    lp.width = popupWidth;
-                    lp.height = popupHeight;
-                }
-                if (!mPreviewCentered) {
-                    mPopupPreviewX = key.x - mPreviewText.getPaddingLeft() + mPaddingLeft;
-                    mPopupPreviewY = key.y - popupHeight + mPreviewOffset;
-                } else {
-                    // TODO: Fix this if centering is brought back
-                    mPopupPreviewX = 160 - mPreviewText.getMeasuredWidth() / 2;
-                    mPopupPreviewY = - mPreviewText.getMeasuredHeight();
-                }
-                mHandler.removeMessages(MSG_REMOVE_PREVIEW);
-                if (mOffsetInWindow == null) {
-                    mOffsetInWindow = new int[2];
-                    getLocationInWindow(mOffsetInWindow);
-                    mOffsetInWindow[0] += mMiniKeyboardOffsetX; // Offset may be zero
-                    mOffsetInWindow[1] += mMiniKeyboardOffsetY; // Offset may be zero
-                }
-                // Set the preview background state
-                mPreviewText.getBackground().setState(
-                        key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
-                if (previewPopup.isShowing()) {
-                    previewPopup.update(mPopupPreviewX + mOffsetInWindow[0],
-                            mPopupPreviewY + mOffsetInWindow[1], 
-                            popupWidth, popupHeight);
-                } else {
-                    previewPopup.setWidth(popupWidth);
-                    previewPopup.setHeight(popupHeight);
-                    previewPopup.showAtLocation(mPopupParent, Gravity.NO_GRAVITY, 
-                            mPopupPreviewX + mOffsetInWindow[0], 
-                            mPopupPreviewY + mOffsetInWindow[1]);
-                }
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_PREVIEW, keyIndex, 0),
-                        ViewConfiguration.getTapTimeout());
             }
         }
+    }
+    
+    private void showKey(final int keyIndex) {
+        final PopupWindow previewPopup = mPreviewPopup;
+        final Key[] keys = mKeys;
+        Key key = keys[keyIndex];
+        if (key.icon != null) {
+            mPreviewText.setCompoundDrawables(null, null, null, 
+                    key.iconPreview != null ? key.iconPreview : key.icon);
+            mPreviewText.setText(null);
+        } else {
+            mPreviewText.setCompoundDrawables(null, null, null, null);
+            mPreviewText.setText(getPreviewText(key));
+            if (key.label.length() > 1 && key.codes.length < 2) {
+                mPreviewText.setTextSize(mLabelTextSize);
+                mPreviewText.setTypeface(Typeface.DEFAULT_BOLD);
+            } else {
+                mPreviewText.setTextSize(mPreviewTextSizeLarge);
+                mPreviewText.setTypeface(Typeface.DEFAULT);
+            }
+        }
+        mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+        int popupWidth = Math.max(mPreviewText.getMeasuredWidth(), key.width 
+                + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight());
+        final int popupHeight = mPreviewHeight;
+        LayoutParams lp = mPreviewText.getLayoutParams();
+        if (lp != null) {
+            lp.width = popupWidth;
+            lp.height = popupHeight;
+        }
+        if (!mPreviewCentered) {
+            mPopupPreviewX = key.x - mPreviewText.getPaddingLeft() + mPaddingLeft;
+            mPopupPreviewY = key.y - popupHeight + mPreviewOffset;
+        } else {
+            // TODO: Fix this if centering is brought back
+            mPopupPreviewX = 160 - mPreviewText.getMeasuredWidth() / 2;
+            mPopupPreviewY = - mPreviewText.getMeasuredHeight();
+        }
+        mHandler.removeMessages(MSG_REMOVE_PREVIEW);
+        if (mOffsetInWindow == null) {
+            mOffsetInWindow = new int[2];
+            getLocationInWindow(mOffsetInWindow);
+            mOffsetInWindow[0] += mMiniKeyboardOffsetX; // Offset may be zero
+            mOffsetInWindow[1] += mMiniKeyboardOffsetY; // Offset may be zero
+        }
+        // Set the preview background state
+        mPreviewText.getBackground().setState(
+                key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
+        if (previewPopup.isShowing()) {
+            previewPopup.update(mPopupPreviewX + mOffsetInWindow[0],
+                    mPopupPreviewY + mOffsetInWindow[1], 
+                    popupWidth, popupHeight);
+        } else {
+            previewPopup.setWidth(popupWidth);
+            previewPopup.setHeight(popupHeight);
+            previewPopup.showAtLocation(mPopupParent, Gravity.NO_GRAVITY, 
+                    mPopupPreviewX + mOffsetInWindow[0], 
+                    mPopupPreviewY + mOffsetInWindow[1]);
+        }
+        mPreviewText.setVisibility(VISIBLE);
     }
 
     private void invalidateKey(int keyIndex) {

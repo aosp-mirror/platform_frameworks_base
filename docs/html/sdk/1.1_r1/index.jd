@@ -1,19 +1,19 @@
-page.title=Download Android 1.1 SDK, Release 1
+page.title=Android 1.1 SDK, Release 1
 
 sdk.version=1.1_r1
 sdk.date=February 2009
 
 sdk.win_download=android-sdk-windows-1.1_r1.zip
-sdk.win_bytes=unknown
-sdk.win_checksum=unknown
+sdk.win_bytes=84533935
+sdk.win_checksum=4cec82e3d2c1658d73182e543d130a06
 
 sdk.mac_download=android-sdk-mac_x86-1.1_r1.zip
-sdk.mac_bytes=unknown
-sdk.mac_checksum=unknown
+sdk.mac_bytes=78918508
+sdk.mac_checksum=d67fb5f0eaf4f5a83dc985f5790940c6
 
 sdk.linux_download=android-sdk-linux_x86-1.1_r1.zip
-sdk.linux_bytes=unknown
-sdk.linux_checksum=unknown
+sdk.linux_bytes=79219171
+sdk.linux_checksum=df88091c9f0ef6cc56cd92afcdad8d56
 
 
 @jd:body
@@ -57,6 +57,6 @@ in the <code>&lt;sdk&gt;/samples/</code> directory of the SDK package.</p>
 
 <p>The most current documentation is always available on the Android Developers site:</p>
 
-<p style="margin-left:2em;"><a href="ttp://developer.android.com/index.html">http://developer.android.com/</a></p>
+<p style="margin-left:2em;"><a href="http://developer.android.com/index.html">http://developer.android.com/</a></p>
 
 

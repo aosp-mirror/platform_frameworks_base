@@ -530,13 +530,7 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
             cnx->hooks = &gHooks[IMPL_HARDWARE];
-            property_get("debug.egl.profiler", value, "0");
-            if (atoi(value) == 0) {
-                cnx->dso = load_driver("libhgl.so", cnx->hooks);
-            } else {
-                LOGW("Using instrumented h/w OpenGL ES library");
-                cnx->dso = load_driver("libhgld.so", cnx->hooks);
-            }
+            cnx->dso = load_driver("libhgl.so", cnx->hooks);
         } else {
             LOGD("3D hardware acceleration is disabled");
         }

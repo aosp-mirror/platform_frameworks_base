@@ -51,7 +51,7 @@ class BrowserFrame extends Handler {
     private final Context mContext;
     private final WebViewDatabase mDatabase;
     private final WebViewCore mWebViewCore;
-    private boolean mLoadInitFromJava;
+    /* package */ boolean mLoadInitFromJava;
     private int mLoadType;
     private boolean mFirstLayoutDone = true;
     private boolean mCommitted = true;

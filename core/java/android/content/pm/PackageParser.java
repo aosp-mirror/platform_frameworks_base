@@ -101,6 +101,8 @@ public class PackageParser {
         pi.packageName = p.packageName;
         pi.versionCode = p.mVersionCode;
         pi.versionName = p.mVersionName;
+        pi.sharedUserId = p.mSharedUserId;
+        pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = p.applicationInfo;
         if ((flags&PackageManager.GET_GIDS) != 0) {
             pi.gids = gids;
@@ -585,6 +587,8 @@ public class PackageParser {
                 return null;
             }
             pkg.mSharedUserId = str.intern();
+            pkg.mSharedUserLabel = sa.getResourceId(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
         sa.recycle();
 
@@ -2044,6 +2048,9 @@ public class PackageParser {
         
         // The shared user id that this package wants to use.
         public String mSharedUserId;
+
+        // The shared user label that this package wants to use.
+        public int mSharedUserLabel;
 
         // Signatures that were read from the package.
         public Signature mSignatures[];

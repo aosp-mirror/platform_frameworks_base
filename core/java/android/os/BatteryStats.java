@@ -1,18 +1,20 @@
 package android.os;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Map;
 
+import android.util.Log;
+import android.util.Printer;
 import android.util.SparseArray;
 
 /**
  * A class providing access to battery usage statistics, including information on
  * wakelocks, processes, packages, and services.  All times are represented in microseconds
  * except where indicated otherwise.
+ * @hide
  */
-public abstract class BatteryStats {
+public abstract class BatteryStats implements Parcelable {
 
     /**
      * A constant indicating a partial wake lock timer.
@@ -96,6 +98,11 @@ public abstract class BatteryStats {
          * @return a time in microseconds
          */
         public abstract long getTotalTime(long now, int which);
+        
+        /**
+         * Temporary for debugging.
+         */
+        public abstract void logState();
     }
 
     /**
@@ -154,10 +161,10 @@ public abstract class BatteryStats {
         public abstract long getTcpBytesSent(int which);
 
         public static abstract class Sensor {
-            /**
-             * {@hide}
-             */
-            public abstract String getName();
+            // Magic sensor number for the GPS.
+            public static final int GPS = -10000;
+            
+            public abstract int getHandle();
             
             public abstract Timer getSensorTime();
         }
@@ -259,6 +266,11 @@ public abstract class BatteryStats {
      */
     public abstract long getPluggedScreenOnTime();
 
+    /**
+     * Return whether we are currently running on battery.
+     */
+    public abstract boolean getIsOnBattery();
+    
     /**
      * Returns a SparseArray containing the statistics for each uid.
      */
@@ -457,7 +469,7 @@ public abstract class BatteryStats {
      * @param pw
      * @param which
      */
-    private final void dumpCheckinLocked(FileDescriptor fd, PrintWriter pw, int which) {
+    private final void dumpCheckinLocked(PrintWriter pw, int which) {
         long uSecTime = SystemClock.elapsedRealtime() * 1000;
         final long uSecNow = getBatteryUptime(uSecTime);
        
@@ -578,35 +590,18 @@ public abstract class BatteryStats {
     }
 
     @SuppressWarnings("unused")
-    private final void dumpLocked(FileDescriptor fd, PrintWriter pw, String prefix, int which) {
+    private final void dumpLocked(Printer pw, String prefix, int which) {
         long uSecTime = SystemClock.elapsedRealtime() * 1000;
         final long uSecNow = getBatteryUptime(uSecTime);
 
         StringBuilder sb = new StringBuilder(128);
-        switch (which) {
-            case STATS_TOTAL:
-                pw.println(prefix + "Current and Historic Battery Usage Statistics:");
-                pw.println(prefix + "  System starts: " + getStartCount());
-                break;
-            case STATS_LAST:
-                pw.println(prefix + "Last Battery Usage Statistics:");
-                break;
-            case STATS_UNPLUGGED:
-                pw.println(prefix + "Last Unplugged Battery Usage Statistics:");
-                break;
-            case STATS_CURRENT:
-                pw.println(prefix + "Current Battery Usage Statistics:");
-                break;
-            default:
-                throw new IllegalArgumentException("which = " + which);
-        }
         long batteryUptime = computeBatteryUptime(uSecNow, which);
         long batteryRealtime = computeBatteryRealtime(getBatteryRealtime(uSecTime), which);
         long elapsedRealtime = computeRealtime(uSecTime, which);
         long uptime = computeUptime(SystemClock.uptimeMillis() * 1000, which);
 
         pw.println(prefix
-                + "  On battery: " + formatTimeMs(batteryUptime / 1000) + "("
+                + "  Time on battery: " + formatTimeMs(batteryUptime / 1000) + "("
                 + formatRatioLocked(batteryUptime, elapsedRealtime)
                 + ") uptime, "
                 + formatTimeMs(batteryRealtime / 1000) + "("
@@ -618,7 +613,7 @@ public abstract class BatteryStats {
                 + "uptime, "
                 + formatTimeMs(elapsedRealtime / 1000)
                 + "realtime");
-
+        
         pw.println(" ");
 
         SparseArray<? extends Uid> uidStats = getUidStats();
@@ -629,8 +624,12 @@ public abstract class BatteryStats {
             pw.println(prefix + "  #" + uid + ":");
             boolean uidActivity = false;
             
-            pw.println(prefix + "    Network: " + u.getTcpBytesReceived(which) + " bytes received, "
-                    + u.getTcpBytesSent(which) + " bytes sent");
+            long tcpReceived = u.getTcpBytesReceived(which);
+            long tcpSent = u.getTcpBytesSent(which);
+            if (tcpReceived != 0 || tcpSent != 0) {
+                pw.println(prefix + "    Network: " + tcpReceived + " bytes received, "
+                        + tcpSent + " bytes sent");
+            }
 
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
@@ -648,7 +647,9 @@ public abstract class BatteryStats {
                             "partial", which, linePrefix);
                     linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), uSecNow,
                             "window", which, linePrefix);
-                    if (linePrefix.equals(": ")) {
+                    if (!linePrefix.equals(": ")) {
+                        sb.append(" realtime");
+                    } else {
                         sb.append(": (nothing executed)");
                     }
                     pw.println(sb.toString());
@@ -665,23 +666,30 @@ public abstract class BatteryStats {
                     sb.setLength(0);
                     sb.append(prefix);
                     sb.append("    Sensor ");
-                    sb.append(sensorNumber);
+                    int handle = se.getHandle();
+                    if (handle == Uid.Sensor.GPS) {
+                        sb.append("GPS");
+                    } else {
+                        sb.append(handle);
+                    }
+                    sb.append(": ");
 
                     Timer timer = se.getSensorTime();
                     if (timer != null) {
                         // Convert from microseconds to milliseconds with rounding
                         long totalTime = (timer.getTotalTime(uSecNow, which) + 500) / 1000;
                         int count = timer.getCount(which);
+                        //timer.logState();
                         if (totalTime != 0) {
-                            sb.append(": ");
                             sb.append(formatTimeMs(totalTime));
-                            sb.append(' ');
-                            sb.append('(');
+                            sb.append("realtime (");
                             sb.append(count);
                             sb.append(" times)");
+                        } else {
+                            sb.append("(not used)");
                         }
                     } else {
-                        sb.append(": (none used)");
+                        sb.append("(not used)");
                     }
 
                     pw.println(sb.toString());
@@ -734,8 +742,9 @@ public abstract class BatteryStats {
                             int launches = ss.getLaunches(which);
                             if (startTime != 0 || starts != 0 || launches != 0) {
                                 pw.println(prefix + "      Service " + sent.getKey() + ":");
-                                pw.println(prefix + "        Time spent started: "
-                                        + formatTimeMs(startTime / 1000));
+                                pw.println(prefix + "        Created for: "
+                                        + formatTimeMs(startTime / 1000)
+                                        + " uptime");
                                 pw.println(prefix + "        Starts: " + starts
                                         + ", launches: " + launches);
                                 apkActivity = true;
@@ -757,36 +766,30 @@ public abstract class BatteryStats {
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
-     * @param fd a FileDescriptor, currently unused.
-     * @param pw a PrintWriter to receive the dump output.
-     * @param args an array of Strings, currently unused.
+     * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
-        boolean isCheckin = false;
-        if (args != null) {
-            for (String arg : args) {
-                if ("-c".equals(arg)) {
-                    isCheckin = true;
-                    break;
-                }
-            }
-        }
-        synchronized (this) {
-            if (isCheckin) {
-                dumpCheckinLocked(fd, pw, STATS_TOTAL);
-                dumpCheckinLocked(fd, pw, STATS_LAST);
-                dumpCheckinLocked(fd, pw, STATS_UNPLUGGED);
-                dumpCheckinLocked(fd, pw, STATS_CURRENT);
-            } else {
-                dumpLocked(fd, pw, "", STATS_TOTAL);
-                pw.println("");
-                dumpLocked(fd, pw, "", STATS_LAST);
-                pw.println("");
-                dumpLocked(fd, pw, "", STATS_UNPLUGGED);
-                pw.println("");
-                dumpLocked(fd, pw, "", STATS_CURRENT);
-            }
-        }
+    public void dumpLocked(Printer pw) {
+        pw.println("Total Statistics (Current and Historic):");
+        pw.println("  System starts: " + getStartCount()
+                + ", currently on battery: " + getIsOnBattery());
+        dumpLocked(pw, "", STATS_TOTAL);
+        pw.println("");
+        pw.println("Last Run Statistics (Previous run of system):");
+        dumpLocked(pw, "", STATS_LAST);
+        pw.println("");
+        pw.println("Current Battery Statistics (Currently running system):");
+        dumpLocked(pw, "", STATS_CURRENT);
+        pw.println("");
+        pw.println("Unplugged Statistics (Since last unplugged from power):");
+        dumpLocked(pw, "", STATS_UNPLUGGED);
+    }
+    
+    @SuppressWarnings("unused")
+    public void dumpCheckinLocked(PrintWriter pw, String[] args) {
+        dumpCheckinLocked(pw, STATS_TOTAL);
+        dumpCheckinLocked(pw, STATS_LAST);
+        dumpCheckinLocked(pw, STATS_UNPLUGGED);
+        dumpCheckinLocked(pw, STATS_CURRENT);
     }
 }

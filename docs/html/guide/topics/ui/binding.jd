@@ -81,6 +81,9 @@ s2.setAdapter(adapter2);
 <p>Note that it is necessary to have the People._ID column in projection used with CursorAdapter
 or else you will get an exception.</p>
 
+<p>If, during the course of your application's life, you change the underlying data that is read by your Adapter,
+you should call {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. This will notify the attached View
+that the data has been changed and it should refresh itself.</p>
 
 <h2 id="HandlingUserSelections">Handling User Selections</h2>
 <p>You handle the user's selecction by setting the class's {@link

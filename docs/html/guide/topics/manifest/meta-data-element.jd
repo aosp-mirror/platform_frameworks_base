@@ -1,0 +1,90 @@
+page.title=&lt;meta-data&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;meta-data android:<a href="#nm">name</a>="<i>string</i>"
+           android:<a href="#rsrc">resource</a>="<i>resource specification</i>"
+           android:<a href="#val">value</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>A name-value pair for an item of additional, arbitrary data that can 
+be supplied to the parent component.  A component element can contain any 
+number of {@code &lt;meta-data&gt;} subelements.  The values from all of
+them are collected in a single {@link android.os.Bundle} object and made 
+available to the component as the 
+{@link android.content.pm.PackageItemInfo#metaData 
+PackageItemInfo.metaData} field.
+
+<p>
+Ordinary values are specified through the <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#value">value</a></code> 
+attribute.  However, to assign a resource ID as the value, use the 
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#resource">resource</a></code> attribute instead.  For example, 
+the following code assigns whatever value is stored in the {@code @string/kangaroo} 
+resource to the "{@code zoo}" name:
+</p>
+
+<pre>&lt;meta-data android:name="zoo" android:value="@string/kangaroo" /&gt;</pre>
+
+<p>
+On the other hand, using the {@code resource} attribute would assign "{@code zoo}"
+the numeric ID of the resource, not the value stored in the resource:
+</p>
+
+<pre>&lt;meta-data android:name="zoo" android:resource="@string/kangaroo" /&gt;</pre>
+
+<p>
+It is highly recommended that you avoid supplying related data as 
+multiple separate {@code &lt;meta-data&gt;} entries. Instead, if you 
+have complex data to associate with a component, store it as a resource and 
+use the {@code resource} attribute to inform the component of its ID.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>A unique name for the item.  To ensure that the name is unique, use a 
+Java-style naming convention &mdash; for example, 
+"{@code com.example.project.activity.fred}".</dd>
+
+<dt><a name="rsrc"></a>{@code android:resource}</dt>
+<dd>A reference to a resource.  The ID of the resource is the value assigned 
+to the item.  The ID can be retrieved from the meta-data Bundle by the 
+{@link android.os.Bundle#getInt Bundle.getInt()} method.</dd>
+
+<dt><a name="val"></a>{@code android:value}</dt>
+<dd>The value assigned to the item.  The data types that can be assigned as values and the Bundle methods that  components use to retrieve those values are listed in the following table:
+
+<table>
+<tr>
+  <th>Type</th>
+  <th>Bundle method</th>
+</tr><tr>
+  <td>String value, using double backslashes ({@code \\}) to escape characters 
+      &mdash; such as "{@code \\n}" and "{@code \\uxxxxx}" for a Unicode character.</td>
+  <td>{@link android.os.Bundle#getString(String) getString()}</td>
+</tr><tr>
+  <td>Integer value, such as "{@code 100}"</td>
+  <td>{@link android.os.Bundle#getInt(String) getInt()}</td>
+</tr><tr>
+  <td>Boolean value, either "{@code true}" or "{@code false}"</td>
+  <td>{@link android.os.Bundle#getBoolean(String) getBoolean()}</td>
+</tr><tr>
+  <td>Color value, in the form "{@code #rgb}", "{@code #argb}", 
+      "{@code #rrggbb}", or "{@code #aarrggbb}"</td>
+  <td>{@link android.os.Bundle#getString(String) getString()}</td>
+</tr><tr>
+  <td>Float value, such as "{@code 1.23}"</td>
+  <td>{@link android.os.Bundle#getFloat(String) getFloat()}</td>
+</tr>
+</table>
+</dd>
+</dl></dd>
+
+</dl>

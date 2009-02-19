@@ -1,0 +1,267 @@
+page.title=&lt;provider&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;provider android:<a href="#auth">authorities</a>="<i>list</i>"
+          android:<a href="#enabled">enabled</a>=["true" | "false"]
+          android:<a href="#exported">exported</a>=["true" | "false"]
+          android:<a href="#gprmsn">grantUriPermissions</a>=["true" | "false"]
+          android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+          android:<a href="#init">initOrder</a>="<i>integer</i>"
+          android:<a href="#label">label</a>="<i>string resource</i>"
+          android:<a href="#multi">multiprocess</a>=["true" | "false"]
+          android:<a href="#nm">name</a>="<i>string</i>"
+          android:<a href="#prmsn">permission</a>="<i>string</i>"
+          android:<a href="#proc">process</a>="<i>string</i>"
+          android:<a href="#rprmsn">readPermission</a>="<i>string</i>"
+          android:<a href="#sync">syncable</a>=["true" | "false"]
+          android:<a href="#wprmsn">writePermission</a>="<i>string</i>" &gt;
+    . . .
+&lt;/provider&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares a content provider &mdash; a subclass of 
+{@link android.content.ContentProvider} &mdash; that supplies structured 
+access to data managed by the application.  All content providers that 
+are part of the application must be represented by {@code &lt;provider&gt;} 
+elements in the manifest file.  The system cannot see, and therefore will 
+not run, any that are not declared.  (You need to declare only 
+those content providers that you develop as part of your application,
+not those developed by others that your application uses.)
+
+<p>
+The Android system identifies content providers by the authority part
+ of a {@code content:} URI.  For example, suppose that the following URI 
+is passed to <code>{@link android.content.ContentResolver#query 
+ContentResolver.query()}</code>:
+
+<p style="margin-left: 2em">{@code content://com.example.project.healthcareprovider/nurses/rn}</p>
+
+<p>
+The {@code content:} scheme identifies the data as belonging to a content 
+provider and the authority ({@code com.example.project.healthcareprovider}) 
+identifies the particular provider.  The authority therefore must be unique.  
+Typically, as in this example, it's the fully qualified name of a 
+ContentProvider subclass.  The path part of a URI may be used by a content 
+provider to identify particular data subsets, but those paths are not
+declared in the manifest.
+</p>
+
+<p>
+For information on using and developing content providers, see a separate document, 
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="auth"></a>{@code android:authorities}</dt>
+<dd>A list of one or more URI authorities that identify data under the purview 
+of the content provider.
+Multiple authorities are listed by separating their names with a semicolon. 
+To avoid conflicts, authority names should use a Java-style naming convention 
+(such as {@code com.example.provider.cartoonprovider}).  Typically, it's the name
+of the ContentProvider subclass.
+
+<p>
+There is no default.  At least one authority must be specified.
+</p></dd>
+
+<dt><a name="enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the content provider can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
+application components, including content providers.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;provider&gt;} 
+attributes must both be "{@code true}" (as they both
+are by default) for the content provider to be enabled.  If either is 
+"{@code false}", the provider is disabled; it cannot be instantiated.
+</p></dd>
+
+<dt><a name="exported"></a>{@code android:exported}</dt>
+<dd>Whether or not the content provider can be used by components of other 
+applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+If "{@code false}", the provider is available only to components of the 
+same application or applications with the same user ID.  The default value
+is "{@code true}".
+
+<p>
+You can export a content provider but still limit access to it with the
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code> attribute.
+</p></dd> 
+
+<dt><a name="gprmsn"></a>{@code android:grantUriPermissions}</dt>
+<dd>Whether or not those who ordinarily would not have permission to 
+access the content provider's data can be granted permission to do so,
+temporarily overcoming the restriction imposed by the
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">readPermission</a></code>,
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">writePermission</a></code>, and 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code> attributes 
+&mdash; 
+"{@code true}" if permission can be granted, and "{@ code false}" if not.  
+If "{@code true}", permission can be granted to any of the content 
+provider's data.  If "{@code false}", permission can be granted only 
+to the data subsets listed in 
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code> subelements, 
+if any.  The default value is "{@code false}".
+
+<p>
+Granting permission is a way of giving an application component one-time 
+access to data protected by a permission.  For example, when an e-mail 
+message contains an attachment, the mail application may call upon the 
+appropriate viewer to open it, even though the viewer doesn't have general 
+permission to look at all the content provider's data. 
+</p>
+
+<p>  
+In such cases, permission is granted by 
+<code>{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}</code> 
+and <code>{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}</code> 
+flags in the Intent object that activates the component.  For example, the 
+mail application might put {@code FLAG_GRANT_READ_URI_PERMISSION} in the 
+Intent passed to {@code Context.startActivity()}.  The permission is specific 
+to the URI in the Intent.  
+</p>
+
+<p>
+If you enable this feature, either by setting this attribute to "{@code true}"
+or by defining <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code> 
+subelements, you must call 
+<code>{@link android.content.Context#revokeUriPermission 
+Context.revokeUriPermission()}</code> when a covered URI is deleted from 
+the provider.
+</p>
+
+<p>
+See also the <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+element.
+</p></dd>
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the content provider. 
+This attribute must be set as a reference to a drawable resource containing 
+the image definition.  If it is not set, the icon specified for the application 
+as a whole is used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#icon">icon</a></code> attribute).</dd>
+
+<dt><a name="init"></a>{@code android:initOrder}</dt>
+<dd>The order in which the content provider should be instantiated, 
+relative to other content providers hosted by the same process.  
+When there are dependencies among content providers, setting this 
+attribute for each of them ensures that they are created in the order 
+required by those dependencies.  The value is a simple integer, 
+with higher numbers being initialized first.</dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the content provided.  
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#label">label</a></code> attribute).
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt><a name="multi"></a>{@code android:multiprocess}</dt>
+<dd>Whether or not an instance of the content provider can be created in 
+every client process &mdash; "{@code true}" if instances can run in multiple
+processes, and "{@code false}" if not.  The default value is "{@code false}".
+
+<p>
+Normally, a content provider is instantiated in the process of the 
+application that defined it.  However, if this flag is set to "{@code true}", 
+the system can create an instance in every process where there's a client 
+that wants to interact withit, thus avoiding the overhead of interprocess 
+communication.
+</p></dd>
+
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the class that implements the content provider, a subclass of 
+{@link android.content.ContentProvider}.  This should be a fully qualified 
+class name (such as, "{@code com.example.project.TransportationProvider}").  
+However, as a shorthand, if the first character of the name is a period, 
+it is appended to the package name specified in the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+
+<dt><a name="prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to read or write the
+content provider's data.  This attribute is a convenient way of setting a 
+single permission for both reading and writing.  However, the 
+<code><a href="#rprmsn">readPermission</a></code> and 
+<code><a href="#wprmsn">writePermission</a></code> attributes take precedence
+over this one.  If the <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">readPermission</a></code> 
+attribute is also set, it controls access for querying the content provider.
+And if the <code><a href="#wprmsn">writePermission</a></code> attribute is set,
+it controls access for modifying the provider's data.
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
+section in the introduction and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt><a name="proc"></a>{@code android:process}</dt>
+<dd>The name of the process in which the content provider should run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> 
+attribute can set a different 
+default for all components.  But each component can override the default
+with its own {@code process} attribute, allowing you to spread your 
+application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the activity runs in that process.
+If the process name begins with a lowercase character, the activity will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+
+<dt><a name="rprmsn"></a>{@code android:readPermission}</dt>
+<dd>A permission that clients must have to query the content provider.  
+See also the <code><a href="#prmsn">permission</a></code> and 
+<code><a href="#wprmsn">writePermission</a></code> attributes.</dd>
+
+<dt><a name="sync"></a>{@code android:syncable}</dt>
+<dd>Whether or not the data under the content provider's control 
+is to be synchronized with data on a server &mdash; "{@code true}" 
+if it is to be synchronized, and "{@ code false}" if not.</dd>
+
+<dt><a name="wprmsn"></a>{@code android:writePermission}</dt>
+<dd>A permission that clients must have to make changes to the data 
+controlled by the content provider.  
+See also the <code><a href="#prmsn">permission</a></code> and 
+<code><a href="#rprmsn">readPermission</a></code> attributes.</dd>
+
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd><a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></dd>
+
+</dl>

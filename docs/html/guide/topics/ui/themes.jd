@@ -5,7 +5,16 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#styles">Styles</a></li>
+    <li><a href="#themes">Themes</a>
+      <ol>
+        <li><a href="#inTheManifest">Set the theme in the manifest</a></li>
+        <li><a href="#fromTheApp">Set the theme from the application</a></li>
+      </ol>
+    </li>
+  </ol>
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Style and Theme Resources</a></li>
@@ -33,7 +42,7 @@ parent.link=index.html
 </ol>
 
 
-<h2>Styles</h2>
+<h2 id="styles">Styles</h2>
 
 <p>Here's an example declaration of a style: </p>
 
@@ -66,7 +75,7 @@ or a reference to any other resource type.</p>
 <p>Now this EditText widget will be styled as defined by the <code>style</code> example above.</p>
 
 
-<h2>Themes</h2>
+<h2 id="themes">Themes</h2>
 
 <p>Just like styles, themes are also declared in XML <code>&lt;style&gt;</code> elements, and are referenced in the same manner.
 The difference is that you can add a theme style only to <code>&lt;application&gt;</code> and <code>&lt;activity&gt;</code> elements &mdash;
@@ -100,8 +109,8 @@ is done by referring to a specific <code>&lt;item></code> by its <code>name</cod
 This technique can be used only in XML resources.
 </p>
 
-<h3>Set the theme in the Manifest</h3>
-<p>To set this theme for all the activites of your application, open the Manifest file and 
+<h3 id="inTheManifest">Set the theme in the manifest</h3>
+<p>To set this theme for all the activites of your application, open the AndroidManifest.xml file and 
 edit the <code>&lt;application></code> tag to include the <code>android:theme</code> attribute with the 
 theme name:</p>
 
@@ -136,7 +145,7 @@ For example, we'll modify the <code>Theme.Dialog</code> theme. First, we need to
 So, for each item in the Dialog theme that we want to override, we re-define the value under this style and 
 then use <var>CustomDialogTheme</var> instead of the <var>Theme.Dialog</var>.</p>
 
-<h3>Set the theme from the application</h3>
+<h3 id="fromTheApp">Set the theme from the application</h3>
 <p>You can also load a theme for an Activity programmatically, if needed. 
 To do so, use the {@link android.app.Activity#setTheme(int) setTheme()} 
 method. Note that, when doing so, you must be sure to set the theme <em>before</em> 

@@ -29,4 +29,5 @@ interface IPowerManager
     void setStayOnSetting(int val);
     long getScreenOnTime();
     void preventScreenOn(boolean prevent);
+    void setScreenBrightnessOverride(int brightness);
 }

@@ -38,7 +38,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
 import android.widget.RemoteViews;
@@ -66,7 +65,6 @@ import org.xmlpull.v1.XmlSerializer;
 class GadgetService extends IGadgetService.Stub
 {
     private static final String TAG = "GadgetService";
-    private static final boolean LOGD = Config.LOGD || false;
 
     private static final String SETTINGS_FILENAME = "gadgets.xml";
     private static final String SETTINGS_TMP_FILENAME = SETTINGS_FILENAME + ".tmp";
@@ -82,6 +80,7 @@ class GadgetService extends IGadgetService.Stub
         GadgetProviderInfo info;
         ArrayList<GadgetId> instances = new ArrayList();
         PendingIntent broadcast;
+        boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
         
         int tag;    // for use while saving state (the index)
     }
@@ -92,6 +91,7 @@ class GadgetService extends IGadgetService.Stub
         String packageName;
         ArrayList<GadgetId> instances = new ArrayList();
         IGadgetHost callbacks;
+        boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
         
         int tag;    // for use while saving state (the index)
     }
@@ -110,13 +110,18 @@ class GadgetService extends IGadgetService.Stub
     int mNextGadgetId = GadgetManager.INVALID_GADGET_ID + 1;
     ArrayList<GadgetId> mGadgetIds = new ArrayList();
     ArrayList<Host> mHosts = new ArrayList();
+    boolean mSafeMode;
 
     GadgetService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        
-        getGadgetList();
+    }
+
+    public void systemReady(boolean safeMode) {
+        mSafeMode = safeMode;
+
+        loadGadgetList();
         loadStateLocked();
 
         // Register for the boot completed broadcast, so we can send the
@@ -148,11 +153,12 @@ class GadgetService extends IGadgetService.Stub
             int N = mInstalledProviders.size();
             pw.println("Providers: (size=" + N + ")");
             for (int i=0; i<N; i++) {
-                GadgetProviderInfo info = mInstalledProviders.get(i).info;
+                Provider p = mInstalledProviders.get(i);
+                GadgetProviderInfo info = p.info;
                 pw.println("  [" + i + "] provder=" + info.provider
                         + " min=(" + info.minWidth + "x" + info.minHeight + ")"
                         + " updatePeriodMillis=" + info.updatePeriodMillis
-                        + " initialLayout=" + info.initialLayout);
+                        + " initialLayout=" + info.initialLayout + " zombie=" + p.zombie);
             }
 
             N = mGadgetIds.size();
@@ -172,7 +178,7 @@ class GadgetService extends IGadgetService.Stub
                 Host host = mHosts.get(i);
                 pw.println("  [" + i + "] packageName=" + host.packageName + " uid=" + host.uid
                         + " hostId=" + host.hostId + " callbacks=" + host.callbacks
-                        + " instances.size=" + host.instances.size());
+                        + " instances.size=" + host.instances.size() + " zombie=" + host.zombie);
             }
         }
     }
@@ -199,16 +205,10 @@ class GadgetService extends IGadgetService.Stub
 
     public void deleteGadgetId(int gadgetId) {
         synchronized (mGadgetIds) {
-            int callingUid = getCallingUid();
-            final int N = mGadgetIds.size();
-            for (int i=0; i<N; i++) {
-                GadgetId id = mGadgetIds.get(i);
-                if (id.provider != null && canAccessGadgetId(id, callingUid)) {
-                    deleteGadgetLocked(id);
-
-                    saveStateLocked();
-                    return;
-                }
+            GadgetId id = lookupGadgetIdLocked(gadgetId);
+            if (id != null) {
+                deleteGadgetLocked(id);
+                saveStateLocked();
             }
         }
     }
@@ -264,19 +264,21 @@ class GadgetService extends IGadgetService.Stub
         Provider p = id.provider;
         if (p != null) {
             p.instances.remove(id);
-            // send the broacast saying that this gadgetId has been deleted
-            Intent intent = new Intent(GadgetManager.ACTION_GADGET_DELETED);
-            intent.setComponent(p.info.provider);
-            intent.putExtra(GadgetManager.EXTRA_GADGET_ID, id.gadgetId);
-            mContext.sendBroadcast(intent);
-            if (p.instances.size() == 0) {
-                // cancel the future updates
-                cancelBroadcasts(p);
-
-                // send the broacast saying that the provider is not in use any more
-                intent = new Intent(GadgetManager.ACTION_GADGET_DISABLED);
+            if (!p.zombie) {
+                // send the broacast saying that this gadgetId has been deleted
+                Intent intent = new Intent(GadgetManager.ACTION_GADGET_DELETED);
                 intent.setComponent(p.info.provider);
+                intent.putExtra(GadgetManager.EXTRA_GADGET_ID, id.gadgetId);
                 mContext.sendBroadcast(intent);
+                if (p.instances.size() == 0) {
+                    // cancel the future updates
+                    cancelBroadcasts(p);
+
+                    // send the broacast saying that the provider is not in use any more
+                    intent = new Intent(GadgetManager.ACTION_GADGET_DISABLED);
+                    intent.setComponent(p.info.provider);
+                    mContext.sendBroadcast(intent);
+                }
             }
         }
     }
@@ -310,6 +312,10 @@ class GadgetService extends IGadgetService.Stub
             if (p == null) {
                 throw new IllegalArgumentException("not a gadget provider: " + provider);
             }
+            if (p.zombie) {
+                throw new IllegalArgumentException("can't bind to a 3rd party provider in"
+                        + " safe mode: " + provider);
+            }
 
             id.provider = p;
             p.instances.add(id);
@@ -334,7 +340,7 @@ class GadgetService extends IGadgetService.Stub
     public GadgetProviderInfo getGadgetInfo(int gadgetId) {
         synchronized (mGadgetIds) {
             GadgetId id = lookupGadgetIdLocked(gadgetId);
-            if (id != null) {
+            if (id != null && id.provider != null && !id.provider.zombie) {
                 return id.provider.info;
             }
             return null;
@@ -356,7 +362,10 @@ class GadgetService extends IGadgetService.Stub
             final int N = mInstalledProviders.size();
             ArrayList<GadgetProviderInfo> result = new ArrayList(N);
             for (int i=0; i<N; i++) {
-                result.add(mInstalledProviders.get(i).info);
+                Provider p = mInstalledProviders.get(i);
+                if (!p.zombie) {
+                    result.add(p.info);
+                }
             }
             return result;
         }
@@ -399,7 +408,7 @@ class GadgetService extends IGadgetService.Stub
         // allow for stale gadgetIds and other badness
         // lookup also checks that the calling process can access the gadget id
         // drop unbound gadget ids (shouldn't be possible under normal circumstances)
-        if (id != null && id.provider != null) {
+        if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
             id.views = views;
 
             // is anyone listening?
@@ -460,9 +469,7 @@ class GadgetService extends IGadgetService.Stub
             return true;
         }
         // Nobody else can access it.
-        // TODO: convert callingPackage over to use UID-based checking instead
-        // TODO: our temp solution is to short-circuit this security check
-        return true;
+        return false;
     }
 
    GadgetId lookupGadgetIdLocked(int gadgetId) {
@@ -521,7 +528,7 @@ class GadgetService extends IGadgetService.Stub
         }
     }
 
-    void getGadgetList() {
+    void loadGadgetList() {
         PackageManager pm = mPackageManager;
 
         Intent intent = new Intent(GadgetManager.ACTION_GADGET_UPDATE);
@@ -854,8 +861,16 @@ class GadgetService extends IGadgetService.Stub
                         String pkg = parser.getAttributeValue(null, "pkg");
                         String cl = parser.getAttributeValue(null, "cl");
                         Provider p = lookupProviderLocked(new ComponentName(pkg, cl));
-                        // if it wasn't uninstalled or something
+                        if (p == null && mSafeMode) {
+                            // if we're in safe mode, make a temporary one
+                            p = new Provider();
+                            p.info = new GadgetProviderInfo();
+                            p.info.provider = new ComponentName(pkg, cl);
+                            p.zombie = true;
+                            mInstalledProviders.add(p);
+                        }
                         if (p != null) {
+                            // if it wasn't uninstalled or something
                             loadedProviders.put(providerIndex, p);
                         }
                         providerIndex++;
@@ -868,13 +883,15 @@ class GadgetService extends IGadgetService.Stub
                         host.packageName = parser.getAttributeValue(null, "pkg");
                         try {
                             host.uid = getUidForPackage(host.packageName);
+                        } catch (PackageManager.NameNotFoundException ex) {
+                            host.zombie = true;
+                        }
+                        if (!host.zombie || mSafeMode) {
+                            // In safe mode, we don't discard the hosts we don't recognize
+                            // so that they're not pruned from our list.  Otherwise, we do.
                             host.hostId = Integer.parseInt(
                                     parser.getAttributeValue(null, "id"), 16);
                             mHosts.add(host);
-                        } catch (PackageManager.NameNotFoundException ex) {
-                            // Just ignore drop this entry, as if it has been uninstalled.
-                            // We need to deal with this case because of safe mode, but there's
-                            // a bug filed about it.
                         }
                     }
                     else if ("g".equals(tag)) {

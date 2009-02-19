@@ -117,22 +117,25 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         line[--len] = 0;
 
         /* ignore guard pages */
-        if (len > 18 && line[18] == '-') skip = true;
+        if (len > 18 && line[17] == '-') skip = true;
 
         start = strtoul(line, 0, 16);
 
-        if (strstr("[heap]", line)) {
+        if (strstr(line, "[heap]")) {
             isNativeHeap = 1;
-        } else if (strstr("/dalvik-LinearAlloc", line)) {
+        } else if (strstr(line, "/dalvik-LinearAlloc")) {
             isDalvikHeap = 1;
-        } else if (strstr("/mspace/dalvik-heap", line)) {
+        } else if (strstr(line, "/mspace/dalvik-heap")) {
             isDalvikHeap = 1;
-        } else if (strstr("/dalvik-heap-bitmap/", line)) {
+        } else if (strstr(line, "/dalvik-heap-bitmap/")) {
             isDalvikHeap = 1;    
-        } else if (strstr("/tmp/sqlite-heap", line)) {
+        } else if (strstr(line, "/tmp/sqlite-heap")) {
             isSqliteHeap = 1;
         }
 
+        //LOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
+        //    isSqliteHeap, line);
+            
         while (true) {
             if (fgets(line, 1024, fp) == 0) {
                 done = true;

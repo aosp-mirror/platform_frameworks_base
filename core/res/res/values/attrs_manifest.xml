@@ -170,6 +170,12 @@
          user ID, they must also be signed with the same signature. -->
     <attr name="sharedUserId" format="string" />
     
+    <!-- Specify a label for the shared user UID of this package.  This is
+         only used if you have also used android:sharedUserId.  This must
+         be a reference to a string resource; it can not be an explicit
+         string. -->
+    <attr name="sharedUserLabel" format="reference" />
+    
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
          that higher numbers are more recent.  You could use this number to
@@ -579,6 +585,7 @@
         <attr name="versionCode" />
         <attr name="versionName" />
         <attr name="sharedUserId" />
+        <attr name="sharedUserLabel" />
     </declare-styleable>
     
     <!-- The <code>application</code> tag describes application-level components

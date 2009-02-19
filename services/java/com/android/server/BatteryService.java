@@ -121,9 +121,10 @@ class BatteryService extends Binder {
         }
         int plugTypeBit = 0;
         if (mAcOnline) {
-            plugTypeBit = BatteryManager.BATTERY_PLUGGED_AC;
-        } else if (mUsbOnline) {
-            plugTypeBit = BatteryManager.BATTERY_PLUGGED_USB;
+            plugTypeBit |= BatteryManager.BATTERY_PLUGGED_AC;
+        }
+        if (mUsbOnline) {
+            plugTypeBit |= BatteryManager.BATTERY_PLUGGED_USB;
         }
         return (plugTypeSet & plugTypeBit) != 0;
     }

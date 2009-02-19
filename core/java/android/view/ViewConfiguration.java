@@ -67,6 +67,13 @@ public class ViewConfiguration {
      * considered to be a tap. 
      */
     private static final int JUMP_TAP_TIMEOUT = 500;
+
+    /**
+     * Defines the duration in milliseconds between the first tap's up event and
+     * the second tap's down event for an interaction to be considered a
+     * double-tap.
+     */
+    private static final int DOUBLE_TAP_TIMEOUT = 300;
     
     /**
      * Defines the duration in milliseconds we want to display zoom controls in response 
@@ -82,7 +89,7 @@ public class ViewConfiguration {
     /**
      * Distance a touch can wander before we think the user is scrolling in pixels
      */
-    private static final int TOUCH_SLOP = 12;
+    private static final int TOUCH_SLOP = 25;
     
     /**
      * Distance between the first touch and second touch to still be considered a double tap
@@ -254,6 +261,16 @@ public class ViewConfiguration {
      */
     public static int getJumpTapTimeout() {
         return JUMP_TAP_TIMEOUT;
+    }
+    
+    /**
+     * @return Defines the duration in milliseconds between the first tap's up event and
+     * the second tap's down event for an interaction to be considered a
+     * double-tap.
+     * @hide pending API council
+     */
+    public static int getDoubleTapTimeout() {
+        return DOUBLE_TAP_TIMEOUT;
     }
     
     /**

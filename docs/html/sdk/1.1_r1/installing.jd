@@ -5,10 +5,11 @@ sdk.version=1.1_r1
 
 
 <p>This page describes how to install the Android 1.1 SDK, Release 1, and set up your development environment. 
-If you haven't downloaded the SDK yet, you can so so from the <a href="{@docRoot}sdk/1.1_r1/index.html">Download</a> page.</p>
+If you haven't downloaded the SDK yet, you can so from the <a href="{@docRoot}sdk/1.1_r1/index.html">Download</a> page.</p>
 
 <p>Before you begin, be sure that your development environment meets the SDK
-<a href="{@docRoot}sdk/1.1_r1/requirements.html">System Requirements</a>.</p>
+<a href="{@docRoot}sdk/1.1_r1/requirements.html">System Requirements</a>. If you encounter any problems during installation,
+see the <a href="#installnotes">Installation Notes</a> at the bottom of this page.</p>
 
 <h4 style="margin-top">Upgrading?</h4>
 <p>If you have already developed applications using an earlier version of the 
@@ -20,7 +21,7 @@ SDK, please skip this page and read the
 <a name="setup"></a>
 <h2>Installing the SDK</h2>
 
-	<p>After downloading the SDK, unpack the .zip archive to a suitable location on your machine. By default, the SDK files are unpacked into a directory named  <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em>_<em>&lt;build&gt;</em></code>. The directory contains the subdirectories <code>tools/</code>, <code>samples/</code>, and others. </p>
+	<p>After downloading the SDK, unpack the .zip archive to a suitable location on your machine. By default, the SDK files are unpacked into a directory named  <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em>_<em>&lt;build&gt;</em></code>. The directory contains a link to a local copy of the documentation and the subdirectories <code>tools/</code>, <code>samples/</code>, and others. </p>
 	
 	<p>Make a note of the name and location of the unpacked SDK directory on your system &mdash; you will need to refer to the SDK directory later, when setting up the Android plugin or using SDK tools. </p>
 
@@ -44,25 +45,16 @@ SDK, please skip this page and read the
 
         <p>Adding <code>tools</code> to your path lets you run Android Debug Bridge (adb) and the other command line <a href="{@docRoot}guide/developing/tools/index.html">tools</a> without needing to supply the full path to the tools directory. Note that, if you update your SDK, you should remember to update your PATH settings to point to the new location, if different.</p>
 
+
+<p>If you will be using the Eclipse IDE as your environment for developing Android applications, continue reading the next
+section in order to install the Android Development Tools plugin and setup Eclipse. If you choose not to use Eclipse, you can 
+develop Android applications using other tools &mdash; read the guide to developing 
+<a href="{@docRoot}guide/developing/other-ide.html">In other IDEs</a>.</p>
+
+
 <h2>Setting up Eclipse</h2>
-<p>If you'll be developing with the Eclipse IDE, follow the following procedure to setup the IDE
-to use the Android SDK.</p>
-<p>Basically, you just need to update your Eclipse preferences to point to the Android SDK directory:</p>
-<ol>
-    <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
-        panel. (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>) </li>
-    <li>Select <strong>Android</strong> from the left panel. </li>
-    <li>For the SDK Location in the main panel, click <strong>Browse...</strong> and locate the SDK directory. </li>
-    <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
-</ol>
-<p>Done! We now recommend that you install the ADT Eclipse plugin, which will provide some much-appreciated assistance in developing Android apps with Eclipse...</p>
 
-
-<h2 id="installingplugin">Installing the Eclipse Plugin (ADT)</h2>
-
-<p>If you will be using the Eclipse IDE as your environment for developing Android applications, you can install a custom plugin called Android Development Tools (ADT), which adds integrated support for Android projects and tools. The ADT plugin includes a variety of powerful extensions that make creating, running, and debugging Android applications faster and easier. Developing in ADT/Eclipse is highly recommended for Eclipse users and those new to Android.</p>
-
-<p>If you <em>will not</em> be using the Eclipse IDE, you do not need to download or install the ADT plugin. You can still develop Android applications using other tools. </p>
+<p>First, you should install a custom plugin called Android Development Tools (ADT), which adds integrated support for Android projects and tools. The ADT plugin includes a variety of powerful extensions that make creating, running, and debugging Android applications faster and easier. Developing in ADT/Eclipse is highly recommended for Eclipse users and those new to Android.</p>
 
 <p>To download and install the ADT plugin, follow the steps below for your respective Eclipse version. </p>
 
@@ -130,6 +122,21 @@ to use the Android SDK.</p>
 </td>
 </tr>
 </table>
+
+
+<p>Now, you just need to modify your Eclipse preferences to point to the Android SDK directory:</p>
+<ol>
+    <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
+        panel. (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>) </li>
+    <li>Select <strong>Android</strong> from the left panel. </li>
+    <li>For the SDK Location in the main panel, click <strong>Browse...</strong> and locate the SDK directory. </li>
+    <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+</ol>
+
+<p>Done! If you haven't encountered any problems, then you're ready to begin developing Android applications.
+We recommend you begin with the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial,
+which will teach you some basics about Android applications and how to create projects using Eclipse.</p>
+
 
 <h3 id="troubleshooting">Troubleshooting ADT Installation</h3>
 <p> 

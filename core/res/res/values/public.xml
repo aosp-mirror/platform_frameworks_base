@@ -1004,6 +1004,7 @@
   <public type="attr" name="hapticFeedbackEnabled" id="0x0101025e" />
   <public type="attr" name="innerRadius" id="0x0101025f" />
   <public type="attr" name="thickness" id="0x01010260" />
+  <public type="attr" name="sharedUserLabel" id="0x01010261" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the

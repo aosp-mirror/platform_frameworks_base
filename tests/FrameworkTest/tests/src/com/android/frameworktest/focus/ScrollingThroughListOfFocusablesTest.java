@@ -87,9 +87,12 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
             assertEquals(0, mListView.getSelectedItemPosition());
             InternalSelectionView view = (InternalSelectionView)
                     mListView.getSelectedView();
-            assertEquals("bottom of view should be just above fading edge",
-                    mListView.getBottom() - mListView.getVerticalFadingEdgeLength(),
-                    view.getBottom());            
+
+            // 1 pixel tolerance in case height / 4 is not an even number
+            final int fadingEdge = mListView.getBottom() - mListView.getVerticalFadingEdgeLength();
+            assertTrue("bottom of view should be just above fading edge",
+                    view.getBottom() >= fadingEdge - 1 &&
+                    view.getBottom() <= fadingEdge);
         }
 
 
@@ -138,9 +141,9 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
         view.getRectForRow(mTempRect, mNumRowsPerItem - 1);
         mListView.offsetDescendantRectToMyCoords(view, mTempRect);
 
-        assertEquals("bottom of last row of last item should be at " +
+        assertTrue("bottom of last row of last item should be at " +
                 "the bottom of the list view (no fading edge)",
-                mListView.getBottom(), mTempRect.bottom);
+                mListView.getBottom() - mListView.getVerticalFadingEdgeLength() < mTempRect.bottom);
     }
 
     @LargeTest

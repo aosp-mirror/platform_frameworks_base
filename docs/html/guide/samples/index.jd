@@ -1,11 +1,17 @@
 guide=true
-page.title=Android Samples
+page.title=Sample Code
 @jd:body
 
 
-<p>Sometimes, the best way to learn how things are done is to just look at some code.
-So here we've provided the source code for some simple Android applications.</p>
+<p>Sometimes, the best way to learn how things are done is to just look at some code. So here
+ we've provided links to let you browse the source of some some simple Android applications. </p>
 
+<p>The source code for these applications is included in the Android SDK, in this location:</p>
+
+<p style="margin-left:2em"><code>&lt;sdk&gt;/samples/</code></p>
+
+<p>You can easily add these applications as projects in your development environment, so that you 
+can modify them and watch them execute. </p>
 <dl>
  <dt><a href="ApiDemos/index.html">API Demos</a></dt>
   <dd>A variety of small applications that demonstrate simple views and widgets.</dd>

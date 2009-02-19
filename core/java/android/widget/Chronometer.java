@@ -46,6 +46,18 @@ import java.util.Locale;
 public class Chronometer extends TextView {
     private static final String TAG = "Chronometer";
 
+    /**
+     * A callback that notifies when the chronometer has incremented on its own.
+     */
+    public interface OnChronometerTickListener {
+
+        /**
+         * Notification that the chronometer has changed.
+         */
+        void onChronometerTick(Chronometer chronometer);
+
+    }
+
     private long mBase;
     private boolean mVisible;
     private boolean mStarted;
@@ -56,6 +68,7 @@ public class Chronometer extends TextView {
     private Locale mFormatterLocale;
     private Object[] mFormatterArgs = new Object[1];
     private StringBuilder mFormatBuilder;
+    private OnChronometerTickListener mOnChronometerTickListener;
 
     /**
      * Initialize this Chronometer object.
@@ -99,6 +112,7 @@ public class Chronometer extends TextView {
      *
      * @param base Use the {@link SystemClock#elapsedRealtime} time base.
      */
+    @android.view.RemotableViewMethod
     public void setBase(long base) {
         mBase = base;
         updateText(SystemClock.elapsedRealtime());
@@ -122,6 +136,7 @@ public class Chronometer extends TextView {
      *
      * @param format the format string.
      */
+    @android.view.RemotableViewMethod
     public void setFormat(String format) {
         mFormat = format;
         if (format != null && mFormatBuilder == null) {
@@ -134,6 +149,23 @@ public class Chronometer extends TextView {
      */
     public String getFormat() {
         return mFormat;
+    }
+
+    /**
+     * Sets the listener to be called when the chronometer changes.
+     * 
+     * @param listener The listener.
+     */
+    public void setOnChronometerTickListener(OnChronometerTickListener listener) {
+        mOnChronometerTickListener = listener;
+    }
+
+    /**
+     * @return The listener (may be null) that is listening for chronometer change
+     *         events.
+     */
+    public OnChronometerTickListener getOnChronometerTickListener() {
+        return mOnChronometerTickListener;
     }
 
     /**
@@ -158,6 +190,15 @@ public class Chronometer extends TextView {
      */
     public void stop() {
         mStarted = false;
+        updateRunning();
+    }
+
+    /**
+     * The same as calling {@link #start} or {@link #stop}.
+     */
+    @android.view.RemotableViewMethod
+    public void setStarted(boolean started) {
+        mStarted = started;
         updateRunning();
     }
 
@@ -216,8 +257,15 @@ public class Chronometer extends TextView {
         public void handleMessage(Message m) {
             if (mStarted) {
                 updateText(SystemClock.elapsedRealtime());
+                dispatchChronometerTick();
                 sendMessageDelayed(Message.obtain(), 1000);
             }
         }
     };
+
+    void dispatchChronometerTick() {
+        if (mOnChronometerTickListener != null) {
+            mOnChronometerTickListener.onChronometerTick(this);
+        }
+    }
 }

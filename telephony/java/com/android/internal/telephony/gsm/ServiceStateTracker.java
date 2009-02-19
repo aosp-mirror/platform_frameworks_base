@@ -25,6 +25,8 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OP
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OPERATOR_NUMERIC;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.gsm.DataConnectionTracker.State;
+
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -70,6 +72,9 @@ final class ServiceStateTracker extends Handler
     static final int DATA_ACCESS_GPRS = 1;
     static final int DATA_ACCESS_EDGE = 2;
     static final int DATA_ACCESS_UMTS = 3;
+    
+    static final int MAX_NUM_DATA_STATE_READS = 15;
+    static final int DATA_STATE_POLL_SLEEP_MS = 100;
 
     //***** Instance Variables
 
@@ -594,6 +599,18 @@ final class ServiceStateTracker extends Handler
                         dcTracker.getStateInString(),
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
                 EventLog.writeEvent(TelephonyEventLog.EVENT_DATA_STATE_RADIO_OFF, val);
+            }
+            dcTracker.cleanConnectionBeforeRadioOff();
+            
+            // poll data state up to 15 times, with a 100ms delay
+            // totaling 1.5 sec. Normal data disable action will finish in 100ms.
+            for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
+                if (dcTracker.state != State.CONNECTED 
+                        && dcTracker.state != State.DISCONNECTING) {
+                    Log.d(LOG_TAG, "Data shutdown complete.");
+                    break;
+                }
+                SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
             }
             // If it's on and available and we want it off..
             cm.setRadioPower(false, null);

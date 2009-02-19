@@ -525,9 +525,6 @@ public class BaseInputConnection implements InputConnection {
             setComposingSpans(sp);
         }
         
-        // Adjust newCursorPosition to be relative the start of the text.
-        newCursorPosition += a;
-
         if (DEBUG) Log.v(TAG, "Replacing from " + a + " to " + b + " with \""
                 + text + "\", composing=" + composing
                 + ", type=" + text.getClass().getCanonicalName());
@@ -540,11 +537,21 @@ public class BaseInputConnection implements InputConnection {
             TextUtils.dumpSpans(text, lp, "  ");
         }
         
-        content.replace(a, b, text);
+        // Position the cursor appropriately, so that after replacing the
+        // desired range of text it will be located in the correct spot.
+        // This allows us to deal with filters performing edits on the text
+        // we are providing here.
+        if (newCursorPosition > 0) {
+            newCursorPosition += b - 1;
+        } else {
+            newCursorPosition += a;
+        }
         if (newCursorPosition < 0) newCursorPosition = 0;
         if (newCursorPosition > content.length())
             newCursorPosition = content.length();
         Selection.setSelection(content, newCursorPosition);
+
+        content.replace(a, b, text);
         
         if (DEBUG) {
             LogPrinter lp = new LogPrinter(Log.VERBOSE, TAG);

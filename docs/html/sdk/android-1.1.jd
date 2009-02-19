@@ -59,7 +59,7 @@ attribute looks like this: </p>
 
 <pre><code>&lt;manifest&gt;
   ...
-  &lt;uses-sdk minSdkVersion="2"&gt;
+  &lt;uses-sdk minSdkVersion="2" /&gt;
   ...
 &lt;/manifest&gt;</code>
 </pre>
@@ -71,7 +71,7 @@ your application will function properly on their devices, especially if
 it uses <a href="#apichange">APIs introduced in Android 1.1</a>. </p>
 
 <p>If your application uses APIs introduced in Android 1.1 but does not
-declare <code>&lt;uses-sdk minSdkVersion="2"&gt;</code>, then it will
+declare <code>&lt;uses-sdk minSdkVersion="2" /&gt;</code>, then it will
 run properly on Android 1.1 devices but <em>not</em> on Android 1.0
 devices. In the latter case, the application will crash at runtime when
 it tries to use the Android 1.1 APIs.</p>
@@ -175,14 +175,13 @@ AM/PM).</li>
 <li>Improves recovery from POP3 connection failures.</li>
 <li>POP3 parser rules loosened, so the application can work with
 non-compliant email servers.</li>
-<li>Removes green CALL button as a shortcut for "add a new call".</li>
 </ul>
 
 <h2 id="features">New Features</h2>
 
 <ul>
 <li>Maps: Adds details and reviews when a user does a search on Maps and
-clicks on a business to view it's details.</li>
+clicks on a business to view its details.</li>
 <li>Dialer: In-call screen timeout default is now longer when using the
 speakerphone.</li>
 <li>Dialer: Adds a "Show dialpad" / "Hide dialpad" item to the in-call
@@ -216,9 +215,9 @@ SDK-bound system images. </li>
 <th>Module or Feature</th><th>Change Description</th>
 </tr>
 <tr><td rowspan="4">Annotations for test systems</td></tr>
-    <tr><td>Added class {@link android.test.suitebuilder.annotation.LargeTest LargeTest} to package {@link android.test.suitebuilder.annotation}</td></tr>
-    <tr><td>Added class {@link android.test.suitebuilder.annotation.MediumTest MediumTest} to package {@link android.test.suitebuilder.annotation}</td></tr>
-    <tr><td>Added class {@link android.test.suitebuilder.annotation.SmallTest SmallTest} to package {@link android.test.suitebuilder.annotation}</td></tr>
+    <tr><td>Added {@link android.test.suitebuilder.annotation.LargeTest LargeTest} annotation.</td></tr>
+    <tr><td>Added {@link android.test.suitebuilder.annotation.MediumTest MediumTest} annotation.</td></tr>
+    <tr><td>Added {@link android.test.suitebuilder.annotation.SmallTest SmallTest} annotation.</td></tr>
 
 <tr><td rowspan="2">Allow a process to easily know its UID.</td></tr>
     <tr><td>Added public method {@link android.os.Process#myUid} to class {@link android.os.Process android.os.Process}</td></tr>

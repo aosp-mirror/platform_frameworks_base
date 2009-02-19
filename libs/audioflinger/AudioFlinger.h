@@ -221,16 +221,22 @@ private:
             };
 
             enum track_flags {
-                STEPSERVER_FAILED = 0x01   //  StepServer could not acquire cblk->lock mutex
+                STEPSERVER_FAILED = 0x01, //  StepServer could not acquire cblk->lock mutex
+                SYSTEM_FLAGS_MASK = 0x0000ffffUL,
+
+                AUDIO_IN_AGC_ENABLE = AudioSystem::AGC_ENABLE << 16,
+                AUDIO_IN_NS_ENABLE  = AudioSystem::NS_ENABLE << 16,
+                AUDIO_IN_IIR_ENABLE = AudioSystem::TX_IIR_ENABLE << 16
             };
 
-                                TrackBase(  const sp<MixerThread>& mixerThread,
+                                TrackBase(const sp<MixerThread>& mixerThread,
                                         const sp<Client>& client,
                                         int streamType,
                                         uint32_t sampleRate,
                                         int format,
                                         int channelCount,
                                         int frameCount,
+                                        uint32_t flags,
                                         const sp<IMemory>& sharedBuffer);
                                 ~TrackBase();
 
@@ -295,7 +301,7 @@ private:
             int                 mState;
             int                 mClientTid;
             uint8_t             mFormat;
-            uint8_t             mFlags;
+            uint32_t            mFlags;
         };
 
         // playback track
@@ -362,13 +368,14 @@ private:
         // record track
         class RecordTrack : public TrackBase {
         public:
-                                RecordTrack(  const sp<MixerThread>& mixerThread,
+                                RecordTrack(const sp<MixerThread>& mixerThread,
                                         const sp<Client>& client,
                                         int streamType,
                                         uint32_t sampleRate,
                                         int format,
                                         int channelCount,
-                                        int frameCount);
+                                        int frameCount,
+                                        uint32_t flags);
                                 ~RecordTrack();
 
             virtual status_t    start();
@@ -585,6 +592,7 @@ private:
                 status_t    start(MixerThread::RecordTrack* recordTrack);
                 void        stop(MixerThread::RecordTrack* recordTrack);
                 void        exit();
+                status_t    dump(int fd, const Vector<String16>& args);
 
     private:
                 AudioRecordThread();
@@ -592,6 +600,7 @@ private:
                 sp<MixerThread::RecordTrack>        mRecordTrack;
                 Mutex                               mLock;
                 Condition                           mWaitWorkCV;
+                Condition                           mStopped;
                 volatile bool                       mActive;
                 status_t                            mStartStatus;
     };

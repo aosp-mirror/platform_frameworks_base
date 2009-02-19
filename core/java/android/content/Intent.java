@@ -1766,9 +1766,9 @@ public class Intent implements Parcelable {
      * next task activity) defines an atomic group of activities that the
      * user can move to.  Tasks can be moved to the foreground and background;
      * all of the activities inside of a particular task always remain in
-     * the same order.  See the
-     * <a href="{@docRoot}intro/appmodel.html">Application Model</a>
-     * documentation for more details on tasks.
+     * the same order.  See 
+     * <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
+     * Activities and Tasks</a> for more details on tasks.
      *
      * <p>This flag is generally used by activities that want
      * to present a "launcher" style behavior: they give the user a list of
@@ -1801,9 +1801,8 @@ public class Intent implements Parcelable {
      * <p>This flag is ignored if
      * {@link #FLAG_ACTIVITY_NEW_TASK} is not set.
      *
-     * <p>See the
-     * <a href="{@docRoot}intro/appmodel.html">Application Model</a>
-     * documentation for more details on tasks.
+     * <p>See <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
+     * Activities and Tasks</a> for more details on tasks.
      */
     public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 0x08000000;
     /**
@@ -1831,9 +1830,8 @@ public class Intent implements Parcelable {
      * especially useful, for example, when launching an activity from the
      * notification manager.
      *
-     * <p>See the
-     * <a href="{@docRoot}intro/appmodel.html">Application Model</a>
-     * documentation for more details on tasks.
+     * <p>See <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
+     * Activities and Tasks</a> for more details on tasks.
      */
     public static final int FLAG_ACTIVITY_CLEAR_TOP = 0x04000000;
     /**
@@ -3919,8 +3917,8 @@ public class Intent implements Parcelable {
      * FLAG_RECEIVER_* flags are all for use with
      * {@link Context#sendBroadcast(Intent) Context.sendBroadcast()}.
      *
-     * <p>See the <a href="{@docRoot}intro/appmodel.html">Application Model</a>
-     * documentation for important information on how some of these options impact
+     * <p>See the <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
+     * Activities and Tasks</a> documentation for important information on how some of these options impact
      * the behavior of your application.
      *
      * @param flags The desired flags.
@@ -4195,14 +4193,11 @@ public class Intent implements Parcelable {
 
         @Override
         public boolean equals(Object obj) {
-            Intent other;
-            try {
-                other = ((FilterComparison)obj).mIntent;
-            } catch (ClassCastException e) {
-                return false;
+            if (obj instanceof FilterComparison) {
+                Intent other = ((FilterComparison)obj).mIntent;
+                return mIntent.filterEquals(other);
             }
-
-            return mIntent.filterEquals(other);
+            return false;
         }
 
         @Override

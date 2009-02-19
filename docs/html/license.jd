@@ -1,4 +1,5 @@
-page.title=Content License		
+page.title=Content License
+hide_license_footer=true
 @jd:body
 
 <div id="mainBodyFluid">
@@ -30,8 +31,8 @@ is licensed under GPLv2 or other license. In those cases, the license
 covering the source code module will apply to the documentation
 extracted from it. </p>
 
-<p>All other content on this site, except as otherwise noted,
-is licensed under the <a
+<p>All other content on this site, except the license documents themselves
+and as otherwise noted, is licensed under the <a
 href="http://creativecommons.org/licenses/by/2.5/">Creative Commons
 Attribution 2.5</a> license. </p>
 

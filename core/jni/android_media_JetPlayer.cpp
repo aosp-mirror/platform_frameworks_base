@@ -81,7 +81,7 @@ android_media_JetPlayer_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     jint maxTracks, jint trackBufferSize)
 {
     //LOGV("android_media_JetPlayer_setup(): entering.");
-    JetPlayer* lpJet = new JetPlayer(weak_this, maxTracks, trackBufferSize);
+    JetPlayer* lpJet = new JetPlayer(env->NewGlobalRef(weak_this), maxTracks, trackBufferSize);
 
     EAS_RESULT result = lpJet->init();
 

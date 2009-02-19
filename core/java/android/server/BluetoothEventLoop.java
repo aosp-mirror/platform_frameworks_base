@@ -359,10 +359,10 @@ class BluetoothEventLoop {
     private void onGetRemoteServiceChannelResult(String address, int channel) {
         IBluetoothDeviceCallback callback = mGetRemoteServiceChannelCallbacks.get(address);
         if (callback != null) {
+            mGetRemoteServiceChannelCallbacks.remove(address);
             try {
                 callback.onGetRemoteServiceChannelResult(address, channel);
             } catch (RemoteException e) {}
-            mGetRemoteServiceChannelCallbacks.remove(address);
         }
     }
 

@@ -64,11 +64,11 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
   /** The unmodified (case-sensitive) key in the headers map is the
    * same index as used by HttpRequestAndroid. */
   public static final int HEADERS_MAP_INDEX_KEY =
-      HttpRequestAndroid.HEADERS_MAP_INDEX_KEY;
+      ApacheHttpRequestAndroid.HEADERS_MAP_INDEX_KEY;
   /** The associated value in the headers map is the same index as
    * used by HttpRequestAndroid. */
   public static final int HEADERS_MAP_INDEX_VALUE =
-      HttpRequestAndroid.HEADERS_MAP_INDEX_VALUE;
+      ApacheHttpRequestAndroid.HEADERS_MAP_INDEX_VALUE;
 
   /**
    * Object passed to the native side, containing information about
@@ -382,7 +382,7 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
     // browser's cache for too long.
     long now_ms = System.currentTimeMillis();
     String expires = DateUtils.formatDate(new Date(now_ms + CACHE_EXPIRY_MS));
-    response.setResponseHeader(HttpRequestAndroid.KEY_EXPIRES, expires);
+    response.setResponseHeader(ApacheHttpRequestAndroid.KEY_EXPIRES, expires);
     // The browser is only interested in a small subset of headers,
     // contained in a Headers object. Iterate the map of all headers
     // and add them to Headers.

@@ -4,11 +4,11 @@ page.title=User Interface
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Key classes and packages</h2>
+  <h2>Key classes</h2>
   <ol>
     <li>{@link android.view.View}</li>
     <li>{@link android.view.ViewGroup}</li>
-    <li>{@link android.widget}</li>
+    <li>{@link android.widget Widget classes}</li>
   </ol>
 
   <h2>In this document</h2>
@@ -107,7 +107,7 @@ complex layout.</p>
 <p>For more on building a UI layout, read <a href="declaring-layout.html">Declaring Layout</a>.
 
 <div class="sidebox-wrapper">
-<div class="sidebox">
+<div class="sidebox-inner">
   <p><b>Tip:</b> You can also draw View and ViewGroups objects in Java code, 
   using the <code>{@link android.view.ViewGroup#addView(View)}</code> methods 
   to dynamically insert new View and ViewGroup objects.</p>

@@ -291,6 +291,25 @@ import java.util.ArrayList;
     }
 
     /**
+     *  Create a fake touch up event at (x,y) with respect to this TextDialog.
+     *  This is used by WebView to act as though a touch event which happened
+     *  before we placed the TextDialog actually hit it, so that it can place
+     *  the cursor accordingly.
+     */
+    /* package */ void fakeTouchEvent(float x, float y) {
+        // We need to ensure that there is a Layout, since the Layout is used
+        // in determining where to place the cursor.
+        if (getLayout() == null) {
+            measure(mWidthSpec, mHeightSpec);
+        }
+        // Create a fake touch up, which is used to place the cursor.
+        MotionEvent ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
+                x, y, 0);
+        onTouchEvent(ev);
+        ev.recycle();
+    }
+
+    /**
      *  Determine whether this TextDialog currently represents the node
      *  represented by ptr.
      *  @param  ptr Pointer to a node to compare to.
@@ -461,9 +480,8 @@ import java.util.ArrayList;
      */
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
         if (adapter != null) {
-            adapter.setTextView(this);
-        } else {
             setInputType(EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+            adapter.setTextView(this);
         }
         super.setAdapter(adapter);
     }

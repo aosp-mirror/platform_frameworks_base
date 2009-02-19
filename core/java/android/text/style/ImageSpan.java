@@ -44,8 +44,9 @@ public class ImageSpan extends DynamicDrawableSpan {
     public ImageSpan(Bitmap b, int verticalAlignment) {
         super(verticalAlignment);
         mDrawable = new BitmapDrawable(b);
-        mDrawable.setBounds(0, 0, mDrawable.getIntrinsicWidth(),
-                mDrawable.getIntrinsicHeight());
+        int width = mDrawable.getIntrinsicWidth();
+        int height = mDrawable.getIntrinsicHeight();
+        mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0); 
     }
 
     public ImageSpan(Drawable d) {

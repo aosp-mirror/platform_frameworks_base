@@ -1,0 +1,226 @@
+page.title=&lt;application&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;application android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
+             android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+             android:<a href="#debug">debuggable</a>=["true" | "false"]
+             android:<a href="#desc">description</a>="<i>string resource</i>"
+             android:<a href="#enabled">enabled</a>=["true" | "false"]
+             android:<a href="#code">hasCode</a>=["true" | "false"]
+             android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+             android:<a href="#label">label</a>="<i>string resource</i>"
+             android:<a href="#space">manageSpaceActivity</a>="<i>string</i>"
+             android:<a href="#nm">name</a>="<i>string</i>"
+             android:<a href="#prmsn">permission</a>="<i>string</i>"
+             android:<a href="#persistent">persistent</a>=["true" | "false"]
+             android:<a href="#proc">process</a>="<i>string</i>"
+             android:<a href="#aff">taskAffinity</a>="<i>string</i>"
+             android:<a href="#theme">theme</a>="<i>resource or theme</i>" &gt;
+    . . .
+&lt;/application&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>The declaration of the application.  This element contains subelements 
+that declare each of the application's components and has attributes 
+that can affect all the components.  Many of these attributes (such as 
+{@code icon}, {@code label}, {@code permission}, {@code process}, 
+{@code taskAffinity}, and {@code allowTaskReparenting}) set default values 
+for corresponding attributes of the component elements.  Others (such as
+{@code debuggable}, {@code enabled}, {@code description}, and 
+{@code allowClearUserData})  set values for the application as a whole and 
+cannot be overridden by the components.</dd>
+
+<dt>attributes</dt>
+<dd><dl class="attr">
+<dt><a name="clear"></a>{@code android:allowClearUserData}</dt>
+<dd>Whether or not users are given the option to remove user data &mdash; 
+"{@code true}" if they are, and "{@code false}" if not.  If the value is 
+"{@code true}", as it is by default, the application manager includes an 
+option that allows users to clear the data.</dd>
+
+<dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
+<dd>Whether or not activities that the application defines can move from 
+the task that started them to the task they have an affinity for when that task 
+is next brought to the front &mdash; "{@code true}" if they can move, and 
+"{@code false}" if they must remain with the task where they started.  
+The default value is "{@code false}".
+
+<p>
+The 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+element has its own 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code>
+attribute that can override the value set here.  See that attribute for more 
+information.
+</p></dd>
+
+<dt><a name="debug"></a>{@code android:debuggable}</dt>
+<dd>Whether or not the application can be debugged, even when running 
+on a device in user mode &mdash; "{@code true}" if it can be, and "{@code false}"
+if not.  The default value is "{@code false}".</dd> 
+
+<dt><a name="desc"></a>{@code android:description}</dt>
+<dd>User-readable text about the application, longer and more descriptive than the application label.  The value must be set as a reference to a string resource.  Unlike the label, it cannot be a raw string.  There is no default value.</dd>
+
+<dt><a name="enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the Android system can instantiate components of 
+the application &mdash; "{@code true}" if it can, and "{@code false}" 
+if not.  If the value is "{@code true}", each component's 
+{@code enabled} attribute determines whether that component is enabled 
+or not.  If the value is "{@code false}", it overrides the 
+component-specific values; all components are disabled.
+
+<p>
+The default value is "{@code true}".
+</p></dd>  
+
+<dt><a name="code"></a>{@code android:hasCode}</dt>
+<dd>Whether or not the application contains any code &mdash; "{@code true}" 
+if it does, and "{@code false}" if not.  When the value is "{@code false}", 
+the system does not try to load any application code when launching components.  
+The default value is "{@code true}".
+
+<p>
+An application would not have any code of its own only if it's using nothing
+but built-in component classes, such as an activity that uses the {@link 
+android.app.AliasActivity} class, a rare occurrence.
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon for the application as whole, and the default icon for 
+each of the application's components.  See the individual 
+{@code icon} attributes for 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>,
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>, and
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements.
+
+<p>
+This attribute must be set as a reference to a drawable resource containing
+the image definition.   There is no default icon.
+</p></dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the application as a whole, and a default 
+label for each of the application's components.  See the individual 
+{@code label} attributes for 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>,
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>, and
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements.
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt><a name="space"></a>{@code android:manageSpaceActivity}</dt>
+<dd>The fully qualified name of an Activity subclass that the system 
+can launch to let users manage the memory occupied by the application 
+on the device.  The activity should also be declared with an 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element.
+</dd>
+
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The fully qualified name of an {@link android.app.Application} 
+subclass implemented for the application.  When the application process 
+is started, this class is instantiated before any of the application's 
+components.  
+
+<p>
+The subclass is optional; most applications won't need one.
+In the absence of a subclass, Android uses an instance of the base 
+Application class.
+</p></dd>
+
+<dt><a name="prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have in order to interact 
+with the application.  This attribute is a convenient way to set a 
+permission that applies to all of the application's components.  It can 
+be overwritten by setting the {@code permission} attributes of individual 
+components.
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
+section in the introduction and another document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt><a name="persistent"></a>{@code android:persistent}</dt>
+<dd>Whether or not the application should remain running at all times &mdash; 
+"{@code true}" if it should, and "{@code false}" if not.  The default value 
+is "{@code false}".  Applications should not normally set this flag; 
+persistence mode is intended only for certain system applications.</dd>
+
+<dt><a name="proc"></a>{@code android:process}</dt>
+<dd>The name of a process where all components of the application should run.
+Each component can override this default by setting its own {@code process}
+attribute.
+
+<p>
+By default, Android creates a process for an application when the first
+of its components needs to run.  All components then run in that process.
+The name of the default process matches the package name set by the
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
+</p>
+
+<p>By setting this attribute to a process name that's shared with another
+application, you can arrange for components of both applications to run in
+the same process &mdash; but only if the two applications also share a
+user ID and be signed with the same certificate.
+</p>
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed.
+If the process name begins with a lowercase character, a global process 
+of that name is created.  A global process can be shared with other
+applications, reducing resource usage.
+</p></dd>
+
+<dt><a href name="aff"></a>{@code android:taskAffinity}</dt>
+<dd>An affinity name that applies to all activities within the application,
+except for those that set a different affinity with their own
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> 
+attributes.  See that attribute for more information.
+
+<p>
+By default, all activities within an application share the same 
+affinity.  The name of that affinity is the same as the package name 
+set by the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
+</p></dd>
+
+<dt><a name="theme"></a>{@code android:theme}</dt>
+<dd>A reference to a style resource defining a default theme for all
+activities in the application.  Individual activities can override
+the default by setting their own <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#theme">theme</a></code> 
+attributes; see that attribute for more information.</dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code></dd>
+
+</dl>

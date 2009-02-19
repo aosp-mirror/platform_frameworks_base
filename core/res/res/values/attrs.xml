@@ -224,15 +224,18 @@
             <!-- Leave the soft input window as-is, in whatever state it
                  last was. -->
             <flag name="stateUnchanged" value="1" />
-            <!-- Don't display the soft input area, there is no reason to
-                 do so on this window. -->
+            <!-- Make the soft input area hidden when normally appropriate
+                 (when the user is navigating forward to your window). -->
             <flag name="stateHidden" value="2" />
+            <!-- Always make the soft input area hidden when this window
+                 has input focus. -->
+            <flag name="stateAlwaysHidden" value="3" />
             <!-- Make the soft input area visible when normally appropriate
                  (when the user is navigating forward to your window). -->
-            <flag name="stateVisible" value="3" />
+            <flag name="stateVisible" value="4" />
             <!-- Always make the soft input area visible when this window
                  has input focus. -->
-            <flag name="stateAlwaysVisible" value="4" />
+            <flag name="stateAlwaysVisible" value="5" />
             
             <!-- The window resize/pan adjustment has not been specified,
                  the system will automatically select between resize and pan

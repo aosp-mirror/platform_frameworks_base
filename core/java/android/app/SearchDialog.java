@@ -31,8 +31,6 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -64,7 +62,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -538,9 +535,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 testIntent = mVoiceAppSearchIntent;
             }      
             if (testIntent != null) {
-                List<ResolveInfo> list = getContext().getPackageManager().
-                        queryIntentActivities(testIntent, PackageManager.MATCH_DEFAULT_ONLY);
-                if (list.size() > 0) {
+                ResolveInfo ri = getContext().getPackageManager().
+                        resolveActivity(testIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                if (ri != null) {
                     visibility = View.VISIBLE;
                 }
             }

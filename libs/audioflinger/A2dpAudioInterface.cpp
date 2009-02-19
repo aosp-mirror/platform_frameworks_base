@@ -72,7 +72,8 @@ AudioStreamOut* A2dpAudioInterface::openOutputStream(
 }
 
 AudioStreamIn* A2dpAudioInterface::openInputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status)
+        int format, int channelCount, uint32_t sampleRate, status_t *status,
+        AudioSystem::audio_in_acoustics acoustics)
 {
     if (status)
         *status = -1;

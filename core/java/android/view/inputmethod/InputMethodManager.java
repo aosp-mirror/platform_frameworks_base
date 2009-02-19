@@ -226,6 +226,10 @@ public final class InputMethodManager {
      * regardless of the state of setting that up.
      */
     View mServedView;
+    /*
+     * Keep track of the view that was set when our window gained focus.
+     */
+    View mWindowFocusedView;
     /**
      * For evaluating the state after a focus change, this is the view that
      * had focus.
@@ -466,8 +470,8 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void setFullscreenMode(boolean enabled) {
-        mFullscreenMode = true;
+    public void setFullscreenMode(boolean fullScreen) {
+        mFullscreenMode = fullScreen;
     }
     
     /**
@@ -828,17 +832,21 @@ public final class InputMethodManager {
      */
     public void focusIn(View view) {
         synchronized (mH) {
-            if (DEBUG) Log.v(TAG, "focusIn: " + view);
-            // Okay we have a new view that is being served.
-            if (mServedView != view) {
-                mCurrentTextBoxAttribute = null;
-            }
-            mServedView = view;
-            mCompletions = null;
-            mServedConnecting = true;
+            focusInLocked(view);
         }
         
         startInputInner();
+    }
+
+    void focusInLocked(View view) {
+        if (DEBUG) Log.v(TAG, "focusIn: " + view);
+        // Okay we have a new view that is being served.
+        if (mServedView != view) {
+            mCurrentTextBoxAttribute = null;
+        }
+        mServedView = view;
+        mCompletions = null;
+        mServedConnecting = true;
     }
 
     /**
@@ -908,20 +916,39 @@ public final class InputMethodManager {
      * Called by ViewRoot the first time it gets window focus.
      * @hide
      */
-    public void onWindowFocus(View focusedView, int softInputMode,
+    public void onWindowFocus(View rootView, View focusedView, int softInputMode,
             boolean first, int windowFlags) {
+        boolean needStartInput = false;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onWindowFocus: " + focusedView
                     + " softInputMode=" + softInputMode
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
+            if (mWindowFocusedView == null) {
+                focusInLocked(focusedView != null ? focusedView : rootView);
+                needStartInput = true;
+            }
+        }
+        
+        if (needStartInput) {
+            startInputInner();
+        }
+        
+        synchronized (mH) {
             try {
                 final boolean isTextEditor = focusedView != null &&
-                focusedView.onCheckIsTextEditor();
+                        focusedView.onCheckIsTextEditor();
                 mService.windowGainedFocus(mClient, focusedView != null,
                         isTextEditor, softInputMode, first, windowFlags);
             } catch (RemoteException e) {
             }
+        }
+    }
+    
+    /** @hide */
+    public void startGettingWindowFocus() {
+        synchronized (mH) {
+            mWindowFocusedView = null;
         }
     }
     

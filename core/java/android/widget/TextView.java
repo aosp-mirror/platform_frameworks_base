@@ -87,6 +87,7 @@ import android.view.ViewDebug;
 import android.view.ViewTreeObserver;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -1521,6 +1522,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textSize
      */
+    @android.view.RemotableViewMethod
     public void setTextSize(float size) {
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
@@ -1572,6 +1574,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textScaleX
      */
+    @android.view.RemotableViewMethod
     public void setTextScaleX(float size) {
         if (size != mTextPaint.getTextScaleX()) {
             mTextPaint.setTextScaleX(size);
@@ -1620,6 +1623,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColor
      */
+    @android.view.RemotableViewMethod
     public void setTextColor(int color) {
         mTextColor = ColorStateList.valueOf(color);
         updateTextColors();
@@ -1662,6 +1666,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColorHighlight
      */
+    @android.view.RemotableViewMethod
     public void setHighlightColor(int color) {
         if (mHighlightColor != color) {
             mHighlightColor = color;
@@ -1703,6 +1708,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_autoLink
      */
+    @android.view.RemotableViewMethod
     public final void setAutoLinkMask(int mask) {
         mAutoLinkMask = mask;
     }
@@ -1715,6 +1721,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_linksClickable
      */
+    @android.view.RemotableViewMethod
     public final void setLinksClickable(boolean whether) {
         mLinksClickable = whether;
     }
@@ -1751,6 +1758,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColorHint
      */
+    @android.view.RemotableViewMethod
     public final void setHintTextColor(int color) {
         mHintTextColor = ColorStateList.valueOf(color);
         updateTextColors();
@@ -1789,6 +1797,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColorLink
      */
+    @android.view.RemotableViewMethod
     public final void setLinkTextColor(int color) {
         mLinkTextColor = ColorStateList.valueOf(color);
         updateTextColors();
@@ -1876,6 +1885,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * reflows the text if they are different from the old flags.
      * @see Paint#setFlags
      */
+    @android.view.RemotableViewMethod
     public void setPaintFlags(int flags) {
         if (mTextPaint.getFlags() != flags) {
             mTextPaint.setFlags(flags);
@@ -1909,6 +1919,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_minLines
      */
+    @android.view.RemotableViewMethod
     public void setMinLines(int minlines) {
         mMinimum = minlines;
         mMinMode = LINES;
@@ -1922,6 +1933,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_minHeight
      */
+    @android.view.RemotableViewMethod
     public void setMinHeight(int minHeight) {
         mMinimum = minHeight;
         mMinMode = PIXELS;
@@ -1935,6 +1947,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_maxLines
      */
+    @android.view.RemotableViewMethod
     public void setMaxLines(int maxlines) {
         mMaximum = maxlines;
         mMaxMode = LINES;
@@ -1948,6 +1961,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_maxHeight
      */
+    @android.view.RemotableViewMethod
     public void setMaxHeight(int maxHeight) {
         mMaximum = maxHeight;
         mMaxMode = PIXELS;
@@ -1961,6 +1975,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_lines
      */
+    @android.view.RemotableViewMethod
     public void setLines(int lines) {
         mMaximum = mMinimum = lines;
         mMaxMode = mMinMode = LINES;
@@ -1976,6 +1991,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_height
      */
+    @android.view.RemotableViewMethod
     public void setHeight(int pixels) {
         mMaximum = mMinimum = pixels;
         mMaxMode = mMinMode = PIXELS;
@@ -1989,6 +2005,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_minEms
      */
+    @android.view.RemotableViewMethod
     public void setMinEms(int minems) {
         mMinWidth = minems;
         mMinWidthMode = EMS;
@@ -2002,6 +2019,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_minWidth
      */
+    @android.view.RemotableViewMethod
     public void setMinWidth(int minpixels) {
         mMinWidth = minpixels;
         mMinWidthMode = PIXELS;
@@ -2015,6 +2033,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_maxEms
      */
+    @android.view.RemotableViewMethod
     public void setMaxEms(int maxems) {
         mMaxWidth = maxems;
         mMaxWidthMode = EMS;
@@ -2028,6 +2047,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_maxWidth
      */
+    @android.view.RemotableViewMethod
     public void setMaxWidth(int maxpixels) {
         mMaxWidth = maxpixels;
         mMaxWidthMode = PIXELS;
@@ -2041,6 +2061,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_ems
      */
+    @android.view.RemotableViewMethod
     public void setEms(int ems) {
         mMaxWidth = mMinWidth = ems;
         mMaxWidthMode = mMinWidthMode = EMS;
@@ -2056,6 +2077,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_width
      */
+    @android.view.RemotableViewMethod
     public void setWidth(int pixels) {
         mMaxWidth = mMinWidth = pixels;
         mMaxWidthMode = mMinWidthMode = PIXELS;
@@ -2321,6 +2343,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_freezesText
      */
+    @android.view.RemotableViewMethod
     public void setFreezesText(boolean freezesText) {
         mFreezesText = freezesText;
     }
@@ -2366,6 +2389,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_text
      */
+    @android.view.RemotableViewMethod
     public final void setText(CharSequence text) {
         setText(text, mBufferType);
     }
@@ -2378,6 +2402,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #setText(CharSequence)
      */
+    @android.view.RemotableViewMethod
     public final void setTextKeepState(CharSequence text) {
         setTextKeepState(text, mBufferType);
     }
@@ -2648,6 +2673,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @android.view.RemotableViewMethod
     public final void setText(int resid) {
         setText(getContext().getResources().getText(resid));
     }
@@ -2666,6 +2692,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_hint
      */
+    @android.view.RemotableViewMethod
     public final void setHint(CharSequence hint) {
         mHint = TextUtils.stringOrSpannedString(hint);
 
@@ -2686,6 +2713,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_hint
      */
+    @android.view.RemotableViewMethod
     public final void setHint(int resid) {
         setHint(getContext().getResources().getText(resid));
     }
@@ -2896,6 +2924,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * <code>error</code> is <code>null</code>, the error message and icon
      * will be cleared.
      */
+    @android.view.RemotableViewMethod
     public void setError(CharSequence error) {
         if (error == null) {
             setError(null, null);
@@ -2954,10 +2983,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mPopup == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            TextView err = (TextView) inflater.inflate(com.android.internal.R.layout.textview_hint,
+            final TextView err = (TextView) inflater.inflate(com.android.internal.R.layout.textview_hint,
                     null);
 
-            mPopup = new PopupWindow(err, 200, 50);
+            mPopup = new PopupWindow(err, 200, 50) {
+                private boolean mAbove = false;
+
+                @Override
+                public void update(int x, int y, int w, int h, boolean force) {
+                    super.update(x, y, w, h, force);
+
+                    boolean above = isAboveAnchor();
+                    if (above != mAbove) {
+                        mAbove = above;
+
+                        if (above) {
+                            err.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error_above);
+                        } else {
+                            err.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error);
+                        }
+                    }
+                }
+            };
             mPopup.setFocusable(false);
         }
 
@@ -5094,6 +5141,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_singleLine
      */
+    @android.view.RemotableViewMethod
     public void setSingleLine(boolean singleLine) {
         if ((mInputType&EditorInfo.TYPE_MASK_CLASS)
                 == EditorInfo.TYPE_CLASS_TEXT) {
@@ -5168,6 +5216,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_selectAllOnFocus
      */
+    @android.view.RemotableViewMethod
     public void setSelectAllOnFocus(boolean selectAllOnFocus) {
         mSelectAllOnFocus = selectAllOnFocus;
 
@@ -5181,6 +5230,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_cursorVisible
      */
+    @android.view.RemotableViewMethod
     public void setCursorVisible(boolean visible) {
         mCursorVisible = visible;
         invalidate();
@@ -5730,6 +5780,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         startStopMarquee(hasWindowFocus);
     }
 
+    /**
+     * Use {@link BaseInputConnection#removeComposingSpans
+     * BaseInputConnection.removeComposingSpans()} to remove any IME composing
+     * state from this text view.
+     */
+    public void clearComposingText() {
+        if (mText instanceof Spannable) {
+            BaseInputConnection.removeComposingSpans((Spannable)mText);
+        }
+    }
+    
     @Override
     public void setSelected(boolean selected) {
         boolean wasSelected = isSelected();

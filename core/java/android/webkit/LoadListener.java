@@ -575,7 +575,7 @@ class LoadListener extends Handler implements EventHandler {
                                 mRequestHandle.getMethod().equals("POST")) {
                         sendMessageInternal(obtainMessage(
                                 MSG_LOCATION_CHANGED_REQUEST));  
-                    } else if (mMethod.equals("POST"))  {
+                    } else if (mMethod != null && mMethod.equals("POST")) {
                         sendMessageInternal(obtainMessage(
                                 MSG_LOCATION_CHANGED_REQUEST));
                     } else {

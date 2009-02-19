@@ -179,6 +179,7 @@ public abstract class Animation implements Cloneable {
     private boolean mOneMoreTime = true;
 
     RectF mPreviousRegion = new RectF();
+    RectF mRegion = new RectF();
     Transformation mTransformation = new Transformation();
     Transformation mPreviousTransformation = new Transformation();
 
@@ -226,6 +227,7 @@ public abstract class Animation implements Cloneable {
     protected Animation clone() throws CloneNotSupportedException {
         final Animation animation = (Animation) super.clone();
         animation.mPreviousRegion = new RectF();
+        animation.mRegion = new RectF();
         animation.mTransformation = new Transformation();
         animation.mPreviousTransformation = new Transformation();
         return animation;
@@ -799,14 +801,15 @@ public abstract class Animation implements Cloneable {
     public void getInvalidateRegion(int left, int top, int right, int bottom,
             RectF invalidate, Transformation transformation) {
 
+        final RectF tempRegion = mRegion;
         final RectF previousRegion = mPreviousRegion;
 
         invalidate.set(left, top, right, bottom);
         transformation.getMatrix().mapRect(invalidate);
+        tempRegion.set(invalidate);
         invalidate.union(previousRegion);
 
-        previousRegion.set(left, top, right, bottom);
-        transformation.getMatrix().mapRect(previousRegion);
+        previousRegion.set(tempRegion);
 
         final Transformation tempTransformation = mTransformation;
         final Transformation previousTransformation = mPreviousTransformation;

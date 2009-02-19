@@ -405,7 +405,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
          * Specify a label and icon as the tab indicator.
          */
         public TabSpec setIndicator(CharSequence label, Drawable icon) {
-            mIndicatorStrategy = new LabelAndIconIndicatorStategy(label, icon);
+            mIndicatorStrategy = new LabelAndIconIndicatorStrategy(label, icon);
             return this;
         }
 
@@ -497,12 +497,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     /**
      * How we create a tab indicator that has a label and an icon
      */
-    private class LabelAndIconIndicatorStategy implements IndicatorStrategy {
+    private class LabelAndIconIndicatorStrategy implements IndicatorStrategy {
 
         private final CharSequence mLabel;
         private final Drawable mIcon;
 
-        private LabelAndIconIndicatorStategy(CharSequence label, Drawable icon) {
+        private LabelAndIconIndicatorStrategy(CharSequence label, Drawable icon) {
             mLabel = label;
             mIcon = icon;
         }

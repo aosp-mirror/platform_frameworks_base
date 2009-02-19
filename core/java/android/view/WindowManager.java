@@ -513,26 +513,33 @@ public interface WindowManager extends ViewManager {
         
         /**
          * Visibility state for {@link #softInputMode}: please hide any soft input
-         * area.
+         * area when normally appropriate (when the user is navigating
+         * forward to your window).
          */
         public static final int SOFT_INPUT_STATE_HIDDEN = 2;
+        
+        /**
+         * Visibility state for {@link #softInputMode}: please always hide any
+         * soft input area when this window receives focus.
+         */
+        public static final int SOFT_INPUT_STATE_ALWAYS_HIDDEN = 3;
         
         /**
          * Visibility state for {@link #softInputMode}: please show the soft
          * input area when normally appropriate (when the user is navigating
          * forward to your window).
          */
-        public static final int SOFT_INPUT_STATE_VISIBLE = 3;
+        public static final int SOFT_INPUT_STATE_VISIBLE = 4;
         
         /**
          * Visibility state for {@link #softInputMode}: please always make the
          * soft input area visible when this window receives input focus.
          */
-        public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 4;
+        public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
         
         /**
          * Mask for {@link #softInputMode} of the bits that determine the
-         * way that the window should be adjusted to accomodate the soft
+         * way that the window should be adjusted to accommodate the soft
          * input window.
          */
         public static final int SOFT_INPUT_MASK_ADJUST = 0xf0;
@@ -634,6 +641,14 @@ public interface WindowManager extends ViewManager {
         public float dimAmount = 1.0f;
     
         /**
+         * This can be used to override the user's preferred brightness of
+         * the screen.  A value of less than 0, the default, means to use the
+         * preferred screen brightness.  0 to 1 adjusts the brightness from
+         * dark to full bright.
+         */
+        public float screenBrightness = -1.0f;
+        
+        /**
          * Identifier for this window.  This will usually be filled in for
          * you.
          */
@@ -729,6 +744,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(windowAnimations);
             out.writeFloat(alpha);
             out.writeFloat(dimAmount);
+            out.writeFloat(screenBrightness);
             out.writeStrongBinder(token);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
@@ -763,6 +779,7 @@ public interface WindowManager extends ViewManager {
             windowAnimations = in.readInt();
             alpha = in.readFloat();
             dimAmount = in.readFloat();
+            screenBrightness = in.readFloat();
             token = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -780,6 +797,7 @@ public interface WindowManager extends ViewManager {
         public static final int MEMORY_TYPE_CHANGED = 1<<8;
         public static final int SOFT_INPUT_MODE_CHANGED = 1<<9;
         public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
+        public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
     
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
@@ -873,6 +891,10 @@ public interface WindowManager extends ViewManager {
             if (dimAmount != o.dimAmount) {
                 dimAmount = o.dimAmount;
                 changes |= DIM_AMOUNT_CHANGED;
+            }
+            if (screenBrightness != o.screenBrightness) {
+                screenBrightness = o.screenBrightness;
+                changes |= SCREEN_BRIGHTNESS_CHANGED;
             }
     
             if (screenOrientation != o.screenOrientation) {

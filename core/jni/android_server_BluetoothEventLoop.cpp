@@ -755,17 +755,22 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
             // already bonded
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_SUCCESS;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress")) {
+            // don't make the java callback
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            goto done;
         } else {
             LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
             result = BOND_RESULT_ERROR;
         }
-        dbus_error_free(&err);
     }
 
     env->CallVoidMethod(event_loop_nat->me,
                         method_onCreateBondingResult,
                         env->NewStringUTF(address),
                         result);
+done:
+    dbus_error_free(&err);
     free(user);
 }
 

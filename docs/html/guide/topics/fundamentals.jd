@@ -42,6 +42,7 @@ page.title=Application Fundamentals
     <li><a href="#broadlife">Broadcast receiver lifecycle</a></li>
     <li><a href="#proclife">Processes and lifecycles</a></li>
   </ol></li>
+</ol>
 </div>
 </div>
 
@@ -401,7 +402,7 @@ components.  For example, an activity might be declared as follows:
         &lt;/activity&gt;
         . . .
     &lt;/application&gt;
-&lt/manifest&gt;</pre>
+&lt;/manifest&gt;</pre>
 
 <p>
 The {@code name} attribute of the 
@@ -469,7 +470,7 @@ two intent filters to the activity:
         &lt;/activity&gt;
         . . .
     &lt;/application&gt;
-&lt/manifest&gt;</pre>
+&lt;/manifest&gt;</pre>
 
 <p>
 The first filter in the example &mdash; the combination of the action
@@ -769,9 +770,9 @@ return to what that instance was doing before the new intent arrived.
 </p>
 
 <p>
-For more on launch modes, see 
-<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The
-AndroidManifest.xml File</a>
+For more on launch modes, see the description of the 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+element. 
 </p>
 
 
@@ -792,19 +793,25 @@ control this behavior and modify it:
 </p>
 
 <dl>
-<dt>The {@code alwaysRetainTaskState} attribute</dt>
+<dt>The <code><a 
+href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
+attribute</dt>
 <dd>If this attribute is set to "{@code true}" in the root activity of a task, 
 the default behavior just described does not happen.  
 The task retains all activities in its stack even after a long period.</dd>
 
-<dt>The {@code clearTaskOnLaunch} attribute</dt>
+<dt>The <code><a 
+href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code>
+attribute</dt>
 <dd>If this attribute is set to "{@code true}" in the root activity of a task, 
 the stack is cleared down to the root activity whenever the user leaves the task 
 and returns to it.  In other words, it's the polar opposite of 
 {@code alwaysRetainTaskState}.  The user always returns to the task in its
 initial state, even after a momentary absence.</dd>
 
-<dt>The {@code finishOnTaskLaunch} attribute</dt>
+<dt>The <code><a 
+href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTaskLaunch</a></code>
+attribute</dt>
 <dd>This attribute is like {@code clearTaskOnLaunch}, but it operates on a 
 single activity, not an entire task.  And it can cause any activity to go
 away, including the root activity.  When it's set to "{@code true}", the 
@@ -999,7 +1006,7 @@ in the following diagram:
 </p>
 
 <p style="margin-left: 2em">
-<img src="{@docRoot}images/binder_rpc.png" alt="RPC mechanism." border="0" />
+<img src="{@docRoot}images/binder_rpc.png" alt="RPC mechanism." />
 </p>
 
 <p>
@@ -1173,7 +1180,7 @@ to commit data changes and otherwise prepare to stop interacting with the user.
 </p>
 
 <div class="sidebox-wrapper">
-<div class="sidebox">
+<div class="sidebox-inner">
 <h2>Calling into the superclass</h2>
 <p>
 An implementation of any activity lifecycle method should always first 
@@ -1235,18 +1242,18 @@ to perform operations when the activity transitions between states.
 <p>
 
 <p style="margin-left: 2em"><img src="{@docRoot}images/activity_lifecycle.png"
-alt="State diagram for an Android activity lifecycle." border="0" /></p>  
+alt="State diagram for an Android activity lifecycle." /></p>  
   
 <p>
 The following table describes each of these methods in more detail and 
 locates it within the activity's overall lifecycle:
 </p>
 
-<table border="2" width="85%" align="center" frame="hsides" rules="rows">
-<colgroup align="left" span="3" />
-<colgroup align="left" />
-<colgroup align="center" />
-<colgroup align="center" />
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
 
 <thead>
 <tr><th colspan="3">Method</th> <th>Description</th> <th>Killable?</th> <th>Next</th></tr>
@@ -1254,7 +1261,7 @@ locates it within the activity's overall lifecycle:
 
 <tbody>
 <tr>
-  <td colspan="3" align="left" border="0"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
   <td>Called when the activity is first created.
       This is where you should do all of your normal static set up &mdash;
       create views, bind data to lists, and so on.  This method is passed
@@ -1268,7 +1275,7 @@ locates it within the activity's overall lifecycle:
 
 <tr>
    <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onRestart 
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart 
 onRestart()}</code></td>
    <td>Called after the activity has been stopped, just prior to it being
        started again.
@@ -1278,7 +1285,7 @@ onRestart()}</code></td>
 </tr>
 
 <tr>
-   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
    <td>Called just before the activity becomes visible to the user.
        <p>Followed by {@code onResume()} if the activity comes
        to the foreground, or {@code onStop()} if it becomes hidden.</p></td>
@@ -1288,7 +1295,7 @@ onRestart()}</code></td>
 
 <tr>
    <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-   <td align="left" border="0"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
    <td>Called just before the activity starts
        interacting with the user.  At this point the activity is at
        the top of the activity stack, with user input going to it.
@@ -1298,7 +1305,7 @@ onRestart()}</code></td>
 </tr>
 
 <tr>
-   <td align="left" border="0"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
    <td>Called when the system is about to start resuming another
        activity.  This method is typically used to commit unsaved changes to
        persistent data, stop animations and other things that may be consuming
@@ -1307,24 +1314,24 @@ onRestart()}</code></td>
        <p>Followed either by {@code onResume()} if the activity
        returns back to the front, or by {@code onStop()} if it becomes
        invisible to the user.</td>
-   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
    <td align="center">{@code onResume()} <br/>or<br/> {@code onStop()}</td>
 </tr>
 
 <tr>
-   <td colspan="2" align="left" border="0"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
    <td>Called when the activity is no longer visible to the user.  This
        may happen because it is being destroyed, or because another activity 
        (either an existing one or a new one) has been resumed and is covering it. 
        <p>Followed either by {@code onRestart()} if
        the activity is coming back to interact with the user, or by
        {@code onDestroy()} if this activity is going away.</p></td>
-   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
    <td align="center">{@code onRestart()} <br/>or<br/> {@code onDestroy()}</td>
 </tr>
 
 <tr>
-   <td colspan="3" align="left" border="0"><code>{@link android.app.Activity#onDestroy 
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy 
 onDestroy()}</code></td>
    <td>Called before the activity is destroyed.  This is the final call 
        that the activity will receive.  It could be called either because the
@@ -1333,7 +1340,7 @@ onDestroy()}</code></td>
        instance of the activity to save space.  You can distinguish
        between these two scenarios with the <code>{@link
        android.app.Activity#isFinishing isFinishing()}</code> method.</td>
-   <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
    <td align="center"><em>nothing</em></td>
 </tr>
 </tbody>
@@ -1346,7 +1353,7 @@ whether or not the system can kill the process hosting the activity
 line of the activity's code</em>.  Three methods ({@code onPause()},
 {@code onStop()}, and {@code onDestroy()}) are marked "Yes."  Because
 {@code onPause()} is the first of the three, it's the only one that's
-guaranteed to be called before the process is killed &mdash 
+guaranteed to be called before the process is killed &mdash; 
 {@code onStop()} and {@code onDestroy()} may not be.  Therefore, you 
 should use {@code onPause()} to write any persistent data (such as user 
 edits) to storage.
@@ -1380,7 +1387,7 @@ previous state.
 To capture that state before the activity is killed, you can implement
 an <code>{@link android.app.Activity#onSaveInstanceState 
 onSaveInstanceState()}</code> method for the activity.  Android calls this 
-method before making the activity vulnerable to being destroyed &mdash 
+method before making the activity vulnerable to being destroyed &mdash;
 that is, before {@code onPause()} is called.  It
 passes the method a {@link android.os.Bundle} object where you can record 
 the dynamic state of the activity as name-value pairs.  When the activity is 
@@ -1552,7 +1559,7 @@ so any service may receive {@code onBind()} and {@code onUnbind()} calls.
 </p>
 
 <p style="margin-left: 2em"><img src="{@docRoot}images/service_lifecycle.png"
-alt="State diagram for Service callbacks." border="0" /></p>
+alt="State diagram for Service callbacks." /></p>
 
 
 <h3 id="broadlife">Broadcast receiver lifecycle</h3>
@@ -1615,7 +1622,7 @@ in the foreground if any of the following conditions hold:
 <ul>
 <li>It is running an activity that the user is interacting with 
 (the Activity object's <code>{@link android.app.Activity#onResume 
-onResume()}</code> method has been called).</p></li>
+onResume()}</code> method has been called).</li>
 
 <li><p>It hosts a service that's bound 
 to the activity that the user is interacting with.</p></li>

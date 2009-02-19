@@ -262,10 +262,8 @@
     <string name="permdesc_reboot">"Pozwala aplikacji na wymuszenie ponownego uruchomienia telefonu."</string>
     <string name="permlab_mount_unmount_filesystems">"montowanie i odmontowanie systemów plików"</string>
     <string name="permdesc_mount_unmount_filesystems">"Pozwala aplikacjom na podłączanie i odłączanie systemów plików w pamięciach przenośnych."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
-    <skip />
-    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems">"formatowanie pamięci zewnętrznej"</string>
+    <string name="permdesc_mount_format_filesystems">"Zezwala aplikacji na formatowanie wymiennych nośników."</string>
     <string name="permlab_vibrate">"kontrolowanie wibracji"</string>
     <string name="permdesc_vibrate">"Pozwala aplikacjom na kontrolowanie wibracji."</string>
     <string name="permlab_flashlight">"kontrolowanie latarki"</string>
@@ -280,10 +278,8 @@
     <string name="permdesc_locationUpdates">"Pozwala włączyć/wyłączyć powiadomienia o aktualizacji położenia przez radio. Nie wykorzystywane przez normalne aplikacje."</string>
     <string name="permlab_checkinProperties">"dostęp do właściwości usługi rezerwacji"</string>
     <string name="permdesc_checkinProperties">"Pozwala na dostęp z uprawnieniami do odczytu/zapisu do właściwości przesłanych przez usługę rezerwacji. Nie wykorzystywane przez normalne aplikacje."</string>
-    <!-- no translation found for permlab_bindGadget (2519859363977647275) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (7865866514555126333) -->
-    <skip />
+    <string name="permlab_bindGadget">"wybieranie gadżetów"</string>
+    <string name="permdesc_bindGadget">"Zezwala aplikacjom na wskazywanie systemowi, które gadżety mogą być używane przez inne aplikacje. Z użyciem tego pozwolenia aplikacje mogą udzielać dostępu do danych osobistych innym aplikacjom. Nie jest ono przeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_modifyPhoneState">"zmiana stanu telefonu"</string>
     <string name="permdesc_modifyPhoneState">"Pozwala aplikacji na kontrolowanie funkcji telefonu w urządzeniu. Aplikacja z tymi uprawnieniami może przełączać sieci, włączać i wyłączać radio itp. bez informowania użytkownika."</string>
     <string name="permlab_readPhoneState">"czytanie stanu telefonu"</string>
@@ -312,10 +308,8 @@
     <string name="permdesc_writeApnSettings">"Pozwala aplikacji na zmianę ustawień APN, takich jak serwer proxy oraz port dowolnego APN."</string>
     <string name="permlab_changeNetworkState">"zmienianie połączeń sieci"</string>
     <string name="permdesc_changeNetworkState">"Pozwala aplikacji na zmianę stanu połączeń sieciowych."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
-    <skip />
+    <string name="permlab_changeBackgroundDataSetting">"zmienianie ustawienia używania danych w tle"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Zezwala aplikacji na zmianę ustawień użycia danych w tle."</string>
     <string name="permlab_accessWifiState">"wyświetlanie stanu Wi-Fi"</string>
     <string name="permdesc_accessWifiState">"Pozwala aplikacji na wyświetlanie informacji o stanie Wi-Fi."</string>
     <string name="permlab_changeWifiState">"zmiana stanu Wi-Fi"</string>
@@ -336,14 +330,10 @@
     <string name="permdesc_subscribedFeedsRead">"Pozwala aplikacjom na pobieranie informacji szczegółowych na temat obecnie zsynchronizowanych źródeł."</string>
     <string name="permlab_subscribedFeedsWrite">"zapisywanie subskrybowanych źródeł"</string>
     <string name="permdesc_subscribedFeedsWrite">"Umożliwia aplikacji zmianę obecnie zsynchronizowanych źródeł. Może to pozwolić szkodliwej aplikacji na zmianę zsynchronizowanych źródeł."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"odczytywanie słownika zdefiniowanego przez użytkownika"</string>
+    <string name="permdesc_readDictionary">"Zezwala aplikacji na odczytywanie wszelkich prywatnych słów, nazw i wyrażeń zapisanych przez użytkownika w swoim słowniku."</string>
+    <string name="permlab_writeDictionary">"zapisywanie w słowniku zdefiniowanym przez użytkownika"</string>
+    <string name="permdesc_writeDictionary">"Zezwala aplikacjom na zapisywanie nowych słów w słowniku użytkownika."</string>
   <string-array name="phoneTypes">
     <item>"Dom"</item>
     <item>"Komórka"</item>
@@ -440,12 +430,9 @@
     <string name="factorytest_not_system">"Czynność FACTORY_TEST jest obsługiwana tylko dla pakietów zainstalowanych w katalogu /system/app."</string>
     <string name="factorytest_no_action">"Nie znaleziono żadnego pakietu, który zapewnia działanie FACTORY_TEST."</string>
     <string name="factorytest_reboot">"Uruchom ponownie"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"Komunikat ze strony pod adresem „<xliff:g id="TITLE">%s</xliff:g>”:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Czy opuścić tę stronę?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wybierz opcję OK, aby kontynuować, lub opcję Anuluj, aby pozostać na tej stronie."</string>
     <string name="save_password_label">"Potwierdź"</string>
     <string name="save_password_message">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
     <string name="save_password_notnow">"Nie teraz"</string>
@@ -496,22 +483,38 @@
     <item quantity="one">"jutro"</item>
     <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"sekundę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> sek. temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"minutę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> min temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"godzinę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"wczoraj"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dni temu"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"za sekundę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"za minutę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"za godzinę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> godz."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"jutro"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
+  </plurals>
     <string name="preposition_for_date">"dnia %s"</string>
     <string name="preposition_for_time">"o %s"</string>
     <string name="preposition_for_year">"w %s"</string>
@@ -553,17 +556,15 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"południe"</string>
     <string name="Noon">"Południe"</string>
     <string name="midnight">"północ"</string>
@@ -691,8 +692,7 @@
     <string name="paste">"Wklej"</string>
     <string name="copyUrl">"Kopiuj adres URL"</string>
     <string name="inputMethod">"Metoda wejściowa"</string>
-    <!-- no translation found for addToDictionary (726256909274177272) -->
-    <skip />
+    <string name="addToDictionary">"Dodaj „%s” do słownika"</string>
     <string name="editTextMenuTitle">"Edytuj tekst"</string>
     <string name="low_internal_storage_view_title">"Mało miejsca"</string>
     <string name="low_internal_storage_view_text">"Maleje ilość dostępnej pamięci telefonu."</string>
@@ -700,8 +700,7 @@
     <string name="cancel">"Anuluj"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Anuluj"</string>
-    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
-    <skip />
+    <string name="dialog_alert_title">"Uwaga"</string>
     <string name="capital_on">"Włącz"</string>
     <string name="capital_off">"Wyłącz"</string>
     <string name="whichApplication">"Zakończ działanie, korzystając z"</string>
@@ -725,8 +724,7 @@
     <string name="volume_music">"Głośność multimediów"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Odtwarzanie przez Bluetooth"</string>
     <string name="volume_call">"Głośność podczas połączenia"</string>
-    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
-    <skip />
+    <string name="volume_bluetooth_call">"Głośność Bluetooth w czasie połączenia"</string>
     <string name="volume_alarm">"Głośność alarmu"</string>
     <string name="volume_notification">"Głośność powiadomienia"</string>
     <string name="volume_unknown">"Głośność"</string>
@@ -762,60 +760,35 @@
     <string name="usb_storage_error_message">"Wystąpił problem z wykorzystaniem karty SD dla pamięci USB."</string>
     <string name="usb_storage_notification_title">"Połączenie przez USB"</string>
     <string name="usb_storage_notification_message">"Wybierz, aby skopiować pliki do/z komputera"</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
-    <skip />
-    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
-    <skip />
-    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
-    <skip />
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
+    <string name="usb_storage_stop_notification_title">"Wyłącz nośnik USB"</string>
+    <string name="usb_storage_stop_notification_message">"Wybierz, aby wyłączyć nośnik USB."</string>
+    <string name="usb_storage_stop_title">"Wyłącz nośnik USB"</string>
+    <string name="usb_storage_stop_message">"Przed wyłączeniem nośnika USB upewnij się, że odłączono go od hosta USB. Wybierz „Wyłącz”, aby wyłączyć nośnik USB."</string>
+    <string name="usb_storage_stop_button_mount">"Wyłącz"</string>
+    <string name="usb_storage_stop_button_unmount">"Anuluj"</string>
+    <string name="usb_storage_stop_error_message">"Napotkano problem przy wyłączaniu nośnika USB. Sprawdź, czy host USB został odłączony i spróbuj ponownie."</string>
+    <string name="extmedia_format_title">"Formatuj kartę SD"</string>
+    <string name="extmedia_format_message">"Czy na pewno sformatować kartę SD? Wszystkie dane na karcie zostaną utracone."</string>
+    <string name="extmedia_format_button_format">"Formatuj"</string>
     <string name="select_input_method">"Wybierz metodę wejściową"</string>
     <string name="fast_scroll_alphabet">"AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for candidates_style (4333913089637062257) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
-    <skip />
-    <!-- no translation found for activity_list_empty (4168820609403385789) -->
-    <skip />
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
-    <skip />
+    <string name="candidates_style"><u>"kandydaci"</u></string>
+    <string name="ext_media_checking_notification_title">"Przygotowywanie karty SD"</string>
+    <string name="ext_media_checking_notification_message">"Sprawdzanie w poszukiwaniu błędów"</string>
+    <string name="ext_media_nofs_notification_title">"Pusta karta SD"</string>
+    <string name="ext_media_nofs_notification_message">"Karta SD jest pusta lub używa nieobsługiwanego systemu plików."</string>
+    <string name="ext_media_unmountable_notification_title">"Uszkodzona karta SD"</string>
+    <string name="ext_media_unmountable_notification_message">"Karta SD jest uszkodzona. Konieczne może być przeformatowanie karty."</string>
+    <string name="ext_media_badremoval_notification_title">"Karta SD została nieoczekiwanie wyjęta"</string>
+    <string name="ext_media_badremoval_notification_message">"Odłącz kartę SD przed jej wyjęciem, aby uniknąć utraty danych."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Można bezpiecznie usunąć kartę SD"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Można teraz bezpiecznie usunąć kartę SD."</string>
+    <string name="ext_media_nomedia_notification_title">"Usunięta karta SD"</string>
+    <string name="ext_media_nomedia_notification_message">"Karta SD została usunięta. Włóż nową kartę SD, aby zwiększyć pamięć urządzenia."</string>
+    <string name="activity_list_empty">"Nie znaleziono pasujących działań"</string>
+    <string name="permlab_pkgUsageStats">"aktualizowanie statystyk użycia komponentu"</string>
+    <string name="permdesc_pkgUsageStats">"Zezwala na modyfikacje zebranych statystyk użycia komponentu. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
     <skip />
 </resources>

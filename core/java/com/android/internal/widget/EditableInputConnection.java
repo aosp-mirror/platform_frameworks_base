@@ -96,4 +96,21 @@ public class EditableInputConnection extends BaseInputConnection {
         mTextView.onPrivateIMECommand(action, data);
         return true;
     }
+
+    @Override
+    public boolean commitText(CharSequence text, int newCursorPosition) {
+        if (mTextView == null) {
+            return super.commitText(text, newCursorPosition);
+        }
+
+        CharSequence errorBefore = mTextView.getError();
+        boolean success = super.commitText(text, newCursorPosition);
+        CharSequence errorAfter = mTextView.getError();
+
+        if (errorAfter != null && errorBefore == errorAfter) {
+            mTextView.setError(null, null);
+        }
+
+        return success;
+    }
 }

@@ -42,6 +42,7 @@ public class AnimatedImageView extends ImageView {
     }
 
     @Override
+    @android.view.RemotableViewMethod
     public void setImageResource(int resid) {
         super.setImageResource(resid);
         updateAnim();

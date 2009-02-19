@@ -65,6 +65,8 @@ interface IAudioService {
 
     oneway void playSoundEffect(int effectType);
   
+    oneway void playSoundEffectVolume(int effectType, float volume);
+
     boolean loadSoundEffects();
   
     oneway void unloadSoundEffects();

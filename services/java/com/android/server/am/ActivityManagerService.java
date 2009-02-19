@@ -204,6 +204,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     static final int LAUNCH_TIMEOUT = 10*1000;
 
+    // How long we wait for a launched process to attach to the activity manager
+    // before we decide it's never going to come up for real.
+    static final int PROC_START_TIMEOUT = 10*1000;
+
     // How long we wait until giving up on the last activity telling us it
     // is idle.
     static final int IDLE_TIMEOUT = 10*1000;
@@ -811,6 +815,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int DESTROY_TIMEOUT_MSG = 17;
     static final int SERVICE_ERROR_MSG = 18;
     static final int RESUME_TOP_ACTIVITY_MSG = 19;
+    static final int PROC_START_TIMEOUT_MSG = 20;
 
     AlertDialog mUidAlert;
 
@@ -852,12 +857,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             } break;
             case SHOW_NOT_RESPONDING_MSG: {
-                HashMap data = (HashMap) msg.obj;
-                // This needs to be *un*synchronized to avoid deadlock.
-                Checkin.logEvent(mContext.getContentResolver(),
-                        Checkin.Events.Tag.SYSTEM_APP_NOT_RESPONDING,
-                        (String)data.get("info"));
                 synchronized (ActivityManagerService.this) {
+                    HashMap data = (HashMap) msg.obj;
                     ProcessRecord proc = (ProcessRecord)data.get("app");
                     if (proc != null && proc.anrDialog != null) {
                         Log.e(TAG, "App already has anr dialog: " + proc);
@@ -991,6 +992,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             case RESUME_TOP_ACTIVITY_MSG: {
                 synchronized (ActivityManagerService.this) {
                     resumeTopActivityLocked(null);
+                }
+            }
+            case PROC_START_TIMEOUT_MSG: {
+                ProcessRecord app = (ProcessRecord)msg.obj;
+                synchronized (ActivityManagerService.this) {
+                    processStartTimedOutLocked(app);
                 }
             }
             }
@@ -1685,6 +1692,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app.pid > 0 && app.pid != MY_PID) {
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
+                mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
             app.pid = 0;
         }
@@ -1777,6 +1785,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 app.removed = false;
                 synchronized (mPidsSelfLocked) {
                     this.mPidsSelfLocked.put(pid, app);
+                    Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                    msg.obj = app;
+                    mHandler.sendMessageDelayed(msg, PROC_START_TIMEOUT);
                 }
             } else {
                 app.pid = 0;
@@ -4033,9 +4044,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             info.append("\nCPU usage:\n");
             info.append(processInfo);
         }
-        info.append("\n/proc/meminfo:\n");
-        info.append(readFile("/proc/meminfo"));
-        
         Log.i(TAG, info.toString());
 
         // The application is not responding. Dump as many thread traces as we can.
@@ -4087,7 +4095,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         msg.what = SHOW_NOT_RESPONDING_MSG;
         msg.obj = map;
         map.put("app", app);
-        map.put("info", info.toString());
         if (activity != null) {
             map.put("activity", activity);
         }
@@ -4390,6 +4397,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int pid = app.pid;
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(pid);
+                mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
             handleAppDiedLocked(app, true);
             mLRUProcesses.remove(app);
@@ -4407,6 +4415,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         return needRestart;
+    }
+
+    private final void processStartTimedOutLocked(ProcessRecord app) {
+        final int pid = app.pid;
+        boolean gone = false;
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord knownApp = mPidsSelfLocked.get(pid);
+            if (knownApp != null && knownApp.thread == null) {
+                mPidsSelfLocked.remove(pid);
+                gone = true;
+            }        
+        }
+        
+        if (gone) {
+            Log.w(TAG, "Process " + app + " failed to attach");
+            mProcessNames.remove(app.processName, app.info.uid);
+            Process.killProcess(pid);
+            if (mPendingBroadcast.curApp.pid == pid) {
+                Log.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
+                mPendingBroadcast = null;
+                scheduleBroadcastsLocked();
+            }
+        } else {
+            Log.w(TAG, "Spurious process start timeout - pid not known for " + app);
+        }
     }
 
     private final boolean attachApplicationLocked(IApplicationThread thread,
@@ -4471,6 +4504,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.debugging = false;
+
+        mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
 
         List providers = generateApplicationProvidersLocked(app);
 
@@ -8630,6 +8665,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Goodbye!
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
+                mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
             app.pid = 0;
         }

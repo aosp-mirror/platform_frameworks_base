@@ -31,7 +31,6 @@ import android.widget.RemoteViews.RemoteView;
  *
  * @attr ref android.R.styleable#ViewFlipper_flipInterval
  */
-@RemoteView
 public class ViewFlipper extends ViewAnimator {
     private int mFlipInterval = 3000;
     private boolean mKeepFlipping = false;
@@ -56,6 +55,7 @@ public class ViewFlipper extends ViewAnimator {
      * @param milliseconds
      *            time in milliseconds
      */
+    @android.view.RemotableViewMethod
     public void setFlipInterval(int milliseconds) {
         mFlipInterval = milliseconds;
     }

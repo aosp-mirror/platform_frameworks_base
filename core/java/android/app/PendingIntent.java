@@ -426,13 +426,9 @@ public final class PendingIntent implements Parcelable {
      */
     @Override
     public boolean equals(Object otherObj) {
-        if (otherObj == null) {
-            return false;
-        }
-        try {
+        if (otherObj instanceof PendingIntent) {
             return mTarget.asBinder().equals(((PendingIntent)otherObj)
                     .mTarget.asBinder());
-        } catch (ClassCastException e) {
         }
         return false;
     }
@@ -442,6 +438,13 @@ public final class PendingIntent implements Parcelable {
         return mTarget.asBinder().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "PendingIntent{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " target " + (mTarget != null ? mTarget.asBinder() : null) + "}";
+    }
+    
     public int describeContents() {
         return 0;
     }

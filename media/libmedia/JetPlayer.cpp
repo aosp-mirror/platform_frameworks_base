@@ -86,8 +86,8 @@ int JetPlayer::init()
         mState = EAS_STATE_ERROR;
         return result;
     }
-    // init the JET library
-    result = JET_Init(mEasData, NULL, 0);
+    // init the JET library with the default app event controller range
+    result = JET_Init(mEasData, NULL, sizeof(S_JET_CONFIG));
     if( result != EAS_SUCCESS) {
         LOGE("JetPlayer::init(): Error initializing JET library, aborting.");
         mState = EAS_STATE_ERROR;
@@ -200,6 +200,11 @@ int JetPlayer::render() {
         while (!mRender)
         {
             LOGV("JetPlayer::render(): signal wait");
+            if (audioStarted) { 
+                mAudioTrack->pause(); 
+                // we have to restart the playback once we start rendering again
+                audioStarted = false;
+            }
             mCondition.wait(mMutex);
             LOGV("JetPlayer::render(): signal rx'd");
         }
@@ -315,7 +320,7 @@ void JetPlayer::fireEventsFromJetQueue()
         while (JET_GetEvent(mEasData, NULL, NULL)) { }
         return;
     }
-    
+
     EAS_U32 rawEvent;
     while (JET_GetEvent(mEasData, &rawEvent, NULL)) {
         mEventCallback(

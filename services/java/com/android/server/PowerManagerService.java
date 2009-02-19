@@ -182,6 +182,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private long mScreenOnTime;
     private long mScreenOnStartTime;
     private boolean mPreventScreenOn;
+    private int mScreenBrightnessOverride = -1;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -245,7 +246,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         public void acquire() {
             if (!mRefCounted || mCount++ == 0) {
-                PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken, mTag);
+                PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
+                        MY_UID, mTag);
             }
         }
 
@@ -486,17 +488,18 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     public void acquireWakeLock(int flags, IBinder lock, String tag) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLocks) {
-                acquireWakeLockLocked(flags, lock, tag);
+                acquireWakeLockLocked(flags, lock, uid, tag);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    public void acquireWakeLockLocked(int flags, IBinder lock, String tag) {
+    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, String tag) {
         int acquireUid = -1;
         String acquireName = null;
         int acquireType = -1;
@@ -509,7 +512,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         WakeLock wl;
         boolean newlock;
         if (index < 0) {
-            wl = new WakeLock(flags, lock, tag, Binder.getCallingUid());
+            wl = new WakeLock(flags, lock, tag, uid);
             switch (wl.flags & LOCK_MASK)
             {
                 case PowerManager.FULL_WAKE_LOCK:
@@ -577,13 +580,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
 
         if (acquireType >= 0) {
-            long origId = Binder.clearCallingIdentity();
             try {
                 mBatteryStats.noteStartWakelock(acquireUid, acquireName, acquireType);
             } catch (RemoteException e) {
                 // Ignore
-            } finally {
-                Binder.restoreCallingIdentity(origId);
             }
         }
     }
@@ -797,6 +797,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 + " mUserActivityAllowed=" + mUserActivityAllowed);
         pw.println("  mKeylightDelay=" + mKeylightDelay + " mDimDelay=" + mDimDelay
                 + " mScreenOffDelay=" + mScreenOffDelay);
+        pw.println("  mPreventScreenOn=" + mPreventScreenOn
+                + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride);
         pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
@@ -1077,7 +1079,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
      * lock (rather than an IPowerManager call).
      */
     public void preventScreenOn(boolean prevent) {
-        // TODO: use a totally new permission (separate from DEVICE_POWER) for this?
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         synchronized (mLocks) {
@@ -1126,6 +1127,17 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
 
+    public void setScreenBrightnessOverride(int brightness) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        synchronized (mLocks) {
+            if (mScreenBrightnessOverride != brightness) {
+                mScreenBrightnessOverride = brightness;
+                updateLightsLocked(mPowerState, SCREEN_ON_BIT);
+            }
+        }
+    }
+    
     /**
      * Sanity-check that gets called 5 seconds after any call to
      * preventScreenOn(true).  This ensures that the original call
@@ -1211,7 +1223,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             }
 
             if (mPowerState != newState) {
-                err = updateLightsLocked(newState, becauseOfUser);
+                err = updateLightsLocked(newState, 0);
                 if (err != 0) {
                     return;
                 }
@@ -1294,6 +1306,15 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
             if (err == 0) {
+                // 
+                //      FIXME(joeo)
+                //
+                // The problem that causes the screen not to come on is that this isn't
+                // called until after the animation is done.  It needs to be set right
+                // away, and the anmiation's state needs to be recorded separately.
+                // 
+                // 
+                
                 mPowerState &= ~SCREEN_ON_BIT;
                 int why = becauseOfUser
                         ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
@@ -1310,9 +1331,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 mBatteryService.getBatteryLevel() <= Power.LOW_BATTERY_THRESHOLD);
     }
 
-    private int updateLightsLocked(int newState, boolean becauseOfUser) {
+    private int updateLightsLocked(int newState, int forceState) {
         int oldState = mPowerState;
-        int difference = newState ^ oldState;
+        int difference = (newState ^ oldState) | forceState;
         if (difference == 0) {
             return 0;
         }
@@ -1544,6 +1565,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     
     private int getPreferredBrightness() {
         try {
+            if (mScreenBrightnessOverride >= 0) {
+                return mScreenBrightnessOverride;
+            }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
                                                           SCREEN_BRIGHTNESS);
              // Don't let applications turn the screen all the way off

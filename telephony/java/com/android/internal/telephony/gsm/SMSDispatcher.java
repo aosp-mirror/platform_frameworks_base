@@ -449,6 +449,13 @@ final class SMSDispatcher extends Handler {
      * @param sms the incoming message from the phone
      */
     /* package */ void dispatchMessage(SmsMessage sms) {
+
+        // If sms is null, means there was a parsing error.
+        // TODO: Should NAK this.
+        if (sms == null) {
+            return;
+        }
+
         boolean handled = false;
 
         // Special case the message waiting indicator messages

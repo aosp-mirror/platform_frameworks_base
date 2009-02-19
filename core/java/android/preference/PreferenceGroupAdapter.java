@@ -242,7 +242,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             mHasReturnedViewTypeCount = true;
         }
         
-        return mPreferenceClassNames.size();
+        return Math.max(1, mPreferenceClassNames.size());
     }
 
 }

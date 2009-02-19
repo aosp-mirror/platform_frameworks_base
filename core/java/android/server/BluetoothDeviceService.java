@@ -111,9 +111,19 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native int isEnabledNative();
 
     /**
-     * Disable bluetooth. Returns true on success.
+     * Bring down bluetooth and disable BT in settings. Returns true on success.
      */
-    public synchronized boolean disable() {
+    public boolean disable() {
+        return disable(true);
+    }
+
+    /**
+     * Bring down bluetooth. Returns true on success.
+     *
+     * @param saveSetting If true, disable BT in settings
+     * 
+     */
+    public synchronized boolean disable(boolean saveSetting) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
 
@@ -137,7 +147,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         mIsEnabled = false;
-        persistBluetoothOnSetting(false);
+        if (saveSetting) {
+            persistBluetoothOnSetting(false);
+        }
         mIsDiscovering = false;
         intent = new Intent(BluetoothIntent.DISABLED_ACTION);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
@@ -145,13 +157,27 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     /**
+     * Bring up bluetooth, asynchronously, and enable BT in settings.
+     * This turns on/off the underlying hardware.
+     *
+     * @return True on success (so far), guaranteeing the callback with be
+     * notified when complete.
+     */
+    public boolean enable(IBluetoothDeviceCallback callback) {
+        return enable(callback, true);
+    }
+
+    /**
      * Enable this Bluetooth device, asynchronously.
      * This turns on/off the underlying hardware.
      *
-     * @return True on success (so far), guarenteeing the callback with be
+     * @param saveSetting If true, enable BT in settings
+     * 
+     * @return True on success (so far), guaranteeing the callback with be
      * notified when complete.
      */
-    public synchronized boolean enable(IBluetoothDeviceCallback callback) {
+    public synchronized boolean enable(IBluetoothDeviceCallback callback,
+            boolean saveSetting) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
 
@@ -165,7 +191,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
-        mEnableThread = new EnableThread(callback);
+        mEnableThread = new EnableThread(callback, saveSetting);
         mEnableThread.start();
         return true;
     }
@@ -189,8 +215,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     private class EnableThread extends Thread {
         private final IBluetoothDeviceCallback mEnableCallback;
-        public EnableThread(IBluetoothDeviceCallback callback) {
+        private final boolean mSaveSetting;
+        public EnableThread(IBluetoothDeviceCallback callback, boolean saveSetting) {
             mEnableCallback = callback;
+            mSaveSetting = saveSetting;
         }
         public void run() {
             boolean res = (enableNative() == 0);
@@ -208,7 +236,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
             if (res) {
                 mIsEnabled = true;
-                persistBluetoothOnSetting(true);
+                if (mSaveSetting) {
+                    persistBluetoothOnSetting(true);
+                }
                 mIsDiscovering = false;
                 Intent intent = new Intent(BluetoothIntent.ENABLED_ACTION);
                 mBondState.loadBondState();
@@ -952,9 +982,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 // If bluetooth is currently expected to be on, then enable or disable bluetooth
                 if (Settings.Secure.getInt(resolver, Settings.Secure.BLUETOOTH_ON, 0) > 0) {
                     if (enabled) {
-                        enable(null);
+                        enable(null, false);
                     } else {
-                        disable();
+                        disable(false);
                     }
                 }
             }

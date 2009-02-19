@@ -156,7 +156,7 @@ status_t AudioTrack::set(
     }
 
     // validate parameters
-    if (((format != AudioSystem::PCM_8_BIT) || mSharedBuffer != 0) &&
+    if (((format != AudioSystem::PCM_8_BIT) || sharedBuffer != 0) &&
         (format != AudioSystem::PCM_16_BIT)) {
         LOGE("Invalid format");
         return BAD_VALUE;

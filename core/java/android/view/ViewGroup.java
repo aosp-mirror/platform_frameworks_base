@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RectF;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -1023,6 +1024,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     void dispatchDetachedFromWindow() {
+        // If we still have a motion target, we are still in the process of
+        // dispatching motion events to a child; we need to get rid of that
+        // child to avoid dispatching events to it after the window is torn
+        // down. To make sure we keep the child in a consistent state, we
+        // first send it an ACTION_CANCEL motion event.
+        if (mMotionTarget != null) {
+            final long now = SystemClock.uptimeMillis();
+            final MotionEvent event = MotionEvent.obtain(now, now,
+                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+            mMotionTarget.dispatchTouchEvent(event);
+            event.recycle();
+            mMotionTarget = null;
+        }
+
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
@@ -1331,6 +1346,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final Animation a = child.getAnimation();
         boolean concatMatrix = false;
 
+        final int childWidth = cr - cl;
+        final int childHeight = cb - ct;
+
         if (a != null) {
             if (mInvalidateRegion == null) {
                 mInvalidateRegion = new RectF();
@@ -1339,8 +1357,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             final boolean initialized = a.isInitialized();
             if (!initialized) {
-                a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
-                a.initializeInvalidateRegion(cl, ct, cr, cb);
+                a.initialize(childWidth, childHeight, getWidth(), getHeight());
+                a.initializeInvalidateRegion(0, 0, childWidth, childHeight);
                 child.onAnimationStart();
             }
 
@@ -1364,7 +1382,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    a.getInvalidateRegion(cl, ct, cr, cb, region, transformToApply);
+                    a.getInvalidateRegion(0, 0, childWidth, childHeight, region, transformToApply);
 
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
@@ -1372,8 +1390,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // Enlarge the invalidate region to account for rounding errors
                     // in Animation#getInvalidateRegion(); Using 0.5f is unfortunately
                     // not enough for some types of animations (e.g. scale down.)
-                    invalidate((int) (region.left - 1.0f), (int) (region.top - 1.0f),
-                            (int) (region.right + 1.0f), (int) (region.bottom + 1.0f));
+                    final int left = cl + (int) (region.left - 1.0f);
+                    final int top = ct + (int) (region.top - 1.0f);
+                    invalidate(left, top,
+                            left + (int) (region.width() + 1.0f),
+                            top + (int) (region.height() + 1.0f));
                 }
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
@@ -1453,9 +1474,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
             if (hasNoCache) {
-                canvas.clipRect(sx, sy, sx + cr - cl, sy + cb - ct);
+                canvas.clipRect(sx, sy, sx + childWidth, sy + childHeight);
             } else {
-                canvas.clipRect(0, 0, cr - cl, cb - ct);
+                canvas.clipRect(0, 0, childWidth, childHeight);
             }
         }
 

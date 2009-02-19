@@ -29,6 +29,20 @@ public class PackageInfo implements Parcelable {
     public String versionName;
     
     /**
+     * The shared user ID name of this package, as specified by the &lt;manifest&gt;
+     * tag's {@link android.R.styleable#AndroidManifest_sharedUserId sharedUserId}
+     * attribute.
+     */
+    public String sharedUserId;
+    
+    /**
+     * The shared user ID label of this package, as specified by the &lt;manifest&gt;
+     * tag's {@link android.R.styleable#AndroidManifest_sharedUserLabel sharedUserLabel}
+     * attribute.
+     */
+    public int sharedUserLabel;
+    
+    /**
      * Information collected from the &lt;application&gt; tag, or null if
      * there was none.
      */
@@ -130,6 +144,8 @@ public class PackageInfo implements Parcelable {
         dest.writeString(packageName);
         dest.writeInt(versionCode);
         dest.writeString(versionName);
+        dest.writeString(sharedUserId);
+        dest.writeInt(sharedUserLabel);
         if (applicationInfo != null) {
             dest.writeInt(1);
             applicationInfo.writeToParcel(dest, parcelableFlags);
@@ -163,6 +179,8 @@ public class PackageInfo implements Parcelable {
         packageName = source.readString();
         versionCode = source.readInt();
         versionName = source.readString();
+        sharedUserId = source.readString();
+        sharedUserLabel = source.readInt();
         int hasApp = source.readInt();
         if (hasApp != 0) {
             applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);

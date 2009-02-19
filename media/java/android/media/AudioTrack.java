@@ -538,9 +538,10 @@ public class AudioTrack
      * @param audioFormat the format in which the audio data is represented. 
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and 
      *   {@link AudioFormat#ENCODING_PCM_8BIT}
-     * @return -1 if an invalid parameter was passed or if the implementation was unable to
-     *   query the hardware for its output properties, or the minimum buffer size expressed
-     *   in number of bytes.
+     * @return {@link #ERROR_BAD_VALUE} if an invalid parameter was passed,
+     *   or {@link #ERROR} if the implementation was unable to query the hardware for its output 
+     *     properties, 
+     *   or the minimum buffer size expressed  in number of bytes.
      */
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
@@ -553,16 +554,28 @@ public class AudioTrack
             break;
         default:
             loge("getMinBufferSize(): Invalid channel configuration.");
-            return -1;
+            return AudioTrack.ERROR_BAD_VALUE;
         }
         
         if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT) 
             && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)) {
             loge("getMinBufferSize(): Invalid audio format.");
-            return -1;
+            return AudioTrack.ERROR_BAD_VALUE;
         }
         
-        return native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
+        if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
+            loge("getMinBufferSize(): " + sampleRateInHz +"Hz is not a supported sample rate.");
+            return AudioTrack.ERROR_BAD_VALUE;
+        }
+        
+        int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
+        if ((size == -1) || (size == 0)) {
+            loge("getMinBufferSize(): error querying hardware");
+            return AudioTrack.ERROR;
+        }
+        else {
+            return size;
+        }
     }
 
 
@@ -810,7 +823,7 @@ public class AudioTrack
             return -1;
         }
 
-        return native_write_byte(audioData, offsetInBytes, sizeInBytes);
+        return native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat);
     }
 
 
@@ -836,7 +849,7 @@ public class AudioTrack
             return -1;
         }
 
-        return native_write_short(audioData, offsetInShorts, sizeInShorts);
+        return native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
     }
 
 
@@ -969,10 +982,10 @@ public class AudioTrack
     private native final void native_flush();
 
     private native final int native_write_byte(byte[] audioData,
-                                               int offsetInBytes, int sizeInBytes);
+                                               int offsetInBytes, int sizeInBytes, int format);
 
     private native final int native_write_short(short[] audioData,
-                                                int offsetInShorts, int sizeInShorts);
+                                                int offsetInShorts, int sizeInShorts, int format);
 
     private native final int native_reload_static();
 

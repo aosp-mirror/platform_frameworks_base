@@ -102,7 +102,7 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean hasWindowFocus() {
-        return true;
+        return this.isEnabled() ? true : false;
     }
 
     /**
@@ -110,7 +110,7 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean isFocused() {
-        return true;
+        return this.isEnabled() ? true : false;
     }
 
     /**
@@ -118,7 +118,6 @@ public class ExtractEditText extends EditText {
      * highlight and cursor will be displayed.
      */
     @Override public boolean hasFocus() {
-        return true;
+        return this.isEnabled() ? true : false;
     }
-    
 }

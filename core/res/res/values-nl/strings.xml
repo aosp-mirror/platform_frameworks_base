@@ -262,10 +262,8 @@
     <string name="permdesc_reboot">"Hiermee kan de toepassing de telefoon gedwongen opnieuw opstarten."</string>
     <string name="permlab_mount_unmount_filesystems">"bestandssystemen koppelen en ontkoppelen"</string>
     <string name="permdesc_mount_unmount_filesystems">"Hiermee kan de toepassing bestandssystemen koppelen en ontkoppelen voor verwisselbare opslagruimte."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
-    <skip />
-    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems">"externe opslag formatteren"</string>
+    <string name="permdesc_mount_format_filesystems">"Hiermee kan de toepassing de externe opslag formatteren."</string>
     <string name="permlab_vibrate">"trilstand beheren"</string>
     <string name="permdesc_vibrate">"Hiermee kan de toepassing de trilstand beheren."</string>
     <string name="permlab_flashlight">"zaklamp bedienen"</string>
@@ -280,10 +278,8 @@
     <string name="permdesc_locationUpdates">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties">"toegang tot checkin-eigenschappen"</string>
     <string name="permdesc_checkinProperties">"Hiermee wordt lees-/schrijftoegang gegeven tot eigenschappen die door de checkin-service zijn geüpload. Niet voor gebruik door normale toepassingen."</string>
-    <!-- no translation found for permlab_bindGadget (2519859363977647275) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (7865866514555126333) -->
-    <skip />
+    <string name="permlab_bindGadget">"gadgets kiezen"</string>
+    <string name="permdesc_bindGadget">"Hiermee kan een toepassing het systeem melden welke gadgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_modifyPhoneState">"telefoonstatus wijzigen"</string>
     <string name="permdesc_modifyPhoneState">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
     <string name="permlab_readPhoneState">"telefoonstatus lezen"</string>
@@ -312,10 +308,8 @@
     <string name="permdesc_writeApnSettings">"Hiermee kan een toepassing de APN-instellingen, zoals proxy en poort, van elke APN wijzigen."</string>
     <string name="permlab_changeNetworkState">"netwerkverbinding wijzigen"</string>
     <string name="permdesc_changeNetworkState">"Hiermee kan een toepassing de verbindingsstatus van het netwerk wijzigen."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
-    <skip />
+    <string name="permlab_changeBackgroundDataSetting">"instelling voor gebruik van achtergrondgegevens van gegevens wijzigen"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Hiermee kan een toepassing de instelling voor gebruik van achtergrondgegevens wijzigen."</string>
     <string name="permlab_accessWifiState">"Wi-Fi-status bekijken"</string>
     <string name="permdesc_accessWifiState">"Hiermee kan een toepassing informatie over de Wi-Fi-status bekijken."</string>
     <string name="permlab_changeWifiState">"Wi-Fi-status wijzigen"</string>
@@ -336,14 +330,10 @@
     <string name="permdesc_subscribedFeedsRead">"Hiermee kan een toepassing details over de huidige gesynchroniseerde feeds achterhalen."</string>
     <string name="permlab_subscribedFeedsWrite">"geabonneerde feeds schrijven"</string>
     <string name="permdesc_subscribedFeedsWrite">"Hiermee kan een toepassing uw huidige gesynchroniseerde feeds wijzigen. Een schadelijke toepassing kan op deze manier uw gesynchroniseerde feeds wijzigen."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"door gebruiker gedefinieerd woordenboek lezen"</string>
+    <string name="permdesc_readDictionary">"Hiermee kan een toepassing privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
+    <string name="permlab_writeDictionary">"schrijven naar door gebruiker gedefinieerd woordenboek"</string>
+    <string name="permdesc_writeDictionary">"Hiermee kan een toepassing nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
   <string-array name="phoneTypes">
     <item>"Thuis"</item>
     <item>"Mobiel"</item>
@@ -440,12 +430,9 @@
     <string name="factorytest_not_system">"De actie FACTORY_TEST wordt alleen ondersteund voor pakketten die zijn geïnstalleerd in /system/app."</string>
     <string name="factorytest_no_action">"Er is geen pakket gevonden dat de actie FACTORY_TEST levert."</string>
     <string name="factorytest_reboot">"Opnieuw opstarten"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"De pagina op \'<xliff:g id="TITLE">%s</xliff:g>\' zegt:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Wilt u deze pagina verlaten?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Kies OK om door te gaan of Annuleren om op de huidige pagina te blijven."</string>
     <string name="save_password_label">"Bevestigen"</string>
     <string name="save_password_message">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow">"Niet nu"</string>
@@ -496,22 +483,38 @@
     <item quantity="one">"morgen"</item>
     <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 seconde geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> seconden geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 minuut geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> minuten geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 uur geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> uur geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"gisteren"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dagen geleden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"over 1 seconde"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> seconden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"over 1 minuut"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> minuten"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"over 1 uur"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> uur"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"morgen"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
+  </plurals>
     <string name="preposition_for_date">"op %s"</string>
     <string name="preposition_for_time">"om %s"</string>
     <string name="preposition_for_year">"in %s"</string>
@@ -553,17 +556,15 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"twaalf uur \'s middags"</string>
     <string name="Noon">"Twaalf uur \'s middags"</string>
     <string name="midnight">"middernacht"</string>
@@ -691,8 +692,7 @@
     <string name="paste">"Plakken"</string>
     <string name="copyUrl">"URL kopiëren"</string>
     <string name="inputMethod">"Invoermethode"</string>
-    <!-- no translation found for addToDictionary (726256909274177272) -->
-    <skip />
+    <string name="addToDictionary">"\'%s\' toevoegen aan woordenboek"</string>
     <string name="editTextMenuTitle">"Tekst bewerken"</string>
     <string name="low_internal_storage_view_title">"Weinig ruimte"</string>
     <string name="low_internal_storage_view_text">"Opslagruimte van telefoon raakt op."</string>
@@ -700,8 +700,7 @@
     <string name="cancel">"Annuleren"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Annuleren"</string>
-    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
-    <skip />
+    <string name="dialog_alert_title">"Let op"</string>
     <string name="capital_on">"AAN"</string>
     <string name="capital_off">"UIT"</string>
     <string name="whichApplication">"Actie voltooien met"</string>
@@ -725,8 +724,7 @@
     <string name="volume_music">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Afspelen via Bluetooth"</string>
     <string name="volume_call">"Volume inkomende oproep"</string>
-    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
-    <skip />
+    <string name="volume_bluetooth_call">"Volume tijdens gesprek in Bluetooth-modus"</string>
     <string name="volume_alarm">"Alarmvolume"</string>
     <string name="volume_notification">"Meldingsvolume"</string>
     <string name="volume_unknown">"Volume"</string>
@@ -762,60 +760,35 @@
     <string name="usb_storage_error_message">"Er is een probleem bij het gebruik van uw SD-kaart voor USB-opslag."</string>
     <string name="usb_storage_notification_title">"USB-verbinding"</string>
     <string name="usb_storage_notification_message">"Selecteer dit om bestanden naar/van uw computer te kopiëren."</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
-    <skip />
-    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
-    <skip />
-    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
-    <skip />
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
+    <string name="usb_storage_stop_notification_title">"USB-opslag uitschakelen"</string>
+    <string name="usb_storage_stop_notification_message">"Selecteer dit om USB-opslag uit te schakelen."</string>
+    <string name="usb_storage_stop_title">"USB-opslag uitschakelen"</string>
+    <string name="usb_storage_stop_message">"Voordat u de USB-opslag uitschakelt, moet u de koppeling met de USB-host verbreken. Selecteer \'Uitschakelen\' om USB-opslag uit te schakelen."</string>
+    <string name="usb_storage_stop_button_mount">"Uitschakelen"</string>
+    <string name="usb_storage_stop_button_unmount">"Annuleren"</string>
+    <string name="usb_storage_stop_error_message">"Er is een probleem opgetreden tijdens het uitschakelen van USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
+    <string name="extmedia_format_title">"SD-kaart formatteren"</string>
+    <string name="extmedia_format_message">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
+    <string name="extmedia_format_button_format">"Formatteren"</string>
     <string name="select_input_method">"Invoermethode selecteren"</string>
     <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for candidates_style (4333913089637062257) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
-    <skip />
-    <!-- no translation found for activity_list_empty (4168820609403385789) -->
-    <skip />
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
-    <skip />
+    <string name="candidates_style"><u>"kandidaten"</u></string>
+    <string name="ext_media_checking_notification_title">"SD-kaart voorbereiden"</string>
+    <string name="ext_media_checking_notification_message">"Controleren op fouten"</string>
+    <string name="ext_media_nofs_notification_title">"Lege SD-kaart"</string>
+    <string name="ext_media_nofs_notification_message">"De SD-kaart is leeg of gebruikt een niet-ondersteund bestandssysteem."</string>
+    <string name="ext_media_unmountable_notification_title">"Beschadigde SD-kaart"</string>
+    <string name="ext_media_unmountable_notification_message">"De SD-kaart is beschadigd. U moet de kaart mogelijk opnieuw formatteren."</string>
+    <string name="ext_media_badremoval_notification_title">"SD-kaart onverwachts verwijderd"</string>
+    <string name="ext_media_badremoval_notification_message">"Ontkoppel de SD-kaart voordat u deze verwijdert om gegevensverlies te voorkomen."</string>
+    <string name="ext_media_safe_unmount_notification_title">"De SD-kaart kan veilig worden verwijderd"</string>
+    <string name="ext_media_safe_unmount_notification_message">"De SD-kaart kan nu veilig worden verwijderd."</string>
+    <string name="ext_media_nomedia_notification_title">"SD-kaart is verwijderd"</string>
+    <string name="ext_media_nomedia_notification_message">"De SD-kaart is verwijderd. Plaats een nieuwe SD-kaart om de opslagcapaciteit van uw apparaat te vergroten."</string>
+    <string name="activity_list_empty">"Geen overeenkomende activiteiten gevonden"</string>
+    <string name="permlab_pkgUsageStats">"gebruiksstatistieken van component bijwerken"</string>
+    <string name="permdesc_pkgUsageStats">"Hiermee kunnen verzamelde gebruiksstatistieken van een component worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
     <skip />
 </resources>

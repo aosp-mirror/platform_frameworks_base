@@ -262,10 +262,8 @@
     <string name="permdesc_reboot">"Ermöglicht der Anwendung, einen Neustart des Telefons zu erzwingen."</string>
     <string name="permlab_mount_unmount_filesystems">"Dateisysteme bereitstellen oder Bereitstellung aufheben"</string>
     <string name="permdesc_mount_unmount_filesystems">"Ermöglicht der Anwendung, Dateisysteme für austauschbare Speicherplätze bereitzustellen oder die Bereitstellung aufzuheben."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
-    <skip />
-    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems">"Externen Speicher formatieren"</string>
+    <string name="permdesc_mount_format_filesystems">"Erlaubt der Anwendung, austauschbaren Speicher zu formatieren."</string>
     <string name="permlab_vibrate">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate">"Ermöglicht der Anwendung, den Vibrationsalarm zu steuern."</string>
     <string name="permlab_flashlight">"Lichtanzeige steuern"</string>
@@ -280,10 +278,8 @@
     <string name="permdesc_locationUpdates">"Ermöglicht die Aktivierung/Deaktivierung der Radio-Benachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_checkinProperties">"Auf Check-In-Eigenschaften zugreifen"</string>
     <string name="permdesc_checkinProperties">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-In-Service hochgeladene Elemente. Nicht für normale Anwendungen vorgesehen."</string>
-    <!-- no translation found for permlab_bindGadget (2519859363977647275) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (7865866514555126333) -->
-    <skip />
+    <string name="permlab_bindGadget">"Gadgets auswählen"</string>
+    <string name="permdesc_bindGadget">"Bei dieser Option meldet die Anwendung dem System, welche Gadgets von welcher Anwendung verwendet werden können. Mit dieser Genehmigung können Anwendungen anderen Anwendungen Zugriff auf persönliche Daten geben. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_modifyPhoneState">"Telefonstatus ändern"</string>
     <string name="permdesc_modifyPhoneState">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState">"Telefonstatus lesen"</string>
@@ -312,10 +308,8 @@
     <string name="permdesc_writeApnSettings">"Ermöglicht einer Anwendung, die APN-Einstellungen wie Proxy und Port eines Zugriffspunkts zu ändern."</string>
     <string name="permlab_changeNetworkState">"Netzwerkkonnektivität ändern"</string>
     <string name="permdesc_changeNetworkState">"Ermöglicht einer Anwendung, den Status der Netzwerkkonnektivität zu ändern."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
-    <skip />
+    <string name="permlab_changeBackgroundDataSetting">"Einstellung zur Verwendung von Hintergrunddaten ändern"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Ermöglicht einer Anwendung, die Einstellung der Verwendung von Hintergrunddaten zu ändern."</string>
     <string name="permlab_accessWifiState">"WLAN-Status anzeigen"</string>
     <string name="permdesc_accessWifiState">"Ermöglicht einer Anwendung, die Informationen zum WLAN-Status einzusehen."</string>
     <string name="permlab_changeWifiState">"WLAN-Status ändern"</string>
@@ -336,14 +330,10 @@
     <string name="permdesc_subscribedFeedsRead">"Ermöglicht einer Anwendung, Details zu den zurzeit synchronisierten Feeds abzurufen."</string>
     <string name="permlab_subscribedFeedsWrite">"Abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite">"Ermöglicht einer Anwendung, Änderungen an den kürzlich synchronisierten Feeds vorzunehmen. Schädliche Anwendungen könnten so Ihre synchronisierten Feeds ändern."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"Nutzerdefiniertes Wörterbuch lesen"</string>
+    <string name="permdesc_readDictionary">"Erlaubt einer Anwendung, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
+    <string name="permlab_writeDictionary">"in nutzerdefiniertes Wörterbuch schreiben"</string>
+    <string name="permdesc_writeDictionary">"Erlaubt einer Anwendung, neue Wörter in das Wörterbuch des Nutzers zu schreiben."</string>
   <string-array name="phoneTypes">
     <item>"Privat"</item>
     <item>"Mobil"</item>
@@ -440,12 +430,9 @@
     <string name="factorytest_not_system">"Die Aktion FACTORY_TEST wird nur für unter \"/system/app\" gespeicherte Pakete unterstützt."</string>
     <string name="factorytest_no_action">"Es wurden kein Paket mit der Aktion FACTORY_TEST gefunden."</string>
     <string name="factorytest_reboot">"Neu booten"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"Die Seite auf \'<xliff:g id="TITLE">%s</xliff:g>\' sagt:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Von dieser Seite navigieren?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wählen Sie \"OK\", um fortzufahren, oder wählen Sie \"Abbrechen\", um auf der aktuellen Seite zu bleiben."</string>
     <string name="save_password_label">"Bestätigen"</string>
     <string name="save_password_message">"Möchten Sie, dass der Browser dieses Passwort speichert?"</string>
     <string name="save_password_notnow">"Nicht jetzt"</string>
@@ -496,22 +483,38 @@
     <item quantity="one">"morgen"</item>
     <item quantity="other">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"vor 1 Sekunde"</item>
+    <item quantity="other">"Vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"vor 1 Minute"</item>
+    <item quantity="other">"vor <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"Vor 1 Stunde"</item>
+    <item quantity="other">"Vor <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"Gestern"</item>
+    <item quantity="other">"Vor <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"in 1 Sekunde"</item>
+    <item quantity="other">"in <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"in 1 Minute"</item>
+    <item quantity="other">"in <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"in 1 Stunde"</item>
+    <item quantity="other">"In <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"morgen"</item>
+    <item quantity="other">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
     <string name="preposition_for_date">"am %s"</string>
     <string name="preposition_for_time">"am %s"</string>
     <string name="preposition_for_year">"in %s"</string>
@@ -542,8 +545,7 @@
     <string name="VideoView_error_title">"Video kann nicht wiedergegeben werden."</string>
     <string name="VideoView_error_text_unknown">"Dieses Video kann leider nicht abgespielt werden."</string>
     <string name="VideoView_error_button">"OK"</string>
-    <!-- no translation found for am (4885350190794996052) -->
-    <skip />
+    <string name="am">"AM"</string>
     <string name="pm">".."</string>
     <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
@@ -554,17 +556,15 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"Mittag"</string>
     <string name="Noon">"Mittag"</string>
     <string name="midnight">"Mitternacht"</string>
@@ -692,8 +692,7 @@
     <string name="paste">"Einfügen"</string>
     <string name="copyUrl">"URL kopieren"</string>
     <string name="inputMethod">"Eingabemethode"</string>
-    <!-- no translation found for addToDictionary (726256909274177272) -->
-    <skip />
+    <string name="addToDictionary">"\"%s\" dem Wörterbuch hinzufügen"</string>
     <string name="editTextMenuTitle">"Text bearbeiten"</string>
     <string name="low_internal_storage_view_title">"Geringer Speicher"</string>
     <string name="low_internal_storage_view_text">"Kaum noch freier Telefonspeicher verfügbar."</string>
@@ -701,8 +700,7 @@
     <string name="cancel">"Abbrechen"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Abbrechen"</string>
-    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
-    <skip />
+    <string name="dialog_alert_title">"Achtung"</string>
     <string name="capital_on">"EIN"</string>
     <string name="capital_off">"AUS"</string>
     <string name="whichApplication">"Aktion beenden mit"</string>
@@ -726,8 +724,7 @@
     <string name="volume_music">"Medienlautstärke"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Wiedergabe durch Bluetooth"</string>
     <string name="volume_call">"Hörerlautstärke"</string>
-    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
-    <skip />
+    <string name="volume_bluetooth_call">"Lautstärke bei eingehendem Bluetooth-Anruf"</string>
     <string name="volume_alarm">"Lautstärke für Alarm"</string>
     <string name="volume_notification">"Benachrichtigungslautstärke"</string>
     <string name="volume_unknown">"Lautstärke"</string>
@@ -763,60 +760,35 @@
     <string name="usb_storage_error_message">"Bei der Verwendung Ihrer SD-Karte als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title">"USB-Verbindung"</string>
     <string name="usb_storage_notification_message">"Wählen Sie die Dateien aus, die von Ihrem oder auf Ihren Computer kopiert werden sollen."</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
-    <skip />
-    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
-    <skip />
-    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
-    <skip />
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
+    <string name="usb_storage_stop_notification_title">"USB-Speicher deaktivieren"</string>
+    <string name="usb_storage_stop_notification_message">"Auswählen, um USB-Speicher zu deaktivieren."</string>
+    <string name="usb_storage_stop_title">"USB-Speicher deaktivieren"</string>
+    <string name="usb_storage_stop_message">"Bevor Sie den USB-Speicher deaktivieren, stellen Sie sicher, dass Sie Ihn vom USB-Host getrennt haben. Wählen Sie \"Deaktivieren\", um den USB-Speicher zu deaktivieren."</string>
+    <string name="usb_storage_stop_button_mount">"Ausschalten"</string>
+    <string name="usb_storage_stop_button_unmount">"Abbrechen"</string>
+    <string name="usb_storage_stop_error_message">"Wir haben beim Deaktivieren des USB-Speichers ein Problem festgestellt. Überprüfen Sie, ob Sie den USB-Host getrennt haben, und versuchen Sie es erneut."</string>
+    <string name="extmedia_format_title">"SD-Karte formatieren"</string>
+    <string name="extmedia_format_message">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
+    <string name="extmedia_format_button_format">"Format"</string>
     <string name="select_input_method">"Eingabemethode auswählen"</string>
     <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for candidates_style (4333913089637062257) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
-    <skip />
-    <!-- no translation found for activity_list_empty (4168820609403385789) -->
-    <skip />
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
-    <skip />
+    <string name="candidates_style"><u>"Kandidaten"</u></string>
+    <string name="ext_media_checking_notification_title">"SD-Karte wird vorbereitet"</string>
+    <string name="ext_media_checking_notification_message">"Nach Fehlern wird gesucht"</string>
+    <string name="ext_media_nofs_notification_title">"SD-Karte leer"</string>
+    <string name="ext_media_nofs_notification_message">"Die SD-Karte ist leer oder verwendet ein Dateisystem, das nicht unterstützt wird."</string>
+    <string name="ext_media_unmountable_notification_title">"Beschädigte SD-Karte"</string>
+    <string name="ext_media_unmountable_notification_message">"Die SD-Karte ist beschädigt. Sie müssen Ihre Karte eventuell neu formatieren."</string>
+    <string name="ext_media_badremoval_notification_title">"SD-Karte unerwartet entfernt"</string>
+    <string name="ext_media_badremoval_notification_message">"SD-Karte vor dem Entnehmen trennen, um Datenverlust zu vermeiden."</string>
+    <string name="ext_media_safe_unmount_notification_title">"SD-Karte\nkann entfernt werden."</string>
+    <string name="ext_media_safe_unmount_notification_message">"Die SD-Karte kann jetzt entfernt werden."</string>
+    <string name="ext_media_nomedia_notification_title">"SD-Karte entfernt"</string>
+    <string name="ext_media_nomedia_notification_message">"Die SD-Karte wurde entfernt. Legen Sie eine neue SD-Karte ein, um den Speicherplatz Ihres Geräts zu erweitern."</string>
+    <string name="activity_list_empty">"Keine passenden Aktivitäten gefunden"</string>
+    <string name="permlab_pkgUsageStats">"Nutzungsstatistik der Komponente aktualisieren"</string>
+    <string name="permdesc_pkgUsageStats">"Ermöglicht die Änderung von gesammelten Nutzungsstatistiken der Komponente. Nicht für normale Anwendungen vorgesehen."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
     <skip />
 </resources>

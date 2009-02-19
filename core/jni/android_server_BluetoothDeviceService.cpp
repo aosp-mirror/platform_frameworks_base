@@ -515,24 +515,39 @@ static jboolean cancelBondingProcessNative(JNIEnv *env, jobject object,
 
 static jboolean removeBondingNative(JNIEnv *env, jobject object, jstring address) {
     LOGV(__FUNCTION__);
+    jboolean result = JNI_FALSE;
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
         const char *c_address = env->GetStringUTFChars(address, NULL);
         LOGV("... address = %s", c_address);
+        DBusError err;
+        dbus_error_init(&err);
         DBusMessage *reply =
-            dbus_func_args_timeout(env, nat->conn, -1, nat->adapter,
-                                   DBUS_CLASS_NAME, "RemoveBonding",
-                                   DBUS_TYPE_STRING, &c_address,
-                                   DBUS_TYPE_INVALID);
-        env->ReleaseStringUTFChars(address, c_address);
-        if (reply) {
-            dbus_message_unref(reply);
+            dbus_func_args_error(env, nat->conn, &err, nat->adapter,
+                                 DBUS_CLASS_NAME, "RemoveBonding",
+                                 DBUS_TYPE_STRING, &c_address,
+                                 DBUS_TYPE_INVALID);
+        if (dbus_error_is_set(&err)) {
+            if (dbus_error_has_name(&err,
+                    BLUEZ_DBUS_BASE_IFC ".Error.DoesNotExist")) {
+                LOGW("%s: Warning: %s (%s)", __FUNCTION__, err.message,
+                     c_address);
+                result = JNI_TRUE;
+            } else {
+                LOGE("%s: D-Bus error %s (%s)", __FUNCTION__, err.name,
+                        err.message);
+            }
+        } else {
+            result = JNI_TRUE;
         }
-        return JNI_TRUE;
+
+        env->ReleaseStringUTFChars(address, c_address);
+        dbus_error_free(&err);
+        if (reply) dbus_message_unref(reply);
     }
 #endif
-    return JNI_FALSE;
+    return result;
 }
 
 static jobjectArray listBondingsNative(JNIEnv *env, jobject object) {

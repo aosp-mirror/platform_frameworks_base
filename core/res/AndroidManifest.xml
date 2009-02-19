@@ -18,7 +18,8 @@
 */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android" android:sharedUserId="android.uid.system">
+    package="android" android:sharedUserId="android.uid.system"
+    android:sharedUserLabel="@string/android_system_label">
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -946,7 +947,7 @@
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
-                 android:label="Android System"
+                 android:label="@string/android_system_label"
                  android:allowClearUserData="false"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"

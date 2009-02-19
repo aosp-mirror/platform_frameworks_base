@@ -229,9 +229,11 @@ public class InputMethodService extends AbstractInputMethodService {
     InputConnection mStartedInputConnection;
     EditorInfo mInputEditorInfo;
     
+    int mShowInputFlags;
     boolean mShowInputRequested;
     boolean mLastShowInputRequested;
     int mCandidatesVisibility;
+    CompletionInfo[] mCurCompletions;
     
     boolean mShowInputForced;
     
@@ -328,6 +330,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public void hideSoftInput() {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
+            mShowInputFlags = 0;
             mShowInputRequested = false;
             mShowInputForced = false;
             hideWindow();
@@ -338,7 +341,10 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public void showSoftInput(int flags) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
-            onShowRequested(flags);
+            mShowInputFlags = 0;
+            if (onShowInputRequested(flags, false)) {
+                showWindow(true);
+            }
         }
     }
     
@@ -364,6 +370,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (!isEnabled()) {
                 return;
             }
+            mCurCompletions = completions;
             onDisplayCompletions(completions);
         }
         
@@ -557,8 +564,9 @@ public class InputMethodService extends AbstractInputMethodService {
         super.onConfigurationChanged(newConfig);
         
         boolean visible = mWindowVisible;
+        int showFlags = mShowInputFlags;
         boolean showingInput = mShowInputRequested;
-        boolean showingForced = mShowInputForced;
+        CompletionInfo[] completions = mCurCompletions;
         initViews();
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
@@ -567,19 +575,24 @@ public class InputMethodService extends AbstractInputMethodService {
                     getCurrentInputEditorInfo(), true);
         }
         if (visible) {
-            if (showingForced) {
-                // If we are showing the full soft keyboard, then go through
-                // this path to take care of current decisions about fullscreen
-                // etc.
-                onShowRequested(InputMethod.SHOW_FORCED|InputMethod.SHOW_EXPLICIT);
-            } else if (showingInput) {
-                // If we are showing the full soft keyboard, then go through
-                // this path to take care of current decisions about fullscreen
-                // etc.
-                onShowRequested(InputMethod.SHOW_EXPLICIT);
-            } else {
-                // Otherwise just put it back for its candidates.
+            if (showingInput) {
+                // If we were last showing the soft keyboard, try to do so again.
+                if (onShowInputRequested(showFlags, true)) {
+                    showWindow(true);
+                    if (completions != null) {
+                        mCurCompletions = completions;
+                        onDisplayCompletions(completions);
+                    }
+                } else {
+                    hideWindow();
+                }
+            } else if (mCandidatesVisibility == View.VISIBLE) {
+                // If the candidates are currently visible, make sure the
+                // window is shown for them.
                 showWindow(false);
+            } else {
+                // Otherwise hide the window.
+                hideWindow();
             }
         }
     }
@@ -1065,36 +1078,42 @@ public class InputMethodService extends AbstractInputMethodService {
      * The system has decided that it may be time to show your input method.
      * This is called due to a corresponding call to your
      * {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}
-     * method.  The default implementation simply calls
-     * {@link #showWindow(boolean)}, except if the
-     * {@link InputMethod#SHOW_EXPLICIT InputMethod.SHOW_EXPLICIT} flag is
-     * not set and the input method is running in fullscreen mode.
+     * method.  The default implementation uses
+     * {@link #onEvaluateInputViewShown()}, {@link #onEvaluateFullscreenMode()},
+     * and the current configuration to decide whether the input view should
+     * be shown at this point.
      * 
      * @param flags Provides additional information about the show request,
      * as per {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}.
+     * @param configChange This is true if we are re-showing due to a
+     * configuration change.
+     * @return Returns true to indicate that the window should be shown.
      */
-    public void onShowRequested(int flags) {
+    public boolean onShowInputRequested(int flags, boolean configChange) {
         if (!onEvaluateInputViewShown()) {
-            return;
+            return false;
         }
         if ((flags&InputMethod.SHOW_EXPLICIT) == 0) {
-            if (onEvaluateFullscreenMode()) {
+            if (!configChange && onEvaluateFullscreenMode()) {
                 // Don't show if this is not explicitly requested by the user and
                 // the input method is fullscreen.  That would be too disruptive.
-                return;
+                // However, we skip this change for a config change, since if
+                // the IME is already shown we do want to go into fullscreen
+                // mode at this point.
+                return false;
             }
             Configuration config = getResources().getConfiguration();
             if (config.keyboard != Configuration.KEYBOARD_NOKEYS) {
                 // And if the device has a hard keyboard, even if it is
                 // currently hidden, don't show the input method implicitly.
                 // These kinds of devices don't need it that much.
-                return;
+                return false;
             }
         }
         if ((flags&InputMethod.SHOW_FORCED) != 0) {
             mShowInputForced = true;
         }
-        showWindow(true);
+        return true;
     }
     
     public void showWindow(boolean showInput) {
@@ -1106,7 +1125,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mInputStarted=" + mInputStarted);
         boolean doShowInput = false;
         boolean wasVisible = mWindowVisible;
-        boolean wasCreated = mWindowCreated;
         mWindowVisible = true;
         if (!mShowInputRequested) {
             if (mInputStarted) {
@@ -1240,6 +1258,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mInputStarted = false;
         mStartedInputConnection = null;
+        mCurCompletions = null;
     }
     
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
@@ -1550,7 +1569,11 @@ public class InputMethodService extends AbstractInputMethodService {
                 eet.setInputType(inputType);
                 eet.setHint(mInputEditorInfo.hintText);
                 if (mExtractedText != null) {
+                    eet.setEnabled(true);
                     eet.setExtractedText(mExtractedText);
+                } else {
+                    eet.setEnabled(false);
+                    eet.setText("");
                 }
             } finally {
                 eet.finishInternalChanges();
@@ -1586,7 +1609,8 @@ public class InputMethodService extends AbstractInputMethodService {
         
         p.println("  mShowInputRequested=" + mShowInputRequested
                 + " mLastShowInputRequested=" + mLastShowInputRequested
-                + " mShowInputForced=" + mShowInputForced);
+                + " mShowInputForced=" + mShowInputForced
+                + " mShowInputFlags=0x" + Integer.toHexString(mShowInputFlags));
         p.println("  mCandidatesVisibility=" + mCandidatesVisibility
                 + " mFullscreenApplied=" + mFullscreenApplied
                 + " mIsFullscreen=" + mIsFullscreen);

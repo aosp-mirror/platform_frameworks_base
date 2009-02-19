@@ -168,6 +168,7 @@ public class RelativeLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
      */
+    @android.view.RemotableViewMethod
     public void setIgnoreGravity(int viewId) {
         mIgnoreGravity = viewId;
     }
@@ -183,6 +184,7 @@ public class RelativeLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#RelativeLayout_gravity
      */
+    @android.view.RemotableViewMethod
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
             if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
@@ -198,6 +200,7 @@ public class RelativeLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
         final int gravity = horizontalGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != gravity) {
@@ -206,6 +209,7 @@ public class RelativeLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setVerticalGravity(int verticalGravity) {
         final int gravity = verticalGravity & Gravity.VERTICAL_GRAVITY_MASK;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != gravity) {

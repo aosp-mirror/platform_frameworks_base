@@ -327,11 +327,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Print the Service's state into the given stream.
+     * Print the Service's state into the given stream.  This gets invoked if
+     * you run "adb shell dumpsys activity service <yourservicename>".
+     * This is distinct from "dumpsys <servicename>", which only works for
+     * named system services and which invokes the {@link IBinder#dump} method
+     * on the {@link IBinder} interface registered with ServiceManager.
      *
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer The PrintWriter to which you should dump your state.  This will be
- * closed for you after you return.
+     * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {

@@ -1191,11 +1191,6 @@ public final class SIMRecords extends Handler implements SimConstants
             SmsMessage message = SmsMessage.newFromCMT(
                                 new String[] { "", pdu });
 
-            Log.i("ENF", "message from " +
-                message.getOriginatingAddress());
-            Log.i("ENF", "message text " +
-                message.getMessageBody());
-
             phone.mSMS.dispatchMessage(message);
         }
     }
@@ -1225,11 +1220,6 @@ public final class SIMRecords extends Handler implements SimConstants
                 // XXX first line is bogus
                 SmsMessage message = SmsMessage.newFromCMT(
                         new String[] { "", pdu });
-
-                Log.i("ENF", "message from " +
-                    message.getOriginatingAddress());
-                Log.i("ENF", "message text " +
-                    message.getMessageBody());
 
                 phone.mSMS.dispatchMessage(message);
 

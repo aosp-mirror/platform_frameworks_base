@@ -69,7 +69,8 @@ public:
             int mFd,
             int format,
             int channelCount,
-            uint32_t sampleRate);
+            uint32_t sampleRate,
+            AudioSystem::audio_in_acoustics acoustics);
 
     uint32_t    sampleRate() const { return 8000; }
     virtual size_t      bufferSize() const { return 320; }
@@ -114,7 +115,8 @@ public:
             int format,
             int channelCount,
             uint32_t sampleRate,
-            status_t *status);
+            status_t *status,
+            AudioSystem::audio_in_acoustics acoustics);
 
             void            closeOutputStream(AudioStreamOutGeneric* out);
             void            closeInputStream(AudioStreamInGeneric* in);
