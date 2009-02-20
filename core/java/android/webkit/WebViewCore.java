@@ -1197,6 +1197,7 @@ final class WebViewCore {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
+        // negative scale indicate that WebCore should reuse the current scale
         float scale = (float) viewWidth / w;
         if (mSettings.getUseWideViewPort()
                 && (w < mViewportWidth || mViewportWidth == -1)) {
@@ -1224,7 +1225,7 @@ final class WebViewCore {
                         // keep the same width and screen width so that there is 
                         // no reflow when zoom-out
                         width = minContentWidth;
-                        screenWidth = Math.min(screenWidth, viewWidth);
+                        screenWidth = Math.min(screenWidth, Math.abs(viewWidth));
                     } else {
                         width = Math.max(w, minContentWidth);
                     }
@@ -1536,11 +1537,11 @@ final class WebViewCore {
         // white space in the GMail which uses WebView for message view.
         if (mWebView != null && mWebView.mHeightCanMeasure) {
             mWebView.mLastHeightSent = 0;
-            // Send a negative scale to indicate that WebCore should reuse the
-            // current scale
+            // Send a negative screen width to indicate that WebCore should 
+            // reuse the current scale
             mEventHub.sendMessage(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, mWebView.mLastWidthSent,
-                    mWebView.mLastHeightSent, new Integer(-1)));
+                    mWebView.mLastHeightSent, -mWebView.mLastWidthSent));
         }
 
         mBrowserFrame.didFirstLayout();

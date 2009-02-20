@@ -4132,8 +4132,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             removeParcelableSpans(content, start, end);
             content.replace(start, end, text.text);
         }
-        Selection.setSelection((Spannable)getText(),
-                text.selectionStart, text.selectionEnd);
+        
+        // Now set the selection position...  make sure it is in range, to
+        // avoid crashes.  If this is a partial update, it is possible that
+        // the underlying text may have changed, causing us problems here.
+        // Also we just don't want to trust clients to do the right thing.
+        Spannable sp = (Spannable)getText();
+        final int N = sp.length();
+        int start = text.selectionStart;
+        if (start < 0) start = 0;
+        else if (start > N) start = N;
+        int end = text.selectionEnd;
+        if (end < 0) end = 0;
+        else if (end > N) end = N;
+        Selection.setSelection(sp, start, end);
     }
     
     /**

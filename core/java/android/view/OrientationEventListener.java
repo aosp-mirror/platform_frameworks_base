@@ -69,8 +69,11 @@ public abstract class OrientationEventListener {
     public OrientationEventListener(Context context, int rate) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
-        mSensorEventListener = new SensorEventListenerImpl();
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (mSensor != null) {
+            // Create listener only if sensors do exist
+            mSensorEventListener = new SensorEventListenerImpl();
+        }
     }
     
     void registerListener(OrientationListener lis) {
@@ -82,6 +85,10 @@ public abstract class OrientationEventListener {
      * {@link #onOrientationChanged} when the device orientation changes.
      */
     public void enable() {
+        if (mSensor == null) {
+            Log.w(TAG, "Cannot detect sensors. Not enabled");
+            return;
+        }
         if (mEnabled == false) {
             if (localLOGV) Log.d(TAG, "OrientationEventListener enabled");
             mSensorManager.registerListener(mSensorEventListener, mSensor, mRate);
@@ -93,6 +100,10 @@ public abstract class OrientationEventListener {
      * Disables the OrientationEventListener.
      */
     public void disable() {
+        if (mSensor == null) {
+            Log.w(TAG, "Cannot detect sensors. Invalid disable");
+            return;
+        }
         if (mEnabled == true) {
             if (localLOGV) Log.d(TAG, "OrientationEventListener disabled");
             mSensorManager.unregisterListener(mSensorEventListener);
@@ -137,6 +148,13 @@ public abstract class OrientationEventListener {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
         }
+    }
+    
+    /*
+     * Returns true if sensor is enabled and false otherwise
+     */
+    public boolean canDetectOrientation() {
+        return mSensor != null;
     }
 
     /**

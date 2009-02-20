@@ -55,7 +55,7 @@ public class MediaRecorderPrepareStateUnitTest extends AndroidTestCase implement
         try {
             recorder.prepare();
         } catch (IOException exception) {
-            fail("recorder.prepare() failed");
+            throw new RuntimeException();
         }
     }
 

@@ -762,6 +762,7 @@
         <enum name="KEYCODE_PREVIOUSSONG" value="88" />
         <enum name="KEYCODE_REWIND" value="89" />
         <enum name="KEYCODE_FORWARD" value="90" />
+        <enum name="KEYCODE_MUTE" value="91" />
     </attr>
 
     <!-- ***************************************************************** -->

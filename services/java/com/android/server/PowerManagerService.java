@@ -246,8 +246,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         public void acquire() {
             if (!mRefCounted || mCount++ == 0) {
-                PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
-                        MY_UID, mTag);
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
+                            MY_UID, mTag);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
@@ -1285,8 +1290,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
+                    mPowerState &= ~SCREEN_ON_BIT;
                     if (!mScreenBrightness.animating) {
-                        err = turnScreenOffLocked(becauseOfUser);
+                        err = screenOffFinishedAnimating(becauseOfUser);
                     } else {
                         mOffBecauseOfUser = becauseOfUser;
                         err = 0;
@@ -1297,33 +1303,25 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
     
-    private int turnScreenOffLocked(boolean becauseOfUser) {
-        if ((mPowerState&SCREEN_ON_BIT) != 0) {
-            EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
-                    mTotalTouchDownTime, mTouchCycles);
-            mLastTouchDown = 0;
-            int err = Power.setScreenState(false);
+    private int screenOffFinishedAnimating(boolean becauseOfUser) {
+        // I don't think we need to check the current state here because all of these
+        // Power.setScreenState and sendNotificationLocked can both handle being 
+        // called multiple times in the same state. -joeo
+        EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
+                mTotalTouchDownTime, mTouchCycles);
+        mLastTouchDown = 0;
+        int err = Power.setScreenState(false);
+        if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
-            if (err == 0) {
-                // 
-                //      FIXME(joeo)
-                //
-                // The problem that causes the screen not to come on is that this isn't
-                // called until after the animation is done.  It needs to be set right
-                // away, and the anmiation's state needs to be recorded separately.
-                // 
-                // 
-                
-                mPowerState &= ~SCREEN_ON_BIT;
-                int why = becauseOfUser
-                        ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
-                        : WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
-                sendNotificationLocked(false, why);
-            }
-            return err;
         }
-        return 0;
+        if (err == 0) {
+            int why = becauseOfUser
+                    ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
+                    : WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
+            sendNotificationLocked(false, why);
+        }
+        return err;
     }
 
     private boolean batteryIsLow() {
@@ -1538,7 +1536,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             animating = more;
             if (!more) {
                 if (mask == Power.SCREEN_LIGHT && curIntValue == Power.BRIGHTNESS_OFF) {
-                    turnScreenOffLocked(mOffBecauseOfUser);
+                    screenOffFinishedAnimating(mOffBecauseOfUser);
                 }
             }
             return more;

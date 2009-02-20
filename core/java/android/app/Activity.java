@@ -890,9 +890,9 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onCreate} or {@link #onStop} when the current
-     * activity is now being displayed to the user.  It will
-     * be followed by {@link #onRestart}.
+     * Called after {@link #onCreate} &mdash; or after {@link #onRestart} when  
+     * the activity had been stopped, but is now again being displayed to the 
+	 * user.  It will be followed by {@link #onResume}.
      *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
@@ -907,9 +907,9 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onStart} when the current activity is being
+     * Called after {@link #onStop} when the current activity is being
      * re-displayed to the user (the user has navigated back to it).  It will
-     * be followed by {@link #onResume}.
+     * be followed by {@link #onStart} and then {@link #onResume}.
      *
      * <p>For activities that are using raw {@link Cursor} objects (instead of
      * creating them through
@@ -923,6 +923,7 @@ public class Activity extends ContextThemeWrapper
      * thrown.</em></p>
      * 
      * @see #onStop
+     * @see #onStart
      * @see #onResume
      */
     protected void onRestart() {
@@ -1220,7 +1221,7 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called when you are no longer visible to the user.  You will next
-     * receive either {@link #onStart}, {@link #onDestroy}, or nothing,
+     * receive either {@link #onRestart}, {@link #onDestroy}, or nothing,
      * depending on later user activity.
      * 
      * <p>Note that this method may never be called, in low memory situations

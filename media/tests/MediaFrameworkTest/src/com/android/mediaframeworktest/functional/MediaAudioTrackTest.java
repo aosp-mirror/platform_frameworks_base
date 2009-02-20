@@ -19,6 +19,8 @@ package com.android.mediaframeworktest.functional;
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
@@ -47,12 +49,127 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
     protected void tearDown() throws Exception {     
         super.tearDown();              
     }
+    
+    //-----------------------------------------------------------------
+    // private class to hold test reslts
+    public class TestResults {
+        public boolean mResult = false;
+        public String  mResultLog = "";
+        public TestResults(boolean b, String s) { mResult = b; mResultLog = s; }
+    }
+    
+    //-----------------------------------------------------------------
+    // generic test methods
+    public TestResults constructorTestMultiSampleRate(
+                        // parameters tested by this method
+                        int _inTest_streamType, int _inTest_mode, int _inTest_config,
+                        // parameter-dependent expected results
+                        int _expected_stateForMode) {
+        
+        int[] testSampleRates = {8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000};
+        String failedRates = "Failure for rate(s): ";
+        boolean localRes, finalRes = true;
+        
+        for(int i = 0 ; i < testSampleRates.length ; i++) {
+            //Log.v("MediaAudioTrackTest", "[ constructorTestMultiSampleRate ] testing "+ testSampleRates[i]);
+            AudioTrack track = null;
+            try {
+                track = new AudioTrack(
+                        _inTest_streamType, 
+                        testSampleRates[i], 
+                        _inTest_config, 
+                        AudioFormat.ENCODING_PCM_16BIT,
+                        AudioTrack.getMinBufferSize(testSampleRates[i], 
+                                _inTest_config, AudioFormat.ENCODING_PCM_16BIT),//testSampleRates[i]*4 
+                        _inTest_mode);
+            } catch(IllegalArgumentException iae) {
+                Log.e("MediaAudioTrackTest", "[ constructorTestMultiSampleRate ] exception at SR "
+                        + testSampleRates[i]+": \n" + iae);
+            }
+            if(track != null) {
+                localRes = (track.getState() == _expected_stateForMode);
+                track.release();
+            }
+            else {
+                localRes = false;
+            }
+            
+            if (!localRes) {
+                //log the error for the test runner
+                failedRates += Integer.toString(testSampleRates[i]) + "Hz ";
+                //log the error for logcat
+                Log.e("MediaAudioTrackTest", "[ constructorTestMultiSampleRate ] failed to construct "
+                        +"AudioTrack(streamType="+_inTest_streamType 
+                        +", sampleRateInHz=" + testSampleRates[i]
+                        +", channelConfig=" + _inTest_config
+                        +", audioFormat=AudioFormat.ENCODING_PCM_16BIT"  
+                        +", bufferSizeInBytes=" + AudioTrack.getMinBufferSize(testSampleRates[i], 
+                                _inTest_config, AudioFormat.ENCODING_PCM_16BIT)
+                        +", mode="+ _inTest_mode );
+                //mark test as failed
+                finalRes = false;
+            }
+        }
+        return new TestResults(finalRes, failedRates);
+    }
+    
+    //-----------------------------------------------------------------
+    // AUDIOTRACK TESTS:
+    //----------------------------------
+    
+    //-----------------------------------------------------------------
+    //      AudioTrack constructor and AudioTrack.getMinBufferSize(...)
+    //----------------------------------
        
-    //Test case 1: Set the invalid volume
+    //Test case 1: constructor for streaming AudioTrack, mono, 16bit at misc valid sample rates
     @MediumTest
-    public void testGetMinVolume() throws Exception {
-        //To Do: Create the test case for GetMinVolume  
-        assertTrue("testGetMinVolume", true);  
+    public void testConstructorMono16MusicStream() throws Exception {
+        
+        TestResults res = constructorTestMultiSampleRate(
+                AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                AudioTrack.STATE_INITIALIZED);
+
+        assertTrue("testConstructorMono16MusicStream: " + res.mResultLog, res.mResult);
+    }
+    
+    
+    //Test case 2: constructor for streaming AudioTrack, stereo, 16bit at misc valid sample rates
+    @MediumTest
+    public void testConstructorStereo16MusicStream() throws Exception {
+        
+        TestResults res = constructorTestMultiSampleRate(
+                AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
+                    AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+                AudioTrack.STATE_INITIALIZED);
+
+        assertTrue("testConstructorStereo16MusicStream: " + res.mResultLog, res.mResult);
+    }
+    
+    
+    //Test case 3: constructor for static AudioTrack, mono, 16bit at misc valid sample rates
+    @MediumTest
+    public void testConstructorMono16MusicStatic() throws Exception {
+        
+        TestResults res = constructorTestMultiSampleRate(
+                AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                AudioTrack.STATE_NO_STATIC_DATA);
+
+        assertTrue("testConstructorMono16MusicStatic: " + res.mResultLog, res.mResult);
+    }
+    
+    
+    //Test case 4: constructor for static AudioTrack, stereo, 16bit at misc valid sample rates
+    @MediumTest
+    public void testConstructorStereo16MusicStatic() throws Exception {
+        
+        TestResults res = constructorTestMultiSampleRate(
+                AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
+                    AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+                AudioTrack.STATE_NO_STATIC_DATA);
+
+        assertTrue("testConstructorStereo16MusicStatic: " + res.mResultLog, res.mResult);
     }
 
 }

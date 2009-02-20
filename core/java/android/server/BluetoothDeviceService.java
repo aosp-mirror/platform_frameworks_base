@@ -47,8 +47,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BluetoothDeviceService extends IBluetoothDevice.Stub {
@@ -121,7 +121,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * Bring down bluetooth. Returns true on success.
      *
      * @param saveSetting If true, disable BT in settings
-     * 
+     *
      */
     public synchronized boolean disable(boolean saveSetting) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -172,7 +172,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * This turns on/off the underlying hardware.
      *
      * @param saveSetting If true, enable BT in settings
-     * 
+     *
      * @return True on success (so far), guaranteeing the callback with be
      * notified when complete.
      */
@@ -275,6 +275,14 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
         private final HashMap<String, Integer> mPinAttempt = new HashMap<String, Integer>();
         private final ArrayList<String> mAutoPairingFailures = new ArrayList<String>();
+        // List of all the vendor_id prefix of Bluetooth addresses for which
+        // auto pairing is not attempted
+        private final ArrayList<String>  mAutoPairingBlacklisted =
+                new ArrayList<String>(Arrays.asList(
+                        "00:02:C7", "00:16:FE", "00:19:C1", "00:1B:FB", "00:1E:3D", //ALPS
+                        "00:21:4F", "00:23:06", "00:24:33", "00:A0:79", // ALPS
+                        "00:0E:6D", "00:13:E0", "00:21:E8", "00:60:57"// Murata for Prius 2007
+                        ));
 
         public synchronized void loadBondState() {
             if (!mIsEnabled) {
@@ -320,6 +328,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             }
 
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        }
+
+        public boolean isAutoPairingBlacklisted(String address) {
+            for (String blacklistAddress : mAutoPairingBlacklisted) {
+                if (address.startsWith(blacklistAddress)) return true;
+            }
+            return false;
         }
 
         public synchronized int getBondState(String address) {

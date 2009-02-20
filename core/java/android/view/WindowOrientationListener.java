@@ -74,8 +74,11 @@ public abstract class WindowOrientationListener {
     public WindowOrientationListener(Context context, int rate) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
-        mSensorEventListener = new SensorEventListenerImpl();
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (mSensor != null) {
+            // Create listener only if sensors do exist
+            mSensorEventListener = new SensorEventListenerImpl();
+        }
     }
 
     /**
@@ -83,6 +86,10 @@ public abstract class WindowOrientationListener {
      * {@link #onOrientationChanged} when the device orientation changes.
      */
     public void enable() {
+        if (mSensor == null) {
+            Log.w(TAG, "Cannot detect sensors. Not enabled");
+            return;
+        }
         if (mEnabled == false) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener enabled");
             mSensorManager.registerListener(mSensorEventListener, mSensor, mRate);
@@ -94,6 +101,10 @@ public abstract class WindowOrientationListener {
      * Disables the WindowOrientationListener.
      */
     public void disable() {
+        if (mSensor == null) {
+            Log.w(TAG, "Cannot detect sensors. Invalid disable");
+            return;
+        }
         if (mEnabled == true) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener disabled");
             mSensorManager.unregisterListener(mSensorEventListener);
@@ -145,6 +156,13 @@ public abstract class WindowOrientationListener {
         }
     }
 
+    /*
+     * Returns true if sensor is enabled and false otherwise
+     */
+    public boolean canDetectOrientation() {
+        return mSensor != null;
+    }
+    
     /**
      * Called when the orientation of the device has changed.
      * orientation parameter is in degrees, ranging from 0 to 359.

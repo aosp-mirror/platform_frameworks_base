@@ -88,7 +88,7 @@ import android.media.AudioManager;
 
         toneGen = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
-        for (type = ToneGenerator.TONE_PROP_BEEP; type <= ToneGenerator.TONE_PROP_PROMPT; type++) {
+        for (type = ToneGenerator.TONE_PROP_BEEP; type <= ToneGenerator.TONE_PROP_BEEP2; type++) {
             if (toneGen.startTone(type)) {
                 Thread.sleep(1000);
                 toneGen.stopTone();

@@ -126,6 +126,11 @@ public final class Checkin {
 
         /** Valid tag values.  Extend as necessary for your needs. */
         public enum Tag {
+            BROWSER_SNAP_CENTER,
+            BROWSER_TEXT_SIZE_CHANGE,
+            BROWSER_ZOOM_OVERVIEW,
+            BROWSER_ZOOM_RING,
+            BROWSER_ZOOM_RING_DRAG,
             CRASHES_REPORTED,
             CRASHES_TRUNCATED,
             ELAPSED_REALTIME_SEC,

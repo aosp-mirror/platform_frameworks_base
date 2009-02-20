@@ -117,7 +117,8 @@ public class KeyEvent implements Parcelable {
     public static final int KEYCODE_PREVIOUSSONG    = 88;
     public static final int KEYCODE_REWIND          = 89;
     public static final int KEYCODE_FORWARD         = 90;
-    private static final int LAST_KEYCODE           = KEYCODE_FORWARD;
+    public static final int KEYCODE_MUTE            = 91;
+    private static final int LAST_KEYCODE           = KEYCODE_MUTE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -502,6 +503,7 @@ public class KeyEvent implements Parcelable {
         case KEYCODE_ENDCALL:
         case KEYCODE_VOLUME_UP:
         case KEYCODE_VOLUME_DOWN:
+        case KEYCODE_MUTE:
         case KEYCODE_POWER:
         case KEYCODE_HEADSETHOOK:
         case KEYCODE_PLAYPAUSE:

@@ -129,12 +129,20 @@ public interface WindowManagerPolicy {
                 Rect contentFrame, Rect visibleFrame);
 
         /**
-         * Retrieve the current frame of the window.  Must be called with the
-         * window manager lock held.
+         * Retrieve the current frame of the window that has been assigned by
+         * the window manager.  Must be called with the window manager lock held.
          * 
          * @return Rect The rectangle holding the window frame.
          */
         public Rect getFrameLw();
+
+        /**
+         * Retrieve the current frame of the window that is actually shown.
+         * Must be called with the window manager lock held.
+         * 
+         * @return Rect The rectangle holding the shown window frame.
+         */
+        public Rect getShownFrameLw();
 
         /**
          * Retrieve the frame of the display that this window was last
@@ -273,9 +281,12 @@ public interface WindowManagerPolicy {
          *                   false, this is based on the currently requested
          *                   frame, which any current animation will be moving
          *                   towards.
+         * @param onlyOpaque If true, this will only pass if the window is
+         * also opaque.
          * @return Returns true if the window is both full screen and opaque
          */
-        public boolean fillsScreenLw(int width, int height, boolean shownFrame);
+        public boolean fillsScreenLw(int width, int height, boolean shownFrame,
+                boolean onlyOpaque);
 
         /**
          * Returns true if this window has been shown on screen at some time in 

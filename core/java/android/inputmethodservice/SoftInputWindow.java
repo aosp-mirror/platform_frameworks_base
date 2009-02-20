@@ -141,7 +141,8 @@ class SoftInputWindow extends Dialog {
         lp.gravity = Gravity.BOTTOM;
         lp.width = -1;
         // Let the input method window's orientation follow sensor based rotation
-        lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
+        // Turn this off for now, it is very problematic.
+        //lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
 
         getWindow().setAttributes(lp);
         getWindow().setFlags(

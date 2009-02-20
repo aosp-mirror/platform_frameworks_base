@@ -38,11 +38,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Checkin;
 import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.Config;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -450,6 +452,13 @@ public class WebView extends AbsoluteLayout
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
 
+    /* package */ static boolean mLogEvent = true;
+    private static final int EVENT_LOG_ZOOM_LEVEL_CHANGE = 70101;
+    private static final int EVENT_LOG_DOUBLE_TAP_DURATION = 70102;
+
+    // for event log
+    private long mLastTouchUpTime = 0;
+
     /**
      * URI scheme for telephone number
      */
@@ -556,7 +565,11 @@ public class WebView extends AbsoluteLayout
 
     private ZoomRingController.OnZoomListener mZoomListener =
             new ZoomRingController.OnZoomListener() {
-        
+
+        private float mClockwiseBound;
+        private float mCounterClockwiseBound;
+        private float mStartScale;
+
         public void onCenter(int x, int y) {
             // Don't translate when the control is invoked, hence we do nothing
             // in this callback
@@ -564,6 +577,10 @@ public class WebView extends AbsoluteLayout
 
         public void onBeginPan() {
             setZoomOverviewVisible(false);
+            if (mLogEvent) {
+                Checkin.updateStats(mContext.getContentResolver(),
+                        Checkin.Stats.Tag.BROWSER_ZOOM_RING_DRAG, 1, 0.0);
+            }
         }
 
         public boolean onPan(int deltaX, int deltaY) {
@@ -576,12 +593,25 @@ public class WebView extends AbsoluteLayout
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 switchOutDrawHistory();
+                if (mMaxZoomScale - 1 > ZOOM_RING_STEPS * 0.01f) {
+                    mClockwiseBound = (float) (2 * Math.PI - MAX_ZOOM_RING_ANGLE);
+                } else {
+                    mClockwiseBound = (float) (2 * Math.PI);
+                }
+                mZoomRingController.setThumbClockwiseBound(mClockwiseBound);
+                if (1 - mMinZoomScale > ZOOM_RING_STEPS * 0.01f) {
+                    mCounterClockwiseBound = MAX_ZOOM_RING_ANGLE;
+                } else {
+                    mCounterClockwiseBound = 0;
+                }
+                mZoomRingController
+                        .setThumbCounterclockwiseBound(mCounterClockwiseBound);
                 float angle = 0f;
-                if (mActualScale > 1) {
+                if (mActualScale > 1 && mClockwiseBound < (float) (2 * Math.PI)) {
                     angle = -(float) Math.round(ZOOM_RING_STEPS
                             * (mActualScale - 1) / (mMaxZoomScale - 1))
                             / ZOOM_RING_STEPS;
-                } else if (mActualScale < 1) {
+                } else if (mActualScale < 1 && mCounterClockwiseBound > 0) {
                     angle = (float) Math.round(ZOOM_RING_STEPS
                             * (1 - mActualScale) / (1 - mMinZoomScale))
                             / ZOOM_RING_STEPS;
@@ -590,16 +620,26 @@ public class WebView extends AbsoluteLayout
                 
                 // Show the zoom overview tab on the ring
                 setZoomOverviewVisible(true);
+                if (mLogEvent) {
+                    Checkin.updateStats(mContext.getContentResolver(),
+                            Checkin.Stats.Tag.BROWSER_ZOOM_RING, 1, 0.0);
+                }
             }
         }
 
         public void onBeginDrag() {
             mPreviewZoomOnly = true;
+            mStartScale = mActualScale;
             setZoomOverviewVisible(false);
         }
         
         public void onEndDrag() {
             mPreviewZoomOnly = false;
+            if (mLogEvent) {
+                EventLog.writeEvent(EVENT_LOG_ZOOM_LEVEL_CHANGE,
+                        (int) mStartScale * 100, (int) mActualScale * 100,
+                        System.currentTimeMillis());
+            }
             setNewZoomScale(mActualScale, true);
         }
 
@@ -616,21 +656,21 @@ public class WebView extends AbsoluteLayout
             mZoomCenterY = (float) centerY;
 
             float scale = 1.0f;
-            if (curAngle > (float) Math.PI)
-                curAngle -= (float) 2 * Math.PI;
-            if (curAngle > 0) {
-                if (curAngle >= MAX_ZOOM_RING_ANGLE) {
+            // curAngle is [0, 2 * Math.PI)
+            if (curAngle < (float) Math.PI) {
+                if (curAngle >= mCounterClockwiseBound) {
                     scale = mMinZoomScale;
                 } else {
                     scale = 1 - (float) Math.round(curAngle
                             / ZOOM_RING_ANGLE_UNIT) / ZOOM_RING_STEPS
                             * (1 - mMinZoomScale);
                 }
-            } else if (curAngle < 0) {
-                if (curAngle <= -MAX_ZOOM_RING_ANGLE) {
+            } else {
+                if (curAngle <= mClockwiseBound) {
                     scale = mMaxZoomScale;
                 } else {
-                    scale = 1 + (float) Math.round(-curAngle
+                    scale = 1 + (float) Math.round(
+                            ((float) 2 * Math.PI - curAngle)
                             / ZOOM_RING_ANGLE_UNIT) / ZOOM_RING_STEPS
                             * (mMaxZoomScale - 1);
                 }
@@ -687,12 +727,11 @@ public class WebView extends AbsoluteLayout
         mScroller = new Scroller(context);
         mZoomRingController = new ZoomRingController(context, this);
         mZoomRingController.setResetThumbAutomatically(false);
-        mZoomRingController.setThumbClockwiseBound(
-                (float) (2 * Math.PI - MAX_ZOOM_RING_ANGLE));
-        mZoomRingController.setThumbCounterclockwiseBound(MAX_ZOOM_RING_ANGLE);
         mZoomRingController.setCallback(mZoomListener);
         mZoomRingController.setZoomRingTrack(
                 com.android.internal.R.drawable.zoom_ring_track_absolute);
+        mZoomRingController.setPannerAcceleration(160);
+        mZoomRingController.setPannerStartAcceleratingDuration(700);
         createZoomRingOverviewTab();
     }
 
@@ -730,6 +769,10 @@ public class WebView extends AbsoluteLayout
             public void onClick(View v) {
                 // Hide the zoom ring
                 mZoomRingController.setVisible(false);
+                if (mLogEvent) {
+                    Checkin.updateStats(mContext.getContentResolver(),
+                            Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
+                }
                 zoomScrollOut();
             }});
         
@@ -3468,7 +3511,7 @@ public class WebView extends AbsoluteLayout
         // update mMinZoomScale
         if (mMinContentWidth > MAX_FLOAT_CONTENT_WIDTH) {
             boolean atMin = Math.abs(mActualScale - mMinZoomScale) < 0.01f;
-            mMinZoomScale = (float) getViewWidth() / mMinContentWidth;
+            mMinZoomScale = (float) getViewWidth() / mContentWidth;
             if (atMin) {
                 // if the WebView was at the minimum zoom scale, keep it. e,g.,
                 // the WebView was at the minimum zoom scale at the portrait
@@ -3535,7 +3578,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (mShowZoomRingTutorial && mMinZoomScale < mMaxZoomScale) {
+        if (mShowZoomRingTutorial && getSettings().supportZoom()
+                && (mMaxZoomScale - mMinZoomScale) > ZOOM_RING_STEPS * 0.01f) {
             ZoomRingController.showZoomTutorialOnce(mContext);
             mShowZoomRingTutorial = false;
             mPrivateHandler.sendMessageDelayed(mPrivateHandler
@@ -3616,10 +3660,18 @@ public class WebView extends AbsoluteLayout
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                     mZoomRingController.setVisible(true);
                     mInZoomTapDragMode = true;
+                    if (mLogEvent) {
+                        EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
+                                (eventTime - mLastTouchUpTime), eventTime);
+                    }
                     return mZoomRingController.handleDoubleTapEvent(ev);
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
+                    if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
+                        EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
+                                (eventTime - mLastTouchUpTime), eventTime);
+                    }
                 }
                 // don't trigger the link if zoom ring is visible
                 if (mTouchMode == TOUCH_INIT_MODE
@@ -3783,17 +3835,23 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
                     case TOUCH_INIT_MODE: // tap
                         if (mZoomRingController.isVisible()) {
-                            // don't trigger the link if zoom ring is visible
+                            // don't trigger the link if zoom ring is visible,
+                            // but still allow the double tap
+                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                                    .obtainMessage(RELEASE_SINGLE_TAP,
+                                            new Boolean(false)),
+                                    DOUBLE_TAP_TIMEOUT);
                             break;
                         }
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                        if (getSettings().supportZoom()
-                                && (mMinZoomScale < mMaxZoomScale)) {
+                        if (getSettings().supportZoom()) {
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP),
+                                    .obtainMessage(RELEASE_SINGLE_TAP,
+                                            new Boolean(true)),
                                     DOUBLE_TAP_TIMEOUT);
                         } else {
                             // do short press now
@@ -3841,7 +3899,8 @@ public class WebView extends AbsoluteLayout
                             // as tap instead of short press.
                             mTouchMode = TOUCH_INIT_MODE;
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP),
+                                    .obtainMessage(RELEASE_SINGLE_TAP,
+                                            new Boolean(true)),
                                     DOUBLE_TAP_TIMEOUT);
                         } else {
                             mTouchMode = TOUCH_DONE_MODE;
@@ -3963,6 +4022,7 @@ public class WebView extends AbsoluteLayout
                         + " time=" + time 
                         + " mLastFocusTime=" + mLastFocusTime);
             }
+            if (isInTouchMode()) requestFocusFromTouch();
             return false; // let common code in onKeyDown at it
         } 
         if (ev.getAction() == MotionEvent.ACTION_UP) {
@@ -4399,7 +4459,12 @@ public class WebView extends AbsoluteLayout
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
         int contentSize = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        nativeMotionUp(contentX, contentY, contentSize, true);
+        if (nativeMotionUp(contentX, contentY, contentSize, true)) {
+            if (mLogEvent) {
+                Checkin.updateStats(mContext.getContentResolver(),
+                        Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
+            }
+        }
         if (nativeUpdateFocusNode() && !mFocusNode.mIsTextField
                 && !mFocusNode.mIsTextArea) {
             playSoundEffect(SoundEffectConstants.CLICK);
@@ -4619,7 +4684,9 @@ public class WebView extends AbsoluteLayout
                 }
                 case RELEASE_SINGLE_TAP: {
                     mTouchMode = TOUCH_DONE_MODE;
-                    doShortPress();
+                    if ((Boolean)msg.obj) {
+                        doShortPress();
+                    }
                     break;
                 }
                 case SWITCH_TO_ENTER:
@@ -4671,7 +4738,7 @@ public class WebView extends AbsoluteLayout
                     mMinContentWidth = msg.arg1;
                     if (mMinContentWidth > MAX_FLOAT_CONTENT_WIDTH) {
                         mMinZoomScale = (float) getViewWidth()
-                                / mMinContentWidth;
+                                / draw.mWidthHeight.x;
                     }
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
@@ -5236,7 +5303,8 @@ public class WebView extends AbsoluteLayout
     private native Rect     nativeGetNavBounds();
     private native void     nativeInstrumentReport();
     private native void     nativeMarkNodeInvalid(int node);
-    private native void     nativeMotionUp(int x, int y, int slop, boolean isClick);
+    // return true if the page has been scrolled
+    private native boolean  nativeMotionUp(int x, int y, int slop, boolean isClick);
     // returns false if it handled the key
     private native boolean  nativeMoveFocus(int keyCode, int count, 
             boolean noScroll);

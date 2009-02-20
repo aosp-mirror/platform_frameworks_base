@@ -84,6 +84,10 @@ public class ZoomRing extends View {
     private Drawable mThumbPlusArrowDrawable;
     /** Shown beneath the thumb if we can still zoom out. */
     private Drawable mThumbMinusArrowDrawable;
+    private static final int THUMB_ARROW_PLUS = 1 << 0;
+    private static final int THUMB_ARROW_MINUS = 1 << 1;
+    /** Bitwise-OR of {@link #THUMB_ARROW_MINUS} and {@link #THUMB_ARROW_PLUS} */
+    private int mThumbArrowsToDraw;
     private static final int THUMB_ARROWS_FADE_DURATION = 300;
     private long mThumbArrowsFadeStartTime;
     private int mThumbArrowsAlpha = 255;
@@ -166,7 +170,7 @@ public class ZoomRing extends View {
         // TODO: add padding to drawable
         setBackgroundResource(R.drawable.zoom_ring_track);
         // TODO get from style
-        setRingBounds(30, Integer.MAX_VALUE);
+        setRingBounds(43, Integer.MAX_VALUE);
 
         mThumbHalfHeight = mThumbDrawable.getIntrinsicHeight() / 2;
         mThumbHalfWidth = mThumbDrawable.getIntrinsicWidth() / 2;
@@ -276,7 +280,7 @@ public class ZoomRing extends View {
                 thumbCenterX + mThumbHalfWidth,
                 thumbCenterY + mThumbHalfHeight);
 
-        if (mThumbArrowsAlpha > 0) {
+        if (mThumbArrowsToDraw > 0) {
             setThumbArrowsAngle(angle);
         }
         
@@ -420,12 +424,15 @@ public class ZoomRing extends View {
         switch (action) {
 
             case MotionEvent.ACTION_DOWN:
-                mCallback.onUserInteractionStarted();
-                
                 if (time - mPreviousUpTime <= DOUBLE_TAP_DISMISS_TIMEOUT) {
                     mCallback.onZoomRingDismissed(true);
+                    onTouchUp(time);
+                    
+                    // Dismissing, so halt here
+                    return true;
                 }
 
+                mCallback.onUserInteractionStarted();
                 mPreviousDownX = x;
                 mPreviousDownY = y;
                 resetState();
@@ -441,23 +448,7 @@ public class ZoomRing extends View {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mMode == MODE_MOVE_ZOOM_RING || mMode == MODE_WAITING_FOR_MOVE_ZOOM_RING) {
-                    mCallback.onZoomRingSetMovableHintVisible(false);
-                    if (mMode == MODE_MOVE_ZOOM_RING) {
-                        mCallback.onZoomRingMovingStopped();
-                    }
-                } else if (mMode == MODE_DRAG_THUMB || mMode == MODE_TAP_DRAG ||
-                        mMode == MODE_WAITING_FOR_DRAG_THUMB) {
-                    onThumbDragStopped();
-                    
-                    if (mMode == MODE_DRAG_THUMB) {
-                        // Animate back to a tick
-                        setThumbAngleAnimated(mPreviousCallbackAngle, 0);
-                    }
-                }
-
-                mPreviousUpTime = time;
-                mCallback.onUserInteractionStopped();
+                onTouchUp(time);
                 return true;
 
             default:
@@ -524,10 +515,9 @@ public class ZoomRing extends View {
                         deltaThumbAndTick = getDelta(mThumbAngle, tickAngle, !oldDirectionIsCcw);
                         boundAngle = getBoundIfExceeds(mThumbAngle, deltaThumbAndTick);
                         if (boundAngle != Integer.MIN_VALUE) {
-                            Log
-                                    .d(
-                                            TAG,
-                                            "Tapped somewhere where the shortest distance goes through a bound, but then the opposite direction also went through a bound!");
+                            // Not allowed to be here, it is between two bounds
+                            mMode = MODE_IGNORE_UNTIL_UP;
+                            return true;
                         }
                     }
                 }
@@ -573,6 +563,26 @@ public class ZoomRing extends View {
         }
 
         return true;
+    }
+    
+    private void onTouchUp(long time) {
+        if (mMode == MODE_MOVE_ZOOM_RING || mMode == MODE_WAITING_FOR_MOVE_ZOOM_RING) {
+            mCallback.onZoomRingSetMovableHintVisible(false);
+            if (mMode == MODE_MOVE_ZOOM_RING) {
+                mCallback.onZoomRingMovingStopped();
+            }
+        } else if (mMode == MODE_DRAG_THUMB || mMode == MODE_TAP_DRAG ||
+                mMode == MODE_WAITING_FOR_DRAG_THUMB) {
+            onThumbDragStopped();
+            
+            if (mMode == MODE_DRAG_THUMB) {
+                // Animate back to a tick
+                setThumbAngleAnimated(mPreviousCallbackAngle, 0);
+            }
+        }
+
+        mPreviousUpTime = time;
+        mCallback.onUserInteractionStopped();
     }
 
     private boolean isDeltaInBounds(int startAngle, int deltaAngle) {
@@ -766,9 +776,11 @@ public class ZoomRing extends View {
             }
         }
 
-        int deltaAngle = getDelta(mThumbAngle, touchAngle, useDirection, ccw);
-        mAcculumalatedTrailAngle += Math.toDegrees(deltaAngle / (double) RADIAN_INT_MULTIPLIER);
-        
+        if (DRAW_TRAIL) {
+            int deltaAngle = getDelta(mThumbAngle, touchAngle, useDirection, ccw);
+            mAcculumalatedTrailAngle += Math.toDegrees(deltaAngle / (double) RADIAN_INT_MULTIPLIER);
+        }
+            
         if (animateThumbToNewAngle) {
             if (useDirection) {
                 setThumbAngleAnimated(touchAngle, 0, ccw);
@@ -851,15 +863,10 @@ public class ZoomRing extends View {
             if (DRAW_TRAIL) {
                 mTrail.draw(canvas);
             }
-
-            // If we aren't near the bounds, draw the corresponding arrows
-            int callbackAngle = mPreviousCallbackAngle;
-            if (callbackAngle < mThumbCwBound - RADIAN_INT_ERROR ||
-                    callbackAngle > mThumbCwBound + RADIAN_INT_ERROR) {
+            if ((mThumbArrowsToDraw & THUMB_ARROW_PLUS) != 0) {
                 mThumbPlusArrowDrawable.draw(canvas);
             }
-            if (callbackAngle < mThumbCcwBound - RADIAN_INT_ERROR ||
-                    callbackAngle > mThumbCcwBound + RADIAN_INT_ERROR) {
+            if ((mThumbArrowsToDraw & THUMB_ARROW_MINUS) != 0) {
                 mThumbMinusArrowDrawable.draw(canvas);
             }
             mThumbDrawable.draw(canvas);
@@ -875,8 +882,21 @@ public class ZoomRing extends View {
     public void setThumbArrowsVisible(boolean visible) {
         if (visible) {
             mThumbArrowsAlpha = 255;
-            mThumbPlusArrowDrawable.setAlpha(255);
-            mThumbMinusArrowDrawable.setAlpha(255);
+            int callbackAngle = mPreviousCallbackAngle;
+            if (callbackAngle < mThumbCwBound - RADIAN_INT_ERROR ||
+                    callbackAngle > mThumbCwBound + RADIAN_INT_ERROR) {
+                mThumbPlusArrowDrawable.setAlpha(255);
+                mThumbArrowsToDraw |= THUMB_ARROW_PLUS;                
+            } else {
+                mThumbArrowsToDraw &= ~THUMB_ARROW_PLUS;
+            }
+            if (callbackAngle < mThumbCcwBound - RADIAN_INT_ERROR ||
+                    callbackAngle > mThumbCcwBound + RADIAN_INT_ERROR) {
+                mThumbMinusArrowDrawable.setAlpha(255);
+                mThumbArrowsToDraw |= THUMB_ARROW_MINUS;
+            } else {
+                mThumbArrowsToDraw &= ~THUMB_ARROW_MINUS;
+            }
             invalidate();
         } else if (mThumbArrowsAlpha == 255) {
             // Only start fade if we're fully visible (otherwise another fade is happening already)
@@ -886,17 +906,24 @@ public class ZoomRing extends View {
     }
     
     private void onThumbArrowsFadeTick() {
-        if (mThumbArrowsAlpha <= 0) return;
+        if (mThumbArrowsAlpha <= 0) {
+            mThumbArrowsToDraw = 0;
+            return;
+        }
         
         mThumbArrowsAlpha = (int)
                 (255 - (255 * (SystemClock.elapsedRealtime() - mThumbArrowsFadeStartTime)
                         / THUMB_ARROWS_FADE_DURATION));
         if (mThumbArrowsAlpha < 0) mThumbArrowsAlpha = 0;
-        mThumbPlusArrowDrawable.setAlpha(mThumbArrowsAlpha);
-        mThumbMinusArrowDrawable.setAlpha(mThumbArrowsAlpha);
-        invalidateDrawable(mThumbPlusArrowDrawable);
-        invalidateDrawable(mThumbMinusArrowDrawable);
-        
+        if ((mThumbArrowsToDraw & THUMB_ARROW_PLUS) != 0) {
+            mThumbPlusArrowDrawable.setAlpha(mThumbArrowsAlpha);
+            invalidateDrawable(mThumbPlusArrowDrawable);
+        }
+        if ((mThumbArrowsToDraw & THUMB_ARROW_MINUS) != 0) {
+            mThumbMinusArrowDrawable.setAlpha(mThumbArrowsAlpha);
+            invalidateDrawable(mThumbMinusArrowDrawable);
+        }
+            
         if (!mHandler.hasMessages(MSG_THUMB_ARROWS_FADE_TICK)) {
             mHandler.sendEmptyMessage(MSG_THUMB_ARROWS_FADE_TICK);
         }

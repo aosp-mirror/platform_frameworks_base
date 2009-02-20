@@ -1477,8 +1477,18 @@ public final class Gmail {
                         LABEL_OUTBOX, LABEL_DRAFT, LABEL_ALL,
                         LABEL_SPAM, LABEL_TRASH);
 
+
+        private static final Set<String> USER_MEANINGFUL_SYSTEM_LABELS_SET =
+                Sets.newHashSet(
+                        SORTED_USER_MEANINGFUL_SYSTEM_LABELS.toArray(
+                                new String[]{}));
+
         public static List<String> getSortedUserMeaningfulSystemLabels() {
             return SORTED_USER_MEANINGFUL_SYSTEM_LABELS;
+        }
+
+        public static Set<String> getUserMeaningfulSystemLabelsSet() {
+            return USER_MEANINGFUL_SYSTEM_LABELS_SET;
         }
 
         /**

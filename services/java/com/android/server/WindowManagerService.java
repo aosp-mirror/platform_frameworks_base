@@ -2088,6 +2088,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 }
                 int or = wtoken.requestedOrientation;
+                // If this application is fullscreen, then just take whatever
+                // orientation it has and ignores whatever is under it.
+                if (wtoken.appFullscreen) {
+                    return or;
+                }
                 // If this application has requested an explicit orientation,
                 // then use it.
                 if (or == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ||
@@ -5594,6 +5599,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             return mFrame;
         }
 
+        public Rect getShownFrameLw() {
+            return mShownFrame;
+        }
+
         public Rect getDisplayFrameLw() {
             return mDisplayFrame;
         }
@@ -6221,8 +6230,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         public boolean fillsScreenLw(int screenWidth, int screenHeight,
-                                   boolean shownFrame) {
+                                   boolean shownFrame, boolean onlyOpaque) {
             if (mSurface == null) {
+                return false;
+            }
+            if (mAppToken != null && !mAppToken.appFullscreen) {
+                return false;
+            }
+            if (onlyOpaque && mAttrs.format != PixelFormat.OPAQUE) {
                 return false;
             }
             final Rect frame = shownFrame ? mShownFrame : mFrame;

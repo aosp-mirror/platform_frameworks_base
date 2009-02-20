@@ -312,7 +312,8 @@ class BluetoothEventLoop {
             case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
             case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
             case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
-                if (!mBluetoothService.getBondState().hasAutoPairingFailed(address)) {
+                if (!mBluetoothService.getBondState().hasAutoPairingFailed(address) &&
+                    !mBluetoothService.getBondState().isAutoPairingBlacklisted(address)) {
                     mBluetoothService.getBondState().attempt(address);
                     mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes("0000"));
                     return;

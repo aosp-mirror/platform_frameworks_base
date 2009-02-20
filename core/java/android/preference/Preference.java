@@ -667,7 +667,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * {@link SharedPreferences}. This should be unique for the package.
      * 
      * @param key The key for the preference.
-     * @see #getId()
      */
     public void setKey(String key) {
         mKey = key;
@@ -1460,7 +1459,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @param container The Bundle in which to save the instance of this Preference.
      * 
      * @see #restoreHierarchyState
-     * @see #dispatchSaveInstanceState
      * @see #onSaveInstanceState
      */
     public void saveHierarchyState(Bundle container) {
@@ -1474,7 +1472,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * 
      * @param container The Bundle in which to save the instance of this Preference.
      * 
-     * @see #dispatchRestoreInstanceState
      * @see #saveHierarchyState
      * @see #onSaveInstanceState
      */
@@ -1503,7 +1500,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      *         The default implementation returns null.
      * @see #onRestoreInstanceState
      * @see #saveHierarchyState
-     * @see #dispatchSaveInstanceState
      */
     protected Parcelable onSaveInstanceState() {
         mBaseMethodCalled = true;
@@ -1516,7 +1512,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @param container The Bundle that holds the previously saved state.
      * 
      * @see #saveHierarchyState
-     * @see #dispatchRestoreInstanceState
      * @see #onRestoreInstanceState
      */
     public void restoreHierarchyState(Bundle container) {
@@ -1530,7 +1525,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * not want to save state for their children.
      * 
      * @param container The Bundle that holds the previously saved state.
-     * @see #dispatchSaveInstanceState
      * @see #restoreHierarchyState
      * @see #onRestoreInstanceState
      */
@@ -1557,7 +1551,6 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      *            {@link #onSaveInstanceState}.
      * @see #onSaveInstanceState
      * @see #restoreHierarchyState
-     * @see #dispatchRestoreInstanceState
      */
     protected void onRestoreInstanceState(Parcelable state) {
         mBaseMethodCalled = true;

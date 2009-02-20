@@ -29,24 +29,22 @@ public class MediaRecorderSetOutputFileStateUnitTest extends AndroidTestCase imp
     private MediaRecorderStateUnitTestTemplate mTestTemplate = new MediaRecorderStateUnitTestTemplate();
     /**
      * 1. It is valid to call setOutputFile() in the following states:
-     *    {DataSourceConfigured}.
+     *    {DataSourceConfigured, Initial, Initialized, Prepared, Recording, Error}.
      * 2. It is invalid to call setOutputFile() in the following states:
-     *    {Initial, Initialized, Prepared, Recording, Error}
+     *    {}
      *    
      * @param stateErrors the MediaRecorderStateErrors to check against.
      */
     public void checkStateErrors(MediaRecorderStateErrors stateErrors) {
         // Valid states.
         assertTrue(!stateErrors.errorInDataSourceConfiguredState);
-
-        // Invalid states.
-        assertTrue(stateErrors.errorInPreparedState);
-        assertTrue(stateErrors.errorInRecordingState);
-        assertTrue(stateErrors.errorInErrorState);
-        assertTrue(stateErrors.errorInInitialState);
-        assertTrue(stateErrors.errorInInitialStateAfterReset);
-        assertTrue(stateErrors.errorInInitialStateAfterStop);
-        assertTrue(stateErrors.errorInInitializedState);
+        assertTrue(!stateErrors.errorInPreparedState);
+        assertTrue(!stateErrors.errorInRecordingState);
+        assertTrue(!stateErrors.errorInErrorState);
+        assertTrue(!stateErrors.errorInInitialState);
+        assertTrue(!stateErrors.errorInInitialStateAfterReset);
+        assertTrue(!stateErrors.errorInInitialStateAfterStop);
+        assertTrue(!stateErrors.errorInInitializedState);
     }
 
     public void invokeMethodUnderTest(MediaRecorder recorder) {

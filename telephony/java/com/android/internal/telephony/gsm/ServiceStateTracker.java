@@ -35,6 +35,7 @@ import android.database.ContentObserver;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.SystemClock;
@@ -141,6 +142,9 @@ final class ServiceStateTracker extends Handler
     // Already sent the event-log for no gprs register
     private boolean mReportedGprsNoReg = false;
 
+    // Wake lock used while setting time of day.
+    private PowerManager.WakeLock mWakeLock;
+    private static final String WAKELOCK_TAG = "ServiceStateTracker";
 
     // Keep track of SPN display rules, so we only broadcast intent if something changes.
     private String curSpn = null;
@@ -230,7 +234,11 @@ final class ServiceStateTracker extends Handler
         cellLoc = new GsmCellLocation();
         newCellLoc = new GsmCellLocation();
 
-        cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
+        PowerManager powerManager =
+                (PowerManager)phone.getContext().getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+
+        cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);        
         cm.registerForRadioStateChanged(this, EVENT_RADIO_STATE_CHANGED, null);
 
         cm.registerForNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED, null);
@@ -1348,42 +1356,49 @@ final class ServiceStateTracker extends Handler
                 return;
             }
 
-            if (getAutoTime()) {
-                long millisSinceNitzReceived
-                        = SystemClock.elapsedRealtime() - nitzReceiveTime;
+            try {
+                mWakeLock.acquire();
 
-                if (millisSinceNitzReceived < 0) {
-                    // Sanity check: something is wrong
-                    Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
-                                        + "backwards since NITZ time was received, "
-                                        + nitz);
-                    return;
+                if (getAutoTime()) {
+                    long millisSinceNitzReceived
+                            = SystemClock.elapsedRealtime() - nitzReceiveTime;
+
+                    if (millisSinceNitzReceived < 0) {
+                        // Sanity check: something is wrong
+                        Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
+                                            + "backwards since NITZ time was received, "
+                                            + nitz);
+                        return;
+                    }
+
+                    if (millisSinceNitzReceived > Integer.MAX_VALUE) {
+                        // If the time is this far off, something is wrong > 24 days!
+                        Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
+                                        + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
+                                        + " days");
+                        return;
+                    }
+
+                    // Note: with range checks above, cast to int is safe
+                    c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
+
+                    Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
+                        + " NITZ receive delay(ms): " + millisSinceNitzReceived
+                        + " gained(ms): "
+                        + (c.getTimeInMillis() - System.currentTimeMillis())
+                        + " from " + nitz);
+
+                    SystemClock.setCurrentTimeMillis(c.getTimeInMillis());
+                    Log.i(LOG_TAG, "NITZ: after Setting time of day");
                 }
-
-                if (millisSinceNitzReceived > Integer.MAX_VALUE) {
-                    // If the time is this far off, something is wrong > 24 days!
-                    Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
-                                    + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
-                                    + " days");
-                    return;
+                SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
+                saveNitzTime(c.getTimeInMillis());
+                if (Config.LOGV) {
+                    long end = SystemClock.elapsedRealtime();
+                    Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
                 }
-
-                // Note: with range checks above, cast to int is safe
-                c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
-
-                Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
-                    + " NITZ receive delay(ms): " + millisSinceNitzReceived
-                    + " gained(ms): "
-                    + (c.getTimeInMillis() - System.currentTimeMillis())
-                    + " from " + nitz);
-
-                setAndBroadcastNetworkSetTime(c.getTimeInMillis());
-            }
-            SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
-            saveNitzTime(c.getTimeInMillis());
-            if (Config.LOGV) {
-                long end = SystemClock.elapsedRealtime();
-                Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
+            } finally {
+                mWakeLock.release();
             }
         } catch (RuntimeException ex) {
             Log.e(LOG_TAG, "NITZ: Parsing NITZ time " + nitz, ex);

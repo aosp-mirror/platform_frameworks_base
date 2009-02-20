@@ -400,7 +400,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     uint32_t u = cblk->user;
     uint32_t bufferEnd = cblk->userBase + cblk->frameCount;
 
-    if (u + framesReady > bufferEnd) {
+    if (u + framesReq > bufferEnd) {
         framesReq = bufferEnd - u;
     }
 

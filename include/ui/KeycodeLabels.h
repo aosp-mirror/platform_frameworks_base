@@ -113,6 +113,7 @@ static const KeycodeLabel KEYCODES[] = {
     { "PREVIOUSSONG", 88 },
     { "REWIND", 89 },
     { "FORWARD", 90 },
+    { "MUTE", 91 },
 
     // NOTE: If you add a new keycode here you must also add it to:
     //   (enum KeyCode, in this file)
@@ -216,7 +217,8 @@ typedef enum KeyCode {
     kKeyCodeNextSong = 87,
     kKeyCodePreviousSong = 88,
     kKeyCodeRewind = 89,
-    kKeyCodeForward = 90
+    kKeyCodeForward = 90,
+    kKeyCodeMute = 91
 } KeyCode;
 
 static const KeycodeLabel FLAGS[] = {

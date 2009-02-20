@@ -100,7 +100,6 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
      * 
      * @return An adapter that provides the {@link Preference} contained in this
      *         {@link PreferenceScreen}.
-     * @see PreferenceGroupAdapter
      */
     public ListAdapter getRootAdapter() {
         if (mRootAdapter == null) {

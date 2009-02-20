@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.gsm.SmsMessage;
 import android.telephony.gsm.SmsManager;
+import com.android.internal.telephony.WapPushOverSms;
 import android.telephony.ServiceState;
 import android.util.Config;
 import com.android.internal.util.HexDump;
@@ -61,37 +62,6 @@ final class SMSDispatcher extends Handler {
 
     /** Default timeout for SMS sent query */
     private static final int DEFAULT_SMS_TIMOUEOUT = 6000;
-
-    private static final int WAP_PDU_TYPE_PUSH = 0x06;
-
-    private static final int WAP_PDU_TYPE_CONFIRMED_PUSH = 0x07;
-
-    private static final byte DRM_RIGHTS_XML = (byte)0xca;
-
-    private static final String DRM_RIGHTS_XML_MIME_TYPE = "application/vnd.oma.drm.rights+xml";
-
-    private static final byte DRM_RIGHTS_WBXML = (byte)0xcb;
-
-    private static final String DRM_RIGHTS_WBXML_MIME_TYPE =
-            "application/vnd.oma.drm.rights+wbxml";
-
-    private static final byte WAP_SI_MIME_PORT = (byte)0xae;
-
-    private static final String WAP_SI_MIME_TYPE = "application/vnd.wap.sic";
-
-    private static final byte WAP_SL_MIME_PORT = (byte)0xb0;
-
-    private static final String WAP_SL_MIME_TYPE = "application/vnd.wap.slc";
-
-    private static final byte WAP_CO_MIME_PORT = (byte)0xb2;
-
-    private static final String WAP_CO_MIME_TYPE = "application/vnd.wap.coc";
-
-    private static final int WAP_PDU_SHORT_LENGTH_MAX = 30;
-
-    private static final int WAP_PDU_LENGTH_QUOTE = 31;
-
-    private static final String MMS_MIME_TYPE = "application/vnd.wap.mms-message";
 
     private static final String[] RAW_PROJECTION = new String[] {
         "pdu",
@@ -123,6 +93,8 @@ final class SMSDispatcher extends Handler {
     static final int EVENT_ALERT_TIMEOUT = 9;
 
     private final GSMPhone mPhone;
+
+    private final WapPushOverSms mWapPush;
 
     private final Context mContext;
 
@@ -208,6 +180,7 @@ final class SMSDispatcher extends Handler {
 
     SMSDispatcher(GSMPhone phone) {
         mPhone = phone;
+        mWapPush = new WapPushOverSms(phone);
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
@@ -538,7 +511,7 @@ final class SMSDispatcher extends Handler {
 
             if (destPort != -1) {
                 if (destPort == SmsHeader.PORT_WAP_PUSH) {
-                    dispatchWapPdu(sms.getUserData());
+                    mWapPush.dispatchWapPdu(sms.getUserData());
                 }
                 // The message was sent to a port, so concoct a URI for it
                 dispatchPortAddressedPdus(pdus, destPort);
@@ -621,7 +594,7 @@ final class SMSDispatcher extends Handler {
             }
 
             // Handle the PUSH
-            dispatchWapPdu(output.toByteArray());
+            mWapPush.dispatchWapPdu(output.toByteArray());
             break;
         }
 
@@ -663,122 +636,6 @@ final class SMSDispatcher extends Handler {
                 intent, "android.permission.RECEIVE_SMS");
     }
 
-    /**
-     * Dispatches inbound messages that are in the WAP PDU format. See
-     * wap-230-wsp-20010705-a section 8 for details on the WAP PDU format.
-     *
-     * @param pdu The WAP PDU, made up of one or more SMS PDUs
-     */
-    private void dispatchWapPdu(byte[] pdu) {
-        int index = 0;
-        int transactionId = pdu[index++] & 0xFF;
-        int pduType = pdu[index++] & 0xFF;
-        int headerLength = 0;
-
-        if ((pduType != WAP_PDU_TYPE_PUSH) &&
-                (pduType != WAP_PDU_TYPE_CONFIRMED_PUSH)) {
-            Log.w(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
-            return;
-        }
-
-        /**
-         * Parse HeaderLen(unsigned integer).
-         * From wap-230-wsp-20010705-a section 8.1.2
-         * The maximum size of a uintvar is 32 bits.
-         * So it will be encoded in no more than 5 octets.
-         */
-        int temp = 0;
-        do {
-            temp = pdu[index++];
-            headerLength = headerLength << 7;
-            headerLength |= temp & 0x7F;
-        } while ((temp & 0x80) != 0);
-
-        int headerStartIndex = index;
-
-        /**
-         * Parse Content-Type.
-         * From wap-230-wsp-20010705-a section 8.4.2.24
-         *
-         * Content-type-value = Constrained-media | Content-general-form
-         * Content-general-form = Value-length Media-type
-         * Media-type = (Well-known-media | Extension-Media) *(Parameter)
-         * Value-length = Short-length | (Length-quote Length)
-         * Short-length = <Any octet 0-30>   (octet <= WAP_PDU_SHORT_LENGTH_MAX)
-         * Length-quote = <Octet 31>         (WAP_PDU_LENGTH_QUOTE)
-         * Length = Uintvar-integer
-         */
-        // Parse Value-length.
-        if ((pdu[index] & 0xff) <= WAP_PDU_SHORT_LENGTH_MAX) {
-            // Short-length.
-            index++;
-        } else if (pdu[index] == WAP_PDU_LENGTH_QUOTE) {
-            // Skip Length-quote.
-            index++;
-            // Skip Length.
-            // Now we assume 8bit is enough to store the content-type length.
-            index++;
-        }
-        String mimeType;
-        switch (pdu[headerStartIndex])
-        {
-        case DRM_RIGHTS_XML:
-            mimeType = DRM_RIGHTS_XML_MIME_TYPE;
-            break;
-        case DRM_RIGHTS_WBXML:
-            mimeType = DRM_RIGHTS_WBXML_MIME_TYPE;
-            break;
-        case WAP_SI_MIME_PORT:
-            // application/vnd.wap.sic
-            mimeType = WAP_SI_MIME_TYPE;
-            break;
-        case WAP_SL_MIME_PORT:
-            mimeType = WAP_SL_MIME_TYPE;
-            break;
-        case WAP_CO_MIME_PORT:
-            mimeType = WAP_CO_MIME_TYPE;
-            break;
-        default:
-            int start = index;
-
-            // Skip text-string.
-            // Now we assume the mimetype is Extension-Media.
-            while (pdu[index++] != '\0') {
-                ;
-            }
-            mimeType = new String(pdu, start, index-start-1);
-            break;
-        }
-
-        // XXX Skip the remainder of the header for now
-        int dataIndex = headerStartIndex + headerLength;
-        byte[] data;
-        if (pdu[headerStartIndex] == WAP_CO_MIME_PORT)
-        {
-            // because SMSDispatcher can't parse push headers "Content-Location" and
-            // X-Wap-Content-URI, so pass the whole push to CO application.
-            data = pdu;
-        } else
-        {
-            data = new byte[pdu.length - dataIndex];
-            System.arraycopy(pdu, dataIndex, data, 0, data.length);
-        }
-
-        // Notify listeners about the WAP PUSH
-        Intent intent = new Intent(Intents.WAP_PUSH_RECEIVED_ACTION);
-        intent.setType(mimeType);
-        intent.putExtra("transactionId", transactionId);
-        intent.putExtra("pduType", pduType);
-        intent.putExtra("data", data);
-
-        if (mimeType.equals(MMS_MIME_TYPE)) {
-            mPhone.getContext().sendBroadcast(
-                    intent, "android.permission.RECEIVE_MMS");
-        } else {
-            mPhone.getContext().sendBroadcast(
-                    intent, "android.permission.RECEIVE_WAP_PUSH");
-        }
-    }
 
     /**
      * Send a multi-part text based SMS.
@@ -913,7 +770,7 @@ final class SMSDispatcher extends Handler {
             sendSms(tracker);
         }        
     }
-    
+
     /**
      * Send a SMS
      *

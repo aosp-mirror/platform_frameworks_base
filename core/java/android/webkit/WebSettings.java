@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Checkin;
+
 import java.lang.SecurityException;
 import android.content.pm.PackageManager;
 
@@ -408,6 +410,10 @@ public class WebSettings {
      * @see WebSettings.TextSize
      */
     public synchronized void setTextSize(TextSize t) {
+        if (WebView.mLogEvent && mTextSize != t ) {
+            Checkin.updateStats(mContext.getContentResolver(),
+                    Checkin.Stats.Tag.BROWSER_TEXT_SIZE_CHANGE, 1, 0.0);
+        }
         mTextSize = t;
         postSync();
     }

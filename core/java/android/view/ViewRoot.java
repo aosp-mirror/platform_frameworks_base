@@ -1817,6 +1817,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (event != null) {
                     event.recycle();
                 }
+                // If we reach this, we delivered a trackball event to mView and
+                // mView consumed it. Because we will not translate the trackball
+                // event into a key event, touch mode will not exit, so we exit
+                // touch mode here.
+                ensureTouchMode(false);
                 //noinspection ReturnInsideFinallyBlock
                 return;
             }
@@ -2140,7 +2145,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 boolean keyHandled = mView.dispatchKeyEvent(event);
 
-                if ((!keyHandled && isDown) || (action == KeyEvent.ACTION_MULTIPLE)) {
+                if (!keyHandled && isDown) {
                     int direction = 0;
                     switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -2541,7 +2546,7 @@ public final class ViewRoot extends Handler implements ViewParent,
          * for us to consider the user to be doing fast trackball movements,
          * and thus apply an acceleration.
          */
-        static final long FAST_MOVE_TIME = 100;
+        static final long FAST_MOVE_TIME = 150;
         
         /**
          * Scaling factor to the time (in milliseconds) between events to how
@@ -2549,7 +2554,7 @@ public final class ViewRoot extends Handler implements ViewParent,
          * is < FAST_MOVE_TIME this multiplies the acceleration; when >
          * FAST_MOVE_TIME it divides it.
          */
-        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/50);
+        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
         
         float position;
         float absPosition;

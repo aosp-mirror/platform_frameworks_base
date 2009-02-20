@@ -240,7 +240,7 @@ public interface SurfaceHolder {
      * in particular there is no guarantee that the content of the Surface
      * will remain unchanged when lockCanvas() is called again.
      * 
-     * @see android.view.SurfaceHolder.lockCanvas
+     * @see #lockCanvas()
      *
      * @param canvas The Canvas previously returned by lockCanvas().
      */

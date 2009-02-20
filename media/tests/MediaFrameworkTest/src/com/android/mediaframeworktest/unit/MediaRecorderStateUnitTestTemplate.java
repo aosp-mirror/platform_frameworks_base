@@ -90,9 +90,15 @@ class MediaRecorderStateUnitTestTemplate extends AndroidTestCase {
         }
     }
 
+    // FIXME:
+    // In the past, stop() == reset().
+    // However, this is no longer true. The plan is to have a STOPPED state.
+    // and from STOPPED state, start can be called without the need to
+    // do the recording configuration again. 
     private void setMediaRecorderToInitialStateAfterStop() {
         try {
             mMediaRecorder.reset();
+/*
             mMediaRecorder.setAudioSource(AUDIO_SOURCE);
             mMediaRecorder.setOutputFormat(OUTPUT_FORMAT);
             mMediaRecorder.setAudioEncoder(AUDIO_ENCODER);
@@ -100,6 +106,7 @@ class MediaRecorderStateUnitTestTemplate extends AndroidTestCase {
             mMediaRecorder.prepare();
             mMediaRecorder.start();
             mMediaRecorder.stop();
+*/
         } catch(Exception e) {
             fail("setMediaRecorderToInitialStateAfterReset: Exception " + e.getClass().getName() + " was thrown.");
         }

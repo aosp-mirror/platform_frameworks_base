@@ -57,7 +57,7 @@ import android.view.animation.DecelerateInterpolator;
 public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         View.OnTouchListener, View.OnKeyListener {
     
-    private static final int ZOOM_RING_RADIUS_INSET = 10;
+    private static final int ZOOM_RING_RADIUS_INSET = 24;
 
     private static final int ZOOM_RING_RECENTERING_DURATION = 500;
 
@@ -79,7 +79,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     private static final int MAX_PAN_GAP = 20;
     private static final int MAX_INITIATE_PAN_GAP = 10;
     // TODO view config
-    private static final int INITIATE_PAN_DELAY = 400;
+    private static final int INITIATE_PAN_DELAY = 300;
     
     private static final String SETTING_NAME_SHOWN_TOAST = "shown_zoom_ring_toast";
     
@@ -146,7 +146,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     private int mZoomRingHeight;
     
     /** Invokes panning of owner view if the zoom ring is touching an edge. */
-    private Panner mPanner = new Panner();
+    private Panner mPanner;
     private long mTouchingEdgeStartTime;
     private boolean mPanningEnabledForThisInteraction;
     
@@ -241,6 +241,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
+        mPanner = new Panner();
         mOwnerView = ownerView;
         
         mZoomRing = new ZoomRing(context);
@@ -389,6 +390,8 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                 };                
             }
             
+            mPanningArrows.setAnimation(null);
+            
             mHandler.post(mPostedVisibleInitializer);
             
             // Handle configuration changes when visible
@@ -409,12 +412,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             } else {
                 mOwnerView.setOnTouchListener(null);
             }
-            
+
             // No longer care about configuration changes
             mContext.unregisterReceiver(mConfigurationChangedReceiver);
             
             mWindowManager.removeView(mContainer);
-
+            mHandler.removeCallbacks(mPostedVisibleInitializer);
+            
             if (mCallback != null) {
                 mCallback.onVisibilityChanged(false);
             }
@@ -464,6 +468,9 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     public boolean handleDoubleTapEvent(MotionEvent event) {
         int action = event.getAction();
         
+        // TODO: make sure this works well with the
+        // ownerView.setOnTouchListener(this) instead of window receiving
+        // touches
         if (action == MotionEvent.ACTION_DOWN) {
             mTouchMode = TOUCH_MODE_WAITING_FOR_TAP_DRAG_MOVEMENT;
             int x = (int) event.getX();
@@ -493,6 +500,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                                     mViewConfig.getScaledTouchSlop()) {
                                 mZoomRing.setTapDragMode(true, x, y);
                                 mTouchMode = TOUCH_MODE_FORWARDING_FOR_TAP_DRAG;
+                                setTouchTargetView(mZoomRing);
                             }
                             return true;
                             
@@ -587,7 +595,6 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
 
     public void onZoomRingMovingStarted() {
         mScroller.abortAnimation();
-        mPanningEnabledForThisInteraction = false;
         mTouchingEdgeStartTime = 0;
         if (mCallback != null) {
             mCallback.onBeginPan();
@@ -658,6 +665,8 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                 if (!horizontalPanning) {
                     // Neither are panning, reset any timer to start pan mode
                     mTouchingEdgeStartTime = 0;
+                    mPanningEnabledForThisInteraction = false;
+                    mPanner.stop();
                 }
             }
         }
@@ -752,6 +761,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             // The ring was dismissed but we need to throw away all events until the up 
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 mOwnerView.setOnTouchListener(null);
+                setTouchTargetView(null);
                 mReleaseTouchListenerOnUp = false;
             }
             
@@ -763,16 +773,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                targetView = mTouchTargetView =
-                        getViewForTouch((int) event.getRawX(), (int) event.getRawY());
-                if (targetView != null) {
-                    targetView.getLocationInWindow(mTouchTargetLocationInWindow);
-                }
+                targetView = getViewForTouch((int) event.getRawX(), (int) event.getRawY());
+                setTouchTargetView(targetView);
                 break;
                 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mTouchTargetView = null;
+                setTouchTargetView(null);
                 break;
         }
 
@@ -796,6 +803,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             }
             
             return false;
+        }
+    }
+    
+    private void setTouchTargetView(View view) {
+        mTouchTargetView = view;
+        if (view != null) {
+            view.getLocationInWindow(mTouchTargetLocationInWindow);
         }
     }
     
@@ -950,6 +964,22 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         }
     }
     
+    public void setPannerStartVelocity(float startVelocity) {
+        mPanner.mStartVelocity = startVelocity;
+    }
+
+    public void setPannerAcceleration(float acceleration) {
+        mPanner.mAcceleration = acceleration;
+    }
+
+    public void setPannerMaxVelocity(float maxVelocity) {
+        mPanner.mMaxVelocity = maxVelocity;
+    }
+
+    public void setPannerStartAcceleratingDuration(int duration) {
+        mPanner.mStartAcceleratingDuration = duration;
+    }
+
     private class Panner implements Runnable {
         private static final int RUN_DELAY = 15;
         private static final float STOP_SLOWDOWN = 0.8f;
@@ -966,6 +996,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         
         /** The time of the last callback to pan the map/browser/etc. */
         private long mPreviousCallbackTime;
+        
+        // TODO Adjust to be DPI safe
+        private float mStartVelocity = 135;
+        private float mAcceleration = 160;
+        private float mMaxVelocity = 1000;
+        private int mStartAcceleratingDuration = 700;
+        private float mVelocity;
         
         /** -100 (full left) to 0 (none) to 100 (full right) */
         public void setHorizontalStrength(int horizontalStrength) {
@@ -1013,11 +1050,12 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             
             boolean firstRun = mPreviousCallbackTime == 0;
             long curTime = SystemClock.elapsedRealtime();
-            int panAmount = getPanAmount(mStartTime, mPreviousCallbackTime, curTime);
+            int panAmount = getPanAmount(mPreviousCallbackTime, curTime);
             mPreviousCallbackTime = curTime;
             
             if (firstRun) {
                 mStartTime = curTime;
+                mVelocity = mStartVelocity;
             } else {
                 int panX = panAmount * mHorizontalStrength / 100;
                 int panY = panAmount * mVerticalStrength / 100;
@@ -1030,12 +1068,22 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             mUiHandler.postDelayed(this, RUN_DELAY);
         }
         
-        // TODO make setter for this value so zoom clients can have different pan rates, if they want
-        private static final int PAN_VELOCITY_PX_S = 30;
-        private int getPanAmount(long startTime, long previousTime, long currentTime) {
-            return (int) ((currentTime - previousTime) * PAN_VELOCITY_PX_S / 100);
+        private int getPanAmount(long previousTime, long currentTime) {
+            if (mVelocity > mMaxVelocity) {
+                mVelocity = mMaxVelocity;
+            } else if (mVelocity < mMaxVelocity) {
+                // See if it's time to add in some acceleration
+                if (currentTime - mStartTime > mStartAcceleratingDuration) {
+                    mVelocity += (currentTime - previousTime) * mAcceleration / 1000;
+                }
+            }
+    
+            return (int) ((currentTime - previousTime) * mVelocity) / 1000;
         }
+
     }
+
+    
     
     public interface OnZoomListener {
         void onBeginDrag();

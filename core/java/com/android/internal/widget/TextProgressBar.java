@@ -104,6 +104,7 @@ public class TextProgressBar extends RelativeLayout implements OnChronometerTick
      * @param durationBase Use the {@link SystemClock#elapsedRealtime} time
      *            base.
      */
+    @android.view.RemotableViewMethod
     public void setDurationBase(long durationBase) {
         mDurationBase = durationBase;
         

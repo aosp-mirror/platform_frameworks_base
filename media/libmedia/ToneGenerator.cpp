@@ -175,27 +175,28 @@ bool ToneGenerator::startTone(int toneType) {
     if (mState == TONE_INIT) {
         if (prepareWave()) {
             LOGV("Immediate start, time %d\n", (unsigned int)(systemTime()/1000000));
-
+            lResult = true;
             mState = TONE_STARTING;
             mLock.unlock();
             mpAudioTrack->start();
             mLock.lock();
             if (mState == TONE_STARTING) {
+                LOGV("Wait for start callback");
                 if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR) {
                     LOGE("--- Immediate start timed out");
                     mState = TONE_IDLE;
+                    lResult = false;
                 }
             }
-
-            if (mState == TONE_PLAYING)
-                lResult = true;
+        } else {
+            mState == TONE_IDLE;
         }
     } else {
         LOGV("Delayed start\n");
 
         mState = TONE_RESTARTING;
         if (mWaitCbkCond.waitRelative(mLock, seconds(1)) == NO_ERROR) {
-            if (mState != TONE_INIT) {
+            if (mState != TONE_IDLE) {
                 lResult = true;
             }
             LOGV("cond received");
@@ -206,7 +207,8 @@ bool ToneGenerator::startTone(int toneType) {
     }
     mLock.unlock();
 
-    LOGV("Tone started, time %d\n", (unsigned int)(systemTime()/1000000));
+    LOGV_IF(lResult, "Tone started, time %d\n", (unsigned int)(systemTime()/1000000));
+    LOGW_IF(!lResult, "Tone start failed!!!, time %d\n", (unsigned int)(systemTime()/1000000));
 
     return lResult;
 }
@@ -457,8 +459,11 @@ audioCallback_EndLoop:
             if (lpToneGen->prepareWave()) {
                 lpToneGen->mState = TONE_STARTING;
             } else {
-                lpToneGen->mState = TONE_INIT;
+                LOGW("Cbk restarting prepareWave() failed\n");
+                lpToneGen->mState = TONE_IDLE;
                 lpToneGen->mpAudioTrack->stop();
+                // Force loop exit
+                lNumSmp = 0;
             }
             lSignal = true;
             break;
