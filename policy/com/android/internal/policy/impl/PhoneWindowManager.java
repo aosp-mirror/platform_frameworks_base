@@ -344,6 +344,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * screen turning on and current app has nosensor based orientation, do nothing
      */
     void updateOrientationListener() {
+        if (!mOrientationListener.canDetectOrientation()) {
+            // If sensor is turned off or nonexistent for some reason
+            return;
+        }
         //Could have been invoked due to screen turning on or off or
         //change of the currently visible window's orientation
         if(localLOGV) Log.i(TAG, "Screen status="+mScreenOn+
@@ -1206,15 +1210,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void animatingWindowLw(WindowState win,
                                 WindowManager.LayoutParams attrs) {
-        if (mTopFullscreenOpaqueWindowState == null
-            && attrs.type >= FIRST_APPLICATION_WINDOW
-            && attrs.type <= LAST_APPLICATION_WINDOW
-            && win.fillsScreenLw(mW, mH, true)
-            && win.isVisibleLw()) {
-            mTopFullscreenOpaqueWindowState = win;
-        } else if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0
-                && win.isVisibleLw()) {
-            mForceStatusBar = true;
+        if (win.isVisibleLw()) {
+            if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
+                mForceStatusBar = true;
+            } else if (mTopFullscreenOpaqueWindowState == null
+                    && attrs.type >= FIRST_APPLICATION_WINDOW
+                    && attrs.type <= LAST_APPLICATION_WINDOW
+                    && win.fillsScreenLw(mW, mH, true, false)
+                    && win.isVisibleLw()) {
+                mTopFullscreenOpaqueWindowState = win;
+            }
         }
     }
 
@@ -1222,21 +1227,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean finishAnimationLw() {
         boolean changed = false;
         if (mStatusBar != null) {
+            //Log.i(TAG, "force=" + mForceStatusBar
+            //        + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar) {
                 changed |= mStatusBar.showLw(true);
             } else if (mTopFullscreenOpaqueWindowState != null) {
-               WindowManager.LayoutParams lp =
-                   mTopFullscreenOpaqueWindowState.getAttrs();
-               boolean hideStatusBar =
-                   (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
-               if (hideStatusBar) {
-                   changed |= mStatusBar.hideLw(true);
-               } else {
-                   changed |= mStatusBar.showLw(true);
-               }
-           }
+                //Log.i(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
+                //        + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
+                //Log.i(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs());
+                WindowManager.LayoutParams lp =
+                    mTopFullscreenOpaqueWindowState.getAttrs();
+                boolean hideStatusBar =
+                    (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
+                if (hideStatusBar) {
+                    changed |= mStatusBar.hideLw(true);
+                } else {
+                    changed |= mStatusBar.showLw(true);
+                }
+            }
         }
-       return changed;
+        return changed;
     }
 
     /** {@inheritDoc} */

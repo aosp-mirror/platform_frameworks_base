@@ -1163,12 +1163,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
 
-            case KeyEvent.KEYCODE_HEADSETHOOK: 
-            case KeyEvent.KEYCODE_PLAYPAUSE: 
-            case KeyEvent.KEYCODE_STOP: 
-            case KeyEvent.KEYCODE_NEXTSONG: 
-            case KeyEvent.KEYCODE_PREVIOUSSONG: 
-            case KeyEvent.KEYCODE_REWIND: 
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_PLAYPAUSE:
+            case KeyEvent.KEYCODE_STOP:
+            case KeyEvent.KEYCODE_NEXTSONG:
+            case KeyEvent.KEYCODE_PREVIOUSSONG:
+            case KeyEvent.KEYCODE_REWIND:
             case KeyEvent.KEYCODE_FORWARD: {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                 intent.putExtra(Intent.EXTRA_KEY_EVENT, event);

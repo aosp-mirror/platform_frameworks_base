@@ -100,10 +100,9 @@ public class KeyguardViewManager implements KeyguardWindowController {
             mKeyguardHost = new KeyguardViewHost(mContext, mCallback);
 
             final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
-            int flags = WindowManager.LayoutParams.FLAG_DITHER
+            int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/
-                    | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
                 flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             }

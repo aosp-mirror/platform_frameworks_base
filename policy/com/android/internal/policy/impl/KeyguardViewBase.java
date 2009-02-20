@@ -167,6 +167,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
             }
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
             switch (keyCode) {
+                case KeyEvent.KEYCODE_MUTE:
                 case KeyEvent.KEYCODE_HEADSETHOOK: 
                 case KeyEvent.KEYCODE_PLAYPAUSE: 
                 case KeyEvent.KEYCODE_STOP: 

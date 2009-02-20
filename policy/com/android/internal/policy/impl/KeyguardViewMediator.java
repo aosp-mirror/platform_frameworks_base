@@ -641,6 +641,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK: 
             case KeyEvent.KEYCODE_PLAYPAUSE: 
             case KeyEvent.KEYCODE_STOP: 
