@@ -40,7 +40,7 @@ public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
     private static final boolean LOCAL_LOGV = false;
 
-    private DatabaseHelper mOpenHelper;
+    protected DatabaseHelper mOpenHelper;
 
     /**
      * Decode a content URL into the table, projection, and arguments
