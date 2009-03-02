@@ -134,7 +134,7 @@ StubClass::make_as_interface(Type *interfaceType)
 
     Method* m = new Method;
         m->comment = "/**\n * Cast an IBinder object into an ";
-        m->comment += interfaceType->Name();
+        m->comment += interfaceType->QualifiedName();
         m->comment += " interface,\n";
         m->comment += " * generating a proxy if needed.\n */";
         m->modifiers = PUBLIC | STATIC;
@@ -324,7 +324,7 @@ generate_method(const method_type* method, Class* interface,
     transactCodeName += method->name.data;
 
     char transactCodeValue[50];
-    sprintf(transactCodeValue, "(IBinder.FIRST_CALL_TRANSACTION + %d)", index);
+    sprintf(transactCodeValue, "(android.os.IBinder.FIRST_CALL_TRANSACTION + %d)", index);
 
     Field* transactCode = new Field(STATIC | FINAL,
                             new Variable(INT_TYPE, transactCodeName));
@@ -518,7 +518,7 @@ generate_method(const method_type* method, Class* interface,
                             new LiteralExpression("Stub." + transactCodeName),
                             _data, _reply ? _reply : NULL_VALUE,
                             new LiteralExpression(
-                                oneway ? "IBinder.FLAG_ONEWAY" : "0"));
+                                oneway ? "android.os.IBinder.FLAG_ONEWAY" : "0"));
     tryStatement->statements->Add(call);
 
     // throw back exceptions.
