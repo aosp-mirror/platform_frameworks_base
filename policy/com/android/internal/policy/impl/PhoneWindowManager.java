@@ -139,7 +139,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
     // Vibrator pattern for haptic feedback of a long press.
-    private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 20, 21};
+    private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 40, 41};
     // Vibrator pattern for haptic feedback of a zoom ring tick
     private static final long[] ZOOM_RING_TICK_VIBE_PATTERN = {0, 10};
     
@@ -388,7 +388,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     void showGlobalActionsDialog() {
         if (mGlobalActions == null) {
-            mGlobalActions = new GlobalActions(mContext);
+            mGlobalActions = new GlobalActions(mContext, mPowerManager);
         }
         final boolean keyguardShowing = mKeyguardMediator.isShowing();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());

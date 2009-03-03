@@ -32,7 +32,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
 import android.text.TextWatcher;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +50,8 @@ import android.widget.TextView;
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
         View.OnClickListener, ServiceConnection, TextWatcher {
+
+
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
@@ -134,7 +135,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     public boolean needsInput() {
         return true;
     }
-
+    
     /** {@inheritDoc} */
     public void onPause() {
 
@@ -191,75 +192,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         return super.dispatchKeyEvent(event);
     }
 
-    /**
-     * Given the string the user entered in the 'username' field, find
-     * the stored account that they probably intended.  Prefer, in order:
-     *
-     *   - an exact match for what was typed, or
-     *   - a case-insensitive match for what was typed, or
-     *   - if they didn't include a domain, an exact match of the username, or
-     *   - if they didn't include a domain, a case-insensitive
-     *     match of the username.
-     *
-     * If there is a tie for the best match, choose neither --
-     * the user needs to be more specific.
-     *
-     * @return an account name from the database, or null if we can't
-     * find a single best match.
-     */
-    private String findIntendedAccount(String username) {
-        String[] accounts = null;
-        try {
-            accounts = mAccountsService.getAccounts();
-        } catch (RemoteException e) {
-            return null;
-        }
-        if (accounts == null) {
-            return null;
-        }
-
-        // Try to figure out which account they meant if they
-        // typed only the username (and not the domain), or got
-        // the case wrong.
-
-        String bestAccount = null;
-        int bestScore = 0;
-        for (String a: accounts) {
-            int score = 0;
-            if (username.equals(a)) {
-                score = 4;
-            } else if (username.equalsIgnoreCase(a)) {
-                score = 3;
-            } else if (username.indexOf('@') < 0) {
-                int i = a.indexOf('@');
-                if (i >= 0) {
-                    String aUsername = a.substring(0, i);
-                    if (username.equals(aUsername)) {
-                        score = 2;
-                    } else if (username.equalsIgnoreCase(aUsername)) {
-                        score = 1;
-                    }
-                }
-            }
-            if (score > bestScore) {
-                bestAccount = a;
-                bestScore = score;
-            } else if (score == bestScore) {
-                bestAccount = null;
-            }
-        }
-        return bestAccount;
-    }
-
     private boolean checkPassword() {
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
         try {
-            String account = findIntendedAccount(login);
-            if (account == null) {
-                return false;
-            }
-            return mAccountsService.shouldUnlock(account, password);
+            return mAccountsService.shouldUnlock(login, password);
         } catch (RemoteException e) {
             return false;
         }

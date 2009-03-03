@@ -155,45 +155,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mKeycodeCameraTimeoutActive = false;
 
     static final int MSG_MENU_LONG_PRESS = 1;
-    static final int MSG_MENU_LONG_PRESS_COMPLETE = 2;
-    static final int MSG_CALL_LONG_PRESS = 3;
-    static final int MSG_CALL_LONG_PRESS_COMPLETE = 4;
-    static final int MSG_CAMERA_LONG_PRESS = 5;
-    static final int MSG_CAMERA_LONG_PRESS_COMPLETE = 6;
+    static final int MSG_CALL_LONG_PRESS = 2;
+    static final int MSG_CAMERA_LONG_PRESS = 3;
     
     private final Handler mKeycodeMenuTimeoutHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_MENU_LONG_PRESS: {
-                    if (mPanelChordingKey == 0) return;
-                    // Before actually doing the long press, enqueue another
-                    // message and do the processing there.  This helps if
-                    // the app isn't being responsive, and finally woke up --
-                    // if the window manager wasn't told about it processing
-                    // the down key for too long, it would enqueue the key up
-                    // at a time after the timeout of this message.  So we go
-                    // through another message, to make sure we process an up
-                    // before continuing.
-                    mKeycodeMenuTimeoutHandler.sendEmptyMessage(
-                            MSG_MENU_LONG_PRESS_COMPLETE);
-                    break;
-                }
-                case MSG_CALL_LONG_PRESS: {
-                    if (!mKeycodeCallTimeoutActive) return;
-                    // See above.
-                    mKeycodeMenuTimeoutHandler.sendEmptyMessage(
-                            MSG_CALL_LONG_PRESS_COMPLETE);
-                    break;
-                }
-                case MSG_CAMERA_LONG_PRESS: {
-                    if (!mKeycodeCameraTimeoutActive) return;
-                    // See above.
-                    mKeycodeMenuTimeoutHandler.sendEmptyMessage(
-                            MSG_CAMERA_LONG_PRESS_COMPLETE);
-                    break;
-                }
-                case MSG_MENU_LONG_PRESS_COMPLETE: {
                     if (mPanelChordingKey == 0) return;
                     mPanelChordingKey = 0;
                     mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -203,7 +172,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         imm.showSoftInputUnchecked(InputMethodManager.SHOW_FORCED);
                     }
                 } break;
-                case MSG_CALL_LONG_PRESS_COMPLETE: {
+                case MSG_CALL_LONG_PRESS: {
                     if (!mKeycodeCallTimeoutActive) return;
                     mKeycodeCallTimeoutActive = false;
                     mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -217,7 +186,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         startCallActivity();
                     }
                 } break;
-                case MSG_CAMERA_LONG_PRESS_COMPLETE: {
+                case MSG_CAMERA_LONG_PRESS: {
                     if (!mKeycodeCameraTimeoutActive) return;
                     mKeycodeCameraTimeoutActive = false;
                     mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -225,7 +194,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, (KeyEvent) msg.obj);
                     getContext().sendOrderedBroadcast(intent, null);
-                    sendCloseSystemWindows();
                 } break;
             }
         }

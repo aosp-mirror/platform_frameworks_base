@@ -289,7 +289,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mUnlockIcon.setVisibility(View.GONE);
-                mUnlockHeader.setText("");
+                mUnlockHeader.setText(R.string.lockscreen_pattern_correct);
                 mCallback.keyguardDone(true);
             } else {
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);

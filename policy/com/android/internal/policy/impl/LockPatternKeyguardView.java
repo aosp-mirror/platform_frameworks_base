@@ -32,12 +32,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.ColorFilter;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -239,8 +233,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                         (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET 
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     showAlmostAtAccountLoginDialog();
-                } else if (mHasAccount
-                        && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
+                } else if (mHasAccount && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                     mLockPatternUtils.setPermanentlyLocked(true);
                     updateScreen(mMode);
                 } else if ((failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)
@@ -260,11 +253,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
          */
         setFocusableInTouchMode(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-
-        // wall paper background
-        final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
-        setBackgroundDrawable(
-                new FastBitmapDrawable(drawable.getBitmap()));
 
         // create both the lock and unlock screen so they are quickly available
         // when the screen turns on
@@ -420,10 +408,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         final View visibleScreen = (mode == Mode.LockScreen)
                 ? mLockScreen : getUnlockScreenForCurrentUnlockMode();
 
-        // do this before changing visibility so focus isn't requested before the input
-        // flag is set
-        mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
-        
 
         if (mScreenOn) {
             if (goneScreen.getVisibility() == View.VISIBLE) {
@@ -437,7 +421,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         goneScreen.setVisibility(View.GONE);
         visibleScreen.setVisibility(View.VISIBLE);
 
-
+        mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
+        
         if (!visibleScreen.requestFocus()) {
             throw new IllegalStateException("keyguard screen must be able to take "
                     + "focus when shown " + visibleScreen.getClass().getCanonicalName());
@@ -581,59 +566,5 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
                 WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
         dialog.show();
-    }
-
-    /**
-     * Used to put wallpaper on the background of the lock screen.  Centers it Horizontally and
-     * vertically.
-     */
-    static private class FastBitmapDrawable extends Drawable {
-        private Bitmap mBitmap;
-
-        private FastBitmapDrawable(Bitmap bitmap) {
-            mBitmap = bitmap;
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            canvas.drawBitmap(
-                    mBitmap,
-                    (getBounds().width() - mBitmap.getWidth()) / 2,
-                    (getBounds().height() - mBitmap.getHeight()) / 2,
-                    null);
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
-
-        @Override
-        public void setAlpha(int alpha) {
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter cf) {
-        }
-
-        @Override
-        public int getIntrinsicWidth() {
-            return mBitmap.getWidth();
-        }
-
-        @Override
-        public int getIntrinsicHeight() {
-            return mBitmap.getHeight();
-        }
-
-        @Override
-        public int getMinimumWidth() {
-            return mBitmap.getWidth();
-        }
-
-        @Override
-        public int getMinimumHeight() {
-            return mBitmap.getHeight();
-        }
     }
 }

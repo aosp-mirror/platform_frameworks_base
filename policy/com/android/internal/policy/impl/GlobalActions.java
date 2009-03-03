@@ -16,30 +16,29 @@
 
 package com.android.internal.policy.impl;
 
+import com.android.internal.R;
+import com.google.android.collect.Lists;
+
 import android.app.AlertDialog;
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.DialogInterface;
 import android.media.AudioManager;
+import android.os.LocalPowerManager;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.android.internal.R;
-import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 
@@ -50,41 +49,34 @@ import java.util.ArrayList;
  */
 class GlobalActions implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener  {
 
-    private static final String TAG = "GlobalActions";
-
     private StatusBarManager mStatusBar;
 
     private final Context mContext;
+    private final LocalPowerManager mPowerManager;
     private final AudioManager mAudioManager;
-
     private ArrayList<Action> mItems;
     private AlertDialog mDialog;
 
     private ToggleAction mSilentModeToggle;
-    private ToggleAction mAirplaneModeOn;
 
     private MyAdapter mAdapter;
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
-    private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
 
     /**
-     * @param context everything needs a context :(
+     * @param context everything needs a context :)
+     * @param powerManager used to turn the screen off (the lock action).
      */
-    public GlobalActions(Context context) {
+    public GlobalActions(Context context, LocalPowerManager powerManager) {
         mContext = context;
+        mPowerManager = powerManager;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
-
-        // get notified of phone state changes
-        TelephonyManager telephonyManager =
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
     }
 
     /**
@@ -131,48 +123,29 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         };
 
-        mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
-                R.string.global_actions_toggle_airplane_mode,
-                R.string.global_actions_airplane_mode_on_status,
-                R.string.global_actions_airplane_mode_off_status) {
-
-            void onToggle(boolean on) {
-                // Change the system setting
-                Settings.System.putInt(
-                        mContext.getContentResolver(),
-                        Settings.System.AIRPLANE_MODE_ON,
-                        on ? 1 : 0);
-                Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-                intent.putExtra("state", on);
-                mContext.sendBroadcast(intent);
-            }
-
-            @Override
-            protected void changeStateFromPress(boolean buttonOn) {
-                mState = buttonOn ? State.TurningOn : State.TurningOff;
-                mAirplaneState = mState;
-            }
-
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
-
         mItems = Lists.newArrayList(
-                // silent mode
+                /* Disabled pending bug 1304831 -- key or touch events wake up device before it
+                 * can go to sleep.
+                // first: lock screen
+                new SinglePressAction(com.android.internal.R.drawable.ic_lock_lock, R.string.global_action_lock) {
+
+                    public void onPress() {
+                        mPowerManager.goToSleep(SystemClock.uptimeMillis() + 1);
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return false;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                },
+                */
+                // next: silent mode
                 mSilentModeToggle,
-                // next: airplane mode
-                mAirplaneModeOn,
                 // last: power off
-                new SinglePressAction(
-                        com.android.internal.R.drawable.ic_lock_power_off,
-                        R.string.global_action_power_off) {
+                new SinglePressAction(com.android.internal.R.drawable.ic_lock_power_off, R.string.global_action_power_off) {
 
                     public void onPress() {
                         // shutdown by making sure radio and power are handled accordingly.
@@ -207,11 +180,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void prepareDialog() {
+        // TODO: May need another 'Vibrate' toggle button, but for now treat them the same
         final boolean silentModeOn =
                 mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
-        mSilentModeToggle.updateState(
-                silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
-        mAirplaneModeOn.updateState(mAirplaneState);
+        mSilentModeToggle.updateState(silentModeOn);
         mAdapter.notifyDataSetChanged();
         if (mKeyguardShowing) {
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
@@ -219,7 +191,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);            
         }
     }
-
 
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
@@ -258,16 +229,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             return count;
         }
 
-        @Override
-        public boolean isEnabled(int position) {
-            return getItem(position).isEnabled();
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
         public Action getItem(int position) {
 
             int filteredPos = 0;
@@ -298,7 +259,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
-            return action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
+            return action.create(mContext, (LinearLayout) convertView, LayoutInflater.from(mContext));
         }
     }
 
@@ -312,7 +273,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * What each item in the global actions dialog must be able to support.
      */
     private interface Action {
-        View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater);
+        LinearLayout create(Context context, LinearLayout convertView, LayoutInflater inflater);
 
         void onPress();
 
@@ -327,8 +288,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
          *   device is provisioned.
          */
         boolean showBeforeProvisioning();
-
-        boolean isEnabled();
     }
 
     /**
@@ -344,17 +303,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mMessageResId = messageResId;
         }
 
-        public boolean isEnabled() {
-            return true;
-        }
-
         abstract public void onPress();
 
-        public View create(
-                Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = (convertView != null) ?
+        public LinearLayout create(Context context, LinearLayout convertView, LayoutInflater inflater) {
+            LinearLayout v = (LinearLayout) ((convertView != null) ?
                     convertView :
-                    inflater.inflate(R.layout.global_actions_item, parent, false);
+                    inflater.inflate(R.layout.global_actions_item, null));
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
@@ -372,26 +326,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * A toggle action knows whether it is on or off, and displays an icon
      * and status message accordingly.
      */
-    private static abstract class ToggleAction implements Action {
+    static abstract class ToggleAction implements Action {
 
-        enum State {
-            Off(false),
-            TurningOn(true),
-            TurningOff(true),
-            On(false);
-
-            private final boolean inTransition;
-
-            State(boolean intermediate) {
-                inTransition = intermediate;
-            }
-
-            public boolean inTransition() {
-                return inTransition;
-            }
-        }
-
-        protected State mState = State.Off;
+        private boolean mOn = false;
 
         // prefs
         private final int mEnabledIconResId;
@@ -419,12 +356,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mDisabledStatusMessageResId = disabledStatusMessageResId;
         }
 
-        public View create(Context context, View convertView, ViewGroup parent,
+        public LinearLayout create(Context context, LinearLayout convertView,
                 LayoutInflater inflater) {
-            View v = (convertView != null) ?
+            LinearLayout v = (LinearLayout) ((convertView != null) ?
                     convertView :
                     inflater.inflate(R
-                            .layout.global_actions_item, parent, false);
+                            .layout.global_actions_item, null));
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
@@ -432,50 +369,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
             messageView.setText(mMessageResId);
 
-            boolean on = ((mState == State.On) || (mState == State.TurningOn));
             icon.setImageDrawable(context.getResources().getDrawable(
-                    (on ? mEnabledIconResId : mDisabledIconResid)));
-            statusView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
+                    (mOn ? mEnabledIconResId : mDisabledIconResid)));
+            statusView.setText(mOn ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
             statusView.setVisibility(View.VISIBLE);
-
-            final boolean enabled = isEnabled();
-            messageView.setEnabled(enabled);
-            statusView.setEnabled(enabled);
-            icon.setEnabled(enabled);
-            v.setEnabled(enabled);
 
             return v;
         }
 
-        public final void onPress() {
-            if (mState.inTransition()) {
-                Log.w(TAG, "shouldn't be able to toggle when in transition");
-                return;
-            }
-
-            final boolean nowOn = !(mState == State.On);
-            onToggle(nowOn);
-            changeStateFromPress(nowOn);
-        }
-
-        public boolean isEnabled() {
-            return !mState.inTransition();
-        }
-
-        /**
-         * Implementations may override this if their state can be in on of the intermediate
-         * states until some notification is received (e.g airplane mode is 'turning off' until
-         * we know the wireless connections are back online
-         * @param buttonOn Whether the button was turned on or off
-         */
-        protected void changeStateFromPress(boolean buttonOn) {
-            mState = buttonOn ? State.On : State.Off;
+        public void onPress() {
+            updateState(!mOn);
+            onToggle(mOn);
         }
 
         abstract void onToggle(boolean on);
 
-        public void updateState(State state) {
-            mState = state;
+        public void updateState(boolean on) {
+            mOn = on;
         }
     }
 
@@ -488,16 +398,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 }
             }
-        }
-    };
-
-    PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onServiceStateChanged(ServiceState serviceState) {
-            final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
-            mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
-            mAirplaneModeOn.updateState(mAirplaneState);
-            mAdapter.notifyDataSetChanged();
         }
     };
 
