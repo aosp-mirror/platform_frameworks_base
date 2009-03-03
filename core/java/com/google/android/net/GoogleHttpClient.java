@@ -16,12 +16,8 @@
 
 package com.google.android.net;
 
-import com.android.internal.net.DbSSLSessionCache;
-import com.android.internal.net.SSLSessionCache;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
 import android.os.NetStat;
@@ -83,10 +79,21 @@ public class GoogleHttpClient implements HttpClient {
     }
 
     /**
-     * GoogleHttpClient(Context, String, boolean) - without SSL session 
-     * persistence. 
-     * 
-     * @deprecated use Context instead of ContentResolver.
+     * Create an HTTP client.  Normaly this client is shared throughout an app.
+     * The HTTP client will construct its User-Agent as follows:
+     *
+     * <appAndVersion> (<build device> <build id>)
+     * or
+     * <appAndVersion> (<build device> <build id>); gzip
+     * (if gzip capable)
+     *
+     * @param resolver to use for acccessing URL rewriting rules.
+     * @param appAndVersion Base app and version to use in the User-Agent.
+     * e.g., "MyApp/1.0"
+     * @param gzipCapable Whether or not this client is able to consume gzip'd
+     * responses.  Only used to modify the User-Agent, not other request
+     * headers.  Needed because Google servers require gzip in the User-Agent
+     * in order to return gzip'd content.
      */
     public GoogleHttpClient(ContentResolver resolver, String appAndVersion,
             boolean gzipCapable) {
@@ -97,41 +104,6 @@ public class GoogleHttpClient implements HttpClient {
         }
         mClient = AndroidHttpClient.newInstance(userAgent);
         mResolver = resolver;
-        mUserAgent = userAgent;
-    }
-
-    /**
-     * Create an HTTP client.  Normaly this client is shared throughout an app.
-     * The HTTP client will construct its User-Agent as follows:
-     *
-     * <appAndVersion> (<build device> <build id>)
-     * or
-     * <appAndVersion> (<build device> <build id>); gzip
-     * (if gzip capable)
-     *
-     * The context has settings for URL rewriting rules and is used to enable
-     *  SSL session persistence.  
-     *    
-     * @param context application context.
-     * @param appAndVersion Base app and version to use in the User-Agent.
-     * e.g., "MyApp/1.0"
-     * @param gzipCapable Whether or not this client is able to consume gzip'd
-     * responses.  Only used to modify the User-Agent, not other request
-     * headers.  Needed because Google servers require gzip in the User-Agent
-     * in order to return gzip'd content.
-     */
-    public GoogleHttpClient(Context context, String appAndVersion,
-        boolean gzipCapable) {
-      
-        String userAgent = appAndVersion
-                + " (" + Build.DEVICE + " " + Build.ID + ")";
-        if (gzipCapable) {
-            userAgent = userAgent + "; gzip";
-        }
-        mClient = AndroidHttpClient.newInstance(userAgent, 
-                SSLSessionCache.getSessionCache(context));
-        
-        mResolver = context.getContentResolver();
         mUserAgent = userAgent;
     }
 

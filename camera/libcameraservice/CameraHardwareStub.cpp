@@ -29,8 +29,7 @@ namespace android {
 
 CameraHardwareStub::CameraHardwareStub()
                   : mParameters(),
-                    mPreviewHeap(0),
-                    mRawHeap(0),
+                    mHeap(0),
                     mFakeCamera(0),
                     mPreviewFrameSize(0),
                     mRawPictureCallback(0),
@@ -63,17 +62,13 @@ void CameraHardwareStub::initDefaultParameters()
 
 void CameraHardwareStub::initHeapLocked()
 {
-    // Create raw heap.
-    int picture_width, picture_height;
-    mParameters.getPictureSize(&picture_width, &picture_height);
-    mRawHeap = new MemoryHeapBase(picture_width * 2 * picture_height);
+    int width, height;
+    mParameters.getPreviewSize(&width, &height);
 
-    int preview_width, preview_height;
-    mParameters.getPreviewSize(&preview_width, &preview_height);
-    LOGD("initHeapLocked: preview size=%dx%d", preview_width, preview_height);
+    LOGD("initHeapLocked: preview size=%dx%d", width, height);
 
     // Note that we enforce yuv422 in setParameters().
-    int how_big = preview_width * preview_height * 2;
+    int how_big = width * height * 2;
 
     // If we are being reinitialized to the same size as before, no
     // work needs to be done.
@@ -84,15 +79,15 @@ void CameraHardwareStub::initHeapLocked()
 
     // Make a new mmap'ed heap that can be shared across processes. 
     // use code below to test with pmem
-    mPreviewHeap = new MemoryHeapBase(mPreviewFrameSize * kBufferCount);
+    mHeap = new MemoryHeapBase(mPreviewFrameSize * kBufferCount);
     // Make an IMemory for each frame so that we can reuse them in callbacks.
     for (int i = 0; i < kBufferCount; i++) {
-        mBuffers[i] = new MemoryBase(mPreviewHeap, i * mPreviewFrameSize, mPreviewFrameSize);
+        mBuffers[i] = new MemoryBase(mHeap, i * mPreviewFrameSize, mPreviewFrameSize);
     }
-    
+
     // Recreate the fake camera to reflect the current size.
     delete mFakeCamera;
-    mFakeCamera = new FakeCamera(preview_width, preview_height);
+    mFakeCamera = new FakeCamera(width, height);
 }
 
 CameraHardwareStub::~CameraHardwareStub()
@@ -104,12 +99,7 @@ CameraHardwareStub::~CameraHardwareStub()
 
 sp<IMemoryHeap> CameraHardwareStub::getPreviewHeap() const
 {
-    return mPreviewHeap;
-}
-
-sp<IMemoryHeap> CameraHardwareStub::getRawHeap() const
-{
-    return mRawHeap;
+    return mHeap;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,7 +114,7 @@ int CameraHardwareStub::previewThread()
         // Find the offset within the heap of the current buffer.
         ssize_t offset = mCurrentPreviewFrame * mPreviewFrameSize;
 
-        sp<MemoryHeapBase> heap = mPreviewHeap;
+        sp<MemoryHeapBase> heap = mHeap;
     
         // this assumes the internal state of fake camera doesn't change
         // (or is thread safe)
@@ -265,9 +255,10 @@ int CameraHardwareStub::pictureThread()
         // In the meantime just make another fake camera picture.
         int w, h;
         mParameters.getPictureSize(&w, &h);
-        sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * 2 * h);
+        sp<MemoryHeapBase> heap = new MemoryHeapBase(w * 2 * h);
+        sp<MemoryBase> mem = new MemoryBase(heap, 0, w * 2 * h);
         FakeCamera cam(w, h);
-        cam.getNextFrameAsYuv422((uint8_t *)mRawHeap->base());
+        cam.getNextFrameAsYuv422((uint8_t *)heap->base());
         if (mRawPictureCallback)
             mRawPictureCallback(mem, mPictureCallbackCookie);
     }

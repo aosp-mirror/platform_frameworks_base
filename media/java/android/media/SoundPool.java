@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -80,11 +79,7 @@ public class SoundPool
 
     public int load(AssetFileDescriptor afd, int priority) {
         if (afd != null) {
-            long len = afd.getLength();
-            if (len < 0) {
-                throw new AndroidRuntimeException("no length for fd");
-            }
-            return _load(afd.getFileDescriptor(), afd.getStartOffset(), len, priority);
+            return _load(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength(), priority);
         } else {
             return 0;
         }

@@ -87,21 +87,14 @@ public final class BridgeContext extends Context {
     private BridgeContentResolver mContentResolver;
 
     /**
-     * @param projectKey An Object identifying the project. This is used for the cache mechanism.
-     * @param metrics the {@link DisplayMetrics}.
-     * @param themeName The name of the theme to use.
-     * @param projectResources the resources of the project. The map contains (String, map) pairs
-     * where the string is the type of the resource reference used in the layout file, and the
-     * map contains (String, {@link IResourceValue}) pairs where the key is the resource name,
-     * and the value is the resource value.
-     * @param frameworkResources the framework resources. The map contains (String, map) pairs
-     * where the string is the type of the resource reference used in the layout file, and the map
-     * contains (String, {@link IResourceValue}) pairs where the key is the resource name, and the
-     * value is the resource value.
+     * @param projectKey
+     * @param currentTheme 
+     * @param projectResources
+     * @param frameworkResources
      * @param styleInheritanceMap
      * @param customViewLoader
      */
-    public BridgeContext(Object projectKey, DisplayMetrics metrics,
+    public BridgeContext(Object projectKey,
             IStyleResourceValue currentTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
@@ -112,6 +105,10 @@ public final class BridgeContext extends Context {
         mLogger = logger;
         Configuration config = new Configuration();
         
+        DisplayMetrics metrics = new DisplayMetrics();
+        metrics.setToDefaults();
+        
+
         AssetManager assetManager = BridgeAssetManager.initSystem();
         mResources = BridgeResources.initSystem(
                 this,

@@ -62,9 +62,6 @@ public final class Checkin {
             AUTOTEST_FAILURE,
             AUTOTEST_SEQUENCE_BEGIN,
             AUTOTEST_SUITE_BEGIN,
-            AUTOTEST_TCPDUMP_BEGIN,
-            AUTOTEST_TCPDUMP_DATA,
-            AUTOTEST_TCPDUMP_END,
             AUTOTEST_TEST_BEGIN,
             AUTOTEST_TEST_FAILURE,
             AUTOTEST_TEST_SUCCESS,
@@ -101,14 +98,14 @@ public final class Checkin {
             SETUP_SERVER_ERROR,
             SETUP_SERVER_TIMEOUT,
             SETUP_NO_DATA_NETWORK,
+            SYSTEM_APP_NOT_RESPONDING,
             SYSTEM_BOOT,
             SYSTEM_LAST_KMSG,
             SYSTEM_RECOVERY_LOG,
             SYSTEM_RESTART,
             SYSTEM_SERVICE_LOOPING,
             SYSTEM_TOMBSTONE,
-            TEST, 
-            BATTERY_DISCHARGE_INFO,
+            TEST,
         }
     }
 
@@ -193,9 +190,6 @@ public final class Checkin {
 
         // The category is used for GTalk service messages
         public static final String CATEGORY = "android.server.checkin.CHECKIN";
-        
-        // If true indicates that the checkin should only transfer market related data
-        public static final String EXTRA_MARKET_ONLY = "market_only";
     }
 
     private static final String TAG = "Checkin";

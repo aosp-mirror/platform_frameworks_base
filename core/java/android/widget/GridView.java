@@ -924,23 +924,32 @@ public class GridView extends AbsListView {
         final int count = mItemCount;
         if (count > 0) {
             final View child = obtainView(0);
+            final int childViewType = mAdapter.getItemViewType(0);
 
-            AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
-            if (p == null) {
-                p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
+            if (lp == null) {
+                lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                child.setLayoutParams(lp);
             }
-            p.viewType = mAdapter.getItemViewType(0);
+            lp.viewType = childViewType;
 
-            int childHeightSpec = getChildMeasureSpec(
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, p.height);
-            int childWidthSpec = getChildMeasureSpec(
-                    MeasureSpec.makeMeasureSpec(mColumnWidth, MeasureSpec.EXACTLY), 0, p.width);
+            final int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
+                    mListPadding.left + mListPadding.right, lp.width);
+
+            int lpHeight = lp.height;
+
+            int childHeightSpec;
+            if (lpHeight > 0) {
+                childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
+            } else {
+                childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            }
+
             child.measure(childWidthSpec, childHeightSpec);
-
             childHeight = child.getMeasuredHeight();
 
-            if (mRecycler.shouldRecycleViewType(p.viewType)) {
+            if (mRecycler.shouldRecycleViewType(childViewType)) {
                 mRecycler.addScrapView(child);
             }
         }

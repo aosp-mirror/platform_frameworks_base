@@ -15,7 +15,8 @@
  */
 
 /**
- * TODO: Move this to services.jar
+ * TODO: Move this to
+ * java/services/com/android/server/BluetoothA2dpService.java
  * and make the contructor package private again.
  * @hide
  */
@@ -34,16 +35,15 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String TAG = "BluetoothA2dpService";
@@ -56,8 +56,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private static final String A2DP_SINK_ADDRESS = "a2dp_sink_address";
     private static final String BLUETOOTH_ENABLED = "bluetooth_enabled";
-
-    private static final int MESSAGE_CONNECT_TO = 1;
 
     private final Context mContext;
     private final IntentFilter mIntentFilter;
@@ -88,7 +86,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         mIntentFilter = new IntentFilter(BluetoothIntent.ENABLED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.DISABLED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
         if (device.isEnabled()) {
@@ -126,37 +123,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     setSinkPriority(address, BluetoothA2dp.PRIORITY_OFF);
                     break;
                 }
-            } else if (action.equals(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION)) {
-                if (getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF) {
-                    // This device is a preferred sink. Make an A2DP connection
-                    // after a delay. We delay to avoid connection collisions,
-                    // and to give other profiles such as HFP a chance to
-                    // connect first.
-                    Message msg = Message.obtain(mHandler, MESSAGE_CONNECT_TO, address);
-                    mHandler.sendMessageDelayed(msg, 6000);
-                }
-            }
-        }
-    };
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MESSAGE_CONNECT_TO:
-                String address = (String)msg.obj;
-                // check device is still preferred, and nothing is currently
-                // connected
-                if (getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF &&
-                        lookupSinksMatchingStates(new int[] {
-                            BluetoothA2dp.STATE_CONNECTING,
-                            BluetoothA2dp.STATE_CONNECTED,
-                            BluetoothA2dp.STATE_PLAYING,
-                            BluetoothA2dp.STATE_DISCONNECTING}).size() == 0) {
-                    log("Auto-connecting A2DP to sink " + address);
-                    connectSink(address);
-                }
-                break;
             }
         }
     };
@@ -176,10 +142,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private synchronized void onBluetoothDisable() {
         if (mAudioDevices != null) {
-            // copy to allow modification during iteration
-            String[] paths = new String[mAudioDevices.size()];
-            paths = mAudioDevices.keySet().toArray(paths);
-            for (String path : paths) {
+            for (String path : mAudioDevices.keySet()) {
                 switch (mAudioDevices.get(path).state) {
                     case BluetoothA2dp.STATE_CONNECTING:
                     case BluetoothA2dp.STATE_CONNECTED:
@@ -271,8 +234,17 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     public synchronized List<String> listConnectedSinks() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return lookupSinksMatchingStates(new int[] {BluetoothA2dp.STATE_CONNECTED,
-                                                    BluetoothA2dp.STATE_PLAYING});
+        List<String> connectedSinks = new ArrayList<String>();
+        if (mAudioDevices == null) {
+            return connectedSinks;
+        }
+        for (SinkState sink : mAudioDevices.values()) {
+            if (sink.state == BluetoothA2dp.STATE_CONNECTED ||
+                sink.state == BluetoothA2dp.STATE_PLAYING) {
+                connectedSinks.add(sink.address);
+            }
+        }
+        return connectedSinks;
     }
 
     public synchronized int getSinkState(String address) {
@@ -326,11 +298,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         // bluez 3.36 quietly disconnects the previous sink when a new sink
         // is connected, so we need to mark all previously connected sinks as
         // disconnected
-
-        // copy to allow modification during iteration
-        String[] paths = new String[mAudioDevices.size()];
-        paths = mAudioDevices.keySet().toArray(paths);
-        for (String oldPath : paths) {
+        for (String oldPath : mAudioDevices.keySet()) {
             if (path.equals(oldPath)) {
                 continue;
             }
@@ -380,22 +348,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
         }
         return null;
-    }
-
-    private synchronized List<String> lookupSinksMatchingStates(int[] states) {
-        List<String> sinks = new ArrayList<String>();
-        if (mAudioDevices == null) {
-            return sinks;
-        }
-        for (SinkState sink : mAudioDevices.values()) {
-            for (int state : states) {
-                if (sink.state == state) {
-                    sinks.add(sink.address);
-                    break;
-                }
-            }
-        }
-        return sinks;
     }
 
     private synchronized void updateState(String path, int state) {

@@ -82,7 +82,9 @@ public class NotificationManager
      * @param id An identifier for this notification unique within your
      *        application.
      * @param notification A {@link Notification} object describing how to
-     *        notify the user, other than the view you're providing. Must not be null.
+     *        notify the user, other than the view you're providing.  If you
+     *        pass null, there will be no persistent notification and no
+     *        flashing, vibration, etc.
      */
     public void notify(int id, Notification notification)
     {

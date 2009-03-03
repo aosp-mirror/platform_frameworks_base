@@ -19,7 +19,6 @@
 #define ANDROID_MEDIARECORDER_H
 
 #include <utils.h>
-#include <media/IMediaPlayerClient.h>
 
 namespace android {
 
@@ -88,24 +87,7 @@ enum media_recorder_states {
     MEDIA_RECORDER_RECORDING             = 1 << 4,
 };
 
-// The "msg" code passed to the listener in notify.
-enum {
-    MEDIA_RECORDER_EVENT_ERROR                    = 1
-};
-
-enum {
-    MEDIA_RECORDER_ERROR_UNKNOWN                  = 1
-};
-
-// ----------------------------------------------------------------------------
-// ref-counted object for callbacks
-class MediaRecorderListener: virtual public RefBase
-{
-public:
-    virtual void notify(int msg, int ext1, int ext2) = 0;
-};
-
-class MediaRecorder : public BnMediaPlayerClient
+class MediaRecorder
 {
 public:
     MediaRecorder();
@@ -123,7 +105,6 @@ public:
     status_t    setOutputFile(int fd, int64_t offset, int64_t length);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
-    status_t    setListener(const sp<MediaRecorderListener>& listener);
     status_t    prepare();
     status_t    getMaxAmplitude(int* max);
     status_t    start();
@@ -132,22 +113,18 @@ public:
     status_t    init();
     status_t    close();
     status_t    release();
-    void        notify(int msg, int ext1, int ext2);
 
 private:
     void                    doCleanUp();
     status_t                doReset();
 
-    sp<IMediaRecorder>          mMediaRecorder;
-    sp<MediaRecorderListener>   mListener;
-    media_recorder_states       mCurrentState;
-    bool                        mIsAudioSourceSet;
-    bool                        mIsVideoSourceSet;
-    bool                        mIsAudioEncoderSet;
-    bool                        mIsVideoEncoderSet;
-    bool                        mIsOutputFileSet;
-    Mutex                       mLock;
-    Mutex                       mNotifyLock;
+    sp<IMediaRecorder>      mMediaRecorder;
+    media_recorder_states   mCurrentState;
+    bool                    mIsAudioSourceSet;
+    bool                    mIsVideoSourceSet;
+    bool                    mIsAudioEncoderSet;
+    bool                    mIsVideoEncoderSet;
+    bool                    mIsOutputFileSet;
 };
 
 };  // namespace android

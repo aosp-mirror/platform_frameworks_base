@@ -783,7 +783,7 @@ org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl
 org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLInputStream
 org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLOutputStream
 org.apache.harmony.xnet.provider.jsse.SSLParameters
-org.apache.harmony.xnet.provider.jsse.ClientSessionContext
+org.apache.harmony.xnet.provider.jsse.SSLSessionContextImpl$1
 org.apache.harmony.xnet.provider.jsse.TrustManagerFactoryImpl
 org.apache.harmony.xnet.provider.jsse.TrustManagerImpl
 org.apache.http.HttpHost

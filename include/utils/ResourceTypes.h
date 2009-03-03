@@ -1101,22 +1101,16 @@ struct ResTable_config
         return false;
     }
     
-    // Return true if 'this' can be considered a match for the parameters in 
+    // Return true if 'this' can be considered a match for the parameters in
     // 'settings'.
-    // Note this is asymetric.  A default piece of data will match every request
-    // but a request for the default should not match odd specifics
-    // (ie, request with no mcc should not match a particular mcc's data)
-    // settings is the requested settings
     inline bool match(const ResTable_config& settings) const {
         if (imsi != 0) {
-            if ((settings.mcc != 0 && mcc != 0
-                 && mcc != settings.mcc) || 
-                (settings.mcc == 0 && mcc != 0)) {
+            if (settings.mcc != 0 && mcc != 0
+                && mcc != settings.mcc) {
                 return false;
             }
-            if ((settings.mnc != 0 && mnc != 0
-                 && mnc != settings.mnc) ||
-                (settings.mnc == 0 && mnc != 0)) {
+            if (settings.mnc != 0 && mnc != 0
+                && mnc != settings.mnc) {
                 return false;
             }
         }

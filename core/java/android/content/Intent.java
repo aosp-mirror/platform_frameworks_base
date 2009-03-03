@@ -522,7 +522,6 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_ALTERNATIVE}
  *     <li> {@link #CATEGORY_SELECTED_ALTERNATIVE}
  *     <li> {@link #CATEGORY_LAUNCHER}
- *     <li> {@link #CATEGORY_INFO}
  *     <li> {@link #CATEGORY_HOME}
  *     <li> {@link #CATEGORY_PREFERENCE}
  *     <li> {@link #CATEGORY_GADGET}
@@ -1546,13 +1545,6 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_LAUNCHER = "android.intent.category.LAUNCHER";
-    /**
-     * Provides information about the package it is in; typically used if
-     * a package does not contain a {@link #CATEGORY_LAUNCHER} to provide
-     * a front-door to the user without having to be shown in the all apps list.
-     */
-    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
-    public static final String CATEGORY_INFO = "android.intent.category.INFO";
     /**
      * This is the home activity, that is the first activity that is displayed
      * when the device boots.

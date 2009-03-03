@@ -98,13 +98,6 @@ public class ExtractEditText extends EditText {
     }
     
     /**
-     * Return true if the edit text is currently showing a scroll bar.
-     */
-    public boolean hasVerticalScrollBar() {
-        return computeVerticalScrollRange() > computeVerticalScrollExtent();
-    }
-    
-    /**
      * Pretend like the window this view is in always has focus, so its
      * highlight and cursor will be displayed.
      */

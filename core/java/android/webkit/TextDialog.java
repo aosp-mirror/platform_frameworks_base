@@ -25,6 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
@@ -41,6 +43,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewConfiguration;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -79,6 +82,22 @@ import java.util.ArrayList;
     // FIXME: This can be replaced with TextView.NO_FILTERS if that
     // is made public/protected.
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+    // The time of the last enter down, so we know whether to perform a long
+    // press.
+    private long            mDownTime;
+
+    private boolean         mTrackballDown = false;
+    private static int      LONGPRESS = 1;
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            if (msg.what == LONGPRESS) {
+                if (mTrackballDown) {
+                    performLongClick();
+                    mTrackballDown = false;
+                }
+            }
+        }
+    };
 
     /**
      * Create a new TextDialog.
@@ -116,13 +135,6 @@ import java.util.ArrayList;
     }
 
     @Override
-    protected boolean shouldAdvanceFocusOnEnter() {
-        // In the browser, single line textfields use enter as a form submit,
-        // so we never want to advance the focus on enter.
-        return false;
-    }
-
-    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.isSystem()) {
             return super.dispatchKeyEvent(event);
@@ -140,33 +152,43 @@ import java.util.ArrayList;
             return true;
         }
 
-        if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)) {
+        // For single-line textfields, return key should not be handled
+        // here.  Instead, the WebView is passed the key up, so it may fire a
+        // submit/onClick.
+        // Center key should always be passed to a potential onClick
+        if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)
+                || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
             if (isPopupShowing()) {
-                return super.dispatchKeyEvent(event);
+                super.dispatchKeyEvent(event);
+                return true;
             }
-            if (!down) {
-                // Hide the keyboard, since the user has just submitted this
-                // form.  The submission happens thanks to the two calls
-                // to sendDomEvent.
+            if (down) {
+                if (event.getRepeatCount() == 0) {
+                    mGotEnterDown = true;
+                    mDownTime = event.getEventTime();
+                    // Send the keydown when the up comes, so that we have
+                    // a chance to handle a long press.
+                } else if (mGotEnterDown && event.getEventTime() - mDownTime >
+                        ViewConfiguration.getLongPressTimeout()) {
+                    performLongClick();
+                    mGotEnterDown = false;
+                }
+            } else if (mGotEnterDown) {
+                mGotEnterDown = false;
+                if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+                    mWebView.shortPressOnTextField();
+                    return true;
+                }
+                // If we reached here, then this is a single line textfield, and
+                // the user pressed ENTER.  In this case, we want to hide the
+                // soft input method.
                 InputMethodManager.getInstance(mContext)
                         .hideSoftInputFromWindow(getWindowToken(), 0);
                 sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
                 sendDomEvent(event);
             }
-            return super.dispatchKeyEvent(event);
-        } else if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-            // Note that this handles center key and trackball.
-            if (isPopupShowing()) {
-                return super.dispatchKeyEvent(event);
-            }
-            // Center key should be passed to a potential onClick
-            if (!down) {
-                mWebView.shortPressOnTextField();
-            }
-            // Pass to super to handle longpress.
-            return super.dispatchKeyEvent(event);
+            return true;
         }
-
         // Ensure there is a layout so arrow keys are handled properly.
         if (getLayout() == null) {
             measure(mWidthSpec, mHeightSpec);
@@ -203,8 +225,9 @@ import java.util.ArrayList;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                     isArrowKey = true;
                     break;
+                case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
-                    // For multi-line text boxes, newlines will
+                    // For multi-line text boxes, newlines and dpad center will
                     // trigger onTextChanged for key down (which will send both
                     // key up and key down) but not key up.
                     mGotEnterDown = true;
@@ -246,7 +269,7 @@ import java.util.ArrayList;
         // with WebCore's notion of the current selection, reset the selection
         // to what it was before the key event.
         Selection.setSelection(text, oldStart, oldEnd);
-        // Ignore the key up event for newlines. This prevents
+        // Ignore the key up event for newlines or dpad center. This prevents
         // multiple newlines in the native textarea.
         if (mGotEnterDown && !down) {
             return true;
@@ -368,8 +391,27 @@ import java.util.ArrayList;
         if (isPopupShowing()) {
             return super.onTrackballEvent(event);
         }
-        if (event.getAction() != MotionEvent.ACTION_MOVE) {
-            return false;
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                if (!mTrackballDown) {
+                    mTrackballDown = true;
+                    mHandler.sendEmptyMessageDelayed(LONGPRESS, 
+                            ViewConfiguration.getLongPressTimeout());
+                }
+                return true;
+            case MotionEvent.ACTION_UP:
+                if (mTrackballDown) {
+                    mWebView.shortPressOnTextField();
+                    mTrackballDown = false;
+                    mHandler.removeMessages(LONGPRESS);
+                }
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+                mTrackballDown = false;
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                // fall through
         }
         Spannable text = (Spannable) getText();
         MovementMethod move = getMovementMethod();
@@ -400,6 +442,7 @@ import java.util.ArrayList;
         // hide the soft keyboard when the edit text is out of focus
         InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
                 getWindowToken(), 0);
+        mHandler.removeMessages(LONGPRESS);
         mWebView.removeView(this);
         mWebView.requestFocus();
         mScrollToAccommodateCursor = false;

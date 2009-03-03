@@ -28,7 +28,7 @@ public interface INetworkLocationManager {
 
     /* callback to allow installation to occur in Location Manager's thread */
     public interface InstallCallback {
-        void installNetworkLocationProvider(INetworkLocationManager manager);
+        void installNetworkLocationProvider(Context context, INetworkLocationManager manager);
     }
     
     void setInstallCallback(InstallCallback callback);

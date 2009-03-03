@@ -250,15 +250,6 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
     
-    public boolean performEditorAction(int actionCode) {
-        try {
-            mIInputContext.performEditorAction(actionCode);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-    
     public boolean performContextMenuAction(int id) {
         try {
             mIInputContext.performContextMenuAction(id);

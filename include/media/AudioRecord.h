@@ -125,20 +125,13 @@ public:
      * channelCount:       Number of PCM channels (e.g 2 for stereo).
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
-     * flags:              A bitmask of acoustic values from enum record_flags.  It enables
-     *                     AGC, NS, and IIR.
+     * flags:              Reserved for future use.
      * cbf:                Callback function. If not null, this function is called periodically
      *                     to provide new PCM data.
      * notificationFrames: The callback function is called each time notificationFrames PCM
      *                     frames are ready in record track output buffer.
      * user                Context for use by the callback receiver.
      */
-
-     enum record_flags {
-         RECORD_AGC_ENABLE = AudioSystem::AGC_ENABLE,
-         RECORD_NS_ENABLE  = AudioSystem::NS_ENABLE,
-         RECORD_IIR_ENABLE = AudioSystem::TX_IIR_ENABLE
-     };
 
                         AudioRecord(int streamType,
                                     uint32_t sampleRate = 0,

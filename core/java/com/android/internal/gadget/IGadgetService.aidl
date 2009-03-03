@@ -44,7 +44,6 @@ interface IGadgetService {
     List<GadgetProviderInfo> getInstalledProviders();
     GadgetProviderInfo getGadgetInfo(int gadgetId);
     void bindGadgetId(int gadgetId, in ComponentName provider);
-    int[] getGadgetIds(in ComponentName provider);
 
 }
 

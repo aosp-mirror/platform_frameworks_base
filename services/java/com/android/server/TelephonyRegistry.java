@@ -33,14 +33,12 @@ import java.util.ArrayList;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.DefaultPhoneNotifier;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneStateIntentReceiver;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.server.am.BatteryStatsService;
 
 
 /**
@@ -57,9 +55,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int events;
     }
 
-    private final Context mContext;
-    private final ArrayList<Record> mRecords = new ArrayList();
-    private final IBatteryStats mBatteryStats;
+    private Context mContext;
+    private ArrayList<Record> mRecords = new ArrayList();
 
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
     private String mCallIncomingNumber = "";
@@ -84,7 +81,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     TelephonyRegistry(Context context) {
         CellLocation.getEmpty().fillInNotifierBundle(mCellLocation);
         mContext = context;
-        mBatteryStats = BatteryStatsService.getService();
     }
 
     public void listen(String pkgForDebug, IPhoneStateListener callback, int events,
@@ -418,18 +414,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastCallStateChanged(int state, String incomingNumber) {
-        long ident = Binder.clearCallingIdentity();
-        try {
-            if (state == TelephonyManager.CALL_STATE_IDLE) {
-                mBatteryStats.notePhoneOff();
-            } else {
-                mBatteryStats.notePhoneOn();
-            }
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         intent.putExtra(Phone.STATE_KEY,
                 DefaultPhoneNotifier.convertCallState(state).toString());

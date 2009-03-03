@@ -1383,8 +1383,18 @@ public class GSMPhone extends PhoneBase {
                     break;
 
                 case EVENT_SIM_RECORDS_LOADED:
-                    updateCurrentCarrierInProvider();
-                    
+                    mSIMRecords.getSIMOperatorNumeric();
+
+                    try {
+                        //set the current field the telephony provider according to
+                        //the SIM's operator
+                        Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
+                        ContentValues map = new ContentValues();
+                        map.put(Telephony.Carriers.NUMERIC, mSIMRecords.getSIMOperatorNumeric());
+                        mContext.getContentResolver().insert(uri, map);
+                    } catch (SQLException e) {
+                        Log.e(LOG_TAG, "Can't store current operator", e);
+                    }
                     // Check if this is a different SIM than the previous one. If so unset the
                     // voice mail number.
                     String imsi = getVmSimImsi();
@@ -1525,27 +1535,7 @@ public class GSMPhone extends PhoneBase {
             }
         }
     }
-
-    /**
-     * Sets the "current" field in the telephony provider according to the SIM's operator
-     * 
-     * @return true for success; false otherwise.
-     */
-    boolean updateCurrentCarrierInProvider() {
-        if (mSIMRecords != null) {
-            try {
-                Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
-                ContentValues map = new ContentValues();
-                map.put(Telephony.Carriers.NUMERIC, mSIMRecords.getSIMOperatorNumeric());
-                mContext.getContentResolver().insert(uri, map);
-                return true;
-            } catch (SQLException e) {
-                Log.e(LOG_TAG, "Can't store current operator", e);
-            }
-        }
-        return false;
-    }
-
+    
     /**
      * Used to track the settings upon completion of the network change.
      */

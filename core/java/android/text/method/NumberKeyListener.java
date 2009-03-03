@@ -101,11 +101,6 @@ public abstract class NumberKeyListener extends BaseKeyListener
             selEnd = Math.max(a, b);
         }
 
-        if (selStart < 0 || selEnd < 0) {
-            selStart = selEnd = 0;
-            Selection.setSelection(content, 0);
-        }
-
         int i = event != null ? lookup(event, content) : 0;
         int repeatCount = event != null ? event.getRepeatCount() : 0;
         if (repeatCount == 0) {

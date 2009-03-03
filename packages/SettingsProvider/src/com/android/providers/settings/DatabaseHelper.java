@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.net.ConnectivityManager;
@@ -63,7 +64,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 33;
+    private static final int DATABASE_VERSION = 32;
     
     private Context mContext;
 
@@ -353,24 +354,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 32;
         }
 
-        if (upgradeVersion == 32) {
-            // The Wi-Fi watchdog SSID list is now seeded with the value of
-            // the property ro.com.android.wifi-watchlist
-            String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
-            if (!TextUtils.isEmpty(wifiWatchList)) {
-                db.beginTransaction();
-                try {
-                    db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
-                            Settings.Secure.WIFI_WATCHDOG_WATCH_LIST + "','" +
-                            wifiWatchList + "');");
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                }
-            }
-            upgradeVersion = 33;
-        }
-
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -636,19 +619,10 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 R.bool.def_wifi_on);
         loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                 R.bool.def_networks_available_notification_on);
-
-        String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
-        if (!TextUtils.isEmpty(wifiWatchList)) {
-            loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
-        }
-
+        
         // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
         // persistent system property instead.
         //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
-        
-        // Allow mock locations default, based on build
-        loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION, 
-                "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
         
         stmt.close();
     }

@@ -78,8 +78,6 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold
  * @attr ref android.R.styleable#AutoCompleteTextView_completionHintView
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownSelector
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -98,9 +96,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private DropDownListView mDropDownList;
     private int mDropDownVerticalOffset;
     private int mDropDownHorizontalOffset;
-    private int mDropDownAnchorId;
-    private View mDropDownAnchorView;  // view is retrieved lazily from id once needed
-    private int mDropDownWidth;
 
     private Drawable mDropDownListHighlight;
 
@@ -152,18 +147,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 a.getDimension(R.styleable.AutoCompleteTextView_dropDownVerticalOffset, 0.0f);
         mDropDownHorizontalOffset = (int)
                 a.getDimension(R.styleable.AutoCompleteTextView_dropDownHorizontalOffset, 0.0f);
-        
-        // Get the anchor's id now, but the view won't be ready, so wait to actually get the
-        // view and store it in mDropDownAnchorView lazily in getDropDownAnchorView later.
-        // Defaults to NO_ID, in which case the getDropDownAnchorView method will simply return
-        // this TextView, as a default anchoring point.
-        mDropDownAnchorId = a.getResourceId(R.styleable.AutoCompleteTextView_dropDownAnchor,
-                View.NO_ID);
-        
-        // For dropdown width, the developer can specify a specific width, or FILL_PARENT
-        // (for full screen width) or WRAP_CONTENT (to match the width of the anchored view).
-        mDropDownWidth = a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownWidth,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
                 R.layout.simple_dropdown_hint);
@@ -203,49 +186,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public void setCompletionHint(CharSequence hint) {
         mHintText = hint;
-    }
-    
-    /**
-     * <p>Returns the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#FILL_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
-     * 
-     * @return the width for the drop down list
-     */
-    public int getDropDownWidth() {
-        return mDropDownWidth;
-    }
-    
-    /**
-     * <p>Sets the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#FILL_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
-     * 
-     * @param width the width to use
-     */
-    public void setDropDownWidth(int width) {
-        mDropDownWidth = width;
-    }
-    
-    /**
-     * <p>Returns the id for the view that the auto-complete drop down list is anchored to.</p>
-     *  
-     * @return the view's id, or {@link View#NO_ID} if none specified
-     */
-    public int getDropDownAnchor() {
-        return mDropDownAnchorId;
-    }
-    
-    /**
-     * <p>Sets the view to which the auto-complete drop down list should anchor. The view
-     * corresponding to this id will not be loaded until the next time it is needed to avoid
-     * loading a view which is not yet instantiated.</p>
-     * 
-     * @param id the id to anchor the drop down list view to
-     */
-    public void setDropDownAnchor(int id) {
-        mDropDownAnchorId = id;
-        mDropDownAnchorView = null;
     }
 
     /**
@@ -801,18 +741,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         return result;
     }
-    
-    /**
-     * <p>Used for lazy instantiation of the anchor view from the id we have. If the value of
-     * the id is NO_ID or we can't find a view for the given id, we return this TextView as
-     * the default anchoring point.</p>
-     */
-    private View getDropDownAnchorView() {
-        if (mDropDownAnchorView == null && mDropDownAnchorId != View.NO_ID) {
-            mDropDownAnchorView = getRootView().findViewById(mDropDownAnchorId);
-        }
-        return mDropDownAnchorView == null ? this : mDropDownAnchorView;
-    }
 
     /**
      * <p>Displays the drop down on screen.</p>
@@ -820,37 +748,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public void showDropDown() {
         int height = buildDropDown();
         if (mPopup.isShowing()) {
-            int widthSpec;
-            if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
-                // The call to PopupWindow's update method below can accept -1 for any
-                // value you do not want to update.
-                widthSpec = -1;
-            } else if (mDropDownWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                widthSpec = getDropDownAnchorView().getWidth();
-            } else {
-                widthSpec = mDropDownWidth;
-            }
-            mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
-                    mDropDownVerticalOffset, widthSpec, height);
+            mPopup.update(this, mDropDownHorizontalOffset, mDropDownVerticalOffset,
+                    getWidth(), height);
         } else {
-            int widthSpec;
-            if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
-                mPopup.setWindowLayoutMode(ViewGroup.LayoutParams.FILL_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-            } else {
-                mPopup.setWindowLayoutMode(0, ViewGroup.LayoutParams.WRAP_CONTENT);
-                if (mDropDownWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    mPopup.setWidth(getDropDownAnchorView().getWidth());
-                } else {
-                    mPopup.setWidth(mDropDownWidth);
-                }
-            }
+            mPopup.setWindowLayoutMode(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+            mPopup.setWidth(getWidth());
             mPopup.setHeight(height);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setOutsideTouchable(true);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
-            mPopup.showAsDropDown(getDropDownAnchorView(),
-                    mDropDownHorizontalOffset, mDropDownVerticalOffset);
+            mPopup.showAsDropDown(this, mDropDownHorizontalOffset, mDropDownVerticalOffset);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
             mDropDownList.hideSelector();
             mDropDownList.requestFocus();

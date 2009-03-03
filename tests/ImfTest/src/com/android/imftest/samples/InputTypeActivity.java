@@ -83,6 +83,10 @@ public class InputTypeActivity extends Activity {
         mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT, 
                 R.string.auto_correct_edit_text_label));
         
+        /* Normal Edit Text w/Search Flag*/
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_SEARCH, 
+                R.string.search_edit_text_label));
+        
         /* Uri Edit Text */
         mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_URI, 
         		R.string.uri_edit_text_label));

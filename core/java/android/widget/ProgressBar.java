@@ -526,7 +526,6 @@ public class ProgressBar extends View {
      * @see #getProgress()
      * @see #incrementProgressBy(int) 
      */
-    @android.view.RemotableViewMethod
     public synchronized void setProgress(int progress) {
         setProgress(progress, false);
     }

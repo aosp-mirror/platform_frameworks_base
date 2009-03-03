@@ -48,6 +48,7 @@ public class Camera {
     private static final int ERROR_CALLBACK = 5;
 
     private int mNativeContext; // accessed by native methods
+    private int mListenerContext;
     private EventHandler mEventHandler;
     private ShutterCallback mShutterCallback;
     private PictureCallback mRawImageCallback;

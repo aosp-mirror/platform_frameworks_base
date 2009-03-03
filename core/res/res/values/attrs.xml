@@ -405,8 +405,7 @@
     <!-- **************************************************************** -->
     <eat-comment />
 
-    <!-- Size of text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp).
-         Supported values include the following:<p/>
+    <!-- Size of text (example: 15sp). Supported values include the following:<p/>
     <ul>
         <li><b>px</b> Pixels</li>
         <li><b>sp</b> Scaled pixels (scaled to relative pixel size on screen). See {@link android.util.DisplayMetrics} for more information.</li>
@@ -415,7 +414,6 @@
     </ul>
         -->
     <attr name="textSize" format="dimension" />
-    
     <!-- Default text typeface. -->
     <attr name="typeface">
         <enum name="normal" value="0" />
@@ -423,26 +421,20 @@
         <enum name="serif" value="2" />
         <enum name="monospace" value="3" />
     </attr>
-    
     <!-- Default text typeface style. -->
     <attr name="textStyle">
         <flag name="normal" value="0" />
         <flag name="bold" value="1" />
         <flag name="italic" value="2" />
     </attr>
-    
     <!-- Color of text (usually same as colorForeground). -->
     <attr name="textColor" format="reference|color" />
-    
     <!-- Color of highlighted text. -->
     <attr name="textColorHighlight" format="reference|color" />
-    
     <!-- Color of hint text (displayed when the field is empty). -->
     <attr name="textColorHint" format="reference|color" />
-    
     <!-- Color of link text (URLs). -->
     <attr name="textColorLink" format="reference|color" />
-    
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
         <enum name="none" value="0" />
@@ -451,7 +443,6 @@
         <enum name="end" value="3" />
         <enum name="marquee" value="4" />
     </attr>
-    
     <!-- The type of data being placed in a text field, used to help an
          input method decide how to let the user enter text.  The constants
          here correspond to those defined by
@@ -494,9 +485,13 @@
         <flag name="textMultiLine" value="0x00020001" />
         <!-- Can be combined with <var>text</var> and its variations to
              indicate that though the regular text view should not be multiple
-             lines, the IME should provide multiple lines if it can.  Corresponds to
+             lines, and IME should provide multiple lines if it can.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_IME_MULTI_LINE}. -->
         <flag name="textImeMultiLine" value="0x00040001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that a search string is being entered.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_SEARCH}. -->
+        <flag name="textSearch" value="0x00080001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
@@ -561,46 +556,6 @@
              {@link android.text.InputType#TYPE_CLASS_DATETIME} |
              {@link android.text.InputType#TYPE_DATETIME_VARIATION_TIME}. -->
         <flag name="time" value="0x00000024" />
-    </attr>
-
-    <!-- Additional features you can enable in an IME associated with an editor,
-         to improve the integration with your application.  The constants
-         here correspond to those defined by
-         {@link android.view.inputmethod.EditorInfo#imeOptions}. -->
-    <attr name="imeOptions">
-        <!-- There are no special semantics associated with this editor. -->
-        <flag name="normal" value="0x00000000" />
-        <!-- There is no special action associated with this editor.
-             Corresponds to
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_NONE}. -->
-        <flag name="actionNone" value="0x00000000" />
-        <!-- The action key performs a "go"
-             operation to take the user to the target of the text they typed.
-             Typically used, for example, when entering a URL.
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_GO}. -->
-        <flag name="actionGo" value="0x00000001" />
-        <!-- The action key performs a "search"
-             operation, taking the user to the results of searching for the text
-             the have typed (in whatever context is appropriate).
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEARCH}. -->
-        <flag name="actionSearch" value="0x00000002" />
-        <!-- The action key performs a "send"
-             operation, delivering the text to its target.  This is typically used
-             when composing a message.
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEND}. -->
-        <flag name="actionSend" value="0x00000003" />
-        <!-- The action key performs a "next"
-             operation, taking the user to the next field that will accept text.
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_NEXT}. -->
-        <flag name="actionNext" value="0x00000004" />
-        <!-- Used in conjunction with a custom action,
-             this indicates that the action should not
-             be available in-line as the same as a "enter" key.  Typically this is
-             because the action has such a significant impact or is not recoverable
-             enough that accidentally hitting it should be avoided, such as sending
-             a message.
-             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ENTER_ACTION}. -->
-        <flag name="flagNoEnterAction" value="0x40000000" />
     </attr>
 
     <!-- A coordinate in the X dimension. -->
@@ -1647,7 +1602,7 @@
     <declare-styleable name="TextAppearance">
         <!-- Text color. -->
         <attr name="textColor" />
-        <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
+        <!-- Size of the text. -->
         <attr name="textSize" />
         <!-- Style (bold, italic, bolditalic) for the text. -->
         <attr name="textStyle" />
@@ -1688,7 +1643,7 @@
         <attr name="textColorHint" />
         <!-- Base text color, typeface, size, and style. -->
         <attr name="textAppearance" />
-        <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
+        <!-- Size of the text. -->
         <attr name="textSize" />
         <!-- Sets the horizontal scaling factor for the text -->
         <attr name="textScaleX" format="float" />
@@ -1860,22 +1815,13 @@
             <enum name="marquee_forever" value="-1" />
         </attr>
         <attr name="inputType" />
-        <attr name="imeOptions" />
         <!-- An addition content type description to supply to the input
              method attached to the text view, which is private to the
              implementation of the input method.  This simply fills in
-             the {@link android.view.inputmethod.EditorInfo#privateImeOptions
-             EditorInfo.privateImeOptions} field when the input
+             the {@link android.view.inputmethod.EditorInfo#privateContentType
+             EditorInfo.privateContentType} field when the input
              method is connected. -->
-        <attr name="privateImeOptions" format="string" />
-        <!-- Supply a value for
-             {@link android.view.inputmethod.EditorInfo#actionLabel EditorInfo.actionLabel}
-             used when an input method is connected to the text view. -->
-        <attr name="imeActionLabel" format="string" />
-        <!-- Supply a value for
-             {@link android.view.inputmethod.EditorInfo#actionId EditorInfo.actionId}
-             used when an input method is connected to the text view. -->
-        <attr name="imeActionId" format="integer" />
+        <attr name="editorPrivateContentType" format="string" />
         <!-- Reference to an
              {@link android.R.styleable#InputExtras &lt;input-extras&gt;}
              XML resource containing additional data to
@@ -1905,19 +1851,6 @@
         <attr name="dropDownVerticalOffset" format="dimension" />
         <!-- Amount of pixels by which the drop down should be offset horizontally. -->
         <attr name="dropDownHorizontalOffset" format="dimension" />
-        <!-- View to anchor the auto-complete dropdown to. If not specified, the text view itself
-             is used. -->
-        <attr name="dropDownAnchor" format="reference" />
-        <!-- Specifies the basic width of the dropdown. Its value may
-             be a dimension (such as "12dip") for a constant width, fill_parent
-             to fill the width of the screen, or wrap_content to match the width
-             of the anchored view. -->
-        <attr name="dropDownWidth" format="dimension">
-            <!-- The dropdown should fill the width of the screen. -->
-            <enum name="fill_parent" value="-1" />
-            <!-- The dropdown should fit the width of its anchor. -->
-            <enum name="wrap_content" value="-2" />
-        </attr>
         <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
@@ -2235,16 +2168,6 @@
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
-    </declare-styleable>
-
-    <!-- Drawable used to draw 9-patches. -->
-    <declare-styleable name="NinePatchDrawable">
-        <!-- Identifier of the bitmap file. This attribute is mandatory. -->
-        <attr name="src" />
-        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
-             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
-             an RGB 565 screen.) -->
-        <attr name="dither" />
     </declare-styleable>
 
     <!-- Drawable used to draw a single color. -->
@@ -2611,7 +2534,6 @@
                        changing to use only icons for its buttons.}-->
         <attr name="searchButtonText" format="string" />
         <attr name="inputType" />
-        <attr name="imeOptions" />
         
         <!-- Additional features are controlled by mode bits in this field.  Omitting
             this field, or setting to zero, provides default behavior.  <i>Optional attribute.</i> 
@@ -3099,20 +3021,14 @@
     <!-- =============================== -->
 
     <!-- Use <code>gadget-provider</code> as the root tag of the XML resource that
-         describes a gadget provider.  See TODO android.gadget package
+         describes a gadget provider.  See TODO android.gadget android.gadget package
          for more info.
      -->
     <declare-styleable name="GadgetProviderInfo">
-        <!-- Minimum width of the gadget. -->
         <attr name="minWidth"/>
-        <!-- Minimum height of the gadget. -->
         <attr name="minHeight"/>
-        <!-- Update period in milliseconds, or 0 if the gadget will update itself. -->
         <attr name="updatePeriodMillis" format="integer" />
-        <!-- A resource id of a layout. -->
         <attr name="initialLayout" format="reference" />
-        <!-- A class name in the gadget's package to be launched to configure.
-             If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
     </declare-styleable>
     

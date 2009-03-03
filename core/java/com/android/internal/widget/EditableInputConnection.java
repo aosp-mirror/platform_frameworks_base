@@ -59,14 +59,7 @@ public class EditableInputConnection extends BaseInputConnection {
         final Editable content = getEditable();
         if (content == null) return false;
         KeyListener kl = mTextView.getKeyListener();
-        if (kl != null) {
-            try {
-                kl.clearMetaKeyState(mTextView, content, states);
-            } catch (AbstractMethodError e) {
-                // This is an old listener that doesn't implement the
-                // new method.
-            }
-        }
+        if (kl != null) kl.clearMetaKeyState(mTextView, content, states);
         return true;
     }
     
@@ -78,12 +71,6 @@ public class EditableInputConnection extends BaseInputConnection {
         return true;
     }
 
-    public boolean performEditorAction(int actionCode) {
-        if (DEBUG) Log.v(TAG, "performEditorAction " + actionCode);
-        mTextView.onEditorAction(actionCode);
-        return true;
-    }
-    
     public boolean performContextMenuAction(int id) {
         if (DEBUG) Log.v(TAG, "performContextMenuAction " + id);
         mTextView.beginBatchEdit();

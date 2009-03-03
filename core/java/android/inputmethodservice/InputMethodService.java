@@ -26,9 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.method.MovementMethod;
@@ -51,7 +49,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 import java.io.FileDescriptor;
@@ -244,8 +241,6 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mIsFullscreen;
     View mExtractView;
     ExtractEditText mExtractEditText;
-    ViewGroup mExtractAccessories;
-    Button mExtractAction;
     ExtractedText mExtractedText;
     int mExtractedToken;
     
@@ -276,21 +271,6 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     };
 
-    final View.OnClickListener mActionClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            final EditorInfo ei = getCurrentInputEditorInfo();
-            final InputConnection ic = getCurrentInputConnection();
-            if (ei != null && ic != null) {
-                if (ei.actionId != 0) {
-                    ic.performEditorAction(ei.actionId);
-                } else if ((ei.imeOptions&EditorInfo.IME_MASK_ACTION)
-                        != EditorInfo.IME_ACTION_NONE) {
-                    ic.performEditorAction(ei.imeOptions&EditorInfo.IME_MASK_ACTION);
-                }
-            }
-        }
-    };
-    
     /**
      * Concrete implementation of
      * {@link AbstractInputMethodService.AbstractInputMethodImpl} that provides
@@ -542,8 +522,6 @@ public class InputMethodService extends AbstractInputMethodService {
         mExtractFrame = (FrameLayout)mRootView.findViewById(android.R.id.extractArea);
         mExtractView = null;
         mExtractEditText = null;
-        mExtractAccessories = null;
-        mExtractAction = null;
         mFullscreenApplied = false;
         
         mCandidatesFrame = (FrameLayout)mRootView.findViewById(android.R.id.candidatesArea);
@@ -725,7 +703,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         setExtractView(v);
                     }
                 }
-                startExtractingText(false);
+                startExtractingText();
             }
         }
         
@@ -929,17 +907,9 @@ public class InputMethodService extends AbstractInputMethodService {
             mExtractEditText = (ExtractEditText)view.findViewById(
                     com.android.internal.R.id.inputExtractEditText);
             mExtractEditText.setIME(this);
-            mExtractAction = (Button)view.findViewById(
-                    com.android.internal.R.id.inputExtractAction);
-            if (mExtractAction != null) {
-                mExtractAccessories = (ViewGroup)view.findViewById(
-                        com.android.internal.R.id.inputExtractAccessories);
-            }
-            startExtractingText(false);
+            startExtractingText();
         } else {
             mExtractEditText = null;
-            mExtractAccessories = null;
-            mExtractAction = null;
         }
     }
     
@@ -1196,7 +1166,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         
         if (doShowInput) {
-            startExtractingText(false);
+            startExtractingText();
         }
         
         if (!wasVisible) {
@@ -1306,7 +1276,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");
                 mInputViewStarted = true;
                 onStartInputView(mInputEditorInfo, restarting);
-                startExtractingText(true);
+                startExtractingText();
             } else if (mCandidatesVisibility == View.VISIBLE) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartCandidatesView");
                 mCandidatesViewStarted = true;
@@ -1483,25 +1453,6 @@ public class InputMethodService extends AbstractInputMethodService {
     static final int MOVEMENT_DOWN = -1;
     static final int MOVEMENT_UP = -2;
     
-    void reportExtractedMovement(int keyCode, int count) {
-        int dx = 0, dy = 0;
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                dx = -count;
-                break;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                dx = count;
-                break;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                dy = -count;
-                break;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                dy = count;
-                break;
-        }
-        onExtractedCursorMovement(dx, dy);       
-    }
-    
     boolean doMovementKey(int keyCode, KeyEvent event, int count) {
         final ExtractEditText eet = mExtractEditText;
         if (isFullscreenMode() && isInputViewShown() && eet != null) {
@@ -1516,7 +1467,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 if (count == MOVEMENT_DOWN) {
                     if (movement.onKeyDown(eet,
                             (Spannable)eet.getText(), keyCode, event)) {
-                        reportExtractedMovement(keyCode, 1);
                         return true;
                     }
                 } else if (count == MOVEMENT_UP) {
@@ -1525,9 +1475,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         return true;
                     }
                 } else {
-                    if (movement.onKeyOther(eet, (Spannable)eet.getText(), event)) {
-                        reportExtractedMovement(keyCode, count);
-                    } else {
+                    if (!movement.onKeyOther(eet, (Spannable)eet.getText(), event)) {
                         KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
                         if (movement.onKeyDown(eet,
                                 (Spannable)eet.getText(), keyCode, down)) {
@@ -1540,7 +1488,6 @@ public class InputMethodService extends AbstractInputMethodService {
                                 movement.onKeyUp(eet,
                                         (Spannable)eet.getText(), keyCode, up);
                             }
-                            reportExtractedMovement(keyCode, count);
                         }
                     }
                 }
@@ -1560,97 +1507,6 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
-     * Send the given key event code (as defined by {@link KeyEvent}) to the
-     * current input connection is a key down + key up event pair.  The sent
-     * events have {@link KeyEvent#FLAG_SOFT_KEYBOARD KeyEvent.FLAG_SOFT_KEYBOARD}
-     * set, so that the recipient can identify them as coming from a software
-     * input method, and
-     * {@link KeyEvent#FLAG_KEEP_TOUCH_MODE KeyEvent.FLAG_KEEP_TOUCH_MODE}, so
-     * that they don't impact the current touch mode of the UI.
-     *
-     * @param keyEventCode The raw key code to send, as defined by
-     * {@link KeyEvent}.
-     */
-    public void sendDownUpKeyEvents(int keyEventCode) {
-        InputConnection ic = getCurrentInputConnection();
-        if (ic == null) return;
-        long eventTime = SystemClock.uptimeMillis();
-        ic.sendKeyEvent(new KeyEvent(eventTime, eventTime,
-                KeyEvent.ACTION_DOWN, keyEventCode, 0, 0, 0, 0,
-                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
-        ic.sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
-                KeyEvent.ACTION_UP, keyEventCode, 0, 0, 0, 0,
-                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
-    }
-    
-    /**
-     * Ask the input target to execute its default action via
-     * {@link InputConnection#performEditorAction
-     * InputConnection.performEditorAction()}.
-     * 
-     * @param fromEnterKey If true, this will be executed as if the user had
-     * pressed an enter key on the keyboard, that is it will <em>not</em>
-     * be done if the editor has set {@link EditorInfo#IME_FLAG_NO_ENTER_ACTION
-     * EditorInfo.IME_FLAG_NO_ENTER_ACTION}.  If false, the action will be
-     * sent regardless of how the editor has set that flag.
-     * 
-     * @return Returns a boolean indicating whether an action has been sent.
-     * If false, either the editor did not specify a default action or it
-     * does not want an action from the enter key.  If true, the action was
-     * sent (or there was no input connection at all).
-     */
-    public boolean sendDefaultEditorAction(boolean fromEnterKey) {
-        EditorInfo ei = getCurrentInputEditorInfo();
-        if (ei != null &&
-                (!fromEnterKey || (ei.imeOptions &
-                        EditorInfo.IME_FLAG_NO_ENTER_ACTION) == 0) &&
-                (ei.imeOptions & EditorInfo.IME_MASK_ACTION) !=
-                    EditorInfo.IME_ACTION_NONE) {
-            // If the enter key was pressed, and the editor has a default
-            // action associated with pressing enter, then send it that
-            // explicit action instead of the key event.
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) {
-                ic.performEditorAction(ei.imeOptions&EditorInfo.IME_MASK_ACTION);
-            }
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Send the given UTF-16 character to the current input connection.  Most
-     * characters will be delivered simply by calling
-     * {@link InputConnection#commitText InputConnection.commitText()} with
-     * the character; some, however, may be handled different.  In particular,
-     * the enter character ('\n') will either be delivered as an action code
-     * or a raw key event, as appropriate.
-     * 
-     * @param charCode The UTF-16 character code to send.
-     */
-    public void sendKeyChar(char charCode) {
-        switch (charCode) {
-            case '\n': // Apps may be listening to an enter key to perform an action
-                if (!sendDefaultEditorAction(true)) {
-                    sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
-                }
-                break;
-            default:
-                // Make sure that digits go through any text watcher on the client side.
-                if (charCode >= '0' && charCode <= '9') {
-                    sendDownUpKeyEvents(charCode - '0' + KeyEvent.KEYCODE_0);
-                } else {
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null) {
-                        ic.commitText(String.valueOf((char) charCode), 1);
-                    }
-                }
-                break;
-        }
-    }
-    
-    /**
      * This is called when the user has moved the cursor in the extracted
      * text view, when running in fullsreen mode.  The default implementation
      * performs the corresponding selection change on the underlying text
@@ -1666,36 +1522,11 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * This is called when the user has clicked on the extracted text view,
      * when running in fullscreen mode.  The default implementation hides
-     * the candidates view when this happens, but only if the extracted text
-     * editor has a vertical scroll bar because its text doesn't fit.
-     * Re-implement this to provide whatever behavior you want.
+     * the candidates view when this happens.  Re-implement this to provide
+     * whatever behavior you want.
      */
     public void onExtractedTextClicked() {
-        if (mExtractEditText == null) {
-            return;
-        }
-        if (mExtractEditText.hasVerticalScrollBar()) {
-            setCandidatesViewShown(false);
-        }
-    }
-    
-    /**
-     * This is called when the user has performed a cursor movement in the
-     * extracted text view, when it is running in fullscreen mode.  The default
-     * implementation hides the candidates view when a vertical movement
-     * happens, but only if the extracted text editor has a vertical scroll bar
-     * because its text doesn't fit.
-     * Re-implement this to provide whatever behavior you want.
-     * @param dx The amount of cursor movement in the x dimension.
-     * @param dy The amount of cursor movement in the y dimension.
-     */
-    public void onExtractedCursorMovement(int dx, int dy) {
-        if (mExtractEditText == null || dy == 0) {
-            return;
-        }
-        if (mExtractEditText.hasVerticalScrollBar()) {
-            setCandidatesViewShown(false);
-        }
+        setCandidatesViewShown(false);
     }
     
     /**
@@ -1714,74 +1545,7 @@ public class InputMethodService extends AbstractInputMethodService {
         return true;
     }
     
-    /**
-     * Return text that can be used as a button label for the given
-     * {@link EditorInfo#imeOptions EditorInfo.imeOptions}.  Returns null
-     * if there is no action requested.  Note that there is no guarantee that
-     * the returned text will be relatively short, so you probably do not
-     * want to use it as text on a soft keyboard key label.
-     * 
-     * @param imeOptions The value from @link EditorInfo#imeOptions EditorInfo.imeOptions}.
-     * 
-     * @return Returns a label to use, or null if there is no action.
-     */
-    public CharSequence getTextForImeAction(int imeOptions) {
-        switch (imeOptions&EditorInfo.IME_MASK_ACTION) {
-            case EditorInfo.IME_ACTION_NONE:
-                return null;
-            case EditorInfo.IME_ACTION_GO:
-                return getText(com.android.internal.R.string.ime_action_go);
-            case EditorInfo.IME_ACTION_SEARCH:
-                return getText(com.android.internal.R.string.ime_action_search);
-            case EditorInfo.IME_ACTION_SEND:
-                return getText(com.android.internal.R.string.ime_action_send);
-            case EditorInfo.IME_ACTION_NEXT:
-                return getText(com.android.internal.R.string.ime_action_next);
-            default:
-                return getText(com.android.internal.R.string.ime_action_default);
-        }
-    }
-    
-    /**
-     * Called when it is time to update the actions available from a full-screen
-     * IME.  You do not need to deal with this if you are using the standard
-     * full screen extract UI.  If replacing it, you will need to re-implement
-     * this to put the action in your own UI and handle it.
-     */
-    public void onUpdateExtractingAccessories(EditorInfo ei) {
-        if (mExtractAccessories == null) {
-            return;
-        }
-        final boolean hasAction = ei.actionLabel != null || (
-                (ei.imeOptions&EditorInfo.IME_MASK_ACTION) != EditorInfo.IME_ACTION_NONE &&
-                (ei.imeOptions&EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0);
-        if (hasAction) {
-            mExtractAccessories.setVisibility(View.VISIBLE);
-            if (ei.actionLabel != null) {
-                mExtractAction.setText(ei.actionLabel);
-            } else {
-                mExtractAction.setText(getTextForImeAction(ei.imeOptions));
-            }
-            mExtractAction.setOnClickListener(mActionClickListener);
-        } else {
-            mExtractAccessories.setVisibility(View.GONE);
-            mExtractAction.setOnClickListener(null);
-        }
-    }
-    
-    /**
-     * This is called when, while currently displayed in extract mode, the
-     * current input target changes.  The default implementation will
-     * auto-hide the IME if the new target is not a full editor, since this
-     * can be an confusing experience for the user.
-     */
-    public void onExtractingInputChanged(EditorInfo ei) {
-        if (ei.inputType == InputType.TYPE_NULL) {
-            dismissSoftInput(InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-    }
-    
-    void startExtractingText(boolean inputChanged) {
+    void startExtractingText() {
         final ExtractEditText eet = mExtractEditText;
         if (eet != null && getCurrentInputStarted()
                 && isFullscreenMode()) {
@@ -1793,13 +1557,9 @@ public class InputMethodService extends AbstractInputMethodService {
             req.hintMaxChars = 10000;
             mExtractedText = getCurrentInputConnection().getExtractedText(req,
                     InputConnection.GET_EXTRACTED_TEXT_MONITOR);
-            
-            final EditorInfo ei = getCurrentInputEditorInfo();
-            
             try {
                 eet.startInternalChanges();
-                onUpdateExtractingAccessories(ei);
-                int inputType = ei.inputType;
+                int inputType = getCurrentInputEditorInfo().inputType;
                 if ((inputType&EditorInfo.TYPE_MASK_CLASS)
                         == EditorInfo.TYPE_CLASS_TEXT) {
                     if ((inputType&EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE) != 0) {
@@ -1807,7 +1567,7 @@ public class InputMethodService extends AbstractInputMethodService {
                     }
                 }
                 eet.setInputType(inputType);
-                eet.setHint(ei.hintText);
+                eet.setHint(mInputEditorInfo.hintText);
                 if (mExtractedText != null) {
                     eet.setEnabled(true);
                     eet.setExtractedText(mExtractedText);
@@ -1817,10 +1577,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             } finally {
                 eet.finishInternalChanges();
-            }
-            
-            if (inputChanged) {
-                onExtractingInputChanged(ei);
             }
         }
     }

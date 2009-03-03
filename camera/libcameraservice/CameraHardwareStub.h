@@ -30,7 +30,6 @@ namespace android {
 class CameraHardwareStub : public CameraHardwareInterface {
 public:
     virtual sp<IMemoryHeap> getPreviewHeap() const;
-    virtual sp<IMemoryHeap> getRawHeap() const;
 
     virtual status_t    startPreview(preview_callback cb, void* user);
     virtual void        stopPreview();
@@ -94,8 +93,7 @@ private:
 
     CameraParameters    mParameters;
 
-    sp<MemoryHeapBase>  mPreviewHeap;
-    sp<MemoryHeapBase>  mRawHeap;
+    sp<MemoryHeapBase>  mHeap;
     sp<MemoryBase>      mBuffers[kBufferCount];
 
     FakeCamera          *mFakeCamera;

@@ -2183,12 +2183,6 @@ public final class Settings {
         public static final String CHECKIN_INTERVAL = "checkin_interval";
 
         /**
-         * Boolean indicating if the market app should force market only checkins on
-         * install/uninstall. Any non-0 value is considered true.
-         */
-        public static final String MARKET_FORCE_CHECKIN = "market_force_checkin";
-
-        /**
          * How frequently (in seconds) to check the memory status of the
          * device.
          */
@@ -2459,14 +2453,6 @@ public final class Settings {
          */
         public static final String GTALK_SSL_HANDSHAKE_TIMEOUT_MS =
                 "gtalk_ssl_handshake_timeout_ms";
-
-        /**
-         * Enable use of ssl session caching. 
-         * 'db' - save each session in a per-process database
-         * not set or any other value - normal java in-memory caching. 
-         *  Other cache types may be added.
-         */
-        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
 
         /**
          * How many bytes long a message has to be, in order to be gzipped.
@@ -2780,29 +2766,11 @@ public final class Settings {
         public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
 
         /**
-         * Whether to use automatic gain control in voice search (0 = disable, 1 = enable). 
-         * To be factored out of this class.
+         * Prefix for rules that launch automatic instrumentation test cycles.
+         * The format is the InstrumentationTestRunner (or compatible) package and class,
+         * followed optionally by space-separated key value pairs to pass to it.
          */
-        public static final String VOICE_SEARCH_ENABLE_AGC = "voice_search_enable_agc";
-
-        /**
-         * Whether to use noise suppression in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_NS = "voice_search_enable_ns";
-
-        /**
-         * Whether to use the IIR filter in voice search (0 = disable, 1 = enable). 
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_IIR = "voice_search_enable_iir";
-
-        /**
-         * List of test suites (local disk filename) for the automatic instrumentation test runner.
-         * The file format is similar to automated_suites.xml, see AutoTesterService.
-         * If this setting is missing or empty, the automatic test runner will not start.
-         */
-        public static final String AUTOTEST_SUITES_FILE = "autotest_suites_file";
+        public static final String AUTOTEST_PREFIX = "autotest:";
 
         /**
          * Interval between synchronous checkins forced by the automatic test runner.
@@ -2816,15 +2784,6 @@ public final class Settings {
          * Interval between reboots forced by the automatic test runner.
          */
         public static final String AUTOTEST_REBOOT_SECONDS = "autotest_reboot_seconds";
-
-        
-        /**
-         * Threshold values for the duration and level of a discharge cycle, under 
-         * which we log discharge cycle info.
-         */
-        public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD = 
-                "battery_discharge_duration_threshold";
-        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
 
         /**
          * @deprecated

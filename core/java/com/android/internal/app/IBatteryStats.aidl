@@ -28,8 +28,6 @@ interface IBatteryStats {
     void noteStopGps(int uid);
     void noteScreenOn();
     void noteScreenOff();
-    void notePhoneOn();
-    void notePhoneOff();
     void setOnBattery(boolean onBattery);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();

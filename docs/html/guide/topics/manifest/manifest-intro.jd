@@ -51,7 +51,7 @@ profiling and other information as the application is running.  These declaratio
 are present in the manifest only while the application is being developed and 
 tested; they're removed before the application is published.</li>
 
-<li>It declares the minimum level of the Android API that the application 
+<li>It declares the minimum version of the Android API that the application 
 requires.</li>
 
 <li>It lists the libraries that the application must be linked against.</li>

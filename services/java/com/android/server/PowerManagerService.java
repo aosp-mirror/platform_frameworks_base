@@ -973,9 +973,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 if (mSpew) {
                     Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
                 }
-                if (mContext != null && ActivityManagerNative.isSystemReady()) {
-                    mContext.sendOrderedBroadcast(mScreenOnIntent, null,
-                            mScreenOnBroadcastDone, mHandler, 0, null, null);
+                if (mContext != null) {
+                    if (ActivityManagerNative.isSystemReady()) {
+                        mContext.sendOrderedBroadcast(mScreenOnIntent, null,
+                                mScreenOnBroadcastDone, mHandler, 0, null, null);
+                    }
                 } else {
                     synchronized (mLocks) {
                         EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 2,
@@ -994,7 +996,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     // ignore it.
                 }
 
-                if (mContext != null && ActivityManagerNative.isSystemReady()) {
+                if (mContext != null) {
                     mContext.sendOrderedBroadcast(mScreenOffIntent, null,
                             mScreenOffBroadcastDone, mHandler, 0, null, null);
                 } else {

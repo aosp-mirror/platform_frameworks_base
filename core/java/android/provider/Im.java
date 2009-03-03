@@ -2044,37 +2044,4 @@ public class Im {
          */
         public static final Uri CONTENT_URI = Uri.parse("content://im/lastRmqId");
     }
-
-    /**
-     * Columns for IM branding resource map cache table. This table caches the result of
-     * loading the branding resources to speed up IM landing page start.
-     */
-    public interface BrandingResourceMapCacheColumns {
-        /**
-         * The provider ID
-         * <P>Type: INTEGER</P>
-         */
-        String PROVIDER_ID = "provider_id";
-        /**
-         * The application resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String APP_RES_ID = "app_res_id";
-        /**
-         * The plugin resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String PLUGIN_RES_ID = "plugin_res_id";
-    }
-
-    /**
-     * The table for caching the result of loading IM branding resources.
-     */
-    public static final class BrandingResourceMapCache
-        implements BaseColumns, BrandingResourceMapCacheColumns {
-        /**
-         * The content:// style URL for this table.
-         */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/brandingResMapCache");
-    }
 }

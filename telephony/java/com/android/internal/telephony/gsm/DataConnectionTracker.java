@@ -884,9 +884,6 @@ final class DataConnectionTracker extends Handler
 
         isConnected = (state != State.IDLE && state != State.FAILED);
 
-        // The "current" may no longer be valid.  MMS depends on this to send properly.
-        phone.updateCurrentCarrierInProvider();
-
         // TODO: It'd be nice to only do this if the changed entrie(s)
         // match the current operator.
         createAllApnList();

@@ -229,7 +229,7 @@ class GadgetService extends IGadgetService.Stub
             int callingUid = getCallingUid();
             final int N = mHosts.size();
             boolean changed = false;
-            for (int i=N-1; i>=0; i--) {
+            for (int i=0; i<N; i++) {
                 Host host = mHosts.get(i);
                 if (host.uid == callingUid) {
                     deleteHostLocked(host);
@@ -244,7 +244,7 @@ class GadgetService extends IGadgetService.Stub
 
     void deleteHostLocked(Host host) {
         final int N = host.instances.size();
-        for (int i=N-1; i>=0; i--) {
+        for (int i=0; i<N; i++) {
             GadgetId id = host.instances.get(i);
             deleteGadgetLocked(id);
         }
@@ -621,17 +621,6 @@ class GadgetService extends IGadgetService.Stub
             gadgetIds[i] = p.instances.get(i).gadgetId;
         }
         return gadgetIds;
-    }
-    
-    public int[] getGadgetIds(ComponentName provider) {
-        synchronized (mGadgetIds) {
-            Provider p = lookupProviderLocked(provider);
-            if (p != null && getCallingUid() == p.uid) {
-                return getGadgetIds(p);                
-            } else {
-                return new int[0];
-            }
-        }
     }
 
     private Provider parseProviderInfoXml(ComponentName component, ResolveInfo ri) {

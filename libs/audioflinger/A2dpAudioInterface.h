@@ -96,6 +96,7 @@ private:
                 int         mRetryCount;
                 char        mA2dpAddress[20];
                 void*       mData;
+                bool        mInitialized;
     };
 
     Mutex                   mLock;

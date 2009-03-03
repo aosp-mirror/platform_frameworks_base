@@ -1828,7 +1828,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
-        
+    
     private PackageParser.Package scanPackageLI(
         File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
@@ -1925,18 +1925,19 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
     
-            // Just create the setting, don't add it yet
             pkgSetting = mSettings.getPackageLP(pkg, suid, destCodeFile,
-                            destResourceFile, pkg.applicationInfo.flags, true, false);
+                            destResourceFile, pkg.applicationInfo.flags, true);
             if (pkgSetting == null) {
                 Log.w(TAG, "Creating application package " + pkgName + " failed");
                 mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 return null;
             }
-            if(mSettings.mDisabledSysPackages.get(pkg.packageName) != null) {
-                pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+            synchronized(mPackages) {
+                if(mSettings.mDisabledSysPackages.get(pkg.packageName) != null) {
+                    pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+                }
             }
-        
+    
             pkg.applicationInfo.uid = pkgSetting.userId;
             pkg.mExtras = pkgSetting;
     
@@ -1984,11 +1985,23 @@ class PackageManagerService extends IPackageManager.Stub {
         long scanFileTime = scanFile.lastModified();
         final boolean forceDex = (scanMode&SCAN_FORCE_DEX) != 0;
         final boolean scanFileNewer = forceDex || scanFileTime != pkgSetting.getTimeStamp();
+
+        // At this point we know it is okay to accept the package, though
+        // errors can still happen as we try to install...
+
+        if ((scanMode&SCAN_MONITOR) != 0) {
+            pkg.mPath = destCodeFile.getAbsolutePath();
+            mAppDirs.put(pkg.mPath, pkg);
+        }
         pkg.applicationInfo.processName = fixProcessName(
                 pkg.applicationInfo.packageName,
                 pkg.applicationInfo.processName,
                 pkg.applicationInfo.uid);
         pkg.applicationInfo.publicSourceDir = pkgSetting.resourcePathString;
+
+        synchronized (mPackages) {
+            mPackages.put(pkg.applicationInfo.packageName, pkg);
+        }
 
         File dataPath;
         if (mPlatformPackage == pkg) {
@@ -2032,7 +2045,8 @@ class PackageManagerService extends IPackageManager.Stub {
                                     return null;
                                 }
                             }
-                        } 
+                            
+                        }
                         if (!recovered) {
                             mHasSystemUidErrors = true;
                         }
@@ -2064,7 +2078,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
                             pkg.applicationInfo.uid);
                     if(ret < 0) {
-                        // Error from installer
+                        //error from installer
                         mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                         return null;
                     }
@@ -2134,17 +2148,8 @@ class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
         }
 
-        if ((scanMode&SCAN_MONITOR) != 0) {
-            pkg.mPath = destCodeFile.getAbsolutePath();
-            mAppDirs.put(pkg.mPath, pkg);
-        }
-
         synchronized (mPackages) {
-            // We don't expect installation to fail beyond this point
-            // Add the new setting to mSettings
-            mSettings.insertPackageSettingLP(pkgSetting, pkg.packageName, suid);
-            // Add the new setting to mPackages
-            mPackages.put(pkg.applicationInfo.packageName, pkg);          
+            
             int N = pkg.providers.size();
             StringBuilder r = null;
             int i;
@@ -3192,7 +3197,7 @@ class PackageManagerService extends IPackageManager.Stub {
         private final String mRootDir;
         private final boolean mIsRom;
     }
-    
+
     /* Called when a downloaded package installation has been confirmed by the user */
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags) {
@@ -3243,7 +3248,7 @@ class PackageManagerService extends IPackageManager.Stub {
     /*
      * Install a non-existing package.
      */
-    private void installNewPackageLI(String pkgName,
+    private void installNewPackageLI(String pkgName, int parseFlags,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked,
@@ -3267,7 +3272,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         PackageParser.Package newPackage = scanPackageLI(tmpPackageFile, destPackageFile,
-                destResourceFile, pkg, 0,
+                destResourceFile, pkg, parseFlags,
                 SCAN_MONITOR | SCAN_FORCE_DEX
                 | SCAN_UPDATE_SIGNATURE 
                 | (forwardLocked ? SCAN_FORWARD_LOCKED : 0));
@@ -3299,7 +3304,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
     
-    private void replacePackageLI(String pkgName,
+    private void replacePackageLI(String pkgName, int parseFlags,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked,
@@ -3316,15 +3321,16 @@ class PackageManagerService extends IPackageManager.Stub {
         boolean sysPkg = ((deletedPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         if(sysPkg) {
             replaceSystemPackageLI(deletedPackage, 
+                    parseFlags, 
                     tmpPackageFile, destFilePath, 
                     destPackageFile, destResourceFile, pkg, forwardLocked, res);
         } else {
-            replaceNonSystemPackageLI(deletedPackage, tmpPackageFile, destFilePath, 
+            replaceNonSystemPackageLI(deletedPackage, parseFlags, tmpPackageFile, destFilePath, 
                     destPackageFile, destResourceFile, pkg, forwardLocked, res);
         }
     }
     
-    private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
+    private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage, int parseFlags,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked,
@@ -3333,7 +3339,6 @@ class PackageManagerService extends IPackageManager.Stub {
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean updatedSettings = false;
-        int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE;
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, false, PackageManager.DONT_DELETE_DATA,
                 res.removedInfo)) {
@@ -3409,15 +3414,14 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
     
-    private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
+    private void replaceSystemPackageLI(PackageParser.Package deletedPackage, int parseFlags,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked,
             PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
-        int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE |
-                PackageParser.PARSE_IS_SYSTEM;
+        parseFlags |= PackageParser.PARSE_IS_SYSTEM;
         String packageName = deletedPackage.packageName;
         res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
         if (packageName == null) {
@@ -3561,6 +3565,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String pkgName = null;
         boolean forwardLocked = false;
         boolean replacingExistingPackage = false;
+        
         // Result object to be returned
         PackageInstalledInfo res = new PackageInstalledInfo();
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
@@ -3666,13 +3671,13 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             
             if(replacingExistingPackage) {
-                replacePackageLI(pkgName,
+                replacePackageLI(pkgName, pFlags,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
                         pkg, forwardLocked,
                         res);
             } else {
-                installNewPackageLI(pkgName,
+                installNewPackageLI(pkgName, pFlags,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
                         pkg, forwardLocked,
@@ -3997,6 +4002,7 @@ class PackageManagerService extends IPackageManager.Stub {
         File sourceFile = new File(applicationInfo.sourceDir);
         if (!sourceFile.exists()) {
             Log.w(TAG, "Package source " + applicationInfo.sourceDir + " does not exist.");
+            return false;
         }
         outInfo.uid = applicationInfo.uid;
 
@@ -5312,10 +5318,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
         PackageSetting getPackageLP(PackageParser.Package pkg,
                 SharedUserSetting sharedUser, File codePath, File resourcePath,
-                int pkgFlags, boolean create, boolean add) {
+                int pkgFlags, boolean create) {
             final String name = pkg.packageName;
             PackageSetting p = getPackageLP(name, sharedUser, codePath,
-                    resourcePath, pkgFlags, create, add);
+                    resourcePath, pkgFlags, create);
 
             if (p != null) {
                 p.pkg = pkg;
@@ -5446,7 +5452,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private PackageSetting getPackageLP(String name,
                 SharedUserSetting sharedUser, File codePath, File resourcePath,
-                int pkgFlags, boolean create, boolean add) {
+                int pkgFlags, boolean create) {
             PackageSetting p = mPackages.get(name);
             if (p != null) {
                 if (!p.codePath.equals(codePath)) {
@@ -5491,25 +5497,15 @@ class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     p.userId = FIRST_APPLICATION_UID;
                 }
+
                 if (p.userId < 0) {
                     reportSettingsProblem(Log.WARN,
                             "Package " + name + " could not be assigned a valid uid");
                     return null;
                 }
-                if (add) {
-                    // Finish adding new package by adding it and updating shared 
-                    // user preferences
-                    insertPackageSettingLP(p, name, sharedUser);
-                }
+                mPackages.put(name, p);
             }
-            return p;
-        }
-        
-        // Utility method that adds a PackageSetting to mPackages and
-        // completes updating the shared user attributes
-        private void insertPackageSettingLP(PackageSetting p, String name,
-                SharedUserSetting sharedUser) {
-            mPackages.put(name, p);
+
             if (sharedUser != null) {
                 if (p.sharedUser != null && p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.ERROR,
@@ -5519,16 +5515,17 @@ class PackageManagerService extends IPackageManager.Stub {
                     p.sharedUser.packages.remove(p);
                 } else if (p.userId != sharedUser.userId) {
                     reportSettingsProblem(Log.ERROR,
-                        "Package " + p.name + " was user id " + p.userId
-                        + " but is now user " + sharedUser
-                        + " with id " + sharedUser.userId
-                        + "; I am not changing its files so it will probably fail!");
+                            "Package " + p.name + " was user id " + p.userId
+                            + " but is now user " + sharedUser
+                            + " with id " + sharedUser.userId
+                            + "; I am not changing its files so it will probably fail!");
                 }
 
                 sharedUser.packages.add(p);
                 p.sharedUser = sharedUser;
                 p.userId = sharedUser.userId;
             }
+            return p;
         }
 
         private void updateSharedUserPerms (PackageSetting deletedPs) {
@@ -5983,7 +5980,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (idObj != null && idObj instanceof SharedUserSetting) {
                     PackageSetting p = getPackageLP(pp.name,
                             (SharedUserSetting)idObj, pp.codePath, pp.resourcePath,
-                            pp.pkgFlags, true, true);
+                            pp.pkgFlags, true);
                     if (p == null) {
                         Log.w(TAG, "Unable to create application package for "
                                 + pp.name);

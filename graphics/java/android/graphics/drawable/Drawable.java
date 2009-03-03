@@ -739,8 +739,6 @@ public abstract class Drawable {
             if (r != null) {
                ((BitmapDrawable) drawable).setDensityScale(r.getDisplayMetrics());
             }
-        } else if (name.equals("nine-patch")) {
-            drawable = new NinePatchDrawable();
         } else {
             throw new XmlPullParserException(parser.getPositionDescription() +
                     ": invalid drawable tag " + name);

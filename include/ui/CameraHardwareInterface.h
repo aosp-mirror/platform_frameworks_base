@@ -87,9 +87,6 @@ public:
     /** Return the IMemoryHeap for the preview image heap */
     virtual sp<IMemoryHeap>         getPreviewHeap() const = 0;
 
-    /** Return the IMemoryHeap for the raw image heap */
-    virtual sp<IMemoryHeap>         getRawHeap() const = 0;
-
     /**
      * Start preview mode. When a preview image is available
      * preview_callback is called with the user parameter. The

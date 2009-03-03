@@ -70,13 +70,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public byte[] getStatistics() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
-        //Log.i("foo", "SENDING BATTERY INFO:");
-        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo"));
-        Parcel out = Parcel.obtain();
-        mStats.writeToParcel(out, 0);
-        byte[] data = out.marshall();
-        out.recycle();
-        return data;
+        synchronized (mStats) {
+            //Log.i("foo", "SENDING BATTERY INFO:");
+            //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo"));
+            Parcel out = Parcel.obtain();
+            mStats.writeToParcel(out, 0);
+            byte[] data = out.marshall();
+            out.recycle();
+            return data;
+        }
     }
     
     public void noteStartWakelock(int uid, String name, int type) {
@@ -132,20 +134,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteScreenOffLocked();
-        }
-    }
-
-    public void notePhoneOn() {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneOnLocked();
-        }
-    }
-    
-    public void notePhoneOff() {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneOffLocked();
         }
     }
 

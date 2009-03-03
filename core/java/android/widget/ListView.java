@@ -1011,13 +1011,34 @@ public class ListView extends AbsListView {
         if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED ||
                 heightMode == MeasureSpec.UNSPECIFIED)) {
             final View child = obtainView(0);
+            final int childViewType = mAdapter.getItemViewType(0);
 
-            measureScrapChild(child, 0, widthMeasureSpec);
+            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
+            if (lp == null) {
+                lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                child.setLayoutParams(lp);
+            }
+            lp.viewType = childViewType;
+
+            final int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
+                    mListPadding.left + mListPadding.right, lp.width);
+
+            int lpHeight = lp.height;
+
+            int childHeightSpec;
+            if (lpHeight > 0) {
+                childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
+            } else {
+                childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            }
+
+            child.measure(childWidthSpec, childHeightSpec);
 
             childWidth = child.getMeasuredWidth();
             childHeight = child.getMeasuredHeight();
 
-            if (recycleOnMeasure()) {
+            if (mRecycler.shouldRecycleViewType(childViewType)) {
                 mRecycler.addScrapView(child);
             }
         }
@@ -1034,40 +1055,13 @@ public class ListView extends AbsListView {
 
         if (heightMode == MeasureSpec.AT_MOST) {
             // TODO: after first layout we should maybe start at the first visible position, not 0
-            heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
+            heightSize = measureHeightOfChildren(
+                    MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY),
+                    0, NO_POSITION, heightSize, -1);
         }
 
         setMeasuredDimension(widthSize, heightSize);
-        mWidthMeasureSpec = widthMeasureSpec;        
-    }
-
-    private void measureScrapChild(View child, int position, int widthMeasureSpec) {
-        LayoutParams p = (LayoutParams) child.getLayoutParams();
-        if (p == null) {
-            p = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, 0);
-        }
-        p.viewType = mAdapter.getItemViewType(position);
-
-        int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
-                mListPadding.left + mListPadding.right, p.width);
-        int lpHeight = p.height;
-        int childHeightSpec;
-        if (lpHeight > 0) {
-            childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
-        } else {
-            childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        }
-        child.measure(childWidthSpec, childHeightSpec);
-    }
-
-    /**
-     * @return True to recycle the views used to measure this ListView in
-     *         UNSPECIFIED/AT_MOST modes, false otherwise.
-     * @hide
-     */
-    protected boolean recycleOnMeasure() {
-        return true;
+        mWidthMeasureSpec = widthMeasureSpec;
     }
 
     /**
@@ -1096,8 +1090,8 @@ public class ListView extends AbsListView {
      *            startPosition is 0).
      * @return The height of this ListView with the given children.
      */
-    final int measureHeightOfChildren(int widthMeasureSpec, int startPosition, int endPosition,
-            final int maxHeight, int disallowPartialChildPosition) {
+    final int measureHeightOfChildren(final int widthMeasureSpec, final int startPosition,
+            int endPosition, final int maxHeight, int disallowPartialChildPosition) {
 
         final ListAdapter adapter = mAdapter;
         if (adapter == null) {
@@ -1116,20 +1110,29 @@ public class ListView extends AbsListView {
         // mItemCount - 1 since endPosition parameter is inclusive
         endPosition = (endPosition == NO_POSITION) ? adapter.getCount() - 1 : endPosition;
         final AbsListView.RecycleBin recycleBin = mRecycler;
-        final boolean recyle = recycleOnMeasure();
-
         for (i = startPosition; i <= endPosition; ++i) {
             child = obtainView(i);
+            final int childViewType = adapter.getItemViewType(i);
 
-            measureScrapChild(child, i, widthMeasureSpec);
+            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
+            if (lp == null) {
+                lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                child.setLayoutParams(lp);
+            }
+            lp.viewType = childViewType;
 
             if (i > 0) {
                 // Count the divider for all but one child
                 returnedHeight += dividerHeight;
             }
 
+            child.measure(widthMeasureSpec, lp.height >= 0
+                    ? MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY)
+                            : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+
             // Recycle the view before we possibly return from the method
-            if (recyle) {
+            if (recycleBin.shouldRecycleViewType(childViewType)) {
                 recycleBin.addScrapView(child);
             }
 
@@ -1653,7 +1656,7 @@ public class ListView extends AbsListView {
 
         // Respect layout params that are already in the view. Otherwise make some up...
         // noinspection unchecked
-        AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
+        AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
         if (p == null) {
             p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
@@ -1672,7 +1675,7 @@ public class ListView extends AbsListView {
 
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
             if (child instanceof Checkable) {
-                ((Checkable) child).setChecked(mCheckStates.get(position));
+                ((Checkable)child).setChecked(mCheckStates.get(position));
             }
         }
 

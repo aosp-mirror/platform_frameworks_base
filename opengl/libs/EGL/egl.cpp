@@ -50,8 +50,8 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 4
+#define VERSION_MINOR 1
+#define VERSION_MAJOR 4
 static char const * const gVendorString     = "Android";
 static char const * const gVersionString    = "1.31 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
@@ -648,8 +648,8 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     }
 
     if (res == EGL_TRUE) {
-        if (major != NULL) *major = VERSION_MAJOR;
-        if (minor != NULL) *minor = VERSION_MINOR;
+        if (major != NULL) *major = 1;
+        if (minor != NULL) *minor = 2;
         return EGL_TRUE;
     }
     return setError(EGL_NOT_INITIALIZED, EGL_FALSE);

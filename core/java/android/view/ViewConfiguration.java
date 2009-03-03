@@ -56,7 +56,7 @@ public class ViewConfiguration {
     
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event 
-     * is a tap or a scroll. If the user does not move within this interval, it is
+     * is a top or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
     private static final int TAP_TIMEOUT = 100;
@@ -213,7 +213,7 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return the length of the fading edges in pixels
+     * @return Defines the length of the fading edges in pixels
      *
      * @deprecated Use {@link #getScaledFadingEdgeLength()} instead.
      */
@@ -223,14 +223,14 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return the length of the fading edges in pixels
+     * @return Defines the length of the fading edges in pixels
      */
     public int getScaledFadingEdgeLength() {
         return mFadingEdgeLength;
     }
 
     /**
-     * @return the duration in milliseconds of the pressed state in child
+     * @return Defines the duration in milliseconds of the pressed state in child
      * components.
      */
     public static int getPressedStateDuration() {
@@ -238,7 +238,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return the duration in milliseconds before a press turns into
+     * @return Defines the duration in milliseconds before a press turns into
      * a long press
      */
     public static int getLongPressTimeout() {
@@ -246,8 +246,8 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return the duration in milliseconds we will wait to see if a touch event
-     * is a tap or a scroll. If the user does not move within this interval, it is
+     * @return Defines the duration in milliseconds we will wait to see if a touch event 
+     * is a top or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
     public static int getTapTimeout() {
@@ -255,7 +255,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return the duration in milliseconds we will wait to see if a touch event
+     * @return Defines the duration in milliseconds we will wait to see if a touch event 
      * is a jump tap. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
@@ -264,7 +264,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return the duration in milliseconds between the first tap's up event and
+     * @return Defines the duration in milliseconds between the first tap's up event and
      * the second tap's down event for an interaction to be considered a
      * double-tap.
      * @hide pending API council

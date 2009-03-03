@@ -688,33 +688,15 @@ static jint android_media_AudioTrack_reload(JNIEnv *env,  jobject thiz) {
 
 
 // ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobject thiz,
-        jint javaStreamType) {
-    int afSamplingRate;
-    // convert the stream type from Java to native value
-    // FIXME: code duplication with android_media_AudioTrack_native_setup()
-    AudioSystem::stream_type nativeStreamType;
-    if (javaStreamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        nativeStreamType = AudioSystem::VOICE_CALL;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        nativeStreamType = AudioSystem::SYSTEM;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_RING) {
-        nativeStreamType = AudioSystem::RING;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_MUSIC) {
-        nativeStreamType = AudioSystem::MUSIC;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_ALARM) {
-        nativeStreamType = AudioSystem::ALARM;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        nativeStreamType = AudioSystem::NOTIFICATION;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        nativeStreamType = AudioSystem::BLUETOOTH_SCO;
-    } else {
-        nativeStreamType = AudioSystem::DEFAULT;
+static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobject thiz) {
+    int afSamplingRate;    
+    AudioTrackJniStorage* lpJniStorage = (AudioTrackJniStorage *)env->GetIntField(
+        thiz, javaAudioTrackFields.jniData);
+    if (lpJniStorage == NULL) {
+        return DEFAULT_OUTPUT_SAMPLE_RATE;
     }
 
-    if (AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType) != NO_ERROR) {
-        LOGE("AudioSystem::getOutputSamplingRate() for stream type %d failed in AudioTrack JNI",
-            nativeStreamType);
+    if (AudioSystem::getOutputSamplingRate(&afSamplingRate, lpJniStorage->mStreamType) != NO_ERROR) {
         return DEFAULT_OUTPUT_SAMPLE_RATE;
     } else {
         return afSamplingRate;
@@ -784,7 +766,7 @@ static JNINativeMethod gMethods[] = {
     {"native_set_loop",      "(III)I",   (void *)android_media_AudioTrack_set_loop},
     {"native_reload_static", "()I",      (void *)android_media_AudioTrack_reload},
     {"native_get_output_sample_rate",
-                             "(I)I",      (void *)android_media_AudioTrack_get_output_sample_rate},
+                             "()I",      (void *)android_media_AudioTrack_get_output_sample_rate},
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioTrack_get_min_buff_size},
 };

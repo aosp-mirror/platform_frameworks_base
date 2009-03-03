@@ -721,7 +721,6 @@ static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
 #define BOND_RESULT_AUTH_REJECTED 2
 #define BOND_RESULT_AUTH_CANCELED 3
 #define BOND_RESULT_REMOTE_DEVICE_DOWN 4
-#define BOND_RESULT_DISCOVERY_IN_PROGRESS 5
 void onCreateBondingResult(DBusMessage *msg, void *user) {
     LOGV(__FUNCTION__);
 
@@ -756,14 +755,10 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
             // already bonded
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_SUCCESS;
-        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress") &&
-                   !strcmp(err.message, "Bonding in progress")) {
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress")) {
+            // don't make the java callback
             LOGV("... error = %s (%s)\n", err.name, err.message);
             goto done;
-        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress") &&
-                   !strcmp(err.message, "Discover in progress")) {
-            LOGV("... error = %s (%s)\n", err.name, err.message);
-            result = BOND_RESULT_DISCOVERY_IN_PROGRESS;
         } else {
             LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
             result = BOND_RESULT_ERROR;

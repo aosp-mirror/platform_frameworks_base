@@ -25,100 +25,17 @@ public class EditorInfo implements InputType, Parcelable {
     public int inputType = TYPE_NULL;
 
     /**
-     * Set of bits in {@link #imeOptions} that provide alternative actions
-     * associated with the "enter" key.  This both helps the IME provide
-     * better feedback about what the enter key will do, and also allows it
-     * to provide alternative mechanisms for providing that command.
-     */
-    public static final int IME_MASK_ACTION = 0x000000ff;
-    
-    /**
-     * Bits of {@link #IME_MASK_ACTION}: there is no special action
-     * associated with this editor.
-     */
-    public static final int IME_ACTION_NONE = 0x00000000;
-    
-    /**
-     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "go"
-     * operation to take the user to the target of the text they typed.
-     * Typically used, for example, when entering a URL.
-     */
-    public static final int IME_ACTION_GO = 0x00000001;
-    
-    /**
-     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "search"
-     * operation, taking the user to the results of searching for the text
-     * the have typed (in whatever context is appropriate).
-     */
-    public static final int IME_ACTION_SEARCH = 0x00000002;
-    
-    /**
-     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "send"
-     * operation, delivering the text to its target.  This is typically used
-     * when composing a message.
-     */
-    public static final int IME_ACTION_SEND = 0x00000003;
-    
-    /**
-     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "next"
-     * operation, taking the user to the next field that will accept text.
-     */
-    public static final int IME_ACTION_NEXT = 0x00000004;
-    
-    /**
-     * Flag of {@link #imeOptions}: used in conjunction with
-     * {@link #IME_MASK_ACTION}, this indicates that the action should not
-     * be available in-line as the same as a "enter" key.  Typically this is
-     * because the action has such a significant impact or is not recoverable
-     * enough that accidentally hitting it should be avoided, such as sending
-     * a message.
-     */
-    public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
-    
-    /**
-     * Generic non-special type for {@link #imeOptions}.
-     */
-    public static final int IME_NORMAL = 0x00000000;
-    
-    /**
-     * Special code for when the ime option has been undefined.  This is not
-     * used with the EditorInfo structure, but can be used elsewhere.
-     */
-    public static final int IME_UNDEFINED = 0x80000000;
-    
-    /**
-     * Extended type information for the editor, to help the IME better
-     * integrate with it.
-     */
-    public int imeOptions = IME_NORMAL;
-    
-    /**
-     * A string supplying additional information options that are
-     * private to a particular IME implementation.  The string must be
+     * A string supplying additional information about the content type that
+     * is private to a particular IME implementation.  The string must be
      * scoped to a package owned by the implementation, to ensure there are
      * no conflicts between implementations, but other than that you can put
      * whatever you want in it to communicate with the IME.  For example,
      * you could have a string that supplies an argument like
      * <code>"com.example.myapp.SpecialMode=3"</code>.  This field is can be
-     * filled in from the {@link android.R.attr#privateImeOptions}
+     * filled in from the {@link android.R.attr#editorPrivateContentType}
      * attribute of a TextView.
      */
-    public String privateImeOptions = null;
-    
-    /**
-     * In some cases an IME may be able to display an arbitrary label for
-     * a command the user can perform, which you can specify here.  You can
-     * not count on this being used.
-     */
-    public CharSequence actionLabel = null;
-    
-    /**
-     * If {@link #actionLabel} has been given, this is the id for that command
-     * when the user presses its button that is delivered back with
-     * {@link InputConnection#performEditorAction(int)
-     * InputConnection.performEditorAction()}.
-     */
-    public int actionId = 0;
+    public String privateContentType = null;
     
     /**
      * The text offset of the start of the selection at the time editing
@@ -189,10 +106,7 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "inputType=0x" + Integer.toHexString(inputType)
-                + " imeOptions=0x" + Integer.toHexString(imeOptions)
-                + " privateImeOptions=" + privateImeOptions);
-        pw.println(prefix + "actionLabel=" + actionLabel
-                + " actionId=" + actionId);
+                + " privateContentType=" + privateContentType);
         pw.println(prefix + "initialSelStart=" + initialSelStart
                 + " initialSelEnd=" + initialSelEnd
                 + " initialCapsMode=0x"
@@ -213,10 +127,7 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(inputType);
-        dest.writeInt(imeOptions);
-        dest.writeString(privateImeOptions);
-        TextUtils.writeToParcel(actionLabel, dest, flags);
-        dest.writeInt(actionId);
+        dest.writeString(privateContentType);
         dest.writeInt(initialSelStart);
         dest.writeInt(initialSelEnd);
         dest.writeInt(initialCapsMode);
@@ -235,10 +146,7 @@ public class EditorInfo implements InputType, Parcelable {
         public EditorInfo createFromParcel(Parcel source) {
             EditorInfo res = new EditorInfo();
             res.inputType = source.readInt();
-            res.imeOptions = source.readInt();
-            res.privateImeOptions = source.readString();
-            res.actionLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            res.actionId = source.readInt();
+            res.privateContentType = source.readString();
             res.initialSelStart = source.readInt();
             res.initialSelEnd = source.readInt();
             res.initialCapsMode = source.readInt();

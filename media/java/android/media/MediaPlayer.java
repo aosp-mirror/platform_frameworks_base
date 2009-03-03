@@ -584,21 +584,14 @@ public class MediaPlayer
             return;
         }
 
-        AssetFileDescriptor fd = null;
+        ParcelFileDescriptor fd = null;
         try {
             ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openAssetFileDescriptor(uri, "r");
+            fd = resolver.openFileDescriptor(uri, "r");
             if (fd == null) {
                 return;
             }
-            // Note: using getDeclaredLength so that our behavior is the same
-            // as previous versions when the content provider is returning
-            // a full file.
-            if (fd.getDeclaredLength() < 0) {
-                setDataSource(fd.getFileDescriptor());
-            } else {
-                setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
-            }
+            setDataSource(fd.getFileDescriptor());
             return;
         } catch (SecurityException ex) {
         } catch (IOException ex) {

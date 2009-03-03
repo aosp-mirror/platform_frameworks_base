@@ -24,7 +24,6 @@ namespace android {
 
 class ISurface;
 class ICamera;
-class IMediaPlayerClient;
 
 class IMediaRecorder: public IInterface
 {
@@ -42,7 +41,6 @@ public:
     virtual	status_t		setOutputFile(int fd, int64_t offset, int64_t length) = 0;
     virtual	status_t		setVideoSize(int width, int height) = 0;
     virtual	status_t		setVideoFrameRate(int frames_per_second) = 0;
-    virtual     status_t                setListener(const sp<IMediaPlayerClient>& listener) = 0;
     virtual	status_t		prepare() = 0;
     virtual	status_t		getMaxAmplitude(int* max) = 0;
     virtual	status_t		start() = 0;

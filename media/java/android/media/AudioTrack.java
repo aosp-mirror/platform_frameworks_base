@@ -436,15 +436,6 @@ public class AudioTrack
     public int getSampleRate() {
         return mSampleRate;
     }
-    
-    /**
-     * @hide
-     * Returns the current playback rate in Hz. Note that this rate may differ from one set using
-     * {@link #setPlaybackRate(int)} as the value effectively set is implementation-dependent.
-     */
-    public int getPlaybackRate() {
-        return native_get_playback_rate();
-    }
 
     /**
      * Returns the configured audio data format. See {@link AudioFormat#ENCODING_PCM_16BIT}
@@ -532,8 +523,8 @@ public class AudioTrack
     /**
      *  Returns the hardware output sample rate
      */
-    static public int getNativeOutputSampleRate(int streamType) {
-        return native_get_output_sample_rate(streamType);
+    static public int getNativeOutputSampleRate() {
+        return native_get_output_sample_rate();
     }
     
     /**
@@ -659,18 +650,15 @@ public class AudioTrack
      * content. Setting it to half the sample rate of the content will cause the playback to
      * last twice as long, but will also result result in a negative pitch shift.
      * The current implementation supports a maximum sample rate of twice the hardware output
-     * sample rate (see {@link #getNativeOutputSampleRate(int)}). Use {@link #getSampleRate()} to
+     * sample rate (see {@link #getNativeOutputSampleRate()}). Use {@link #getSampleRate()} to
      * check the rate actually used in hardware after potential clamping.
      * @param sampleRateInHz
-     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+     * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setPlaybackRate(int sampleRateInHz) {
         if (mState != STATE_INITIALIZED) {
             return ERROR_INVALID_OPERATION;
-        }
-        if (sampleRateInHz <= 0) {
-            return ERROR_BAD_VALUE;
         }
         native_set_playback_rate(sampleRateInHz);
         return SUCCESS;
@@ -711,7 +699,7 @@ public class AudioTrack
      */
     public int setPlaybackHeadPosition(int positionInFrames) {
         synchronized(mPlayStateLock) {
-            if ((mPlayState == PLAYSTATE_STOPPED) || (mPlayState == PLAYSTATE_PAUSED)) {
+            if(mPlayState == PLAYSTATE_STOPPED) {
                 return native_set_position(positionInFrames);
             } else {
                 return ERROR_INVALID_OPERATION;
@@ -729,9 +717,6 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setLoopPoints(int startInFrames, int endInFrames, int loopCount) {
-        if (mDataLoadMode == MODE_STREAM) {
-            return ERROR_INVALID_OPERATION;
-        }
         return native_set_loop(startInFrames, endInFrames, loopCount);
     }
 
@@ -821,9 +806,8 @@ public class AudioTrack
      * @param audioData the array that holds the data to play.
      * @param offsetInBytes the offset in audioData where the data to play starts.
      * @param sizeInBytes the number of bytes to read in audioData after the offset.
-     * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
+     * @return the number of bytes that were written or -1 if the object wasn't properly
+     *    initialized.
      */
 
     public int write(byte[] audioData,int offsetInBytes, int sizeInBytes) {
@@ -832,14 +816,11 @@ public class AudioTrack
                 && (sizeInBytes > 0)) {
             mState = STATE_INITIALIZED;
         }
+        //TODO check if future writes should be forbidden for static tracks
+        //     or: how to update data for static tracks?
 
         if (mState != STATE_INITIALIZED) {
-            return ERROR_INVALID_OPERATION;
-        }
-
-        if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0) 
-                || (offsetInBytes + sizeInBytes > audioData.length)) {
-            return ERROR_BAD_VALUE;
+            return -1;
         }
 
         return native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat);
@@ -851,9 +832,8 @@ public class AudioTrack
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset in audioData where the data to play starts.
      * @param sizeInShorts the number of bytes to read in audioData after the offset.
-     * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
-      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-      *    the parameters don't resolve to valid data and indexes.
+     * @return the number of shorts that were written or -1 if the object wasn't properly
+     *    initialized.
      */
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
@@ -862,14 +842,11 @@ public class AudioTrack
                 && (sizeInShorts > 0)) {
             mState = STATE_INITIALIZED;
         }
-        
-        if (mState != STATE_INITIALIZED) {
-            return ERROR_INVALID_OPERATION;
-        }
+        //TODO check if future writes should be forbidden for static tracks
+        //     or: how to update data for static tracks?
 
-        if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0) 
-                || (offsetInShorts + sizeInShorts > audioData.length)) {
-            return ERROR_BAD_VALUE;
+        if (mState != STATE_INITIALIZED) {
+            return -1;
         }
 
         return native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
@@ -1030,7 +1007,7 @@ public class AudioTrack
 
     private native final int native_set_loop(int start, int end, int loopCount);
 
-    static private native final int native_get_output_sample_rate(int streamType);
+    static private native final int native_get_output_sample_rate();
     static private native final int native_get_min_buff_size(
             int sampleRateInHz, int channelConfig, int audioFormat);
 

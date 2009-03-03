@@ -19,7 +19,6 @@ package android.gadget;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -63,11 +62,7 @@ public class GadgetHost {
         }
     }
 
-    class UpdateHandler extends Handler {
-        public UpdateHandler(Looper looper) {
-            super(looper);
-        }
-        
+    Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case HANDLE_UPDATE: {
@@ -80,9 +75,7 @@ public class GadgetHost {
                 }
             }
         }
-    }
-    
-    Handler mHandler;
+    };
 
     int mHostId;
     Callbacks mCallbacks = new Callbacks();
@@ -91,7 +84,6 @@ public class GadgetHost {
     public GadgetHost(Context context, int hostId) {
         mContext = context;
         mHostId = hostId;
-        mHandler = new UpdateHandler(context.getMainLooper());
         synchronized (sServiceLock) {
             if (sService == null) {
                 IBinder b = ServiceManager.getService(Context.GADGET_SERVICE);

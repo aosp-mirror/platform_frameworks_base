@@ -110,8 +110,6 @@ sp<Camera> Camera::connect()
     if (c->mCamera != 0) {
         c->mCamera->asBinder()->linkToDeath(c);
         c->mStatus = NO_ERROR;
-    } else {
-        c.clear();
     }
     return c;
 }

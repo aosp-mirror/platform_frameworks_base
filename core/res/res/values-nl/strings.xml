@@ -40,7 +40,7 @@
     <string name="mismatchPin">"De PIN-codes die u heeft ingevoerd, komen niet overeen."</string>
     <string name="invalidPin">"Voer een PIN-code van 4 tot 8 cijfers in."</string>
     <string name="needPuk">"Uw SIM-kaart is geblokkeerd met de PUK-code. Typ de PUK-code om de blokkering op te heffen."</string>
-    <string name="needPuk2">"Voer de PUK2-code in om de SIM-kaart te ontgrendelen."</string>
+    <string name="needPuk2">"Voer de PUK2-code in om de SIM-kaart te deblokkeren."</string>
     <string name="ClipMmi">"Inkomende beller-id"</string>
     <string name="ClirMmi">"Uitgaande beller-id"</string>
     <string name="CfMmi">"Oproep doorschakelen"</string>
@@ -103,21 +103,13 @@
     <string name="global_action_toggle_silent_mode">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status">"Geluid is AAN"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
     <string name="safeMode">"Veilige modus"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
     <string name="permgrouplab_costMoney">"Services waarvoor u moet betalen"</string>
     <string name="permgroupdesc_costMoney">"Toepassingen toestaan activiteiten uit te voeren waarvoor mogelijk kosten in rekening worden gebracht."</string>
     <string name="permgrouplab_messages">"Uw berichten"</string>
     <string name="permgroupdesc_messages">"SMS, e-mail en andere berichten lezen en schrijven."</string>
     <string name="permgrouplab_personalInfo">"Uw persoonlijke informatie"</string>
-    <string name="permgroupdesc_personalInfo">"Rechtstreekse toegang tot de op uw telefoon opgeslagen contacten en agenda."</string>
+    <string name="permgroupdesc_personalInfo">"Rechtstreekse toegang tot de op uw telefoon opgeslagen contactpersonen en agenda."</string>
     <string name="permgrouplab_location">"Uw locatie"</string>
     <string name="permgroupdesc_location">"Uw fysieke locatie bijhouden"</string>
     <string name="permgrouplab_network">"Netwerkcommunicatie"</string>
@@ -162,7 +154,7 @@
     <string name="permdesc_restartPackages">"Hiermee kan een toepassing andere toepassingen opnieuw starten."</string>
     <string name="permlab_setProcessForeground">"stoppen voorkomen"</string>
     <string name="permdesc_setProcessForeground">"Hiermee kan een toepassing ervoor zorgen dat elk willekeurig proces op de voorgrond wordt uitgevoerd en dus niet kan worden afgesloten. Nooit vereist voor normale toepassingen."</string>
-    <string name="permlab_forceBack">"toepassing nu sluiten"</string>
+    <string name="permlab_forceBack">"toepassing gedwongen sluiten"</string>
     <string name="permdesc_forceBack">"Hiermee kan een toepassing elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_dump">"interne systeemstatus ophalen"</string>
     <string name="permdesc_dump">"Hiermee kan een toepassing de interne status van het systeem ophalen. Schadelijke toepassingen kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
@@ -266,8 +258,8 @@
     <string name="permdesc_camera">"Hiermee kan een toepassing foto\'s maken met de camera. De toepassing kan op deze manier op elk gewenste moment foto\'s verzamelen van wat de camera ziet."</string>
     <string name="permlab_brick">"telefoon permanent uitschakelen"</string>
     <string name="permdesc_brick">"Hiermee kan de toepassing de telefoon permanent uitschakelen. Dit is erg gevaarlijk."</string>
-    <string name="permlab_reboot">"telefoon nu opnieuw opstarten"</string>
-    <string name="permdesc_reboot">"Hiermee kan de toepassing de telefoon nu opnieuw opstarten."</string>
+    <string name="permlab_reboot">"telefoon gedwongen opnieuw opstarten"</string>
+    <string name="permdesc_reboot">"Hiermee kan de toepassing de telefoon gedwongen opnieuw opstarten."</string>
     <string name="permlab_mount_unmount_filesystems">"bestandssystemen koppelen en ontkoppelen"</string>
     <string name="permdesc_mount_unmount_filesystems">"Hiermee kan de toepassing bestandssystemen koppelen en ontkoppelen voor verwisselbare opslagruimte."</string>
     <string name="permlab_mount_format_filesystems">"externe opslag formatteren"</string>
@@ -329,9 +321,9 @@
     <string name="permlab_disableKeyguard">"toetsblokkering uitschakelen"</string>
     <string name="permdesc_disableKeyguard">"Hiermee kan een toepassing de toetsblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Een voorbeeld: de telefoon schakelt de toetsblokkering uit als er een oproep binnenkomt en schakelt de toetsblokkering weer in als de oproep is beëindigd."</string>
     <string name="permlab_readSyncSettings">"synchronisatie-instellingen lezen"</string>
-    <string name="permdesc_readSyncSettings">"Hiermee kan een toepassing de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permdesc_readSyncSettings">"Hiermee kan een toepassing de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contactpersonen is ingeschakeld."</string>
     <string name="permlab_writeSyncSettings">"synchronisatie-instellingen schrijven"</string>
-    <string name="permdesc_writeSyncSettings">"Hiermee kan een toepassing uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permdesc_writeSyncSettings">"Hiermee kan een toepassing uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van contactpersonen is ingeschakeld."</string>
     <string name="permlab_readSyncStats">"synchronisatiestatistieken lezen"</string>
     <string name="permdesc_readSyncStats">"Hiermee kan een toepassing de synchronisatiestatistieken lezen, zoals de geschiedenis van uitgevoerde synchronisaties."</string>
     <string name="permlab_subscribedFeedsRead">"geabonneerde feeds lezen"</string>
@@ -387,18 +379,17 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"PIN-code invoeren"</string>
     <string name="keyguard_password_wrong_pin_code">"Onjuiste PIN-code!"</string>
-    <string name="keyguard_label_text">"Druk op \'Menu\' en vervolgens op 0 om te ontgrendelen."</string>
+    <string name="keyguard_label_text">"Druk op \'Menu\' en vervolgens op 0 om te deblokkeren."</string>
     <string name="emergency_call_dialog_number_for_display">"Alarmnummer"</string>
     <string name="lockscreen_carrier_default">"(Geen service)"</string>
     <string name="lockscreen_screen_locked">"Scherm geblokkeerd."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Druk op \'Menu\' om te ontgrendelen of noodoproep te plaatsen."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Druk op \'Menu\' om te ontgrendelen."</string>
-    <string name="lockscreen_pattern_instructions">"Patroon tekenen om te ontgrendelen"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Druk op \'Menu\' om te deblokkeren of noodoproep te plaatsen."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Druk op \'Menu\' om te deblokkeren."</string>
+    <string name="lockscreen_pattern_instructions">"Patroon tekenen om te deblokkeren"</string>
     <string name="lockscreen_emergency_call">"Noodoproep"</string>
     <string name="lockscreen_pattern_correct">"Juist!"</string>
     <string name="lockscreen_pattern_wrong">"Probeer het opnieuw"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Opladen (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Sluit de oplader aan."</string>
     <string name="lockscreen_missing_sim_message_short">"Geen SIM-kaart."</string>
     <string name="lockscreen_missing_sim_message">"Geen SIM-kaart in telefoon."</string>
@@ -407,13 +398,13 @@
     <string name="lockscreen_sim_puk_locked_message">"SIM-kaart is geblokkeerd met PUK-code."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Neem contact op met de klantenservice."</string>
     <string name="lockscreen_sim_locked_message">"SIM-kaart is geblokkeerd."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-kaart ontgrendelen..."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-kaart deblokkeren..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen, wordt u gevraagd om uw telefoon te ontgrendelen met uw Google aanmelding."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen, wordt u gevraagd om uw telefoon te deblokkeren met uw Google aanmelding."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Patroon vergeten?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Te veel patroonpogingen!"</string>
-    <string name="lockscreen_glogin_instructions">"U moet zich aanmelden bij uw Google-account"\n"om te ontgrendelen"</string>
+    <string name="lockscreen_glogin_instructions">"U moet zich aanmelden bij uw Google-account"\n"om te deblokkeren"</string>
     <string name="lockscreen_glogin_username_hint">"Gebruikersnaam (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button">"Aanmelden"</string>
@@ -421,15 +412,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
     <skip />
     <string name="status_bar_clear_all_button">"Meldingen wissen"</string>
     <string name="status_bar_no_notifications_title">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title">"Actief"</string>
     <string name="status_bar_latest_events_title">"Meldingen"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
+    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
     <skip />
     <string name="battery_status_charging">"Opladen..."</string>
     <string name="battery_low_title">"Sluit de oplader aan"</string>
@@ -578,12 +569,12 @@
     <string name="Noon">"Twaalf uur \'s middags"</string>
     <string name="midnight">"middernacht"</string>
     <string name="Midnight">"Middernacht"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
+    <!-- no translation found for month_day (5565829181417740906) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
+    <!-- no translation found for month_year (9219019380312413367) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -612,11 +603,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
+    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
+    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Zondag"</string>
     <string name="day_of_week_long_monday">"Maandag"</string>
@@ -701,7 +692,7 @@
     <string name="paste">"Plakken"</string>
     <string name="copyUrl">"URL kopiëren"</string>
     <string name="inputMethod">"Invoermethode"</string>
-    <string name="addToDictionary">"%s\' toevoegen aan woordenboek"</string>
+    <string name="addToDictionary">"\'%s\' toevoegen aan woordenboek"</string>
     <string name="editTextMenuTitle">"Tekst bewerken"</string>
     <string name="low_internal_storage_view_title">"Weinig ruimte"</string>
     <string name="low_internal_storage_view_text">"Opslagruimte van telefoon raakt op."</string>
@@ -725,7 +716,7 @@
     <string name="anr_activity_process">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
     <string name="anr_application_process">"Toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet."</string>
-    <string name="force_close">"Nu sluiten"</string>
+    <string name="force_close">"Gedwongen sluiten"</string>
     <string name="wait">"Wachten"</string>
     <string name="debug">"Foutopsporing"</string>
     <string name="sendText">"Selecteer een actie voor tekst"</string>
@@ -780,8 +771,8 @@
     <string name="extmedia_format_message">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
     <string name="extmedia_format_button_format">"Formatteren"</string>
     <string name="select_input_method">"Invoermethode selecteren"</string>
-    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"kandidaten"</u></string>
     <string name="ext_media_checking_notification_title">"SD-kaart voorbereiden"</string>
     <string name="ext_media_checking_notification_message">"Controleren op fouten"</string>
@@ -798,18 +789,6 @@
     <string name="activity_list_empty">"Geen overeenkomende activiteiten gevonden"</string>
     <string name="permlab_pkgUsageStats">"gebruiksstatistieken van component bijwerken"</string>
     <string name="permdesc_pkgUsageStats">"Hiermee kunnen verzamelde gebruiksstatistieken van een component worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
     <skip />
 </resources>

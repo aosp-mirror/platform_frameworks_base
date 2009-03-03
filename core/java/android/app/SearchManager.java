@@ -747,14 +747,6 @@ import android.view.KeyEvent;
  *             <a href="../R.attr.html#inputType">inputType</a> attribute.</td>
  *         <td align="center">No</td>
  *     </tr>
- *     <tr><th>android:imeOptions</th>
- *         <td>If provided, supplies additional options for the input method.
- *             For most searches, in which free form text is expected, this attribute
- *             need not be provided, and will default to "actionSearch".
- *             Suitable values for this attribute are described in the
- *             <a href="../R.attr.html#imeOptions">imeOptions</a> attribute.</td>
- *         <td align="center">No</td>
- *     </tr>
  *     
  *     </tbody>
  * </table>

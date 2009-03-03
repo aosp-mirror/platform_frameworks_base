@@ -704,7 +704,7 @@
     <permission android:name="android.permission.STATUS_BAR"
         android:label="@string/permlab_statusBar"
         android:description="@string/permdesc_statusBar"
-        android:protectionLevel="signatureOrSystem" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to force any currently running process to be
          in the foreground. -->

@@ -25,7 +25,6 @@ import android.os.Hardware;
 import android.os.IHardwareService;
 import android.os.Power;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Binder;
@@ -241,7 +240,6 @@ public class HardwareService extends IHardwareService.Stub {
         }
 
         public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             synchronized (this) {
                 int index = 0;
                 long[] pattern = mPattern;
