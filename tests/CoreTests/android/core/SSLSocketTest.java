@@ -19,9 +19,13 @@ package android.core;
 import junit.framework.TestCase;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
+import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,18 +33,28 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.KeyStore;
+import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * SSL integration tests that hit real servers.
+ */
 public class SSLSocketTest extends TestCase {
 
     private static SSLSocketFactory clientFactory =
@@ -61,13 +75,15 @@ public class SSLSocketTest extends TestCase {
      * @param delay     The delay after each request (in seconds).
      * @throws IOException When a problem occurs.
      */
-    private void fetch(String host, int port, boolean secure, String path,
-            int outerLoop, int innerLoop, int delay, int timeout) throws IOException {
+    private void fetch(SSLSocketFactory socketFactory, String host, int port,
+            boolean secure, String path, int outerLoop, int innerLoop,
+            int delay, int timeout) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, port);
 
         for (int i = 0; i < outerLoop; i++) {
             // Connect to the remote host
-            Socket socket = secure ? clientFactory.createSocket() : new Socket();
+            Socket socket = secure ? socketFactory.createSocket()
+                    : new Socket();
             if (timeout >= 0) {
                 socket.setKeepAlive(true);
                 socket.setSoTimeout(timeout * 1000);
@@ -156,6 +172,16 @@ public class SSLSocketTest extends TestCase {
             // Close the connection
             socket.close();
         }
+    }
+
+    /**
+     * Invokes fetch() with the default socket factory.
+     */
+    private void fetch(String host, int port, boolean secure, String path,
+            int outerLoop, int innerLoop,
+            int delay, int timeout) throws IOException {
+        fetch(clientFactory, host, port, secure, path, outerLoop, innerLoop,
+                delay, timeout);
     }
 
     /**
@@ -619,13 +645,17 @@ public class SSLSocketTest extends TestCase {
         
         public void run() {
             try {
-                KeyManager[] keyManagers = provideKeys ? getKeyManagers(SERVER_KEYS_BKS) : null;
-                TrustManager[] trustManagers = new TrustManager[] { trustManager };
+                KeyManager[] keyManagers = provideKeys
+                        ? getKeyManagers(SERVER_KEYS_BKS) : null;
+                TrustManager[] trustManagers = new TrustManager[] {
+                        trustManager };
 
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(keyManagers, trustManagers, null);
                 
-                SSLServerSocket serverSocket = (SSLServerSocket)sslContext.getServerSocketFactory().createServerSocket();
+                SSLServerSocket serverSocket
+                        = (SSLServerSocket) sslContext.getServerSocketFactory()
+                        .createServerSocket();
                 
                 if (clientAuth == CLIENT_AUTH_WANTED) {
                     serverSocket.setWantClientAuth(true);
@@ -637,14 +667,15 @@ public class SSLSocketTest extends TestCase {
                 
                 serverSocket.bind(new InetSocketAddress(port));
                 
-                SSLSocket clientSocket = (SSLSocket)serverSocket.accept();
+                SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
 
                 InputStream stream = clientSocket.getInputStream();
 
                 for (int i = 0; i < 256; i++) {
                     int j = stream.read();
                     if (i != j) {
-                        throw new RuntimeException("Error reading socket, expected " + i + ", got " + j);
+                        throw new RuntimeException("Error reading socket,"
+                                + " expected " + i + ", got " + j);
                     }
                 }
                 
@@ -690,13 +721,16 @@ public class SSLSocketTest extends TestCase {
         
         public void run() {
             try {
-                KeyManager[] keyManagers = provideKeys ? getKeyManagers(CLIENT_KEYS_BKS) : null;
-                TrustManager[] trustManagers = new TrustManager[] { trustManager };
+                KeyManager[] keyManagers = provideKeys
+                        ? getKeyManagers(CLIENT_KEYS_BKS) : null;
+                TrustManager[] trustManagers = new TrustManager[] {
+                        trustManager };
 
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(keyManagers, trustManagers, null);
                 
-                SSLSocket socket = (SSLSocket)sslContext.getSocketFactory().createSocket();
+                SSLSocket socket = (SSLSocket) sslContext.getSocketFactory()
+                        .createSocket();
 
                 socket.connect(new InetSocketAddress(port));
                 socket.startHandshake();
@@ -867,6 +901,189 @@ public class SSLSocketTest extends TestCase {
             fail("SSL handshake should have failed.");
         }
     }
-    
-    
+
+    /**
+     * Tests our in-memory and persistent caching support.
+     */
+    public void testClientSessionCaching() throws IOException,
+            KeyManagementException {
+        SSLContextImpl context = new SSLContextImpl();
+
+        // Cache size = 2.
+        FakeClientSessionCache fakeCache = new FakeClientSessionCache();
+        context.engineInit(null, null, null, fakeCache, null);
+        SSLSocketFactory socketFactory = context.engineGetSocketFactory();
+        context.engineGetClientSessionContext().setSessionCacheSize(2);
+        makeRequests(socketFactory);
+        List<String> smallCacheOps = Arrays.asList(
+                "get www.fortify.net",
+                "put www.fortify.net",
+                "get www.paypal.com",
+                "put www.paypal.com",
+                "get www.yellownet.ch",
+                "put www.yellownet.ch",
+
+                // At this point, all in-memory cache requests should miss,
+                // but the sessions will still be in the persistent cache.
+                "get www.fortify.net",
+                "get www.paypal.com",
+                "get www.yellownet.ch"
+        );
+        assertEquals(smallCacheOps, fakeCache.ops);
+
+        // Cache size = 3.
+        fakeCache = new FakeClientSessionCache();
+        context.engineInit(null, null, null, fakeCache, null);
+        socketFactory = context.engineGetSocketFactory();
+        context.engineGetClientSessionContext().setSessionCacheSize(3);
+        makeRequests(socketFactory);
+        List<String> bigCacheOps = Arrays.asList(
+                "get www.fortify.net",
+                "put www.fortify.net",
+                "get www.paypal.com",
+                "put www.paypal.com",
+                "get www.yellownet.ch",
+                "put www.yellownet.ch"
+
+                // At this point, all results should be in the in-memory
+                // cache, and the persistent cache shouldn't be hit anymore.
+        );
+        assertEquals(bigCacheOps, fakeCache.ops);
+
+        // Cache size = 4.
+        fakeCache = new FakeClientSessionCache();
+        context.engineInit(null, null, null, fakeCache, null);
+        socketFactory = context.engineGetSocketFactory();
+        context.engineGetClientSessionContext().setSessionCacheSize(4);
+        makeRequests(socketFactory);
+        assertEquals(bigCacheOps, fakeCache.ops);
+    }
+
+    /**
+     * Executes sequence of requests twice using given socket factory.
+     */
+    private void makeRequests(SSLSocketFactory socketFactory)
+            throws IOException {
+        for (int i = 0; i < 2; i++) {
+            fetch(socketFactory, "www.fortify.net", 443, true, "/sslcheck.html",
+                    1, 1, 0, 60);
+            fetch(socketFactory, "www.paypal.com", 443, true, "/",
+                    1, 1, 0, 60);
+            fetch(socketFactory, "www.yellownet.ch", 443, true, "/",
+                    1, 1, 0, 60);
+        }
+    }
+
+    /**
+     * Fake in the sense that it doesn't actually persist anything.
+     */
+    static class FakeClientSessionCache implements SSLClientSessionCache {
+
+        List<String> ops = new ArrayList<String>();
+        Map<String, byte[]> sessions = new HashMap<String, byte[]>();
+
+        public byte[] getSessionData(String host, int port) {
+            ops.add("get " + host);
+            return sessions.get(host);
+        }
+
+        public void putSessionData(SSLSession session, byte[] sessionData) {
+            String host = session.getPeerHost();
+            System.err.println("length: " + sessionData.length);
+            ops.add("put " + host);
+            sessions.put(host, sessionData);
+        }
+    }
+
+    public void testFileBasedClientSessionCache() throws IOException,
+            KeyManagementException {
+        SSLContextImpl context = new SSLContextImpl();
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        if (tmpDir == null) {
+            fail("Please set 'java.io.tmpdir' system property.");
+        }
+        File cacheDir = new File(tmpDir
+                + "/" + SSLSocketTest.class.getName() + "/cache");
+        deleteDir(cacheDir);
+        SSLClientSessionCache fileCache
+                = FileClientSessionCache.usingDirectory(cacheDir);
+        try {
+            ClientSessionCacheProxy cacheProxy
+                    = new ClientSessionCacheProxy(fileCache);
+            context.engineInit(null, null, null, cacheProxy, null);
+            SSLSocketFactory socketFactory = context.engineGetSocketFactory();
+            context.engineGetClientSessionContext().setSessionCacheSize(1);
+            makeRequests(socketFactory);
+            List<String> expected = Arrays.asList(
+                    "unsuccessful get www.fortify.net",
+                    "put www.fortify.net",
+                    "unsuccessful get www.paypal.com",
+                    "put www.paypal.com",
+                    "unsuccessful get www.yellownet.ch",
+                    "put www.yellownet.ch",
+
+                    // At this point, all in-memory cache requests should miss,
+                    // but the sessions will still be in the persistent cache.
+                    "successful get www.fortify.net",
+                    "successful get www.paypal.com",
+                    "successful get www.yellownet.ch"
+            );
+            assertEquals(expected, cacheProxy.ops);
+
+            // Try again now that file-based cache is populated.
+            fileCache = FileClientSessionCache.usingDirectory(cacheDir);
+            cacheProxy = new ClientSessionCacheProxy(fileCache);
+            context.engineInit(null, null, null, cacheProxy, null);
+            socketFactory = context.engineGetSocketFactory();
+            context.engineGetClientSessionContext().setSessionCacheSize(1);
+            makeRequests(socketFactory);
+            expected = Arrays.asList(
+                    "successful get www.fortify.net",
+                    "successful get www.paypal.com",
+                    "successful get www.yellownet.ch",
+                    "successful get www.fortify.net",
+                    "successful get www.paypal.com",
+                    "successful get www.yellownet.ch"
+            );
+            assertEquals(expected, cacheProxy.ops);
+        } finally {
+            deleteDir(cacheDir);
+        }
+    }
+
+    private static void deleteDir(File directory) {
+        if (!directory.exists()) {
+            return;
+        }
+        for (File file : directory.listFiles()) {
+            file.delete();
+        }
+        directory.delete();
+    }
+
+    static class ClientSessionCacheProxy implements SSLClientSessionCache {
+
+        final SSLClientSessionCache delegate;
+        final List<String> ops = new ArrayList<String>();
+
+        ClientSessionCacheProxy(SSLClientSessionCache delegate) {
+            this.delegate = delegate;
+        }
+
+        public byte[] getSessionData(String host, int port) {
+            byte[] sessionData = delegate.getSessionData(host, port);
+            ops.add((sessionData == null ? "unsuccessful" : "successful")
+                    + " get " + host);
+            return sessionData;
+        }
+
+        public void putSessionData(SSLSession session, byte[] sessionData) {
+            delegate.putSessionData(session, sessionData);
+            ops.add("put " + session.getPeerHost());
+        }
+    }
+
+    public static void main(String[] args) throws KeyManagementException, IOException {
+        new SSLSocketTest().testFileBasedClientSessionCache();
+    }
 }

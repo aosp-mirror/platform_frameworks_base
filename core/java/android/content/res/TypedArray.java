@@ -438,6 +438,34 @@ public class TypedArray {
         throw new RuntimeException(getPositionDescription()
                 + ": You must supply a " + name + " attribute.");
     }
+    
+    /**
+     * Special version of {@link #getDimensionPixelSize} for retrieving
+     * {@link android.view.ViewGroup}'s layout_width and layout_height
+     * attributes.  This is only here for performance reasons; applications
+     * should use {@link #getDimensionPixelSize}.
+     * 
+     * @param index Index of the attribute to retrieve.
+     * @param defValue The default value to return if this attribute is not
+     * default or contains the wrong type of data.
+     * 
+     * @return Attribute dimension value multiplied by the appropriate 
+     * metric and truncated to integer pixels.
+     */
+    public int getLayoutDimension(int index, int defValue) {
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        final int[] data = mData;
+        final int type = data[index+AssetManager.STYLE_TYPE];
+        if (type >= TypedValue.TYPE_FIRST_INT
+                && type <= TypedValue.TYPE_LAST_INT) {
+            return data[index+AssetManager.STYLE_DATA];
+        } else if (type == TypedValue.TYPE_DIMENSION) {
+            return TypedValue.complexToDimensionPixelSize(
+                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+        }
+
+        return defValue;
+    }
 
     /**
      * Retrieve a fractional unit attribute at <var>index</var>.

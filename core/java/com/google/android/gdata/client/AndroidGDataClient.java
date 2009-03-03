@@ -21,6 +21,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.AbstractHttpEntity;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.net.http.AndroidHttpClient;
 import android.text.TextUtils;
 import android.util.Config;
@@ -117,16 +118,28 @@ public class AndroidGDataClient implements GDataClient {
     }
 
     /**
-     * Creates a new AndroidGDataClient.
-     * 
-     * @param resolver The ContentResolver to get URL rewriting rules from
-     * through the Android proxy server, using null to indicate not using proxy.
+     * @deprecated Use AndroidGDAtaClient(Context) instead.
      */
     public AndroidGDataClient(ContentResolver resolver) {
         mHttpClient = new GoogleHttpClient(resolver, USER_AGENT_APP_VERSION,
                 true /* gzip capable */);
         mHttpClient.enableCurlLogging(TAG, Log.VERBOSE);
         mResolver = resolver;
+    }
+
+    /**
+     * Creates a new AndroidGDataClient.
+     * 
+     * @param context The ContentResolver to get URL rewriting rules from
+     * through the Android proxy server, using null to indicate not using proxy.
+     * The context will also be used by GoogleHttpClient for configuration of 
+     * SSL session persistence.
+     */
+    public AndroidGDataClient(Context context) {
+        mHttpClient = new GoogleHttpClient(context, USER_AGENT_APP_VERSION,
+                true /* gzip capable */);
+        mHttpClient.enableCurlLogging(TAG, Log.VERBOSE);
+        mResolver = context.getContentResolver();
     }
 
     public void close() {

@@ -17,6 +17,7 @@
 package android.content;
 
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -28,6 +29,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -170,6 +172,143 @@ public abstract class ContentResolver {
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * </ul>
+     * 
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     * 
+     * @param uri The desired URI.
+     * @return InputStream
+     * @throws FileNotFoundException if the provided URI could not be opened.
+     * @see #openAssetFileDescriptor(Uri, String)
+     */
+    public final InputStream openInputStream(Uri uri)
+            throws FileNotFoundException {
+        String scheme = uri.getScheme();
+        if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+            // Note: left here to avoid breaking compatibility.  May be removed
+            // with sufficient testing.
+            OpenResourceIdResult r = getResourceId(uri);
+            try {
+                InputStream stream = r.r.openRawResource(r.id);
+                return stream;
+            } catch (Resources.NotFoundException ex) {
+                throw new FileNotFoundException("Resource does not exist: " + uri);
+            }
+        } else if (SCHEME_FILE.equals(scheme)) {
+            // Note: left here to avoid breaking compatibility.  May be removed
+            // with sufficient testing.
+            return new FileInputStream(uri.getPath());
+        } else {
+            AssetFileDescriptor fd = openAssetFileDescriptor(uri, "r");
+            try {
+                return fd != null ? fd.createInputStream() : null;
+            } catch (IOException e) {
+                throw new FileNotFoundException("Unable to create stream");
+            }
+        }
+    }
+
+    /**
+     * Synonym for {@link #openOutputStream(Uri, String)
+     * openOutputStream(uri, "w")}.
+     * @throws FileNotFoundException if the provided URI could not be opened.
+     */
+    public final OutputStream openOutputStream(Uri uri)
+            throws FileNotFoundException {
+        return openOutputStream(uri, "w");
+    }
+
+    /**
+     * Open a stream on to the content associated with a content URI.  If there
+     * is no data associated with the URI, FileNotFoundException is thrown.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     *
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     * 
+     * @param uri The desired URI.
+     * @param mode May be "w", "wa", "rw", or "rwt".
+     * @return OutputStream
+     * @throws FileNotFoundException if the provided URI could not be opened.
+     * @see #openAssetFileDescriptor(Uri, String)
+     */
+    public final OutputStream openOutputStream(Uri uri, String mode)
+            throws FileNotFoundException {
+        AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode);
+        try {
+            return fd != null ? fd.createOutputStream() : null;
+        } catch (IOException e) {
+            throw new FileNotFoundException("Unable to create stream");
+        }
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a "content:" URI.  This
+     * is like {@link #openAssetFileDescriptor(Uri, String)}, but uses the
+     * underlying {@link ContentProvider#openFile}
+     * ContentProvider.openFile()} method, so will <em>not</em> work with
+     * providers that return sub-sections of files.  If at all possible,
+     * you should use {@link #openAssetFileDescriptor(Uri, String)}.  You
+     * will receive a FileNotFoundException exception if the provider returns a
+     * sub-section of a file.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     *
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     * 
+     * @param uri The desired URI to open.
+     * @param mode The file mode to use, as per {@link ContentProvider#openFile
+     * ContentProvider.openFile}.
+     * @return Returns a new ParcelFileDescriptor pointing to the file.  You
+     * own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * file exists under the URI or the mode is invalid.
+     * @see #openAssetFileDescriptor(Uri, String)
+     */
+    public final ParcelFileDescriptor openFileDescriptor(Uri uri,
+            String mode) throws FileNotFoundException {
+        AssetFileDescriptor afd = openAssetFileDescriptor(uri, mode);
+        if (afd == null) {
+            return null;
+        }
+        
+        if (afd.getDeclaredLength() < 0) {
+            // This is a full file!
+            return afd.getParcelFileDescriptor();
+        }
+        
+        // Client can't handle a sub-section of a file, so close what
+        // we got and bail with an exception.
+        try {
+            afd.close();
+        } catch (IOException e) {
+        }
+        
+        throw new FileNotFoundException("Not a whole file");
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a "content:" URI.  This
+     * interacts with the underlying {@link ContentProvider#openAssetFile}
+     * ContentProvider.openAssetFile()} method of the provider associated with the
+     * given URI, to retrieve any file stored there.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
      * <h5>The android.resource ({@link #SCHEME_ANDROID_RESOURCE}) Scheme</h5>
      * <p>
      * A Uri object can be used to reference a resource in an APK file.  The
@@ -193,129 +332,130 @@ public abstract class ContentResolver {
      * <pre>Uri uri = Uri.parse("android.resource://com.example.myapp/raw/my_resource");</pre>
      * </li>
      * </ul>
-     * @param uri The desired "content:" URI.
-     * @return InputStream
-     * @throws FileNotFoundException if the provided URI could not be opened.
-     */
-    public final InputStream openInputStream(Uri uri)
-            throws FileNotFoundException {
-        String scheme = uri.getScheme();
-        if (SCHEME_CONTENT.equals(scheme)) {
-            ParcelFileDescriptor fd = openFileDescriptor(uri, "r");
-            return fd != null ? new ParcelFileDescriptor.AutoCloseInputStream(fd) : null;
-        } else if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
-            String authority = uri.getAuthority();
-            Resources r;
-            if (TextUtils.isEmpty(authority)) {
-                throw new FileNotFoundException("No authority: " + uri);
-            } else {
-                try {
-                    r = mContext.getPackageManager().getResourcesForApplication(authority);
-                } catch (NameNotFoundException ex) {
-                    throw new FileNotFoundException("No package found for authority: " + uri);
-                }
-            }
-            List<String> path = uri.getPathSegments();
-            if (path == null) {
-                throw new FileNotFoundException("No path: " + uri);
-            }
-            int len = path.size();
-            int id;
-            if (len == 1) {
-                try {
-                    id = Integer.parseInt(path.get(0));
-                } catch (NumberFormatException e) {
-                    throw new FileNotFoundException("Single path segment is not a resource ID: " + uri);
-                }
-            } else if (len == 2) {
-                id = r.getIdentifier(path.get(1), path.get(0), authority);
-            } else {
-                throw new FileNotFoundException("More than two path segments: " + uri);
-            }
-            if (id == 0) {
-                throw new FileNotFoundException("No resource found for: " + uri);
-            }
-            try {
-                InputStream stream = r.openRawResource(id);
-                return stream;
-            } catch (Resources.NotFoundException ex) {
-                throw new FileNotFoundException("Resource ID does not exist: " + uri);
-            }
-        } else if (SCHEME_FILE.equals(scheme)) {
-            return new FileInputStream(uri.getPath());
-        } else {
-            throw new FileNotFoundException("Unknown scheme: " + uri);
-        }
-    }
-
-    /**
-     * Open a stream on to the content associated with a content URI.  If there
-     * is no data associated with the URI, FileNotFoundException is thrown.
-     *
-     * <h5>Accepts the following URI schemes:</h5>
-     * <ul>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * </ul>
-     *
-     * @param uri The desired "content:" URI.
-     * @return OutputStream
-     */
-    public final OutputStream openOutputStream(Uri uri)
-            throws FileNotFoundException {
-        String scheme = uri.getScheme();
-        if (SCHEME_CONTENT.equals(scheme)) {
-            ParcelFileDescriptor fd = openFileDescriptor(uri, "rw");
-            return fd != null
-                    ? new ParcelFileDescriptor.AutoCloseOutputStream(fd) : null;
-        } else {
-            throw new FileNotFoundException("Unknown scheme: " + uri);
-        }
-    }
-
-    /**
-     * Open a raw file descriptor to access data under a "content:" URI.  This
-     * interacts with the underlying {@link ContentProvider#openFile}
-     * ContentProvider.openFile()} method of the provider associated with the
-     * given URI, to retrieve any file stored there.
-     *
-     * <h5>Accepts the following URI schemes:</h5>
-     * <ul>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * </ul>
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
+     * ContentProvider.openAssetFile}.
      * @return Returns a new ParcelFileDescriptor pointing to the file.  You
      * own this descriptor and are responsible for closing it when done.
      * @throws FileNotFoundException Throws FileNotFoundException of no
      * file exists under the URI or the mode is invalid.
      */
-    public final ParcelFileDescriptor openFileDescriptor(Uri uri,
+    public final AssetFileDescriptor openAssetFileDescriptor(Uri uri,
             String mode) throws FileNotFoundException {
-        IContentProvider provider = acquireProvider(uri);
-        if (provider == null) {
-            throw new FileNotFoundException("No content provider: " + uri);
-        }
-        try {
-            ParcelFileDescriptor fd = provider.openFile(uri, mode);
-            if(fd == null) {
-                releaseProvider(provider);
-                return null;
+        String scheme = uri.getScheme();
+        if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+            if (!"r".equals(mode)) {
+                throw new FileNotFoundException("Can't write resources: " + uri);
             }
-            return new ParcelFileDescriptorInner(fd, provider);
-        } catch (RemoteException e) {
-            releaseProvider(provider);
-            throw new FileNotFoundException("Dead content provider: " + uri);
-        } catch (FileNotFoundException e) {
-            releaseProvider(provider);
-            throw e;
-        } catch (RuntimeException e) {
-            releaseProvider(provider);
-            throw e;
+            OpenResourceIdResult r = getResourceId(uri);
+            try {
+                return r.r.openRawResourceFd(r.id);
+            } catch (Resources.NotFoundException ex) {
+                throw new FileNotFoundException("Resource does not exist: " + uri);
+            }
+        } else if (SCHEME_FILE.equals(scheme)) {
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                    new File(uri.getPath()), modeToMode(uri, mode));
+            return new AssetFileDescriptor(pfd, 0, -1);
+        } else {
+            IContentProvider provider = acquireProvider(uri);
+            if (provider == null) {
+                throw new FileNotFoundException("No content provider: " + uri);
+            }
+            try {
+                AssetFileDescriptor fd = provider.openAssetFile(uri, mode);
+                if(fd == null) {
+                    releaseProvider(provider);
+                    return null;
+                }
+                ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
+                        fd.getParcelFileDescriptor(), provider);
+                return new AssetFileDescriptor(pfd, fd.getStartOffset(),
+                        fd.getDeclaredLength());
+            } catch (RemoteException e) {
+                releaseProvider(provider);
+                throw new FileNotFoundException("Dead content provider: " + uri);
+            } catch (FileNotFoundException e) {
+                releaseProvider(provider);
+                throw e;
+            } catch (RuntimeException e) {
+                releaseProvider(provider);
+                throw e;
+            }
         }
     }
 
+    class OpenResourceIdResult {
+        Resources r;
+        int id;
+    }
+    
+    OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
+        String authority = uri.getAuthority();
+        Resources r;
+        if (TextUtils.isEmpty(authority)) {
+            throw new FileNotFoundException("No authority: " + uri);
+        } else {
+            try {
+                r = mContext.getPackageManager().getResourcesForApplication(authority);
+            } catch (NameNotFoundException ex) {
+                throw new FileNotFoundException("No package found for authority: " + uri);
+            }
+        }
+        List<String> path = uri.getPathSegments();
+        if (path == null) {
+            throw new FileNotFoundException("No path: " + uri);
+        }
+        int len = path.size();
+        int id;
+        if (len == 1) {
+            try {
+                id = Integer.parseInt(path.get(0));
+            } catch (NumberFormatException e) {
+                throw new FileNotFoundException("Single path segment is not a resource ID: " + uri);
+            }
+        } else if (len == 2) {
+            id = r.getIdentifier(path.get(1), path.get(0), authority);
+        } else {
+            throw new FileNotFoundException("More than two path segments: " + uri);
+        }
+        if (id == 0) {
+            throw new FileNotFoundException("No resource found for: " + uri);
+        }
+        OpenResourceIdResult res = new OpenResourceIdResult();
+        res.r = r;
+        res.id = id;
+        return res;
+    }
+    
+    /** @hide */
+    static public int modeToMode(Uri uri, String mode) throws FileNotFoundException {
+        int modeBits;
+        if ("r".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
+        } else if ("w".equals(mode) || "wt".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_TRUNCATE;
+        } else if ("wa".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_APPEND;
+        } else if ("rw".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
+                    | ParcelFileDescriptor.MODE_CREATE;
+        } else if ("rwt".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_TRUNCATE;
+        } else {
+            throw new FileNotFoundException("Bad mode for " + uri + ": "
+                    + mode);
+        }
+        return modeBits;
+    }
+    
     /**
      * Inserts a row into a table at the given URL.
      *

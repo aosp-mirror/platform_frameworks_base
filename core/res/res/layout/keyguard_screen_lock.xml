@@ -24,7 +24,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:gravity="bottom"
-    android:background="#FF000000"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
         >
@@ -37,6 +36,8 @@
         android:layout_marginBottom="15dip"
         android:layout_marginLeft="15dip"
         android:layout_marginRight="15dip"
+	android:paddingTop="20dip"
+	android:paddingBottom="20dip"
         android:background="@android:drawable/popup_full_dark"
         >
 

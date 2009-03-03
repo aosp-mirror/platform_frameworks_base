@@ -168,6 +168,8 @@ status_t AudioTrack::set(
 
     // Ensure that buffer depth covers at least audio hardware latency
     uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
+    if (minBufCount < 2) minBufCount = 2;
+
     // When playing from shared buffer, playback will start even if last audioflinger
     // block is partly filled.
     if (sharedBuffer != 0 && minBufCount > 1) {
@@ -437,8 +439,8 @@ void AudioTrack::setSampleRate(int rate)
         return;
     }
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.
+    if (rate <= 0) rate = 1;
     if (rate > afSamplingRate*2) rate = afSamplingRate*2;
-
     if (rate > MAX_SAMPLE_RATE) rate = MAX_SAMPLE_RATE;
 
     mCblk->sampleRate = rate;
@@ -466,10 +468,15 @@ status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount
 
     if (loopStart >= loopEnd ||
         loopEnd - loopStart > mFrameCount) {
-        LOGW("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, mFrameCount, cblk->user);
+        LOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, mFrameCount, cblk->user);
         return BAD_VALUE;
     }
-    // TODO handle shared buffer here: limit loop end to framecount
+
+    if ((mSharedBuffer != 0) && (loopEnd   > mFrameCount)) {
+        LOGE("setLoop invalid value: loop markers beyond data: loopStart %d, loopEnd %d, framecount %d",
+            loopStart, loopEnd, mFrameCount);
+        return BAD_VALUE;
+    }   
 
     cblk->loopStart = loopStart;
     cblk->loopEnd = loopEnd;

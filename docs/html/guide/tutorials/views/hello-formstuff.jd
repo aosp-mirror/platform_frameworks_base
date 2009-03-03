@@ -32,7 +32,7 @@ We'll make it display a message when pressed.</p>
 <ol>
   <li><img src="images/android.png" align="right"/>
 	Drag the Android image on the right (or your own image) into the
-	res/drawables/ directory of your project. 
+	res/drawable/ directory of your project. 
         We'll use this for the button.</li>
   <li>Open the layout file and, inside the LinearLayout, add the {@link android.widget.ImageButton} element:
 <pre>
@@ -43,7 +43,7 @@ We'll make it display a message when pressed.</p>
     android:src="@drawable/android" />	
 </pre>
 	<p>The source of the button
-	is from the res/drawables/ directory, where we've placed the android.png.</p>
+	is from the res/drawable/ directory, where we've placed the android.png.</p>
         <p class="note"><strong>Tip:</strong> You can also reference some of the many built-in
         images from the Android {@link android.R.drawable} resources, 
         like <code>ic_media_play</code>, for a "play" button image. To do so, change the source
@@ -52,7 +52,7 @@ We'll make it display a message when pressed.</p>
 <li>To make the button to actually do something, add the following
 code at the end of the <code>onCreate()</code> method:
 <pre>
-ImageButton button = (ImageButton) findViewById(R.id.android_button);
+final ImageButton button = (ImageButton) findViewById(R.id.android_button);
 button.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
@@ -84,12 +84,12 @@ defines the action to be made when the button is clicked. Here, we show a
 <li>To do something with the text that the user enters, add the following code
 to the end of the <code>onCreate()</code> method:
 <pre>
-EditText edittext = (EditText) findViewById(R.id.edittext);
+final EditText edittext = (EditText) findViewById(R.id.edittext);
 edittext.setOnKeyListener(new OnKeyListener() {
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
           // Perform action on key press
-          Toast.makeText(HelloImageButton.this, edittext.getText(), Toast.LENGTH_SHORT).show();
+          Toast.makeText(HelloFormStuff.this, edittext.getText(), Toast.LENGTH_SHORT).show();
           return true;
         }
         return false;
@@ -127,9 +127,9 @@ checkbox.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
         if (checkbox.isChecked()) {
-            Toast.makeText(HelloImageButton.this, "Selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "Selected", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(HelloImageButton.this, "Not selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "Not selected", Toast.LENGTH_SHORT).show();
         }
     }
 });
@@ -183,7 +183,7 @@ OnClickListener radio_listener = new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
         RadioButton rb = (RadioButton) v;
-        Toast.makeText(HelloImageButton.this, rb.getText(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(HelloFormStuff.this, rb.getText(), Toast.LENGTH_SHORT).show();
     }
 };
 </pre>
@@ -225,9 +225,9 @@ togglebutton.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
         if (togglebutton.isChecked()) {
-            Toast.makeText(HelloImageButton.this, "ON", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "ON", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(HelloImageButton.this, "OFF", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "OFF", Toast.LENGTH_SHORT).show();
         }
     }
 });

@@ -40,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.IWindow;
@@ -72,6 +73,8 @@ public final class Bridge implements ILayoutBridge {
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
     
     public static class StaticMethodNotImplementedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public StaticMethodNotImplementedException(String msg) {
             super(msg);
         }
@@ -277,17 +280,37 @@ public final class Bridge implements ILayoutBridge {
             isProjectTheme = true;
         }
         
-        return computeLayout(layoutDescription, projectKey, screenWidth, screenHeight, themeName, isProjectTheme,
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
+                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                themeName, isProjectTheme,
+                projectResources, frameworkResources, customViewLoader, logger);
+    }
+
+    /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     */
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
+                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                themeName, isProjectTheme,
                 projectResources, frameworkResources, customViewLoader, logger);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
             IProjectCallback customViewLoader, ILayoutLog logger) {
@@ -298,7 +321,7 @@ public final class Bridge implements ILayoutBridge {
         synchronized (sDefaultLogger) {
             sLogger = logger;
         }
-        
+
         // find the current theme and compute the style inheritance map
         Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
             new HashMap<IStyleResourceValue, IStyleResourceValue>();
@@ -309,7 +332,16 @@ public final class Bridge implements ILayoutBridge {
         
         BridgeContext context = null; 
         try {
-            context = new BridgeContext(projectKey, currentTheme, projectResources,
+            // setup the display Metrics.
+            DisplayMetrics metrics = new DisplayMetrics();
+            metrics.density = density / (float) DisplayMetrics.DEFAULT_DENSITY;
+            metrics.scaledDensity = metrics.density;
+            metrics.widthPixels = screenWidth;
+            metrics.heightPixels = screenHeight;
+            metrics.xdpi = xdpi;
+            metrics.ydpi = ydpi;
+
+            context = new BridgeContext(projectKey, metrics, currentTheme, projectResources,
                     frameworkResources, styleParentMap, customViewLoader, logger);
             BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
             context.setBridgeInflater(inflater);

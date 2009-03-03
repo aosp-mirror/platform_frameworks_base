@@ -859,6 +859,14 @@ static void write_png(const char* imageName,
 
     analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
                   &paletteEntries, &hasTransparency, &color_type, outRows);
+
+    // If the image is a 9-patch, we need to preserve it as a ARGB file to make
+    // sure the pixels will not be pre-dithered/clamped until we decide they are
+    if (imageInfo.is9Patch && (color_type == PNG_COLOR_TYPE_RGB ||
+            color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)) {
+        color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+    }
+
     switch (color_type) {
     case PNG_COLOR_TYPE_PALETTE:
         NOISY(printf("Image %s has %d colors%s, using PNG_COLOR_TYPE_PALETTE\n",

@@ -4,22 +4,43 @@ sdk.version=1.1_r1
 @jd:body
 
 
-<p>This page describes how to install the Android 1.1 SDK, Release 1, and set up your development environment. 
-If you haven't downloaded the SDK yet, you can so from the <a href="{@docRoot}sdk/1.1_r1/index.html">Download</a> page.</p>
+<p>This page describes how to install the Android SDK and set up your
+development environment. If you haven't downloaded the SDK, you can
+do so from the 
+<a href="{@docRoot}sdk/1.1_r1/index.html">Download</a> page.</p>
 
-<p>Before you begin, be sure that your development environment meets the SDK
-<a href="{@docRoot}sdk/1.1_r1/requirements.html">System Requirements</a>. If you encounter any problems during installation,
-see the <a href="#installnotes">Installation Notes</a> at the bottom of this page.</p>
+<p>If you encounter any problems during installation, see the 
+<a href="#installnotes">Installation Notes</a> at the bottom of
+this page.</p>
 
 <h4 style="margin-top">Upgrading?</h4>
-<p>If you have already developed applications using an earlier version of the 
-SDK, please skip this page and read the 
-<a href="{@docRoot}sdk/1.1_r1/upgrading.html"><strong>Upgrading the SDK</strong></a></b> document instead.
+<p>If you have already developed applications using an earlier version
+of the SDK, please skip this page and read the 
+<a href="{@docRoot}sdk/1.1_r1/upgrading.html"><strong>Upgrading the
+SDK</strong></a></b> document instead.
 </p>
 
-<a name="installingsdk"></a>
-<a name="setup"></a>
-<h2>Installing the SDK</h2>
+
+<h2 id="setup">Preparing for Installation</h2>
+
+<p>Before you get started with the Android SDK, take a moment to confirm
+that your development machine meets the <a
+href="{@docRoot}sdk/1.1_r1/requirements.html">system requirements</a>.
+</p>
+
+<p>If you will be developing on Eclipse with the Android Development
+Tools (ADT) Plugin &mdash; the recommended path if you are new to
+Android &mdash; make sure that you have a suitable version of Eclipse
+installed on your computer. If you need to install Eclipse, you can
+download it from this location: </p>
+
+<p style="margin-left:2em;"><a href=
+"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a
+></p>
+
+<p>A Java or RCP version of Eclipse is recommended. </p>
+
+<h2 id="installingsdk">Installing the SDK</h2>
 
 	<p>After downloading the SDK, unpack the .zip archive to a suitable location on your machine. By default, the SDK files are unpacked into a directory named  <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em>_<em>&lt;build&gt;</em></code>. The directory contains a link to a local copy of the documentation and the subdirectories <code>tools/</code>, <code>samples/</code>, and others. </p>
 	
@@ -47,16 +68,34 @@ SDK, please skip this page and read the
 
 
 <p>If you will be using the Eclipse IDE as your environment for developing Android applications, continue reading the next
-section in order to install the Android Development Tools plugin and setup Eclipse. If you choose not to use Eclipse, you can 
+section in order to install the Android Development Tools plugin and set up Eclipse. If you choose not to use Eclipse, you can 
 develop Android applications using other tools &mdash; read the guide to developing 
-<a href="{@docRoot}guide/developing/other-ide.html">In other IDEs</a>.</p>
+<a href="{@docRoot}guide/developing/other-ide.html">in other IDEs</a>.</p>
 
 
-<h2>Setting up Eclipse</h2>
+<h2 id="installingplugin">Installing the ADT Plugin for Eclipse</h2>
 
-<p>First, you should install a custom plugin called Android Development Tools (ADT), which adds integrated support for Android projects and tools. The ADT plugin includes a variety of powerful extensions that make creating, running, and debugging Android applications faster and easier. Developing in ADT/Eclipse is highly recommended for Eclipse users and those new to Android.</p>
+<p>Android offers a custom plugin for the Eclipse IDE, called Android
+Development Tools (ADT), that is designed to give you a powerful,
+integrated environment in which to build Android applications. It
+extends the capabilites of Eclipse to let you quickly set up new Android
+projects, create an application UI, add components based on the Android
+Framework API, and debug using the Android SDK tools.</p>
 
-<p>To download and install the ADT plugin, follow the steps below for your respective Eclipse version. </p>
+<p>If you are new to Android or want to develop using the Eclipse IDE,
+the ADT plugin will be an essential part of your development
+environment. In general, using Eclipse with ADT is a highly recommended
+approach and is the fastest way to get started. This section describes
+how to install ADT into your Eclipse environment. 
+
+<p>If you prefer to work in a development environment other than Eclipse,
+you do not need to install Eclipse or the ADT Plugin. Instead, you can 
+access the SDK tools directly to build and debug your application. </p>
+
+<p>Once you have Eclipse installed, as described in <a href="#setup">
+Preparing for Installation</a>, follow the steps below to
+download the ADT plugin and install it in your respective Eclipse
+environment. </p>
 
 <table style="font-size:100%">
 <tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
@@ -123,7 +162,6 @@ develop Android applications using other tools &mdash; read the guide to develop
 </tr>
 </table>
 
-
 <p>Now, you just need to modify your Eclipse preferences to point to the Android SDK directory:</p>
 <ol>
     <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
@@ -133,9 +171,9 @@ develop Android applications using other tools &mdash; read the guide to develop
     <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
 </ol>
 
-<p>Done! If you haven't encountered any problems, then you're ready to begin developing Android applications.
-We recommend you begin with the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial,
-which will teach you some basics about Android applications and how to create projects using Eclipse.</p>
+<p>Done! If you haven't encountered any problems, then you're ready to
+begin developing Android applications. See the <a href="#next">After 
+Installation: Next Steps</a> section for suggestions on how to start. </p>
 
 
 <h3 id="troubleshooting">Troubleshooting ADT Installation</h3>
@@ -182,8 +220,59 @@ JKS</pre>
 Java 6 will resolve this issue and you can then reinstall the ADT
 Plugin.</p>
 
-<a name="installnotes"></a>
-<h2>Installation Notes</h2>
+
+<h2 id="next">After Installation: Next Steps</h2>
+<p>Once you have installed the SDK and the ADT Plugin, you are ready to
+begin developing applications. Here are a few ways you can get started: </p>
+
+<p><strong>Learn about Android</strong></p>
+<ul>
+<li>Take a look at the <a href="{@docRoot}guide/index.html">Dev
+Guide</a> and the types of information it provides</li>
+<li>Read an introduction to Android as a platform in <a
+href="{@docRoot}guide/basics/what-is-android.html">What is
+Android?</a></li>
+<li>Learn about the Android framework and how applications run on it in
+<a href="{@docRoot}guide/topics/fundamentals.html">Application
+Fundamentals</a></li>
+<li>Take a look at the Android framework API specification in the <a
+href="{@docRoot}reference/index.html">Reference</a> tab</li>
+</ul>
+
+<p><strong>Explore the SDK</strong></p>
+<ul>
+<li>Get an overview of the <a
+href="{@docRoot}guide/development/tools/index.html">development
+tools</a> that are available to you</li>
+<li>Read the overviews of how to develop <a
+href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or
+<a href="{@docRoot}guide/developing/other-ide.html">in other IDEs</a>
+</li>
+</ul>
+
+<p><strong>Explore some code</strong></p>
+<ul>
+<li>Set up a <a href="{@docRoot}guide/tutorials/hello-world.html">Hello
+World application</a></li>
+<li>Follow the <a href="{@docRoot}guide/tutorials/notepad/index.html">
+Notepad Tutorial</a> to build a full Android application </li>
+<li>Create a new project for one of the other sample applications
+included in <code>&lt;sdk&gt;/samples</code>, then compile and run it in
+your development environment</li>
+</ul>
+
+<p><strong>Visit the Android developer groups</strong></p>
+<ul>
+<li>Take a look at the <a
+href="{@docRoot}community/index.html">Community</a> tab to see a list of
+Android developers groups. In particular, you might want to look at the
+<a href="http://groups.google.com/group/android-developers">Android
+Developers</a> group to get a sense for what the Android developer
+community is like.</li>
+</ul>
+
+
+<h2 id="installnotes">Installation Notes</h2>
 <h4>Ubuntu Linux Notes</h4>
 <ul>
     <li>If you need help installing and configuring Java on your
@@ -215,9 +304,9 @@ and the ADT plugin. </li>
 <ul>
     <li>If JDK is already installed on your development computer, please
 take a moment to make sure that it meets the version requirements listed
-at the top of this page. In particular, note that some Linux
-distributions may include JDK 1.4 or Gnu Compiler for Java, both of
-which are not supported for Android development.</li>
+in the <a href="{@docRoot}sdk/1.1_r1/requirements.html">System Requirements</a>.
+In particular, note that some Linux distributions may include JDK 1.4 or Gnu
+Compiler for Java, both of which are not supported for Android development.</li>
 </ul>
 
 

@@ -46,6 +46,7 @@ public class Resources {
     static final String TAG = "Resources";
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
+    private static final boolean TRACE_FOR_PRELOAD = false;
 
     private static final int sSdkVersion = SystemProperties.getInt(
             "ro.build.version.sdk", 0);
@@ -57,6 +58,8 @@ public class Resources {
     // single-threaded, and after that these are immutable.
     private static final SparseArray<Drawable.ConstantState> mPreloadedDrawables
             = new SparseArray<Drawable.ConstantState>();
+    private static final SparseArray<ColorStateList> mPreloadedColorStateLists
+            = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
@@ -78,7 +81,7 @@ public class Resources {
     private final Configuration mConfiguration = new Configuration();
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
-    
+
     /**
      * This exception is thrown by the resource APIs when a requested resource
      * can not be found.
@@ -90,7 +93,7 @@ public class Resources {
         public NotFoundException(String name) {
             super(name);
         }
-    };
+    }
 
     /**
      * Create a new Resources object on top of an existing set of assets in an
@@ -1229,7 +1232,9 @@ public class Resources {
                 width = mMetrics.widthPixels;
                 height = mMetrics.heightPixels;
             } else {
+                //noinspection SuspiciousNameCombination
                 width = mMetrics.heightPixels;
+                //noinspection SuspiciousNameCombination
                 height = mMetrics.widthPixels;
             }
             int keyboardHidden = mConfiguration.keyboardHidden;
@@ -1342,6 +1347,7 @@ public class Resources {
         try {
             return Integer.parseInt(name);
         } catch (Exception e) {
+            // Ignore
         }
         return mAssets.getResourceIdentifier(name, defType, defPackage);
     }
@@ -1575,21 +1581,18 @@ public class Resources {
     
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
-        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
-            && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            // Should we be caching these?  If we use constant colors much
-            // at all, most likely...
-            //System.out.println("Creating drawable for color: #" +
-            //                   Integer.toHexString(value.data));
-            Drawable dr = new ColorDrawable(value.data);
-            dr.setChangingConfigurations(value.changingConfigurations);
-            return dr;
+
+        if (TRACE_FOR_PRELOAD) {
+            // Log only framework resources
+            if ((id >>> 24) == 0x1) {
+                final String name = getResourceName(id);
+                if (name != null) android.util.Log.d("PreloadDrawable", name);
+            }
         }
 
-        final int key = (value.assetCookie<<24)|value.data;
+        final int key = (value.assetCookie << 24) | value.data;
         Drawable dr = getCachedDrawable(key);
-        //System.out.println("Cached drawable @ #" +
-        //                   Integer.toHexString(key.intValue()) + ": " + dr);
+
         if (dr != null) {
             return dr;
         }
@@ -1597,46 +1600,52 @@ public class Resources {
         Drawable.ConstantState cs = mPreloadedDrawables.get(key);
         if (cs != null) {
             dr = cs.newDrawable();
-            
         } else {
-            if (value.string == null) {
-                throw new NotFoundException(
-                        "Resource is not a Drawable (color or path): " + value);
+            if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
+                    value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                dr = new ColorDrawable(value.data);
             }
-            
-            String file = value.string.toString();
-    
-            if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
-                    + value.assetCookie + ": " + file);
-            
-            if (file.endsWith(".xml")) {
-                try {
-                    XmlResourceParser rp = loadXmlResourceParser(
-                            file, id, value.assetCookie, "drawable"); 
-                    dr = Drawable.createFromXml(this, rp);
-                    rp.close();
-                } catch (Exception e) {
-                    NotFoundException rnf = new NotFoundException(
-                        "File " + file + " from drawable resource ID #0x"
-                        + Integer.toHexString(id));
-                    rnf.initCause(e);
-                    throw rnf;
+
+            if (dr == null) {
+                if (value.string == null) {
+                    throw new NotFoundException(
+                            "Resource is not a Drawable (color or path): " + value);
                 }
-    
-            } else {
-                try {
-                    InputStream is = mAssets.openNonAsset(
-                            value.assetCookie, file, AssetManager.ACCESS_BUFFER);
-    //                System.out.println("Opened file " + file + ": " + is);
-                    dr = Drawable.createFromResourceStream(this, value, is, file);
-                    is.close();
-    //                System.out.println("Created stream: " + dr);
-                } catch (Exception e) {
-                    NotFoundException rnf = new NotFoundException(
-                        "File " + file + " from drawable resource ID #0x"
-                        + Integer.toHexString(id));
-                    rnf.initCause(e);
-                    throw rnf;
+
+                String file = value.string.toString();
+
+                if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
+                        + value.assetCookie + ": " + file);
+
+                if (file.endsWith(".xml")) {
+                    try {
+                        XmlResourceParser rp = loadXmlResourceParser(
+                                file, id, value.assetCookie, "drawable");
+                        dr = Drawable.createFromXml(this, rp);
+                        rp.close();
+                    } catch (Exception e) {
+                        NotFoundException rnf = new NotFoundException(
+                            "File " + file + " from drawable resource ID #0x"
+                            + Integer.toHexString(id));
+                        rnf.initCause(e);
+                        throw rnf;
+                    }
+
+                } else {
+                    try {
+                        InputStream is = mAssets.openNonAsset(
+                                value.assetCookie, file, AssetManager.ACCESS_BUFFER);
+        //                System.out.println("Opened file " + file + ": " + is);
+                        dr = Drawable.createFromResourceStream(this, value, is, file);
+                        is.close();
+        //                System.out.println("Created stream: " + dr);
+                    } catch (Exception e) {
+                        NotFoundException rnf = new NotFoundException(
+                            "File " + file + " from drawable resource ID #0x"
+                            + Integer.toHexString(id));
+                        rnf.initCause(e);
+                        throw rnf;
+                    }
                 }
             }
         }
@@ -1647,13 +1656,13 @@ public class Resources {
             if (cs != null) {
                 if (mPreloading) {
                     mPreloadedDrawables.put(key, cs);
-                }
-                synchronized (mTmpValue) {
-                    //Log.i(TAG, "Saving cached drawable @ #" +
-                    //        Integer.toHexString(key.intValue())
-                    //        + " in " + this + ": " + cs);
-                    mDrawableCache.put(
-                        key, new WeakReference<Drawable.ConstantState>(cs));
+                } else {
+                    synchronized (mTmpValue) {
+                        //Log.i(TAG, "Saving cached drawable @ #" +
+                        //        Integer.toHexString(key.intValue())
+                        //        + " in " + this + ": " + cs);
+                        mDrawableCache.put(key, new WeakReference<Drawable.ConstantState>(cs));
+                    }
                 }
             }
         }
@@ -1661,7 +1670,7 @@ public class Resources {
         return dr;
     }
 
-    private final Drawable getCachedDrawable(int key) {
+    private Drawable getCachedDrawable(int key) {
         synchronized (mTmpValue) {
             WeakReference<Drawable.ConstantState> wr = mDrawableCache.get(key);
             if (wr != null) {   // we have the key
@@ -1682,13 +1691,40 @@ public class Resources {
 
     /*package*/ ColorStateList loadColorStateList(TypedValue value, int id)
             throws NotFoundException {
-        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
-            && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            return ColorStateList.valueOf(value.data);
+        if (TRACE_FOR_PRELOAD) {
+            // Log only framework resources
+            if ((id >>> 24) == 0x1) {
+                final String name = getResourceName(id);
+                if (name != null) android.util.Log.d("PreloadColorStateList", name);
+            }
         }
 
-        final int key = (value.assetCookie<<24)|value.data;
-        ColorStateList csl = getCachedColorStateList(key);
+        final int key = (value.assetCookie << 24) | value.data;
+
+        ColorStateList csl;
+
+        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
+                value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+
+            csl = mPreloadedColorStateLists.get(key);
+            if (csl != null) {
+                return csl;
+            }
+
+            csl = ColorStateList.valueOf(value.data);
+            if (mPreloading) {
+                mPreloadedColorStateLists.put(key, csl);
+            }
+
+            return csl;
+        }
+
+        csl = getCachedColorStateList(key);
+        if (csl != null) {
+            return csl;
+        }
+
+        csl = mPreloadedColorStateLists.get(key);
         if (csl != null) {
             return csl;
         }
@@ -1720,12 +1756,16 @@ public class Resources {
         }
 
         if (csl != null) {
-            synchronized (mTmpValue) {
-                //Log.i(TAG, "Saving cached color state list @ #" +
-                //        Integer.toHexString(key.intValue())
-                //        + " in " + this + ": " + csl);
-                mColorStateListCache.put(
-                    key, new WeakReference<ColorStateList>(csl));
+            if (mPreloading) {
+                mPreloadedColorStateLists.put(key, csl);
+            } else {
+                synchronized (mTmpValue) {
+                    //Log.i(TAG, "Saving cached color state list @ #" +
+                    //        Integer.toHexString(key.intValue())
+                    //        + " in " + this + ": " + csl);
+                    mColorStateListCache.put(
+                        key, new WeakReference<ColorStateList>(csl));
+                }
             }
         }
 

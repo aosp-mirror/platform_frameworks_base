@@ -128,11 +128,6 @@ public interface InputType {
      */
     public static final int TYPE_TEXT_FLAG_IME_MULTI_LINE = 0x00040000;
     
-    /**
-     * Flag for {@link #TYPE_CLASS_TEXT}: flags any text being used as a search string
-     */
-    public static final int TYPE_TEXT_FLAG_SEARCH = 0x00080000;
-    
     // ----------------------------------------------------------------------
     
     /**

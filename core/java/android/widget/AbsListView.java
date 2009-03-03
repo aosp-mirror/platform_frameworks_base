@@ -17,7 +17,6 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -28,6 +27,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -893,25 +893,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mSyncMode = SYNC_FIRST_POSITION;
         }
 
-        // Don't restore the type filter window when there is no keyboard
-        if (acceptFilter()) {
-            String filterText = ss.filter;
-            setFilterText(filterText);
-        }
+        setFilterText(ss.filter);
 
         requestLayout();
     }
 
     private boolean acceptFilter() {
         final Context context = mContext;
-        final Configuration configuration = context.getResources().getConfiguration();
-        final boolean keyboardShowing = configuration.keyboardHidden !=
-                Configuration.KEYBOARDHIDDEN_YES;
-        final boolean hasKeyboard = configuration.keyboard != Configuration.KEYBOARD_NOKEYS;
         final InputMethodManager inputManager = (InputMethodManager)
                 context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        return (hasKeyboard && keyboardShowing) ||
-                (!hasKeyboard && !inputManager.isFullscreenMode());
+        return !inputManager.isFullscreenMode();
     }
 
     /**
@@ -922,7 +913,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setFilterText(String filterText) {
         // TODO: Should we check for acceptFilter()?
-        if (mTextFilterEnabled && filterText != null && filterText.length() > 0) {
+        if (mTextFilterEnabled && !TextUtils.isEmpty(filterText)) {
             createTextFilter(false);
             // This is going to call our listener onTextChanged, but we might not
             // be ready to bring up a window yet
@@ -942,6 +933,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /**
+     * Returns the list's text filter, if available. 
+     * @return the list's text filter or null if filtering isn't enabled
+     * @hide pending API Council approval
+     */
+    public CharSequence getTextFilter() {
+        if (mTextFilterEnabled && mTextFilter != null) {
+            return mTextFilter.getText();
+        }
+        return null;
+    }
+    
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);

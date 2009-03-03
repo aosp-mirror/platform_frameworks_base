@@ -214,7 +214,6 @@ public class LocationManagerService extends ILocationManager.Stub
 
     // Last known cell service state
     private TelephonyManager mTelephonyManager;
-    private int mSignalStrength = -1;
 
     // Location collector
     private ILocationCollector mCollector;
@@ -1764,7 +1763,7 @@ public class LocationManagerService extends ILocationManager.Stub
                         Log.d(TAG, "installing network location provider");
                         INetworkLocationManager.InstallCallback callback =
                                 (INetworkLocationManager.InstallCallback)msg.obj;
-                        callback.installNetworkLocationProvider(mContext, LocationManagerService.this);
+                        callback.installNetworkLocationProvider(LocationManagerService.this);
                     }
                 }
             } catch (Exception e) {
@@ -1774,40 +1773,90 @@ public class LocationManagerService extends ILocationManager.Stub
         }
     }
 
-    PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-
-        private CellState mLastCellState = null;
+    class CellLocationUpdater extends Thread {
+        CellLocation mNextLocation;
+        
+        CellLocationUpdater() {
+            super("CellLocationUpdater");
+        }
+        
         @Override
-        public void onCellLocationChanged(CellLocation cellLocation) {
-            try {
+        public void run() {
+            int curAsu = -1;
+            CellLocation curLocation = null;
+            
+            while (true) {
+                // See if there is more work to do...
                 synchronized (mLocationListeners) {
-                    int asu = mSignalStrength;
-    
-                    // Gets cell state
-                    mLastCellState = new CellState(mTelephonyManager, cellLocation, asu);
-    
-                    // Notify collector
-                    if (mCollector != null) {
-                        mCollector.updateCellState(mLastCellState);
+                    if (curLocation == mNextLocation) {
+                        mCellLocationUpdater = null;
+                        break;
                     }
+                    
+                    curLocation = mNextLocation;
+                    if (curLocation == null) {
+                        mCellLocationUpdater = null;
+                        break;
+                    }
+                    
+                    curAsu = mLastSignalStrength;
+                    
+                    mNextLocation = null;
+                }
+                
+                try {
+                    // Gets cell state.  This can block so must be done without
+                    // locks held.
+                    CellState cs = new CellState(mTelephonyManager, curLocation, curAsu);
+                    
+                    synchronized (mLocationListeners) {
+                        mLastCellState = cs;
+        
+                        cs.updateSignalStrength(mLastSignalStrength);
+                        cs.updateRadioType(mLastRadioType);
+                        
+                        // Notify collector
+                        if (mCollector != null) {
+                            mCollector.updateCellState(cs);
+                        }
     
-                    // Updates providers
-                    List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
-                    for (LocationProviderImpl provider : providers) {
-                        if (provider.requiresCell()) {
-                            provider.updateCellState(mLastCellState);
+                        // Updates providers
+                        List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
+                        for (LocationProviderImpl provider : providers) {
+                            if (provider.requiresCell()) {
+                                provider.updateCellState(cs);
+                            }
                         }
                     }
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Exception in PhoneStateListener.onCellLocationChanged:", e);
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Exception in PhoneStateListener.onCellLocationCahnged:", e);
+            }
+        }
+    }
+    
+    CellLocationUpdater mCellLocationUpdater = null;
+    CellState mLastCellState = null;
+    int mLastSignalStrength = -1;
+    int mLastRadioType = -1;
+    
+    PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+
+        @Override
+        public void onCellLocationChanged(CellLocation cellLocation) {
+            synchronized (mLocationListeners) {
+                if (mCellLocationUpdater == null) {
+                    mCellLocationUpdater = new CellLocationUpdater();
+                    mCellLocationUpdater.start();
+                }
+                mCellLocationUpdater.mNextLocation = cellLocation;
             }
         }
 
         @Override
         public void onSignalStrengthChanged(int asu) {
             synchronized (mLocationListeners) {
-                mSignalStrength = asu;
+                mLastSignalStrength = asu;
     
                 if (mLastCellState != null) {
                     mLastCellState.updateSignalStrength(asu);
@@ -1818,8 +1867,18 @@ public class LocationManagerService extends ILocationManager.Stub
         @Override
         public void onDataConnectionStateChanged(int state) {
             synchronized (mLocationListeners) {
+                // Get radio type
+                int radioType = mTelephonyManager.getNetworkType();
+                if (radioType == TelephonyManager.NETWORK_TYPE_GPRS ||
+                    radioType == TelephonyManager.NETWORK_TYPE_EDGE) {
+                    radioType = CellState.RADIO_TYPE_GPRS;
+                } else if (radioType == TelephonyManager.NETWORK_TYPE_UMTS) {
+                    radioType = CellState.RADIO_TYPE_WCDMA;
+                }
+                mLastRadioType = radioType;
+
                 if (mLastCellState != null) {
-                    mLastCellState.updateRadioType(mTelephonyManager);
+                    mLastCellState.updateRadioType(radioType);
                 }
             }
         }
@@ -2555,8 +2614,11 @@ public class LocationManagerService extends ILocationManager.Stub
             pw.println("  mGpsNavigating=" + mGpsNavigating);
             pw.println("  mNetworkLocationProvider=" + mNetworkLocationProvider);
             pw.println("  mNetworkLocationInterface=" + mNetworkLocationInterface);
+            pw.println("  mLastSignalStrength=" + mLastSignalStrength
+                    + "  mLastRadioType=" + mLastRadioType);
+            pw.println("  mCellLocationUpdater=" + mCellLocationUpdater);
+            pw.println("  mLastCellState=" + mLastCellState);
             pw.println("  mCollector=" + mCollector);
-            pw.println("  mSignalStrength=" + mSignalStrength);
             pw.println("  mAlarmInterval=" + mAlarmInterval
                     + " mScreenOn=" + mScreenOn
                     + " mWakeLockAcquireTime=" + mWakeLockAcquireTime);

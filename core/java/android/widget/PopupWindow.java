@@ -30,6 +30,7 @@ import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -102,6 +103,8 @@ public class PopupWindow {
     private Rect mTempRect = new Rect();
     
     private Drawable mBackground;
+    private Drawable mAboveAnchorBackgroundDrawable;
+    private Drawable mBelowAnchorBackgroundDrawable;
 
     private boolean mAboveAnchor;
     
@@ -164,6 +167,43 @@ public class PopupWindow {
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
 
+        // If this is a StateListDrawable, try to find and store the drawable to be
+        // used when the drop-down is placed above its anchor view, and the one to be
+        // used when the drop-down is placed below its anchor view. We extract
+        // the drawables ourselves to work around a problem with using refreshDrawableState
+        // that it will take into account the padding of all drawables specified in a
+        // StateListDrawable, thus adding superfluous padding to drop-down views.
+        //
+        // We assume a StateListDrawable will have a drawable for ABOVE_ANCHOR_STATE_SET and
+        // at least one other drawable, intended for the 'below-anchor state'.
+        if (mBackground instanceof StateListDrawable) {
+            StateListDrawable background = (StateListDrawable) mBackground;
+
+            // Find the above-anchor view - this one's easy, it should be labeled as such.
+            int aboveAnchorStateIndex = background.getStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
+            
+            // Now, for the below-anchor view, look for any other drawable specified in the
+            // StateListDrawable which is not for the above-anchor state and use that.
+            int count = background.getStateCount();
+            int belowAnchorStateIndex = -1;
+            for (int i = 0; i < count; i++) {
+                if (i != aboveAnchorStateIndex) {
+                    belowAnchorStateIndex = i;
+                    break;
+                }
+            }
+            
+            // Store the drawables we found, if we found them. Otherwise, set them both
+            // to null so that we'll just use refreshDrawableState.
+            if (aboveAnchorStateIndex != -1 && belowAnchorStateIndex != -1) {
+                mAboveAnchorBackgroundDrawable = background.getStateDrawable(aboveAnchorStateIndex);
+                mBelowAnchorBackgroundDrawable = background.getStateDrawable(belowAnchorStateIndex);
+            } else {
+                mBelowAnchorBackgroundDrawable = null;
+                mAboveAnchorBackgroundDrawable = null;
+            }
+        }
+        
         a.recycle();
     }
 
@@ -661,7 +701,18 @@ public class PopupWindow {
         mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
 
         if (mBackground != null) {
-            mPopupView.refreshDrawableState();
+            // If the background drawable provided was a StateListDrawable with above-anchor
+            // and below-anchor states, use those. Otherwise rely on refreshDrawableState to
+            // do the job.
+            if (mAboveAnchorBackgroundDrawable != null) {
+                if (mAboveAnchor) {
+                    mPopupView.setBackgroundDrawable(mAboveAnchorBackgroundDrawable);
+                } else {
+                    mPopupView.setBackgroundDrawable(mBelowAnchorBackgroundDrawable);
+                }
+            } else {
+                mPopupView.refreshDrawableState();
+            }
         }
 
         if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
@@ -697,12 +748,18 @@ public class PopupWindow {
      */
     private void preparePopup(WindowManager.LayoutParams p) {
         if (mBackground != null) {
+            final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
+            int height = ViewGroup.LayoutParams.FILL_PARENT;
+            if (layoutParams != null &&
+                    layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            }
+
             // when a background is available, we embed the content view
             // within another view that owns the background drawable
             PopupViewContainer popupViewContainer = new PopupViewContainer(mContext);
             PopupViewContainer.LayoutParams listParams = new PopupViewContainer.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.FILL_PARENT
+                    ViewGroup.LayoutParams.FILL_PARENT, height
             );
             popupViewContainer.setBackgroundDrawable(mBackground);
             popupViewContainer.addView(mContentView, listParams);

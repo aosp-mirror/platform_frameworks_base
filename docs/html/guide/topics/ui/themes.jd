@@ -36,8 +36,8 @@ parent.link=index.html
   <li>Create a file named <code>styles.xml</code> in the your application's <code>res/values</code> directory. Add a root <code>&lt;resources></code> node.</li>
   <li>For each style or theme, add a <code>&lt;style&gt;</code> element with a unique <code>name</code> and, optionally, a <code>parent</code> attribute.
     The name is used for referencing these styles later, and the parent indicates what style resource to inherit from.</li>
-  <li>Inside the <code>style</code> element, declare format values in one or more <code>&lt;item&gt;</code> element. 
-    Each <code>item</code> identifies its style property with a <code>name</code> attribute and defines its style value inside the element.</li>
+  <li>Inside the <code>&lt;style></code> element, declare format values in one or more <code>&lt;item&gt;</code> element(s). 
+    Each <code>&lt;item&gt;</code> identifies its style property with a <code>name</code> attribute and defines its style value inside the element.</li>
   <li>You can then reference the custom resources from other XML resources, your manifest or application code.</li>
 </ol>
 
@@ -60,7 +60,7 @@ parent.link=index.html
 The <code>name</code> attribute in the <code>item</code> can refer to a standard string, a hex color value, 
 or a reference to any other resource type.</p>
 
-<p>Note the <code>parent</code> attribute in the <code>style</code> element. This attribute lets you specify a resource from which the current style will inherit values. The style can inherit from any type of resource that contains the style(s) you want. In general, your styles should always inherit (directly or indirectly) from a standard Android style resource. This way, you only have to define the values that you want to change.</p>
+<p>Notice the <code>parent</code> attribute in the <code>&lt;style></code> element. This attribute lets you specify a resource from which the current style will inherit values. The style can inherit from any type of resource that contains the style(s) you want. In general, your styles should always inherit (directly or indirectly) from a standard Android style resource. This way, you only have to define the values that you want to change.</p>
 
 <p>Here's how you would reference the custom style from an XML layout, in this case, for an EditText element:</p>
 
@@ -72,14 +72,15 @@ or a reference to any other resource type.</p>
           android:text="Hello, World!" /&gt;
 </pre>
 
-<p>Now this EditText widget will be styled as defined by the <code>style</code> example above.</p>
+<p>Now this EditText widget will be styled as defined by the XML example above.</p>
 
 
 <h2 id="themes">Themes</h2>
 
 <p>Just like styles, themes are also declared in XML <code>&lt;style&gt;</code> elements, and are referenced in the same manner.
-The difference is that you can add a theme style only to <code>&lt;application&gt;</code> and <code>&lt;activity&gt;</code> elements &mdash;
-they cannot be applied to individual views in the layout.</p>
+The difference is that you add a theme to an entire application or activity, via the <code>&lt;application&gt;</code> 
+and <code>&lt;activity&gt;</code> elements in the Android Manifest &mdash;
+themes cannot be applied to individual Views.</p>
 
 <p>Here's an example declaration of a theme:</p>
 
@@ -130,32 +131,26 @@ appear like a dialog box. In the manifest, reference an Android theme like so:</
 </pre>
 
 <p>If you like a theme, but want to slightly tweak it, just add the theme as the <code>parent</code> of your custom theme.
-For example, we'll modify the <code>Theme.Dialog</code> theme. First, we need to import the parent of the
-<code>Dialog</code> theme: <code>Theme</code>. At the top of the <code>resources</code>, add:</p>
-<pre>
-&lt;style name="Theme" parent="@android:Theme">
-    &lt;!-- no modification -->
-&lt;/style>
-</pre>
-<p>Now create a a new theme with <code>Theme.Dialog</code> as the parent:</p>
+For example, we'll modify the <code>Theme.Dialog</code> theme. To do so, create a style
+with <code>Theme.Dialog</code> as the parent:</p>
 <pre>
 &lt;style name="CustomDialogTheme" parent="@android:style/Theme.Dialog">
 </pre>
-<p>There it is. We've inherited the Dialog theme, so we can adjust its styles as we like. 
-So, for each item in the Dialog theme that we want to override, we re-define the value under this style and 
-then use <var>CustomDialogTheme</var> instead of the <var>Theme.Dialog</var>.</p>
+<p>There it is. We've inherited the Android Dialog theme so we can adjust its styles as we like. 
+So, for each item in the Dialog theme that we want to change, we re-define the value here and 
+use <var>CustomDialogTheme</var> instead of <var>Theme.Dialog</var> inside the Android Manifest.</p>
 
 <h3 id="fromTheApp">Set the theme from the application</h3>
 <p>You can also load a theme for an Activity programmatically, if needed. 
 To do so, use the {@link android.app.Activity#setTheme(int) setTheme()} 
 method. Note that, when doing so, you must be sure to set the theme <em>before</em> 
 instantiating any Views in the context, for example, before calling 
-setContentView(View) or inflate(int, ViewGroup). This ensures that 
+<code>setContentView(View)</code> or <code>inflate(int, ViewGroup)</code>. This ensures that 
 the system applies the same theme for all of your UI screens. Here's an example:</p>
 
 <pre>
- protected void onCreate(Bundle icicle) {
-    super.onCreate(icicle);
+ protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ...
     setTheme(android.R.style.Theme_Light);
     setContentView(R.layout.linear_layout_3);
@@ -164,14 +159,14 @@ the system applies the same theme for all of your UI screens. Here's an example:
 
 <p>If you are considering loading a theme programmatically for the main
 screen of your application, note that the theme would not be applied
-in any animations the system would use to show the activity, which
-would take place before your application starts. In most cases, if 
+in any animations the system would use to start the activity, which
+would take place before your application opens. In most cases, if 
 you want to apply a theme to your main screen, doing so in XML
  is a better approach. </p>
 
 <p>For detailed information about custom styles and themes and referencing them from your application, see
-<a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Style
-and Theme Resources</a>.</p>
+<a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Available Resource Types:
+Style and Themes</a>.</p>
 
 <p>For information about default themes and styles available, see {@link android.R.style}.</p>
 

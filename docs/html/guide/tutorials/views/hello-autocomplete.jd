@@ -40,7 +40,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
     AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.edit);
     ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-            android.R.layout.simple_dropdown_item_1line, R.array.planets);
+            android.R.layout.simple_dropdown_item_1line, COUNTRIES);
     textView.setAdapter(adapter);
 }
 </pre>

@@ -54,7 +54,7 @@ public class UsbStorageStopActivity extends AlertActivity implements DialogInter
 
         // Set up the "dialog"
         final AlertController.AlertParams p = mAlertParams;
-        p.mIconId = com.android.internal.R.drawable.stat_sys_warning;
+        p.mIconId = com.android.internal.R.drawable.ic_dialog_alert;
         p.mTitle = getString(com.android.internal.R.string.usb_storage_stop_title);
         p.mMessage = getString(com.android.internal.R.string.usb_storage_stop_message);
         p.mPositiveButtonText = getString(com.android.internal.R.string.usb_storage_stop_button_mount);

@@ -141,6 +141,20 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
                                     BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         }
+
+        // Remove remoteServiceChannelCallbacks
+        HashMap<String, IBluetoothDeviceCallback> callbacksMap =
+            mEventLoop.getRemoteServiceChannelCallbacks();
+        IBluetoothDeviceCallback callback;
+
+        for (String address : callbacksMap.keySet()) {
+            callback = callbacksMap.get(address);
+            try {
+                callback.onGetRemoteServiceChannelResult(address, BluetoothError.ERROR_DISABLED);
+            } catch (RemoteException e) {}
+            callbacksMap.remove(address);
+        }
+
         // update mode
         Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
         intent.putExtra(BluetoothIntent.SCAN_MODE, BluetoothDevice.SCAN_MODE_NONE);
@@ -569,10 +583,18 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         }
         address = address.toUpperCase();
 
+        String[] bonding = mBondState.listInState(BluetoothDevice.BOND_BONDING);
+        if (bonding.length > 0 && !bonding[0].equals(address)) {
+            log("Ignoring createBond(): another device is bonding");
+            // a different device is currently bonding, fail
+            return false;
+        }
+
         // Check for bond state only if we are not performing auto
         // pairing exponential back-off attempts.
         if (!mBondState.isAutoPairingAttemptsInProgress(address) &&
-            mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
+                mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
+            log("Ignoring createBond(): this device is already bonding or bonded");
             return false;
         }
 

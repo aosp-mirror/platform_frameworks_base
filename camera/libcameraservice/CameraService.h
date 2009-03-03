@@ -172,6 +172,9 @@ private:
         // for a callback from CameraHardwareInterface.  If this
         // happens, it will cause a deadlock.
         mutable     Mutex                       mSurfaceLock;
+        // mBufferLock synchronizes buffer registration between takePicture() 
+        // and yuvPictureCallback().
+        mutable     Mutex                       mBufferLock;
         mutable     Condition                   mReady;
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;

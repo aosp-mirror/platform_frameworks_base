@@ -57,6 +57,7 @@ import com.android.internal.view.menu.MenuBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.lang.ref.SoftReference;
 
 /**
  * <p>
@@ -1563,7 +1564,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
 
     private int[] mDrawableState = null;
 
-    private Bitmap mDrawingCache;
+    private SoftReference<Bitmap> mDrawingCache;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -3950,25 +3951,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         if ((changed & WILL_NOT_CACHE_DRAWING) != 0) {
-            if (mDrawingCache != null) {
-                mDrawingCache.recycle();
-            }
-            mDrawingCache = null;
+            destroyDrawingCache();
         }
 
         if ((changed & DRAWING_CACHE_ENABLED) != 0) {
-            if (mDrawingCache != null) {
-                mDrawingCache.recycle();
-            }
-            mDrawingCache = null;
+            destroyDrawingCache();
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
         }
 
         if ((changed & DRAWING_CACHE_QUALITY_MASK) != 0) {
-            if (mDrawingCache != null) {
-                mDrawingCache.recycle();
-            }
-            mDrawingCache = null;
+            destroyDrawingCache();
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
         }
 
@@ -5415,11 +5407,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if ((mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING) {
             return null;
         }
-        if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED &&
-            ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDrawingCache == null)) {
+        if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED) {
             buildDrawingCache();
         }
-        return mDrawingCache;
+        return mDrawingCache == null ? null : mDrawingCache.get();
     }
 
     /**
@@ -5434,7 +5425,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      */
     public void destroyDrawingCache() {
         if (mDrawingCache != null) {
-            mDrawingCache.recycle();
+            final Bitmap bitmap = mDrawingCache.get();
+            if (bitmap != null) bitmap.recycle();
             mDrawingCache = null;
         }
     }
@@ -5474,7 +5466,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @see #destroyDrawingCache()
      */
     public void buildDrawingCache() {
-        if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDrawingCache == null) {
+        if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDrawingCache == null ||
+                mDrawingCache.get() == null) {
+
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
             }
@@ -5492,15 +5486,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (width <= 0 || height <= 0 ||
                     (width * height * (opaque ? 2 : 4) >= // Projected bitmap size in bytes
                             ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
-                if (mDrawingCache != null) {
-                    mDrawingCache.recycle();
-                }
-                mDrawingCache = null;
+                destroyDrawingCache();
                 return;
             }
 
             boolean clear = true;
-            Bitmap bitmap = mDrawingCache;
+            Bitmap bitmap = mDrawingCache == null ? null : mDrawingCache.get();
 
             if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
 
@@ -5525,12 +5516,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 }
 
                 // Try to cleanup memory
-                if (mDrawingCache != null) {
-                    mDrawingCache.recycle();
-                }
+                if (bitmap != null) bitmap.recycle();
 
                 try {
-                    mDrawingCache = bitmap = Bitmap.createBitmap(width, height, quality);
+                    bitmap = Bitmap.createBitmap(width, height, quality);
+                    mDrawingCache = new SoftReference<Bitmap>(bitmap);
                 } catch (OutOfMemoryError e) {
                     // If there is not enough memory to create the bitmap cache, just
                     // ignore the issue as bitmap caches are not required to draw the
@@ -8060,7 +8050,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 shader = new LinearGradient(0, 0, 0, 1, color, 0, Shader.TileMode.CLAMP);
                 
                 paint.setShader(shader);
-                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+                // Restore the default transfer mode (src_over)
+                paint.setXfermode(null);
             }
         }
     }

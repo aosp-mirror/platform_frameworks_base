@@ -17,7 +17,6 @@
 package android.opengl;
 
 /**
- * {@hide}
  * A collection of utility methods for computing the visibility of triangle
  * meshes.
  *

@@ -41,15 +41,67 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 // helper function to extract a native Camera object from a Camera Java object
-extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz);
+extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct camera_context_t** context);
 
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
     /* actually in android.view.Surface XXX */
     jfieldID    surface_native;
+
+    jmethodID   post_event;
 };
 static fields_t fields;
+
+static Mutex sLock;
+
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class JNIMediaRecorderListener: public MediaRecorderListener
+{
+public:
+    JNIMediaRecorderListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
+    ~JNIMediaRecorderListener();
+    void notify(int msg, int ext1, int ext2);
+private:
+    JNIMediaRecorderListener();
+    jclass      mClass;     // Reference to MediaRecorder class
+    jobject     mObject;    // Weak ref to MediaRecorder Java object to call on
+};
+
+JNIMediaRecorderListener::JNIMediaRecorderListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
+{
+
+    // Hold onto the MediaRecorder class for use in calling the static method
+    // that posts events to the application thread.
+    jclass clazz = env->GetObjectClass(thiz);
+    if (clazz == NULL) {
+        LOGE("Can't find android/media/MediaRecorder");
+        jniThrowException(env, "java/lang/Exception", NULL);
+        return;
+    }
+    mClass = (jclass)env->NewGlobalRef(clazz);
+
+    // We use a weak reference so the MediaRecorder object can be garbage collected.
+    // The reference is only used as a proxy for callbacks.
+    mObject  = env->NewGlobalRef(weak_thiz);
+}
+
+JNIMediaRecorderListener::~JNIMediaRecorderListener()
+{
+    // remove global references
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteGlobalRef(mObject);
+    env->DeleteGlobalRef(mClass);
+}
+
+void JNIMediaRecorderListener::notify(int msg, int ext1, int ext2)
+{
+    LOGV("JNIMediaRecorderListener::notify");
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, msg, ext1, ext2, 0);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -74,10 +126,32 @@ static bool process_media_recorder_call(JNIEnv *env, status_t opStatus, const ch
     return false;
 }
 
+static sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject thiz)
+{
+    Mutex::Autolock l(sLock);
+    MediaRecorder* const p = (MediaRecorder*)env->GetIntField(thiz, fields.context);
+    return sp<MediaRecorder>(p);
+}
+
+static sp<MediaRecorder> setMediaRecorder(JNIEnv* env, jobject thiz, const sp<MediaRecorder>& recorder)
+{
+    Mutex::Autolock l(sLock);
+    sp<MediaRecorder> old = (MediaRecorder*)env->GetIntField(thiz, fields.context);
+    if (recorder.get()) {
+        recorder->incStrong(thiz);
+    }
+    if (old != 0) {
+        old->decStrong(thiz);
+    }
+    env->SetIntField(thiz, fields.context, (int)recorder.get());
+    return old;
+}
+
+
 static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, jobject camera)
 {
-    sp<Camera> c = get_native_camera(env, camera);
-    MediaRecorder *mr = (MediaRecorder*)env->GetIntField(thiz, fields.context);
+    sp<Camera> c = get_native_camera(env, camera, NULL);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setCamera(c->remote()),
             "java/lang/RuntimeException", "setCamera failed.");
 }
@@ -90,7 +164,7 @@ android_media_MediaRecorder_setVideoSource(JNIEnv *env, jobject thiz, jint vs)
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid video source");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setVideoSource(vs), "java/lang/RuntimeException", "setVideoSource failed.");
 }
 
@@ -102,7 +176,7 @@ android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio source");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setAudioSource(as), "java/lang/RuntimeException", "setAudioSource failed.");
 }
 
@@ -114,7 +188,7 @@ android_media_MediaRecorder_setOutputFormat(JNIEnv *env, jobject thiz, jint of)
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid output format");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setOutputFormat(of), "java/lang/RuntimeException", "setOutputFormat failed.");
 }
 
@@ -126,7 +200,7 @@ android_media_MediaRecorder_setVideoEncoder(JNIEnv *env, jobject thiz, jint ve)
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid video encoder");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setVideoEncoder(ve), "java/lang/RuntimeException", "setVideoEncoder failed.");
 }
 
@@ -138,7 +212,7 @@ android_media_MediaRecorder_setAudioEncoder(JNIEnv *env, jobject thiz, jint ae)
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio encoder");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setAudioEncoder(ae), "java/lang/RuntimeException", "setAudioEncoder failed.");
 }
 
@@ -151,7 +225,7 @@ android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject f
         return;
     }
     int fd = getParcelFileDescriptorFD(env, fileDescriptor);
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     status_t opStatus = mr->setOutputFile(fd, offset, length);
     process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
 }
@@ -160,7 +234,7 @@ static void
 android_media_MediaRecorder_setVideoSize(JNIEnv *env, jobject thiz, jint width, jint height)
 {
     LOGV("setVideoSize(%d, %d)", width, height);
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
 
     if (width <= 0 || height <= 0) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "invalid video size");
@@ -177,7 +251,7 @@ android_media_MediaRecorder_setVideoFrameRate(JNIEnv *env, jobject thiz, jint ra
         jniThrowException(env, "java/lang/IllegalArgumentException", "invalid frame rate");
         return;
     }
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setVideoFrameRate(rate), "java/lang/RuntimeException", "setVideoFrameRate failed.");
 }
 
@@ -185,7 +259,7 @@ static void
 android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
 {
     LOGV("prepare");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
 
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
@@ -202,7 +276,7 @@ static int
 android_media_MediaRecorder_native_getMaxAmplitude(JNIEnv *env, jobject thiz)
 {
     LOGV("getMaxAmplitude");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     int result = 0;
     process_media_recorder_call(env, mr->getMaxAmplitude(&result), "java/lang/RuntimeException", "getMaxAmplitude failed.");
     return result;
@@ -212,7 +286,7 @@ static void
 android_media_MediaRecorder_start(JNIEnv *env, jobject thiz)
 {
     LOGV("start");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->start(), "java/lang/RuntimeException", "start failed.");
 }
 
@@ -220,46 +294,54 @@ static void
 android_media_MediaRecorder_stop(JNIEnv *env, jobject thiz)
 {
     LOGV("stop");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->stop(), "java/lang/RuntimeException", "stop failed.");
 }
 
 static void
-android_media_MediaRecorder_reset(JNIEnv *env, jobject thiz)
+android_media_MediaRecorder_native_reset(JNIEnv *env, jobject thiz)
 {
-    LOGV("reset");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
-    process_media_recorder_call(env, mr->reset(), "java/lang/RuntimeException", "reset failed.");
+    LOGV("native_reset");
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->reset(), "java/lang/RuntimeException", "native_reset failed.");
 }
 
 static void
 android_media_MediaRecorder_release(JNIEnv *env, jobject thiz)
 {
     LOGV("release");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
-    env->SetIntField(thiz, fields.context, 0);
-    delete mr;
+    sp<MediaRecorder> mr = setMediaRecorder(env, thiz, 0);
+    if (mr != NULL) {
+        mr->setListener(NULL);
+    }
 }
 
 static void
-android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz)
+android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
     LOGV("setup");
-    MediaRecorder *mr = new MediaRecorder();
-    if (mr->initCheck() == NO_ERROR) {
-        env->SetIntField(thiz, fields.context, (int)mr);
-    } else {
-        delete mr;
-        jniThrowException(env, "java/lang/IOException", "Unable to initialize camera");
+    sp<MediaRecorder> mr = new MediaRecorder();
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
+        return;
     }
+    if (mr->initCheck() != NO_ERROR) {
+        jniThrowException(env, "java/lang/IOException", "Unable to initialize camera");
+        return;
+    }
+
+    // create new listener and give it to MediaRecorder
+    sp<JNIMediaRecorderListener> listener = new JNIMediaRecorderListener(env, thiz, weak_this);
+    mr->setListener(listener);
+
+    setMediaRecorder(env, thiz, mr);
 }
 
 static void
 android_media_MediaRecorder_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("finalize");
-    MediaRecorder *mr = (MediaRecorder *)env->GetIntField(thiz, fields.context);
-    delete mr;
+    android_media_MediaRecorder_release(env, thiz);
 }
 
 // ----------------------------------------------------------------------------
@@ -278,9 +360,9 @@ static JNINativeMethod gMethods[] = {
     {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
     {"start",                "()V",                             (void *)android_media_MediaRecorder_start},
     {"stop",                 "()V",                             (void *)android_media_MediaRecorder_stop},
-    {"reset",                "()V",                             (void *)android_media_MediaRecorder_reset},
+    {"native_reset",                "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
-    {"native_setup",         "()V",                             (void *)android_media_MediaRecorder_native_setup},
+    {"native_setup",         "(Ljava/lang/Object;)V",           (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
@@ -317,6 +399,13 @@ int register_android_media_MediaRecorder(JNIEnv *env)
     fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
     if (fields.surface_native == NULL) {
         LOGE("Can't find Surface fields");
+        return -1;
+    }
+
+    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    if (fields.post_event == NULL) {
+        LOGE("Can't find MediaRecorder.postEventFromNative");
         return -1;
     }
 

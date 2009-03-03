@@ -152,7 +152,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
 }
 
 CameraService::Client::Client(const sp<CameraService>& cameraService,
-        const sp<ICameraClient>& cameraClient, pid_t clientPid) 
+        const sp<ICameraClient>& cameraClient, pid_t clientPid)
 {
     LOGD("Client E constructor");
     mCameraService = cameraService;
@@ -429,7 +429,7 @@ status_t CameraService::Client::startPreviewMode()
         ret = mHardware->startPreview(NULL, mCameraService.get());
         if (ret != NO_ERROR)
             LOGE("mHardware->startPreview() failed with status %d\n", ret);
- 
+
     } else {
         ret = mHardware->startPreview(previewCallback,
                                       mCameraService.get());
@@ -684,13 +684,33 @@ status_t CameraService::Client::takePicture()
         return INVALID_OPERATION;
     }
 
-    if (mSurface != NULL && !mUseOverlay)
-        mSurface->unregisterBuffers();
 
-    return mHardware->takePicture(shutterCallback,
+    Mutex::Autolock buffer_lock(mBufferLock);
+    result = mHardware->takePicture(shutterCallback,
                                   yuvPictureCallback,
                                   jpegPictureCallback,
                                   mCameraService.get());
+
+    // It takes quite some time before yuvPicture callback to be called. 
+    // Register the buffer for raw image here to reduce latency.  
+    // But yuvPictureCallback is called from libcamera. So do not call into a
+    // libcamera function here that gets another lock, which may cause deadlock.
+    if (mSurface != 0 && !mUseOverlay) {
+        int w, h;
+        CameraParameters params(mHardware->getParameters());
+        params.getPictureSize(&w, &h);
+        mSurface->unregisterBuffers();
+        uint32_t transform = 0;
+        if (params.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
+            LOGV("portrait mode");
+            transform = ISurface::BufferHeap::ROT_90;
+        }
+        ISurface::BufferHeap buffers(w, h, w, h,
+            PIXEL_FORMAT_YCbCr_420_SP, transform, 0, mHardware->getRawHeap());
+        mSurface->registerBuffers(buffers);
+    }
+
+    return result;
 }
 
 // picture callback - snapshot taken
@@ -732,23 +752,9 @@ void CameraService::Client::yuvPictureCallback(const sp<IMemory>& mem,
 #endif
 
     // Put the YUV version of the snapshot in the preview display.
-    int w, h;
-    CameraParameters params(client->mHardware->getParameters());
-    params.getPictureSize(&w, &h);
-
-//  Mutex::Autolock clientLock(client->mLock);
+    // Use lock to make sure buffer has been registered.
+    Mutex::Autolock clientLock(client->mBufferLock);
     if (client->mSurface != 0 && !client->mUseOverlay) {
-        client->mSurface->unregisterBuffers();
-        
-        uint32_t transform = 0;
-        if (params.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
-            LOGV("portrait mode");
-            transform = ISurface::BufferHeap::ROT_90;
-        }
-        ISurface::BufferHeap buffers(w, h, w, h,
-                PIXEL_FORMAT_YCbCr_420_SP, transform, 0, heap);
-        
-        client->mSurface->registerBuffers(buffers);
         client->mSurface->postBuffer(offset);
     }
 

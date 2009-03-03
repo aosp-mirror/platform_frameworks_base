@@ -74,7 +74,6 @@ public class KeyboardView extends View implements View.OnClickListener {
          * For keys that repeat, this is only called once.
          * @param primaryCode the unicode of the key being pressed. If the touch is not on a valid
          * key, the value will be zero.
-         * @hide Pending API Council approval
          */
         void onPress(int primaryCode);
         
@@ -82,7 +81,6 @@ public class KeyboardView extends View implements View.OnClickListener {
          * Called when the user releases a key. This is sent after the {@link #onKey} is called.
          * For keys that repeat, this is only called once.
          * @param primaryCode the code of the key that was released
-         * @hide Pending API Council approval
          */
         void onRelease(int primaryCode);
 
@@ -98,6 +96,12 @@ public class KeyboardView extends View implements View.OnClickListener {
          */
         void onKey(int primaryCode, int[] keyCodes);
 
+        /**
+         * Sends a sequence of characters to the listener.
+         * @param text the sequence of characters to be displayed.
+         */
+        void onText(CharSequence text);
+        
         /**
          * Called when the user quickly moves the finger from right to left.
          */
@@ -394,6 +398,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         requestLayout();
         invalidate();
         computeProximityThreshold(keyboard);
+        mMiniKeyboardCache.clear(); // Not really necessary to do every time, but will free up views
     }
 
     /**
@@ -699,9 +704,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
             if (key.text != null) {
-                for (int i = 0; i < key.text.length(); i++) {
-                    mKeyboardActionListener.onKey(key.text.charAt(i), key.codes);
-                }
+                mKeyboardActionListener.onText(key.text);
                 mKeyboardActionListener.onRelease(NOT_A_KEY);
             } else {
                 int code = key.codes[0];
@@ -792,7 +795,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPreviewText.setCompoundDrawables(null, null, null, null);
             mPreviewText.setText(getPreviewText(key));
             if (key.label.length() > 1 && key.codes.length < 2) {
-                mPreviewText.setTextSize(mLabelTextSize);
+                mPreviewText.setTextSize(mKeyTextSize);
                 mPreviewText.setTypeface(Typeface.DEFAULT_BOLD);
             } else {
                 mPreviewText.setTextSize(mPreviewTextSizeLarge);
@@ -893,6 +896,11 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mMiniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
                     public void onKey(int primaryCode, int[] keyCodes) {
                         mKeyboardActionListener.onKey(primaryCode, keyCodes);
+                        dismissPopupKeyboard();
+                    }
+                    
+                    public void onText(CharSequence text) {
+                        mKeyboardActionListener.onText(text);
                         dismissPopupKeyboard();
                     }
                     
@@ -1102,6 +1110,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         mHandler.removeMessages(MSG_SHOW_PREVIEW);
         
         dismissPopupKeyboard();
+        
+        mMiniKeyboardCache.clear();
     }
     
     @Override

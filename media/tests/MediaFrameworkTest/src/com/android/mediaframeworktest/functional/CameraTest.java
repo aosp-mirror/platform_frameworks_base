@@ -136,11 +136,13 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
     //Implement the RawPictureCallback
     private final class RawPictureCallback implements PictureCallback { 
         public void onPictureTaken(byte [] rawData, Camera camera) {
-           if (rawData != null) {
-               rawPictureCallbackResult = true;
-           } else {
-               rawPictureCallbackResult = false;
-           }
+           // no support for raw data - success if we get the callback
+           rawPictureCallbackResult = true;
+           //if (rawData != null) {
+           //    rawPictureCallbackResult = true;
+           //} else {
+           //    rawPictureCallbackResult = false;
+           //}
             Log.v(TAG, "RawPictureCallback callback");
         }
     };

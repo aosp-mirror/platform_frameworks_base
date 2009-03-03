@@ -63,8 +63,10 @@ public class BluetoothDevice {
     public static final int UNBOND_REASON_AUTH_CANCELED = 3;
     /** A bond attempt failed because we could not contact the remote device */
     public static final int UNBOND_REASON_REMOTE_DEVICE_DOWN = 4;
+    /** A bond attempt failed because a discovery is in progress */
+    public static final int UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
     /** An existing bond was explicitly revoked */
-    public static final int UNBOND_REASON_REMOVED = 5;
+    public static final int UNBOND_REASON_REMOVED = 6;
 
     private static final String TAG = "BluetoothDevice";
     

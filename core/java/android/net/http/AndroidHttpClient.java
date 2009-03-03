@@ -47,6 +47,8 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +57,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.net.URI;
+import java.security.KeyManagementException;
 
 import android.util.Log;
 import android.content.ContentResolver;
@@ -98,10 +101,13 @@ public final class AndroidHttpClient implements HttpClient {
 
     /**
      * Create a new HttpClient with reasonable defaults (which you can update).
+     *
      * @param userAgent to report in your HTTP requests.
+     * @param sessionCache persistent session cache
      * @return AndroidHttpClient for you to use for all your requests.
      */
-    public static AndroidHttpClient newInstance(String userAgent) {
+    public static AndroidHttpClient newInstance(String userAgent,
+            SSLClientSessionCache sessionCache) {
         HttpParams params = new BasicHttpParams();
 
         // Turn off stale checking.  Our connections break all the time anyway,
@@ -123,13 +129,49 @@ public final class AndroidHttpClient implements HttpClient {
         schemeRegistry.register(new Scheme("http",
                 PlainSocketFactory.getSocketFactory(), 80));
         schemeRegistry.register(new Scheme("https",
-                SSLSocketFactory.getSocketFactory(), 443));
+                socketFactoryWithCache(sessionCache), 443));
+
         ClientConnectionManager manager =
                 new ThreadSafeClientConnManager(params, schemeRegistry);
 
         // We use a factory method to modify superclass initialization
         // parameters without the funny call-a-static-method dance.
         return new AndroidHttpClient(manager, params);
+    }
+
+    /**
+     * Returns a socket factory backed by the given persistent session cache.
+     *
+     * @param sessionCache to retrieve sessions from, null for no cache
+     */
+    private static SSLSocketFactory socketFactoryWithCache(
+            SSLClientSessionCache sessionCache) {
+        if (sessionCache == null) {
+            // Use the default factory which doesn't support persistent
+            // caching.
+            return SSLSocketFactory.getSocketFactory();
+        }
+
+        // Create a new SSL context backed by the cache.
+        // TODO: Keep a weak *identity* hash map of caches to engines. In the
+        // mean time, if we have two engines for the same cache, they'll still
+        // share sessions but will have to do so through the persistent cache.
+        SSLContextImpl sslContext = new SSLContextImpl();
+        try {
+            sslContext.engineInit(null, null, null, sessionCache, null);
+        } catch (KeyManagementException e) {
+            throw new AssertionError(e);
+        }
+        return new SSLSocketFactory(sslContext.engineGetSocketFactory());
+    }
+
+    /**
+     * Create a new HttpClient with reasonable defaults (which you can update).
+     * @param userAgent to report in your HTTP requests.
+     * @return AndroidHttpClient for you to use for all your requests.
+     */
+    public static AndroidHttpClient newInstance(String userAgent) {
+        return newInstance(userAgent, null /* session cache */);
     }
 
     private final HttpClient delegate;

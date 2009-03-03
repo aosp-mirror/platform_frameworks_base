@@ -361,6 +361,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     HistoryRecord mFocusedActivity = null;
 
     /**
+     * This is the last activity that we put into the paused state.  This is
+     * used to determine if we need to do an activity transition while sleeping,
+     * when we normally hold the top activity paused.
+     */
+    HistoryRecord mLastPausedActivity = null;
+
+    /**
      * List of activities that are waiting for a new activity
      * to become visible before completing whatever operation they are
      * supposed to do.
@@ -1819,6 +1826,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_PAUSE) Log.v(TAG, "Start pausing: " + prev);
         mResumedActivity = null;
         mPausingActivity = prev;
+        mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
 
@@ -1837,9 +1845,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // Ignore exception, if process died other code will cleanup.
                 Log.w(TAG, "Exception thrown during pause", e);
                 mPausingActivity = null;
+                mLastPausedActivity = null;
             }
         } else {
             mPausingActivity = null;
+            mLastPausedActivity = null;
         }
 
         // If we are not going to sleep, we want to ensure the device is
@@ -2002,7 +2012,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // First: if this is not the current activity being started, make
             // sure it matches the current configuration.
             if (r != starting && doThisProcess) {
-                ensureActivityConfigurationLocked(r);
+                ensureActivityConfigurationLocked(r, 0);
             }
             
             if (r.app == null || r.app.thread == null) {
@@ -2192,6 +2202,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return false;
         }
 
+        // If we are sleeping, and there is no resumed activity, and the top
+        // activity is paused, well that is the state we want.
+        if (mSleeping && mLastPausedActivity == next && next.state == ActivityState.PAUSED) {
+            // Make sure we have executed any pending transitions, since there
+            // should be nothing left to do at this point.
+            mWindowManager.executeAppTransition();
+            return false;
+        }
+        
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStoppingActivities.remove(next);
@@ -2311,6 +2330,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // Do over!
                     mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
                 }
+                mWindowManager.executeAppTransition();
                 return true;
             }
             
@@ -3839,6 +3859,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_PAUSE) Log.v(TAG, "App died while pausing: " + mPausingActivity);
             mPausingActivity = null;
         }
+        if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
+            mLastPausedActivity = null;
+        }
 
         // Remove this application's activities from active lists.
         removeHistoryRecordsForAppLocked(mLRUActivities, app);
@@ -4432,7 +4455,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Log.w(TAG, "Process " + app + " failed to attach");
             mProcessNames.remove(app.processName, app.info.uid);
             Process.killProcess(pid);
-            if (mPendingBroadcast.curApp.pid == pid) {
+            if (mPendingBroadcast != null && mPendingBroadcast.curApp.pid == pid) {
                 Log.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
                 mPendingBroadcast = null;
                 scheduleBroadcastsLocked();
@@ -7836,6 +7859,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             pw.println("  mPausingActivity: " + mPausingActivity);
             pw.println("  mResumedActivity: " + mResumedActivity);
             pw.println("  mFocusedActivity: " + mFocusedActivity);
+            pw.println("  mLastPausedActivity: " + mLastPausedActivity);
 
             if (mRecentTasks.size() > 0) {
                 pw.println(" ");
@@ -10975,7 +10999,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         if (starting != null) {
-            kept = ensureActivityConfigurationLocked(starting);
+            kept = ensureActivityConfigurationLocked(starting, changes);
             if (kept) {
                 // If this didn't result in the starting activity being
                 // destroyed, then we need to make sure at this point that all
@@ -11032,7 +11056,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * for whatever reason.  Ensures the HistoryRecord is updated with the
      * correct configuration and all other bookkeeping is handled.
      */
-    private final boolean ensureActivityConfigurationLocked(HistoryRecord r) {
+    private final boolean ensureActivityConfigurationLocked(HistoryRecord r,
+            int globalChanges) {
         if (DEBUG_SWITCH) Log.i(TAG, "Ensuring correct configuration: " + r);
         
         // Short circuit: if the two configurations are the exact same
@@ -11079,7 +11104,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if ((changes&(~r.info.configChanges)) != 0) {
                 // Aha, the activity isn't handling the change, so DIE DIE DIE.
                 r.configChangeFlags |= changes;
-                r.startFreezingScreenLocked(r.app, changes);
+                r.startFreezingScreenLocked(r.app, globalChanges);
                 if (r.app == null || r.app.thread == null) {
                     if (DEBUG_SWITCH) Log.i(TAG, "Switch is destroying non-running " + r);
                     destroyActivityLocked(r, true);

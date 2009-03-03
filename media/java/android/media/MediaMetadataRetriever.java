@@ -18,6 +18,7 @@ package android.media;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -137,11 +138,11 @@ public class MediaMetadataRetriever
             return;
         }
 
-        ParcelFileDescriptor fd = null;
+        AssetFileDescriptor fd = null;
         try {
             ContentResolver resolver = context.getContentResolver();
             try {
-                fd = resolver.openFileDescriptor(uri, "r");
+                fd = resolver.openAssetFileDescriptor(uri, "r");
             } catch(FileNotFoundException e) {
                 throw new IllegalArgumentException();
             }
@@ -152,7 +153,14 @@ public class MediaMetadataRetriever
             if (!descriptor.valid()) {
                 throw new IllegalArgumentException();
             }
-            setDataSource(descriptor);
+            // Note: using getDeclaredLength so that our behavior is the same
+            // as previous versions when the content provider is returning
+            // a full file.
+            if (fd.getDeclaredLength() < 0) {
+                setDataSource(descriptor);
+            } else {
+                setDataSource(descriptor, fd.getStartOffset(), fd.getDeclaredLength());
+            }
             return;
         } catch (SecurityException ex) {
         } finally {

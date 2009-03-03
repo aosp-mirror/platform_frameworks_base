@@ -258,5 +258,16 @@ MediaRecorderClient::~MediaRecorderClient()
     release();
 }
 
+status_t MediaRecorderClient::setListener(const sp<IMediaPlayerClient>& listener)
+{
+    LOGV("setListener");
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setListener(listener);
+}
+
 }; // namespace android
 

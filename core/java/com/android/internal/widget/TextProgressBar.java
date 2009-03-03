@@ -115,8 +115,10 @@ public class TextProgressBar extends RelativeLayout implements OnChronometerTick
         
         // Update the ProgressBar maximum relative to Chronometer base
         mDuration = (int) (durationBase - mChronometer.getBase());
+        if (mDuration <= 0) {
+            mDuration = 1;
+        }
         mProgressBar.setMax(mDuration);
-        
     }
     
     /**

@@ -840,7 +840,7 @@ public class ImageView extends View {
 
     @Override
     public int getBaseline() {
-        return mBaselineAligned ? getHeight() : -1;
+        return mBaselineAligned ? getMeasuredHeight() : -1;
     }
     
     /**

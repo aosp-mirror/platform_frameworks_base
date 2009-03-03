@@ -16,8 +16,11 @@
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/oh_hai_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
     android:text="@string/oh_hai"
+    android:background="#8fff"
+    android:textColor="#000"
+    android:textStyle="bold"
 />
 

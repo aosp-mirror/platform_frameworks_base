@@ -50,6 +50,8 @@ import com.android.internal.view.IInputContextCallback;
 
     void setSelection(int start, int end);
     
+    void performEditorAction(int actionCode);
+    
     void performContextMenuAction(int id);
     
     void beginBatchEdit();

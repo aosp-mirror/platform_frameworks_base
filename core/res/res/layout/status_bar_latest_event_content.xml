@@ -22,6 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:singleLine="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingLeft="4dp"
@@ -38,6 +40,8 @@
             android:layout_weight="1"
             android:textColor="#ff000000"
             android:singleLine="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
             android:textSize="14sp"
             android:paddingLeft="4dp"
             />

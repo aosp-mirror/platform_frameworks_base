@@ -21,6 +21,7 @@
 #include <utils/Parcel.h>
 #include <ui/ISurface.h>
 #include <ui/ICamera.h>
+#include <media/IMediaPlayerClient.h>
 #include <media/IMediaRecorder.h>
 
 namespace android {
@@ -44,7 +45,8 @@ enum {
     SET_VIDEO_SIZE,
     SET_VIDEO_FRAMERATE,
     SET_PREVIEW_SURFACE,
-    SET_CAMERA
+    SET_CAMERA,
+    SET_LISTENER
 };
 
 class BpMediaRecorder: public BpInterface<IMediaRecorder>
@@ -173,6 +175,16 @@ public:
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
         data.writeInt32(frames_per_second);
         remote()->transact(SET_VIDEO_FRAMERATE, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setListener(const sp<IMediaPlayerClient>& listener)
+    {
+        LOGV("setListener(%p)", listener.get());
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeStrongBinder(listener->asBinder());
+        remote()->transact(SET_LISTENER, data, &reply);
         return reply.readInt32();
     }
 
@@ -371,6 +383,14 @@ status_t BnMediaRecorder::onTransact(
             CHECK_INTERFACE(IMediaRecorder, data, reply);
             int frames_per_second = data.readInt32();
             reply->writeInt32(setVideoFrameRate(frames_per_second));
+            return NO_ERROR;
+        } break;
+        case SET_LISTENER: {
+            LOGV("SET_LISTENER");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            sp<IMediaPlayerClient> listener =
+                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
+            reply->writeInt32(setListener(listener));
             return NO_ERROR;
         } break;
         case SET_PREVIEW_SURFACE: {

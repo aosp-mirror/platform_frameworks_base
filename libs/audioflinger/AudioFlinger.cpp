@@ -171,13 +171,6 @@ AudioFlinger::AudioFlinger()
      } else {
         LOGE("Couldn't even initialize the stubbed audio hardware!");
     }
-
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.audio.silent", value, "0");
-    if (atoi(value)) {
-        LOGD("Silence is golden");
-        setMasterMute(true);
-    }
 }
 
 AudioFlinger::~AudioFlinger()
@@ -995,6 +988,16 @@ bool AudioFlinger::MixerThread::threadLoop()
                 IPCThreadState::self()->flushCommands();
                 mWaitWorkCV.wait(mLock);
                 LOGV("Audio hardware exiting standby, output %d\n", mOutputType);
+                
+                if (mMasterMute == false) {
+                    char value[PROPERTY_VALUE_MAX];
+                    property_get("ro.audio.silent", value, "0");
+                    if (atoi(value)) {
+                        LOGD("Silence is golden");
+                        setMasterMute(true);
+                    }                    
+                }
+                
                 standbyTime = systemTime() + kStandbyTimeInNsecs;
                 continue;
             }

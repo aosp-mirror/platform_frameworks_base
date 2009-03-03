@@ -1,61 +1,34 @@
-/*
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
-
 package com.android.providers.subscribedfeeds;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.Context;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteFullException;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.SubscribedFeeds;
-import android.provider.Sync;
-import android.provider.SyncConstValue;
-import android.text.TextUtils;
+import android.util.Log;
 import android.util.Config;
 import android.util.EventLog;
-import android.util.Log;
+import android.app.IntentService;
+import android.provider.Sync;
+import android.provider.SubscribedFeeds;
+import android.provider.SyncConstValue;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteFullException;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.os.Bundle;
+import android.os.Debug;
+import android.text.TextUtils;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
- * Handles the XMPP_CONNECTED_ACTION intent by updating all the
- * subscribed feeds with the new jabber id and initiating a sync
- * for all subscriptions.
- *
- * Handles the TICKLE_ACTION intent by finding the matching
- * subscribed feed and intiating a sync for it.
+ * A service to handle various intents asynchronously.
  */
-public class SubscribedFeedsService extends BroadcastReceiver {
-
+public class SubscribedFeedsIntentService extends IntentService {
     private static final String TAG = "Sync";
-
-    private static final String SUBSCRIBED_FEEDS_REFRESH_ACTION =
-            "com.android.subscribedfeeds.action.REFRESH";
-
-    private static final Intent sSubscribedFeedsRefreshIntent =
-            new Intent(SUBSCRIBED_FEEDS_REFRESH_ACTION);
 
     private static final String[] sAccountProjection =
             new String[] {SubscribedFeeds.Accounts._SYNC_ACCOUNT};
@@ -67,11 +40,20 @@ public class SubscribedFeedsService extends BroadcastReceiver {
 
     private static final String sSubscribedFeedsPrefs = "subscribedFeeds";
 
-    static final int LOG_TICKLE = 2742;
+    private static final String GTALK_DATA_MESSAGE_RECEIVED =
+            "android.intent.action.GTALK_DATA_MESSAGE_RECEIVED";
 
-    public void onReceive(Context context, Intent intent) {
-        if ("android.intent.action.GTALK_DATA_MESSAGE_RECEIVED".equals(
-                intent.getAction())) {
+    private static final String SUBSCRIBED_FEEDS_REFRESH_ACTION =
+            "com.android.subscribedfeeds.action.REFRESH";
+
+    private static final int LOG_TICKLE = 2742;
+
+    public SubscribedFeedsIntentService() {
+        super("SubscribedFeedsIntentService");
+    }
+
+    protected void onHandleIntent(Intent intent) {
+        if (GTALK_DATA_MESSAGE_RECEIVED.equals(intent.getAction())) {
             boolean fromTrustedServer = intent.getBooleanExtra("from_trusted_server", false);
             if (fromTrustedServer) {
                 String account = intent.getStringExtra("account");
@@ -89,7 +71,7 @@ public class SubscribedFeedsService extends BroadcastReceiver {
                             + account + " - " + token);
                 }
 
-                handleTickle(context, account, token);
+                handleTickle(this, account, token);
             } else {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Ignoring tickle -- not from trusted server.");
@@ -102,25 +84,23 @@ public class SubscribedFeedsService extends BroadcastReceiver {
                 Log.d(TAG, "Received boot completed action");
             }
             // load the time from the shared preferences and schedule an alarm
-            long refreshTime = context.getSharedPreferences(
+            long refreshTime = getSharedPreferences(
                     sSubscribedFeedsPrefs,
                     Context.MODE_WORLD_READABLE).getLong(sRefreshTime, 0);
-            scheduleRefresh(context, refreshTime);
-        } else if (sSubscribedFeedsRefreshIntent.getAction().equals(
-                intent.getAction())) {
+            scheduleRefresh(this, refreshTime);
+        } else if (SUBSCRIBED_FEEDS_REFRESH_ACTION.equals(intent.getAction())) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received sSubscribedFeedsRefreshIntent");
             }
-            handleRefreshAlarm(context);
+            handleRefreshAlarm(this);
         }
     }
-
     private void scheduleRefresh(Context context, long when) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(
                 Context.ALARM_SERVICE);
-        PendingIntent sender = PendingIntent.getBroadcast(context,
-                0, sSubscribedFeedsRefreshIntent, 0);
-        alarmManager.set(AlarmManager.RTC, when, sender);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+                0, new Intent(SUBSCRIBED_FEEDS_REFRESH_ACTION), 0);
+        alarmManager.set(AlarmManager.RTC, when, pendingIntent);
     }
 
     private void handleTickle(Context context, String account, String feed) {
@@ -204,10 +184,8 @@ public class SubscribedFeedsService extends BroadcastReceiver {
         // Schedule a refresh.
         long refreshTime = Calendar.getInstance().getTimeInMillis() + SUBSCRIPTION_REFRESH_INTERVAL;
         scheduleRefresh(context, refreshTime);
-        SharedPreferences preferences = context
-                .getSharedPreferences(sSubscribedFeedsPrefs,
-                        Context.MODE_WORLD_READABLE);
-        SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences.Editor editor = context.getSharedPreferences(sSubscribedFeedsPrefs,
+                Context.MODE_WORLD_READABLE).edit();
         editor.putLong(sRefreshTime, refreshTime);
         editor.commit();
     }

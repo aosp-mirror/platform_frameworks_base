@@ -229,6 +229,12 @@ public class KeyEvent implements Parcelable {
     public static final int FLAG_SOFT_KEYBOARD = 0x2;
     
     /**
+     * This mask is set if we don't want the key event to cause us to leave
+     * touch mode.
+     */
+    public static final int FLAG_KEEP_TOUCH_MODE = 0x4;
+    
+    /**
      * Returns the maximum keycode.
      */
     public static int getMaxKeyCode() {

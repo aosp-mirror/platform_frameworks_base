@@ -218,6 +218,104 @@ static int myTid() {
 #endif
 }
 
+#if defined(__arm__)
+extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
+        size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
+extern "C" void free_malloc_leak_info(uint8_t* info);
+
+void memStatus(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    typedef struct {
+        size_t size;
+        size_t dups;
+        intptr_t * backtrace;
+    } AllocEntry;
+
+    uint8_t *info = NULL;
+    size_t overallSize = 0;
+    size_t infoSize = 0;
+    size_t totalMemory = 0;
+    size_t backtraceSize = 0;
+
+    get_malloc_leak_info(&info, &overallSize, &infoSize, &totalMemory, &backtraceSize);
+    if (info) {
+        uint8_t *ptr = info;
+        size_t count = overallSize / infoSize;
+
+        snprintf(buffer, SIZE, " Allocation count %i\n", count);
+        result.append(buffer);
+
+        AllocEntry * entries = new AllocEntry[count];
+
+        for (size_t i = 0; i < count; i++) {
+            // Each entry should be size_t, size_t, intptr_t[backtraceSize]
+            AllocEntry *e = &entries[i];
+
+            e->size = *reinterpret_cast<size_t *>(ptr);
+            ptr += sizeof(size_t);
+
+            e->dups = *reinterpret_cast<size_t *>(ptr);
+            ptr += sizeof(size_t);
+
+            e->backtrace = reinterpret_cast<intptr_t *>(ptr);
+            ptr += sizeof(intptr_t) * backtraceSize;
+        }
+
+        // Now we need to sort the entries.  They come sorted by size but
+        // not by stack trace which causes problems using diff.
+        bool moved;
+        do {
+            moved = false;
+            for (size_t i = 0; i < (count - 1); i++) {
+                AllocEntry *e1 = &entries[i];
+                AllocEntry *e2 = &entries[i+1];
+
+                bool swap = e1->size < e2->size;
+                if (e1->size == e2->size) {
+                    for(size_t j = 0; j < backtraceSize; j++) {
+                        if (e1->backtrace[j] == e2->backtrace[j]) {
+                            continue;
+                        }
+                        swap = e1->backtrace[j] < e2->backtrace[j];
+                        break;
+                    }
+                }
+                if (swap) {
+                    AllocEntry t = entries[i];
+                    entries[i] = entries[i+1];
+                    entries[i+1] = t;
+                    moved = true;
+                }
+            }
+        } while (moved);
+
+        for (size_t i = 0; i < count; i++) {
+            AllocEntry *e = &entries[i];
+
+            snprintf(buffer, SIZE, "size %8i, dup %4i", e->size, e->dups);
+            result.append(buffer);
+            for (size_t ct = 0; (ct < backtraceSize) && e->backtrace[ct]; ct++) {
+                if (ct) {
+                    result.append(", ");
+                }
+                snprintf(buffer, SIZE, "0x%08x", e->backtrace[ct]);
+                result.append(buffer);
+            }
+            result.append("\n");
+        }
+
+        delete[] entries;
+        free_malloc_leak_info(info);
+    }
+
+    write(fd, result.string(), result.size());
+}
+#endif
+
 status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 256;
@@ -300,6 +398,18 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
             result.append("\n");
         }
+
+#if defined(__arm__)
+        bool dumpMem = false;
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i] == String16("-m")) {
+                dumpMem = true;
+            }
+        }
+        if (dumpMem) {
+            memStatus(fd, args);
+        }
+#endif
     }
     write(fd, result.string(), result.size());
     return NO_ERROR;

@@ -45,6 +45,8 @@
 #define INVALID_VERSION -1
 #define SQLITE_SOFT_HEAP_LIMIT (4 * 1024 * 1024)
 #define ANDROID_TABLE "android_metadata"
+/* uncomment the next line to force-enable logging of all statements */
+// #define DB_LOG_STATEMENTS
 
 namespace android {
 
@@ -197,7 +199,11 @@ static void native_execSQL(JNIEnv* env, jobject object, jstring sqlString)
             env->ReleaseStringUTFChars(sqlString, sql8);
 
         }
-    } else IF_LOGV() {
+    } else
+#ifndef DB_LOG_STATEMENTS
+    IF_LOGV()
+#endif
+    {
         char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
         LOGV("Success on %p when executing '%s'\n", handle, sql8);
         env->ReleaseStringUTFChars(sqlString, sql8);

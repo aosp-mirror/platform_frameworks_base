@@ -60,9 +60,37 @@ static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromSocket(JNIEn
     return fileDescriptorClone;
 }
 
+static jlong android_os_ParcelFileDescriptor_getStatSize(JNIEnv* env,
+    jobject clazz)
+{
+    jint fd = env->GetIntField(clazz, gFileDescriptorOffsets.mDescriptor);
+    
+    struct stat st;
+    if (fstat(fd, &st) != 0) {
+        return -1;
+    }
+    
+    if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
+        return st.st_size;
+    }
+    
+    return -1;
+}
+
+static jlong android_os_ParcelFileDescriptor_seekTo(JNIEnv* env,
+    jobject clazz, jlong pos)
+{
+    jint fd = env->GetIntField(clazz, gFileDescriptorOffsets.mDescriptor);
+    return lseek(fd, pos, SEEK_SET);
+}
+
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
     {"getFileDescriptorFromSocket", "(Ljava/net/Socket;)Ljava/io/FileDescriptor;",
-        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket}
+        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket},
+    {"getStatSize", "()J",
+        (void*)android_os_ParcelFileDescriptor_getStatSize},
+    {"seekTo", "(J)J",
+        (void*)android_os_ParcelFileDescriptor_seekTo}
 };
 
 const char* const kParcelFileDescriptorPathName = "android/os/ParcelFileDescriptor";

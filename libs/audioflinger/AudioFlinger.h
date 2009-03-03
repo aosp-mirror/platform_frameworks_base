@@ -223,10 +223,7 @@ private:
             enum track_flags {
                 STEPSERVER_FAILED = 0x01, //  StepServer could not acquire cblk->lock mutex
                 SYSTEM_FLAGS_MASK = 0x0000ffffUL,
-
-                AUDIO_IN_AGC_ENABLE = AudioSystem::AGC_ENABLE << 16,
-                AUDIO_IN_NS_ENABLE  = AudioSystem::NS_ENABLE << 16,
-                AUDIO_IN_IIR_ENABLE = AudioSystem::TX_IIR_ENABLE << 16
+                // The upper 16 bits are used for track-specific flags.
             };
 
                                 TrackBase(const sp<MixerThread>& mixerThread,

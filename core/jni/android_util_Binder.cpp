@@ -1223,6 +1223,7 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jobject clazz,
 
     if (mode&0x08000000) flags |= O_CREAT;
     if (mode&0x04000000) flags |= O_TRUNC;
+    if (mode&0x02000000) flags |= O_APPEND;
 
     int realMode = S_IRWXU|S_IRWXG;
     if (mode&0x00000001) realMode |= S_IROTH;

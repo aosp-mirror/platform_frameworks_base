@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status">"Lyden er på"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"Sikkermodus"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"Betaltjenester"</string>
     <string name="permgroupdesc_costMoney">"Lar applikasjoner utføre operasjoner som kan koste deg penger."</string>
     <string name="permgrouplab_messages">"Meldinger"</string>
@@ -389,7 +397,8 @@
     <string name="lockscreen_emergency_call">"Nødanrop"</string>
     <string name="lockscreen_pattern_correct">"Riktig!"</string>
     <string name="lockscreen_pattern_wrong">"Beklager, prøv igjen:"</string>
-    <string name="lockscreen_plugged_in">"Lader (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"Koble til en batterilader."</string>
     <string name="lockscreen_missing_sim_message_short">"Mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message">"Ikke noe SIM-kort i telefonen."</string>
@@ -412,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"Fjern varslinger"</string>
     <string name="status_bar_no_notifications_title">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title">"Varslinger"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"Lader…"</string>
     <string name="battery_low_title">"Koble til en lader"</string>
@@ -430,7 +439,7 @@
     <string name="factorytest_not_system">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
     <string name="factorytest_no_action">"No package was found that provides the FACTORY_TEST action."</string>
     <string name="factorytest_reboot">"Reboot"</string>
-    <string name="js_dialog_title">"Siden \\\'<xliff:g id="TITLE">%s</xliff:g>\\\' sier:"</string>
+    <string name="js_dialog_title">"Siden \'<xliff:g id="TITLE">%s</xliff:g> sier:\""</string>
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
     <string name="save_password_label">"Bekreft"</string>
@@ -554,27 +563,27 @@
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>PLACEHOLDERplaceholder"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'., \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'. \\\'\'\\\'\''<xliff:g id="MONTH">MMMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\', \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'\\\'\'\\\'\'. \\\'\'\\\'\''<xliff:g id="MONTH">MMM</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>'\\\'\'\\\'\':\\\'\'\\\'\''<xliff:g id="MINUTE">mm</xliff:g>'\\\'\'\\\'\' \\\'\'\\\'\''<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>'\\\'\'\\\'\':\\\'\'\\\'\''<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'., '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"middag"</string>
     <string name="Noon">"Middag"</string>
     <string name="midnight">"midnatt"</string>
     <string name="Midnight">"Midnatt"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -603,11 +612,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"søndag"</string>
     <string name="day_of_week_long_monday">"mandag"</string>
@@ -688,7 +697,7 @@
     <string name="cut">"Klipp ut"</string>
     <string name="cutAll">"Klipp ut alt"</string>
     <string name="copy">"Kopier"</string>
-    <string name="copyAll">"Koiper alt"</string>
+    <string name="copyAll">"Kopier alt"</string>
     <string name="paste">"Lim inn"</string>
     <string name="copyUrl">"Kopier URL"</string>
     <string name="inputMethod">"Inndatametode"</string>
@@ -744,7 +753,7 @@
     <string name="select_character">"Sett inn tegn"</string>
     <string name="sms_control_default_app_name">"Ukjent applikasjon"</string>
     <string name="sms_control_title">"Sending SMS messages"</string>
-    <string name="sms_control_message">"A large number of SMS messages are being sent. Select \\\\\\\"OK\\\\\\\" to continue, or \\\\\\\"Cancel\\\\\\\" to stop sending."</string>
+    <string name="sms_control_message">"A large number of SMS messages are being sent. Select \"OK\" to continue, or \"Cancel\" to stop sending."</string>
     <string name="sms_control_yes">"OK"</string>
     <string name="sms_control_no">"Avbryt"</string>
     <string name="date_time_set">"Lagre"</string>
@@ -754,7 +763,7 @@
     <string name="perms_show_all"><b>"Vis alle"</b></string>
     <string name="googlewebcontenthelper_loading">"Laster inn…"</string>
     <string name="usb_storage_title">"USB koblet til"</string>
-    <string name="usb_storage_message">"Du har koblet telefonen til en datamaskin via USB. Velg \\\\\\\"Monter\\\\\\\" dersom du ønsker å kopiere filer mellom datmaskinen og minnekortet i telefonen."</string>
+    <string name="usb_storage_message">"Du har koblet telefonen til en datamaskin via USB. Velg \"Monter\" dersom du ønsker å kopiere filer mellom datmaskinen og minnekortet i telefonen."</string>
     <string name="usb_storage_button_mount">"Monter"</string>
     <string name="usb_storage_button_unmount">"Ikke monter"</string>
     <string name="usb_storage_error_message">"Det oppsto et problem med å bruke minnekortet ditt for USB-lagring."</string>
@@ -771,8 +780,8 @@
     <string name="extmedia_format_message">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
     <string name="extmedia_format_button_format">"Format"</string>
     <string name="select_input_method">"Velg inndatametode"</string>
-    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
     <string name="ext_media_checking_notification_title">"Forbereder minnekort"</string>
     <string name="ext_media_checking_notification_message">"Sjekker for feil"</string>
@@ -789,6 +798,18 @@
     <string name="activity_list_empty">"Fant ingen tilsvarende aktiviteter"</string>
     <string name="permlab_pkgUsageStats">"oppdater statistikk over komponentbruk"</string>
     <string name="permdesc_pkgUsageStats">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />
 </resources>

@@ -176,11 +176,11 @@ public class StatusBarService extends IStatusBar.Stub
     WindowManager.LayoutParams mExpandedParams;
     ScrollView mScrollView;
     View mNotificationLinearLayout;
-    View mOngoingTitle;
+    TextView mOngoingTitle;
     LinearLayout mOngoingItems;
-    View mLatestTitle;
+    TextView mLatestTitle;
     LinearLayout mLatestItems;
-    View mNoNotificationsTitle;
+    TextView mNoNotificationsTitle;
     TextView mSpnLabel;
     TextView mPlmnLabel;
     TextView mClearButton;
@@ -270,11 +270,11 @@ public class StatusBarService extends IStatusBar.Stub
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
-        mOngoingTitle = expanded.findViewById(R.id.ongoingTitle);
+        mOngoingTitle = (TextView)expanded.findViewById(R.id.ongoingTitle);
         mOngoingItems = (LinearLayout)expanded.findViewById(R.id.ongoingItems);
-        mLatestTitle = expanded.findViewById(R.id.latestTitle);
+        mLatestTitle = (TextView)expanded.findViewById(R.id.latestTitle);
         mLatestItems = (LinearLayout)expanded.findViewById(R.id.latestItems);
-        mNoNotificationsTitle = expanded.findViewById(R.id.noNotificationsTitle);
+        mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mSpnLabel = (TextView)expanded.findViewById(R.id.spnLabel);
@@ -1705,6 +1705,9 @@ public class StatusBarService extends IStatusBar.Stub
      */
     void updateResources() {
         mClearButton.setText(mContext.getText(R.string.status_bar_clear_all_button));
+        mOngoingTitle.setText(mContext.getText(R.string.status_bar_ongoing_events_title));
+        mLatestTitle.setText(mContext.getText(R.string.status_bar_latest_events_title));
+        mNoNotificationsTitle.setText(mContext.getText(R.string.status_bar_no_notifications_title));
         Log.d(TAG, "updateResources");
     }
 

@@ -23,9 +23,9 @@
 
 <com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:background="#FF000000"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#A0000000"
         >
 
     <!-- left side: instructions and emergency call button -->
@@ -114,11 +114,11 @@
         </FrameLayout>
     </LinearLayout>
 
-    <View
+    <!--View
          android:background="@android:drawable/code_lock_left"
          android:layout_width="2dip"
-         android:layout_height="fill_parent" />
-    
+         android:layout_height="fill_parent" /-->
+
     <!-- right side: lock pattern -->
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
          android:layout_width="wrap_content"

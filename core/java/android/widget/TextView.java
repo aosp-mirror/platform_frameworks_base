@@ -84,6 +84,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AnimationUtils;
@@ -215,7 +216,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int mDrawableSizeTop, mDrawableSizeBottom, mDrawableSizeLeft, mDrawableSizeRight;
         int mDrawableWidthTop, mDrawableWidthBottom, mDrawableHeightLeft, mDrawableHeightRight;
         int mDrawablePadding;
-    };
+    }
     private Drawables mDrawables;
 
     private CharSequence mError;
@@ -239,8 +240,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mMarqueeRepeatLimit = 3;
 
     class InputContentType {
-        String privateContentType;
+        int imeOptions = EditorInfo.IME_UNDEFINED;
+        String privateImeOptions;
+        CharSequence imeActionLabel;
+        int imeActionId;
         Bundle extras;
+        OnEditorActionListener onEditorActionListener;
+        boolean enterDown;
     }
     InputContentType mInputContentType;
 
@@ -268,6 +274,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         p.measureText("H");
     }
 
+    /**
+     * Interface definition for a callback to be invoked when an action is
+     * performed on the editor.
+     */
+    public interface OnEditorActionListener {
+        /**
+         * Called when an action is being performed.
+         *
+         * @param v The view that was clicked.
+         * @param actionId Identifier of the action.  This will be either the
+         * identifier you supplied, or {@link EditorInfo#IME_UNDEFINED
+         * EditorInfo.IME_UNDEFINED} if being called due to the enter key
+         * being pressed.
+         * @param event If triggered by an enter key, this is the event;
+         * otherwise, this is null.
+         * @return Return true if you have consumed the action, else false.
+         */
+        boolean onEditorAction(TextView v, int actionId, KeyEvent event);
+    }
+    
     public TextView(Context context) {
         this(context, null);
     }
@@ -376,7 +402,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int shadowcolor = 0;
         float dx = 0, dy = 0, r = 0;
         boolean password = false;
-        int contentType = EditorInfo.TYPE_NULL;
+        int inputType = EditorInfo.TYPE_NULL;
 
         int n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
@@ -610,11 +636,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case com.android.internal.R.styleable.TextView_inputType:
-                contentType = a.getInt(attr, mInputType);
+                inputType = a.getInt(attr, mInputType);
                 break;
 
-            case com.android.internal.R.styleable.TextView_editorPrivateContentType:
-                setPrivateContentType(a.getString(attr));
+            case com.android.internal.R.styleable.TextView_imeOptions:
+                if (mInputContentType == null) {
+                    mInputContentType = new InputContentType();
+                }
+                mInputContentType.imeOptions = a.getInt(attr,
+                        mInputContentType.imeOptions);
+                break;
+
+            case com.android.internal.R.styleable.TextView_imeActionLabel:
+                if (mInputContentType == null) {
+                    mInputContentType = new InputContentType();
+                }
+                mInputContentType.imeActionLabel = a.getText(attr);
+                break;
+
+            case com.android.internal.R.styleable.TextView_imeActionId:
+                if (mInputContentType == null) {
+                    mInputContentType = new InputContentType();
+                }
+                mInputContentType.imeActionId = a.getInt(attr,
+                        mInputContentType.imeActionId);
+                break;
+
+            case com.android.internal.R.styleable.TextView_privateImeOptions:
+                setPrivateImeOptions(a.getString(attr));
                 break;
 
             case com.android.internal.R.styleable.TextView_editorExtras:
@@ -632,7 +681,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         BufferType bufferType = BufferType.EDITABLE;
 
-        if ((contentType&(EditorInfo.TYPE_MASK_CLASS
+        if ((inputType&(EditorInfo.TYPE_MASK_CLASS
                 |EditorInfo.TYPE_MASK_VARIATION))
                 == (EditorInfo.TYPE_CLASS_TEXT
                         |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
@@ -656,57 +705,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 throw new RuntimeException(ex);
             }
             try {
-                mInputType = contentType != EditorInfo.TYPE_NULL
-                        ? contentType
+                mInputType = inputType != EditorInfo.TYPE_NULL
+                        ? inputType
                         : mInput.getInputType();
             } catch (IncompatibleClassChangeError e) {
                 mInputType = EditorInfo.TYPE_CLASS_TEXT;
             }
         } else if (digits != null) {
             mInput = DigitsKeyListener.getInstance(digits.toString());
-            mInputType = contentType;
-        } else if (contentType != EditorInfo.TYPE_NULL) {
-            setInputType(contentType, true);
-            singleLine = (contentType&(EditorInfo.TYPE_MASK_CLASS
+            mInputType = inputType;
+        } else if (inputType != EditorInfo.TYPE_NULL) {
+            setInputType(inputType, true);
+            singleLine = (inputType&(EditorInfo.TYPE_MASK_CLASS
                             | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) !=
                     (EditorInfo.TYPE_CLASS_TEXT
                             | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
         } else if (phone) {
             mInput = DialerKeyListener.getInstance();
-            contentType = EditorInfo.TYPE_CLASS_PHONE;
+            inputType = EditorInfo.TYPE_CLASS_PHONE;
         } else if (numeric != 0) {
             mInput = DigitsKeyListener.getInstance((numeric & SIGNED) != 0,
                                                    (numeric & DECIMAL) != 0);
-            contentType = EditorInfo.TYPE_CLASS_NUMBER;
+            inputType = EditorInfo.TYPE_CLASS_NUMBER;
             if ((numeric & SIGNED) != 0) {
-                contentType |= EditorInfo.TYPE_NUMBER_FLAG_SIGNED;
+                inputType |= EditorInfo.TYPE_NUMBER_FLAG_SIGNED;
             }
             if ((numeric & DECIMAL) != 0) {
-                contentType |= EditorInfo.TYPE_NUMBER_FLAG_DECIMAL;
+                inputType |= EditorInfo.TYPE_NUMBER_FLAG_DECIMAL;
             }
-            mInputType = contentType;
+            mInputType = inputType;
         } else if (autotext || autocap != -1) {
             TextKeyListener.Capitalize cap;
 
-            contentType = EditorInfo.TYPE_CLASS_TEXT;
+            inputType = EditorInfo.TYPE_CLASS_TEXT;
             if (!singleLine) {
-                contentType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
             }
 
             switch (autocap) {
             case 1:
                 cap = TextKeyListener.Capitalize.SENTENCES;
-                contentType |= EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES;
                 break;
 
             case 2:
                 cap = TextKeyListener.Capitalize.WORDS;
-                contentType |= EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS;
                 break;
 
             case 3:
                 cap = TextKeyListener.Capitalize.CHARACTERS;
-                contentType |= EditorInfo.TYPE_TEXT_FLAG_CAP_CHARACTERS;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_CAP_CHARACTERS;
                 break;
 
             default:
@@ -715,7 +764,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             mInput = TextKeyListener.getInstance(autotext, cap);
-            mInputType = contentType;
+            mInputType = inputType;
         } else if (editable) {
             mInput = TextKeyListener.getInstance();
             mInputType = EditorInfo.TYPE_CLASS_TEXT;
@@ -1075,6 +1124,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_singleLine
      */
     public final void setTransformationMethod(TransformationMethod method) {
+        if (method == mTransformation) {
+            // Avoid the setText() below if the transformation is
+            // the same.
+            return;
+        }
         if (mTransformation != null) {
             if (mText instanceof Spannable) {
                 ((Spannable) mText).removeSpan(mTransformation);
@@ -2778,7 +2832,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Directly change the content type integer of the text view, without
      * modifying any other state.
-     * @see #setContentType
+     * @see #setInputType(int)
      * @see android.text.InputType
      * @attr ref android.R.styleable#TextView_inputType
      */
@@ -2842,28 +2896,159 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Change the editor type integer associated with the text view, which
+     * will be reported to an IME with {@link EditorInfo#imeOptions} when it
+     * has focus.
+     * @see #getImeOptions
+     * @see android.view.inputmethod.EditorInfo
+     * @attr ref android.R.styleable#TextView_imeOptions
+     */
+    public void setImeOptions(int imeOptions) {
+        if (mInputContentType == null) {
+            mInputContentType = new InputContentType();
+        }
+        mInputContentType.imeOptions = imeOptions;
+    }
+
+    /**
+     * Get the type of the IME editor.
+     *
+     * @see #setImeOptions(int)
+     * @see android.view.inputmethod.EditorInfo
+     */
+    public int getImeOptions() {
+        return mInputContentType != null
+                ? mInputContentType.imeOptions : EditorInfo.IME_UNDEFINED;
+    }
+
+    /**
+     * Change the custom IME action associated with the text view, which
+     * will be reported to an IME with {@link EditorInfo#actionLabel}
+     * and {@link EditorInfo#actionId} when it has focus.
+     * @see #getImeActionLabel
+     * @see #getImeActionId
+     * @see android.view.inputmethod.EditorInfo
+     * @attr ref android.R.styleable#TextView_imeActionLabel
+     * @attr ref android.R.styleable#TextView_imeActionId
+     */
+    public void setImeActionLabel(CharSequence label, int actionId) {
+        if (mInputContentType == null) {
+            mInputContentType = new InputContentType();
+        }
+        mInputContentType.imeActionLabel = label;
+        mInputContentType.imeActionId = actionId;
+    }
+
+    /**
+     * Get the IME action label previous set with {@link #setImeActionLabel}.
+     *
+     * @see #setImeActionLabel
+     * @see android.view.inputmethod.EditorInfo
+     */
+    public CharSequence getImeActionLabel() {
+        return mInputContentType != null
+                ? mInputContentType.imeActionLabel : null;
+    }
+
+    /**
+     * Get the IME action ID previous set with {@link #setImeActionLabel}.
+     *
+     * @see #setImeActionLabel
+     * @see android.view.inputmethod.EditorInfo
+     */
+    public int getImeActionId() {
+        return mInputContentType != null
+                ? mInputContentType.imeActionId : 0;
+    }
+
+    /**
+     * Set a special OnClickListener to be called when an action is performed
+     * on the text view.  This will be called when the enter key is pressed,
+     * or when an action supplied to the IME is selected by the user.
+     */
+    public void setOnEditorActionListener(OnEditorActionListener l) {
+        if (mInputContentType == null) {
+            mInputContentType = new InputContentType();
+        }
+        mInputContentType.onEditorActionListener = l;
+    }
+    
+    /**
+     * Called when an attached input method calls
+     * {@link InputConnection#performEditorAction(int)
+     * InputConnection.performEditorAction()}
+     * for this text view.  The default implementation will call your click
+     * listener supplied to {@link #setOnEditorActionListener},
+     * or generate an enter key down/up pair to invoke the action if not.
+     * 
+     * @param actionCode The code of the action being performed.
+     * 
+     * @see #setOnEditorActionListener
+     */
+    public void onEditorAction(int actionCode) {
+        final InputContentType ict = mInputContentType;
+        if (ict != null) {
+            if (ict.onEditorActionListener != null) {
+                if (ict.onEditorActionListener.onEditorAction(this,
+                        actionCode, null)) {
+                    return;
+                }
+            }
+        }
+        
+        if (actionCode == EditorInfo.IME_ACTION_NEXT &&
+                (ict != null || !shouldAdvanceFocusOnEnter())) {
+            // This is the default handling for the NEXT action, to advance
+            // focus.  Note that for backwards compatibility we don't do this
+            // default handling if explicit ime options have not been given,
+            // and we do not advance by default on an enter key -- in that
+            // case, we want to turn this into the normal enter key codes that
+            // an app may be expecting.
+            View v = focusSearch(FOCUS_DOWN);
+            if (v != null) {
+                if (!v.requestFocus(FOCUS_DOWN)) {
+                    throw new IllegalStateException("focus search returned a view " +
+                            "that wasn't able to take focus!");
+                }
+            }
+            return;
+        }
+        
+        Handler h = getHandler();
+        long eventTime = SystemClock.uptimeMillis();
+        h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                new KeyEvent(eventTime, eventTime,
+                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
+        h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
+    }
+    
+    /**
      * Set the private content type of the text, which is the
-     * {@link EditorInfo#privateContentType TextBoxAttribute.privateContentType}
+     * {@link EditorInfo#privateImeOptions EditorInfo.privateImeOptions}
      * field that will be filled in when creating an input connection.
      *
-     * @see #getPrivateContentType()
-     * @see EditorInfo#privateContentType
-     * @attr ref android.R.styleable#TextView_editorPrivateContentType
+     * @see #getPrivateImeOptions()
+     * @see EditorInfo#privateImeOptions
+     * @attr ref android.R.styleable#TextView_privateImeOptions
      */
-    public void setPrivateContentType(String type) {
+    public void setPrivateImeOptions(String type) {
         if (mInputContentType == null) mInputContentType = new InputContentType();
-        mInputContentType.privateContentType = type;
+        mInputContentType.privateImeOptions = type;
     }
 
     /**
      * Get the private type of the content.
      *
-     * @see #setPrivateContentType(String)
-     * @see EditorInfo#privateContentType
+     * @see #setPrivateImeOptions(String)
+     * @see EditorInfo#privateImeOptions
      */
-    public String getPrivateContentType() {
+    public String getPrivateImeOptions() {
         return mInputContentType != null
-                ? mInputContentType.privateContentType : null;
+                ? mInputContentType.privateImeOptions : null;
     }
 
     /**
@@ -3807,7 +3992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * but also in mail addresses and subjects which will display on multiple
      * lines but where it doesn't make sense to insert newlines.
      */
-    private boolean advanceFocusOnEnter() {
+    protected boolean shouldAdvanceFocusOnEnter() {
         if (mInput == null) {
             return false;
         }
@@ -3828,15 +4013,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    private boolean isInterestingEnter(KeyEvent event) {
+        if ((event.getFlags() & KeyEvent.FLAG_SOFT_KEYBOARD) != 0 &&
+                mInputContentType != null &&
+                (mInputContentType.imeOptions &
+                        EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0) {
+            // If this enter key came from a soft keyboard, and the
+            // text editor has been configured to not do a default
+            // action for software enter keys, then we aren't interested.
+            return false;
+        }
+        return true;
+    }
+    
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
         if (!isEnabled()) {
             return 0;
         }
 
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
-                if (advanceFocusOnEnter()) {
+                if (!isInterestingEnter(event)) {
+                    // Ignore enter key we aren't interested in.
+                    return -1;
+                }
+                if (mInputContentType != null
+                        && mInputContentType.onEditorActionListener != null) {
+                    mInputContentType.enterDown = true;
+                }
+                // fall through...
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (shouldAdvanceFocusOnEnter()) {
                     return 0;
                 }
         }
@@ -3939,7 +4146,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return super.onKeyUp(keyCode, event);
                 
             case KeyEvent.KEYCODE_ENTER:
-                if (advanceFocusOnEnter()) {
+                if (mInputContentType != null
+                        && mInputContentType.onEditorActionListener != null
+                        && mInputContentType.enterDown) {
+                    mInputContentType.enterDown = false;
+                    if (mInputContentType.onEditorActionListener.onEditorAction(
+                            this, EditorInfo.IME_UNDEFINED, event)) {
+                        return true;
+                    }
+                }
+                
+                if (shouldAdvanceFocusOnEnter()) {
                     /*
                      * If there is a click listener, just call through to
                      * super, which will invoke it.
@@ -3994,11 +4211,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInputMethodState = new InputMethodState();
             }
             outAttrs.inputType = mInputType;
-            outAttrs.hintText = mHint;
             if (mInputContentType != null) {
-                outAttrs.privateContentType = mInputContentType.privateContentType;
+                outAttrs.imeOptions = mInputContentType.imeOptions;
+                outAttrs.privateImeOptions = mInputContentType.privateImeOptions;
+                outAttrs.actionLabel = mInputContentType.imeActionLabel;
+                outAttrs.actionId = mInputContentType.imeActionId;
                 outAttrs.extras = mInputContentType.extras;
+            } else {
+                outAttrs.imeOptions = EditorInfo.IME_UNDEFINED;
             }
+            if (outAttrs.imeOptions == EditorInfo.IME_UNDEFINED) {
+                if (focusSearch(FOCUS_DOWN) != null) {
+                    // An action has not been set, but the enter key will move to
+                    // the next focus, so set the action to that.
+                    outAttrs.imeOptions = EditorInfo.IME_ACTION_NEXT;
+                    if (!shouldAdvanceFocusOnEnter()) {
+                        outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                    }
+                }
+            }
+            outAttrs.hintText = mHint;
             if (mText instanceof Editable) {
                 InputConnection ic = new EditableInputConnection(this);
                 outAttrs.initialSelStart = Selection.getSelectionStart(mText);
@@ -5787,6 +6019,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             // Don't leave us in the middle of a batch edit.
             onEndBatchEdit();
+            if (mInputContentType != null) {
+                mInputContentType.enterDown = false;
+            }
         }
 
         startStopMarquee(hasWindowFocus);
@@ -5880,8 +6115,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mScroller = s;
     }
 
-    private static class Blink extends Handler
-            implements Runnable {
+    private static class Blink extends Handler implements Runnable {
         private WeakReference<TextView> mView;
         private boolean mCancelled;
 
@@ -6139,20 +6373,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         int start = end;
-        char c;
         int len = mText.length();
 
-        while (start > 0 && (((c = mTransformed.charAt(start - 1)) == '\'') ||
-                             (Character.isLetterOrDigit(c)))) {
-            start--;
+        for (; start > 0; start--) {
+            char c = mTransformed.charAt(start - 1);
+            int type = Character.getType(c);
+
+            if (c != '\'' &&
+                type != Character.UPPERCASE_LETTER &&
+                type != Character.LOWERCASE_LETTER &&
+                type != Character.TITLECASE_LETTER &&
+                type != Character.MODIFIER_LETTER &&
+                type != Character.DECIMAL_DIGIT_NUMBER) {
+                break;
+            }
         }
 
-        while (end < len && (((c = mTransformed.charAt(end)) == '\'') ||
-                             (Character.isLetterOrDigit(c)))) {
-            end++;
+        for (; end < len; end++) {
+            char c = mTransformed.charAt(end);
+            int type = Character.getType(c);
+
+            if (c != '\'' &&
+                type != Character.UPPERCASE_LETTER &&
+                type != Character.LOWERCASE_LETTER &&
+                type != Character.TITLECASE_LETTER &&
+                type != Character.MODIFIER_LETTER &&
+                type != Character.DECIMAL_DIGIT_NUMBER) {
+                break;
+            }
         }
 
         if (start == end) {
+            return null;
+        }
+
+        if (end - start > 48) {
             return null;
         }
 

@@ -3954,6 +3954,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         synchronized(mWindowMap) {
             mKeyWaiter.bindTargetWindowLocked(focus);
         }
+
+        // NOSHIP extra state logging
+        mKeyWaiter.recordDispatchState(event, focus);
+        // END NOSHIP
         
         try {
             if (DEBUG_INPUT || DEBUG_FOCUS) {
@@ -4097,6 +4101,55 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * but not the other way around.
      */
     final class KeyWaiter {
+        // NOSHIP debugging
+        public class DispatchState {
+            private KeyEvent event;
+            private WindowState focus;
+            private long time;
+            private WindowState lastWin;
+            private IBinder lastBinder;
+            private boolean finished;
+            private boolean gotFirstWindow;
+            private boolean eventDispatching;
+            private long timeToSwitch;
+            private boolean wasFrozen;
+            private boolean focusPaused;
+            
+            DispatchState(KeyEvent theEvent, WindowState theFocus) {
+                focus = theFocus;
+                event = theEvent;
+                time = System.currentTimeMillis();
+                // snapshot KeyWaiter state
+                lastWin = mLastWin;
+                lastBinder = mLastBinder;
+                finished = mFinished;
+                gotFirstWindow = mGotFirstWindow;
+                eventDispatching = mEventDispatching;
+                timeToSwitch = mTimeToSwitch;
+                wasFrozen = mWasFrozen;
+                // cache the paused state at ctor time as well
+                if (theFocus == null || theFocus.mToken == null) {
+                    Log.i(TAG, "focus " + theFocus + " mToken is null at event dispatch!");
+                    focusPaused = false;
+                } else {
+                    focusPaused = theFocus.mToken.paused;
+                }
+            }
+            
+            public String toString() {
+                return "{{" + event + " to " + focus + " @ " + time
+                        + " lw=" + lastWin + " lb=" + lastBinder
+                        + " fin=" + finished + " gfw=" + gotFirstWindow
+                        + " ed=" + eventDispatching + " tts=" + timeToSwitch
+                        + " wf=" + wasFrozen + " fp=" + focusPaused + "}}";
+            }
+        };
+        private DispatchState mDispatchState = null;
+        public void recordDispatchState(KeyEvent theEvent, WindowState theFocus) {
+            mDispatchState = new DispatchState(theEvent, theFocus);
+        }
+        // END NOSHIP
+
         public static final int RETURN_NOTHING = 0;
         public static final int RETURN_PENDING_POINTER = 1;
         public static final int RETURN_PENDING_TRACKBALL = 2;
@@ -4258,6 +4311,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         Log.w(TAG, "Key dispatching timed out sending to " +
                               (targetWin != null ? targetWin.mAttrs.getTitle()
                               : "<null>"));
+                        // NOSHIP debugging
+                        Log.w(TAG, "Dispatch state: " + mDispatchState);
+                        Log.w(TAG, "Current state:  " + new DispatchState(nextKey, targetWin));
+                        // END NOSHIP
                         //dump();
                         if (targetWin != null) {
                             at = targetWin.getAppToken();
@@ -4640,7 +4697,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 newWindow.mToken.paused = false;
 
                 mGotFirstWindow = true;
-                boolean doNotify = true;
+                boolean doNotify = false;
 
                 if ((newWindow.mAttrs.flags & FLAG_SYSTEM_ERROR) != 0) {
                     if (DEBUG_INPUT) Log.v(TAG,
@@ -4649,6 +4706,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mLastBinder = null;
                     mMotionTarget = null;
                     mFinished = true;
+                    doNotify = true;    // ensure that we reset the key waiters after hijacking
                 } else if (mLastWin != null) {
                     // If the new window is above the window we are
                     // waiting on, then stop waiting and let key dispatching
@@ -4657,15 +4715,15 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         TAG, "Last win layer=" + mLastWin.mLayer
                         + ", new win layer=" + newWindow.mLayer);
                     if (newWindow.mLayer >= mLastWin.mLayer) {
-                        if (!mLastWin.canReceiveKeys()) {
-                            mLastWin.mToken.paused = false;
-                            doFinishedKeyLocked(true);  // does a notifyAll()
-                            doNotify = false;
-                        }
-                    } else {
-                        // the new window is lower; no need to wake key waiters
-                        doNotify = false;
+                        // The new window is above the old; finish pending input to the last
+                        // window and start directing it to the new one.
+                        mLastWin.mToken.paused = false;
+                        doFinishedKeyLocked(true);  // does a notifyAll()
                     }
+                    // Either the new window is lower, so there is no need to wake key waiters,
+                    // or we just finished key input to the previous window, which implicitly
+                    // notified the key waiters.  In both cases, we don't need to issue the
+                    // notification here, so we do not set doNotify.
                 }
 
                 if (doNotify) {
@@ -6405,7 +6463,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public String toString() {
             return "Window{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " " + mAttrs.getTitle() + "}";
+                + " " + mAttrs.getTitle() + " paused=" + mToken.paused + "}";
         }
     }
     
@@ -8644,7 +8702,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     + " mLastBinder=" + mKeyWaiter.mLastBinder);
             pw.println("    mFinished=" + mKeyWaiter.mFinished
                     + " mGotFirstWindow=" + mKeyWaiter.mGotFirstWindow
-                    + " mEventDispatching" + mKeyWaiter.mEventDispatching
+                    + " mEventDispatching=" + mKeyWaiter.mEventDispatching
                     + " mTimeToSwitch=" + mKeyWaiter.mTimeToSwitch);
         }
     }

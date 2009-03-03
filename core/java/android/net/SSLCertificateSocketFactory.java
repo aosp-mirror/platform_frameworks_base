@@ -16,38 +16,45 @@
 
 package android.net;
 
-import android.util.Log;
-import android.util.Config;
+import android.content.Context;
 import android.net.http.DomainNameChecker;
 import android.os.SystemProperties;
+import android.util.Config;
+import android.util.Log;
+
+import com.android.internal.net.SSLSessionCache;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.GeneralSecurityException;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-
+/**
+ * SSLSocketFactory that allows skipping the certificate chain validation
+ * based on system setting (socket.relaxsslcheck=yes, ro.secure=1 - for 
+ * testing only).
+ * 
+ * It also adds a readTimeout that will be set on each created socket. 
+ * The factory will use SSL session persistence if enabled by config.
+ */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
-    private static final boolean DBG = true;
     private static final String LOG_TAG = "SSLCertificateSocketFactory";
     
     private static X509TrustManager sDefaultTrustManager;
-
-    private final int socketReadTimeoutForSslHandshake;
 
     static {
         try {
@@ -83,14 +90,36 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     };
 
-    private SSLSocketFactory factory;
+    private static SSLSocketFactory factory;
+    
+    /** 
+     * Initialize a single default factory to be used for all returned 
+     * sockets. 
+     *
+     * Because of the signature of getDefault(int timeout) it needs to create 
+     * a new instance which encapsulates the timeout on each call. We want
+     * to share a single SSLContext and SSLSessionCache.
+     * 
+     * Can be called multiple times - but only the first will initialize the factory.
+     *  
+     * @param androidContext will be used for SSL session persistence. Null for backward
+     * compatibility, no SSL persistence.
+     * @hide
+     */
+    public static synchronized void setupDefaultFactory(Context androidContext) {
+        if ( factory != null) {
+            // Can only be initialized once, to avoid having multiple caches.
+            return;
+        }
+        factory = SSLSessionCache.getSocketFactory(androidContext, TRUST_MANAGER);
+    }
+
+    private final int socketReadTimeoutForSslHandshake;
 
     public SSLCertificateSocketFactory(int socketReadTimeoutForSslHandshake)
             throws NoSuchAlgorithmException, KeyManagementException {  
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, TRUST_MANAGER, new java.security.SecureRandom());
-        factory = (SSLSocketFactory) context.getSocketFactory();
-        this.socketReadTimeoutForSslHandshake = socketReadTimeoutForSslHandshake;
+        this.socketReadTimeoutForSslHandshake
+                = socketReadTimeoutForSslHandshake;
     }
 
     /**
@@ -103,6 +132,11 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      */
     public static SocketFactory getDefault(int socketReadTimeoutForSslHandshake) {
         try {
+            if (factory == null) {
+                // The delegated factory was not initialized explicitely with a context.
+                // Use a default one.
+                setupDefaultFactory(null);
+            }
             return new SSLCertificateSocketFactory(socketReadTimeoutForSslHandshake);
         } catch (NoSuchAlgorithmException e) {
             Log.e(LOG_TAG, 

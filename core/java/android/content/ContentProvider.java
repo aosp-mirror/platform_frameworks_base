@@ -18,6 +18,7 @@ package android.content;
 
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.CursorToBulkCursorAdaptor;
@@ -160,6 +161,13 @@ public abstract class ContentProvider implements ComponentCallbacks {
             if (mode != null && mode.startsWith("rw")) checkWritePermission(uri);
             else checkReadPermission(uri);
             return ContentProvider.this.openFile(uri, mode);
+        }
+
+        public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+                throws FileNotFoundException {
+            if (mode != null && mode.startsWith("rw")) checkWritePermission(uri);
+            else checkReadPermission(uri);
+            return ContentProvider.this.openAssetFile(uri, mode);
         }
 
         public ISyncAdapter getSyncAdapter() {
@@ -438,8 +446,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * of this method should create a new ParcelFileDescriptor for each call.
      *
      * @param uri The URI whose file is to be opened.
-     * @param mode Access mode for the file.  May be "r" for read-only access
-     * or "rw" for read and write access.
+     * @param mode Access mode for the file.  May be "r" for read-only access,
+     * "rw" for read and write access, or "rwt" for read and write access
+     * that truncates any existing file.
      *
      * @return Returns a new ParcelFileDescriptor which you can use to access
      * the file.
@@ -448,11 +457,54 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * no file associated with the given URI or the mode is invalid.
      * @throws SecurityException Throws SecurityException if the caller does
      * not have permission to access the file.
-     */
+     * 
+     * @see #openAssetFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     */    
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
         throw new FileNotFoundException("No files supported by provider at "
                 + uri);
+    }
+    
+    /**
+     * This is like {@link #openFile}, but can be implemented by providers
+     * that need to be able to return sub-sections of files, often assets
+     * inside of their .apk.  Note that when implementing this your clients
+     * must be able to deal with such files, either directly with
+     * {@link ContentResolver#openAssetFileDescriptor
+     * ContentResolver.openAssetFileDescriptor}, or by using the higher-level
+     * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
+     * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
+     * methods.
+     * 
+     * <p><em>Note: if you are implementing this to return a full file, you
+     * should create the AssetFileDescriptor with
+     * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
+     * applications that can not handle sub-sections of files.</em></p>
+     *
+     * @param uri The URI whose file is to be opened.
+     * @param mode Access mode for the file.  May be "r" for read-only access,
+     * "w" for write-only access (erasing whatever data is currently in
+     * the file), "wa" for write-only access to append to any existing data,
+     * "rw" for read and write access on any existing data, and "rwt" for read
+     * and write access that truncates any existing file.
+     *
+     * @return Returns a new AssetFileDescriptor which you can use to access
+     * the file.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the file.
+     * 
+     * @see #openFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     */
+    public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+            throws FileNotFoundException {
+        ParcelFileDescriptor fd = openFile(uri, mode);
+        return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
     }
 
     /**
@@ -460,7 +512,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * by looking up a column named "_data" at the given URI.
      *
      * @param uri The URI to be opened.
-     * @param mode The file mode.
+     * @param mode The file mode.  May be "r" for read-only access,
+     * "w" for write-only access (erasing whatever data is currently in
+     * the file), "wa" for write-only access to append to any existing data,
+     * "rw" for read and write access on any existing data, and "rwt" for read
+     * and write access that truncates any existing file.
      *
      * @return Returns a new ParcelFileDescriptor that can be used by the
      * client to access the file.
@@ -489,16 +545,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
             throw new FileNotFoundException("Column _data not found.");
         }
 
-        int modeBits;
-        if ("r".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
-        } else if ("rw".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE;
-        } else {
-            throw new FileNotFoundException("Bad mode for " + uri + ": "
-                    + mode);
-        }
+        int modeBits = ContentResolver.modeToMode(uri, mode);
         return ParcelFileDescriptor.open(new File(path), modeBits);
     }
 

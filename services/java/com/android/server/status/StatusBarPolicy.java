@@ -234,7 +234,7 @@ public class StatusBarPolicy {
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
                     action.equals(AudioManager.VIBRATE_SETTING_CHANGED_ACTION)) {
-                updateVolume(intent);
+                updateVolume();
             }
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
@@ -326,6 +326,7 @@ public class StatusBarPolicy {
                 null, com.android.internal.R.drawable.stat_sys_ringer_silent, 0, 0);
         mVolumeIcon = service.addIcon(mVolumeData, null);
         service.setIconVisibility(mVolumeIcon, false);
+        updateVolume();
         
         IntentFilter filter = new IntentFilter();
 
@@ -755,9 +756,7 @@ public class StatusBarPolicy {
         }
     }
 
-    private final void updateVolume(Intent intent) {
-        // This can be called from two different received intents, so don't use extras.
-        
+    private final void updateVolume() {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||

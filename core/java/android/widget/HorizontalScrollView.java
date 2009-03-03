@@ -875,7 +875,7 @@ public class HorizontalScrollView extends FrameLayout {
             int parentHeightMeasureSpec, int heightUsed) {
         final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
 
-        final int childHeightMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
                 mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin
                         + heightUsed, lp.height);
         final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(

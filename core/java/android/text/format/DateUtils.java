@@ -595,6 +595,17 @@ public class DateUtils
      * @param elapsedSeconds the elapsed time in seconds.
      */
     public static String formatElapsedTime(long elapsedSeconds) {
+        return formatElapsedTime(null, elapsedSeconds);
+    }
+    
+    /**
+     * Formats an elapsed time in the form "MM:SS" or "H:MM:SS"
+     * for display on the call-in-progress screen.
+     * 
+     * @param recycle {@link StringBuilder} to recycle, if possible
+     * @param elapsedSeconds the elapsed time in seconds.
+     */
+    public static String formatElapsedTime(StringBuilder recycle, long elapsedSeconds) {
         initFormatStrings();
 
         long hours = 0;
@@ -613,18 +624,24 @@ public class DateUtils
 
         String result;
         if (hours > 0) {
-            return formatElapsedTime(sElapsedFormatHMMSS, hours, minutes, seconds);
+            return formatElapsedTime(recycle, sElapsedFormatHMMSS, hours, minutes, seconds);
         } else {
-            return formatElapsedTime(sElapsedFormatMMSS, minutes, seconds);
+            return formatElapsedTime(recycle, sElapsedFormatMMSS, minutes, seconds);
         }
     }
 
     /**
      * Fast formatting of h:mm:ss
      */
-    private static String formatElapsedTime(String format, long hours, long minutes, long seconds) {
+    private static String formatElapsedTime(StringBuilder recycle, String format, long hours,
+            long minutes, long seconds) {
         if (FAST_FORMAT_HMMSS.equals(format)) {
-            StringBuffer sb = new StringBuffer(16);
+            StringBuilder sb = recycle;
+            if (sb == null) {
+                sb = new StringBuilder(8);
+            } else {
+                sb.setLength(0);
+            }
             sb.append(hours);
             sb.append(TIME_SEPARATOR);
             if (minutes < 10) { 
@@ -649,9 +666,15 @@ public class DateUtils
     /**
      * Fast formatting of m:ss
      */
-    private static String formatElapsedTime(String format, long minutes, long seconds) {
+    private static String formatElapsedTime(StringBuilder recycle, String format, long minutes,
+            long seconds) {
         if (FAST_FORMAT_MMSS.equals(format)) {
-            StringBuffer sb = new StringBuffer(16);
+            StringBuilder sb = recycle;
+            if (sb == null) {
+                sb = new StringBuilder(8);
+            } else {
+                sb.setLength(0);
+            }
             if (minutes < 10) { 
                 sb.append(TIME_PADDING);
             } else {
@@ -1028,8 +1051,9 @@ public class DateUtils
      * If FORMAT_NO_YEAR is set, then the year is not shown.
      * If neither FORMAT_SHOW_YEAR nor FORMAT_NO_YEAR are set, then the year
      * is shown only if it is different from the current year, or if the start
-     * and end dates fall on different years.
-     * 
+     * and end dates fall on different years.  If both are set,
+     * FORMAT_SHOW_YEAR takes precedence.
+     *
      * <p>
      * Normally the date is shown unless the start and end day are the same.
      * If FORMAT_SHOW_DATE is set, then the date is always shown, even for
@@ -1120,24 +1144,28 @@ public class DateUtils
         boolean abbrevMonth = (flags & (FORMAT_ABBREV_MONTH | FORMAT_ABBREV_ALL)) != 0;
         boolean noMonthDay = (flags & FORMAT_NO_MONTH_DAY) != 0;
         boolean numericDate = (flags & FORMAT_NUMERIC_DATE) != 0;
-    
-        Time startDate;
-        Time endDate;
-        
-        if (useUTC) {
-            startDate = new Time(Time.TIMEZONE_UTC);
-            endDate = new Time(Time.TIMEZONE_UTC);
-        } else {
-            startDate = new Time();
-            endDate = new Time();
-        }
-        
+
+        // If we're getting called with a single instant in time (from
+        // e.g. formatDateTime(), below), then we can skip a lot of
+        // computation below that'd otherwise be thrown out.
+        boolean isInstant = (startMillis == endMillis);
+
+        Time startDate = useUTC ? new Time(Time.TIMEZONE_UTC) : new Time();
         startDate.set(startMillis);
-        endDate.set(endMillis);
-        int startJulianDay = Time.getJulianDay(startMillis, startDate.gmtoff);
-        int endJulianDay = Time.getJulianDay(endMillis, endDate.gmtoff);
-        int dayDistance = endJulianDay - startJulianDay;
-        
+
+        Time endDate;
+        int dayDistance;
+        if (isInstant) {
+            endDate = startDate;
+            dayDistance = 0;
+        } else {
+            endDate = useUTC ? new Time(Time.TIMEZONE_UTC) : new Time();
+            endDate.set(endMillis);
+            int startJulianDay = Time.getJulianDay(startMillis, startDate.gmtoff);
+            int endJulianDay = Time.getJulianDay(endMillis, endDate.gmtoff);
+            dayDistance = endJulianDay - startJulianDay;
+        }
+
         // If the end date ends at 12am at the beginning of a day,
         // then modify it to make it look like it ends at midnight on
         // the previous day.  This will allow us to display "8pm - midnight",
@@ -1152,20 +1180,21 @@ public class DateUtils
         // and an end date of Nov 12 at 00:00.
         // If the start and end time are the same, then skip this and don't
         // adjust the date.
-        if ((endDate.hour | endDate.minute | endDate.second) == 0
-                && (!showTime || dayDistance <= 1) && (startMillis != endMillis)) {
+        if (!isInstant
+            && (endDate.hour | endDate.minute | endDate.second) == 0
+            && (!showTime || dayDistance <= 1)) {
             endDate.monthDay -= 1;
             endDate.normalize(true /* ignore isDst */);
         }
-        
+
         int startDay = startDate.monthDay;
         int startMonthNum = startDate.month;
         int startYear = startDate.year;
-    
+
         int endDay = endDate.monthDay;
         int endMonthNum = endDate.month;
         int endYear = endDate.year;
-    
+
         String startWeekDayString = "";
         String endWeekDayString = "";
         if (showWeekDay) {
@@ -1176,9 +1205,9 @@ public class DateUtils
                 weekDayFormat = WEEKDAY_FORMAT;
             }
             startWeekDayString = startDate.format(weekDayFormat);
-            endWeekDayString = endDate.format(weekDayFormat);
+            endWeekDayString = isInstant ? startWeekDayString : endDate.format(weekDayFormat);
         }
-        
+
         String startTimeString = "";
         String endTimeString = "";
         if (showTime) {
@@ -1204,7 +1233,7 @@ public class DateUtils
                 boolean capNoon = (flags & FORMAT_CAP_NOON) != 0;
                 boolean noMidnight = (flags & FORMAT_NO_MIDNIGHT) != 0;
                 boolean capMidnight = (flags & FORMAT_CAP_MIDNIGHT) != 0;
-    
+
                 boolean startOnTheHour = startDate.minute == 0 && startDate.second == 0;
                 boolean endOnTheHour = endDate.minute == 0 && endDate.second == 0;
                 if (abbrevTime && startOnTheHour) {
@@ -1220,20 +1249,41 @@ public class DateUtils
                         startTimeFormat = res.getString(com.android.internal.R.string.hour_minute_ampm);
                     }
                 }
-                if (abbrevTime && endOnTheHour) {
-                    if (capAMPM) {
-                        endTimeFormat = res.getString(com.android.internal.R.string.hour_cap_ampm);
+
+                // Don't waste time on setting endTimeFormat when
+                // we're dealing with an instant, where we'll never
+                // need the end point.  (It's the same as the start
+                // point)
+                if (!isInstant) {
+                    if (abbrevTime && endOnTheHour) {
+                        if (capAMPM) {
+                            endTimeFormat = res.getString(com.android.internal.R.string.hour_cap_ampm);
+                        } else {
+                            endTimeFormat = res.getString(com.android.internal.R.string.hour_ampm);
+                        }
                     } else {
-                        endTimeFormat = res.getString(com.android.internal.R.string.hour_ampm);
+                        if (capAMPM) {
+                            endTimeFormat = res.getString(com.android.internal.R.string.hour_minute_cap_ampm);
+                        } else {
+                            endTimeFormat = res.getString(com.android.internal.R.string.hour_minute_ampm);
+                        }
                     }
-                } else {
-                    if (capAMPM) {
-                        endTimeFormat = res.getString(com.android.internal.R.string.hour_minute_cap_ampm);
-                    } else {
-                        endTimeFormat = res.getString(com.android.internal.R.string.hour_minute_ampm);
+
+                    if (endDate.hour == 12 && endOnTheHour && !noNoon) {
+                        if (capNoon) {
+                            endTimeFormat = res.getString(com.android.internal.R.string.Noon);
+                        } else {
+                            endTimeFormat = res.getString(com.android.internal.R.string.noon);
+                        }
+                    } else if (endDate.hour == 0 && endOnTheHour && !noMidnight) {
+                        if (capMidnight) {
+                            endTimeFormat = res.getString(com.android.internal.R.string.Midnight);
+                        } else {
+                            endTimeFormat = res.getString(com.android.internal.R.string.midnight);
+                        }
                     }
                 }
-                
+
                 if (startDate.hour == 12 && startOnTheHour && !noNoon) {
                     if (capNoon) {
                         startTimeFormat = res.getString(com.android.internal.R.string.Noon);
@@ -1243,37 +1293,32 @@ public class DateUtils
                     // Don't show the start time starting at midnight.  Show
                     // 12am instead.
                 }
-                
-                if (endDate.hour == 12 && endOnTheHour && !noNoon) {
-                    if (capNoon) {
-                        endTimeFormat = res.getString(com.android.internal.R.string.Noon);
-                    } else {
-                        endTimeFormat = res.getString(com.android.internal.R.string.noon);
-                    }
-                } else if (endDate.hour == 0 && endOnTheHour && !noMidnight) {
-                    if (capMidnight) {
-                        endTimeFormat = res.getString(com.android.internal.R.string.Midnight);
-                    } else {
-                        endTimeFormat = res.getString(com.android.internal.R.string.midnight);
-                    }
-                }
             }
+
             startTimeString = startDate.format(startTimeFormat);
-            endTimeString = endDate.format(endTimeFormat);
+            endTimeString = isInstant ? startTimeString : endDate.format(endTimeFormat);
         }
-        
-        // Get the current year
-        long millis = System.currentTimeMillis();
-        Time time = new Time();
-        time.set(millis);
-        int currentYear = time.year;
-    
+
         // Show the year if the user specified FORMAT_SHOW_YEAR or if
         // the starting and end years are different from each other
         // or from the current year.  But don't show the year if the
-        // user specified FORMAT_NO_YEAR;
-        showYear = showYear || (!noYear && (startYear != endYear || startYear != currentYear));
-        
+        // user specified FORMAT_NO_YEAR.
+        if (showYear) {
+            // No code... just a comment for clarity.  Keep showYear
+            // on, as they enabled it with FORMAT_SHOW_YEAR.  This
+            // takes precedence over them setting FORMAT_NO_YEAR.
+        } else if (noYear) {
+            // They explicitly didn't want a year.
+            showYear = false;
+        } else if (startYear != endYear) {
+            showYear = true;
+        } else {
+            // Show the year if it's not equal to the current year.
+            Time currentTime = new Time();
+            currentTime.setToNow();
+            showYear = startYear != currentTime.year;
+        }
+
         String defaultDateFormat, fullFormat, dateRange;
         if (numericDate) {
             defaultDateFormat = res.getString(com.android.internal.R.string.numeric_date);
@@ -1306,7 +1351,7 @@ public class DateUtils
                 }
             }
         }
-        
+
         if (showWeekDay) {
             if (showTime) {
                 fullFormat = res.getString(com.android.internal.R.string.wday1_date1_time1_wday2_date2_time2);
@@ -1320,20 +1365,20 @@ public class DateUtils
                 fullFormat = res.getString(com.android.internal.R.string.date1_date2);
             }
         }
-        
+
         if (noMonthDay && startMonthNum == endMonthNum) {
             // Example: "January, 2008"
             String startDateString = startDate.format(defaultDateFormat);
             return startDateString;
         }
-    
+
         if (startYear != endYear || noMonthDay) {
             // Different year or we are not showing the month day number.
             // Example: "December 31, 2007 - January 1, 2008"
             // Or: "January - February, 2008"
             String startDateString = startDate.format(defaultDateFormat);
             String endDateString = endDate.format(defaultDateFormat);
-    
+
             // The values that are used in a fullFormat string are specified
             // by position.
             dateRange = String.format(fullFormat,
@@ -1341,7 +1386,7 @@ public class DateUtils
                     endWeekDayString, endDateString, endTimeString);
             return dateRange;
         }
-        
+
         // Get the month, day, and year strings for the start and end dates
         String monthFormat;
         if (numericDate) {
@@ -1354,16 +1399,17 @@ public class DateUtils
         String startMonthString = startDate.format(monthFormat);
         String startMonthDayString = startDate.format(MONTH_DAY_FORMAT);
         String startYearString = startDate.format(YEAR_FORMAT);
-        String endMonthString = endDate.format(monthFormat);
-        String endMonthDayString = endDate.format(MONTH_DAY_FORMAT);
-        String endYearString = endDate.format(YEAR_FORMAT);
-        
+
+        String endMonthString = isInstant ? null : endDate.format(monthFormat);
+        String endMonthDayString = isInstant ? null : endDate.format(MONTH_DAY_FORMAT);
+        String endYearString = isInstant ? null : endDate.format(YEAR_FORMAT);
+
         if (startMonthNum != endMonthNum) {
             // Same year, different month.
             // Example: "October 28 - November 3"
             // or: "Wed, Oct 31 - Sat, Nov 3, 2007"
             // or: "Oct 31, 8am - Sat, Nov 3, 2007, 5pm"
-            
+
             int index = 0;
             if (showWeekDay) index = 1;
             if (showYear) index += 2;
@@ -1371,7 +1417,7 @@ public class DateUtils
             if (numericDate) index += 8;
             int resId = sameYearTable[index];
             fullFormat = res.getString(resId);
-            
+
             // The values that are used in a fullFormat string are specified
             // by position.
             dateRange = String.format(fullFormat,
@@ -1381,7 +1427,7 @@ public class DateUtils
                     endYearString, endTimeString);
             return dateRange;
         }
-    
+
         if (startDay != endDay) {
             // Same month, different day.
             int index = 0;
@@ -1391,7 +1437,7 @@ public class DateUtils
             if (numericDate) index += 8;
             int resId = sameMonthTable[index];
             fullFormat = res.getString(resId);
-            
+
             // The values that are used in a fullFormat string are specified
             // by position.
             dateRange = String.format(fullFormat,
@@ -1401,19 +1447,19 @@ public class DateUtils
                     endYearString, endTimeString);
             return dateRange;
         }
-        
+
         // Same start and end day
         boolean showDate = (flags & FORMAT_SHOW_DATE) != 0;
-        
+
         // If nothing was specified, then show the date.
         if (!showTime && !showDate && !showWeekDay) showDate = true;
-        
+
         // Compute the time string (example: "10:00 - 11:00 am")
         String timeString = "";
         if (showTime) {
             // If the start and end time are the same, then just show the
             // start time.
-            if (startMillis == endMillis) {
+            if (isInstant) {
                 // Same start and end time.
                 // Example: "10:15 AM"
                 timeString = startTimeString;
@@ -1423,7 +1469,7 @@ public class DateUtils
                 timeString = String.format(timeFormat, startTimeString, endTimeString);
             }
         }
-    
+
         // Figure out which full format to use.
         fullFormat = "";
         String dateString = "";
@@ -1457,7 +1503,7 @@ public class DateUtils
         } else if (showTime) {
             return timeString;
         }
-    
+
         // The values that are used in a fullFormat string are specified
         // by position.
         dateRange = String.format(fullFormat, timeString, startWeekDayString, dateString);

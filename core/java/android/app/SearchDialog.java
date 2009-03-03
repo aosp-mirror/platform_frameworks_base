@@ -448,6 +448,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
             }
             mSearchTextField.setInputType(inputType);
+            mSearchTextField.setImeOptions(mSearchable.getImeOptions());
         }
     }
 
@@ -793,7 +794,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // otherwise, dispatch an "edit view" key
                 switch (keyCode) {
                 case KeyEvent.KEYCODE_ENTER:
-                case KeyEvent.KEYCODE_DPAD_CENTER:
                     if (event.getAction() == KeyEvent.ACTION_UP) {
                         v.cancelLongPress();
                         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);                    

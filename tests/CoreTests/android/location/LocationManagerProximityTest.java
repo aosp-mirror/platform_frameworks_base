@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
@@ -33,8 +34,10 @@ import android.util.Log;
  * TODO: add tests for more scenarios
  * 
  * To run:
- *  adb shell am instrument -e class com.google.android.mapstests.api.LocationProximityTest \
- *     -w com.google.android.mapstests/.MapInstrumentationTestRunner
+ *  adb shell am instrument -e class android.location.LocationManagerProximityTest \
+ *     -w android.core/android.test.InstrumentationTestRunner
+ *     
+ * This test requires that the "Allow mock locations" setting be enabled     
  * 
  */
 @MediumTest
@@ -46,8 +49,6 @@ public class LocationManagerProximityTest extends AndroidTestCase {
     private LocationManager mLocationManager;
     private PendingIntent mPendingIntent;
     private TestIntentReceiver mIntentReceiver;
-    private String mOriginalAllowedProviders;
-    private int mOriginalMocksAllowed;
 
     private static final String LOG_TAG = "LocationProximityTest";
 
@@ -60,27 +61,13 @@ public class LocationManagerProximityTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
-        // allow mock locations
-        mOriginalMocksAllowed =
-            android.provider.Settings.Secure.getInt(getContext().getContentResolver(),
-                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, 0);
-        
-        android.provider.Settings.Secure.putInt(getContext().getContentResolver(),
-                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, 1);
-        
-        mOriginalAllowedProviders = 
-            android.provider.Settings.Secure.getString(
-                    getContext().getContentResolver(), 
-                    android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        
-        // ensure 'only' the mock provider is enabled
-        // need to do this so the proximity listener does not ignore the mock 
-        // updates in favor of gps updates
-        android.provider.Settings.Secure.putString(
-                getContext().getContentResolver(), 
-                android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED, 
-                PROVIDER_NAME);
+
+        // test that mock locations are allowed so a more descriptive error message can be logged
+        if (Settings.Secure.getInt(getContext().getContentResolver(),
+            Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 0) {
+            fail("Mock locations are currently disabled in Settings - this test requires " +
+                 "mock locations");
+        }
 
         mLocationManager = (LocationManager) getContext().
                 getSystemService(Context.LOCATION_SERVICE);
@@ -108,18 +95,6 @@ public class LocationManagerProximityTest extends AndroidTestCase {
         }
         if (mIntentReceiver != null) {
             getContext().unregisterReceiver(mIntentReceiver);
-        }
-        
-        android.provider.Settings.Secure.putInt(getContext().getContentResolver(),
-                android.provider.Settings.Secure.ALLOW_MOCK_LOCATION, mOriginalMocksAllowed);
-        
-        if (mOriginalAllowedProviders != null) {
-            // restore original settings
-            android.provider.Settings.Secure.putString(
-                    getContext().getContentResolver(), 
-                    android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED, 
-                    mOriginalAllowedProviders);
-            mLocationManager.updateProviders();
         }
     }
 

@@ -143,6 +143,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
+    boolean mLastWasImTarget;
 
     boolean mWindowAttributesChanged = false;
 
@@ -998,6 +999,21 @@ public final class ViewRoot extends Handler implements ViewParent,
         mNewSurfaceNeeded = false;
         mViewVisibility = viewVisibility;
 
+        if (mAttachInfo.mHasWindowFocus) {
+            final boolean imTarget = WindowManager.LayoutParams
+                    .mayUseInputMethod(mWindowAttributes.flags);
+            if (imTarget != mLastWasImTarget) {
+                mLastWasImTarget = imTarget;
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null && imTarget) {
+                    imm.startGettingWindowFocus(mView);
+                    imm.onWindowFocus(mView, mView.findFocus(),
+                            mWindowAttributes.softInputMode,
+                            !mHasHadWindowFocus, mWindowAttributes.flags);
+                }
+            }
+        }
+        
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw();
 
         if (!cancelDraw && !newSurface) {
@@ -1176,7 +1192,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // properly re-composite its drawing on a transparent
                 // background. This automatically respects the clip/dirty region
                 if (!canvas.isOpaque()) {
-                    canvas.drawColor(0xff0000ff, PorterDuff.Mode.CLEAR);
+                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
                 } else if (yoff != 0) {
                     // If we are applying an offset, we need to clear the area
                     // where the offset doesn't appear to avoid having garbage
@@ -1608,10 +1624,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
                 
+                mLastWasImTarget = WindowManager.LayoutParams
+                        .mayUseInputMethod(mWindowAttributes.flags);
+                
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (mView != null) {
-                    if (hasWindowFocus && imm != null) {
-                        imm.startGettingWindowFocus();
+                    if (hasWindowFocus && imm != null && mLastWasImTarget) {
+                        imm.startGettingWindowFocus(mView);
                     }
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
                 }
@@ -1619,7 +1638,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // Note: must be done after the focus change callbacks,
                 // so all of the view state is set up correctly.
                 if (hasWindowFocus) {
-                    if (imm != null) {
+                    if (imm != null && mLastWasImTarget) {
                         imm.onWindowFocus(mView, mView.findFocus(),
                                 mWindowAttributes.softInputMode,
                                 !mHasHadWindowFocus, mWindowAttributes.flags);
@@ -1976,6 +1995,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return false;
         }
+        if ((event.getFlags()&KeyEvent.FLAG_KEEP_TOUCH_MODE) != 0) {
+            return false;
+        }
 
         // only relevant if we are in touch mode
         if (!mAttachInfo.mInTouchMode) {
@@ -2095,8 +2117,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         // If it is possible for this window to interact with the input
         // method window, then we want to first dispatch our key events
         // to the input method.
-        if (WindowManager.LayoutParams.mayUseInputMethod(
-                mWindowAttributes.flags)) {
+        if (mLastWasImTarget) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null && mView != null) {
                 int seq = enqueuePendingEvent(event, sendDone);
@@ -2126,6 +2147,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sWindowSession.finishKey(mWindow);
                 } catch (RemoteException e) {
                 }
+            } else {
+                Log.w("ViewRoot", "handleFinishedEvent(seq=" + seq
+                        + " handled=" + handled + " ev=" + event
+                        + ") neither delivering nor finishing key");
             }
         }
     }
@@ -2448,6 +2473,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchKey(event);
+            } else {
+                Log.w("ViewRoot.W", "Key event " + event + " but no ViewRoot available!");
             }
         }
 

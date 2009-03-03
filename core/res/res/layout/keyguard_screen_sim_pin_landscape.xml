@@ -20,7 +20,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#FF000000"
+    android:background="#A0000000"
         >
 
     <!-- displays dots as user enters pin -->

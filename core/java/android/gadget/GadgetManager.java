@@ -300,5 +300,21 @@ public class GadgetManager {
             throw new RuntimeException("system server dead?", e);
         }
     }
+
+    /**
+     * Get the list of gadgetIds that have been bound to the given gadget
+     * provider.
+     * 
+     * @param provider The {@link android.content.BroadcastReceiver} that is the
+     *            gadget provider to find gadgetIds for.
+     */
+    public int[] getGadgetIds(ComponentName provider) {
+        try {
+            return sService.getGadgetIds(provider);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
 }
 

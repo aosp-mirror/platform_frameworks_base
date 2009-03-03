@@ -126,7 +126,7 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
         Editable text = getText();
 
         int end = getSelectionEnd();
-        if (end < 0) {
+        if (end < 0 || mTokenizer == null) {
             return false;
         }
 
@@ -147,7 +147,7 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
     public void performValidation() {
         Validator v = getValidator();
 
-        if (v == null) {
+        if (v == null || mTokenizer == null) {
             return;
         }
 

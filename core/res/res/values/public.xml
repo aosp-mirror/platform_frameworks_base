@@ -942,7 +942,7 @@
   <public type="attr" name="inputType" id="0x01010220" />
   <public type="attr" name="isDefault" id="0x01010221" />
   <public type="attr" name="windowDisablePreview" id="0x01010222" />
-  <public type="attr" name="editorPrivateContentType" id="0x01010223" />
+  <public type="attr" name="privateImeOptions" id="0x01010223" />
   <public type="attr" name="editorExtras" id="0x01010224" />
   <public type="attr" name="settingsActivity" id="0x01010225" />
   <public type="attr" name="fastScrollEnabled" id="0x01010226" />
@@ -1005,6 +1005,11 @@
   <public type="attr" name="innerRadius" id="0x0101025f" />
   <public type="attr" name="thickness" id="0x01010260" />
   <public type="attr" name="sharedUserLabel" id="0x01010261" />
+  <public type="attr" name="dropDownWidth" id="0x01010262" />
+  <public type="attr" name="dropDownAnchor" id="0x01010263" />
+  <public type="attr" name="imeOptions" id="0x01010264" />
+  <public type="attr" name="imeActionLabel" id="0x01010265" />
+  <public type="attr" name="imeActionId" id="0x01010266" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the

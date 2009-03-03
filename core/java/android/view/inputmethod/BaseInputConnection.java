@@ -341,6 +341,13 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation does nothing.
      */
+    public boolean performEditorAction(int actionCode) {
+        return false;
+    }
+
+    /**
+     * The default implementation does nothing.
+     */
     public boolean performContextMenuAction(int id) {
         return false;
     }

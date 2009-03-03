@@ -188,7 +188,6 @@ class ServerThread extends Thread {
                 Log.i(TAG, "Starting Status Bar Service.");
                 statusBar = new StatusBarService(context);
                 ServiceManager.addService("statusbar", statusBar);
-                com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting StatusBarService", e);
             }
@@ -314,6 +313,12 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.GADGET_SERVICE, gadget);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Gadget Service", e);
+            }
+
+            try {
+                com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure installing status bar icons", e);
             }
         }
 

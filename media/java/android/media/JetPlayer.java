@@ -25,6 +25,7 @@ import android.content.res.AssetFileDescriptor;
 import android.os.Looper;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 
 /**
@@ -163,8 +164,12 @@ public class JetPlayer
     
     
     public boolean loadJetFile(AssetFileDescriptor afd) {
+        long len = afd.getLength();
+        if (len < 0) {
+            throw new AndroidRuntimeException("no length for fd");
+        }
         return native_loadJetFromFileD(
-                afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                afd.getFileDescriptor(), afd.getStartOffset(), len);
     }
     
     
@@ -251,7 +256,9 @@ public class JetPlayer
                             mJet,
                             (short)((msg.arg1 & JET_EVENT_SEG_MASK)   >> JET_EVENT_SEG_SHIFT),
                             (byte) ((msg.arg1 & JET_EVENT_TRACK_MASK) >> JET_EVENT_TRACK_SHIFT),
-                            (byte) ((msg.arg1 & JET_EVENT_CHAN_MASK)  >> JET_EVENT_CHAN_SHIFT),
+                            // JETCreator channel numbers start at 1, but the index starts at 0
+                            // in the .jet files
+                            (byte)(((msg.arg1 & JET_EVENT_CHAN_MASK)  >> JET_EVENT_CHAN_SHIFT) + 1),
                             (byte) ((msg.arg1 & JET_EVENT_CTRL_MASK)  >> JET_EVENT_CTRL_SHIFT),
                             (byte)  (msg.arg1 & JET_EVENT_VAL_MASK) );
                     }

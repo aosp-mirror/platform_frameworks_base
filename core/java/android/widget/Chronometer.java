@@ -69,7 +69,10 @@ public class Chronometer extends TextView {
     private Object[] mFormatterArgs = new Object[1];
     private StringBuilder mFormatBuilder;
     private OnChronometerTickListener mOnChronometerTickListener;
-
+    private StringBuilder mRecycle = new StringBuilder(8);
+    
+    private static final int TICK_WHAT = 2;
+    
     /**
      * Initialize this Chronometer object.
      * Sets the base to the current time.
@@ -115,6 +118,7 @@ public class Chronometer extends TextView {
     @android.view.RemotableViewMethod
     public void setBase(long base) {
         mBase = base;
+        dispatchChronometerTick();
         updateText(SystemClock.elapsedRealtime());
     }
 
@@ -216,10 +220,10 @@ public class Chronometer extends TextView {
         updateRunning();
     }
 
-    private void updateText(long now) {
+    private synchronized void updateText(long now) {
         long seconds = now - mBase;
         seconds /= 1000;
-        String text = DateUtils.formatElapsedTime(seconds);
+        String text = DateUtils.formatElapsedTime(mRecycle, seconds);
 
         if (mFormat != null) {
             Locale loc = Locale.getDefault();
@@ -247,7 +251,10 @@ public class Chronometer extends TextView {
         if (running != mRunning) {
             if (running) {
                 updateText(SystemClock.elapsedRealtime());
-                mHandler.sendMessageDelayed(Message.obtain(), 1000);
+                dispatchChronometerTick();
+                mHandler.sendMessageDelayed(Message.obtain(mHandler, TICK_WHAT), 1000);
+            } else {
+                mHandler.removeMessages(TICK_WHAT);
             }
             mRunning = running;
         }
@@ -255,10 +262,10 @@ public class Chronometer extends TextView {
     
     private Handler mHandler = new Handler() {
         public void handleMessage(Message m) {
-            if (mStarted) {
+            if (mRunning) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                sendMessageDelayed(Message.obtain(), 1000);
+                sendMessageDelayed(Message.obtain(this, TICK_WHAT), 1000);
             }
         }
     };

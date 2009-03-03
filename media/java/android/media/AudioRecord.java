@@ -532,12 +532,19 @@ public class AudioRecord
      * @param audioData the array to which the recorded audio data is written.
      * @param offsetInBytes index in audioData from which the data is written.
      * @param sizeInBytes the number of requested bytes.
-     * @return the number of bytes that were read or -1 if the object wasn't properly
-     *    initialized. The number of bytes will not exceed sizeInBytes.
+     * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of bytes will not exceed sizeInBytes.
      */    
     public int read(byte[] audioData, int offsetInBytes, int sizeInBytes) {
         if (mState != STATE_INITIALIZED) {
-            return -1;
+            return ERROR_INVALID_OPERATION;
+        }
+        
+        if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0) 
+                || (offsetInBytes + sizeInBytes > audioData.length)) {
+            return ERROR_BAD_VALUE;
         }
 
         return native_read_in_byte_array(audioData, offsetInBytes, sizeInBytes);
@@ -549,12 +556,19 @@ public class AudioRecord
      * @param audioData the array to which the recorded audio data is written.
      * @param offsetInShorts index in audioData from which the data is written.
      * @param sizeInShorts the number of requested shorts.
-     * @return the number of shorts that were read. or -1 if the object wasn't properly
-     *    initialized. The number of shorts will not exceed sizeInShorts
+     * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of shorts will not exceed sizeInShorts.
      */    
     public int read(short[] audioData, int offsetInShorts, int sizeInShorts) {
         if (mState != STATE_INITIALIZED) {
-            return -1;
+            return ERROR_INVALID_OPERATION;
+        }
+        
+        if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0) 
+                || (offsetInShorts + sizeInShorts > audioData.length)) {
+            return ERROR_BAD_VALUE;
         }
 
         return native_read_in_short_array(audioData, offsetInShorts, sizeInShorts);
@@ -566,12 +580,18 @@ public class AudioRecord
      * is not a direct buffer, this method will always return 0.
      * @param audioBuffer the direct buffer to which the recorded audio data is written.
      * @param sizeInBytes the number of requested bytes.
-     * @return the number of bytes that were read or -1 if the object wasn't properly
-     *    initialized. The number of bytes will not exceed sizeInBytes.
+     * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of bytes will not exceed sizeInBytes.
      */    
     public int read(ByteBuffer audioBuffer, int sizeInBytes) {
         if (mState != STATE_INITIALIZED) {
-            return -1;
+            return ERROR_INVALID_OPERATION;
+        }
+        
+        if ( (audioBuffer == null) || (sizeInBytes < 0) ) {
+            return ERROR_BAD_VALUE;
         }
 
         return native_read_in_direct_buffer(audioBuffer, sizeInBytes);

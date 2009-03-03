@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"静音模式"</string>
     <string name="global_action_silent_mode_on_status">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status">"声音已开启"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"安全模式"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"需要您支付费用的服务"</string>
     <string name="permgroupdesc_costMoney">"允许应用程序执行可能需要您支付费用的操作。"</string>
     <string name="permgrouplab_messages">"您的信息"</string>
@@ -389,7 +397,8 @@
     <string name="lockscreen_emergency_call">"紧急电话"</string>
     <string name="lockscreen_pattern_correct">"正确！"</string>
     <string name="lockscreen_pattern_wrong">"很抱歉，请重试"</string>
-    <string name="lockscreen_plugged_in">"正在充电 (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short">"没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message">"手机中无 SIM 卡。"</string>
@@ -412,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"清除通知"</string>
     <string name="status_bar_no_notifications_title">"无通知"</string>
     <string name="status_bar_ongoing_events_title">"正在进行的"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"正在充电..."</string>
     <string name="battery_low_title">"请连接充电器"</string>
@@ -569,12 +578,12 @@
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日 <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
@@ -603,11 +612,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"周日"</string>
     <string name="day_of_week_long_monday">"周一"</string>
@@ -771,8 +780,8 @@
     <string name="extmedia_format_message">"您确定要格式化 SD 卡？卡上的所有数据都会丢失。"</string>
     <string name="extmedia_format_button_format">"格式化"</string>
     <string name="select_input_method">"选择输入方法"</string>
-    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"候选"</u></string>
     <string name="ext_media_checking_notification_title">"正在准备 SD 卡"</string>
     <string name="ext_media_checking_notification_message">"检查是否有错误"</string>
@@ -789,6 +798,18 @@
     <string name="activity_list_empty">"找不到匹配的活动"</string>
     <string name="permlab_pkgUsageStats">"更新组件使用情况统计"</string>
     <string name="permdesc_pkgUsageStats">"允许修改收集的组件使用情况统计。普通应用程序不能使用此权限。"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4742624865416767717) -->
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />
 </resources>

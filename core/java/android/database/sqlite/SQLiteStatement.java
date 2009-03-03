@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
@@ -26,6 +27,10 @@ import android.os.SystemClock;
  */
 public class SQLiteStatement extends SQLiteProgram
 {
+    private static final String TAG = "SQLiteStatement";
+
+    private final String mSql;
+
     /**
      * Don't use SQLiteStatement constructor directly, please use
      * {@link SQLiteDatabase#compileStatement(String)}
@@ -34,6 +39,11 @@ public class SQLiteStatement extends SQLiteProgram
      */
     /* package */ SQLiteStatement(SQLiteDatabase db, String sql) {
         super(db, sql);
+        if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+            mSql = sql;
+        } else {
+            mSql = null;
+        }
     }
 
     /**
@@ -50,6 +60,9 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                Log.v(TAG, "execute() for [" + mSql + "]");
+            }
             native_execute();
             if (logStats) {
                 mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
@@ -77,6 +90,9 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                Log.v(TAG, "executeInsert() for [" + mSql + "]");
+            }
             native_execute();
             if (logStats) {
                 mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
@@ -103,6 +119,9 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                Log.v(TAG, "simpleQueryForLong() for [" + mSql + "]");
+            }
             long retValue = native_1x1_long();
             if (logStats) {
                 mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
@@ -129,6 +148,9 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                Log.v(TAG, "simpleQueryForString() for [" + mSql + "]");
+            }
             String retValue = native_1x1_string();
             if (logStats) {
                 mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());

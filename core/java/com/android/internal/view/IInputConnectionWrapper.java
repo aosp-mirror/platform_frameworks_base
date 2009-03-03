@@ -23,7 +23,8 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_COMMIT_TEXT = 50;
     private static final int DO_COMMIT_COMPLETION = 55;
     private static final int DO_SET_SELECTION = 57;
-    private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 58;
+    private static final int DO_PERFORM_EDITOR_ACTION = 58;
+    private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 59;
     private static final int DO_SET_COMPOSING_TEXT = 60;
     private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
@@ -97,6 +98,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageII(DO_SET_SELECTION, start, end));
     }
 
+    public void performEditorAction(int id) {
+        dispatchMessage(obtainMessageII(DO_PERFORM_EDITOR_ACTION, id, 0));
+    }
+    
     public void performContextMenuAction(int id) {
         dispatchMessage(obtainMessageII(DO_PERFORM_CONTEXT_MENU_ACTION, id, 0));
     }
@@ -233,6 +238,15 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.setSelection(msg.arg1, msg.arg2);
+                return;
+            }
+            case DO_PERFORM_EDITOR_ACTION: {
+                InputConnection ic = mInputConnection.get();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "performEditorAction on inactive InputConnection");
+                    return;
+                }
+                ic.performEditorAction(msg.arg1);
                 return;
             }
             case DO_PERFORM_CONTEXT_MENU_ACTION: {

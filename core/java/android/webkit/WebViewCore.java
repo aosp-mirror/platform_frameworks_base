@@ -1294,7 +1294,9 @@ final class WebViewCore {
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.NEW_PICTURE_MSG_ID, nativeGetContentMinPrefWidth(),
+                    WebView.NEW_PICTURE_MSG_ID,
+                    mViewportMinimumScale == 0 ? nativeGetContentMinPrefWidth()
+                            : 0,
                     0, draw).sendToTarget();
             nativeCheckNavCache();
             if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {

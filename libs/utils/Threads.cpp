@@ -896,6 +896,7 @@ void ReadWriteLock::unlockForRead()
 {
     mLock.lock();
     if (mNumReaders == 0) {
+        mLock.unlock();
         LOG(LOG_WARN, "thread",
             "WARNING: unlockForRead requested, but not locked\n");
         return;
@@ -961,6 +962,7 @@ void ReadWriteLock::unlockForWrite()
 {
     mLock.lock();
     if (mNumWriters == 0) {
+        mLock.unlock();
         LOG(LOG_WARN, "thread",
             "WARNING: unlockForWrite requested, but not locked\n");
         return;
@@ -972,7 +974,7 @@ void ReadWriteLock::unlockForWrite()
     //printf(" wrlk held %.3f msec\n",
     //    (double) mDebugTimer.durationUsecs() / 1000.0);
 #endif
-    // mWriteWaiter.signal();       // should other writers get first dibs?
+    mWriteWaiter.signal();         // should other writers get first dibs?
     //printf("+++ signaling readers (if any)\n");
     mReadWaiter.broadcast();        // wake all readers (if any)
     mLock.unlock();

@@ -208,8 +208,22 @@ public interface InputConnection {
     /**
      * Set the selection of the text editor.  To set the cursor position,
      * start and end should have the same value.
+     * @return Returns true on success, false if the input connection is no longer
+     * valid.
      */
     public boolean setSelection(int start, int end);
+    
+    /**
+     * Have the editor perform an action it has said it can do.
+     * 
+     * @param editorAction This must be one of the action constants for
+     * {@link EditorInfo#imeOptions EditorInfo.editorType}, such as
+     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}.
+     * 
+     * @return Returns true on success, false if the input connection is no longer
+     * valid.
+     */
+    public boolean performEditorAction(int editorAction);
     
     /**
      * Perform a context menu action on the field.  The given id may be one of:

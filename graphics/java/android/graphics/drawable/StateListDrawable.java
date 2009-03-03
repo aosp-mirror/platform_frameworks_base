@@ -203,7 +203,20 @@ public class StateListDrawable extends DrawableContainer {
     public Drawable getStateDrawable(int index) {
         return mStateListState.getChildren()[index];
     }
-
+    
+    /**
+     * Gets the index of the drawable with the provided state set.
+     * 
+     * @param stateSet the state set to look up
+     * @return the index of the provided state set, or -1 if not found
+     * @hide pending API council
+     * @see #getStateDrawable(int)
+     * @see #getStateSet(int)
+     */
+    public int getStateDrawableIndex(int[] stateSet) {
+        return mStateListState.indexOfStateSet(stateSet);
+    }
+    
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {

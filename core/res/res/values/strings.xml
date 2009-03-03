@@ -240,6 +240,15 @@
     <!-- status message in phone options dialog for when silent mode is disabled -->
     <string name="global_action_silent_mode_off_status">Sound is ON</string>
 
+    <!-- label for item that toggles airplane mode -->
+    <string name="global_actions_toggle_airplane_mode">Airplane mode</string>
+
+    <!-- status message in phone options dialog for when airplane mode is on -->
+    <string name="global_actions_airplane_mode_on_status">Airplane mode is ON</string>
+
+    <!-- status message in phone options dialog for when airplane mode is off -->
+    <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
+
     <!-- Displayed to the user to tell them that they have started up the phone in "safe mode" -->
     <string name="safeMode">Safe mode</string>
 
@@ -1116,7 +1125,7 @@
 
     <!-- When the lock screen is showing and the phone plugged in, show the current
          charge %.  -->
-    <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d%%</xliff:g>)</string>
+    <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>)</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -2265,6 +2274,26 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_pkgUsageStats">Allows the modification of collected component usage statistics. Not for use by normal applications.</string>
 
-    <!-- Shown in the tutorial for double tap to zoom. -->
-    <string name="tutorial_double_tap_to_zoom_message_short">Double tap to zoom</string>
+    <!-- Shown in the tutorial for tap twice for zoom control. -->
+    <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
+
+    <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
+    the gadget. -->
+    <string name="gadget_host_error_inflating">Error inflating widget</string>
+
+    <!-- Long label for a button on a full-screen input method for the "Go" action. -->
+    <string name="ime_action_go">Go</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Search" action. -->
+    <string name="ime_action_search">Search</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Send" action. -->
+    <string name="ime_action_send">Send</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Next" action. -->
+    <string name="ime_action_next">Next</string>
+    
+    <!-- Long label for a button on a full-screen input method for an unknown action. -->
+    <string name="ime_action_default">Execute</string>
+    
 </resources>

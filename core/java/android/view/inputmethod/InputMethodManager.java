@@ -222,6 +222,11 @@ public final class InputMethodManager {
     // -----------------------------------------------------------
     
     /**
+     * This is the root view of the overall window that currently has input
+     * method focus.
+     */
+    View mCurRootView;
+    /**
      * This is the view that should currently be served by an input method,
      * regardless of the state of setting that up.
      */
@@ -840,6 +845,13 @@ public final class InputMethodManager {
 
     void focusInLocked(View view) {
         if (DEBUG) Log.v(TAG, "focusIn: " + view);
+        
+        if (mCurRootView != view.getRootView()) {
+            // This is a request from a window that isn't in the window with
+            // IME focus, so ignore it.
+            return;
+        }
+        
         // Okay we have a new view that is being served.
         if (mServedView != view) {
             mCurrentTextBoxAttribute = null;
@@ -913,7 +925,7 @@ public final class InputMethodManager {
     }
     
     /**
-     * Called by ViewRoot the first time it gets window focus.
+     * Called by ViewRoot when its window gets input focus.
      * @hide
      */
     public void onWindowFocus(View rootView, View focusedView, int softInputMode,
@@ -946,9 +958,10 @@ public final class InputMethodManager {
     }
     
     /** @hide */
-    public void startGettingWindowFocus() {
+    public void startGettingWindowFocus(View rootView) {
         synchronized (mH) {
             mWindowFocusedView = null;
+            mCurRootView = rootView;
         }
     }
     
@@ -1165,6 +1178,7 @@ public final class InputMethodManager {
                 + " mBindSequence=" + mBindSequence
                 + " mCurId=" + mCurId);
         p.println("  mCurMethod=" + mCurMethod);
+        p.println("  mCurRootView=" + mCurRootView);
         p.println("  mServedView=" + mServedView);
         p.println("  mLastServedView=" + mLastServedView);
         p.println("  mServedConnecting=" + mServedConnecting);

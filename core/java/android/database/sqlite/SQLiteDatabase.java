@@ -778,9 +778,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Returns the maximum size the database may grow to.
+     * Returns the current database page size, in bytes.
      *
-     * @return the new maximum database size
+     * @return the database page size, in bytes
      */
     public long getPageSize() {
         SQLiteStatement prog = null;

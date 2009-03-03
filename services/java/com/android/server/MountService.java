@@ -505,9 +505,12 @@ class MountService extends IMountService.Stub {
             if (mMediaStorageNotification == null) {
                 mMediaStorageNotification = new Notification();
                 mMediaStorageNotification.when = 0;
-                if (mPlaySounds) {
-                    mMediaStorageNotification.defaults |= Notification.DEFAULT_SOUND;
-                }
+            }
+
+            if (mPlaySounds) {
+                mMediaStorageNotification.defaults |= Notification.DEFAULT_SOUND;
+            } else {
+                mMediaStorageNotification.defaults &= ~Notification.DEFAULT_SOUND;
             }
 
             if (dismissable) {

@@ -75,6 +75,13 @@ abstract class ContentServiceNative extends Binder implements IContentService
     {
         try {
         switch (code) {
+            case 5038: {
+                data.readString(); // ignore the interface token that service generated
+                Uri uri = Uri.parse(data.readString());
+                notifyChange(uri, null, false, false);
+                return true;
+            }
+            
             case REGISTER_CONTENT_OBSERVER_TRANSACTION: {
                 Uri uri = Uri.CREATOR.createFromParcel(data);
                 boolean notifyForDescendents = data.readInt() != 0;

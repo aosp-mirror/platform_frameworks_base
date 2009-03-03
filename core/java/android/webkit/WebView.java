@@ -71,6 +71,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Scroller;
 import android.widget.Toast;
+import android.widget.ZoomButtonsController;
 import android.widget.ZoomControls;
 import android.widget.ZoomRingController;
 import android.widget.FrameLayout;
@@ -284,8 +285,10 @@ public class WebView extends AbsoluteLayout
     /**
      * Customizable constant
      */
-    // pre-computed square of ViewConfiguration.getTouchSlop()
+    // pre-computed square of ViewConfiguration.getScaledTouchSlop()
     private int mTouchSlopSquare;
+    // pre-computed square of ViewConfiguration.getScaledDoubleTapSlop()
+    private int mDoubleTapSlopSquare;
     // This should be ViewConfiguration.getTapTimeout()
     // But system time out is 100ms, which is too short for the browser.
     // In the browser, if it switches out of tap too soon, jump tap won't work.
@@ -321,6 +324,8 @@ public class WebView extends AbsoluteLayout
     private int mContentHeight;  // cache of value from WebViewCore
 
     static int MAX_FLOAT_CONTENT_WIDTH = 480;
+    // the calculated minimum content width for calculating the minimum scale.
+    // If it is 0, it means don't use it.
     private int mMinContentWidth;
 
     // Need to have the separate control for horizontal and vertical scrollbar 
@@ -553,7 +558,9 @@ public class WebView extends AbsoluteLayout
             return mExtra;
         }
     }
-    
+
+    private ZoomButtonsController mZoomButtonsController; 
+
     private ZoomRingController mZoomRingController;
     private ImageView mZoomRingOverview;
     private Animation mZoomRingOverviewExitAnimation;
@@ -617,6 +624,9 @@ public class WebView extends AbsoluteLayout
                             / ZOOM_RING_STEPS;
                 }
                 mZoomRingController.setThumbAngle(angle * MAX_ZOOM_RING_ANGLE);
+
+                // Don't show a thumb if the user cannot zoom
+                mZoomRingController.setThumbVisible(mMinZoomScale != mMaxZoomScale);
                 
                 // Show the zoom overview tab on the ring
                 setZoomOverviewVisible(true);
@@ -733,6 +743,26 @@ public class WebView extends AbsoluteLayout
         mZoomRingController.setPannerAcceleration(160);
         mZoomRingController.setPannerStartAcceleratingDuration(700);
         createZoomRingOverviewTab();
+        mZoomButtonsController = new ZoomButtonsController(context, this);
+        mZoomButtonsController.setOverviewVisible(true);
+        mZoomButtonsController.setCallback(new ZoomButtonsController.OnZoomListener() {
+            public void onCenter(int x, int y) {
+                mZoomListener.onCenter(x, y);
+            }
+
+            public void onOverview() {
+                mZoomButtonsController.setVisible(false);
+                zoomScrollOut();
+            }
+
+            public void onVisibilityChanged(boolean visible) {
+                mZoomListener.onVisibilityChanged(visible);
+            }
+
+            public void onZoom(boolean zoomIn) {
+                mZoomListener.onSimpleZoom(zoomIn);
+            }
+        });
     }
 
     private void init() {
@@ -745,6 +775,9 @@ public class WebView extends AbsoluteLayout
         final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
+        final int doubleTapslop = ViewConfiguration.get(getContext())
+                .getScaledDoubleTapSlop();
+        mDoubleTapSlopSquare = doubleTapslop * doubleTapslop;
     }
 
     private void createZoomRingOverviewTab() {
@@ -763,7 +796,7 @@ public class WebView extends AbsoluteLayout
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER);
         // TODO: magic constant that's based on the zoom ring radius + some offset
-        lp.topMargin = 208;
+        lp.topMargin = 200;
         mZoomRingOverview.setLayoutParams(lp);
         mZoomRingOverview.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -2305,8 +2338,19 @@ public class WebView extends AbsoluteLayout
     /**
      * Use this function to bind an object to Javascript so that the
      * methods can be accessed from Javascript.
-     * IMPORTANT, the object that is bound runs in another thread and
-     * not in the thread that it was constructed in.
+     * <p><strong>IMPORTANT:</strong>
+     * <ul>
+     * <li> Using addJavascriptInterface() allows JavaScript to control your
+     * application. This can be a very useful feature or a dangerous security
+     * issue. When the HTML in the WebView is untrustworthy (for example, part
+     * or all of the HTML is provided by some person or process), then an
+     * attacker could inject HTML that will execute your code and possibly any
+     * code of the attacker's choosing.<br>
+     * Do not use addJavascriptInterface() unless all of the HTML in this
+     * WebView was written by you.</li>
+     * <li> The Java object that is bound runs in another thread and not in
+     * the thread that it was constructed in.</li>
+     * </ul></p>
      * @param obj The class instance to bind to Javascript
      * @param interfaceName The name to used to expose the class in Javascript
      */
@@ -2969,8 +3013,8 @@ public class WebView extends AbsoluteLayout
         if (lp != null) {
             // Take the last touch and adjust for the location of the
             // TextDialog.
-            float x = mLastTouchX - lp.x;
-            float y = mLastTouchY - lp.y;
+            float x = mLastTouchX + (float) (mScrollX - lp.x);
+            float y = mLastTouchY + (float) (mScrollY - lp.y);
             mTextEntry.fakeTouchEvent(x, y);
         }
     }
@@ -3164,6 +3208,9 @@ public class WebView extends AbsoluteLayout
                 mSelectX = mScrollX + (int) mLastTouchX;
                 mSelectY = mScrollY + (int) mLastTouchY;
             }
+            int contentX = viewToContent((int) mLastTouchX + mScrollX);
+            int contentY = viewToContent((int) mLastTouchY + mScrollY);
+            nativeClearFocus(contentX, contentY);
        }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
@@ -3355,6 +3402,9 @@ public class WebView extends AbsoluteLayout
     public void emulateShiftHeld() {
         mExtendSelection = false;
         mShiftIsPressed = true;
+        int contentX = viewToContent((int) mLastTouchX + mScrollX);
+        int contentY = viewToContent((int) mLastTouchY + mScrollY);
+        nativeClearFocus(contentX, contentY);
     }
 
     private boolean commitCopy() {
@@ -3401,6 +3451,7 @@ public class WebView extends AbsoluteLayout
 
         // Clean up the zoom ring
         mZoomRingController.setVisible(false);
+        mZoomButtonsController.setVisible(false);
     }
     
     // Implementation for OnHierarchyChangeListener
@@ -3449,8 +3500,17 @@ public class WebView extends AbsoluteLayout
                 // false for the first parameter
             }
         } else {
-            // If our window has lost focus, stop drawing the focus ring
-            mDrawFocusRing = false;
+            if (!mZoomButtonsController.isVisible()) {
+                /*
+                 * The zoom controls come in their own window, so our window
+                 * loses focus. Our policy is to not draw the focus ring if
+                 * our window is not focused, but this is an exception since
+                 * the user can still navigate the web page with the zoom
+                 * controls showing.
+                 */
+                // If our window has lost focus, stop drawing the focus ring
+                mDrawFocusRing = false;
+            }
             mGotKeyDown = false;
             mShiftIsPressed = false;
             if (mNativeClass != 0) {
@@ -3592,7 +3652,8 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
-        if (mZoomRingController.isVisible() && mInZoomTapDragMode) {
+        if ((mZoomRingController.isVisible() || mZoomButtonsController.isVisible())
+                && mInZoomTapDragMode) {
             if (ev.getAction() == MotionEvent.ACTION_UP) {
                 // Just released the second tap, no longer in tap-drag mode
                 mInZoomTapDragMode = false;
@@ -3630,6 +3691,9 @@ public class WebView extends AbsoluteLayout
             mLastSentTouchTime = eventTime;
         }
 
+        int deltaX = (int) (mLastTouchX - x);
+        int deltaY = (int) (mLastTouchY - y);
+
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN
@@ -3655,16 +3719,23 @@ public class WebView extends AbsoluteLayout
                             , viewToContent(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
                 } else if (!ZoomRingController.useOldZoom(mContext) &&
-                        mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
+                        mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP) &&
+                        (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare)) {
                     // Found doubletap, invoke the zoom controller
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-                    mZoomRingController.setVisible(true);
+                    int contentX = viewToContent((int) mLastTouchX + mScrollX);
+                    int contentY = viewToContent((int) mLastTouchY + mScrollY);
+                    if (inEditingMode()) {
+                        mTextEntry.updateCachedTextfield();
+                    }
+                    nativeClearFocus(contentX, contentY);
                     mInZoomTapDragMode = true;
                     if (mLogEvent) {
                         EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
-                    return mZoomRingController.handleDoubleTapEvent(ev);
+                    return mZoomRingController.handleDoubleTapEvent(ev) ||
+                            mZoomButtonsController.handleDoubleTapEvent(ev);
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
@@ -3700,9 +3771,6 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 mVelocityTracker.addMovement(ev);
-
-                int deltaX = (int) (mLastTouchX - x);
-                int deltaY = (int) (mLastTouchY - y);
 
                 if (mTouchMode != TOUCH_DRAG_MODE) {
                     if (mTouchMode == TOUCH_SELECT_MODE) {
@@ -5092,6 +5160,8 @@ public class WebView extends AbsoluteLayout
                 });
                 if (mSelection != -1) {
                     listView.setSelection(mSelection);
+                    listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                    listView.setItemChecked(mSelection, true);
                 }
             }
             dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {

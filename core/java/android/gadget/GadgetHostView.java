@@ -18,7 +18,13 @@ package android.gadget;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.Config;
 import android.util.Log;
 import android.view.Gravity;
@@ -29,16 +35,23 @@ import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.ViewAnimator;
 
 /**
  * Provides the glue to show gadget views. This class offers automatic animation
  * between updates, and will try recycling old views for each incoming
  * {@link RemoteViews}.
  */
-public class GadgetHostView extends ViewAnimator implements Animation.AnimationListener {
+public class GadgetHostView extends FrameLayout {
     static final String TAG = "GadgetHostView";
-    static final boolean LOGD = Config.LOGD || true;
+    static final boolean LOGD = false;
+    static final boolean CROSSFADE = false;
+
+    static final int VIEW_MODE_NOINIT = 0;
+    static final int VIEW_MODE_CONTENT = 1;
+    static final int VIEW_MODE_ERROR = 2;
+    static final int VIEW_MODE_DEFAULT = 3;
+
+    static final int FADE_DURATION = 1000;
 
     // When we're inflating the initialLayout for a gadget, we only allow
     // views that are allowed in RemoteViews.
@@ -47,28 +60,17 @@ public class GadgetHostView extends ViewAnimator implements Animation.AnimationL
             return clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
         }
     };
-    
-    Context mLocalContext;
+
+    Context mContext;
     
     int mGadgetId;
     GadgetProviderInfo mInfo;
-    
-    View mActiveView = null;
-    View mStaleView = null;
-    
-    int mActiveLayoutId = -1;
-    int mStaleLayoutId = -1;
-    
-    /**
-     * Last set of {@link RemoteViews} applied to {@link #mActiveView}
-     */
-    RemoteViews mActiveActions = null;
-    
-    /**
-     * Flag indicating that {@link #mActiveActions} has been applied to
-     * {@link #mStaleView}, meaning it's readyto recycle.
-     */
-    boolean mStalePrepared = false;
+    View mView;
+    int mViewMode = VIEW_MODE_NOINIT;
+    int mLayoutId = -1;
+    long mFadeStartTime = -1;
+    Bitmap mOld;
+    Paint mOldPaint = new Paint();
     
     /**
      * Create a host view.  Uses default fade animations.
@@ -86,27 +88,13 @@ public class GadgetHostView extends ViewAnimator implements Animation.AnimationL
      */
     public GadgetHostView(Context context, int animationIn, int animationOut) {
         super(context);
-        mLocalContext = context;
-        
-        // Prepare our default transition animations
-        setAnimateFirstView(true);
-        setInAnimation(context, animationIn);
-        setOutAnimation(context, animationOut);
-
-        // Watch for animation events to prepare recycling
-        Animation inAnimation = getInAnimation();
-        if (inAnimation != null) {
-            inAnimation.setAnimationListener(this);
-        }
+        mContext = context;
     }
     
     /**
      * Set the gadget that will be displayed by this view.
      */
     public void setGadget(int gadgetId, GadgetProviderInfo info) {
-        if (mInfo != null) {
-            // TODO: remove the old view, or whatever
-        }
         mGadgetId = gadgetId;
         mInfo = info;
     }
@@ -119,92 +107,141 @@ public class GadgetHostView extends ViewAnimator implements Animation.AnimationL
         return mInfo;
     }
 
-    public void onAnimationEnd(Animation animation) {
-        // When our transition animation finishes, we should try bringing our
-        // newly-stale view up to the current view.
-        if (mActiveActions != null &&
-                mStaleLayoutId == mActiveActions.getLayoutId()) {
-            if (LOGD) Log.d(TAG, "after animation, layoutId matched so we're recycling old view");
-            mActiveActions.reapply(mLocalContext, mStaleView);
-            mStalePrepared = true;
-        }
-    }
-
-    public void onAnimationRepeat(Animation animation) {
-    }
-
-    public void onAnimationStart(Animation animation) {
-    }
-
     /**
      * Process a set of {@link RemoteViews} coming in as an update from the
      * gadget provider. Will animate into these new views as needed.
      */
     public void updateGadget(RemoteViews remoteViews) {
-        if (LOGD) Log.d(TAG, "updateGadget called");
+        if (LOGD) Log.d(TAG, "updateGadget called mOld=" + mOld);
         
         boolean recycled = false;
-        View newContent = null;
+        View content = null;
         Exception exception = null;
         
+        // Capture the old view into a bitmap so we can do the crossfade.
+        if (CROSSFADE) {
+            if (mFadeStartTime < 0) {
+                if (mView != null) {
+                    final int width = mView.getWidth();
+                    final int height = mView.getHeight();
+                    try {
+                        mOld = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    } catch (OutOfMemoryError e) {
+                        // we just won't do the fade
+                        mOld = null;
+                    }
+                    if (mOld != null) {
+                        //mView.drawIntoBitmap(mOld);
+                    }
+                }
+            }
+        }
+        
         if (remoteViews == null) {
-            newContent = getDefaultView();
-        }
-        
-        // If our stale view has been prepared to match active, and the new
-        // layout matches, try recycling it
-        if (newContent == null && mStalePrepared &&
-                remoteViews.getLayoutId() == mStaleLayoutId) {
-            try {
-                remoteViews.reapply(mLocalContext, mStaleView);
-                newContent = mStaleView;
-                recycled = true;
-                if (LOGD) Log.d(TAG, "was able to recycled existing layout");
-            } catch (RuntimeException e) {
-                exception = e;
+            if (mViewMode == VIEW_MODE_DEFAULT) {
+                // We've already done this -- nothing to do.
+                return;
             }
-        }
-        
-        // Try normal RemoteView inflation
-        if (newContent == null) {
-            try {
-                newContent = remoteViews.apply(mLocalContext, this);
-                if (LOGD) Log.d(TAG, "had to inflate new layout");
-            } catch (RuntimeException e) {
-                exception = e;
+            content = getDefaultView();
+            mLayoutId = -1;
+            mViewMode = VIEW_MODE_DEFAULT;
+        } else {
+            int layoutId = remoteViews.getLayoutId();
+
+            // If our stale view has been prepared to match active, and the new
+            // layout matches, try recycling it
+            if (content == null && layoutId == mLayoutId) {
+                try {
+                    remoteViews.reapply(mContext, mView);
+                    content = mView;
+                    recycled = true;
+                    if (LOGD) Log.d(TAG, "was able to recycled existing layout");
+                } catch (RuntimeException e) {
+                    exception = e;
+                }
             }
+            
+            // Try normal RemoteView inflation
+            if (content == null) {
+                try {
+                    content = remoteViews.apply(mContext, this);
+                    if (LOGD) Log.d(TAG, "had to inflate new layout");
+                } catch (RuntimeException e) {
+                    exception = e;
+                }
+            }
+
+            mLayoutId = layoutId;
+            mViewMode = VIEW_MODE_CONTENT;
         }
         
-        if (exception != null && LOGD) {
-            Log.w(TAG, "Error inflating gadget " + getGadgetInfo(), exception);
-        }
-        
-        if (newContent == null) {
-            // TODO: Should we throw an exception here for the host activity to catch?
-            // Maybe we should show a generic error widget.
-            if (LOGD) Log.d(TAG, "updateGadget couldn't find any view, so inflating error");
-            newContent = getErrorView();
+        if (content == null) {
+            if (mViewMode == VIEW_MODE_ERROR) {
+                // We've already done this -- nothing to do.
+                return ;
+            }
+            Log.w(TAG, "updateGadget couldn't find any view, using error view", exception);
+            content = getErrorView();
+            mViewMode = VIEW_MODE_ERROR;
         }
         
         if (!recycled) {
-            prepareView(newContent);
-            addView(newContent);
+            prepareView(content);
+            addView(content);
         }
-        
-        showNext();
-        
-        if (!recycled) {
-            removeView(mStaleView);
+
+        if (mView != content) {
+            removeView(mView);
+            mView = content;
         }
-        
-        mStalePrepared = false;
-        mActiveActions = remoteViews;
-        
-        mStaleView = mActiveView;
-        mActiveView = newContent;
-        
-        mStaleLayoutId = mActiveLayoutId;
-        mActiveLayoutId = (remoteViews == null) ? -1 : remoteViews.getLayoutId();
+
+        if (CROSSFADE) {
+            if (mFadeStartTime < 0) {
+                // if there is already an animation in progress, don't do anything --
+                // the new view will pop in on top of the old one during the cross fade,
+                // and that looks okay.
+                mFadeStartTime = SystemClock.uptimeMillis();
+                invalidate();
+            }
+        }
+    }
+
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        if (CROSSFADE) {
+            int alpha;
+            int l = child.getLeft();
+            int t = child.getTop();
+            if (mFadeStartTime > 0) {
+                alpha = (int)(((drawingTime-mFadeStartTime)*255)/FADE_DURATION);
+                if (alpha > 255) {
+                    alpha = 255;
+                }
+                Log.d(TAG, "drawChild alpha=" + alpha + " l=" + l + " t=" + t
+                        + " w=" + child.getWidth());
+                if (alpha != 255 && mOld != null) {
+                    mOldPaint.setAlpha(255-alpha);
+                    //canvas.drawBitmap(mOld, l, t, mOldPaint);
+                }
+            } else {
+                alpha = 255;
+            }
+            int restoreTo = canvas.saveLayerAlpha(l, t, child.getWidth(), child.getHeight(), alpha,
+                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+            boolean rv = super.drawChild(canvas, child, drawingTime);
+            canvas.restoreToCount(restoreTo);
+            if (alpha < 255) {
+                invalidate();
+            } else {
+                mFadeStartTime = -1;
+                if (mOld != null) {
+                    mOld.recycle();
+                    mOld = null;
+                }
+            }
+            return rv;
+        } else {
+            return super.drawChild(canvas, child, drawingTime);
+        }
     }
     
     /**
@@ -234,7 +271,7 @@ public class GadgetHostView extends ViewAnimator implements Animation.AnimationL
         
         try {
             if (mInfo != null) {
-                Context theirContext = mLocalContext.createPackageContext(
+                Context theirContext = mContext.createPackageContext(
                         mInfo.provider.getPackageName(), 0 /* no flags */);
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -266,9 +303,9 @@ public class GadgetHostView extends ViewAnimator implements Animation.AnimationL
      * Inflate and return a view that represents an error state.
      */
     protected View getErrorView() {
-        TextView tv = new TextView(mLocalContext);
-        // TODO: move this error string and background color into resources
-        tv.setText("Error inflating gadget");
+        TextView tv = new TextView(mContext);
+        tv.setText(com.android.internal.R.string.gadget_host_error_inflating);
+        // TODO: get this color from somewhere.
         tv.setBackgroundColor(Color.argb(127, 0, 0, 0));
         return tv;
     }

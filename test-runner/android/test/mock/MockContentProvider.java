@@ -19,6 +19,7 @@ package android.test.mock;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.ISyncAdapter;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.IBulkCursor;
@@ -81,6 +82,12 @@ public class MockContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
+    @SuppressWarnings("unused")
+    public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+    
     @SuppressWarnings("unused")
     public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) throws RemoteException {

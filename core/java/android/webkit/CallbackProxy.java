@@ -907,10 +907,12 @@ class CallbackProxy extends Handler {
     }
 
     public void onReceivedIcon(Bitmap icon) {
-        if (Config.DEBUG && mBackForwardList.getCurrentItem() == null) {
-            throw new AssertionError();
+        // The current item might be null if the icon was already stored in the
+        // database and this is a new WebView.
+        WebHistoryItem i = mBackForwardList.getCurrentItem();
+        if (i != null) {
+            i.setFavicon(icon);
         }
-        mBackForwardList.getCurrentItem().setFavicon(icon);
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
         if (mWebChromeClient == null) {
