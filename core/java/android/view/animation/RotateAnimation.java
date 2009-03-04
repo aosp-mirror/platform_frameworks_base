@@ -40,7 +40,7 @@ public class RotateAnimation extends Animation {
     private float mPivotY;
 
     /**
-     * Constructor used whan an RotateAnimation is loaded from a resource.
+     * Constructor used when a RotateAnimation is loaded from a resource.
      * 
      * @param context Application context to use
      * @param attrs Attribute set from which to read values

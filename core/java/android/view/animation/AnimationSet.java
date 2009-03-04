@@ -53,7 +53,7 @@ public class AnimationSet extends Animation {
     private long[] mStoredOffsets;
 
     /**
-     * Constructor used whan an AnimationSet is loaded from a resource. 
+     * Constructor used when an AnimationSet is loaded from a resource. 
      * 
      * @param context Application context to use
      * @param attrs Attribute set from which to read values
