@@ -1254,8 +1254,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 res |= WindowManagerImpl.ADD_FLAG_APP_VISIBLE;
             }
             
+            boolean focusChanged = false;
             if (win.canReceiveKeys()) {
-                if (updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS)) {
+                if ((focusChanged=updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS))
+                        == true) {
                     imMayMove = false;
                 }
             }
@@ -1270,6 +1272,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             
             //dump();
 
+            if (focusChanged) {
+                if (mCurrentFocus != null) {
+                    mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
+                }
+            }
+            
             if (localLOGV) Log.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
@@ -1633,16 +1641,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 outSurface.clear();
             }
 
-            boolean assignLayers = false;
-            
             if (focusMayChange) {
                 //System.out.println("Focus may change: " + win.mAttrs.getTitle());
                 if (updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
-                    assignLayers = true;
                     imMayMove = false;
                 }
                 //System.out.println("Relayout " + win + ": focus=" + mCurrentFocus);
             }
+            
+            // updateFocusedWindowLocked() already assigned layers so we only need to
+            // reassign them at this point if the IM window state gets shuffled
+            boolean assignLayers = false;
             
             if (imMayMove) {
                 if (moveInputMethodWindowsIfNeededLocked(false)) {
@@ -2371,7 +2380,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         }
                         
                         updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
-                        assignLayersLocked();
                         mLayoutNeeded = true;
                         performLayoutAndPlaceSurfacesLocked();
                         Binder.restoreCallingIdentity(origId);
@@ -2513,7 +2521,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (changed && performLayout) {
                 mLayoutNeeded = true;
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
-                assignLayersLocked();
                 performLayoutAndPlaceSurfacesLocked();
             }
         }
@@ -2894,7 +2901,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 if (DEBUG_REORDER) Log.v(TAG, "Final window list:");
                 if (DEBUG_REORDER) dumpWindowsLocked();
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
-                assignLayersLocked();
                 mLayoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
@@ -2942,7 +2948,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
-        assignLayersLocked();
         mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
 
@@ -4114,6 +4119,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             private long timeToSwitch;
             private boolean wasFrozen;
             private boolean focusPaused;
+            private WindowState curFocus;
             
             DispatchState(KeyEvent theEvent, WindowState theFocus) {
                 focus = theFocus;
@@ -4127,6 +4133,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 eventDispatching = mEventDispatching;
                 timeToSwitch = mTimeToSwitch;
                 wasFrozen = mWasFrozen;
+                curFocus = mCurrentFocus;
                 // cache the paused state at ctor time as well
                 if (theFocus == null || theFocus.mToken == null) {
                     Log.i(TAG, "focus " + theFocus + " mToken is null at event dispatch!");
@@ -4141,7 +4148,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         + " lw=" + lastWin + " lb=" + lastBinder
                         + " fin=" + finished + " gfw=" + gotFirstWindow
                         + " ed=" + eventDispatching + " tts=" + timeToSwitch
-                        + " wf=" + wasFrozen + " fp=" + focusPaused + "}}";
+                        + " wf=" + wasFrozen + " fp=" + focusPaused
+                        + " mcf=" + mCurrentFocus + "}}";
             }
         };
         private DispatchState mDispatchState = null;
@@ -4261,7 +4269,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             + " targetIsNew=" + targetIsNew
                             + " paused="
                             + (targetWin != null ? targetWin.mToken.paused : false)
-                            + " mFocusedApp=" + mFocusedApp);
+                            + " mFocusedApp=" + mFocusedApp
+                            + " mCurrentFocus=" + mCurrentFocus);
                     
                     targetApp = targetWin != null
                             ? targetWin.mAppToken : mFocusedApp;
@@ -4290,7 +4299,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         wait(curTimeout);
                         if (DEBUG_INPUT) Log.v(TAG, "Finished waiting @"
                                 + SystemClock.uptimeMillis() + " startTime="
-                                + startTime + " switchTime=" + mTimeToSwitch);
+                                + startTime + " switchTime=" + mTimeToSwitch
+                                + " target=" + targetWin + " mLW=" + mLastWin
+                                + " mLB=" + mLastBinder + " fin=" + mFinished
+                                + " mCurrentFocus=" + mCurrentFocus);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -4656,10 +4668,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         mFinished = true;
                         notifyAll();
                     }
-                } else {
-                    if (DEBUG_INPUT || true) Log.v(
-                            TAG, "finishedKey: " + client + " tried to finish but mLastBinder="
-                            + mLastBinder);
                 }
                 
                 if (qev != null) {
@@ -4687,7 +4695,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return;
             }
             synchronized (this) {
-                if (DEBUG_INPUT || true) Log.v(
+                if (DEBUG_INPUT) Log.v(
                     TAG, "New key dispatch window: win="
                     + newWindow.mClient.asBinder()
                     + ", last=" + mLastBinder
@@ -4701,7 +4709,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 newWindow.mToken.paused = false;
 
                 mGotFirstWindow = true;
-                boolean doNotify = true;
 
                 if ((newWindow.mAttrs.flags & FLAG_SYSTEM_ERROR) != 0) {
                     if (DEBUG_INPUT) Log.v(TAG,
@@ -4718,29 +4725,21 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         TAG, "Last win layer=" + mLastWin.mLayer
                         + ", new win layer=" + newWindow.mLayer);
                     if (newWindow.mLayer >= mLastWin.mLayer) {
-                        if (!mLastWin.canReceiveKeys()) {
-                            mLastWin.mToken.paused = false;
-                            if (DEBUG_INPUT || true) Log.v(TAG,
-                                    "Finishing old key to " + mLastWin);
-                            doFinishedKeyLocked(true);  // does a notifyAll()
-                            doNotify = false;
-                        } else {
-                            if (DEBUG_INPUT || true) Log.v(TAG, "mLastWin " + mLastWin
-                                    + " still receiving keys; not resetting dispatch to "
-                                    + newWindow);
-                        }
-                    } else {
-                        // the new window is lower; no need to wake key waiters
-                        if (DEBUG_INPUT || true) Log.v(TAG, 
-                                "New layer " + newWindow.mLayer + " is below last layer "
-                                + mLastWin.mLayer + " - not resetting dispatch");
-                        doNotify = false;
+                        // The new window is above the old; finish pending input to the last
+                        // window and start directing it to the new one.
+                        mLastWin.mToken.paused = false;
+                        doFinishedKeyLocked(true);  // does a notifyAll()
                     }
+                    // Either the new window is lower, so there is no need to wake key waiters,
+                    // or we just finished key input to the previous window, which implicitly
+                    // notified the key waiters.  In both cases, we don't need to issue the
+                    // notification here.
+                    return;
                 }
 
-                if (doNotify) {
-                    notifyAll();
-                }
+                // Now that we've put a new window state in place, make the event waiter
+                // take notice and retarget its attentions.
+                notifyAll();
             }
         }
 
@@ -8397,22 +8396,25 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
-            if (newFocus != null) {
-                mKeyWaiter.handleNewWindowLocked(newFocus);
-            }
             
             final WindowState imWindow = mInputMethodWindow;
             if (newFocus != imWindow && oldFocus != imWindow) {
-                moveInputMethodWindowsIfNeededLocked(
+                if (moveInputMethodWindowsIfNeededLocked(
                         mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS &&
-                        mode != UPDATE_FOCUS_WILL_PLACE_SURFACES);
-                mLayoutNeeded = true;
+                        mode != UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+                    mLayoutNeeded = true;
+                }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner();
-                } else if (mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    mLayoutNeeded = true;
-                    performLayoutAndPlaceSurfacesLocked();
+                } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
+                    // Client will do the layout, but we need to assign layers
+                    // for handleNewWindowLocked() below.
+                    assignLayersLocked();
                 }
+            }
+            
+            if (newFocus != null && mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
+                mKeyWaiter.handleNewWindowLocked(newFocus);
             }
             return true;
         }
