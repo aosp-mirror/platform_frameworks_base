@@ -1,5 +1,0 @@
-This package contains tests which need to access package-private members in the framework code.
-To do this, the tests must be loaded in the same class loader as the classes which they are
-testing. This package is loaded in the boot classpath.
-
-Run these tests via AndroidTests -> FrameworkTests.
