@@ -1,0 +1,61 @@
+page.title=&lt;permission-tree&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;permission-tree android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+                 android:<a href="#label">label</a>="<i>string resource</i>" ]
+                 android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares the base name for a tree of permissions.  The application takes 
+ownership of all names within the tree.  It can dynamically add new permissions 
+to the tree by calling <code>{@link android.content.pm.PackageManager#addPermission PackageManager.addPermission()}</code>.  Names within the tree are separated by
+periods ('{@code .}').  For example, if the base name is
+{@code com.example.project.taxes}, permissions like the following might be
+added:
+
+<p style="margin-left: 2em">{@code com.example.project.taxes.CALCULATE}
+<br/>{@code com.example.project.taxes.deductions.MAKE_SOME_UP}
+<br/>{@code com.example.project.taxes.deductions.EXAGGERATE}</p>
+
+<p>
+Note that this element does not declare a permission itself, only a 
+namespace in which further permissions can be placed.  See the 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+element for information on declaring permissions.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon representing all the permissions in the tree.  This attribute 
+must be set as a reference to a drawable resource containing the image 
+definition.</dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable name for the group.  As a convenience, the label can 
+be directly set as a raw string for quick and dirty programming.  However, 
+when the application is ready to be published, it should be set as a 
+reference to a string resource, so that it can be localized like other 
+strings in the user interface.</dd>
+
+<dt><a name="nm"</a>{@code android:name}</dt>
+<dd>The name that's at the base of the permission tree.  It serves as 
+a prefix to all permission names in the tree.  Java-style scoping should 
+be used to ensure that the name is unique.  The name must have more than 
+two period-separated seqments in its path &mdash; for example, 
+{@code com.example.base} is OK, but {@code com.example} is not.</dd>
+
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+</dd>
+
+</dl>

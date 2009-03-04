@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"KB"</string>
+    <string name="megabyteShort">"MB"</string>
+    <string name="gigabyteShort">"GB"</string>
+    <string name="terabyteShort">"TB"</string>
+    <string name="petabyteShort">"PB"</string>
+    <string name="untitled">"&lt;제목없음&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(전화번호 없음)"</string>
+    <string name="unknownName">"(알 수 없음)"</string>
+    <string name="defaultVoiceMailAlphaTag">"음성메일"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
+    <string name="serviceEnabled">"서비스가 활성화되었습니다."</string>
+    <string name="serviceEnabledFor">"사용 설정된 서비스 목록:"</string>
+    <string name="serviceDisabled">"서비스가 비활성화되었습니다."</string>
+    <string name="serviceRegistered">"등록이 완료되었습니다."</string>
+    <string name="serviceErased">"지웠습니다."</string>
+    <string name="passwordIncorrect">"비밀번호가 잘못되었습니다."</string>
+    <string name="mmiComplete">"MMI 완료"</string>
+    <string name="badPin">"이전 PIN이 올바르지 않습니다."</string>
+    <string name="badPuk">"입력한 PUK가 올바르지 않습니다."</string>
+    <string name="mismatchPin">"입력한 PIN이 일치하지 않습니다."</string>
+    <string name="invalidPin">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
+    <string name="needPuk">"SIM 카드의 PUK가 잠겨 있습니다. 잠금해제하려면 PUK 코드를 입력하세요."</string>
+    <string name="needPuk2">"SIM 카드 잠금을 해제하려면 PUK2를 입력하세요."</string>
+    <string name="ClipMmi">"수신 발신자 번호"</string>
+    <string name="ClirMmi">"발신 발신자 번호"</string>
+    <string name="CfMmi">"착신전환"</string>
+    <string name="CwMmi">"통화중 대기"</string>
+    <string name="BaMmi">"착발신 제한"</string>
+    <string name="PwdMmi">"비밀번호 변경"</string>
+    <string name="PinMmi">"PIN 변경"</string>
+    <string name="CLIRDefaultOnNextCallOn">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
+    <string name="CLIRDefaultOnNextCallOff">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
+    <string name="CLIRDefaultOffNextCallOn">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
+    <string name="CLIRDefaultOffNextCallOff">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
+    <string name="serviceNotProvisioned">"서비스가 준비되지 않았습니다."</string>
+    <string name="CLIRPermanent">"발신자 번호 설정을 변경할 수 없습니다."</string>
+    <string name="serviceClassVoice">"음성"</string>
+    <string name="serviceClassData">"데이터"</string>
+    <string name="serviceClassFAX">"팩스"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"비동기"</string>
+    <string name="serviceClassDataSync">"동기화"</string>
+    <string name="serviceClassPacket">"패킷"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안 됨"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g>초 후 <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안 됨"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안 됨"</string>
+    <string name="httpErrorOk">"확인"</string>
+    <string name="httpError">"웹페이지에 오류가 있습니다."</string>
+    <string name="httpErrorLookup">"URL을 찾을 수 없습니다."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"사이트 인증 스키마가 지원되지 않습니다."</string>
+    <string name="httpErrorAuth">"인증에 실패했습니다."</string>
+    <string name="httpErrorProxyAuth">"프록시 서버를 통한 인증에 실패했습니다."</string>
+    <string name="httpErrorConnect">"서버에 연결하지 못했습니다."</string>
+    <string name="httpErrorIO">"서버와 통신할 수 없습니다. 나중에 다시 시도하세요."</string>
+    <string name="httpErrorTimeout">"서버 연결 제한시간이 초과되었습니다."</string>
+    <string name="httpErrorRedirectLoop">"페이지에 서버 리디렉션이 너무 많이 포함되어 있습니다."</string>
+    <string name="httpErrorUnsupportedScheme">"지원되지 않는 프로토콜입니다."</string>
+    <string name="httpErrorFailedSslHandshake">"보안 연결을 설정하지 못했습니다."</string>
+    <string name="httpErrorBadUrl">"URL이 올바르지 않아 페이지를 열 수 없습니다."</string>
+    <string name="httpErrorFile">"파일에 액세스할 수 없습니다."</string>
+    <string name="httpErrorFileNotFound">"요청한 파일을 찾을 수 없습니다."</string>
+    <string name="httpErrorTooManyRequests">"처리 중인 요청이 너무 많습니다. 잠시 후에 다시 시도하세요."</string>
+    <string name="contentServiceSync">"동기화"</string>
+    <string name="contentServiceSyncNotificationTitle">"동기화"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"<xliff:g id="CONTENT_TYPE">%s</xliff:g> 삭제가 너무 많습니다."</string>
+    <string name="low_memory">"전화기 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
+    <string name="me">"나"</string>
+    <string name="power_dialog">"전화기 옵션"</string>
+    <string name="silent_mode">"무음 모드"</string>
+    <string name="turn_on_radio">"무선 켜기"</string>
+    <string name="turn_off_radio">"무선 끄기"</string>
+    <string name="screen_lock">"화면 잠금"</string>
+    <string name="power_off">"끄기"</string>
+    <string name="shutdown_progress">"종료 중..."</string>
+    <string name="shutdown_confirm">"전화기가 종료됩니다."</string>
+    <string name="no_recent_tasks">"최신 응용프로그램이 아닙니다."</string>
+    <string name="global_actions">"전화기 옵션"</string>
+    <string name="global_action_lock">"화면 잠금"</string>
+    <string name="global_action_power_off">"끄기"</string>
+    <string name="global_action_toggle_silent_mode">"무음 모드"</string>
+    <string name="global_action_silent_mode_on_status">"소리 꺼짐"</string>
+    <string name="global_action_silent_mode_off_status">"소리 켜짐"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
+    <string name="safeMode">"안전 모드"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
+    <string name="permgrouplab_costMoney">"요금이 부과되는 서비스"</string>
+    <string name="permgroupdesc_costMoney">"응용프로그램이 요금이 부과될 수 있는 작업을 할 수 있습니다."</string>
+    <string name="permgrouplab_messages">"메시지"</string>
+    <string name="permgroupdesc_messages">"SMS, 이메일 및 기타 메시지를 읽고 씁니다."</string>
+    <string name="permgrouplab_personalInfo">"개인 정보"</string>
+    <string name="permgroupdesc_personalInfo">"전화기에 저장된 연락처 및 캘린더에 직접 액세스합니다."</string>
+    <string name="permgrouplab_location">"위치"</string>
+    <string name="permgroupdesc_location">"물리적 위치 모니터링"</string>
+    <string name="permgrouplab_network">"네트워크 통신"</string>
+    <string name="permgroupdesc_network">"응용프로그램이 다양한 네트워크 기능에 액세스할 수 있습니다."</string>
+    <string name="permgrouplab_accounts">"Google 계정"</string>
+    <string name="permgroupdesc_accounts">"사용가능한 Google 계정에 액세스합니다."</string>
+    <string name="permgrouplab_hardwareControls">"하드웨어 제어"</string>
+    <string name="permgroupdesc_hardwareControls">"핸드셋의 하드웨어에 직접 액세스합니다."</string>
+    <string name="permgrouplab_phoneCalls">"전화 통화"</string>
+    <string name="permgroupdesc_phoneCalls">"전화 통화를 모니터링, 기록 및 처리합니다."</string>
+    <string name="permgrouplab_systemTools">"시스템 도구"</string>
+    <string name="permgroupdesc_systemTools">"하위 수준의 액세스 및 시스템 제어"</string>
+    <string name="permgrouplab_developmentTools">"개발도구"</string>
+    <string name="permgroupdesc_developmentTools">"응용프로그램 개발자에게만 필요한 기능입니다."</string>
+    <string name="permlab_statusBar">"상태 표시줄 사용 안 함 또는 수정"</string>
+    <string name="permdesc_statusBar">"응용프로그램이 상태 표시줄을 비활성화하거나 시스템 아이콘을 추가 및 제거할 수 있습니다."</string>
+    <string name="permlab_expandStatusBar">"상태 표시줄 확장/축소"</string>
+    <string name="permdesc_expandStatusBar">"응용프로그램이 상태 표시줄을 확장하거나 축소할 수 있습니다."</string>
+    <string name="permlab_processOutgoingCalls">"발신전화 가로채기"</string>
+    <string name="permdesc_processOutgoingCalls">"응용프로그램이 발신전화를 처리하고 전화를 걸 번호를 변경할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 발신전화를 모니터링하거나, 다른 방향으로 돌리거나, 중단시킬 수 있습니다."</string>
+    <string name="permlab_receiveSms">"SMS 받기"</string>
+    <string name="permdesc_receiveSms">"응용프로그램이 SMS 메시지를 받고 처리할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_receiveMms">"MMS 받기"</string>
+    <string name="permdesc_receiveMms">"응용프로그램이 MMS 메시지를 받고 처리할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_sendSms">"SMS 메시지 보내기"</string>
+    <string name="permdesc_sendSms">"응용프로그램이 SMS 메시지를 보낼 수 있습니다. 악성 응용프로그램은 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
+    <string name="permlab_readSms">"SMS 또는 MMS 읽기"</string>
+    <string name="permdesc_readSms">"응용프로그램이 전화기 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 기밀 메시지를 읽을 수 있습니다."</string>
+    <string name="permlab_writeSms">"SMS 또는 MMS 편집"</string>
+    <string name="permdesc_writeSms">"응용프로그램이 전화기 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
+    <string name="permlab_receiveWapPush">"WAP 받기"</string>
+    <string name="permdesc_receiveWapPush">"응용프로그램이 WAP 메시지를 받고 처리할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_getTasks">"실행 중인 응용프로그램 검색"</string>
+    <string name="permdesc_getTasks">"응용프로그램이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 다른 응용프로그램에 대한 개인 정보를 검색할 수 있습니다."</string>
+    <string name="permlab_reorderTasks">"실행 중인 응용프로그램 순서 재지정"</string>
+    <string name="permdesc_reorderTasks">"응용프로그램이 작업을 포그라운드나 백그라운드로 이동할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 사용자의 조작 없이 작업을 강제로 앞으로 이동할 수 있습니다."</string>
+    <string name="permlab_setDebugApp">"응용프로그램 디버깅 사용"</string>
+    <string name="permdesc_setDebugApp">"응용프로그램이 다른 응용프로그램에 대한 디버깅을 설정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 다른 응용프로그램을 중지시킬 수 있습니다."</string>
+    <string name="permlab_changeConfiguration">"UI 설정 변경"</string>
+    <string name="permdesc_changeConfiguration">"응용프로그램이 로케일 또는 전체 글꼴 크기 같은 현재 구성을 변경할 수 있습니다."</string>
+    <string name="permlab_restartPackages">"다른 응용프로그램 다시 시작"</string>
+    <string name="permdesc_restartPackages">"응용프로그램이 다른 응용프로그램을 강제로 다시 시작할 수 있습니다."</string>
+    <string name="permlab_setProcessForeground">"중지되지 않도록 하기"</string>
+    <string name="permdesc_setProcessForeground">"응용프로그램이 프로세스를 포그라운드에서 실행되도록 하여 프로세스를 중지할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_forceBack">"강제로 응용프로그램 닫기"</string>
+    <string name="permdesc_forceBack">"응용프로그램이 포그라운드에 있는 활동을 강제로 닫을 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_dump">"시스템 내부 상태 검색"</string>
+    <string name="permdesc_dump">"응용프로그램이 시스템의 내부 상태를 검색할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인 정보와 보안 정보를 검색할 수 있습니다."</string>
+    <string name="permlab_addSystemService">"하위 수준 서비스 게시"</string>
+    <string name="permdesc_addSystemService">"응용프로그램이 자체 하위 수준 시스템 서비스를 게시할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 하이재킹하거나 시스템의 데이터를 도용 또는 손상시킬 수 있습니다."</string>
+    <string name="permlab_runSetActivityWatcher">"실행 중인 모든 응용프로그램 모니터링 및 제어"</string>
+    <string name="permdesc_runSetActivityWatcher">"응용프로그램이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 전화기 사용 시에는 필요하지 않습니다."</string>
+    <string name="permlab_broadcastPackageRemoved">"패키지 제거 브로드캐스트 보내기"</string>
+    <string name="permdesc_broadcastPackageRemoved">"응용프로그램이 응용프로그램 패키지가 제거되었다는 알림을 브로드캐스트할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 실행 중인 다른 응용프로그램을 중지시킬 수 있습니다."</string>
+    <string name="permlab_broadcastSmsReceived">"SMS 수신 브로드캐스트 보내기"</string>
+    <string name="permdesc_broadcastSmsReceived">"응용프로그램이 SMS 메시지를 받았다는 알림을 브로드캐스트할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 들어오는 SMS 메시지처럼 위장할 수 있습니다."</string>
+    <string name="permlab_broadcastWapPush">"WAP-PUSH-수신 브로드캐스트 보내기"</string>
+    <string name="permdesc_broadcastWapPush">"응용프로그램이 WAP PUSH 메시지를 받았다는 알림을 브로드캐스트할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 MMS 메시지를 받은 것처럼 위장하거나 웹페이지의 콘텐츠를 악성 변종으로 바꿀 수 있습니다."</string>
+    <string name="permlab_setProcessLimit">"실행 중인 프로세스 수 제한"</string>
+    <string name="permdesc_setProcessLimit">"응용프로그램이 실행할 최대 프로세스 수를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_setAlwaysFinish">"모든 백그라운드 응용프로그램이 닫히도록 하기"</string>
+    <string name="permdesc_setAlwaysFinish">"응용프로그램이 백그라운드로 이동한 활동을 항상 바로 마칠지 여부를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_fotaUpdate">"시스템 업데이트 자동으로 설치"</string>
+    <string name="permdesc_fotaUpdate">"응용프로그램이 대기 중인 시스템 업데이트에 대한 알림을 받고 설치를 트리거할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 인증되지 않은 업데이트로 시스템을 손상시키거나 업데이트 절차를 방해할 수 있습니다."</string>
+    <string name="permlab_batteryStats">"배터리 통계 수정"</string>
+    <string name="permdesc_batteryStats">"수집된 배터리 통계를 수정할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_internalSystemWindow">"인증되지 않은 창 표시"</string>
+    <string name="permdesc_internalSystemWindow">"내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_systemAlertWindow">"시스템 수준 경고 표시"</string>
+    <string name="permdesc_systemAlertWindow">"응용프로그램이 시스템 경고 창을 표시할 수 있습니다. 악성 응용프로그램은 전화기 화면 전체를 차지할 수 있습니다."</string>
+    <string name="permlab_setAnimationScale">"전체 애니메이션 속도 수정"</string>
+    <string name="permdesc_setAnimationScale">"응용프로그램이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있습니다."</string>
+    <string name="permlab_manageAppTokens">"응용프로그램 토큰 관리"</string>
+    <string name="permdesc_manageAppTokens">"응용프로그램이 일반적인 Z-순서를 무시하여 자체 토큰을 만들고 관리할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_injectEvents">"키 및 컨트롤 버튼 누르기"</string>
+    <string name="permdesc_injectEvents">"응용프로그램이 입력 이벤트(예: 키 누름)를 다른 응용프로그램에 전달할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 전화기를 완전히 제어할 수 있습니다."</string>
+    <string name="permlab_readInputState">"사용자가 입력한 내용 및 수행한 작업 기록"</string>
+    <string name="permdesc_readInputState">"응용프로그램이 다른 응용프로그램과 상호작용할 때에도 사용자가 누르는 키(예: 비밀번호 입력)를 볼 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_bindInputMethod">"입력 방법에 고정"</string>
+    <string name="permdesc_bindInputMethod">"보유자가 입력 방법의 최상위 인터페이스에 고정할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_setOrientation">"화면 방향 변경"</string>
+    <string name="permdesc_setOrientation">"응용프로그램이 언제든지 화면 회전을 변경할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
+    <string name="permlab_signalPersistentProcesses">"응용프로그램에 Linux 신호 보내기"</string>
+    <string name="permdesc_signalPersistentProcesses">"응용프로그램이 제공된 신호를 모든 영구 프로세스로 보내도록 요청할 수 있습니다."</string>
+    <string name="permlab_persistentActivity">"응용프로그램이 항상 실행되도록 설정"</string>
+    <string name="permdesc_persistentActivity">"응용프로그램이 연결된 일부 구성요소를 지속하여 다른 응용프로그램에 사용할 수 없도록 합니다."</string>
+    <string name="permlab_deletePackages">"응용프로그램 삭제"</string>
+    <string name="permdesc_deletePackages">"응용프로그램이 Android 패키지를 삭제할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 중요한 응용프로그램을 삭제할 수 있습니다."</string>
+    <string name="permlab_clearAppUserData">"다른 응용프로그램의 데이터 삭제"</string>
+    <string name="permdesc_clearAppUserData">"응용프로그램이 사용자 데이터를 지울 수 있습니다."</string>
+    <string name="permlab_deleteCacheFiles">"다른 응용프로그램의 캐시 삭제"</string>
+    <string name="permdesc_deleteCacheFiles">"응용프로그램이 캐시 파일을 삭제할 수 있습니다."</string>
+    <string name="permlab_getPackageSize">"응용프로그램 저장공간 계산"</string>
+    <string name="permdesc_getPackageSize">"응용프로그램이 해당 코드, 데이터 및 캐시 크기를 검색할 수 있습니다."</string>
+    <string name="permlab_installPackages">"응용프로그램 직접 설치"</string>
+    <string name="permdesc_installPackages">"응용프로그램이 새로운 또는 업데이트된 Android 패키지를 설치할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 임의의 강력한 권한으로 새 응용프로그램을 추가할 수 있습니다."</string>
+    <string name="permlab_clearAppCache">"모든 응용프로그램 캐시 데이터 삭제"</string>
+    <string name="permdesc_clearAppCache">"응용프로그램이 응용프로그램 캐시 디렉토리에 있는 파일을 삭제하여 전화기의 저장공간을 늘릴 수 있습니다. 액세스는 일반적으로 시스템 프로세스로 제한됩니다."</string>
+    <string name="permlab_readLogs">"시스템 로그 파일 읽기"</string>
+    <string name="permdesc_readLogs">"응용프로그램이 시스템의 다양한 로그 파일을 읽을 수 있습니다. 이 경우 응용프로그램은 사용자가 전화기로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있지만 여기에 개인 정보는 포함되어서는 안 됩니다."</string>
+    <string name="permlab_diagnostic">"진단 그룹 소유의 리소스 읽기/작성"</string>
+    <string name="permdesc_diagnostic">"응용프로그램이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있습니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로, 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
+    <string name="permlab_changeComponentState">"응용프로그램 구성요소 사용 또는 사용 안 함"</string>
+    <string name="permdesc_changeComponentState">"응용프로그램이 다른 응용프로그램 구성요소의 사용 여부를 변경할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 중요한 전화기 기능을 사용하지 않도록 설정할 수 있습니다. 응용프로그램 구성요소가 쓸모없게 되거나, 일관성이 없어지거나, 불안정해질 수 있으므로 이 권한을 설정할 때는 주의해야 합니다."</string>
+    <string name="permlab_setPreferredApplications">"기본 응용프로그램 설정"</string>
+    <string name="permdesc_setPreferredApplications">"응용프로그램이 기본 응용프로그램을 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 기존 응용프로그램이 사용자의 개인 데이터를 수집하도록 스푸핑하여 실행되는 응용프로그램을 변경할 수 있습니다."</string>
+    <string name="permlab_writeSettings">"전체 시스템 설정 수정"</string>
+    <string name="permdesc_writeSettings">"응용프로그램이 시스템의 설정 데이터를 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템 구성을 손상시킬 수 있습니다."</string>
+    <string name="permlab_writeSecureSettings">"보안 시스템 설정 수정"</string>
+    <string name="permdesc_writeSecureSettings">"응용프로그램이 시스템 보안 설정값 데이터를 수정할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_writeGservices">"Google 서비스 지도 수정"</string>
+    <string name="permdesc_writeGservices">"응용프로그램이 Google 서비스 지도를 수정할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_receiveBootCompleted">"부팅할 때 자동 시작"</string>
+    <string name="permdesc_receiveBootCompleted">"응용프로그램이 시스템 부팅이 끝난 후 바로 시작할 수 있습니다. 이 경우 전화기가 시작하는 데 시간이 오래 걸리고 응용프로그램이 항상 실행되어 전체 전화기 속도가 느려질 수 있습니다."</string>
+    <string name="permlab_broadcastSticky">"남은 브로드캐스트 보내기"</string>
+    <string name="permdesc_broadcastSticky">"응용프로그램이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있습니다. 악성 응용프로그램은 전화기가 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
+    <string name="permlab_readContacts">"연락처 데이터 읽기"</string>
+    <string name="permdesc_readContacts">"응용프로그램이 전화기에 저장된 모든 연락처(주소) 데이터를 읽을 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 데이터를 다른 사람에게 보낼 수 있습니다."</string>
+    <string name="permlab_writeContacts">"연락처 데이터 작성"</string>
+    <string name="permdesc_writeContacts">"응용프로그램이 전화기에 저장된 연락처(주소) 데이터를 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permlab_writeOwnerData">"소유자 데이터 작성"</string>
+    <string name="permdesc_writeOwnerData">"응용프로그램이 전화기에 저장된 전화기 소유자 데이터를 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 소유자 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permlab_readOwnerData">"소유자 데이터 읽기"</string>
+    <string name="permdesc_readOwnerData">"응용프로그램이 전화기에 저장된 전화기 소유자 데이터를 읽을 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 전화기 소유자 데이터를 읽을 수 있습니다."</string>
+    <string name="permlab_readCalendar">"캘린더 데이터 읽기"</string>
+    <string name="permdesc_readCalendar">"응용프로그램이 전화기에 저장된 모든 캘린더 일정을 읽을 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
+    <string name="permlab_writeCalendar">"캘린더 데이터 작성"</string>
+    <string name="permdesc_writeCalendar">"응용프로그램이 전화기에 저장된 캘린더 일정을 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 캘린더 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permlab_accessMockLocation">"테스트를 위해 위치 소스로 가장"</string>
+    <string name="permdesc_accessMockLocation">"테스트용 가짜 위치 소스를 만듭니다. 악성 응용프로그램은 이 기능을 이용하여 GPS, 네트워크 제공업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
+    <string name="permlab_accessLocationExtraCommands">"추가 위치 제공업체 명령 액세스"</string>
+    <string name="permdesc_accessLocationExtraCommands">"추가 위치 제공업체 명령에 액세스합니다. 악성 응용프로그램은 이 기능을 이용하여 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
+    <string name="permlab_accessFineLocation">"자세한 (GPS) 위치"</string>
+    <string name="permdesc_accessFineLocation">"가능한 경우 전화기에서 GPS(범지구 위치 측정 시스템) 등의 자세한 위치 소스에 액세스합니다. 악성 응용프로그램은 이 기능을 이용하여 사용자의 위치를 측정하고 추가 배터리 전원을 소비할 수 있습니다."</string>
+    <string name="permlab_accessCoarseLocation">"광범위한 네트워크 기반 위치"</string>
+    <string name="permdesc_accessCoarseLocation">"전화기의 대략적인 위치를 측정하기 위해 셀룰러 네트워크 데이터베이스와 같은 광범위한 위치 소스에 액세스합니다. 악성 응용프로그램은 이 기능을 이용하여 사용자의 위치를 대략적으로 측정할 수 있습니다."</string>
+    <string name="permlab_accessSurfaceFlinger">"SurfaceFlinger 액세스"</string>
+    <string name="permdesc_accessSurfaceFlinger">"응용프로그램이 SurfaceFlinger의 하위 수준 기능을 사용할 수 있습니다."</string>
+    <string name="permlab_readFrameBuffer">"프레임 버퍼 읽기"</string>
+    <string name="permdesc_readFrameBuffer">"응용프로그램이 프레임 버퍼의 콘텐츠를 읽을 수 있습니다."</string>
+    <string name="permlab_modifyAudioSettings">"오디오 설정 변경"</string>
+    <string name="permdesc_modifyAudioSettings">"응용프로그램이 볼륨 및 경로 지정 같은 전체 오디오 설정을 수정할 수 있습니다."</string>
+    <string name="permlab_recordAudio">"오디오 녹음"</string>
+    <string name="permdesc_recordAudio">"응용프로그램이 오디오 레코드 경로에 액세스할 수 있습니다."</string>
+    <string name="permlab_camera">"사진 촬영"</string>
+    <string name="permdesc_camera">"응용프로그램이 카메라로 사진을 찍을 수 있습니다. 이 경우 응용프로그램은 카메라에 표시되는 이미지를 언제든지 수집할 수 있습니다."</string>
+    <string name="permlab_brick">"전화기를 영구적으로 비활성화"</string>
+    <string name="permdesc_brick">"응용프로그램이 전화기를 영구적으로 사용하지 않도록 설정할 수 있습니다. 이 기능은 매우 위험합니다."</string>
+    <string name="permlab_reboot">"전화기 강제로 다시 부팅"</string>
+    <string name="permdesc_reboot">"응용프로그램이 전화기를 강제로 다시 부팅할 수 있습니다."</string>
+    <string name="permlab_mount_unmount_filesystems">"파일시스템 마운트 및 마운트 해제"</string>
+    <string name="permdesc_mount_unmount_filesystems">"응용프로그램이 이동식 저장소의 파일시스템을 마운트하고 마운트 해제할 수 있습니다."</string>
+    <string name="permlab_mount_format_filesystems">"외부 저장소 포맷"</string>
+    <string name="permdesc_mount_format_filesystems">"응용프로그램이 제거 가능한 저장소를 포맷하도록 합니다."</string>
+    <string name="permlab_vibrate">"진동 제어"</string>
+    <string name="permdesc_vibrate">"응용프로그램이 진동을 제어할 수 있습니다."</string>
+    <string name="permlab_flashlight">"손전등 제어"</string>
+    <string name="permdesc_flashlight">"응용프로그램이 손전등을 제어할 수 있습니다."</string>
+    <string name="permlab_hardware_test">"하드웨어 테스트"</string>
+    <string name="permdesc_hardware_test">"응용프로그램이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있습니다."</string>
+    <string name="permlab_callPhone">"전화번호로 직접 전화걸기"</string>
+    <string name="permdesc_callPhone">"응용프로그램이 사용자의 조작 없이 전화번호로 전화를 걸 수 있습니다. 악성 응용프로그램은 전화요금 청구서에 예상치 못한 통화 요금이 부과되도록 할 수 있습니다. 이 권한으로 응용프로그램은 비상 전화를 걸 수 없습니다."</string>
+    <string name="permlab_callPrivileged">"전화번호로 직접 전화걸기"</string>
+    <string name="permdesc_callPrivileged">"응용프로그램이 사용자의 조작 없이 비상 번호를 포함한 전화번호로 전화를 걸 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 응급 서비스를 불필요하거나 불법적으로 호출할 수 있습니다."</string>
+    <string name="permlab_locationUpdates">"위치 업데이트 알림 제어"</string>
+    <string name="permdesc_locationUpdates">"무선의 위치 업데이트 알림을 활성화하거나 비활성화할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_checkinProperties">"체크인 속성 액세스"</string>
+    <string name="permdesc_checkinProperties">"체크인 서비스에서 업로드한 속성에 대한 읽기/쓰기 액세스를 허용합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permlab_bindGadget">"가젯 선택"</string>
+    <string name="permdesc_bindGadget">"어느 응용프로그램이 어느 가젯을 사용할 수 있는지 시스템에 알려 주는 권한을 본 응용프로그램에 부여합니다. 이 권한을 사용하면 응용프로그램이 개인 데이터에 대한 액세스 권한을 다른 응용프로그램에 제공할 수 있습니다. 일반 응용프로그램은 이 권한을 사용할 수 없습니다."</string>
+    <string name="permlab_modifyPhoneState">"전화기 상태 수정"</string>
+    <string name="permdesc_modifyPhoneState">"응용프로그램이 장치의 전화 기능을 제어할 수 있습니다. 이 권한을 갖는 응용프로그램은 사용자에게 알리지 않고 네트워크를 전환하거나, 전화 무선 기능을 켜고 끌 수 있습니다."</string>
+    <string name="permlab_readPhoneState">"전화기 상태 읽기"</string>
+    <string name="permdesc_readPhoneState">"응용프로그램이 장치의 전화 기능에 액세스할 수 있습니다. 이 권한을 갖는 응용프로그램은 전화기의 전화번호, 통화가 활성인지 여부, 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
+    <string name="permlab_wakeLock">"전화기가 절전 모드로 전환되지 않도록 설정"</string>
+    <string name="permdesc_wakeLock">"응용프로그램이 전화기가 절전 모드로 전환되지 않도록 할 수 있습니다."</string>
+    <string name="permlab_devicePower">"전화기 전원 켜고 끄기"</string>
+    <string name="permdesc_devicePower">"응용프로그램이 전화기를 켜거나 끌 수 있습니다."</string>
+    <string name="permlab_factoryTest">"출고 테스트 모드로 실행"</string>
+    <string name="permdesc_factoryTest">"전화기 하드웨어에 대한 완전한 액세스를 허용하는 하위 수준의 제조업체 테스트로 실행됩니다. 전화기가 제조업체 테스트 모드로 실행 중일 때만 사용할 수 있습니다."</string>
+    <string name="permlab_setWallpaper">"배경화면 설정"</string>
+    <string name="permdesc_setWallpaper">"응용프로그램이 시스템 배경화면을 설정할 수 있습니다."</string>
+    <string name="permlab_setWallpaperHints">"배경화면 크기 힌트 설정"</string>
+    <string name="permdesc_setWallpaperHints">"응용프로그램이 시스템 배경화면 크기 힌트를 설정할 수 있습니다."</string>
+    <string name="permlab_masterClear">"시스템을 공장 기본값으로 재설정"</string>
+    <string name="permdesc_masterClear">"응용프로그램이 모든 데이터, 구성 및 설치된 응용프로그램을 지워서 시스템을 공장 기본값으로 완전히 재설정할 수 있습니다."</string>
+    <string name="permlab_setTimeZone">"표준시간대 설정"</string>
+    <string name="permdesc_setTimeZone">"응용프로그램이 전화기의 표준시간대를 변경할 수 있습니다."</string>
+    <string name="permlab_getAccounts">"알려진 계정 검색"</string>
+    <string name="permdesc_getAccounts">"응용프로그램이 전화기에 알려진 계정 목록을 가져올 수 있습니다."</string>
+    <string name="permlab_accessNetworkState">"네트워크 상태 보기"</string>
+    <string name="permdesc_accessNetworkState">"응용프로그램이 모든 네트워크의 상태를 볼 수 있습니다."</string>
+    <string name="permlab_createNetworkSockets">"인터넷에 완전히 액세스"</string>
+    <string name="permdesc_createNetworkSockets">"응용프로그램이 네트워크 소켓을 만들 수 있습니다."</string>
+    <string name="permlab_writeApnSettings">"액세스포인트 이름 설정 쓰기"</string>
+    <string name="permdesc_writeApnSettings">"응용프로그램이 APN의 프록시 및 포트 같은 APN 설정을 수정할 수 있습니다."</string>
+    <string name="permlab_changeNetworkState">"네트워크 연결 변경"</string>
+    <string name="permdesc_changeNetworkState">"응용프로그램이 네트워크 연결 상태를 변경할 수 있습니다."</string>
+    <string name="permlab_changeBackgroundDataSetting">"백그라운드 데이터 사용 설정 변경"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"백그라운드 데이터 사용 설정을 변경할 수 있는 권한을 응용프로그램에 부여합니다."</string>
+    <string name="permlab_accessWifiState">"Wi-Fi 상태 보기"</string>
+    <string name="permdesc_accessWifiState">"응용프로그램이 Wi-Fi의 상태에 대한 정보를 볼 수 있습니다."</string>
+    <string name="permlab_changeWifiState">"Wi-Fi 상태 변경"</string>
+    <string name="permdesc_changeWifiState">"응용프로그램이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있습니다."</string>
+    <string name="permlab_bluetoothAdmin">"Bluetooth 관리"</string>
+    <string name="permdesc_bluetoothAdmin">"응용프로그램이 로컬 Bluetooth 전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있습니다."</string>
+    <string name="permlab_bluetooth">"Bluetooth 연결 만들기"</string>
+    <string name="permdesc_bluetooth">"응용프로그램이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하거나 연결을 수락할 수 있습니다."</string>
+    <string name="permlab_disableKeyguard">"키 잠금 사용 안 함"</string>
+    <string name="permdesc_disableKeyguard">"응용프로그램이 키 잠금 및 연결된 비밀번호 보안을 비활성화할 수 있습니다. 예를 들어, 전화기가 수신전화를 받을 때 키 잠금을 비활성화했다가 통화가 끝나면 키 잠금을 다시 활성화할 수 있습니다."</string>
+    <string name="permlab_readSyncSettings">"동기화 설정 읽기"</string>
+    <string name="permdesc_readSyncSettings">"응용프로그램이 연락처에 대해 동기화를 활성화할지 여부 같은 동기화 설정을 읽을 수 있습니다."</string>
+    <string name="permlab_writeSyncSettings">"동기화 설정 쓰기"</string>
+    <string name="permdesc_writeSyncSettings">"응용프로그램이 연락처에 대해 동기화를 활성화할지 여부 같은 동기화 설정을 수정할 수 있습니다."</string>
+    <string name="permlab_readSyncStats">"동기화 통계 읽기"</string>
+    <string name="permdesc_readSyncStats">"응용프로그램이 동기화 통계(예: 실행된 동기화 기록)을 읽을 수 있습니다."</string>
+    <string name="permlab_subscribedFeedsRead">"가입된 피드 읽기"</string>
+    <string name="permdesc_subscribedFeedsRead">"응용프로그램이 현재 동기화된 피드에 대한 상세정보를 가져올 수 있습니다."</string>
+    <string name="permlab_subscribedFeedsWrite">"가입 피드 작성"</string>
+    <string name="permdesc_subscribedFeedsWrite">"응용프로그램이 현재 동기화된 피드를 수정할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 동기화된 피드를 변경할 수 있습니다."</string>
+    <string name="permlab_readDictionary">"상용자 정의 사전 읽기"</string>
+    <string name="permdesc_readDictionary">"응용프로그램이 사용자 사전에 보관되어 있을 수 있는 비공개 단어, 이름 및 구문을 읽도록 합니다."</string>
+    <string name="permlab_writeDictionary">"상용자 정의 사전에 작성"</string>
+    <string name="permdesc_writeDictionary">"응용프로그램이 사용자 사전에 새 단어를 입력할 수 있습니다."</string>
+  <string-array name="phoneTypes">
+    <item>"집"</item>
+    <item>"휴대전화"</item>
+    <item>"회사"</item>
+    <item>"회사 팩스"</item>
+    <item>"집(팩스)"</item>
+    <item>"호출기"</item>
+    <item>"기타"</item>
+    <item>"사용자설정"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"집"</item>
+    <item>"회사"</item>
+    <item>"기타"</item>
+    <item>"사용자설정"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"집"</item>
+    <item>"회사"</item>
+    <item>"기타"</item>
+    <item>"사용자설정"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"집"</item>
+    <item>"회사"</item>
+    <item>"기타"</item>
+    <item>"사용자설정"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"회사"</item>
+    <item>"기타"</item>
+    <item>"사용자설정"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google 토크"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"PIN 코드 입력"</string>
+    <string name="keyguard_password_wrong_pin_code">"PIN 코드가 잘못되었습니다."</string>
+    <string name="keyguard_label_text">"잠금해제하려면 메뉴를 누른 다음 0을 누릅니다."</string>
+    <string name="emergency_call_dialog_number_for_display">"비상 전화번호"</string>
+    <string name="lockscreen_carrier_default">"(서비스 안 됨)"</string>
+    <string name="lockscreen_screen_locked">"화면 잠김"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"잠금해제하려면 메뉴를 누르세요."</string>
+    <string name="lockscreen_pattern_instructions">"잠금해제를 위해 패턴 그리기"</string>
+    <string name="lockscreen_emergency_call">"비상 전화"</string>
+    <string name="lockscreen_pattern_correct">"맞습니다."</string>
+    <string name="lockscreen_pattern_wrong">"죄송합니다. 다시 시도하세요."</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
+    <string name="lockscreen_low_battery">"충전기를 연결하세요."</string>
+    <string name="lockscreen_missing_sim_message_short">"SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_message">"전화기에 SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_instructions">"SIM 카드를 삽입하세요."</string>
+    <string name="lockscreen_network_locked_message">"네트워크 잠김"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM 카드의 PUK가 잠겨 있습니다."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"고객지원팀에 문의하세요."</string>
+    <string name="lockscreen_sim_locked_message">"SIM 카드가 잠겨 있습니다."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM 카드 잠금해제 중..."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 가져왔습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 Google 로그인을 통해 전화기를 잠금해제하도록 요청됩니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 입력하세요."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"패턴을 잊으셨나요?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"패턴을 너무 많이 시도했습니다."</string>
+    <string name="lockscreen_glogin_instructions">"잠금해제하려면"\n"Google 계정으로 로그인하세요."</string>
+    <string name="lockscreen_glogin_username_hint">"사용자 이름(이메일)"</string>
+    <string name="lockscreen_glogin_password_hint">"비밀번호"</string>
+    <string name="lockscreen_glogin_submit_button">"로그인"</string>
+    <string name="lockscreen_glogin_invalid_input">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
+    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
+    <skip />
+    <string name="status_bar_clear_all_button">"알림 지우기"</string>
+    <string name="status_bar_no_notifications_title">"알림 없음"</string>
+    <string name="status_bar_ongoing_events_title">"사용 중"</string>
+    <string name="status_bar_latest_events_title">"알림"</string>
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
+    <skip />
+    <string name="battery_status_charging">"충전 중..."</string>
+    <string name="battery_low_title">"충전기를 연결하세요."</string>
+    <string name="battery_low_subtitle">"배터리 전원이 부족합니다."</string>
+    <string name="battery_low_percent_format">"<xliff:g id="NUMBER">%d%%</xliff:g> 미만 남음"</string>
+    <string name="factorytest_failed">"출고 테스트 불합격"</string>
+    <string name="factorytest_not_system">"FACTORY_TEST 작업은 /system/app 디렉토리에 설치된 패키지에 대해서만 지원됩니다."</string>
+    <string name="factorytest_no_action">"FACTORY_TEST 작업을 제공하는 패키지가 없습니다."</string>
+    <string name="factorytest_reboot">"다시 부팅"</string>
+    <string name="js_dialog_title">"\'<xliff:g id="TITLE">%s</xliff:g>\' 페이지 내용:"</string>
+    <string name="js_dialog_title_default">"자바스크립트"</string>
+    <string name="js_dialog_before_unload">"다른 페이지를 탐색하시겠습니까?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"계속하려면 \'확인\'을 선택하고 현재 페이지에 그대로 있으려면 \'취소\'를 선택하세요."</string>
+    <string name="save_password_label">"확인"</string>
+    <string name="save_password_message">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
+    <string name="save_password_notnow">"나중에"</string>
+    <string name="save_password_remember">"저장"</string>
+    <string name="save_password_never">"저장 안 함"</string>
+    <string name="open_permission_deny">"페이지를 열 수 있는 권한이 없습니다."</string>
+    <string name="text_copied">"텍스트가 클립보드에 복사되었습니다."</string>
+    <string name="more_item_label">"자세히"</string>
+    <string name="prepend_shortcut_label">"Menu+"</string>
+    <string name="menu_space_shortcut_label">"스페이스바"</string>
+    <string name="menu_enter_shortcut_label">"입력"</string>
+    <string name="menu_delete_shortcut_label">"삭제"</string>
+    <string name="search_go">"검색"</string>
+    <string name="today">"오늘"</string>
+    <string name="yesterday">"어제"</string>
+    <string name="tomorrow">"내일"</string>
+    <string name="oneMonthDurationPast">"한 달 전"</string>
+    <string name="beforeOneMonthDurationPast">"한 달 전"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"1초 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>초 전"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"1분 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>분 전"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"1시간 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>시간 전"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"어제"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>일 전"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"1초 내"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>초 후"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"1분 내"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>분 후"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"1시간 내"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>시간 후"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"내일"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>일 후"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1초 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 초 전"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1분 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>분 전"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1시간 전"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>시간 전"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"어제"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>일 전"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"1초 후"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 초 후"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"1분 후"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>분 후"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"1시간 후"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>시간 후"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"내일"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>일 후"</item>
+  </plurals>
+    <string name="preposition_for_date">"%s"</string>
+    <string name="preposition_for_time">"%s"</string>
+    <string name="preposition_for_year">"%s년"</string>
+    <string name="day">"일"</string>
+    <string name="days">"일"</string>
+    <string name="hour">"시간"</string>
+    <string name="hours">"시간"</string>
+    <string name="minute">"분"</string>
+    <string name="minutes">"분"</string>
+    <string name="second">"초"</string>
+    <string name="seconds">"초"</string>
+    <string name="week">"주"</string>
+    <string name="weeks">"주"</string>
+    <string name="year">"년"</string>
+    <string name="years">"년"</string>
+    <string name="sunday">"일요일"</string>
+    <string name="monday">"월요일"</string>
+    <string name="tuesday">"화요일"</string>
+    <string name="wednesday">"수요일"</string>
+    <string name="thursday">"목요일"</string>
+    <string name="friday">"금요일"</string>
+    <string name="saturday">"토요일"</string>
+    <string name="every_weekday">"주중 매일(월-금)"</string>
+    <string name="daily">"매일"</string>
+    <string name="weekly">"매주 <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"매월"</string>
+    <string name="yearly">"매년"</string>
+    <string name="VideoView_error_title">"동영상 재생 안 됨"</string>
+    <string name="VideoView_error_text_unknown">"죄송합니다. 동영상을 재생할 수 없습니다."</string>
+    <string name="VideoView_error_button">"확인"</string>
+    <string name="am">"AM"</string>
+    <string name="pm">"PM"</string>
+    <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
+    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="DAY">d</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="DAY">d</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="noon">"정오"</string>
+    <string name="Noon">"정오"</string>
+    <string name="midnight">"자정"</string>
+    <string name="Midnight">"자정"</string>
+    <!-- no translation found for month_day (3693060561170538204) -->
+    <skip />
+    <!-- no translation found for month (1976700695144952053) -->
+    <skip />
+    <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>, <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for month_year (2106203387378728384) -->
+    <skip />
+    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>, <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> <xliff:g id="MONTH">%b</xliff:g>, <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
+    <skip />
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
+    <skip />
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <skip />
+    <string name="day_of_week_long_sunday">"일요일"</string>
+    <string name="day_of_week_long_monday">"월요일"</string>
+    <string name="day_of_week_long_tuesday">"화요일"</string>
+    <string name="day_of_week_long_wednesday">"수요일"</string>
+    <string name="day_of_week_long_thursday">"목요일"</string>
+    <string name="day_of_week_long_friday">"금요일"</string>
+    <string name="day_of_week_long_saturday">"토요일"</string>
+    <string name="day_of_week_medium_sunday">"일요일"</string>
+    <string name="day_of_week_medium_monday">"월"</string>
+    <string name="day_of_week_medium_tuesday">"화"</string>
+    <string name="day_of_week_medium_wednesday">"수"</string>
+    <string name="day_of_week_medium_thursday">"목"</string>
+    <string name="day_of_week_medium_friday">"금"</string>
+    <string name="day_of_week_medium_saturday">"토"</string>
+    <string name="day_of_week_short_sunday">"일"</string>
+    <string name="day_of_week_short_monday">"월"</string>
+    <string name="day_of_week_short_tuesday">"화"</string>
+    <string name="day_of_week_short_wednesday">"수"</string>
+    <string name="day_of_week_short_thursday">"목"</string>
+    <string name="day_of_week_short_friday">"금"</string>
+    <string name="day_of_week_short_saturday">"토"</string>
+    <string name="day_of_week_shorter_sunday">"일"</string>
+    <string name="day_of_week_shorter_monday">"월"</string>
+    <string name="day_of_week_shorter_tuesday">"화"</string>
+    <string name="day_of_week_shorter_wednesday">"수"</string>
+    <string name="day_of_week_shorter_thursday">"목"</string>
+    <string name="day_of_week_shorter_friday">"금"</string>
+    <string name="day_of_week_shorter_saturday">"토"</string>
+    <string name="day_of_week_shortest_sunday">"일"</string>
+    <string name="day_of_week_shortest_monday">"3월"</string>
+    <string name="day_of_week_shortest_tuesday">"목"</string>
+    <string name="day_of_week_shortest_wednesday">"수"</string>
+    <string name="day_of_week_shortest_thursday">"목"</string>
+    <string name="day_of_week_shortest_friday">"금"</string>
+    <string name="day_of_week_shortest_saturday">"토"</string>
+    <string name="month_long_january">"1월"</string>
+    <string name="month_long_february">"2월"</string>
+    <string name="month_long_march">"3월"</string>
+    <string name="month_long_april">"4월"</string>
+    <string name="month_long_may">"5월"</string>
+    <string name="month_long_june">"6월"</string>
+    <string name="month_long_july">"7월"</string>
+    <string name="month_long_august">"8월"</string>
+    <string name="month_long_september">"9월"</string>
+    <string name="month_long_october">"10월"</string>
+    <string name="month_long_november">"11월"</string>
+    <string name="month_long_december">"12월"</string>
+    <string name="month_medium_january">"1월"</string>
+    <string name="month_medium_february">"2월"</string>
+    <string name="month_medium_march">"3월"</string>
+    <string name="month_medium_april">"4월"</string>
+    <string name="month_medium_may">"5월"</string>
+    <string name="month_medium_june">"6월"</string>
+    <string name="month_medium_july">"7월"</string>
+    <string name="month_medium_august">"8월"</string>
+    <string name="month_medium_september">"9월"</string>
+    <string name="month_medium_october">"10월"</string>
+    <string name="month_medium_november">"11월"</string>
+    <string name="month_medium_december">"12월"</string>
+    <string name="month_shortest_january">"1월"</string>
+    <string name="month_shortest_february">"금"</string>
+    <string name="month_shortest_march">"3월"</string>
+    <string name="month_shortest_april">"4월"</string>
+    <string name="month_shortest_may">"5월"</string>
+    <string name="month_shortest_june">"6월"</string>
+    <string name="month_shortest_july">"7월"</string>
+    <string name="month_shortest_august">"8월"</string>
+    <string name="month_shortest_september">"9월"</string>
+    <string name="month_shortest_october">"10월"</string>
+    <string name="month_shortest_november">"11월"</string>
+    <string name="month_shortest_december">"12월"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"모두 선택"</string>
+    <string name="selectText">"텍스트 선택"</string>
+    <string name="stopSelectingText">"텍스트 선택 중지"</string>
+    <string name="cut">"잘라내기"</string>
+    <string name="cutAll">"모두 잘라내기"</string>
+    <string name="copy">"복사"</string>
+    <string name="copyAll">"모두 복사"</string>
+    <string name="paste">"붙여넣기"</string>
+    <string name="copyUrl">"URL 복사"</string>
+    <string name="inputMethod">"입력 방법"</string>
+    <string name="addToDictionary">"사전에 \'%s\' 추가"</string>
+    <string name="editTextMenuTitle">"텍스트 수정"</string>
+    <string name="low_internal_storage_view_title">"저장공간 부족"</string>
+    <string name="low_internal_storage_view_text">"전화기 저장공간이 부족합니다."</string>
+    <string name="ok">"확인"</string>
+    <string name="cancel">"취소"</string>
+    <string name="yes">"확인"</string>
+    <string name="no">"취소"</string>
+    <string name="dialog_alert_title">"주의"</string>
+    <string name="capital_on">"켜짐"</string>
+    <string name="capital_off">"끄기"</string>
+    <string name="whichApplication">"작업을 수행할 때 사용하는 권한"</string>
+    <string name="alwaysUse">"이 작업에 대해 기본값으로 사용"</string>
+    <string name="clearDefaultHintMsg">"홈 설정 &gt; 응용프로그램 &gt; 응용프로그램 관리에서 기본값을 지웁니다."</string>
+    <string name="chooseActivity">"작업 선택"</string>
+    <string name="noApplications">"작업을 수행할 수 있는 응용프로그램이 없습니다."</string>
+    <string name="aerr_title">"죄송합니다."</string>
+    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 예상치 않게 중지되었습니다. 다시 시도하세요."</string>
+    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 예상치 않게 중지되었습니다. 다시 시도하세요."</string>
+    <string name="anr_title">"죄송합니다."</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동(<xliff:g id="APPLICATION">%2$s</xliff:g> 응용프로그램)이 응답하지 않습니다."</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
+    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
+    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."</string>
+    <string name="force_close">"강제로 닫기"</string>
+    <string name="wait">"대기"</string>
+    <string name="debug">"디버깅"</string>
+    <string name="sendText">"텍스트에 대한 작업 선택"</string>
+    <string name="volume_ringtone">"벨소리 볼륨"</string>
+    <string name="volume_music">"미디어 볼륨"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth를 통해 재생"</string>
+    <string name="volume_call">"통화볼륨"</string>
+    <string name="volume_bluetooth_call">"Bluetooth 통화 볼륨"</string>
+    <string name="volume_alarm">"알람 볼륨"</string>
+    <string name="volume_notification">"알림 볼륨"</string>
+    <string name="volume_unknown">"볼륨"</string>
+    <string name="ringtone_default">"기본 벨소리"</string>
+    <string name="ringtone_default_with_actual">"기본 벨소리(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"무음"</string>
+    <string name="ringtone_picker_title">"벨소리"</string>
+    <string name="ringtone_unknown">"알 수 없는 벨소리"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Wi-Fi 네트워크 사용가능"</item>
+    <item quantity="other">"Wi-Fi 네트워크 사용가능"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"개방형 Wi-Fi 네트워크 사용가능"</item>
+    <item quantity="other">"개방형 Wi-Fi 네트워크 사용가능"</item>
+  </plurals>
+    <string name="select_character">"문자 삽입"</string>
+    <string name="sms_control_default_app_name">"알 수 없는 응용프로그램"</string>
+    <string name="sms_control_title">"SMS 메시지를 보내는 중"</string>
+    <string name="sms_control_message">"여러 개의 SMS 메시지를 보내는 중입니다. 계속하려면 \'확인\'을 선택하고 전송을 중지하려면 \'취소\'를 선택하세요."</string>
+    <string name="sms_control_yes">"확인"</string>
+    <string name="sms_control_no">"취소"</string>
+    <string name="date_time_set">"설정"</string>
+    <string name="default_permission_group">"기본값"</string>
+    <string name="no_permissions">"권한이 필요하지 않음"</string>
+    <string name="perms_hide"><b>"숨기기"</b></string>
+    <string name="perms_show_all"><b>"모두 표시"</b></string>
+    <string name="googlewebcontenthelper_loading">"로드 중..."</string>
+    <string name="usb_storage_title">"USB 연결됨"</string>
+    <string name="usb_storage_message">"USB를 통해 전화기를 컴퓨터에 연결했습니다. 컴퓨터와 전화기 SD 카드 간에 파일을 복사하려면 \'마운트\'를 선택하세요."</string>
+    <string name="usb_storage_button_mount">"마운트"</string>
+    <string name="usb_storage_button_unmount">"마운트 안 함"</string>
+    <string name="usb_storage_error_message">"USB 저장소에 SD 카드를 사용하는 동안 문제가 발생했습니다."</string>
+    <string name="usb_storage_notification_title">"USB 연결됨"</string>
+    <string name="usb_storage_notification_message">"컴퓨터에 파일을 복사하거나 컴퓨터의 파일을 복사하려면 선택합니다."</string>
+    <string name="usb_storage_stop_notification_title">"USB 저장소 끄기"</string>
+    <string name="usb_storage_stop_notification_message">"USB 저장소 끄기를 선택하세요."</string>
+    <string name="usb_storage_stop_title">"USB 저장소 끄기"</string>
+    <string name="usb_storage_stop_message">"USB 저장소를 끄기 전에 반드시 USB 호스를 마운트 해제하세요. USB 저장소를 끄려면 \'끄기\'를 선택하세요."</string>
+    <string name="usb_storage_stop_button_mount">"USB 저장소 끄기"</string>
+    <string name="usb_storage_stop_button_unmount">"취소"</string>
+    <string name="usb_storage_stop_error_message">"USB 저장소를 끄는 동안 Weve에 문제가 발행했습니다. USB 호스트를 마운트 해제했는지 확인한 후 다시 시도하세요."</string>
+    <string name="extmedia_format_title">"SD 카드 포맷"</string>
+    <string name="extmedia_format_message">"SD 카드를 포맷하시겠습니까? 포맷하면 카드의 모든 데이터를 잃게 됩니다."</string>
+    <string name="extmedia_format_button_format">"포맷"</string>
+    <string name="select_input_method">"입력 방법 선택"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"가능한 원인"</u></string>
+    <string name="ext_media_checking_notification_title">"SD 카드 준비 중"</string>
+    <string name="ext_media_checking_notification_message">"오류 확인 중"</string>
+    <string name="ext_media_nofs_notification_title">"빈 SD 카드"</string>
+    <string name="ext_media_nofs_notification_message">"SD 카드가 비어 있거나 지원되지 않는 파일시스템입니다."</string>
+    <string name="ext_media_unmountable_notification_title">"손상된 SD 카드"</string>
+    <string name="ext_media_unmountable_notification_message">"SD 카드가 손상되었습니다. 카드를 다시 포맷하시기 바랍니다."</string>
+    <string name="ext_media_badremoval_notification_title">"SD 카드가 예상치 않게 제거되었습니다."</string>
+    <string name="ext_media_badremoval_notification_message">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
+    <string name="ext_media_safe_unmount_notification_title">"SD 카드를 안전하게 제거할 수 있습니다."</string>
+    <string name="ext_media_safe_unmount_notification_message">"이제 SD 카드를 안전하게 제거할 수 있습니다."</string>
+    <string name="ext_media_nomedia_notification_title">"SD 카드를 제거했습니다."</string>
+    <string name="ext_media_nomedia_notification_message">"SD가 제거되었습니다. 기기의 저장 용량을 늘리려면 새 SD 카드를 삽입하세요."</string>
+    <string name="activity_list_empty">"일치하는 활동이 없습니다."</string>
+    <string name="permlab_pkgUsageStats">"구성요소 사용 통계 업데이트"</string>
+    <string name="permdesc_pkgUsageStats">"수집된 구성요소 사용 통계를 수정할 수 있는 권한을 부여합니다. 일반 응용프로그램은 이 권한을 사용할 수 없습니다."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
+</resources>

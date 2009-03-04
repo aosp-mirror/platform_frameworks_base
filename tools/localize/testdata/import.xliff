@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2"
+        version="1.2"
+        >
+    <file datatype="x-android-res"
+            original="//device/tools/localize/testdata/res/values/strings.xml"
+            product-version="1.0"
+            date="08:10:54 12/07/07 PST"
+            source-language="en_US"
+            product-name="kila"
+            target-language="zz_ZZ"
+            build-num="44391"
+            >
+        <body>
+            <trans-unit id="string:changed_in_xx">
+                <source>aaa</source>
+                <target>AAA</target>
+            </trans-unit>
+            <trans-unit id="string:first_translation">
+                <source>bbb</source>
+                <target>BBB</target>
+            </trans-unit>
+            <trans-unit id="string:deleted_string">
+                <source>ddd</source>
+                <target>DDDD</target>
+            </trans-unit>
+            <trans-unit id="array:0:growing_array">
+                <source>1-One</source>
+                <target>1-oNE</target>
+            </trans-unit>
+            <trans-unit id="array:1:growing_array">
+                <source>1-Two</source>
+                <target>1-tWO</target>
+            </trans-unit>
+            <trans-unit id="array:2:growing_array">
+                <source>1-Three</source>
+                <target>1-tHREE</target>
+            </trans-unit>
+            <trans-unit id="array:0:shrinking_array">
+                <source>2-One</source>
+                <target>2-oNE</target>
+            </trans-unit>
+            <trans-unit id="array:1:shrinking_array">
+                <source>2-Two</source>
+                <target>2-tWO</target>
+            </trans-unit>
+            <trans-unit id="array:2:shrinking_array">
+                <source>2-Three</source>
+                <target>2-tHREE</target>
+            </trans-unit>
+            <trans-unit id="array:3:shrinking_array">
+                <source>2-Four</source>
+                <target>2-fOUR</target>
+            </trans-unit>
+            <trans-unit id="array:0:deleted_array">
+                <source>4-One</source>
+                <target>4-oNE</target>
+            </trans-unit>
+            <trans-unit id="array:1:deleted_array">
+                <source>4-Two</source>
+                <target>4-tWO</target>
+            </trans-unit>
+            <trans-unit id="array:2:deleted_array">
+                <source>4-Three</source>
+                <target>4-tHREE</target>
+            </trans-unit>
+
+        </body>
+    </file>
+</xliff>
+
+

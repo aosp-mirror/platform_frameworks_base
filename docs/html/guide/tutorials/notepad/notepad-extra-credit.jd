@@ -1,0 +1,70 @@
+page.title=Notepad Extra Credit
+parent.title=Notepad Tutorial
+parent.link=index.html
+@jd:body
+
+
+<p><em>In this exercise, you will use the debugger to look at the work you did
+in Exercise 3. This exercise demonstrates:</em></p>
+<ul>
+<li><em>How to set breakpoints to observe execution</em> </li>
+<li><em>How to run your application in debug mode</code></em></li>
+</ul>
+
+<div style="float:right;white-space:nowrap">
+
+	[<a href="notepad-ex1.html">Exercise 1</a>]
+	[<a href="notepad-ex2.html">Exercise 2</a>]
+	[<a href="notepad-ex3.html">Exercise 3</a>]
+	<span style="color:#BBB;">
+		[<a href="notepad-extra-credit.html" style="color:#BBB;">Extra Credit</a>]
+	</span>
+</div>
+
+<h2>Step 1</h2>
+
+<p>Using the working <code>Notepadv3</code>, put breakpoints in the code at the
+    beginning of the <code>onCreate()</code>, <code>onPause()</code>,
+    <code>onSaveInstanceState()</code> and <code>onResume()</code> methods in the
+    <code>NoteEdit</code> class (if you are not familiar with Eclipse, just
+    right click in the narrow grey border on the left of the edit window at the
+    line you want a breakpoint, and select <em>Toggle Breakpoint</em>, you
+should see a blue dot appear).</p>
+ 
+<h2>Step 2</h2>
+
+<p>Now start the notepad demo in debug mode:</p>
+
+<ol type="a">
+    <li>
+      Right click on the <code>Notepadv3</code> project and from the Debug menu
+      select <em>Debug As -&gt; Android Application.</em></li>
+    <li>
+      The Android emulator should say <em>"waiting for debugger to connect"</em>
+      briefly and then run the application.</li>
+  <li>
+      If it gets stuck on the waiting... screen, quit the emulator and Eclipse,
+      from the command line do an <code>adb kill-server</code>, and then restart
+Eclipse and try again.</li></ol>
+      
+      <h2>Step 3</h2>
+
+<p>When you edit or create a new note you should see the breakpoints getting
+    hit and the execution stopping.</p>
+    
+    <h2>Step 4</h2>
+
+<p>Hit the Resume button to let execution continue (yellow rectangle with a
+green triangle to its right in the Eclipse toolbars near the top).</p>
+
+<h2>Step 5</h2>
+
+<p>Experiment a bit with the confirm and back buttons, and try pressing Home and
+    making other mode changes. Watch what life-cycle events are generated and
+when.</p>
+
+<p>The Android Eclipse plugin not only offers excellent debugging support for
+your application development, but also superb profiling support. You can also
+try using <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
+find the bottlenecks and fix them.</p>
+

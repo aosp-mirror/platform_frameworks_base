@@ -1,0 +1,38 @@
+page.title=&lt;category&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;category android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Adds a category name to an intent filter.  See 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and 
+Intent Filters</a> for details on intent filters and the role of category
+specifications within a filter.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the category.  Standard categories are defined in the 
+{@link android.content.Intent} class as {@code CATEGORY_<i>name</i>} 
+constants.  The name assigned here can be derived from those constants 
+by prefixing "{@code android.intent.category.}" to the 
+{@code <i>name</i>} that follows {@code CATEGORY_}.  For example,
+the string value for {@code CATEGORY_LAUNCHER} is 
+"{@code android.intent.category.LAUNCHER}".
+
+<p>
+Custom categories should use the package name as a prefix, to ensure
+that they are unique.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code></dd>
+
+</dl>

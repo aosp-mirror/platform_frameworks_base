@@ -1,0 +1,327 @@
+page.title=SDK Release Notes
+@jd:body
+
+<p>This document provides version-specific information about Android SDK releases. For the latest known issues, please ensure that you're viewing this page at: <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+
+<h2 id="1.1_r1">Android 1.1 SDK, Release 1</h2>
+
+<p>This SDK provides the development tools and Android system image you need to create applications for Android-powered devices. Applications developed on this SDK will be compatible with mobile devices running the Android 1.1 platform. </p>
+
+<p>This release provides an updated system image (Android 1.1), updated documentation, and the same set of development tools provided in the Android 1.0 r2 SDK. The updated system image includes bug fixes and some smaller features, as well as a few minor API changes from the 1.0 version. </p>
+
+<p>For details about the Android 1.1 system image included in the SDK &mdash; including bug fixes, features, and API changes &mdash; please read the <a href="{@docRoot}sdk/android-1.1.html">Android 1.1 Version Notes</a>.</p>
+
+<h3>App Versioning for Android 1.1</h3>
+
+<p>If you are using this SDK to build an application that is compatible <em>only</em> with Android-powered devices running the Android 1.1 platform, please note that you <strong>must</strong> set the the <code>android:minSdkVersion</code> attribute in the application's manifest to the API Level of Android 1.1 &mdash; "2".</p>
+
+<p>Specifically, you specify the <code>android:minSdkVersion</code> attribute in a <code>&lt;uses-sdk&gt;</code> element as a child of <code>&lt;manifest&gt;</code> in the manifest file. When set, the attribute looks like this: </p>
+
+<pre><code>&lt;manifest&gt;
+  ...
+  &lt;uses-sdk minSdkVersion="2" /&gt;
+  ...
+&lt;/manifest&gt;</code>
+</pre>
+
+<p>By setting <code>android:minSdkVersion</code> in this way, you ensure that users will only be able to install your application if their devices are running the Android 1.1 platform. In turn, this ensures that your application will function properly on their devices, especially if it uses APIs introduced in Android 1.1. </p>
+
+<p>If your application uses APIs introduced in Android 1.1 but does not declare <code>&lt;uses-sdk minSdkVersion="2" /&gt;</code>, then it will run properly on Android 1.1 devices but <em>not</em> on Android 1.0 devices. </p>
+
+<p>If your application does not use any new APIs introduced in Android 1.1, you can indicate Android 1.0 compatibility by removing <code>minSdkVersion</code> or setting the attribute to "1". However, before publishing your application, you must make sure to compile your application against the Android 1.0 system image (available in the Android 1.0 SDK), to ensure that it builds and functions properly for Android 1.0 devices. You should test the application against system images corresponding to the API Levels that the application is designed to be compatible with.</p>
+
+<p>If you are sure your application is not using Android 1.1 APIs and has no need to use them, you might find it easier to keep working in the Android 1.0 SDK, rather than migrating to the Android 1.1 SDK and having to do additional testing.</p>
+
+
+<h3>ADT Plugin Compatibility</h3>
+
+<p>For this version of the SDK &mdash; Android 1.1 SDK, Release 1
+&mdash; the compatible version of the Android Development Tools (ADT)
+Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a
+previous version of ADT, you should update to the latest version for use
+with this SDK. For information about how to update your ADT plugin, see
+<a href="{@docRoot}sdk/1.1_r1/upgrading.html#update-plugin">Upgrading
+the SDK</a>.</p>
+
+<h3>Installation and Upgrade Notes</h3>
+
+<p>If you've been developing an application using an Android 1.0 SDK no
+changes to your application are needed. You may want to wipe application
+user data (emulator option <code>-wipe-data</code>) when running your
+application on the Android 1.1 emulator for the first time.</p>
+
+<p>If you're installing the Android SDK for the first time, please see
+the instructions in <a
+href="{@docRoot}sdk/1.1_r1/installing.html">Installing the SDK</a>.
+
+<h3>Other Notes</h3>
+
+<p><strong>MapView API Key</strong></p>
+
+<p>com.google.android.maps.MapView is a class that lets you
+easily integrate Google Maps into your application. Before you can
+access the maps data, you will need to register with the Google Maps
+service and receive a Maps API Key, which you then add to your MapView
+for authentication to the server.</p>
+
+<p>Developers should note that the registration service for MapView is now
+active and Google Maps is actively enforcing the Maps API Key requirement. 
+For information about how to register for a Maps API Key, see 
+<a href="{@docRoot}guide/topics/location/geo/mapkey.html">
+Obtaining a Maps API Key</a>.</p>
+
+<p><strong>USB Drivers for Windows</strong></p>
+
+<p>If you using Windows and want to develop or test your application on an
+Android-powered device (such as the T-Mobile G1), you need an appropriate USB
+driver. For your convenience, the Windows version of the Android SDK includes
+these USB drivers that you can install, to let you develop on the device:</p>
+
+<ul>
+<li>USB driver for 32-bit XP and Vista</li>
+<li>USB driver for 64-bit Vista only</li>
+</ul>
+
+<p>The USB driver files are located in the
+<code>&lt;SDK&gt;/usb_driver</code> directory. For details and
+installation instructions, see <a
+href="{@docRoot}guide/developing/device.html#setting-up">Setting Up a
+Device for Development</a>.</p>
+</p>
+
+<h3>Resolved Issues, Changes</h3>
+
+<p><strong>Emulator</strong></p>
+<ul>
+<li>Emulator now saves the user image in &lt;android&gt;/SDK1.1/</code></li>
+</ul>
+
+<h3>Known Issues</h3>
+
+<p><strong>JUnit and Eclipse/ADT</strong></p>
+<ul>
+<li>If you are developing in Eclipse/ADT and want to add JUnit test
+classes, you can do so. However, you need to set up a custom JUnit configuration
+before your tests will run properly. For detailed information about how to set
+up the JUnit configuration, see the troubleshooting topic <a
+href="{@docRoot}guide/appendix/faq/troubleshooting.html#addjunit">Running a Junit test class
+in Eclipse</a>.</li>
+</ul>
+
+<p><strong>Other</strong></p>
+
+<ul>
+<li>It is not possible to send MMS messages between emulator instances. </li>
+<li>In some cases, you may encounter problems when using the browser on an
+emulator started with the command-line option <code>-http-proxy</code>. </li>
+<li>On the OSX platform, if you manually remove the ~/.android directory
+using <code>rm -rf ~/.android</code>, then try to run 
+the emulator, it crashes. This happens because the emulator fails to create 
+a new .android directory before attempting to create the child SDK1.0 directory.
+To work around this issue, manually create a new .android directory using
+<code>mkdir ~/.android</code>, then run the emulator. The emulator 
+creates the SDK1.0 directory and starts normally. </li>
+<li>We regret to inform developers that Android 1.1 will not include support 
+for ARCNet network interfaces.</li>
+<li>The final set of Intent patterns honored by Android 1.0 has not yet been
+fully documented. Documentation will be provided in future releases.</li>
+<li>In ADT Editor, you can add at most ten new resource values at a time,
+in a given res/values/*.xml, using the form in the Android Resources pane. 
+If you add more than ten, the Android Resources pane will not display the
+attributes fields for the additional resource entries. To work around this 
+problem, you can close the file in the editor and open it again, or you 
+can edit the resource entries in the XML text mode. </li>
+<li>The emulator's battery-control commands (<code>power &lt;option&gt</code>)
+are not working in this release.</li>
+</ul>
+
+
+
+
+
+<h2 id="1.0_r2">Android 1.0 SDK, Release 2</h2>
+
+<p>This SDK release includes the Android 1.0 platform and application API.
+Applications developed on this SDK will be compatible with mobile devices
+running the Android 1.0 platform.</p>
+
+<p>This release includes mainly bug fixes, although some smaller features were
+added.</p>
+
+<h3>ADT Plugin Compatibility</h3>
+
+<p>For this release of the SDK, the compatible version of the Android
+Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are
+using a previous version of ADT, you should update to the latest version for use
+with this SDK. For information about how to update your ADT plugin, see <a
+href="/android/intro/upgrading.html">Upgrading the SDK</a>.</p>
+
+<h3>Installation and Upgrade Notes</h3>
+
+<p>If you're installing the Android SDK for the first time, please see the
+instructions in <a href="/android/intro/installing.html">Installing the
+SDK</a>.
+
+<h3>Other Notes</h3>
+
+<p><strong>T-Mobile G1 Compatability</strong></p>
+
+<p>This version of the SDK has been tested for compatability with the first 
+Android-powered mobile device, the <a href="http://www.t-mobileg1.com">T-Mobile
+G1</a>. </p>
+
+<p><strong>MapView API Key</strong></p>
+
+<p>MapView is a class that lets you easily integrate Google Maps into your
+application. Before you can access the maps data, you will need to register with
+the Google Maps service and receive a Maps API Key, which you then add to your
+MapView for authentication to the server.</p>
+
+<p>Developers should note that the registration service for MapView is now
+active and Google Maps is actively enforcing the Maps API Key requirement. For
+information about how to register for a Maps API Key, see <a
+href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.
+google.com/android/toolbox/apis/mapkey.html</a>.</p>
+
+<p><strong>USB Driver for Windows</strong></p>
+<p>If you using Windows and want to develop or test your application on an
+Android-powered device (such as the T-Mobile G1), you need an appropriate USB
+driver. For your convenience, the Windows version of the Android SDK includes a
+USB driver that you can install, to let you develop on the device. The USB
+driver files are located in the <code>&lt;SDK&gt;/usb_driver</code> directory. 
+
+</p>
+
+<h3>Resolved Issues, Changes</h3>
+<ul>
+<li>The android.jar in this SDK release now includes several classes that were
+missing from the previous SDK. </li>
+<li>The android.R.styleable class and its fields were removed from the public
+API, to better ensure forward-compatibility for applications. The constants
+declared in android.R.styleable were platform-specific and subject to arbitrary
+change across versions, so were not suitable for use by applications. You can
+still access the platform's styleable attributes from your resources or code. To
+do so, declare a custom resource element using a
+<code>&lt;declare-styleable&gt;</code> in your project's res/values/R.attrs
+file, then declare the attribute inside. For examples, see 
+&lt;sdk&gt;/samples/ApiDemos/res/values/attrs.xml. For more information about
+custom resources, see <a
+href="/android/reference/available-resources.html#customresources">Custom
+Layout Resources</a>. Note that the android.R.styleable documentation is still
+provided in the SDK, but only as a reference of the platform's styleable
+attributes for the various elements.</li>
+<li>The VM now properly ensures that private classes are not 
+available to applications through reflection. If you were using reflection
+to access private classes in a previous release, you will now get a run-time 
+error. </li>
+
+<li>The Settings and Email applications are now included in the SDK and
+available in the emulator.</li>
+<li>We regret to inform developers that SDK 1.0_r2 does not support MFM, RLL, 
+or Winchester hard disk drives.</li>
+<li>In the emulator, the control key for enabling/disabling trackball mode 
+is changed from Control-T to F6. You can also enter trackball mode temporarily
+using the Delete key. While the key is pressed, you can send trackball events.</li>
+</ul>
+
+<p>Unless otherwise noted, Known Issues from the previous SDK release also apply
+to this release.</p>
+
+
+
+
+
+
+<h2 id="1.0_r1">Android 1.0 SDK, Release 1</h2>
+
+<p>This SDK release is the first to include the Android 1.0 platform and application API. Applications developed on this SDK will be compatible with mobile devices running the Android 1.0 platform, when such devices are available.</p>
+
+<p>This release includes mainly bug fixes, although some smaller features were added. The Android 1.0 also includes several API changes from the 0.9 version. For more information on API changes, see the <a href="/android/migrating/0.9-1.0/changes-overview.html">Overview of Changes</a> and the <a href="/android/migrating/0.9-1.0/changes.html">API Differences Report</a>. For those porting from the M5 release, the SDK also includes the legacy changes overview and API Differences Reports. See the current Overview of Changes for more information. </p>
+
+<h3>ADT Plugin Compatibility</h3>
+
+<p>For this version of the SDK &mdash; Android 1.0 SDK, Release 1 &mdash; the compatible version of the Android Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a previous version of ADT, you should update to the latest version for use with this SDK. For information about how to update your ADT plugin, see <a href="/android/intro/upgrading.html">Upgrading the SDK</a>.</p>
+
+<h3>Installation and Upgrade Notes</h3>
+
+<p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Please see <a href="/android/intro/upgrading.html">Upgrading the SDK</a> for detailed instructions on how to make the transition to this release.  Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
+
+<p>If you're installing the Android SDK for the first time, please see the instructions in <a href="/android/intro/installing.html">Installing the SDK</a>.
+
+<h3>Other Notes</h3>
+
+<p><strong>MapView API Key</strong></p>
+
+<p><a href="/android/reference/com/google/android/maps/MapView.html">MapView</a> is a class that lets you easily integrate Google Maps into your application. Before you can access the maps data, you will need to register with the Google Maps service and receive a Maps API Key, which you then add to your MapView for authentication to the server.</p>
+
+<p>Currently, the registration service for MapView is not yet active and Google Maps is not yet enforcing the Maps API Key requirement. However, note that the registration service will be activated soon, so that MapViews in any application deployed to a mobile device will require registration and a valid Maps API Key. </p>
+
+<p>As soon as the registration service becomes available, we will update the page at <a href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.google.com/android/toolbox/apis/mapkey.html</a> with details about how and where to register. Please check that page periodically for registration information, if you are using a MapView.</p>
+
+
+<h3>Resolved Issues, Changes</h3>
+
+<p><strong>Emulator</strong></p>
+<ul>
+<li>Emulator now saves the user image in &lt;android&gt;/SDK1.0/</code></li>
+<li>Fixed EsounD-related freezes on Linux.</li>
+<li>Fixed the documentation in -help-audio. '-audio list' doesn't work, one
+ needs to call -help-audio-out and -help-audio-in to get the list of valid
+ audio backends.</li>
+<li>Fixed scrollwheel Dpad emulation in rotated mode. before that, using the
+ scroll-wheel would always generated Dpad Up/Down events, even when in
+ landscape mode.</li>
+
+<li>Several Obsolete command options were removed.</li>
+<li>Setting the network speed through the console or the -netspeed option will
+ properly modify the connectivity icon on the device.</li>
+<li>Setting the GSM voice registration state to 'roaming' in the console will
+ properly modify the voice icon on the device</li>
+</ul>
+
+<p><strong>SQLite</strong></p>
+<ul>
+<li>SQLite is now included in the SDK package on all platforms. </li>
+</ul>
+
+<h3>Known Issues</h3>
+
+<p><strong>JUnit and Eclipse/ADT</strong></p>
+<ul>
+<li>If you are developing in Eclipse/ADT and want to add JUnit test
+classes, you can do so. However, you need to set up a custom JUnit configuration
+before your tests will run properly. For detailed information about how to set
+up the JUnit configuration, see the troubleshooting topic <a
+href="/android/kb/troubleshooting.html#addjunit">Running a Junit test class
+in Eclipse</a>.</li>
+</ul>
+
+<p><strong>Other</strong></p>
+
+<ul>
+<li>It is not possible to send MMS messages between emulator instances. </li>
+<li>In some cases, you may encounter problems when using the browser on an
+emulator started with the command-line option <code>-http-proxy</code>. </li>
+
+<li>We regret to inform developers that Android 1.0 will not include support for
+dot-matrix printers.</li>
+<li>On the OSX platform, if you manually remove the ~/.android directory
+using <code>rm -rf ~/.android</code>, then try to run 
+the emulator, it crashes. This happens because the emulator fails to create 
+a new .android directory before attempting to create the child SDK1.0 directory.
+To work around this issue, manually create a new .android directory using
+<code>mkdir ~/.android</code>, then run the emulator. The emulator 
+creates the SDK1.0 directory and starts normally. </li>
+<li>The final set of Intent patterns honored by Android 1.0 has not yet been
+fully documented. Documentation will be provided in future releases.</li>
+<li>In ADT Editor, you can add at most ten new resource values at a time,
+in a given res/values/*.xml, using the form in the Android Resources pane. 
+If you add more than ten, the Android Resources pane will not display the
+attributes fields for the additional resource entries. To work around this 
+problem, you can close the file in the editor and open it again, or you 
+can edit the resource entries in the XML text mode. </li>
+<li>The emulator's battery-control commands (<code>power &lt;option&gt</code>)
+are not working in this release.</li>
+
+</ul>
+

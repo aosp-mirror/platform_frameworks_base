@@ -1,0 +1,13 @@
+page.title=Sensors
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+
+
+<h2>Accelerometer</h2>
+<p>The accelerometer sensors allow you to detect the various movements of the device.</p>
+
+<h2>Compass</h2>
+<p>The compass provides data on the devices current polar orientation.</p>

@@ -1,0 +1,176 @@
+page.title=&lt;service&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;service android:<a href="#enabled">enabled</a>=["true" | "false"]
+         android:<a href="#exported">exported[</a>="true" | "false"]
+         android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+         android:<a href="#label">label</a>="<i>string resource</i>"
+         android:<a href="#nm">name</a>="<i>string</i>"
+         android:<a href="#prmsn">permission</a>="<i>string</i>"
+         android:<a href="#proc">process</a>="<i>string</i>" &gt;
+    . . .
+&lt;/service&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filer&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares a service (a {@link android.app.Service} subclass) as one 
+of the application's components.  Unlike activities, services lack a 
+visual user interface.  They're used to implement long-running background 
+operations or a rich communications API that can be called by other 
+applications.
+
+<p>
+All services must be represented by {@code &lt;service&gt;} elements in 
+the manifest file.  Any that are not declared there will not be seen 
+by the system and will never be run.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the service can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
+application components, including services.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;service&gt;} 
+attributes must both be "{@code true}" (as they both
+are by default) for the service to be enabled.  If either is 
+"{@code false}", the service is disabled; it cannot be instantiated.
+</p></dd>
+
+<dt><a name="exported"></a>{@code android:exported}</dt>
+<dd>Whether or not components of other applications can invoke 
+the service or interact with it &mdash; "{@code true}" if they can, and 
+"{@code false}" if not.  When the value is "{@code false}", only 
+components of the same application or applications 
+with the same user ID can start the service or bind to it.
+
+<p>
+The default value depends on whether the service contains intent filters.  The 
+absence of any filters means that it can be invoked only by specifying 
+its exact class name.  This implies that the service is intended only for 
+application-internal use (since others would not know the class name).  So in 
+this case, the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the service 
+is intended for external use, so the default value is "{@code true}".
+</p>
+
+<p>
+This attribute is not the only way to limit the exposure of a service to other
+applications.  You can also use a permission to limit the external entities that 
+can interact with the service (see the <code><a href="{@docRoot}guide/topics/manifest/service-element.html#prmsn">permission</a></code> 
+attribute).
+</p></dd>
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the service.  This attribute must be set as a 
+reference to a drawable resource containing the image definition.  
+If it is not set, the icon specified for the application 
+as a whole is used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#icon">icon</a></code> attribute).
+</p>
+
+<p>
+The service's icon &mdash; whether set here or by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element &mdash; is also the 
+default icon for all the service's intent filters (see the 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#icon">icon</a></code> attribute).
+</p></dd> 
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A name for the service that can be displayed to users.  
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#label">label</a></code> attribute).
+
+<p>
+The service's label &mdash; whether set here or by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element &mdash; is also the 
+default label for all the service's intent filters (see the 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#label">label</a></code> attribute). 
+</p>
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the {@link android.app.Service} subclass that implements 
+the service.  This should be a fully qualified class name (such as, 
+"{@code com.example.project.RoomService}").  However, as a shorthand, if 
+the first character of the name is a period (for example, "{@code .RoomService}"),
+it is appended to the package name specified in the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.  
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt><a name="prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that that an entity must have in order to 
+launch the service or bind to it.  If a caller of 
+<code>{@link android.content.Context#startService startService()}</code>,
+<code>{@link android.content.Context#bindService bindService()}</code>, or
+<code>{@link android.content.Context#stopService stopService()}</code>,
+has not been granted this permission, the method will not work and the
+Intent object will not be delivered to the service.
+
+<p>
+If this attribute is not set, the permission set by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#prmsn">permission</a></code> 
+attribute applies to the service.  If neither attribute is set, the service is
+not protected by a permission.
+</p>
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
+section in the introduction and a separate document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>.
+</p></dd>
+
+<dt><a name="proc"></a>{@code android:process}</dt>
+<dd>The name of the process where the service is to run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> 
+attribute can set a different 
+default for all components.  But component can override the default
+with its own {@code process} attribute, allowing you to spread your 
+application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the service runs in that process.
+If the process name begins with a lowercase character, the service will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code></dd>
+
+</dl>

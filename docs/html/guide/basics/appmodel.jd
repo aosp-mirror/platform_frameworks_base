@@ -1,0 +1,261 @@
+page.title=Application Model
+@jd:body
+<h1>Android Application Model: Applications, Tasks, Processes, and Threads</h1>
+
+<p>In most operating systems, there is a strong 1-to-1 correlation between
+the executable image (such as the .exe on Windows) that an application lives in,
+the process it runs in, and the icon and application the user interacts with.
+In Android these associations are much more fluid, and it is important to
+understand how the various pieces can be put together.</p>
+
+<p>Because of the flexible nature of Android applications, there is some
+basic terminology that needs to be understood when implementing the
+various pieces of an application:</p>
+
+<ul>
+<li><p>An <strong>android package</strong> (or <strong>.apk</strong> for short)
+is the file containing an application's code and its resources.  This is the
+file that an application is distributed in and downloaded by the user when
+installing that application on their device.</p></li>
+
+<li><p>A <strong>task</strong> is generally what the user perceives as
+an "application" that can be launched: usually a task has an icon in the
+home screen through which it is accessed, and it is available as a top-level
+item that can be brought to the foreground in front of other
+tasks.</p></li>
+
+<li><p>A <strong>process</strong> is a low-level kernel process in which
+an application's code is running.  Normally all of the code in a
+.apk is run in one, dedicated process for that .apk; however, the
+{@link android.R.styleable#AndroidManifestApplication_process process} tag
+can be used to modify where that code is run, either for
+{@link android.R.styleable#AndroidManifestApplication the entire .apk}
+or for individual
+{@link android.R.styleable#AndroidManifestActivity activity},
+{@link android.R.styleable#AndroidManifestReceiver receiver},
+{@link android.R.styleable#AndroidManifestService service}, or
+{@link android.R.styleable#AndroidManifestProvider provider}, components.</p></li>
+</ul>
+
+<h2 id="Tasks">Tasks</h2>
+
+<p>A key point here is: <em>when the user sees as an "application," what
+they are actually dealing with is a task</em>.  If you just create a .apk
+with a number of activities, one of which is a top-level entry point (via
+an {@link android.R.styleable#AndroidManifestIntentFilter intent-filter} for
+the action <code>android.intent.action.MAIN</code> and
+category <code>android.intent.category.LAUNCHER</code>), then there will indeed
+be one task created for your .apk, and any activities you start from there
+will also run as part of that task.</p>
+
+<p>A task, then, from the user's perspective your application; and from the
+application developer's perspective it is one or more activities the user
+has traversed through in that task and not yet closed, or an activity stack.
+A new task is created by
+starting an activity Intent with the {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+Intent.FLAG_ACTIVITY_NEW_TASK} flag; this Intent will be used as the root Intent of
+the task, defining what task it is.  Any activity started without this flag
+will run in the same task as the activity that is starting it (unless that
+activity has requested a special launch mode, as discussed later).  Tasks can
+be re-ordered: if you use FLAG_ACTIVITY_NEW_TASK but there is already a task
+running for that Intent, the current task's activity stack will be brought
+to the foreground instead of starting a new task.</p>
+
+<p>FLAG_ACTIVITY_NEW_TASK must only be used with care: using it says that,
+from the user's perspective, a new application starts at this point.  If this
+is not the behavior you desire, you should not be creating a new task.  In
+addition, you should only use the new task flag if it is possible for the user
+to navigate from home back to where they are and launch the same Intent as a
+new task.  Otherwise, if the user presses HOME instead of BACK from the task
+you have launched, your task and its activities will be ordered behind the
+home screen without a way to return to them.</p>
+
+<h3>Task Affinities</h3>
+
+<p>In some cases Android needs to know which task an activity belongs to even when
+it is not being launched in to a specific task.  This is accomplished through
+task affinities, which provide a unique static name for the task that one or more
+activities are intended to run in.  The default task affinity for an activity
+is the name of the .apk package name the activity is implemented in.  This
+provides the normally expected behavior, where all of the activities in a
+particular .apk are part of a single application to the user.</p>
+
+<p>When starting a new activity without the
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+Intent.FLAG_ACTIVITY_NEW_TASK} flag, task affinities have no impact on the
+task the new activity will run in: it will always run in the task of the
+activity that is starting it.  However, if the NEW_TASK flag is being used,
+then the affinity will be used to determine if a task already exists with
+the same affinity.  If so, that task will be brought to the front and the
+new activity launched at the top of that task.</p>
+
+<p>This behavior is most useful for situations where you must use the
+NEW_TASK flag, in particular launching activities from status bar notifications
+or home screen shortcuts.  The result is that, when the user launches your
+application this way, its current task state will be brought to the foreground,
+and the activity they now want to look at placed on top of it.</p>
+
+<p>You can assign your own task affinities in your manifest's
+{@link android.R.styleable#AndroidManifestApplication application} tag for
+all activities in the .apk, or the
+{@link android.R.styleable#AndroidManifestActivity activity} tag of
+individual activities.  Some examples of how this can be used are:</p>
+
+<ul>
+<li>If your .apk contains multiple top-level applications that the user can
+launch, then you will probably want to assign different affinities to each
+of the activities that the users sees for your .apk.  A good convention for
+coming up with distinct names is to append your .apk's package name with
+a colon separated string.  For example, the "com.android.contacts" .apk
+may have the affinities "com.android.contacts:Dialer" and
+"com.android.contacts:ContactsList".</ul>
+<li>If you are replacing a notification, shortcut, or other such "inner"
+activity of an application that can be launched from outside of it, you may
+need to explicitly set the taskAffinity of your replacement activity to be
+the same as the application you are replacing.  For example, if you are
+replacing the contacts details view (which the user can make and invoke
+shortcuts to), you would want to set the taskAffinity to
+"com.android.contacts".</li>
+</ul>
+
+<h3>Launch Modes and Launch Flags</h3>
+
+<p>The main way you control how activities interact with tasks is through
+the activity's
+{@link android.R.styleable#AndroidManifestActivity_launchMode launchMode}
+attribute and the {@link android.content.Intent#setFlags flags} associated
+with an Intent.  These two parameters can work together in various ways
+to control the outcome of the activity launch, as described in their
+associated documentation.  Here we will look at some common use cases and
+combinations of these parameters.</p>
+
+<p>The most common launch mode you will use (besides the default
+<code>standard</code> mode) is <code>singleTop</code>.  This does not have
+an impact on tasks; it just avoids starting the same activity multiple times
+on the top of a stack.
+
+<p>The <code>singleTask</code> launch mode has a major
+impact on tasks: it causes the activity to always be started in
+a new task (or its existing task to be brought to the foreground).  Using
+this mode requires a lot of care in how you interact with the rest of the
+system, as it impacts every path in to the activity.  It should only be used
+with activities that are front doors to the application (that is, which
+support the MAIN action and LAUNCHER category).</p>
+
+<p>The <code>singleInstance</code> launch mode is even more specialized, and
+should only be used in applications that are implemented entirely as one
+activity.</p>
+
+<p>A situation you will often run in to is when another entity (such as the
+{@link android.app.SearchManager} or {@link android.app.NotificationManager})
+starts one of your activities.  In this case, the
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+Intent.FLAG_ACTIVITY_NEW_TASK} flag must be used, because the activity is
+being started outside of a task (and the application/task may not even
+exist).  As described previously, the standard behavior in this situation
+is to bring to the foreground the current task matching the new activity's
+affinity and start the new activity at the top of it.  There are, however,
+other types of behavior that you can implement.</p>
+
+<p>One common approach is to also use the
+{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP
+Intent.FLAG_ACTIVITY_CLEAR_TOP} flag in conjunction with NEW_TASK.  By doing so,
+if your task is already running, then it will be brought to the foreground,
+all of the activities on its stack cleared except the root activity, and the
+root activity's {@link android.app.Activity#onNewIntent} called with the
+Intent being started.  Note that the activity often also use the <code>singleTop</code>
+or <code>singleTask</code> launch mode when using this approach, so that
+the current instance is given the new intent instead of requiring that it
+be destroyed and a new instance started.</p>
+
+<p>Another approach you can take is to set the notification activity's
+<code>android:taskAffinity</code> to the empty string "" (indicating no affinity)
+and setting the
+<code>{@link android.R.styleable#AndroidManifestActivity_noHistory
+android:noHistory}</code> and
+<code>{@link android.R.styleable#AndroidManifestActivity_excludeFromRecents
+android:excludeFromRecents}</code> attributes.
+This approach is useful if you would like the notification
+to take the user to a separate activity describing it, rather than return
+to the application's task.  By specifying these attributes, the activity will
+be finished whether the user leaves it with BACK or HOME and it will not
+show up in the recent tasks list; if the <code>noHistory</code> attribute
+isn't specified, pressing HOME will result in the activity and its task
+remaining in the system, possibly with no way to return to it.</p>
+
+<p>Be sure to read the documentation on the
+{@link android.R.styleable#AndroidManifestActivity_launchMode launchMode attribute}
+and the {@link android.content.Intent#setFlags Intent flags} for the details
+on these options.</p>
+
+<h2 id="Processes">Processes</h2>
+
+<p>In Android, processes are entirely an implementation detail of applications
+and not something the user is normally aware of.  Their main uses are simply:</p>
+
+<ul>
+<li> Improving stability or security by putting untrusted or unstable code
+into another process.
+<li> Reducing overhead by running the code of multiple .apks in the same
+process.
+<li> Helping the system manage resources by putting heavy-weight code in
+a separate process that can be killed independently of other parts of the
+application.
+</ul>
+
+<p>As described previously, the
+{@link android.R.styleable#AndroidManifestApplication_process process} attribute
+is used to control the process that particular application components run in.
+Note that this attribute can not be used to violate security of the system: if
+two .apks that are not sharing the same user ID try to run in the same process,
+this will not be allowed and different distinct processes will be created for
+each of them.</p>
+
+<p>See the <a href="{@docRoot}devel/security.html">security</a> document for
+more information on these security restrictions.</p>
+
+<h2 id="Threads">Threads</h2>
+
+<p>Every process has one or more threads running in it.  In most situations, Android
+avoids creating additional threads in a process, keeping an application
+single-threaded unless it creates its own threads.  An important repercussion
+of this is that all calls to {@link android.app.Activity},
+{@link android.content.BroadcastReceiver}, and {@link android.app.Service}
+instances are made only from the main thread of the process they are running in.</p>
+
+<p>Note that a new thread is <strong>not</strong> created for each
+Activity, BroadcastReceiver, Service, or ContentProvider instance:
+these application components are instantiated in the desired process (all in the
+same process unless otherwise specified), in the main thread of that process.
+This means that none of these components (including services) should perform
+long or blocking operations (such as networking calls or computation loops)
+when called by the system, since this will block
+all other components in the process.  You can use the standard library
+{@link java.lang.Thread} class or Android's {@link android.os.HandlerThread}
+convenience class to perform long operations on another thread.</p>
+
+<p>There are a few important exceptions to this threading rule:</p>
+
+<ul>
+<li><p>Calls on to an {@link android.os.IBinder} or interface implemented on
+an IBinder are dispatched from the thread calling them or a thread pool in the
+local process if coming from another process, <em>not</em>
+from the main thread of their process.  In particular, calls on to the IBinder
+of a {@link android.app.Service} will be called this way.  (Though
+calls to methods on Service itself are done from the main thread.)
+This means that <em>implementations of IBinder interfaces must always be
+written in a thread-safe way, since they can be called from any number of
+arbitrary threads at the same time</em>.</p></li>
+
+<li><p>Calls to the main methods of {@link android.content.ContentProvider}
+are dispatched from the calling thread or main thread as with IBinder.  The
+specific methods are documented in the ContentProvider class.
+This means that <em>implementations of these methods must always be
+written in a thread-safe way, since they can be called from any number of
+arbitrary threads at the same time</em>.</p></li>
+
+<li><p>Calls on {@link android.view.View} and its subclasses are made from the
+thread that the view's window is running in.  Normally this will be the main
+thread of the process, however if you create a thread and show a window from
+there then the window's view hierarchy will be called from that thread.</p></li>
+</ul>

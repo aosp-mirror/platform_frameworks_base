@@ -1,0 +1,2 @@
+/sdcard/android/layout_tests/fast/js/regexp-charclass-crash.html
+/sdcard/android/layout_tests/fast/canvas/gradient-add-second-start-end-stop.html

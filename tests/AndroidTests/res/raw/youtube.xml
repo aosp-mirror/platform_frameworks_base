@@ -1,0 +1,1852 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<feed xmlns='http://www.w3.org/2005/Atom'
+      xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+      xmlns:media='http://search.yahoo.com/mrss/'
+      xmlns:gd='http://schemas.google.com/g/2005'
+      xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://dm5.google.com/feeds/standardfeeds/top_rated</id>
+    <updated>2007-05-01T18:13:20.333Z</updated>
+    <title type='text'>Top Rated - Beta</title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <link rel='alternate' type='text/html'
+          href='http://www.youtube.com/browse?s=tr'></link>
+    <link rel='http://schemas.google.com/g/2005#feed'
+          type='application/atom+xml'
+          href='http://dm5.google.com/feeds/standardfeeds/top_rated'></link>
+    <link rel='self' type='application/atom+xml'
+          href='http://dm5.google.com/feeds/standardfeeds/top_rated?start-index=1&amp;max-results=25'></link>
+    <link rel='next' type='application/atom+xml'
+          href='http://dm5.google.com/feeds/standardfeeds/top_rated?start-index=26&amp;max-results=25'></link>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='beta' uri='http://gdata.youtube.com/'>YouTube data API
+    </generator>
+    <openSearch:totalResults>99</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/nojWJ6-XmeQ</id>
+        <published>2006-09-01T15:13:19.000Z</published>
+        <updated>2006-09-01T15:13:19.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='hilarious'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='funny'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Commercial'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='humor'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Condoms'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Banned'></category>
+        <title type='text'>Banned Commercial - Condoms</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/nojWJ6-XmeQ'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=nojWJ6-XmeQ'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/nojWJ6-XmeQ/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/nojWJ6-XmeQ/ratings'></link>
+        <author>
+            <name>bannedcommercials</name>
+            <uri>http://dm5.google.com/feeds/users/bannedcommercials</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Banned Commercial - Condoms</media:title>
+            <media:description type='plain'>Banned Commercial - Condoms
+            </media:description>
+            <media:keywords>Banned, Commercial, Condoms, funny, hilarious,
+                comedy, humor
+            </media:keywords>
+            <yt:duration seconds='45'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=nojWJ6-XmeQ'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/nojWJ6-XmeQ/2.jpg'
+                             height='97' width='130'
+                             time='00:00:22.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/nojWJ6-XmeQ/1.jpg'
+                             height='97' width='130'
+                             time='00:00:11.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/nojWJ6-XmeQ/3.jpg'
+                             height='97' width='130'
+                             time='00:00:33.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/nojWJ6-XmeQ/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='65183' average='4.92'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/nojWJ6-XmeQ/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/JahdnOQ9XCA</id>
+        <published>2006-09-01T17:25:14.000Z</published>
+        <updated>2006-09-01T17:25:14.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Voodoo'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='hilarious'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Clinton'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='funny'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Bill'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Commercial'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='very'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='doll'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='humor'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Entertainment' label='Entertainment'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Banned'></category>
+        <title type='text'>Banned Commercial - Bill Clinton Voodoo doll very
+            funny
+        </title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JahdnOQ9XCA'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=JahdnOQ9XCA'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JahdnOQ9XCA/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JahdnOQ9XCA/ratings'></link>
+        <author>
+            <name>bannedcommercials</name>
+            <uri>http://dm5.google.com/feeds/users/bannedcommercials</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Banned Commercial - Bill Clinton Voodoo
+                doll very funny
+            </media:title>
+            <media:description type='plain'>Banned Commercial - Bill Clinton
+                Voodoo doll very funny
+            </media:description>
+            <media:keywords>Banned, Commercial, Bill, Clinton, Voodoo, doll,
+                very, funny, humor, hilarious, comedy
+            </media:keywords>
+            <yt:duration seconds='69'></yt:duration>
+            <media:category label='Entertainment'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Entertainment
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=JahdnOQ9XCA'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/JahdnOQ9XCA/2.jpg'
+                             height='97' width='130'
+                             time='00:00:34.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JahdnOQ9XCA/1.jpg'
+                             height='97' width='130'
+                             time='00:00:17.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JahdnOQ9XCA/3.jpg'
+                             height='97' width='130'
+                             time='00:00:51.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JahdnOQ9XCA/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='60422' average='4.92'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/JahdnOQ9XCA/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/VcQIwbvGRKU</id>
+        <published>2006-09-03T05:32:33.000Z</published>
+        <updated>2006-09-03T05:32:33.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='hilarious'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='funny'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Commercial'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Talk'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Amazing'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='humor'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Entertainment' label='Entertainment'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='awesome'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='TV'></category>
+        <title type='text'>Amazing funny TV Commercial - Talk Talk</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/VcQIwbvGRKU'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=VcQIwbvGRKU'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/VcQIwbvGRKU/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/VcQIwbvGRKU/ratings'></link>
+        <author>
+            <name>bannedcommercials</name>
+            <uri>http://dm5.google.com/feeds/users/bannedcommercials</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Amazing funny TV Commercial - Talk Talk
+            </media:title>
+            <media:description type='plain'>Amazing funny TV Commercial - Talk
+                Talk
+            </media:description>
+            <media:keywords>Amazing, funny, TV, Commercial, Talk, humor,
+                hilarious, awesome
+            </media:keywords>
+            <yt:duration seconds='39'></yt:duration>
+            <media:category label='Entertainment'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Entertainment
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=VcQIwbvGRKU'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/VcQIwbvGRKU/2.jpg'
+                             height='97' width='130'
+                             time='00:00:19.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/VcQIwbvGRKU/1.jpg'
+                             height='97' width='130'
+                             time='00:00:09.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/VcQIwbvGRKU/3.jpg'
+                             height='97' width='130'
+                             time='00:00:29.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/VcQIwbvGRKU/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='47602' average='4.92'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/VcQIwbvGRKU/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/JsD6uEZsIsU</id>
+        <published>2006-11-28T16:42:47.000Z</published>
+        <updated>2006-11-28T16:42:47.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mckee'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Andy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Guitar'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Acoustic'></category>
+        <title type='text'>Andy Mckee - Rylynn - Acoustic Guitar -
+            www.candyrat.com
+        </title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JsD6uEZsIsU'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=JsD6uEZsIsU'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JsD6uEZsIsU/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JsD6uEZsIsU/ratings'></link>
+        <author>
+            <name>rpoland</name>
+            <uri>http://dm5.google.com/feeds/users/rpoland</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Andy Mckee - Rylynn - Acoustic Guitar -
+                www.candyrat.com
+            </media:title>
+            <media:description type='plain'>Filmed Nov, 2006.
+
+                CD - Art of Motion
+
+                http://www.candyrat.com
+
+                Transcriptions Available at:
+
+                http://www.candyrat.com
+            </media:description>
+            <media:keywords>Andy, Mckee, Acoustic, Guitar</media:keywords>
+            <yt:duration seconds='315'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=JsD6uEZsIsU'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/JsD6uEZsIsU/2.jpg'
+                             height='97' width='130'
+                             time='00:02:37.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JsD6uEZsIsU/1.jpg'
+                             height='97' width='130'
+                             time='00:01:18.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JsD6uEZsIsU/3.jpg'
+                             height='97' width='130'
+                             time='00:03:56.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JsD6uEZsIsU/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5035' average='4.92'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/JsD6uEZsIsU/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/dt1fB62cGbo</id>
+        <published>2006-11-19T16:02:11.000Z</published>
+        <updated>2006-11-19T16:02:11.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Toto'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Africa'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mckee'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Andy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Guitar'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Fingerstyle'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Acoustic'></category>
+        <title type='text'>Andy Mckee - Africa - Toto - www.candyrat.com</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/dt1fB62cGbo'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=dt1fB62cGbo'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/dt1fB62cGbo/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/dt1fB62cGbo/ratings'></link>
+        <author>
+            <name>rpoland</name>
+            <uri>http://dm5.google.com/feeds/users/rpoland</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Andy Mckee - Africa - Toto -
+                www.candyrat.com
+            </media:title>
+            <media:description type='plain'>Andy Mckee
+
+                filmed, Nov, 2006.
+
+                CD - Dreamcatcher
+                http://www.candyrat.com
+
+                Transcriptions Available at:
+                http://www.candyrat.com
+            </media:description>
+            <media:keywords>Andy, Mckee, Acoustic, Guitar, Fingerstyle, Africa,
+                Toto
+            </media:keywords>
+            <yt:duration seconds='268'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=dt1fB62cGbo'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/dt1fB62cGbo/2.jpg'
+                             height='97' width='130'
+                             time='00:02:14'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/dt1fB62cGbo/1.jpg'
+                             height='97' width='130'
+                             time='00:01:07'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/dt1fB62cGbo/3.jpg'
+                             height='97' width='130'
+                             time='00:03:21'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/dt1fB62cGbo/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='4741' average='4.93'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/dt1fB62cGbo/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/Ddn4MGaS3N4</id>
+        <published>2006-11-25T21:38:20.000Z</published>
+        <updated>2006-11-25T21:38:20.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mckee'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Andy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Guitar'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Acoustic'></category>
+        <title type='text'>Andy Mckee - Guitar - Drifting - www.candyrat.com
+        </title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ddn4MGaS3N4'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=Ddn4MGaS3N4'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ddn4MGaS3N4/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ddn4MGaS3N4/ratings'></link>
+        <author>
+            <name>rpoland</name>
+            <uri>http://dm5.google.com/feeds/users/rpoland</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Andy Mckee - Guitar - Drifting -
+                www.candyrat.com
+            </media:title>
+            <media:description type='plain'>Acoustic Guitar
+
+                Drifting - Andy Mckee's Original Song
+
+                filmed, Nov, 2006.
+
+                CD - Art of Motion
+
+                http://www.candyrat.com
+
+                Transcriptions Available at:
+
+                http://www.candyrat.com
+            </media:description>
+            <media:keywords>Acoustic, Guitar, Andy, Mckee</media:keywords>
+            <yt:duration seconds='198'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=Ddn4MGaS3N4'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/Ddn4MGaS3N4/2.jpg'
+                             height='97' width='130'
+                             time='00:01:39'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ddn4MGaS3N4/1.jpg'
+                             height='97' width='130'
+                             time='00:00:49.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ddn4MGaS3N4/3.jpg'
+                             height='97' width='130'
+                             time='00:02:28.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ddn4MGaS3N4/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='26323' average='4.90'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/Ddn4MGaS3N4/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/SmVAWKfJ4Go</id>
+        <published>2005-12-13T02:25:05.000Z</published>
+        <updated>2005-12-13T02:25:05.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Cash'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='hurt'></category>
+        <title type='text'>Cash Hurt</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/SmVAWKfJ4Go'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=SmVAWKfJ4Go'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/SmVAWKfJ4Go/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/SmVAWKfJ4Go/ratings'></link>
+        <author>
+            <name>beachbuggy</name>
+            <uri>http://dm5.google.com/feeds/users/beachbuggy</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Cash Hurt</media:title>
+            <media:description type='plain'>cash hurt</media:description>
+            <media:keywords>Cash, hurt</media:keywords>
+            <yt:duration seconds='241'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=SmVAWKfJ4Go'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/SmVAWKfJ4Go/2.jpg'
+                             height='97' width='130'
+                             time='00:02:00.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/SmVAWKfJ4Go/1.jpg'
+                             height='97' width='130'
+                             time='00:01:00.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/SmVAWKfJ4Go/3.jpg'
+                             height='97' width='130'
+                             time='00:03:00.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/SmVAWKfJ4Go/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5328' average='4.91'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/SmVAWKfJ4Go/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/AbndgwfG22k</id>
+        <published>2006-06-18T18:07:46.000Z</published>
+        <updated>2006-06-18T18:07:46.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Tommy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Don'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Preston'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Kottke'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Emmanuel'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Ross'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mongrain'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Hedges'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Erik'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Michael'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Reed'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Guitar'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Leo'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Acoustic'></category>
+        <title type='text'>"AirTap!"</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/AbndgwfG22k'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=AbndgwfG22k'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/AbndgwfG22k/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/AbndgwfG22k/ratings'></link>
+        <author>
+            <name>erikmongrain</name>
+            <uri>http://dm5.google.com/feeds/users/erikmongrain</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>"AirTap!"</media:title>
+            <media:description type='plain'>MY FIRST CD IS NOW AVAILABLE ON MY
+                WEBSITE IN MP3 FORMAT !!! IN STORE MAY 2007 !
+                www.erikmongrain.com
+
+                Myself playing a composition I made 6 years ago in the streets
+                of Spain when I was travelling around.That was on "Belle et Bum"
+                (popular music show in Quebec ).
+            </media:description>
+            <media:keywords>Acoustic, Guitar, Michael, Hedges, Preston, Reed,
+                Don, Ross, Erik, Mongrain, Tommy, Emmanuel, Leo, Kottke
+            </media:keywords>
+            <yt:duration seconds='180'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=AbndgwfG22k'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/AbndgwfG22k/2.jpg'
+                             height='97' width='130'
+                             time='00:01:30'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/AbndgwfG22k/1.jpg'
+                             height='97' width='130'
+                             time='00:00:45'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/AbndgwfG22k/3.jpg'
+                             height='97' width='130'
+                             time='00:02:15'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/AbndgwfG22k/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6453' average='4.90'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/AbndgwfG22k/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/2Neop9OVaB8</id>
+        <published>2006-11-21T23:03:29.000Z</published>
+        <updated>2006-11-21T23:03:29.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Reel'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Minor'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Dunks'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Shinoda'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Skate'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mike'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Name'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Fuse'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Flips'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Sports'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Entertainment' label='Entertainment'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Action'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Ties'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Remember'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Fort'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Highlight'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Scooter'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Tricks'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Rising'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='The'></category>
+        <title type='text'>Remember The Name - Highlight Reel Video</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/2Neop9OVaB8'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=2Neop9OVaB8'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/2Neop9OVaB8/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/2Neop9OVaB8/ratings'></link>
+        <author>
+            <name>fortminor</name>
+            <uri>http://dm5.google.com/feeds/users/fortminor</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Remember The Name - Highlight Reel Video
+            </media:title>
+            <media:description type='plain'>Fort Minor Remember The Name
+                "Highlight Reel" video - made from the winning video clips
+                submitted for the Fort Minor / Fuse Remember The Name contest -
+                congratulations to all the winners!
+            </media:description>
+            <media:keywords>Fort, Minor, Fuse, Highlight, Reel, Action, Sports,
+                Remember, The, Name, Rising, Ties, Mike, Shinoda, Skate,
+                Scooter, Tricks, Flips, Dunks
+            </media:keywords>
+            <yt:duration seconds='246'></yt:duration>
+            <media:category label='Entertainment'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Entertainment
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=2Neop9OVaB8'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/2Neop9OVaB8/2.jpg'
+                             height='97' width='130'
+                             time='00:02:03'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/2Neop9OVaB8/1.jpg'
+                             height='97' width='130'
+                             time='00:01:01.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/2Neop9OVaB8/3.jpg'
+                             height='97' width='130'
+                             time='00:03:04.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/2Neop9OVaB8/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5535' average='4.90'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/2Neop9OVaB8/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/QKXWAE8YYxY</id>
+        <published>2006-02-03T00:07:12.000Z</published>
+        <updated>2006-02-03T00:07:12.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='MF'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Self'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Resident'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='MSI'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Evil'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Stupid'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Indulgence'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Four'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Mindless'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='RE4'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Games' label='Gadgets &amp; Games'></category>
+        <title type='text'>Resident Evil 4 -- Stupid MF</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/QKXWAE8YYxY'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=QKXWAE8YYxY'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/QKXWAE8YYxY/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/QKXWAE8YYxY/ratings'></link>
+        <author>
+            <name>raypinot</name>
+            <uri>http://dm5.google.com/feeds/users/raypinot</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Resident Evil 4 -- Stupid MF</media:title>
+            <media:description type='plain'>Video I made for Resident Evil 4
+                using "Separate Ways" and footage and that didn't make it into
+                my first video, "Vicinity of Obscenity" This video is done to
+                the song "Stupid MF" by Mindless Self Indulgence.
+
+                http://www.help-lara-and-ray.com/
+            </media:description>
+            <media:keywords>Resident, Evil, Four, RE4, Mindless, Self,
+                Indulgence, MSI, Stupid, MF
+            </media:keywords>
+            <yt:duration seconds='146'></yt:duration>
+            <media:category label='Gadgets &amp; Games'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Games
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=QKXWAE8YYxY'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/QKXWAE8YYxY/2.jpg'
+                             height='97' width='130'
+                             time='00:01:13'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/QKXWAE8YYxY/1.jpg'
+                             height='97' width='130'
+                             time='00:00:36.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/QKXWAE8YYxY/3.jpg'
+                             height='97' width='130'
+                             time='00:01:49.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/QKXWAE8YYxY/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='12632' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/QKXWAE8YYxY/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/zQoAUI84amI</id>
+        <published>2006-02-02T23:36:31.000Z</published>
+        <updated>2006-02-02T23:36:31.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Resident'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Evil'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='of'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='SOAD'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Obscenity'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Four'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Vicinity'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='System'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='RE4'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Games' label='Gadgets &amp; Games'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Down'></category>
+        <title type='text'>Resident Evil 4 -- Vicinity of Obscenity</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/zQoAUI84amI'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=zQoAUI84amI'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/zQoAUI84amI/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/zQoAUI84amI/ratings'></link>
+        <author>
+            <name>raypinot</name>
+            <uri>http://dm5.google.com/feeds/users/raypinot</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Resident Evil 4 -- Vicinity of Obscenity
+            </media:title>
+            <media:description type='plain'>Music video I made For Resident Evil
+                4 (PS2), using the System of a Down song, "Vicinity of
+                Obscenity"
+
+
+                http://www.help-lara-and-ray.com/
+            </media:description>
+            <media:keywords>Resident, Evil, Four, RE4, System, Down, SOAD,
+                Vicinity, of, Obscenity
+            </media:keywords>
+            <yt:duration seconds='168'></yt:duration>
+            <media:category label='Gadgets &amp; Games'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Games
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=zQoAUI84amI'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/zQoAUI84amI/2.jpg'
+                             height='97' width='130'
+                             time='00:01:24'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/zQoAUI84amI/1.jpg'
+                             height='97' width='130'
+                             time='00:00:42'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/zQoAUI84amI/3.jpg'
+                             height='97' width='130'
+                             time='00:02:06'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/zQoAUI84amI/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='9509' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/zQoAUI84amI/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/JzqumbhfxRo</id>
+        <published>2006-11-07T16:59:10.000Z</published>
+        <updated>2006-11-07T16:59:10.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='gjertsen'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='drums'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='and'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='editing'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='piano'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='amateur'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='drumkit'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='titties'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='norsk'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='ass'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Film' label='Film &amp; Animation'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='lasse'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='hyperactive'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='lassegg'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='norwegian'></category>
+        <title type='text'>Amateur - Lasse Gjertsen</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JzqumbhfxRo'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=JzqumbhfxRo'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JzqumbhfxRo/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/JzqumbhfxRo/ratings'></link>
+        <author>
+            <name>lassegg</name>
+            <uri>http://dm5.google.com/feeds/users/lassegg</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Amateur - Lasse Gjertsen</media:title>
+            <media:description type='plain'>I've taken my hyperactive editing
+                style a step further! Hope you'll enjoy it!
+
+                If you want to download the audio from this video, go to
+                http://www11.nrk.no/urort/user/?id=36781
+                It's a norwegian page where I uploaded some of my music. (Lytt =
+                Listen to, Last ned = Download)
+
+                Oh shit, I forgot to put this in the video, and now it's too
+                late to change it:
+                Thanks to my friend Mattis for letting me borrow the drum kit.
+                Also thanks to the person letting me use her piano, but she
+                didn't want her name here :P
+
+                And now; to you people saying I'm ripping off Michel Gondry:
+                I've seen his video with the drumkit called "Drumb and Drumber".
+                It's here on youtube somewhere. His video and my video are
+                different because of one very important detail: Gondy filmed
+                himself doing drumming sequences and LOOPED them, while I hit
+                each drum and piano chord seperately and edited them together.
+                This is a very big difference if you have any idea about video
+                editing. Actually, there is a short sequence of 5 sec where he
+                does cut the beat, but I didn't notice this until recently,
+                which makes me an idiot. But I still don't think it's a rip off,
+                only similar. SO one question to you guys: If I write a song
+                which includes the words "love" and "tight", am I ripping off
+                The Beatles?? :P I met Michel Gondry in Milan, Italy and asked
+                him. He didn't really give me a clear answer, but it seemed like
+                he thought so. Either that or he didn't like my clothes. Lol.
+            </media:description>
+            <media:keywords>amateur, lasse, gjertsen, drumkit, drums, piano,
+                music, norsk, norwegian, lassegg, hyperactive, editing, ass,
+                and, titties
+            </media:keywords>
+            <yt:duration seconds='192'></yt:duration>
+            <media:category label='Film &amp; Animation'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Film
+            </media:category>
+            <media:content
+                    url='rtsp://rtsp.youtube.com/youtube/videos/JzqumbhfxRo/video.3gp'
+                    type='video/3gpp' medium='video' isDefault='true'
+                    expression='full' duration='192'
+                    yt:format='1'></media:content>
+            <media:player
+                    url='http://www.youtube.com/watch?v=JzqumbhfxRo'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/JzqumbhfxRo/2.jpg'
+                             height='97' width='130'
+                             time='00:01:36'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JzqumbhfxRo/1.jpg'
+                             height='97' width='130'
+                             time='00:00:48'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JzqumbhfxRo/3.jpg'
+                             height='97' width='130'
+                             time='00:02:24'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/JzqumbhfxRo/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='35620' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/JzqumbhfxRo/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/YxQrPXPSVhQ</id>
+        <published>2006-06-17T16:04:49.000Z</published>
+        <updated>2006-06-17T16:04:49.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Evanescence'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <title type='text'>Evanescence</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/YxQrPXPSVhQ'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=YxQrPXPSVhQ'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/YxQrPXPSVhQ/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/YxQrPXPSVhQ/ratings'></link>
+        <author>
+            <name>luke4leanne</name>
+            <uri>http://dm5.google.com/feeds/users/luke4leanne</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Evanescence</media:title>
+            <media:description type='plain'>Evanescence-My Immortal
+            </media:description>
+            <media:keywords>Evanescence</media:keywords>
+            <yt:duration seconds='272'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=YxQrPXPSVhQ'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/YxQrPXPSVhQ/2.jpg'
+                             height='97' width='130'
+                             time='00:02:16'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/YxQrPXPSVhQ/1.jpg'
+                             height='97' width='130'
+                             time='00:01:08'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/YxQrPXPSVhQ/3.jpg'
+                             height='97' width='130'
+                             time='00:03:24'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/YxQrPXPSVhQ/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5226' average='4.90'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/YxQrPXPSVhQ/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/O9mEKMz2Pvo</id>
+        <published>2006-02-15T12:14:08.000Z</published>
+        <updated>2006-02-15T12:14:08.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Weeps'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Shimabukuro'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='ukelele'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Gently'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Guitar'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='While'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='My'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Jake'></category>
+        <title type='text'>Jake Shimabukuro plays "While My Guitar Gently Weeps"
+        </title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/O9mEKMz2Pvo'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=O9mEKMz2Pvo'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/O9mEKMz2Pvo/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/O9mEKMz2Pvo/ratings'></link>
+        <author>
+            <name>strewth</name>
+            <uri>http://dm5.google.com/feeds/users/strewth</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Jake Shimabukuro plays "While My Guitar
+                Gently Weeps"
+            </media:title>
+            <media:description type='plain'>Jake Shimabukuro plays "While My
+                Guitar Gently Weeps" on the ukelele. Amazing.
+            </media:description>
+            <media:keywords>Jake, Shimabukuro, While, My, Guitar, Gently, Weeps,
+                ukelele
+            </media:keywords>
+            <yt:duration seconds='272'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=O9mEKMz2Pvo'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/O9mEKMz2Pvo/2.jpg'
+                             height='97' width='130'
+                             time='00:02:16'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/O9mEKMz2Pvo/1.jpg'
+                             height='97' width='130'
+                             time='00:01:08'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/O9mEKMz2Pvo/3.jpg'
+                             height='97' width='130'
+                             time='00:03:24'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/O9mEKMz2Pvo/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6596' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/O9mEKMz2Pvo/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/rP3qL4UG1TI</id>
+        <published>2006-10-27T20:29:34.000Z</published>
+        <updated>2006-10-27T20:29:34.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='105'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Live'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Spears'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='whitemenace'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Entertainment' label='Entertainment'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Q101'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Woody'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Ravey'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='snoop'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='JayZ'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='dog'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='show'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='morning'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Aries'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Tony'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='radio'></category>
+        <title type='text'>The Woody show "Aries Spears" rap Live105.com</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/rP3qL4UG1TI'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=rP3qL4UG1TI'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/rP3qL4UG1TI/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/rP3qL4UG1TI/ratings'></link>
+        <author>
+            <name>Livemorningshow</name>
+            <uri>http://dm5.google.com/feeds/users/Livemorningshow</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>The Woody show "Aries Spears" rap
+                Live105.com
+            </media:title>
+            <media:description type='plain'>Live 105 Morning show "Aries Spears"
+                rap with Woody,Tony and Ravey. Edited By:
+                myspace.com/whitemenace
+            </media:description>
+            <media:keywords>Woody, Tony, Ravey, Live, 105, radio, morning, show,
+                Aries, Spears, JayZ, whitemenace, snoop, dog, Q101
+            </media:keywords>
+            <yt:duration seconds='135'></yt:duration>
+            <media:category label='Entertainment'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Entertainment
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=rP3qL4UG1TI'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/rP3qL4UG1TI/2.jpg'
+                             height='97' width='130'
+                             time='00:01:07.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/rP3qL4UG1TI/1.jpg'
+                             height='97' width='130'
+                             time='00:00:33.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/rP3qL4UG1TI/3.jpg'
+                             height='97' width='130'
+                             time='00:01:41.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/rP3qL4UG1TI/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='4856' average='4.90'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/rP3qL4UG1TI/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/4NFiu-V7StQ</id>
+        <published>2006-05-19T17:11:52.000Z</published>
+        <updated>2006-05-19T17:11:52.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Sims'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Chemical'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Film' label='Film &amp; Animation'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Helena'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Jaydee'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Romance'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Movie'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='MCR'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='machinima'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='My'></category>
+        <title type='text'>Helena - My Chemical Romance - Sims 2 version</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/4NFiu-V7StQ'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=4NFiu-V7StQ'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/4NFiu-V7StQ/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/4NFiu-V7StQ/ratings'></link>
+        <author>
+            <name>jaydee227</name>
+            <uri>http://dm5.google.com/feeds/users/jaydee227</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Helena - My Chemical Romance - Sims 2
+                version
+            </media:title>
+            <media:description type='plain'>This is the 3rd sims movie I made.
+                you need to watch it carefully or you won't understand the
+                story. But hope you enjoy :)
+
+                USEFUL LINKS:
+
+                Explanations to the storyline:
+                http://www.jd-movies.com/helenaexplained.html
+
+                List of the custom content:
+                http://www.jd-movies.com/helenacc.html
+
+                Movie FAQ:
+                http://www.jd-movies.com/helenafaq.html
+
+                Download link (MUCH better quality):
+                http://www.archive.org/download/helenasims2/Helena.wmv
+            </media:description>
+            <media:keywords>Helena, My, Chemical, Romance, MCR, Sims, Movie,
+                machinima, Jaydee
+            </media:keywords>
+            <yt:duration seconds='265'></yt:duration>
+            <media:category label='Film &amp; Animation'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Film
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=4NFiu-V7StQ'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/4NFiu-V7StQ/2.jpg'
+                             height='97' width='130'
+                             time='00:02:12.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/4NFiu-V7StQ/1.jpg'
+                             height='97' width='130'
+                             time='00:01:06.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/4NFiu-V7StQ/3.jpg'
+                             height='97' width='130'
+                             time='00:03:18.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/4NFiu-V7StQ/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='8446' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/4NFiu-V7StQ/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/bGFXKYvH39I</id>
+        <published>2006-06-21T17:23:54.000Z</published>
+        <updated>2006-06-21T17:23:54.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Three'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='grace'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='days'></category>
+        <title type='text'>three days grace-Animal I Have Become</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/bGFXKYvH39I'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=bGFXKYvH39I'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/bGFXKYvH39I/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/bGFXKYvH39I/ratings'></link>
+        <author>
+            <name>jollech69</name>
+            <uri>http://dm5.google.com/feeds/users/jollech69</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>three days grace-Animal I Have Become
+            </media:title>
+            <media:description type='plain'>By 3 days grace</media:description>
+            <media:keywords>Three, days, grace</media:keywords>
+            <yt:duration seconds='233'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=bGFXKYvH39I'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/bGFXKYvH39I/2.jpg'
+                             height='97' width='130'
+                             time='00:01:56.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/bGFXKYvH39I/1.jpg'
+                             height='97' width='130'
+                             time='00:00:58.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/bGFXKYvH39I/3.jpg'
+                             height='97' width='130'
+                             time='00:02:54.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/bGFXKYvH39I/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5975' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/bGFXKYvH39I/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/V1_OkegYtZI</id>
+        <published>2007-03-17T10:45:49.000Z</published>
+        <updated>2007-03-17T10:45:49.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='series'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='spoof'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='dub'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='abridged'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yugioh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <title type='text'>Yu-Gi-Oh: The Abridged Series - Episode 19</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V1_OkegYtZI'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=V1_OkegYtZI'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V1_OkegYtZI/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V1_OkegYtZI/ratings'></link>
+        <author>
+            <name>LittleKuriboh</name>
+            <uri>http://dm5.google.com/feeds/users/LittleKuriboh</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Yu-Gi-Oh: The Abridged Series - Episode 19
+            </media:title>
+            <media:description type='plain'>Imagine Yu-Gi-Oh condensed into
+                about nine minutes. That's basically what this is.
+
+                Yu-Gi-Oh is the property of Konami and Kazuki Takahasi.
+            </media:description>
+            <media:keywords>yugioh, abridged, series, dub, spoof
+            </media:keywords>
+            <yt:duration seconds='513'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=V1_OkegYtZI'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/V1_OkegYtZI/2.jpg'
+                             height='97' width='130'
+                             time='00:04:16.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V1_OkegYtZI/1.jpg'
+                             height='97' width='130'
+                             time='00:02:08.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V1_OkegYtZI/3.jpg'
+                             height='97' width='130'
+                             time='00:06:24.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V1_OkegYtZI/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5912' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/V1_OkegYtZI/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/1A42U-pKP0U</id>
+        <published>2006-06-02T16:38:18.000Z</published>
+        <updated>2006-06-02T16:38:18.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Inside'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='FroM'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='LP'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='The'></category>
+        <title type='text'>™[LINKIN PARK-From The Inside]™</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/1A42U-pKP0U'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=1A42U-pKP0U'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/1A42U-pKP0U/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/1A42U-pKP0U/ratings'></link>
+        <author>
+            <name>linkin2789</name>
+            <uri>http://dm5.google.com/feeds/users/linkin2789</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>™[LINKIN PARK-From The Inside]™
+            </media:title>
+            <media:description type='plain'>Video de la canción From The Inside
+                de Linkin Park.
+            </media:description>
+            <media:keywords>LP, FroM, The, Inside</media:keywords>
+            <yt:duration seconds='175'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=1A42U-pKP0U'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/1A42U-pKP0U/2.jpg'
+                             height='97' width='130'
+                             time='00:01:27.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/1A42U-pKP0U/1.jpg'
+                             height='97' width='130'
+                             time='00:00:43.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/1A42U-pKP0U/3.jpg'
+                             height='97' width='130'
+                             time='00:02:11.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/1A42U-pKP0U/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6824' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/1A42U-pKP0U/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/s-7UX1xSEfU</id>
+        <published>2006-07-18T17:06:52.000Z</published>
+        <updated>2006-07-18T17:06:52.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='spoof'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='dub'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='abridged'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yugioh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yu-gi-oh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='anime'></category>
+        <title type='text'>Yu-Gi-Oh: The Abridged Series (Episode 3)</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/s-7UX1xSEfU'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=s-7UX1xSEfU'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/s-7UX1xSEfU/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/s-7UX1xSEfU/ratings'></link>
+        <author>
+            <name>LittleKuriboh</name>
+            <uri>http://dm5.google.com/feeds/users/LittleKuriboh</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Yu-Gi-Oh: The Abridged Series (Episode 3)
+            </media:title>
+            <media:description type='plain'>Imagine "Yu-Gi-Oh" condensed into
+                four minutes. That's basically what this is.
+            </media:description>
+            <media:keywords>yugioh, yu-gi-oh, dub, spoof, anime, abridged
+            </media:keywords>
+            <yt:duration seconds='273'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=s-7UX1xSEfU'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/s-7UX1xSEfU/2.jpg'
+                             height='97' width='130'
+                             time='00:02:16.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/s-7UX1xSEfU/1.jpg'
+                             height='97' width='130'
+                             time='00:01:08.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/s-7UX1xSEfU/3.jpg'
+                             height='97' width='130'
+                             time='00:03:24.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/s-7UX1xSEfU/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='5907' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/s-7UX1xSEfU/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/V6k3YlcYtS0</id>
+        <published>2006-08-05T22:15:41.000Z</published>
+        <updated>2006-08-05T22:15:41.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='spoof'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='dub'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='abridged'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yugioh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yu-gi-oh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='anime'></category>
+        <title type='text'>Yu-Gi-Oh: The Abridged Series (Episode 6)</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V6k3YlcYtS0'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=V6k3YlcYtS0'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V6k3YlcYtS0/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/V6k3YlcYtS0/ratings'></link>
+        <author>
+            <name>LittleKuriboh</name>
+            <uri>http://dm5.google.com/feeds/users/LittleKuriboh</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Yu-Gi-Oh: The Abridged Series (Episode 6)
+            </media:title>
+            <media:description type='plain'>Imagine "Yu-Gi-Oh" condensed into
+                four... uh, six minutes. That's basically what this is.
+
+                Yu-Gi-Oh belongs to Kazuki Takahashi
+            </media:description>
+            <media:keywords>yu-gi-oh, yugioh, abridged, dub, spoof, anime
+            </media:keywords>
+            <yt:duration seconds='355'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=V6k3YlcYtS0'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/V6k3YlcYtS0/2.jpg'
+                             height='97' width='130'
+                             time='00:02:57.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V6k3YlcYtS0/1.jpg'
+                             height='97' width='130'
+                             time='00:01:28.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V6k3YlcYtS0/3.jpg'
+                             height='97' width='130'
+                             time='00:04:26.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/V6k3YlcYtS0/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6447' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/V6k3YlcYtS0/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/HTKs5ZT16PM</id>
+        <published>2006-10-23T18:15:56.000Z</published>
+        <updated>2006-10-23T18:15:56.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='series'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='spoof'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='dub'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='abridged'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='yugioh'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='anime'></category>
+        <title type='text'>Yu-Gi-Oh: The Abridged Series (Episode 13)</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/HTKs5ZT16PM'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=HTKs5ZT16PM'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/HTKs5ZT16PM/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/HTKs5ZT16PM/ratings'></link>
+        <author>
+            <name>LittleKuriboh</name>
+            <uri>http://dm5.google.com/feeds/users/LittleKuriboh</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Yu-Gi-Oh: The Abridged Series (Episode 13)
+            </media:title>
+            <media:description type='plain'>Please ignore the imposter videos.
+
+                Imagine "Yu-Gi-Oh" condensed into five/six minutes. That's
+                basically what this is.
+
+                Yu-Gi-Oh belongs to Kazuki Takahashi
+            </media:description>
+            <media:keywords>yugioh, abridged, series, anime, spoof, dub
+            </media:keywords>
+            <yt:duration seconds='349'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=HTKs5ZT16PM'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/HTKs5ZT16PM/2.jpg'
+                             height='97' width='130'
+                             time='00:02:54.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/HTKs5ZT16PM/1.jpg'
+                             height='97' width='130'
+                             time='00:01:27.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/HTKs5ZT16PM/3.jpg'
+                             height='97' width='130'
+                             time='00:04:21.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/HTKs5ZT16PM/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='7255' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/HTKs5ZT16PM/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/MePzWtHqrso</id>
+        <published>2006-06-28T00:21:59.000Z</published>
+        <updated>2006-06-28T00:21:59.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Benjamin'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Breaking'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Music' label='Music'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Diary'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Jane'></category>
+        <title type='text'>Breaking Benjamin - "The Diary of Jane"</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/MePzWtHqrso'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=MePzWtHqrso'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/MePzWtHqrso/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/MePzWtHqrso/ratings'></link>
+        <author>
+            <name>BrienTA</name>
+            <uri>http://dm5.google.com/feeds/users/BrienTA</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Breaking Benjamin - "The Diary of Jane"
+            </media:title>
+            <media:description type='plain'>Breaking Benjamin - "The Diary of
+                Jane"
+            </media:description>
+            <media:keywords>Breaking, Benjamin, Diary, Jane</media:keywords>
+            <yt:duration seconds='207'></yt:duration>
+            <media:category label='Music'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Music
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=MePzWtHqrso'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/MePzWtHqrso/2.jpg'
+                             height='97' width='130'
+                             time='00:01:43.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/MePzWtHqrso/1.jpg'
+                             height='97' width='130'
+                             time='00:00:51.750'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/MePzWtHqrso/3.jpg'
+                             height='97' width='130'
+                             time='00:02:35.250'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/MePzWtHqrso/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6298' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/MePzWtHqrso/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/ElrldD02if0</id>
+        <published>2006-11-20T19:41:52.000Z</published>
+        <updated>2006-11-20T19:41:52.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='ms.paint'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='paint'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='how'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='good'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='automobile'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='custom'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='art'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='comaro'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='foose'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='chip'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='artistic'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='concept'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='great'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='awsome'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Film' label='Film &amp; Animation'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='design'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='draw'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='car'></category>
+        <title type='text'>Re: How to draw a car in MS. Paint</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/ElrldD02if0'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=ElrldD02if0'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/ElrldD02if0/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/ElrldD02if0/ratings'></link>
+        <author>
+            <name>picster</name>
+            <uri>http://dm5.google.com/feeds/users/picster</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>Re: How to draw a car in MS. Paint
+            </media:title>
+            <media:description type='plain'>WATCH MY NEW VIDEO!!!!
+                http://www.youtube.com/watch?v=vUWqRhReaZk
+
+                ----
+                Wow! So many nice comments and views :)
+                I'm very happy you all like it.
+
+                And thank you very much for all the nice emails!
+            </media:description>
+            <media:keywords>car, art, paint, draw, automobile, comaro, custom,
+                concept, how, ms.paint, great, good, awsome, design, artistic,
+                chip, foose
+            </media:keywords>
+            <yt:duration seconds='318'></yt:duration>
+            <media:category label='Film &amp; Animation'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Film
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=ElrldD02if0'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/ElrldD02if0/2.jpg'
+                             height='97' width='130'
+                             time='00:02:39'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/ElrldD02if0/1.jpg'
+                             height='97' width='130'
+                             time='00:01:19.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/ElrldD02if0/3.jpg'
+                             height='97' width='130'
+                             time='00:03:58.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/ElrldD02if0/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='9986' average='4.88'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/ElrldD02if0/comments'></gd:feedLink>
+    </entry>
+    <entry>
+        <id>http://dm5.google.com/feeds/videos/Ox0c_1l9al4</id>
+        <published>2006-07-04T01:56:27.000Z</published>
+        <updated>2006-07-04T01:56:27.000Z</updated>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Cook'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Naruto'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/keywords.cat'
+                  term='Dane'></category>
+        <category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'
+                  term='Comedy' label='Comedy'></category>
+        <title type='text'>AMV Comedians 2 (Dane Cook)</title>
+        <link rel='self' type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ox0c_1l9al4'></link>
+        <link rel='alternate' type='text/html'
+              href='http://www.youtube.com/watch?v=Ox0c_1l9al4'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ox0c_1l9al4/responses'></link>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.ratings'
+              type='application/atom+xml'
+              href='http://dm5.google.com/feeds/videos/Ox0c_1l9al4/ratings'></link>
+        <author>
+            <name>Rubix89</name>
+            <uri>http://dm5.google.com/feeds/users/Rubix89</uri>
+        </author>
+        <media:group>
+            <media:title type='plain'>AMV Comedians 2 (Dane Cook)</media:title>
+            <media:description type='plain'>Anime: Naruto
+                Comedian: Dane Cook
+                I know I already did Dane Cook, but I couldnt pass up this joke.
+                http://www.animemusicvideos.org/members/members_videoinfo.php?v=130820
+            </media:description>
+            <media:keywords>Naruto, Dane, Cook</media:keywords>
+            <yt:duration seconds='126'></yt:duration>
+            <media:category label='Comedy'
+                            scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>
+                Comedy
+            </media:category>
+            <media:player
+                    url='http://www.youtube.com/watch?v=Ox0c_1l9al4'></media:player>
+            <media:thumbnail url='http://img.youtube.com/vi/Ox0c_1l9al4/2.jpg'
+                             height='97' width='130'
+                             time='00:01:03'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ox0c_1l9al4/1.jpg'
+                             height='97' width='130'
+                             time='00:00:31.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ox0c_1l9al4/3.jpg'
+                             height='97' width='130'
+                             time='00:01:34.500'></media:thumbnail>
+            <media:thumbnail url='http://img.youtube.com/vi/Ox0c_1l9al4/0.jpg'
+                             height='240' width='320'></media:thumbnail>
+        </media:group>
+        <gd:rating min='1' max='5' numRaters='6727' average='4.89'></gd:rating>
+        <gd:feedLink rel='comments'
+                     href='http://dm5.google.com/feeds/videos/Ox0c_1l9al4/comments'></gd:feedLink>
+    </entry>
+</feed>

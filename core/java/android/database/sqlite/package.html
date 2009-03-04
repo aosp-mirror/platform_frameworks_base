@@ -1,0 +1,20 @@
+<HTML>
+<BODY>
+Contains the SQLite database management
+classes that an application would use to manage its own private database.
+<p>
+Applications use these classes to maange private databases. If creating a
+content provider, you will probably have to use these classes to create and
+manage your own database to store content. See <a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> to learn
+the conventions for implementing a content provider. See the
+NotePadProvider class in the NotePad sample application in the SDK for an
+example of a content provider. Android ships with SQLite version 3.4.0
+<p>If you are working with data sent to you by a provider, you will not use
+these SQLite classes, but instead use the generic {@link android.database}
+classes.
+<p>Android ships with the sqlite3 database tool in the <code>tools/</code>
+folder. You can use this tool to browse or run SQL commands on the device. Run by
+typing <code>sqlite3</code> in a shell window.
+</BODY>
+</HTML>

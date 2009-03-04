@@ -1,0 +1,16 @@
+<ASDF>
+    <a id="system"
+            old-cl="1"
+            new-cl="43019">
+        <app dir="apps/common" />
+    </a>
+    <a id="samples"
+            old-cl="1"
+            new-cl="43019">asdf
+        <app dir="samples/NotePad" />
+        <app dir="samples/LunarLander" />
+        <something>a<b>,</b>b </something>
+        <exact xml:space="preserve">a<b>,</b>b </exact>
+    </a>
+</ASDF>
+

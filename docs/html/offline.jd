@@ -1,0 +1,36 @@
+home=true
+page.title=Welcome
+@jd:body
+
+<div id="mainBodyFluid">
+
+<h1>Welcome to the Android SDK!</h1>
+
+<img src="{@docRoot}images/android_icon_125.png" style="float:right; margin:1em 6em 6em;" />
+
+<p>If you've just downloaded the SDK, then continue with  
+<a href="{@docRoot}sdk/1.1_r1/installing.html">Installing the Android SDK</a>.</p>
+
+<p>If you're upgrading from a previously installed version, then refer to the 
+<a href="{@docRoot}sdk/1.1_r1/upgrading.html">Upgrading</a> guide.</p>
+
+<p>Once you've completed the SDK installation, you can start learning about
+development on the Android framework by reading the <a
+href="{@docRoot}guide/index.html">Developer's Guide</a>. The SDK package
+also includes a wide variety of very helpful <a
+href="{@docRoot}samples/index.html">code samples</a>.</p>
+
+<p>Please note that you are currently viewing a local, offline version of the
+Android developer documentation. The offline documentation offers the same
+content and features as the online documentation, but since the search
+capability is network-based, it will not work while you are offline.
+Autocompletion for API packages and classes, also offered from the search box,
+is available both online and offline and loads the reference documentation for
+the item you select.</p>
+
+<p>For the most current, fully searchable documentation, please visit</p>
+
+<p style="margin-left:2em;"><a href="http://developer.android.com/index.html">
+http://developer.android.com</a>.</p>
+
+</div>

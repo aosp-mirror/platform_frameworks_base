@@ -1,0 +1,84 @@
+<!-- ANSI Standard fixed size types -->
+<type name=int8_t format=signedIntegral size=int8_t/>
+<type name=int16_t format=signedIntegral size=int16_t/>
+<type name=int32_t format=signedIntegral size=int32_t/>
+<type name=int64_t format=signedIntegral size=int64_t/>
+<type name=uint8_t format=integral size=int8_t/>
+<type name=uint16_t format=integral size=int16_t/>
+<type name=uint32_t format=integral size=int32_t/>
+<type name=uint64_t format=integral size=int64_t/>
+<type name=float format=float size=float/>
+<type name=double format=float size=double/>
+
+<!-- Standard types of variable size, these are machine specific -->
+<type name=int_least8_t format=signedIntegral size=int8_t/>
+<type name=int_least16_t format=signedIntegral size=int16_t/>
+<type name=int_least32_t format=signedIntegral size=int32_t/>
+<type name=int_least64_t format=signedIntegral size=int64_t/>
+<type name=uint_least8_t format=integral size=int8_t/>
+<type name=uint_least16_t format=integral size=int16_t/>
+<type name=uint_least32_t format=integral size=int32_t/>
+<type name=uint_least64_t format=integral size=int64_t/>
+<type name=int_fast8_t format=signedIntegral size=int8_t/>
+<type name=int_fast16_t format=signedIntegral size=int16_t/>
+<type name=int_fast32_t format=signedIntegral size=int32_t/>
+<type name=int_fast64_t format=signedIntegral size=int64_t/>
+<type name=uint_fast8_t format=integral size=int8_t/>
+<type name=uint_fast16_t format=integral size=int16_t/>
+<type name=uint_fast32_t format=integral size=int32_t/>
+<type name=uint_fast64_t format=integral size=int64_t/>
+<type name=intptr_t format=integral size=intptr_t/>
+<type name=uintptr_t format=integral size=intptr_t/>
+<type name=intmax_t format=integral size=intmax_t/>
+<type name=uintmax_t format=integral size=intmax_t/>
+
+<!-- Standard C++ variable size types, also machine specific -->
+<type name=wchar_t format=signedIntegral size=wchar_t/>
+<type name=size_t format=integral size=size_t/>
+<type name=char format=signedIntegral size=char/>
+<type name=short format=signedIntegral size=short/>
+<type name=int format=signedIntegral size=int/>
+<type name=long format=signedIntegral size=long/>
+<type name=longlong format=signedIntegral size=longlong/>
+<type name=u_char format=signedIntegral size=char/>
+<type name=u_short format=signedIntegral size=short/>
+<type name=u_int format=signedIntegral size=int/>
+<type name=u_long format=signedIntegral size=long/>
+<type name=u_longlong format=signedIntegral size=longlong/>
+
+<!-- libc types -->
+<type name=time_t format=signedIntegral size=time_t/>
+<type name=off_t format=signedIntegral size=off_t/>
+<type name=ptrdiff_t format=signedIntegral size=ptrdiff_t/>
+<type name=dev_t format=integral size=dev_t/>
+<type name=uid_t format=integral size=uid_t/>
+<type name=gid_t format=integral size=gid_t/>
+<type name=mode_t format=integral size=mode_t/>
+<type name=nlink_t format=integral size=nlink_t/>
+<type name=pid_t format=integral size=pid_t/>
+<type name=fsid_t format=integral size=fsid_t/>
+<type name=clock_t format=integral size=clock_t/>
+<type name=id_t format=integral size=id_t/>
+<type name=key_t format=integral size=key_t/>
+<type name=blksize_t format=integral size=blksize_t/>
+
+<!-- Types within the ustl library -->
+<type name=utf8 format=integral minSize="1" maxSize="8"/>
+<type name=auto format=unstructured id="AUTO"/>
+<namespace name=ustl>
+    <type name=uoff_t extends=size_t/>
+    <type name=cmemlink_ptr_t format=pointer/>
+    <type name=memlink_ptr_t extends=cmemlink_ptr_t/>
+    <type name=memblock_ptr_t extends=memlink_ptr_t/>
+    <type name=cmemlink format=struct>
+	<var name=data_size type=size_t />
+	<var name=data format=unstructured size=data_size />
+    </type>
+    <type name=memlink extends=cmemlink />
+    <type name=memblock extends=cmemlink />
+    <type name=string extends=memblock>
+	<var name=data_size type=utf8 />
+	<var name=data format=array type=utf8 size=data_size />
+    </type>
+</namespace>
+

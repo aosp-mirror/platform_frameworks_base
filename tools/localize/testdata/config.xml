@@ -1,0 +1,15 @@
+<localize-config>
+    <configuration id="system"
+            old-cl="1"
+            new-cl="43019">
+        <app dir="apps/common" />
+    </configuration>
+    <configuration id="samples"
+            old-cl="24801"
+            new-cl="43019">
+        <app dir="samples/NotePad" />
+        <reject file="samples/NotePad/res/values/strings.xml" name="string:menu_delete">
+            QA says this sounds <b>rude</b>.
+        </reject>
+    </configuration>
+</localize-config>

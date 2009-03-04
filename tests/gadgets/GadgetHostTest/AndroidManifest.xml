@@ -1,0 +1,36 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.tests.gadgethost">
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application>
+        <activity android:name="GadgetHostActivity" android:label="_GadgetHost">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="TestGadgetConfigure" android:label="Configure TestGadgetProvider">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- BEGIN_INCLUDE(GadgetProvider) -->
+        <receiver android:name="TestGadgetProvider"
+                    android:label="@string/oh_hai"
+                    android:icon="@drawable/oh_hai_icon"
+                    >
+            <intent-filter>
+                <action android:name="android.gadget.action.GADGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.gadget.provider"
+                        android:resource="@xml/gadget_info"
+                        />
+        </receiver>
+        <!-- END_INCLUDE(GadgetProvider) -->
+        
+    </application>
+</manifest>

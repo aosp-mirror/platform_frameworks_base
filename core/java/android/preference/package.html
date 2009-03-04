@@ -1,0 +1,23 @@
+<HTML>
+<BODY>
+Provides classes that manage application preferences and implement the preferences UI.
+Using these ensures that all the preferences within each application are maintained 
+in the same manner and the user experience is consistent with that of the system and 
+other applications.
+<p>
+The preferences portion of an application 
+should be ran as a separate {@link android.app.Activity} that extends
+the {@link android.preference.PreferenceActivity} class. In the PreferenceActivity, a 
+{@link android.preference.PreferenceScreen} object should be the root element of the layout. 
+The PreferenceScreen contains {@link android.preference.Preference} elements such as a 
+{@link android.preference.CheckBoxPreference}, {@link android.preference.EditTextPreference}, 
+{@link android.preference.ListPreference}, {@link android.preference.PreferenceCategory},
+or {@link android.preference.RingtonePreference}. </p>
+<p>
+All settings made for a given {@link android.preference.Preference} will be automatically saved
+to the application's instance of {@link android.content.SharedPreferences}. Access to the 
+SharedPreferences is simple with {@link android.preference.Preference#getSharedPreferences()}.</p>
+<p>
+Note that saved preferences are accessible only to the application that created them.</p>
+</BODY>
+</HTML>

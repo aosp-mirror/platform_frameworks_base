@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"б"</string>
+    <string name="kilobyteShort">"Кб"</string>
+    <string name="megabyteShort">"Мб"</string>
+    <string name="gigabyteShort">"Гб"</string>
+    <string name="terabyteShort">"Тб"</string>
+    <string name="petabyteShort">"Пб"</string>
+    <string name="untitled">"&lt;без названия&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(Нет номера телефона)"</string>
+    <string name="unknownName">"(Неизвестно)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Голосовая почта"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Проблема с подключением или недействительный код MMI."</string>
+    <string name="serviceEnabled">"Служба включена."</string>
+    <string name="serviceEnabledFor">"Служба включена для следующего:"</string>
+    <string name="serviceDisabled">"Служба отключена."</string>
+    <string name="serviceRegistered">"Регистрация прошла успешно."</string>
+    <string name="serviceErased">"Удаление прошло успешно."</string>
+    <string name="passwordIncorrect">"Неверный пароль."</string>
+    <string name="mmiComplete">"Код MMI завершен."</string>
+    <string name="badPin">"Указан неверный старый PIN."</string>
+    <string name="badPuk">"Указан неверный PUK."</string>
+    <string name="mismatchPin">"Указанные PIN-коды не совпадают."</string>
+    <string name="invalidPin">"Введите PIN, содержащий от 4 до 8 цифр."</string>
+    <string name="needPuk">"Ваша SIM-карта заблокирована PUK-кодом. Введите PUK, чтобы разблокировать ее."</string>
+    <string name="needPuk2">"Введите PUK2 для разблокирования SIM-карты."</string>
+    <string name="ClipMmi">"Идентификатор звонящего"</string>
+    <string name="ClirMmi">"Идентификатор принимающего вызов"</string>
+    <string name="CfMmi">"Перенаправление вызовов"</string>
+    <string name="CwMmi">"Ожидание вызова"</string>
+    <string name="BaMmi">"Запрет вызовов"</string>
+    <string name="PwdMmi">"Изменение пароля"</string>
+    <string name="PinMmi">"Изменение PIN"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Идентификатор звонящего по умолчанию ограничен. Следующий вызов: ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Идентификатор звонящего по умолчанию ограничен. Следующий вызов: не ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Идентификатор звонящего по умолчанию не ограничен. Следующий вызов: ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Идентификатор звонящего по умолчанию не ограничен. Следующий вызов: не ограничен"</string>
+    <string name="serviceNotProvisioned">"Услуга не предоставляется."</string>
+    <string name="CLIRPermanent">"Нельзя изменить настройки идентификатора звонящего."</string>
+    <string name="serviceClassVoice">"Голос"</string>
+    <string name="serviceClassData">"Данные"</string>
+    <string name="serviceClassFAX">"ФАКС"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Асинхр."</string>
+    <string name="serviceClassDataSync">"Синхронизация"</string>
+    <string name="serviceClassPacket">"Пакетные данные"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не перенаправлено"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> через <xliff:g id="TIME_DELAY">{2}</xliff:g> сек."</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не перенаправлено"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не перенаправлено"</string>
+    <string name="httpErrorOk">"ОК"</string>
+    <string name="httpError">"Веб-страница содержит ошибку."</string>
+    <string name="httpErrorLookup">"Не удается найти URL."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Схема аутентификации сайта не поддерживается."</string>
+    <string name="httpErrorAuth">"Не удалось выполнить аутентификацию."</string>
+    <string name="httpErrorProxyAuth">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
+    <string name="httpErrorConnect">"Не удалось связаться с сервером."</string>
+    <string name="httpErrorIO">"Сервер не отвечает. Повторите попытку позже."</string>
+    <string name="httpErrorTimeout">"Время подключения к серверу истекло."</string>
+    <string name="httpErrorRedirectLoop">"Страница содержит слишком много перенаправлений."</string>
+    <string name="httpErrorUnsupportedScheme">"Протокол не поддерживается"</string>
+    <string name="httpErrorFailedSslHandshake">"Невозможно установить безопасное соединение."</string>
+    <string name="httpErrorBadUrl">"Невозможно открыть страницу, поскольку URL недействителен."</string>
+    <string name="httpErrorFile">"Нет доступа к файлу."</string>
+    <string name="httpErrorFileNotFound">"Нужный файл не найден."</string>
+    <string name="httpErrorTooManyRequests">"Обрабатывается слишком много запросов. Повторите попытку позже."</string>
+    <string name="contentServiceSync">"Синхронизация"</string>
+    <string name="contentServiceSyncNotificationTitle">"Синхронизация"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="low_memory">"Память телефона полна! Удалите какие-нибудь файлы, чтобы освободить место."</string>
+    <string name="me">"Я"</string>
+    <string name="power_dialog">"Параметры телефона"</string>
+    <string name="silent_mode">"Беззвучный режим"</string>
+    <string name="turn_on_radio">"Включить беспроводную связь"</string>
+    <string name="turn_off_radio">"Отключить беспроводную связь"</string>
+    <string name="screen_lock">"Заблокировать экран"</string>
+    <string name="power_off">"Отключить питание"</string>
+    <string name="shutdown_progress">"Идет выключение…"</string>
+    <string name="shutdown_confirm">"Телефон будет выключен."</string>
+    <string name="no_recent_tasks">"Нет новых приложений."</string>
+    <string name="global_actions">"Параметры телефона"</string>
+    <string name="global_action_lock">"Заблокировать экран"</string>
+    <string name="global_action_power_off">"Отключить питание"</string>
+    <string name="global_action_toggle_silent_mode">"Беззвучный режим"</string>
+    <string name="global_action_silent_mode_on_status">"Звук выключен"</string>
+    <string name="global_action_silent_mode_off_status">"Звук включен"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
+    <string name="safeMode">"Безопасный режим"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
+    <string name="permgrouplab_costMoney">"Платные службы"</string>
+    <string name="permgroupdesc_costMoney">"Разрешить приложениям выполнять действия, за которые может взиматься плата."</string>
+    <string name="permgrouplab_messages">"Сообщения"</string>
+    <string name="permgroupdesc_messages">"Чтение и запись SMS, электронной почты и других сообщений."</string>
+    <string name="permgrouplab_personalInfo">"Личная информация"</string>
+    <string name="permgroupdesc_personalInfo">"Прямой доступ к вашим контактам и календарю, сохраненным на телефоне."</string>
+    <string name="permgrouplab_location">"Ваше местоположение"</string>
+    <string name="permgroupdesc_location">"Наблюдение за вашим местоположением"</string>
+    <string name="permgrouplab_network">"Связь с сетью"</string>
+    <string name="permgroupdesc_network">"Разрешить приложениям использовать сетевые функции."</string>
+    <string name="permgrouplab_accounts">"Ваши аккаунты Google"</string>
+    <string name="permgroupdesc_accounts">"Доступ к имеющимся аккаунтам Google."</string>
+    <string name="permgrouplab_hardwareControls">"Управление оборудованием"</string>
+    <string name="permgroupdesc_hardwareControls">"Прямой доступ к оборудованию телефона."</string>
+    <string name="permgrouplab_phoneCalls">"Телефонные вызовы"</string>
+    <string name="permgroupdesc_phoneCalls">"Слежение, запись и обработка вызовов."</string>
+    <string name="permgrouplab_systemTools">"Системные инструменты"</string>
+    <string name="permgroupdesc_systemTools">"Доступ и управление системой на низком уровне."</string>
+    <string name="permgrouplab_developmentTools">"Средства для разработки"</string>
+    <string name="permgroupdesc_developmentTools">"Функции, необходимые только разработчикам приложений."</string>
+    <string name="permlab_statusBar">"отключать или изменять панель состояния"</string>
+    <string name="permdesc_statusBar">"Разрешает приложению отключать панель состояния или добавлять и удалять системные значки."</string>
+    <string name="permlab_expandStatusBar">"разворачивать/сворачивать панель состояния"</string>
+    <string name="permdesc_expandStatusBar">"Разрешает приложению разворачивать и сворачивать панель состояния."</string>
+    <string name="permlab_processOutgoingCalls">"перехватывать исходящие вызовы"</string>
+    <string name="permdesc_processOutgoingCalls">"Разрешает приложению обрабатывать исходящие вызовы и изменять набираемый номер. Вредоносное ПО может следить, перенаправлять или блокировать исходящие вызовы."</string>
+    <string name="permlab_receiveSms">"получать SMS"</string>
+    <string name="permdesc_receiveSms">"Разрешает приложениям получать и обрабатывать сообщения SMS. Вредоносное ПО может отслеживать ваши сообщения или удалять до того, как вы их увидите."</string>
+    <string name="permlab_receiveMms">"получать MMS"</string>
+    <string name="permdesc_receiveMms">"Разрешает приложениям получать и обрабатывать сообщения MMS. Вредоносное ПО может отслеживать ваши сообщения или удалять их, не показав вам."</string>
+    <string name="permlab_sendSms">"отправлять SMS"</string>
+    <string name="permdesc_sendSms">"Разрешает приложениям отправлять SMS. Вредоносное ПО может тратить ваши деньги, отправляя сообщения без вашего ведома."</string>
+    <string name="permlab_readSms">"читать SMS и MMS"</string>
+    <string name="permdesc_readSms">"Разрешает приложению записывать SMS, сохраненные в телефоне или на SIM-карте. Вредоносное ПО может читать конфиденциальные сообщения."</string>
+    <string name="permlab_writeSms">"изменять SMS и MMS"</string>
+    <string name="permdesc_writeSms">"Разрешает приложению записывать данные в SMS, сохраненные в телефоне или на SIM-карте. Вредоносное ПО может удалять сообщения."</string>
+    <string name="permlab_receiveWapPush">"получать через WAP"</string>
+    <string name="permdesc_receiveWapPush">"Разрешает приложениям получать и обрабатывать сообщения WAP. Вредоносное ПО может отслеживать ваши сообщения или удалять до того, как вы их увидите."</string>
+    <string name="permlab_getTasks">"получать работающие приложения"</string>
+    <string name="permdesc_getTasks">"Разрешает приложению получать информацию о работающих и недавно выполненных задачах. Может позволить вредоносному ПО получать конфиденциальную информацию о других приложениях."</string>
+    <string name="permlab_reorderTasks">"переупорядочивать работающие приложения"</string>
+    <string name="permdesc_reorderTasks">"Разрешает приложению изменять приоритет задач. Вредоносное ПО может выходить на передний план без вашего разрешения."</string>
+    <string name="permlab_setDebugApp">"включать отладку приложений"</string>
+    <string name="permdesc_setDebugApp">"Разрешает приложению включать отладку других приложений. Вредоносное ПО может таким образом закрывать другие приложения."</string>
+    <string name="permlab_changeConfiguration">"изменять настройки интерфейса"</string>
+    <string name="permdesc_changeConfiguration">"Позволяет приложению изменять текущую конфигурацию, например локаль и общий размер шрифта."</string>
+    <string name="permlab_restartPackages">"перезапускать другие приложения"</string>
+    <string name="permdesc_restartPackages">"Разрешает приложению принудительно перезапускать другие приложения."</string>
+    <string name="permlab_setProcessForeground">"предотвращать остановку"</string>
+    <string name="permdesc_setProcessForeground">"Разрешает приложению запускать любые процессы на переднем плане так, что их нельзя прекратить. Не требуется обычным приложениям."</string>
+    <string name="permlab_forceBack">"принудительно закрывать приложения"</string>
+    <string name="permdesc_forceBack">"Позволяет приложению принудительно закрывать и переводить в фоновый режим действия, работающие на переднем плане. Не требуется обычным приложениям."</string>
+    <string name="permlab_dump">"получать внутреннее состояние системы"</string>
+    <string name="permdesc_dump">"Разрешает приложениям получать внутреннее состояние системы. Вредоносное ПО может получать множество личной и защищенной информации, которая обычно не была бы им доступна."</string>
+    <string name="permlab_addSystemService">"публиковать службы низкого уровня"</string>
+    <string name="permdesc_addSystemService">"Разрешает приложению публиковать собственные системные службы низкого уровня. Вредоносное ПО может взломать систему и украсть или повредить данные в ней."</string>
+    <string name="permlab_runSetActivityWatcher">"наблюдать и управлять запуском всех приложений"</string>
+    <string name="permdesc_runSetActivityWatcher">"Разрешает приложению следить и управлять тем, как система запускает действия. Вредоносное ПО может полностью нарушить работу системы. Это разрешение нужно только для разработки, но не при обычном использовании телефона."</string>
+    <string name="permlab_broadcastPackageRemoved">"отправлять оповещения об удалении пакетов"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Позволяет приложению распространять уведомление об удалении пакета приложения. Вредоносное ПО может использовать это для остановки любых других работающих приложений."</string>
+    <string name="permlab_broadcastSmsReceived">"отправлять оповещения о получении SMS"</string>
+    <string name="permdesc_broadcastSmsReceived">"Разрешает приложению распространять уведомление о том, что получено сообщение SMS. Вредоносное ПО может пользоваться этим для фальсификации входящих сообщений SMS."</string>
+    <string name="permlab_broadcastWapPush">"отправлять оповещения о получении WAP-PUSH"</string>
+    <string name="permdesc_broadcastWapPush">"Разрешает приложению распространять уведомление о получении сообщения WAP PUSH. Вредоносное ПО может использовать это для подделки отчета о получении MMS или просто заменять содержание любой веб-страницы вредоносными вариантами."</string>
+    <string name="permlab_setProcessLimit">"ограничивать количество выполняемых процессов"</string>
+    <string name="permdesc_setProcessLimit">"Позволяет приложению контролировать максимальное количество выполняемых процессов. Не требуется обычным приложениям."</string>
+    <string name="permlab_setAlwaysFinish">"закрывать все фоновые приложения"</string>
+    <string name="permdesc_setAlwaysFinish">"Разрешает приложению следить, чтобы действия всегда завершались после перехода в фоновый режим. Не требуется обычным приложениям."</string>
+    <string name="permlab_fotaUpdate">"автоматически устанавливать системные обновления"</string>
+    <string name="permdesc_fotaUpdate">"Разрешает приложению получать уведомления о предстоящих обновлениях системы и запускать их установку. Это дает вредоносному ПО возможность повредить систему неавторизованными обновлениями или помешать выполнению обновления."</string>
+    <string name="permlab_batteryStats">"изменять данные о батарее"</string>
+    <string name="permdesc_batteryStats">"Разрешает изменять данные о батарее. Не используется обычными приложениями."</string>
+    <string name="permlab_internalSystemWindow">"отображать неавторизованные окна"</string>
+    <string name="permdesc_internalSystemWindow">"Разрешает создавать окна, используемые внутренним системным интерфейсом пользователя. Не для использования обычными программами."</string>
+    <string name="permlab_systemAlertWindow">"отображать системные предупреждения"</string>
+    <string name="permdesc_systemAlertWindow">"Разрешает приложению показывать окна системных предупреждений. Вредоносное ПО может захватить весь экран телефона."</string>
+    <string name="permlab_setAnimationScale">"изменять общую скорость анимации"</string>
+    <string name="permdesc_setAnimationScale">"Позволяет приложению в любой момент изменять общую скорость анимации (ускорять и замедлять анимацию)."</string>
+    <string name="permlab_manageAppTokens">"управлять маркерами приложений"</string>
+    <string name="permdesc_manageAppTokens">"Разрешает приложениям создавать и управлять собственными маркерами вместо обычного порядка Z. Не требуется обычным приложениям."</string>
+    <string name="permlab_injectEvents">"нажимать на клавиши и кнопки управления"</string>
+    <string name="permdesc_injectEvents">"Позволяет приложению передавать другим приложениям собственные события ввода (нажатия клавиш и т.д.). Вредоносное ПО может воспользоваться этим для захвата телефона."</string>
+    <string name="permlab_readInputState">"записывать нажимаемые клавиши и действия"</string>
+    <string name="permdesc_readInputState">"Разрешает приложениям отслеживать нажимаемые клавиши даже при работе в другом приложении (например набор пароля). Никогда не используется обычными приложениями."</string>
+    <string name="permlab_bindInputMethod">"выполнять привязку к способу ввода"</string>
+    <string name="permdesc_bindInputMethod">"Разрешает владельцу привязку к интерфейсу верхнего уровня способа ввода. Не требуется обычным приложениям."</string>
+    <string name="permlab_setOrientation">"изменять положение экрана"</string>
+    <string name="permdesc_setOrientation">"Позволяет приложению в любой момент изменять положение экрана. Не требуется обычным приложениям."</string>
+    <string name="permlab_signalPersistentProcesses">"отправлять приложениям Linux-сигналы"</string>
+    <string name="permdesc_signalPersistentProcesses">"Разрешает приложению запрашивать отправку поступающего сигнала всем постоянным процессам."</string>
+    <string name="permlab_persistentActivity">"выполнять приложение постоянно"</string>
+    <string name="permdesc_persistentActivity">"Позволяет приложению переводить свои компоненты в постоянное состояние так, что система не сможет использовать их для других приложений."</string>
+    <string name="permlab_deletePackages">"удалять приложения"</string>
+    <string name="permdesc_deletePackages">"Разрешает приложению удалять пакеты Android. Вредоносное ПО может воспользоваться этим для удаления важных приложений."</string>
+    <string name="permlab_clearAppUserData">"удалять данные других приложений"</string>
+    <string name="permdesc_clearAppUserData">"Разрешает приложению удалять данные пользователя."</string>
+    <string name="permlab_deleteCacheFiles">"удалять кэш других приложений"</string>
+    <string name="permdesc_deleteCacheFiles">"Позволяет приложению удалять файлы из кэша."</string>
+    <string name="permlab_getPackageSize">"измерять место для хранения данных приложений"</string>
+    <string name="permdesc_getPackageSize">"Разрешает приложению получать размеры своего кода, данных и кэша"</string>
+    <string name="permlab_installPackages">"напрямую устанавливать приложения"</string>
+    <string name="permdesc_installPackages">"Разрешает приложению устанавливать новые или обновленные пакеты Android. Вредоносное ПО может использовать это для добавления новых приложений с абсолютными полномочиями."</string>
+    <string name="permlab_clearAppCache">"удалять все данные из кэша приложений"</string>
+    <string name="permdesc_clearAppCache">"Разрешает приложению освобождать место на телефоне, удаляя файлы из каталога кэша приложения. Обычно доступ разрешен только системным процессам."</string>
+    <string name="permlab_readLogs">"читать файлы системного журнала"</string>
+    <string name="permdesc_readLogs">"Разрешает приложению считывать различные файлы журналов системы. Это позволяет получать сведения о том, что вы делаете с телефоном, но в этих файлах не должно быть личной или конфиденциальной информации."</string>
+    <string name="permlab_diagnostic">"считывать и записывать ресурсы, принадлежащих diag"</string>
+    <string name="permdesc_diagnostic">"Разрешает приложению считывать и записывать в любой ресурс, принадлежащий группе diag, например файлы в /dev. Это может влиять на стабильность и безопасность системы. Следует использовать ТОЛЬКО при диагностике оборудования производителем или оператором."</string>
+    <string name="permlab_changeComponentState">"включать и выключать компоненты приложений"</string>
+    <string name="permdesc_changeComponentState">"Разрешает приложению включать или отключать компоненты другого приложения. Вредоносное ПО сможет отключать важные функции телефона. Эту возможность следует использовать с осторожностью, так как можно привести компоненты приложений в нерабочее, несовместимое или нестабильное состояние."</string>
+    <string name="permlab_setPreferredApplications">"задавать предпочитаемые приложения"</string>
+    <string name="permdesc_setPreferredApplications">"Позволяет приложению изменять предпочитаемые приложения. Это может позволить вредоносному ПО незаметно изменить работающие приложения поддельными  и собрать ваши личные данные."</string>
+    <string name="permlab_writeSettings">"изменять глобальные настройки системы"</string>
+    <string name="permdesc_writeSettings">"Разрешает приложению изменять данные настройки системы. Вредоносное ПО может повредить конфигурацию вашей системы."</string>
+    <string name="permlab_writeSecureSettings">"изменять защищенные настройки системы"</string>
+    <string name="permdesc_writeSecureSettings">"Разрешает приложению изменять данные в защищенных настройках системы. Не используется обычными приложениями."</string>
+    <string name="permlab_writeGservices">"изменять карту служб Google"</string>
+    <string name="permdesc_writeGservices">"Разрешает приложению изменять карту служб Google. Не используется обычными приложениями."</string>
+    <string name="permlab_receiveBootCompleted">"автоматически запускаться при загрузке"</string>
+    <string name="permdesc_receiveBootCompleted">"Разрешает приложению запускаться сразу после загрузки системы. Это может увеличить время запуска телефона, а постоянная работа приложения может снизить общую скорость работы."</string>
+    <string name="permlab_broadcastSticky">"отправлять постоянное оповещение"</string>
+    <string name="permdesc_broadcastSticky">"Разрешает приложению отправлять постоянные оповещения, остающиеся после окончания рассылки. Вредоносное ПО может замедлить работу телефона или привести к нестабильности, используя слишком много памяти."</string>
+    <string name="permlab_readContacts">"считывать данные контактов"</string>
+    <string name="permdesc_readContacts">"Разрешает приложению считывать полную контактную информацию (адрес), сохраненную в вашем телефоне. Может использоваться вредоносным ПО для отправки этих данных другим людям."</string>
+    <string name="permlab_writeContacts">"записывать данные контактов"</string>
+    <string name="permdesc_writeContacts">"Разрешает приложению изменять контактную информацию (адрес), сохраненную в телефоне. Вредоносное ПО может использовать это для удаления или изменения данных контактов."</string>
+    <string name="permlab_writeOwnerData">"записывать данные о владельце"</string>
+    <string name="permdesc_writeOwnerData">"Разрешает приложению изменять данные о владельце, сохраненные в телефоне. Вредоносное ПО может использовать это для удаления или изменения данных о владельце."</string>
+    <string name="permlab_readOwnerData">"считывать данные о владельце"</string>
+    <string name="permdesc_readOwnerData">"Разрешает приложению считывать данные о владельце, сохраненные в телефоне. Вредоносное ПО может использовать это для чтения данных о владельце."</string>
+    <string name="permlab_readCalendar">"считывать данные календаря"</string>
+    <string name="permdesc_readCalendar">"Разрешает приложению считывать все события календаря, сохраненные в телефоне. Вредоносное ПО может использовать это для отправки событий вашего календаря другим людям."</string>
+    <string name="permlab_writeCalendar">"записывать данные календаря"</string>
+    <string name="permdesc_writeCalendar">"Позволяет приложению изменять сохраненные в телефоне события календаря. Вредоносное ПО сможет стирать или изменять данные календаря."</string>
+    <string name="permlab_accessMockLocation">"имитировать источники данных о положении для тестирования"</string>
+    <string name="permdesc_accessMockLocation">"Создание имитаций источников данных о местоположении для тестирования. Вредоносное ПО может использовать это для изменения данных о местоположении и/или состоянии, сообщаемых настоящими источниками таких данных, например GPS или оператором связи."</string>
+    <string name="permlab_accessLocationExtraCommands">"получать доступ к дополнительным командам местоположения от поставщика связи"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Доступ к дополнительным командам местоположения от поставщика связи. Это дает вредоносному ПО возможность мешать работе GPS или других источников данных о местоположении."</string>
+    <string name="permlab_accessFineLocation">"определять точное местоположение (GPS)"</string>
+    <string name="permdesc_accessFineLocation">"Доступ к имеющимся источникам точных данных о местоположении телефона, например к GPS. Вредоносное ПО сможет узнать, где вы находитесь, а также истратить заряд батареи."</string>
+    <string name="permlab_accessCoarseLocation">"определять приблизительное местоположение (на основе данных сети)"</string>
+    <string name="permdesc_accessCoarseLocation">"Доступ (при наличии) к источникам сведений о приблизительном расположении, например базам данных сотовой сети. Вредоносное ПО может использовать эту функцию для того, чтобы определять ваше местоположение."</string>
+    <string name="permlab_accessSurfaceFlinger">"открывать SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Разрешает приложению использовать функции SurfaceFlinger низкого уровня."</string>
+    <string name="permlab_readFrameBuffer">"считывать данные из буфера фреймов"</string>
+    <string name="permdesc_readFrameBuffer">"Разрешает приложению считывать содержание буфера фрейма."</string>
+    <string name="permlab_modifyAudioSettings">"изменять настройки звука"</string>
+    <string name="permdesc_modifyAudioSettings">"Разрешает приложениям изменять глобальные настройки звука, например громкость и маршрут сигнала."</string>
+    <string name="permlab_recordAudio">"записывать звук"</string>
+    <string name="permdesc_recordAudio">"Разрешает приложению получать доступ к пути записи звука."</string>
+    <string name="permlab_camera">"снимать фотографии"</string>
+    <string name="permdesc_camera">"Разрешает приложению делать снимки с помощью камеры. Это позволяет приложению в любой момент записывать то, что видно через камеру."</string>
+    <string name="permlab_brick">"отключать телефон навсегда"</string>
+    <string name="permdesc_brick">"Разрешает приложению навсегда отключить телефон. Это очень опасно."</string>
+    <string name="permlab_reboot">"принудительно перезагружать телефон"</string>
+    <string name="permdesc_reboot">"Разрешает приложению принудительно перезагружать телефон."</string>
+    <string name="permlab_mount_unmount_filesystems">"подключаться и отключаться от файловых систем"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Разрешает приложению подключаться и отключаться от файловых систем съемных устройств хранения."</string>
+    <string name="permlab_mount_format_filesystems">"форматировать внешний накопитель"</string>
+    <string name="permdesc_mount_format_filesystems">"Позволяет приложению форматировать съемный накопитель."</string>
+    <string name="permlab_vibrate">"управлять вибрацией"</string>
+    <string name="permdesc_vibrate">"Разрешает приложению управлять вибровызовом."</string>
+    <string name="permlab_flashlight">"управлять фонарем"</string>
+    <string name="permdesc_flashlight">"Разрешает приложению управлять фонарем."</string>
+    <string name="permlab_hardware_test">"проверять оборудование"</string>
+    <string name="permdesc_hardware_test">"Разрешает приложению управлять внешними устройствами для тестирования оборудования."</string>
+    <string name="permlab_callPhone">"напрямую вызывать телефонные номера"</string>
+    <string name="permdesc_callPhone">"Разрешает приложениям вызывать телефонные номера без вашего участия. Вредоносное ПО может выполнять вызовы, за которые придется платить. Заметьте, что это не разрешает приложению вызывать номера экстренных служб."</string>
+    <string name="permlab_callPrivileged">"напрямую вызывать любые телефонные номера"</string>
+    <string name="permdesc_callPrivileged">"Разрешает приложению вызывать любой номер, включая экстренные, без вашего участия. Вредоносное ПО может совершать ненужные и незаконные вызовы в службы неотложной помощи."</string>
+    <string name="permlab_locationUpdates">"управлять уведомлениями об обновлении местоположения"</string>
+    <string name="permdesc_locationUpdates">"Разрешает включение/отключение уведомлений о местоположении по радиосвязи. Не используется обычными приложениями."</string>
+    <string name="permlab_checkinProperties">"открывать свойства проверки"</string>
+    <string name="permdesc_checkinProperties">"Разрешает доступ на чтение и запись к свойствам, загруженным службой проверки. Не используется обычными приложениями."</string>
+    <string name="permlab_bindGadget">"выбирать гаджеты"</string>
+    <string name="permdesc_bindGadget">"Позволяет приложению сообщить системе, какие приложения могут использовать какие гаджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_modifyPhoneState">"изменять состояние телефона"</string>
+    <string name="permdesc_modifyPhoneState">"Позволяет приложению управлять телефонными функциями устройства. Приложение с такими полномочиями может переключать сети, включать и выключать радиосвязь и т.д., не сообщая вам об этом."</string>
+    <string name="permlab_readPhoneState">"считывать состояние телефона"</string>
+    <string name="permdesc_readPhoneState">"Разрешает приложению использовать телефонные функции устройства. Приложение с такими полномочиями может определить номер данного телефона, наличие вызова, номер, с которым связан вызов и так далее."</string>
+    <string name="permlab_wakeLock">"предотвращать переход телефона в режим ожидания"</string>
+    <string name="permdesc_wakeLock">"Разрешает приложению блокировать переход телефона в режим ожидания."</string>
+    <string name="permlab_devicePower">"включать и отключать телефон"</string>
+    <string name="permdesc_devicePower">"Позволяет приложениям включать и выключать телефон."</string>
+    <string name="permlab_factoryTest">"работа в режиме заводского тестирования"</string>
+    <string name="permdesc_factoryTest">"Работа в качестве теста производителя низкого уровня, что дает полный доступ к оборудованию телефона. Доступно только при работе телефона в режиме теста производителя."</string>
+    <string name="permlab_setWallpaper">"устанавливать фоновый рисунок"</string>
+    <string name="permdesc_setWallpaper">"Разрешает приложению устанавливать системный фоновый рисунок."</string>
+    <string name="permlab_setWallpaperHints">"устанавливать подсказки по размеру фонового рисунка"</string>
+    <string name="permdesc_setWallpaperHints">"Разрешает приложению устанавливать системные подсказки по размеру фонового рисунка."</string>
+    <string name="permlab_masterClear">"выполнять сброс системы и восстановление заводских настроек"</string>
+    <string name="permdesc_masterClear">"Разрешает приложению полностью сбрасывать настройки системы до заводских, удаляя все данные, конфигурацию и установленные приложения."</string>
+    <string name="permlab_setTimeZone">"устанавливать часовой пояс"</string>
+    <string name="permdesc_setTimeZone">"Разрешает приложению изменять часовой пояс телефона."</string>
+    <string name="permlab_getAccounts">"обнаруживать известные аккаунты"</string>
+    <string name="permdesc_getAccounts">"Разрешает приложению получать список аккаунтов, известных телефону."</string>
+    <string name="permlab_accessNetworkState">"просматривать состояние сети"</string>
+    <string name="permdesc_accessNetworkState">"Позволяет приложению видеть состояние всех сетей."</string>
+    <string name="permlab_createNetworkSockets">"обладать полным доступом в Интернет"</string>
+    <string name="permdesc_createNetworkSockets">"Позволяет приложению создавать сетевые сокеты."</string>
+    <string name="permlab_writeApnSettings">"записывать настройки названий точек доступа"</string>
+    <string name="permdesc_writeApnSettings">"Разрешает приложению изменять настройки APN, например прокси и порт любого APN."</string>
+    <string name="permlab_changeNetworkState">"изменять подключение к сети"</string>
+    <string name="permdesc_changeNetworkState">"Позволяет приложению изменять подключение к сети."</string>
+    <string name="permlab_changeBackgroundDataSetting">"изменить настройку использования фоновых данных"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Позволяет приложению изменять настройку использования фоновых данных."</string>
+    <string name="permlab_accessWifiState">"просматривать состояние Wi-Fi"</string>
+    <string name="permdesc_accessWifiState">"Разрешает приложению просматривать сведения о состоянии Wi-Fi."</string>
+    <string name="permlab_changeWifiState">"изменять состояние Wi-Fi"</string>
+    <string name="permdesc_changeWifiState">"Разрешает приложению подключаться и отключаться от точек доступа Wi-Fi и вносить изменения в настроенные сети Wi-Fi."</string>
+    <string name="permlab_bluetoothAdmin">"управлять Bluetooth"</string>
+    <string name="permdesc_bluetoothAdmin">"Разрешает приложению настраивать локальный телефон с Bluetooth, а также обнаруживать удаленные устройства и соединяться с ними."</string>
+    <string name="permlab_bluetooth">"создавать Bluetooth-подключения"</string>
+    <string name="permdesc_bluetooth">"Позволяет приложению просматривать конфигурацию локального телефона Bluetooth, создавать и разрешать подключение к связанным устройствам."</string>
+    <string name="permlab_disableKeyguard">"отключать блокировку клавиатуры"</string>
+    <string name="permdesc_disableKeyguard">"Разрешает приложению отключать блокировку клавиш и связанную с ней защиту паролем. Пример нормального использования – отключение блокировки телефоном, когда он принимает вызов, и ее включение после окончания вызова."</string>
+    <string name="permlab_readSyncSettings">"считывать настройки синхронизации"</string>
+    <string name="permdesc_readSyncSettings">"Разрешает приложению считывать настройки синхронизации, например наличие синхронизации контактов."</string>
+    <string name="permlab_writeSyncSettings">"записывать настройки синхронизации"</string>
+    <string name="permdesc_writeSyncSettings">"Разрешает приложению изменять настройки синхронизации, например синхронизацию контактов."</string>
+    <string name="permlab_readSyncStats">"считывать данные о синхронизации"</string>
+    <string name="permdesc_readSyncStats">"Разрешает приложению считывать данные о синхронизации, например историю выполненных синхронизаций."</string>
+    <string name="permlab_subscribedFeedsRead">"считывать фиды с подпиской"</string>
+    <string name="permdesc_subscribedFeedsRead">"Позволяет приложению получать сведения о синхронизированных фидах."</string>
+    <string name="permlab_subscribedFeedsWrite">"записывать фиды с подпиской"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Разрешает приложению изменять ваши синхронизированные фиды. Это может позволить вредоносному ПО изменять ваши синхронизированные фиды."</string>
+    <string name="permlab_readDictionary">"выполнять чтение из пользовательского словаря"</string>
+    <string name="permdesc_readDictionary">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
+    <string name="permlab_writeDictionary">"записывать в пользовательский словарь"</string>
+    <string name="permdesc_writeDictionary">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
+  <string-array name="phoneTypes">
+    <item>"Домашний"</item>
+    <item>"Мобильный"</item>
+    <item>"Рабочий"</item>
+    <item>"Рабочий факс"</item>
+    <item>"Домашний факс"</item>
+    <item>"Пейджер"</item>
+    <item>"Другое"</item>
+    <item>"Другой"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Домашний"</item>
+    <item>"Рабочий"</item>
+    <item>"Другое"</item>
+    <item>"Другой"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Домашний"</item>
+    <item>"Рабочий"</item>
+    <item>"Другое"</item>
+    <item>"Другой"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Домашний"</item>
+    <item>"Рабочий"</item>
+    <item>"Другое"</item>
+    <item>"Другой"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Рабочий"</item>
+    <item>"Другое"</item>
+    <item>"Другой"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"Введите PIN-код"</string>
+    <string name="keyguard_password_wrong_pin_code">"Неверный PIN-код!"</string>
+    <string name="keyguard_label_text">"Для разблокировки нажмите Menu и 0."</string>
+    <string name="emergency_call_dialog_number_for_display">"Номер экстренной службы"</string>
+    <string name="lockscreen_carrier_default">"(Вне зоны обслуживания)"</string>
+    <string name="lockscreen_screen_locked">"Экран заблокирован."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Нажмите Menu для разблокировки или выполните экстренный вызов."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Чтобы снять блокировку, нажмите Menu."</string>
+    <string name="lockscreen_pattern_instructions">"Для разблокировки воспроизведите комбинацию"</string>
+    <string name="lockscreen_emergency_call">"Экстренный вызов"</string>
+    <string name="lockscreen_pattern_correct">"Верно!"</string>
+    <string name="lockscreen_pattern_wrong">"Неверно, попробуйте еще раз"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
+    <string name="lockscreen_low_battery">"Подключите зарядное устройство."</string>
+    <string name="lockscreen_missing_sim_message_short">"Нет SIM-карты."</string>
+    <string name="lockscreen_missing_sim_message">"В телефоне нет SIM-карты."</string>
+    <string name="lockscreen_missing_sim_instructions">"Вставьте SIM-карту."</string>
+    <string name="lockscreen_network_locked_message">"Заблокирована сетью"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM-карта заблокирована PUK-кодом."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Свяжитесь со службой поддержки."</string>
+    <string name="lockscreen_sim_locked_message">"SIM-карта заблокирована."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"Разблокировка SIM-карты..."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Вы неправильно воспроизвели комбинацию разблокировки <xliff:g id="NUMBER_0">%d</xliff:g> раз. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Вы неверно воспроизвели комбинацию разблокировки <xliff:g id="NUMBER_0">%d</xliff:g> раз(а). После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток(ки) придется разблокировать телефон с помощью входа Google."\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Забыли комбинацию?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Слишком много попыток ввести комбинацию!"</string>
+    <string name="lockscreen_glogin_instructions">"Для разблокировки"\n"войдите с помощью своего аккаунта Google"</string>
+    <string name="lockscreen_glogin_username_hint">"Имя пользователя (адрес электронной почты)"</string>
+    <string name="lockscreen_glogin_password_hint">"Пароль"</string>
+    <string name="lockscreen_glogin_submit_button">"Войти"</string>
+    <string name="lockscreen_glogin_invalid_input">"Недействительное имя пользователя или пароль."</string>
+    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
+    <skip />
+    <string name="status_bar_clear_all_button">"Очистить уведомления"</string>
+    <string name="status_bar_no_notifications_title">"Нет уведомлений"</string>
+    <string name="status_bar_ongoing_events_title">"Текущие"</string>
+    <string name="status_bar_latest_events_title">"Уведомления"</string>
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
+    <skip />
+    <string name="battery_status_charging">"Идет зарядка..."</string>
+    <string name="battery_low_title">"Подключите зарядное устройство"</string>
+    <string name="battery_low_subtitle">"Батарея садится:"</string>
+    <string name="battery_low_percent_format">"осталось менее <xliff:g id="NUMBER">%d%%</xliff:g>."</string>
+    <string name="factorytest_failed">"Ошибка заводского теста"</string>
+    <string name="factorytest_not_system">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в папке /system/app."</string>
+    <string name="factorytest_no_action">"Пакет, предоставляющий действие FACTORY_TEST, не найден."</string>
+    <string name="factorytest_reboot">"Перезагрузить"</string>
+    <string name="js_dialog_title">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
+    <string name="save_password_label">"Подтверждение"</string>
+    <string name="save_password_message">"Сохранить этот пароль в браузере?"</string>
+    <string name="save_password_notnow">"Не сейчас"</string>
+    <string name="save_password_remember">"Запомнить"</string>
+    <string name="save_password_never">"Никогда"</string>
+    <string name="open_permission_deny">"У вас нет разрешения открывать эту страницу."</string>
+    <string name="text_copied">"Текст скопирован в буфер обмена."</string>
+    <string name="more_item_label">"Еще"</string>
+    <string name="prepend_shortcut_label">"Мenu+"</string>
+    <string name="menu_space_shortcut_label">"место"</string>
+    <string name="menu_enter_shortcut_label">"ввод"</string>
+    <string name="menu_delete_shortcut_label">"удалить"</string>
+    <string name="search_go">"Поиск"</string>
+    <string name="today">"Сегодня"</string>
+    <string name="yesterday">"Вчера"</string>
+    <string name="tomorrow">"Завтра"</string>
+    <string name="oneMonthDurationPast">"1 месяц назад"</string>
+    <string name="beforeOneMonthDurationPast">"Больше 1 месяца назад"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"1 секунду назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> сек. назад"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"1 минуту назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"1 час назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"вчера"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"через 1 секунду"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"через 1 минуту"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"через 1 час"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> час."</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"завтра"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 сек. назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> сек. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 мин. назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 час назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"вчера"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"через 1 сек."</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"через 1 мин."</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"через 1 час"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> час."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"завтра"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+  </plurals>
+    <string name="preposition_for_date">"%s"</string>
+    <string name="preposition_for_time">"в %s"</string>
+    <string name="preposition_for_year">"в %s"</string>
+    <string name="day">"день"</string>
+    <string name="days">"дни"</string>
+    <string name="hour">"час"</string>
+    <string name="hours">"часы"</string>
+    <string name="minute">"мин"</string>
+    <string name="minutes">"мин."</string>
+    <string name="second">"сек"</string>
+    <string name="seconds">"сек."</string>
+    <string name="week">"неделя"</string>
+    <string name="weeks">"недели"</string>
+    <string name="year">"год"</string>
+    <string name="years">"годы"</string>
+    <string name="sunday">"воскресенье"</string>
+    <string name="monday">"понедельник"</string>
+    <string name="tuesday">"вторник"</string>
+    <string name="wednesday">"среда"</string>
+    <string name="thursday">"четверг"</string>
+    <string name="friday">"пятница"</string>
+    <string name="saturday">"суббота"</string>
+    <string name="every_weekday">"По рабочим дням (пн-пт)"</string>
+    <string name="daily">"Ежедневно"</string>
+    <string name="weekly">"Еженедельно в: <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Ежемесячно"</string>
+    <string name="yearly">"Ежегодно"</string>
+    <string name="VideoView_error_title">"Не удается воспроизвести видео"</string>
+    <string name="VideoView_error_text_unknown">"К сожалению, это видео нельзя воспроизвести."</string>
+    <string name="VideoView_error_button">"ОК"</string>
+    <string name="am">"AM"</string>
+    <string name="pm">"PM"</string>
+    <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="noon">"полдень"</string>
+    <string name="Noon">"Полдень"</string>
+    <string name="midnight">"полночь"</string>
+    <string name="Midnight">"Полночь"</string>
+    <!-- no translation found for month_day (3693060561170538204) -->
+    <skip />
+    <!-- no translation found for month (1976700695144952053) -->
+    <skip />
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for month_year (2106203387378728384) -->
+    <skip />
+    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
+    <skip />
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
+    <skip />
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <skip />
+    <string name="day_of_week_long_sunday">"воскресенье"</string>
+    <string name="day_of_week_long_monday">"понедельник"</string>
+    <string name="day_of_week_long_tuesday">"вторник"</string>
+    <string name="day_of_week_long_wednesday">"среда"</string>
+    <string name="day_of_week_long_thursday">"четверг"</string>
+    <string name="day_of_week_long_friday">"пятница"</string>
+    <string name="day_of_week_long_saturday">"суббота"</string>
+    <string name="day_of_week_medium_sunday">"вс"</string>
+    <string name="day_of_week_medium_monday">"пн"</string>
+    <string name="day_of_week_medium_tuesday">"вт"</string>
+    <string name="day_of_week_medium_wednesday">"ср"</string>
+    <string name="day_of_week_medium_thursday">"чт"</string>
+    <string name="day_of_week_medium_friday">"пт"</string>
+    <string name="day_of_week_medium_saturday">"сб"</string>
+    <string name="day_of_week_short_sunday">"вс"</string>
+    <string name="day_of_week_short_monday">"пн"</string>
+    <string name="day_of_week_short_tuesday">"вт"</string>
+    <string name="day_of_week_short_wednesday">"ср"</string>
+    <string name="day_of_week_short_thursday">"чт"</string>
+    <string name="day_of_week_short_friday">"пт"</string>
+    <string name="day_of_week_short_saturday">"сб"</string>
+    <string name="day_of_week_shorter_sunday">"вс"</string>
+    <string name="day_of_week_shorter_monday">"пн"</string>
+    <string name="day_of_week_shorter_tuesday">"вт"</string>
+    <string name="day_of_week_shorter_wednesday">"с"</string>
+    <string name="day_of_week_shorter_thursday">"чт"</string>
+    <string name="day_of_week_shorter_friday">"пт"</string>
+    <string name="day_of_week_shorter_saturday">"сб"</string>
+    <string name="day_of_week_shortest_sunday">"в"</string>
+    <string name="day_of_week_shortest_monday">"п"</string>
+    <string name="day_of_week_shortest_tuesday">"в"</string>
+    <string name="day_of_week_shortest_wednesday">"с"</string>
+    <string name="day_of_week_shortest_thursday">"ч"</string>
+    <string name="day_of_week_shortest_friday">"п"</string>
+    <string name="day_of_week_shortest_saturday">"с"</string>
+    <string name="month_long_january">"январь"</string>
+    <string name="month_long_february">"февраль"</string>
+    <string name="month_long_march">"март"</string>
+    <string name="month_long_april">"апрель"</string>
+    <string name="month_long_may">"май"</string>
+    <string name="month_long_june">"июнь"</string>
+    <string name="month_long_july">"июль"</string>
+    <string name="month_long_august">"август"</string>
+    <string name="month_long_september">"сентябрь"</string>
+    <string name="month_long_october">"октябрь"</string>
+    <string name="month_long_november">"ноябрь"</string>
+    <string name="month_long_december">"декабрь"</string>
+    <string name="month_medium_january">"янв"</string>
+    <string name="month_medium_february">"фев"</string>
+    <string name="month_medium_march">"мар"</string>
+    <string name="month_medium_april">"апр"</string>
+    <string name="month_medium_may">"май"</string>
+    <string name="month_medium_june">"июн"</string>
+    <string name="month_medium_july">"июл"</string>
+    <string name="month_medium_august">"авг"</string>
+    <string name="month_medium_september">"сен"</string>
+    <string name="month_medium_october">"окт"</string>
+    <string name="month_medium_november">"ноя"</string>
+    <string name="month_medium_december">"дек"</string>
+    <string name="month_shortest_january">"Я"</string>
+    <string name="month_shortest_february">"ф"</string>
+    <string name="month_shortest_march">"м"</string>
+    <string name="month_shortest_april">"а"</string>
+    <string name="month_shortest_may">"м"</string>
+    <string name="month_shortest_june">"и"</string>
+    <string name="month_shortest_july">"и"</string>
+    <string name="month_shortest_august">"а"</string>
+    <string name="month_shortest_september">"с"</string>
+    <string name="month_shortest_october">"о"</string>
+    <string name="month_shortest_november">"н"</string>
+    <string name="month_shortest_december">"д"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Выбрать все"</string>
+    <string name="selectText">"Выбрать текст"</string>
+    <string name="stopSelectingText">"Прекратить выбор текста"</string>
+    <string name="cut">"Вырезать"</string>
+    <string name="cutAll">"Вырезать все"</string>
+    <string name="copy">"Копировать"</string>
+    <string name="copyAll">"Копировать все"</string>
+    <string name="paste">"Вставить"</string>
+    <string name="copyUrl">"Копировать URL"</string>
+    <string name="inputMethod">"Способ ввода"</string>
+    <string name="addToDictionary">"Добавить \"%s\" в словарь"</string>
+    <string name="editTextMenuTitle">"Правка текста"</string>
+    <string name="low_internal_storage_view_title">"Недостаточно места"</string>
+    <string name="low_internal_storage_view_text">"В памяти телефона осталось мало места."</string>
+    <string name="ok">"ОК"</string>
+    <string name="cancel">"Отмена"</string>
+    <string name="yes">"ОК"</string>
+    <string name="no">"Отмена"</string>
+    <string name="dialog_alert_title">"Внимание"</string>
+    <string name="capital_on">"ВКЛ"</string>
+    <string name="capital_off">"ВЫКЛ"</string>
+    <string name="whichApplication">"Выполнить действие с помощью"</string>
+    <string name="alwaysUse">"Использовать для этого действия по умолчанию."</string>
+    <string name="clearDefaultHintMsg">"Значения по умолчанию можно сбросить в разделе Настройки главного экрана &gt; Приложения &gt; Управление приложениями."</string>
+    <string name="chooseActivity">"Выберите действие"</string>
+    <string name="noApplications">"Нет приложений, которые могли бы выполнить это действие."</string>
+    <string name="aerr_title">"Ой!"</string>
+    <string name="aerr_application">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) неожиданно остановилось. Повторите попытку."</string>
+    <string name="aerr_process">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> неожиданно остановился. Повторите попытку."</string>
+    <string name="anr_title">"Ой!"</string>
+    <string name="anr_activity_application">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в приложении <xliff:g id="APPLICATION">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_activity_process">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_application_process">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_process">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> не отвечает."</string>
+    <string name="force_close">"Закрыть принудительно"</string>
+    <string name="wait">"Подождать"</string>
+    <string name="debug">"Отладка"</string>
+    <string name="sendText">"Выберите действие для текста"</string>
+    <string name="volume_ringtone">"Громкость звонка"</string>
+    <string name="volume_music">"Громкость звука мультимедиа"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Воспроизводится через Bluetooth"</string>
+    <string name="volume_call">"Громкость звонка"</string>
+    <string name="volume_bluetooth_call">"Громкость входящего вызова Bluetooth"</string>
+    <string name="volume_alarm">"Громкость будильника"</string>
+    <string name="volume_notification">"Громкость уведомления"</string>
+    <string name="volume_unknown">"Громкость"</string>
+    <string name="ringtone_default">"Мелодия звонка по умолчанию"</string>
+    <string name="ringtone_default_with_actual">"Мелодия звонка по умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Тишина"</string>
+    <string name="ringtone_picker_title">"Мелодии звонка"</string>
+    <string name="ringtone_unknown">"Неизвестная мелодия звонка"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Доступна сеть Wi-Fi"</item>
+    <item quantity="other">"Доступны сети Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Доступна открытая сеть Wi-Fi"</item>
+    <item quantity="other">"Доступны открытые сети Wi-Fi"</item>
+  </plurals>
+    <string name="select_character">"Вставка символа"</string>
+    <string name="sms_control_default_app_name">"Неизвестное приложение"</string>
+    <string name="sms_control_title">"Отправка SMS"</string>
+    <string name="sms_control_message">"Отправляется большое количество сообщений SMS. Выберите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остановить отправку."</string>
+    <string name="sms_control_yes">"ОК"</string>
+    <string name="sms_control_no">"Отмена"</string>
+    <string name="date_time_set">"Установить"</string>
+    <string name="default_permission_group">"По умолчанию"</string>
+    <string name="no_permissions">"Не требуется разрешений"</string>
+    <string name="perms_hide"><b>"Скрыть"</b></string>
+    <string name="perms_show_all"><b>"Показать все"</b></string>
+    <string name="googlewebcontenthelper_loading">"Идет загрузка…"</string>
+    <string name="usb_storage_title">"Подключение через USB"</string>
+    <string name="usb_storage_message">"Вы подключили телефон к компьютеру через USB. Выберите \"Подключиться\" для копирования файлов между компьютером и картой SD телефона."</string>
+    <string name="usb_storage_button_mount">"Подключиться"</string>
+    <string name="usb_storage_button_unmount">"Не подключаться"</string>
+    <string name="usb_storage_error_message">"Не удается использовать карту SD в качестве USB-хранилища."</string>
+    <string name="usb_storage_notification_title">"Подключение через USB"</string>
+    <string name="usb_storage_notification_message">"Выберите для копирования файлов на/с компьютера."</string>
+    <string name="usb_storage_stop_notification_title">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_notification_message">"Выберите, чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_title">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_message">"Перед выключением USB-накопителя обязательно отключите USB-хост. Выберите \"Выключить\", чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_button_mount">"Выключить"</string>
+    <string name="usb_storage_stop_button_unmount">"Отмена"</string>
+    <string name="usb_storage_stop_error_message">"При выключении USB-накопителя произошла проблема. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
+    <string name="extmedia_format_title">"Форматировать карту SD"</string>
+    <string name="extmedia_format_message">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
+    <string name="extmedia_format_button_format">"Формат"</string>
+    <string name="select_input_method">"Выбор способа ввода"</string>
+    <string name="fast_scroll_alphabet">" АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
+    <string name="candidates_style"><u>"кандидаты"</u></string>
+    <string name="ext_media_checking_notification_title">"Подготовка карты SD"</string>
+    <string name="ext_media_checking_notification_message">"Поиск ошибок"</string>
+    <string name="ext_media_nofs_notification_title">"Пустая карта SD"</string>
+    <string name="ext_media_nofs_notification_message">"Карта SD пуста или использует неподдерживаемую файловую систему."</string>
+    <string name="ext_media_unmountable_notification_title">"Поврежденная карта SD"</string>
+    <string name="ext_media_unmountable_notification_message">"Карта SD повреждена. Может потребоваться переформатировать ее."</string>
+    <string name="ext_media_badremoval_notification_title">"Карта SD неожиданно извлечена"</string>
+    <string name="ext_media_badremoval_notification_message">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Безопасное удаление карты SD"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Теперь карту SD можно безопасно удалить."</string>
+    <string name="ext_media_nomedia_notification_title">"Карта SD удалена"</string>
+    <string name="ext_media_nomedia_notification_message">"Карта SD была удалена. Для увеличения емкости устройства вставьте новую карту SD."</string>
+    <string name="activity_list_empty">"Подходящих действий не найдено"</string>
+    <string name="permlab_pkgUsageStats">"обновлять статистику использования компонентов"</string>
+    <string name="permdesc_pkgUsageStats">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
+</resources>

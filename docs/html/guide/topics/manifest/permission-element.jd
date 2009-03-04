@@ -1,0 +1,131 @@
+page.title=&lt;permission&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt></dt>
+<dd><pre class="stx">&lt;permission android:<a href="#desc">description</a>="<i>string resource</i>"
+            android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+            android:<a href="#label">label</a>="<i>string resource</i>"
+            android:<a href="#nm">name</a>="<i>string</i>"
+            android:<a href="#pgroup">permissionGroup</a>="<i>string</i>"
+            android:<a href="#plevel">protectionLevel</a>=["normal" | "dangerous" | 
+                                     "signature" | "signatureOrSystem"] /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares a security permission that can be used to limit access 
+to specific components or features of this or other applications.  
+See the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a>
+section in the introduction,
+and the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> 
+document for more information on how permissions work.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="desc"></a>{@code android:description}</dt>
+<dd>A user-readable description of the permission, longer and more 
+informative than the label.  It may be displayed to explain the 
+permission to the user &mdash; for example, when the user is asked 
+whether to grant the permission to another application.
+
+<p>
+This attribute must be set as a reference to a string resource; 
+unlike the {@code label} attribute, it cannot be a raw string.
+</p></dd>
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>A reference to a drawable resource for an icon that represents the 
+permission.</dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A name for the permission, one that can be displayed to users. 
+
+<p>
+As a convenience, the label can be directly set 
+as a raw string while you're developing the application.  However, 
+when the application is ready to be published, it should be set as a 
+reference to a string resource, so that it can be localized like other 
+strings in the user interface.
+</p></dd>
+
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the permission.  This is the name that will be used in 
+code to refer to the permission &mdash; for example, in a 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> element and the
+{@code permission} attributes of application components.
+
+<p>
+The name must be unique, so it should use Java-style scoping &mdash; 
+for example, "{@code com.example.project.PERMITTED_ACTION}".
+</p></dd>
+
+<dt><a name="pgroup"></a>{@code android:permissionGroup}</dt>
+<dd>Assigns this permission to a group.  The value of this attribute is 
+the name of the group, which must be declared with the 
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code> element in this 
+or another application.  If this attribute is not set, the permission
+does not belong to a group.</dd>
+
+<dt><a name="plevel"></a>{@code android:protectionLevel}</dt>
+<dd>Characterizes the potential risk implied in the permission and
+indicates the procedure the system should follow when determining
+whether or not to grant the permission to an application requesting it. 
+The value can be set to one of the following strings:
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Meaning</th>
+</tr><tr>
+   <td>"{@code normal}"</td>
+   <td>The default value.  A lower-risk permission that gives requesting 
+       applications access to isolated application-level features, with 
+       minimal risk to other applications, the system, or the user.  
+       The system automatically grants this type
+       of permission to a requesting application at installation, without
+       asking for the user's explicit approval (though the user always
+       has the option to review these permissions before installing).
+</tr><tr>
+   <td>"{@code dangerous}"</td>
+   <td>A higher-risk permission that would give a requesting application
+       access to private user data or control over the device that can
+       negatively impact the user.  Because this type of permission
+       introduces potential risk, the system may not automatically
+       grant it to the requesting application.  For example, any dangerous
+       permissions requested by an application may be displayed to the
+       user and require confirmation before proceeding, or some other
+       approach may be taken to avoid the user automatically allowing
+       the use of such facilities.
+</tr><tr>
+   <td>"{@code signature}"</td>
+   <td>A permission that the system grants only if the requesting
+       application is signed with the same certificate as the application
+       that declared the permission. If the certificates match, the system
+       automatically grants the permission without notifying the user or
+       asking for the user's explicit approval.
+</tr><tr>
+   <td>"{@code signatureOrSystem}"</td>
+   <td>A permission that the system grants only to applications that are 
+       in the Android system image <em>or</em> that are signed with the same
+       certificates as those in the system image.  Please avoid using this 
+       option, as the {@code signature} protection level should be sufficient 
+       for most needs and works regardless of exactly where applications are 
+       installed.  The "{@code signatureOrSystem}"
+       permission is used for certain special situations where multiple
+       vendors have applications built into a system image and need
+       to share specific features explicitly because they are being built
+       together.
+</tr>
+</table>
+</dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code></dd>
+</dd>
+
+</dl>

@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /gae_shell/
+Disallow: /assets/
+Disallow: /images/
+Sitemap: http://developer.android.com/sitemap.txt

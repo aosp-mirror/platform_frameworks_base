@@ -1,0 +1,62 @@
+page.title=Android 1.1 SDK, Release 1
+
+sdk.version=1.1_r1
+sdk.date=February 2009
+
+sdk.win_download=android-sdk-windows-1.1_r1.zip
+sdk.win_bytes=86038515
+sdk.win_checksum=8c4b9080b430025370689e03d20842f3
+
+sdk.mac_download=android-sdk-mac_x86-1.1_r1.zip
+sdk.mac_bytes=79046151
+sdk.mac_checksum=becf0f1763d61eedce15d2a903d6c1dd
+
+sdk.linux_download=android-sdk-linux_x86-1.1_r1.zip
+sdk.linux_bytes=79345522
+sdk.linux_checksum=ebcb16b0cd4aef198b4dd9a1418efbf1
+
+
+@jd:body
+
+<h2>SDK Contents</h2>
+
+<h4>Development tools</h4>
+
+<p>The SDK includes a variety of tools for developing and debugging application code and designing an application UI. You can read about the tools in the  
+<a href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them in the <code>&lt;sdk&gt;/tools/</code> directory. 
+
+<p>The tools package included in this SDK is the same as that included in the Android 1.0, Release 2 SDK. </p>
+
+<h4 id="system_images">System Images</h4>
+
+<p>The Android system images listed below are included in this SDK. For more information about a system image &mdash; features, applications included, localizations, API changes, and so on &mdash; see its Version Notes. </p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>System Image</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+
+<tr>
+<td width="5%"><nobr>Android 1.1</nobr></td>
+<td  width="5%">2</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.1.html">Version Notes</a></nobr></td>
+<td>Includes com.google.android.maps external library and a set of standard development applications. </td>
+
+</tr>
+
+</table>
+
+<h4>Sample Code and Applications</h4>
+
+<p>You can look at a variety of tutorials and samples in the <a href="{@docRoot}guide/samples/index.html">Dev Guide</a> and access the sample code itself
+in the <code>&lt;sdk&gt;/samples/</code> directory of the SDK package.</p>
+
+<h4>Documentation</h4>
+
+<p>The SDK package includes a full set of local documentation. To view it, open the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. If you are developing in an IDE such as Eclipse, you can also view the reference documentation directly in the IDE. </p>
+
+<p>The most current documentation is always available on the Android Developers site:</p>
+
+<p style="margin-left:2em;"><a href="http://developer.android.com/index.html">http://developer.android.com/</a></p>
+
+

@@ -1,0 +1,13 @@
+page.title=Appendix
+@jd:body
+
+<dl>
+    <dt><a href="media-formats.html">Supported Android Media Formats</a></dt>
+    <dd>A list of media codecs included in the Android platform.</dd>
+    <dt><a href="g-app-intents.html">Intents List: Invoking Google Applications on Android Devices</a></dt>
+    <dd>Intents you can send to invoke Google applications on Android devices.</dd>
+    <dt><a href="faq/index.html">FAQs, Tips, and How-to</a></dt>
+    <dd>How to get things done in Android.</dd>
+    <dt><a href="glossary.html">Glossary</a></dt>
+    <dd>Glossary of Android terminology.</dd>
+</dl>

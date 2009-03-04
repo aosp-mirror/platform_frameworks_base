@@ -1,0 +1,120 @@
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.unit_tests.os;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
+
+import android.os.FileObserver;
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+public class FileObserverTest extends AndroidTestCase {
+    private Observer mObserver;
+    private File mTestFile;
+    
+    private static class Observer extends FileObserver {
+        public List<Map> events = Lists.newArrayList();
+        public int totalEvents = 0;
+
+        public Observer(String path) {
+            super(path);
+        }
+
+        public void onEvent(int event, String path) {
+            synchronized (this) {
+                totalEvents++;
+                Map<String, Object> map = Maps.newHashMap();
+
+                map.put("event", event);
+                map.put("path", path);
+
+                events.add(map);
+
+                this.notifyAll();
+            }
+        }
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        mTestFile = File.createTempFile(".file_observer_test", ".txt"); 
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (mTestFile != null && mTestFile.exists()) {
+            mTestFile.delete();
+        }
+    }
+    
+    @LargeTest
+    public void testRun() throws Exception {
+        // make file changes and wait for them
+        assertTrue(mTestFile.exists());
+        assertNotNull(mTestFile.getParent());
+        
+        mObserver = new Observer(mTestFile.getParent());
+        mObserver.startWatching();
+
+        FileOutputStream out = new FileOutputStream(mTestFile);
+        try {
+            out.write(0x20);
+            waitForEvent(); // open
+            waitForEvent(); // modify
+
+            mTestFile.delete();
+            waitForEvent(); // delete
+
+            mObserver.stopWatching();
+            
+            // Ensure that we have seen at least 3 events.
+            assertTrue(mObserver.totalEvents > 3);
+        } finally {
+            out.close();
+        }
+    }
+
+    private void waitForEvent() {
+        synchronized (mObserver) {
+            boolean done = false;
+            while (!done) {
+                try {
+                    mObserver.wait(2000);
+                    done = true;
+                } catch (InterruptedException e) {
+                }
+            }
+
+            Iterator<Map> it = mObserver.events.iterator();
+
+            while (it.hasNext()) {
+                Map map = it.next();
+                Log.i("FileObserverTest", "event: " + map.get("event").toString() + " path: " + map.get("path"));
+            }
+
+            mObserver.events.clear();
+        }
+    }
+}

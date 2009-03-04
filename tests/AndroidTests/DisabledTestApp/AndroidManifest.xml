@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.unit_tests.disabled_app"
+        android:sharedUserId="com.android.uid.test">
+
+    <application enabled="false">
+
+        <!-- Used to test package component enabling and disabling -->
+        <activity android:name=".DisabledActivity" android:enabled="false" >
+        </activity>
+        <activity android:name=".EnabledActivity" >
+        </activity>
+    </application>
+</manifest>

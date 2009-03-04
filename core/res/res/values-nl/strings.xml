@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"kB"</string>
+    <string name="megabyteShort">"MB"</string>
+    <string name="gigabyteShort">"GB"</string>
+    <string name="terabyteShort">"TB"</string>
+    <string name="petabyteShort">"PB"</string>
+    <string name="untitled">"&lt;zonder titel&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(Geen telefoonnummer)"</string>
+    <string name="unknownName">"(Onbekend)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Voicemail"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Verbindingsprobleem of ongeldige MMI-code."</string>
+    <string name="serviceEnabled">"Service is ingeschakeld."</string>
+    <string name="serviceEnabledFor">"Service is ingeschakeld voor:"</string>
+    <string name="serviceDisabled">"Service is uitgeschakeld."</string>
+    <string name="serviceRegistered">"De registratie is voltooid."</string>
+    <string name="serviceErased">"Wissen uitgevoerd."</string>
+    <string name="passwordIncorrect">"Onjuist wachtwoord."</string>
+    <string name="mmiComplete">"MMI voltooid."</string>
+    <string name="badPin">"De oude PIN-code die u heeft ingevoerd, is onjuist."</string>
+    <string name="badPuk">"De PUK-code die u heeft ingevoerd, is onjuist."</string>
+    <string name="mismatchPin">"De PIN-codes die u heeft ingevoerd, komen niet overeen."</string>
+    <string name="invalidPin">"Voer een PIN-code van 4 tot 8 cijfers in."</string>
+    <string name="needPuk">"Uw SIM-kaart is geblokkeerd met de PUK-code. Typ de PUK-code om de blokkering op te heffen."</string>
+    <string name="needPuk2">"Voer de PUK2-code in om de SIM-kaart te ontgrendelen."</string>
+    <string name="ClipMmi">"Inkomende beller-id"</string>
+    <string name="ClirMmi">"Uitgaande beller-id"</string>
+    <string name="CfMmi">"Oproep doorschakelen"</string>
+    <string name="CwMmi">"Wisselgesprek"</string>
+    <string name="BaMmi">"Oproep blokkeren"</string>
+    <string name="PwdMmi">"Wachtwoordwijziging"</string>
+    <string name="PinMmi">"PIN-wijziging"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: beperkt."</string>
+    <string name="CLIRDefaultOnNextCallOff">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: onbeperkt."</string>
+    <string name="CLIRDefaultOffNextCallOn">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: beperkt."</string>
+    <string name="CLIRDefaultOffNextCallOff">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
+    <string name="serviceNotProvisioned">"Service niet voorzien."</string>
+    <string name="CLIRPermanent">"De instelling voor beller-id kan niet worden gewijzigd."</string>
+    <string name="serviceClassVoice">"Spraak"</string>
+    <string name="serviceClassData">"Gegevens"</string>
+    <string name="serviceClassFAX">"FAX"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Asynchroon"</string>
+    <string name="serviceClassDataSync">"Synchroniseren"</string>
+    <string name="serviceClassPacket">"Pakket"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> seconden"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
+    <string name="httpErrorOk">"OK"</string>
+    <string name="httpError">"De webpagina bevat een fout."</string>
+    <string name="httpErrorLookup">"De URL kan niet worden gevonden."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Het schema voor de siteverificatie wordt niet ondersteund."</string>
+    <string name="httpErrorAuth">"Verificatie mislukt."</string>
+    <string name="httpErrorProxyAuth">"Verificatie via de proxyserver is mislukt."</string>
+    <string name="httpErrorConnect">"Er kan geen verbinding met de server worden gemaakt."</string>
+    <string name="httpErrorIO">"De server kan niet communiceren. Probeer het later opnieuw."</string>
+    <string name="httpErrorTimeout">"Er is een time-out voor de serververbinding opgetreden."</string>
+    <string name="httpErrorRedirectLoop">"De pagina bevat te veel serveromleidingen."</string>
+    <string name="httpErrorUnsupportedScheme">"Het protocol wordt niet ondersteund."</string>
+    <string name="httpErrorFailedSslHandshake">"Er kan geen beveiligde verbinding tot stand worden gebracht."</string>
+    <string name="httpErrorBadUrl">"De pagina kan niet worden geopend, omdat de URL ongeldig is."</string>
+    <string name="httpErrorFile">"Het bestand kan niet worden geopend."</string>
+    <string name="httpErrorFileNotFound">"Het opgevraagde bestand is niet gevonden."</string>
+    <string name="httpErrorTooManyRequests">"Er worden te veel aanvragen verwerkt. Probeer het later opnieuw."</string>
+    <string name="contentServiceSync">"Synchroniseren"</string>
+    <string name="contentServiceSyncNotificationTitle">"Synchroniseren"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="low_memory">"Telefoongeheugen is vol! Verwijder enkele bestanden om ruimte vrij te maken."</string>
+    <string name="me">"Ik"</string>
+    <string name="power_dialog">"Telefoonopties"</string>
+    <string name="silent_mode">"Stille modus"</string>
+    <string name="turn_on_radio">"Draadloos inschakelen"</string>
+    <string name="turn_off_radio">"Draadloos uitschakelen"</string>
+    <string name="screen_lock">"Schermblokkering"</string>
+    <string name="power_off">"Uitschakelen"</string>
+    <string name="shutdown_progress">"Uitschakelen..."</string>
+    <string name="shutdown_confirm">"Uw telefoon wordt uitgeschakeld."</string>
+    <string name="no_recent_tasks">"Geen recente toepassingen."</string>
+    <string name="global_actions">"Telefoonopties"</string>
+    <string name="global_action_lock">"Schermblokkering"</string>
+    <string name="global_action_power_off">"Uitschakelen"</string>
+    <string name="global_action_toggle_silent_mode">"Stille modus"</string>
+    <string name="global_action_silent_mode_on_status">"Geluid is UIT"</string>
+    <string name="global_action_silent_mode_off_status">"Geluid is AAN"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
+    <string name="safeMode">"Veilige modus"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
+    <string name="permgrouplab_costMoney">"Services waarvoor u moet betalen"</string>
+    <string name="permgroupdesc_costMoney">"Toepassingen toestaan activiteiten uit te voeren waarvoor mogelijk kosten in rekening worden gebracht."</string>
+    <string name="permgrouplab_messages">"Uw berichten"</string>
+    <string name="permgroupdesc_messages">"SMS, e-mail en andere berichten lezen en schrijven."</string>
+    <string name="permgrouplab_personalInfo">"Uw persoonlijke informatie"</string>
+    <string name="permgroupdesc_personalInfo">"Rechtstreekse toegang tot de op uw telefoon opgeslagen contacten en agenda."</string>
+    <string name="permgrouplab_location">"Uw locatie"</string>
+    <string name="permgroupdesc_location">"Uw fysieke locatie bijhouden"</string>
+    <string name="permgrouplab_network">"Netwerkcommunicatie"</string>
+    <string name="permgroupdesc_network">"Toepassingen toestaan verschillende netwerkfuncties te openen."</string>
+    <string name="permgrouplab_accounts">"Uw Google-accounts"</string>
+    <string name="permgroupdesc_accounts">"Toegang tot de beschikbare Google-accounts."</string>
+    <string name="permgrouplab_hardwareControls">"Bedieningselementen hardware"</string>
+    <string name="permgroupdesc_hardwareControls">"Rechtstreekse toegang tot hardware op de handset."</string>
+    <string name="permgrouplab_phoneCalls">"Telefoonoproepen"</string>
+    <string name="permgroupdesc_phoneCalls">"Oproepen bijhouden, registreren en verwerken."</string>
+    <string name="permgrouplab_systemTools">"Systeemhulpprogramma\'s"</string>
+    <string name="permgroupdesc_systemTools">"Toegang tot en beheer van het systeem op lager niveau."</string>
+    <string name="permgrouplab_developmentTools">"Ontwikkelingshulpprogramma\'s"</string>
+    <string name="permgroupdesc_developmentTools">"Functies die alleen door toepassingsontwikkelaars worden gebruikt."</string>
+    <string name="permlab_statusBar">"statusbalk uitschakelen of wijzigen"</string>
+    <string name="permdesc_statusBar">"Hiermee kan een toepassing de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
+    <string name="permlab_expandStatusBar">"statusbalk uitvouwen/samenvouwen"</string>
+    <string name="permdesc_expandStatusBar">"Hiermee kan de toepassing de statusbalk uitvouwen of samenvouwen."</string>
+    <string name="permlab_processOutgoingCalls">"uitgaande oproepen onderscheppen"</string>
+    <string name="permdesc_processOutgoingCalls">"Hiermee kan een toepassing uitgaande oproepen verwerken en het nummer wijzigen dat wordt gebeld. Schadelijke toepassingen kunnen uitgaande oproepen bijhouden, omleiden of tegenhouden."</string>
+    <string name="permlab_receiveSms">"SMS ontvangen"</string>
+    <string name="permdesc_receiveSms">"Hiermee kan een toepassing SMS-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permlab_receiveMms">"MMS ontvangen"</string>
+    <string name="permdesc_receiveMms">"Hiermee kan een toepassing MMS-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permlab_sendSms">"SMS-berichten verzenden"</string>
+    <string name="permdesc_sendSms">"Hiermee kan de toepassing SMS-berichten verzenden. Schadelijke toepassingen kunnen u geld kosten door berichten te verzenden zonder uw toestemming."</string>
+    <string name="permlab_readSms">"SMS of MMS lezen"</string>
+    <string name="permdesc_readSms">"Hiermee kan een toepassing de op uw telefoon of SIM-kaart opgeslagen SMS-berichten lezen. Schadelijke toepassingen kunnen uw vertrouwelijke berichten mogelijk lezen."</string>
+    <string name="permlab_writeSms">"SMS of MMS bewerken"</string>
+    <string name="permdesc_writeSms">"Hiermee kan een toepassing naar de op uw telefoon of SIM-kaart opgeslagen SMS-berichten schrijven. Schadelijke toepassingen kunnen uw berichten mogelijk verwijderen."</string>
+    <string name="permlab_receiveWapPush">"WAP ontvangen"</string>
+    <string name="permdesc_receiveWapPush">"Hiermee kan een toepassing WAP-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permlab_getTasks">"actieve toepassingen ophalen"</string>
+    <string name="permdesc_getTasks">"Hiermee kan een toepassing informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke toepassingen kunnen op deze manier mogelijk privé-informatie over andere toepassingen achterhalen."</string>
+    <string name="permlab_reorderTasks">"actieve toepassingen opnieuw indelen"</string>
+    <string name="permdesc_reorderTasks">"Hiermee kan een toepassing taken naar de voor- en achtergrond verplaatsen. Schadelijke toepassingen kunnen zichzelf op de voorgrond plaatsen zonder dat u hier iets aan kunt doen."</string>
+    <string name="permlab_setDebugApp">"foutopsporing in toepassingen inschakelen"</string>
+    <string name="permdesc_setDebugApp">"Hiermee kan een toepassing de foutopsporing voor een andere toepassing inschakelen. Schadelijke toepassingen kunnen dit gebruiken om andere toepassingen af te sluiten."</string>
+    <string name="permlab_changeConfiguration">"uw UI-instellingen wijzigen"</string>
+    <string name="permdesc_changeConfiguration">"Hiermee kan een toepassing de huidige configuratie, zoals de landinstelling of de algemene lettergrootte, wijzigen."</string>
+    <string name="permlab_restartPackages">"andere toepassingen opnieuw starten"</string>
+    <string name="permdesc_restartPackages">"Hiermee kan een toepassing andere toepassingen opnieuw starten."</string>
+    <string name="permlab_setProcessForeground">"stoppen voorkomen"</string>
+    <string name="permdesc_setProcessForeground">"Hiermee kan een toepassing ervoor zorgen dat elk willekeurig proces op de voorgrond wordt uitgevoerd en dus niet kan worden afgesloten. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_forceBack">"toepassing nu sluiten"</string>
+    <string name="permdesc_forceBack">"Hiermee kan een toepassing elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_dump">"interne systeemstatus ophalen"</string>
+    <string name="permdesc_dump">"Hiermee kan een toepassing de interne status van het systeem ophalen. Schadelijke toepassingen kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
+    <string name="permlab_addSystemService">"services op laag niveau publiceren"</string>
+    <string name="permdesc_addSystemService">"Hiermee kunnen toepassingen hun eigen systeemservices op laag niveau publiceren. Schadelijke toepassingen kunnen het systeem mogelijk kapen en willekeurige gegevens van het systeem stelen of beschadigen."</string>
+    <string name="permlab_runSetActivityWatcher">"alle startende toepassingen bijhouden en beheren"</string>
+    <string name="permdesc_runSetActivityWatcher">"Hiermee kan een toepassing de manier waarop het systeem activiteiten start, bijhouden en beheren. Schadelijke toepassingen kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal telefoongebruik."</string>
+    <string name="permlab_broadcastPackageRemoved">"melding verzenden dat pakket is verwijderd"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Hiermee kan een toepassing een melding verzenden dat een toepassingspakket is verwijderd. Schadelijke toepassingen kunnen hiervan gebruik maken om alle andere actieve toepassingen af te sluiten."</string>
+    <string name="permlab_broadcastSmsReceived">"melding over ontvangen SMS-bericht verzenden"</string>
+    <string name="permdesc_broadcastSmsReceived">"Hiermee kan een toepassing een melding verzenden dat een SMS-bericht is ontvangen. Schadelijke toepassingen kunnen hiervan gebruik maken om inkomende SMS-berichten te vervalsen."</string>
+    <string name="permlab_broadcastWapPush">"melding over ontvangen WAP-PUSH-bericht verzenden"</string>
+    <string name="permdesc_broadcastWapPush">"Hiermee kan een toepassing een melding verzenden dat een WAP PUSH-bericht is ontvangen. Schadelijke toepassingen kunnen hiervan gebruik maken om een valse MMS-ontvangst te melden of de inhoud van willekeurige webpagina\'s door schadelijke varianten te vervangen."</string>
+    <string name="permlab_setProcessLimit">"aantal actieve processen beperken"</string>
+    <string name="permdesc_setProcessLimit">"Hiermee kan een toepassing het maximum aantal processen bepalen dat wordt uitgevoerd. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_setAlwaysFinish">"alle achtergrondtoepassingen sluiten"</string>
+    <string name="permdesc_setAlwaysFinish">"Hiermee kan een toepassing bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale toepassingen."</string>
+    <string name="permlab_fotaUpdate">"systeemupdates automatisch installeren"</string>
+    <string name="permdesc_fotaUpdate">"Hiermee ontvangt een toepassing meldingen over beschikbare systeemupdates en kan hun installatie starten. Schadelijke toepassingen kunnen hiervan gebruik maken om het systeem met ongeautoriseerde updates te beschadigen of het updateproces in het algemeen te verstoren."</string>
+    <string name="permlab_batteryStats">"accustatistieken aanpassen"</string>
+    <string name="permdesc_batteryStats">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_internalSystemWindow">"niet-geautoriseerde vensters weergeven"</string>
+    <string name="permdesc_internalSystemWindow">"Hiermee kunnen vensters worden gemaakt die door de interne systeemgebruikersinterface worden gebruikt. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_systemAlertWindow">"waarschuwingen op systeemniveau weergeven"</string>
+    <string name="permdesc_systemAlertWindow">"Hiermee kan een toepassing systeemwaarschuwingen weergeven. Schadelijke toepassingen kunnen op deze manier het hele scherm van de telefoon overnemen."</string>
+    <string name="permlab_setAnimationScale">"algemene animatiesnelheid wijzigen"</string>
+    <string name="permdesc_setAnimationScale">"Hiermee kan een toepassing op elk gewenst moment de algemene animatiesnelheid wijzigen (snellere of tragere animaties)."</string>
+    <string name="permlab_manageAppTokens">"toepassingstokens beheren"</string>
+    <string name="permdesc_manageAppTokens">"Hiermee kunnen toepassingen hun eigen tokens maken en beheren, waarbij de normale Z-volgorde wordt overgeslagen. Nooit nodig voor normale toepassingen."</string>
+    <string name="permlab_injectEvents">"drukken op toetsen en bedieningselementen"</string>
+    <string name="permdesc_injectEvents">"Hiermee kan een toepassing zijn eigen invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere toepassingen doorgeven. Schadelijke toepassingen kunnen dit gebruiken om de telefoon over te nemen."</string>
+    <string name="permlab_readInputState">"uw invoer en acties vastleggen"</string>
+    <string name="permdesc_readInputState">"Hiermee kan een toepassing uw toetsaanslagen registreren, zelfs tijdens de interactie met een andere toepassing (zoals de invoer van een wachtwoord). Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_bindInputMethod">"verbinden aan een invoermethode"</string>
+    <string name="permdesc_bindInputMethod">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een invoermethode. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_setOrientation">"schermstand wijzigen"</string>
+    <string name="permdesc_setOrientation">"Hiermee kan een toepassing op elk gewenst moment de oriëntatie van het scherm wijzigen. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_signalPersistentProcesses">"Linux-signalen verzenden naar toepassingen"</string>
+    <string name="permdesc_signalPersistentProcesses">"Hiermee kan de toepassing ervoor zorgen dat het geleverde signaal wordt verzonden naar alle persistente processen."</string>
+    <string name="permlab_persistentActivity">"toepassing altijd laten uitvoeren"</string>
+    <string name="permdesc_persistentActivity">"Hiermee kan een toepassing delen van zichzelf persistent maken, zodat het systeem dat deel niet voor andere toepassingen kan gebruiken."</string>
+    <string name="permlab_deletePackages">"toepassingen verwijderen"</string>
+    <string name="permdesc_deletePackages">"Hiermee kan een toepassing Android-pakketten verwijderen. Schadelijke toepassingen kunnen dit gebruiken om belangrijke toepassingen te verwijderen."</string>
+    <string name="permlab_clearAppUserData">"gegevens van andere toepassingen verwijderen"</string>
+    <string name="permdesc_clearAppUserData">"Hiermee kan een toepassing gebruikersgegevens wissen."</string>
+    <string name="permlab_deleteCacheFiles">"caches van andere toepassingen verwijderen"</string>
+    <string name="permdesc_deleteCacheFiles">"Hiermee kan een toepassing cachebestanden verwijderen."</string>
+    <string name="permlab_getPackageSize">"opslagruimte van toepassing bepalen"</string>
+    <string name="permdesc_getPackageSize">"Hiermee kan een toepassing de bijbehorende code, gegevens en cachegrootten ophalen."</string>
+    <string name="permlab_installPackages">"toepassingen rechtstreeks installeren"</string>
+    <string name="permdesc_installPackages">"Hiermee kan een toepassing nieuwe of bijgewerkte Android-pakketten installeren. Schadelijke toepassingen kunnen hiervan gebruik maken om nieuwe toepassingen met willekeurig krachtige machtigingen toe te voegen."</string>
+    <string name="permlab_clearAppCache">"alle cachegegevens van toepassing verwijderen"</string>
+    <string name="permdesc_clearAppCache">"Hiermee kan een toepassing opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemap van de toepassing. De toegang is doorgaans beperkt tot het systeemproces."</string>
+    <string name="permlab_readLogs">"systeemlogbestanden lezen"</string>
+    <string name="permdesc_readLogs">"Hiermee kan een toepassing de verschillende logbestanden van het systeem lezen. De toepassing kan op deze manier algemene informatie achterhalen over uw telefoongebruik. Hierin is geen persoonlijke of privé-informatie opgenomen."</string>
+    <string name="permlab_diagnostic">"lezen/schrijven naar bronnen van diag"</string>
+    <string name="permdesc_diagnostic">"Hiermee kan een toepassing lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
+    <string name="permlab_changeComponentState">"toepassingscomponenten in- of uitschakelen"</string>
+    <string name="permdesc_changeComponentState">"Hiermee kan een toepassing bepalen of een component van een andere toepassing is ingeschakeld. Schadelijke toepassingen kunnen hiervan gebruik maken om belangrijke telefoonfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien toepassingscomponenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
+    <string name="permlab_setPreferredApplications">"voorkeurstoepassingen instellen"</string>
+    <string name="permdesc_setPreferredApplications">"Hiermee kan een toepassing uw voorkeurstoepassingen wijzigen. Schadelijke toepassingen kunnen op deze manier de actieve toepassingen zonder uw medeweten wijzigen en uw bestaande toepassingen doorzoeken om privégegevens van u te verzamelen."</string>
+    <string name="permlab_writeSettings">"algemene systeeminstellingen wijzigen"</string>
+    <string name="permdesc_writeSettings">"Hiermee kan een toepassing de systeeminstellingen wijzigen. Schadelijke toepassingen kunnen hiermee uw systeemconfiguratie beschadigen."</string>
+    <string name="permlab_writeSecureSettings">"beveiligde systeeminstellingen wijzigen"</string>
+    <string name="permdesc_writeSecureSettings">"Hiermee kan een toepassing beveiligde systeeminstellingen wijzigen. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_writeGservices">"de Google-serviceskaart wijzigen"</string>
+    <string name="permdesc_writeGservices">"Hiermee kan een toepassing de Google-serviceskaart wijzigen. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_receiveBootCompleted">"automatisch starten bij opstarten"</string>
+    <string name="permdesc_receiveBootCompleted">"Hiermee kan een toepassing zichzelf starten zodra het systeem klaar is met opstarten. Hierdoor kan het langer duren voordat de telefoon is opgestart en kan de toepassing de telefoonprocessen vertragen door altijd actief te zijn."</string>
+    <string name="permlab_broadcastSticky">"sticky broadcast verzenden"</string>
+    <string name="permdesc_broadcastSticky">"Hiermee kan een toepassing sticky broadcasts verzenden die achterblijven als de broadcast eindigt. Schadelijke toepassingen kunnen hiermee de telefoon traag of instabiel maken door ervoor te zorgen dat er te veel geheugenruimte wordt gebruikt."</string>
+    <string name="permlab_readContacts">"contactgegevens lezen"</string>
+    <string name="permdesc_readContacts">"Hiermee kan een toepassing alle contactgegevens (adresgegevens) zien die op uw telefoon zijn opgeslagen. Schadelijke toepassingen kunnen hiervan gebruik maken om uw gegevens te verzenden naar andere personen."</string>
+    <string name="permlab_writeContacts">"contactgegevens schrijven"</string>
+    <string name="permdesc_writeContacts">"Hiermee kan een toepassing de op uw telefoon opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke toepassingen kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
+    <string name="permlab_writeOwnerData">"gegevens eigenaar schrijven"</string>
+    <string name="permdesc_writeOwnerData">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar wijzigen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar verwijderen of wijzigen."</string>
+    <string name="permlab_readOwnerData">"gegevens eigenaar lezen"</string>
+    <string name="permdesc_readOwnerData">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar lezen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar lezen."</string>
+    <string name="permlab_readCalendar">"agendagegevens lezen"</string>
+    <string name="permdesc_readCalendar">"Hiermee kan een toepassing alle agendagebeurtenissen lezen die zijn opgeslagen op uw telefoon. Schadelijke toepassingen kunnen hiervan gebruik maken om uw agendagebeurtenissen te verzenden naar andere personen."</string>
+    <string name="permlab_writeCalendar">"agendagegevens schrijven"</string>
+    <string name="permdesc_writeCalendar">"Hiermee kan een toepassing de op uw telefoon opgeslagen agendagebeurtenissen wijzigen. Schadelijke toepassingen kunnen hiermee uw agendagegevens verwijderen of wijzigen."</string>
+    <string name="permlab_accessMockLocation">"neplocatiebronnen voor test"</string>
+    <string name="permdesc_accessMockLocation">"Neplocatiebronnen voor testdoeleinden maken. Schadelijke toepassingen kunnen dit gebruiken om de locatie en/of status te overschrijven die door de echte locatiebronnen wordt aangegeven, zoals GPS of netwerkaanbieders."</string>
+    <string name="permlab_accessLocationExtraCommands">"toegang opdrachten aanbieder extra locaties"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Toegang tot opdrachten aanbieder extra locaties. Schadelijke toepassingen kunnen hiervan gebruik maken om de werking van GPS of andere locatiebronnen te verstoren."</string>
+    <string name="permlab_accessFineLocation">"nauwkeurige (GPS) locatie"</string>
+    <string name="permdesc_accessFineLocation">"Toegang tot exacte locatiebronnen, zoals het Global Positioning System op de telefoon, indien beschikbaar. Schadelijke toepassingen kunnen dit gebruiken om te bepalen waar u zich bevindt en mogelijk extra acculading verbruiken."</string>
+    <string name="permlab_accessCoarseLocation">"globale (netwerkgebaseerde) locatie"</string>
+    <string name="permdesc_accessCoarseLocation">"Toegang tot globale locatiebronnen, zoals de mobiele netwerkdatabase om een globale telefoonlocatie te bepalen, indien beschikbaar. Schadelijke toepassingen kunnen hiervan gebruik maken om bij benadering te bepalen waar u zich bevindt."</string>
+    <string name="permlab_accessSurfaceFlinger">"toegang tot SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Hiermee kan een toepassing SurfaceFlinger-functies op laag niveau gebruiken."</string>
+    <string name="permlab_readFrameBuffer">"framebuffer lezen"</string>
+    <string name="permdesc_readFrameBuffer">"Hiermee kan een toepassing de inhoud van de framebuffer lezen."</string>
+    <string name="permlab_modifyAudioSettings">"uw audio-instellingen wijzigen"</string>
+    <string name="permdesc_modifyAudioSettings">"Hiermee kan een toepassing de algemene audio-instellingen, zoals volume en omleiding, wijzigen."</string>
+    <string name="permlab_recordAudio">"audio opnemen"</string>
+    <string name="permdesc_recordAudio">"Hiermee krijgt de toepassing toegang tot het audio-opnamepad."</string>
+    <string name="permlab_camera">"foto\'s maken"</string>
+    <string name="permdesc_camera">"Hiermee kan een toepassing foto\'s maken met de camera. De toepassing kan op deze manier op elk gewenste moment foto\'s verzamelen van wat de camera ziet."</string>
+    <string name="permlab_brick">"telefoon permanent uitschakelen"</string>
+    <string name="permdesc_brick">"Hiermee kan de toepassing de telefoon permanent uitschakelen. Dit is erg gevaarlijk."</string>
+    <string name="permlab_reboot">"telefoon nu opnieuw opstarten"</string>
+    <string name="permdesc_reboot">"Hiermee kan de toepassing de telefoon nu opnieuw opstarten."</string>
+    <string name="permlab_mount_unmount_filesystems">"bestandssystemen koppelen en ontkoppelen"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Hiermee kan de toepassing bestandssystemen koppelen en ontkoppelen voor verwisselbare opslagruimte."</string>
+    <string name="permlab_mount_format_filesystems">"externe opslag formatteren"</string>
+    <string name="permdesc_mount_format_filesystems">"Hiermee kan de toepassing de externe opslag formatteren."</string>
+    <string name="permlab_vibrate">"trilstand beheren"</string>
+    <string name="permdesc_vibrate">"Hiermee kan de toepassing de trilstand beheren."</string>
+    <string name="permlab_flashlight">"zaklamp bedienen"</string>
+    <string name="permdesc_flashlight">"Hiermee kan de toepassing de zaklamp bedienen."</string>
+    <string name="permlab_hardware_test">"hardware testen"</string>
+    <string name="permdesc_hardware_test">"Hiermee kan de toepassing verschillende randapparaten beheren om de hardware te testen."</string>
+    <string name="permlab_callPhone">"telefoonnummers rechtstreeks bellen"</string>
+    <string name="permdesc_callPhone">"Hiermee kan de toepassing telefoonnummers bellen zonder uw tussenkomst. Door schadelijke toepassingen kunnen onverwachte oproepen op uw telefoonrekening verschijnen. De toepassing kan hiermee geen alarmnummers bellen."</string>
+    <string name="permlab_callPrivileged">"alle telefoonnummers rechtstreeks bellen"</string>
+    <string name="permdesc_callPrivileged">"Hiermee kan een toepassing elk telefoonnummer, inclusief alarmnummers, bellen zonder uw tussenkomst. Schadelijke toepassingen kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
+    <string name="permlab_locationUpdates">"meldingen over locatie-updates beheren"</string>
+    <string name="permdesc_locationUpdates">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_checkinProperties">"toegang tot checkin-eigenschappen"</string>
+    <string name="permdesc_checkinProperties">"Hiermee wordt lees-/schrijftoegang gegeven tot eigenschappen die door de checkin-service zijn geüpload. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_bindGadget">"gadgets kiezen"</string>
+    <string name="permdesc_bindGadget">"Hiermee kan een toepassing het systeem melden welke gadgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_modifyPhoneState">"telefoonstatus wijzigen"</string>
+    <string name="permdesc_modifyPhoneState">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
+    <string name="permlab_readPhoneState">"telefoonstatus lezen"</string>
+    <string name="permdesc_readPhoneState">"Hiermee krijgt de toepassing toegang tot de telefoonfuncties van het apparaat. Een toepassing met de betreffende machtiging kan het telefoonnummer van deze telefoon achterhalen, bepalen of een oproep actief is, het gekozen nummer achterhalen en dergelijke."</string>
+    <string name="permlab_wakeLock">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
+    <string name="permdesc_wakeLock">"Hiermee kan een toepassing voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
+    <string name="permlab_devicePower">"telefoon in- of uitschakelen"</string>
+    <string name="permdesc_devicePower">"Hiermee kan de toepassing de telefoon in- of uitschakelen."</string>
+    <string name="permlab_factoryTest">"uitvoeren in fabriekstestmodus"</string>
+    <string name="permdesc_factoryTest">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de telefoon. Alleen beschikbaar als een telefoon zich in de fabrikanttestmodus bevindt."</string>
+    <string name="permlab_setWallpaper">"achtergrond instellen"</string>
+    <string name="permdesc_setWallpaper">"Hiermee kan de toepassing de systeemachtergrond instellen."</string>
+    <string name="permlab_setWallpaperHints">"grootte achtergrond instellen"</string>
+    <string name="permdesc_setWallpaperHints">"Hiermee kan de toepassing de grootte van de achtergrond instellen."</string>
+    <string name="permlab_masterClear">"systeem terugzetten op fabrieksinstellingen"</string>
+    <string name="permdesc_masterClear">"Hiermee kan een toepassing het systeem terugzetten op de fabrieksinstellingen, waarbij alle gegevens, configuraties en geïnstalleerde toepassingen worden verwijderd."</string>
+    <string name="permlab_setTimeZone">"tijdzone instellen"</string>
+    <string name="permdesc_setTimeZone">"Hiermee kan een toepassing de tijdzone van de telefoon wijzigen."</string>
+    <string name="permlab_getAccounts">"bekende accounts zoeken"</string>
+    <string name="permdesc_getAccounts">"Hiermee kan een toepassing de lijst met accounts van een telefoon ophalen."</string>
+    <string name="permlab_accessNetworkState">"netwerkstatus bekijken"</string>
+    <string name="permdesc_accessNetworkState">"Hiermee kan een toepassing de status van alle netwerken bekijken."</string>
+    <string name="permlab_createNetworkSockets">"volledige internettoegang"</string>
+    <string name="permdesc_createNetworkSockets">"Hiermee kan een toepassing netwerksockets maken."</string>
+    <string name="permlab_writeApnSettings">"instellingen voor toegangspuntnaam schrijven"</string>
+    <string name="permdesc_writeApnSettings">"Hiermee kan een toepassing de APN-instellingen, zoals proxy en poort, van elke APN wijzigen."</string>
+    <string name="permlab_changeNetworkState">"netwerkverbinding wijzigen"</string>
+    <string name="permdesc_changeNetworkState">"Hiermee kan een toepassing de verbindingsstatus van het netwerk wijzigen."</string>
+    <string name="permlab_changeBackgroundDataSetting">"instelling voor gebruik van achtergrondgegevens van gegevens wijzigen"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Hiermee kan een toepassing de instelling voor gebruik van achtergrondgegevens wijzigen."</string>
+    <string name="permlab_accessWifiState">"Wi-Fi-status bekijken"</string>
+    <string name="permdesc_accessWifiState">"Hiermee kan een toepassing informatie over de Wi-Fi-status bekijken."</string>
+    <string name="permlab_changeWifiState">"Wi-Fi-status wijzigen"</string>
+    <string name="permdesc_changeWifiState">"Hiermee kan een toepassing zich koppelen aan en loskoppelen van Wi-Fi toegangspunten en wijzigingen aanbrengen in geconfigureerde Wi-Fi-netwerken."</string>
+    <string name="permlab_bluetoothAdmin">"bluetooth-beheer"</string>
+    <string name="permdesc_bluetoothAdmin">"Hiermee kan een toepassing de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en aansluiten."</string>
+    <string name="permlab_bluetooth">"Bluetooth-verbindingen maken"</string>
+    <string name="permdesc_bluetooth">"Hiermee kan een toepassing de configuratie van een lokale Bluetooth-telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
+    <string name="permlab_disableKeyguard">"toetsblokkering uitschakelen"</string>
+    <string name="permdesc_disableKeyguard">"Hiermee kan een toepassing de toetsblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Een voorbeeld: de telefoon schakelt de toetsblokkering uit als er een oproep binnenkomt en schakelt de toetsblokkering weer in als de oproep is beëindigd."</string>
+    <string name="permlab_readSyncSettings">"synchronisatie-instellingen lezen"</string>
+    <string name="permdesc_readSyncSettings">"Hiermee kan een toepassing de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permlab_writeSyncSettings">"synchronisatie-instellingen schrijven"</string>
+    <string name="permdesc_writeSyncSettings">"Hiermee kan een toepassing uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permlab_readSyncStats">"synchronisatiestatistieken lezen"</string>
+    <string name="permdesc_readSyncStats">"Hiermee kan een toepassing de synchronisatiestatistieken lezen, zoals de geschiedenis van uitgevoerde synchronisaties."</string>
+    <string name="permlab_subscribedFeedsRead">"geabonneerde feeds lezen"</string>
+    <string name="permdesc_subscribedFeedsRead">"Hiermee kan een toepassing details over de huidige gesynchroniseerde feeds achterhalen."</string>
+    <string name="permlab_subscribedFeedsWrite">"geabonneerde feeds schrijven"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Hiermee kan een toepassing uw huidige gesynchroniseerde feeds wijzigen. Een schadelijke toepassing kan op deze manier uw gesynchroniseerde feeds wijzigen."</string>
+    <string name="permlab_readDictionary">"door gebruiker gedefinieerd woordenboek lezen"</string>
+    <string name="permdesc_readDictionary">"Hiermee kan een toepassing privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
+    <string name="permlab_writeDictionary">"schrijven naar door gebruiker gedefinieerd woordenboek"</string>
+    <string name="permdesc_writeDictionary">"Hiermee kan een toepassing nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
+  <string-array name="phoneTypes">
+    <item>"Thuis"</item>
+    <item>"Mobiel"</item>
+    <item>"Werk"</item>
+    <item>"Fax werk"</item>
+    <item>"Fax thuis"</item>
+    <item>"Semafoon"</item>
+    <item>"Overig"</item>
+    <item>"Aangepast"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Thuis"</item>
+    <item>"Werk"</item>
+    <item>"Overig"</item>
+    <item>"Aangepast"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Thuis"</item>
+    <item>"Werk"</item>
+    <item>"Overig"</item>
+    <item>"Aangepast"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Thuis"</item>
+    <item>"Werk"</item>
+    <item>"Overig"</item>
+    <item>"Aangepast"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Werk"</item>
+    <item>"Overig"</item>
+    <item>"Aangepast"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"PIN-code invoeren"</string>
+    <string name="keyguard_password_wrong_pin_code">"Onjuiste PIN-code!"</string>
+    <string name="keyguard_label_text">"Druk op \'Menu\' en vervolgens op 0 om te ontgrendelen."</string>
+    <string name="emergency_call_dialog_number_for_display">"Alarmnummer"</string>
+    <string name="lockscreen_carrier_default">"(Geen service)"</string>
+    <string name="lockscreen_screen_locked">"Scherm geblokkeerd."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Druk op \'Menu\' om te ontgrendelen of noodoproep te plaatsen."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Druk op \'Menu\' om te ontgrendelen."</string>
+    <string name="lockscreen_pattern_instructions">"Patroon tekenen om te ontgrendelen"</string>
+    <string name="lockscreen_emergency_call">"Noodoproep"</string>
+    <string name="lockscreen_pattern_correct">"Juist!"</string>
+    <string name="lockscreen_pattern_wrong">"Probeer het opnieuw"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
+    <string name="lockscreen_low_battery">"Sluit de oplader aan."</string>
+    <string name="lockscreen_missing_sim_message_short">"Geen SIM-kaart."</string>
+    <string name="lockscreen_missing_sim_message">"Geen SIM-kaart in telefoon."</string>
+    <string name="lockscreen_missing_sim_instructions">"Plaats een SIM-kaart."</string>
+    <string name="lockscreen_network_locked_message">"Netwerk geblokkeerd"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM-kaart is geblokkeerd met PUK-code."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Neem contact op met de klantenservice."</string>
+    <string name="lockscreen_sim_locked_message">"SIM-kaart is geblokkeerd."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-kaart ontgrendelen..."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen, wordt u gevraagd om uw telefoon te ontgrendelen met uw Google aanmelding."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Patroon vergeten?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Te veel patroonpogingen!"</string>
+    <string name="lockscreen_glogin_instructions">"U moet zich aanmelden bij uw Google-account"\n"om te ontgrendelen"</string>
+    <string name="lockscreen_glogin_username_hint">"Gebruikersnaam (e-mail)"</string>
+    <string name="lockscreen_glogin_password_hint">"Wachtwoord"</string>
+    <string name="lockscreen_glogin_submit_button">"Aanmelden"</string>
+    <string name="lockscreen_glogin_invalid_input">"Gebruikersnaam of wachtwoord ongeldig."</string>
+    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
+    <skip />
+    <string name="status_bar_clear_all_button">"Meldingen wissen"</string>
+    <string name="status_bar_no_notifications_title">"Geen meldingen"</string>
+    <string name="status_bar_ongoing_events_title">"Actief"</string>
+    <string name="status_bar_latest_events_title">"Meldingen"</string>
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
+    <skip />
+    <string name="battery_status_charging">"Opladen..."</string>
+    <string name="battery_low_title">"Sluit de oplader aan"</string>
+    <string name="battery_low_subtitle">"De accu raakt op:"</string>
+    <string name="battery_low_percent_format">"minder dan <xliff:g id="NUMBER">%d%%</xliff:g> resterend."</string>
+    <string name="factorytest_failed">"Fabriekstest mislukt"</string>
+    <string name="factorytest_not_system">"De actie FACTORY_TEST wordt alleen ondersteund voor pakketten die zijn geïnstalleerd in /system/app."</string>
+    <string name="factorytest_no_action">"Er is geen pakket gevonden dat de actie FACTORY_TEST levert."</string>
+    <string name="factorytest_reboot">"Opnieuw opstarten"</string>
+    <string name="js_dialog_title">"De pagina op \'<xliff:g id="TITLE">%s</xliff:g>\' zegt:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Wilt u deze pagina verlaten?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Kies OK om door te gaan of Annuleren om op de huidige pagina te blijven."</string>
+    <string name="save_password_label">"Bevestigen"</string>
+    <string name="save_password_message">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
+    <string name="save_password_notnow">"Niet nu"</string>
+    <string name="save_password_remember">"Onthouden"</string>
+    <string name="save_password_never">"Nooit"</string>
+    <string name="open_permission_deny">"U heeft geen toestemming om deze pagina te openen."</string>
+    <string name="text_copied">"Tekst naar klembord gekopieerd."</string>
+    <string name="more_item_label">"Meer"</string>
+    <string name="prepend_shortcut_label">"Menu+"</string>
+    <string name="menu_space_shortcut_label">"ruimte"</string>
+    <string name="menu_enter_shortcut_label">"invoeren"</string>
+    <string name="menu_delete_shortcut_label">"verwijderen"</string>
+    <string name="search_go">"Zoeken"</string>
+    <string name="today">"Vandaag"</string>
+    <string name="yesterday">"Gisteren"</string>
+    <string name="tomorrow">"Morgen"</string>
+    <string name="oneMonthDurationPast">"1 maand geleden"</string>
+    <string name="beforeOneMonthDurationPast">"Meer dan 1 maand geleden"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"1 seconde geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> seconden geleden"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"1 minuut geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> minuten geleden"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"1 uur geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> uur geleden"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"gisteren"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dagen geleden"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"over 1 seconde"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> seconden"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"over 1 minuut"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> minuten"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"over 1 uur"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> uur"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"morgen"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 seconde geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> seconden geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 minuut geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> minuten geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 uur geleden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> uur geleden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"gisteren"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dagen geleden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"over 1 seconde"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> seconden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"over 1 minuut"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> minuten"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"over 1 uur"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> uur"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"morgen"</item>
+    <item quantity="other">"over <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
+  </plurals>
+    <string name="preposition_for_date">"op %s"</string>
+    <string name="preposition_for_time">"om %s"</string>
+    <string name="preposition_for_year">"in %s"</string>
+    <string name="day">"dag"</string>
+    <string name="days">"dagen"</string>
+    <string name="hour">"uur"</string>
+    <string name="hours">"uren"</string>
+    <string name="minute">"min"</string>
+    <string name="minutes">"minuten"</string>
+    <string name="second">"sec"</string>
+    <string name="seconds">"seconden"</string>
+    <string name="week">"week"</string>
+    <string name="weeks">"weken"</string>
+    <string name="year">"jaar"</string>
+    <string name="years">"jaren"</string>
+    <string name="sunday">"Zondag"</string>
+    <string name="monday">"Maandag"</string>
+    <string name="tuesday">"Dinsdag"</string>
+    <string name="wednesday">"Woensdag"</string>
+    <string name="thursday">"Donderdag"</string>
+    <string name="friday">"Vrijdag"</string>
+    <string name="saturday">"Zaterdag"</string>
+    <string name="every_weekday">"Elke weekdag (ma-vr)"</string>
+    <string name="daily">"Dagelijks"</string>
+    <string name="weekly">"Wekelijks op <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Maandelijks"</string>
+    <string name="yearly">"Jaarlijks"</string>
+    <string name="VideoView_error_title">"Video kan niet worden afgespeeld"</string>
+    <string name="VideoView_error_text_unknown">"Deze video kan niet worden afgespeeld."</string>
+    <string name="VideoView_error_button">"OK"</string>
+    <string name="am">"am"</string>
+    <string name="pm">"pm"</string>
+    <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="noon">"twaalf uur \'s middags"</string>
+    <string name="Noon">"Twaalf uur \'s middags"</string>
+    <string name="midnight">"middernacht"</string>
+    <string name="Midnight">"Middernacht"</string>
+    <!-- no translation found for month_day (3693060561170538204) -->
+    <skip />
+    <!-- no translation found for month (1976700695144952053) -->
+    <skip />
+    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for month_year (2106203387378728384) -->
+    <skip />
+    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
+    <skip />
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
+    <skip />
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <skip />
+    <string name="day_of_week_long_sunday">"Zondag"</string>
+    <string name="day_of_week_long_monday">"Maandag"</string>
+    <string name="day_of_week_long_tuesday">"Dinsdag"</string>
+    <string name="day_of_week_long_wednesday">"Woensdag"</string>
+    <string name="day_of_week_long_thursday">"Donderdag"</string>
+    <string name="day_of_week_long_friday">"Vrijdag"</string>
+    <string name="day_of_week_long_saturday">"Zaterdag"</string>
+    <string name="day_of_week_medium_sunday">"Zo"</string>
+    <string name="day_of_week_medium_monday">"Ma"</string>
+    <string name="day_of_week_medium_tuesday">"Di"</string>
+    <string name="day_of_week_medium_wednesday">"Wo"</string>
+    <string name="day_of_week_medium_thursday">"Do"</string>
+    <string name="day_of_week_medium_friday">"Vr"</string>
+    <string name="day_of_week_medium_saturday">"Za"</string>
+    <string name="day_of_week_short_sunday">"Zo"</string>
+    <string name="day_of_week_short_monday">"Ma"</string>
+    <string name="day_of_week_short_tuesday">"Di"</string>
+    <string name="day_of_week_short_wednesday">"Wo"</string>
+    <string name="day_of_week_short_thursday">"Do"</string>
+    <string name="day_of_week_short_friday">"Vr"</string>
+    <string name="day_of_week_short_saturday">"Za"</string>
+    <string name="day_of_week_shorter_sunday">"Zo"</string>
+    <string name="day_of_week_shorter_monday">"M"</string>
+    <string name="day_of_week_shorter_tuesday">"Di"</string>
+    <string name="day_of_week_shorter_wednesday">"W"</string>
+    <string name="day_of_week_shorter_thursday">"Do"</string>
+    <string name="day_of_week_shorter_friday">"V"</string>
+    <string name="day_of_week_shorter_saturday">"Za"</string>
+    <string name="day_of_week_shortest_sunday">"Z"</string>
+    <string name="day_of_week_shortest_monday">"M"</string>
+    <string name="day_of_week_shortest_tuesday">"D"</string>
+    <string name="day_of_week_shortest_wednesday">"W"</string>
+    <string name="day_of_week_shortest_thursday">"D"</string>
+    <string name="day_of_week_shortest_friday">"V"</string>
+    <string name="day_of_week_shortest_saturday">"Z"</string>
+    <string name="month_long_january">"Januari"</string>
+    <string name="month_long_february">"Februari"</string>
+    <string name="month_long_march">"Maart"</string>
+    <string name="month_long_april">"April"</string>
+    <string name="month_long_may">"Mei"</string>
+    <string name="month_long_june">"Juni"</string>
+    <string name="month_long_july">"Juli"</string>
+    <string name="month_long_august">"Augustus"</string>
+    <string name="month_long_september">"September"</string>
+    <string name="month_long_october">"Oktober"</string>
+    <string name="month_long_november">"November"</string>
+    <string name="month_long_december">"December"</string>
+    <string name="month_medium_january">"Jan"</string>
+    <string name="month_medium_february">"Feb"</string>
+    <string name="month_medium_march">"Mrt"</string>
+    <string name="month_medium_april">"Apr"</string>
+    <string name="month_medium_may">"Mei"</string>
+    <string name="month_medium_june">"Jun"</string>
+    <string name="month_medium_july">"Jul"</string>
+    <string name="month_medium_august">"Aug"</string>
+    <string name="month_medium_september">"Sep"</string>
+    <string name="month_medium_october">"Okt"</string>
+    <string name="month_medium_november">"Nov"</string>
+    <string name="month_medium_december">"Dec"</string>
+    <string name="month_shortest_january">"J"</string>
+    <string name="month_shortest_february">"V"</string>
+    <string name="month_shortest_march">"M"</string>
+    <string name="month_shortest_april">"A"</string>
+    <string name="month_shortest_may">"M"</string>
+    <string name="month_shortest_june">"J"</string>
+    <string name="month_shortest_july">"J"</string>
+    <string name="month_shortest_august">"A"</string>
+    <string name="month_shortest_september">"S"</string>
+    <string name="month_shortest_october">"O"</string>
+    <string name="month_shortest_november">"N"</string>
+    <string name="month_shortest_december">"D"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Alles selecteren"</string>
+    <string name="selectText">"Tekst selecteren"</string>
+    <string name="stopSelectingText">"Stoppen met tekst selecteren"</string>
+    <string name="cut">"Knippen"</string>
+    <string name="cutAll">"Alles knippen"</string>
+    <string name="copy">"Kopiëren"</string>
+    <string name="copyAll">"Alles kopiëren"</string>
+    <string name="paste">"Plakken"</string>
+    <string name="copyUrl">"URL kopiëren"</string>
+    <string name="inputMethod">"Invoermethode"</string>
+    <string name="addToDictionary">"%s\' toevoegen aan woordenboek"</string>
+    <string name="editTextMenuTitle">"Tekst bewerken"</string>
+    <string name="low_internal_storage_view_title">"Weinig ruimte"</string>
+    <string name="low_internal_storage_view_text">"Opslagruimte van telefoon raakt op."</string>
+    <string name="ok">"OK"</string>
+    <string name="cancel">"Annuleren"</string>
+    <string name="yes">"OK"</string>
+    <string name="no">"Annuleren"</string>
+    <string name="dialog_alert_title">"Let op"</string>
+    <string name="capital_on">"AAN"</string>
+    <string name="capital_off">"UIT"</string>
+    <string name="whichApplication">"Actie voltooien met"</string>
+    <string name="alwaysUse">"Standaard gebruiken voor deze actie."</string>
+    <string name="clearDefaultHintMsg">"Wis standaardinstelling via startscherm: \'Instellingen\' &gt; \'Toepassingen\' &gt; \'Toepassingen beheren\'."</string>
+    <string name="chooseActivity">"Een actie selecteren"</string>
+    <string name="noApplications">"Geen enkele toepassing kan deze actie uitvoeren."</string>
+    <string name="aerr_title">"Helaas!"</string>
+    <string name="aerr_application">"De toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) is onverwachts gestopt. Probeer het opnieuw."</string>
+    <string name="aerr_process">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> is onverwachts gestopt. Probeer het opnieuw."</string>
+    <string name="anr_title">"Helaas!"</string>
+    <string name="anr_activity_application">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in toepassing <xliff:g id="APPLICATION">%2$s</xliff:g>) reageert niet."</string>
+    <string name="anr_activity_process">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
+    <string name="anr_application_process">"Toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
+    <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet."</string>
+    <string name="force_close">"Nu sluiten"</string>
+    <string name="wait">"Wachten"</string>
+    <string name="debug">"Foutopsporing"</string>
+    <string name="sendText">"Selecteer een actie voor tekst"</string>
+    <string name="volume_ringtone">"Belvolume"</string>
+    <string name="volume_music">"Mediavolume"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Afspelen via Bluetooth"</string>
+    <string name="volume_call">"Volume inkomende oproep"</string>
+    <string name="volume_bluetooth_call">"Volume tijdens gesprek in Bluetooth-modus"</string>
+    <string name="volume_alarm">"Alarmvolume"</string>
+    <string name="volume_notification">"Meldingsvolume"</string>
+    <string name="volume_unknown">"Volume"</string>
+    <string name="ringtone_default">"Standaardbeltoon"</string>
+    <string name="ringtone_default_with_actual">"Standaardbeltoon (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Stil"</string>
+    <string name="ringtone_picker_title">"Beltonen"</string>
+    <string name="ringtone_unknown">"Onbekende beltoon"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Wi-Fi-netwerk beschikbaar"</item>
+    <item quantity="other">"Wi-Fi-netwerken beschikbaar"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Open Wi-Fi-netwerk beschikbaar"</item>
+    <item quantity="other">"Open Wi-Fi-netwerken beschikbaar"</item>
+  </plurals>
+    <string name="select_character">"Teken invoegen"</string>
+    <string name="sms_control_default_app_name">"Onbekende toepassing"</string>
+    <string name="sms_control_title">"SMS-berichten verzenden"</string>
+    <string name="sms_control_message">"Er wordt een groot aantal SMS-berichten verzonden. Selecteer \'OK\' om door te gaan of \'Annuleren\' om de verzending te stoppen."</string>
+    <string name="sms_control_yes">"OK"</string>
+    <string name="sms_control_no">"Annuleren"</string>
+    <string name="date_time_set">"Instellen"</string>
+    <string name="default_permission_group">"Standaard"</string>
+    <string name="no_permissions">"Geen machtigingen vereist"</string>
+    <string name="perms_hide"><b>"Verbergen"</b></string>
+    <string name="perms_show_all"><b>"Alles weergeven"</b></string>
+    <string name="googlewebcontenthelper_loading">"Laden..."</string>
+    <string name="usb_storage_title">"USB-verbinding"</string>
+    <string name="usb_storage_message">"U heeft uw telefoon via USB op uw computer aangesloten. Selecteer \'Koppelen\' als u bestanden tussen uw computer en de SD-kaart van uw telefoon wilt kopiëren."</string>
+    <string name="usb_storage_button_mount">"Koppelen"</string>
+    <string name="usb_storage_button_unmount">"Niet koppelen"</string>
+    <string name="usb_storage_error_message">"Er is een probleem bij het gebruik van uw SD-kaart voor USB-opslag."</string>
+    <string name="usb_storage_notification_title">"USB-verbinding"</string>
+    <string name="usb_storage_notification_message">"Selecteer dit om bestanden naar/van uw computer te kopiëren."</string>
+    <string name="usb_storage_stop_notification_title">"USB-opslag uitschakelen"</string>
+    <string name="usb_storage_stop_notification_message">"Selecteer dit om USB-opslag uit te schakelen."</string>
+    <string name="usb_storage_stop_title">"USB-opslag uitschakelen"</string>
+    <string name="usb_storage_stop_message">"Voordat u de USB-opslag uitschakelt, moet u de koppeling met de USB-host verbreken. Selecteer \'Uitschakelen\' om USB-opslag uit te schakelen."</string>
+    <string name="usb_storage_stop_button_mount">"Uitschakelen"</string>
+    <string name="usb_storage_stop_button_unmount">"Annuleren"</string>
+    <string name="usb_storage_stop_error_message">"Er is een probleem opgetreden tijdens het uitschakelen van USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
+    <string name="extmedia_format_title">"SD-kaart formatteren"</string>
+    <string name="extmedia_format_message">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
+    <string name="extmedia_format_button_format">"Formatteren"</string>
+    <string name="select_input_method">"Invoermethode selecteren"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"kandidaten"</u></string>
+    <string name="ext_media_checking_notification_title">"SD-kaart voorbereiden"</string>
+    <string name="ext_media_checking_notification_message">"Controleren op fouten"</string>
+    <string name="ext_media_nofs_notification_title">"Lege SD-kaart"</string>
+    <string name="ext_media_nofs_notification_message">"De SD-kaart is leeg of gebruikt een niet-ondersteund bestandssysteem."</string>
+    <string name="ext_media_unmountable_notification_title">"Beschadigde SD-kaart"</string>
+    <string name="ext_media_unmountable_notification_message">"De SD-kaart is beschadigd. U moet de kaart mogelijk opnieuw formatteren."</string>
+    <string name="ext_media_badremoval_notification_title">"SD-kaart onverwachts verwijderd"</string>
+    <string name="ext_media_badremoval_notification_message">"Ontkoppel de SD-kaart voordat u deze verwijdert om gegevensverlies te voorkomen."</string>
+    <string name="ext_media_safe_unmount_notification_title">"De SD-kaart kan veilig worden verwijderd"</string>
+    <string name="ext_media_safe_unmount_notification_message">"De SD-kaart kan nu veilig worden verwijderd."</string>
+    <string name="ext_media_nomedia_notification_title">"SD-kaart is verwijderd"</string>
+    <string name="ext_media_nomedia_notification_message">"De SD-kaart is verwijderd. Plaats een nieuwe SD-kaart om de opslagcapaciteit van uw apparaat te vergroten."</string>
+    <string name="activity_list_empty">"Geen overeenkomende activiteiten gevonden"</string>
+    <string name="permlab_pkgUsageStats">"gebruiksstatistieken van component bijwerken"</string>
+    <string name="permdesc_pkgUsageStats">"Hiermee kunnen verzamelde gebruiksstatistieken van een component worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
+</resources>

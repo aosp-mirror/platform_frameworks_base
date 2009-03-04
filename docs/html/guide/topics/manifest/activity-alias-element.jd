@@ -1,0 +1,129 @@
+page.title=&lt;activity-alias&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;activity-alias android:<a href="#enabled">enabled</a>=["true" | "false"]
+                android:<a href="#exported">exported</a>=["true" | "false"]
+                android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+                android:<a href="#label">label</a>="<i>string resource</i>"
+                android:<a href="#nm">name</a>="<i>string</i>"
+                android:<a href="#prmsn">permission</a>="<i>string</i>"
+                android:<a href="#trgt">targetActivity</a>="<i>string</i>" &gt;
+    . . .
+&lt;/activity-alias&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>An alias for an activity, named by the {@code targetActivity} 
+attribute.  The target must be in the same application as the
+alias and it must be declared before the alias in the manifest.
+
+<p>
+The alias presents the target activity as a independent entity.
+It can have its own set of intent filters, and they, rather than the 
+intent filters on the target activity itself, determine which intents 
+can activate the target through the alias and how the system
+treats the alias.  For example, the intent filters on the alias may 
+specify the "<code>{@link android.content.Intent#ACTION_MAIN 
+android.intent.action.MAIN}</code>" 
+and "<code>{@link android.content.Intent#CATEGORY_LAUNCHER 
+android.intent.category.LAUNCHER}</code>" flags, causing it to be 
+represented in the application launcher, even though none of the 
+filters on the target activity itself set these flags.
+</p>
+
+<p>
+With the exception of {@code targetActivity}, {@code &lt;activity-alias&gt;} 
+attributes are a subset of <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> attributes.  
+For attributes in the subset, none of the values set for the target carry over
+to the alias.  However, for attributes not in the subset, the values set for 
+the target activity also apply to the alias.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the target activity can be instantiated by the system through 
+this alias &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+The default value is "{@code true}".
+
+<p>
+The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
+application components, including activity aliases.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;activity-alias&gt;} 
+attributes must both be "{@code true}" for the system to be able to instantiate 
+the target activity through the alias.  If either is "{@code false}", the alias 
+does not work.
+</p></dd>
+
+<dt><a name="exported"></a>{@code android:exported}</dt>
+<dd>Whether or not components of other applications can launch the target activity 
+through this alias &mdash; "{@code true}" if they can, and "{@code false}" if not.  
+If "{@code false}", the target activity can be launched through the alias only by 
+components of the same application as the alias or applications with the same user ID.  
+
+<p>
+The default value depends on whether the alias contains intent filters.  The 
+absence of any filters means that the activity can be invoked through the alias
+only by specifying the exact name of the alias.  This implies that the alias 
+is intended only for application-internal use (since others would not know its name)  
+&mdash; so the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the alias 
+is intended for external use &mdash; so the default value is "{@code true}".
+</p></dd>
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon for the target activity when presented to users through the alias.  
+See the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#icon">icon</a></code> attribute for more information.
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the alias when presented to users through the alias.
+See the the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#label">label</a></code> attribute for more information.
+</p></dd>
+
+<dt><a name="nm">{@code android:name}</dt>
+<dd>A unique name for the alias.  The name should resemble a fully
+qualified class name.  But, unlike the name of the target activity, 
+the alias name is arbitrary; it does not refer to an actual class.  
+</p></dd>
+
+<dt><a name="prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to launch the target activity 
+or get it to do something via the alias.  If a caller of 
+<code>{@link android.content.Context#startActivity startActivity()}</code> or
+<code>{@link android.app.Activity#startActivityForResult startActivityForResult()}</code>
+has not been granted the specified permission, the target activity will not be
+activated. 
+
+<p>This attribute supplants any permission set for the target activity itself.  If
+it is not set, a permission is not needed to activate the target through the alias.
+</p>
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a> 
+section in the introduction.
+</p></dd>
+
+<dt><a name="trgt"></a>{@code android:targetActivity}</dt>
+<dd>The name of the activity that can be activated through the alias.
+This name must match the {@code name} attribute of an 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element that precedes
+the alias in the manifest.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code></dd>
+
+</dl>

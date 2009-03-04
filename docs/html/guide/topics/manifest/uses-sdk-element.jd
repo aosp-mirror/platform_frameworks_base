@@ -1,0 +1,49 @@
+page.title=&lt;uses-sdk&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-sdk android:<a href="#min">minSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares which levels of the Android API the application can run against.  
+The level is incremented when there are additions to the API and resource tree, 
+so an application developed using level 3 of the API may not run against level 
+1 or 2, but should run against level 3, 4, 5, and above.
+</p>
+
+<p>
+The default level is 1. 
+</p>
+
+<p>
+For more information on the API level, see the 
+<a href="{@docRoot}guide/publishing/versioning.html#minsdkversion">Specifying 
+Minimum System API Version</a> section of 
+<a href="{@docRoot}guide/publishing/versioning.html">Versioning Your 
+Applications</a>.
+</p></dd> 
+
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="min"></a>{@code android:minSdkVersion}</dt>
+<dd>An integer designating the minimum level of the Android API that's required 
+for the application to run.
+
+<p>
+Despite its name, this attribute is set to the API level, <em>not</em> to the 
+version number of the SDK (software development kit).  The API level is always 
+a single integer; the SDK version may be split into major and minor components 
+(such as 1.2).  You cannot derive the API level from the SDK version number 
+(for example, it is not the same as the major version or the sum of the major 
+and minor versions).  To learn what the API level is, check the notes that 
+came with the SDK you're using.
+</p></dd>
+
+</dl></dd>
+
+</dl>

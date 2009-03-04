@@ -1,0 +1,38 @@
+application: androidappdocs-staging
+version: 1
+runtime: python
+api_version: 1
+
+# This file defines two mutually exclusive 
+# hander blocks:
+# - a handler for use on a local dev_appserver
+#   during development or non-production doc build
+# - a handler for use on a production gae 
+#   instance. This handler requires that the
+#   docs files in the app have been compressed 
+#   with divide_and_compress.py and that main.py
+#   and gae_shell/ are present.
+#
+# Only one of the handler blocks should be
+# uncommented at any given time. By default,
+# the development handler is exposed. 
+
+handlers:
+
+# DEVELOPMENT HANDLER
+# (this handler block *must* be commented
+# out before pushing to a production server)
+- url: /
+  static_dir: /
+
+# PRODUCTION GAE HANDLER
+#- url: /gae_shell/static
+#  static_dir: gae_shell/static
+#  expiration: 1d
+#
+#- url: /gae_shell/.*
+#  script: /gae_shell/shell.py
+#  login: admin
+#
+#- url: .*
+#  script: main.py

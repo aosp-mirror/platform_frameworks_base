@@ -1,0 +1,65 @@
+page.title=Android 1.0 SDK, release 2
+
+sdk.not_latest_version=true
+
+sdk.version=1.0_r2
+sdk.date=November 2008
+
+sdk.win_download=android-sdk-windows-1.0_r2.zip
+sdk.win_bytes=98360564
+sdk.win_checksum=a5e1af8ac145946b4a9627516ad4a711
+
+sdk.mac_download=android-sdk-mac_x86-1.0_r2.zip
+sdk.mac_bytes=93771410
+sdk.mac_checksum=87b99d5e9f59b78363a63200c11498e8
+
+sdk.linux_download=android-sdk-linux_x86-1.0_r2.zip
+sdk.linux_bytes=94186463
+sdk.linux_checksum=a1f3b6d854596f850f5008856d0f380e
+
+
+@jd:body
+
+<h2>Included in this SDK</h2>
+
+<h4>Development tools</h4>
+
+<p>The SDK includes a variety of tools for developing and debugging application code and designing 
+an application UI. You can read about the tools in the documentation included with the SDK. 
+You can access the tools in the <code>&lt;sdk&gt;/tools/</code> directory.</p>
+
+<h4 id="system_images">System Images</h4>
+
+<p>The Android system images listed below are included in this SDK.</p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>System Image</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+
+<tr>
+<td width="5%"><nobr>Android 1.0</nobr></td>
+<td  width="5%">1</td>
+<td  width="5%"><nobr>N/A</nobr></td>
+<td>Includes the {@code com.google.android.maps} external library and a set of standard development 
+applications. </td>
+
+</tr>
+
+</table>
+
+<h4>Sample Code and Applications</h4>
+
+<p>You can look at a variety of tutorials and samples in the 
+documentation included with the SDK and access the sample code itself
+in the <code>&lt;sdk&gt;/samples/</code> directory of the SDK package.</p>
+
+<h4>Documentation</h4>
+
+<p>The SDK package provides a full set of local documentation, including installation and upgrade 
+instructions. To view it, open the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. 
+If you are developing in an IDE such as Eclipse, you can also view the reference documentation 
+directly in the IDE. </p>
+
+
+
