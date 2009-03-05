@@ -1068,6 +1068,7 @@
   <public type="style" name="ButtonBar" id="0x01030058" />
   
   <public type="string" name="dialog_alert_title" id="0x01040014" />
+  <public type="string" name="VideoView_error_text_invalid_progressive_playback" id="0x01040015" />
 
   <public type="drawable" name="emo_im_angel"               id="0x010800a4" />
   <public type="drawable" name="emo_im_cool"                id="0x010800a5" />

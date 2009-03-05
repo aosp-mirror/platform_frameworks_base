@@ -1471,6 +1471,8 @@
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Cannot play video</string>
+    <!-- Text for error alert when a video container is not valid for progressive download/playback. -->
+    <string name="VideoView_error_text_invalid_progressive_playback">Sorry, this video is not valid for streaming to this device.</string>
     <!-- Text for error alert when a video cannot be played. it can be used by any app. -->
     <string name="VideoView_error_text_unknown">Sorry, this video cannot be played.</string>
     <!-- Button to close error alert when a video cannot be played -->

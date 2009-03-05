@@ -84,6 +84,10 @@ static void android_os_fileobserver_observe(JNIEnv* env, jobject object, jint fd
             }
             
 		    env->CallVoidMethod(object, method_onEvent, event->wd, event->mask, path);
+            if (path != NULL)
+            {
+                env->DeleteLocalRef(path);
+            }
 		    
 		    event_size = sizeof(*event) + event->len;
 			num_bytes -= event_size;

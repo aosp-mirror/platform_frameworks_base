@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 /**
@@ -54,7 +54,7 @@ public class MediaRecorderStopStateUnitTest extends AndroidTestCase implements M
         recorder.stop();
     }
 
-    @MediumTest
+    @LargeTest
     public void testStop() {
         mTestTemplate.runTestOnMethod(this);
     }
