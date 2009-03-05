@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.InputType;
@@ -53,7 +54,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -348,22 +348,36 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * Handle a request by the system to hide the soft input area.
          */
-        public void hideSoftInput() {
+        public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
+            boolean wasVis = isInputViewShown();
             mShowInputFlags = 0;
             mShowInputRequested = false;
             mShowInputForced = false;
             hideWindow();
+            if (resultReceiver != null) {
+                resultReceiver.send(wasVis != isInputViewShown()
+                        ? InputMethodManager.RESULT_HIDDEN
+                        : (wasVis ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                                : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
+            }
         }
 
         /**
          * Handle a request by the system to show the soft input area.
          */
-        public void showSoftInput(int flags) {
+        public void showSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
+            boolean wasVis = isInputViewShown();
             mShowInputFlags = 0;
             if (onShowInputRequested(flags, false)) {
                 showWindow(true);
+            }
+            if (resultReceiver != null) {
+                resultReceiver.send(wasVis != isInputViewShown()
+                        ? InputMethodManager.RESULT_SHOWN
+                        : (wasVis ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                                : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
         }
     }
@@ -439,6 +453,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             InputMethodService.this.onAppPrivateCommand(action, data);
+        }
+        
+        /**
+         * 
+         */
+        public void toggleSoftInput(int showFlags, int hideFlags) {
+            InputMethodService.this.onToggleSoftInput(showFlags, hideFlags);
         }
     }
     
@@ -1048,7 +1069,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * text; you can override this (not calling the base class implementation)
      * to perform whatever behavior you would like.
      * 
-     * @boolean finishingInput If true, {@link #onFinishInput} will be
+     * @param finishingInput If true, {@link #onFinishInput} will be
      * called immediately after.
      */
     public void onFinishInputView(boolean finishingInput) {
@@ -1092,7 +1113,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * text; you can override this (not calling the base class implementation)
      * to perform whatever behavior you would like.
      * 
-     * @boolean finishingInput If true, {@link #onFinishInput} will be
+     * @param finishingInput If true, {@link #onFinishInput} will be
      * called immediately after.
      */
     public void onFinishCandidatesView(boolean finishingInput) {
@@ -1107,14 +1128,14 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * The system has decided that it may be time to show your input method.
      * This is called due to a corresponding call to your
-     * {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}
+     * {@link InputMethod#showSoftInput InputMethod.showSoftInput()}
      * method.  The default implementation uses
      * {@link #onEvaluateInputViewShown()}, {@link #onEvaluateFullscreenMode()},
      * and the current configuration to decide whether the input view should
      * be shown at this point.
      * 
      * @param flags Provides additional information about the show request,
-     * as per {@link InputMethod#showSoftInput(int) InputMethod.showSoftInput(int)}.
+     * as per {@link InputMethod#showSoftInput InputMethod.showSoftInput()}.
      * @param configChange This is true if we are re-showing due to a
      * configuration change.
      * @return Returns true to indicate that the window should be shown.
@@ -1290,7 +1311,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mStartedInputConnection = null;
         mCurCompletions = null;
     }
-    
+
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
         if (!restarting) {
             doFinishInput();
@@ -1399,8 +1420,22 @@ public class InputMethodService extends AbstractInputMethodService {
      * 0 or have the {@link InputMethodManager#HIDE_IMPLICIT_ONLY
      * InputMethodManager.HIDE_IMPLICIT_ONLY} bit set.
      */
-    public void dismissSoftInput(int flags) {
+    public void requestHideSelf(int flags) {
         mImm.hideSoftInputFromInputMethod(mToken, flags);
+    }
+    
+    /**
+     * Show the input method. This is a call back to the
+     * IMF to handle showing the input method.
+     * Close this input method's soft input area, removing it from the display.
+     * The input method will continue running, but the user can no longer use
+     * it to generate input by touching the screen.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link InputMethodManager#SHOW_FORCED
+     * InputMethodManager.} bit set.
+     */
+    private void requestShowSelf(int flags) {
+        mImm.showSoftInputFromInputMethod(mToken, flags);
     }
     
     /**
@@ -1421,7 +1456,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mShowInputRequested) {
                 // If the soft input area is shown, back closes it and we
                 // consume the back key.
-                dismissSoftInput(0);
+                requestHideSelf(0);
                 return true;
             } else if (mWindowVisible) {
                 if (mCandidatesVisibility == View.VISIBLE) {
@@ -1438,7 +1473,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             }
         }
-        
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }
 
@@ -1478,6 +1512,18 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     public void onAppPrivateCommand(String action, Bundle data) {
+    }
+    
+    /**
+     * Handle a request by the system to toggle the soft input area.
+     */
+    private void onToggleSoftInput(int showFlags, int hideFlags) {
+        if (DEBUG) Log.v(TAG, "toggleSoftInput()");
+        if (isInputViewShown()) {
+            requestHideSelf(hideFlags);
+        } else {
+            requestShowSelf(showFlags);
+        }
     }
     
     static final int MOVEMENT_DOWN = -1;
@@ -1737,6 +1783,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 return getText(com.android.internal.R.string.ime_action_send);
             case EditorInfo.IME_ACTION_NEXT:
                 return getText(com.android.internal.R.string.ime_action_next);
+            case EditorInfo.IME_ACTION_DONE:
+                return getText(com.android.internal.R.string.ime_action_done);
             default:
                 return getText(com.android.internal.R.string.ime_action_default);
         }
@@ -1777,7 +1825,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onExtractingInputChanged(EditorInfo ei) {
         if (ei.inputType == InputType.TYPE_NULL) {
-            dismissSoftInput(InputMethodManager.HIDE_NOT_ALWAYS);
+            requestHideSelf(InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
     

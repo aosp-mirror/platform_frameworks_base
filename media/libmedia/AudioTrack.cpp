@@ -808,7 +808,14 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         writtenSize = audioBuffer.size;
 
         // Sanity check on returned size
-        if (ssize_t(writtenSize) <= 0) break;
+        if (ssize_t(writtenSize) <= 0) {
+            // The callback is done filling buffers
+            // Keep this thread going to handle timed events and
+            // still try to get more data in intervals of WAIT_PERIOD_MS
+            // but don't just loop and block the CPU, so wait
+            usleep(WAIT_PERIOD_MS*1000);
+            break;
+        }
         if (writtenSize > reqSize) writtenSize = reqSize;
 
         if (mFormat == AudioSystem::PCM_8_BIT) {

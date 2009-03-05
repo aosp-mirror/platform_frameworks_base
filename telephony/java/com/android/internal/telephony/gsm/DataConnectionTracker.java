@@ -172,11 +172,14 @@ final class DataConnectionTracker extends Handler
 
     private boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
 
-    // wifi connection status will be updated by sticky intent
+    /** wifi connection status will be updated by sticky intent */
     private boolean mIsWifiConnected = false;
 
     /** Intent sent when the reconnect alarm fires. */
     private PendingIntent mReconnectIntent = null;
+    
+    /** Is packet service restricted by network */
+    private boolean mIsPsRestricted = false;
 
     //***** Constants
 
@@ -249,6 +252,8 @@ final class DataConnectionTracker extends Handler
     static final int EVENT_START_NETSTAT_POLL = 27;
     static final int EVENT_START_RECOVERY = 28;
     static final int EVENT_APN_CHANGED = 29;
+    static final int EVENT_PS_RESTRICT_ENABLED = 30;
+    static final int EVENT_PS_RESTRICT_DISABLED = 31;
 
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
@@ -307,6 +312,8 @@ final class DataConnectionTracker extends Handler
         phone.mSST.registerForGprsDetached(this, EVENT_GPRS_DETACHED, null);
         phone.mSST.registerForRoamingOn(this, EVENT_ROAMING_ON, null);
         phone.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
+        phone.mSST.registerForPsRestrictedEnabled(this, EVENT_PS_RESTRICT_ENABLED, null);
+        phone.mSST.registerForPsRestrictedDisabled(this, EVENT_PS_RESTRICT_DISABLED, null);
 
         this.netstat = INetStatService.Stub.asInterface(ServiceManager.getService("netstat"));
 
@@ -474,6 +481,7 @@ final class DataConnectionTracker extends Handler
      *  2. registered to gprs service
      *  3. user doesn't explicitly disable data service
      *  4. wifi is not on
+     *  5. packet service is not restricted
      *
      * @return false while no data connection if all above requirements are met.
      */
@@ -483,7 +491,8 @@ final class DataConnectionTracker extends Handler
         if (phone.mSIMRecords.getRecordsLoaded() &&
             phone.mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
             (!roaming || getDataOnRoamingEnabled()) &&
-            !mIsWifiConnected ) {
+            !mIsWifiConnected && 
+            !mIsPsRestricted ) {
             return (state == State.CONNECTED);
         }
         return true;
@@ -650,6 +659,8 @@ final class DataConnectionTracker extends Handler
     {
         if (DBG) log("***trySetupData due to " + (reason == null ? "(unspecified)" : reason));
 
+        Log.d(LOG_TAG, "[DSAC DEB] " + "trySetupData with mIsPsRestricted=" + mIsPsRestricted);
+        
         if (phone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
@@ -668,7 +679,8 @@ final class DataConnectionTracker extends Handler
                 && phone.mSIMRecords.getRecordsLoaded()
                 && ( phone.mSST.isConcurrentVoiceAndData() ||
                      phone.getState() == Phone.State.IDLE )
-                && isDataAllowed()) {
+                && isDataAllowed()
+                && !mIsPsRestricted ) {
 
             if (state == State.IDLE) {
                 waitingApns = buildWaitingApns();
@@ -695,7 +707,8 @@ final class DataConnectionTracker extends Handler
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
-                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled());
+                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
+                    " ps restricted=" + mIsPsRestricted);
             return false;
         }
     }
@@ -1279,7 +1292,8 @@ final class DataConnectionTracker extends Handler
         boolean retry = true;
         
         if ( Phone.REASON_RADIO_TURNED_OFF.equals(reason) ||
-             Phone.REASON_DATA_DISABLED.equals(reason) ) { 
+             Phone.REASON_DATA_DISABLED.equals(reason)    ||
+             Phone.REASON_PS_RESTRICT_ENABLED.equals(reason)) { 
             retry = false;
         }
         return retry;
@@ -1571,6 +1585,37 @@ final class DataConnectionTracker extends Handler
             case EVENT_APN_CHANGED:
                 onApnChanged();
                 break;
+            
+            case EVENT_PS_RESTRICT_ENABLED:
+                /**
+                 * We don't need to explicitly to tear down the PDP context
+                 * when PS restricted is enabled. The base band will deactive
+                 * PDP context and notify us with PDP_CONTEXT_CHANGED.
+                 * But we should stop the network polling and prevent reset PDP.
+                 */
+                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted); 
+                stopNetStatPoll();
+                mIsPsRestricted = true; 
+                break;
+                
+            case EVENT_PS_RESTRICT_DISABLED:
+                /**
+                 * When PS restrict is removed, we need setup PDP connection if
+                 * PDP connection is down.
+                 */
+                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_PS_RESTRICT_DISABLED " + mIsPsRestricted);
+                mIsPsRestricted  = false;
+                if (state == State.CONNECTED) {
+                    startNetStatPoll();
+                } else {
+                    if (state == State.FAILED) {
+                        cleanUpConnection(false, Phone.REASON_PS_RESTRICT_ENABLED);
+                        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                    }
+                    trySetupData(Phone.REASON_PS_RESTRICT_ENABLED);
+                }
+                break;
+             
         }
     }
 

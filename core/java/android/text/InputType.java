@@ -179,9 +179,27 @@ public interface InputType {
     public static final int TYPE_TEXT_VARIATION_PASSWORD = 0x00000080;
     
     /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering a password, which should
+     * be visible to the user.
+     */
+    public static final int TYPE_TEXT_VARIATION_VISIBLE_PASSWORD = 0x00000090;
+    
+    /**
      * Variation of {@link #TYPE_CLASS_TEXT}: entering text inside of a web form.
      */
-    public static final int TYPE_TEXT_VARIATION_WEB_EDIT_TEXT = 0x00000090;
+    public static final int TYPE_TEXT_VARIATION_WEB_EDIT_TEXT = 0x000000a0;
+    
+    /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering text to filter contents
+     * of a list etc.
+     */
+    public static final int TYPE_TEXT_VARIATION_FILTER = 0x000000b0;
+    
+    /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering text for phonetic
+     * pronunciation, such as a phonetic name field in contacts.
+     */
+    public static final int TYPE_TEXT_VARIATION_PHONETIC = 0x000000c0;
     
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------

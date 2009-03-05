@@ -617,7 +617,7 @@ parse_preprocessed_file(const string& filename)
 
     FILE* f = fopen(filename.c_str(), "rb");
     if (f == NULL) {
-        fprintf(stderr, "aidl: can't open preprocessd file: %s\n",
+        fprintf(stderr, "aidl: can't open preprocessed file: %s\n",
                 filename.c_str());
         return 1;
     }

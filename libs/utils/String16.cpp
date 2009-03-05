@@ -388,7 +388,7 @@ status_t String16::setTo(const char16_t* other, size_t len)
         ->editResize((len+1)*sizeof(char16_t));
     if (buf) {
         char16_t* str = (char16_t*)buf->data();
-        memcpy(str, other, len*sizeof(char16_t));
+        memmove(str, other, len*sizeof(char16_t));
         str[len] = 0;
         mString = str;
         return NO_ERROR;

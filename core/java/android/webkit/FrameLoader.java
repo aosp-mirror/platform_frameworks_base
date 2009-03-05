@@ -21,7 +21,6 @@ import android.net.http.RequestHandle;
 import android.util.Config;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
-import android.webkit.UrlInterceptRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -234,12 +233,14 @@ class FrameLoader {
     private boolean handleUrlIntercept() {
         // Check if the URL can be served from UrlIntercept. If
         // successful, return the data just like a cache hit.
-        CacheResult result = UrlInterceptRegistry.getSurrogate(
+
+        PluginData data = UrlInterceptRegistry.getPluginData(
                 mListener.url(), mHeaders);
-        if(result != null) {
-            // Intercepted. The data is stored in result.stream. Setup
-            // a load from the CacheResult.
-            startCacheLoad(result);
+
+        if(data != null) {
+            PluginContentLoader loader =
+                    new PluginContentLoader(mListener, data);
+            loader.load();
             return true;
         }
         // Not intercepted. Carry on as normal.

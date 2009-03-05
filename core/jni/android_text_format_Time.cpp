@@ -52,6 +52,9 @@ static jfieldID g_dateTimeFormatField = 0;
 static jfieldID g_amField = 0;
 static jfieldID g_pmField = 0;
 static jfieldID g_dateCommandField = 0;
+static jfieldID g_localeField = 0;
+
+static jclass g_timeClass = NULL;
 
 static inline bool java2time(JNIEnv* env, Time* t, jobject o)
 {
@@ -183,56 +186,101 @@ static jstring android_text_format_Time_format2445(JNIEnv* env, jobject This)
 static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
                             jstring formatObject)
 {
-    Time t;
-    struct strftime_locale locale;
-    jclass timeClass = env->FindClass("android/text/format/Time");
-    jstring js_mon[12], js_month[12], js_wday[7], js_weekday[7];
-    jstring js_X_fmt, js_x_fmt, js_c_fmt, js_am, js_pm, js_date_fmt;
-    jobjectArray ja;
+    // We only teardown and setup our 'locale' struct and other state
+    // when the Java-side locale changed.  This is safe to do here
+    // without locking because we're always called from Java code
+    // synchronized on the class instance.
+    static jobject js_locale_previous = NULL;
+    static struct strftime_locale locale;
+    static jstring js_mon[12], js_month[12], js_wday[7], js_weekday[7];
+    static jstring js_X_fmt, js_x_fmt, js_c_fmt, js_am, js_pm, js_date_fmt;
 
+    Time t;
     if (!java2time(env, &t, This)) return env->NewStringUTF("");
 
-    ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortMonthsField);
-    for (int i = 0; i < 12; i++) {
-        js_mon[i] = (jstring) env->GetObjectArrayElement(ja, i);
-        locale.mon[i] = env->GetStringUTFChars(js_mon[i], NULL);
+    jclass timeClass = g_timeClass;
+    jobject js_locale = (jobject) env->GetStaticObjectField(timeClass, g_localeField);
+    if (js_locale_previous != js_locale) {
+        if (js_locale_previous != NULL) {
+            // Free the old one.
+            for (int i = 0; i < 12; i++) {
+                env->ReleaseStringUTFChars(js_mon[i], locale.mon[i]);
+                env->ReleaseStringUTFChars(js_month[i], locale.month[i]);
+                env->DeleteGlobalRef(js_mon[i]);
+                env->DeleteGlobalRef(js_month[i]);
+            }
+
+            for (int i = 0; i < 7; i++) {
+                env->ReleaseStringUTFChars(js_wday[i], locale.wday[i]);
+                env->ReleaseStringUTFChars(js_weekday[i], locale.weekday[i]);
+                env->DeleteGlobalRef(js_wday[i]);
+                env->DeleteGlobalRef(js_weekday[i]);
+            }
+
+            env->ReleaseStringUTFChars(js_X_fmt, locale.X_fmt);
+            env->ReleaseStringUTFChars(js_x_fmt, locale.x_fmt);
+            env->ReleaseStringUTFChars(js_c_fmt, locale.c_fmt);
+            env->ReleaseStringUTFChars(js_am, locale.am);
+            env->ReleaseStringUTFChars(js_pm, locale.pm);
+            env->ReleaseStringUTFChars(js_date_fmt, locale.date_fmt);
+            env->DeleteGlobalRef(js_X_fmt);
+            env->DeleteGlobalRef(js_x_fmt);
+            env->DeleteGlobalRef(js_c_fmt);
+            env->DeleteGlobalRef(js_am);
+            env->DeleteGlobalRef(js_pm);
+            env->DeleteGlobalRef(js_date_fmt);
+        }
+        js_locale_previous = js_locale;
+
+        jobjectArray ja;
+        ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortMonthsField);
+        for (int i = 0; i < 12; i++) {
+            js_mon[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            locale.mon[i] = env->GetStringUTFChars(js_mon[i], NULL);
+        }
+
+        ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longMonthsField);
+        for (int i = 0; i < 12; i++) {
+            js_month[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            locale.month[i] = env->GetStringUTFChars(js_month[i], NULL);
+        }
+
+        ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortWeekdaysField);
+        for (int i = 0; i < 7; i++) {
+            js_wday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            locale.wday[i] = env->GetStringUTFChars(js_wday[i], NULL);
+        }
+
+        ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longWeekdaysField);
+        for (int i = 0; i < 7; i++) {
+            js_weekday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            locale.weekday[i] = env->GetStringUTFChars(js_weekday[i], NULL);
+        }
+
+        js_X_fmt = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                       timeClass, g_timeOnlyFormatField));
+        locale.X_fmt = env->GetStringUTFChars(js_X_fmt, NULL);
+
+        js_x_fmt = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                       timeClass, g_dateOnlyFormatField));
+        locale.x_fmt = env->GetStringUTFChars(js_x_fmt, NULL);
+
+        js_c_fmt = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                       timeClass, g_dateTimeFormatField));
+        locale.c_fmt = env->GetStringUTFChars(js_c_fmt, NULL);
+
+        js_am = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                    timeClass, g_amField));
+        locale.am = env->GetStringUTFChars(js_am, NULL);
+
+        js_pm = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                    timeClass, g_pmField));
+        locale.pm = env->GetStringUTFChars(js_pm, NULL);
+
+        js_date_fmt = (jstring) env->NewGlobalRef(env->GetStaticObjectField(
+                                                          timeClass, g_dateCommandField));
+        locale.date_fmt = env->GetStringUTFChars(js_date_fmt, NULL);
     }
-
-    ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longMonthsField);
-    for (int i = 0; i < 12; i++) {
-        js_month[i] = (jstring) env->GetObjectArrayElement(ja, i);
-        locale.month[i] = env->GetStringUTFChars(js_month[i], NULL);
-    }
-
-    ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortWeekdaysField);
-    for (int i = 0; i < 7; i++) {
-        js_wday[i] = (jstring) env->GetObjectArrayElement(ja, i);
-        locale.wday[i] = env->GetStringUTFChars(js_wday[i], NULL);
-    }
-
-    ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longWeekdaysField);
-    for (int i = 0; i < 7; i++) {
-        js_weekday[i] = (jstring) env->GetObjectArrayElement(ja, i);
-        locale.weekday[i] = env->GetStringUTFChars(js_weekday[i], NULL);
-    }
-
-    js_X_fmt = (jstring) env->GetStaticObjectField(timeClass, g_timeOnlyFormatField);
-    locale.X_fmt = env->GetStringUTFChars(js_X_fmt, NULL);
-
-    js_x_fmt = (jstring) env->GetStaticObjectField(timeClass, g_dateOnlyFormatField);
-    locale.x_fmt = env->GetStringUTFChars(js_x_fmt, NULL);
-
-    js_c_fmt = (jstring) env->GetStaticObjectField(timeClass, g_dateTimeFormatField);
-    locale.c_fmt = env->GetStringUTFChars(js_c_fmt, NULL);
-
-    js_am = (jstring) env->GetStaticObjectField(timeClass, g_amField);
-    locale.am = env->GetStringUTFChars(js_am, NULL);
-
-    js_pm = (jstring) env->GetStaticObjectField(timeClass, g_pmField);
-    locale.pm = env->GetStringUTFChars(js_pm, NULL);
-
-    js_date_fmt = (jstring) env->GetStaticObjectField(timeClass, g_dateCommandField);
-    locale.date_fmt = env->GetStringUTFChars(js_date_fmt, NULL);
 
     ACQUIRE_TIMEZONE(This, t)
 
@@ -242,23 +290,6 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
 
     env->ReleaseStringUTFChars(formatObject, format);
     RELEASE_TIMEZONE(This, t)
-
-    for (int i = 0; i < 12; i++) {
-        env->ReleaseStringUTFChars(js_mon[i], locale.mon[i]);
-        env->ReleaseStringUTFChars(js_month[i], locale.month[i]);
-    }
-
-    for (int i = 0; i < 7; i++) {
-        env->ReleaseStringUTFChars(js_wday[i], locale.wday[i]);
-        env->ReleaseStringUTFChars(js_weekday[i], locale.weekday[i]);
-    }
-
-    env->ReleaseStringUTFChars(js_X_fmt, locale.X_fmt);
-    env->ReleaseStringUTFChars(js_x_fmt, locale.x_fmt);
-    env->ReleaseStringUTFChars(js_c_fmt, locale.c_fmt);
-    env->ReleaseStringUTFChars(js_am, locale.am);
-    env->ReleaseStringUTFChars(js_pm, locale.pm);
-    env->ReleaseStringUTFChars(js_date_fmt, locale.date_fmt);
 
     return env->NewStringUTF(r.string());
 }
@@ -307,7 +338,6 @@ static void android_text_format_Time_set(JNIEnv* env, jobject This, jlong millis
 {
     env->SetBooleanField(This, g_allDayField, JNI_FALSE);
     Time t;
-    if (!java2time(env, &t, This)) return;
     ACQUIRE_TIMEZONE(This, t)
 
     t.set(millis);
@@ -592,6 +622,8 @@ int register_android_text_format_Time(JNIEnv* env)
 {
     jclass timeClass = env->FindClass("android/text/format/Time");
 
+    g_timeClass = (jclass) env->NewGlobalRef(timeClass);
+
     g_allDayField = env->GetFieldID(timeClass, "allDay", "Z");
     g_secField = env->GetFieldID(timeClass, "second", "I");
     g_minField = env->GetFieldID(timeClass, "minute", "I");
@@ -615,9 +647,9 @@ int register_android_text_format_Time(JNIEnv* env)
     g_amField = env->GetStaticFieldID(timeClass, "sAm", "Ljava/lang/String;");
     g_pmField = env->GetStaticFieldID(timeClass, "sPm", "Ljava/lang/String;");
     g_dateCommandField = env->GetStaticFieldID(timeClass, "sDateCommand", "Ljava/lang/String;");
+    g_localeField = env->GetStaticFieldID(timeClass, "sLocale", "Ljava/util/Locale;");
 
     return AndroidRuntime::registerNativeMethods(env, "android/text/format/Time", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android
-

@@ -390,6 +390,16 @@ public class GSMConnection extends Connection {
                     return DisconnectCause.OUT_OF_SERVICE;
                 } else if (phone.getSimCard().getState() != GsmSimCard.State.READY) {
                     return DisconnectCause.SIM_ERROR;
+                } else if (causeCode == CallFailCause.ERROR_UNSPECIFIED) {
+                    if (phone.mSST.rs.isCsRestricted()) {
+                        return DisconnectCause.CS_RESTRICTED; 
+                    } else if (phone.mSST.rs.isCsEmergencyRestricted()) {
+                        return DisconnectCause.CS_RESTRICTED_EMERGENCY;
+                    } else if (phone.mSST.rs.isCsNormalRestricted()) {
+                        return DisconnectCause.CS_RESTRICTED_NORMAL;
+                    } else {
+                        return DisconnectCause.NORMAL;
+                    }
                 } else {
                     return DisconnectCause.NORMAL;
                 }

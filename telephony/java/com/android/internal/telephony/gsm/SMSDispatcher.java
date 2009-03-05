@@ -471,35 +471,50 @@ final class SMSDispatcher extends Handler {
         SmsHeader header = sms.getUserDataHeader();
         if (header != null) {
             for (SmsHeader.Element element : header.getElements()) {
-                switch (element.getID()) {
-                case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
-                    byte[] data = element.getData();
-
-                    referenceNumber = data[0] & 0xff;
-                    count = data[1] & 0xff;
-                    sequence = data[2] & 0xff;
-
-                    break;
-                }
-
-                case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
-                    byte[] data = element.getData();
-
-                    referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
-                    count = data[2] & 0xff;
-                    sequence = data[3] & 0xff;
-
-                    break;
-                }
-
-                case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
-                    byte[] data = element.getData();
-
-                    destPort = (data[0] & 0xff) << 8;
-                    destPort |= (data[1] & 0xff);
-
-                    break;
-                }
+                try {
+                    switch (element.getID()) {
+                        case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
+                            byte[] data = element.getData();
+                            
+                            referenceNumber = data[0] & 0xff;
+                            count = data[1] & 0xff;
+                            sequence = data[2] & 0xff;
+                            
+                            // Per TS 23.040, 9.2.3.24.1: If the count is zero, sequence
+                            // is zero, or sequence > count, ignore the entire element
+                            if (count == 0 || sequence == 0 || sequence > count) {
+                                referenceNumber = -1;
+                            }
+                            break;
+                        }
+                        
+                        case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
+                            byte[] data = element.getData();
+                            
+                            referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
+                            count = data[2] & 0xff;
+                            sequence = data[3] & 0xff;
+                            
+                            // Per TS 23.040, 9.2.3.24.8: If the count is zero, sequence
+                            // is zero, or sequence > count, ignore the entire element
+                            if (count == 0 || sequence == 0 || sequence > count) {
+                                referenceNumber = -1;
+                            }
+                            break;
+                        }
+                        
+                        case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
+                            byte[] data = element.getData();
+                            
+                            destPort = (data[0] & 0xff) << 8;
+                            destPort |= (data[1] & 0xff);
+                            
+                            break;
+                        }
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    Log.e(TAG, "Bad element in header", e);
+                    return;  // TODO: NACK the message or something, don't just discard.
                 }
             }
         }

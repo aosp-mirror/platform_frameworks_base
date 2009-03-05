@@ -1565,7 +1565,7 @@
          want a 24-hour clock.
          You can remove the colon
          or make other punctuation changes appropriate for your locale. -->
-    <string name="twenty_four_hour_time_format" format="date"><xliff:g id="hour" example="23">H</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g></string>
+    <string name="twenty_four_hour_time_format" format="date"><xliff:g id="hour" example="23">HH</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g></string>
 
     <!-- Quoted name for 12pm, lowercase -->
     <string name="noon">"noon"</string>
@@ -2292,6 +2292,9 @@
     
     <!-- Long label for a button on a full-screen input method for the "Next" action. -->
     <string name="ime_action_next">Next</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Done" action. -->
+    <string name="ime_action_done">Done</string>
     
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>

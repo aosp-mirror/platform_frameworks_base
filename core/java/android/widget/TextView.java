@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.Message;
 import android.text.BoringLayout;
@@ -234,6 +235,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CharWrapper mCharWrapper = null;
 
     private boolean mSelectionMoved = false;
+    private boolean mTouchFocusSelectedAll = false;
 
     private Marquee mMarquee;
     private boolean mRestartMarquee;
@@ -836,6 +838,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (password) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
+            typefaceIndex = MONOSPACE;
+        } else if ((mInputType&(EditorInfo.TYPE_MASK_CLASS
+                |EditorInfo.TYPE_MASK_VARIATION))
+                == (EditorInfo.TYPE_CLASS_TEXT
+                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
             typefaceIndex = MONOSPACE;
         }
 
@@ -2244,6 +2251,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int selEnd;
         CharSequence text;
         boolean frozenWithFocus;
+        CharSequence error;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -2256,6 +2264,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             out.writeInt(selEnd);
             out.writeInt(frozenWithFocus ? 1 : 0);
             TextUtils.writeToParcel(text, out, flags);
+
+            if (error == null) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(1);
+                TextUtils.writeToParcel(error, out, flags);
+            }
         }
 
         @Override
@@ -2286,6 +2301,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selEnd = in.readInt();
             frozenWithFocus = (in.readInt() != 0);
             text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+
+            if (in.readInt() != 0) {
+                error = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            }
         }
     }
 
@@ -2338,6 +2357,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ss.frozenWithFocus = true;
             }
 
+            ss.error = mError;
+
             return ss;
         }
 
@@ -2382,6 +2403,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             }
+        }
+
+        if (ss.error != null) {
+            setError(ss.error);
         }
     }
 
@@ -2799,8 +2824,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setInputType(int type) {
         setInputType(type, false);
-        final boolean isPassword = (type&(EditorInfo.TYPE_MASK_CLASS
-                |EditorInfo.TYPE_MASK_VARIATION))
+        final int variation = type&(EditorInfo.TYPE_MASK_CLASS
+                |EditorInfo.TYPE_MASK_VARIATION);
+        final boolean isPassword = variation
                 == (EditorInfo.TYPE_CLASS_TEXT
                         |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
         boolean forceUpdate = false;
@@ -2809,8 +2835,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setTypefaceByIndex(MONOSPACE, 0);
         } else if (mTransformation == PasswordTransformationMethod.getInstance()) {
             // We need to clean up if we were previously in password mode.
-            setTypefaceByIndex(-1, -1);
+            if (variation != (EditorInfo.TYPE_CLASS_TEXT
+                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
+                setTypefaceByIndex(-1, -1);
+            }
             forceUpdate = true;
+        } else if (variation == (EditorInfo.TYPE_CLASS_TEXT
+                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
+            setTypefaceByIndex(MONOSPACE, 0);
         }
         
         boolean multiLine = (type&(EditorInfo.TYPE_MASK_CLASS
@@ -2999,23 +3031,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         }
-        
-        if (actionCode == EditorInfo.IME_ACTION_NEXT &&
-                (ict != null || !shouldAdvanceFocusOnEnter())) {
-            // This is the default handling for the NEXT action, to advance
-            // focus.  Note that for backwards compatibility we don't do this
+        if (ict != null || !shouldAdvanceFocusOnEnter()) {
+            // This is the handling for some default action.
+            // Note that for backwards compatibility we don't do this
             // default handling if explicit ime options have not been given,
-            // and we do not advance by default on an enter key -- in that
-            // case, we want to turn this into the normal enter key codes that
-            // an app may be expecting.
-            View v = focusSearch(FOCUS_DOWN);
-            if (v != null) {
-                if (!v.requestFocus(FOCUS_DOWN)) {
-                    throw new IllegalStateException("focus search returned a view " +
-                            "that wasn't able to take focus!");
+            // to instead turn this into the normal enter key codes that an
+            // app may be expecting.
+            if (actionCode == EditorInfo.IME_ACTION_NEXT) {
+                View v = focusSearch(FOCUS_DOWN);
+                if (v != null) {
+                    if (!v.requestFocus(FOCUS_DOWN)) {
+                        throw new IllegalStateException("focus search returned a view " +
+                                "that wasn't able to take focus!");
+                    }
+                }
+                return;
+                
+            } else if (actionCode == EditorInfo.IME_ACTION_DONE) {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
                 }
             }
-            return;
         }
         
         Handler h = getHandler();
@@ -3998,7 +4035,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * but also in mail addresses and subjects which will display on multiple
      * lines but where it doesn't make sense to insert newlines.
      */
-    protected boolean shouldAdvanceFocusOnEnter() {
+    private boolean shouldAdvanceFocusOnEnter() {
         if (mInput == null) {
             return false;
         }
@@ -4192,6 +4229,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                              */
                             super.onKeyUp(keyCode, event);
                             return true;
+                        } else if ((event.getFlags()
+                                & KeyEvent.FLAG_SOFT_KEYBOARD) != 0) {
+                            // No target for next focus, but make sure the IME
+                            // if this came from it.
+                            InputMethodManager imm = InputMethodManager.peekInstance();
+                            if (imm != null) {
+                                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                            }
                         }
                     }
 
@@ -4234,9 +4279,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // An action has not been set, but the enter key will move to
                     // the next focus, so set the action to that.
                     outAttrs.imeOptions = EditorInfo.IME_ACTION_NEXT;
-                    if (!shouldAdvanceFocusOnEnter()) {
-                        outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                    }
+                } else {
+                    // An action has not been set, and there is no focus to move
+                    // to, so let's just supply a "done" action.
+                    outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
+                }
+                if (!shouldAdvanceFocusOnEnter()) {
+                    outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 }
             }
             outAttrs.hintText = mHint;
@@ -5977,6 +6026,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (mSelectAllOnFocus) {
                     Selection.setSelection((Spannable) mText, 0, mText.length());
+                    mTouchFocusSelectedAll = true;
                 }
 
                 if (selMoved && selStart >= 0 && selEnd >= 0) {
@@ -6078,12 +6128,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    class CommitSelectionReceiver extends ResultReceiver {
+        int mNewStart;
+        int mNewEnd;
+        
+        CommitSelectionReceiver() {
+            super(getHandler());
+        }
+        
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode != InputMethodManager.RESULT_SHOWN) {
+                Selection.setSelection((Spannable)mText, mNewStart, mNewEnd);
+            }
+        }
+    }
+    
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        final int action = event.getAction();
+        if (action == MotionEvent.ACTION_DOWN) {
+            // Reset this state; it will be re-set if super.onTouchEvent
+            // causes focus to move to the view.
+            mTouchFocusSelectedAll = false;
+        }
+        
         final boolean superResult = super.onTouchEvent(event);
 
-        final int action = event.getAction();
-        
         /*
          * Don't handle the release after a long press, because it will
          * move the selection away from whatever the menu action was
@@ -6100,17 +6170,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mScrolled = false;
             }
             
-            boolean moved = mMovement.onTouchEvent(this, (Spannable) mText, event);
+            boolean handled = false;
+            
+            int oldSelStart = Selection.getSelectionStart(mText);
+            int oldSelEnd = Selection.getSelectionEnd(mText);
+            
+            handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
 
             if (mText instanceof Editable && onCheckIsTextEditor()) {
                 if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(this, 0);
+                    
+                    // This is going to be gross...  if tapping on the text view
+                    // causes the IME to be displayed, we don't want the selection
+                    // to change.  But the selection has already changed, and
+                    // we won't know right away whether the IME is getting
+                    // displayed, so...
+                    
+                    int newSelStart = Selection.getSelectionStart(mText);
+                    int newSelEnd = Selection.getSelectionEnd(mText);
+                    CommitSelectionReceiver csr = null;
+                    if (newSelStart != oldSelStart || newSelEnd != oldSelEnd) {
+                        csr = new CommitSelectionReceiver();
+                        csr.mNewStart = newSelStart;
+                        csr.mNewEnd = newSelEnd;
+                    }
+                    
+                    if (imm.showSoftInput(this, 0, csr) && csr != null) {
+                        // The IME might get shown -- revert to the old
+                        // selection, and change to the new when we finally
+                        // find out of it is okay.
+                        Selection.setSelection((Spannable)mText, oldSelStart, oldSelEnd);
+                        handled = true;
+                    }
                 }
             }
 
-            if (moved) {
+            if (handled) {
                 return true;
             }
         }
@@ -6118,6 +6215,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return superResult;
     }
 
+    /**
+     * Returns true, only while processing a touch gesture, if the initial
+     * touch down event caused focus to move to the text view and as a result
+     * it selected all of its text.
+     */
+    public boolean didTouchFocusSelectAll() {
+        return mTouchFocusSelectedAll;
+    }
+    
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();

@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.widget;
 
 import com.android.internal.R;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RotateDrawable;
@@ -18,36 +35,47 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 /**
+ * A view that has a draggable thumb on a circle.
+ * 
  * @hide
  */
 public class ZoomRing extends View {
-
-    // TODO: move to ViewConfiguration?
-    static final int DOUBLE_TAP_DISMISS_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
-    // TODO: get from theme
     private static final String TAG = "ZoomRing";
 
     // TODO: Temporary until the trail is done
     private static final boolean DRAW_TRAIL = false;
 
-    // TODO: xml
-    private static final int THUMB_DISTANCE = 63;
-
-    /** To avoid floating point calculations, we multiply radians by this value. */
+    /**
+     * To avoid floating point calculations and int round-offs, we multiply
+     * radians by this value.
+     */
     public static final int RADIAN_INT_MULTIPLIER = 10000;
+    /** The allowable margin of error when comparing two angles. */
     public static final int RADIAN_INT_ERROR = 100;
-    /** PI using our multiplier. */
     public static final int PI_INT_MULTIPLIED = (int) (Math.PI * RADIAN_INT_MULTIPLIER);
     public static final int TWO_PI_INT_MULTIPLIED = PI_INT_MULTIPLIED * 2;
-    /** PI/2 using our multiplier. */
     private static final int HALF_PI_INT_MULTIPLIED = PI_INT_MULTIPLIED / 2;
 
-    private int mZeroAngle = HALF_PI_INT_MULTIPLIED * 3;
-    
+    private static final int DOUBLE_TAP_DISMISS_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
+    private final int mTouchSlop;
+
+    /** The slop when the user is grabbing the thumb. */
     private static final int THUMB_GRAB_SLOP = PI_INT_MULTIPLIED / 8;
+    /** The slop until a user starts dragging the thumb. */
     private static final int THUMB_DRAG_SLOP = PI_INT_MULTIPLIED / 12;
 
+    /** The distance (in px) from the center of the ring to the center of the thumb. */ 
+    private int mThumbDistance;
+
+    /** The angle on a unit circle that is considered to be the zoom ring's 0 degree. */
+    private int mZeroAngle = HALF_PI_INT_MULTIPLIED * 3;
+
     /**
+     * The maximum delta angle that the thumb can move. The primary use is to
+     * ensure that when a user taps on the ring, the movement to reach that
+     * target angle is not ambiguous (for example, if the thumb is at 0 and he
+     * taps 180, should the thumb go clockwise or counterclockwise?
+     * <p>
      * Includes error because we compare this to the result of
      * getDelta(getClosestTickeAngle(..), oldAngle) which ends up having some
      * rounding error.
@@ -55,58 +83,93 @@ public class ZoomRing extends View {
     private static final int MAX_ABS_JUMP_DELTA_ANGLE = (2 * PI_INT_MULTIPLIED / 3) +
             RADIAN_INT_ERROR; 
 
-    /** The cached X of our center. */
+    /** The cached X of the zoom ring's center (in zoom ring coordinates). */
     private int mCenterX;
-    /** The cached Y of our center. */
+    /** The cached Y of the zoom ring's center (in zoom ring coordinates). */
     private int mCenterY;
 
     /** The angle of the thumb (in int radians) */
     private int mThumbAngle;
+    /** The cached width/2 of the zoom ring. */
     private int mThumbHalfWidth;
+    /** The cached height/2 of the zoom ring. */
     private int mThumbHalfHeight;
     
+    /**
+     * The bound for the thumb's movement when it is being dragged clockwise.
+     * Can be Integer.MIN_VALUE if there is no bound in this direction.
+     */
     private int mThumbCwBound = Integer.MIN_VALUE;
+    /**
+     * The bound for the thumb's movement when it is being dragged
+     * counterclockwise. Can be Integer.MIN_VALUE if there is no bound in this
+     * direction.
+     */
     private int mThumbCcwBound = Integer.MIN_VALUE;
+    
+    /**
+     * Whether to enforce the maximum absolute jump delta. See
+     * {@link #MAX_ABS_JUMP_DELTA_ANGLE}.
+     */
     private boolean mEnforceMaxAbsJump = true;
     
     /** The inner radius of the track. */
-    private int mBoundInnerRadiusSquared = 0;
+    private int mTrackInnerRadius;
+    /** Cached square of the inner radius of the track. */
+    private int mTrackInnerRadiusSquared;
     /** The outer radius of the track. */
-    private int mBoundOuterRadiusSquared = Integer.MAX_VALUE;
+    private int mTrackOuterRadius;
+    /** Cached square of the outer radius of the track. */
+    private int mTrackOuterRadiusSquared;
 
+    /** The raw X of where the widget previously was located. */
     private int mPreviousWidgetDragX;
+    /** The raw Y of where the widget previously was located. */
     private int mPreviousWidgetDragY;
 
+    /** Whether the thumb should be visible. */
     private boolean mThumbVisible = true;
+    
+    /** The drawable for the thumb. */
     private Drawable mThumbDrawable;
     
     /** Shown beneath the thumb if we can still zoom in. */
-    private Drawable mThumbPlusArrowDrawable;
+    private Drawable mZoomInArrowDrawable;
     /** Shown beneath the thumb if we can still zoom out. */
-    private Drawable mThumbMinusArrowDrawable;
+    private Drawable mZoomOutArrowDrawable;
+    
+    /** @see #mThumbArrowsToDraw */
     private static final int THUMB_ARROW_PLUS = 1 << 0;
+    /** @see #mThumbArrowsToDraw */
     private static final int THUMB_ARROW_MINUS = 1 << 1;
     /** Bitwise-OR of {@link #THUMB_ARROW_MINUS} and {@link #THUMB_ARROW_PLUS} */
     private int mThumbArrowsToDraw;
+    
+    /** The duration for the thumb arrows fading out */
     private static final int THUMB_ARROWS_FADE_DURATION = 300;
+    /** The time when the fade out started. */
     private long mThumbArrowsFadeStartTime;
+    /** The current alpha for the thumb arrows. */
     private int mThumbArrowsAlpha = 255;
 
-    private static final int THUMB_PLUS_MINUS_DISTANCE = 69;
-    private static final int THUMB_PLUS_MINUS_OFFSET_ANGLE = TWO_PI_INT_MULTIPLIED / 11;
+    /** The distance from the center to the zoom arrow hints (usually plus and minus). */
+    private int mZoomArrowHintDistance;
+    /** The offset angle from the thumb angle to draw the zoom arrow hints. */
+    private int mZoomArrowHintOffsetAngle = TWO_PI_INT_MULTIPLIED / 11;
     /** Drawn (without rotation) on top of the arrow. */
-    private Drawable mThumbPlusDrawable;
+    private Drawable mZoomInArrowHintDrawable;
     /** Drawn (without rotation) on top of the arrow. */
-    private Drawable mThumbMinusDrawable;
+    private Drawable mZoomOutArrowHintDrawable;
     
+    /** Zoom ring is just chillin' */
     private static final int MODE_IDLE = 0;
-
     /**
      * User has his finger down somewhere on the ring (besides the thumb) and we
      * are waiting for him to move the slop amount before considering him in the
      * drag thumb state.
      */
     private static final int MODE_WAITING_FOR_DRAG_THUMB_AFTER_JUMP = 5;
+    /** User is dragging the thumb. */
     private static final int MODE_DRAG_THUMB = 1;
     /**
      * User has his finger down, but we are waiting for him to pass the touch
@@ -114,51 +177,65 @@ public class ZoomRing extends View {
      * show the movable hint.
      */
     private static final int MODE_WAITING_FOR_MOVE_ZOOM_RING = 4;
+    /** User is moving the zoom ring. */
     private static final int MODE_MOVE_ZOOM_RING = 2;
+    /** User is dragging the thumb via tap-drag. */
     private static final int MODE_TAP_DRAG = 3;
     /** Ignore the touch interaction until the user touches the thumb again. */
     private static final int MODE_IGNORE_UNTIL_TOUCHES_THUMB = 6;
+    /** The current mode of interaction. */
     private int mMode;
-    
     /** Records the last mode the user was in. */
     private int mPreviousMode;
-    
+
+    /** The previous time of the up-touch on the center. */
     private long mPreviousCenterUpTime;
+    /** The previous X of down-touch. */
     private int mPreviousDownX;
+    /** The previous Y of down-touch. */
     private int mPreviousDownY;
 
-    private int mWaitingForDragThumbDownAngle;
+    /** The angle where the user first grabbed the thumb. */
+    private int mInitialGrabThumbAngle;
     
+    /** The callback. */
     private OnZoomRingCallback mCallback;
-    private int mPreviousCallbackAngle;
-    private int mCallbackThreshold = Integer.MAX_VALUE;
+    /** The tick angle that we previously called back with. */
+    private int mPreviousCallbackTickAngle;
+    /** The delta angle between ticks.  A tick is a callback point. */
+    private int mTickDelta = Integer.MAX_VALUE;
     /** If the user drags to within __% of a tick, snap to that tick. */
-    private int mFuzzyCallbackThreshold = Integer.MAX_VALUE;
+    private int mFuzzyTickDelta = Integer.MAX_VALUE;
     
-    private boolean mResetThumbAutomatically = true;
+    /** The angle where the thumb is officially starting to be dragged. */
     private int mThumbDragStartAngle;
 
-    private final int mTouchSlop;
-
+    /** The drawable for the zoom trail. */
     private Drawable mTrail;
+    /** The accumulated angle for the trail. */
     private double mAcculumalatedTrailAngle;
     
+    /** The animation-step tracker for scrolling the thumb to a particular position. */
     private Scroller mThumbScroller;
 
+    /** Whether to ever vibrate when passing a tick. */
     private boolean mVibration = true;
     
-    private static final int MSG_THUMB_SCROLLER_TICK = 1;
-    private static final int MSG_THUMB_ARROWS_FADE_TICK = 2;
+    /** The drawable used to hint that this can pan its owner. */
+    private Drawable mPanningArrowsDrawable;
+    
+    private static final int MSG_THUMB_SCROLLER_STEP = 1;
+    private static final int MSG_THUMB_ARROWS_FADE_STEP = 2;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_THUMB_SCROLLER_TICK:
-                    onThumbScrollerTick();
+                case MSG_THUMB_SCROLLER_STEP:
+                    onThumbScrollerStep();
                     break;
                     
-                case MSG_THUMB_ARROWS_FADE_TICK:
-                    onThumbArrowsFadeTick();
+                case MSG_THUMB_ARROWS_FADE_STEP:
+                    onThumbArrowsFadeStep();
                     break;
             }
         }
@@ -170,50 +247,64 @@ public class ZoomRing extends View {
         ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
 
-        // TODO get drawables from style instead
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ZoomRing, defStyle, 0);
+        mThumbDistance = (int) a.getDimension(R.styleable.ZoomRing_thumbDistance, 0);
+        setTrackRadii(
+                (int) a.getDimension(R.styleable.ZoomRing_trackInnerRadius, 0),
+                (int) a.getDimension(R.styleable.ZoomRing_trackOuterRadius, Integer.MAX_VALUE));
+        mThumbDrawable = a.getDrawable(R.styleable.ZoomRing_thumbDrawable);
+        mZoomInArrowDrawable = a.getDrawable(R.styleable.ZoomRing_zoomInArrowDrawable);
+        mZoomOutArrowDrawable = a.getDrawable(R.styleable.ZoomRing_zoomOutArrowDrawable);
+        mZoomInArrowHintDrawable = a.getDrawable(R.styleable.ZoomRing_zoomInArrowHintDrawable);
+        mZoomOutArrowHintDrawable = a.getDrawable(R.styleable.ZoomRing_zoomOutArrowHintDrawable);
+        mZoomArrowHintDistance =
+                (int) a.getDimension(R.styleable.ZoomRing_zoomArrowHintDistance, 0);
+        mZoomArrowHintOffsetAngle =
+                (int) (a.getInteger(R.styleable.ZoomRing_zoomArrowHintOffsetAngle, 0)
+                        * TWO_PI_INT_MULTIPLIED / 360);
+        mPanningArrowsDrawable = a.getDrawable(R.styleable.ZoomRing_panningArrowsDrawable);
+        a.recycle();
+        
         Resources res = context.getResources();
-        mThumbDrawable = res.getDrawable(R.drawable.zoom_ring_thumb);
-        mThumbPlusArrowDrawable = res.getDrawable(R.drawable.zoom_ring_thumb_plus_arrow_rotatable).
-                mutate();
-        mThumbMinusArrowDrawable = res.getDrawable(R.drawable.zoom_ring_thumb_minus_arrow_rotatable).
-                mutate();
-        mThumbPlusDrawable = res.getDrawable(R.drawable.zoom_ring_thumb_plus);
-        mThumbMinusDrawable = res.getDrawable(R.drawable.zoom_ring_thumb_minus);
         if (DRAW_TRAIL) {
+            // TODO get drawables from style instead
             mTrail = res.getDrawable(R.drawable.zoom_ring_trail).mutate();
         }
-
-        // TODO: add padding to drawable
-        setBackgroundResource(R.drawable.zoom_ring_track);
-        // TODO get from style
-        setRingBounds(43, Integer.MAX_VALUE);
 
         mThumbHalfHeight = mThumbDrawable.getIntrinsicHeight() / 2;
         mThumbHalfWidth = mThumbDrawable.getIntrinsicWidth() / 2;
 
-        setCallbackThreshold(PI_INT_MULTIPLIED / 6);
+        setTickDelta(PI_INT_MULTIPLIED / 6);
     }
 
     public ZoomRing(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.zoomRingStyle);
     }
 
     public ZoomRing(Context context) {
         this(context, null);
     }
 
+    public void setTrackDrawable(Drawable drawable) {
+        setBackgroundDrawable(drawable);
+    }
+    
     public void setCallback(OnZoomRingCallback callback) {
         mCallback = callback;
     }
 
-    // TODO: rename
-    public void setCallbackThreshold(int callbackThreshold) {
-        mCallbackThreshold = callbackThreshold;
-        mFuzzyCallbackThreshold = (int) (callbackThreshold * 0.65f);
+    /**
+     * Sets the distance between ticks.  This will be used as a callback threshold.
+     * 
+     * @param angle The angle between ticks.
+     */
+    public void setTickDelta(int angle) {
+        mTickDelta = angle;
+        mFuzzyTickDelta = (int) (angle * 0.65f);
     }
 
-    public void setVibration(boolean vibrate) {
-        mVibration = vibrate;
+    public void setVibration(boolean vibration) {
+        mVibration = vibration;
     }
     
     public void setThumbVisible(boolean thumbVisible) {
@@ -223,28 +314,42 @@ public class ZoomRing extends View {
         }
     }
     
-    // TODO: from XML too
-    public void setRingBounds(int innerRadius, int outerRadius) {
-        mBoundInnerRadiusSquared = innerRadius * innerRadius;
-        if (mBoundInnerRadiusSquared < innerRadius) {
+    public Drawable getPanningArrowsDrawable() {
+        return mPanningArrowsDrawable;
+    }
+    
+    public void setTrackRadii(int innerRadius, int outerRadius) {
+        mTrackInnerRadius = innerRadius;
+        mTrackOuterRadius = outerRadius;
+        
+        mTrackInnerRadiusSquared = innerRadius * innerRadius;
+        if (mTrackInnerRadiusSquared < innerRadius) {
             // Prevent overflow
-            mBoundInnerRadiusSquared = Integer.MAX_VALUE;
+            mTrackInnerRadiusSquared = Integer.MAX_VALUE;
         }
 
-        mBoundOuterRadiusSquared = outerRadius * outerRadius;
-        if (mBoundOuterRadiusSquared < outerRadius) {
+        mTrackOuterRadiusSquared = outerRadius * outerRadius;
+        if (mTrackOuterRadiusSquared < outerRadius) {
             // Prevent overflow
-            mBoundOuterRadiusSquared = Integer.MAX_VALUE;
+            mTrackOuterRadiusSquared = Integer.MAX_VALUE;
         }
     }
 
+    public int getTrackInnerRadius() {
+        return mTrackInnerRadius;
+    }
+    
+    public int getTrackOuterRadius() {
+        return mTrackOuterRadius;
+    }
+    
     public void setThumbClockwiseBound(int angle) {
         if (angle < 0) {
             mThumbCwBound = Integer.MIN_VALUE;
         } else {
             mThumbCwBound = getClosestTickAngle(angle);
         }
-        setEnforceMaxAbsJump();
+        updateEnforceMaxAbsJump();
     }
     
     public void setThumbCounterclockwiseBound(int angle) {
@@ -253,14 +358,14 @@ public class ZoomRing extends View {
         } else {
             mThumbCcwBound = getClosestTickAngle(angle);
         }
-        setEnforceMaxAbsJump();
+        updateEnforceMaxAbsJump();
     }
     
-    private void setEnforceMaxAbsJump() {
+    private void updateEnforceMaxAbsJump() {
         // If there are bounds in both direction, there is no reason to restrict
         // the amount that a user can absolute jump to
         mEnforceMaxAbsJump =
-            mThumbCcwBound == Integer.MIN_VALUE || mThumbCwBound == Integer.MIN_VALUE;
+                mThumbCcwBound == Integer.MIN_VALUE || mThumbCwBound == Integer.MIN_VALUE;
     }
     
     public int getThumbAngle() {
@@ -269,7 +374,7 @@ public class ZoomRing extends View {
     
     public void setThumbAngle(int angle) {
         angle = getValidAngle(angle);
-        mPreviousCallbackAngle = getClosestTickAngle(angle);
+        mPreviousCallbackTickAngle = getClosestTickAngle(angle);
         setThumbAngleAuto(angle, false, false);
     }
     
@@ -299,9 +404,9 @@ public class ZoomRing extends View {
         mThumbAngle = angle;
         int unoffsetAngle = angle + mZeroAngle;
         int thumbCenterX = (int) (Math.cos(1f * unoffsetAngle / RADIAN_INT_MULTIPLIER) *
-                THUMB_DISTANCE) + mCenterX;
+                mThumbDistance) + mCenterX;
         int thumbCenterY = (int) (Math.sin(1f * unoffsetAngle / RADIAN_INT_MULTIPLIER) *
-                THUMB_DISTANCE) * -1 + mCenterY;
+                mThumbDistance) * -1 + mCenterY;
 
         mThumbDrawable.setBounds(thumbCenterX - mThumbHalfWidth,
                 thumbCenterY - mThumbHalfHeight,
@@ -356,7 +461,7 @@ public class ZoomRing extends View {
             duration = getAnimationDuration(deltaAngle);
         }
         mThumbScroller.startScroll(startAngle, 0, deltaAngle, 0, duration);
-        onThumbScrollerTick();
+        onThumbScrollerStep();
     }
     
     private int getAnimationDuration(int deltaAngle) {
@@ -364,10 +469,10 @@ public class ZoomRing extends View {
         return 300 + deltaAngle * 300 / RADIAN_INT_MULTIPLIER; 
     }
     
-    private void onThumbScrollerTick() {
+    private void onThumbScrollerStep() {
         if (!mThumbScroller.computeScrollOffset()) return;
         setThumbAngleInt(getThumbScrollerAngle());        
-        mHandler.sendEmptyMessage(MSG_THUMB_SCROLLER_TICK);
+        mHandler.sendEmptyMessage(MSG_THUMB_SCROLLER_STEP);
     }
 
     private int getThumbScrollerAngle() {
@@ -375,16 +480,10 @@ public class ZoomRing extends View {
     }
     
     public void resetThumbAngle() {
-        if (mResetThumbAutomatically) {
-            mPreviousCallbackAngle = 0;
-            setThumbAngleInt(0);
-        }
+        mPreviousCallbackTickAngle = 0;
+        setThumbAngleInt(0);
     }
     
-    public void setResetThumbAutomatically(boolean resetThumbAutomatically) {
-        mResetThumbAutomatically = resetThumbAutomatically;
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec),
@@ -411,14 +510,12 @@ public class ZoomRing extends View {
         }
         
         // These drawables are the same size as the track
-        mThumbPlusArrowDrawable.setBounds(0, 0, right - left, bottom - top);
-        mThumbMinusArrowDrawable.setBounds(0, 0, right - left, bottom - top);
+        mZoomInArrowDrawable.setBounds(0, 0, right - left, bottom - top);
+        mZoomOutArrowDrawable.setBounds(0, 0, right - left, bottom - top);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        Log.d(TAG, "History size: " + event.getHistorySize());
-        
         return handleTouch(event.getAction(), event.getEventTime(),
                 (int) event.getX(), (int) event.getY(), (int) event.getRawX(),
                 (int) event.getRawY());
@@ -457,15 +554,10 @@ public class ZoomRing extends View {
         boolean isTouchingRing = mThumbVisible;
         
         int touchAngle = getAngle(localX, localY);
-//        printAngle("touchAngle", touchAngle);
-//        printAngle("mThumbAngle", mThumbAngle);
-//        printAngle("mPreviousCallbackAngle", mPreviousCallbackAngle);
-//        Log.d(TAG, "");
-        		
         
         int radiusSquared = localX * localX + localY * localY;
-        if (radiusSquared < mBoundInnerRadiusSquared ||
-                radiusSquared > mBoundOuterRadiusSquared) {
+        if (radiusSquared < mTrackInnerRadiusSquared ||
+                radiusSquared > mTrackOuterRadiusSquared) {
             // Out-of-bounds
             isTouchingThumb = false;
             isTouchingRing = false;
@@ -486,7 +578,7 @@ public class ZoomRing extends View {
                 if (!isTouchingRing &&
                         (time - mPreviousCenterUpTime <= DOUBLE_TAP_DISMISS_TIMEOUT)) {
                     // Make sure the double-tap is in the center of the widget (and not on the ring)
-                    mCallback.onZoomRingDismissed(true);
+                    mCallback.onZoomRingDismissed();
                     onTouchUp(time, isTouchingRing);
                     
                     // Dismissing, so halt here
@@ -557,7 +649,7 @@ public class ZoomRing extends View {
                 }
 
                 setMode(MODE_WAITING_FOR_DRAG_THUMB_AFTER_JUMP);
-                mWaitingForDragThumbDownAngle = touchAngle;
+                mInitialGrabThumbAngle = touchAngle;
                 boolean ccw = deltaThumbAndTick > 0;
                 setThumbAngleAnimated(tickAngle, 0, ccw);
                 
@@ -577,9 +669,9 @@ public class ZoomRing extends View {
             }
 
         } else if (mMode == MODE_WAITING_FOR_DRAG_THUMB_AFTER_JUMP) {
-            int deltaDownAngle = getDelta(mWaitingForDragThumbDownAngle, touchAngle);
+            int deltaDownAngle = getDelta(mInitialGrabThumbAngle, touchAngle);
             if ((deltaDownAngle < -THUMB_DRAG_SLOP || deltaDownAngle > THUMB_DRAG_SLOP) &&
-                    isDeltaInBounds(mWaitingForDragThumbDownAngle, deltaDownAngle)) {
+                    isDeltaInBounds(mInitialGrabThumbAngle, deltaDownAngle)) {
                 setMode(MODE_DRAG_THUMB);
                 
                 // No need to call onThumbDragStarted, since that was done when they tapped-to-jump
@@ -591,6 +683,8 @@ public class ZoomRing extends View {
                 /* Make sure the user has moved the slop amount before going into that mode. */
                 setMode(MODE_MOVE_ZOOM_RING);
                 mCallback.onZoomRingMovingStarted();
+                // Move the zoom ring so it is under the finger where the user first touched
+                mCallback.onZoomRingMoved(x - mPreviousDownX, y - mPreviousDownY, rawX, rawY);
             }
         } else if (mMode == MODE_IGNORE_UNTIL_TOUCHES_THUMB) {
             if (isTouchingThumb) {
@@ -629,7 +723,7 @@ public class ZoomRing extends View {
             
             if (mode == MODE_DRAG_THUMB || mode == MODE_TAP_DRAG) {
                 // Animate back to a tick
-                setThumbAngleAnimated(mPreviousCallbackAngle, 0);
+                setThumbAngleAnimated(mPreviousCallbackTickAngle, 0);
             }
         }
         mCallback.onUserInteractionStopped();
@@ -741,9 +835,9 @@ public class ZoomRing extends View {
         boolean animateThumbToNewAngle = false;
         
         int totalDeltaAngle;
-        totalDeltaAngle = getDelta(mPreviousCallbackAngle, touchAngle, useDirection, ccw);
-        if (totalDeltaAngle >= mFuzzyCallbackThreshold
-                || totalDeltaAngle <= -mFuzzyCallbackThreshold) {
+        totalDeltaAngle = getDelta(mPreviousCallbackTickAngle, touchAngle, useDirection, ccw);
+        if (totalDeltaAngle >= mFuzzyTickDelta
+                || totalDeltaAngle <= -mFuzzyTickDelta) {
 
             if (!useDirection) {
                 // Set ccw to match the direction found by getDelta
@@ -763,9 +857,9 @@ public class ZoomRing extends View {
             if (ccw && mThumbCcwBound != Integer.MIN_VALUE) {
                 int deltaCcwBoundAndTouch =
                         getDelta(mThumbCcwBound, touchAngle, useDirection, true);
-                if (deltaCcwBoundAndTouch >= mCallbackThreshold / 2) {
+                if (deltaCcwBoundAndTouch >= mTickDelta / 2) {
                     // The touch has past a bound
-                    int deltaPreviousCbAndTouch = getDelta(mPreviousCallbackAngle,
+                    int deltaPreviousCbAndTouch = getDelta(mPreviousCallbackTickAngle,
                             touchAngle, useDirection, true);
                     if (deltaPreviousCbAndTouch >= deltaCcwBoundAndTouch) {
                         // The bound is between the previous callback angle and the touch
@@ -778,8 +872,8 @@ public class ZoomRing extends View {
                 // See block above for general comments
                 int deltaCwBoundAndTouch =
                         getDelta(mThumbCwBound, touchAngle, useDirection, false);
-                if (deltaCwBoundAndTouch <= -mCallbackThreshold / 2) {
-                    int deltaPreviousCbAndTouch = getDelta(mPreviousCallbackAngle,
+                if (deltaCwBoundAndTouch <= -mTickDelta / 2) {
+                    int deltaPreviousCbAndTouch = getDelta(mPreviousCallbackTickAngle,
                             touchAngle, useDirection, false);
                     /*
                      * Both of these will be negative since we got delta in
@@ -795,7 +889,7 @@ public class ZoomRing extends View {
             }
             if (touchAngle != oldTouchAngle) {
                 // We bounded the touch angle
-                totalDeltaAngle = getDelta(mPreviousCallbackAngle, touchAngle, useDirection, ccw);
+                totalDeltaAngle = getDelta(mPreviousCallbackTickAngle, touchAngle, useDirection, ccw);
                 animateThumbToNewAngle = true;
                 setMode(MODE_IGNORE_UNTIL_TOUCHES_THUMB);
             }
@@ -819,7 +913,7 @@ public class ZoomRing extends View {
              * hit. If we do int division, we'll end up with one level lower
              * than the one he was going for.
              */
-            int deltaLevels = Math.round((float) totalDeltaAngle / mCallbackThreshold); 
+            int deltaLevels = Math.round((float) totalDeltaAngle / mTickDelta); 
             if (deltaLevels != 0) {
                 boolean canStillZoom = mCallback.onZoomRingThumbDragged(
                         deltaLevels, mThumbDragStartAngle, touchAngle);
@@ -833,8 +927,8 @@ public class ZoomRing extends View {
                 }
                 
                 // Set the callback angle to the actual angle based on how many delta levels we gave
-                mPreviousCallbackAngle = getValidAngle(
-                        mPreviousCallbackAngle + (deltaLevels * mCallbackThreshold));
+                mPreviousCallbackTickAngle = getValidAngle(
+                        mPreviousCallbackTickAngle + (deltaLevels * mTickDelta));
             }
         }
 
@@ -993,14 +1087,14 @@ public class ZoomRing extends View {
     }
 
     private int getClosestTickAngle(int angle) {
-        int smallerAngleDistance = angle % mCallbackThreshold;
+        int smallerAngleDistance = angle % mTickDelta;
         int smallerAngle = angle - smallerAngleDistance;
-        if (smallerAngleDistance < mCallbackThreshold / 2) {
+        if (smallerAngleDistance < mTickDelta / 2) {
             // Closer to the smaller angle
             return smallerAngle;
         } else {
             // Closer to the bigger angle (premodding)
-            return (smallerAngle + mCallbackThreshold) % TWO_PI_INT_MULTIPLIED; 
+            return (smallerAngle + mTickDelta) % TWO_PI_INT_MULTIPLIED; 
         }
     }
 
@@ -1025,7 +1119,7 @@ public class ZoomRing extends View {
         super.onWindowFocusChanged(hasWindowFocus);
 
         if (!hasWindowFocus) {
-            mCallback.onZoomRingDismissed(true);
+            mCallback.onZoomRingDismissed();
         }
     }
     
@@ -1054,12 +1148,12 @@ public class ZoomRing extends View {
                 mTrail.draw(canvas);
             }
             if ((mThumbArrowsToDraw & THUMB_ARROW_PLUS) != 0) {
-                mThumbPlusArrowDrawable.draw(canvas);
-                mThumbPlusDrawable.draw(canvas);
+                mZoomInArrowDrawable.draw(canvas);
+                mZoomInArrowHintDrawable.draw(canvas);
             }
             if ((mThumbArrowsToDraw & THUMB_ARROW_MINUS) != 0) {
-                mThumbMinusArrowDrawable.draw(canvas);
-                mThumbMinusDrawable.draw(canvas);
+                mZoomOutArrowDrawable.draw(canvas);
+                mZoomOutArrowHintDrawable.draw(canvas);
             }
             mThumbDrawable.draw(canvas);
         }
@@ -1067,48 +1161,48 @@ public class ZoomRing extends View {
     
     private void setThumbArrowsAngle(int angle) {
         int level = -angle * 10000 / ZoomRing.TWO_PI_INT_MULTIPLIED;
-        mThumbPlusArrowDrawable.setLevel(level);
-        mThumbMinusArrowDrawable.setLevel(level);
+        mZoomInArrowDrawable.setLevel(level);
+        mZoomOutArrowDrawable.setLevel(level);
         
         // Assume it is a square
-        int halfSideLength = mThumbPlusDrawable.getIntrinsicHeight() / 2;
+        int halfSideLength = mZoomInArrowHintDrawable.getIntrinsicHeight() / 2;
         int unoffsetAngle = angle + mZeroAngle;
         
-        int plusCenterX = (int) (Math.cos(1f * (unoffsetAngle - THUMB_PLUS_MINUS_OFFSET_ANGLE)
-                / RADIAN_INT_MULTIPLIER) * THUMB_PLUS_MINUS_DISTANCE) + mCenterX;
-        int plusCenterY = (int) (Math.sin(1f * (unoffsetAngle - THUMB_PLUS_MINUS_OFFSET_ANGLE)
-                / RADIAN_INT_MULTIPLIER) * THUMB_PLUS_MINUS_DISTANCE) * -1 + mCenterY;
-        mThumbPlusDrawable.setBounds(plusCenterX - halfSideLength,
+        int plusCenterX = (int) (Math.cos(1f * (unoffsetAngle - mZoomArrowHintOffsetAngle)
+                / RADIAN_INT_MULTIPLIER) * mZoomArrowHintDistance) + mCenterX;
+        int plusCenterY = (int) (Math.sin(1f * (unoffsetAngle - mZoomArrowHintOffsetAngle)
+                / RADIAN_INT_MULTIPLIER) * mZoomArrowHintDistance) * -1 + mCenterY;
+        mZoomInArrowHintDrawable.setBounds(plusCenterX - halfSideLength,
                 plusCenterY - halfSideLength,
                 plusCenterX + halfSideLength,
                 plusCenterY + halfSideLength);
         
-        int minusCenterX = (int) (Math.cos(1f * (unoffsetAngle + THUMB_PLUS_MINUS_OFFSET_ANGLE)
-                / RADIAN_INT_MULTIPLIER) * THUMB_PLUS_MINUS_DISTANCE) + mCenterX;
-        int minusCenterY = (int) (Math.sin(1f * (unoffsetAngle + THUMB_PLUS_MINUS_OFFSET_ANGLE)
-                / RADIAN_INT_MULTIPLIER) * THUMB_PLUS_MINUS_DISTANCE) * -1 + mCenterY;
-        mThumbMinusDrawable.setBounds(minusCenterX - halfSideLength,
+        int minusCenterX = (int) (Math.cos(1f * (unoffsetAngle + mZoomArrowHintOffsetAngle)
+                / RADIAN_INT_MULTIPLIER) * mZoomArrowHintDistance) + mCenterX;
+        int minusCenterY = (int) (Math.sin(1f * (unoffsetAngle + mZoomArrowHintOffsetAngle)
+                / RADIAN_INT_MULTIPLIER) * mZoomArrowHintDistance) * -1 + mCenterY;
+        mZoomOutArrowHintDrawable.setBounds(minusCenterX - halfSideLength,
                 minusCenterY - halfSideLength,
                 minusCenterX + halfSideLength,
                 minusCenterY + halfSideLength);
     }
     
-    public void setThumbArrowsVisible(boolean visible) {
+    void setThumbArrowsVisible(boolean visible) {
         if (visible) {
             mThumbArrowsAlpha = 255;
-            int callbackAngle = mPreviousCallbackAngle;
+            int callbackAngle = mPreviousCallbackTickAngle;
             if (callbackAngle < mThumbCwBound - RADIAN_INT_ERROR ||
                     callbackAngle > mThumbCwBound + RADIAN_INT_ERROR) {
-                mThumbPlusArrowDrawable.setAlpha(255);
-                mThumbPlusDrawable.setAlpha(255);
+                mZoomInArrowDrawable.setAlpha(255);
+                mZoomInArrowHintDrawable.setAlpha(255);
                 mThumbArrowsToDraw |= THUMB_ARROW_PLUS;                
             } else {
                 mThumbArrowsToDraw &= ~THUMB_ARROW_PLUS;
             }
             if (callbackAngle < mThumbCcwBound - RADIAN_INT_ERROR ||
                     callbackAngle > mThumbCcwBound + RADIAN_INT_ERROR) {
-                mThumbMinusArrowDrawable.setAlpha(255);
-                mThumbMinusDrawable.setAlpha(255);
+                mZoomOutArrowDrawable.setAlpha(255);
+                mZoomOutArrowHintDrawable.setAlpha(255);
                 mThumbArrowsToDraw |= THUMB_ARROW_MINUS;
             } else {
                 mThumbArrowsToDraw &= ~THUMB_ARROW_MINUS;
@@ -1117,11 +1211,11 @@ public class ZoomRing extends View {
         } else if (mThumbArrowsAlpha == 255) {
             // Only start fade if we're fully visible (otherwise another fade is happening already)
             mThumbArrowsFadeStartTime = SystemClock.elapsedRealtime();
-            onThumbArrowsFadeTick();
+            onThumbArrowsFadeStep();
         }
     }
     
-    private void onThumbArrowsFadeTick() {
+    private void onThumbArrowsFadeStep() {
         if (mThumbArrowsAlpha <= 0) {
             mThumbArrowsToDraw = 0;
             return;
@@ -1132,20 +1226,20 @@ public class ZoomRing extends View {
                         / THUMB_ARROWS_FADE_DURATION));
         if (mThumbArrowsAlpha < 0) mThumbArrowsAlpha = 0;
         if ((mThumbArrowsToDraw & THUMB_ARROW_PLUS) != 0) {
-            mThumbPlusArrowDrawable.setAlpha(mThumbArrowsAlpha);
-            mThumbPlusDrawable.setAlpha(mThumbArrowsAlpha);
-            invalidateDrawable(mThumbPlusDrawable);
-            invalidateDrawable(mThumbPlusArrowDrawable);
+            mZoomInArrowDrawable.setAlpha(mThumbArrowsAlpha);
+            mZoomInArrowHintDrawable.setAlpha(mThumbArrowsAlpha);
+            invalidateDrawable(mZoomInArrowHintDrawable);
+            invalidateDrawable(mZoomInArrowDrawable);
         }
         if ((mThumbArrowsToDraw & THUMB_ARROW_MINUS) != 0) {
-            mThumbMinusArrowDrawable.setAlpha(mThumbArrowsAlpha);
-            mThumbMinusDrawable.setAlpha(mThumbArrowsAlpha);
-            invalidateDrawable(mThumbMinusDrawable);
-            invalidateDrawable(mThumbMinusArrowDrawable);
+            mZoomOutArrowDrawable.setAlpha(mThumbArrowsAlpha);
+            mZoomOutArrowHintDrawable.setAlpha(mThumbArrowsAlpha);
+            invalidateDrawable(mZoomOutArrowHintDrawable);
+            invalidateDrawable(mZoomOutArrowDrawable);
         }
             
-        if (!mHandler.hasMessages(MSG_THUMB_ARROWS_FADE_TICK)) {
-            mHandler.sendEmptyMessage(MSG_THUMB_ARROWS_FADE_TICK);
+        if (!mHandler.hasMessages(MSG_THUMB_ARROWS_FADE_STEP)) {
+            mHandler.sendEmptyMessage(MSG_THUMB_ARROWS_FADE_STEP);
         }
     }
     
@@ -1168,7 +1262,7 @@ public class ZoomRing extends View {
         boolean onZoomRingThumbDragged(int numLevels, int startAngle, int curAngle);
         void onZoomRingThumbDraggingStopped();
         
-        void onZoomRingDismissed(boolean dismissImmediately);
+        void onZoomRingDismissed();
         
         void onUserInteractionStarted();
         void onUserInteractionStopped();

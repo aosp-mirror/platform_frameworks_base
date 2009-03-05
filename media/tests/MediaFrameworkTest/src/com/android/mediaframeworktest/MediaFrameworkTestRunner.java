@@ -49,7 +49,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaMetadataTest.class);
         suite.addTestSuite(CameraTest.class);
         suite.addTestSuite(MediaRecorderTest.class);
-        //suite.addTestSuite(MediaAudioTrackTest.class);
+        suite.addTestSuite(MediaAudioTrackTest.class);
         return suite;
     }
 

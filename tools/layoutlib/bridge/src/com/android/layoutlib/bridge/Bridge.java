@@ -56,6 +56,7 @@ import android.view.View.MeasureSpec;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -94,14 +95,15 @@ public final class Bridge implements ILayoutBridge {
     private final static Map<String, Map<String, Integer>> sRFullMap =
         new HashMap<String, Map<String,Integer>>();
     
-    private final static Map<Object, Map<String, Bitmap>> sProjectBitmapCache =
-        new HashMap<Object, Map<String, Bitmap>>();
-    private final static Map<Object, Map<String, NinePatch>> sProject9PatchCache =
-        new HashMap<Object, Map<String, NinePatch>>();
+    private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
+        new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
+    private final static Map<Object, Map<String, SoftReference<NinePatch>>> sProject9PatchCache =
+        new HashMap<Object, Map<String, SoftReference<NinePatch>>>();
 
-    private final static Map<String, Bitmap> sFrameworkBitmapCache = new HashMap<String, Bitmap>();
-    private final static Map<String, NinePatch> sFramework9PatchCache =
-        new HashMap<String, NinePatch>();
+    private final static Map<String, SoftReference<Bitmap>> sFrameworkBitmapCache =
+        new HashMap<String, SoftReference<Bitmap>>();
+    private final static Map<String, SoftReference<NinePatch>> sFramework9PatchCache =
+        new HashMap<String, SoftReference<NinePatch>>();
     
     private static Map<String, Map<String, Integer>> sEnumValueMap;
 
@@ -717,15 +719,21 @@ public final class Bridge implements ILayoutBridge {
      */
     static Bitmap getCachedBitmap(String value, Object projectKey) {
         if (projectKey != null) {
-            Map<String, Bitmap> map = sProjectBitmapCache.get(projectKey);
+            Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
             if (map != null) {
-                return map.get(value);
+                SoftReference<Bitmap> ref = map.get(value);
+                if (ref != null) {
+                    return ref.get();
+                }
             }
-            
-            return null;
+        } else {
+            SoftReference<Bitmap> ref = sFrameworkBitmapCache.get(value);
+            if (ref != null) {
+                return ref.get();
+            }
         }
-        
-        return sFrameworkBitmapCache.get(value);
+
+        return null;
     }
 
     /**
@@ -736,17 +744,17 @@ public final class Bridge implements ILayoutBridge {
      */
     static void setCachedBitmap(String value, Bitmap bmp, Object projectKey) {
         if (projectKey != null) {
-            Map<String, Bitmap> map = sProjectBitmapCache.get(projectKey);
+            Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
 
             if (map == null) {
-                map = new HashMap<String, Bitmap>();
+                map = new HashMap<String, SoftReference<Bitmap>>();
                 sProjectBitmapCache.put(projectKey, map);
             }
             
-            map.put(value, bmp);
+            map.put(value, new SoftReference<Bitmap>(bmp));
+        } else {
+            sFrameworkBitmapCache.put(value, new SoftReference<Bitmap>(bmp));
         }
-        
-        sFrameworkBitmapCache.put(value, bmp);
     }
 
     /**
@@ -758,16 +766,22 @@ public final class Bridge implements ILayoutBridge {
      */
     static NinePatch getCached9Patch(String value, Object projectKey) {
         if (projectKey != null) {
-            Map<String, NinePatch> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
             
             if (map != null) {
-                return map.get(value);
+                SoftReference<NinePatch> ref = map.get(value);
+                if (ref != null) {
+                    return ref.get();
+                }
             }
-            
-            return null;
+        } else {
+            SoftReference<NinePatch> ref = sFramework9PatchCache.get(value);
+            if (ref != null) {
+                return ref.get();
+            }
         }
         
-        return sFramework9PatchCache.get(value);
+        return null;
     }
 
     /**
@@ -778,19 +792,19 @@ public final class Bridge implements ILayoutBridge {
      */
     static void setCached9Patch(String value, NinePatch ninePatch, Object projectKey) {
         if (projectKey != null) {
-            Map<String, NinePatch> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
 
             if (map == null) {
-                map = new HashMap<String, NinePatch>();
+                map = new HashMap<String, SoftReference<NinePatch>>();
                 sProject9PatchCache.put(projectKey, map);
             }
             
-            map.put(value, ninePatch);
+            map.put(value, new SoftReference<NinePatch>(ninePatch));
+        } else {
+            sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
         }
-        
-        sFramework9PatchCache.put(value, ninePatch);
     }
-    
+
     /**
      * Implementation of {@link IWindowSession} so that mSession is not null in
      * the {@link SurfaceView}.

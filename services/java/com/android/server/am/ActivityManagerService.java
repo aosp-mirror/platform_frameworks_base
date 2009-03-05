@@ -263,6 +263,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final int HIDDEN_APP_MAX_ADJ;
     static int HIDDEN_APP_MIN_ADJ;
 
+    // This is a process holding the home application -- we want to try
+    // avoiding killing it, even if it would normally be in the background,
+    // because the user interacts with it so much.
+    final int HOME_APP_ADJ;
+
     // This is a process holding a secondary server -- killing it will not
     // have much of an impact as far as the user is concerned. Value set in
     // system/rootdir/init.rc on startup.
@@ -290,6 +295,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Corresponding memory levels for above adjustments.
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
+    final int HOME_APP_MEM;
     final int SECONDARY_SERVER_MEM;
     final int VISIBLE_APP_MEM;
     final int FOREGROUND_APP_MEM;
@@ -486,6 +492,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final ArrayList<ProcessRecord> mProcessesToGc
             = new ArrayList<ProcessRecord>();
 
+    /**
+     * This is the process holding what we currently consider to be
+     * the "home" activity.
+     */
+    private ProcessRecord mHomeProcess;
+    
     /**
      * List of running activities, sorted by recent usage.
      * The first entry in the list is the least recently used.
@@ -871,6 +883,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         Log.e(TAG, "App already has anr dialog: " + proc);
                         return;
                     }
+                    
+                    broadcastIntentLocked(null, null, new Intent("android.intent.action.ANR"),
+                            null, null, 0, null, null, null,
+                            false, false, MY_PID, Process.SYSTEM_UID);
+
                     Dialog d = new AppNotRespondingDialog(ActivityManagerService.this,
                             mContext, proc, (HistoryRecord)data.get("activity"));
                     d.show();
@@ -1267,6 +1284,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_ADJ"));
         SECONDARY_SERVER_ADJ =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_ADJ"));
+        HOME_APP_ADJ =
+            Integer.valueOf(SystemProperties.get("ro.HOME_APP_ADJ"));
         HIDDEN_APP_MIN_ADJ =
             Integer.valueOf(SystemProperties.get("ro.HIDDEN_APP_MIN_ADJ"));
         CONTENT_PROVIDER_ADJ =
@@ -1280,6 +1299,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_MEM"))*PAGE_SIZE;
         SECONDARY_SERVER_MEM =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_MEM"))*PAGE_SIZE;
+        HOME_APP_MEM =
+            Integer.valueOf(SystemProperties.get("ro.HOME_APP_MEM"))*PAGE_SIZE;
         HIDDEN_APP_MEM =
             Integer.valueOf(SystemProperties.get("ro.HIDDEN_APP_MEM"))*PAGE_SIZE;
         EMPTY_APP_MEM =
@@ -1547,6 +1568,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 EventLog.writeEvent(LOG_AM_RESTART_ACTIVITY,
                         System.identityHashCode(r),
                         r.task.taskId, r.shortComponentName);
+            }
+            if (r.isHomeActivity) {
+                mHomeProcess = app;
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     r.info, r.icicle, results, newIntents, !andResume,
@@ -2188,7 +2212,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (app == null || app.instrumentationClass == null) {
                     intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivityLocked(null, intent, null, null, 0, aInfo,
-                            null, null, 0, 0, 0, false);
+                            null, null, 0, 0, 0, false, false);
                 }
             }
             return true;
@@ -2669,7 +2693,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Uri[] grantedUriPermissions,
             int grantedMode, ActivityInfo aInfo, IBinder resultTo,
             String resultWho, int requestCode,
-            int callingPid, int callingUid, boolean onlyIfNeeded) {
+            int callingPid, int callingUid, boolean onlyIfNeeded,
+            boolean componentSpecified) {
         Log.i(TAG, "Starting activity: " + intent);
 
         HistoryRecord sourceRecord = null;
@@ -2784,7 +2809,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         HistoryRecord r = new HistoryRecord(this, callerApp, callingUid,
                 intent, resolvedType, aInfo, mConfiguration,
-                resultRecord, resultWho, requestCode);
+                resultRecord, resultWho, requestCode, componentSpecified);
         r.startTime = SystemClock.uptimeMillis();
 
         HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
@@ -3118,6 +3143,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        final boolean componentSpecified = intent.getComponent() != null;
+        
         // Don't modify the client's object!
         intent = new Intent(intent);
 
@@ -3157,7 +3184,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int res = startActivityLocked(caller, intent, resolvedType,
                     grantedUriPermissions, grantedMode, aInfo,
                     resultTo, resultWho, requestCode, -1, -1,
-                    onlyIfNeeded);
+                    onlyIfNeeded, componentSpecified);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -3247,7 +3274,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // those are not yet exposed to user code, so there is no need.
             int res = startActivityLocked(r.app.thread, intent,
                     r.resolvedType, null, 0, aInfo, resultTo, resultWho,
-                    requestCode, -1, r.launchedFromUid, false);
+                    requestCode, -1, r.launchedFromUid, false, false);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -3261,6 +3288,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded) {
+        final boolean componentSpecified = intent.getComponent() != null;
+        
         // Don't modify the client's object!
         intent = new Intent(intent);
 
@@ -3291,7 +3320,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             return startActivityLocked(null, intent, resolvedType,
                     null, 0, aInfo, resultTo, resultWho, requestCode, -1, uid,
-                    onlyIfNeeded);
+                    onlyIfNeeded, componentSpecified);
         }
     }
 
@@ -5678,9 +5707,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public void getMemoryInfo(ActivityManager.MemoryInfo outInfo) {
         outInfo.availMem = Process.getFreeMemory();
-        outInfo.threshold = SECONDARY_SERVER_MEM;
+        outInfo.threshold = HOME_APP_MEM;
         outInfo.lowMemory = outInfo.availMem <
-                (SECONDARY_SERVER_MEM + ((HIDDEN_APP_MEM-SECONDARY_SERVER_MEM)/2));
+                (HOME_APP_MEM + ((HIDDEN_APP_MEM-HOME_APP_MEM)/2));
     }
     
     // =========================================================
@@ -7798,7 +7827,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
                     } else if (adj >= HIDDEN_APP_MIN_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-                        currApp.lru = adj - HIDDEN_APP_MIN_ADJ;
+                        currApp.lru = adj - HIDDEN_APP_MIN_ADJ + 1;
+                    } else if (adj >= HOME_APP_ADJ) {
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+                        currApp.lru = 0;
                     } else if (adj >= SECONDARY_SERVER_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
                     } else if (adj >= VISIBLE_APP_ADJ) {
@@ -7997,6 +8029,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             pw.println(" ");
             pw.println("  Total persistent processes: " + numPers);
+            pw.println("  mHomeProcess: " + mHomeProcess);
             pw.println("  mConfiguration: " + mConfiguration);
             pw.println("  mStartRunning=" + mStartRunning
                     + " mSystemReady=" + mSystemReady
@@ -8680,6 +8713,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         mProcessesOnHold.remove(app);
 
+        if (app == mHomeProcess) {
+            mHomeProcess = null;
+        }
+        
         if (restart) {
             // We have components that still need to be running in the
             // process, so re-launch it.
@@ -11185,9 +11222,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         app.isForeground = false;
 
-        // Right now there are three interesting states: it is
-        // either the foreground app, background with activities,
-        // or background without activities.
+        // Determine the importance of the process, starting with most
+        // important to least, and assign an appropriate OOM adjustment.
         int adj;
         int N;
         if (app == TOP_APP || app.instrumentationClass != null
@@ -11207,6 +11243,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } else if (app.foregroundServices || app.forcingToForeground != null) {
             // The user is aware of this app, so make it visible.
             adj = VISIBLE_APP_ADJ;
+        } else if (app == mHomeProcess) {
+            // This process is hosting what we currently consider to be the
+            // home app, so we don't want to let it go into the background.
+            adj = HOME_APP_ADJ;
         } else if ((N=app.activities.size()) != 0) {
             // This app is in the background with paused activities.
             adj = hiddenAdj;
@@ -11222,7 +11262,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             adj = EMPTY_APP_ADJ;
         }
 
-        // By default, we use the computed adjusted.  It may be changed if
+        // By default, we use the computed adjustment.  It may be changed if
         // there are applications dependent on our services or providers, but
         // this gives us a baseline and makes sure we don't get into an
         // infinite recursion.

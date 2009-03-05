@@ -1023,6 +1023,11 @@ public final class Telephony {
          * <P>Type: INTEGER</P>
          */
         public static final String ERROR = "error";
+        /**
+         * Indicates whether this thread contains any attachments.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String HAS_ATTACHMENT = "has_attachment";
     }
 
     /**

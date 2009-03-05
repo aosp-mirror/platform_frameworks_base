@@ -176,7 +176,9 @@ size_t Res_png_9patch::serializedSize()
 
 void* Res_png_9patch::serialize()
 {
-    void* newData = malloc(serializedSize());
+    // Use calloc since we're going to leave a few holes in the data
+    // and want this to run cleanly under valgrind
+    void* newData = calloc(1, serializedSize());
     serialize(newData);
     return newData;
 }
@@ -3150,13 +3152,13 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
             const char16_t* pos = s;
             while (pos < end && !failed) {
                 const char16_t* start = pos;
-                end++;
+                pos++;
                 while (pos < end && *pos != '|') {
                     pos++;
                 }
-				//printf("Looking for: %s\n", String8(start, pos-start).string());
+                //printf("Looking for: %s\n", String8(start, pos-start).string());
                 const bag_entry* bagi = bag;
-				ssize_t i;
+                ssize_t i;
                 for (i=0; i<cnt; i++, bagi++) {
                     if (!Res_INTERNALID(bagi->map.name.ident)) {
                         //printf("Trying attr #%08x\n", bagi->map.name.ident);
@@ -3184,7 +3186,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
             }
             unlockBag(bag);
             if (!failed) {
-				//printf("Final flag value: 0x%lx\n", outValue->data);
+                //printf("Final flag value: 0x%lx\n", outValue->data);
                 return true;
             }
         }
@@ -3192,7 +3194,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
 
         if (fromAccessor) {
             if (accessor->getAttributeFlags(attrID, s, len, outValue)) {
-				//printf("Final flag value: 0x%lx\n", outValue->data);
+                //printf("Final flag value: 0x%lx\n", outValue->data);
                 return true;
             }
         }

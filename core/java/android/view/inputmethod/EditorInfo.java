@@ -66,6 +66,12 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_ACTION_NEXT = 0x00000004;
     
     /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "done"
+     * operation, typically meaning the IME will be closed.
+     */
+    public static final int IME_ACTION_DONE = 0x00000005;
+    
+    /**
      * Flag of {@link #imeOptions}: used in conjunction with
      * {@link #IME_MASK_ACTION}, this indicates that the action should not
      * be available in-line as the same as a "enter" key.  Typically this is

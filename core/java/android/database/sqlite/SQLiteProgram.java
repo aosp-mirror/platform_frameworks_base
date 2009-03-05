@@ -22,7 +22,7 @@ import android.util.Log;
  * A base class for compiled SQLite programs.
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
-    static final String TAG = "SQLiteProgram";
+    private static final String TAG = "SQLiteProgram";
 
     /** The database this program is compiled against. */
     protected SQLiteDatabase mDatabase;

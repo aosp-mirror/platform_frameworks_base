@@ -43,6 +43,15 @@
     run_command(&c, TIMEOUT);   \
 }
 
+#define EXEC_TIMEOUT(cmd, tmout)\
+{                               \
+    static struct Command c = { \
+        "/system/bin/" cmd,     \
+        { cmd, 0 }              \
+    };                          \
+    run_command(&c, tmout);     \
+}
+
 #define EXEC_XBIN(cmd)          \
 {                               \
     static struct Command c = { \

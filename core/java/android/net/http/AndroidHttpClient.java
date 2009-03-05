@@ -63,6 +63,7 @@ import android.util.Log;
 import android.content.ContentResolver;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.os.SystemProperties;
 
 /**
  * Subclass of the Apache {@link DefaultHttpClient} that is configured with
@@ -387,10 +388,12 @@ public final class AndroidHttpClient implements HttpClient {
         }
 
         /**
-         * Returns true if auth logging is turned on for this configuration.
+         * Returns true if auth logging is turned on for this configuration.  Can only be set on
+         * insecure devices.
          */
         private boolean isAuthLoggable() {
-            return Log.isLoggable(tag + "-auth", level);
+            String secure = SystemProperties.get("ro.secure");
+            return "0".equals(secure) && Log.isLoggable(tag + "-auth", level);
         }
 
         /**

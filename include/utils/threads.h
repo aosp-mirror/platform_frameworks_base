@@ -249,41 +249,6 @@ private:
 
 
 /*
- * Read/write lock.  The resource can have multiple readers or one writer,
- * but can't be read and written at the same time.
- *
- * The same thread should not call a lock function while it already has
- * a lock.  (Should be okay for multiple readers.)
- */
-class ReadWriteLock {
-public:
-    ReadWriteLock()
-        : mNumReaders(0), mNumWriters(0)
-        {}
-    ~ReadWriteLock() {}
-
-    void lockForRead();
-    bool tryLockForRead();
-    void unlockForRead();
-
-    void lockForWrite();
-    bool tryLockForWrite();
-    void unlockForWrite();
-
-private:
-    int         mNumReaders;
-    int         mNumWriters;
-
-    Mutex       mLock;
-    Condition   mReadWaiter;
-    Condition   mWriteWaiter;
-#if defined(PRINT_RENDER_TIMES)
-    DurationTimer mDebugTimer;
-#endif
-};
-
-
-/*
  * This is our spiffy thread object!
  */
 

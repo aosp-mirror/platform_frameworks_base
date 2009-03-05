@@ -2766,6 +2766,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private void showPopup() {
         // Make sure we have a window before showing the popup
         if (getWindowVisibility() == View.VISIBLE) {
+            createTextFilter(true);
             positionPopup(false);
             // Make sure we get focus if we are showing the popup
             checkFocus();
@@ -2913,8 +2914,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mPopup == null) {
             Context c = getContext();
             PopupWindow p = new PopupWindow(c);
-            LayoutInflater layoutInflater = (LayoutInflater) c
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater)
+                    c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mTextFilter = (EditText) layoutInflater.inflate(
                     com.android.internal.R.layout.typing_filter, null);
             mTextFilter.addTextChangedListener(this);
@@ -3136,6 +3137,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          */
         int viewType;
 
+        /**
+         * When this boolean is set, the view has been added to the AbsListView
+         * at least once. It is used to know whether headers/footers have already
+         * been added to the list view and whether they should be treated as
+         * recycled views or not.
+         */
+        boolean recycledHeaderFooter;
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
@@ -3269,7 +3278,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (lp != null && lp.viewType != AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
                     // Note:  We do place AdapterView.ITEM_VIEW_TYPE_IGNORE in active views.
                     //        However, we will NOT place them into scrap views.
-                    activeViews[i] = getChildAt(i);
+                    activeViews[i] = child;
                 }
             }
         }

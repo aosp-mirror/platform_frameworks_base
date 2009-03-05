@@ -332,8 +332,8 @@ static status_t do_9patch(const char* imageName, image_info* image)
     int H = image->height;
     int i, j;
 
-    int maxSizeXDivs = (W / 2 + 1) * sizeof(int32_t);
-    int maxSizeYDivs = (H / 2 + 1) * sizeof(int32_t);
+    int maxSizeXDivs = W * sizeof(int32_t);
+    int maxSizeYDivs = H * sizeof(int32_t);
     int32_t* xDivs = (int32_t*) malloc(maxSizeXDivs);
     int32_t* yDivs = (int32_t*) malloc(maxSizeYDivs);
     uint8_t  numXDivs = 0;

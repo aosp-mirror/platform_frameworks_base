@@ -333,6 +333,12 @@ public class ImageView extends View {
         resizeFromDrawable();
     }
 
+    /**
+     * Sets the image level, when it is constructed from a 
+     * {@link android.graphics.drawable.LevelListDrawable}.
+     *
+     * @param level The new level for the image.
+     */
     @android.view.RemotableViewMethod
     public void setImageLevel(int level) {
         mLevel = level;

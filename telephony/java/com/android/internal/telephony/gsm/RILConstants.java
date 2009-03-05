@@ -51,6 +51,32 @@ cat include/telephony/ril.h | \
     int RIL_SIM_PIN = 3;
     int RIL_SIM_PUK = 4;
     int RIL_SIM_NETWORK_PERSONALIZATION = 5;
+    
+    /** 
+     * No restriction at all including voice/SMS/USSD/SS/AV64 
+     * and packet data.
+     */   
+    int RIL_RESTRICTED_STATE_NONE = 0x00;    
+    /** 
+     * Block emergency call due to restriction. 
+     * But allow all normal voice/SMS/USSD/SS/AV64. 
+     */
+    int RIL_RESTRICTED_STATE_CS_EMERGENCY = 0x01;
+    /** 
+     * Block all normal voice/SMS/USSD/SS/AV64 due to restriction. 
+     * Only Emergency call allowed. 
+     */
+    int RIL_RESTRICTED_STATE_CS_NORMAL = 0x02;
+    /** 
+     * Block all voice/SMS/USSD/SS/AV64 
+     * including emergency call due to restriction.
+     */
+    int RIL_RESTRICTED_STATE_CS_ALL = 0x04;
+    /** 
+     * Block packet data access due to restriction. 
+     */  
+    int RIL_RESTRICTED_STATE_PS_ALL = 0x10;
+    
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;
     int RIL_REQUEST_ENTER_SIM_PUK = 3;
@@ -147,4 +173,5 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_SIM_SMS_STORAGE_FULL = 1016;
     int RIL_UNSOL_SIM_REFRESH = 1017;
     int RIL_UNSOL_CALL_RING = 1018;
+    int RIL_UNSOL_RESTRICTED_STATE_CHANGED = 1023;
 }

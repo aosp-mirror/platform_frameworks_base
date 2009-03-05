@@ -266,32 +266,10 @@ public class AnimationSet extends Animation {
     /**
      * @hide
      */
-    public void getInvalidateRegion(int left, int top, int right, int bottom,
-            RectF invalidate, Transformation transformation) {
-
-        final RectF previousRegion = mPreviousRegion;
-
-        invalidate.set(left, top, right, bottom);
-        transformation.getMatrix().mapRect(invalidate);
-        invalidate.union(previousRegion);
-
-        previousRegion.set(left, top, right, bottom);
-        transformation.getMatrix().mapRect(previousRegion);
-
-        final Transformation tempTransformation = mTransformation;
-        final Transformation previousTransformation = mPreviousTransformation;
-
-        tempTransformation.set(transformation);
-        transformation.set(previousTransformation);
-        previousTransformation.set(tempTransformation);
-    }
-
-    /**
-     * @hide
-     */
     public void initializeInvalidateRegion(int left, int top, int right, int bottom) {
         final RectF region = mPreviousRegion;
         region.set(left, top, right, bottom);
+        region.inset(-1.0f, -1.0f);
 
         if (mFillBefore) {
             final int count = mAnimations.size();
@@ -400,8 +378,12 @@ public class AnimationSet extends Animation {
 
 
         long[] storedOffsets = mStoredOffsets;
-        if (storedOffsets == null || storedOffsets.length != count) {
-            storedOffsets = mStoredOffsets = new long[count];
+        if (startOffsetSet) {
+            if (storedOffsets == null || storedOffsets.length != count) {
+                storedOffsets = mStoredOffsets = new long[count];
+            }
+        } else if (storedOffsets != null) {
+            storedOffsets = mStoredOffsets = null;
         }
 
         for (int i = 0; i < count; i++) {
@@ -445,7 +427,6 @@ public class AnimationSet extends Animation {
 
         final ArrayList<Animation> children = mAnimations;
         final int count = children.size();
-
 
         for (int i = 0; i < count; i++) {
             children.get(i).setStartOffset(offsets[i]);

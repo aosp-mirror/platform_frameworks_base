@@ -162,6 +162,7 @@
         <item name="spinnerItemStyle">@android:style/Widget.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.KeyboardView</item>
+        <item name="zoomRingStyle">@android:style/Widget.ZoomRing</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>

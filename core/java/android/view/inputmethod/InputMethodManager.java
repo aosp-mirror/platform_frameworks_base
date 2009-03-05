@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -287,6 +288,9 @@ public final class InputMethodManager {
     // -----------------------------------------------------------
     
     static final int MSG_DUMP = 1;
+    static final int MSG_BIND = 2;
+    static final int MSG_UNBIND = 3;
+    static final int MSG_SET_ACTIVE = 4;
     
     class H extends Handler {
         H(Looper looper) {
@@ -306,6 +310,68 @@ public final class InputMethodManager {
                     }
                     synchronized (args.arg4) {
                         ((CountDownLatch)args.arg4).countDown();
+                    }
+                    return;
+                }
+                case MSG_BIND: {
+                    final InputBindResult res = (InputBindResult)msg.obj;
+                    synchronized (mH) {
+                        if (mBindSequence < 0 || mBindSequence != res.sequence) {
+                            Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
+                                    + ", given seq=" + res.sequence);
+                            return;
+                        }
+                        
+                        mCurMethod = res.method;
+                        mCurId = res.id;
+                        mBindSequence = res.sequence;
+                    }
+                    startInputInner();
+                    return;
+                }
+                case MSG_UNBIND: {
+                    final int sequence = msg.arg1;
+                    synchronized (mH) {
+                        if (mBindSequence == sequence) {
+                            if (false) {
+                                // XXX the server has already unbound!
+                                if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
+                                    try {
+                                        mCurMethod.finishInput();
+                                    } catch (RemoteException e) {
+                                        Log.w(TAG, "IME died: " + mCurId, e);
+                                    }
+                                }
+                            }
+                            clearBindingLocked();
+                            
+                            // If we were actively using the last input method, then
+                            // we would like to re-connect to the next input method.
+                            if (mServedView != null && mServedView.isFocused()) {
+                                mServedConnecting = true;
+                            }
+                        }
+                        startInputInner();
+                    }
+                    return;
+                }
+                case MSG_SET_ACTIVE: {
+                    final boolean active = msg.arg1 != 0;
+                    synchronized (mH) {
+                        mActive = active;
+                        mFullscreenMode = false;
+                        if (!active) {
+                            // Some other client has starting using the IME, so note
+                            // that this happened and make sure our own editor's
+                            // state is reset.
+                            mHasBeenInactive = true;
+                            try {
+                                // Note that finishComposingText() is allowed to run
+                                // even when we are not active.
+                                mIInputContext.finishComposingText();
+                            } catch (RemoteException e) {
+                            }
+                        }
                     }
                     return;
                 }
@@ -348,62 +414,15 @@ public final class InputMethodManager {
         }
         
         public void onBindMethod(InputBindResult res) {
-            synchronized (mH) {
-                if (mBindSequence < 0 || mBindSequence != res.sequence) {
-                    Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
-                            + ", given seq=" + res.sequence);
-                    return;
-                }
-                
-                mCurMethod = res.method;
-                mCurId = res.id;
-                mBindSequence = res.sequence;
-            }
-            startInputInner();
+            mH.sendMessage(mH.obtainMessage(MSG_BIND, res));
         }
         
         public void onUnbindMethod(int sequence) {
-            synchronized (mH) {
-                if (mBindSequence == sequence) {
-                    if (false) {
-                        // XXX the server has already unbound!
-                        if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
-                            try {
-                                mCurMethod.finishInput();
-                            } catch (RemoteException e) {
-                                Log.w(TAG, "IME died: " + mCurId, e);
-                            }
-                        }
-                    }
-                    clearBindingLocked();
-                    
-                    // If we were actively using the last input method, then
-                    // we would like to re-connect to the next input method.
-                    if (mServedView != null && mServedView.isFocused()) {
-                        mServedConnecting = true;
-                    }
-                }
-                startInputInner();
-            }
+            mH.sendMessage(mH.obtainMessage(MSG_UNBIND, sequence, 0));
         }
         
         public void setActive(boolean active) {
-            synchronized (mH) {
-                mActive = active;
-                mFullscreenMode = false;
-                if (!active) {
-                    // Some other client has starting using the IME, so note
-                    // that this happened and make sure our own editor's
-                    // state is reset.
-                    mHasBeenInactive = true;
-                    try {
-                        // Note that finishComposingText() is allowed to run
-                        // even when we are not active.
-                        mIInputContext.finishComposingText();
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
+            mH.sendMessage(mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0));
         }
     };    
     
@@ -646,6 +665,52 @@ public final class InputMethodManager {
     public static final int SHOW_FORCED = 0x0002;
     
     /**
+     * Synonym for {@link #showSoftInput(View, int, ResultReceiver)} without
+     * a result receiver: explicitly request that the current input method's
+     * soft input area be shown to the user, if needed.
+     * 
+     * @param view The currently focused view, which would like to receive
+     * soft keyboard input.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
+     */
+    public boolean showSoftInput(View view, int flags) {
+        return showSoftInput(view, flags, null);
+    }
+    
+    /**
+     * Flag for the {@link ResultReceiver} result code from
+     * {@link #showSoftInput(View, int, ResultReceiver)} and
+     * {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}: the
+     * state of the soft input window was unchanged and remains shown.
+     */
+    public static final int RESULT_UNCHANGED_SHOWN = 0;
+    
+    /**
+     * Flag for the {@link ResultReceiver} result code from
+     * {@link #showSoftInput(View, int, ResultReceiver)} and
+     * {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}: the
+     * state of the soft input window was unchanged and remains hidden.
+     */
+    public static final int RESULT_UNCHANGED_HIDDEN = 1;
+    
+    /**
+     * Flag for the {@link ResultReceiver} result code from
+     * {@link #showSoftInput(View, int, ResultReceiver)} and
+     * {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}: the
+     * state of the soft input window changed from hidden to shown.
+     */
+    public static final int RESULT_SHOWN = 2;
+    
+    /**
+     * Flag for the {@link ResultReceiver} result code from
+     * {@link #showSoftInput(View, int, ResultReceiver)} and
+     * {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}: the
+     * state of the soft input window changed from shown to hidden.
+     */
+    public static final int RESULT_HIDDEN = 3;
+    
+    /**
      * Explicitly request that the current input method's soft input area be
      * shown to the user, if needed.  Call this if the user interacts with
      * your view in such a way that they have expressed they would like to
@@ -655,25 +720,33 @@ public final class InputMethodManager {
      * soft keyboard input.
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #SHOW_IMPLICIT} bit set.
+     * @param resultReceiver If non-null, this will be called by the IME when
+     * it has processed your request to tell you what it has done.  The result
+     * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
+     * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
+     * {@link #RESULT_HIDDEN}.
      */
-    public void showSoftInput(View view, int flags) {
+    public boolean showSoftInput(View view, int flags,
+            ResultReceiver resultReceiver) {
         checkFocus();
         synchronized (mH) {
             if (mServedView != view) {
-                return;
+                return false;
             }
 
             try {
-                mService.showSoftInput(mClient, flags);
+                return mService.showSoftInput(mClient, flags, resultReceiver);
             } catch (RemoteException e) {
             }
+            
+            return false;
         }
     }
     
     /** @hide */
-    public void showSoftInputUnchecked(int flags) {
+    public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         try {
-            mService.showSoftInput(mClient, flags);
+            mService.showSoftInput(mClient, flags, resultReceiver);
         } catch (RemoteException e) {
         }
     }
@@ -693,6 +766,20 @@ public final class InputMethodManager {
     public static final int HIDE_NOT_ALWAYS = 0x0002;
     
     /**
+     * Synonym for {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)
+     * without a result: request to hide the soft input window from the
+     * context of the window that is currently accepting input.
+     * 
+     * @param windowToken The token of the window that is making the request,
+     * as returned by {@link View#getWindowToken() View.getWindowToken()}.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
+     */
+    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags) {
+        return hideSoftInputFromWindow(windowToken, flags, null);
+    }
+    
+    /**
      * Request to hide the soft input window from the context of the window
      * that is currently accepting input.  This should be called as a result
      * of the user doing some actually than fairly explicitly requests to
@@ -702,21 +789,77 @@ public final class InputMethodManager {
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
+     * @param resultReceiver If non-null, this will be called by the IME when
+     * it has processed your request to tell you what it has done.  The result
+     * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
+     * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
+     * {@link #RESULT_HIDDEN}.
      */
-    public void hideSoftInputFromWindow(IBinder windowToken, int flags) {
+    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+            ResultReceiver resultReceiver) {
         checkFocus();
+        synchronized (mH) {
+            if (mServedView == null || mServedView.getWindowToken() != windowToken) {
+                return false;
+            }
+
+            try {
+                return mService.hideSoftInput(mClient, flags, resultReceiver);
+            } catch (RemoteException e) {
+            }
+            return false;
+        }
+    }
+    
+
+    /**
+     * This method toggles the input method window display.
+     * If the input window is already displayed, it gets hidden. 
+     * If not the input window will be displayed.
+     * @param windowToken The token of the window that is making the request,
+     * as returned by {@link View#getWindowToken() View.getWindowToken()}.
+     * @param showFlags Provides additional operating flags.  May be
+     * 0 or have the {@link #SHOW_IMPLICIT},
+     * {@link #SHOW_FORCED} bit set.
+     * @param hideFlags Provides additional operating flags.  May be
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
+     * {@link #HIDE_NOT_ALWAYS} bit set.
+     **/
+    public void toggleSoftInputFromWindow(IBinder windowToken, int showFlags, int hideFlags) {
         synchronized (mH) {
             if (mServedView == null || mServedView.getWindowToken() != windowToken) {
                 return;
             }
+            if (mCurMethod != null) {
+                try {
+                    mCurMethod.toggleSoftInput(showFlags, hideFlags);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
 
+    /*
+     * This method toggles the input method window display.
+     * If the input window is already displayed, it gets hidden. 
+     * If not the input window will be displayed.
+     * @param showFlags Provides additional operating flags.  May be
+     * 0 or have the {@link #SHOW_IMPLICIT},
+     * {@link #SHOW_FORCED} bit set.
+     * @param hideFlags Provides additional operating flags.  May be
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
+     * {@link #HIDE_NOT_ALWAYS} bit set.
+     * @hide
+     */
+    public void toggleSoftInput(int showFlags, int hideFlags) {
+        if (mCurMethod != null) {
             try {
-                mService.hideSoftInput(mClient, flags);
+                mCurMethod.toggleSoftInput(showFlags, hideFlags);
             } catch (RemoteException e) {
             }
         }
     }
-    
+
     /**
      * If the input method is currently connected to the given view,
      * restart it with its new contents.  You should call this when the text
@@ -956,7 +1099,7 @@ public final class InputMethodManager {
     
     void closeCurrentInput() {
         try {
-            mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS);
+            mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS, null);
         } catch (RemoteException e) {
         }
     }
@@ -1118,11 +1261,33 @@ public final class InputMethodManager {
      * when it was started, which allows it to perform this operation on
      * itself.
      * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
+     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
+     * {@link #HIDE_NOT_ALWAYS} bit set.
      */
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
         try {
             mService.hideMySoftInput(token, flags);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Show the input method's soft input area, so the user 
+     * sees the input method window and can interact with it.
+     * This can only be called from the currently active input method,
+     * as validated by the given token.
+     * 
+     * @param token Supplies the identifying token given to an input method
+     * when it was started, which allows it to perform this operation on
+     * itself.
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link #SHOW_IMPLICIT} or
+     * {@link #SHOW_FORCED} bit set.
+     */
+    public void showSoftInputFromInputMethod(IBinder token, int flags) {
+        try {
+            mService.showMySoftInput(token, flags);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -1204,7 +1369,7 @@ public final class InputMethodManager {
             }
         }
     }
-    
+
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");

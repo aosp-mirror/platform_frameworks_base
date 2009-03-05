@@ -144,6 +144,11 @@
         <item name="windowExitAnimation">@anim/search_bar_exit</item>
     </style>
 
+    <!-- Standard animations for the zoom ring. -->
+    <style name="Animation.ZoomRing">
+        <item name="windowEnterAnimation">@anim/zoom_ring_enter</item>
+        <item name="windowExitAnimation">@anim/zoom_ring_exit</item>
+    </style>
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBarTitle">
@@ -454,6 +459,21 @@
         <item name="android:verticalCorrection">-10dip</item>
         <item name="android:shadowColor">#BB000000</item>
         <item name="android:shadowRadius">2.75</item>
+    </style>
+
+    <style name="Widget.ZoomRing">
+        <item name="android:background">@android:drawable/zoom_ring_track</item>
+        <item name="android:thumbDrawable">@android:drawable/zoom_ring_thumb</item>
+        <item name="android:thumbDistance">63dip</item>
+        <item name="android:trackInnerRadius">43dip</item>
+        <item name="android:trackOuterRadius">91dip</item>
+        <item name="android:zoomInArrowDrawable">@android:drawable/zoom_ring_thumb_plus_arrow_rotatable</item>
+        <item name="android:zoomOutArrowDrawable">@android:drawable/zoom_ring_thumb_minus_arrow_rotatable</item>
+        <item name="android:zoomInArrowHintDrawable">@android:drawable/zoom_ring_thumb_plus</item>
+        <item name="android:zoomOutArrowHintDrawable">@android:drawable/zoom_ring_thumb_minus</item>
+        <item name="android:zoomArrowHintDistance">69dip</item>
+        <item name="android:zoomArrowHintOffsetAngle">33</item>
+        <item name="android:panningArrowsDrawable">@android:drawable/zoom_ring_arrows</item>
     </style>
 
     <!-- Text Appearances -->

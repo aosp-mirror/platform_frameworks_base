@@ -1387,14 +1387,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
                     mPrivateFlags |= DRAW_ANIMATION;
-                    // Enlarge the invalidate region to account for rounding errors
-                    // in Animation#getInvalidateRegion(); Using 0.5f is unfortunately
-                    // not enough for some types of animations (e.g. scale down.)
-                    final int left = cl + (int) (region.left - 1.0f);
-                    final int top = ct + (int) (region.top - 1.0f);
-                    invalidate(left, top,
-                            left + (int) (region.width() + 1.0f),
-                            top + (int) (region.height() + 1.0f));
+
+                    final int left = cl + (int) region.left;
+                    final int top = ct + (int) region.top;
+                    invalidate(left, top, left + (int) region.width(), top + (int) region.height());
                 }
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==

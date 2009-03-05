@@ -127,7 +127,10 @@ static void dumpstate(int full) {
         PRINT("========================================================");
         PRINT("== dumpsys");
         PRINT("========================================================");
-        EXEC("dumpsys");
+        /* the full dumpsys is starting to take a long time, so we need
+           to increase its timeout.  we really need to do the timeouts in
+           dumpsys itself... */
+        EXEC_TIMEOUT("dumpsys", 40);
     }
 }
 

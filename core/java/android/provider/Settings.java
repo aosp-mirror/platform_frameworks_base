@@ -2825,6 +2825,11 @@ public final class Settings {
         public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
                 "battery_discharge_duration_threshold";
         public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
+        
+        /**
+         * An email address that anr bugreports should be sent to.
+         */
+        public static final String ANR_BUGREPORT_RECIPIENT = "anr_bugreport_recipient";
 
         /**
          * @deprecated

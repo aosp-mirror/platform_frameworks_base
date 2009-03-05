@@ -929,6 +929,7 @@ public class GridView extends AbsListView {
             if (p == null) {
                 p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                child.setLayoutParams(p);
             }
             p.viewType = mAdapter.getItemViewType(0);
 
@@ -1328,11 +1329,8 @@ public class GridView extends AbsListView {
      */
     @Override
     void setSelectionInt(int position) {
-        mBlockLayoutRequests = true;
         setNextSelectedPositionInt(position);
         layoutChildren();
-
-        mBlockLayoutRequests = false;
     }
 
     @Override

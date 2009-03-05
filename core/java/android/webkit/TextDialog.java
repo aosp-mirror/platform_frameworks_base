@@ -113,13 +113,7 @@ import java.util.ArrayList;
         // that other applications that use embedded WebViews will properly
         // display the text in textfields.
         setTextColor(Color.BLACK);
-    }
-
-    @Override
-    protected boolean shouldAdvanceFocusOnEnter() {
-        // In the browser, single line textfields use enter as a form submit,
-        // so we never want to advance the focus on enter.
-        return false;
+        setImeOptions(EditorInfo.IME_ACTION_NONE);
     }
 
     @Override

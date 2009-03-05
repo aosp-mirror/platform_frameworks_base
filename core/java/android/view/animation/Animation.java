@@ -340,6 +340,7 @@ public abstract class Animation implements Cloneable {
      * to run.
      */
     public void restrictDuration(long durationMillis) {
+        // If we start after the duration, then we just won't run.
         if (mStartOffset > durationMillis) {
             mStartOffset = durationMillis;
             mDuration = 0;
@@ -349,11 +350,26 @@ public abstract class Animation implements Cloneable {
         
         long dur = mDuration + mStartOffset;
         if (dur > durationMillis) {
-            mDuration = dur = durationMillis-mStartOffset;
+            mDuration = durationMillis-mStartOffset;
+            dur = durationMillis;
         }
+        // If the duration is 0 or less, then we won't run.
+        if (mDuration <= 0) {
+            mDuration = 0;
+            mRepeatCount = 0;
+            return;
+        }
+        // Reduce the number of repeats to keep below the maximum duration.
+        // The comparison between mRepeatCount and duration is to catch
+        // overflows after multiplying them.
         if (mRepeatCount < 0 || mRepeatCount > durationMillis
                 || (dur*mRepeatCount) > durationMillis) {
-            mRepeatCount = (int)(durationMillis/dur);
+            // Figure out how many times to do the animation.  Subtract 1 since
+            // repeat count is the number of times to repeat so 0 runs once.
+            mRepeatCount = (int)(durationMillis/dur) - 1;
+            if (mRepeatCount < 0) {
+                mRepeatCount = 0;
+            }
         }
     }
     
@@ -416,7 +432,7 @@ public abstract class Animation implements Cloneable {
      * Sets how many times the animation should be repeated. If the repeat
      * count is 0, the animation is never repeated. If the repeat count is
      * greater than 0 or {@link #INFINITE}, the repeat mode will be taken
-     * into account. The repeat count if 0 by default.
+     * into account. The repeat count is 0 by default.
      *
      * @param repeatCount the number of times the animation should be repeated
      * @attr ref android.R.styleable#Animation_repeatCount
@@ -806,6 +822,8 @@ public abstract class Animation implements Cloneable {
 
         invalidate.set(left, top, right, bottom);
         transformation.getMatrix().mapRect(invalidate);
+        // Enlarge the invalidate region to account for rounding errors
+        invalidate.inset(-1.0f, -1.0f);
         tempRegion.set(invalidate);
         invalidate.union(previousRegion);
 
@@ -830,6 +848,8 @@ public abstract class Animation implements Cloneable {
     public void initializeInvalidateRegion(int left, int top, int right, int bottom) {
         final RectF region = mPreviousRegion;
         region.set(left, top, right, bottom);
+        // Enlarge the invalidate region to account for rounding errors
+        region.inset(-1.0f, -1.0f);
         if (mFillBefore) {
             final Transformation previousTransformation = mPreviousTransformation;
             applyTransformation(0.0f, previousTransformation);

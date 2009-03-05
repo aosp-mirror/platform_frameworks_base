@@ -313,6 +313,7 @@ android_media_MediaRecorder_release(JNIEnv *env, jobject thiz)
     sp<MediaRecorder> mr = setMediaRecorder(env, thiz, 0);
     if (mr != NULL) {
         mr->setListener(NULL);
+        mr->release();
     }
 }
 

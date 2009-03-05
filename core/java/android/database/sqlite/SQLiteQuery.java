@@ -18,13 +18,14 @@ package android.database.sqlite;
 
 import android.database.CursorWindow;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * A SQLite program that represents a query that reads the resulting rows into a CursorWindow.
  * This class is used by SQLiteCursor and isn't useful itself.
  */
 public class SQLiteQuery extends SQLiteProgram {
-    //private static final String TAG = "Cursor";
+    private static final String TAG = "Cursor";
 
     /** The index of the unbound OFFSET parameter */
     private int mOffsetIndex;
@@ -73,6 +74,11 @@ public class SQLiteQuery extends SQLiteProgram {
                 // is not safe in this situation. the native code will ignore maxRead
                 int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
                         maxRead, lastPos);
+
+                // Logging
+                if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                    Log.d(TAG, "fillWindow(): " + mQuery);
+                }
                 if (logStats) {
                     mDatabase.logTimeStat(true /* read */, startTime,
                             SystemClock.elapsedRealtime());

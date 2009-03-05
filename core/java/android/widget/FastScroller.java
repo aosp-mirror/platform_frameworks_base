@@ -62,6 +62,8 @@ class FastScroller {
     private int mVisibleItem;
     private Paint mPaint;
     private int mListOffset;
+    private int mItemCount = -1;
+    private boolean mLongList;
     
     private Object [] mSections;
     private String mSectionText;
@@ -219,8 +221,12 @@ class FastScroller {
     
     void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, 
             int totalItemCount) {
-        // Are there enough pages to require fast scroll?
-        if (visibleItemCount > 0 && totalItemCount / visibleItemCount < MIN_PAGES) {
+        // Are there enough pages to require fast scroll? Recompute only if total count changes
+        if (mItemCount != totalItemCount && visibleItemCount > 0) {
+            mItemCount = totalItemCount;
+            mLongList = mItemCount / visibleItemCount >= MIN_PAGES;
+        }
+        if (!mLongList) {
             if (mState != STATE_NONE) {
                 setState(STATE_NONE);
             }

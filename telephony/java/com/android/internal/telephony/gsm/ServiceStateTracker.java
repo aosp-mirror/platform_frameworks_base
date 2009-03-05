@@ -23,11 +23,15 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERAT
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OPERATOR_ALPHA;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OPERATOR_NUMERIC;
+
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.gsm.DataConnectionTracker.State;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -87,6 +91,7 @@ final class ServiceStateTracker extends Handler
     GsmCellLocation cellLoc;
     GsmCellLocation newCellLoc;
     int mPreferredNetworkType;
+    RestrictedState rs;
 
     int rssi = 99;     // signal strength 0-31, 99=unknown
                        // That's "received signal strength indication" fyi
@@ -119,6 +124,9 @@ final class ServiceStateTracker extends Handler
     private RegistrantList gprsDetachedRegistrants = new RegistrantList();
     private RegistrantList roamingOnRegistrants = new RegistrantList();
     private RegistrantList roamingOffRegistrants = new RegistrantList();
+    private RegistrantList psRestrictEnabledRegistrants = new RegistrantList();
+    private RegistrantList psRestrictDisabledRegistrants = new RegistrantList();
+    
 
     // Sometimes we get the NITZ time before we know what country we are in.
     // Keep the time zone information from the NITZ string so we can fix
@@ -141,6 +149,11 @@ final class ServiceStateTracker extends Handler
     private boolean mStartedGprsRegCheck = false;
     // Already sent the event-log for no gprs register
     private boolean mReportedGprsNoReg = false;
+    
+    /**
+     * The Notification object given to the NotificationManager.
+     */
+    private Notification mNotification;
 
     // Wake lock used while setting time of day.
     private PowerManager.WakeLock mWakeLock;
@@ -162,6 +175,17 @@ final class ServiceStateTracker extends Handler
     // waiting period before recheck gprs and voice registration
     static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
+    // notification type
+    static final int PS_ENABLED = 1001;             // Access Control blocks data service
+    static final int PS_DISABLED = 1002;            // Access Control enables data service
+    static final int CS_ENABLED = 1003;             // Access Control blocks all voice/sms service
+    static final int CS_DISABLED = 1004;            // Access Control enables all voice/sms service
+    static final int CS_NORMAL_ENABLED = 1005;      // Access Control blocks normal voice/sms service
+    static final int CS_NORMAL_DISABLED = 1006;     // Access Control enables normal voice/sms service
+    static final int CS_EMERGENCY_ENABLED = 1007;   // Access Control blocks emergency call service
+    static final int CS_EMERGENCY_DISABLED  = 1008; // Access Control enables emergency call service       
+    
+    
     //***** Events
     static final int EVENT_RADIO_STATE_CHANGED       = 1;
     static final int EVENT_NETWORK_STATE_CHANGED        = 2;
@@ -182,6 +206,7 @@ final class ServiceStateTracker extends Handler
     static final int EVENT_SET_PREFERRED_NETWORK_TYPE = 20;
     static final int EVENT_RESET_PREFERRED_NETWORK_TYPE = 21;
     static final int EVENT_CHECK_REPORT_GPRS = 22;
+    static final int EVENT_RESTRICTED_STATE_CHANGED = 23;
 
   //***** Time Zones
 
@@ -221,8 +246,7 @@ final class ServiceStateTracker extends Handler
             revertToNitz();
         }
     };
-
-
+    
     //***** Constructors
 
     ServiceStateTracker(GSMPhone phone)
@@ -233,6 +257,7 @@ final class ServiceStateTracker extends Handler
         newSS = new ServiceState();
         cellLoc = new GsmCellLocation();
         newCellLoc = new GsmCellLocation();
+        rs = new RestrictedState();
 
         PowerManager powerManager =
                 (PowerManager)phone.getContext().getSystemService(Context.POWER_SERVICE);
@@ -244,7 +269,7 @@ final class ServiceStateTracker extends Handler
         cm.registerForNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED, null);
         cm.setOnNITZTime(this, EVENT_NITZ_TIME, null);
         cm.setOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, null);
-
+        cm.setOnRestrictedStateChanged(this, EVENT_RESTRICTED_STATE_CHANGED, null);       
         cm.registerForSIMReady(this, EVENT_SIM_READY, null);
 
         // system setting property AIRPLANE_MODE_ON is set in Settings.
@@ -267,8 +292,7 @@ final class ServiceStateTracker extends Handler
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    /*protected*/ void
-    registerForGprsAttached(Handler h, int what, Object obj) {
+    /*protected*/ void registerForGprsAttached(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
         gprsAttachedRegistrants.add(r);
 
@@ -291,8 +315,7 @@ final class ServiceStateTracker extends Handler
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    /*protected*/  void
-    registerForGprsDetached(Handler h, int what, Object obj) {
+    /*protected*/ void registerForGprsDetached(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
         gprsDetachedRegistrants.add(r);
 
@@ -349,6 +372,38 @@ final class ServiceStateTracker extends Handler
                 obtainMessage(EVENT_GET_PREFERRED_NETWORK_TYPE, onComplete));
     }
 
+    /**
+     * Registration point for transition into packet service restricted zone.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
+    void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
+        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedEnabled "); 
+        Registrant r = new Registrant(h, what, obj);
+        psRestrictEnabledRegistrants.add(r);
+
+        if (rs.isPsRestricted()) {
+            r.notifyRegistrant();
+        }
+    }
+    
+    /**
+     * Registration point for transition out of packet service restricted zone.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
+    void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
+        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedDisabled "); 
+        Registrant r = new Registrant(h, what, obj);
+        psRestrictDisabledRegistrants.add(r);
+
+        if (rs.isPsRestricted()) {
+            r.notifyRegistrant();
+        }
+    }
+    
     //***** Called from GSMPhone
 
     public void
@@ -561,6 +616,17 @@ final class ServiceStateTracker extends Handler
                 }
                 mStartedGprsRegCheck = false;
                 break;
+                
+            case EVENT_RESTRICTED_STATE_CHANGED:
+                // This is a notification from
+                // CommandsInterface.setOnRestrictedStateChanged
+
+                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_RESTRICTED_STATE_CHANGED");
+                
+                ar = (AsyncResult) msg.obj;
+
+                onRestrictedStateChanged(ar);
+                break;
 
         }
     }
@@ -569,7 +635,7 @@ final class ServiceStateTracker extends Handler
 
     private void updateSpnDisplay() {
         int rule = phone.mSIMRecords.getDisplayRule(ss.getOperatorNumeric());
-        String spn = phone.mSIMRecords.getServiceProvideName();
+        String spn = phone.mSIMRecords.getServiceProviderName();
         String plmn = ss.getOperatorAlphaLong();
 
         if (rule != curSpnRule
@@ -1111,6 +1177,63 @@ final class ServiceStateTracker extends Handler
             phone.notifySignalStrength();
         }
     }
+    
+    /**
+     * Set restricted state based on the OnRestrictedStateChanged notification
+     * If any voice or packet restricted state changes, trigger a UI
+     * notification and notify registrants.
+     * @param ar an int value of RIL_RESTRICTED_STATE_*
+     */
+    private void onRestrictedStateChanged(AsyncResult ar)
+    {
+        Log.d(LOG_TAG, "[DSAC DEB] " + "onRestrictedStateChanged");
+        RestrictedState newRs = new RestrictedState();
+ 
+        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at enter "+ rs);
+        
+        if (ar.exception == null) {
+            int[] ints = (int[])ar.result;
+            int state = ints[0];
+            
+            newRs.setCsEmergencyRestricted(
+                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_EMERGENCY) != 0) ||
+                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
+            newRs.setCsNormalRestricted(
+                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_NORMAL) != 0) ||
+                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
+            newRs.setPsRestricted(
+                    (state & RILConstants.RIL_RESTRICTED_STATE_PS_ALL)!= 0);
+            
+            Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);         
+            
+            if (!rs.isPsRestricted() && newRs.isPsRestricted()) {
+                psRestrictEnabledRegistrants.notifyRegistrants();
+                setNotification(PS_ENABLED, false);
+            } else if (rs.isPsRestricted() && !newRs.isPsRestricted()) {
+                psRestrictDisabledRegistrants.notifyRegistrants();
+                setNotification(PS_DISABLED, false);
+            }
+            
+            if (!rs.isCsRestricted() && newRs.isCsRestricted()) {
+                setNotification(CS_ENABLED, false);
+            } else if (rs.isCsRestricted() && !newRs.isCsRestricted()) {
+                setNotification(CS_DISABLED, false);
+            } else {
+                if (!rs.isCsEmergencyRestricted() && newRs.isCsEmergencyRestricted()) {
+                    setNotification(CS_EMERGENCY_ENABLED, false); 
+                } else if (rs.isCsEmergencyRestricted() && !newRs.isCsEmergencyRestricted()) {
+                    setNotification(CS_EMERGENCY_DISABLED, false); 
+                }
+                if (!rs.isCsNormalRestricted() && newRs.isCsNormalRestricted()) {
+                    setNotification(CS_NORMAL_ENABLED, false); 
+                } else if (rs.isCsEmergencyRestricted() && !newRs.isCsEmergencyRestricted()) {
+                    setNotification(CS_NORMAL_DISABLED, false); 
+                }
+            }
+            rs = newRs;
+        }
+        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at return "+ rs);
+    }
 
     /** code is registration state 0-5 from TS 27.007 7.2 */
     private int
@@ -1465,4 +1588,72 @@ final class ServiceStateTracker extends Handler
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
         }
     }
+    
+    /**
+     * Post a notification to NotificationManager for restricted state
+     * 
+     * @param notifyType is one state of PS/CS_*_ENABLE/DISABLE
+     * @param isCancel true to cancel the previous posted notification 
+     *                 (current is not implemented yet)
+     */
+    private void setNotification(int notifyType, boolean isCancel) {
+
+        Log.d(LOG_TAG, "[DSAC DEB] " + "create notification " + notifyType);
+        mNotification = new Notification();
+        mNotification.when = System.currentTimeMillis();
+        mNotification.flags = Notification.FLAG_AUTO_CANCEL;
+        mNotification.icon = com.android.internal.R.drawable.icon_highlight_square;
+        Intent intent = new Intent();
+        mNotification.contentIntent = PendingIntent
+        .getActivity(phone.getContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        // TODO 
+        // should use getResources().getText(com.android.internal.R.)
+        CharSequence title = "Restricted State Changed";
+        CharSequence details = "";
+        switch (notifyType) {
+        case PS_ENABLED:
+            details = "Access Control blocks data service.";
+            break;
+        case PS_DISABLED:
+            details = "Access Control enables data service.";
+            break;
+        case CS_ENABLED:
+            details = "Access Control blocks all voice/sms service.";
+            break;   
+        case CS_DISABLED:
+            details = "Access Control enables all voice/sms service.";
+            break;  
+        case CS_NORMAL_ENABLED:
+            details = "Access Control blocks normal voice/sms service.";
+            break;   
+        case CS_NORMAL_DISABLED:
+            details = "Access Control enables normal voice/sms service.";
+            break; 
+        case CS_EMERGENCY_ENABLED:
+            details = "Access Control blocks emergency call service.";
+            break;   
+        case CS_EMERGENCY_DISABLED:
+            details = "Access Control enables emergency call service.";
+            break;  
+        }
+        
+        Log.d(LOG_TAG, "[DSAC DEB] " + "put notification " + title + " / " +details);
+        mNotification.tickerText = title;
+        mNotification.setLatestEventInfo(phone.getContext(), title, details, 
+                mNotification.contentIntent);
+        
+        NotificationManager notificationManager = (NotificationManager) 
+            phone.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (isCancel) {
+            // TODO
+            //if we go the notification route, probably want to only put up a single
+            //notification if both CS+PS is restricted, instead of one for each.nnnnn
+            //Anyway, need UX team input on UI.
+            //notificationManager.cancel(notifyType);
+        }
+        notificationManager.notify(notifyType, mNotification);
+    }
+
 }

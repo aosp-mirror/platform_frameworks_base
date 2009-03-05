@@ -689,7 +689,10 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
-        public void onSimpleZoom(boolean zoomIn) {
+        public void onSimpleZoom(boolean zoomIn, int centerX, int centerY) {
+            mZoomCenterX = (float) centerX;
+            mZoomCenterY = (float) centerY;
+            
             if (zoomIn) {
                 zoomIn();
             } else {
@@ -736,12 +739,12 @@ public class WebView extends AbsoluteLayout
         mFocusData.mY = 0;
         mScroller = new Scroller(context);
         mZoomRingController = new ZoomRingController(context, this);
-        mZoomRingController.setResetThumbAutomatically(false);
         mZoomRingController.setCallback(mZoomListener);
-        mZoomRingController.setZoomRingTrack(
+        mZoomRingController.setTrackDrawable(
                 com.android.internal.R.drawable.zoom_ring_track_absolute);
-        mZoomRingController.setPannerAcceleration(160);
-        mZoomRingController.setPannerStartAcceleratingDuration(700);
+        float density = context.getResources().getDisplayMetrics().density;
+        mZoomRingController.setPannerAcceleration((int) (160 * density));
+        mZoomRingController.setPannerStartAcceleratingDuration((int) (700 * density));
         createZoomRingOverviewTab();
         mZoomButtonsController = new ZoomButtonsController(context, this);
         mZoomButtonsController.setOverviewVisible(true);
@@ -760,7 +763,7 @@ public class WebView extends AbsoluteLayout
             }
 
             public void onZoom(boolean zoomIn) {
-                mZoomListener.onSimpleZoom(zoomIn);
+                mZoomListener.onSimpleZoom(zoomIn, getWidth() / 2, getHeight() / 2);
             }
         });
     }
@@ -4491,6 +4494,14 @@ public class WebView extends AbsoluteLayout
         return zoomControls;
     }
 
+    // This used to be the value returned by ViewConfiguration.getTouchSlop().
+    // We pass this to the navigation cache to find where the user clicked.
+    // TouchSlop has been increased for other purposes, but for the
+    // navigation cache it is too big, and may result in clicking the wrong
+    // spot.  This is a concern when the cache is out of date, and clicking
+    // finds a node which is wrong but nearby.
+    private static final int NAV_SLOP = 12;
+
     private void updateSelection() {
         if (mNativeClass == 0) {
             return;
@@ -4498,7 +4509,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        int contentSize = ViewConfiguration.getTouchSlop();
+        int contentSize = NAV_SLOP;
         Rect rect = new Rect(contentX - contentSize, contentY - contentSize,
                 contentX + contentSize, contentY + contentSize);
         // If we were already focused on a textfield, update its cache.
@@ -4513,7 +4524,7 @@ public class WebView extends AbsoluteLayout
             View v = mTextEntry;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
-            int contentSize = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+            int contentSize = NAV_SLOP;
             nativeMotionUp(x, y, contentSize, true);
         }
     }
@@ -4526,7 +4537,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        int contentSize = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        int contentSize = NAV_SLOP;
         if (nativeMotionUp(contentX, contentY, contentSize, true)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),

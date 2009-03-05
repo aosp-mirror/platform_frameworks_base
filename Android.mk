@@ -100,6 +100,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/gadget/IGadgetService.aidl \
 	core/java/com/android/internal/gadget/IGadgetHost.aidl \
+    core/java/com/android/internal/os/IResultReceiver.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
 	core/java/com/android/internal/view/IInputMethod.aidl \

@@ -153,31 +153,23 @@ public class AudioTrack
      */
     private final Object mPlayStateLock = new Object();
     /**
-     * The listener the AudioTrack notifies previously set marker is reached.
-     *  @see #setMarkerReachedListener(OnMarkerReachedListener)
+     * The listener the AudioTrack notifies when the playback position reaches a marker
+     * or for periodic updates during the progression of the playback head.
+     *  @see #setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener)
      */
-    private OnMarkerReachedListener mMarkerListener = null;
+    private OnPlaybackPositionUpdateListener mPositionListener = null;
     /**
-     * Lock to protect marker listener updates against event notifications
+     * Lock to protect event listener updates against event notifications
      */
-    private final Object mMarkerListenerLock = new Object();
-    /**
-     * The listener the AudioTrack notifies periodically during playback.
-     *  @see #setPeriodicNotificationListener(OnPeriodicNotificationListener)
-     */
-    private OnPeriodicNotificationListener mPeriodicListener = null;
-    /**
-     * Lock to protect periodic listener updates against event notifications
-     */
-    private final Object mPeriodicListenerLock = new Object();
+    private final Object mPositionListenerLock = new Object();
     /**
      * Size of the native audio buffer.
      */
     private int mNativeBufferSizeInBytes = 0;
     /**
-     * Handler for events coming from the native code
+     * Handler for marker events coming from the native code
      */
-    private NativeEventHandler mNativeEventHandler = null;
+    private NativeEventHandlerDelegate mEventHandlerDelegate = null;
     /**
      * The audio data sampling rate in Hz.
      */
@@ -370,22 +362,6 @@ public class AudioTrack
         }
 
         mNativeBufferSizeInBytes = audioBufferSize;
-    }
-
-
-    // Convenience method for the creation of the native event handler
-    // It is called only when a non-null event listener is set.
-    // precondition:
-    //    mNativeEventHandler is null
-    private void createNativeEventHandler() {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mNativeEventHandler = new NativeEventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mNativeEventHandler = new NativeEventHandler(this, looper);
-        } else {
-            mNativeEventHandler = null;
-        }
     }
 
 
@@ -592,31 +568,26 @@ public class AudioTrack
     // Initialization / configuration
     //--------------------
     /**
-     * Sets the listener the AudioTrack notifies when a previously set marker is reached.
+     * Sets the listener the AudioTrack notifies when a previously set marker is reached or
+     * for each periodic playback head position update.
      * @param listener
      */
-    public void setMarkerReachedListener(OnMarkerReachedListener listener) {
-        synchronized (mMarkerListenerLock) {
-            mMarkerListener = listener;
+    public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener) {
+        setPlaybackPositionUpdateListener(listener, null);
+    }
+    
+
+    public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener, 
+                                                    Handler handler) {
+        synchronized (mPositionListenerLock) {
+            mPositionListener = listener;
         }
-        if ((listener != null) && (mNativeEventHandler == null)) {
-            createNativeEventHandler();
+        if (listener != null) {
+            mEventHandlerDelegate = new NativeEventHandlerDelegate(this, handler);
         }
+        
     }
 
-
-    /**
-     * Sets the listener the AudioTrack notifies periodically during playback.
-     * @param listener
-     */
-    public void setPeriodicNotificationListener(OnPeriodicNotificationListener listener) {
-        synchronized (mPeriodicListenerLock) {
-            mPeriodicListener = listener;
-        }
-        if ((listener != null) && (mNativeEventHandler == null)) {
-            createNativeEventHandler();
-        }
-    }
 
 
      /**
@@ -895,23 +866,16 @@ public class AudioTrack
     // Interface definitions
     //--------------------
     /**
-     * Interface definition for a callback to be invoked when an AudioTrack has
-     * reached a notification marker set by setNotificationMarkerPosition().
+     * Interface definition for a callback to be invoked when the playback head position of
+     * an AudioTrack has reached a notification marker or has increased by a certain period.
      */
-    public interface OnMarkerReachedListener  {
+    public interface OnPlaybackPositionUpdateListener  {
         /**
          * Called on the listener to notify it that the previously set marker has been reached
          * by the playback head.
          */
         void onMarkerReached(AudioTrack track);
-    }
-
-
-    /**
-     * Interface definition for a callback to be invoked for each periodic AudioTrack
-     * update during playback. The update interval is set by setPositionNotificationPeriod().
-     */
-    public interface OnPeriodicNotificationListener  {
+        
         /**
          * Called on the listener to periodically notify it that the playback head has reached
          * a multiple of the notification period.
@@ -924,42 +888,63 @@ public class AudioTrack
     // Inner classes
     //--------------------
     /**
-     * Helper class to handle the forwarding of native events to the appropriate listeners
-     */
-    private class NativeEventHandler extends Handler
-    {
-        private AudioTrack mAudioTrack;
-
-        public NativeEventHandler(AudioTrack mp, Looper looper) {
-            super(looper);
-            mAudioTrack = mp;
+     * Helper class to handle the forwarding of native events to the appropriate listener
+     * (potentially) handled in a different thread
+     */  
+    private class NativeEventHandlerDelegate {
+        private final AudioTrack mAudioTrack;
+        private final Handler mHandler;
+        
+        NativeEventHandlerDelegate(AudioTrack track, Handler handler) {
+            mAudioTrack = track;
+            // find the looper for our new event handler
+            Looper looper;
+            if (handler != null) {
+                looper = handler.getLooper();
+            } else {
+                // no given handler, look for main looper
+                if ((looper = Looper.myLooper()) == null) {
+                    looper = Looper.getMainLooper();
+                }
+            }
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        if (mAudioTrack == null) {
+                            return;
+                        }
+                        OnPlaybackPositionUpdateListener listener = null;
+                        synchronized (mPositionListenerLock) {
+                            listener = mAudioTrack.mPositionListener;
+                        }
+                        switch(msg.what) {
+                        case NATIVE_EVENT_MARKER:
+                            if (listener != null) {
+                                listener.onMarkerReached(mAudioTrack);
+                            }
+                            break;
+                        case NATIVE_EVENT_NEW_POS:
+                            if (listener != null) {
+                                listener.onPeriodicNotification(mAudioTrack);
+                            }
+                            break;
+                        default:
+                            Log.e(TAG, "[ android.media.AudioTrack.NativeEventHandler ] " +
+                                    "Unknown event type: " + msg.what);
+                            break;
+                        }
+                    }
+                };
+            } else {
+                mHandler = null;
+            } 
         }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (mAudioTrack == null) {
-                return;
-            }
-            switch(msg.what) {
-            case NATIVE_EVENT_MARKER:
-                synchronized (mMarkerListenerLock) {
-                    if (mAudioTrack.mMarkerListener != null) {
-                        mAudioTrack.mMarkerListener.onMarkerReached(mAudioTrack);
-                    }
-                }
-                break;
-            case NATIVE_EVENT_NEW_POS:
-                synchronized (mPeriodicListenerLock) {
-                    if (mAudioTrack.mPeriodicListener != null) {
-                        mAudioTrack.mPeriodicListener.onPeriodicNotification(mAudioTrack);
-                    }
-                }
-                break;
-            default:
-                Log.e(TAG, "[ android.media.AudioTrack.NativeEventHandler ] " +
-                        "Unknown event type: " + msg.what);
-                break;
-            }
+        
+        Handler getHandler() {
+            return mHandler;
         }
     }
 
@@ -976,9 +961,10 @@ public class AudioTrack
             return;
         }
 
-        if (track.mNativeEventHandler != null) {
-            Message m = track.mNativeEventHandler.obtainMessage(what, arg1, arg2, obj);
-            track.mNativeEventHandler.sendMessage(m);
+        if (track.mEventHandlerDelegate != null) {
+            Message m = 
+                track.mEventHandlerDelegate.getHandler().obtainMessage(what, arg1, arg2, obj);
+            track.mEventHandlerDelegate.getHandler().sendMessage(m);
         }
 
     }

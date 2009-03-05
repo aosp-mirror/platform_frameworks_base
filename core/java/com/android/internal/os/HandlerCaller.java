@@ -120,6 +120,10 @@ public class HandlerCaller {
         return mH.obtainMessage(what, arg1, 0);
     }
     
+    public Message obtainMessageII(int what, int arg1, int arg2) {
+        return mH.obtainMessage(what, arg1, arg2);
+    }
+    
     public Message obtainMessageIO(int what, int arg1, Object arg2) {
         return mH.obtainMessage(what, arg1, 0, arg2);
     }

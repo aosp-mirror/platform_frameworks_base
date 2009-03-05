@@ -371,6 +371,8 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
+        <!-- Default ZoomRing style. -->
+        <attr name="zoomRingStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -529,10 +531,23 @@
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_PASSWORD}. -->
         <flag name="textPassword" value="0x00000081" />
+        <!-- Text that is a password that should be visible.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_VISIBLE_PASSWORD}. -->
+        <flag name="textVisiblePassword" value="0x00000091" />
         <!-- Text that is being supplied as text in a web form.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}. -->
-        <flag name="textWebEditText" value="0x00000091" />
+        <flag name="textWebEditText" value="0x000000a1" />
+        <!-- Text that is filtering some other data.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_FILTER}. -->
+        <flag name="textFilter" value="0x000000b1" />
+        <!-- Text that is for phonetic pronunciation, such as a phonetic name
+             field in a contact entry.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_PHONETIC}. -->
+        <flag name="textPhonetic" value="0x000000c1" />
         <!-- A numeric only field.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_NUMBER}. -->
         <flag name="number" value="0x00000002" />
@@ -1920,6 +1935,34 @@
         </attr>
         <attr name="inputType" />
     </declare-styleable>
+    <declare-styleable name="ZoomRing">
+        <!-- Defines the drawable used as the thumb. -->
+        <attr name="thumbDrawable" format="reference" />
+        <!-- Defines the distance of the thumb from the center of the ring. -->
+        <attr name="thumbDistance" format="dimension" />
+        <!-- Defines the distance from the center of the ring to the beginning of the track. -->
+        <attr name="trackInnerRadius" format="dimension" />
+        <!-- Defines the distance from the center of the ring to the end of the track. -->
+        <attr name="trackOuterRadius" format="dimension" />
+        <!-- Defines the drawable used as a hint to show which direction is zoom in. This should be
+             the same size as the zoom ring's asset.  It will be rotated programmatically. -->
+        <attr name="zoomInArrowDrawable" format="reference" />
+        <!-- Defines the drawable used as a hint to show which direction is zoom out. This should be
+             the same size as the zoom ring's asset.  It will be rotated programmatically. -->
+        <attr name="zoomOutArrowDrawable" format="reference" />
+        <!-- Defines the drawable that is laid on top of the zoom in arrow.
+             For example, this could be a +. -->
+        <attr name="zoomInArrowHintDrawable" format="reference" />
+        <!-- Defines the drawable that is laid on top of the zoom out arrow.
+             For example, this could be a -. -->
+        <attr name="zoomOutArrowHintDrawable" format="reference" />
+        <!-- Defines the distance of the zoom arrow hint from the center of the ring. -->
+        <attr name="zoomArrowHintDistance" format="dimension" />
+        <!-- Defines the offset of the zoom arrow hints from the thumb. Valid ranges are [0, 359] -->
+        <attr name="zoomArrowHintOffsetAngle" format="integer" />
+        <!-- Defines the drawable used to hint that the zoom ring can pan its owner. -->
+        <attr name="panningArrowsDrawable" format="reference" />
+    </declare-styleable>    
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
     </declare-styleable>
@@ -2183,7 +2226,9 @@
     </declare-styleable>
     
     <declare-styleable name="LevelListDrawableItem">
+        <!-- The minimum level allowed for this item. -->
         <attr name="minLevel" format="integer" />
+        <!-- The maximum level allowed for this item. -->
         <attr name="maxLevel" format="integer" />
         <attr name="drawable" />
     </declare-styleable>

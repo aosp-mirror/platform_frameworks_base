@@ -1126,6 +1126,7 @@ class LoadListener extends Handler implements EventHandler {
                 mCacheResult = null;
             }
 
+            // This will strip the anchor
             setUrl(redirectTo);
 
             // Redirect may be in the cache
@@ -1143,7 +1144,7 @@ class LoadListener extends Handler implements EventHandler {
                 // mRequestHandle can be null when the request was satisfied
                 // by the cache, and the cache returned a redirect
                 if (mRequestHandle != null) {
-                    mRequestHandle.setupRedirect(redirectTo, mStatusCode,
+                    mRequestHandle.setupRedirect(mUrl, mStatusCode,
                             mRequestHeaders);
                 } else {
                     // If the original request came from the cache, there is no
@@ -1336,19 +1337,16 @@ class LoadListener extends Handler implements EventHandler {
      */
     void setUrl(String url) {
         if (url != null) {
-            if (URLUtil.isDataUrl(url)) {
-             // Don't strip anchor as that is a valid part of the URL
-                mUrl = url;
-            } else {
-                mUrl = URLUtil.stripAnchor(url);
-            }
             mUri = null;
-            if (URLUtil.isNetworkUrl(mUrl)) {
+            if (URLUtil.isNetworkUrl(url)) {
+                mUrl = URLUtil.stripAnchor(url);
                 try {
                     mUri = new WebAddress(mUrl);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
+            } else {
+                mUrl = url;
             }
         }
     }

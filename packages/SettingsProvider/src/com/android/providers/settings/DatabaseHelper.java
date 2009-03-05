@@ -63,7 +63,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 33;
+    private static final int DATABASE_VERSION = 34;
     
     private Context mContext;
 
@@ -369,6 +369,18 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 33;
+        }
+        
+        if (upgradeVersion == 33) {
+            // Set the default zoom controls to: tap-twice to bring up +/-
+            db.beginTransaction();
+            try {
+                db.execSQL("INSERT INTO system(name,value) values('zoom','2');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 34;
         }
 
         if (upgradeVersion != currentVersion) {

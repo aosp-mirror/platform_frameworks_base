@@ -26,7 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
-import android.util.SparseArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -1040,6 +1039,7 @@ public class ListView extends AbsListView {
         if (p == null) {
             p = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+            child.setLayoutParams(p);
         }
         p.viewType = mAdapter.getItemViewType(position);
 
@@ -1320,6 +1320,8 @@ public class ListView extends AbsListView {
         final boolean blockLayoutRequests = mBlockLayoutRequests;
         if (!blockLayoutRequests) {
             mBlockLayoutRequests = true;
+        } else {
+            return;
         }
 
         try {
@@ -1429,15 +1431,12 @@ public class ListView extends AbsListView {
                 // we can remember the focused view to restore after relayout if the
                 // data hasn't changed, or if the focused position is a header or footer
                 if (!dataChanged || isDirectChildHeaderOrFooter(focusedChild)) {
-                    focusLayoutRestoreDirectChild = getFocusedChild();
-                    if (focusLayoutRestoreDirectChild != null) {
-
-                        // remember the specific view that had focus
-                        focusLayoutRestoreView = findFocus();
-                        if (focusLayoutRestoreView != null) {
-                            // tell it we are going to mess with it
-                            focusLayoutRestoreView.onStartTemporaryDetach();
-                        }
+                    focusLayoutRestoreDirectChild = focusedChild;
+                    // remember the specific view that had focus
+                    focusLayoutRestoreView = findFocus();
+                    if (focusLayoutRestoreView != null) {
+                        // tell it we are going to mess with it
+                        focusLayoutRestoreView.onStartTemporaryDetach();
                     }
                 }
                 requestFocus();
@@ -1657,9 +1656,12 @@ public class ListView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled) {
+        if (recycled || (p.recycledHeaderFooter && p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
+            if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                p.recycledHeaderFooter = true;
+            }
             addViewInLayout(child, flowDown ? -1 : 0, p, true);
         }
 
@@ -1766,10 +1768,8 @@ public class ListView extends AbsListView {
      */
     @Override
     void setSelectionInt(int position) {
-        mBlockLayoutRequests = true;
         setNextSelectedPositionInt(position);
         layoutChildren();
-        mBlockLayoutRequests = false;
     }
 
     /**

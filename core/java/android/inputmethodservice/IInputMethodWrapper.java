@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -144,10 +145,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 mInputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT:
-                mInputMethod.showSoftInput(msg.arg1);
+                mInputMethod.showSoftInput(msg.arg1, (ResultReceiver)msg.obj);
                 return;
             case DO_HIDE_SOFT_INPUT:
-                mInputMethod.hideSoftInput();
+                mInputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
                 return;
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -225,12 +226,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
     
-    public void showSoftInput(int flags) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_SHOW_SOFT_INPUT,
-                flags));
+    public void showSoftInput(int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_SHOW_SOFT_INPUT,
+                flags, resultReceiver));
     }
     
-    public void hideSoftInput() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_HIDE_SOFT_INPUT));
+    public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_HIDE_SOFT_INPUT,
+                flags, resultReceiver));
     }
 }

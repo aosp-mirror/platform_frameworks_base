@@ -28,7 +28,7 @@ namespace android {
 
 class ICameraService : public IInterface
 {
-protected:
+public:
     enum {
         CONNECT = IBinder::FIRST_CALL_TRANSACTION,
     };

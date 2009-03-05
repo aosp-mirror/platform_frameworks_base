@@ -221,6 +221,9 @@ public class LocationManagerService extends ILocationManager.Stub
     // Wifi Manager
     private WifiManager mWifiManager;
 
+    private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
+    private boolean mWifiEnabled = false;
+
     /**
      * A wrapper class holding either an ILocationListener or a PendingIntent to receive
      * location updates.
@@ -597,16 +600,6 @@ public class LocationManagerService extends ILocationManager.Stub
 
         // Create a wifi lock for future use
         mWifiLock = getWifiWakelockLocked();
-
-        // There might be an existing wifi scan available
-        if (mWifiManager != null) {
-            List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
-            if (wifiScanResults != null && wifiScanResults.size() != 0) {
-                if (mNetworkLocationInterface != null) {
-                    mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
-                }
-            }
-        }
     }
 
     public void setInstallCallback(InstallCallback callback) {
@@ -625,6 +618,31 @@ public class LocationManagerService extends ILocationManager.Stub
             mNetworkLocationProvider = (LocationProviderImpl)provider;
             LocationProviderImpl.addProvider(mNetworkLocationProvider);
             updateProvidersLocked();
+            
+            // notify NetworkLocationProvider of any events it might have missed
+            synchronized (mLocationListeners) {
+                mNetworkLocationProvider.updateNetworkState(mNetworkState);
+                mNetworkLocationInterface.updateWifiEnabledState(mWifiEnabled);
+                mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
+
+                if (mLastCellState != null) {
+                    if (mCollector != null) {
+                        mCollector.updateCellState(mLastCellState);
+                    }
+                    mNetworkLocationProvider.updateCellState(mLastCellState);
+                }
+
+                // There might be an existing wifi scan available
+                if (mWifiManager != null) {
+                    List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
+                    if (wifiScanResults != null && wifiScanResults.size() != 0) {
+                        mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
+                        if (mCollector != null) {
+                            mCollector.updateWifiScanResults(wifiScanResults);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1992,12 +2010,12 @@ public class LocationManagerService extends ILocationManager.Stub
                 }
 
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                int networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
-
                 boolean noConnectivity =
                     intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
                 if (!noConnectivity) {
-                    networkState = LocationProvider.AVAILABLE;
+                    mNetworkState = LocationProvider.AVAILABLE;
+                } else {
+                    mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 }
 
                 // Notify location providers of current network state
@@ -2005,7 +2023,7 @@ public class LocationManagerService extends ILocationManager.Stub
                     List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
                     for (LocationProviderImpl provider : providers) {
                         if (provider.requiresNetwork()) {
-                            provider.updateNetworkState(networkState);
+                            provider.updateNetworkState(mNetworkState);
                         }
                     }
                 }
@@ -2014,11 +2032,10 @@ public class LocationManagerService extends ILocationManager.Stub
                 int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                     WifiManager.WIFI_STATE_UNKNOWN);
 
-                boolean enabled;
                 if (state == WifiManager.WIFI_STATE_ENABLED) {
-                    enabled = true;
+                    mWifiEnabled = true;
                 } else if (state == WifiManager.WIFI_STATE_DISABLED) {
-                    enabled = false;
+                    mWifiEnabled = false;
                 } else {
                     return;
                 }
@@ -2026,7 +2043,7 @@ public class LocationManagerService extends ILocationManager.Stub
                 // Notify network provider of current wifi enabled state
                 synchronized (mLocationListeners) {
                     if (mNetworkLocationInterface != null) {
-                        mNetworkLocationInterface.updateWifiEnabledState(enabled);
+                        mNetworkLocationInterface.updateWifiEnabledState(mWifiEnabled);
                     }
                 }
 

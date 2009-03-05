@@ -34,9 +34,20 @@ import android.util.AttributeSet;
  * battery level.
  * <p>
  * It can be defined in an XML file with the <code>&lt;level-list></code> element.
- * Each Drawable level is defined in a nested <code>&lt;item></code>
+ * Each Drawable level is defined in a nested <code>&lt;item></code>. For example:
  * </p>
- *
+ * <pre>
+ * &lt;level-list xmlns:android="http://schemas.android.com/apk/res/android">
+ *  &lt;item android:maxLevel="0" android:drawable="@drawable/ic_wifi_signal_1" />
+ *  &lt;item android:maxLevel="1" android:drawable="@drawable/ic_wifi_signal_2" />
+ *  &lt;item android:maxLevel="2" android:drawable="@drawable/ic_wifi_signal_3" />
+ *  &lt;item android:maxLevel="3" android:drawable="@drawable/ic_wifi_signal_4" />
+ * &lt;/level-list>
+ *</pre>
+ * <p>With this XML saved into the res/drawable/ folder of the project, it can be referenced as
+ * the drawable for an {@link android.widget.ImageView}. The default image is the first in the list.
+ * It can then be changed to one of the other levels with
+ * {@link android.widget.ImageView#setImageLevel(int)}.</p>
  * @attr ref android.R.styleable#LevelListDrawableItem_minLevel
  * @attr ref android.R.styleable#LevelListDrawableItem_maxLevel
  * @attr ref android.R.styleable#LevelListDrawableItem_drawable

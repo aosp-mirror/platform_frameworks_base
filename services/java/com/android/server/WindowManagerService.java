@@ -2076,6 +2076,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int curGroup = 0;
             int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             boolean haveGroup = false;
+            boolean lastFullscreen = false;
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
@@ -2090,16 +2091,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 } else if (curGroup != wtoken.groupId) {
                     // If we have hit a new application group, and the bottom
                     // of the previous group didn't explicitly say to use
-                    // the orientation behind it, then we'll stick with the
+                    // the orientation behind it, and the last app was
+                    // full screen, then we'll stick with the
                     // user's orientation.
-                    if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                    if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
+                            && lastFullscreen) {
                         return lastOrientation;
                     }
                 }
                 int or = wtoken.requestedOrientation;
                 // If this application is fullscreen, then just take whatever
                 // orientation it has and ignores whatever is under it.
-                if (wtoken.appFullscreen) {
+                lastFullscreen = wtoken.appFullscreen;
+                if (lastFullscreen) {
                     return or;
                 }
                 // If this application has requested an explicit orientation,

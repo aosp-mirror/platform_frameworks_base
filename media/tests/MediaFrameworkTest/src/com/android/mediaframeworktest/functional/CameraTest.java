@@ -100,6 +100,12 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      */
     private void terminateMessageLooper() {
         mLooper.quit();
+        //TODO yslau : take out the sleep until bug#1693519 fix
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e){
+            Log.v(TAG, e.toString());
+        }
         mCamera.release();
     }
     

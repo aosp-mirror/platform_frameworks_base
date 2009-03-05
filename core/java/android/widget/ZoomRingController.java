@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.DisplayMetrics;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -44,11 +45,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 
-// TODO: make sure no px values exist, only dip (scale if necessary from Viewconfiguration)
-
 /**
- * TODO: Docs
- *
+ * A controller to simplify the use of the zoom ring widget.   
+ * <p>
  * If you are using this with a custom View, please call
  * {@link #setVisible(boolean) setVisible(false)} from the
  * {@link View#onDetachedFromWindow}.
@@ -58,13 +57,7 @@ import android.view.animation.DecelerateInterpolator;
 public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         View.OnTouchListener, View.OnKeyListener {
 
-    private static final int ZOOM_RING_RADIUS_INSET = 24;
-
-    private static final int ZOOM_RING_RECENTERING_DURATION = 500;
-
-    private static final String TAG = "ZoomRing";
-
-    public static final boolean USE_OLD_ZOOM = false;
+    // Temporary methods for different zoom types
     static int getZoomType(Context context) {
         return Settings.System.getInt(context.getContentResolver(), "zoom", 1);
     }
@@ -75,19 +68,43 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         return getZoomType(context) == 1;
     }
 
-    private static final int ZOOM_CONTROLS_TIMEOUT =
-            (int) ViewConfiguration.getZoomControlsTimeout();
+    /** The duration for the animation to re-center the zoom ring. */
+    private static final int RECENTERING_DURATION = 500;
 
-    // TODO: move these to ViewConfiguration or re-use existing ones
-    // TODO: scale px values based on latest from ViewConfiguration
-    private static final int SECOND_TAP_TIMEOUT = 500;
-    private static final int ZOOM_RING_DISMISS_DELAY = SECOND_TAP_TIMEOUT / 2;
-    // TODO: view config?  at least scaled
-    private static final int MAX_PAN_GAP = 20;
-    private static final int MAX_INITIATE_PAN_GAP = 10;
-    // TODO view config
+    /** The inactivity timeout for the zoom ring. */
+    private static final int INACTIVITY_TIMEOUT =
+            (int) ViewConfiguration.getZoomControlsTimeout();
+    
+    /**
+     * The delay when the user taps outside to dismiss the zoom ring. This is
+     * because the user can do a second-tap to recenter the owner view instead
+     * of dismissing the zoom ring.
+     */
+    private static final int OUTSIDE_TAP_DISMISS_DELAY =
+            ViewConfiguration.getDoubleTapTimeout() / 2;
+    
+    /**
+     * When the zoom ring is on the edge, this is the delay before we actually
+     * start panning the owner.
+     * @see #mInitiatePanGap
+     */
     private static final int INITIATE_PAN_DELAY = 300;
 
+    /**
+     * While already panning, if the zoom ring remains this close to an edge,
+     * the owner will continue to be panned.
+     */
+    private int mPanGap;
+    
+    /** To begin a pan, the zoom ring must be this close to an edge. */
+    private int mInitiatePanGap;
+
+    /** Initialized from ViewConfiguration. */
+    private int mScaledTouchSlop;
+
+    /**
+     * The setting name that tracks whether we've shown the zoom ring toast.
+     */
     private static final String SETTING_NAME_SHOWN_TOAST = "shown_zoom_ring_toast";
 
     private Context mContext;
@@ -137,25 +154,37 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
      * screen once (for the first tap down) instead of twice (for the first tap
      * down and then to grab the thumb).
      */
+    /** The X where the tap-drag started. */
     private int mTapDragStartX;
+    /** The Y where the tap-drag started. */
     private int mTapDragStartY;
 
+    /** The controller is idle */
     private static final int TOUCH_MODE_IDLE = 0;
-    private static final int TOUCH_MODE_WAITING_FOR_SECOND_TAP = 1;
+    /**
+     * In the middle of a second-tap interaction, waiting for either an up-touch
+     * or the user to start dragging to go into tap-drag mode.
+     */
     private static final int TOUCH_MODE_WAITING_FOR_TAP_DRAG_MOVEMENT = 2;
+    /** In the middle of a tap-drag. */
     private static final int TOUCH_MODE_FORWARDING_FOR_TAP_DRAG = 3;
     private int mTouchMode;
 
+    /** Whether the zoom ring is visible. */
     private boolean mIsZoomRingVisible;
 
     private ZoomRing mZoomRing;
+    /** Cached width of the zoom ring. */
     private int mZoomRingWidth;
+    /** Cached height of the zoom ring. */
     private int mZoomRingHeight;
 
     /** Invokes panning of owner view if the zoom ring is touching an edge. */
     private Panner mPanner;
+    /** The time when the zoom ring first touched the edge. */
     private long mTouchingEdgeStartTime;
-    private boolean mPanningEnabledForThisInteraction;
+    /** Whether the user has already initiated the panning. */
+    private boolean mPanningInitiated;
 
     /**
      * When the finger moves the zoom ring to an edge, this is the horizontal
@@ -167,15 +196,20 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     /** Vertical accumulator, see {@link #mMovingZoomRingOobX} */
     private int mMovingZoomRingOobY;
 
+    /** Arrows that hint that the zoom ring is movable. */
     private ImageView mPanningArrows;
+    /** The animation shown when the panning arrows are being shown. */
     private Animation mPanningArrowsEnterAnimation;
+    /** The animation shown when the panning arrows are being hidden. */
     private Animation mPanningArrowsExitAnimation;
 
+    /**
+     * Temporary rectangle, only use from the UI thread (and ideally don't rely
+     * on it being unused across many method calls.)
+     */
     private Rect mTempRect = new Rect();
 
     private OnZoomListener mCallback;
-
-    private ViewConfiguration mViewConfig;
 
     /**
      * When the zoom ring is centered on screen, this will be the x value used
@@ -217,6 +251,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     private IntentFilter mConfigurationChangedFilter =
             new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
 
+    /** Listens for configuration changes so we can make sure we're still in a reasonable state. */
     private BroadcastReceiver mConfigurationChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -228,7 +263,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     };
 
     /** Keeps the scroller going (or starts it). */
-    private static final int MSG_SCROLLER_TICK = 1;
+    private static final int MSG_SCROLLER_STEP = 1;
     /** When configuration changes, this is called after the UI thread is idle. */
     private static final int MSG_POST_CONFIGURATION_CHANGED = 2;
     /** Used to delay the zoom ring dismissal. */
@@ -244,8 +279,8 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SCROLLER_TICK:
-                    onScrollerTick();
+                case MSG_SCROLLER_STEP:
+                    onScrollerStep();
                     break;
 
                 case MSG_POST_CONFIGURATION_CHANGED:
@@ -296,8 +331,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mContainerLayoutParams.width = LayoutParams.WRAP_CONTENT;
         mContainerLayoutParams.type = LayoutParams.TYPE_APPLICATION_PANEL;
         mContainerLayoutParams.format = PixelFormat.TRANSPARENT;
-        // TODO: make a new animation for this
-        mContainerLayoutParams.windowAnimations = com.android.internal.R.style.Animation_Dialog;
+        mContainerLayoutParams.windowAnimations = com.android.internal.R.style.Animation_ZoomRing;
 
         mContainer = new FrameLayout(context);
         mContainer.setLayoutParams(mContainerLayoutParams);
@@ -308,13 +342,17 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
 
         mScroller = new Scroller(context, new DecelerateInterpolator());
 
-        mViewConfig = ViewConfiguration.get(context);
+        ViewConfiguration vc = ViewConfiguration.get(context);
+        mScaledTouchSlop = vc.getScaledTouchSlop();
+        
+        float density = context.getResources().getDisplayMetrics().density;
+        mPanGap = (int) (20 * density);
+        mInitiatePanGap = (int) (10 * density);
     }
 
     private void createPanningArrows() {
-        // TODO: style
         mPanningArrows = new ImageView(mContext);
-        mPanningArrows.setImageResource(com.android.internal.R.drawable.zoom_ring_arrows);
+        mPanningArrows.setImageDrawable(mZoomRing.getPanningArrowsDrawable());
         mPanningArrows.setLayoutParams(new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -328,15 +366,16 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     }
 
     /**
-     * Sets the angle (in radians) a user must travel in order for the client to
-     * get a callback. Once there is a callback, the accumulator resets. For
-     * example, if you set this to PI/6, it will give a callback every time the
-     * user moves PI/6 amount on the ring.
-     *
-     * @param callbackThreshold The angle for the callback threshold, in radians
+     * Sets the angle (in radians) between ticks. This is also the angle a user
+     * must move the thumb in order for the client to get a callback. Once there
+     * is a callback, the accumulator resets. For example, if you set this to
+     * PI/6, it will give a callback every time the user moves PI/6 amount on
+     * the ring.
+     * 
+     * @param angle The angle for the callback threshold, in radians
      */
-    public void setZoomCallbackThreshold(float callbackThreshold) {
-        mZoomRing.setCallbackThreshold((int) (callbackThreshold * ZoomRing.RADIAN_INT_MULTIPLIER));
+    public void setTickDelta(float angle) {
+        mZoomRing.setTickDelta((int) (angle * ZoomRing.RADIAN_INT_MULTIPLIER));
     }
 
     /**
@@ -346,14 +385,23 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
      * @hide Need a better way of doing this, but this one-off for browser so it
      *       can have its final look for the usability study
      */
-    public void setZoomRingTrack(int drawable) {
+    public void setTrackDrawable(int drawable) {
         mZoomRing.setBackgroundResource(drawable);
     }
-
+    
+    /**
+     * Sets the callback for the zoom ring controller.
+     * 
+     * @param callback The callback.
+     */
     public void setCallback(OnZoomListener callback) {
         mCallback = callback;
     }
 
+    public void setVibration(boolean vibrate) {
+        mZoomRing.setVibration(vibrate);
+    }
+    
     public void setThumbAngle(float angle) {
         mZoomRing.setThumbAngle((int) (angle * ZoomRing.RADIAN_INT_MULTIPLIER));
     }
@@ -362,14 +410,6 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mZoomRing.setThumbAngleAnimated((int) (angle * ZoomRing.RADIAN_INT_MULTIPLIER), 0);
     }
 
-    public void setResetThumbAutomatically(boolean resetThumbAutomatically) {
-        mZoomRing.setResetThumbAutomatically(resetThumbAutomatically);
-    }
-
-    public void setVibration(boolean vibrate) {
-        mZoomRing.setVibration(vibrate);
-    }
-    
     public void setThumbVisible(boolean thumbVisible) {
         mZoomRing.setThumbVisible(thumbVisible);
     }
@@ -407,7 +447,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                 return;
             }
             
-            dismissZoomRingDelayed(ZOOM_CONTROLS_TIMEOUT);
+            dismissZoomRingDelayed(INACTIVITY_TIMEOUT);
         } else {
             mPanner.stop();
         }
@@ -429,12 +469,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                     public void run() {
                         refreshPositioningVariables();
                         resetZoomRing();
-
-                        // TODO: remove this 'update' and just center zoom ring before the
-                        // 'add', but need to make sure we have the width and height (which
-                        // probably can only be retrieved after it's measured, which happens
-                        // after it's added).
-                        mWindowManager.updateViewLayout(mContainer, mContainerLayoutParams);
+                        refreshContainerLayout();
 
                         if (mCallback != null) {
                             mCallback.onVisibilityChanged(true);
@@ -479,19 +514,34 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
 
     }
 
+    private void refreshContainerLayout() {
+        if (mIsZoomRingVisible) {
+            mWindowManager.updateViewLayout(mContainer, mContainerLayoutParams);
+        }
+    }
+
     /**
-     * TODO: docs
-     *
+     * Returns the container of the zoom ring widget. The client can add views
+     * here to be shown alongside the zoom ring.  See {@link #getZoomRingId()}.
+     * <p>
      * Notes:
-     * - Touch dispatching is different.  Only direct children who are clickable are eligble for touch events.
-     * - Please ensure you set your View to INVISIBLE not GONE when hiding it.
-     *
-     * @return
+     * <ul>
+     * <li> The controller dispatches touch events differently than the regular view
+     * framework.
+     * <li> Please ensure you set your view to INVISIBLE not GONE when hiding it.
+     * </ul>
+     * 
+     * @return The layout used by the container.
      */
     public FrameLayout getContainer() {
         return mContainer;
     }
 
+    /**
+     * Returns the id of the zoom ring widget.
+     * 
+     * @return The id of the zoom ring widget.
+     */
     public int getZoomRingId() {
         return mZoomRing.getId();
     }
@@ -514,7 +564,10 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     /**
      * Should be called by the client for each event belonging to the second tap
      * (the down, move, up, and cancel events).
-     *
+     * <p>
+     * In most cases, the client can use a {@link GestureDetector} and forward events from
+     * {@link GestureDetector.OnDoubleTapListener#onDoubleTapEvent(MotionEvent)}.
+     * 
      * @param event The event belonging to the second tap.
      * @return Whether the event was consumed.
      */
@@ -550,9 +603,9 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                         case MotionEvent.ACTION_MOVE:
                             int x = (int) event.getX();
                             int y = (int) event.getY();
-                            if (Math.abs(x - mTapDragStartX) > mViewConfig.getScaledTouchSlop() ||
+                            if (Math.abs(x - mTapDragStartX) > mScaledTouchSlop ||
                                     Math.abs(y - mTapDragStartY) >
-                                    mViewConfig.getScaledTouchSlop()) {
+                                    mScaledTouchSlop) {
                                 mZoomRing.setTapDragMode(true, x, y);
                                 mTouchMode = TOUCH_MODE_FORWARDING_FOR_TAP_DRAG;
                                 setTouchTargetView(mZoomRing);
@@ -600,8 +653,8 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             int width = mContainer.getWidth();
             int height = mContainer.getHeight();
             mScroller.startScroll(lp.x, lp.y, mCenteredContainerX - lp.x,
-                    mCenteredContainerY - lp.y, ZOOM_RING_RECENTERING_DURATION);
-            mHandler.sendEmptyMessage(MSG_SCROLLER_TICK);
+                    mCenteredContainerY - lp.y, RECENTERING_DURATION);
+            mHandler.sendEmptyMessage(MSG_SCROLLER_STEP);
         }
     }
 
@@ -636,18 +689,22 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mZoomRing.handleTouch(event.getAction(), event.getEventTime(), x, y, rawX, rawY);
     }
 
+    /** @hide */
     public void onZoomRingSetMovableHintVisible(boolean visible) {
         setPanningArrowsVisible(visible);
     }
 
+    /** @hide */
     public void onUserInteractionStarted() {
         mHandler.removeMessages(MSG_DISMISS_ZOOM_RING);
     }
 
+    /** @hide */
     public void onUserInteractionStopped() {
-        dismissZoomRingDelayed(ZOOM_CONTROLS_TIMEOUT);
+        dismissZoomRingDelayed(INACTIVITY_TIMEOUT);
     }
 
+    /** @hide */
     public void onZoomRingMovingStarted() {
         mScroller.abortAnimation();
         mTouchingEdgeStartTime = 0;
@@ -664,6 +721,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         mPanningArrows.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
+    /** @hide */
     public boolean onZoomRingMoved(int deltaX, int deltaY, int rawX, int rawY) {
 
         if (mMovingZoomRingOobX != 0) {
@@ -721,12 +779,12 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                     ownerBounds.bottom - mZoomRingHeight : newZoomRingY;
         lp.y = newZoomRingY - zoomRingTop;
 
-        mWindowManager.updateViewLayout(mContainer, lp);
-
+        refreshContainerLayout();
+        
         // Check for pan
         boolean horizontalPanning = true;
         int leftGap = newZoomRingX - ownerBounds.left;
-        if (leftGap < MAX_PAN_GAP) {
+        if (leftGap < mPanGap) {
             if (leftGap == 0 && deltaX != 0 && mMovingZoomRingOobX == 0) {
                 // Future moves in this direction should be accumulated in mMovingZoomRingOobX
                 mMovingZoomRingOobX = deltaX / Math.abs(deltaX);
@@ -736,7 +794,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             }
         } else {
             int rightGap = ownerBounds.right - (lp.x + mZoomRingWidth + zoomRingLeft);
-            if (rightGap < MAX_PAN_GAP) {
+            if (rightGap < mPanGap) {
                 if (rightGap == 0 && deltaX != 0 && mMovingZoomRingOobX == 0) {
                     mMovingZoomRingOobX = deltaX / Math.abs(deltaX);
                 }
@@ -750,7 +808,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         }
 
         int topGap = newZoomRingY - ownerBounds.top;
-        if (topGap < MAX_PAN_GAP) {
+        if (topGap < mPanGap) {
             if (topGap == 0 && deltaY != 0 && mMovingZoomRingOobY == 0) {
                 mMovingZoomRingOobY = deltaY / Math.abs(deltaY);
             }
@@ -759,7 +817,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             }
         } else {
             int bottomGap = ownerBounds.bottom - (lp.y + mZoomRingHeight + zoomRingTop);
-            if (bottomGap < MAX_PAN_GAP) {
+            if (bottomGap < mPanGap) {
                 if (bottomGap == 0 && deltaY != 0 && mMovingZoomRingOobY == 0) {
                     mMovingZoomRingOobY = deltaY / Math.abs(deltaY);
                 }
@@ -771,7 +829,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
                 if (!horizontalPanning) {
                     // Neither are panning, reset any timer to start pan mode
                     mTouchingEdgeStartTime = 0;
-                    mPanningEnabledForThisInteraction = false;
+                    mPanningInitiated = false;
                     mPanner.stop();
                 }
             }
@@ -781,13 +839,13 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     }
 
     private boolean shouldPan(int gap) {
-        if (mPanningEnabledForThisInteraction) return true;
+        if (mPanningInitiated) return true;
 
-        if (gap < MAX_INITIATE_PAN_GAP) {
+        if (gap < mInitiatePanGap) {
             long time = SystemClock.elapsedRealtime();
             if (mTouchingEdgeStartTime != 0 &&
                     mTouchingEdgeStartTime + INITIATE_PAN_DELAY < time) {
-                mPanningEnabledForThisInteraction = true;
+                mPanningInitiated = true;
                 return true;
             } else if (mTouchingEdgeStartTime == 0) {
                 mTouchingEdgeStartTime = time;
@@ -800,6 +858,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         return false;
     }
 
+    /** @hide */
     public void onZoomRingMovingStopped() {
         mPanner.stop();
         setPanningArrowsVisible(false);
@@ -809,27 +868,25 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
     }
 
     private int getStrengthFromGap(int gap) {
-        return gap > MAX_PAN_GAP ? 0 :
-            (MAX_PAN_GAP - gap) * 100 / MAX_PAN_GAP;
+        return gap > mPanGap ? 0 :
+            (mPanGap - gap) * 100 / mPanGap;
     }
 
+    /** @hide */
     public void onZoomRingThumbDraggingStarted() {
         if (mCallback != null) {
             mCallback.onBeginDrag();
         }
     }
 
+    /** @hide */
     public boolean onZoomRingThumbDragged(int numLevels, int startAngle, int curAngle) {
         if (mCallback != null) {
             int deltaZoomLevel = -numLevels;
-            int globalZoomCenterX = mContainerLayoutParams.x + mZoomRing.getLeft() +
-                    mZoomRingWidth / 2;
-            int globalZoomCenterY = mContainerLayoutParams.y + mZoomRing.getTop() +
-                    mZoomRingHeight / 2;
 
             return mCallback.onDragZoom(deltaZoomLevel,
-                    globalZoomCenterX - mOwnerViewBounds.left,
-                    globalZoomCenterY - mOwnerViewBounds.top,
+                    getZoomRingCenterXInOwnerCoordinates(),
+                    getZoomRingCenterYInOwnerCoordinates(),
                     (float) startAngle / ZoomRing.RADIAN_INT_MULTIPLIER,
                     (float) curAngle / ZoomRing.RADIAN_INT_MULTIPLIER);
         }
@@ -837,24 +894,36 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         return false;
     }
 
+    private int getZoomRingCenterXInOwnerCoordinates() {
+        int globalZoomCenterX = mContainerLayoutParams.x + mZoomRing.getLeft() +
+                mZoomRingWidth / 2;
+        return globalZoomCenterX - mOwnerViewBounds.left;
+    }
+
+    private int getZoomRingCenterYInOwnerCoordinates() {
+        int globalZoomCenterY = mContainerLayoutParams.y + mZoomRing.getTop() +
+                mZoomRingHeight / 2;
+        return globalZoomCenterY - mOwnerViewBounds.top;
+    }
+
+    /** @hide */
     public void onZoomRingThumbDraggingStopped() {
         if (mCallback != null) {
             mCallback.onEndDrag();
         }
     }
 
-    public void onZoomRingDismissed(boolean dismissImmediately) {
-        if (dismissImmediately) {
-            mHandler.removeMessages(MSG_DISMISS_ZOOM_RING);
-            setVisible(false);
-        } else {
-            dismissZoomRingDelayed(ZOOM_RING_DISMISS_DELAY);
-        }
+    /** @hide */
+    public void onZoomRingDismissed() {
+        mHandler.removeMessages(MSG_DISMISS_ZOOM_RING);
+        setVisible(false);
     }
 
+    /** @hide */
     public void onRingDown(int tickAngle, int touchAngle) {
     }
 
+    /** @hide */
     public boolean onTouch(View v, MotionEvent event) {
         if (sTutorialDialog != null && sTutorialDialog.isShowing() &&
                 SystemClock.elapsedRealtime() - sTutorialShowTime >= TUTORIAL_MIN_DISPLAY_TIME) {
@@ -904,8 +973,9 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             return retValue;
 
         } else {
+//            dismissZoomRingDelayed(ZOOM_CONTROLS_TIMEOUT);
             if (action == MotionEvent.ACTION_DOWN) {
-                dismissZoomRingDelayed(ZOOM_RING_DISMISS_DELAY);
+                dismissZoomRingDelayed(OUTSIDE_TAP_DISMISS_DELAY);
             }
 
             return false;
@@ -932,7 +1002,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         int containerCenterY = mContainerLayoutParams.y + mContainer.getHeight() / 2;
         int distanceFromCenterX = rawX - containerCenterX;
         int distanceFromCenterY = rawY - containerCenterY;
-        int zoomRingRadius = mZoomRingWidth / 2 - ZOOM_RING_RADIUS_INSET;
+        int zoomRingRadius = mZoomRing.getTrackOuterRadius();
         if (distanceFromCenterX * distanceFromCenterX +
                 distanceFromCenterY * distanceFromCenterY <=
                 zoomRingRadius * zoomRingRadius) {
@@ -960,7 +1030,11 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         return null;
     }
 
-    /** Steals key events from the owner view. */
+    /**
+     * Steals key events from the owner view.
+     * 
+     * @hide
+     */
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -971,12 +1045,14 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
             case KeyEvent.KEYCODE_DPAD_UP:
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 // Keep the zoom alive a little longer
-                dismissZoomRingDelayed(ZOOM_CONTROLS_TIMEOUT);
+                dismissZoomRingDelayed(INACTIVITY_TIMEOUT);
                 // They started zooming, hide the thumb arrows
                 mZoomRing.setThumbArrowsVisible(false);
 
                 if (mCallback != null && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    mCallback.onSimpleZoom(keyCode == KeyEvent.KEYCODE_DPAD_UP);
+                    mCallback.onSimpleZoom(keyCode == KeyEvent.KEYCODE_DPAD_UP,
+                            getZoomRingCenterXInOwnerCoordinates(),
+                            getZoomRingCenterYInOwnerCoordinates());
                 }
 
                 return true;
@@ -985,18 +1061,18 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         return false;
     }
 
-    private void onScrollerTick() {
+    private void onScrollerStep() {
         if (!mScroller.computeScrollOffset() || !mIsZoomRingVisible) return;
 
         mContainerLayoutParams.x = mScroller.getCurrX();
         mContainerLayoutParams.y = mScroller.getCurrY();
-        mWindowManager.updateViewLayout(mContainer, mContainerLayoutParams);
+        refreshContainerLayout();
 
-        mHandler.sendEmptyMessage(MSG_SCROLLER_TICK);
+        mHandler.sendEmptyMessage(MSG_SCROLLER_STEP);
     }
 
     private void onPostConfigurationChanged() {
-        dismissZoomRingDelayed(ZOOM_CONTROLS_TIMEOUT);
+        dismissZoomRingDelayed(INACTIVITY_TIMEOUT);
         refreshPositioningVariables();
         ensureZoomRingIsCentered();
     }
@@ -1056,6 +1132,7 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         sTutorialShowTime = SystemClock.elapsedRealtime();
     }
 
+    /** @hide Should only be used by Android platform apps */
     public static void finishZoomTutorial(Context context, boolean userNotified) {
         if (sTutorialDialog == null) return;
 
@@ -1078,22 +1155,45 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
         }
     }
 
+    /** @hide Should only be used by Android platform apps */
     public void finishZoomTutorial() {
         finishZoomTutorial(mContext, true);
     }
 
+    /**
+     * Sets the initial velocity of a pan.
+     * 
+     * @param startVelocity The initial velocity to move the owner view, in
+     *            pixels per second.
+     */
     public void setPannerStartVelocity(float startVelocity) {
         mPanner.mStartVelocity = startVelocity;
     }
 
+    /**
+     * Sets the accelartion of the pan.
+     *
+     * @param acceleration The acceleration, in pixels per second squared.
+     */
     public void setPannerAcceleration(float acceleration) {
         mPanner.mAcceleration = acceleration;
     }
 
+    /**
+     * Sets the maximum velocity of a pan.
+     * 
+     * @param maxVelocity The max velocity to move the owner view, in pixels per
+     *            second.
+     */
     public void setPannerMaxVelocity(float maxVelocity) {
         mPanner.mMaxVelocity = maxVelocity;
     }
 
+    /**
+     * Sets the duration before acceleration will be applied.
+     * 
+     * @param duration The duration, in milliseconds.
+     */
     public void setPannerStartAcceleratingDuration(int duration) {
         mPanner.mStartAcceleratingDuration = duration;
     }
@@ -1201,16 +1301,83 @@ public class ZoomRingController implements ZoomRing.OnZoomRingCallback,
 
     }
 
+    /**
+     * Interface used to inform the client of zoom events that the user
+     * triggers.
+     */
     public interface OnZoomListener {
+        /**
+         * Called when the user begins dragging the thumb on the zoom ring.
+         */
         void onBeginDrag();
+
+        /**
+         * Called when the user drags the thumb and passes a tick causing a
+         * zoom.
+         * 
+         * @param deltaZoomLevel The number of levels to be zoomed. Positive to
+         *            zoom in, negative to zoom out.
+         * @param centerX The point about which to zoom. The zoom should pin
+         *            this point, leaving it at the same coordinate. This is
+         *            relative to the owner view's upper-left.
+         * @param centerY The point about which to zoom. The zoom should pin
+         *            this point, leaving it at the same coordinate. This is
+         *            relative to the owner view's upper-left.
+         * @param startAngle The angle where the user started dragging the thumb.
+         * @param curAngle The current angle of the thumb.
+         * @return Whether the owner was zoomed.
+         */
         boolean onDragZoom(int deltaZoomLevel, int centerX, int centerY, float startAngle,
                 float curAngle);
+        
+        /**
+         * Called when the user releases the thumb.
+         */
         void onEndDrag();
-        void onSimpleZoom(boolean deltaZoomLevel);
+
+        /**
+         * Called when the user zooms via some other mechanism, for example
+         * arrow keys or a trackball.
+         * 
+         * @param zoomIn Whether to zoom in (true) or out (false).
+         * @param centerX See {@link #onDragZoom(int, int, int, float, float)}.
+         * @param centerY See {@link #onDragZoom(int, int, int, float, float)}.
+         */
+        void onSimpleZoom(boolean zoomIn, int centerX, int centerY);
+
+        /**
+         * Called when the user begins moving the zoom ring in order to pan the
+         * owner.
+         */
         void onBeginPan();
+        
+        /**
+         * Called when the owner should pan as a result of the user moving the zoom ring.
+         * 
+         * @param deltaX The amount to pan horizontally.
+         * @param deltaY The amount to pan vertically.
+         * @return Whether the owner was panned.
+         */
         boolean onPan(int deltaX, int deltaY);
+        
+        /**
+         * Called when the user releases the zoom ring.
+         */
         void onEndPan();
+        
+        /**
+         * Called when the client should center the owner on the given point.
+         * 
+         * @param x The x to center on, relative to the owner view's upper-left.
+         * @param y The y to center on, relative to the owner view's upper-left.
+         */
         void onCenter(int x, int y);
+        
+        /**
+         * Called when the zoom ring's visibility changes.
+         * 
+         * @param visible Whether the zoom ring is visible (true) or not (false).
+         */
         void onVisibilityChanged(boolean visible);
     }
 }

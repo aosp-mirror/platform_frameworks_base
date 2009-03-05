@@ -258,7 +258,7 @@ public final class GsmSimCard extends Handler implements SimCard {
     }
 
     public String getServiceProviderName () {
-        return phone.mSIMRecords.getServiceProvideName();
+        return phone.mSIMRecords.getServiceProviderName();
     }
 
     //***** Handler implementation

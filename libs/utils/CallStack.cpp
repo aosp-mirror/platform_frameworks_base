@@ -120,13 +120,18 @@ class MapInfo {
         char name[];
     };
 
-    const char *map_to_name(uint64_t pc, const char* def) {
+    const char *map_to_name(uint64_t pc, const char* def, uint64_t* start) {
         mapinfo* mi = getMapInfoList();
         while(mi) {
-            if ((pc >= mi->start) && (pc < mi->end))
+            if ((pc >= mi->start) && (pc < mi->end)) {
+                if (start) 
+                    *start = mi->start;
                 return mi->name;
+            }
             mi = mi->next;
         }
+        if (start) 
+            *start = 0;
         return def;
     }
 
@@ -183,8 +188,15 @@ public:
         }
     }
     
-    static const char *mapAddressToName(const void* pc, const char* def) {
-        return sMapInfo.map_to_name((uint64_t)pc, def);
+    static const char *mapAddressToName(const void* pc, const char* def,
+            void const** start) 
+    {
+        uint64_t s;
+        char const* name = sMapInfo.map_to_name(uint64_t(uintptr_t(pc)), def, &s);
+        if (start) {
+            *start = (void*)s;
+        }
+        return name;
     }
 
 };
@@ -297,8 +309,9 @@ String8 CallStack::toStringSingleLevel(const char* prefix, int32_t level) const
         res.append(name);
         res.append(tmp2);
     } else { 
-        name = MapInfo::mapAddressToName(ip, "<unknown>");
-        snprintf(tmp, 256, "pc %p  %s", ip, name);
+        void const* start = 0;
+        name = MapInfo::mapAddressToName(ip, "<unknown>", &start);
+        snprintf(tmp, 256, "pc %08lx  %s", uintptr_t(ip)-uintptr_t(start), name);
         res.append(tmp);
     }
     res.append("\n");
