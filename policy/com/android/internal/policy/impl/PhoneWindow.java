@@ -200,7 +200,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm != null) {
-                        imm.showSoftInputUnchecked(InputMethodManager.SHOW_FORCED);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                     }
                 } break;
                 case MSG_CALL_LONG_PRESS_COMPLETE: {

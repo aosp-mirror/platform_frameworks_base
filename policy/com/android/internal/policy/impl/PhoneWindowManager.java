@@ -277,9 +277,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 rotation =  (orientation >= 270 - _LOWER_THRESHOLD
                         && orientation <= 270 + threshold)
                         ? Surface.ROTATION_90 : Surface.ROTATION_0;
-            } else if (orientation == WindowOrientationListener.ORIENTATION_FLAT) {
-                // return portrait 
-                rotation = Surface.ROTATION_0;
             } else {
                 // ignore orientation value
                 return;
