@@ -19,7 +19,6 @@
 
 bool InitializeForThread();
 void UninitializeForThread();
-void keydestructor(void*);
 
 #endif /* THREAD_INIT_H*/
 	

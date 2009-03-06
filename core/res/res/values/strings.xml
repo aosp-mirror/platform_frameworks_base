@@ -843,10 +843,10 @@
 
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindGadget">choose gadgets</string>
+    <string name="permlab_bindGadget">choose widgets</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindGadget">Allows the application to tell the system
-        which gadgets can be used by which application.  With this permission,
+        which widgets can be used by which application.  With this permission,
         applications can give access to personal data to other applications.
         Not for use by normal applications.</string>
 
