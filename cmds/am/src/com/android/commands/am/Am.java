@@ -75,6 +75,8 @@ public class Am {
             runInstrument();
         } else if (op.equals("broadcast")) {
             sendBroadcast();
+        } else if (op.equals("profile")) {
+            runProfile();
         } else {
             System.err.println("Error: Unknown command: " + op);
             showUsage();
@@ -423,6 +425,49 @@ public class Am {
         }
     }
 
+    private void runProfile() {
+        String profileFile = null;
+        boolean start = false;
+
+        String process = nextArg();
+        if (process == null) {
+            System.err.println("Error: No profile process supplied");
+            showUsage();
+            return;
+        }
+        
+        String cmd = nextArg();
+        if ("start".equals(cmd)) {
+            start = true;
+            profileFile = nextArg();
+            if (profileFile == null) {
+                System.err.println("Error: No profile file path supplied");
+                showUsage();
+                return;
+            }
+        } else if (!"stop".equals(cmd)) {
+            System.err.println("Error: Profile command " + cmd + " not valid");
+            showUsage();
+            return;
+        }
+        
+        try {
+            if (!mAm.profileControl(process, start, profileFile)) {
+                System.out.println("PROFILE FAILED on process " + process);
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("PROFILE FAILED: " + e.getMessage());
+            return;
+        } catch (IllegalStateException e) {
+            System.out.println("PROFILE FAILED: " + e.getMessage());
+            return;
+        } catch (RemoteException e) {
+            System.out.println("PROFILE FAILED: activity manager gone");
+            return;
+        }
+    }
+
     private String nextOption() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -470,11 +515,12 @@ public class Am {
     }
 
     private void showUsage() {
-        System.err.println("usage: am [start|broadcast|instrument]");
+        System.err.println("usage: am [start|broadcast|instrument|profile]");
         System.err.println("       am start -D INTENT");
         System.err.println("       am broadcast INTENT");
         System.err.println("       am instrument [-r] [-e <ARG_NAME> <ARG_VALUE>] [-p <PROF_FILE>]");
         System.err.println("                [-w] <COMPONENT> ");
+        System.err.println("       am profile <PROCESS> [start <PROF_FILE>|stop]");
         System.err.println("");
         System.err.println("       INTENT is described with:");
         System.err.println("                [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]");

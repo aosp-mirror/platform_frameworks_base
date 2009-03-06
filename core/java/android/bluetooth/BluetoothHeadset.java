@@ -126,6 +126,7 @@ public class BluetoothHeadset {
      * are ok.
      */
     public synchronized void close() {
+        if (DBG) log("close()");
         if (mConnection != null) {
             mContext.unbindService(mConnection);
             mConnection = null;
@@ -138,6 +139,7 @@ public class BluetoothHeadset {
      *         object is currently not connected to the Headset service.
      */
     public int getState() {
+        if (DBG) log("getState()");
         if (mService != null) {
             try {
                 return mService.getState();
@@ -156,6 +158,7 @@ public class BluetoothHeadset {
      *         service.
      */
     public String getHeadsetAddress() {
+        if (DBG) log("getHeadsetAddress()");
         if (mService != null) {
             try {
                 return mService.getHeadsetAddress();
@@ -180,6 +183,7 @@ public class BluetoothHeadset {
      *                will be expected.
      */
     public boolean connectHeadset(String address) {
+        if (DBG) log("connectHeadset(" + address + ")");
         if (mService != null) {
             try {
                 if (mService.connectHeadset(address)) {
@@ -199,6 +203,7 @@ public class BluetoothHeadset {
      * if not currently connected to the headset service.
      */
     public boolean isConnected(String address) {
+        if (DBG) log("isConnected(" + address + ")");
         if (mService != null) {
             try {
                 return mService.isConnected(address);
@@ -216,6 +221,7 @@ public class BluetoothHeadset {
      * not currently connected to the Headset service.
      */
     public boolean disconnectHeadset() {
+        if (DBG) log("disconnectHeadset()");
         if (mService != null) {
             try {
                 mService.disconnectHeadset();
@@ -235,6 +241,7 @@ public class BluetoothHeadset {
      * error.
      */
     public boolean startVoiceRecognition() {
+        if (DBG) log("startVoiceRecognition()");
         if (mService != null) {
             try {
                 return mService.startVoiceRecognition();
@@ -252,6 +259,7 @@ public class BluetoothHeadset {
      * headset is not in voice recognition mode, or on error.
      */
     public boolean stopVoiceRecognition() {
+        if (DBG) log("stopVoiceRecognition()");
         if (mService != null) {
             try {
                 return mService.stopVoiceRecognition();
@@ -282,6 +290,7 @@ public class BluetoothHeadset {
      * @return True if successful, false if there was some error.
      */
     public boolean setPriority(String address, int priority) {
+        if (DBG) log("setPriority(" + address + ", " + priority + ")");
         if (mService != null) {
             try {
                 return mService.setPriority(address, priority);
@@ -299,6 +308,7 @@ public class BluetoothHeadset {
      * @return non-negative priority, or negative error code on error.
      */
     public int getPriority(String address) {
+        if (DBG) log("getPriority(" + address + ")");
         if (mService != null) {
             try {
                 return mService.getPriority(address);
@@ -350,4 +360,8 @@ public class BluetoothHeadset {
             }
         }
     };
+
+    private static void log(String msg) {
+        Log.d(TAG, msg);
+    }
 }

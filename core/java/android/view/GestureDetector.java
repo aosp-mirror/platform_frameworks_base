@@ -499,13 +499,10 @@ public class GestureDetector {
                 // Finally, give the up event of the double-tap
                 handled |= mDoubleTapListener.onDoubleTapEvent(ev);
                 mIsDoubleTapping = false;
-                break;
             } else if (mInLongPress) {
                 mHandler.removeMessages(TAP);
                 mInLongPress = false;
-                break;
-            }
-            if (mAlwaysInTapRegion) {
+            } else if (mAlwaysInTapRegion) {
                 handled = mListener.onSingleTapUp(ev);
             } else {
 

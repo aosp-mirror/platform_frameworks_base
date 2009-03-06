@@ -221,6 +221,10 @@ public interface IActivityManager extends IInterface {
     // Get device configuration
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
     
+    // Turn on/off profiling in a particular process.
+    public boolean profileControl(String process, boolean start,
+            String path) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -365,4 +369,5 @@ public interface IActivityManager extends IInterface {
     int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;
     int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
+    int PROFILE_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+85;
 }

@@ -295,7 +295,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 new ArrayList<String>(Arrays.asList(
                         "00:02:C7", "00:16:FE", "00:19:C1", "00:1B:FB", "00:1E:3D", //ALPS
                         "00:21:4F", "00:23:06", "00:24:33", "00:A0:79", // ALPS
-                        "00:0E:6D", "00:13:E0", "00:21:E8", "00:60:57"// Murata for Prius 2007
+                        "00:0E:6D", "00:13:E0", "00:21:E8", "00:60:57",// Murata for Prius 2007
+                        "00:0E:9F" // TEMIC SDS  for Porsche
                         ));
 
         public synchronized void loadBondState() {

@@ -1449,6 +1449,10 @@ public final class ActivityThread {
             }
         }
         
+        public void profilerControl(boolean start, String path) {
+            queueOrSendMessage(H.PROFILER_CONTROL, path, start ? 1 : 0);
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1641,6 +1645,7 @@ public final class ActivityThread {
         public static final int LOW_MEMORY              = 124;
         public static final int ACTIVITY_CONFIGURATION_CHANGED = 125;
         public static final int RELAUNCH_ACTIVITY       = 126;
+        public static final int PROFILER_CONTROL        = 127;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1671,6 +1676,7 @@ public final class ActivityThread {
                     case LOW_MEMORY: return "LOW_MEMORY";
                     case ACTIVITY_CONFIGURATION_CHANGED: return "ACTIVITY_CONFIGURATION_CHANGED";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
+                    case PROFILER_CONTROL: return "PROFILER_CONTROL";
                 }
             }
             return "(unknown)";
@@ -1769,6 +1775,9 @@ public final class ActivityThread {
                     break;
                 case ACTIVITY_CONFIGURATION_CHANGED:
                     handleActivityConfigurationChanged((IBinder)msg.obj);
+                    break;
+                case PROFILER_CONTROL:
+                    handleProfilerControl(msg.arg1 != 0, (String)msg.obj);
                     break;
             }
         }
@@ -3432,6 +3441,21 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mConfiguration);
     }
 
+    final void handleProfilerControl(boolean start, String path) {
+        if (start) {
+            File file = new File(path);
+            file.getParentFile().mkdirs();
+            try {
+                Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Profiling failed on path " + path
+                        + " -- can the process access this path?");
+            }
+        } else {
+            Debug.stopMethodTracing();
+        }
+    }
+    
     final void handleLowMemory() {
         ArrayList<ComponentCallbacks> callbacks
                 = new ArrayList<ComponentCallbacks>();

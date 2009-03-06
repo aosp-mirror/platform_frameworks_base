@@ -979,6 +979,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case PROFILE_CONTROL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String process = data.readString();
+            boolean start = data.readInt() != 0;
+            String path = data.readString();
+            boolean res = profileControl(process, start, path);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+        
         case PEEK_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Intent service = Intent.CREATOR.createFromParcel(data);
@@ -2131,5 +2142,23 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
+    
+    public boolean profileControl(String process, boolean start,
+            String path) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(process);
+        data.writeInt(start ? 1 : 0);
+        data.writeString(path);
+        mRemote.transact(PROFILE_CONTROL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return res;
+    }
+    
     private IBinder mRemote;
 }
