@@ -45,7 +45,7 @@ public class TranslateAnimation extends Animation {
     private float mToYDelta;
 
     /**
-     * Constructor used whan an ScaleAnimation is loaded from a resource.
+     * Constructor used when an TranslateAnimation is loaded from a resource.
      * 
      * @param context Application context to use
      * @param attrs Attribute set from which to read values
@@ -80,7 +80,7 @@ public class TranslateAnimation extends Animation {
     }
 
     /**
-     * Constructor to use when building a ScaleAnimation from code
+     * Constructor to use when building a TranslateAnimation from code
      * 
      * @param fromXDelta Change in X coordinate to apply at the start of the
      *        animation
@@ -104,7 +104,7 @@ public class TranslateAnimation extends Animation {
     }
 
     /**
-     * Constructor to use when building a ScaleAnimation from code
+     * Constructor to use when building a TranslateAnimation from code
      * 
      * @param fromXType Specifies how fromXValue should be interpreted. One of
      *        Animation.ABSOLUTE, Animation.RELATIVE_TO_SELF, or
