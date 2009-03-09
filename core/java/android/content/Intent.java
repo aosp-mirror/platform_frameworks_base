@@ -1042,6 +1042,14 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
+
+    /**
+     * Broadcast Action: Sent when the user is present after device wakes up (e.g when the 
+     * keyguard is gone).
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USER_PRESENT= "android.intent.action.USER_PRESENT";
+
     /**
      * Broadcast Action: The current time has changed.  Sent every
      * minute.  You can <em>not</em> receive this through components declared

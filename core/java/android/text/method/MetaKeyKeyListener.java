@@ -159,11 +159,19 @@ public abstract class MetaKeyKeyListener {
 
     /**
      * Returns true if this object is one that this class would use to
-     * keep track of meta state in the specified text.
+     * keep track of any meta state in the specified text.
      */
     public static boolean isMetaTracker(CharSequence text, Object what) {
         return what == CAP || what == ALT || what == SYM ||
                what == SELECTING;
+    }
+
+    /**
+     * Returns true if this object is one that this class would use to
+     * keep track of the selecting meta state in the specified text.
+     */
+    public static boolean isSelectingMetaTracker(CharSequence text, Object what) {
+        return what == SELECTING;
     }
 
     private static void adjust(Spannable content, Object what) {

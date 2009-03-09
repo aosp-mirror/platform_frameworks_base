@@ -55,6 +55,11 @@ public class ExtractedText implements Parcelable {
     public static final int FLAG_SINGLE_LINE = 0x0001;
     
     /**
+     * Bit for {@link #flags}: set if the editor is currently in selection mode.
+     */
+    public static final int FLAG_SELECTING = 0x0002;
+    
+    /**
      * Additional bit flags of information about the edited text.
      */
     public int flags;
@@ -72,7 +77,7 @@ public class ExtractedText implements Parcelable {
         dest.writeInt(partialEndOffset);
         dest.writeInt(selectionStart);
         dest.writeInt(selectionEnd);
-        dest.writeInt(flags);
+        dest.writeInt(this.flags);
     }
 
     /**

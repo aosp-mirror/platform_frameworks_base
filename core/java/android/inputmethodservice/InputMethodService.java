@@ -1377,9 +1377,11 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mExtractedToken != token) {
             return;
         }
-        if (mExtractEditText != null && text != null) {
-            mExtractedText = text;
-            mExtractEditText.setExtractedText(text);
+        if (text != null) {
+            if (mExtractEditText != null) {
+                mExtractedText = text;
+                mExtractEditText.setExtractedText(text);
+            }
         }
     }
     

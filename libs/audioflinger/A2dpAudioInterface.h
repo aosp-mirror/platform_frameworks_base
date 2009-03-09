@@ -82,11 +82,12 @@ private:
         virtual status_t    setVolume(float volume) { return INVALID_OPERATION; }
         virtual ssize_t     write(const void* buffer, size_t bytes);
                 status_t    standby();
-                status_t    close();
         virtual status_t    dump(int fd, const Vector<String16>& args);
 
     private:
         friend class A2dpAudioInterface;
+                status_t    init();
+                status_t    close();
         status_t            setAddress(const char* address);
 
     private:
@@ -96,9 +97,9 @@ private:
                 int         mRetryCount;
                 char        mA2dpAddress[20];
                 void*       mData;
+                Mutex       mLock;
     };
 
-    Mutex                   mLock;
     A2dpAudioStreamOut*     mOutput;
 };
 

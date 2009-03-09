@@ -73,7 +73,6 @@ import android.widget.Scroller;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
 import android.widget.ZoomControls;
-import android.widget.ZoomRingController;
 import android.widget.FrameLayout;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -239,8 +238,8 @@ public class WebView extends AbsoluteLayout
      */
     VelocityTracker mVelocityTracker;
 
-    private static boolean mShowZoomRingTutorial = true;
-    private static final int ZOOM_RING_TUTORIAL_DURATION = 3000;
+    private static boolean mShowZoomTutorial = true;
+    private static final int ZOOM_TUTORIAL_DURATION = 3000;
 
     /**
      * Touch mode
@@ -264,11 +263,6 @@ public class WebView extends AbsoluteLayout
 
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
-
-    // Whether we are in the drag tap mode, which exists starting at the second
-    // tap's down, through its move, and includes its up. These events should be
-    // given to the method on the zoom controller.
-    private boolean mInZoomTapDragMode = false;
 
     // Whether to prevent drag during touch. The initial value depends on
     // mForwardTouchEvents. If WebCore wants touch events, we assume it will
@@ -361,7 +355,7 @@ public class WebView extends AbsoluteLayout
     private static final int UPDATE_TEXT_ENTRY_ADAPTER = 6;
     private static final int SWITCH_TO_ENTER = 7;
     private static final int RESUME_WEBCORE_UPDATE = 8;
-    private static final int DISMISS_ZOOM_RING_TUTORIAL = 9;
+    private static final int DISMISS_ZOOM_TUTORIAL = 9;
 
     //! arg1=x, arg2=y
     static final int SCROLL_TO_MSG_ID               = 10;
@@ -416,11 +410,6 @@ public class WebView extends AbsoluteLayout
 
     // width which view is considered to be fully zoomed out
     static final int ZOOM_OUT_WIDTH = 1024;
-
-    private static final float MAX_ZOOM_RING_ANGLE = (float) (Math.PI * 2 / 3);
-    private static final int ZOOM_RING_STEPS = 4;
-    private static final float ZOOM_RING_ANGLE_UNIT = MAX_ZOOM_RING_ANGLE
-            / ZOOM_RING_STEPS;
 
     private static final float DEFAULT_MAX_ZOOM_SCALE = 2;
     private static final float DEFAULT_MIN_ZOOM_SCALE = (float) 1/3;
@@ -560,146 +549,52 @@ public class WebView extends AbsoluteLayout
     }
 
     private ZoomButtonsController mZoomButtonsController; 
+    private ImageView mZoomOverviewButton;
 
-    private ZoomRingController mZoomRingController;
-    private ImageView mZoomRingOverview;
-    private Animation mZoomRingOverviewExitAnimation;
-
-    // These keep track of the center point of the zoom ring.  They are used to
+    // These keep track of the center point of the zoom.  They are used to
     // determine the point around which we should zoom.
     private float mZoomCenterX;
     private float mZoomCenterY;
 
-    private ZoomRingController.OnZoomListener mZoomListener =
-            new ZoomRingController.OnZoomListener() {
-
-        private float mClockwiseBound;
-        private float mCounterClockwiseBound;
-        private float mStartScale;
+    private ZoomButtonsController.OnZoomListener mZoomListener =
+            new ZoomButtonsController.OnZoomListener() {
 
         public void onCenter(int x, int y) {
             // Don't translate when the control is invoked, hence we do nothing
             // in this callback
         }
 
-        public void onBeginPan() {
-            setZoomOverviewVisible(false);
+        public void onOverview() {
+            mZoomButtonsController.setVisible(false);
+            zoomScrollOut();
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
-                        Checkin.Stats.Tag.BROWSER_ZOOM_RING_DRAG, 1, 0.0);
+                        Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
             }
-        }
-
-        public boolean onPan(int deltaX, int deltaY) {
-            return pinScrollBy(deltaX, deltaY, false, 0);
-        }
-
-        public void onEndPan() {
         }
 
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 switchOutDrawHistory();
-                if (mMaxZoomScale - 1 > ZOOM_RING_STEPS * 0.01f) {
-                    mClockwiseBound = (float) (2 * Math.PI - MAX_ZOOM_RING_ANGLE);
-                } else {
-                    mClockwiseBound = (float) (2 * Math.PI);
-                }
-                mZoomRingController.setThumbClockwiseBound(mClockwiseBound);
-                if (1 - mMinZoomScale > ZOOM_RING_STEPS * 0.01f) {
-                    mCounterClockwiseBound = MAX_ZOOM_RING_ANGLE;
-                } else {
-                    mCounterClockwiseBound = 0;
-                }
-                mZoomRingController
-                        .setThumbCounterclockwiseBound(mCounterClockwiseBound);
-                float angle = 0f;
-                if (mActualScale > 1 && mClockwiseBound < (float) (2 * Math.PI)) {
-                    angle = -(float) Math.round(ZOOM_RING_STEPS
-                            * (mActualScale - 1) / (mMaxZoomScale - 1))
-                            / ZOOM_RING_STEPS;
-                } else if (mActualScale < 1 && mCounterClockwiseBound > 0) {
-                    angle = (float) Math.round(ZOOM_RING_STEPS
-                            * (1 - mActualScale) / (1 - mMinZoomScale))
-                            / ZOOM_RING_STEPS;
-                }
-                mZoomRingController.setThumbAngle(angle * MAX_ZOOM_RING_ANGLE);
-
-                // Don't show a thumb if the user cannot zoom
-                mZoomRingController.setThumbVisible(mMinZoomScale != mMaxZoomScale);
-                
-                // Show the zoom overview tab on the ring
-                setZoomOverviewVisible(true);
-                if (mLogEvent) {
-                    Checkin.updateStats(mContext.getContentResolver(),
-                            Checkin.Stats.Tag.BROWSER_ZOOM_RING, 1, 0.0);
-                }
+                mZoomButtonsController.setOverviewVisible(true);
+                updateButtonsEnabled();
             }
         }
 
-        public void onBeginDrag() {
-            mPreviewZoomOnly = true;
-            mStartScale = mActualScale;
-            setZoomOverviewVisible(false);
-        }
-        
-        public void onEndDrag() {
-            mPreviewZoomOnly = false;
-            if (mLogEvent) {
-                EventLog.writeEvent(EVENT_LOG_ZOOM_LEVEL_CHANGE,
-                        (int) mStartScale * 100, (int) mActualScale * 100,
-                        System.currentTimeMillis());
-            }
-            setNewZoomScale(mActualScale, true);
+        private void updateButtonsEnabled() {
+            mZoomButtonsController.setZoomInEnabled(mActualScale < mMaxZoomScale);
+            mZoomButtonsController.setZoomOutEnabled(mActualScale > mMinZoomScale);
         }
 
-        public boolean onDragZoom(int deltaZoomLevel, int centerX,
-                int centerY, float startAngle, float curAngle) {
-            if (deltaZoomLevel < 0
-                    && Math.abs(mActualScale - mMinZoomScale) < 0.01f
-                    || deltaZoomLevel > 0
-                    &&  Math.abs(mActualScale - mMaxZoomScale) < 0.01f
-                    || deltaZoomLevel == 0) {
-                return false;
-            }
-            mZoomCenterX = (float) centerX;
-            mZoomCenterY = (float) centerY;
-
-            float scale = 1.0f;
-            // curAngle is [0, 2 * Math.PI)
-            if (curAngle < (float) Math.PI) {
-                if (curAngle >= mCounterClockwiseBound) {
-                    scale = mMinZoomScale;
-                } else {
-                    scale = 1 - (float) Math.round(curAngle
-                            / ZOOM_RING_ANGLE_UNIT) / ZOOM_RING_STEPS
-                            * (1 - mMinZoomScale);
-                }
-            } else {
-                if (curAngle <= mClockwiseBound) {
-                    scale = mMaxZoomScale;
-                } else {
-                    scale = 1 + (float) Math.round(
-                            ((float) 2 * Math.PI - curAngle)
-                            / ZOOM_RING_ANGLE_UNIT) / ZOOM_RING_STEPS
-                            * (mMaxZoomScale - 1);
-                }
-            }
-            zoomWithPreview(scale);
-            return true;
-        }
-
-        public void onSimpleZoom(boolean zoomIn, int centerX, int centerY) {
-            mZoomCenterX = (float) centerX;
-            mZoomCenterY = (float) centerY;
-            
+        public void onZoom(boolean zoomIn) {
             if (zoomIn) {
                 zoomIn();
             } else {
                 zoomOut();
             }
+            
+            updateButtonsEnabled();
         }
-        
     };
     
     /**
@@ -738,34 +633,8 @@ public class WebView extends AbsoluteLayout
         mFocusData.mX = 0;
         mFocusData.mY = 0;
         mScroller = new Scroller(context);
-        mZoomRingController = new ZoomRingController(context, this);
-        mZoomRingController.setCallback(mZoomListener);
-        mZoomRingController.setTrackDrawable(
-                com.android.internal.R.drawable.zoom_ring_track_absolute);
-        float density = context.getResources().getDisplayMetrics().density;
-        mZoomRingController.setPannerAcceleration((int) (160 * density));
-        mZoomRingController.setPannerStartAcceleratingDuration((int) (700 * density));
-        createZoomRingOverviewTab();
         mZoomButtonsController = new ZoomButtonsController(context, this);
-        mZoomButtonsController.setOverviewVisible(true);
-        mZoomButtonsController.setCallback(new ZoomButtonsController.OnZoomListener() {
-            public void onCenter(int x, int y) {
-                mZoomListener.onCenter(x, y);
-            }
-
-            public void onOverview() {
-                mZoomButtonsController.setVisible(false);
-                zoomScrollOut();
-            }
-
-            public void onVisibilityChanged(boolean visible) {
-                mZoomListener.onVisibilityChanged(visible);
-            }
-
-            public void onZoom(boolean zoomIn) {
-                mZoomListener.onSimpleZoom(zoomIn, getWidth() / 2, getHeight() / 2);
-            }
-        });
+        mZoomButtonsController.setCallback(mZoomListener);
     }
 
     private void init() {
@@ -783,67 +652,6 @@ public class WebView extends AbsoluteLayout
         mDoubleTapSlopSquare = doubleTapslop * doubleTapslop;
     }
 
-    private void createZoomRingOverviewTab() {
-        Context context = getContext();
-        
-        mZoomRingOverviewExitAnimation = AnimationUtils.loadAnimation(context,
-                com.android.internal.R.anim.fade_out);
-        
-        mZoomRingOverview = new ImageView(context);
-        mZoomRingOverview.setBackgroundResource(
-                com.android.internal.R.drawable.zoom_ring_overview_tab);
-        mZoomRingOverview.setImageResource(com.android.internal.R.drawable.btn_zoom_page);
-        
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER);
-        // TODO: magic constant that's based on the zoom ring radius + some offset
-        lp.topMargin = 200;
-        mZoomRingOverview.setLayoutParams(lp);
-        mZoomRingOverview.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Hide the zoom ring
-                mZoomRingController.setVisible(false);
-                if (mLogEvent) {
-                    Checkin.updateStats(mContext.getContentResolver(),
-                            Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
-                }
-                zoomScrollOut();
-            }});
-        
-        // Measure the overview View to figure out its height
-        mZoomRingOverview.forceLayout();
-        mZoomRingOverview.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-        
-        ViewGroup container = mZoomRingController.getContainer();
-        // Find the index of the zoom ring in the container
-        View zoomRing = container.findViewById(mZoomRingController.getZoomRingId());
-        int zoomRingIndex;
-        for (zoomRingIndex = container.getChildCount() - 1; zoomRingIndex >= 0; zoomRingIndex--) {
-            if (container.getChildAt(zoomRingIndex) == zoomRing) break;
-        }
-        // Add the overview tab below the zoom ring (so we don't steal its events)
-        container.addView(mZoomRingOverview, zoomRingIndex);
-        // Since we use margins to adjust the vertical placement of the tab, the widget
-        // ends up getting clipped off. Ensure the container is big enough for
-        // us.
-        int myHeight = mZoomRingOverview.getMeasuredHeight() + lp.topMargin / 2;
-        // Multiplied by 2 b/c the zoom ring needs to be centered on the screen
-        container.setMinimumHeight(myHeight * 2);
-    }
-    
-    private void setZoomOverviewVisible(boolean visible) {
-        int newVisibility = visible ? View.VISIBLE : View.INVISIBLE;
-        if (mZoomRingOverview.getVisibility() == newVisibility) return;
-            
-        if (!visible) {
-            mZoomRingOverview.startAnimation(mZoomRingOverviewExitAnimation);
-        }
-        mZoomRingOverview.setVisibility(newVisibility);
-    }
-    
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
             String password, final Message resumeMsg) {
        boolean rVal = false;
@@ -2988,6 +2796,7 @@ public class WebView extends AbsoluteLayout
      *  @param  end     End of selection to delete.
      */
     /* package */ void deleteSelection(int start, int end) {
+        mTextGeneration++;
         mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, start, end,
                 new WebViewCore.FocusData(mFocusData));
     }
@@ -3452,8 +3261,7 @@ public class WebView extends AbsoluteLayout
             p.setOnHierarchyChangeListener(null);
         }
 
-        // Clean up the zoom ring
-        mZoomRingController.setVisible(false);
+        // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
     }
     
@@ -3565,9 +3373,7 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
-        // Center zooming to the center of the screen.  This is appropriate for
-        // this case of zooming, and it also sets us up properly if we remove
-        // the new zoom ring controller
+        // Center zooming to the center of the screen.
         mZoomCenterX = getViewWidth() * .5f;
         mZoomCenterY = getViewHeight() * .5f;
 
@@ -3641,27 +3447,18 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (mShowZoomRingTutorial && getSettings().supportZoom()
-                && (mMaxZoomScale - mMinZoomScale) > ZOOM_RING_STEPS * 0.01f) {
-            ZoomRingController.showZoomTutorialOnce(mContext);
-            mShowZoomRingTutorial = false;
+        if (mShowZoomTutorial && getSettings().supportZoom()
+                && (mMaxZoomScale != mMinZoomScale)) {
+            ZoomButtonsController.showZoomTutorialOnce(mContext);
+            mShowZoomTutorial = false;
             mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                    .obtainMessage(DISMISS_ZOOM_RING_TUTORIAL),
-                    ZOOM_RING_TUTORIAL_DURATION);
+                    .obtainMessage(DISMISS_ZOOM_TUTORIAL),
+                    ZOOM_TUTORIAL_DURATION);
         }
 
         if (LOGV_ENABLED) {
             Log.v(LOGTAG, ev + " at " + ev.getEventTime() + " mTouchMode="
                     + mTouchMode);
-        }
-
-        if ((mZoomRingController.isVisible() || mZoomButtonsController.isVisible())
-                && mInZoomTapDragMode) {
-            if (ev.getAction() == MotionEvent.ACTION_UP) {
-                // Just released the second tap, no longer in tap-drag mode
-                mInZoomTapDragMode = false;
-            }
-            return mZoomRingController.handleDoubleTapEvent(ev);
         }
 
         int action = ev.getAction();
@@ -3689,7 +3486,7 @@ public class WebView extends AbsoluteLayout
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContent((int) x + mScrollX);
-            ted.mY = viewToContent((int) y + mScrollY);;
+            ted.mY = viewToContent((int) y + mScrollY);
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mLastSentTouchTime = eventTime;
         }
@@ -3721,7 +3518,7 @@ public class WebView extends AbsoluteLayout
                     nativeMoveSelection(viewToContent(mSelectX)
                             , viewToContent(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
-                } else if (!ZoomRingController.useOldZoom(mContext) &&
+                } else if (!ZoomButtonsController.useOldZoom(mContext) &&
                         mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP) &&
                         (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare)) {
                     // Found doubletap, invoke the zoom controller
@@ -3732,13 +3529,11 @@ public class WebView extends AbsoluteLayout
                         mTextEntry.updateCachedTextfield();
                     }
                     nativeClearFocus(contentX, contentY);
-                    mInZoomTapDragMode = true;
                     if (mLogEvent) {
                         EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
-                    return mZoomRingController.handleDoubleTapEvent(ev) ||
-                            mZoomButtonsController.handleDoubleTapEvent(ev);
+                    return mZoomButtonsController.handleDoubleTapEvent(ev);
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
@@ -3747,9 +3542,8 @@ public class WebView extends AbsoluteLayout
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
                 }
-                // don't trigger the link if zoom ring is visible
-                if (mTouchMode == TOUCH_INIT_MODE
-                        && !mZoomRingController.isVisible()) {
+                // Trigger the link
+                if (mTouchMode == TOUCH_INIT_MODE) {
                     mPrivateHandler.sendMessageDelayed(mPrivateHandler
                             .obtainMessage(SWITCH_TO_SHORTPRESS), TAP_TIMEOUT);
                 }
@@ -3885,7 +3679,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                if (ZoomRingController.useOldZoom(mContext)) {
+                if (ZoomButtonsController.useOldZoom(mContext)) {
                     boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
                     boolean showMagnify = canZoomScrollOut();
                     if (mZoomControls != null && (showPlusMinus || showMagnify)) {
@@ -3909,15 +3703,6 @@ public class WebView extends AbsoluteLayout
                 mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
                     case TOUCH_INIT_MODE: // tap
-                        if (mZoomRingController.isVisible()) {
-                            // don't trigger the link if zoom ring is visible,
-                            // but still allow the double tap
-                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP,
-                                            new Boolean(false)),
-                                    DOUBLE_TAP_TIMEOUT);
-                            break;
-                        }
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         if (getSettings().supportZoom()) {
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
@@ -4432,14 +4217,6 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council? Assuming we make ZoomRingController itself
-     *       public, which I think we will.
-     */
-    public ZoomRingController getZoomRingController() {
-        return mZoomRingController;    
-    }
-    
-    /**
      * Perform zoom in in the webview
      * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
      */
@@ -4482,9 +4259,6 @@ public class WebView extends AbsoluteLayout
         });
         zoomControls.setOnZoomMagnifyClickListener(new OnClickListener() {
             public void onClick(View v) {
-                // Hide the zoom ring
-                mZoomRingController.setVisible(false);
-                
                 mPrivateHandler.removeCallbacks(mZoomControlRunnable);
                 mPrivateHandler.postDelayed(mZoomControlRunnable,
                         ZOOM_CONTROLS_TIMEOUT);
@@ -4693,6 +4467,7 @@ public class WebView extends AbsoluteLayout
         arg.put("replace", replace);
         arg.put("start", new Integer(newStart));
         arg.put("end", new Integer(newEnd));
+        mTextGeneration++;
         mWebViewCore.sendMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
     }
 
@@ -5006,8 +4781,8 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
-                case DISMISS_ZOOM_RING_TUTORIAL:
-                    mZoomRingController.finishZoomTutorial();
+                case DISMISS_ZOOM_TUTORIAL:
+                    mZoomButtonsController.finishZoomTutorial();
                     break;
 
                 default:

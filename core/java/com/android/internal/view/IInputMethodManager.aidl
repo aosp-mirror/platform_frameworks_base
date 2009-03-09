@@ -43,7 +43,7 @@ interface IInputMethodManager {
             in ResultReceiver resultReceiver);
     boolean hideSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
-    void windowGainedFocus(in IInputMethodClient client,
+    void windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
             boolean viewHasFocus, boolean isTextEditor,
             int softInputMode, boolean first, int windowFlags);
             

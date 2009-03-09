@@ -237,7 +237,28 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         public void run() {
             boolean res = (enableNative() == 0);
             if (res) {
-                mEventLoop.start();
+                int retryCount = 2;
+                boolean running = false;
+                while ((retryCount-- > 0) && !running) {
+                    mEventLoop.start();
+                    // it may take a momement for the other thread to do its 
+                    // thing.  Check periodically for a while.
+                    int pollCount = 5;
+                    while ((pollCount-- > 0) && !running) {
+                        if (mEventLoop.isEventLoopRunning()) {
+                            running = true;
+                            break;
+                        }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {}
+                    }
+                }
+                if (!running) {
+                    log("bt EnableThread giving up");
+                    res = false;
+                    disableNative();
+                }
             }
 
             if (mEnableCallback != null) {
@@ -254,14 +275,20 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                     persistBluetoothOnSetting(true);
                 }
                 mIsDiscovering = false;
-                Intent intent = new Intent(BluetoothIntent.ENABLED_ACTION);
                 mBondState.loadBondState();
-                mContext.sendBroadcast(intent, BLUETOOTH_PERM);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(REGISTER_SDP_RECORDS), 3000);
 
                 // Update mode
                 mEventLoop.onModeChanged(getModeNative());
             }
+            Intent intent = null;
+            if (res) {
+                intent = new Intent(BluetoothIntent.ENABLED_ACTION);
+            } else {
+                intent = new Intent(BluetoothIntent.DISABLED_ACTION);
+            }
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+
             mEnableThread = null;
         }
     }

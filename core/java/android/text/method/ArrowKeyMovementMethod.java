@@ -204,7 +204,7 @@ implements MovementMethod
                                 MotionEvent event) {
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
-        if (widget.isFocused() && !widget.didTouchFocusSelectAll()) {
+        if (widget.isFocused() && !widget.didTouchFocusSelect()) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 int x = (int) event.getX();
                 int y = (int) event.getY();

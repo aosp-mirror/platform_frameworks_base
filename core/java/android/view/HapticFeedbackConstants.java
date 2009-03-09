@@ -26,9 +26,6 @@ public class HapticFeedbackConstants {
 
     public static final int LONG_PRESS = 0;
     
-    /** @hide pending API council */
-    public static final int ZOOM_RING_TICK = 1;
-    
     /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the setting in the

@@ -46,8 +46,10 @@ import java.io.IOException;
  * such as scaling and tinting.
  */
 public class VideoView extends SurfaceView implements MediaPlayerControl {
+    private String TAG = "VideoView";
     // settable by the client
     private Uri         mUri;
+    private int         mDuration;
 
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
@@ -184,6 +186,8 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mIsPrepared = false;
+            Log.v(TAG, "reset duration to -1 in openVideo");
+            mDuration = -1;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
@@ -195,10 +199,10 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.prepareAsync();
             attachMediaController();
         } catch (IOException ex) {
-            Log.w("VideoView", "Unable to open content: " + mUri, ex);
+            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         } catch (IllegalArgumentException ex) {
-            Log.w("VideoView", "Unable to open content: " + mUri, ex);
+            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         }
     }
@@ -299,7 +303,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
         public boolean onError(MediaPlayer mp, int a, int b) {
-            Log.d("VideoView", "Error: " + a + "," + b);
+            Log.d(TAG, "Error: " + a + "," + b);
             if (mMediaController != null) {
                 mMediaController.hide();
             }
@@ -497,9 +501,14 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     
     public int getDuration() {
         if (mMediaPlayer != null && mIsPrepared) {
-            return mMediaPlayer.getDuration();
+            if (mDuration > 0) {
+                return mDuration;
+            }
+            mDuration = mMediaPlayer.getDuration();
+            return mDuration;
         }
-        return -1;
+        mDuration = -1;
+        return mDuration;
     }
     
     public int getCurrentPosition() {

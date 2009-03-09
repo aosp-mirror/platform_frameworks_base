@@ -386,7 +386,14 @@ public class BaseInputConnection implements InputConnection {
             // anyway.
             return true;
         }
-        Selection.setSelection(content, start, end);
+        if (start == end && MetaKeyKeyListener.getMetaState(content,
+                MetaKeyKeyListener.META_SELECTING) != 0) {
+            // If we are in selection mode, then we want to extend the
+            // selection instead of replacing it.
+            Selection.extendSelection(content, start);
+        } else {
+            Selection.setSelection(content, start, end);
+        }
         return true;
     }
 

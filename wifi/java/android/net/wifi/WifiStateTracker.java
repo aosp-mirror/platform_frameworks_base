@@ -38,6 +38,7 @@ import android.util.Config;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothA2dp;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
@@ -244,6 +245,10 @@ public class WifiStateTracker extends NetworkStateTracker {
     private int mRunState;
 
     private boolean mIsScanOnly;
+
+    private BluetoothA2dp mBluetoothA2dp;
+
+    private boolean mBluetoothScanMode;
     
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
@@ -577,6 +582,30 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
+    /**
+     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
+     * some of the low-level scan parameters used by the driver are changed to
+     * reduce interference with A2DP streaming.
+     *
+     * @param isBluetoothPlaying whether to enable or disable this mode
+     */
+    public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
+        WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
+    }
+
+    private void checkIsBluetoothPlaying() {
+        boolean isBluetoothPlaying = false;
+        List<String> connected = mBluetoothA2dp.listConnectedSinks();
+
+        for (String address : connected) {
+            if (mBluetoothA2dp.getSinkState(address) == BluetoothA2dp.STATE_PLAYING) {
+                isBluetoothPlaying = true;
+                break;
+            }
+        }
+        setBluetoothScanMode(isBluetoothPlaying);
+    }
+
     @Override
     public void releaseWakeLock() {
         if (mReleaseWakeLockCallback != null) {
@@ -682,9 +711,13 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * are going to end up being thrown away. Obviously, if we
                  * ever want to support multicast, this will have to change.
                  */
+                if (mBluetoothA2dp == null) {
+                    mBluetoothA2dp = new BluetoothA2dp(mContext);
+                }
                 synchronized (this) {
                     WifiNative.startPacketFiltering();
                 }
+                checkIsBluetoothPlaying();
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:

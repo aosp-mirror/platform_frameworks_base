@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := platform.xml
 
-LOCAL_MODULE_TAGS := user development
+LOCAL_MODULE_TAGS := user
 
 LOCAL_MODULE_CLASS := ETC
 

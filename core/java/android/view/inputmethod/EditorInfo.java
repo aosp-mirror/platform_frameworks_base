@@ -33,43 +33,49 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_MASK_ACTION = 0x000000ff;
     
     /**
-     * Bits of {@link #IME_MASK_ACTION}: there is no special action
-     * associated with this editor.
+     * Bits of {@link #IME_MASK_ACTION}: no specific action has been
+     * associated with this editor, let the editor come up with its own if
+     * it can.
      */
-    public static final int IME_ACTION_NONE = 0x00000000;
+    public static final int IME_ACTION_UNSPECIFIED = 0x00000000;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: there is no available action.
+     */
+    public static final int IME_ACTION_NONE = 0x00000001;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "go"
      * operation to take the user to the target of the text they typed.
      * Typically used, for example, when entering a URL.
      */
-    public static final int IME_ACTION_GO = 0x00000001;
+    public static final int IME_ACTION_GO = 0x00000002;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "search"
      * operation, taking the user to the results of searching for the text
      * the have typed (in whatever context is appropriate).
      */
-    public static final int IME_ACTION_SEARCH = 0x00000002;
+    public static final int IME_ACTION_SEARCH = 0x00000003;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "send"
      * operation, delivering the text to its target.  This is typically used
      * when composing a message.
      */
-    public static final int IME_ACTION_SEND = 0x00000003;
+    public static final int IME_ACTION_SEND = 0x00000004;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "next"
      * operation, taking the user to the next field that will accept text.
      */
-    public static final int IME_ACTION_NEXT = 0x00000004;
+    public static final int IME_ACTION_NEXT = 0x00000005;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "done"
      * operation, typically meaning the IME will be closed.
      */
-    public static final int IME_ACTION_DONE = 0x00000005;
+    public static final int IME_ACTION_DONE = 0x00000006;
     
     /**
      * Flag of {@link #imeOptions}: used in conjunction with
@@ -82,21 +88,15 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
     
     /**
-     * Generic non-special type for {@link #imeOptions}.
+     * Generic unspecified type for {@link #imeOptions}.
      */
-    public static final int IME_NORMAL = 0x00000000;
-    
-    /**
-     * Special code for when the ime option has been undefined.  This is not
-     * used with the EditorInfo structure, but can be used elsewhere.
-     */
-    public static final int IME_UNDEFINED = 0x80000000;
+    public static final int IME_NULL = 0x00000000;
     
     /**
      * Extended type information for the editor, to help the IME better
      * integrate with it.
      */
-    public int imeOptions = IME_NORMAL;
+    public int imeOptions = IME_NULL;
     
     /**
      * A string supplying additional information options that are

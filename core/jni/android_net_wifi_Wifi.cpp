@@ -397,6 +397,16 @@ static jboolean android_net_wifi_setBluetoothCoexistenceModeCommand(JNIEnv* env,
     return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
 }
 
+static jboolean android_net_wifi_setBluetoothCoexistenceScanModeCommand(JNIEnv* env, jobject clazz, jboolean setCoexScanMode)
+{
+    char cmdstr[256];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER BTCOEXSCAN-%s", setCoexScanMode ? "START" : "STOP");
+    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
+
+    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
+}
+
 static jboolean android_net_wifi_saveConfigCommand(JNIEnv* env, jobject clazz)
 {
     // Make sure we never write out a value for AP_SCAN other than 1
@@ -503,6 +513,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceModeCommand },
+    { "setBluetoothCoexistenceScanModeCommand", "(Z)Z",
+    		(void*) android_net_wifi_setBluetoothCoexistenceScanModeCommand },
     { "getRssiCommand", "()I", (void*) android_net_wifi_getRssiCommand },
     { "getLinkSpeedCommand", "()I", (void*) android_net_wifi_getLinkSpeedCommand },
     { "getMacAddressCommand", "()Ljava/lang/String;", (void*) android_net_wifi_getMacAddressCommand },

@@ -3663,8 +3663,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * would make sense to automatically display a soft input window for
      * it.  Subclasses should override this if they implement
      * {@link #onCreateInputConnection(EditorInfo)} to return true if
-     * a call on that method would return a non-null InputConnection.  The
-     * default implementation always returns false.
+     * a call on that method would return a non-null InputConnection, and
+     * they are really a first-class editor that the user would normally
+     * start typing on when the go into a window containing your view.
+     * 
+     * <p>The default implementation always returns false.  This does
+     * <em>not</em> mean that its {@link #onCreateInputConnection(EditorInfo)}
+     * will not be called or the user can not otherwise perform edits on your
+     * view; it is just a hint to the system that this is not the primary
+     * purpose of this view.
      * 
      * @return Returns true if this view is a text editor, else false.
      */
@@ -3688,6 +3695,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         return null;
     }
 
+    /**
+     * Called by the {@link android.view.inputmethod.InputMethodManager}
+     * when a view who is not the current
+     * input connection target is trying to make a call on the manager.  The
+     * default implementation returns false; you can override this to return
+     * true for certain views if you are performing InputConnection proxying
+     * to them.
+     * @param view The View that is making the InputMethodManager call.
+     * @return Return true to allow the call, false to reject.
+     */
+    public boolean checkInputConnectionProxy(View view) {
+        return false;
+    }
+    
     /**
      * Show the context menu for this view. It is not safe to hold on to the
      * menu after returning from this method.
@@ -5016,7 +5037,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             (viewFlags & SCROLLBARS_VERTICAL) == SCROLLBARS_VERTICAL ?
                     getVerticalScrollbarWidth() : 0;
 
-        scrollBar.setBounds(scrollX + (mPaddingLeft & inside) + getScrollBarPaddingLeft(), top,
+        scrollBar.setBounds(scrollX + (mPaddingLeft & inside), top,
                 scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap, top + size);
         scrollBar.setParameters(
                 computeHorizontalScrollRange(),
@@ -6503,32 +6524,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         return mBGDrawable;
     }
 
-    private int getScrollBarPaddingLeft() {
-        // TODO: Deal with RTL languages
-        return 0;
-    }
-
-    /*
-     * Returns the pixels occupied by the vertical scrollbar, if not overlaid
-     */
-    private int getScrollBarPaddingRight() {
-        // TODO: Deal with RTL languages
-        if ((mViewFlags & SCROLLBARS_VERTICAL) == 0) {
-            return 0;
-        }
-        return (mViewFlags & SCROLLBARS_INSET_MASK) == 0 ? 0 : getVerticalScrollbarWidth();
-    }
-
-    /*
-     * Returns the pixels occupied by the horizontal scrollbar, if not overlaid
-     */
-    private int getScrollBarPaddingBottom() {
-        if ((mViewFlags & SCROLLBARS_HORIZONTAL) == 0) {
-            return 0;
-        }
-        return (mViewFlags & SCROLLBARS_INSET_MASK) == 0 ? 0 : getHorizontalScrollbarHeight();
-    }
-
     /**
      * Sets the padding. The view may add on the space required to display
      * the scrollbars, depending on the style and visibility of the scrollbars.
@@ -6552,7 +6547,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
 
-        if (mPaddingLeft != left + getScrollBarPaddingLeft()) {
+        final int viewFlags = mViewFlags;
+        
+        // Common case is there are no scroll bars.
+        if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
+            // TODO: Deal with RTL languages to adjust left padding instead of right.
+            if ((viewFlags & SCROLLBARS_VERTICAL) != 0) {
+                right += (viewFlags & SCROLLBARS_INSET_MASK) == 0
+                        ? 0 : getVerticalScrollbarWidth();
+            }
+            if ((viewFlags & SCROLLBARS_HORIZONTAL) == 0) {
+                bottom += (viewFlags & SCROLLBARS_INSET_MASK) == 0
+                        ? 0 : getHorizontalScrollbarHeight();
+            }
+        }
+        
+        if (mPaddingLeft != left) {
             changed = true;
             mPaddingLeft = left;
         }
@@ -6560,13 +6570,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             changed = true;
             mPaddingTop = top;
         }
-        if (mPaddingRight != right + getScrollBarPaddingRight()) {
+        if (mPaddingRight != right) {
             changed = true;
-            mPaddingRight = right + getScrollBarPaddingRight();
+            mPaddingRight = right;
         }
-        if (mPaddingBottom != bottom + getScrollBarPaddingBottom()) {
+        if (mPaddingBottom != bottom) {
             changed = true;
-            mPaddingBottom = bottom + getScrollBarPaddingBottom();
+            mPaddingBottom = bottom;
         }
 
         if (changed) {

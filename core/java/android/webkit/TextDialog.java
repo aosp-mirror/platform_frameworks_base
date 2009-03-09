@@ -32,8 +32,6 @@ import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
-import android.text.method.PasswordTransformationMethod;
-import android.text.method.TextKeyListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyCharacterMap;
@@ -475,15 +473,10 @@ import java.util.ArrayList;
      * @param   inPassword  True if the textfield is a password field.
      */
     /* package */ void setInPassword(boolean inPassword) {
-        PasswordTransformationMethod method;
         if (inPassword) {
-            method = PasswordTransformationMethod.getInstance();
-            setInputType(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.
+            setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
                     TYPE_TEXT_VARIATION_PASSWORD);
-        } else {
-            method = null;
         }
-        setTransformationMethod(method);
     }
 
     /* package */ void setMaxLength(int maxLength) {
@@ -545,20 +538,13 @@ import java.util.ArrayList;
      * removing the password input type.
      */
     public void setSingleLine(boolean single) {
-        if (mSingle != single) {
-            TextKeyListener.Capitalize cap;
-            int inputType = EditorInfo.TYPE_CLASS_TEXT;
-            if (single) {
-                cap = TextKeyListener.Capitalize.NONE;
-            } else {
-                cap = TextKeyListener.Capitalize.SENTENCES;
-                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-            }
-            setKeyListener(TextKeyListener.getInstance(!single, cap));
-            mSingle = single;
-            setHorizontallyScrolling(single);
-            setInputType(inputType);
+        int inputType = EditorInfo.TYPE_CLASS_TEXT;
+        if (!single) {
+            inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
         }
+        mSingle = single;
+        setHorizontallyScrolling(single);
+        setInputType(inputType);
     }
 
     /**

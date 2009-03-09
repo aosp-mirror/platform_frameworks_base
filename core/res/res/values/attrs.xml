@@ -371,8 +371,6 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
-        <!-- Default ZoomRing style. -->
-        <attr name="zoomRingStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -585,29 +583,34 @@
     <attr name="imeOptions">
         <!-- There are no special semantics associated with this editor. -->
         <flag name="normal" value="0x00000000" />
-        <!-- There is no special action associated with this editor.
+        <!-- There is no specific action associated with this editor, let the
+             editor come up with its own if it can.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_UNSPECIFIED}. -->
+        <flag name="actionUnspecified" value="0x00000000" />
+        <!-- This editor has no action associated with it.
              Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_NONE}. -->
-        <flag name="actionNone" value="0x00000000" />
+        <flag name="actionNone" value="0x00000001" />
         <!-- The action key performs a "go"
              operation to take the user to the target of the text they typed.
              Typically used, for example, when entering a URL.
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_GO}. -->
-        <flag name="actionGo" value="0x00000001" />
+        <flag name="actionGo" value="0x00000002" />
         <!-- The action key performs a "search"
              operation, taking the user to the results of searching for the text
              the have typed (in whatever context is appropriate).
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEARCH}. -->
-        <flag name="actionSearch" value="0x00000002" />
+        <flag name="actionSearch" value="0x00000003" />
         <!-- The action key performs a "send"
              operation, delivering the text to its target.  This is typically used
              when composing a message.
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEND}. -->
-        <flag name="actionSend" value="0x00000003" />
+        <flag name="actionSend" value="0x00000004" />
         <!-- The action key performs a "next"
              operation, taking the user to the next field that will accept text.
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_NEXT}. -->
-        <flag name="actionNext" value="0x00000004" />
+        <flag name="actionNext" value="0x00000005" />
         <!-- Used in conjunction with a custom action,
              this indicates that the action should not
              be available in-line as the same as a "enter" key.  Typically this is
@@ -1935,34 +1938,6 @@
         </attr>
         <attr name="inputType" />
     </declare-styleable>
-    <declare-styleable name="ZoomRing">
-        <!-- Defines the drawable used as the thumb. -->
-        <attr name="thumbDrawable" format="reference" />
-        <!-- Defines the distance of the thumb from the center of the ring. -->
-        <attr name="thumbDistance" format="dimension" />
-        <!-- Defines the distance from the center of the ring to the beginning of the track. -->
-        <attr name="trackInnerRadius" format="dimension" />
-        <!-- Defines the distance from the center of the ring to the end of the track. -->
-        <attr name="trackOuterRadius" format="dimension" />
-        <!-- Defines the drawable used as a hint to show which direction is zoom in. This should be
-             the same size as the zoom ring's asset.  It will be rotated programmatically. -->
-        <attr name="zoomInArrowDrawable" format="reference" />
-        <!-- Defines the drawable used as a hint to show which direction is zoom out. This should be
-             the same size as the zoom ring's asset.  It will be rotated programmatically. -->
-        <attr name="zoomOutArrowDrawable" format="reference" />
-        <!-- Defines the drawable that is laid on top of the zoom in arrow.
-             For example, this could be a +. -->
-        <attr name="zoomInArrowHintDrawable" format="reference" />
-        <!-- Defines the drawable that is laid on top of the zoom out arrow.
-             For example, this could be a -. -->
-        <attr name="zoomOutArrowHintDrawable" format="reference" />
-        <!-- Defines the distance of the zoom arrow hint from the center of the ring. -->
-        <attr name="zoomArrowHintDistance" format="dimension" />
-        <!-- Defines the offset of the zoom arrow hints from the thumb. Valid ranges are [0, 359] -->
-        <attr name="zoomArrowHintOffsetAngle" format="integer" />
-        <!-- Defines the drawable used to hint that the zoom ring can pan its owner. -->
-        <attr name="panningArrowsDrawable" format="reference" />
-    </declare-styleable>    
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
     </declare-styleable>

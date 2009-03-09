@@ -182,8 +182,9 @@ bool ToneGenerator::startTone(int toneType) {
             mLock.lock();
             if (mState == TONE_STARTING) {
                 LOGV("Wait for start callback");
-                if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR) {
-                    LOGE("--- Immediate start timed out");
+                status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+                if (lStatus != NO_ERROR) {
+                    LOGE("--- Immediate start timed out, status %d", lStatus);
                     mState = TONE_IDLE;
                     lResult = false;
                 }
@@ -195,13 +196,14 @@ bool ToneGenerator::startTone(int toneType) {
         LOGV("Delayed start\n");
 
         mState = TONE_RESTARTING;
-        if (mWaitCbkCond.waitRelative(mLock, seconds(1)) == NO_ERROR) {
+        status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        if (lStatus == NO_ERROR) {
             if (mState != TONE_IDLE) {
                 lResult = true;
             }
             LOGV("cond received");
         } else {
-            LOGE("--- Delayed start timed out");
+            LOGE("--- Delayed start timed out, status %d", lStatus);
             mState = TONE_IDLE;
         }
     }
@@ -368,6 +370,8 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             break;
         default:
             LOGV("Extra Cbk");
+            // Force loop exit
+            lNumSmp = 0;
             goto audioCallback_EndLoop;
         }
         

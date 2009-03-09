@@ -17,7 +17,6 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
-import android.text.Spanned;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -135,7 +134,7 @@ public interface InputConnection {
      * @return Returns true on success, false if the input connection is no longer
      * valid.
      */
-    boolean deleteSurroundingText(int leftLength, int rightLength);
+    public boolean deleteSurroundingText(int leftLength, int rightLength);
 
     /**
      * Set composing text around the current cursor position with the given text,

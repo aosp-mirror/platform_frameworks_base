@@ -260,8 +260,9 @@ public class PackageParser {
         boolean assetError = true;
         try {
             assmgr = new AssetManager();
-            if(assmgr.addAssetPath(mArchiveSourcePath) != 0) {
-                parser = assmgr.openXmlResourceParser("AndroidManifest.xml");
+            int cookie = assmgr.addAssetPath(mArchiveSourcePath);
+            if(cookie != 0) {
+                parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
                 assetError = false;
             } else {
                 Log.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);

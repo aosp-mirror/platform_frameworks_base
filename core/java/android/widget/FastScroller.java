@@ -26,7 +26,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 
 /**
@@ -313,12 +312,17 @@ class FastScroller {
                 // Non-existent letter
                 while (section > 0) {
                     section--;
-                     prevIndex = mSectionIndexer.getPositionForSection(section);
-                     if (prevIndex != index) {
-                         prevSection = section;
-                         sectionIndex = section;
-                         break;
-                     }
+                    prevIndex = mSectionIndexer.getPositionForSection(section);
+                    if (prevIndex != index) {
+                        prevSection = section;
+                        sectionIndex = section;
+                        break;
+                    } else if (section == 0) {
+                        // When section reaches 0 here, sectionIndex must follow it.
+                        // Assuming mSectionIndexer.getPositionForSection(0) == 0.
+                        sectionIndex = 0;
+                        break;
+                    }
                 }
             }
             // Find the next index, in case the assumed next index is not

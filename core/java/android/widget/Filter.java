@@ -42,9 +42,11 @@ public abstract class Filter {
     private static final String THREAD_NAME = "Filter";
     private static final int FILTER_TOKEN = 0xD0D0F00D;
     private static final int FINISH_TOKEN = 0xDEADBEEF;
-    
+
     private Handler mThreadHandler;
     private Handler mResultHandler;
+
+    private final Object mLock = new Object();
 
     /**
      * <p>Creates a new asynchronous filter.</p>
@@ -81,8 +83,7 @@ public abstract class Filter {
      * @see #publishResults(CharSequence, android.widget.Filter.FilterResults)
      */
     public final void filter(CharSequence constraint, FilterListener listener) {
-        synchronized (this) {
-
+        synchronized (mLock) {
             if (mThreadHandler == null) {
                 HandlerThread thread = new HandlerThread(THREAD_NAME);
                 thread.start();
@@ -221,7 +222,7 @@ public abstract class Filter {
                         message.sendToTarget();
                     }
 
-                    synchronized (this) {
+                    synchronized (mLock) {
                         if (mThreadHandler != null) {
                             Message finishMessage = mThreadHandler.obtainMessage(FINISH_TOKEN);
                             mThreadHandler.sendMessageDelayed(finishMessage, 3000);
@@ -229,7 +230,7 @@ public abstract class Filter {
                     }
                     break;
                 case FINISH_TOKEN:
-                    synchronized (this) {
+                    synchronized (mLock) {
                         if (mThreadHandler != null) {
                             mThreadHandler.getLooper().quit();
                             mThreadHandler = null;

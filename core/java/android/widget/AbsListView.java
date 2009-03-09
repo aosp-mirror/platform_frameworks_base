@@ -41,6 +41,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ContextMenu.ContextMenuInfo;
 
@@ -899,6 +903,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private boolean acceptFilter() {
+        if (!mTextFilterEnabled || !(getAdapter() instanceof Filterable) ||
+                ((Filterable) getAdapter()).getFilter() == null) {
+            return false;
+        }
         final Context context = mContext;
         final InputMethodManager inputManager = (InputMethodManager)
                 context.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1107,7 +1115,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // filter popup needs to follow the widget.
         if (mFiltered && changed && getWindowVisibility() == View.VISIBLE && mPopup != null &&
                 mPopup.isShowing()) {
-            positionPopup(true);
+            positionPopup();
         }
 
         return changed;
@@ -2767,20 +2775,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Make sure we have a window before showing the popup
         if (getWindowVisibility() == View.VISIBLE) {
             createTextFilter(true);
-            positionPopup(false);
+            positionPopup();
             // Make sure we get focus if we are showing the popup
             checkFocus();
         }
     }
 
-    private void positionPopup(boolean update) {
+    private void positionPopup() {
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         final int[] xy = new int[2];
         getLocationOnScreen(xy);
         // TODO: The 20 below should come from the theme and be expressed in dip
         // TODO: And the gravity should be defined in the theme as well
         final int bottomGap = screenHeight - xy[1] - getHeight() + (int) (mDensityScale * 20);
-        if (!update) {
+        if (!mPopup.isShowing()) {
             mPopup.showAtLocation(this, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL,
                     xy[0], bottomGap);
         } else {
@@ -2849,8 +2857,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return True if the text filter handled the event, false otherwise.
      */
     boolean sendToTextFilter(int keyCode, int count, KeyEvent event) {
-        if (!mTextFilterEnabled || !(getAdapter() instanceof Filterable) ||
-                ((Filterable) getAdapter()).getFilter() == null) {
+        if (!acceptFilter()) {
             return false;
         }
 
@@ -2879,7 +2886,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             break;
         }
 
-        if (okToSend && acceptFilter()) {
+        if (okToSend) {
             createTextFilter(true);
 
             KeyEvent forwardEvent = event;
@@ -2906,6 +2913,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * Return an InputConnection for editing of the filter text.
+     */
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        // XXX we need to have the text filter created, so we can get an
+        // InputConnection to proxy to.  Unfortunately this means we pretty
+        // much need to make it as soon as a list view gets focus.
+        createTextFilter(false);
+        return mTextFilter.onCreateInputConnection(outAttrs);
+    }
+    
+    /**
+     * For filtering we proxy an input connection to an internal text editor,
+     * and this allows the proxying to happen.
+     */
+    @Override
+    public boolean checkInputConnectionProxy(View view) {
+        return view == mTextFilter;
+    }
+    
+    /**
      * Creates the window for the text filter and populates it with an EditText field;
      *
      * @param animateEntrance true if the window should appear with an animation
@@ -2918,6 +2946,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mTextFilter = (EditText) layoutInflater.inflate(
                     com.android.internal.R.layout.typing_filter, null);
+            // For some reason setting this as the "real" input type changes
+            // the text view in some way that it doesn't work, and I don't
+            // want to figure out why this is.
+            mTextFilter.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
+                    | EditorInfo.TYPE_TEXT_VARIATION_FILTER);
             mTextFilter.addTextChangedListener(this);
             p.setFocusable(false);
             p.setTouchable(false);

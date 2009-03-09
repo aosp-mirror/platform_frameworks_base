@@ -92,6 +92,7 @@ extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
 extern int register_android_content_XmlBlock(JNIEnv* env);
+extern int register_android_emoji_EmojiFactory(JNIEnv* env);
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
@@ -1026,6 +1027,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),
+    REG_JNI(register_android_emoji_EmojiFactory),
     REG_JNI(register_android_security_Md5MessageDigest),
     REG_JNI(register_android_text_AndroidCharacter),
     REG_JNI(register_android_text_KeyCharacterMap),

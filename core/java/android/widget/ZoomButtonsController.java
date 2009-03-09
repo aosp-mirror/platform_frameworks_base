@@ -16,14 +16,19 @@
 
 package android.widget;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -31,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -46,7 +52,7 @@ import android.view.WindowManager.LayoutParams;
  *
  * @hide
  */
-public class ZoomButtonsController implements View.OnTouchListener {
+public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyListener {
 
     private static final String TAG = "ZoomButtonsController";
 
@@ -60,13 +66,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
     private WindowManager mWindowManager;
 
     /**
-     * The view that is being zoomed by this zoom ring.
+     * The view that is being zoomed by this zoom controller.
      */
     private View mOwnerView;
 
     /**
      * The bounds of the owner view in global coordinates. This is recalculated
-     * each time the zoom ring is shown.
+     * each time the zoom controller is shown.
      */
     private Rect mOwnerViewBounds = new Rect();
 
@@ -89,11 +95,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
      */
     private int[] mTouchTargetLocationInWindow = new int[2];
     /**
-     * If the zoom ring is dismissed but the user is still in a touch
+     * If the zoom controller is dismissed but the user is still in a touch
      * interaction, we set this to true. This will ignore all touch events until
      * up/cancel, and then set the owner's touch listener to null.
      */
     private boolean mReleaseTouchListenerOnUp;
+    
+    private boolean mIsSecondTapDown;
 
     private boolean mIsVisible;
 
@@ -122,10 +130,16 @@ public class ZoomButtonsController implements View.OnTouchListener {
         }
     };
 
+    /**
+     * The setting name that tracks whether we've shown the zoom tutorial.
+     */
+    private static final String SETTING_NAME_SHOWN_TUTORIAL = "shown_zoom_tutorial";
+    private static Dialog sTutorialDialog;
+
     /** When configuration changes, this is called after the UI thread is idle. */
     private static final int MSG_POST_CONFIGURATION_CHANGED = 2;
-    /** Used to delay the zoom ring dismissal. */
-    private static final int MSG_DISMISS_ZOOM_RING = 3;
+    /** Used to delay the zoom controller dismissal. */
+    private static final int MSG_DISMISS_ZOOM_CONTROLS = 3;
     /**
      * If setVisible(true) is called and the owner view's window token is null,
      * we delay the setVisible(true) call until it is not null.
@@ -140,7 +154,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                     onPostConfigurationChanged();
                     break;
 
-                case MSG_DISMISS_ZOOM_RING:
+                case MSG_DISMISS_ZOOM_CONTROLS:
                     setVisible(false);
                     break;
                     
@@ -148,7 +162,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                     if (mOwnerView.getWindowToken() == null) {
                         // Doh, it is still null, throw an exception
                         throw new IllegalArgumentException(
-                                "Cannot make the zoom ring visible if the owner view is " +
+                                "Cannot make the zoom controller visible if the owner view is " +
                                 "not attached to a window.");
                     }
                     setVisible(true);
@@ -165,11 +179,24 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
         mContainer = createContainer();
     }
-
+    
+    public void setZoomInEnabled(boolean enabled) {
+        mControls.setIsZoomInEnabled(enabled);
+    }
+    
+    public void setZoomOutEnabled(boolean enabled) {
+        mControls.setIsZoomOutEnabled(enabled);
+    }
+    
+    public void setZoomSpeed(long speed) {
+        mControls.setZoomSpeed(speed);
+    }
+    
     private FrameLayout createContainer() {
         LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.BOTTOM | Gravity.CENTER;
         lp.flags = LayoutParams.FLAG_NOT_TOUCHABLE |
+                LayoutParams.FLAG_NOT_FOCUSABLE |
                 LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         lp.height = LayoutParams.WRAP_CONTENT;
         lp.width = LayoutParams.FILL_PARENT;
@@ -182,6 +209,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
         FrameLayout container = new FrameLayout(mContext);
         container.setLayoutParams(lp);
         container.setMeasureAllChildren(true);
+        container.setOnKeyListener(this);
         
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -326,13 +354,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
         return mContainer;
     }
 
-    public int getZoomRingId() {
+    public int getZoomControlsId() {
         return mControls.getId();
     }
 
     private void dismissControlsDelayed(int delay) {
-        mHandler.removeMessages(MSG_DISMISS_ZOOM_RING);
-        mHandler.sendEmptyMessageDelayed(MSG_DISMISS_ZOOM_RING, delay);
+        mHandler.removeMessages(MSG_DISMISS_ZOOM_CONTROLS);
+        mHandler.sendEmptyMessageDelayed(MSG_DISMISS_ZOOM_CONTROLS, delay);
     }
 
     /**
@@ -351,8 +379,21 @@ public class ZoomButtonsController implements View.OnTouchListener {
             int x = (int) event.getX();
             int y = (int) event.getY();
 
+            /*
+             * This class will consume all events in the second tap (down,
+             * move(s), up). But, the owner already got the second tap's down,
+             * so cancel that. Do this before setVisible, since that call
+             * will set us as a touch listener.
+             */
+            MotionEvent cancelEvent = MotionEvent.obtain(event.getDownTime(),
+                    SystemClock.elapsedRealtime(),
+                    MotionEvent.ACTION_CANCEL, 0, 0, 0);
+            mOwnerView.dispatchTouchEvent(cancelEvent);
+            cancelEvent.recycle();
+
             setVisible(true);
             centerPoint(x, y);
+            mIsSecondTapDown = true;
         }
 
         return true;
@@ -373,11 +414,23 @@ public class ZoomButtonsController implements View.OnTouchListener {
         }
     }
 
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
+        return false;
+    }
+
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
 
+        // Consume all events during the second-tap interaction (down, move, up/cancel)
+        boolean consumeEvent = mIsSecondTapDown;
+        if ((action == MotionEvent.ACTION_UP) || (action == MotionEvent.ACTION_CANCEL)) {
+            // The second tap can no longer be down
+            mIsSecondTapDown = false;
+        }
+        
         if (mReleaseTouchListenerOnUp) {
-            // The ring was dismissed but we need to throw away all events until the up
+            // The controls were dismissed but we need to throw away all events until the up
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 mOwnerView.setOnTouchListener(null);
                 setTouchTargetView(null);
@@ -417,10 +470,10 @@ public class ZoomButtonsController implements View.OnTouchListener {
                     mOwnerViewBounds.top - targetViewRawY);
             boolean retValue = targetView.dispatchTouchEvent(containerEvent);
             containerEvent.recycle();
-            return retValue;
+            return retValue || consumeEvent;
 
         } else {
-            return false;
+            return consumeEvent;
         }
     }
 
@@ -465,10 +518,102 @@ public class ZoomButtonsController implements View.OnTouchListener {
         refreshPositioningVariables();
     }
 
-    public static boolean useThisZoom(Context context) {
-        return ZoomRingController.getZoomType(context) == 2;
+    /*
+     * This is static so Activities can call this instead of the Views
+     * (Activities usually do not have a reference to the ZoomButtonsController
+     * instance.)
+     */
+    /**
+     * Shows a "tutorial" (some text) to the user teaching her the new zoom
+     * invocation method. Must call from the main thread.
+     * <p>
+     * It checks the global system setting to ensure this has not been seen
+     * before. Furthermore, if the application does not have privilege to write
+     * to the system settings, it will store this bit locally in a shared
+     * preference.
+     *
+     * @hide This should only be used by our main apps--browser, maps, and
+     *       gallery
+     */
+    public static void showZoomTutorialOnce(Context context) {
+        ContentResolver cr = context.getContentResolver();
+        if (Settings.System.getInt(cr, SETTING_NAME_SHOWN_TUTORIAL, 0) == 1) {
+            return;
+        }
+
+        SharedPreferences sp = context.getSharedPreferences("_zoom", Context.MODE_PRIVATE);
+        if (sp.getInt(SETTING_NAME_SHOWN_TUTORIAL, 0) == 1) {
+            return;
+        }
+
+        if (sTutorialDialog != null && sTutorialDialog.isShowing()) {
+            sTutorialDialog.dismiss();
+        }
+
+        LayoutInflater layoutInflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        TextView textView = (TextView) layoutInflater.inflate(
+                com.android.internal.R.layout.alert_dialog_simple_text, null)
+                .findViewById(android.R.id.text1);
+        textView.setText(com.android.internal.R.string.tutorial_double_tap_to_zoom_message_short);
+        
+        sTutorialDialog = new AlertDialog.Builder(context)
+                .setView(textView)
+                .setIcon(0)
+                .create();
+
+        Window window = sTutorialDialog.getWindow();
+        window.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND |
+                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        sTutorialDialog.show();
     }
-    
+
+    /** @hide Should only be used by Android platform apps */
+    public static void finishZoomTutorial(Context context, boolean userNotified) {
+        if (sTutorialDialog == null) return;
+
+        sTutorialDialog.dismiss();
+        sTutorialDialog = null;
+
+        // Record that they have seen the tutorial
+        if (userNotified) {
+            try {
+                Settings.System.putInt(context.getContentResolver(), SETTING_NAME_SHOWN_TUTORIAL,
+                        1);
+            } catch (SecurityException e) {
+                /*
+                 * The app does not have permission to clear this global flag, make
+                 * sure the user does not see the message when he comes back to this
+                 * same app at least.
+                 */
+                SharedPreferences sp = context.getSharedPreferences("_zoom", Context.MODE_PRIVATE);
+                sp.edit().putInt(SETTING_NAME_SHOWN_TUTORIAL, 1).commit();
+            }
+        }
+    }
+
+    /** @hide Should only be used by Android platform apps */
+    public void finishZoomTutorial() {
+        finishZoomTutorial(mContext, true);
+    }
+
+    // Temporary methods for different zoom types
+    static int getZoomType(Context context) {
+        return Settings.System.getInt(context.getContentResolver(), "zoom", 1);
+    }
+
+    public static boolean useOldZoom(Context context) {
+        return getZoomType(context) == 0;
+    }
+
+    public static boolean useThisZoom(Context context) {
+        return getZoomType(context) == 2;
+    }
+
     public interface OnZoomListener {
         void onCenter(int x, int y);
         void onVisibilityChanged(boolean visible);

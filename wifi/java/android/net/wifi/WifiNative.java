@@ -117,6 +117,16 @@ public class WifiNative {
      * @return Whether the mode was successfully set.
      */
     public native static boolean setBluetoothCoexistenceModeCommand(int mode);
+
+    /**
+     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
+     * some of the low-level scan parameters used by the driver are changed to
+     * reduce interference with A2DP streaming.
+     *
+     * @param isSet whether to enable or disable this mode
+     * @return {@code true} if the command succeeded, {@code false} otherwise.
+     */
+    public native static boolean setBluetoothCoexistenceScanModeCommand(boolean setCoexScanMode);
     
     public native static boolean saveConfigCommand();
 

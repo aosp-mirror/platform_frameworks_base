@@ -494,4 +494,18 @@ public class MediaNames {
     "/sdcard/media_api/video_stress/h263/mpeg4_QVGA.3gp",
     "/sdcard/media_api/video_stress/h263/mpeg4_SQVGA.mp4"
   };
+  
+  //Streaming test files
+  public static final String STREAM_H264_480_360_1411k = 
+      "http://sridharg.googlejunta.com/yslau/stress_media/h264_regular.mp4"; 
+  public static final String STREAM_WMV = 
+      "http://sridharg.googlejunta.com/yslau/stress_media/bugs.wmv"; 
+  public static final String STREAM_H263_176x144_325k = 
+      "http://sridharg.googlejunta.com/yslau/stress_media/h263_regular.3gp";
+  public static final String STREAM_H264_352x288_1536k = 
+      "http://sridharg.googlejunta.com/yslau/stress_media/h264_highBitRate.mp4";
+  public static final String STREAM_MP3= 
+      "http://sridharg.googlejunta.com/yslau/stress_media/mp3_regular.mp3";
+  public static final String STREAM_MPEG4_QVGA_128k = 
+      "http://sridharg.googlejunta.com/yslau/stress_media/mpeg4_qvga_24fps.3gp";
 }

@@ -48,7 +48,6 @@ AudioStreamOut* A2dpAudioInterface::openOutputStream(
         int format, int channelCount, uint32_t sampleRate, status_t *status)
 {
     LOGD("A2dpAudioInterface::openOutputStream %d, %d, %d\n", format, channelCount, sampleRate);
-    Mutex::Autolock lock(mLock);
     status_t err = 0;
 
     // only one output stream allowed
@@ -134,7 +133,8 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
     mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL)
 {
     // use any address by default
-    strncpy(mA2dpAddress, "00:00:00:00:00:00", sizeof(mA2dpAddress));
+    strcpy(mA2dpAddress, "00:00:00:00:00:00");
+    init();
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::set(
@@ -163,18 +163,12 @@ A2dpAudioInterface::A2dpAudioStreamOut::~A2dpAudioStreamOut()
 
 ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t bytes)
 {    
-    status_t status = NO_INIT;
-    size_t remaining = bytes;
+    Mutex::Autolock lock(mLock);
 
-    if (!mData) {
-        status = a2dp_init(44100, 2, &mData);
-        if (status < 0) {
-            LOGE("a2dp_init failed err: %d\n", status);
-            mData = NULL;
-            goto Error;
-        }
-        a2dp_set_sink(mData, mA2dpAddress);
-    }
+    size_t remaining = bytes;
+    status_t status = init();
+    if (status < 0)
+        goto Error;
     
     while (remaining > 0) {
         status = a2dp_write(mData, buffer, remaining);
@@ -197,9 +191,26 @@ Error:
     return status;
 }
 
+status_t A2dpAudioInterface::A2dpAudioStreamOut::init()
+{
+    if (!mData) {
+        status_t status = a2dp_init(44100, 2, &mData);
+        if (status < 0) {
+            LOGE("a2dp_init failed err: %d\n", status);
+            mData = NULL;
+            return status;
+        }
+        a2dp_set_sink(mData, mA2dpAddress);
+    }
+
+    return 0;
+}
+
 status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
 {
     int result = 0;
+
+    Mutex::Autolock lock(mLock);
 
     if (!mStandby) {
         result = a2dp_stop(mData);
@@ -212,15 +223,15 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::setAddress(const char* address)
 {
-    if (strlen(address) < sizeof(mA2dpAddress))
+    Mutex::Autolock lock(mLock);
+
+    if (strlen(address) != strlen("00:00:00:00:00:00"))
         return -EINVAL;
 
-    if (strcmp(address, mA2dpAddress)) {
-        strcpy(mA2dpAddress, address);
-        if (mData)
-            a2dp_set_sink(mData, mA2dpAddress);
-    }
-    
+    strcpy(mA2dpAddress, address);
+    if (mData)
+        a2dp_set_sink(mData, mA2dpAddress);
+
     return NO_ERROR;
 }
 

@@ -27,6 +27,7 @@ LOCAL_SRC_FILES:= \
 	android_database_SQLiteProgram.cpp \
 	android_database_SQLiteQuery.cpp \
 	android_database_SQLiteStatement.cpp \
+	android_emoji_EmojiFactory.cpp \
 	android_view_Display.cpp \
 	android_view_Surface.cpp \
 	android_view_ViewRoot.cpp \
@@ -132,6 +133,7 @@ LOCAL_C_INCLUDES += \
 	external/tremor/Tremor \
 	external/icu4c/i18n \
 	external/icu4c/common \
+	frameworks/opt/emoji
 
 LOCAL_SHARED_LIBRARIES := \
 	libexpat \
@@ -156,12 +158,13 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libicudata \
 	libmedia \
-	libwpa_client
+	libwpa_client \
+	libemoji
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \
 	external/dbus \
-	external/bluez/libs/include
+	system/bluetooth/bluez-clean-headers
 LOCAL_CFLAGS += -DHAVE_BLUETOOTH
 LOCAL_SHARED_LIBRARIES += libbluedroid libdbus
 endif
@@ -189,6 +192,5 @@ endif
 LOCAL_MODULE:= libandroid_runtime
 
 include $(BUILD_SHARED_LIBRARY)
-
 
 include $(call all-makefiles-under,$(LOCAL_PATH))

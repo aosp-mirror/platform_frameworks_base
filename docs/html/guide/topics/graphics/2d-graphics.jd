@@ -447,7 +447,7 @@ Here's an example XML file for a frame-by-frame animation:</p>
 
 <p>This animation runs for just three frames. By setting the <code>android:oneshot</code> attribute of the 
 list to <var>true</var>, it will cycle just once then stop and hold on the last frame. If it is set <var>false</var> then
-the animation will loop. With this XML saved as <code>rocket_thrust.xml</p> in the <code>res/anim/</code> directory
+the animation will loop. With this XML saved as <code>rocket_thrust.xml</code> in the <code>res/anim/</code> directory
 of the project, it can be added as the background image to a View and then called to play. Here's an example Activity,
 in which the animation is added to an {@link android.widget.ImageView} and then animated when the screen is touched:</p>
 <pre>

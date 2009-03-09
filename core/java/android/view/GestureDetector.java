@@ -498,7 +498,6 @@ public class GestureDetector {
             if (mIsDoubleTapping) {
                 // Finally, give the up event of the double-tap
                 handled |= mDoubleTapListener.onDoubleTapEvent(ev);
-                mIsDoubleTapping = false;
             } else if (mInLongPress) {
                 mHandler.removeMessages(TAP);
                 mInLongPress = false;
@@ -520,6 +519,7 @@ public class GestureDetector {
             mPreviousUpEvent = MotionEvent.obtain(ev);
             mVelocityTracker.recycle();
             mVelocityTracker = null;
+            mIsDoubleTapping = false;
             mHandler.removeMessages(SHOW_PRESS);
             mHandler.removeMessages(LONG_PRESS);
             break;
@@ -529,6 +529,7 @@ public class GestureDetector {
             mHandler.removeMessages(TAP);
             mVelocityTracker.recycle();
             mVelocityTracker = null;
+            mIsDoubleTapping = false;
             mStillDown = false;
             if (mInLongPress) {
                 mInLongPress = false;

@@ -22,9 +22,9 @@ import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
 import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothA2dp;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -1491,6 +1491,12 @@ public class WifiService extends IWifiManager.Stub {
                     return;
                 }
                 mPluggedType = pluggedType;
+            } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+                boolean isBluetoothPlaying =
+                        intent.getIntExtra(
+                                BluetoothA2dp.SINK_STATE,
+                                BluetoothA2dp.STATE_DISCONNECTED) == BluetoothA2dp.STATE_PLAYING;
+                mWifiStateTracker.setBluetoothScanMode(isBluetoothPlaying);
             } else {
                 return;
             }
@@ -1603,13 +1609,11 @@ public class WifiService extends IWifiManager.Stub {
 
     private void registerForBroadcasts() {
         IntentFilter intentFilter = new IntentFilter();
-        if (isAirplaneSensitive()) {
-            intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        }
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
+        intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
     

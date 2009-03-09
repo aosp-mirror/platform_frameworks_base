@@ -81,7 +81,7 @@ public class ZoomControls extends LinearLayout {
     }
     
     public void show() {
-        if (ZoomRingController.useOldZoom(mContext)) {
+        if (ZoomButtonsController.useOldZoom(mContext)) {
             fade(View.VISIBLE, 0.0f, 1.0f);
         }
     }

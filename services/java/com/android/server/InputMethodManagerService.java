@@ -196,6 +196,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     ClientState mCurClient;
     
     /**
+     * The last window token that gained focus.
+     */
+    IBinder mCurFocusedWindow;
+    
+    /**
      * The input context last provided by the current client.
      */
     IInputContext mCurInputContext;
@@ -557,7 +562,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
          }
     }
     
-    void unbindCurrentInputLocked() {
+    void unbindCurrentClientLocked() {
         if (mCurClient != null) {
             if (DEBUG) Log.v(TAG, "unbindCurrentInputLocked: client = "
                     + mCurClient.client.asBinder());
@@ -658,7 +663,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurClient != cs) {
             // If the client is changing, we need to switch over to the new
             // one.
-            unbindCurrentInputLocked();
+            unbindCurrentClientLocked();
             if (DEBUG) Log.v(TAG, "switching to client: client = "
                     + cs.client.asBinder());
 
@@ -721,21 +726,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
         }
         
-        if (mHaveConnection) {
-            mContext.unbindService(this);
-            mHaveConnection = false;
-        }
-        
-        if (mCurToken != null) {
-            try {
-                if (DEBUG) Log.v(TAG, "Removing window token: " + mCurToken);
-                mIWindowManager.removeWindowToken(mCurToken);
-            } catch (RemoteException e) {
-            }
-            mCurToken = null;
-        }
-        
-        clearCurMethod();
+        unbindCurrentMethodLocked(false);
         
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
@@ -814,7 +805,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
     
-    void clearCurMethod() {
+    void unbindCurrentMethodLocked(boolean reportToClient) {
+        if (mHaveConnection) {
+            mContext.unbindService(this);
+            mHaveConnection = false;
+        }
+        
+        if (mCurToken != null) {
+            try {
+                if (DEBUG) Log.v(TAG, "Removing window token: " + mCurToken);
+                mIWindowManager.removeWindowToken(mCurToken);
+            } catch (RemoteException e) {
+            }
+            mCurToken = null;
+        }
+        
+        clearCurMethodLocked();
+        
+        if (reportToClient && mCurClient != null) {
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                    MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
+        }
+    }
+    
+    void clearCurMethodLocked() {
         if (mCurMethod != null) {
             for (ClientState cs : mClients.values()) {
                 cs.sessionRequested = false;
@@ -831,7 +845,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mCurIntent=" + mCurIntent);
             if (mCurMethod != null && mCurIntent != null
                     && name.equals(mCurIntent.getComponent())) {
-                clearCurMethod();
+                clearCurMethodLocked();
                 // We consider this to be a new bind attempt, since the system
                 // should now try to restart the service for us.
                 mLastBindTime = SystemClock.uptimeMillis();
@@ -871,14 +885,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateFromSettingsLocked() {
+        // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
+        // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
+        // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
+        // enabled.
         String id = Settings.Secure.getString(mContext.getContentResolver(),
             Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (id != null) {
+        if (id != null && id.length() > 0) {
             try {
                 setInputMethodLocked(id);
             } catch (IllegalArgumentException e) {
                 Log.w(TAG, "Unknown input method from prefs: " + id, e);
+                unbindCurrentMethodLocked(true);
             }
+        } else {
+            // There is no longer an input method set, so stop any current one.
+            unbindCurrentMethodLocked(true);
         }
     }
     
@@ -903,7 +925,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcast(intent);
             }
-            unbindCurrentInputLocked();
+            unbindCurrentClientLocked();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1023,7 +1045,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
     
-    public void windowGainedFocus(IInputMethodClient client,
+    public void windowGainedFocus(IInputMethodClient client, IBinder windowToken,
             boolean viewHasFocus, boolean isTextEditor, int softInputMode,
             boolean first, int windowFlags) {
         long ident = Binder.clearCallingIdentity();
@@ -1043,13 +1065,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // focus in the window manager, to allow this call to
                         // be made before input is started in it.
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Log.w(TAG, "Ignoring focus gain of: " + client);
+                            Log.w(TAG, "Client not active, ignoring focus gain of: " + client);
                             return;
                         }
                     } catch (RemoteException e) {
                     }
                 }
     
+                if (mCurFocusedWindow == windowToken) {
+                    Log.w(TAG, "Window already focused, ignoring focus gain of: " + client);
+                    return;
+                }
+                mCurFocusedWindow = windowToken;
+                
                 switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
                         if (!isTextEditor || (softInputMode &
@@ -1558,7 +1586,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mInputMethodData=" + mInputMethodData);
             p.println("  mCurrentMethod=" + mCurMethodId);
             client = mCurClient;
-            p.println("  mCurSeq=" + mCurSeq + " mCurClient=" + client);
+            p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
+            p.println("  mCurFocusedWindow=" + mCurFocusedWindow);
             p.println("  mCurId=" + mCurId + " mHaveConnect=" + mHaveConnection
                     + " mBoundToMethod=" + mBoundToMethod);
             p.println("  mCurToken=" + mCurToken);

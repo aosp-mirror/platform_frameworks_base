@@ -529,7 +529,10 @@ public final class InputMethodManager {
     public boolean isActive(View view) {
         checkFocus();
         synchronized (mH) {
-            return mServedView == view && mCurrentTextBoxAttribute != null;
+            return (mServedView == view
+                    || (mServedView != null
+                            && mServedView.checkInputConnectionProxy(view)))
+                    && mCurrentTextBoxAttribute != null;
         }
     }
     
@@ -620,7 +623,8 @@ public final class InputMethodManager {
     public void displayCompletions(View view, CompletionInfo[] completions) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view) {
+            if (mServedView != view && (mServedView == null
+                            || !mServedView.checkInputConnectionProxy(view))) {
                 return;
             }
             
@@ -637,7 +641,8 @@ public final class InputMethodManager {
     public void updateExtractedText(View view, int token, ExtractedText text) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view) {
+            if (mServedView != view && (mServedView == null
+                    || !mServedView.checkInputConnectionProxy(view))) {
                 return;
             }
             
@@ -730,7 +735,8 @@ public final class InputMethodManager {
             ResultReceiver resultReceiver) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view) {
+            if (mServedView != view && (mServedView == null
+                    || !mServedView.checkInputConnectionProxy(view))) {
                 return false;
             }
 
@@ -871,7 +877,8 @@ public final class InputMethodManager {
     public void restartInput(View view) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view) {
+            if (mServedView != view && (mServedView == null
+                    || !mServedView.checkInputConnectionProxy(view))) {
                 return;
             }
             
@@ -1032,7 +1039,7 @@ public final class InputMethodManager {
             if (DEBUG) Log.v(TAG, "focusOut: " + view
                     + " mServedView=" + mServedView
                     + " winFocus=" + view.hasWindowFocus());
-            if (mServedView == view) {
+            if (mServedView != view) {
                 // The following code would auto-hide the IME if we end up
                 // with no more views with focus.  This can happen, however,
                 // whenever we go into touch mode, so it ends up hiding
@@ -1129,8 +1136,9 @@ public final class InputMethodManager {
             try {
                 final boolean isTextEditor = focusedView != null &&
                         focusedView.onCheckIsTextEditor();
-                mService.windowGainedFocus(mClient, focusedView != null,
-                        isTextEditor, softInputMode, first, windowFlags);
+                mService.windowGainedFocus(mClient, rootView.getWindowToken(),
+                        focusedView != null, isTextEditor, softInputMode, first,
+                        windowFlags);
             } catch (RemoteException e) {
             }
         }
@@ -1150,8 +1158,9 @@ public final class InputMethodManager {
             int candidatesStart, int candidatesEnd) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view || mCurrentTextBoxAttribute == null
-                    || mCurMethod == null) {
+            if ((mServedView != view && (mServedView == null
+                        || !mServedView.checkInputConnectionProxy(view)))
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
             
@@ -1189,8 +1198,9 @@ public final class InputMethodManager {
     public void updateCursor(View view, int left, int top, int right, int bottom) {
         checkFocus();
         synchronized (mH) {
-            if (mServedView != view || mCurrentTextBoxAttribute == null
-                    || mCurMethod == null) {
+            if ((mServedView != view && (mServedView == null
+                        || !mServedView.checkInputConnectionProxy(view)))
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
             
@@ -1223,7 +1233,8 @@ public final class InputMethodManager {
     public void sendAppPrivateCommand(View view, String action, Bundle data) {
         checkFocus();
         synchronized (mH) {
-            if ((view != null && mServedView != view)
+            if ((mServedView != view && (mServedView == null
+                        || !mServedView.checkInputConnectionProxy(view)))
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }

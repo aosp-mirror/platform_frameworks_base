@@ -65,13 +65,6 @@
         <item>@drawable/spinner_dropdown_background</item>
         <item>@drawable/title_bar</item>
         <item>@drawable/title_bar_shadow</item>
-        <item>@drawable/zoom_ring_arrows</item>
-        <item>@drawable/zoom_ring_overview_tab</item>
-        <item>@drawable/zoom_ring_thumb</item>
-        <item>@drawable/zoom_ring_thumb_minus_arrow_rotatable</item>
-        <item>@drawable/zoom_ring_thumb_plus_arrow_rotatable</item>
-        <item>@drawable/zoom_ring_track</item>
-        <item>@drawable/zoom_ring_track_absolute</item>
         <!-- Visual lock screen -->
         <item>@drawable/indicator_code_lock_drag_direction_green_up</item>
         <item>@drawable/indicator_code_lock_drag_direction_red_up</item>

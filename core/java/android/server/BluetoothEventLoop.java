@@ -44,6 +44,7 @@ class BluetoothEventLoop {
 
     private int mNativeData;
     private Thread mThread;
+    private boolean mStarted;
     private boolean mInterrupted;
     private HashMap<String, Integer> mPasskeyAgentRequestData;
     private HashMap<String, IBluetoothDeviceCallback> mGetRemoteServiceChannelCallbacks;
@@ -122,14 +123,18 @@ class BluetoothEventLoop {
                 public void run() {
                     try {
                         if (setUpEventLoopNative()) {
+                            mStarted = true;
                             while (!mInterrupted) {
                                 waitForAndDispatchEvent(0);
                                 sleep(500);
                             }
-                            tearDownEventLoopNative();
                         }
+                        // tear down even in the error case to clean
+                        // up anything we started to setup
+                        tearDownEventLoopNative();
                     } catch (InterruptedException e) { }
                     if (DBG) log("Event Loop thread finished");
+                    mThread = null;
                 }
             };
         if (DBG) log("Starting Event Loop thread");
@@ -152,7 +157,7 @@ class BluetoothEventLoop {
     }
 
     public synchronized boolean isEventLoopRunning() {
-        return mThread != null;
+        return mThread != null && mStarted;
     }
 
     /*package*/ void onModeChanged(String bluezMode) {

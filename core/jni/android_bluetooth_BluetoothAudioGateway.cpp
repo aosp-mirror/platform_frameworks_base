@@ -49,8 +49,6 @@
 
 #ifdef HAVE_BLUETOOTH
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/sco.h>
 #endif

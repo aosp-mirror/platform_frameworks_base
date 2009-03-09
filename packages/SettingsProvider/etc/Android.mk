@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := bookmarks.xml
 
-LOCAL_MODULE_TAGS := user development
+LOCAL_MODULE_TAGS := user
 
 # This will install the file in /system/etc
 #
@@ -36,7 +36,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := favorites.xml
 
-LOCAL_MODULE_TAGS := user development
+LOCAL_MODULE_TAGS := user
 
 # This will install the file in /system/etc
 #

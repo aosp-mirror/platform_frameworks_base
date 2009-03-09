@@ -14,24 +14,9 @@
      limitations under the License.
 -->
 
-<rotate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:pivotX="50%"
-    android:pivotY="50%"
-    android:fromDegrees="0"
-    android:toDegrees="360">
-
-    <shape
-        android:shape="ring"
-        android:innerRadius="60dip"
-        android:thickness="14dip"
-        android:useLevel="true">
-
-        <gradient
-            android:type="sweep"
-            android:useLevel="true"
-            android:startColor="#1000ceff"
-            android:endColor="#ffadd252" />
-
-    </shape>
-
- </rotate>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+        android:drawable="@drawable/ic_btn_round_more_disabled" />
+    <item
+         android:drawable="@drawable/ic_btn_round_more_normal" />
+</selector>

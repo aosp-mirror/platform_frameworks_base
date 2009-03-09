@@ -112,7 +112,7 @@ public:
     
     virtual     size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
     
-    virtual     void        wakeUp();
+    virtual     void        wakeUp()    { mWaitWorkCV.broadcast(); }
     
     // IBinder::DeathRecipient
     virtual     void        binderDied(const wp<IBinder>& who);
@@ -161,7 +161,8 @@ private:
     void                    doSetOutput(int outputType);
 
 #ifdef WITH_A2DP
-    void                    setA2dpEnabled(bool enable);
+    void                    setA2dpEnabled_l(bool enable);
+    void                    checkA2dpEnabledChange_l();
 #endif
     static bool             streamForcedToSpeaker(int streamType);
     
@@ -459,7 +460,7 @@ private:
                     bool        isMusicActive() const;
         
                     
-        sp<Track> createTrack(
+                    sp<Track>   createTrack_l(
                                     const sp<AudioFlinger::Client>& client,
                                     int streamType,
                                     uint32_t sampleRate,
@@ -468,12 +469,10 @@ private:
                                     int frameCount,
                                     const sp<IMemory>& sharedBuffer,
                                     status_t *status);
-
-                    void        wakeUp() { mWaitWorkCV.broadcast(); }
                     
-                    void        getTracks(SortedVector < sp<Track> >& tracks,
+                    void        getTracks_l(SortedVector < sp<Track> >& tracks,
                                           SortedVector < wp<Track> >& activeTracks);
-                    void        putTracks(SortedVector < sp<Track> >& tracks,
+                    void        putTracks_l(SortedVector < sp<Track> >& tracks,
                                           SortedVector < wp<Track> >& activeTracks);
                     void        setOuputTrack(OutputTrack *track) { mOutputTrack = track; }
                     
@@ -498,22 +497,19 @@ private:
         MixerThread(const Client&);
         MixerThread& operator = (const MixerThread&);
   
-        status_t    addTrack(const sp<Track>& track);
-        void        removeTrack(wp<Track> track, int name);
-        void        remove_track_l(wp<Track> track, int name);
-        void        destroyTrack(const sp<Track>& track);
-        int         getTrackName();
-        void        deleteTrackName(int name);
-        void        addActiveTrack(const wp<Track>& t);
-        void        removeActiveTrack(const wp<Track>& t);
+        status_t    addTrack_l(const sp<Track>& track);
+        void        removeTrack_l(wp<Track> track, int name);
+        void        destroyTrack_l(const sp<Track>& track);
+        int         getTrackName_l();
+        void        deleteTrackName_l(int name);
+        void        addActiveTrack_l(const wp<Track>& t);
+        void        removeActiveTrack_l(const wp<Track>& t);
         size_t      getOutputFrameCount();
 
         status_t    dumpInternals(int fd, const Vector<String16>& args);
         status_t    dumpTracks(int fd, const Vector<String16>& args);
         
         sp<AudioFlinger>                mAudioFlinger;       
-        mutable     Mutex               mLock;
-        mutable     Condition           mWaitWorkCV;
         SortedVector< wp<Track> >       mActiveTracks;
         SortedVector< sp<Track> >       mTracks;
         stream_type_t                   mStreamTypes[AudioSystem::NUM_STREAM_TYPES];
@@ -607,11 +603,11 @@ private:
 
                 status_t    startRecord(MixerThread::RecordTrack* recordTrack);
                 void        stopRecord(MixerThread::RecordTrack* recordTrack);
-                
-                void        handleOutputSwitch();
 
-    mutable     Mutex                                       mHardwareLock;
-    mutable     Mutex                                       mLock;
+    mutable     Mutex                               mHardwareLock;
+    mutable     Mutex                               mLock;
+    mutable     Condition                           mWaitWorkCV;
+
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;
 
                 sp<MixerThread>                     mA2dpMixerThread;
@@ -620,7 +616,7 @@ private:
                 AudioHardwareInterface*             mA2dpAudioInterface;
                 sp<AudioRecordThread>               mAudioRecordThread;
                 bool                                mA2dpEnabled;
-                bool                                mA2dpEnabledReq;
+                bool                                mNotifyA2dpChange;
     mutable     int                                 mHardwareStatus;
                 SortedVector< wp<IBinder> >         mNotificationClients;
                 int                                 mForcedSpeakerCount;
