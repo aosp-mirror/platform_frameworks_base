@@ -280,13 +280,7 @@ public abstract class AbsSeekBar extends ProgressBar {
             progress = mTouchProgressOffset;
         }
         
-        final int max = getMax();
         progress += scale * max;
-        if (progress < 0) {
-            progress = 0;
-        } else if (progress > max) {
-            progress = max;
-        }
         
         setProgress((int) progress, true);
     }
