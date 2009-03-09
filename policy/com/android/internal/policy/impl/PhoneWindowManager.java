@@ -140,8 +140,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Vibrator pattern for haptic feedback of a long press.
     private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 20, 21};
-    // Vibrator pattern for haptic feedback of a zoom ring tick
-    private static final long[] ZOOM_RING_TICK_VIBE_PATTERN = {0, 10};
     
     Context mContext;
     IWindowManager mWindowManager;
@@ -1223,6 +1221,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public boolean finishAnimationLw() {
         boolean changed = false;
+        boolean hiding = false;
         if (mStatusBar != null) {
             //Log.i(TAG, "force=" + mForceStatusBar
             //        + " top=" + mTopFullscreenOpaqueWindowState);
@@ -1238,11 +1237,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
                 if (hideStatusBar) {
                     changed |= mStatusBar.hideLw(true);
+                    hiding = true;
                 } else {
                     changed |= mStatusBar.showLw(true);
                 }
             }
         }
+        
+        if (changed && hiding) {
+            IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
+            if (sbs != null) {
+                try {
+                    // Make sure the window shade is hidden.
+                    sbs.deactivate();
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        
         return changed;
     }
 
@@ -1782,8 +1794,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.LONG_PRESS:
                 mVibrator.vibrate(LONG_PRESS_VIBE_PATTERN, -1);
                 return true;
-            case HapticFeedbackConstants.ZOOM_RING_TICK:
-                mVibrator.vibrate(ZOOM_RING_TICK_VIBE_PATTERN, -1);
         }
         return false;
     }
