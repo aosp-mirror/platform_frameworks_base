@@ -540,7 +540,9 @@ import java.util.ArrayList;
     public void setSingleLine(boolean single) {
         int inputType = EditorInfo.TYPE_CLASS_TEXT;
         if (!single) {
-            inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+            inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                    | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
+                    | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
         }
         mSingle = single;
         setHorizontallyScrolling(single);

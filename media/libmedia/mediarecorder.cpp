@@ -456,6 +456,11 @@ status_t MediaRecorder::stop()
         mCurrentState = MEDIA_RECORDER_ERROR;
         return ret;
     }
+ 
+    // FIXME:
+    // stop and reset are semantically different.
+    // We treat them the same for now, and will change this in the future.
+    doCleanUp();
     mCurrentState = MEDIA_RECORDER_IDLE;
     return ret;
 }

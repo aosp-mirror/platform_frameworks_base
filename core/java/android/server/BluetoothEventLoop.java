@@ -52,6 +52,7 @@ class BluetoothEventLoop {
     private Context mContext;
 
     private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
+    private static final int EVENT_RESTART_BLUETOOTH = 2;
 
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
@@ -73,6 +74,10 @@ class BluetoothEventLoop {
                     mBluetoothService.createBond(address);
                     return;
                 }
+                break;
+            case EVENT_RESTART_BLUETOOTH:
+                mBluetoothService.disable();
+                mBluetoothService.enable(null);
                 break;
             }
         }
@@ -369,6 +374,13 @@ class BluetoothEventLoop {
             try {
                 callback.onGetRemoteServiceChannelResult(address, channel);
             } catch (RemoteException e) {}
+        }
+    }
+
+    private void onRestartRequired() {
+        if (mBluetoothService.isEnabled()) {
+            Log.e(TAG, "*** A serious error occured (did hcid crash?) - restarting Bluetooth ***");
+            mHandler.sendEmptyMessage(EVENT_RESTART_BLUETOOTH);
         }
     }
 

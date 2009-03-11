@@ -134,7 +134,7 @@ public class WebSettings {
     private int             mDefaultFixedFontSize = 13;
     private boolean         mLoadsImagesAutomatically = true;
     private boolean         mBlockNetworkImage = false;
-    private boolean         mBlockNetworkLoads = false;
+    private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
     private boolean         mPluginsEnabled = false;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
@@ -248,7 +248,9 @@ public class WebSettings {
         mUserAgent = getCurrentUserAgent();
         mUseDefaultUserAgent = true;
 
-        verifyNetworkAccess();
+        mBlockNetworkLoads = mContext.checkPermission(
+                "android.permission.INTERNET", android.os.Process.myPid(),
+                android.os.Process.myUid()) != PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -835,7 +837,7 @@ public class WebSettings {
     private void verifyNetworkAccess() {
         if (!mBlockNetworkLoads) {
             if (mContext.checkPermission("android.permission.INTERNET", 
-                    android.os.Process.myPid(), 0) != 
+                    android.os.Process.myPid(), android.os.Process.myUid()) != 
                         PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException
                         ("Permission denied - " +

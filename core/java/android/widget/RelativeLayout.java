@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Gravity;
+import android.view.ViewDebug;
 import android.widget.RemoteViews.RemoteView;
 import android.graphics.Rect;
 import com.android.internal.R;
@@ -803,13 +804,33 @@ public class RelativeLayout extends ViewGroup {
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_centerVertical
      */
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        @ViewDebug.ExportedProperty(resolveId = true, indexMapping = {
+            @ViewDebug.IntToString(from = ABOVE,               to = "above"),
+            @ViewDebug.IntToString(from = ALIGN_BASELINE,      to = "alignBaseline"),
+            @ViewDebug.IntToString(from = ALIGN_BOTTOM,        to = "alignBottom"),
+            @ViewDebug.IntToString(from = ALIGN_LEFT,          to = "alignLeft"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_BOTTOM, to = "alignParentBottom"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_LEFT,   to = "alignParentLeft"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_RIGHT,  to = "alignParentRight"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_TOP,    to = "alignParentTop"),
+            @ViewDebug.IntToString(from = ALIGN_RIGHT,         to = "alignRight"),
+            @ViewDebug.IntToString(from = ALIGN_TOP,           to = "alignTop"),
+            @ViewDebug.IntToString(from = BELOW,               to = "below"),
+            @ViewDebug.IntToString(from = CENTER_HORIZONTAL,   to = "centerHorizontal"),
+            @ViewDebug.IntToString(from = CENTER_IN_PARENT,    to = "center"),
+            @ViewDebug.IntToString(from = CENTER_VERTICAL,     to = "centerVertical"),
+            @ViewDebug.IntToString(from = LEFT_OF,             to = "leftOf"),
+            @ViewDebug.IntToString(from = RIGHT_OF,            to = "rightOf")
+        }, mapping = { @ViewDebug.IntToString(from = TRUE, to = "true") })
         private int[] mRules = new int[VERB_COUNT];
+
         private int mLeft, mTop, mRight, mBottom;
 
         /**
          * When true, uses the parent as the anchor if the anchor doesn't exist or if
          * the anchor's visibility is GONE.
          */
+        @ViewDebug.ExportedProperty
         public boolean alignWithParent;
 
         public LayoutParams(Context c, AttributeSet attrs) {

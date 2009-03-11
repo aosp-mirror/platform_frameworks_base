@@ -126,7 +126,7 @@ public class ListView extends AbsListView {
     private SparseBooleanArray mCheckStates;
 
     // used for temporary calculations.
-    private Rect mTempRect = new Rect();
+    private final Rect mTempRect = new Rect();
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
@@ -1656,7 +1656,8 @@ public class ListView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled || (p.recycledHeaderFooter && p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
+        if (recycled || (p.recycledHeaderFooter &&
+                p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
             if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
@@ -2643,6 +2644,7 @@ public class ListView extends AbsListView {
 
         final int listBottom = getHeight() - mListPadding.bottom;
         final int listTop = mListPadding.top;
+        final AbsListView.RecycleBin recycleBin = mRecycler;
 
         if (amount < 0) {
             // shifted items up
@@ -2670,8 +2672,13 @@ public class ListView extends AbsListView {
             // top views may be panned off screen
             View first = getChildAt(0);
             while (first.getBottom() < listTop) {
-                removeViewInLayout(first);
-                mRecycler.addScrapView(first);
+                AbsListView.LayoutParams layoutParams = (LayoutParams) first.getLayoutParams();
+                if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
+                    removeViewInLayout(first);
+                    recycleBin.addScrapView(first);
+                } else {
+                    detachViewFromParent(first);
+                }
                 first = getChildAt(0);
                 mFirstPosition++;
             }
@@ -2696,8 +2703,13 @@ public class ListView extends AbsListView {
 
             // bottom view may be panned off screen
             while (last.getTop() > listBottom) {
-                removeViewInLayout(last);
-                mRecycler.addScrapView(last);
+                AbsListView.LayoutParams layoutParams = (LayoutParams) last.getLayoutParams();
+                if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
+                    removeViewInLayout(last);
+                    recycleBin.addScrapView(last);
+                } else {
+                    detachViewFromParent(last);
+                }
                 last = getChildAt(--lastIndex);
             }
         }

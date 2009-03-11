@@ -179,6 +179,7 @@ SurfaceFlinger::SurfaceFlinger()
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
         mFreezeCount(0),
+        mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugCpu(0),
         mDebugFps(0),
@@ -467,16 +468,24 @@ void SurfaceFlinger::waitForEvent()
     // wait for something to do
     if (UNLIKELY(isFrozen())) {
         // wait 5 seconds
-        int err = mSyncObject.wait(ms2ns(5000));
+        const nsecs_t freezeDisplayTimeout = ms2ns(5000);
+        const nsecs_t now = systemTime();
+        if (mFreezeDisplayTime == 0) {
+            mFreezeDisplayTime = now;
+        }
+        nsecs_t waitTime = freezeDisplayTimeout - (now - mFreezeDisplayTime);
+        int err = (waitTime > 0) ? mSyncObject.wait(waitTime) : TIMED_OUT;
         if (err != NO_ERROR) {
             if (isFrozen()) {
                 // we timed out and are still frozen
                 LOGW("timeout expired mFreezeDisplay=%d, mFreezeCount=%d",
                         mFreezeDisplay, mFreezeCount);
                 mFreezeCount = 0;
+                mFreezeDisplay = false;
             }
         }
     } else {
+        mFreezeDisplayTime = 0;
         mSyncObject.wait();
     }
 }
@@ -671,13 +680,6 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
             // freezing or unfreezing the display -> trigger animation if needed
             mFreezeDisplay = mCurrentState.freezeDisplay;
-            const nsecs_t now = systemTime();
-            if (mFreezeDisplay) {
-                mFreezeDisplayTime = now;
-            } else {
-                //LOGD("Screen was frozen for %llu us",
-                //        ns2us(now-mFreezeDisplayTime));
-            }
         }
 
         // some layers might have been removed, so

@@ -46,9 +46,13 @@ public class DatabaseLocaleTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mDatabase = SQLiteDatabase.create(null);
-        mDatabase.execSQL("CREATE TABLE test (data TEXT COLLATE LOCALIZED);");
+        mDatabase.execSQL(
+                "CREATE TABLE test (id INTEGER PRIMARY KEY, data TEXT COLLATE LOCALIZED);");
+    }
+
+    private void insertStrings() {
         for (String s : STRINGS) {
-            mDatabase.execSQL("INSERT INTO test VALUES('" + s + "');");
+            mDatabase.execSQL("INSERT INTO test (data) VALUES('" + s + "');");
         }
     }
 
@@ -75,12 +79,14 @@ public class DatabaseLocaleTest extends TestCase {
 
     @MediumTest
     public void testLocaleInsertOrder() throws Exception {
+        insertStrings();
         String[] results = query("SELECT data FROM test");
         MoreAsserts.assertEquals(STRINGS, results);
     }
 
     @MediumTest
     public void testLocaleenUS() throws Exception {
+        insertStrings();
         Log.i("LocaleTest", "about to call setLocale en_US");
         mDatabase.setLocale(new Locale("en", "US"));
         String[] results;
@@ -98,5 +104,26 @@ public class DatabaseLocaleTest extends TestCase {
                 STRINGS[6],  // "COTE"
                 STRINGS[5],  // "dog"
         });
+    }
+
+    @SmallTest
+    public void testHoge() throws Exception {
+        Cursor cursor = null;
+        try {
+            String expectedString = new String(new int[] {0xFE000}, 0, 1);
+            mDatabase.execSQL("INSERT INTO test(id, data) VALUES(1, '" + expectedString + "')");
+            cursor = mDatabase.rawQuery("SELECT data FROM test WHERE id = 1", null);
+            
+            assertNotNull(cursor);
+            assertTrue(cursor.moveToFirst());
+            String actualString = cursor.getString(0);
+            assertEquals(expectedString.length(), actualString.length());
+            for (int i = 0; i < expectedString.length(); i++) {
+                assertEquals((int)expectedString.charAt(i), (int)actualString.charAt(i));
+            }
+            assertEquals(expectedString, actualString);
+        } finally {
+            if (cursor != null) cursor.close();
+        }
     }
 }

@@ -287,6 +287,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             } else {
                 intent = new Intent(BluetoothIntent.DISABLED_ACTION);
             }
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
             mEnableThread = null;

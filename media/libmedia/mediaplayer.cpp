@@ -215,6 +215,10 @@ status_t MediaPlayer::prepareAsync_l()
     return INVALID_OPERATION;
 }
 
+// TODO: In case of error, prepareAsync provides the caller with 2 error codes,
+// one defined in the Android framework and one provided by the implementation
+// that generated the error. The sync version of prepare returns only 1 error
+// code.
 status_t MediaPlayer::prepare()
 {
     LOGV("prepare");
@@ -512,7 +516,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         }
         break;
     case MEDIA_ERROR:
-        // Always log errors
+        // Always log errors.
+        // ext1: Media framework error code.
+        // ext2: Implementation dependant error code.
         LOGE("error (%d, %d)", ext1, ext2);
         mCurrentState = MEDIA_PLAYER_STATE_ERROR;
         if (mPrepareSync)
@@ -523,6 +529,11 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
             mSignal.signal();
             send = false;
         }
+        break;
+    case MEDIA_INFO:
+        // ext1: Media framework error code.
+        // ext2: Implementation dependant error code.
+        LOGW("info/warning (%d, %d)", ext1, ext2);
         break;
     case MEDIA_SEEK_COMPLETE:
         LOGV("Received seek complete");

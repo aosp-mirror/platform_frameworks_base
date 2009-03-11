@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -46,9 +45,6 @@ import android.util.AttributeSet;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -68,12 +64,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Scroller;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
-import android.widget.ZoomControls;
-import android.widget.FrameLayout;
 import android.widget.AdapterView.OnItemClickListener;
 
 import java.io.File;
@@ -113,57 +106,6 @@ public class WebView extends AbsoluteLayout
     static final boolean DEBUG = false;
     static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
-    private class ExtendedZoomControls extends FrameLayout {
-        public ExtendedZoomControls(Context context, AttributeSet attrs) {
-            super(context, attrs);
-            LayoutInflater inflater = (LayoutInflater)
-                    context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inflater.inflate(com.android.internal.R.layout.zoom_magnify, this, true);
-            mZoomControls = (ZoomControls) findViewById(com.android.internal.R.id.zoomControls);
-            mZoomMagnify = (ImageView) findViewById(com.android.internal.R.id.zoomMagnify);
-        }
-        
-        public void show(boolean showZoom, boolean canZoomOut) {
-            mZoomControls.setVisibility(showZoom ? View.VISIBLE : View.GONE);
-            mZoomMagnify.setVisibility(canZoomOut ? View.VISIBLE : View.GONE);
-            fade(View.VISIBLE, 0.0f, 1.0f);
-        }
-        
-        public void hide() {
-            fade(View.GONE, 1.0f, 0.0f);
-        }
-        
-        private void fade(int visibility, float startAlpha, float endAlpha) {
-            AlphaAnimation anim = new AlphaAnimation(startAlpha, endAlpha);
-            anim.setDuration(500);
-            startAnimation(anim);
-            setVisibility(visibility);
-        }
-        
-        public void setIsZoomMagnifyEnabled(boolean isEnabled) {
-            mZoomMagnify.setEnabled(isEnabled);
-        }
-        
-        public boolean hasFocus() {
-            return mZoomControls.hasFocus() || mZoomMagnify.hasFocus();
-        }
-        
-        public void setOnZoomInClickListener(OnClickListener listener) {
-            mZoomControls.setOnZoomInClickListener(listener);
-        }
-            
-        public void setOnZoomOutClickListener(OnClickListener listener) {
-            mZoomControls.setOnZoomOutClickListener(listener);
-        }
-            
-        public void setOnZoomMagnifyClickListener(OnClickListener listener) {
-            mZoomMagnify.setOnClickListener(listener);
-        }
-
-        ZoomControls mZoomControls;
-        ImageView mZoomMagnify;
-    }
-    
     /**
      *  Transportation object for returning WebView across thread boundaries.
      */
@@ -281,8 +223,10 @@ public class WebView extends AbsoluteLayout
      */
     // pre-computed square of ViewConfiguration.getScaledTouchSlop()
     private int mTouchSlopSquare;
-    // pre-computed square of ViewConfiguration.getScaledDoubleTapSlop()
+    // pre-computed square of the density adjusted double tap slop
     private int mDoubleTapSlopSquare;
+    // pre-computed density adjusted navigation slop
+    private int mNavSlop;
     // This should be ViewConfiguration.getTapTimeout()
     // But system time out is 100ms, which is too short for the browser.
     // In the browser, if it switches out of tap too soon, jump tap won't work.
@@ -295,9 +239,6 @@ public class WebView extends AbsoluteLayout
     private static final int LONG_PRESS_TIMEOUT = 1000;
     // needed to avoid flinging after a pause of no movement
     private static final int MIN_FLING_TIME = 250;
-    // The time that the Zoom Controls are visible before fading away
-    private static final long ZOOM_CONTROLS_TIMEOUT = 
-            ViewConfiguration.getZoomControlsTimeout();
     // The amount of content to overlap between two screens when going through
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
@@ -336,10 +277,6 @@ public class WebView extends AbsoluteLayout
     private Scroller mScroller;
 
     private boolean mWrapContent;
-
-    // The View containing the zoom controls
-    private ExtendedZoomControls mZoomControls;
-    private Runnable mZoomControlRunnable;
 
     // true if we should call webcore to draw the content, false means we have
     // requested something but it isn't ready to draw yet.
@@ -550,6 +487,7 @@ public class WebView extends AbsoluteLayout
 
     private ZoomButtonsController mZoomButtonsController; 
     private ImageView mZoomOverviewButton;
+    private ImageView mZoomFitPageButton;
 
     // These keep track of the center point of the zoom.  They are used to
     // determine the point around which we should zoom.
@@ -564,26 +502,11 @@ public class WebView extends AbsoluteLayout
             // in this callback
         }
 
-        public void onOverview() {
-            mZoomButtonsController.setVisible(false);
-            zoomScrollOut();
-            if (mLogEvent) {
-                Checkin.updateStats(mContext.getContentResolver(),
-                        Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
-            }
-        }
-
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 switchOutDrawHistory();
-                mZoomButtonsController.setOverviewVisible(true);
-                updateButtonsEnabled();
+                updateZoomButtonsEnabled();
             }
-        }
-
-        private void updateButtonsEnabled() {
-            mZoomButtonsController.setZoomInEnabled(mActualScale < mMaxZoomScale);
-            mZoomButtonsController.setZoomOutEnabled(mActualScale > mMinZoomScale);
         }
 
         public void onZoom(boolean zoomIn) {
@@ -593,7 +516,7 @@ public class WebView extends AbsoluteLayout
                 zoomOut();
             }
             
-            updateButtonsEnabled();
+            updateZoomButtonsEnabled();
         }
     };
     
@@ -633,8 +556,49 @@ public class WebView extends AbsoluteLayout
         mFocusData.mX = 0;
         mFocusData.mY = 0;
         mScroller = new Scroller(context);
+
+        initZoomController(context);
+    }
+
+    private void initZoomController(Context context) {
+        // Create the buttons controller
         mZoomButtonsController = new ZoomButtonsController(context, this);
         mZoomButtonsController.setCallback(mZoomListener);
+
+        // Create the accessory buttons
+        LayoutInflater inflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewGroup container = mZoomButtonsController.getContainer();
+        inflater.inflate(com.android.internal.R.layout.zoom_browser_accessory_buttons, container);
+        mZoomOverviewButton =
+                (ImageView) container.findViewById(com.android.internal.R.id.zoom_page_overview);
+        mZoomOverviewButton.setOnClickListener(
+            new View.OnClickListener() {
+                public void onClick(View v) {
+                    mZoomButtonsController.setVisible(false);
+                    zoomScrollOut();
+                    if (mLogEvent) {
+                        Checkin.updateStats(mContext.getContentResolver(),
+                                Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
+                    }
+                }
+            });
+        mZoomFitPageButton =
+                (ImageView) container.findViewById(com.android.internal.R.id.zoom_fit_page);
+        mZoomFitPageButton.setOnClickListener(
+            new View.OnClickListener() {
+                public void onClick(View v) {
+                    zoomWithPreview(1f);
+                    updateZoomButtonsEnabled();
+                }
+            });
+    }
+
+    private void updateZoomButtonsEnabled() {
+        mZoomButtonsController.setZoomInEnabled(mActualScale < mMaxZoomScale);
+        mZoomButtonsController.setZoomOutEnabled(mActualScale > mMinZoomScale);
+        mZoomFitPageButton.setEnabled(mActualScale != 1);
+        mZoomOverviewButton.setEnabled(canZoomScrollOut());
     }
 
     private void init() {
@@ -647,9 +611,16 @@ public class WebView extends AbsoluteLayout
         final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
-        final int doubleTapslop = ViewConfiguration.get(getContext())
-                .getScaledDoubleTapSlop();
+        // use twice the line height, 32 based on our current default font, for
+        // the double tap slop as the ViewConfiguration's double tap slop, 100,
+        // is too big for the Browser
+        final int doubleTapslop = (int) (32 * getContext().getResources()
+                .getDisplayMetrics().density);
         mDoubleTapSlopSquare = doubleTapslop * doubleTapslop;
+        // use one line height, 16 based on our current default font, for how
+        // far we allow a touch be away from the edge of a link
+        mNavSlop = (int) (16 * getContext().getResources()
+                .getDisplayMetrics().density);
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -1380,13 +1351,7 @@ public class WebView extends AbsoluteLayout
             return;
         }
         clearTextEntry();
-        ExtendedZoomControls zoomControls = (ExtendedZoomControls) 
-                getZoomControls();
-        zoomControls.show(true, canZoomScrollOut());
-        zoomControls.requestFocus();
-        mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-        mPrivateHandler.postDelayed(mZoomControlRunnable,
-                ZOOM_CONTROLS_TIMEOUT);
+        mZoomButtonsController.setVisible(true);
     }
 
     /**
@@ -1498,7 +1463,8 @@ public class WebView extends AbsoluteLayout
     private static int pinLoc(int x, int viewMax, int docMax) {
 //        Log.d(LOGTAG, "-- pinLoc " + x + " " + viewMax + " " + docMax);
         if (docMax < viewMax) {   // the doc has room on the sides for "blank"
-            x = -(viewMax - docMax) >> 1;
+            // pin the short document to the top/left of the screen
+            x = 0;
 //            Log.d(LOGTAG, "--- center " + x);
         } else if (x < 0) {
             x = 0;
@@ -2589,11 +2555,8 @@ public class WebView extends AbsoluteLayout
     private void startZoomScrollOut() {
         setHorizontalScrollBarEnabled(false);
         setVerticalScrollBarEnabled(false);
-        if (mZoomControlRunnable != null) {
-            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-        }
-        if (mZoomControls != null) {
-            mZoomControls.hide();
+        if (mZoomButtonsController.isVisible()) {
+            mZoomButtonsController.setVisible(false);
         }
         int width = getViewWidth();
         int height = getViewHeight();
@@ -3263,6 +3226,7 @@ public class WebView extends AbsoluteLayout
 
         // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
+        ZoomButtonsController.finishZoomTutorial(mContext, false);
     }
     
     // Implementation for OnHierarchyChangeListener
@@ -3518,22 +3482,29 @@ public class WebView extends AbsoluteLayout
                     nativeMoveSelection(viewToContent(mSelectX)
                             , viewToContent(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
-                } else if (!ZoomButtonsController.useOldZoom(mContext) &&
-                        mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP) &&
-                        (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare)) {
-                    // Found doubletap, invoke the zoom controller
+                } else if (!ZoomButtonsController.useOldZoom(mContext)
+                        && mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-                    int contentX = viewToContent((int) mLastTouchX + mScrollX);
-                    int contentY = viewToContent((int) mLastTouchY + mScrollY);
-                    if (inEditingMode()) {
-                        mTextEntry.updateCachedTextfield();
+                    if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
+                        // Found doubletap, invoke the zoom controller
+                        int contentX = viewToContent((int) mLastTouchX
+                                + mScrollX);
+                        int contentY = viewToContent((int) mLastTouchY
+                                + mScrollY);
+                        if (inEditingMode()) {
+                            mTextEntry.updateCachedTextfield();
+                        }
+                        nativeClearFocus(contentX, contentY);
+                        if (mLogEvent) {
+                            EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
+                                    (eventTime - mLastTouchUpTime), eventTime);
+                        }
+                        return mZoomButtonsController.handleDoubleTapEvent(ev);
+                    } else {
+                        // commit the short press action
+                        doShortPress();
+                        // continue, mTouchMode should be still TOUCH_INIT_MODE
                     }
-                    nativeClearFocus(contentX, contentY);
-                    if (mLogEvent) {
-                        EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
-                                (eventTime - mLastTouchUpTime), eventTime);
-                    }
-                    return mZoomButtonsController.handleDoubleTapEvent(ev);
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
@@ -3678,20 +3649,6 @@ public class WebView extends AbsoluteLayout
                     mLastTouchTime = eventTime;
                     mUserScroll = true;
                 }
-
-                if (ZoomButtonsController.useOldZoom(mContext)) {
-                    boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
-                    boolean showMagnify = canZoomScrollOut();
-                    if (mZoomControls != null && (showPlusMinus || showMagnify)) {
-                        if (mZoomControls.getVisibility() == View.VISIBLE) {
-                            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                        } else {
-                            mZoomControls.show(showPlusMinus, showMagnify);
-                        }
-                        mPrivateHandler.postDelayed(mZoomControlRunnable,
-                                ZOOM_CONTROLS_TIMEOUT);
-                    }
-                }
                 if (done) {
                     // return false to indicate that we can't pan out of the
                     // view space
@@ -3706,8 +3663,7 @@ public class WebView extends AbsoluteLayout
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         if (getSettings().supportZoom()) {
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP,
-                                            new Boolean(true)),
+                                    .obtainMessage(RELEASE_SINGLE_TAP),
                                     DOUBLE_TAP_TIMEOUT);
                         } else {
                             // do short press now
@@ -3755,8 +3711,7 @@ public class WebView extends AbsoluteLayout
                             // as tap instead of short press.
                             mTouchMode = TOUCH_INIT_MODE;
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP,
-                                            new Boolean(true)),
+                                    .obtainMessage(RELEASE_SINGLE_TAP),
                                     DOUBLE_TAP_TIMEOUT);
                         } else {
                             mTouchMode = TOUCH_DONE_MODE;
@@ -4178,42 +4133,41 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * An InvisibleView is an invisible, zero-sized View for backwards
+     * compatibility
+     */
+    private final class InvisibleView extends View {
+
+        private InvisibleView(Context context) {
+            super(context);
+            setVisibility(GONE);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            setMeasuredDimension(0, 0);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+        }
+
+        @Override
+        protected void dispatchDraw(Canvas canvas) {
+        }
+    }
+
+    /**
      * Returns a view containing zoom controls i.e. +/- buttons. The caller is
      * in charge of installing this view to the view hierarchy. This view will
      * become visible when the user starts scrolling via touch and fade away if
      * the user does not interact with it.
+     * <p/>
+     * From 1.5, WebView change to use ZoomButtonsController. This will return
+     * an invisible dummy view for backwards compatibility.
      */
     public View getZoomControls() {
-        if (!getSettings().supportZoom()) {
-            Log.w(LOGTAG, "This WebView doesn't support zoom.");
-            return null;
-        }
-        if (mZoomControls == null) {
-            mZoomControls = createZoomControls();
-            
-            /*
-             * need to be set to VISIBLE first so that getMeasuredHeight() in
-             * {@link #onSizeChanged()} can return the measured value for proper
-             * layout.
-             */
-            mZoomControls.setVisibility(View.VISIBLE);
-            mZoomControlRunnable = new Runnable() {
-                public void run() {
-                    
-                    /* Don't dismiss the controls if the user has
-                     * focus on them. Wait and check again later.
-                     */
-                    if (!mZoomControls.hasFocus()) {
-                        mZoomControls.hide();
-                    } else {
-                        mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                        mPrivateHandler.postDelayed(mZoomControlRunnable,
-                                ZOOM_CONTROLS_TIMEOUT);
-                    }
-                }
-            };
-        }
-        return mZoomControls;
+        return new InvisibleView(mContext);
     }
 
     /**
@@ -4236,46 +4190,6 @@ public class WebView extends AbsoluteLayout
         return zoomWithPreview(mActualScale * 0.8f);
     }
 
-    private ExtendedZoomControls createZoomControls() {
-        ExtendedZoomControls zoomControls = new ExtendedZoomControls(mContext
-            , null);
-        zoomControls.setOnZoomInClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // reset time out
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomIn();
-            }
-        });
-        zoomControls.setOnZoomOutClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // reset time out
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomOut();
-            }
-        });
-        zoomControls.setOnZoomMagnifyClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomScrollOut();
-            }
-        });
-        return zoomControls;
-    }
-
-    // This used to be the value returned by ViewConfiguration.getTouchSlop().
-    // We pass this to the navigation cache to find where the user clicked.
-    // TouchSlop has been increased for other purposes, but for the
-    // navigation cache it is too big, and may result in clicking the wrong
-    // spot.  This is a concern when the cache is out of date, and clicking
-    // finds a node which is wrong but nearby.
-    private static final int NAV_SLOP = 12;
-
     private void updateSelection() {
         if (mNativeClass == 0) {
             return;
@@ -4283,9 +4197,8 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        int contentSize = NAV_SLOP;
-        Rect rect = new Rect(contentX - contentSize, contentY - contentSize,
-                contentX + contentSize, contentY + contentSize);
+        Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
+                contentX + mNavSlop, contentY + mNavSlop);
         // If we were already focused on a textfield, update its cache.
         if (inEditingMode()) {
             mTextEntry.updateCachedTextfield();
@@ -4298,8 +4211,7 @@ public class WebView extends AbsoluteLayout
             View v = mTextEntry;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
-            int contentSize = NAV_SLOP;
-            nativeMotionUp(x, y, contentSize, true);
+            nativeMotionUp(x, y, mNavSlop, true);
         }
     }
 
@@ -4311,8 +4223,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        int contentSize = NAV_SLOP;
-        if (nativeMotionUp(contentX, contentY, contentSize, true)) {
+        if (nativeMotionUp(contentX, contentY, mNavSlop, true)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
                         Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
@@ -4538,9 +4449,7 @@ public class WebView extends AbsoluteLayout
                 }
                 case RELEASE_SINGLE_TAP: {
                     mTouchMode = TOUCH_DONE_MODE;
-                    if ((Boolean)msg.obj) {
-                        doShortPress();
-                    }
+                    doShortPress();
                     break;
                 }
                 case SWITCH_TO_ENTER:

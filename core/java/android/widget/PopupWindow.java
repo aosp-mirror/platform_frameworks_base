@@ -837,7 +837,7 @@ public class PopupWindow {
         if (!mTouchable) {
             curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
-        if (mTouchable) {
+        if (mOutsideTouchable) {
             curFlags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
         if (!mClippingEnabled) {

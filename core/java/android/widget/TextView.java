@@ -3242,6 +3242,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             };
             mPopup.setFocusable(false);
+            // The user is entering text, so the input method is needed.  We
+            // don't want the popup to be displayed on top of it.
+            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         }
 
         TextView tv = (TextView) mPopup.getContentView();

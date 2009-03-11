@@ -1,7 +1,0 @@
-<gadget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="150dp"
-    android:minHeight="150dp"
-    android:updatePeriodMillis="2000"
-    android:initialLayout="@layout/test_gadget"
-    >
-</gadget-provider>

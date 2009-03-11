@@ -1511,8 +1511,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     @ViewDebug.ExportedProperty
     int mUserPaddingBottom;
 
-    private int mOldWidthMeasureSpec = Integer.MIN_VALUE;
-    private int mOldHeightMeasureSpec = Integer.MIN_VALUE;
+    /**
+     * @hide
+     */
+    int mOldWidthMeasureSpec = Integer.MIN_VALUE;
+    /**
+     * @hide
+     */
+    int mOldHeightMeasureSpec = Integer.MIN_VALUE;
 
     private Resources mResources = null;
 
@@ -2661,9 +2667,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @attr ref android.R.styleable#View_visibility
      */
     @ViewDebug.ExportedProperty(mapping = {
-        @ViewDebug.IntToString(from = 0, to = "VISIBLE"),
-        @ViewDebug.IntToString(from = 4, to = "INVISIBLE"),
-        @ViewDebug.IntToString(from = 8, to = "GONE")
+        @ViewDebug.IntToString(from = VISIBLE,   to = "VISIBLE"),
+        @ViewDebug.IntToString(from = INVISIBLE, to = "INVISIBLE"),
+        @ViewDebug.IntToString(from = GONE,      to = "GONE")
     })
     public int getVisibility() {
         return mViewFlags & VISIBILITY_MASK;
@@ -3291,8 +3297,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * when ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW) is set
      */
     private static void captureViewInfo(String subTag, View v) {
-        if (v == null ||
-           SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW, 0) == 0) {
+        if (v == null || SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW, 0) == 0) {
             return;
         }
         ViewDebug.dumpCapturedView(subTag, v);

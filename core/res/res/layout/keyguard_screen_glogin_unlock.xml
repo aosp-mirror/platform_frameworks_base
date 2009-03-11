@@ -20,7 +20,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="#A0000000"
+    android:background="@android:color/background_dark"
         >
     <ScrollView
         android:layout_width="fill_parent"
@@ -35,10 +35,11 @@
             <TextView 
                 android:id="@+id/topHeader"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="64dip"
                 android:layout_alignParentTop="true"
-                android:textSize="24sp"
-                android:layout_marginTop="8dip"
+                android:layout_marginLeft="4dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:gravity="center_vertical"
                 android:drawableLeft="@drawable/ic_lock_idle_lock"
                 android:drawablePadding="5dip"
                 android:text="@android:string/lockscreen_glogin_too_many_attempts"
@@ -50,8 +51,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="1dip"
                 android:layout_below="@id/topHeader"
-                android:layout_marginTop="8dip"
-                android:background="@android:drawable/divider_horizontal_bright"/>
+                android:background="@drawable/divider_horizontal_dark"/>
         
             <TextView
                 android:id="@+id/instructions"
@@ -59,8 +59,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/spacerTop"
                 android:layout_marginTop="8dip"
-                android:gravity="center"
-                android:textSize="18sp"
+                android:layout_marginLeft="9dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@android:string/lockscreen_glogin_instructions"
                 />
         
@@ -70,6 +70,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/instructions"
                 android:layout_marginTop="8dip"
+                android:layout_marginLeft="7dip"
+                android:layout_marginRight="7dip"
                 android:hint="@android:string/lockscreen_glogin_username_hint"
                 android:inputType="textEmailAddress"
                 />
@@ -79,7 +81,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/login"
-                android:layout_marginTop="8dip"
+                android:layout_marginTop="15dip"
+                android:layout_marginLeft="7dip"
+                android:layout_marginRight="7dip"
                 android:inputType="textPassword"
                 android:hint="@android:string/lockscreen_glogin_password_hint"
                 android:nextFocusRight="@+id/ok"
@@ -89,38 +93,35 @@
             <!-- ok below password, aligned to right of screen -->
             <Button
                 android:id="@+id/ok"
-                android:layout_width="wrap_content"
+                android:layout_width="85dip"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/password"
-                android:layout_marginTop="8dip"
+                android:layout_marginTop="7dip"
+                android:layout_marginRight="7dip"
                 android:layout_alignParentRight="true"
-                android:textSize="18sp"
                 android:text="@android:string/lockscreen_glogin_submit_button"
                 />
         
         </RelativeLayout>
     </ScrollView>
     
-    <View android:layout_width="1dp" android:layout_height="3dp" />
-    
+    <!-- spacer above emergency call -->
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:layout_marginBottom="4dip"
+
+        android:background="@drawable/divider_horizontal_dark"/>
+
     <!-- emergency call button at bottom center -->
     <Button
         android:id="@+id/emergencyCall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="0"
-        android:textSize="18sp"
         android:drawableLeft="@drawable/ic_emergency"
         android:drawablePadding="3dip"
         android:text="@android:string/lockscreen_emergency_call"
         />
 
-    <!-- spacer above emergency call (doesn't fit in landscape...)-->
-    <!--View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:layout_above="@id/emergencyCall"
-        android:layout_marginBottom="8dip"
-        android:background="@android:drawable/divider_horizontal_bright"/-->
 </LinearLayout>

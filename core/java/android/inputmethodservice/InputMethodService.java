@@ -1398,10 +1398,17 @@ public class InputMethodService extends AbstractInputMethodService {
             int newSelStart, int newSelEnd,
             int candidatesStart, int candidatesEnd) {
         final ExtractEditText eet = mExtractEditText;
-        if (eet != null && mExtractedText != null) {
+        if (eet != null && isFullscreenMode() && mExtractedText != null) {
             final int off = mExtractedText.startOffset;
             eet.startInternalChanges();
-            eet.setSelection(newSelStart-off, newSelEnd-off);
+            newSelStart -= off;
+            newSelEnd -= off;
+            final int len = eet.getText().length();
+            if (newSelStart < 0) newSelStart = 0;
+            else if (newSelStart > len) newSelStart = len;
+            if (newSelEnd < 0) newSelEnd = 0;
+            else if (newSelEnd > len) newSelEnd = len;
+            eet.setSelection(newSelStart, newSelEnd);
             eet.finishInternalChanges();
         }
     }

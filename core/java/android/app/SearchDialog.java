@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -125,7 +126,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
     // support for AutoCompleteTextView suggestions display
     private SuggestionsAdapter mSuggestionsAdapter;
-
+    private Handler mHandler = new Handler();
+    private Runnable mInstallSuggestionAdapter = new Runnable() {
+        public void run() {
+            if (mSearchTextField != null) {
+                mSearchTextField.setAdapter(mSuggestionsAdapter);
+            }
+        }
+    };
 
     /**
      * Constructor - fires it up and makes it look like the search UI.
@@ -253,7 +261,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mSearchTextField.setAdapter(mSuggestionsAdapter);
             mSearchTextField.setText(initialQuery);
         } else {
-            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable);
+            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable,
+                    mHandler, mInstallSuggestionAdapter);
             mSearchTextField.setAdapter(mSuggestionsAdapter);
 
             // finally, load the user's initial text (which may trigger suggestions)
@@ -1296,10 +1305,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // These private variables are shared by the filter thread and must be protected
         private WeakReference<Cursor> mRecentCursor = new WeakReference<Cursor>(null);
         private boolean mNonUserQuery = false;
+        private Handler mHandler;
+        private Runnable mInstallSuggestionAdapter;
 
-        public SuggestionsAdapter(Context context, SearchableInfo searchable) {
+        public SuggestionsAdapter(Context context, SearchableInfo searchable,
+                Handler handler, Runnable installSuggestionAdapter) {
             super(context, -1, null, null, null);
             mSearchable = searchable;
+            mHandler = handler;
+            mInstallSuggestionAdapter = installSuggestionAdapter;
             
             // set up provider resources (gives us icons, etc.)
             Context activityContext = mSearchable.getActivityContext(mContext);
@@ -1414,7 +1428,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
                 // Now actually set up the cursor, columns, and the list view
                 changeCursorAndColumns(c, from, to);
-                setViewResource(layout);              
+                setViewResource(layout);          
+                // Force the underlying ListView to discard and reload all layouts
+                // (Note, this could be optimized for cases where layout/cursor remain same)
+                mHandler.post(mInstallSuggestionAdapter);
+
             } else {
                 // Provide some help for developers instead of just silently discarding
                 Log.w(LOG_TAG, "Suggestions cursor discarded due to missing required columns.");

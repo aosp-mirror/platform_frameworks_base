@@ -525,7 +525,6 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_INFO}
  *     <li> {@link #CATEGORY_HOME}
  *     <li> {@link #CATEGORY_PREFERENCE}
- *     <li> {@link #CATEGORY_GADGET}
  *     <li> {@link #CATEGORY_TEST}
  * </ul>
  *
@@ -1544,12 +1543,6 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_TAB = "android.intent.category.TAB";
     /**
-     * This activity can be embedded inside of another activity that is hosting
-     * gadgets.
-     */
-    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
-    public static final String CATEGORY_GADGET = "android.intent.category.GADGET";
-    /**
      * Should be displayed in the top-level launcher.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
@@ -1579,9 +1572,6 @@ public class Intent implements Parcelable {
     public static final String CATEGORY_DEVELOPMENT_PREFERENCE = "android.intent.category.DEVELOPMENT_PREFERENCE";
     /**
      * Capable of running inside a parent activity container.
-     *
-     * <p>Note: being removed in favor of more explicit categories such as
-     * CATEGORY_GADGET
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_EMBED = "android.intent.category.EMBED";

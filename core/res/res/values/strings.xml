@@ -1184,7 +1184,7 @@
     <!-- Title of the unlock screen that uses your Google login and password -->
     <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts!</string>
     <!-- In the unlock screen, message telling the user that they need to use their Google login and password to unlock the phone -->
-    <string name="lockscreen_glogin_instructions">To unlock,\nsign in with your Google account</string>
+    <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account</string>
     <!-- Hint caption for the username field when unlocking the phone using login and password -->
     <string name="lockscreen_glogin_username_hint">Username (email)</string>
     <!-- Hint caption for the password field when unlocking the phone using login and password -->

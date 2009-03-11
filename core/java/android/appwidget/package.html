@@ -1,0 +1,136 @@
+<body>
+<p>Android allows applications to publish views to be embedded in other applications.  These
+views are called widgets, and are published by "AppWidget providers."  The component that can
+contain widgets is called a "AppWidget host."
+</p>
+<h3><a href="package-descr.html#providers">AppWidget Providers</a></h3>
+<ul>
+  <li><a href="package-descr.html#provider_manifest">Declaring a widget in the AndroidManifest</a></li>
+  <li><a href="package-descr.html#provider_meta_data">Adding the AppWidgetProviderInfo meta-data</a></li>
+  <li><a href="package-descr.html#provider_AppWidgetProvider">Using the AppWidgetProvider class</a></li>
+  <li><a href="package-descr.html#provider_configuration">AppWidget Configuration UI</a></li>
+  <li><a href="package-descr.html#provider_broadcasts">AppWidget Broadcast Intents</a></li>
+</ul>
+<h3><a href="package-descr.html#">AppWidget Hosts</a></h3>
+
+
+{@more}
+
+
+<h2><a name="providers"></a>AppWidget Providers</h2>
+<p>
+Any application can publish widgets.  All an application needs to do to publish a widget is
+to have a {@link android.content.BroadcastReceiver} that receives the {@link
+android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} intent,
+and provide some meta-data about the widget.  Android provides the
+{@link android.appwidget.AppWidgetProvider} class, which extends BroadcastReceiver, as a convenience
+class to aid in handling the broadcasts.
+
+<h3><a name="provider_manifest"></a>Declaring a widget in the AndroidManifest</h3>
+
+<p>
+First, declare the {@link android.content.BroadcastReceiver} in your application's
+<code>AndroidManifest.xml</code> file.
+
+{@sample frameworks/base/tests/appwidgets/AppWidgetHostTest/AndroidManifest.xml AppWidgetProvider}
+
+<p>
+The <b><code>&lt;receiver&gt;</b> element has the following attributes:
+<ul>
+  <li><b><code>android:name</code> -</b> which specifies the
+        {@link android.content.BroadcastReceiver} or {@link android.appwidget.AppWidgetProvider}
+        class.</li>
+  <li><b><code>android:label</code> -</b> which specifies the string resource that
+        will be shown by the widget picker as the label.</li>
+  <li><b><code>android:icon</code> -</b> which specifies the drawable resource that
+        will be shown by the widget picker as the icon.</li>
+</ul>
+
+<p>
+The <b><code>&lt;intent-filter&gt;</b> element tells the {@link android.content.pm.PackageManager}
+that this {@link android.content.BroadcastReceiver} receives the {@link
+android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} broadcast.
+The widget manager will send other broadcasts directly to your widget provider as required.
+It is only necessary to explicitly declare that you accept the {@link
+android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} broadcast.
+
+<p>
+The <b><code>&lt;meta-data&gt;</code></b> element tells the widget manager which xml resource to
+read to find the {@link android.appwidget.AppWidgetProviderInfo} for your widget provider.  It has the following
+attributes:
+<ul>
+  <li><b><code>android:name="android.appwidget.provider"</code> -</b> identifies this meta-data
+        as the {@link android.appwidget.AppWidgetProviderInfo} descriptor.</li>
+  <li><b><code>android:resource</code> -</b> is the xml resource to use as that descriptor.</li>
+</ul>
+
+
+<h3><a name="provider_meta_data"></a>Adding the {@link android.appwidget.AppWidgetProviderInfo AppWidgetProviderInfo} meta-data</h3>
+
+<p>
+For a widget, the values in the {@link android.appwidget.AppWidgetProviderInfo} structure are supplied
+in an XML resource.  In the example above, the xml resource is referenced with
+<code>android:resource="@xml/appwidget_info"</code>.  That XML file would go in your application's
+directory at <code>res/xml/appwidget_info.xml</code>.  Here is a simple example.
+
+{@sample frameworks/base/tests/appwidgets/AppWidgetHostTest/res/xml/appwidget_info.xml AppWidgetProviderInfo}
+
+<p>
+The attributes are as documented in the {@link android.appwidget.AppWidgetProviderInfo GagetInfo} class.  (86400000 milliseconds means once per day)
+
+
+<h3><a name="provider_AppWidgetProvider"></a>Using the {@link android.appwidget.AppWidgetProvider AppWidgetProvider} class</h3>
+
+<p>The AppWidgetProvider class is the easiest way to handle the widget provider intent broadcasts.
+See the <code>src/com/example/android/apis/appwidget/ExampleAppWidgetProvider.java</code>
+sample class in ApiDemos for an example.
+
+<p class="note">Keep in mind that since the the AppWidgetProvider is a BroadcastReceiver,
+your process is not guaranteed to keep running after the callback methods return.  See
+<a href="../../../guide/topics/fundamentals.html#broadlife">Application Fundamentals &gt;
+Broadcast Receiver Lifecycle</a> for more information.
+
+
+
+<h3><a name="provider_configuration"></a>AppWidget Configuration UI</h3>
+
+<p>
+Widget hosts have the ability to start a configuration activity when a widget is instantiated.
+The activity should be declared as normal in AndroidManifest.xml, and it should be listed in
+the AppWidgetProviderInfo XML file in the <code>android:configure</code> attribute.
+
+<p>The activity you specified will be launched with the {@link
+android.appwidget.AppWidgetManager#ACTION_APPWIDGET_CONFIGURE} action.  See the documentation for that
+action for more info.
+
+<p>See the <code>src/com/example/android/apis/appwidget/ExampleAppWidgetConfigure.java</code>
+sample class in ApiDemos for an example.
+
+
+
+<h3><a name="providers_broadcasts"></a>AppWidget Broadcast Intents</h3>
+
+<p>{@link android.appwidget.AppWidgetProvider} is just a convenience class.  If you would like
+to receive the widget broadcasts directly, you can.  The four intents you need to care about are:
+<ul>
+  <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE}</li>
+  <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_DELETED}</li>
+  <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_ENABLED}</li>
+  <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_DISABLED}</li>
+</ul>
+
+<p>By way of example, the implementation of
+{@link android.appwidget.AppWidgetProvider#onReceive} is quite simple:</p>
+
+{@sample frameworks/base/core/java/android/appwidget/AppWidgetProvider.java onReceive}
+
+
+<h2>AppWidget Hosts</h3>
+<p>Widget hosts are the containers in which widgets can be placed.  Most of the look and feel
+details are left up to the widget hosts.  For example, the home screen has one way of viewing
+widgets, but the lock screen could also contain widgets, and it would have a different way of
+adding, removing and otherwise managing widgets.</p>
+<p>For more information on implementing your own widget host, see the
+{@link android.appwidget.AppWidgetHost AppWidgetHost} class.</p>
+</body>
+

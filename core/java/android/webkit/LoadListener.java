@@ -376,6 +376,11 @@ class LoadListener extends Handler implements EventHandler {
                 }
             }
         }
+
+        // if there is buffered data, commit them in the end
+        boolean needToCommit = mAuthHeader != null && !mustAuthenticate
+                && mNativeLoader != 0 && !mDataBuilder.isEmpty();
+
         // it is only here that we can reset the last mAuthHeader object
         // (if existed) and start a new one!!!
         mAuthHeader = null;
@@ -410,6 +415,10 @@ class LoadListener extends Handler implements EventHandler {
             }
         }
         commitHeadersCheckRedirect();
+
+        if (needToCommit) {
+            commitLoad();
+        }
     }
 
     /**

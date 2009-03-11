@@ -1423,7 +1423,42 @@ public class Contacts {
          */
         public static final String ATTACH_IMAGE =
                 "com.android.contacts.action.ATTACH_IMAGE";
-        
+
+        /**
+         * Takes as input a data URI with a mailto: or tel: scheme. If a single
+         * contact exists with the given data it will be shown. If no contact
+         * exists, a dialog will ask the user if they want to create a new
+         * contact with the provided details filled in. If multiple contacts
+         * share the data the user will be prompted to pick which contact they
+         * want to view.
+         * <p>
+         * For <code>mailto:</code> URIs, the scheme specific portion must be a
+         * raw email address, such as one built using
+         * {@link Uri#fromParts(String, String, String)}.
+         * <p>
+         * For <code>tel:</code> URIs, the scheme specific portion is compared
+         * to existing numbers using the standard caller ID lookup algorithm.
+         * The number must be properly encoded, for example using
+         * {@link Uri#fromParts(String, String, String)}.
+         * <p>
+         * Any extras from the {@link Insert} class will be passed along to the
+         * create activity if there are no contacts to show.
+         * <p>
+         * Passing true for the {@link #EXTRA_FORCE_CREATE} extra will skip
+         * prompting the user when the contact doesn't exist.
+         */
+        public static final String SHOW_OR_CREATE_CONTACT =
+                "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
+
+        /**
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new contact if no matching
+         * contact found.  Otherwise, default behavior is to prompt user with dialog before creating.
+         *
+         * <P>Type: BOOLEAN</P>
+         */
+        public static final String EXTRA_FORCE_CREATE =
+                "com.android.contacts.action.FORCE_CREATE";
+
         /**
          * Intents related to the Contacts app UI.
          */

@@ -298,8 +298,10 @@ public class QwertyKeyListener extends BaseKeyListener {
                 content.removeSpan(repl[0]);
 
                 // only cancel the autocomplete if the cursor is at the end of
-                // the replaced span
-                if (selStart == en) {
+                // the replaced span (or after it, because the user is
+                // backspacing over the space after the word, not the word
+                // itself).
+                if (selStart >= en) {
                     content.setSpan(TextKeyListener.INHIBIT_REPLACEMENT,
                                     en, en, Spannable.SPAN_POINT_POINT);
                     content.replace(st, en, old);

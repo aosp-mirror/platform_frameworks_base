@@ -924,13 +924,13 @@
         android:description="@string/permdesc_batteryStats"
         android:protectionLevel="normal" />
 
-    <!-- Allows an application to tell the gadget service which application
-         can access gadget's data.  The normal user flow is that a user
-         picks a gadget to go into a particular host, thereby giving that
-         host application access to the private data from the gadget app.
+    <!-- Allows an application to tell the AppWidget service which application
+         can access AppWidget's data.  The normal user flow is that a user
+         picks an AppWidget to go into a particular host, thereby giving that
+         host application access to the private data from the AppWidget app.
          An application that has this permission should honor that contract.
          Very few applications should need to use this permission. -->
-    <permission android:name="android.permission.BIND_GADGET"
+    <permission android:name="android.permission.BIND_APPWIDGET"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_bindGadget"
         android:description="@string/permdesc_bindGadget"

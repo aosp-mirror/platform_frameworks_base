@@ -44,7 +44,7 @@
             android:background="@android:drawable/keyboard_accessory_bg_landscape"
         >
         
-        <Button android:id="@+id/inputExtractAction"
+        <android.inputmethodservice.ExtractButton android:id="@+id/inputExtractAction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

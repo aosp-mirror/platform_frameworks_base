@@ -302,15 +302,15 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
 
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
-        public boolean onError(MediaPlayer mp, int a, int b) {
-            Log.d(TAG, "Error: " + a + "," + b);
+        public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
+            Log.d(TAG, "Error: " + framework_err + "," + impl_err);
             if (mMediaController != null) {
                 mMediaController.hide();
             }
 
             /* If an error handler has been supplied, use it and finish. */
             if (mOnErrorListener != null) {
-                if (mOnErrorListener.onError(mMediaPlayer, a, b)) {
+                if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
                     return true;
                 }
             }
@@ -322,9 +322,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
              */
             if (getWindowToken() != null) {
                 Resources r = mContext.getResources();
+                int messageId;
+
+                if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+                    messageId = com.android.internal.R.string.VideoView_error_text_invalid_progressive_playback;
+                } else {
+                    messageId = com.android.internal.R.string.VideoView_error_text_unknown;
+                }
+
                 new AlertDialog.Builder(mContext)
                         .setTitle(com.android.internal.R.string.VideoView_error_title)
-                        .setMessage(com.android.internal.R.string.VideoView_error_text_unknown)
+                        .setMessage(messageId)
                         .setPositiveButton(com.android.internal.R.string.VideoView_error_button,
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {

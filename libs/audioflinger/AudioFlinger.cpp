@@ -119,7 +119,8 @@ static bool settingsAllowed() {
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
         mAudioHardware(0), mA2dpAudioInterface(0), mA2dpEnabled(false), mNotifyA2dpChange(false),
-        mForcedSpeakerCount(0), mForcedRoute(0), mRouteRestoreTime(0), mMusicMuteSaved(false)
+        mForcedSpeakerCount(0), mA2dpDisableCount(0), mA2dpSuppressed(false), mForcedRoute(0),
+        mRouteRestoreTime(0), mMusicMuteSaved(false)
 {
     mHardwareStatus = AUDIO_HW_IDLE;
     mAudioHardware = AudioHardwareInterface::create();
@@ -166,7 +167,7 @@ AudioFlinger::AudioFlinger()
         setMasterMute(false);
 
         // Start record thread
-        mAudioRecordThread = new AudioRecordThread(mAudioHardware);
+        mAudioRecordThread = new AudioRecordThread(mAudioHardware, this);
         if (mAudioRecordThread != 0) {
             mAudioRecordThread->run("AudioRecordThread", PRIORITY_URGENT_AUDIO);            
         }
@@ -240,6 +241,12 @@ bool AudioFlinger::streamForcedToSpeaker(int streamType)
     return (streamType == AudioSystem::RING ||
             streamType == AudioSystem::ALARM ||
             streamType == AudioSystem::NOTIFICATION);
+}
+
+bool AudioFlinger::streamDisablesA2dp(int streamType)
+{
+    return (streamType == AudioSystem::VOICE_CALL ||
+            streamType == AudioSystem::BLUETOOTH_SCO);
 }
 
 status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
@@ -482,7 +489,11 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
         if (routes & AudioSystem::ROUTE_BLUETOOTH_A2DP) {
             enableA2dp = true;
         }
-        setA2dpEnabled_l(enableA2dp);
+        if (mA2dpDisableCount > 0) {
+            mA2dpSuppressed = enableA2dp;
+        } else {
+            setA2dpEnabled_l(enableA2dp);
+        }
         LOGV("setOutput done\n");
     }
 #endif
@@ -798,9 +809,9 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
                 if (--mForcedSpeakerCount == 0) {
                     mRouteRestoreTime = systemTime() + milliseconds(kStopSleepTime/1000);
                 }
-                LOGV("mForcedSpeakerCount decremented to %d", mForcedSpeakerCount);            
+                LOGV("mForcedSpeakerCount decremented to %d", mForcedSpeakerCount);
             } else {
-                LOGE("mForcedSpeakerCount is already zero");            
+                LOGE("mForcedSpeakerCount is already zero");
             }
         }
         break;
@@ -825,6 +836,41 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
     }
 }
 
+#ifdef WITH_A2DP
+void AudioFlinger::handleStreamDisablesA2dp(int command)
+{
+    switch(command) {
+    case ACTIVE_TRACK_ADDED:
+        {
+            AutoMutex lock(mHardwareLock);
+            if (mA2dpDisableCount++ == 0) {
+                if (mA2dpEnabled) {
+                    setA2dpEnabled_l(false);
+                    mA2dpSuppressed = true;
+                }
+            }
+            LOGV("mA2dpDisableCount incremented to %d", mA2dpDisableCount);
+        }
+        break;
+    case ACTIVE_TRACK_REMOVED:
+        {
+            AutoMutex lock(mHardwareLock);
+            if (mA2dpDisableCount > 0){
+                if (--mA2dpDisableCount == 0) {
+                    if (mA2dpSuppressed) {
+                        setA2dpEnabled_l(true);
+                        mA2dpSuppressed = false;
+                    }
+                }
+                LOGV("mA2dpDisableCount decremented to %d", mA2dpDisableCount);
+            } else {
+                LOGE("mA2dpDisableCount is already zero");
+            }
+        }
+        break;
+    }
+}
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -1455,6 +1501,11 @@ void AudioFlinger::MixerThread::addActiveTrack_l(const wp<Track>& t)
         if (streamForcedToSpeaker(track->type())) {
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_ADDED);
         }        
+#ifdef WITH_A2DP
+        if (streamDisablesA2dp(track->type())) {
+            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_ADDED);
+        }
+#endif
     }
 }
 
@@ -1472,6 +1523,11 @@ void AudioFlinger::MixerThread::removeActiveTrack_l(const wp<Track>& t)
         if (streamForcedToSpeaker(track->type())) {
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_REMOVED);
         }
+#ifdef WITH_A2DP
+        if (streamDisablesA2dp(track->type())) {
+            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_REMOVED);
+        }
+#endif
     }
 }
 
@@ -2311,8 +2367,10 @@ status_t AudioFlinger::RecordHandle::onTransact(
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::AudioRecordThread::AudioRecordThread(AudioHardwareInterface* audioHardware) :
+AudioFlinger::AudioRecordThread::AudioRecordThread(AudioHardwareInterface* audioHardware,
+            const sp<AudioFlinger>& audioFlinger) :
     mAudioHardware(audioHardware),
+    mAudioFlinger(audioFlinger),
     mActive(false)
 {
 }
@@ -2417,6 +2475,12 @@ status_t AudioFlinger::AudioRecordThread::start(MixerThread::RecordTrack* record
 
     mRecordTrack = recordTrack;
 
+#ifdef WITH_A2DP
+    if (streamDisablesA2dp(recordTrack->type())) {
+        mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_ADDED);
+    }
+#endif
+
     // signal thread to start
     LOGV("Signal record thread");
     mWaitWorkCV.signal();
@@ -2429,6 +2493,11 @@ void AudioFlinger::AudioRecordThread::stop(MixerThread::RecordTrack* recordTrack
     LOGV("AudioRecordThread::stop");
     AutoMutex lock(&mLock);
     if (mActive && (recordTrack == mRecordTrack.get())) {
+#ifdef WITH_A2DP
+        if (streamDisablesA2dp(recordTrack->type())) {
+            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_REMOVED);
+        }
+#endif
         mActive = false;
         mStopped.wait(mLock);
     }

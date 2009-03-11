@@ -271,11 +271,6 @@ final class WebViewCore {
     static native String nativeFindAddress(String addr);
 
     /**
-     * Rebuild the nav cache if the dom changed.
-     */
-    private native void nativeCheckNavCache();
-
-    /**
      * Empty the picture set.
      */
     private native void nativeClearContent();
@@ -1298,7 +1293,6 @@ final class WebViewCore {
                     mViewportMinimumScale == 0 ? nativeGetContentMinPrefWidth()
                             : 0,
                     0, draw).sendToTarget();
-            nativeCheckNavCache();
             if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {
                 // as we have the new picture, try to sync the scroll position
                 Message.obtain(mWebView.mPrivateHandler,

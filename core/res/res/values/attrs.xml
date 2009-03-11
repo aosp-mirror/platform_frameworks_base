@@ -586,7 +586,7 @@
         <!-- There is no specific action associated with this editor, let the
              editor come up with its own if it can.
              Corresponds to
-             {@link android.view.inputmethod.EditorInfo#IME_ACTION_UNSPECIFIED}. -->
+             {@link android.view.inputmethod.EditorInfo#IME_NULL}. -->
         <flag name="actionUnspecified" value="0x00000000" />
         <!-- This editor has no action associated with it.
              Corresponds to
@@ -595,28 +595,38 @@
         <!-- The action key performs a "go"
              operation to take the user to the target of the text they typed.
              Typically used, for example, when entering a URL.
+             Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_GO}. -->
         <flag name="actionGo" value="0x00000002" />
         <!-- The action key performs a "search"
              operation, taking the user to the results of searching for the text
              the have typed (in whatever context is appropriate).
+             Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEARCH}. -->
         <flag name="actionSearch" value="0x00000003" />
         <!-- The action key performs a "send"
              operation, delivering the text to its target.  This is typically used
              when composing a message.
+             Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEND}. -->
         <flag name="actionSend" value="0x00000004" />
         <!-- The action key performs a "next"
              operation, taking the user to the next field that will accept text.
+             Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_NEXT}. -->
         <flag name="actionNext" value="0x00000005" />
+        <!-- The action key performs a "done"
+             operation, closing the soft input method.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE}. -->
+        <flag name="actionDone" value="0x00000006" />
         <!-- Used in conjunction with a custom action,
              this indicates that the action should not
              be available in-line as the same as a "enter" key.  Typically this is
              because the action has such a significant impact or is not recoverable
              enough that accidentally hitting it should be avoided, such as sending
              a message.
+             <p>Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ENTER_ACTION}. -->
         <flag name="flagNoEnterAction" value="0x40000000" />
     </attr>
@@ -3115,23 +3125,23 @@
     </declare-styleable>
 
     <!-- =============================== -->
-    <!-- Gadget package class attributes -->
+    <!-- AppWidget package class attributes -->
     <!-- =============================== -->
 
-    <!-- Use <code>gadget-provider</code> as the root tag of the XML resource that
-         describes a gadget provider.  See TODO android.gadget package
+    <!-- Use <code>appwidget-provider</code> as the root tag of the XML resource that
+         describes an AppWidget provider.  See TODO android.appwidget package
          for more info.
      -->
-    <declare-styleable name="GadgetProviderInfo">
-        <!-- Minimum width of the gadget. -->
+    <declare-styleable name="AppWidgetProviderInfo">
+        <!-- Minimum width of the AppWidget. -->
         <attr name="minWidth"/>
-        <!-- Minimum height of the gadget. -->
+        <!-- Minimum height of the AppWidget. -->
         <attr name="minHeight"/>
-        <!-- Update period in milliseconds, or 0 if the gadget will update itself. -->
+        <!-- Update period in milliseconds, or 0 if the AppWidget will update itself. -->
         <attr name="updatePeriodMillis" format="integer" />
         <!-- A resource id of a layout. -->
         <attr name="initialLayout" format="reference" />
-        <!-- A class name in the gadget's package to be launched to configure.
+        <!-- A class name in the AppWidget's package to be launched to configure.
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
     </declare-styleable>

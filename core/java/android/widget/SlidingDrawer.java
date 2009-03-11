@@ -358,14 +358,16 @@ public class SlidingDrawer extends ViewGroup {
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
-            if (mOnDrawerScrollListener != null) {
-                mOnDrawerScrollListener.onScrollStarted();
-            }
             mTracking = true;
 
             handle.setPressed(true);
             // Must be called before prepareTracking()
             prepareContent();
+
+            // Must be called after prepareContent()
+            if (mOnDrawerScrollListener != null) {
+                mOnDrawerScrollListener.onScrollStarted();
+            }
 
             if (mVertical) {
                 final int top = mHandle.getTop();
@@ -447,6 +449,8 @@ public class SlidingDrawer extends ViewGroup {
                                 } else {
                                     animateOpen(vertical ? top : left);
                                 }
+                            } else {
+                                performFling(vertical ? top : left, velocity, false);
                             }
 
                         } else {
@@ -762,11 +766,11 @@ public class SlidingDrawer extends ViewGroup {
      * @see #toggle()
      */
     public void animateClose() {
+        prepareContent();
         final OnDrawerScrollListener scrollListener = mOnDrawerScrollListener;
         if (scrollListener != null) {
             scrollListener.onScrollStarted();
         }
-        prepareContent();
         animateClose(mVertical ? mHandle.getTop() : mHandle.getLeft());
         if (scrollListener != null) {
             scrollListener.onScrollEnded();
@@ -783,11 +787,11 @@ public class SlidingDrawer extends ViewGroup {
      * @see #toggle()
      */
     public void animateOpen() {
+        prepareContent();
         final OnDrawerScrollListener scrollListener = mOnDrawerScrollListener;
         if (scrollListener != null) {
             scrollListener.onScrollStarted();
         }
-        prepareContent();
         animateOpen(mVertical ? mHandle.getTop() : mHandle.getLeft());
         if (scrollListener != null) {
             scrollListener.onScrollEnded();

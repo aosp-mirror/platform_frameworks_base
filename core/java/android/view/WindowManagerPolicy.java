@@ -54,7 +54,7 @@ import android.view.animation.Animation;
  * window manager is a very low-level system service, there are few other
  * system services you can call with this lock held.  It is explicitly okay to
  * make calls into the package manager and power manager; it is explicitly not
- * okay to make calls into the activity manager.  Note that
+ * okay to make calls into the activity manager or most other services.  Note that
  * {@link android.content.Context#checkPermission(String, int, int)} and
  * variations require calling into the activity manager.
  * <dt> Li <dd> Called with the input thread lock held.  This lock can be
@@ -748,7 +748,7 @@ public interface WindowManagerPolicy {
      * ActivityInfo.SCREEN_ORIENTATION_PORTRAIT}), return a surface
      * rotation.
      */
-    public int rotationForOrientation(int orientation, int lastRotation,
+    public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled);
     
     /**
@@ -781,16 +781,16 @@ public interface WindowManagerPolicy {
      */
     public boolean isCheekPressedAgainstScreen(MotionEvent ev);
     
-    public void setCurrentOrientation(int newOrientation);
+    public void setCurrentOrientationLw(int newOrientation);
     
     /**
      * Call from application to perform haptic feedback on its window.
      */
-    public boolean performHapticFeedback(WindowState win, int effectId, boolean always);
+    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
     
     /**
      * Called when we have stopped keeping the screen on because a window
      * requesting this is no longer visible.
      */
-    public void screenOnStopped();
+    public void screenOnStoppedLw();
 }

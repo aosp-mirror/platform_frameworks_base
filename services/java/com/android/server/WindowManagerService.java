@@ -1373,10 +1373,9 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         removeWindowInnerLocked(session, win);
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
-        if (wasVisible) {
-            if (updateOrientationFromAppTokens(null) != null) {
-                sendNewConfiguration();
-            }
+        if (wasVisible && computeForcedAppOrientationLocked()
+                != mForcedAppOrientation) {
+            mH.sendMessage(mH.obtainMessage(H.COMPUTE_AND_SEND_NEW_CONFIGURATION));
         }
         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
         Binder.restoreCallingIdentity(origId);
@@ -2141,23 +2140,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * @see android.view.IWindowManager#updateOrientationFromAppTokens(
      * android.os.IBinder)
      */
-    public Configuration updateOrientationFromAppTokensLocked(
+    Configuration updateOrientationFromAppTokensLocked(
             IBinder freezeThisOneIfNeeded) {
         boolean changed = false;
-        Configuration config = null;
         long ident = Binder.clearCallingIdentity();
         try {
-            int req = getOrientationFromWindowsLocked();
-            if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                req = getOrientationFromAppTokensLocked();
-            }
+            int req = computeForcedAppOrientationLocked();
             
             if (req != mForcedAppOrientation) {
                 changed = true;
                 mForcedAppOrientation = req;
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
-                mPolicy.setCurrentOrientation(req);
+                mPolicy.setCurrentOrientationLw(req);
             }
             
             if (changed) {
@@ -2180,6 +2175,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         
         return null;
+    }
+    
+    int computeForcedAppOrientationLocked() {
+        int req = getOrientationFromWindowsLocked();
+        if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+            req = getOrientationFromAppTokensLocked();
+        }
+        return req;
     }
     
     public void setAppOrientation(IApplicationToken token, int requestedOrientation) {
@@ -3284,7 +3287,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mRequestedRotation = rotation;
         }
         if (DEBUG_ORIENTATION) Log.v(TAG, "Overwriting rotation value from " + rotation);
-        rotation = mPolicy.rotationForOrientation(mForcedAppOrientation,
+        rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation,
                 mRotation, mDisplayEnabled);
         if (DEBUG_ORIENTATION) Log.v(TAG, "new rotation is set to " + rotation);
         changed = mDisplayEnabled && mRotation != rotation;
@@ -4960,7 +4963,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 if (holding) {
                     mHoldingScreen.acquire();
                 } else {
-                    mPolicy.screenOnStopped();
+                    mPolicy.screenOnStoppedLw();
                     mHoldingScreen.release();
                 }
             }
@@ -5290,7 +5293,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             synchronized(mWindowMap) {
                 long ident = Binder.clearCallingIdentity();
                 try {
-                    return mPolicy.performHapticFeedback(
+                    return mPolicy.performHapticFeedbackLw(
                             windowForClientLocked(this, window), effectId, always);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -6944,6 +6947,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
         public static final int APP_FREEZE_TIMEOUT = 17;
+        public static final int COMPUTE_AND_SEND_NEW_CONFIGURATION = 18;
         
         private Session mLastReportedHold;
         
@@ -7270,6 +7274,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                 unsetAppFreezingScreenLocked(tok, true, true);
                             }
                         }
+                    }
+                    break;
+                }
+                
+                case COMPUTE_AND_SEND_NEW_CONFIGURATION: {
+                    if (updateOrientationFromAppTokens(null) != null) {
+                        sendNewConfiguration();
                     }
                     break;
                 }

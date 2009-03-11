@@ -144,6 +144,13 @@
         <item name="windowExitAnimation">@anim/search_bar_exit</item>
     </style>
 
+    <!-- Window animations that are applied to the zoom buttons overlay window.
+         {@hide Pending API council approval} -->
+    <style name="Animation.ZoomButtons">
+        <item name="windowEnterAnimation">@anim/fade_in</item>
+        <item name="windowExitAnimation">@anim/fade_out</item>
+    </style>
+
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBarTitle">

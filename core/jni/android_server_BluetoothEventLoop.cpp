@@ -61,6 +61,8 @@ static jmethodID method_onPasskeyAgentCancel;
 static jmethodID method_onAuthAgentAuthorize;
 static jmethodID method_onAuthAgentCancel;
 
+static jmethodID method_onRestartRequired;
+
 typedef event_loop_native_data_t native_data_t;
 
 // Only valid during waitForAndDispatchEventNative()
@@ -98,6 +100,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onAuthAgentAuthorize = env->GetMethodID(clazz, "onAuthAgentAuthorize", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z");
     method_onAuthAgentCancel = env->GetMethodID(clazz, "onAuthAgentCancel", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     method_onGetRemoteServiceChannelResult = env->GetMethodID(clazz, "onGetRemoteServiceChannelResult", "(Ljava/lang/String;I)V");
+
+    method_onRestartRequired = env->GetMethodID(clazz, "onRestartRequired", "()V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
 #endif
@@ -164,6 +168,13 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         }
 
         // Set which messages will be processed by this dbus connection
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='org.freedesktop.DBus'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
         dbus_bus_add_match(nat->conn,
                 "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Adapter'",
                 &err);
@@ -298,6 +309,12 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
         }
         dbus_bus_remove_match(nat->conn,
                 "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Adapter'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='org.freedesktop.DBus'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -507,6 +524,28 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
             env->CallVoidMethod(nat->me,
                                 method_onNameChanged,
                                 env->NewStringUTF(c_name));
+        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        return DBUS_HANDLER_RESULT_HANDLED;
+    } else if (dbus_message_is_signal(msg,
+                                      "org.freedesktop.DBus",
+                                      "NameOwnerChanged")) {
+        char *c_name;
+        char *c_old_owner;
+        char *c_new_owner;
+        if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_name,
+                                  DBUS_TYPE_STRING, &c_old_owner,
+                                  DBUS_TYPE_STRING, &c_new_owner,
+                                  DBUS_TYPE_INVALID)) {
+            LOGV("... name = %s", c_name);
+            LOGV("... old_owner = %s", c_old_owner);
+            LOGV("... new_owner = %s", c_new_owner);
+            if (!strcmp(c_name, "org.bluez") && c_new_owner[0] != '\0') {
+                // New owner of org.bluez. This can only happen when hcid
+                // restarts. Need to restart framework BT services to recover.
+                LOGE("Looks like hcid restarted");
+                env->CallVoidMethod(nat->me, method_onRestartRequired);
+            }
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         return DBUS_HANDLER_RESULT_HANDLED;
     }

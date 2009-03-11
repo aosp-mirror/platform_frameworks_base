@@ -208,6 +208,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (mAudioDevices == null) {
             return BluetoothError.ERROR;
         }
+        // ignore if there are any active sinks
+        if (lookupSinksMatchingStates(new int[] {
+                BluetoothA2dp.STATE_CONNECTING,
+                BluetoothA2dp.STATE_CONNECTED,
+                BluetoothA2dp.STATE_PLAYING,
+                BluetoothA2dp.STATE_DISCONNECTING}).size() != 0) {
+            return BluetoothError.ERROR;
+        }
+
         String path = lookupPath(address);
         if (path == null) {
             path = createHeadsetNative(address);

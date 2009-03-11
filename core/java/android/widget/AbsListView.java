@@ -41,10 +41,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ContextMenu.ContextMenuInfo;
 
@@ -2917,11 +2915,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        // XXX we need to have the text filter created, so we can get an
-        // InputConnection to proxy to.  Unfortunately this means we pretty
-        // much need to make it as soon as a list view gets focus.
-        createTextFilter(false);
-        return mTextFilter.onCreateInputConnection(outAttrs);
+        if (isTextFilterEnabled()) {
+            // XXX we need to have the text filter created, so we can get an
+            // InputConnection to proxy to.  Unfortunately this means we pretty
+            // much need to make it as soon as a list view gets focus.
+            createTextFilter(false);
+            return mTextFilter.onCreateInputConnection(outAttrs);
+        }
+        return null;
     }
     
     /**
@@ -3015,7 +3016,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * filtering as the text changes.
      */
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (mPopup != null) {
+        if (mPopup != null && isTextFilterEnabled()) {
             int length = s.length();
             boolean showing = mPopup.isShowing();
             if (!showing && length > 0) {

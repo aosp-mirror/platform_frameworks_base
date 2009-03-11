@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
@@ -61,7 +62,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
 
     // TODO: scaled to density
     private static final int ZOOM_CONTROLS_TOUCH_PADDING = 20;
-    
+
     private Context mContext;
     private WindowManager mWindowManager;
 
@@ -84,7 +85,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
     private int[] mContainerLocation = new int[2];
 
     private ZoomControls mControls;
-    
+
     /**
      * The view (or null) that should receive touch events. This will get set if
      * the touch down hits the container. It will be reset on the touch up.
@@ -100,7 +101,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
      * up/cancel, and then set the owner's touch listener to null.
      */
     private boolean mReleaseTouchListenerOnUp;
-    
+
     private boolean mIsSecondTapDown;
 
     private boolean mIsVisible;
@@ -145,7 +146,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
      * we delay the setVisible(true) call until it is not null.
      */
     private static final int MSG_POST_SET_VISIBLE = 4;
-    
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -157,7 +158,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
                 case MSG_DISMISS_ZOOM_CONTROLS:
                     setVisible(false);
                     break;
-                    
+
                 case MSG_POST_SET_VISIBLE:
                     if (mOwnerView.getWindowToken() == null) {
                         // Doh, it is still null, throw an exception
@@ -179,19 +180,19 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
 
         mContainer = createContainer();
     }
-    
+
     public void setZoomInEnabled(boolean enabled) {
         mControls.setIsZoomInEnabled(enabled);
     }
-    
+
     public void setZoomOutEnabled(boolean enabled) {
         mControls.setIsZoomOutEnabled(enabled);
     }
-    
+
     public void setZoomSpeed(long speed) {
         mControls.setZoomSpeed(speed);
     }
-    
+
     private FrameLayout createContainer() {
         LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.BOTTOM | Gravity.CENTER;
@@ -202,19 +203,18 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
         lp.width = LayoutParams.FILL_PARENT;
         lp.type = LayoutParams.TYPE_APPLICATION_PANEL;
         lp.format = PixelFormat.TRANSPARENT;
-        // TODO: make a new animation for this
-        lp.windowAnimations = com.android.internal.R.style.Animation_InputMethodFancy;
+        lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons;
         mContainerLayoutParams = lp;
-        
+
         FrameLayout container = new FrameLayout(mContext);
         container.setLayoutParams(lp);
         container.setMeasureAllChildren(true);
         container.setOnKeyListener(this);
-        
+
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(com.android.internal.R.layout.zoom_magnify, container);
-        
+        inflater.inflate(com.android.internal.R.layout.zoom_container, container);
+
         mControls = (ZoomControls) container.findViewById(com.android.internal.R.id.zoomControls);
         mControls.setOnZoomInClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -229,37 +229,23 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
             }
         });
 
-        View overview = container.findViewById(com.android.internal.R.id.zoomMagnify);
-        overview.setVisibility(View.GONE);
-        overview.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
-                if (mCallback != null) mCallback.onOverview();
-            }
-        });
-        
         return container;
     }
-    
+
     public void setCallback(OnZoomListener callback) {
         mCallback = callback;
     }
 
     public void setFocusable(boolean focusable) {
         if (focusable) {
-            mContainerLayoutParams.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE; 
+            mContainerLayoutParams.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
         } else {
             mContainerLayoutParams.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
         }
-        
+
         if (mIsVisible) {
             mWindowManager.updateViewLayout(mContainer, mContainerLayoutParams);
         }
-    }
-    
-    public void setOverviewVisible(boolean visible) {
-        mContainer.findViewById(com.android.internal.R.id.zoomMagnify)
-                .setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     public boolean isVisible() {
@@ -269,7 +255,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
     public void setVisible(boolean visible) {
 
         if (!useThisZoom(mContext)) return;
-        
+
         if (visible) {
             if (mOwnerView.getWindowToken() == null) {
                 /*
@@ -282,7 +268,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
                 }
                 return;
             }
-            
+
             dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
         }
 
@@ -350,12 +336,8 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
      *
      * @return TODO
      */
-    public FrameLayout getContainer() {
+    public ViewGroup getContainer() {
         return mContainer;
-    }
-
-    public int getZoomControlsId() {
-        return mControls.getId();
     }
 
     private void dismissControlsDelayed(int delay) {
@@ -372,7 +354,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
      */
     public boolean handleDoubleTapEvent(MotionEvent event) {
         if (!useThisZoom(mContext)) return false;
-        
+
         int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -428,7 +410,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
             // The second tap can no longer be down
             mIsSecondTapDown = false;
         }
-        
+
         if (mReleaseTouchListenerOnUp) {
             // The controls were dismissed but we need to throw away all events until the up
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -443,7 +425,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
 
         // TODO: optimize this (it ends up removing message and queuing another)
         dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
-        
+
         View targetView = mTouchTargetView;
 
         switch (action) {
@@ -556,7 +538,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
                 com.android.internal.R.layout.alert_dialog_simple_text, null)
                 .findViewById(android.R.id.text1);
         textView.setText(com.android.internal.R.string.tutorial_double_tap_to_zoom_message_short);
-        
+
         sTutorialDialog = new AlertDialog.Builder(context)
                 .setView(textView)
                 .setIcon(0)
@@ -603,7 +585,7 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
 
     // Temporary methods for different zoom types
     static int getZoomType(Context context) {
-        return Settings.System.getInt(context.getContentResolver(), "zoom", 1);
+        return Settings.System.getInt(context.getContentResolver(), "zoom", 2);
     }
 
     public static boolean useOldZoom(Context context) {
@@ -618,6 +600,5 @@ public class ZoomButtonsController implements View.OnTouchListener, View.OnKeyLi
         void onCenter(int x, int y);
         void onVisibilityChanged(boolean visible);
         void onZoom(boolean zoomIn);
-        void onOverview();
     }
 }

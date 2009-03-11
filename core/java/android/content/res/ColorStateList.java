@@ -304,7 +304,6 @@ public class ColorStateList implements Parcelable {
         for (int i=0; i<N; i++) {
             dest.writeIntArray(mStateSpecs[i]);
         }
-        dest.writeArray(mStateSpecs);
         dest.writeIntArray(mColors);
     }
 

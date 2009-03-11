@@ -461,14 +461,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     // by ensuring it has focus and getting its window out
                     // of touch mode.
                     mDropDownList.requestFocusFromTouch();
-                    if (false) {
-                        // Update whether the pop-up is in front of or behind
-                        // the input method, depending on whether the user has
-                        // moved down in it.
-                        mPopup.setInputMethodMode(curIndex > 0
-                                ? PopupWindow.INPUT_METHOD_NOT_NEEDED
-                                : PopupWindow.INPUT_METHOD_NEEDED);
-                    }
                     mPopup.update();
 
                     switch (keyCode) {
@@ -503,6 +495,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mLastKeyCode = keyCode;
         boolean handled = super.onKeyDown(keyCode, event);
         mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
+
+        if (handled && isPopupShowing() && mDropDownList != null) {
+            clearListSelection();
+        }
 
         return handled;
     }
@@ -833,7 +829,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, widthSpec, height);
         } else {
-            int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
                 mPopup.setWindowLayoutMode(ViewGroup.LayoutParams.FILL_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -1119,6 +1114,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         
         protected int[] onCreateDrawableState(int extraSpace) {
             int[] res = super.onCreateDrawableState(extraSpace);
+            //noinspection ConstantIfStatement
             if (false) {
                 StringBuilder sb = new StringBuilder("Created drawable state: [");
                 for (int i=0; i<res.length; i++) {

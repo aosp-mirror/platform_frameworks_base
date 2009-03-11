@@ -220,7 +220,7 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 
 AndroidRuntime::AndroidRuntime()
 {
-    SkGraphics::Init(false);    // true means run unittests (slow)
+    SkGraphics::Init();
     // this sets our preference for 16bit images during decode
     // in case the src is opaque and 24bit
     SkImageDecoder::SetDeviceConfig(SkBitmap::kRGB_565_Config);

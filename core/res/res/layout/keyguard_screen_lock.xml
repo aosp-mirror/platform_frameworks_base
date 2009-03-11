@@ -36,8 +36,8 @@
         android:layout_marginBottom="15dip"
         android:layout_marginLeft="15dip"
         android:layout_marginRight="15dip"
-	android:paddingTop="20dip"
-	android:paddingBottom="20dip"
+        android:paddingTop="20dip"
+        android:paddingBottom="20dip"
         android:background="@android:drawable/popup_full_dark"
         >
 
@@ -59,13 +59,15 @@
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:text="@android:string/lockscreen_missing_sim_message"
-                  android:textSize="22sp"/>
+                  android:textAppearance="?android:attr/textAppearanceLarge"/>
         <TextView android:id="@+id/headerSimBad2"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
+                  android:layout_marginTop="7dip"
+                  android:layout_marginBottom="7dip"
                   android:gravity="center"
                   android:text="@android:string/lockscreen_missing_sim_instructions"
-                  android:textSize="20sp"/>
+                  android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <!-- spacer after carrier info / sim messages -->
         <View
@@ -203,17 +205,15 @@
         <!-- emergency call button shown when sim is missing or PUKd -->
         <Button
             android:id="@+id/emergencyCallButton"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
             android:layout_marginBottom="5dip"
-            android:drawableTop="@drawable/ic_emergency"
+            android:layout_marginTop="5dip"
+            android:layout_gravity="center_horizontal"
+            android:drawableLeft="@drawable/ic_emergency"
             android:drawablePadding="3dip"
             android:text="@android:string/lockscreen_emergency_call"
-            android:textSize="14sp"
            />
-
 
     </LinearLayout>
 </LinearLayout>

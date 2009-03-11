@@ -165,6 +165,7 @@ private:
     void                    checkA2dpEnabledChange_l();
 #endif
     static bool             streamForcedToSpeaker(int streamType);
+    static bool             streamDisablesA2dp(int streamType);
     
     // Management of forced route to speaker for certain track types.
     enum force_speaker_command {
@@ -174,6 +175,9 @@ private:
         FORCE_ROUTE_RESTORE
     };
     void                    handleForcedSpeakerRoute(int command);
+#ifdef WITH_A2DP
+    void                    handleStreamDisablesA2dp(int command);
+#endif
 
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
@@ -576,7 +580,7 @@ private:
     class AudioRecordThread : public Thread
     {
     public:
-        AudioRecordThread(AudioHardwareInterface* audioHardware);
+        AudioRecordThread(AudioHardwareInterface* audioHardware, const sp<AudioFlinger>& audioFlinger);
         virtual             ~AudioRecordThread();
         virtual bool        threadLoop();
         virtual status_t    readyToRun() { return NO_ERROR; }
@@ -590,6 +594,7 @@ private:
     private:
                 AudioRecordThread();
                 AudioHardwareInterface              *mAudioHardware;
+                sp<AudioFlinger>                    mAudioFlinger;
                 sp<MixerThread::RecordTrack>        mRecordTrack;
                 Mutex                               mLock;
                 Condition                           mWaitWorkCV;
@@ -620,6 +625,10 @@ private:
     mutable     int                                 mHardwareStatus;
                 SortedVector< wp<IBinder> >         mNotificationClients;
                 int                                 mForcedSpeakerCount;
+                int                                 mA2dpDisableCount;
+
+                // true if A2DP should resume when mA2dpDisableCount returns to zero
+                bool                                mA2dpSuppressed;
                 uint32_t                            mSavedRoute;
                 uint32_t                            mForcedRoute;
                 nsecs_t                             mRouteRestoreTime;

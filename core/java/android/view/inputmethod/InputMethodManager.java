@@ -921,6 +921,7 @@ public final class InputMethodManager {
                     startInputInner();
                 }
             });
+            return;
         }
         
         // Okay we are now ready to call into the served view and have it

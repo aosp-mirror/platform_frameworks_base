@@ -30,6 +30,7 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import android.widget.EditText;
 
 import com.android.internal.R;
 
@@ -76,7 +77,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         }
     };
 
-    private final TextView mText;
+    private final EditText mText;
     private final InputFilter mNumberInputFilter;
 
     private String[] mDisplayedValues;
@@ -117,7 +118,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mDecrementButton.setOnLongClickListener(this);
         mDecrementButton.setNumberPicker(this);
         
-        mText = (TextView) findViewById(R.id.timepicker_input);
+        mText = (EditText) findViewById(R.id.timepicker_input);
         mText.setOnFocusChangeListener(this);
         mText.setFilters(new InputFilter[] {inputFilter});
         mText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
@@ -188,11 +189,8 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     }
     
     public void onClick(View v) {
-        
-        /* The text view may still have focus so clear it's focus which will
-         * trigger the on focus changed and any typed values to be pulled.
-         */
-        mText.clearFocus();
+        validateInput(mText);
+        if (!mText.hasFocus()) mText.requestFocus();
 
         // now perform the increment/decrement
         if (R.id.increment == v.getId()) {
@@ -239,6 +237,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         } else {
             mText.setText(mDisplayedValues[mCurrent - mStart]);
         }
+        mText.setSelection(mText.getText().length());
     }
     
     private void validateCurrentView(CharSequence str) {
@@ -257,16 +256,20 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
          * has valid values.
          */
         if (!hasFocus) {
-            String str = String.valueOf(((TextView) v).getText());
-            if ("".equals(str)) {
-                
-                // Restore to the old value as we don't allow empty values
-                updateView();
-            } else {
-                
-                // Check the new value and ensure it's in range
-                validateCurrentView(str);
-            }
+            validateInput(v);
+        }
+    }
+
+    private void validateInput(View v) {
+        String str = String.valueOf(((TextView) v).getText());
+        if ("".equals(str)) {
+
+            // Restore to the old value as we don't allow empty values
+            updateView();
+        } else {
+
+            // Check the new value and ensure it's in range
+            validateCurrentView(str);
         }
     }
 

@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Comparator;
+import java.util.Collections;
 
 /**
  * A ListAdapter that manages a ListView backed by an array of arbitrary
@@ -224,6 +226,17 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
             mObjects.clear();
         }
         if (mNotifyOnChange) notifyDataSetChanged();
+    }
+
+    /**
+     * Sorts the content of this adapter using the specified comparator.
+     *
+     * @param comparator The comparator used to sort the objects contained
+     *        in this adapter.
+     */
+    public void sort(Comparator<? super T> comparator) {
+        Collections.sort(mObjects, comparator);
+        if (mNotifyOnChange) notifyDataSetChanged();        
     }
 
     /**

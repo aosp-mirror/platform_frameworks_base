@@ -1540,7 +1540,15 @@ public final class Gmail {
 
         /** Returns the number of unread conversation with a given label. */
         public int getNumUnreadConversations(long labelId) {
-            return getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
+            Integer unreadConversations =
+                    getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
+            // There seems to be a race condition here that can get the label maps into a bad
+            // state and lose state on a particular label.
+            if (unreadConversations == null) {
+                return 0;
+            } else {
+                return unreadConversations;
+            }
         }
 
         /**

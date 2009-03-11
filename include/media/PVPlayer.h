@@ -53,8 +53,8 @@ public:
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return PV_PLAYER; }
 
-            // make available to PlayerDriver
-            void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }
+    // make available to PlayerDriver
+    void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }
 
 private:
     static void         do_nothing(status_t s, void *cookie, bool cancelled) { }

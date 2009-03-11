@@ -1250,12 +1250,12 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@blink android.gadget.GadgetManager} for accessing wallpapers.
+     * {@blink android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
      * @hide
      * @see #getSystemService
      */
-    public static final String GADGET_SERVICE = "gadget";
+    public static final String APPWIDGET_SERVICE = "appwidget";
     
     /**
      * Determine whether the given permission is allowed for a particular

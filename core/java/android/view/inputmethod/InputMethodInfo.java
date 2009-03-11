@@ -174,6 +174,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * Return the raw information about the Service implementing this
+     * input method.  Do not modify the returned object.
+     */
+    public ServiceInfo getServiceInfo() {
+        return mService.serviceInfo;
+    }
+
+    /**
      * Return the component of the service that implements this input
      * method.
      */
