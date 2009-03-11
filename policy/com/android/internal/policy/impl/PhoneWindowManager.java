@@ -87,12 +87,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.WindowState;
 import android.media.IAudioService;
 import android.media.AudioManager;
 
 /**
- * WindowManagerPolicy implementation for the Android phone UI.
+ * WindowManagerPolicy implementation for the Android phone UI.  This
+ * introduces a new method suffix, Lp, for an internal lock of the
+ * PhoneWindowManager.  This is used to protect some internal state, and
+ * can be acquired with either thw Lw and Li lock held, so has the restrictions
+ * of both of those when held.
  */
 public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
@@ -140,6 +143,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Vibrator pattern for haptic feedback of a long press.
     private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 20, 21};
+    
+    final Object mLock = new Object();
     
     Context mContext;
     IWindowManager mWindowManager;
@@ -234,20 +239,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            mEndcallBehavior = Settings.System.getInt(resolver,
-                    Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
-            int accelerometerDefault = Settings.System.getInt(resolver,
-                    Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
-            if (mAccelerometerDefault != accelerometerDefault) {
-                mAccelerometerDefault = accelerometerDefault;
-                updateOrientationListener();
-            }
-            String imId = Settings.Secure.getString(resolver,
-                    Settings.Secure.DEFAULT_INPUT_METHOD);
-            boolean hasSoftInput = imId != null && imId.length() > 0;
-            if (mHasSoftInput != hasSoftInput) {
-                mHasSoftInput = hasSoftInput;
-                updateRotation();
+            synchronized (mLock) {
+                mEndcallBehavior = Settings.System.getInt(resolver,
+                        Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
+                int accelerometerDefault = Settings.System.getInt(resolver,
+                        Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
+                if (mAccelerometerDefault != accelerometerDefault) {
+                    mAccelerometerDefault = accelerometerDefault;
+                    updateOrientationListenerLp();
+                }
+                String imId = Settings.Secure.getString(resolver,
+                        Settings.Secure.DEFAULT_INPUT_METHOD);
+                boolean hasSoftInput = imId != null && imId.length() > 0;
+                if (mHasSoftInput != hasSoftInput) {
+                    mHasSoftInput = hasSoftInput;
+                    updateRotation();
+                }
             }
         }
     }
@@ -296,7 +303,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     MyOrientationListener mOrientationListener;
 
-    boolean useSensorForOrientation() {
+    boolean useSensorForOrientationLp() {
         if(mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             return true;
         }
@@ -308,8 +315,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
     
-    boolean needSensorRunning() {
-        if(mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+    boolean needSensorRunningLp() {
+        if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             // If the application has explicitly requested to follow the
             // orientation, then we need to turn the sensor or.
             return true;
@@ -338,22 +345,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * screen turning on and current app has sensor based orientation, enable listeners if needed
      * screen turning on and current app has nosensor based orientation, do nothing
      */
-    void updateOrientationListener() {
+    void updateOrientationListenerLp() {
         if (!mOrientationListener.canDetectOrientation()) {
             // If sensor is turned off or nonexistent for some reason
             return;
         }
         //Could have been invoked due to screen turning on or off or
         //change of the currently visible window's orientation
-        if(localLOGV) Log.i(TAG, "Screen status="+mScreenOn+
+        if (localLOGV) Log.i(TAG, "Screen status="+mScreenOn+
                 ", current orientation="+mCurrentAppOrientation+
                 ", SensorEnabled="+mOrientationSensorEnabled);
         boolean disable = true;
-        if(mScreenOn) {
-            if(needSensorRunning()) {
+        if (mScreenOn) {
+            if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
-                if(!mOrientationSensorEnabled) {
+                if (!mOrientationSensorEnabled) {
                     mOrientationListener.enable();
                     if(localLOGV) Log.i(TAG, "Enabling listeners");
                     // We haven't had the sensor on, so don't yet know
@@ -364,7 +371,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } 
         } 
         //check if sensors need to be disabled
-        if(disable && mOrientationSensorEnabled) {
+        if (disable && mOrientationSensorEnabled) {
             mOrientationListener.disable();
             if(localLOGV) Log.i(TAG, "Disabling listeners");
             mSensorRotation = -1;
@@ -375,7 +382,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Runnable mEndCallLongPress = new Runnable() {
         public void run() {
             mShouldTurnOffOnKeyUp = false;
-            performHapticFeedback(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
             showGlobalActionsDialog();
         }
@@ -409,7 +416,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              * the user lets go of the home key
              */
             mHomePressed = false;
-            performHapticFeedback(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
             showRecentAppsDialog();
         }
@@ -1615,18 +1622,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
-        EventLog.writeEvent(70000, 0);
-        mKeyguardMediator.onScreenTurnedOff(why);
-        mScreenOn = false;
-        updateOrientationListener();
+        synchronized (mLock) {
+            EventLog.writeEvent(70000, 0);
+            mKeyguardMediator.onScreenTurnedOff(why);
+            mScreenOn = false;
+            updateOrientationListenerLp();
+        }
     }
 
     /** {@inheritDoc} */
     public void screenTurnedOn() {
-        EventLog.writeEvent(70000, 1);
-        mKeyguardMediator.onScreenTurnedOn();
-        mScreenOn = true;
-        updateOrientationListener();
+        synchronized (mLock) {
+            EventLog.writeEvent(70000, 1);
+            mKeyguardMediator.onScreenTurnedOn();
+            mScreenOn = true;
+            updateOrientationListenerLp();
+        }
     }
 
     /** {@inheritDoc} */
@@ -1674,27 +1685,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    public int rotationForOrientation(int orientation, int lastRotation,
+    public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled) {
-        switch (orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                //always return landscape if orientation set to landscape
-                return Surface.ROTATION_90;
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                //always return portrait if orientation set to portrait
-                return Surface.ROTATION_0;
-        }
-        // case for nosensor meaning ignore sensor and consider only lid
-        // or orientation sensor disabled
-        //or case.unspecified
-        if (mLidOpen) {
-            return Surface.ROTATION_90;
-        } else {
-            if (useSensorForOrientation()) {
-                // If the user has enabled auto rotation by default, do it.
-                return mSensorRotation >= 0 ? mSensorRotation : lastRotation;
+        synchronized (mLock) {
+            switch (orientation) {
+                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+                    //always return landscape if orientation set to landscape
+                    return Surface.ROTATION_90;
+                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+                    //always return portrait if orientation set to portrait
+                    return Surface.ROTATION_0;
             }
-            return Surface.ROTATION_0;
+            // case for nosensor meaning ignore sensor and consider only lid
+            // or orientation sensor disabled
+            //or case.unspecified
+            if (mLidOpen) {
+                return Surface.ROTATION_90;
+            } else {
+                if (useSensorForOrientationLp()) {
+                    // If the user has enabled auto rotation by default, do it.
+                    return mSensorRotation >= 0 ? mSensorRotation : lastRotation;
+                }
+                return Surface.ROTATION_0;
+            }
         }
     }
 
@@ -1721,8 +1734,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // tell the keyguard
             mKeyguardMediator.onSystemReady();
             android.os.SystemProperties.set("dev.bootcomplete", "1"); 
-            updateOrientationListener();
-            mVibrator = new Vibrator();
+            synchronized (mLock) {
+                updateOrientationListenerLp();
+                mVibrator = new Vibrator();
+            }
         } catch (RemoteException e) {
             // Ignore
         }
@@ -1778,14 +1793,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return true;
     }
     
-    public void setCurrentOrientation(int newOrientation) {
-        if(newOrientation != mCurrentAppOrientation) {
-            mCurrentAppOrientation = newOrientation;
-            updateOrientationListener();
+    public void setCurrentOrientationLw(int newOrientation) {
+        synchronized (mLock) {
+            if (newOrientation != mCurrentAppOrientation) {
+                mCurrentAppOrientation = newOrientation;
+                updateOrientationListenerLp();
+            }
         }
     }
     
-    public boolean performHapticFeedback(WindowState win, int effectId, boolean always) {
+    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
         if (!always && Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0) {
             return false;
@@ -1798,7 +1815,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
     
-    public void screenOnStopped() {
+    public void screenOnStoppedLw() {
         if (!mKeyguardMediator.isShowing()) {
             long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
