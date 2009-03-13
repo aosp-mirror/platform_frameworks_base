@@ -260,32 +260,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     class MyOrientationListener extends WindowOrientationListener {
-        private static final int _LOWER_THRESHOLD = 30;
-        private static final int _UPPER_THRESHOLD = 60;
-        
         MyOrientationListener(Context context) {
             super(context);
         }
         
         @Override
-        public void onOrientationChanged(int orientation) {
-            // ignore orientation changes unless the value is in a range 
-            // When switching from portrait to landscape try to use a lower threshold limit
-            // Use upper threshold limit when switching from landscape to portrait
-            // this is to delay the switch as much as we can
-            int rotation;
-            int threshold = (mSensorRotation == Surface.ROTATION_90) ? _UPPER_THRESHOLD :
-                    _LOWER_THRESHOLD;
-            
-            if ((orientation >= 0 && orientation <= _UPPER_THRESHOLD) ||
-                    (orientation >= 270 - _LOWER_THRESHOLD)) {
-                rotation =  (orientation >= 270 - _LOWER_THRESHOLD
-                        && orientation <= 270 + threshold)
-                        ? Surface.ROTATION_90 : Surface.ROTATION_0;
-            } else {
-                // ignore orientation value
-                return;
-            }
+        public void onOrientationChanged(int rotation) {
             // Send updates based on orientation value
             if (rotation != mSensorRotation) {
                 if(localLOGV) Log.i(TAG, "onOrientationChanged, rotation changed from "+rotation+" to "+mSensorRotation);

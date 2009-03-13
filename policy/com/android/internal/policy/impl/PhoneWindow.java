@@ -163,6 +163,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     static final int MSG_CALL_LONG_PRESS_COMPLETE = 4;
     static final int MSG_CAMERA_LONG_PRESS = 5;
     static final int MSG_CAMERA_LONG_PRESS_COMPLETE = 6;
+    static final int MSG_SEARCH_LONG_PRESS = 7;
+    static final int MSG_SEARCH_LONG_PRESS_COMPLETE = 8;
 
     private final Handler mKeycodeMenuTimeoutHandler = new Handler() {
         @Override
@@ -194,6 +196,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // See above.
                     Message newMessage = Message.obtain(msg);
                     newMessage.what = MSG_CAMERA_LONG_PRESS_COMPLETE;
+                    mKeycodeMenuTimeoutHandler.sendMessage(newMessage);
+                    break;
+                }
+                case MSG_SEARCH_LONG_PRESS: {
+                    if (!mSearchKeyDownReceived) return;
+                    // See above.
+                    Message newMessage = Message.obtain(msg);
+                    newMessage.what = MSG_SEARCH_LONG_PRESS_COMPLETE;
                     mKeycodeMenuTimeoutHandler.sendMessage(newMessage);
                     break;
                 }
@@ -230,6 +240,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, (KeyEvent) msg.obj);
                     getContext().sendOrderedBroadcast(intent, null);
                     sendCloseSystemWindows();
+                } break;
+                case MSG_SEARCH_LONG_PRESS_COMPLETE: {
+                    if (getKeyguardManager().inKeyguardRestrictedInputMode() ||
+                            !mSearchKeyDownReceived) {
+                        mSearchKeyDownReceived = false;
+                        return;
+                    }
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    // launch the search activity
+                    Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        sendCloseSystemWindows();
+                        getContext().startActivity(intent);
+                        // Only clear this if we successfully start the
+                        // activity; otherwise we will allow the normal short
+                        // press action to be performed.
+                        mSearchKeyDownReceived = false;
+                    } catch (ActivityNotFoundException e) {
+                    }
                 } break;
             }
         }
@@ -1276,6 +1306,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_SEARCH: {
                 if (event.getRepeatCount() == 0) {
                     mSearchKeyDownReceived = true;
+                    Configuration config = getContext().getResources().getConfiguration(); 
+                    if (config.keyboard == Configuration.KEYBOARD_NOKEYS
+                            || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+                        // If this device does not have a hardware keyboard,
+                        // or that keyboard is hidden, then we can't use the
+                        // search key for chording to perform shortcuts;
+                        // instead, we will let the user long press,
+                        mKeycodeMenuTimeoutHandler.removeMessages(MSG_SEARCH_LONG_PRESS);
+                        mKeycodeMenuTimeoutHandler.sendMessageDelayed(
+                                mKeycodeMenuTimeoutHandler.obtainMessage(MSG_SEARCH_LONG_PRESS),
+                                ViewConfiguration.getLongPressTimeout());
+                    }
+                    return true;
                 }
                 break;
             }
@@ -1370,6 +1413,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  */
                 if (getKeyguardManager().inKeyguardRestrictedInputMode() ||
                         !mSearchKeyDownReceived) {
+                    mSearchKeyDownReceived = false;
                     break;
                 }
                 mSearchKeyDownReceived = false;

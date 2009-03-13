@@ -46,7 +46,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     private final boolean mCreatedWithKeyboardOpen;
 
     private TextView mHeaderText;
-    private EditText mPinText;
+    private TextView mPinText;
 
     private TextView mOkButton;
     private TextView mEmergencyCallButton;
@@ -75,7 +75,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         }
 
         mHeaderText = (TextView) findViewById(R.id.headerText);
-        mPinText = (EditText) findViewById(R.id.pinDisplay);
+        mPinText = (TextView) findViewById(R.id.pinDisplay);
         mBackSpaceButton = findViewById(R.id.backspace);
         mBackSpaceButton.setOnClickListener(this);
 
@@ -159,7 +159,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
     public void onClick(View v) {
         if (v == mBackSpaceButton) {
-            final Editable digits = mPinText.getText();
+            final Editable digits = mPinText.getEditableText();
             final int len = digits.length();
             if (len > 0) {
                 digits.delete(len-1, len);
