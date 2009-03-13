@@ -34,24 +34,12 @@ public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
-    private int mOrientation = ORIENTATION_UNKNOWN;
     private SensorManager mSensorManager;
     private boolean mEnabled = false;
     private int mRate;
     private Sensor mSensor;
     private SensorEventListener mSensorEventListener;
-    
-    /**
-     * Returned from onOrientationChanged when the device orientation cannot be determined
-     * (typically when the device is in a close to flat position).
-     *
-     *  @see #onOrientationChanged
-     */
-    public static final int ORIENTATION_UNKNOWN = -1;
-    /*
-     * Returned when the device is almost lying flat on a surface
-     */
-    public static final int ORIENTATION_FLAT = -2;
+    private int mSensorRotation = -1;
 
     /**
      * Creates a new WindowOrientationListener.
@@ -116,24 +104,47 @@ public abstract class WindowOrientationListener {
         private static final int _DATA_X = 0;
         private static final int _DATA_Y = 1;
         private static final int _DATA_Z = 2;
+        // Angle around x-axis thats considered almost perfect vertical to hold
+        // the device
+        private static final int PIVOT = 30;
+        // Angle around x-asis that's considered almost too vertical. Beyond
+        // this angle will not result in any orientation changes. f phone faces uses,
+        // the device is leaning backward.
+        private static final int PIVOT_UPPER = 65;
+        // Angle about x-axis that's considered negative vertical. Beyond this
+        // angle will not result in any orientation changes. If phone faces uses,
+        // the device is leaning forward.
+        private static final int PIVOT_LOWER = 0;
+        // Upper threshold limit for switching from portrait to landscape
+        private static final int PL_UPPER = 280;
+        // Lower threshold limit for switching from landscape to portrait
+        private static final int LP_LOWER = 320;
+        // Lower threshold limt for switching from portrait to landscape
+        private static final int PL_LOWER = 240;
+        // Upper threshold limit for switching from landscape to portrait
+        private static final int LP_UPPER = 360;
+        
+        // Internal value used for calculating linear variant
+        private static final float PL_LINEAR_FACTOR =
+            ((float)(PL_UPPER-PL_LOWER))/((float)(PIVOT_UPPER-PIVOT_LOWER));
+        //  Internal value used for calculating linear variant
+        private static final float LP_LINEAR_FACTOR =
+            ((float)(LP_UPPER - LP_LOWER))/((float)(PIVOT_UPPER-PIVOT_LOWER));
         
         public void onSensorChanged(SensorEvent event) {
             float[] values = event.values;
-            int orientation = ORIENTATION_UNKNOWN;
             float X = values[_DATA_X];
             float Y = values[_DATA_Y];
             float Z = values[_DATA_Z];
             float OneEightyOverPi = 57.29577957855f;
             float gravity = (float) Math.sqrt(X*X+Y*Y+Z*Z);
             float zyangle = Math.abs((float)Math.asin(Z/gravity)*OneEightyOverPi);
-            // The device is considered flat if the angle is more than 75
-            // if the angle is less than 40, its considered too flat to switch
-            // orientation. if the angle is between 40 - 75, the orientation is unknown
-            if (zyangle < 40) {
+            int rotation = mSensorRotation;
+            if ((zyangle <= PIVOT_UPPER) && (zyangle >= PIVOT_LOWER)) {
                 // Check orientation only if the phone is flat enough
                 // Don't trust the angle if the magnitude is small compared to the y value
                 float angle = (float)Math.atan2(Y, -X) * OneEightyOverPi;
-                orientation = 90 - (int)Math.round(angle);
+                int orientation = 90 - (int)Math.round(angle);
                 // normalize to 0 - 359 range
                 while (orientation >= 360) {
                     orientation -= 360;
@@ -141,13 +152,24 @@ public abstract class WindowOrientationListener {
                 while (orientation < 0) {
                     orientation += 360;
                 }
-            } else if (zyangle >= 75){
-                orientation = ORIENTATION_FLAT;
+               
+                float delta = (float)Math.abs(zyangle - PIVOT);
+                if (((orientation >= 0) && (orientation <= LP_UPPER)) ||
+                        (orientation >= PL_LOWER)) {
+                    float threshold;
+                    if (mSensorRotation == Surface.ROTATION_90) {
+                        threshold = LP_LOWER + (LP_LINEAR_FACTOR * delta) ;
+                    } else {
+                        threshold = PL_UPPER - (PL_LINEAR_FACTOR * delta);
+                    }
+                    rotation = (orientation >= PL_LOWER &&
+                            orientation <= threshold) ? Surface.ROTATION_90 : Surface.ROTATION_0;
+                }
+                
             }
-            
-            if (orientation != mOrientation) {
-                mOrientation = orientation;
-                onOrientationChanged(orientation);
+            if (rotation != mSensorRotation) {
+                mSensorRotation = rotation;
+                onOrientationChanged(mSensorRotation);
             }
         }
 
@@ -164,17 +186,11 @@ public abstract class WindowOrientationListener {
     }
     
     /**
-     * Called when the orientation of the device has changed.
-     * orientation parameter is in degrees, ranging from 0 to 359.
-     * orientation is 0 degrees when the device is oriented in its natural position,
-     * 90 degrees when its left side is at the top, 180 degrees when it is upside down, 
-     * and 270 degrees when its right side is to the top.
-     * {@link #ORIENTATION_UNKNOWN} is returned when the device is close to flat
-     * and the orientation cannot be determined.
-     *
-     * @param orientation The new orientation of the device.
+     * Called when the rotation view of the device has changed.
+     * Can be either Surface.ROTATION_90 or Surface.ROTATION_0.
+     * @param rotation The new orientation of the device.
      *
      *  @see #ORIENTATION_UNKNOWN
      */
-    abstract public void onOrientationChanged(int orientation);
+    abstract public void onOrientationChanged(int rotation);
 }

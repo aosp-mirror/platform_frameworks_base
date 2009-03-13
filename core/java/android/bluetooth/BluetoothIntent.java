@@ -45,6 +45,8 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.HEADSET_STATE";
     public static final String HEADSET_PREVIOUS_STATE =
         "android.bluetooth.intent.HEADSET_PREVIOUS_STATE";
+    public static final String HEADSET_AUDIO_STATE =
+        "android.bluetooth.intent.HEADSET_AUDIO_STATE";
     public static final String BOND_STATE =
         "android.bluetooth.intent.BOND_STATE";
     public static final String BOND_PREVIOUS_STATE =
@@ -122,7 +124,18 @@ public interface BluetoothIntent {
     public static final String BOND_STATE_CHANGED_ACTION      =
         "android.bluetooth.intent.action.BOND_STATE_CHANGED_ACTION";
 
+    /**
+     * TODO(API release): Move into BluetoothHeadset
+     */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String HEADSET_STATE_CHANGED_ACTION      =
         "android.bluetooth.intent.action.HEADSET_STATE_CHANGED";
+
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String HEADSET_AUDIO_STATE_CHANGED_ACTION =
+        "android.bluetooth.intent.action.HEADSET_ADUIO_STATE_CHANGED";
 }

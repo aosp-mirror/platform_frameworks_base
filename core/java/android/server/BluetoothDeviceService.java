@@ -81,10 +81,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      */
     public synchronized void init() {
         initializeNativeDataNative();
-        mIsEnabled = (isEnabledNative() == 1);
-        if (mIsEnabled) {
-            mBondState.loadBondState();
+
+        if (isEnabledNative() == 1) {
+            Log.w(TAG, "Bluetooth daemons already running - runtime restart? ");
+            disableNative();
         }
+
+        mIsEnabled = false;
         mIsDiscovering = false;
         mEventLoop = new BluetoothEventLoop(mContext, this);
         registerForAirplaneMode();

@@ -743,9 +743,14 @@ public final class CookieManager {
              * Note: in the case of "foo=bluh, bar=bluh;path=/", we interpret
              * it as one cookie instead of two cookies.
              */
+            int semicolonIndex = cookieString.indexOf(SEMICOLON, index);
             int equalIndex = cookieString.indexOf(EQUAL, index);
             if (equalIndex == -1) {
                 // bad format, force return
+                break;
+            }
+            if (semicolonIndex > -1 && semicolonIndex < equalIndex) {
+                // empty cookie, like "; path=/", return
                 break;
             }
             cookie = new Cookie(host, path);
@@ -757,7 +762,7 @@ public final class CookieManager {
                     break;
                 }
             }
-            int semicolonIndex = cookieString.indexOf(SEMICOLON, index);
+            semicolonIndex = cookieString.indexOf(SEMICOLON, index);
             if (semicolonIndex == -1) {
                 semicolonIndex = length;
             }

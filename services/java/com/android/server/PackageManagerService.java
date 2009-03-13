@@ -5460,6 +5460,12 @@ class PackageManagerService extends IPackageManager.Stub {
                         // has to delete the one installed in the data partition in order to pick up the
                         // new system package.
                         return p;
+                    } else if ((p.pkg != null) && (p.pkg.applicationInfo != null) &&
+                                ((p.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)) {
+                        // Check for non-system apps
+                        reportSettingsProblem(Log.WARN,
+                                "Package " + name + " codePath changed from " + p.codePath
+                                + " to " + codePath + "; Retaining data and using new code");
                     } else {
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath

@@ -19,6 +19,8 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-	<translate android:fromXDelta="0" android:toXDelta="25%" android:duration="50"/>
-	<alpha android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="50" />
+	<translate android:fromXDelta="0" android:toXDelta="25%"
+            android:duration="@android:integer/config_shortAnimTime"/>
+	<alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+            android:duration="@android:integer/config_shortAnimTime" />
 </set>

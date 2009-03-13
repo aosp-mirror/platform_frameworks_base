@@ -180,9 +180,6 @@ public class WebView extends AbsoluteLayout
      */
     VelocityTracker mVelocityTracker;
 
-    private static boolean mShowZoomTutorial = true;
-    private static final int ZOOM_TUTORIAL_DURATION = 3000;
-
     /**
      * Touch mode
      */
@@ -223,16 +220,12 @@ public class WebView extends AbsoluteLayout
      */
     // pre-computed square of ViewConfiguration.getScaledTouchSlop()
     private int mTouchSlopSquare;
-    // pre-computed square of the density adjusted double tap slop
-    private int mDoubleTapSlopSquare;
     // pre-computed density adjusted navigation slop
     private int mNavSlop;
     // This should be ViewConfiguration.getTapTimeout()
     // But system time out is 100ms, which is too short for the browser.
     // In the browser, if it switches out of tap too soon, jump tap won't work.
     private static final int TAP_TIMEOUT = 200;
-    // The duration in milliseconds we will wait to see if it is a double tap.
-    private static final int DOUBLE_TAP_TIMEOUT = 250;
     // This should be ViewConfiguration.getLongPressTimeout()
     // But system time out is 500ms, which is too short for the browser.
     // With a short timeout, it's difficult to treat trigger a short press.
@@ -257,11 +250,6 @@ public class WebView extends AbsoluteLayout
 
     private int mContentWidth;   // cache of value from WebViewCore
     private int mContentHeight;  // cache of value from WebViewCore
-
-    static int MAX_FLOAT_CONTENT_WIDTH = 480;
-    // the calculated minimum content width for calculating the minimum scale.
-    // If it is 0, it means don't use it.
-    private int mMinContentWidth;
 
     // Need to have the separate control for horizontal and vertical scrollbar 
     // style than the View's single scrollbar style
@@ -288,11 +276,9 @@ public class WebView extends AbsoluteLayout
     private static final int NEVER_REMEMBER_PASSWORD = 2;
     private static final int SWITCH_TO_SHORTPRESS = 3;
     private static final int SWITCH_TO_LONGPRESS = 4;
-    private static final int RELEASE_SINGLE_TAP = 5;
     private static final int UPDATE_TEXT_ENTRY_ADAPTER = 6;
     private static final int SWITCH_TO_ENTER = 7;
     private static final int RESUME_WEBCORE_UPDATE = 8;
-    private static final int DISMISS_ZOOM_TUTORIAL = 9;
 
     //! arg1=x, arg2=y
     static final int SCROLL_TO_MSG_ID               = 10;
@@ -321,7 +307,7 @@ public class WebView extends AbsoluteLayout
         "NEVER_REMEMBER_PASSWORD", // = 2;
         "SWITCH_TO_SHORTPRESS", // = 3;
         "SWITCH_TO_LONGPRESS", // = 4;
-        "RELEASE_SINGLE_TAP", // = 5;
+        "5",
         "UPDATE_TEXT_ENTRY_ADAPTER", // = 6;
         "SWITCH_TO_ENTER", // = 7;
         "RESUME_WEBCORE_UPDATE", // = 8;
@@ -346,13 +332,14 @@ public class WebView extends AbsoluteLayout
     };
 
     // width which view is considered to be fully zoomed out
-    static final int ZOOM_OUT_WIDTH = 1024;
+    static final int ZOOM_OUT_WIDTH = 1008;
 
-    private static final float DEFAULT_MAX_ZOOM_SCALE = 2;
-    private static final float DEFAULT_MIN_ZOOM_SCALE = (float) 1/3;
+    private static final float DEFAULT_MAX_ZOOM_SCALE = 4.0f;
+    private static final float DEFAULT_MIN_ZOOM_SCALE = 0.25f;
     // scale limit, which can be set through viewport meta tag in the web page
     private float mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
     private float mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+    private boolean mMinZoomScaleFixed = false;
 
     // initial scale in percent. 0 means using default.
     private int mInitialScale = 0;
@@ -562,8 +549,8 @@ public class WebView extends AbsoluteLayout
 
     private void initZoomController(Context context) {
         // Create the buttons controller
-        mZoomButtonsController = new ZoomButtonsController(context, this);
-        mZoomButtonsController.setCallback(mZoomListener);
+        mZoomButtonsController = new ZoomButtonsController(this);
+        mZoomButtonsController.setOnZoomListener(mZoomListener);
 
         // Create the accessory buttons
         LayoutInflater inflater =
@@ -611,12 +598,6 @@ public class WebView extends AbsoluteLayout
         final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
-        // use twice the line height, 32 based on our current default font, for
-        // the double tap slop as the ViewConfiguration's double tap slop, 100,
-        // is too big for the Browser
-        final int doubleTapslop = (int) (32 * getContext().getResources()
-                .getDisplayMetrics().density);
-        mDoubleTapSlopSquare = doubleTapslop * doubleTapslop;
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
         mNavSlop = (int) (16 * getContext().getResources()
@@ -1646,8 +1627,7 @@ public class WebView extends AbsoluteLayout
      * @return true if new values were sent
      */
     private boolean sendViewSizeZoom() {
-        int viewWidth = getViewWidth();
-        int newWidth = Math.round(viewWidth * mInvActualScale);
+        int newWidth = Math.round(getViewWidth() * mInvActualScale);
         int newHeight = Math.round(getViewHeight() * mInvActualScale);
         /*
          * Because the native side may have already done a layout before the
@@ -1663,7 +1643,7 @@ public class WebView extends AbsoluteLayout
         // Avoid sending another message if the dimensions have not changed.
         if (newWidth != mLastWidthSent || newHeight != mLastHeightSent) {
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED,
-                    newWidth, newHeight, new Integer(viewWidth));
+                    newWidth, newHeight, new Float(mActualScale));
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
             return true;
@@ -3341,19 +3321,10 @@ public class WebView extends AbsoluteLayout
         mZoomCenterX = getViewWidth() * .5f;
         mZoomCenterY = getViewHeight() * .5f;
 
-        // update mMinZoomScale
-        if (mMinContentWidth > MAX_FLOAT_CONTENT_WIDTH) {
-            boolean atMin = Math.abs(mActualScale - mMinZoomScale) < 0.01f;
-            mMinZoomScale = (float) getViewWidth() / mContentWidth;
-            if (atMin) {
-                // if the WebView was at the minimum zoom scale, keep it. e,g.,
-                // the WebView was at the minimum zoom scale at the portrait
-                // mode, rotate it to the landscape modifying the scale to the
-                // new minimum zoom scale, when rotating back, we would like to
-                // keep the minimum zoom scale instead of keeping the same scale
-                // as normally we do.
-                mActualScale = mMinZoomScale;
-            }
+        // update mMinZoomScale if the minimum zoom scale is not fixed
+        if (!mMinZoomScaleFixed) {
+            mMinZoomScale = (float) getViewWidth()
+                    / Math.max(ZOOM_OUT_WIDTH, mContentWidth);
         }
 
         // we always force, in case our height changed, in which case we still
@@ -3409,15 +3380,6 @@ public class WebView extends AbsoluteLayout
     public boolean onTouchEvent(MotionEvent ev) {
         if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
             return false;
-        }
-
-        if (mShowZoomTutorial && getSettings().supportZoom()
-                && (mMaxZoomScale != mMinZoomScale)) {
-            ZoomButtonsController.showZoomTutorialOnce(mContext);
-            mShowZoomTutorial = false;
-            mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                    .obtainMessage(DISMISS_ZOOM_TUTORIAL),
-                    ZOOM_TUTORIAL_DURATION);
         }
 
         if (LOGV_ENABLED) {
@@ -3482,29 +3444,6 @@ public class WebView extends AbsoluteLayout
                     nativeMoveSelection(viewToContent(mSelectX)
                             , viewToContent(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
-                } else if (!ZoomButtonsController.useOldZoom(mContext)
-                        && mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
-                    mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-                    if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
-                        // Found doubletap, invoke the zoom controller
-                        int contentX = viewToContent((int) mLastTouchX
-                                + mScrollX);
-                        int contentY = viewToContent((int) mLastTouchY
-                                + mScrollY);
-                        if (inEditingMode()) {
-                            mTextEntry.updateCachedTextfield();
-                        }
-                        nativeClearFocus(contentX, contentY);
-                        if (mLogEvent) {
-                            EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
-                                    (eventTime - mLastTouchUpTime), eventTime);
-                        }
-                        return mZoomButtonsController.handleDoubleTapEvent(ev);
-                    } else {
-                        // commit the short press action
-                        doShortPress();
-                        // continue, mTouchMode should be still TOUCH_INIT_MODE
-                    }
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
@@ -3588,6 +3527,12 @@ public class WebView extends AbsoluteLayout
                         mWebViewCore
                                 .sendMessage(EventHub.SET_SNAP_ANCHOR, 0, 0);
                     }
+                    if (getSettings().supportZoom()
+                            && !mZoomButtonsController.isVisible()
+                            && (canZoomScrollOut() || 
+                                    mMinZoomScale < mMaxZoomScale)) {
+                        mZoomButtonsController.setVisible(true);
+                    }
                 }
 
                 // do pan
@@ -3660,16 +3605,12 @@ public class WebView extends AbsoluteLayout
                 mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
                     case TOUCH_INIT_MODE: // tap
+                    case TOUCH_SHORTPRESS_START_MODE:
+                    case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                        if (getSettings().supportZoom()) {
-                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP),
-                                    DOUBLE_TAP_TIMEOUT);
-                        } else {
-                            // do short press now
-                            mTouchMode = TOUCH_DONE_MODE;
-                            doShortPress();
-                        }
+                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                        mTouchMode = TOUCH_DONE_MODE;
+                        doShortPress();
                         break;
                     case TOUCH_SELECT_MODE:
                         commitCopy();
@@ -3697,28 +3638,6 @@ public class WebView extends AbsoluteLayout
                             invalidate();
                         }
                         break;
-                    case TOUCH_SHORTPRESS_START_MODE:
-                    case TOUCH_SHORTPRESS_MODE: {
-                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                        if (eventTime - mLastTouchTime < TAP_TIMEOUT
-                                && getSettings().supportZoom()) {
-                            // Note: window manager will not release ACTION_UP
-                            // until all the previous action events are
-                            // returned. If GC happens, it can cause
-                            // SWITCH_TO_SHORTPRESS message fired before
-                            // ACTION_UP sent even time stamp of ACTION_UP is
-                            // less than the tap time out. We need to treat this
-                            // as tap instead of short press.
-                            mTouchMode = TOUCH_INIT_MODE;
-                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(RELEASE_SINGLE_TAP),
-                                    DOUBLE_TAP_TIMEOUT);
-                        } else {
-                            mTouchMode = TOUCH_DONE_MODE;
-                            doShortPress();
-                        }
-                        break;
-                    }
                     case TOUCH_DRAG_MODE:
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
@@ -3759,7 +3678,6 @@ public class WebView extends AbsoluteLayout
                 }
                 mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                 mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                 mTouchMode = TOUCH_DONE_MODE;
                 int contentX = viewToContent((int) mLastTouchX + mScrollX);
                 int contentY = viewToContent((int) mLastTouchY + mScrollY);
@@ -4132,31 +4050,7 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /**
-     * An InvisibleView is an invisible, zero-sized View for backwards
-     * compatibility
-     */
-    private final class InvisibleView extends View {
-
-        private InvisibleView(Context context) {
-            super(context);
-            setVisibility(GONE);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(0, 0);
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-        }
-
-        @Override
-        protected void dispatchDraw(Canvas canvas) {
-        }
-    }
-
+    // TODO: deprecate
     /**
      * Returns a view containing zoom controls i.e. +/- buttons. The caller is
      * in charge of installing this view to the view hierarchy. This view will
@@ -4167,7 +4061,19 @@ public class WebView extends AbsoluteLayout
      * an invisible dummy view for backwards compatibility.
      */
     public View getZoomControls() {
-        return new InvisibleView(mContext);
+        return mZoomButtonsController.getDummyZoomControls();
+    }
+
+    /**
+     * Gets the {@link ZoomButtonsController} which can be used to add
+     * additional buttons to the zoom controls window.
+     * 
+     * @return The instance of {@link ZoomButtonsController} used by this class,
+     *         or null if it is unavailable.
+     * @hide pending API council
+     */
+    public ZoomButtonsController getZoomButtonsController() {
+        return mZoomButtonsController;
     }
 
     /**
@@ -4447,11 +4353,6 @@ public class WebView extends AbsoluteLayout
                     updateTextEntry();
                     break;
                 }
-                case RELEASE_SINGLE_TAP: {
-                    mTouchMode = TOUCH_DONE_MODE;
-                    doShortPress();
-                    break;
-                }
                 case SWITCH_TO_ENTER:
                     if (LOGV_ENABLED) Log.v(LOGTAG, "SWITCH_TO_ENTER");
                     mTouchMode = TOUCH_DONE_MODE;
@@ -4498,10 +4399,9 @@ public class WebView extends AbsoluteLayout
                                     0, 0);
                         }
                     }
-                    mMinContentWidth = msg.arg1;
-                    if (mMinContentWidth > MAX_FLOAT_CONTENT_WIDTH) {
+                    if (!mMinZoomScaleFixed) {
                         mMinZoomScale = (float) getViewWidth()
-                                / draw.mWidthHeight.x;
+                                / Math.max(ZOOM_OUT_WIDTH, draw.mWidthHeight.x);
                     }
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
@@ -4561,8 +4461,10 @@ public class WebView extends AbsoluteLayout
                     int minScale = (Integer) scaleLimit.get("minScale");
                     if (minScale == 0) {
                         mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                        mMinZoomScaleFixed = false;
                     } else {
                         mMinZoomScale = (float) (minScale / 100.0);
+                        mMinZoomScaleFixed = true;
                     }
                     int maxScale = (Integer) scaleLimit.get("maxScale");
                     if (maxScale == 0) {
@@ -4688,10 +4590,6 @@ public class WebView extends AbsoluteLayout
                             mTouchMode = TOUCH_DONE_MODE;
                         }
                     }
-                    break;
-
-                case DISMISS_ZOOM_TUTORIAL:
-                    mZoomButtonsController.finishZoomTutorial();
                     break;
 
                 default:

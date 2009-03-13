@@ -13,16 +13,19 @@ usage()
             "       aidl --preprocess OUTPUT INPUT...\n"
             "\n"
             "OPTIONS:\n"
-            "   -I<DIR>  search path for import statements.\n"
-            "   -d<FILE> generate dependency file.\n"
-            "   -p<FILE> file created by --preprocess to import.\n"
-            "   -b       fail when trying to compile a parcelable.\n"
+            "   -I<DIR>    search path for import statements.\n"
+            "   -d<FILE>   generate dependency file.\n"
+            "   -p<FILE>   file created by --preprocess to import.\n"
+            "   -o<FOLDER> base output folder for generated files.\n"
+            "   -b         fail when trying to compile a parcelable.\n"
             "\n"
             "INPUT:\n"
             "   An aidl interface file.\n"
             "\n"
             "OUTPUT:\n"
-            "   The generated interface files. If omitted, the input filename is used, with the .aidl extension changed to a .java extension.\n"
+            "   The generated interface files.\n"
+            "   If omitted and the -o option is not used, the input filename is used, with the .aidl extension changed to a .java extension.\n"
+            "   If the -o option is used, the generated files will be placed in the base output folder, under their package folder\n"
            );
     return 1;
 }
@@ -78,6 +81,14 @@ parse_options(int argc, const char* const* argv, Options *options)
                         return usage();
                     }
                 }
+                else if (s[1] == 'o') {
+                    if (len > 2) {
+                        options->outputBaseFolder = s+2;
+                    } else {
+                        fprintf(stderr, "-o option (%d) requires a path.\n", i);
+                        return usage();
+                    }
+                }
                 else if (len == 2 && s[1] == 'b') {
                     options->failOnParcelable = true;
                 }
@@ -111,7 +122,7 @@ parse_options(int argc, const char* const* argv, Options *options)
     if (i < argc) {
         options->outputFileName = argv[i];
         i++;
-    } else {
+    } else if (options->outputBaseFolder.length() == 0) {
         // copy input into output and change the extension from .aidl to .java
         options->outputFileName = options->inputFileName;
         string::size_type pos = options->outputFileName.size()-5;

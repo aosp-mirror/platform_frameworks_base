@@ -25,4 +25,13 @@
          manager will disable alpha trasformation in animations where not
          strictly needed. -->
     <bool name="config_sf_limitedAlpha">false</bool>
+    
+    <!-- The duration (in milliseconds) of a short animation. -->
+    <integer name="config_shortAnimTime">100</integer>
+    
+    <!-- The duration (in milliseconds) of a medium-length animation. -->
+    <integer name="config_mediumAnimTime">150</integer>
+    
+    <!-- The duration (in milliseconds) of a long animation. -->
+    <integer name="config_longAnimTime">300</integer>
 </resources>

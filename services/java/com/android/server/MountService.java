@@ -82,6 +82,8 @@ class MountService extends IMountService.Stub {
 
     private boolean mMounted;
 
+    private boolean mAutoStartUms;
+
     /**
      * Constructs a new MountService instance
      * 
@@ -100,6 +102,8 @@ class MountService extends IMountService.Stub {
         mShowSafeUnmountNotificationWhenUnmounted = false;
 
         mPlaySounds = SystemProperties.get("persist.service.mount.playsnd", "1").equals("1");
+
+        mAutoStartUms = SystemProperties.get("persist.service.mount.umsauto", "0").equals("1");
     }
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -198,6 +202,26 @@ class MountService extends IMountService.Stub {
     }
 
     /**
+     * Returns true if we auto-start UMS on cable insertion.
+     */
+    public boolean getAutoStartUms() {
+        return mAutoStartUms;
+    }
+
+    /**
+     * Set whether or not we're playing media notification sounds.
+     */
+    public void setAutoStartUms(boolean enabled) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SETTINGS) 
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires WRITE_SETTINGS permission");
+        }
+        mAutoStartUms = enabled;
+        SystemProperties.set("persist.service.mount.umsauto", (enabled ? "1" : "0"));
+    }
+
+    /**
      * Update the state of the USB mass storage notification
      */
     void updateUsbMassStorageNotification(boolean suppressIfConnected, boolean sound) {
@@ -239,7 +263,14 @@ class MountService extends IMountService.Stub {
             !storageState.equals(Environment.MEDIA_BAD_REMOVAL) &&
             !storageState.equals(Environment.MEDIA_CHECKING)) {
 
-            updateUsbMassStorageNotification(false, true);
+            if (mAutoStartUms) {
+                try {
+                    setMassStorageEnabled(true);
+                } catch (RemoteException e) {
+                }
+            } else {
+                updateUsbMassStorageNotification(false, true);
+            }
         }
 
         Intent intent = new Intent(Intent.ACTION_UMS_CONNECTED);

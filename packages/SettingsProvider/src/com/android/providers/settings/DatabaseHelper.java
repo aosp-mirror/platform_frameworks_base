@@ -334,7 +334,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 31) {
             /*
-             * Animations are now turned off by default.
+             * Animations are now managed in preferences, and may be
+             * enabled or disabled based on product resources.
              */
             db.beginTransaction();
             try {

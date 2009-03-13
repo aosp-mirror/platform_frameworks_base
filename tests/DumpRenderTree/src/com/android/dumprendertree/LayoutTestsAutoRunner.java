@@ -27,7 +27,7 @@ import android.os.Bundle;
 
 
 /**
- * Instrumentation Test Runner for all MediaPlayer tests.
+ * Instrumentation Test Runner for all DumpRenderTree tests.
  * 
  * Running all tests:
  *
@@ -40,6 +40,7 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(LayoutTestsAutoTest.class);
+        suite.addTestSuite(LoadTestsAutoTest.class);
         return suite;
     }
 
@@ -51,18 +52,22 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        String path = (String) icicle.get("path");
-        LayoutTestsAutoTest.setLayoutTestDir(path);
+        this.mTestPath = (String) icicle.get("path");
         String timeout_str = (String) icicle.get("timeout");
-        int timeout = 0;  // default value
         if (timeout_str != null) {
             try {
-                timeout = Integer.parseInt(timeout_str);
+                this.mTimeoutInMillis = Integer.parseInt(timeout_str);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        LayoutTestsAutoTest.setTimeoutInMillis(timeout);
+        
+        String r = (String)icicle.get("rebaseline");
+        this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
     }
+    
+    public String mTestPath = null;
+    public int mTimeoutInMillis = 0;
+    public boolean mRebaseline = false;
 }
 

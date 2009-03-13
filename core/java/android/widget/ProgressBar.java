@@ -763,7 +763,7 @@ public class ProgressBar extends View {
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (!mInDrawing) {
-            if (dr == mProgressDrawable || dr == mIndeterminateDrawable) {
+            if (verifyDrawable(dr)) {
                 final Rect dirty = dr.getBounds();
                 final int scrollX = mScrollX + mPaddingLeft;
                 final int scrollY = mScrollY + mPaddingTop;

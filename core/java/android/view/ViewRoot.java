@@ -219,7 +219,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mVisRect = new Rect();
         mVisPoint = new Point();
         mWinFrame = new Rect();
-        mWindow = new W(this);
+        mWindow = new W(this, context);
         mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
@@ -2453,11 +2453,71 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
     
+    static class EventCompletion extends Handler {
+        final IWindow mWindow;
+        final KeyEvent mKeyEvent;
+        final boolean mIsPointer;
+        final MotionEvent mMotionEvent;
+        
+        EventCompletion(Looper looper, IWindow window, KeyEvent key,
+                boolean isPointer, MotionEvent motion) {
+            super(looper);
+            mWindow = window;
+            mKeyEvent = key;
+            mIsPointer = isPointer;
+            mMotionEvent = motion;
+            sendEmptyMessage(0);
+        }
+        
+        @Override
+        public void handleMessage(Message msg) {
+            if (mKeyEvent != null) {
+                try {
+                    sWindowSession.finishKey(mWindow);
+                 } catch (RemoteException e) {
+                 }
+            } else if (mIsPointer) {
+                boolean didFinish;
+                MotionEvent event = mMotionEvent;
+                if (event == null) {
+                    try {
+                        event = sWindowSession.getPendingPointerMove(mWindow);
+                    } catch (RemoteException e) {
+                    }
+                    didFinish = true;
+                } else {
+                    didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
+                }
+                if (!didFinish) {
+                    try {
+                        sWindowSession.finishKey(mWindow);
+                     } catch (RemoteException e) {
+                     }
+                }
+            } else {
+                MotionEvent event = mMotionEvent;
+                if (event == null) {
+                    try {
+                        event = sWindowSession.getPendingTrackballMove(mWindow);
+                    } catch (RemoteException e) {
+                    }
+                } else {
+                    try {
+                        sWindowSession.finishKey(mWindow);
+                     } catch (RemoteException e) {
+                     }
+                }
+            }
+        }
+    }
+    
     static class W extends IWindow.Stub {
-        private WeakReference<ViewRoot> mViewRoot;
+        private final WeakReference<ViewRoot> mViewRoot;
+        private final Looper mMainLooper;
 
-        public W(ViewRoot viewRoot) {
+        public W(ViewRoot viewRoot, Context context) {
             mViewRoot = new WeakReference<ViewRoot>(viewRoot);
+            mMainLooper = context.getMainLooper();
         }
 
         public void resized(int w, int h, Rect coveredInsets,
@@ -2475,6 +2535,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 viewRoot.dispatchKey(event);
             } else {
                 Log.w("ViewRoot.W", "Key event " + event + " but no ViewRoot available!");
+                new EventCompletion(mMainLooper, this, event, false, null);
             }
         }
 
@@ -2482,6 +2543,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchPointer(event, eventTime);
+            } else {
+                new EventCompletion(mMainLooper, this, null, true, event);
             }
         }
 
@@ -2489,6 +2552,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchTrackball(event, eventTime);
+            } else {
+                new EventCompletion(mMainLooper, this, null, false, event);
             }
         }
 

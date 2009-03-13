@@ -16,33 +16,32 @@
 
 package android.inputmethodservice;
 
-import com.android.internal.R;
-
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.Paint.Align;
+import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
-import android.preference.PreferenceManager;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import com.android.internal.R;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -221,6 +220,15 @@ public class KeyboardView extends View implements View.OnClickListener {
     private static final int MULTITAP_INTERVAL = 800; // milliseconds
     private StringBuilder mPreviewLabel = new StringBuilder(1);
 
+    /** Whether the keyboard bitmap needs to be redrawn before it's blitted. **/
+    private boolean mDrawPending;
+    /** The dirty region in the keyboard bitmap */
+    private Rect mDirtyRect = new Rect();
+    /** The keyboard bitmap for faster updates */
+    private Bitmap mBuffer;
+    /** The canvas for the above mutable keyboard bitmap */
+    private Canvas mCanvas;
+    
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -396,7 +404,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
         requestLayout();
-        invalidate();
+        // Release buffer, just in case the new keyboard has a different size. 
+        // It will be reallocated on the next draw.
+        mBuffer = null;
+        invalidateAll();
         computeProximityThreshold(keyboard);
         mMiniKeyboardCache.clear(); // Not really necessary to do every time, but will free up views
     }
@@ -420,7 +431,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mKeyboard != null) {
             if (mKeyboard.setShifted(shifted)) {
                 // The whole keyboard probably needs to be redrawn
-                invalidate();
+                invalidateAll();
                 return true;
             }
         }
@@ -545,8 +556,30 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     @Override
+    public void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // Release the buffer, if any and it will be reallocated on the next draw
+        mBuffer = null;
+    }
+
+    @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (mDrawPending || mBuffer == null) {
+            onBufferDraw();
+        }
+        canvas.drawBitmap(mBuffer, 0, 0, null);
+    }
+    
+    private void onBufferDraw() {
+        if (mBuffer == null) {
+            mBuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBuffer);
+            invalidateAll();
+        }
+        final Canvas canvas = mCanvas;
+        canvas.clipRect(mDirtyRect, Op.REPLACE);
+        
         if (mKeyboard == null) return;
         
         final Paint paint = mPaint;
@@ -557,24 +590,20 @@ public class KeyboardView extends View implements View.OnClickListener {
         final int kbdPaddingTop = mPaddingTop;
         final Key[] keys = mKeys;
         final Key invalidKey = mInvalidatedKey;
-        //canvas.translate(0, mKeyboardPaddingTop);
+
         paint.setAlpha(255);
         paint.setColor(mKeyTextColor);
         boolean drawSingleKey = false;
         if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
-//            System.out.println("Key bounds = " + (invalidKey.x + mPaddingLeft) + ","
-//                    + (invalidKey.y + mPaddingTop) + "," 
-//                    + (invalidKey.x + invalidKey.width + mPaddingLeft) + "," 
-//                    + (invalidKey.y + invalidKey.height + mPaddingTop));
-//            System.out.println("Clip bounds =" + clipRegion.toShortString());
-            // Is clipRegion completely contained within the invalidated key?
-            if (invalidKey.x + kbdPaddingLeft - 1 <= clipRegion.left &&
-                    invalidKey.y + kbdPaddingTop - 1 <= clipRegion.top &&
-                    invalidKey.x + invalidKey.width + kbdPaddingLeft + 1 >= clipRegion.right &&
-                    invalidKey.y + invalidKey.height + kbdPaddingTop + 1 >= clipRegion.bottom) {
-                drawSingleKey = true;
-            }
+          // Is clipRegion completely contained within the invalidated key?
+          if (invalidKey.x + kbdPaddingLeft - 1 <= clipRegion.left &&
+                  invalidKey.y + kbdPaddingTop - 1 <= clipRegion.top &&
+                  invalidKey.x + invalidKey.width + kbdPaddingLeft + 1 >= clipRegion.right &&
+                  invalidKey.y + invalidKey.height + kbdPaddingTop + 1 >= clipRegion.bottom) {
+              drawSingleKey = true;
+          }
         }
+        canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
         final int keyCount = keys.length;
         for (int i = 0; i < keyCount; i++) {
             final Key key = keys[i];
@@ -645,6 +674,9 @@ public class KeyboardView extends View implements View.OnClickListener {
             paint.setColor(0xFF00FF00);
             canvas.drawCircle((mStartX + mLastX) / 2, (mStartY + mLastY) / 2, 2, paint);
         }
+        
+        mDrawPending = false;
+        mDirtyRect.setEmpty();
     }
 
     private int getKeyIndices(int x, int y, int[] allKeys) {
@@ -844,12 +876,21 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewText.setVisibility(VISIBLE);
     }
 
+    private void invalidateAll() {
+        mDirtyRect.union(0, 0, getWidth(), getHeight());
+        mDrawPending = true;
+        invalidate();
+    }
+    
     private void invalidateKey(int keyIndex) {
         if (keyIndex < 0 || keyIndex >= mKeys.length) {
             return;
         }
         final Key key = mKeys[keyIndex];
         mInvalidatedKey = key;
+        mDirtyRect.union(key.x + mPaddingLeft, key.y + mPaddingTop, 
+                key.x + key.width + mPaddingLeft, key.y + key.height + mPaddingTop);
+        onBufferDraw();
         invalidate(key.x + mPaddingLeft, key.y + mPaddingTop, 
                 key.x + key.width + mPaddingLeft, key.y + key.height + mPaddingTop);
     }
@@ -952,7 +993,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPopupKeyboard.showAtLocation(this, Gravity.NO_GRAVITY, x, y);
             mMiniKeyboardOnScreen = true;
             //mMiniKeyboard.onTouchEvent(getTranslatedEvent(me));
-            invalidate();
+            invalidateAll();
             return true;
         }
         return false;
@@ -1066,11 +1107,11 @@ public class KeyboardView extends View implements View.OnClickListener {
                 }
                 showPreview(NOT_A_KEY);
                 Arrays.fill(mKeyIndices, NOT_A_KEY);
-                invalidateKey(keyIndex);
                 // If we're not on a repeating key (which sends on a DOWN event)
                 if (mRepeatKeyIndex == NOT_A_KEY && !mMiniKeyboardOnScreen && !mAbortKey) {
                     detectAndSendKey(touchX, touchY, eventTime);
                 }
+                invalidateKey(keyIndex);
                 mRepeatKeyIndex = NOT_A_KEY;
                 break;
         }
@@ -1110,7 +1151,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         mHandler.removeMessages(MSG_SHOW_PREVIEW);
         
         dismissPopupKeyboard();
-        
+        mBuffer = null;
+        mCanvas = null;
         mMiniKeyboardCache.clear();
     }
     
@@ -1124,10 +1166,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mPopupKeyboard.isShowing()) {
             mPopupKeyboard.dismiss();
             mMiniKeyboardOnScreen = false;
-            invalidate();
+            invalidateAll();
         }
     }
-    
+
     public boolean handleBack() {
         if (mPopupKeyboard.isShowing()) {
             dismissPopupKeyboard();

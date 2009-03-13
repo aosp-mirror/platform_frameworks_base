@@ -6208,7 +6208,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
-        if (mMovement != null && mText instanceof Spannable && mLayout != null) {
+        if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
             
             if (action == MotionEvent.ACTION_DOWN) {
                 mScrolled = false;
@@ -6219,7 +6219,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int oldSelStart = Selection.getSelectionStart(mText);
             int oldSelEnd = Selection.getSelectionEnd(mText);
             
-            handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
+            if (mMovement != null) {
+                handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
+            }
 
             if (mText instanceof Editable && onCheckIsTextEditor()) {
                 if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {

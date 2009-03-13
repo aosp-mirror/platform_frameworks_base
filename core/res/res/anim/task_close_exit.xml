@@ -20,5 +20,6 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator">
-	<translate android:fromXDelta="0%" android:toXDelta="33%" android:duration="200"/>
+	<translate android:fromXDelta="0%" android:toXDelta="33%"
+        android:duration="@android:integer/config_mediumAnimTime"/>
 </set>

@@ -22,7 +22,6 @@ import com.android.mediaframeworktest.MediaNames;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -595,12 +594,12 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         //-------- tear down      --------------
         track.release();
     }
-/*    
-    //Test case 7: setPlaybackRate() clips values over twice the output sample rate
+    
+    //Test case 7: setPlaybackRate() and retrieve value, should be the same for half the content SR
     @LargeTest
-    public void testSetPlaybackRateClip() throws Exception {
+    public void testSetGetPlaybackRate() throws Exception {
         // constants for test
-        final String TEST_NAME = "testSetPlaybackRateClip";
+        final String TEST_NAME = "testSetGetPlaybackRate";
         final int TEST_SR = 22050;
         final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
@@ -612,18 +611,17 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
                 minBuffSize, TEST_MODE);
         byte data[] = new byte[minBuffSize/2];
-        int outputSR = AudioTrack.getNativeOutputSampleRate(TEST_STREAM_TYPE);
         //--------    test        --------------
         track.write(data, 0, data.length);
         track.write(data, 0, data.length);
         assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
         track.play();
-        track.setPlaybackRate(3*outputSR);
-        assertTrue(TEST_NAME, track.getSampleRate() == 2*outputSR);
+        track.setPlaybackRate((int)(TEST_SR/2));
+        assertTrue(TEST_NAME, track.getPlaybackRate() == (int)(TEST_SR/2));
         //-------- tear down      --------------
         track.release();
     }
-*/    
+    
     //Test case 8: setPlaybackRate() invalid operation if track not initialized
     @LargeTest
     public void testSetPlaybackRateUninit() throws Exception {
@@ -641,7 +639,8 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
                 minBuffSize, TEST_MODE);
         //--------    test        --------------
         assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_NO_STATIC_DATA);
-        assertTrue(TEST_NAME, track.setPlaybackRate(TEST_SR/2) == AudioTrack.ERROR_INVALID_OPERATION);
+        assertTrue(TEST_NAME, 
+                track.setPlaybackRate(TEST_SR/2) == AudioTrack.ERROR_INVALID_OPERATION);
         //-------- tear down      --------------
         track.release();
     }
@@ -863,8 +862,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         //-------- tear down      --------------
         track.release();
     }
-/*    
-    //Test case 7: setLoopPoints() fails with start beyond what can be written for the track
+    //Test case 8: setLoopPoints() fails with start beyond what can be written for the track
     @LargeTest
     public void testSetLoopPointsStartTooFar() throws Exception {
         // constants for test
@@ -891,7 +889,327 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         //-------- tear down      --------------
         track.release();
     }
-*/    
+
+    //Test case 9: setLoopPoints() fails with end beyond what can be written for the track
+    @LargeTest
+    public void testSetLoopPointsEndTooFar() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testSetLoopPointsEndTooFar";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STATIC;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        int dataSizeInFrames = minBuffSize/2;//16bit data
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_NO_STATIC_DATA);
+        track.write(data, 0, data.length);
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME, 
+                track.setLoopPoints(dataSizeInFrames-10, dataSizeInFrames+50, 2) 
+                    == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    
+    //-----------------------------------------------------------------
+    //      Audio data supply
+    //----------------------------------
+    
+    //Test case 1: write() fails when supplying less data (bytes) than declared
+    @LargeTest
+    public void testWriteByteOffsetTooBig() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByteOffsetTooBig";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 10, data.length) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 2: write() fails when supplying less data (shorts) than declared
+    @LargeTest
+    public void testWriteShortOffsetTooBig() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShortOffsetTooBig";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 10, data.length) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 3: write() fails when supplying less data (bytes) than declared
+    @LargeTest
+    public void testWriteByteSizeTooBig() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByteSizeTooBig";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length + 10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 4: write() fails when supplying less data (shorts) than declared
+    @LargeTest
+    public void testWriteShortSizeTooBig() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShortSizeTooBig";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length + 10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 5: write() fails with negative offset
+    @LargeTest
+    public void testWriteByteNegativeOffset() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByteNegativeOffset";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, -10, data.length - 10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 6: write() fails with negative offset
+    @LargeTest
+    public void testWriteShortNegativeOffset() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShortNegativeOffset";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, -10, data.length - 10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 7: write() fails with negative size
+    @LargeTest
+    public void testWriteByteNegativeSize() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByteNegativeSize";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, -10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 8: write() fails with negative size
+    @LargeTest
+    public void testWriteShortNegativeSize() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShortNegativeSize";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, -10) == AudioTrack.ERROR_BAD_VALUE);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 9: write() succeeds and returns the size that was written for 16bit
+    @LargeTest
+    public void testWriteByte() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByte";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length) == data.length);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 10: write() succeeds and returns the size that was written for 16bit
+    @LargeTest
+    public void testWriteShort() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShort";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length) == data.length);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 11: write() succeeds and returns the size that was written for 8bit
+    @LargeTest
+    public void testWriteByte8bit() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteByte8bit";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        byte data[] = new byte[minBuffSize];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length) == data.length);
+        //-------- tear down      --------------
+        track.release();
+    }
+    
+    //Test case 12: write() succeeds and returns the size that was written for 8bit
+    @LargeTest
+    public void testWriteShort8bit() throws Exception {
+        // constants for test
+        final String TEST_NAME = "testWriteShort8bit";
+        final int TEST_SR = 22050;
+        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+        final int TEST_MODE = AudioTrack.MODE_STREAM;
+        final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        
+        //-------- initialization --------------
+        int minBuffSize = AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT);
+        AudioTrack track = new AudioTrack(TEST_STREAM_TYPE, TEST_SR, TEST_CONF, TEST_FORMAT, 
+                2*minBuffSize, TEST_MODE);
+        short data[] = new short[minBuffSize/2];
+        //--------    test        --------------
+        assumeTrue(TEST_NAME, track.getState() == AudioTrack.STATE_INITIALIZED);
+        assertTrue(TEST_NAME,
+                track.write(data, 0, data.length) == data.length);
+        //-------- tear down      --------------
+        track.release();
+    }
     
 }
 

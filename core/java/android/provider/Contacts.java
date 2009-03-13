@@ -182,7 +182,7 @@ public class Contacts {
          * <p>Type: TEXT</P>
          */
         public static final String PHONETIC_NAME = "phonetic_name";
-
+        
         /**
          * The display name. If name is not null name, else if number is not null number,
          * else if email is not null email.
@@ -190,6 +190,14 @@ public class Contacts {
          */
         public static final String DISPLAY_NAME = "display_name";
 
+        /**
+         * The field for sorting list phonetically. The content of this field
+         * may not be human readable but phonetically sortable.
+         * <P>Type: TEXT</p>
+         * @hide Used only in Contacts application for now.
+         */
+        public static final String SORT_STRING = "sort_string";
+        
         /**
          * Notes about the person.
          * <P>Type: TEXT</P>
@@ -231,7 +239,7 @@ public class Contacts {
          * The server version of the photo
          * <P>Type: TEXT (the version number portion of the photo URI)</P>
          */
-        public static final String PHOTO_VERSION = "photo_version";
+        public static final String PHOTO_VERSION = "photo_version";       
     }
 
     /**

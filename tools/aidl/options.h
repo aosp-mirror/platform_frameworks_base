@@ -20,6 +20,7 @@ struct Options
     vector<string> preprocessedFiles;
     string inputFileName;
     string outputFileName;
+    string outputBaseFolder;
     string depFileName;
 
     vector<string> filesToPreprocess;

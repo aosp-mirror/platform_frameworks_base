@@ -154,6 +154,16 @@ status_t MediaRecorderClient::setVideoFrameRate(int frames_per_second)
     return mRecorder->setVideoFrameRate(frames_per_second);
 }
 
+status_t MediaRecorderClient::setParameters(const String8& params) {
+    LOGV("setParameters(%s)", params.string());
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setParameters(params);
+}
+
 status_t MediaRecorderClient::prepare()
 {
     LOGV("prepare");

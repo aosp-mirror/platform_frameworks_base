@@ -20,7 +20,8 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator">
-    <translate android:fromYDelta="20%" android:toYDelta="0" android:duration="100"/>
+    <translate android:fromYDelta="20%" android:toYDelta="0"
+            android:duration="@android:integer/config_shortAnimTime"/>
     <alpha android:fromAlpha="0.5" android:toAlpha="1.0"
-            android:duration="100" />
+            android:duration="@android:integer/config_shortAnimTime" />
 </set>

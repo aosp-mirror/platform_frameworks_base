@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.Browser;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -78,7 +79,10 @@ public class DesktopAndroid {
 
     Intent viewWebPage = new Intent(Intent.ACTION_VIEW);
     viewWebPage.setData(Uri.parse(url));
-    viewWebPage.addCategory(Intent.CATEGORY_BROWSABLE);
+    long urlHash = url.hashCode();
+    long uniqueId = (urlHash << 32) | viewWebPage.hashCode();
+    viewWebPage.putExtra(Browser.EXTRA_APPLICATION_ID,
+            Long.toString(uniqueId));
 
     Intent intent = new Intent(ACTION_INSTALL_SHORTCUT);
     intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, viewWebPage);

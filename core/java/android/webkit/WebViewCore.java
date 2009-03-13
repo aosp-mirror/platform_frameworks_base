@@ -725,7 +725,7 @@ final class WebViewCore {
 
                         case VIEW_SIZE_CHANGED:
                             viewSizeChanged(msg.arg1, msg.arg2,
-                                    ((Integer) msg.obj).intValue());
+                                    ((Float) msg.obj).floatValue());
                             break;
 
                         case SET_SCROLL_OFFSET:
@@ -1181,23 +1181,16 @@ final class WebViewCore {
     private int mCurrentViewWidth = 0;
     private int mCurrentViewHeight = 0;
 
-    // Define a minimum screen width so that we won't wrap the paragraph to one
-    // word per line during zoom-in.
-    private static final int MIN_SCREEN_WIDTH = 160;
-
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(int w, int h, int viewWidth) {
+    private void viewSizeChanged(int w, int h, float scale) {
         if (LOGV_ENABLED) Log.v(LOGTAG, "CORE onSizeChanged");
         if (w == 0) {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
-        // negative scale indicate that WebCore should reuse the current scale
-        float scale = (float) viewWidth / w;
         if (mSettings.getUseWideViewPort()
                 && (w < mViewportWidth || mViewportWidth == -1)) {
             int width = mViewportWidth;
-            int screenWidth = Math.max(w, MIN_SCREEN_WIDTH);
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() == 
                         WebSettings.LayoutAlgorithm.NORMAL) {
@@ -1215,19 +1208,11 @@ final class WebViewCore {
                      * In the worse case, the native width will be adjusted when
                      * next zoom or screen orientation change happens.
                      */
-                    int minContentWidth = nativeGetContentMinPrefWidth();
-                    if (minContentWidth > WebView.MAX_FLOAT_CONTENT_WIDTH) {
-                        // keep the same width and screen width so that there is 
-                        // no reflow when zoom-out
-                        width = minContentWidth;
-                        screenWidth = Math.min(screenWidth, Math.abs(viewWidth));
-                    } else {
-                        width = Math.max(w, minContentWidth);
-                    }
+                    width = Math.max(w, nativeGetContentMinPrefWidth());
                 }
             }
-            nativeSetSize(width, Math.round((float) width * h / w),
-                    screenWidth, scale, w, h);
+            nativeSetSize(width, Math.round((float) width * h / w), w, scale,
+                    w, h);
         } else {
             nativeSetSize(w, h, w, scale, w, h);
         }
@@ -1289,10 +1274,7 @@ final class WebViewCore {
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.NEW_PICTURE_MSG_ID,
-                    mViewportMinimumScale == 0 ? nativeGetContentMinPrefWidth()
-                            : 0,
-                    0, draw).sendToTarget();
+                    WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
             if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {
                 // as we have the new picture, try to sync the scroll position
                 Message.obtain(mWebView.mPrivateHandler,
@@ -1533,11 +1515,11 @@ final class WebViewCore {
         // white space in the GMail which uses WebView for message view.
         if (mWebView != null && mWebView.mHeightCanMeasure) {
             mWebView.mLastHeightSent = 0;
-            // Send a negative screen width to indicate that WebCore should 
-            // reuse the current scale
+            // Send a negative scale to indicate that WebCore should reuse the
+            // current scale
             mEventHub.sendMessage(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, mWebView.mLastWidthSent,
-                    mWebView.mLastHeightSent, -mWebView.mLastWidthSent));
+                    mWebView.mLastHeightSent, -1.0f));
         }
 
         mBrowserFrame.didFirstLayout();

@@ -663,7 +663,7 @@ public class ViewDebug {
                     public Object[] pre() {
                         final DisplayMetrics metrics = view.getResources().getDisplayMetrics();
                         final Bitmap bitmap = Bitmap.createBitmap(metrics.widthPixels,
-                                metrics.heightPixels, Bitmap.Config.ARGB_8888);
+                                metrics.heightPixels, Bitmap.Config.RGB_565);
                         final Canvas canvas = new Canvas(bitmap);
                         return new Object[] { bitmap, canvas };
                     }

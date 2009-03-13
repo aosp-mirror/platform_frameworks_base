@@ -22,6 +22,7 @@
   use --refresh-test-list option *once* to re-generate test list on the card.
 
   Some other options are:
+    --rebaseline generates expected layout tests results under /sdcard/android/expected_result/ 
     --time-out-ms (default is 8000 millis) for each test
     --adb-options="-e" passes option string to adb
     --results-directory=..., (default is ./layout-test-results) directory name under which results are stored.
@@ -55,8 +56,8 @@ def DumpRenderTreeFinished(adb_cmd):
     output: adb_cmd string
   """
   
-  # pull /sdcard/running_test.txt, if the content is "#DONE", it's done
-  shell_cmd_str = adb_cmd + " shell cat /sdcard/running_test.txt"
+  # pull /sdcard/android/running_test.txt, if the content is "#DONE", it's done
+  shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   return adb_output.strip() == "#DONE"
 
@@ -145,7 +146,7 @@ def main(options, args):
 
   # Include all tests if none are specified.
   if not args:
-    path = 'fast';
+    path = '/';
   else:
     path = ' '.join(args);
 
@@ -156,8 +157,8 @@ def main(options, args):
   # Re-generate the test list if --refresh-test-list is on
   if options.refresh_test_list:
     logging.info("Generating test list.");
-    shell_cmd_str = adb_cmd + " shell am instrument -e class com.android.dumprendertree.LayoutTestsAutoTest#generateTestList -e path fast -w com.android.dumprendertree/.LayoutTestsAutoRunner"
-    adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+    generate_test_list_cmd_str = adb_cmd + " shell am instrument -e class com.android.dumprendertree.LayoutTestsAutoTest#generateTestList -e path \"" + path + "\" -w com.android.dumprendertree/.LayoutTestsAutoRunner"
+    adb_output = subprocess.Popen(generate_test_list_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
 
     if adb_output.find('Process crashed') != -1:
        logging.info("Aborting because cannot generate test list.\n" + adb_output)
@@ -169,20 +170,28 @@ def main(options, args):
   # Count crashed tests.
   crashed_tests = []
 
-  timeout_ms = '8000'
+  timeout_ms = '5000'
   if options.time_out_ms:
     timeout_ms = options.time_out_ms
 
   # Run test until it's done
 
+  run_layout_test_cmd_prefix = adb_cmd + " shell am instrument"
+
+  run_layout_test_cmd_postfix = " -e path \"" + path + "\" -e timeout " + timeout_ms
+  if options.rebaseline:
+    run_layout_test_cmd_postfix += " -e rebaseline true"
+  run_layout_test_cmd_postfix += " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
+
   # Call LayoutTestsAutoTest::startLayoutTests.
-  shell_cmd_str = adb_cmd + " shell am instrument -e class com.android.dumprendertree.LayoutTestsAutoTest#startLayoutTests -e path \"" + path + "\" -e timeout " + timeout_ms + " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
-  adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+  run_layout_test_cmd = run_layout_test_cmd_prefix + " -e class com.android.dumprendertree.LayoutTestsAutoTest#startLayoutTests" + run_layout_test_cmd_postfix
+
+  adb_output = subprocess.Popen(run_layout_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   while not DumpRenderTreeFinished(adb_cmd):
     # Get the running_test.txt
     logging.error("DumpRenderTree crashed, output:\n" + adb_output)
 
-    shell_cmd_str = adb_cmd + " shell cat /sdcard/running_test.txt"
+    shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
     crashed_test = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE).communicate()[0]
     
     logging.info(crashed_test + " CRASHED");
@@ -190,9 +199,9 @@ def main(options, args):
 
     logging.info("Resuming layout test runner...");
     # Call LayoutTestsAutoTest::resumeLayoutTests
-    shell_cmd_str = adb_cmd + " shell am instrument -e class com.android.dumprendertree.LayoutTestsAutoTest#resumeLayoutTests -e path \"" + path + "\" -e timeout " + timeout_ms + " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
+    run_layout_test_cmd = run_layout_test_cmd_prefix + " -e class com.android.dumprendertree.LayoutTestsAutoTest#resumeLayoutTests" + run_layout_test_cmd_postfix
 
-    adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+    adb_output = subprocess.Popen(run_layout_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
 
   if adb_output.find('INSTRUMENTATION_FAILED') != -1:
     logging.error("Error happened : " + adb_output)
@@ -219,7 +228,7 @@ def main(options, args):
     
   # Create the crash list.
   fp = open(results_dir + "/layout_tests_crashed.txt", "w");
-  fp.writelines(crashed_tests)
+  fp.writelines('\n'.join(crashed_tests))
   fp.close()
 
   # Count the number of tests in each category.
@@ -250,6 +259,9 @@ def main(options, args):
 
 if '__main__' == __name__:
   option_parser = optparse.OptionParser()
+  option_parser.add_option("", "--rebaseline", action="store_true",
+                           default=False,
+                           help="generate expected results for those tests not having one")
   option_parser.add_option("", "--time-out-ms",
                            default=None,
                            help="set the timeout for each test")

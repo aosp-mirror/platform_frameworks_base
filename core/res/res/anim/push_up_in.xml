@@ -15,6 +15,8 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-	<translate android:fromYDelta="100%p" android:toYDelta="0" android:duration="300"/>
-	<alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300" />
+	<translate android:fromYDelta="100%p" android:toYDelta="0"
+            android:duration="@android:integer/config_longAnimTime"/>
+	<alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+            android:duration="@android:integer/config_longAnimTime" />
 </set>

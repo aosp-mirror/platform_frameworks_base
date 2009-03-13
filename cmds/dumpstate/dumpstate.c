@@ -130,7 +130,7 @@ static void dumpstate(int full) {
         /* the full dumpsys is starting to take a long time, so we need
            to increase its timeout.  we really need to do the timeouts in
            dumpsys itself... */
-        EXEC_TIMEOUT("dumpsys", 40);
+        EXEC_TIMEOUT("dumpsys", 60);
     }
 }
 

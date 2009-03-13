@@ -1095,4 +1095,8 @@
 
   <!--  Drawable to use as a background for a taller version of the titlebar -->
   <public type="drawable" name="title_bar_tall" id="0x010800b7" />
+  
+  <public type="integer" name="config_shortAnimTime" id="0x010e0000" />
+  <public type="integer" name="config_mediumAnimTime" id="0x010e0001" />
+  <public type="integer" name="config_longAnimTime" id="0x010e0002" />
 </resources>

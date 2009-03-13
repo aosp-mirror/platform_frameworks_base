@@ -45,6 +45,7 @@ public:
     status_t setPreviewSurface(const sp<ISurface>& surface);
     status_t setOutputFile(const char *path);
     status_t setOutputFile(int fd, int64_t offset, int64_t length);
+    status_t setParameters(const String8& params);
     status_t setListener(const sp<IMediaPlayerClient>& listener);
     status_t prepare();
     status_t start();

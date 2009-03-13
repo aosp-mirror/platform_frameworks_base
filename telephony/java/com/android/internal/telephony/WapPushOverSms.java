@@ -16,11 +16,12 @@
 
 package com.android.internal.telephony;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.provider.Telephony.Sms.Intents;
 import android.util.Config;
 import android.util.Log;
-import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.SimUtils;
 
 
@@ -32,12 +33,19 @@ import com.android.internal.telephony.gsm.SimUtils;
 public class WapPushOverSms {
     private static final String LOG_TAG = "WAP PUSH";
 
-    private final GSMPhone mPhone;
+    private final Context mContext;
     private WspTypeDecoder pduDecoder;
+    private PowerManager.WakeLock mWakeLock;
 
+    /**
+     * Hold the wake lock for 5 seconds, which should be enough time for 
+     * any receiver(s) to grab its own wake lock.
+     */
+    private final int WAKE_LOCK_TIMEOUT = 5000;
 
-    public WapPushOverSms(GSMPhone phone) {
-        mPhone = phone;
+    public WapPushOverSms(Phone phone) {
+        mContext = phone.getContext();
+        createWakelock();
     }
 
     /**
@@ -163,8 +171,6 @@ public class WapPushOverSms {
         }
     }
 
-
-
     private void dispatchWapPdu_default(
             byte[] pdu, int transactionId, int pduType, String mimeType, int dataIndex) {
         byte[] data;
@@ -178,8 +184,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_WAP_PUSH");
+        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_PushCO(byte[] pdu, int transactionId, int pduType) {
@@ -189,8 +194,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", pdu);
 
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_WAP_PUSH");
+        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_MMS(byte[] pdu, int transactionId, int pduType, int dataIndex) {
@@ -205,7 +209,19 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_MMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_MMS");
+    }
+
+    private void createWakelock() {
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WapPushOverSms");
+        mWakeLock.setReferenceCounted(true);
+    }
+
+    private void sendBroadcast(Intent intent, String permission) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendBroadcast(intent, permission);
     }
 }

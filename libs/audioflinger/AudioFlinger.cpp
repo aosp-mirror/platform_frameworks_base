@@ -837,12 +837,12 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
 }
 
 #ifdef WITH_A2DP
-void AudioFlinger::handleStreamDisablesA2dp(int command)
+// handleStreamDisablesA2dp_l() must be called with AudioFlinger::mLock held
+void AudioFlinger::handleStreamDisablesA2dp_l(int command)
 {
     switch(command) {
     case ACTIVE_TRACK_ADDED:
         {
-            AutoMutex lock(mHardwareLock);
             if (mA2dpDisableCount++ == 0) {
                 if (mA2dpEnabled) {
                     setA2dpEnabled_l(false);
@@ -854,8 +854,7 @@ void AudioFlinger::handleStreamDisablesA2dp(int command)
         break;
     case ACTIVE_TRACK_REMOVED:
         {
-            AutoMutex lock(mHardwareLock);
-            if (mA2dpDisableCount > 0){
+            if (mA2dpDisableCount > 0) {
                 if (--mA2dpDisableCount == 0) {
                     if (mA2dpSuppressed) {
                         setA2dpEnabled_l(true);
@@ -1502,8 +1501,10 @@ void AudioFlinger::MixerThread::addActiveTrack_l(const wp<Track>& t)
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_ADDED);
         }        
 #ifdef WITH_A2DP
+        // AudioFlinger::mLock must be locked before calling
+        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
         if (streamDisablesA2dp(track->type())) {
-            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_ADDED);
+            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_ADDED);
         }
 #endif
     }
@@ -1524,8 +1525,10 @@ void AudioFlinger::MixerThread::removeActiveTrack_l(const wp<Track>& t)
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_REMOVED);
         }
 #ifdef WITH_A2DP
+        // AudioFlinger::mLock must be locked before calling
+        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
         if (streamDisablesA2dp(track->type())) {
-            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_REMOVED);
+            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_REMOVED);
         }
 #endif
     }
@@ -2476,8 +2479,15 @@ status_t AudioFlinger::AudioRecordThread::start(MixerThread::RecordTrack* record
     mRecordTrack = recordTrack;
 
 #ifdef WITH_A2DP
-    if (streamDisablesA2dp(recordTrack->type())) {
-        mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_ADDED);
+    { // scope for lock2
+
+        // AudioFlinger::mLock must be locked before calling
+        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
+        AutoMutex lock2(&mAudioFlinger->mLock);
+
+        // Currently there is no way to detect if we are recording over SCO,
+        // so we disable A2DP during any recording.
+        mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_ADDED);
     }
 #endif
 
@@ -2494,8 +2504,15 @@ void AudioFlinger::AudioRecordThread::stop(MixerThread::RecordTrack* recordTrack
     AutoMutex lock(&mLock);
     if (mActive && (recordTrack == mRecordTrack.get())) {
 #ifdef WITH_A2DP
-        if (streamDisablesA2dp(recordTrack->type())) {
-            mAudioFlinger->handleStreamDisablesA2dp(ACTIVE_TRACK_REMOVED);
+        { // scope for lock2
+    
+            // AudioFlinger::mLock must be locked before calling
+            // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
+            AutoMutex lock2(&mAudioFlinger->mLock);
+
+            // Currently there is no way to detect if we are recording over SCO,
+            // so we disable A2DP during any recording.
+            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_REMOVED);
         }
 #endif
         mActive = false;

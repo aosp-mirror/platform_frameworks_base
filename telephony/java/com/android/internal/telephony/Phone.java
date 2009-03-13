@@ -140,6 +140,7 @@ public interface Phone {
     static final String REASON_VOICE_CALL_STARTED = "2GVoiceCallStarted";
     static final String REASON_PS_RESTRICT_ENABLED = "psRestrictEnabled";
     static final String REASON_PS_RESTRICT_DISABLED = "psRestrictDisabled";
+    static final String REASON_SIM_LOADED = "simLoaded";
     
     // Used for band mode selection methods
     static final int BM_UNSPECIFIED = 0; // selected by baseband automatically

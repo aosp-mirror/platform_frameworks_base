@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Browser;
 import android.util.Config;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -175,6 +176,11 @@ class CallbackProxy extends Handler {
             Intent intent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(overrideUrl));
             intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            // If another application is running a WebView and launches the
+            // Browser through this Intent, we want to reuse the same window if
+            // possible.
+            intent.putExtra(Browser.EXTRA_APPLICATION_ID,
+                    mContext.getPackageName());
             try {
                 mContext.startActivity(intent);
                 override = true;

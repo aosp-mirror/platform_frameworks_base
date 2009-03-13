@@ -1511,7 +1511,7 @@ final class ServiceStateTracker extends Handler
                         + (c.getTimeInMillis() - System.currentTimeMillis())
                         + " from " + nitz);
 
-                    SystemClock.setCurrentTimeMillis(c.getTimeInMillis());
+                    setAndBroadcastNetworkSetTime(c.getTimeInMillis());
                     Log.i(LOG_TAG, "NITZ: after Setting time of day");
                 }
                 SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));

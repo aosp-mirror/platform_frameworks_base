@@ -16,20 +16,26 @@
 
 package com.android.internal.widget;
 
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.EditText;
 
 /**
- * EditStyledText extends EditText for managing the flow and status 
- * to edit the styled text. This manages the states and flows of editing,
- * supports inserting image, import/export HTML.
+ * EditStyledText extends EditText for managing the flow and status to edit
+ * the styled text. This manages the states and flows of editing, supports
+ * inserting image, import/export HTML.
  */
 public class EditStyledText extends EditText {
 
@@ -61,7 +67,7 @@ public class EditStyledText extends EditText {
     public static final int STATE_SELECT_ON = 1;
     /** The state that selection is done, but not fixed. */
     public static final int STATE_SELECTED = 2;
-    /** The state that selection is done and not fixed.*/
+    /** The state that selection is done and not fixed. */
     public static final int STATE_SELECT_FIX = 3;
 
     /**
@@ -73,26 +79,28 @@ public class EditStyledText extends EditText {
     public static final int HINT_MSG_SELECT_END = 3;
     public static final int HINT_MSG_PUSH_COMPETE = 4;
 
-
     /**
-     * EditStyledTextInterface provides functions for notifying messages
-     * to calling class.
+     * EditStyledTextInterface provides functions for notifying messages to
+     * calling class.
      */
-    public interface EditStyledTextInterface {
-        public void notifyHintMsg(int msg_id);
+    public interface EditStyledTextNotifier {
+        public void notifyHintMsg(int msgId);
     }
-    private EditStyledTextInterface mESTInterface;
+
+    private EditStyledTextNotifier mESTInterface;
 
     /**
-     * EditStyledTextEditorManager manages the flow and status of 
-     * each function for editing styled text.
+     * EditStyledTextEditorManager manages the flow and status of each
+     * function for editing styled text.
      */
-    private EditStyledTextEditorManager mManager;
+    private EditorManager mManager;
+    private StyledTextConverter mConverter;
+    private StyledTextToast mToast;
 
     /**
-      * EditStyledText extends EditText for managing flow of each editing
-      * action.
-      */
+     * EditStyledText extends EditText for managing flow of each editing
+     * action.
+     */
     public EditStyledText(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
@@ -109,11 +117,54 @@ public class EditStyledText extends EditText {
     }
 
     /**
-     * Set View objects used in EditStyledText.
-     * @param helptext The view shows help messages.
+     * Set Notifier.
      */
-    public void setParts(EditStyledTextInterface est_interface) {
-        mESTInterface = est_interface;
+    public void setNotifier(EditStyledTextNotifier estInterface) {
+        mESTInterface = estInterface;
+    }
+
+    /**
+     * Set Builder for AlertDialog.
+     * 
+     * @param builder
+     *            Builder for opening Alert Dialog.
+     */
+    public void setBuilder(Builder builder) {
+        mToast.setBuilder(builder);
+    }
+
+    /**
+     * Set Parameters for ColorAlertDialog.
+     * 
+     * @param colortitle
+     *            Title for Alert Dialog.
+     * @param colornames
+     *            List of name of selecting color.
+     * @param colorints
+     *            List of int of color.
+     */
+    public void setColorAlertParams(CharSequence colortitle,
+            CharSequence[] colornames, CharSequence[] colorints) {
+        mToast.setColorAlertParams(colortitle, colornames, colorints);
+    }
+
+    /**
+     * Set Parameters for SizeAlertDialog.
+     * 
+     * @param sizetitle
+     *            Title for Alert Dialog.
+     * @param sizenames
+     *            List of name of selecting size.
+     * @param sizedisplayints
+     *            List of int of size displayed in TextView.
+     * @param sizesendints
+     *            List of int of size exported to HTML.
+     */
+    public void setSizeAlertParams(CharSequence sizetitle,
+            CharSequence[] sizenames, CharSequence[] sizedisplayints,
+            CharSequence[] sizesendints) {
+        mToast.setSizeAlertParams(sizetitle, sizenames, sizedisplayints,
+                sizesendints);
     }
 
     @Override
@@ -129,8 +180,8 @@ public class EditStyledText extends EditText {
     }
 
     /**
-     * Start editing. This function have to be called before other
-     * editing actions.
+     * Start editing. This function have to be called before other editing
+     * actions.
      */
     public void onStartEdit() {
         mManager.onStartEdit();
@@ -186,6 +237,26 @@ public class EditStyledText extends EditText {
     }
 
     /**
+     * InsertImage to TextView by using URI
+     * 
+     * @param uri
+     *            URI of the iamge inserted to TextView.
+     */
+    public void onInsertImage(Uri uri) {
+        mManager.onInsertImage(uri);
+    }
+
+    /**
+     * InsertImage to TextView by using resource ID
+     * 
+     * @param resId
+     *            Resource ID of the iamge inserted to TextView.
+     */
+    public void onInsertImage(int resId) {
+        mManager.onInsertImage(resId);
+    }
+
+    /**
      * Fix Selected Item.
      */
     public void fixSelectedItem() {
@@ -194,7 +265,9 @@ public class EditStyledText extends EditText {
 
     /**
      * Set Size of the Item.
-     * @param size The size of the Item.
+     * 
+     * @param size
+     *            The size of the Item.
      */
     public void setItemSize(int size) {
         mManager.setItemSize(size);
@@ -202,14 +275,25 @@ public class EditStyledText extends EditText {
 
     /**
      * Set Color of the Item.
-     * @param color The color of the Item.
+     * 
+     * @param color
+     *            The color of the Item.
      */
     public void setItemColor(int color) {
         mManager.setItemColor(color);
     }
 
+    public void onShowColorAlert() {
+        mToast.onShowColorAlertDialog();
+    }
+
+    public void onShowSizeAlert() {
+        mToast.onShowSizeAlertDialog();
+    }
+
     /**
      * Check editing is started.
+     * 
      * @return Whether editing is started or not.
      */
     public boolean isEditting() {
@@ -218,6 +302,7 @@ public class EditStyledText extends EditText {
 
     /**
      * Get the mode of the action.
+     * 
      * @return The mode of the action.
      */
     public int getEditMode() {
@@ -226,10 +311,15 @@ public class EditStyledText extends EditText {
 
     /**
      * Get the state of the selection.
+     * 
      * @return The state of the selection.
      */
     public int getSelectState() {
         return mManager.getSelectState();
+    }
+
+    public String getBody() {
+        return mConverter.getConvertedBody();
     }
 
     /**
@@ -240,23 +330,36 @@ public class EditStyledText extends EditText {
             Log.d(LOG_TAG, "--- init");
             requestFocus();
         }
-        mManager = new EditStyledTextEditorManager(this);
+        mManager = new EditorManager(this);
+        mConverter = new StyledTextConverter(this);
+        mToast = new StyledTextToast(this);
     }
 
     /**
      * Notify hint messages what action is expected to calling class.
-     * @param msg
+     * 
+     * @param msgId
+     *            Id of the hint message.
      */
-    private void setHintMessage(int msg_id) {
+    private void setHintMessage(int msgId) {
         if (mESTInterface != null) {
-            mESTInterface.notifyHintMsg(msg_id);
+            mESTInterface.notifyHintMsg(msgId);
         }
+    }
+
+    @Override
+    public Bundle getInputExtras(boolean create) {
+        Bundle bundle = super.getInputExtras(create);
+        if (bundle != null) {
+            bundle.putBoolean("allowEmoji", true);
+        }
+        return bundle;
     }
 
     /**
      * Object which manages the flow and status of editing actions.
      */
-    private class EditStyledTextEditorManager {
+    private class EditorManager {
         private boolean mEditFlag = false;
         private int mMode = 0;
         private int mState = 0;
@@ -266,7 +369,7 @@ public class EditStyledText extends EditText {
         private Editable mTextSelectBuffer;
         private CharSequence mTextCopyBufer;
 
-        EditStyledTextEditorManager(EditStyledText est) {
+        EditorManager(EditStyledText est) {
             mEST = est;
         }
 
@@ -368,6 +471,28 @@ public class EditStyledText extends EditText {
             handleComplete();
         }
 
+        public void onInsertImage(Uri uri) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onInsertImage by URI: " + uri.getPath()
+                        + "," + uri.toString());
+            }
+
+            mEST.getText().append("a");
+            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), uri),
+                    mEST.getText().length() - 1, mEST.getText().length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        public void onInsertImage(int resID) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onInsertImage by resID");
+            }
+            mEST.getText().append("b");
+            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), resID),
+                    mEST.getText().length() - 1, mEST.getText().length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
         public boolean isEditting() {
             return mEditFlag;
         }
@@ -403,6 +528,12 @@ public class EditStyledText extends EditText {
             switch (mMode) {
             case MODE_COPY:
                 handleCopy();
+                break;
+            case MODE_COLOR:
+                handleColor();
+                break;
+            case MODE_SIZE:
+                handleSize();
                 break;
             default:
                 break;
@@ -455,12 +586,14 @@ public class EditStyledText extends EditText {
                 Log.d(LOG_TAG, "--- handleSize: " + mMode + "," + mState);
             }
             if (!mEditFlag) {
+                Log.e(LOG_TAG, "--- Editing is not started for handlesize.");
                 return;
             }
             if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
                 mMode = MODE_SIZE;
                 if (mState == STATE_SELECTED) {
                     mState = STATE_SELECT_FIX;
+                    handleSize();
                 } else {
                     handleSelect();
                 }
@@ -468,22 +601,29 @@ public class EditStyledText extends EditText {
                 handleCancel();
                 mMode = MODE_SIZE;
                 handleSize();
-            } else if (mState == STATE_SELECT_FIX) {
-                mEST.setHintMessage(HINT_MSG_NULL);
+            } else {
+                if (mState == STATE_SELECT_FIX) {
+                    mEST.setHintMessage(HINT_MSG_NULL);
+                    mEST.onShowSizeAlert();
+                } else {
+                    Log.d(LOG_TAG, "--- handlesize: do nothing");
+                }
             }
         }
 
         private void handleColor() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- handleColor");
+                Log.d(LOG_TAG, "--- handleSize: " + mMode + "," + mState);
             }
             if (!mEditFlag) {
+                Log.e(LOG_TAG, "--- Editing is not started for handlecolor.");
                 return;
             }
             if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
                 mMode = MODE_COLOR;
                 if (mState == STATE_SELECTED) {
                     mState = STATE_SELECT_FIX;
+                    handleColor();
                 } else {
                     handleSelect();
                 }
@@ -491,35 +631,39 @@ public class EditStyledText extends EditText {
                 handleCancel();
                 mMode = MODE_COLOR;
                 handleSize();
-            } else if (mState == STATE_SELECT_FIX) {
-                mEST.setHintMessage(HINT_MSG_NULL);
+            } else {
+                if (mState == STATE_SELECT_FIX) {
+                    mEST.setHintMessage(HINT_MSG_NULL);
+                    mEST.onShowColorAlert();
+                } else {
+                    Log.d(LOG_TAG, "--- handlecolor: do nothing");
+                }
             }
         }
 
         private void handleSelect() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- handleSelect" + mEditFlag + "," + mState);
+                Log.d(LOG_TAG, "--- handleSelect:" + mEditFlag + "," + mState);
             }
             if (!mEditFlag) {
                 return;
             }
             if (mState == STATE_SELECT_OFF) {
                 if (isTextSelected()) {
-                    Log.e(LOG_TAG, "Selection state is off, but selected");
+                    Log.e(LOG_TAG, "Selection is off, but selected");
                 }
                 setSelectStartPos();
                 mEST.setHintMessage(HINT_MSG_SELECT_END);
             } else if (mState == STATE_SELECT_ON) {
                 if (isTextSelected()) {
-                    Log.e(LOG_TAG, "Selection state now start, but selected");
+                    Log.e(LOG_TAG, "Selection now start, but selected");
                 }
                 setSelectEndPos();
                 mEST.setHintMessage(HINT_MSG_PUSH_COMPETE);
                 doNextHandle();
             } else if (mState == STATE_SELECTED) {
                 if (!isTextSelected()) {
-                    Log.e(LOG_TAG,
-                            "Selection state is done, but not selected");
+                    Log.e(LOG_TAG, "Selection is done, but not selected");
                 }
                 setSelectEndPos();
                 doNextHandle();
@@ -537,6 +681,9 @@ public class EditStyledText extends EditText {
         }
 
         private void doNextHandle() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- doNextHandle: " + mMode + "," + mState);
+            }
             switch (mMode) {
             case MODE_COPY:
                 handleCopy();
@@ -556,6 +703,9 @@ public class EditStyledText extends EditText {
         }
 
         private void handleResetEdit() {
+            if (DBG) {
+                Log.d(LOG_TAG, "Reset Editor");
+            }
             handleCancel();
             mEditFlag = true;
             mEST.setHintMessage(HINT_MSG_SELECT_START);
@@ -564,7 +714,7 @@ public class EditStyledText extends EditText {
         // Methods of selection
         private void onSelect() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onSelect");
+                Log.d(LOG_TAG, "--- onSelect:" + mCurStart + "," + mCurEnd);
             }
             if (mCurStart >= 0 && mCurStart <= mEST.getText().length()
                     && mCurEnd >= 0 && mCurEnd <= mEST.getText().length()) {
@@ -650,4 +800,132 @@ public class EditStyledText extends EditText {
         }
     }
 
+    private class StyledTextConverter {
+        private EditStyledText mEST;
+
+        public StyledTextConverter(EditStyledText est) {
+            mEST = est;
+        }
+
+        public String getConvertedBody() {
+            String htmlBody = Html.toHtml(mEST.getText());
+            return htmlBody;
+        }
+    }
+
+    private class StyledTextToast {
+        Builder mBuilder;
+        CharSequence mColorTitle;
+        CharSequence mSizeTitle;
+        CharSequence[] mColorNames;
+        CharSequence[] mColorInts;
+        CharSequence[] mSizeNames;
+        CharSequence[] mSizeDisplayInts;
+        CharSequence[] mSizeSendInts;
+        EditStyledText mEST;
+
+        public StyledTextToast(EditStyledText est) {
+            mEST = est;
+        }
+
+        public void setBuilder(Builder builder) {
+            mBuilder = builder;
+        }
+
+        public void setColorAlertParams(CharSequence colortitle,
+                CharSequence[] colornames, CharSequence[] colorints) {
+            mColorTitle = colortitle;
+            mColorNames = colornames;
+            mColorInts = colorints;
+        }
+
+        public void setSizeAlertParams(CharSequence sizetitle,
+                CharSequence[] sizenames, CharSequence[] sizedisplayints,
+                CharSequence[] sizesendints) {
+            mSizeTitle = sizetitle;
+            mSizeNames = sizenames;
+            mSizeDisplayInts = sizedisplayints;
+            mSizeSendInts = sizesendints;
+        }
+
+        public boolean checkColorAlertParams() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- checkParams");
+            }
+            if (mBuilder == null) {
+                Log.e(LOG_TAG, "--- builder is null.");
+                return false;
+            } else if (mColorTitle == null || mColorNames == null
+                    || mColorInts == null) {
+                Log.e(LOG_TAG, "--- color alert params are null.");
+                return false;
+            } else if (mColorNames.length != mColorInts.length) {
+                Log.e(LOG_TAG, "--- the length of color alert params are "
+                        + "different.");
+                return false;
+            }
+            return true;
+        }
+
+        public boolean checkSizeAlertParams() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- checkParams");
+            }
+            if (mBuilder == null) {
+                Log.e(LOG_TAG, "--- builder is null.");
+            } else if (mSizeTitle == null || mSizeNames == null
+                    || mSizeDisplayInts == null || mSizeSendInts == null) {
+                Log.e(LOG_TAG, "--- size alert params are null.");
+            } else if (mSizeNames.length != mSizeDisplayInts.length
+                    && mSizeSendInts.length != mSizeDisplayInts.length) {
+                Log.e(LOG_TAG, "--- the length of size alert params are "
+                        + "different.");
+            }
+            return true;
+        }
+
+        private void onShowColorAlertDialog() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onShowAlertDialog");
+            }
+            if (!checkColorAlertParams()) {
+                return;
+            }
+            mBuilder.setTitle(mColorTitle);
+            mBuilder.setIcon(0);
+            mBuilder.
+            setItems(mColorNames,
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Log.d("EETVM", "mBuilder.onclick:" + which);
+                    int color = Integer.parseInt(
+                            (String) mColorInts[which], 16) - 0x01000000;
+                    mEST.setItemColor(color);
+                }
+            });
+            mBuilder.show();
+        }
+
+        private void onShowSizeAlertDialog() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onShowAlertDialog");
+            }
+            if (!checkColorAlertParams()) {
+                return;
+            }
+            mBuilder.setTitle(mSizeTitle);
+            mBuilder.setIcon(0);
+            mBuilder.
+            setItems(mSizeNames,
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Log.d("EETVM", "mBuilder.onclick:" + which);
+                    int size = Integer
+                    .parseInt((String) mSizeDisplayInts[which]);
+                    mEST.setItemSize(size);
+                }
+            });
+            mBuilder.show();
+        }
+    }
 }

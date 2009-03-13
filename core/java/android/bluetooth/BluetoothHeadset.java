@@ -67,6 +67,11 @@ public class BluetoothHeadset {
     /** A headset is currently connected */
     public static final int STATE_CONNECTED    = 2;
 
+    /** A SCO audio channel is not established */
+    public static final int AUDIO_STATE_DISCONNECTED = 0;
+    /** A SCO audio channel is established */
+    public static final int AUDIO_STATE_CONNECTED = 1;
+
     public static final int RESULT_FAILURE = 0;
     public static final int RESULT_SUCCESS = 1;
     /** Connection canceled before completetion. */

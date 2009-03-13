@@ -21,6 +21,7 @@
 #include <ui/Surface.h>
 #include <media/mediarecorder.h>
 #include <utils/IServiceManager.h>
+#include <utils/String8.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
 
@@ -353,6 +354,23 @@ status_t MediaRecorder::setVideoFrameRate(int frames_per_second)
         mCurrentState = MEDIA_RECORDER_ERROR;
         return ret;
     }
+    return ret;
+}
+
+status_t MediaRecorder::setParameters(const String8& params) {
+    LOGV("setParameters(%s)", params.string());
+    if(mMediaRecorder == NULL) {
+        LOGE("media recorder is not initialized yet");
+        return INVALID_OPERATION;
+    }
+
+    status_t ret = mMediaRecorder->setParameters(params);
+    if (OK != ret) {
+        LOGE("setParameters(%s) failed: %d", params.string(), ret);
+        mCurrentState = MEDIA_RECORDER_ERROR;
+        return ret;
+    }
+
     return ret;
 }
 

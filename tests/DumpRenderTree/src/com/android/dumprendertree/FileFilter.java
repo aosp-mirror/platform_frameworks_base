@@ -75,31 +75,14 @@ public class FileFilter {
         ".", // ignore hidden directories and files
         "resources", // ignore resource directories
         "AppleScript", // AppleScript not supported
-        "xpath", // xpath requires libxml2, not supported
-        "xsl", //xsl requires libxml2 & libxslt, not sup.
-        "kde", // don't run kde tests.
         ".svn", // don't run anything under .svn folder
-        "gradients", // known crash
-        "profiler"  // profiler is not supported
+        "profiler",  // profiler is not supported
+        "svg",  // svg is not supported
+        "platform",  // platform specific
+        "http"  // requires local http(s) server
     };
         
     static final String [] ignoreTestList = {
-        "toString-stack-overflow.html", // Crashes #606688
-        "frame-limit.html", // generates too many GREFs
-        "css-insert-import-rule.html", // Crashes, #717414
-        "input-text-enter.html", // Crashes. #735088
-        "text-shadow-extreme-value.html", // Crashes #571671
-        "reflection-masks.html",
-        "frame-creation-removal.html",
-        "large-expressions.html",
-        "null-page-show-modal-dialog-crash.html",
-        "font-face-implicit-local-font.html",
-        "font-face-locally-installed.html",
-        "beforeSelectorOnCodeElement.html",
-        "cssTarget-crash.html",
-        "searchfield-heights.html", // Bug 1570692
-        "tabindex-focus-blur-all.html",
-        "search-rtl.html" // fast/forms/search-rtl.html
         };
     
     static void fillIgnoreResultSet() {

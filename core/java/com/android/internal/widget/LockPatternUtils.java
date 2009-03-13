@@ -78,6 +78,7 @@ public class LockPatternUtils {
 
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
+    private final static String PATTERN_EVER_CHOSEN = "lockscreen.patterneverchosen";
 
     private final ContentResolver mContentResolver;
 
@@ -139,6 +140,16 @@ public class LockPatternUtils {
     }
 
     /**
+     * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
+     * currently cleared.
+     *
+     * @return True if the user has ever chosen a pattern.
+     */
+    public boolean isPatternEverChosen() {
+        return getBoolean(PATTERN_EVER_CHOSEN);
+    }
+
+    /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
      */
@@ -155,6 +166,7 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
+            setBoolean(PATTERN_EVER_CHOSEN, true);
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
             Log.e(TAG, "Unable to save lock pattern to " + sLockPatternFilename);

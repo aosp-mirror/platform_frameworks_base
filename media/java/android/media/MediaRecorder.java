@@ -71,6 +71,7 @@ public class MediaRecorder
     private FileDescriptor mFd;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
+    private OnInfoListener mOnInfoListener;
 
     /**
      * Default constructor.
@@ -256,6 +257,15 @@ public class MediaRecorder
     public native void setVideoFrameRate(int rate) throws IllegalStateException;
 
     /**
+     * Sets the maximum duration (in ms) of the recording session.
+     * Call this after setOutFormat() but before prepare().
+     *
+     * @param max_duration_ms the maximum duration in ms (if zero or negative, disables the duration limit)
+     *
+     */
+    public native void setMaxDuration(int max_duration_ms) throws IllegalArgumentException;
+
+    /**
      * Sets the audio encoder to be used for recording. If this method is not
      * called, the output file will not contain an audio track. Call this after
      * setOutputFormat() but before prepare().
@@ -420,6 +430,48 @@ public class MediaRecorder
         mOnErrorListener = l;
     }
 
+    /* Do not change these values without updating their counterparts
+     * in include/media/mediarecorder.h!
+     */
+    /** Unspecified media recorder error.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_UNKNOWN              = 1;
+    /** A maximum duration had been setup and has now been reached.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800;
+
+    /**
+     * Interface definition for a callback to be invoked when an error
+     * occurs while recording.
+     */
+    public interface OnInfoListener
+    {
+        /**
+         * Called when an error occurs while recording.
+         * 
+         * @param mr the MediaRecorder that encountered the error
+         * @param what    the type of error that has occurred:
+         * <ul>
+         * <li>{@link #MEDIA_RECORDER_INFO_UNKNOWN}
+         * </ul>
+         * @param extra   an extra code, specific to the error type
+         */
+        void onInfo(MediaRecorder mr, int what, int extra);
+    }
+
+    /**
+     * Register a callback to be invoked when an informational event occurs while
+     * recording.
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnInfoListener(OnInfoListener listener)
+    {
+        mOnInfoListener = listener;
+    }
+
     private class EventHandler extends Handler
     {
         private MediaRecorder mMediaRecorder;
@@ -429,10 +481,11 @@ public class MediaRecorder
             mMediaRecorder = mr;
         }
 
-        /* Do not change this value without updating its counterpart
+        /* Do not change these values without updating their counterparts
          * in include/media/mediarecorder.h!
          */
         private static final int MEDIA_RECORDER_EVENT_ERROR = 1;
+        private static final int MEDIA_RECORDER_EVENT_INFO  = 2;
 
         @Override
         public void handleMessage(Message msg) {
@@ -444,6 +497,12 @@ public class MediaRecorder
             case MEDIA_RECORDER_EVENT_ERROR:
                 if (mOnErrorListener != null)
                     mOnErrorListener.onError(mMediaRecorder, msg.arg1, msg.arg2);
+
+                return;
+
+            case MEDIA_RECORDER_EVENT_INFO:
+                if (mOnInfoListener != null)
+                    mOnInfoListener.onInfo(mMediaRecorder, msg.arg1, msg.arg2);
 
                 return;
 

@@ -1026,6 +1026,15 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
+
+    /**
+     * Activity Action: Start action associated with long pressing on the
+     * search key.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
     
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

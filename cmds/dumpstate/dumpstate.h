@@ -19,8 +19,8 @@
 
 #include <time.h>
 
-// Commands time out after 15 seconds
-#define TIMEOUT     15
+// Commands time out after 60 seconds
+#define TIMEOUT     60
 
 #define PRINT(s) printf("%s\n", s)
 

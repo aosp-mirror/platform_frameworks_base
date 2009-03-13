@@ -630,6 +630,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
     
     /**
+     * We're changing the adapter and its views so really, really clear everything out
+     * @hide - for SearchDialog only
+     */
+    public void resetListAndClearViews() {
+        if (mDropDownList != null) {
+            mDropDownList.resetListAndClearViews();
+        }
+    }
+
+    /**
      * <p>Starts filtering the content of the drop down list. The filtering
      * pattern is the content of the edit box. Subclasses should override this
      * method to filter with a different pattern, for instance a substring of

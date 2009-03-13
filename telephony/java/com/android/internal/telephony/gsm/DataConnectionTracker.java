@@ -199,9 +199,9 @@ final class DataConnectionTracker extends Handler
     private static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
 
     /** Default ping deadline, in seconds. */
-    private final int DEFAULT_PING_DEADLINE = 5;
+    private static final int DEFAULT_PING_DEADLINE = 5;
     /** Default max failure count before attempting to network re-registration. */
-    private final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
+    private static final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
 
     /**
      * After detecting a potential connection problem, this is the max number
@@ -677,8 +677,7 @@ final class DataConnectionTracker extends Handler
         if ((state == State.IDLE || state == State.SCANNING)
                 && (gprsState == ServiceState.STATE_IN_SERVICE || noAutoAttach)
                 && phone.mSIMRecords.getRecordsLoaded()
-                && ( phone.mSST.isConcurrentVoiceAndData() ||
-                     phone.getState() == Phone.State.IDLE )
+                && phone.getState() == Phone.State.IDLE
                 && isDataAllowed()
                 && !mIsPsRestricted ) {
 
@@ -1351,7 +1350,7 @@ final class DataConnectionTracker extends Handler
                 if (state == State.FAILED) {
                     cleanUpConnection(false, null);
                 }
-                sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+                sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
                 break;
 
             case EVENT_ENABLE_NEW_APN:
@@ -1362,6 +1361,10 @@ final class DataConnectionTracker extends Handler
                 break;
 
             case EVENT_TRY_SETUP_DATA:
+                if (msg.obj instanceof String) {
+                    reason = (String)msg.obj;
+                }
+
                 trySetupData(reason);
                 break;
 
@@ -1500,7 +1503,10 @@ final class DataConnectionTracker extends Handler
                         } else {
                             // we still have more apns to try
                             setState(State.SCANNING);
-                            trySetupData(reason);
+                            // Wait a bit before trying the next APN, so that 
+                            // we're not tying up the RIL command channel
+                            sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                                    RECONNECT_DELAY_INITIAL_MILLIS);
                         }
                     } else {
                         startDelayedRetry(cause, reason);

@@ -50,7 +50,7 @@ interface IMountService
     void unmountMedia(String mountPoint);
 
     /**
-     * Format external storage given a mount point
+     * Format external storage given a mount point.
      */
     void formatMedia(String mountPoint);
 
@@ -63,4 +63,16 @@ interface IMountService
      * Sets whether or not media notification sounds are played.
      */
     void setPlayNotificationSounds(boolean value);
+
+    /**
+     * Returns true if USB Mass Storage is automatically started
+     * when a UMS host is detected.
+     */
+    boolean getAutoStartUms();
+
+    /**
+     * Sets whether or not USB Mass Storage is automatically started
+     * when a UMS host is detected.
+     */
+    void setAutoStartUms(boolean value);
 }

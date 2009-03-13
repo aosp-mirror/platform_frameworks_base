@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Telephony;
 import android.provider.Settings;
 import android.provider.Telephony.Sms.Intents;
@@ -122,6 +123,15 @@ final class SMSDispatcher extends Handler {
 
     private SmsTracker mSTracker;
 
+    /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
+    private PowerManager.WakeLock mWakeLock;
+
+    /**
+     * Hold the wake lock for 5 seconds, which should be enough time for 
+     * any receiver(s) to grab its own wake lock.
+     */
+    private final int WAKE_LOCK_TIMEOUT = 5000;
+
     /**
      *  Implement the per-application based SMS control, which only allows
      *  a limit on the number of SMS/MMS messages an app can send in checking
@@ -185,6 +195,8 @@ final class SMSDispatcher extends Handler {
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
         mSTracker = null;
+
+        createWakelock();
 
         int check_period = Settings.Gservices.getInt(mResolver,
                 Settings.Gservices.SMS_OUTGOING_CEHCK_INTERVAL_MS,
@@ -286,6 +298,19 @@ final class SMSDispatcher extends Handler {
         }
     }
 
+    private void createWakelock() {
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSDispatcher");
+        mWakeLock.setReferenceCounted(true);
+    }
+
+    private void sendBroadcast(Intent intent, String permission) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendBroadcast(intent, permission);
+    }
+
     /**
      * Called when SIM_FULL message is received from the RIL.  Notifies interested
      * parties that SIM storage for SMS messages is full.
@@ -293,7 +318,7 @@ final class SMSDispatcher extends Handler {
     private void handleSimFull() {
         // broadcast SIM_FULL intent
         Intent intent = new Intent(Intents.SIM_FULL_ACTION);
-        mPhone.getContext().sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -633,8 +658,7 @@ final class SMSDispatcher extends Handler {
     private void dispatchPdus(byte[][] pdus) {
         Intent intent = new Intent(Intents.SMS_RECEIVED_ACTION);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -647,8 +671,7 @@ final class SMSDispatcher extends Handler {
         Uri uri = Uri.parse("sms://localhost:" + port);
         Intent intent = new Intent(Intents.DATA_SMS_RECEIVED_ACTION, uri);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
 

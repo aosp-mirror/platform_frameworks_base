@@ -16,9 +16,11 @@
 
 package android.text.style;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
+import android.provider.Browser;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
 import android.view.View;
@@ -54,8 +56,9 @@ public class URLSpan extends ClickableSpan implements ParcelableSpan {
     @Override
     public void onClick(View widget) {
         Uri uri = Uri.parse(getURL());
+        Context context = widget.getContext();
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-        widget.getContext().startActivity(intent);
+        intent.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+        context.startActivity(intent);
     }
 }

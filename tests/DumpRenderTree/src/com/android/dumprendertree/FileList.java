@@ -17,6 +17,7 @@
 package com.android.dumprendertree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,8 @@ public abstract class FileList extends ListActivity
         	return myData;
         }
         String[] files = f.list();
- 
+        Arrays.sort(files);
+
         for (int i = 0; i < files.length; i++) {
         	StringBuilder sb = new StringBuilder(mPath);
         	sb.append(File.separatorChar);

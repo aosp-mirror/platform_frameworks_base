@@ -66,9 +66,9 @@ public class Regex {
     public static final Pattern WEB_URL_PATTERN
         = Pattern.compile(
             "((?:(http|https|Http|Https):\\/\\/(?:(?:[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)"
-            + "\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2}))+(?:\\:(?:[a-zA-Z0-9\\$\\-\\_"
-            + "\\.\\+\\!\\*\\'\\(\\)\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2}))+)?\\@)?)?"
-            + "((?:(?:[a-zA-Z0-9][a-zA-Z0-9\\-]*\\.)+"   // named host
+            + "\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2})){1,64}(?:\\:(?:[a-zA-Z0-9\\$\\-\\_"
+            + "\\.\\+\\!\\*\\'\\(\\)\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2})){1,25})?\\@)?)?"
+            + "((?:(?:[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}\\.)+"   // named host
             + "(?:"   // plus top level domain
             + "(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])"
             + "|(?:biz|b[abdefghijmnorstvwyz])"
@@ -122,12 +122,12 @@ public class Regex {
 
     public static final Pattern EMAIL_ADDRESS_PATTERN
         = Pattern.compile(
-            "[a-zA-Z0-9\\+\\.\\_\\%\\-]+" +
+            "[a-zA-Z0-9\\+\\.\\_\\%\\-]{1,256}" +
             "\\@" +
-            "[a-zA-Z0-9][a-zA-Z0-9\\-]*" +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
             "(" +
                 "\\." +
-                "[a-zA-Z0-9][a-zA-Z0-9\\-]*" +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
             ")+"
         );
 

@@ -89,12 +89,22 @@ enum media_recorder_states {
 };
 
 // The "msg" code passed to the listener in notify.
-enum {
-    MEDIA_RECORDER_EVENT_ERROR                    = 1
+enum media_recorder_event_type {
+    MEDIA_RECORDER_EVENT_ERROR                    = 1,
+    MEDIA_RECORDER_EVENT_INFO                     = 2
 };
 
-enum {
+enum media_recorder_error_type {
     MEDIA_RECORDER_ERROR_UNKNOWN                  = 1
+};
+
+// The codes are distributed as follow:
+//   0xx: Reserved
+//   8xx: General info/warning
+// 
+enum media_recorder_info_type {
+    MEDIA_RECORDER_INFO_UNKNOWN                   = 1,
+    MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800
 };
 
 // ----------------------------------------------------------------------------
@@ -123,6 +133,7 @@ public:
     status_t    setOutputFile(int fd, int64_t offset, int64_t length);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
+    status_t    setParameters(const String8& params);
     status_t    setListener(const sp<MediaRecorderListener>& listener);
     status_t    prepare();
     status_t    getMaxAmplitude(int* max);

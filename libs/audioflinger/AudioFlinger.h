@@ -176,7 +176,7 @@ private:
     };
     void                    handleForcedSpeakerRoute(int command);
 #ifdef WITH_A2DP
-    void                    handleStreamDisablesA2dp(int command);
+    void                    handleStreamDisablesA2dp_l(int command);
 #endif
 
     // Internal dump utilites.

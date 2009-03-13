@@ -21,6 +21,9 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android">
     <scale android:fromXScale="0.5" android:toXScale="1.0"
            android:fromYScale="0.5" android:toYScale="1.0"
-           android:pivotX="0%" android:pivotY="100%" android:duration="125" />
-    <alpha android:interpolator="@anim/decelerate_interpolator" android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="75" />
+           android:pivotX="0%" android:pivotY="100%"
+           android:duration="@android:integer/config_shortAnimTime" />
+    <alpha android:interpolator="@anim/decelerate_interpolator"
+            android:fromAlpha="0.0" android:toAlpha="1.0"
+            android:duration="@android:integer/config_shortAnimTime" />
 </set>
