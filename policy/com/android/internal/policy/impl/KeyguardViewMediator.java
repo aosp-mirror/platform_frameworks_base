@@ -204,6 +204,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private boolean mKeyboardOpen = false;
 
     /**
+     * we send this intent when the keyguard is dismissed.
+     */
+    private Intent mUserPresentIntent;
+
+    /**
      * {@link #setKeyguardEnabled} waits on this condition when it reenables
      * the keyguard.
      */
@@ -248,6 +253,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 context, WindowManagerImpl.getDefault(), this,
                 mKeyguardViewProperties, mUpdateMonitor);
 
+        mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
     }
 
     /**
@@ -641,6 +647,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK: 
             case KeyEvent.KEYCODE_PLAYPAUSE: 
             case KeyEvent.KEYCODE_STOP: 
@@ -771,6 +778,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         handleHide();
         mPM.userActivity(SystemClock.uptimeMillis(), true);
         mWakeLock.release();
+        mContext.sendBroadcast(mUserPresentIntent);
     }
 
     /**

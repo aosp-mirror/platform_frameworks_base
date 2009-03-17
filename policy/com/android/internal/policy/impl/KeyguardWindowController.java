@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,13 @@
 package com.android.internal.policy.impl;
 
 /**
- * Common interface of each {@link android.view.View} that is a screen of
- * {@link LockPatternKeyguardView}.
+ * Interface passed to the keyguard view, for it to call up to control
+ * its containing window.
  */
-public interface KeyguardScreen {
-
+public interface KeyguardWindowController {
     /**
-     * Return true if your view needs input, so should allow the soft
-     * keyboard to be displayed.
+     * Control whether the window needs input -- that is if it has
+     * text fields and thus should allow input method interaction.
      */
-    boolean needsInput();
-    
-    /**
-     * This screen is no longer in front of the user.
-     */
-    void onPause();
-
-    /**
-     * This screen is going to be in front of the user.
-     */
-    void onResume();
-
-    /**
-     * This view is going away; a hook to do cleanup.
-     */
-    void cleanUp();
+    void setNeedsInput(boolean needsInput);
 }

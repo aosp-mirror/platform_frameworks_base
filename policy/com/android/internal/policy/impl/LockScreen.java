@@ -340,7 +340,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     public void onOrientationChange(boolean inPortrait) {
-	mCallback.pokeWakelock();
     }
 
     public void onKeyboardChange(boolean isKeyboardOpen) {
@@ -350,6 +349,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
 
+    /** {@inheritDoc} */
+    public boolean needsInput() {
+        return false;
+    }
+    
     /** {@inheritDoc} */
     public void onPause() {
 

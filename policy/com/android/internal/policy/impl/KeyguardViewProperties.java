@@ -29,9 +29,12 @@ public interface KeyguardViewProperties {
      * Create a keyguard view.
      * @param context the context to use when creating the view.
      * @param updateMonitor configuration may be based on this.
+     * @param controller for talking back with the containing window.
      * @return the view.
      */
-    KeyguardViewBase createKeyguardView(Context context, KeyguardUpdateMonitor updateMonitor);
+    KeyguardViewBase createKeyguardView(Context context,
+            KeyguardUpdateMonitor updateMonitor,
+            KeyguardWindowController controller);
 
     /**
      * Would the keyguard be secure right now?

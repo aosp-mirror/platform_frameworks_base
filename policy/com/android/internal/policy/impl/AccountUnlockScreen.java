@@ -28,8 +28,11 @@ import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
+import android.text.TextWatcher;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,12 +50,15 @@ import android.widget.TextView;
  * IAccountsService.
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        View.OnClickListener, ServiceConnection {
-
-
+        View.OnClickListener, ServiceConnection, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
+
+    /**
+     * The amount of millis to stay awake once this screen detects activity
+     */
+    private static final int AWAKE_POKE_MILLIS = 30000;
 
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
@@ -87,8 +93,10 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mLogin = (EditText) findViewById(R.id.login);
         mLogin.setFilters(new InputFilter[] { new LoginFilter.UsernameFilterGeneric() } );
+        mLogin.addTextChangedListener(this);
 
         mPassword = (EditText) findViewById(R.id.password);
+        mPassword.addTextChangedListener(this);
 
         mOk = (Button) findViewById(R.id.ok);
         mOk.setOnClickListener(this);
@@ -105,11 +113,26 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         }
     }
 
+    public void afterTextChanged(Editable s) {
+    }
+
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
+    }
+
     @Override
     protected boolean onRequestFocusInDescendants(int direction,
             Rect previouslyFocusedRect) {
         // send focus to the login field
         return mLogin.requestFocus(direction, previouslyFocusedRect);
+    }
+
+    /** {@inheritDoc} */
+    public boolean needsInput() {
+        return true;
     }
 
     /** {@inheritDoc} */
@@ -132,6 +155,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void onClick(View v) {
+        mCallback.pokeWakelock();
         if (v == mOk) {
             if (checkPassword()) {
                 // clear out forgotten password
@@ -167,11 +191,75 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         return super.dispatchKeyEvent(event);
     }
 
+    /**
+     * Given the string the user entered in the 'username' field, find
+     * the stored account that they probably intended.  Prefer, in order:
+     *
+     *   - an exact match for what was typed, or
+     *   - a case-insensitive match for what was typed, or
+     *   - if they didn't include a domain, an exact match of the username, or
+     *   - if they didn't include a domain, a case-insensitive
+     *     match of the username.
+     *
+     * If there is a tie for the best match, choose neither --
+     * the user needs to be more specific.
+     *
+     * @return an account name from the database, or null if we can't
+     * find a single best match.
+     */
+    private String findIntendedAccount(String username) {
+        String[] accounts = null;
+        try {
+            accounts = mAccountsService.getAccounts();
+        } catch (RemoteException e) {
+            return null;
+        }
+        if (accounts == null) {
+            return null;
+        }
+
+        // Try to figure out which account they meant if they
+        // typed only the username (and not the domain), or got
+        // the case wrong.
+
+        String bestAccount = null;
+        int bestScore = 0;
+        for (String a: accounts) {
+            int score = 0;
+            if (username.equals(a)) {
+                score = 4;
+            } else if (username.equalsIgnoreCase(a)) {
+                score = 3;
+            } else if (username.indexOf('@') < 0) {
+                int i = a.indexOf('@');
+                if (i >= 0) {
+                    String aUsername = a.substring(0, i);
+                    if (username.equals(aUsername)) {
+                        score = 2;
+                    } else if (username.equalsIgnoreCase(aUsername)) {
+                        score = 1;
+                    }
+                }
+            }
+            if (score > bestScore) {
+                bestAccount = a;
+                bestScore = score;
+            } else if (score == bestScore) {
+                bestAccount = null;
+            }
+        }
+        return bestAccount;
+    }
+
     private boolean checkPassword() {
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
         try {
-            return mAccountsService.shouldUnlock(login, password);
+            String account = findIntendedAccount(login);
+            if (account == null) {
+                return false;
+            }
+            return mAccountsService.shouldUnlock(account, password);
         } catch (RemoteException e) {
             return false;
         }

@@ -375,12 +375,12 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Is the keyboard currently open?
+     * Is the (hard) keyboard currently open?
      */
     boolean queryKeyboardOpen() {
         final Configuration configuration = mContext.getResources().getConfiguration();
 
-        return configuration.keyboardHidden == Configuration.KEYBOARDHIDDEN_NO;
+        return configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
     }
 
     /**

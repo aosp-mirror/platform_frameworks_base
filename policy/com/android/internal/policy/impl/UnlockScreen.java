@@ -16,14 +16,10 @@
 
 package com.android.internal.policy.impl;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.CountDownTimer;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -230,6 +226,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public void onKeyboardChange(boolean isKeyboardOpen) {}
 
     /** {@inheritDoc} */
+    public boolean needsInput() {
+        return false;
+    }
+    
+    /** {@inheritDoc} */
     public void onPause() {
         if (mCountdownTimer != null) {
             mCountdownTimer.cancel();
@@ -288,7 +289,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mUnlockIcon.setVisibility(View.GONE);
-                mUnlockHeader.setText(R.string.lockscreen_pattern_correct);
+                mUnlockHeader.setText("");
                 mCallback.keyguardDone(true);
             } else {
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
@@ -299,8 +300,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     mCallback.reportFailedPatternAttempt();
                 }
                 if (mFailedPatternAttemptsSinceLastTimeout >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
-                    long deadline = SystemClock.elapsedRealtime() + LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS;
-                    mLockPatternUtils.setLockoutAttemptDeadline(deadline);
+                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                     return;
                 }

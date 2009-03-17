@@ -19,6 +19,7 @@ package com.android.internal.policy.impl;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -36,6 +37,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
 
     private KeyguardViewCallback mCallback;
     private AudioManager mAudioManager;
+    private TelephonyManager mTelephonyManager = null;
 
     public KeyguardViewBase(Context context) {
         super(context);
@@ -131,8 +133,18 @@ public abstract class KeyguardViewBase extends FrameLayout {
         final int keyCode = event.getKeyCode();
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
+                case KeyEvent.KEYCODE_PLAYPAUSE:
+                    /* Suppress PLAYPAUSE toggle when phone is ringing or
+                     * in-call to avoid music playback */
+                    if (mTelephonyManager == null) {
+                        mTelephonyManager = (TelephonyManager) getContext().getSystemService(
+                                Context.TELEPHONY_SERVICE);
+                    }
+                    if (mTelephonyManager != null &&
+                            mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+                        return true;  // suppress key event
+                    }
                 case KeyEvent.KEYCODE_HEADSETHOOK: 
-                case KeyEvent.KEYCODE_PLAYPAUSE: 
                 case KeyEvent.KEYCODE_STOP: 
                 case KeyEvent.KEYCODE_NEXTSONG: 
                 case KeyEvent.KEYCODE_PREVIOUSSONG: 
@@ -167,6 +179,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
             }
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
             switch (keyCode) {
+                case KeyEvent.KEYCODE_MUTE:
                 case KeyEvent.KEYCODE_HEADSETHOOK: 
                 case KeyEvent.KEYCODE_PLAYPAUSE: 
                 case KeyEvent.KEYCODE_STOP: 
