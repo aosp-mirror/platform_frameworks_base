@@ -20,88 +20,86 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 
 /**
- * Wrapper around InputConnection interface, calling through to another
- * implementation of it.
+ * <p>Wrapper class for proxying calls to another InputConnection.  Subclass
+ * and have fun!
  */
 public class InputConnectionWrapper implements InputConnection {
-    InputConnection mBase;
+    private final InputConnection mTarget;
     
-    /**
-     * Create a new wrapper around an existing InputConnection implementation.
-     */
-    public InputConnectionWrapper(InputConnection base) {
-        mBase = base;
+    public InputConnectionWrapper(InputConnection target) {
+        mTarget = target;
     }
     
-    /**
-     * Return the base InputConnection that this class is wrapping.
-     */
-    InputConnection getBase() {
-        return mBase;
+    public CharSequence getTextBeforeCursor(int n, int flags) {
+        return mTarget.getTextBeforeCursor(n, flags);
     }
     
-    public CharSequence getTextBeforeCursor(int n) {
-        return mBase.getTextBeforeCursor(n);
-    }
-
-    public CharSequence getTextAfterCursor(int n) {
-        return mBase.getTextAfterCursor(n);
+    public CharSequence getTextAfterCursor(int n, int flags) {
+        return mTarget.getTextAfterCursor(n, flags);
     }
 
     public int getCursorCapsMode(int reqModes) {
-        return mBase.getCursorCapsMode(reqModes);
+        return mTarget.getCursorCapsMode(reqModes);
     }
     
     public ExtractedText getExtractedText(ExtractedTextRequest request,
             int flags) {
-        return mBase.getExtractedText(request, flags);
+        return mTarget.getExtractedText(request, flags);
     }
 
     public boolean deleteSurroundingText(int leftLength, int rightLength) {
-        return mBase.deleteSurroundingText(leftLength, rightLength);
+        return mTarget.deleteSurroundingText(leftLength, rightLength);
     }
 
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
-        return mBase.setComposingText(text, newCursorPosition);
+        return mTarget.setComposingText(text, newCursorPosition);
     }
 
     public boolean finishComposingText() {
-        return mBase.finishComposingText();
+        return mTarget.finishComposingText();
     }
     
     public boolean commitText(CharSequence text, int newCursorPosition) {
-        return mBase.commitText(text, newCursorPosition);
+        return mTarget.commitText(text, newCursorPosition);
     }
 
     public boolean commitCompletion(CompletionInfo text) {
-        return mBase.commitCompletion(text);
+        return mTarget.commitCompletion(text);
+    }
+
+    public boolean setSelection(int start, int end) {
+        return mTarget.setSelection(start, end);
+    }
+    
+    public boolean performEditorAction(int editorAction) {
+        return mTarget.performEditorAction(editorAction);
+    }
+    
+    public boolean performContextMenuAction(int id) {
+        return mTarget.performContextMenuAction(id);
     }
     
     public boolean beginBatchEdit() {
-        return mBase.beginBatchEdit();
+        return mTarget.beginBatchEdit();
     }
     
     public boolean endBatchEdit() {
-        return mBase.endBatchEdit();
+        return mTarget.endBatchEdit();
     }
     
     public boolean sendKeyEvent(KeyEvent event) {
-        return mBase.sendKeyEvent(event);
+        return mTarget.sendKeyEvent(event);
     }
 
     public boolean clearMetaKeyStates(int states) {
-        return mBase.clearMetaKeyStates(states);
+        return mTarget.clearMetaKeyStates(states);
+    }
+    
+    public boolean reportFullscreenMode(boolean enabled) {
+        return mTarget.reportFullscreenMode(enabled);
     }
     
     public boolean performPrivateCommand(String action, Bundle data) {
-        return mBase.performPrivateCommand(action, data);
-    }
-    
-    public boolean showStatusIcon(String packageName, int resId) {
-        return mBase.showStatusIcon(packageName, resId);
-    }
-    
-    public boolean hideStatusIcon() {
-        return mBase.hideStatusIcon();
+        return mTarget.performPrivateCommand(action, data);
     }
 }

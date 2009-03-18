@@ -24,7 +24,6 @@ import android.view.KeyEvent;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-import com.android.frameworktest.listview.ListScrollListener;
 import android.test.TouchUtils;
 
 public class ListScrollListenerTest extends ActivityInstrumentationTestCase<ListScrollListener> implements
@@ -88,8 +87,6 @@ public class ListScrollListenerTest extends ActivityInstrumentationTestCase<List
 
     @LargeTest
     public void testTouchScrolling() {
-        Instrumentation inst = getInstrumentation();
-        
         int firstVisibleItem = mFirstVisibleItem;
         TouchUtils.dragQuarterScreenUp(this);
         TouchUtils.dragQuarterScreenUp(this);

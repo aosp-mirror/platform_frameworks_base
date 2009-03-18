@@ -23,9 +23,9 @@
 <com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#FF000000"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
+    android:background="#A0000000"
         >
 
     <!-- lock icon and header message -->
@@ -53,17 +53,18 @@
             android:textSize="18sp"/>
     </LinearLayout>
 
-    <View
+    <!--View
          android:background="@android:drawable/code_lock_top"
          android:layout_width="fill_parent"
-         android:layout_height="2dip" />
+         android:layout_height="2dip" /-->
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
          android:layout_width="wrap_content"
-         android:layout_height="wrap_content" />
-    <View
+         android:layout_height="wrap_content"
+         />
+    <!--View
          android:background="@android:drawable/code_lock_bottom"
          android:layout_width="fill_parent"
-         android:layout_height="8dip" />
+         android:layout_height="8dip" /-->
 
     <!-- footer -->
     <FrameLayout
@@ -100,6 +101,10 @@
                 android:layout_width="0dip"
                 android:layout_height="fill_parent"
                 android:layout_weight="1.0"
+                android:layout_marginTop="4dip"
+                android:layout_marginBottom="4dip"
+                android:layout_marginLeft="4dip"
+                android:layout_marginRight="2dip"
                 android:text="@android:string/lockscreen_emergency_call"
                 android:textSize="14sp"
                 android:drawableLeft="@drawable/ic_emergency"
@@ -109,6 +114,10 @@
                 android:layout_width="0dip"
                 android:layout_height="fill_parent"
                 android:layout_weight="1.0"
+                android:layout_marginTop="4dip"
+                android:layout_marginBottom="4dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="4dip"
                 android:textSize="14sp"
                 android:visibility="invisible"
                 />

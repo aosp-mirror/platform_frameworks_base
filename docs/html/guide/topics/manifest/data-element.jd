@@ -1,0 +1,148 @@
+page.title=&lt;data&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;data android:<a href="#host">host</a>="<i>string</i>"
+      android:<a href="#mime">mimeType</a>="<i>string</i>"
+      android:<a href="#path">path</a>="<i>string</i>"
+      android:<a href="#path">pathPattern</a>="<i>string</i>"
+      android:<a href="#path">pathPrefix</a>="<i>string</i>"
+      android:<a href="#port">port</a>="<i>string</i>"
+      android:<a href="#scheme">scheme</a>="<i>string</i>" /&gt;</pre></dd>
+
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Adds a data specification to an intent filter.  The specification can 
+be just a data type (the <code><a href="{@docRoot}guide/topics/manifest/data-element.html#mime">mimeType</a></code> attribute), 
+just a URI, or both a data type and a URI.  A URI is specified by separate 
+attributes for each of its parts:
+
+<p style="margin-left: 2em">{@code scheme://host:port/path} <i>or</i> 
+{@code pathPrefix} <i>or</i> {@code pathPattern}</p>
+
+<p>
+These attributes are optional, but also mutually dependent: 
+If a <code><a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">scheme</a></code> is not specified for the 
+intent filter, all the other URI attributes are ignored.  If a 
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html#host">host</a></code> is not specified for the filer, 
+the {@code port} attribute and all the path attributes are ignored.
+</p>
+
+<p>
+All the {@code &lt;data&gt;} elements contained within the same
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element contribute to
+the same filter.  So, for example, the following filter specification,
+</p>
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;data android:scheme="something" android:host="project.example.com" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre>
+
+<p>is equivalent to this one:</p>
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;data android:scheme="something" /&gt
+    &lt;data android:host="project.example.com" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre>
+
+<p>
+You can place any number of &lt;data&gt; elements inside an
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> to give it multiple data 
+options.  None of its attributes have default values.  
+</p>
+
+<p>
+Information on how intent filters work, including the rules for how Intent objects
+are matched against filters, can be found in another document,
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+Intent Filters</a>.  See also the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#ifs">Intent Filters</a> 
+section in the introduction.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="host"></a>{@code android:host}</dt>
+<dd>The host part of a URI authority.  This attribute is meaningless
+unless a <code><a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">scheme</a></code> attribute is also 
+specified for the filter.
+</dd>
+
+<dt><a name="mime"></a>{@code android:mimeType}</dt>
+<dd>A MIME media type, such as {@code image/jpeg} or {@code audio/mpeg4-generic}.  
+The subtype can be the asterisk wildcard ({@code *}) to indicate that any 
+subtype matches.</dd>
+
+<dt><a name="path"></a>{@code android:path}
+<br/>{@code android:pathPrefix}
+<br/>{@code android:pathPattern}</dt>
+<dd>The path part of a URI.  The {@code path} attribute specifies a complete 
+path that is matched against the complete path in an Intent object.  The 
+{@code pathPrefix} attribute specifies a partial path that is matched against 
+only the initial part of the path in the Intent object.  The {@code pathPattern} 
+attribute specifies a complete path that is matched against the complete path 
+in the Intent object, but it can contain the following wildcards: 
+
+<ul>
+<li>An asterisk ('{@code *}') matches a sequence of 0 to many occurrences of
+the immediately preceding character.</li>
+
+<li>A period followed by an asterisk ("{@code .*}") matches any sequence of 
+0 to many characters.</li>
+</ul>
+
+<p>
+Because '{@code \}' is used as an escape character when the string is read 
+from XML (before it is parsed as a pattern), you will need to double-escape:  
+For example, a literal '{@code *}' would be written as "{@code \\*}" and a 
+literal '{@code \}' would be written as "{@code \\\\}".  This is basically 
+the same as what you would need to write if constructing the string in Java code.
+</p>
+
+<p>
+For more information on these three types of patterns, see the descriptions of 
+{@link android.os.PatternMatcher#PATTERN_LITERAL},
+{@link android.os.PatternMatcher#PATTERN_PREFIX}, and
+{@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB} in the
+{@link android.os.PatternMatcher} class.
+</p>
+
+<p>These attributes are meaningful only if the 
+<code><a href="#scheme">scheme</a></code> and <code><a href="#host">host</a></code> 
+attributes are also specified for the filter.
+</p></dd>
+
+<dt><a name="port"></a>{@code android:port}</dt>
+<dd>The port part of a URI authority.  This attribute is meaningful only 
+if the <code><a href="#scheme">scheme</a></code> and 
+<code><a href="#host">host</a></code> attributes are also specified for 
+the filter.</dd>
+
+<dt><a name="scheme"></a>{@code android:scheme}</dt>
+<dd>The scheme part of a URI.  This is the minimal essential attribute for 
+specifying a URI; at least one {@code scheme} attribute must be set 
+for the filter, or none of the other URI attributes are meaningful.
+
+<p>
+A scheme is specified without the trailing colon (for example,
+{@code http}, rather than {@code http:}).
+</p>
+
+<p>
+If the filter has a data type set (the <code><a href="{@docRoot}guide/topics/manifest/data-element.html#mime">mimeType</a></code> 
+attribute) but no scheme, the {@code content:} and {@code file:} schemes are
+assumed.
+</p></dd>
+</dl></dd>  
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code></dd>
+
+</dl>

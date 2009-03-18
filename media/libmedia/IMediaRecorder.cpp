@@ -21,6 +21,7 @@
 #include <utils/Parcel.h>
 #include <ui/ISurface.h>
 #include <ui/ICamera.h>
+#include <media/IMediaPlayerClient.h>
 #include <media/IMediaRecorder.h>
 
 namespace android {
@@ -39,11 +40,14 @@ enum {
     SET_OUTPUT_FORMAT,
     SET_VIDEO_ENCODER,
     SET_AUDIO_ENCODER,
-    SET_OUTPUT_FILE,
+    SET_OUTPUT_FILE_PATH,
+    SET_OUTPUT_FILE_FD,
     SET_VIDEO_SIZE,
     SET_VIDEO_FRAMERATE,
+    SET_PARAMETERS,
     SET_PREVIEW_SURFACE,
-    SET_CAMERA
+    SET_CAMERA,
+    SET_LISTENER
 };
 
 class BpMediaRecorder: public BpInterface<IMediaRecorder>
@@ -139,7 +143,18 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
         data.writeCString(path);
-        remote()->transact(SET_OUTPUT_FILE, data, &reply);
+        remote()->transact(SET_OUTPUT_FILE_PATH, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setOutputFile(int fd, int64_t offset, int64_t length) {
+        LOGV("setOutputFile(%d, %lld, %lld)", fd, offset, length);
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeFileDescriptor(fd);
+        data.writeInt64(offset);
+        data.writeInt64(length);
+        remote()->transact(SET_OUTPUT_FILE_FD, data, &reply);
         return reply.readInt32();
     }
 
@@ -161,6 +176,26 @@ public:
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
         data.writeInt32(frames_per_second);
         remote()->transact(SET_VIDEO_FRAMERATE, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setParameters(const String8& params)
+    {
+        LOGV("setParameter(%s)", params.string());
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeString8(params);
+        remote()->transact(SET_PARAMETERS, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setListener(const sp<IMediaPlayerClient>& listener)
+    {
+        LOGV("setListener(%p)", listener.get());
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeStrongBinder(listener->asBinder());
+        remote()->transact(SET_LISTENER, data, &reply);
         return reply.readInt32();
     }
 
@@ -330,11 +365,20 @@ status_t BnMediaRecorder::onTransact(
             return NO_ERROR;
 
         } break;
-        case SET_OUTPUT_FILE: {
-            LOGV("SET_OUTPUT_FILE");
+        case SET_OUTPUT_FILE_PATH: {
+            LOGV("SET_OUTPUT_FILE_PATH");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
             const char* path = data.readCString();
             reply->writeInt32(setOutputFile(path));
+            return NO_ERROR;
+        } break;
+        case SET_OUTPUT_FILE_FD: {
+            LOGV("SET_OUTPUT_FILE_FD");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            int fd = dup(data.readFileDescriptor());
+            int64_t offset = data.readInt64();
+            int64_t length = data.readInt64();
+            reply->writeInt32(setOutputFile(fd, offset, length));
             return NO_ERROR;
         } break;
         case SET_VIDEO_SIZE: {
@@ -350,6 +394,20 @@ status_t BnMediaRecorder::onTransact(
             CHECK_INTERFACE(IMediaRecorder, data, reply);
             int frames_per_second = data.readInt32();
             reply->writeInt32(setVideoFrameRate(frames_per_second));
+            return NO_ERROR;
+        } break;
+        case SET_PARAMETERS: {
+            LOGV("SET_PARAMETER");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            reply->writeInt32(setParameters(data.readString8()));
+            return NO_ERROR;
+        } break;
+        case SET_LISTENER: {
+            LOGV("SET_LISTENER");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            sp<IMediaPlayerClient> listener =
+                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
+            reply->writeInt32(setListener(listener));
             return NO_ERROR;
         } break;
         case SET_PREVIEW_SURFACE: {

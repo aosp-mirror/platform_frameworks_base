@@ -53,6 +53,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -93,11 +94,11 @@ import java.util.HashMap;
  * {@link android.R.styleable#AndroidManifestActivity &lt;activity&gt;}
  * declaration in their package's <code>AndroidManifest.xml</code>.</p>
  * 
- * <p>The Activity class is an important part of an
- * <a href="{@docRoot}intro/lifecycle.html">application's overall lifecycle</a>,
+ * <p>The Activity class is an important part of an application's overall lifecycle,
  * and the way activities are launched and put together is a fundamental
- * part of the platform's
- * <a href="{@docRoot}intro/appmodel.html">application model</a>.</p>
+ * part of the platform's application model. For a detailed perspective on the structure of
+ * Android applications and lifecycles, please read the <em>Dev Guide</em> document on 
+ * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>.</p>
  * 
  * <p>Topics covered here:
  * <ol>
@@ -527,7 +528,7 @@ import java.util.HashMap;
  * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
  * element in their own manifest to be able to start that activity.
  * 
- * <p>See the <a href="{@docRoot}devel/security.html">Security Model</a>
+ * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
  * document for more information on permissions and security in general.
  * 
  * <a name="ProcessLifecycle"></a>
@@ -629,6 +630,9 @@ public class Activity extends ContextThemeWrapper
 
     private WindowManager mWindowManager;
     /*package*/ View mDecor = null;
+    /*package*/ boolean mWindowAdded = false;
+    /*package*/ boolean mVisibleFromServer = false;
+    /*package*/ boolean mVisibleFromClient = true;
 
     private CharSequence mTitle;
     private int mTitleColor = 0;
@@ -779,6 +783,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onPostCreate
      */
     protected void onCreate(Bundle savedInstanceState) {
+        mVisibleFromClient = mWindow.getWindowStyle().getBoolean(
+                com.android.internal.R.styleable.Window_windowNoDisplay, true);
         mCalled = true;
     }
 
@@ -884,9 +890,9 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onCreate} or {@link #onStop} when the current
-     * activity is now being displayed to the user.  It will
-     * be followed by {@link #onRestart}.
+     * Called after {@link #onCreate} &mdash; or after {@link #onRestart} when  
+     * the activity had been stopped, but is now again being displayed to the 
+	 * user.  It will be followed by {@link #onResume}.
      *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
@@ -901,9 +907,9 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onStart} when the current activity is being
+     * Called after {@link #onStop} when the current activity is being
      * re-displayed to the user (the user has navigated back to it).  It will
-     * be followed by {@link #onResume}.
+     * be followed by {@link #onStart} and then {@link #onResume}.
      *
      * <p>For activities that are using raw {@link Cursor} objects (instead of
      * creating them through
@@ -917,6 +923,7 @@ public class Activity extends ContextThemeWrapper
      * thrown.</em></p>
      * 
      * @see #onStop
+     * @see #onStart
      * @see #onResume
      */
     protected void onRestart() {
@@ -1134,12 +1141,19 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called as part of the activity lifecycle when an activity is about to go
      * into the background as the result of user choice.  For example, when the
-     * user presses the Home key, {@link #onUserLeaving} will be called, but
+     * user presses the Home key, {@link #onUserLeaveHint} will be called, but
      * when an incoming phone call causes the in-call Activity to be automatically
-     * brought to the foreground, {@link #onUserLeaving} will not be called on
-     * the activity being interrupted.
+     * brought to the foreground, {@link #onUserLeaveHint} will not be called on
+     * the activity being interrupted.  In cases when it is invoked, this method
+     * is called right before the activity's {@link #onPause} callback.
+     * 
+     * <p>This callback and {@link #onUserInteraction} are intended to help
+     * activities manage status bar notifications intelligently; specifically,
+     * for helping activities determine the proper time to cancel a notfication.
+     * 
+     * @see #onUserInteraction()
      */
-    protected void onUserLeaving() {
+    protected void onUserLeaveHint() {
     }
     
     /**
@@ -1207,7 +1221,7 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called when you are no longer visible to the user.  You will next
-     * receive either {@link #onStart}, {@link #onDestroy}, or nothing,
+     * receive either {@link #onRestart}, {@link #onDestroy}, or nothing,
      * depending on later user activity.
      * 
      * <p>Note that this method may never be called, in low memory situations
@@ -1443,7 +1457,6 @@ public class Activity extends ContextThemeWrapper
      * @return The Cursor that was returned by query().
      * 
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
-     * @see #managedCommitUpdates
      * @see #startManagingCursor
      * @hide
      */
@@ -1475,7 +1488,6 @@ public class Activity extends ContextThemeWrapper
      * @return The Cursor that was returned by query().
      * 
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
-     * @see #managedCommitUpdates
      * @see #startManagingCursor
      */
     public final Cursor managedQuery(Uri uri,
@@ -1863,6 +1875,28 @@ public class Activity extends ContextThemeWrapper
         return false;
     }
     
+    /**
+     * Called whenever a key, touch, or trackball event is dispatched to the
+     * activity.  Implement this method if you wish to know that the user has
+     * interacted with the device in some way while your activity is running.
+     * This callback and {@link #onUserLeaveHint} are intended to help
+     * activities manage status bar notifications intelligently; specifically,
+     * for helping activities determine the proper time to cancel a notfication.
+     * 
+     * <p>All calls to your activity's {@link #onUserLeaveHint} callback will
+     * be accompanied by calls to {@link #onUserInteraction}.  This
+     * ensures that your activity will be told of relevant user activity such
+     * as pulling down the notification pane and touching an item there.
+     * 
+     * <p>Note that this callback will be invoked for the touch down action
+     * that begins a touch gesture, but may not be invoked for the touch-moved
+     * and touch-up actions that follow.
+     * 
+     * @see #onUserLeaveHint()
+     */
+    public void onUserInteraction() {
+    }
+    
     public void onWindowAttributesChanged(WindowManager.LayoutParams params) {
         // Update window manager if: we have a view, that view is
         // attached to its parent (which will be a RootView), and
@@ -1935,6 +1969,7 @@ public class Activity extends ContextThemeWrapper
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
+        onUserInteraction();
         if (getWindow().superDispatchKeyEvent(event)) {
             return true;
         }
@@ -1952,6 +1987,9 @@ public class Activity extends ContextThemeWrapper
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            onUserInteraction();
+        }
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }
@@ -1969,6 +2007,7 @@ public class Activity extends ContextThemeWrapper
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchTrackballEvent(MotionEvent ev) {
+        onUserInteraction();
         if (getWindow().superDispatchTrackballEvent(ev)) {
             return true;
         }
@@ -2865,6 +2904,35 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Control whether this activity's main window is visible.  This is intended
+     * only for the special case of an activity that is not going to show a
+     * UI itself, but can't just finish prior to onResume() because it needs
+     * to wait for a service binding or such.  Setting this to false allows
+     * you to prevent your UI from being shown during that time.
+     * 
+     * <p>The default value for this is taken from the
+     * {@link android.R.attr#windowNoDisplay} attribute of the activity's theme.
+     */
+    public void setVisible(boolean visible) {
+        if (mVisibleFromClient != visible) {
+            mVisibleFromClient = visible;
+            if (mVisibleFromServer) {
+                if (visible) makeVisible();
+                else mDecor.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+    
+    void makeVisible() {
+        if (!mWindowAdded) {
+            ViewManager wm = getWindowManager();
+            wm.addView(mDecor, getWindow().getAttributes());
+            mWindowAdded = true;
+        }
+        mDecor.setVisibility(View.VISIBLE);
+    }
+    
+    /**
      * Check to see whether this activity is in the process of finishing,
      * either because you called {@link #finish} on it or someone else
      * has requested that it finished.  This is often used in
@@ -3482,7 +3550,8 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performUserLeaving() {
-        onUserLeaving();
+        onUserInteraction();
+        onUserLeaveHint();
     }
     
     final void performStop() {

@@ -44,6 +44,7 @@ static struct typedvalue_offsets_t
     jfieldID mAssetCookie;
     jfieldID mResourceId;
     jfieldID mChangingConfigurations;
+    jfieldID mDensity;
 } gTypedValueOffsets;
 
 static struct assetfiledescriptor_offsets_t
@@ -83,7 +84,11 @@ enum {
 
 static jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
                       const Res_value& value, uint32_t ref, ssize_t block,
-                      uint32_t typeSpecFlags)
+                      uint32_t typeSpecFlags, ResTable_config* config = NULL);
+
+jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
+               const Res_value& value, uint32_t ref, ssize_t block,
+               uint32_t typeSpecFlags, ResTable_config* config)
 {
     env->SetIntField(outValue, gTypedValueOffsets.mType, value.dataType);
     env->SetIntField(outValue, gTypedValueOffsets.mAssetCookie,
@@ -93,6 +98,9 @@ static jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
     env->SetIntField(outValue, gTypedValueOffsets.mResourceId, ref);
     env->SetIntField(outValue, gTypedValueOffsets.mChangingConfigurations,
             typeSpecFlags);
+    if (config != NULL) {
+        env->SetIntField(outValue, gTypedValueOffsets.mDensity, config->density);
+    }
     return block;
 }
 
@@ -703,13 +711,14 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
     const ResTable& res(am->getResources());
 
     Res_value value;
+    ResTable_config config;
     uint32_t typeSpecFlags;
-    ssize_t block = res.getResource(ident, &value, false, &typeSpecFlags);
+    ssize_t block = res.getResource(ident, &value, false, &typeSpecFlags, &config);
     uint32_t ref = ident;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref);
     }
-    return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags) : block;
+    return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags, &config) : block;
 }
 
 static jint android_content_AssetManager_loadResourceBagValue(JNIEnv* env, jobject clazz,
@@ -1648,6 +1657,8 @@ int register_android_content_AssetManager(JNIEnv* env)
     gTypedValueOffsets.mChangingConfigurations
         = env->GetFieldID(typedValue, "changingConfigurations", "I");
     LOG_FATAL_IF(gTypedValueOffsets.mChangingConfigurations == NULL, "Unable to find TypedValue.changingConfigurations");
+    gTypedValueOffsets.mDensity = env->GetFieldID(typedValue, "density", "I");
+    LOG_FATAL_IF(gTypedValueOffsets.mDensity == NULL, "Unable to find TypedValue.density");
 
     jclass assetFd = env->FindClass("android/content/res/AssetFileDescriptor");
     LOG_FATAL_IF(assetFd == NULL, "Unable to find class android/content/res/AssetFileDescriptor");

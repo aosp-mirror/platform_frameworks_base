@@ -17,6 +17,7 @@
 package com.android.dumprendertree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,8 @@ public abstract class FileList extends ListActivity
         	return myData;
         }
         String[] files = f.list();
- 
+        Arrays.sort(files);
+
         for (int i = 0; i < files.length; i++) {
         	StringBuilder sb = new StringBuilder(mPath);
         	sb.append(File.separatorChar);
@@ -117,9 +119,14 @@ public abstract class FileList extends ListActivity
     {
     	Map map = (Map) l.getItemAtPosition(position);
     	String path = (String)map.get("path");
-    	if (path.length() > 0)
-    	    processFile(path, true);
 
+        if ((new File(path)).isDirectory()) {
+            mPath = path;
+            mFocusFile = null;
+            updateList();
+        } else {
+            processFile(path, false);
+        }
     }
     
     /*
@@ -148,7 +155,7 @@ public abstract class FileList extends ListActivity
     
     protected void setupPath() 
     {
-    	mPath = "/sdcard";
+    	mPath = "/sdcard/android/layout_tests";
     	mBaseLength = mPath.length();
     }
     

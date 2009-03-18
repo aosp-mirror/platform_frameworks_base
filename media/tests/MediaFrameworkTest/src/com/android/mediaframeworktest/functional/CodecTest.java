@@ -28,6 +28,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -39,6 +40,16 @@ import java.io.InputStream;
  */  
 public class CodecTest {    
     private static String TAG = "MediaPlayerApiTest";
+    private static MediaPlayer mMediaPlayer;
+    private MediaPlayer.OnPreparedListener mOnPreparedListener;
+    
+    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  //10 seconds max.
+    private static boolean mInitialized = false;
+    private static Looper mLooper = null;
+    private static final Object lock = new Object();
+    private static final Object prepareDone = new Object();
+    private static boolean onPrepareSuccess = false;
+    
 
     public static String printCpuInfo(){      
         String cm = "dumpsys cpuinfo";
@@ -573,5 +584,89 @@ public class CodecTest {
 
         return true;
     }
+    
+    /*
+     * Initializes the message looper so that the mediaPlayer object can 
+     * receive the callback messages.
+     */
+    private static void initializeMessageLooper() {
+        Log.v(TAG, "start looper");
+        new Thread() {
+            @Override
+            public void run() {
+                // Set up a looper to be used by camera.
+                Looper.prepare();
+                Log.v(TAG, "start loopRun");
+                // Save the looper so that we can terminate this thread 
+                // after we are done with it.
+                mLooper = Looper.myLooper();                
+                mMediaPlayer = new MediaPlayer();                                
+                synchronized (lock) {
+                    mInitialized = true;
+                    lock.notify();
+                }
+                Looper.loop();  // Blocks forever until Looper.quit() is called.
+                Log.v(TAG, "initializeMessageLooper: quit.");
+            }
+        }.start();
+    }
+    
+    /*
+     * Terminates the message looper thread.
+     */
+    private static void terminateMessageLooper() {
+        mLooper.quit();
+        mMediaPlayer.release();
+    }
+    
+    static MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
+        public void onPrepared(MediaPlayer mp) {
+            synchronized (prepareDone) {
+                Log.v(TAG, "notify the prepare callback");
+                prepareDone.notify();
+                onPrepareSuccess = true;
+            }
+        }
+    };
+   
+    public static boolean prepareAsyncCallback(String filePath) throws Exception {
+        int videoWidth = 0;
+        int videoHeight = 0;
+        boolean checkVideoDimension = false;
+        
+        initializeMessageLooper();
+        synchronized (lock) {
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return false;
+            }
+        }
+        try{
+            mMediaPlayer.setOnPreparedListener(mPreparedListener);
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.prepareAsync(); 
+            synchronized (prepareDone) {
+                try {
+                    prepareDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    Log.v(TAG, "setPreview done");
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted.");
+                }
+            }
+            videoWidth = mMediaPlayer.getVideoWidth();
+            videoHeight = mMediaPlayer.getVideoHeight();
+            
+            terminateMessageLooper();
+        }catch (Exception e){
+            Log.v(TAG,e.getMessage());
+        }      
+       return onPrepareSuccess;
+    }
+    
+    
+    
 }
 

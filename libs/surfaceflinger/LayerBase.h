@@ -86,8 +86,8 @@ public:
                 uint32_t        z;
                 uint8_t         alpha;
                 uint8_t         flags;
-                uint8_t         sequence;   // changes when visible regions can change
-                uint8_t         reserved;
+                uint8_t         reserved[2];
+                int32_t         sequence;   // changes when visible regions can change
                 uint32_t        tint;
                 Transform       transform;
                 Region          transparentRegion;
@@ -104,11 +104,11 @@ public:
             
             void commitTransaction(bool skipSize);
             bool requestTransaction();
-
+            void forceVisibilityTransaction();
+            
             uint32_t getTransactionFlags(uint32_t flags);
             uint32_t setTransactionFlags(uint32_t flags);
             
-            void validateVisibility(const Transform& globalTransform);
             Rect visibleBounds() const;
             void drawRegion(const Region& reg) const;
 
@@ -162,7 +162,12 @@ public:
      * the bitmap (as opposed to the size of the drawing state).
      */
     virtual Point getPhysicalSize() const;
-    
+
+    /**
+     * validateVisibility - cache a bunch of things
+     */
+    virtual void validateVisibility(const Transform& globalTransform);
+
     /**
      * lockPageFlip - called each time the screen is redrawn and returns whether
      * the visible regions need to be recomputed (this is a fairly heavy
@@ -188,10 +193,15 @@ public:
      * needsBlending - true if this surface needs blending
      */
     virtual bool needsBlending() const  { return false; }
-    
+
     /**
-     * isSecure - true if this surface is secure, that is if it prevents a
-     * screenshot to be taken,
+     * transformed -- true is this surface needs a to be transformed
+     */
+    virtual bool transformed() const    { return mTransformed; }
+
+    /**
+     * isSecure - true if this surface is secure, that is if it prevents
+     * screenshots or vns servers.
      */
     virtual bool isSecure() const       { return false; }
 
@@ -210,7 +220,6 @@ public:
     }
 
     int32_t  getOrientation() const { return mOrientation; }
-    bool transformed() const    { return mTransformed; }
     int  tx() const             { return mLeft; }
     int  ty() const             { return mTop; }
     
@@ -221,7 +230,9 @@ protected:
           GLuint createTexture() const;
     
           void drawWithOpenGL(const Region& clip,
-                  GLint textureName, const GGLSurface& surface) const;
+                  GLint textureName,
+                  const GGLSurface& surface,
+                  int transform = 0) const;
 
           void clearWithOpenGL(const Region& clip) const;
 
@@ -320,8 +331,7 @@ public:
             *params = mParams;
         }
 
-        virtual status_t registerBuffers(int w, int h, int hstride, int vstride,
-                PixelFormat format, const sp<IMemoryHeap>& heap) 
+        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers) 
                 { return INVALID_OPERATION; }
         virtual void postBuffer(ssize_t offset) { }
         virtual void unregisterBuffers() { };

@@ -67,10 +67,15 @@ public class BluetoothHeadset {
     /** A headset is currently connected */
     public static final int STATE_CONNECTED    = 2;
 
+    /** A SCO audio channel is not established */
+    public static final int AUDIO_STATE_DISCONNECTED = 0;
+    /** A SCO audio channel is established */
+    public static final int AUDIO_STATE_CONNECTED = 1;
+
     public static final int RESULT_FAILURE = 0;
     public static final int RESULT_SUCCESS = 1;
-    /** Connection cancelled before completetion. */
-    public static final int RESULT_CANCELLED = 2;
+    /** Connection canceled before completetion. */
+    public static final int RESULT_CANCELED = 2;
 
     /** Default priority for headsets that should be auto-connected */
     public static final int PRIORITY_AUTO = 100;
@@ -126,6 +131,7 @@ public class BluetoothHeadset {
      * are ok.
      */
     public synchronized void close() {
+        if (DBG) log("close()");
         if (mConnection != null) {
             mContext.unbindService(mConnection);
             mConnection = null;
@@ -138,6 +144,7 @@ public class BluetoothHeadset {
      *         object is currently not connected to the Headset service.
      */
     public int getState() {
+        if (DBG) log("getState()");
         if (mService != null) {
             try {
                 return mService.getState();
@@ -156,6 +163,7 @@ public class BluetoothHeadset {
      *         service.
      */
     public String getHeadsetAddress() {
+        if (DBG) log("getHeadsetAddress()");
         if (mService != null) {
             try {
                 return mService.getHeadsetAddress();
@@ -180,6 +188,7 @@ public class BluetoothHeadset {
      *                will be expected.
      */
     public boolean connectHeadset(String address) {
+        if (DBG) log("connectHeadset(" + address + ")");
         if (mService != null) {
             try {
                 if (mService.connectHeadset(address)) {
@@ -199,6 +208,7 @@ public class BluetoothHeadset {
      * if not currently connected to the headset service.
      */
     public boolean isConnected(String address) {
+        if (DBG) log("isConnected(" + address + ")");
         if (mService != null) {
             try {
                 return mService.isConnected(address);
@@ -216,6 +226,7 @@ public class BluetoothHeadset {
      * not currently connected to the Headset service.
      */
     public boolean disconnectHeadset() {
+        if (DBG) log("disconnectHeadset()");
         if (mService != null) {
             try {
                 mService.disconnectHeadset();
@@ -235,6 +246,7 @@ public class BluetoothHeadset {
      * error.
      */
     public boolean startVoiceRecognition() {
+        if (DBG) log("startVoiceRecognition()");
         if (mService != null) {
             try {
                 return mService.startVoiceRecognition();
@@ -252,6 +264,7 @@ public class BluetoothHeadset {
      * headset is not in voice recognition mode, or on error.
      */
     public boolean stopVoiceRecognition() {
+        if (DBG) log("stopVoiceRecognition()");
         if (mService != null) {
             try {
                 return mService.stopVoiceRecognition();
@@ -282,6 +295,7 @@ public class BluetoothHeadset {
      * @return True if successful, false if there was some error.
      */
     public boolean setPriority(String address, int priority) {
+        if (DBG) log("setPriority(" + address + ", " + priority + ")");
         if (mService != null) {
             try {
                 return mService.setPriority(address, priority);
@@ -299,6 +313,7 @@ public class BluetoothHeadset {
      * @return non-negative priority, or negative error code on error.
      */
     public int getPriority(String address) {
+        if (DBG) log("getPriority(" + address + ")");
         if (mService != null) {
             try {
                 return mService.getPriority(address);
@@ -318,6 +333,12 @@ public class BluetoothHeadset {
      * @return True if this device might support HSP or HFP.
      */
     public static boolean doesClassMatch(int btClass) {
+        // The render service class is required by the spec for HFP, so is a
+        // pretty good signal
+        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
+            return true;
+        }
+        // Just in case they forgot the render service class
         switch (BluetoothClass.Device.getDevice(btClass)) {
         case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
         case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
@@ -344,4 +365,8 @@ public class BluetoothHeadset {
             }
         }
     };
+
+    private static void log(String msg) {
+        Log.d(TAG, msg);
+    }
 }

@@ -55,6 +55,7 @@ public class BuildTest extends TestCase {
     @SmallTest
     public void testBuildFields() throws Exception {
         assertNotEmpty("ID", Build.ID);
+        assertNotEmpty("DISPLAY", Build.DISPLAY);
         assertNotEmpty("PRODUCT", Build.PRODUCT);
         assertNotEmpty("DEVICE", Build.DEVICE);
         assertNotEmpty("BOARD", Build.BOARD);

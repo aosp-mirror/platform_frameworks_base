@@ -51,7 +51,7 @@ class BrowserFrame extends Handler {
     private final Context mContext;
     private final WebViewDatabase mDatabase;
     private final WebViewCore mWebViewCore;
-    private boolean mLoadInitFromJava;
+    /* package */ boolean mLoadInitFromJava;
     private int mLoadType;
     private boolean mFirstLayoutDone = true;
     private boolean mCommitted = true;
@@ -201,10 +201,14 @@ class BrowserFrame extends Handler {
             final String failingUrl) {
         // As this is called for the main resource and loading will be stopped
         // after, reset the state variables.
+        resetLoadingStates();
+        mCallbackProxy.onReceivedError(errorCode, description, failingUrl);
+    }
+
+    private void resetLoadingStates() {
         mCommitted = true;
         mWebViewCore.mEndScaleZoom = mFirstLayoutDone == false;
         mFirstLayoutDone = true;
-        mCallbackProxy.onReceivedError(errorCode, description, failingUrl);
     }
 
     /* package */boolean committed() {
@@ -290,6 +294,7 @@ class BrowserFrame extends Handler {
 
         if (isMainFrame || loadType == FRAME_LOADTYPE_STANDARD) {
             if (isMainFrame) {
+                resetLoadingStates();
                 mCallbackProxy.switchOutDrawHistory();
                 mCallbackProxy.onPageFinished(url);
             }
@@ -555,8 +560,11 @@ class BrowserFrame extends Handler {
                 method, isHighPriority);
         loader.setHeaders(headers);
         loader.setPostData(postData);
-        loader.setCacheMode(cacheMode); // Set the load mode to the mode used
-                                        // for the current page.
+        // Set the load mode to the mode used for the current page.
+        // If WebKit wants validation, go to network directly.
+        loader.setCacheMode(headers.containsKey("If-Modified-Since")
+                || headers.containsKey("If-None-Match") ? 
+                        WebSettings.LOAD_NO_CACHE : cacheMode);
         // Set referrer to current URL?
         if (!loader.executeLoad()) {
             checker.responseAlert("startLoadingResource fail");
@@ -751,7 +759,14 @@ class BrowserFrame extends Handler {
     /**
      * Stop loading the current page.
      */
-    public native void stopLoading();
+    public void stopLoading() {
+        if (mIsMainFrame) {
+            resetLoadingStates();
+        }
+        nativeStopLoading();
+    }
+
+    private native void nativeStopLoading();
 
     /**
      * Return true if the document has images.

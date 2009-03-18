@@ -20,7 +20,7 @@ package android.text;
  * When an object of a type is attached to an Editable, its methods will
  * be called when the text is changed.
  */
-public interface TextWatcher {
+public interface TextWatcher extends NoCopySpan {
     /**
      * This method is called to notify you that, within <code>s</code>,
      * the <code>count</code> characters beginning at <code>start</code>

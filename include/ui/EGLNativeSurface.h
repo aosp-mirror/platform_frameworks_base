@@ -23,7 +23,7 @@
 #include <cutils/atomic.h>
 #include <utils/RefBase.h>
 
-#include <GLES/eglnatives.h>
+#include <EGL/eglnatives.h>
 
 // ---------------------------------------------------------------------------
 namespace android {

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <ui/EGLNativeSurface.h>
+#include <EGL/egl.h>
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -33,18 +34,16 @@ public:
     EGLNativeWindowSurface(const sp<Surface>& surface);
     ~EGLNativeWindowSurface();
 
+    void        setSwapRectangle(int l, int t, int w, int h);
+
 private:
     static void         hook_incRef(NativeWindowType window);
     static void         hook_decRef(NativeWindowType window);
     static uint32_t     hook_swapBuffers(NativeWindowType window);
-    static uint32_t     hook_nextBuffer(NativeWindowType window);
-    static void         hook_setSwapRectangle(NativeWindowType window, int l, int t, int w, int h);
     static void         hook_connect(NativeWindowType window);
     static void         hook_disconnect(NativeWindowType window);
 
             uint32_t    swapBuffers();
-            uint32_t    nextBuffer();
-            void        setSwapRectangle(int l, int t, int w, int h);
             void        connect();
             void        disconnect();
             

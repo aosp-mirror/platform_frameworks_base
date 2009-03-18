@@ -22,6 +22,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.IllegalStateException;
 
 /**
  * Plays a series of audio URIs, but does all the hard work on another thread
@@ -71,20 +72,20 @@ public class AsyncPlayer {
                         // is playing, let it continue until we're done, so there
                         // is less of a glitch.
                         MediaPlayer player = new MediaPlayer();
-                        player.setDataSource(cmd.context, cmd.uri);
                         player.setAudioStreamType(cmd.stream);
+                        player.setDataSource(cmd.context, cmd.uri);
                         player.setLooping(cmd.looping);
                         player.prepare();
+                        player.start();
                         if (mPlayer != null) {
-                            // stop the previous one.
-                            mPlayer.stop();
                             mPlayer.release();
                         }
-                        player.start();
                         mPlayer = player;
                     }
                     catch (IOException e) {
                         Log.w(mTag, "error loading sound for " + cmd.uri, e);
+                    } catch (IllegalStateException e) {
+                        Log.w(mTag, "IllegalStateException (content provider died?) " + cmd.uri, e);
                     }
                     break;
                 case STOP:

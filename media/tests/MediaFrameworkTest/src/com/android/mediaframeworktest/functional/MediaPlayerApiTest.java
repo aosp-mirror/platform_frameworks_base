@@ -52,7 +52,8 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
         return true;
     }   
     
-   
+
+    
     //Audio    
     //Wait for PV bugs for MP3 duration
     @MediumTest
@@ -385,9 +386,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("WMV SeekTo", isSeek);         
     }
     
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
     @LargeTest
     public void testSoundRecord() throws Exception {
       boolean isRecordered = CodecTest.mediaRecorderRecord(MediaNames.RECORDER_OUTPUT);
@@ -413,8 +411,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("Play mp3 from resources", mp3Resources);         
     }
     
-    //Bug# 1422662
-    @Suppress
     @MediumTest
     public void testPrepareAsyncReset() throws Exception {
       boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_LARGE_MP3);
@@ -431,6 +427,20 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     public void testIsLoopingAfterReset() throws Exception {
         boolean isLooping = CodecTest.isLoopingAfterReset(MediaNames.AMR);
         assertTrue("isLooping after reset", isLooping);
+    }
+    
+    @LargeTest
+    public void testLocalMp3PrepareAsyncCallback() throws Exception {
+        boolean onPrepareSuccess = 
+            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR);
+        assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
+    }
+    
+    @LargeTest
+    public void testStreamPrepareAsyncCallback() throws Exception {
+        boolean onPrepareSuccess = 
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k);
+        assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
     }
 }
 

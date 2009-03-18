@@ -17,13 +17,15 @@
 package android.database.sqlite;
 
 import android.database.CursorWindow;
+import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * A SQLite program that represents a query that reads the resulting rows into a CursorWindow.
  * This class is used by SQLiteCursor and isn't useful itself.
  */
 public class SQLiteQuery extends SQLiteProgram {
-    //private static final String TAG = "Cursor";
+    private static final String TAG = "Cursor";
 
     /** The index of the unbound OFFSET parameter */
     private int mOffsetIndex;
@@ -55,12 +57,14 @@ public class SQLiteQuery extends SQLiteProgram {
      * Reads rows into a buffer. This method acquires the database lock.
      * 
      * @param window The window to fill into
-     * @param startPos The position to start reading rows from
      * @return number of total rows in the query
      */
     /* package */ int fillWindow(CursorWindow window,  
             int maxRead, int lastPos) {
         mDatabase.lock();
+
+        boolean logStats = mDatabase.mLogStats;
+        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
         try {
             acquireReference();
             try {
@@ -68,8 +72,18 @@ public class SQLiteQuery extends SQLiteProgram {
                 // if the start pos is not equal to 0, then most likely window is 
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
-                return native_fill_window(window, window.getStartPosition(), mOffsetIndex, 
+                int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
                         maxRead, lastPos);
+
+                // Logging
+                if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                    Log.d(TAG, "fillWindow(): " + mQuery);
+                }
+                if (logStats) {
+                    mDatabase.logTimeStat(true /* read */, startTime,
+                            SystemClock.elapsedRealtime());
+                }
+                return numRows;
             } catch (IllegalStateException e){
                 // simply ignore it
                 return 0;

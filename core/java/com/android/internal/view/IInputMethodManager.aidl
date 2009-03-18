@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.os.ResultReceiver;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.EditorInfo;
 import com.android.internal.view.InputBindResult;
@@ -35,18 +36,22 @@ interface IInputMethodManager {
     void removeClient(in IInputMethodClient client);
             
     InputBindResult startInput(in IInputMethodClient client,
-            in EditorInfo attribute, boolean initial, boolean needResult);
+            IInputContext inputContext, in EditorInfo attribute,
+            boolean initial, boolean needResult);
     void finishInput(in IInputMethodClient client);
-    void showSoftInput(in IInputMethodClient client, int flags);
-    void hideSoftInput(in IInputMethodClient client, int flags);
-    void windowGainedFocus(in IInputMethodClient client,
+    boolean showSoftInput(in IInputMethodClient client, int flags,
+            in ResultReceiver resultReceiver);
+    boolean hideSoftInput(in IInputMethodClient client, int flags,
+            in ResultReceiver resultReceiver);
+    void windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
             boolean viewHasFocus, boolean isTextEditor,
             int softInputMode, boolean first, int windowFlags);
             
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void setInputMethod(in IBinder token, String id);
     void hideMySoftInput(in IBinder token, int flags);
-    void updateStatusIcon(int iconId, String iconPackage);
+    void showMySoftInput(in IBinder token, int flags);
+    void updateStatusIcon(in IBinder token, String packageName, int iconId);
     
     boolean setInputMethodEnabled(String id, boolean enabled);
 }

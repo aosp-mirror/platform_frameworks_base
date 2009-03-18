@@ -138,8 +138,11 @@ public interface Phone {
     static final String REASON_PDP_RESET = "pdpReset";
     static final String REASON_VOICE_CALL_ENDED = "2GVoiceCallEnded";
     static final String REASON_VOICE_CALL_STARTED = "2GVoiceCallStarted";
-
-    // Used for band mode selction methods
+    static final String REASON_PS_RESTRICT_ENABLED = "psRestrictEnabled";
+    static final String REASON_PS_RESTRICT_DISABLED = "psRestrictDisabled";
+    static final String REASON_SIM_LOADED = "simLoaded";
+    
+    // Used for band mode selection methods
     static final int BM_UNSPECIFIED = 0; // selected by baseband automatically
     static final int BM_EURO_BAND   = 1; // GSM-900 / DCS-1800 / WCDMA-IMT-2000
     static final int BM_US_BAND     = 2; // GSM-850 / PCS-1900 / WCDMA-850 / WCDMA-PCS-1900

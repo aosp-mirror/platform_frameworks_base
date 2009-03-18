@@ -24,6 +24,7 @@ import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothA2dp;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -86,10 +87,13 @@ public class WifiService extends IWifiManager.Stub {
 
     private final LockList mLocks = new LockList();
     /**
-     * See {@link Settings.System#WIFI_IDLE_MS}. This is the default value if a
-     * Settings.System value is not present.
+     * See {@link Settings.Gservices#WIFI_IDLE_MS}. This is the default value if a
+     * Settings.Gservices value is not present. This timeout value is chosen as
+     * the approximate point at which the battery drain caused by Wi-Fi
+     * being enabled but not active exceeds the battery drain caused by
+     * re-establishing a connection to the mobile data network.
      */
-    private static final long DEFAULT_IDLE_MILLIS = 2 * 60 * 1000; /* 2 minutes */
+    private static final long DEFAULT_IDLE_MILLIS = 15 * 60 * 1000; /* 15 minutes */
 
     private static final String WAKELOCK_TAG = "WifiService";
 
@@ -100,7 +104,7 @@ public class WifiService extends IWifiManager.Stub {
      * provides a bit of extra margin.
      * <p>
      * See {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}.
-     * This is the default value if a Settings.System value is not present.
+     * This is the default value if a Settings.Secure value is not present.
      */
     private static final int DEFAULT_WAKELOCK_TIMEOUT = 8000;
 
@@ -204,8 +208,6 @@ public class WifiService extends IWifiManager.Stub {
                         mWifiHandler.removeMessages(MESSAGE_RELEASE_WAKELOCK);
                         synchronized (sDriverStopWakeLock) {
                             if (sDriverStopWakeLock.isHeld()) {
-                                if (DBG) Log.d(TAG, "Releasing driver-stop wakelock " +
-                                        sDriverStopWakeLock);
                                 sDriverStopWakeLock.release();
                             }
                         }
@@ -213,9 +215,18 @@ public class WifiService extends IWifiManager.Stub {
                 }
         );
 
-        Log.d(TAG, "WifiService starting up with Wi-Fi " +
-            (wifiEnabled ? "enabled" : "disabled"));
-        registerForBroadcasts();
+        Log.i(TAG, "WifiService starting up with Wi-Fi " +
+                (wifiEnabled ? "enabled" : "disabled"));
+
+        mContext.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        updateWifiState();
+                    }
+                },
+                new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
+
         setWifiEnabledBlocking(wifiEnabled, false);
     }
 
@@ -293,7 +304,7 @@ public class WifiService extends IWifiManager.Stub {
                         decrementHiddentNetworkPresentCounter();
                     }
                 }
-                mIsHiddenNetworkPresent.put(netId, new Boolean(present));
+                mIsHiddenNetworkPresent.put(netId, present);
             }
         } else {
             Log.e(TAG, "addOrUpdateHiddenNetwork(): Invalid (negative) network id!");
@@ -422,6 +433,7 @@ public class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)}
+     * @param enable {@code true} to enable, {@code false} to disable.
      * @return {@code true} if the enable/disable operation was
      *         started or is already in the queue.
      */
@@ -429,10 +441,6 @@ public class WifiService extends IWifiManager.Stub {
         enforceChangePermission();
         if (mWifiHandler == null) return false;
 
-        /*
-         * Remove any enable/disable Wi-Fi messages we may have in the queue
-         * before adding a new one
-         */
         synchronized (mWifiHandler) {
             sWakeLock.acquire();
             sendEnableMessage(enable, true);
@@ -458,40 +466,42 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        updateWifiState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING);
+        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING);
 
         if (enable) {
             if (!WifiNative.loadDriver()) {
                 Log.e(TAG, "Failed to load Wi-Fi driver.");
-                updateWifiState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN);
                 return false;
             }
             if (!WifiNative.startSupplicant()) {
                 WifiNative.unloadDriver();
                 Log.e(TAG, "Failed to start supplicant daemon.");
-                updateWifiState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN);
                 return false;
             }
+            registerForBroadcasts();
             mWifiStateTracker.startEventLoop();
         } else {
 
-            // Remove notification (it will no-op if it isn't visible)
+            mContext.unregisterReceiver(mReceiver);
+           // Remove notification (it will no-op if it isn't visible)
             mWifiStateTracker.setNotificationVisible(false, 0, false, 0);
 
             boolean failedToStopSupplicantOrUnloadDriver = false;
             if (!WifiNative.stopSupplicant()) {
                 Log.e(TAG, "Failed to stop supplicant daemon.");
-                updateWifiState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN);
                 failedToStopSupplicantOrUnloadDriver = true;
             }
-            
+
             // We must reset the interface before we unload the driver
             mWifiStateTracker.resetInterface();
-            
+
             if (!WifiNative.unloadDriver()) {
                 Log.e(TAG, "Failed to unload Wi-Fi driver.");
                 if (!failedToStopSupplicantOrUnloadDriver) {
-                    updateWifiState(WIFI_STATE_UNKNOWN);
+                    setWifiEnabledState(WIFI_STATE_UNKNOWN);
                     failedToStopSupplicantOrUnloadDriver = true;
                 }
             }
@@ -505,7 +515,7 @@ public class WifiService extends IWifiManager.Stub {
         if (persist) {
             persistWifiEnabled(enable);
         }
-        updateWifiState(eventualWifiState);
+        setWifiEnabledState(eventualWifiState);
 
         /*
          * Initialize the hidden networks state and the number of allowed
@@ -519,7 +529,7 @@ public class WifiService extends IWifiManager.Stub {
         return true;
     }
 
-    private void updateWifiState(int wifiState) {
+    private void setWifiEnabledState(int wifiState) {
         final int previousWifiState = mWifiState;
 
         // Update state
@@ -527,6 +537,7 @@ public class WifiService extends IWifiManager.Stub {
 
         // Broadcast
         final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_WIFI_STATE, wifiState);
         intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, previousWifiState);
         mContext.sendStickyBroadcast(intent);
@@ -551,7 +562,7 @@ public class WifiService extends IWifiManager.Stub {
      *         {@link WifiManager#WIFI_STATE_ENABLING},
      *         {@link WifiManager#WIFI_STATE_UNKNOWN}
      */
-    public int getWifiState() {
+    public int getWifiEnabledState() {
         enforceAccessPermission();
         return mWifiState;
     }
@@ -1082,9 +1093,7 @@ public class WifiService extends IWifiManager.Stub {
          */
         removeNetworkIfHidden(netId);
 
-        synchronized (mWifiStateTracker) {
-            return WifiNative.removeNetworkCommand(netId);
-        }
+        return mWifiStateTracker.removeNetwork(netId);
     }
 
     /**
@@ -1221,7 +1230,6 @@ public class WifiService extends IWifiManager.Stub {
                             if (scanResult != null) {
                               scanResult.level = -scanResultLevel;
                               scanList.add(scanResult);
-                              //if (DBG) Log.d(TAG, "ScanResult: " + scanResult);
                             }
                         } else if (DBG) {
                             Log.w(TAG,
@@ -1344,7 +1352,7 @@ public class WifiService extends IWifiManager.Stub {
             if (result && mNeedReconfig) {
                 mNeedReconfig = false;
                 result = WifiNative.reloadConfigCommand();
-                
+
                 if (result) {
                     Intent intent = new Intent(WifiManager.NETWORK_IDS_CHANGED_ACTION);
                     mContext.sendBroadcast(intent);
@@ -1359,7 +1367,7 @@ public class WifiService extends IWifiManager.Stub {
      * in the current regulatory domain. This method should be used only
      * if the correct number of channels cannot be determined automatically
      * for some reason. If the operation is successful, the new value is
-     * persisted as a System setting.
+     * persisted as a Secure setting.
      * @param numChannels the number of allowed channels. Must be greater than 0
      * and less than or equal to 16.
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
@@ -1441,14 +1449,12 @@ public class WifiService extends IWifiManager.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            long idleMillis = Settings.System.getLong(mContext.getContentResolver(),
-                                                  Settings.System.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
+            long idleMillis = Settings.Gservices.getLong(mContext.getContentResolver(),
+                                                  Settings.Gservices.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
             int stayAwakeConditions =
                     Settings.System.getInt(mContext.getContentResolver(),
                                            Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
-            if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
-                /* do nothing, we'll check isAirplaneModeOn later. */
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+            if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
@@ -1485,6 +1491,12 @@ public class WifiService extends IWifiManager.Stub {
                     return;
                 }
                 mPluggedType = pluggedType;
+            } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+                boolean isBluetoothPlaying =
+                        intent.getIntExtra(
+                                BluetoothA2dp.SINK_STATE,
+                                BluetoothA2dp.STATE_DISCONNECTED) == BluetoothA2dp.STATE_PLAYING;
+                mWifiStateTracker.setBluetoothScanMode(isBluetoothPlaying);
             } else {
                 return;
             }
@@ -1543,7 +1555,6 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void sendStartMessage(boolean scanOnlyMode) {
-        if (DBG) Log.d(TAG, "sendStartMessage(" + scanOnlyMode + ")");
         Message.obtain(mWifiHandler, MESSAGE_START_WIFI, scanOnlyMode ? 1 : 0, 0).sendToTarget();
     }
 
@@ -1561,6 +1572,9 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         synchronized (mWifiHandler) {
+            if (mWifiState == WIFI_STATE_ENABLING && !airplaneMode) {
+                return;
+            }
             if (wifiShouldBeEnabled) {
                 if (wifiShouldBeStarted) {
                     sWakeLock.acquire();
@@ -1573,6 +1587,15 @@ public class WifiService extends IWifiManager.Stub {
                                     mContext.getContentResolver(),
                                     Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
                                     DEFAULT_WAKELOCK_TIMEOUT);
+                    /*
+                     * The following wakelock is held in order to ensure
+                     * that the connectivity manager has time to fail over
+                     * to the mobile data network. The connectivity manager
+                     * releases it once mobile data connectivity has been
+                     * established. If connectivity cannot be established,
+                     * the wakelock is released after wakeLockTimeout
+                     * milliseconds have elapsed.
+                     */
                     sDriverStopWakeLock.acquire();
                     mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
                     mWifiHandler.sendEmptyMessageDelayed(MESSAGE_RELEASE_WAKELOCK, wakeLockTimeout);
@@ -1585,18 +1608,13 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void registerForBroadcasts() {
-        if (isAirplaneSensitive()) {
-            mContext.registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
-        }
-        mContext.registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_ON));
-        mContext.registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_OFF));
-        mContext.registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        mContext.registerReceiver(mReceiver,
-                new IntentFilter(ACTION_DEVICE_IDLE));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        intentFilter.addAction(ACTION_DEVICE_IDLE);
+        intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+        mContext.registerReceiver(mReceiver, intentFilter);
     }
     
     private boolean isAirplaneSensitive() {
@@ -1664,7 +1682,7 @@ public class WifiService extends IWifiManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump WifiService from from pid="
                     + Binder.getCallingPid()
@@ -1672,11 +1690,14 @@ public class WifiService extends IWifiManager.Stub {
             return;
         }
         pw.println("Wi-Fi is " + stateName(mWifiState));
-        pw.println("stay-awake conditions: " +
+        pw.println("Stay-awake conditions: " +
                 Settings.System.getInt(mContext.getContentResolver(),
                                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));
         pw.println();
 
+        pw.println("Internal state:");
+        pw.println(mWifiStateTracker);
+        pw.println();
         pw.println("Latest scan results:");
         List<ScanResult> scanResults = mWifiStateTracker.getScanResultsList();
         if (scanResults != null && scanResults.size() != 0) {
@@ -1784,13 +1805,6 @@ public class WifiService extends IWifiManager.Stub {
                 if (mList.get(i).mBinder == binder)
                     return i;
             return -1;
-        }
-
-        private synchronized void clear() {
-            if (!mList.isEmpty()) {
-                mList.clear();
-                updateWifiState();
-            }
         }
 
         private void dump(PrintWriter pw) {

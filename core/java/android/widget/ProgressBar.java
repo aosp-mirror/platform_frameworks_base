@@ -344,6 +344,7 @@ public class ProgressBar extends View {
      *
      * @param indeterminate true to enable the indeterminate mode
      */
+    @android.view.RemotableViewMethod
     public synchronized void setIndeterminate(boolean indeterminate) {
         if ((!mOnlyIndeterminate || !mIndeterminate) && indeterminate != mIndeterminate) {
             mIndeterminate = indeterminate;
@@ -525,10 +526,12 @@ public class ProgressBar extends View {
      * @see #getProgress()
      * @see #incrementProgressBy(int) 
      */
+    @android.view.RemotableViewMethod
     public synchronized void setProgress(int progress) {
         setProgress(progress, false);
     }
     
+    @android.view.RemotableViewMethod
     synchronized void setProgress(int progress, boolean fromUser) {
         if (mIndeterminate) {
             return;
@@ -560,6 +563,7 @@ public class ProgressBar extends View {
      * @see #getSecondaryProgress()
      * @see #incrementSecondaryProgressBy(int)
      */
+    @android.view.RemotableViewMethod
     public synchronized void setSecondaryProgress(int secondaryProgress) {
         if (mIndeterminate) {
             return;
@@ -633,6 +637,7 @@ public class ProgressBar extends View {
      * @see #setProgress(int) 
      * @see #setSecondaryProgress(int) 
      */
+    @android.view.RemotableViewMethod
     public synchronized void setMax(int max) {
         if (max < 0) {
             max = 0;
@@ -758,10 +763,10 @@ public class ProgressBar extends View {
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (!mInDrawing) {
-            if (dr == mProgressDrawable || dr == mIndeterminateDrawable) {
+            if (verifyDrawable(dr)) {
                 final Rect dirty = dr.getBounds();
                 final int scrollX = mScrollX + mPaddingLeft;
-                final int scrollY = mScrollY + mPaddingRight;
+                final int scrollY = mScrollY + mPaddingTop;
 
                 invalidate(dirty.left + scrollX, dirty.top + scrollY,
                         dirty.right + scrollX, dirty.bottom + scrollY);

@@ -54,7 +54,7 @@ import android.view.animation.Animation;
  * window manager is a very low-level system service, there are few other
  * system services you can call with this lock held.  It is explicitly okay to
  * make calls into the package manager and power manager; it is explicitly not
- * okay to make calls into the activity manager.  Note that
+ * okay to make calls into the activity manager or most other services.  Note that
  * {@link android.content.Context#checkPermission(String, int, int)} and
  * variations require calling into the activity manager.
  * <dt> Li <dd> Called with the input thread lock held.  This lock can be
@@ -129,12 +129,20 @@ public interface WindowManagerPolicy {
                 Rect contentFrame, Rect visibleFrame);
 
         /**
-         * Retrieve the current frame of the window.  Must be called with the
-         * window manager lock held.
+         * Retrieve the current frame of the window that has been assigned by
+         * the window manager.  Must be called with the window manager lock held.
          * 
          * @return Rect The rectangle holding the window frame.
          */
         public Rect getFrameLw();
+
+        /**
+         * Retrieve the current frame of the window that is actually shown.
+         * Must be called with the window manager lock held.
+         * 
+         * @return Rect The rectangle holding the shown window frame.
+         */
+        public Rect getShownFrameLw();
 
         /**
          * Retrieve the frame of the display that this window was last
@@ -273,9 +281,12 @@ public interface WindowManagerPolicy {
          *                   false, this is based on the currently requested
          *                   frame, which any current animation will be moving
          *                   towards.
+         * @param onlyOpaque If true, this will only pass if the window is
+         * also opaque.
          * @return Returns true if the window is both full screen and opaque
          */
-        public boolean fillsScreenLw(int width, int height, boolean shownFrame);
+        public boolean fillsScreenLw(int width, int height, boolean shownFrame,
+                boolean onlyOpaque);
 
         /**
          * Returns true if this window has been shown on screen at some time in 
@@ -289,16 +300,18 @@ public interface WindowManagerPolicy {
          * Can be called by the policy to force a window to be hidden,
          * regardless of whether the client or window manager would like
          * it shown.  Must be called with the window manager lock held.
+         * Returns true if {@link #showLw} was last called for the window.
          */
-        public void hideLw(boolean doAnimation);
+        public boolean hideLw(boolean doAnimation);
         
         /**
          * Can be called to undo the effect of {@link #hideLw}, allowing a
          * window to be shown as long as the window manager and client would
          * also like it to be shown.  Must be called with the window manager
          * lock held.
+         * Returns true if {@link #hideLw} was last called for the window.
          */
-        public void showLw(boolean doAnimation);
+        public boolean showLw(boolean doAnimation);
     }
 
     /** No transition happening. */
@@ -735,10 +748,17 @@ public interface WindowManagerPolicy {
      * ActivityInfo.SCREEN_ORIENTATION_PORTRAIT}), return a surface
      * rotation.
      */
-    public int rotationForOrientation(int orientation);
+    public int rotationForOrientationLw(int orientation, int lastRotation,
+            boolean displayEnabled);
     
     /**
-     * Called when the system is mostly done booting
+     * Called when the system is mostly done booting to dentermine whether
+     * the system should go into safe mode.
+     */
+    public boolean detectSafeMode();
+    
+    /**
+     * Called when the system is mostly done booting.
      */
     public void systemReady();
 
@@ -761,5 +781,16 @@ public interface WindowManagerPolicy {
      */
     public boolean isCheekPressedAgainstScreen(MotionEvent ev);
     
-    public void setCurrentOrientation(int newOrientation);
+    public void setCurrentOrientationLw(int newOrientation);
+    
+    /**
+     * Call from application to perform haptic feedback on its window.
+     */
+    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
+    
+    /**
+     * Called when we have stopped keeping the screen on because a window
+     * requesting this is no longer visible.
+     */
+    public void screenOnStoppedLw();
 }

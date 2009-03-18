@@ -25,16 +25,14 @@
 
 package android.webkit.gears;
 
-import android.net.http.Headers;
 import android.util.Log;
-import android.webkit.CacheManager;
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.Plugin;
+import android.webkit.PluginData;
 import android.webkit.UrlInterceptRegistry;
 import android.webkit.UrlInterceptHandler;
 import android.webkit.WebView;
 
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.util.CharArrayBuffer;
 
 import java.io.*;
@@ -53,22 +51,16 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
   private static final String LOG_TAG = "Gears-J";
   /** Buffer size for reading/writing streams. */
   private static final int BUFFER_SIZE = 4096;
-  /**
-   * Number of milliseconds to expire LocalServer temporary entries in
-   * the browser's cache. Somewhat arbitrarily chosen as a compromise
-   * between being a) long enough not to expire during page load and
-   * b) short enough to evict entries during a session. */
-  private static final int CACHE_EXPIRY_MS = 60000; // 1 minute.
   /** Enable/disable all logging in this class. */
   private static boolean logEnabled = false;
   /** The unmodified (case-sensitive) key in the headers map is the
    * same index as used by HttpRequestAndroid. */
   public static final int HEADERS_MAP_INDEX_KEY =
-      HttpRequestAndroid.HEADERS_MAP_INDEX_KEY;
+      ApacheHttpRequestAndroid.HEADERS_MAP_INDEX_KEY;
   /** The associated value in the headers map is the same index as
    * used by HttpRequestAndroid. */
   public static final int HEADERS_MAP_INDEX_VALUE =
-      HttpRequestAndroid.HEADERS_MAP_INDEX_VALUE;
+      ApacheHttpRequestAndroid.HEADERS_MAP_INDEX_VALUE;
 
   /**
    * Object passed to the native side, containing information about
@@ -140,6 +132,8 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
     private String encoding;
     // The stream which contains the body when read().
     private InputStream inputStream;
+    // The length of the content body.
+    private long contentLength;
 
     /**
      * Initialize members using an in-memory array to return the body.
@@ -160,6 +154,7 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
       this.mimeType = mimeType;
       this.encoding = encoding;
       // Setup a stream to read out of the byte array.
+      this.contentLength = body.length;
       this.inputStream = new ByteArrayInputStream(body);
     }
     
@@ -185,7 +180,9 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
       this.encoding = encoding;
       try {
         // Setup a stream to read out of a file on disk.
-        this.inputStream = new FileInputStream(new File(path));
+        File file = new File(path);
+        this.contentLength = file.length();
+        this.inputStream = new FileInputStream(file);
         return true;
       } catch (java.io.FileNotFoundException ex) {
         log("File not found: " + path);
@@ -274,6 +271,13 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
     public InputStream getInputStream() {
       return inputStream;
     }
+
+    /**
+     * @return The length of the response body.
+     */
+    public long getContentLength() {
+      return contentLength;
+    }
   }
 
   /**
@@ -319,44 +323,32 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
     UrlInterceptRegistry.unregisterHandler(this);
   }
 
-  /**
-   * Copy the entire InputStream to OutputStream.
-   * @param inputStream The stream to read from.
-   * @param outputStream The stream to write to.
-   * @return True if the entire stream copied successfully, false on error.
-   */
-  private boolean copyStream(InputStream inputStream,
-      OutputStream outputStream) {
-    try {
-      // Temporary buffer to copy stream through.
-      byte[] buf = new byte[BUFFER_SIZE];
-      for (;;) {
-        // Read up to BUFFER_SIZE bytes.
-        int bytes = inputStream.read(buf);
-        if (bytes < 0) {
-          break;
-        }
-        // Write the number of bytes we just read.
-        outputStream.write(buf, 0, bytes);
-      }
-    } catch (IOException ex) {
-      log("Got IOException copying stream: " + ex);
-      return false;
+    /**
+     * Given an URL, returns the CacheResult which contains the
+     * surrogate response for the request, or null if the handler is
+     * not interested.
+     *
+     * @param url URL string.
+     * @param headers The headers associated with the request. May be null.
+     * @return The CacheResult containing the surrogate response.
+     * @Deprecated Use PluginData getPluginData(String url,
+     * Map<String, String> headers); instead
+     */
+    @Deprecated
+    public CacheResult service(String url, Map<String, String> headers) {
+      throw new UnsupportedOperationException("unimplemented");
     }
-    return true;
-  }
 
   /**
-   * Given an URL, returns a CacheResult which contains the response
-   * for the request. This implements the UrlInterceptHandler interface.
+   * Given an URL, returns a PluginData instance which contains the
+   * response for the request. This implements the UrlInterceptHandler
+   * interface.
    *
-   * @param url            The fully qualified URL being requested.
+   * @param url The fully qualified URL being requested.
    * @param requestHeaders The request headers for this URL.
-   * @return If a response can be crafted, a CacheResult initialized
-   *         to return the surrogate response. If this URL cannot
-   *         be serviced, returns null.
+   * @return a PluginData object.
    */
-  public CacheResult service(String url, Map<String, String> requestHeaders) {
+  public PluginData getPluginData(String url, Map<String, String> requestHeaders) {
     // Thankfully the browser does call us with case-sensitive
     // headers. We just need to map it case-insensitive.
     Map<String, String[]> lowercaseRequestHeaders =
@@ -374,86 +366,10 @@ public class UrlInterceptHandlerGears implements UrlInterceptHandler {
       // No result for this URL.
       return null;
     }
-    // Translate the ServiceResponse to a CacheResult.
-    // Translate http -> gears, https -> gearss, so we don't overwrite
-    // existing entries.
-    String gearsUrl = "gears" + url.substring("http".length());
-    // Set the result to expire, so that entries don't pollute the
-    // browser's cache for too long.
-    long now_ms = System.currentTimeMillis();
-    String expires = DateUtils.formatDate(new Date(now_ms + CACHE_EXPIRY_MS));
-    response.setResponseHeader(HttpRequestAndroid.KEY_EXPIRES, expires);
-    // The browser is only interested in a small subset of headers,
-    // contained in a Headers object. Iterate the map of all headers
-    // and add them to Headers.
-    Headers headers = new Headers();
-    Iterator<Map.Entry<String, String[]>> responseHeadersIt =
-        response.getResponseHeaders().entrySet().iterator();
-    while (responseHeadersIt.hasNext()) {
-      Map.Entry<String, String[]> entry = responseHeadersIt.next();
-      // Headers.parseHeader() expects lowercase keys.
-      String keyValue = entry.getKey() + ": "
-          + entry.getValue()[HEADERS_MAP_INDEX_VALUE];
-      CharArrayBuffer buffer = new CharArrayBuffer(keyValue.length());
-      buffer.append(keyValue);
-      // Parse it into the header container.
-      headers.parseHeader(buffer);
-    }
-    CacheResult cacheResult = CacheManager.createCacheFile(
-        gearsUrl,
-        response.getStatusCode(),
-        headers,
-        response.getMimeType(),
-        true); // forceCache
-
-    if (cacheResult == null) {
-      // With the no-cache policy we could end up
-      // with a null result
-      return null;
-    }
-
-    // Set encoding if specified.
-    String encoding = response.getEncoding();
-    if (encoding != null) {
-      cacheResult.setEncoding(encoding);
-    }
-    // Copy the response body to the CacheResult. This handles all
-    // combinations of memory vs on-disk on both sides.
-    InputStream inputStream = response.getInputStream();
-    OutputStream outputStream = cacheResult.getOutputStream();
-    boolean copied = copyStream(inputStream, outputStream);
-    // Close the input and output streams to relinquish their
-    // resources earlier.
-    try {
-      inputStream.close();
-    } catch (IOException ex) {
-      log("IOException closing InputStream: " + ex);
-      copied = false;
-    }
-    try {
-      outputStream.close();
-    } catch (IOException ex) {
-      log("IOException closing OutputStream: " + ex);
-      copied = false;
-    }
-    if (!copied) {
-      log("copyStream of local result failed");
-      return null;
-    }
-    // Save the entry into the browser's cache.
-    CacheManager.saveCacheFile(gearsUrl, cacheResult);
-    // Get it back from the cache, this time properly initialized to
-    // be used for input.
-    cacheResult = CacheManager.getCacheFile(gearsUrl, null);
-    if (cacheResult != null) {
-      log("Returning surrogate result");
-      return cacheResult;
-    } else {
-      // Not an expected condition, but handle gracefully. Perhaps out
-      // of memory or disk?
-      Log.e(LOG_TAG, "Lost CacheResult between save and get. Can't serve.\n");
-      return null;
-    }
+    return new PluginData(response.getInputStream(),
+                          response.getContentLength(),
+                          response.getResponseHeaders(),
+                          response.getStatusCode());
   }
 
   /**

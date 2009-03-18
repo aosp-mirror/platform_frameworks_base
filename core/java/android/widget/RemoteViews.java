@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -30,15 +31,21 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
+import java.lang.Class;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 
@@ -77,19 +84,22 @@ public class RemoteViews implements Parcelable, Filter {
     
     
     /**
-     * This annotation indicates that a subclass of View is alllowed to be used with the
-     * {@link android.widget.RemoteViews} mechanism.
+     * This annotation indicates that a subclass of View is alllowed to be used
+     * with the {@link android.widget.RemoteViews} mechanism.
      */
     @Target({ ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RemoteView {
     }
-    
+
     /**
      * Exception to send when something goes wrong executing an action
      *
      */
     public static class ActionException extends RuntimeException {
+        public ActionException(Exception ex) {
+            super(ex);
+        }
         public ActionException(String message) {
             super(message);
         }
@@ -107,274 +117,7 @@ public class RemoteViews implements Parcelable, Filter {
             return 0;
         }
     };
-    
-    /**
-     * Equivalent to calling View.setVisibility
-     */
-    private class SetViewVisibility extends Action {
-        public SetViewVisibility(int id, int vis) {
-            viewId = id;
-            visibility = vis;
-        }
-        
-        public SetViewVisibility(Parcel parcel) {
-            viewId = parcel.readInt();
-            visibility = parcel.readInt();
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            dest.writeInt(visibility);   
-        }
-        
-        @Override
-        public void apply(View root) {
-            View target = root.findViewById(viewId);
-            if (target != null) {
-                target.setVisibility(visibility);
-            }
-        }
-        
-        private int viewId;
-        private int visibility;
-        public final static int TAG = 0;
-    }
-    
-    /**
-     * Equivalent to calling TextView.setText
-     */
-    private class SetTextViewText extends Action {
-        public SetTextViewText(int id, CharSequence t) {
-            viewId = id;
-            text = t;
-        }
-        
-        public SetTextViewText(Parcel parcel) {
-            viewId = parcel.readInt();
-            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            TextUtils.writeToParcel(text, dest, flags);   
-        }
-        
-        @Override
-        public void apply(View root) {
-            TextView target = (TextView) root.findViewById(viewId);
-            if (target != null) {
-                target.setText(text);
-            }
-        }
-        
-        int viewId;
-        CharSequence text;
-        public final static int TAG = 1;
-    }
 
-    /**
-     * Equivalent to calling ImageView.setResource
-     */
-    private class SetImageViewResource extends Action {
-        public SetImageViewResource(int id, int src) {
-            viewId = id;
-            srcId = src;
-        }
-        
-        public SetImageViewResource(Parcel parcel) {
-            viewId = parcel.readInt();
-            srcId = parcel.readInt();
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            dest.writeInt(srcId);   
-        }
-        
-        @Override
-        public void apply(View root) {
-            ImageView target = (ImageView) root.findViewById(viewId);
-            Drawable d = mContext.getResources().getDrawable(srcId);
-            if (target != null) {
-                target.setImageDrawable(d);
-            }
-        }
-        
-        int viewId;
-        int srcId;
-        public final static int TAG = 2;
-    }
-    
-    /**
-     * Equivalent to calling ImageView.setImageURI
-     */
-    private class SetImageViewUri extends Action {
-        public SetImageViewUri(int id, Uri u) {
-            viewId = id;
-            uri = u;
-        }
-        
-        public SetImageViewUri(Parcel parcel) {
-            viewId = parcel.readInt();
-            uri = Uri.CREATOR.createFromParcel(parcel);
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            Uri.writeToParcel(dest, uri);
-        }
-        
-        @Override
-        public void apply(View root) {
-            ImageView target = (ImageView) root.findViewById(viewId);
-            if (target != null) {
-                target.setImageURI(uri);
-            }
-        }
-        
-        int viewId;
-        Uri uri;
-        public final static int TAG = 3;
-    }
-
-    /**
-     * Equivalent to calling ImageView.setImageBitmap
-     */
-    private class SetImageViewBitmap extends Action {
-        public SetImageViewBitmap(int id, Bitmap src) {
-            viewId = id;
-            bitmap = src;
-        }
-
-        public SetImageViewBitmap(Parcel parcel) {
-            viewId = parcel.readInt();
-            bitmap = Bitmap.CREATOR.createFromParcel(parcel);
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            if (bitmap != null) {
-                bitmap.writeToParcel(dest, flags);
-            }
-        }
-
-        @Override
-        public void apply(View root) {
-            if (bitmap != null) {
-                ImageView target = (ImageView) root.findViewById(viewId);
-                Drawable d = new BitmapDrawable(bitmap);
-                if (target != null) {
-                    target.setImageDrawable(d);
-                }
-            }
-        }
-
-        int viewId;
-        Bitmap bitmap;
-        public final static int TAG = 4;
-    }
-    
-    /**
-     * Equivalent to calling Chronometer.setBase, Chronometer.setFormat,
-     * and Chronometer.start/stop.
-     */
-    private class SetChronometer extends Action {
-        public SetChronometer(int id, long base, String format, boolean running) {
-            this.viewId = id;
-            this.base = base;
-            this.format = format;
-            this.running = running;
-        }
-        
-        public SetChronometer(Parcel parcel) {
-            viewId = parcel.readInt();
-            base = parcel.readLong();
-            format = parcel.readString();
-            running = parcel.readInt() != 0;
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            dest.writeLong(base);
-            dest.writeString(format);
-            dest.writeInt(running ? 1 : 0);
-        }
-        
-        @Override
-        public void apply(View root) {
-            Chronometer target = (Chronometer) root.findViewById(viewId);
-            if (target != null) {
-                target.setBase(base);
-                target.setFormat(format);
-                if (running) {
-                    target.start();
-                } else {
-                    target.stop();
-                }
-            }
-        }
-        
-        int viewId;
-        boolean running;
-        long base;
-        String format;
-
-        public final static int TAG = 5;
-    }
-    
-    /**
-     * Equivalent to calling ProgressBar.setMax, ProgressBar.setProgress and
-     * ProgressBar.setIndeterminate
-     */
-    private class SetProgressBar extends Action {
-        public SetProgressBar(int id, int max, int progress, boolean indeterminate) {
-            this.viewId = id;
-            this.progress = progress;
-            this.max = max;
-            this.indeterminate = indeterminate;
-        }
-        
-        public SetProgressBar(Parcel parcel) {
-            viewId = parcel.readInt();
-            progress = parcel.readInt();
-            max = parcel.readInt();
-            indeterminate = parcel.readInt() != 0;
-        }
-        
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(TAG);
-            dest.writeInt(viewId);
-            dest.writeInt(progress);
-            dest.writeInt(max);
-            dest.writeInt(indeterminate ? 1 : 0);
-        }
-        
-        @Override
-        public void apply(View root) {
-            ProgressBar target = (ProgressBar) root.findViewById(viewId);
-            if (target != null) {
-                target.setIndeterminate(indeterminate);
-                if (!indeterminate) {
-                    target.setMax(max);
-                    target.setProgress(progress);
-                }
-            }
-        }
-        
-        int viewId;
-        boolean indeterminate;
-        int progress;
-        int max;
-
-        public final static int TAG = 6;
-    }
-    
     /**
      * Equivalent to calling
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
@@ -418,8 +161,304 @@ public class RemoteViews implements Parcelable, Filter {
         int viewId;
         PendingIntent pendingIntent;
 
-        public final static int TAG = 7;
+        public final static int TAG = 1;
     }
+
+    /**
+     * Equivalent to calling a combination of {@link Drawable#setAlpha(int)},
+     * {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)},
+     * and/or {@link Drawable#setLevel(int)} on the {@link Drawable} of a given view.
+     * <p>
+     * These operations will be performed on the {@link Drawable} returned by the
+     * target {@link View#getBackground()} by default.  If targetBackground is false,
+     * we assume the target is an {@link ImageView} and try applying the operations
+     * to {@link ImageView#getDrawable()}.
+     * <p>
+     * You can omit specific calls by marking their values with null or -1.
+     */
+    private class SetDrawableParameters extends Action {
+        public SetDrawableParameters(int id, boolean targetBackground, int alpha,
+                int colorFilter, PorterDuff.Mode mode, int level) {
+            this.viewId = id;
+            this.targetBackground = targetBackground;
+            this.alpha = alpha;
+            this.colorFilter = colorFilter;
+            this.filterMode = mode;
+            this.level = level;
+        }
+        
+        public SetDrawableParameters(Parcel parcel) {
+            viewId = parcel.readInt();
+            targetBackground = parcel.readInt() != 0;
+            alpha = parcel.readInt();
+            colorFilter = parcel.readInt();
+            boolean hasMode = parcel.readInt() != 0;
+            if (hasMode) {
+                filterMode = PorterDuff.Mode.valueOf(parcel.readString());
+            } else {
+                filterMode = null;
+            }
+            level = parcel.readInt();
+        }
+        
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(targetBackground ? 1 : 0);
+            dest.writeInt(alpha);
+            dest.writeInt(colorFilter);
+            if (filterMode != null) {
+                dest.writeInt(1);
+                dest.writeString(filterMode.toString());
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeInt(level);
+        }
+        
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+            if (target == null) {
+                return;
+            }
+            
+            // Pick the correct drawable to modify for this view
+            Drawable targetDrawable = null;
+            if (targetBackground) {
+                targetDrawable = target.getBackground();
+            } else if (target instanceof ImageView) {
+                ImageView imageView = (ImageView) target;
+                targetDrawable = imageView.getDrawable();
+            }
+            
+            // Perform modifications only if values are set correctly
+            if (alpha != -1) {
+                targetDrawable.setAlpha(alpha);
+            }
+            if (colorFilter != -1 && filterMode != null) {
+                targetDrawable.setColorFilter(colorFilter, filterMode);
+            }
+            if (level != -1) {
+                targetDrawable.setLevel(level);
+            }
+        }
+        
+        int viewId;
+        boolean targetBackground;
+        int alpha;
+        int colorFilter;
+        PorterDuff.Mode filterMode;
+        int level;
+
+        public final static int TAG = 3;
+    }
+    
+    /**
+     * Base class for the reflection actions.
+     */
+    private class ReflectionAction extends Action {
+        static final int TAG = 2;
+
+        static final int BOOLEAN = 1;
+        static final int BYTE = 2;
+        static final int SHORT = 3;
+        static final int INT = 4;
+        static final int LONG = 5;
+        static final int FLOAT = 6;
+        static final int DOUBLE = 7;
+        static final int CHAR = 8;
+        static final int STRING = 9;
+        static final int CHAR_SEQUENCE = 10;
+        static final int URI = 11;
+        static final int BITMAP = 12;
+
+        int viewId;
+        String methodName;
+        int type;
+        Object value;
+
+        ReflectionAction(int viewId, String methodName, int type, Object value) {
+            this.viewId = viewId;
+            this.methodName = methodName;
+            this.type = type;
+            this.value = value;
+        }
+
+        ReflectionAction(Parcel in) {
+            this.viewId = in.readInt();
+            this.methodName = in.readString();
+            this.type = in.readInt();
+            if (false) {
+                Log.d("RemoteViews", "read viewId=0x" + Integer.toHexString(this.viewId)
+                        + " methodName=" + this.methodName + " type=" + this.type);
+            }
+            switch (this.type) {
+                case BOOLEAN:
+                    this.value = in.readInt() != 0;
+                    break;
+                case BYTE:
+                    this.value = in.readByte();
+                    break;
+                case SHORT:
+                    this.value = (short)in.readInt();
+                    break;
+                case INT:
+                    this.value = in.readInt();
+                    break;
+                case LONG:
+                    this.value = in.readLong();
+                    break;
+                case FLOAT:
+                    this.value = in.readFloat();
+                    break;
+                case DOUBLE:
+                    this.value = in.readDouble();
+                    break;
+                case CHAR:
+                    this.value = (char)in.readInt();
+                    break;
+                case STRING:
+                    this.value = in.readString();
+                    break;
+                case CHAR_SEQUENCE:
+                    this.value = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+                    break;
+                case URI:
+                    this.value = Uri.CREATOR.createFromParcel(in);
+                    break;
+                case BITMAP:
+                    this.value = Bitmap.CREATOR.createFromParcel(in);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(TAG);
+            out.writeInt(this.viewId);
+            out.writeString(this.methodName);
+            out.writeInt(this.type);
+            if (false) {
+                Log.d("RemoteViews", "write viewId=0x" + Integer.toHexString(this.viewId)
+                        + " methodName=" + this.methodName + " type=" + this.type);
+            }
+            switch (this.type) {
+                case BOOLEAN:
+                    out.writeInt(((Boolean)this.value).booleanValue() ? 1 : 0);
+                    break;
+                case BYTE:
+                    out.writeByte(((Byte)this.value).byteValue());
+                    break;
+                case SHORT:
+                    out.writeInt(((Short)this.value).shortValue());
+                    break;
+                case INT:
+                    out.writeInt(((Integer)this.value).intValue());
+                    break;
+                case LONG:
+                    out.writeLong(((Long)this.value).longValue());
+                    break;
+                case FLOAT:
+                    out.writeFloat(((Float)this.value).floatValue());
+                    break;
+                case DOUBLE:
+                    out.writeDouble(((Double)this.value).doubleValue());
+                    break;
+                case CHAR:
+                    out.writeInt((int)((Character)this.value).charValue());
+                    break;
+                case STRING:
+                    out.writeString((String)this.value);
+                    break;
+                case CHAR_SEQUENCE:
+                    TextUtils.writeToParcel((CharSequence)this.value, out, flags);   
+                    break;
+                case URI:
+                    ((Uri)this.value).writeToParcel(out, flags);
+                    break;
+                case BITMAP:
+                    ((Bitmap)this.value).writeToParcel(out, flags);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private Class getParameterType() {
+            switch (this.type) {
+                case BOOLEAN:
+                    return boolean.class;
+                case BYTE:
+                    return byte.class;
+                case SHORT:
+                    return short.class;
+                case INT:
+                    return int.class;
+                case LONG:
+                    return long.class;
+                case FLOAT:
+                    return float.class;
+                case DOUBLE:
+                    return double.class;
+                case CHAR:
+                    return char.class;
+                case STRING:
+                    return String.class;
+                case CHAR_SEQUENCE:
+                    return CharSequence.class;
+                case URI:
+                    return Uri.class;
+                case BITMAP:
+                    return Bitmap.class;
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public void apply(View root) {
+            final View view = root.findViewById(viewId);
+            if (view == null) {
+                throw new ActionException("can't find view: 0x" + Integer.toHexString(viewId));
+            }
+
+            Class param = getParameterType();
+            if (param == null) {
+                throw new ActionException("bad type: " + this.type);
+            }
+
+            Class klass = view.getClass();
+            Method method = null;
+            try {
+                method = klass.getMethod(this.methodName, getParameterType());
+            }
+            catch (NoSuchMethodException ex) {
+                throw new ActionException("view: " + klass.getName() + " doesn't have method: "
+                        + this.methodName + "(" + param.getName() + ")");
+            }
+
+            if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
+                throw new ActionException("view: " + klass.getName()
+                        + " can't use method with RemoteViews: "
+                        + this.methodName + "(" + param.getName() + ")");
+            }
+
+            try {
+                if (false) {
+                    Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
+                        + this.methodName + "(" + param.getName() + ") with "
+                        + (this.value == null ? "null" : this.value.getClass().getName()));
+                }
+                method.invoke(view, this.value);
+            }
+            catch (Exception ex) {
+                throw new ActionException(ex);
+            }
+        }
+    }
+
 
     /**
      * Create a new RemoteViews object that will display the views contained
@@ -447,32 +486,17 @@ public class RemoteViews implements Parcelable, Filter {
             for (int i=0; i<count; i++) {
                 int tag = parcel.readInt();
                 switch (tag) {
-                case SetViewVisibility.TAG:
-                    mActions.add(new SetViewVisibility(parcel));
-                    break;
-                case SetTextViewText.TAG:
-                    mActions.add(new SetTextViewText(parcel));
-                    break;
-                case SetImageViewResource.TAG:
-                    mActions.add(new SetImageViewResource(parcel));
-                    break;
-                case SetImageViewUri.TAG:
-                    mActions.add(new SetImageViewUri(parcel));
-                    break;
-                case SetImageViewBitmap.TAG:
-                    mActions.add(new SetImageViewBitmap(parcel));
-                    break;
-                case SetChronometer.TAG:
-                    mActions.add(new SetChronometer(parcel));
-                    break;
-                case SetProgressBar.TAG:
-                    mActions.add(new SetProgressBar(parcel));
-                    break;
                 case SetOnClickPendingIntent.TAG:
                     mActions.add(new SetOnClickPendingIntent(parcel));
                     break;
+                case SetDrawableParameters.TAG:
+                    mActions.add(new SetDrawableParameters(parcel));
+                    break;
+                case ReflectionAction.TAG:
+                    mActions.add(new ReflectionAction(parcel));
+                    break;
                 default:
-                    throw new ActionException("Tag " + tag + "not found");
+                    throw new ActionException("Tag " + tag + " not found");
                 }
             }
         }
@@ -505,7 +529,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param visibility The new visibility for the view
      */
     public void setViewVisibility(int viewId, int visibility) {
-        addAction(new SetViewVisibility(viewId, visibility));
+        setInt(viewId, "setVisibility", visibility);
     }
     
     /**
@@ -515,7 +539,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param text The new text for the view
      */
     public void setTextViewText(int viewId, CharSequence text) {
-        addAction(new SetTextViewText(viewId, text));
+        setCharSequence(viewId, "setText", text);
     }
     
     /**
@@ -525,7 +549,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param srcId The new resource id for the drawable
      */
     public void setImageViewResource(int viewId, int srcId) {   
-        addAction(new SetImageViewResource(viewId, srcId));
+        setInt(viewId, "setImageResource", srcId);
     }
 
     /**
@@ -535,7 +559,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param uri The Uri for the image
      */
     public void setImageViewUri(int viewId, Uri uri) {
-        addAction(new SetImageViewUri(viewId, uri));
+        setUri(viewId, "setImageURI", uri);
     }
 
     /**
@@ -545,7 +569,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param bitmap The new Bitmap for the drawable
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
-        addAction(new SetImageViewBitmap(viewId, bitmap));
+        setBitmap(viewId, "setImageBitmap", bitmap);
     }
 
     /**
@@ -560,16 +584,20 @@ public class RemoteViews implements Parcelable, Filter {
      *             {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
      * @param format The Chronometer format string, or null to
      *               simply display the timer value.
-     * @param running True if you want the clock to be running, false if not.
+     * @param started True if you want the clock to be started, false if not.
      */
-    public void setChronometer(int viewId, long base, String format, boolean running) {
-        addAction(new SetChronometer(viewId, base, format, running));
+    public void setChronometer(int viewId, long base, String format, boolean started) {
+        setLong(viewId, "setBase", base);
+        setString(viewId, "setFormat", format);
+        setBoolean(viewId, "setStarted", started);
     }
     
     /**
      * Equivalent to calling {@link ProgressBar#setMax ProgressBar.setMax},
      * {@link ProgressBar#setProgress ProgressBar.setProgress}, and
      * {@link ProgressBar#setIndeterminate ProgressBar.setIndeterminate}
+     *
+     * If indeterminate is true, then the values for max and progress are ignored.
      * 
      * @param viewId The id of the view whose text should change
      * @param max The 100% value for the progress bar
@@ -579,7 +607,11 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setProgressBar(int viewId, int max, int progress, 
             boolean indeterminate) {
-        addAction(new SetProgressBar(viewId, max, progress, indeterminate));
+        setBoolean(viewId, "setIndeterminate", indeterminate);
+        if (!indeterminate) {
+            setInt(viewId, "setMax", max);
+            setInt(viewId, "setProgress", progress);
+        }
     }
     
     /**
@@ -592,6 +624,97 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setOnClickPendingIntent(int viewId, PendingIntent pendingIntent) {
         addAction(new SetOnClickPendingIntent(viewId, pendingIntent));
+    }
+
+    /**
+     * @hide
+     * Equivalent to calling a combination of {@link Drawable#setAlpha(int)},
+     * {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)},
+     * and/or {@link Drawable#setLevel(int)} on the {@link Drawable} of a given
+     * view.
+     * <p>
+     * You can omit specific calls by marking their values with null or -1.
+     * 
+     * @param viewId The id of the view that contains the target
+     *            {@link Drawable}
+     * @param targetBackground If true, apply these parameters to the
+     *            {@link Drawable} returned by
+     *            {@link android.view.View#getBackground()}. Otherwise, assume
+     *            the target view is an {@link ImageView} and apply them to
+     *            {@link ImageView#getDrawable()}.
+     * @param alpha Specify an alpha value for the drawable, or -1 to leave
+     *            unchanged.
+     * @param colorFilter Specify a color for a
+     *            {@link android.graphics.ColorFilter} for this drawable, or -1
+     *            to leave unchanged.
+     * @param mode Specify a PorterDuff mode for this drawable, or null to leave
+     *            unchanged.
+     * @param level Specify the level for the drawable, or -1 to leave
+     *            unchanged.
+     */
+    public void setDrawableParameters(int viewId, boolean targetBackground, int alpha,
+            int colorFilter, PorterDuff.Mode mode, int level) {
+        addAction(new SetDrawableParameters(viewId, targetBackground, alpha,
+                colorFilter, mode, level));
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.TextView#setTextColor(int)}.
+     * 
+     * @param viewId The id of the view whose text should change
+     * @param color Sets the text color for all the states (normal, selected,
+     *            focused) to be this color.
+     */
+    public void setTextColor(int viewId, int color) {
+        setInt(viewId, "setTextColor", color);
+    }
+
+    public void setBoolean(int viewId, String methodName, boolean value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BOOLEAN, value));
+    }
+
+    public void setByte(int viewId, String methodName, byte value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BYTE, value));
+    }
+
+    public void setShort(int viewId, String methodName, short value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.SHORT, value));
+    }
+
+    public void setInt(int viewId, String methodName, int value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INT, value));
+    }
+
+    public void setLong(int viewId, String methodName, long value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.LONG, value));
+    }
+
+    public void setFloat(int viewId, String methodName, float value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.FLOAT, value));
+    }
+
+    public void setDouble(int viewId, String methodName, double value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.DOUBLE, value));
+    }
+
+    public void setChar(int viewId, String methodName, char value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR, value));
+    }
+
+    public void setString(int viewId, String methodName, String value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.STRING, value));
+    }
+
+    public void setCharSequence(int viewId, String methodName, CharSequence value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE, value));
+    }
+
+    public void setUri(int viewId, String methodName, Uri value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.URI, value));
+    }
+
+    public void setBitmap(int viewId, String methodName, Bitmap value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BITMAP, value));
     }
 
     /**

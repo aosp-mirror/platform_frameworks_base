@@ -18,6 +18,7 @@ package com.android.internal.view;
 
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
@@ -38,9 +39,9 @@ oneway interface IInputMethod {
     
     void unbindInput();
 
-    void startInput(in EditorInfo attribute);
+    void startInput(in IInputContext inputContext, in EditorInfo attribute);
 
-    void restartInput(in EditorInfo attribute);
+    void restartInput(in IInputContext inputContext, in EditorInfo attribute);
 
     void createSession(IInputMethodCallback callback);
     
@@ -48,7 +49,7 @@ oneway interface IInputMethod {
     
     void revokeSession(IInputMethodSession session);
     
-    void showSoftInput(boolean explicit);
+    void showSoftInput(int flags, in ResultReceiver resultReceiver);
     
-    void hideSoftInput();
+    void hideSoftInput(int flags, in ResultReceiver resultReceiver);
 }

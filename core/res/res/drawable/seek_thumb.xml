@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<!-- This is the rating bar drawable that is used to a show a filled star. -->
+<!-- This is the thumb on the seek bar. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_pressed="true"

@@ -567,8 +567,8 @@ public final class AssetManager {
 
     /**
      * Add an additional set of assets to the asset manager.  This can be
-     * either a directory or ZIP file.  Not for use by applications.  A
-     * zero return value indicates failure.
+     * either a directory or ZIP file.  Not for use by applications.  Returns
+     * the cookie of the added asset, or 0 on failure.
      * {@hide}
      */
     public native final int addAssetPath(String path);

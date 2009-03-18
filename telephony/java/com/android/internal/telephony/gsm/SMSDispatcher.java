@@ -32,11 +32,13 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Telephony;
 import android.provider.Settings;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.gsm.SmsMessage;
 import android.telephony.gsm.SmsManager;
+import com.android.internal.telephony.WapPushOverSms;
 import android.telephony.ServiceState;
 import android.util.Config;
 import com.android.internal.util.HexDump;
@@ -61,37 +63,6 @@ final class SMSDispatcher extends Handler {
 
     /** Default timeout for SMS sent query */
     private static final int DEFAULT_SMS_TIMOUEOUT = 6000;
-
-    private static final int WAP_PDU_TYPE_PUSH = 0x06;
-
-    private static final int WAP_PDU_TYPE_CONFIRMED_PUSH = 0x07;
-
-    private static final byte DRM_RIGHTS_XML = (byte)0xca;
-
-    private static final String DRM_RIGHTS_XML_MIME_TYPE = "application/vnd.oma.drm.rights+xml";
-
-    private static final byte DRM_RIGHTS_WBXML = (byte)0xcb;
-
-    private static final String DRM_RIGHTS_WBXML_MIME_TYPE =
-            "application/vnd.oma.drm.rights+wbxml";
-
-    private static final byte WAP_SI_MIME_PORT = (byte)0xae;
-
-    private static final String WAP_SI_MIME_TYPE = "application/vnd.wap.sic";
-
-    private static final byte WAP_SL_MIME_PORT = (byte)0xb0;
-
-    private static final String WAP_SL_MIME_TYPE = "application/vnd.wap.slc";
-
-    private static final byte WAP_CO_MIME_PORT = (byte)0xb2;
-
-    private static final String WAP_CO_MIME_TYPE = "application/vnd.wap.coc";
-
-    private static final int WAP_PDU_SHORT_LENGTH_MAX = 30;
-
-    private static final int WAP_PDU_LENGTH_QUOTE = 31;
-
-    private static final String MMS_MIME_TYPE = "application/vnd.wap.mms-message";
 
     private static final String[] RAW_PROJECTION = new String[] {
         "pdu",
@@ -124,6 +95,8 @@ final class SMSDispatcher extends Handler {
 
     private final GSMPhone mPhone;
 
+    private final WapPushOverSms mWapPush;
+
     private final Context mContext;
 
     private final ContentResolver mResolver;
@@ -135,7 +108,9 @@ final class SMSDispatcher extends Handler {
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
     /** Delay before next send attempt on a failed SMS, in milliseconds. */
-    private static final int SEND_RETRY_DELAY = 2000; // ms
+    private static final int SEND_RETRY_DELAY = 2000; 
+    /** single part SMS */
+    private static final int SINGLE_PART_SMS = 1;
 
     /**
      * Message reference for a CONCATENATED_8_BIT_REFERENCE or
@@ -147,6 +122,15 @@ final class SMSDispatcher extends Handler {
     private SmsCounter mCounter;
 
     private SmsTracker mSTracker;
+
+    /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
+    private PowerManager.WakeLock mWakeLock;
+
+    /**
+     * Hold the wake lock for 5 seconds, which should be enough time for 
+     * any receiver(s) to grab its own wake lock.
+     */
+    private final int WAKE_LOCK_TIMEOUT = 5000;
 
     /**
      *  Implement the per-application based SMS control, which only allows
@@ -169,15 +153,23 @@ final class SMSDispatcher extends Handler {
             mSmsStamp = new HashMap<String, ArrayList<Long>> ();
         }
 
-        boolean check(String appName) {
+        /**
+         * Check to see if an application allow to send new SMS messages
+         *  
+         * @param appName is the application sending sms
+         * @param smsWaiting is the number of new sms wants to be sent
+         * @return true if application is allowed to send the requested number 
+         *         of new sms messages 
+         */
+        boolean check(String appName, int smsWaiting) {
             if (!mSmsStamp.containsKey(appName)) {
                 mSmsStamp.put(appName, new ArrayList<Long>());
             }
 
-            return isUnderLimit(mSmsStamp.get(appName));
+            return isUnderLimit(mSmsStamp.get(appName), smsWaiting);
         }
 
-        private boolean isUnderLimit(ArrayList<Long> sent) {
+        private boolean isUnderLimit(ArrayList<Long> sent, int smsWaiting) {
             Long ct =  System.currentTimeMillis();
 
             Log.d(TAG, "SMS send size=" + sent.size() + "time=" + ct);
@@ -185,9 +177,11 @@ final class SMSDispatcher extends Handler {
             while (sent.size() > 0 && (ct - sent.get(0)) > mCheckPeriod ) {
                     sent.remove(0);
             }
-
-            if (sent.size() < mMaxAllowed) {
-                sent.add(ct);
+            
+            if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
+                for (int i = 0; i < smsWaiting; i++ ) {
+                    sent.add(ct);
+                }
                 return true;
             }
             return false;
@@ -196,10 +190,13 @@ final class SMSDispatcher extends Handler {
 
     SMSDispatcher(GSMPhone phone) {
         mPhone = phone;
+        mWapPush = new WapPushOverSms(phone);
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
         mSTracker = null;
+
+        createWakelock();
 
         int check_period = Settings.Gservices.getInt(mResolver,
                 Settings.Gservices.SMS_OUTGOING_CEHCK_INTERVAL_MS,
@@ -290,12 +287,28 @@ final class SMSDispatcher extends Handler {
 
         case EVENT_SEND_CONFIRMED_SMS:
             if (mSTracker!=null) {
-                Log.d(TAG, "Ready to send SMS again.");
-                sendSms(mSTracker);
+                if (isMultipartTracker(mSTracker)) {
+                    sendMultipartSms(mSTracker);
+                } else {
+                    sendSms(mSTracker);
+                } 
                 mSTracker = null;
             }
             break;
         }
+    }
+
+    private void createWakelock() {
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSDispatcher");
+        mWakeLock.setReferenceCounted(true);
+    }
+
+    private void sendBroadcast(Intent intent, String permission) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendBroadcast(intent, permission);
     }
 
     /**
@@ -305,7 +318,7 @@ final class SMSDispatcher extends Handler {
     private void handleSimFull() {
         // broadcast SIM_FULL intent
         Intent intent = new Intent(Intents.SIM_FULL_ACTION);
-        mPhone.getContext().sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -434,6 +447,13 @@ final class SMSDispatcher extends Handler {
      * @param sms the incoming message from the phone
      */
     /* package */ void dispatchMessage(SmsMessage sms) {
+
+        // If sms is null, means there was a parsing error.
+        // TODO: Should NAK this.
+        if (sms == null) {
+            return;
+        }
+
         boolean handled = false;
 
         // Special case the message waiting indicator messages
@@ -476,35 +496,50 @@ final class SMSDispatcher extends Handler {
         SmsHeader header = sms.getUserDataHeader();
         if (header != null) {
             for (SmsHeader.Element element : header.getElements()) {
-                switch (element.getID()) {
-                case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
-                    byte[] data = element.getData();
-
-                    referenceNumber = data[0] & 0xff;
-                    count = data[1] & 0xff;
-                    sequence = data[2] & 0xff;
-
-                    break;
-                }
-
-                case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
-                    byte[] data = element.getData();
-
-                    referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
-                    count = data[2] & 0xff;
-                    sequence = data[3] & 0xff;
-
-                    break;
-                }
-
-                case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
-                    byte[] data = element.getData();
-
-                    destPort = (data[0] & 0xff) << 8;
-                    destPort |= (data[1] & 0xff);
-
-                    break;
-                }
+                try {
+                    switch (element.getID()) {
+                        case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
+                            byte[] data = element.getData();
+                            
+                            referenceNumber = data[0] & 0xff;
+                            count = data[1] & 0xff;
+                            sequence = data[2] & 0xff;
+                            
+                            // Per TS 23.040, 9.2.3.24.1: If the count is zero, sequence
+                            // is zero, or sequence > count, ignore the entire element
+                            if (count == 0 || sequence == 0 || sequence > count) {
+                                referenceNumber = -1;
+                            }
+                            break;
+                        }
+                        
+                        case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
+                            byte[] data = element.getData();
+                            
+                            referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
+                            count = data[2] & 0xff;
+                            sequence = data[3] & 0xff;
+                            
+                            // Per TS 23.040, 9.2.3.24.8: If the count is zero, sequence
+                            // is zero, or sequence > count, ignore the entire element
+                            if (count == 0 || sequence == 0 || sequence > count) {
+                                referenceNumber = -1;
+                            }
+                            break;
+                        }
+                        
+                        case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
+                            byte[] data = element.getData();
+                            
+                            destPort = (data[0] & 0xff) << 8;
+                            destPort |= (data[1] & 0xff);
+                            
+                            break;
+                        }
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    Log.e(TAG, "Bad element in header", e);
+                    return;  // TODO: NACK the message or something, don't just discard.
                 }
             }
         }
@@ -516,7 +551,7 @@ final class SMSDispatcher extends Handler {
 
             if (destPort != -1) {
                 if (destPort == SmsHeader.PORT_WAP_PUSH) {
-                    dispatchWapPdu(sms.getUserData());
+                    mWapPush.dispatchWapPdu(sms.getUserData());
                 }
                 // The message was sent to a port, so concoct a URI for it
                 dispatchPortAddressedPdus(pdus, destPort);
@@ -599,7 +634,7 @@ final class SMSDispatcher extends Handler {
             }
 
             // Handle the PUSH
-            dispatchWapPdu(output.toByteArray());
+            mWapPush.dispatchWapPdu(output.toByteArray());
             break;
         }
 
@@ -623,8 +658,7 @@ final class SMSDispatcher extends Handler {
     private void dispatchPdus(byte[][] pdus) {
         Intent intent = new Intent(Intents.SMS_RECEIVED_ACTION);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -637,126 +671,9 @@ final class SMSDispatcher extends Handler {
         Uri uri = Uri.parse("sms://localhost:" + port);
         Intent intent = new Intent(Intents.DATA_SMS_RECEIVED_ACTION, uri);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
-    /**
-     * Dispatches inbound messages that are in the WAP PDU format. See
-     * wap-230-wsp-20010705-a section 8 for details on the WAP PDU format.
-     *
-     * @param pdu The WAP PDU, made up of one or more SMS PDUs
-     */
-    private void dispatchWapPdu(byte[] pdu) {
-        int index = 0;
-        int transactionId = pdu[index++] & 0xFF;
-        int pduType = pdu[index++] & 0xFF;
-        int headerLength = 0;
-
-        if ((pduType != WAP_PDU_TYPE_PUSH) &&
-                (pduType != WAP_PDU_TYPE_CONFIRMED_PUSH)) {
-            Log.w(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
-            return;
-        }
-
-        /**
-         * Parse HeaderLen(unsigned integer).
-         * From wap-230-wsp-20010705-a section 8.1.2
-         * The maximum size of a uintvar is 32 bits.
-         * So it will be encoded in no more than 5 octets.
-         */
-        int temp = 0;
-        do {
-            temp = pdu[index++];
-            headerLength = headerLength << 7;
-            headerLength |= temp & 0x7F;
-        } while ((temp & 0x80) != 0);
-
-        int headerStartIndex = index;
-
-        /**
-         * Parse Content-Type.
-         * From wap-230-wsp-20010705-a section 8.4.2.24
-         *
-         * Content-type-value = Constrained-media | Content-general-form
-         * Content-general-form = Value-length Media-type
-         * Media-type = (Well-known-media | Extension-Media) *(Parameter)
-         * Value-length = Short-length | (Length-quote Length)
-         * Short-length = <Any octet 0-30>   (octet <= WAP_PDU_SHORT_LENGTH_MAX)
-         * Length-quote = <Octet 31>         (WAP_PDU_LENGTH_QUOTE)
-         * Length = Uintvar-integer
-         */
-        // Parse Value-length.
-        if ((pdu[index] & 0xff) <= WAP_PDU_SHORT_LENGTH_MAX) {
-            // Short-length.
-            index++;
-        } else if (pdu[index] == WAP_PDU_LENGTH_QUOTE) {
-            // Skip Length-quote.
-            index++;
-            // Skip Length.
-            // Now we assume 8bit is enough to store the content-type length.
-            index++;
-        }
-        String mimeType;
-        switch (pdu[headerStartIndex])
-        {
-        case DRM_RIGHTS_XML:
-            mimeType = DRM_RIGHTS_XML_MIME_TYPE;
-            break;
-        case DRM_RIGHTS_WBXML:
-            mimeType = DRM_RIGHTS_WBXML_MIME_TYPE;
-            break;
-        case WAP_SI_MIME_PORT:
-            // application/vnd.wap.sic
-            mimeType = WAP_SI_MIME_TYPE;
-            break;
-        case WAP_SL_MIME_PORT:
-            mimeType = WAP_SL_MIME_TYPE;
-            break;
-        case WAP_CO_MIME_PORT:
-            mimeType = WAP_CO_MIME_TYPE;
-            break;
-        default:
-            int start = index;
-
-            // Skip text-string.
-            // Now we assume the mimetype is Extension-Media.
-            while (pdu[index++] != '\0') {
-                ;
-            }
-            mimeType = new String(pdu, start, index-start-1);
-            break;
-        }
-
-        // XXX Skip the remainder of the header for now
-        int dataIndex = headerStartIndex + headerLength;
-        byte[] data;
-        if (pdu[headerStartIndex] == WAP_CO_MIME_PORT)
-        {
-            // because SMSDispatcher can't parse push headers "Content-Location" and
-            // X-Wap-Content-URI, so pass the whole push to CO application.
-            data = pdu;
-        } else
-        {
-            data = new byte[pdu.length - dataIndex];
-            System.arraycopy(pdu, dataIndex, data, 0, data.length);
-        }
-
-        // Notify listeners about the WAP PUSH
-        Intent intent = new Intent(Intents.WAP_PUSH_RECEIVED_ACTION);
-        intent.setType(mimeType);
-        intent.putExtra("transactionId", transactionId);
-        intent.putExtra("pduType", pduType);
-        intent.putExtra("data", data);
-
-        if (mimeType.equals(MMS_MIME_TYPE)) {
-            mPhone.getContext().sendBroadcast(
-                    intent, "android.permission.RECEIVE_MMS");
-        } else {
-            mPhone.getContext().sendBroadcast(
-                    intent, "android.permission.RECEIVE_WAP_PUSH");
-        }
-    }
 
     /**
      * Send a multi-part text based SMS.
@@ -786,6 +703,81 @@ final class SMSDispatcher extends Handler {
     void sendMultipartText(String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
 
+        PendingIntent sentIntent = null;
+        
+        
+        int ss = mPhone.getServiceState().getState();
+        
+        if (ss == ServiceState.STATE_IN_SERVICE) {
+            // Only check SMS sending limit while in service
+            if (sentIntents != null && sentIntents.size() > 0) {
+                sentIntent = sentIntents.get(0);
+            }
+            String appName = getAppNameByIntent(sentIntent);
+            if ( !mCounter.check(appName, parts.size())) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("destination", destinationAddress);
+                map.put("scaddress", scAddress);
+                map.put("parts", parts);
+                map.put("sentIntents", sentIntents);
+                map.put("deliveryIntents", deliveryIntents);
+                
+                SmsTracker multipartParameter = new SmsTracker(map, null, null);
+
+                sendMessage(obtainMessage(EVENT_POST_ALERT, multipartParameter));
+                return;
+            }
+        }
+        
+        sendMultipartTextWithPermit(destinationAddress, 
+                scAddress, parts, sentIntents, deliveryIntents);
+    }
+
+    /**
+     * Send a multi-part text based SMS which already passed SMS control check.
+     *
+     * It is the working function for sendMultipartText().
+     * 
+     * @param destinationAddress the address to send the message to
+     * @param scAddress is the service center address or null to use
+     *   the current default SMSC
+     * @param parts an <code>ArrayList</code> of strings that, in order,
+     *   comprise the original message
+     * @param sentIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been sent.
+     *   The result code will be <code>Activity.RESULT_OK<code> for success,
+     *   or one of these errors:
+     *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
+     *   <code>RESULT_ERROR_RADIO_OFF</code>
+     *   <code>RESULT_ERROR_NULL_PDU</code>.
+     * @param deliveryIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been delivered
+     *   to the recipient.  The raw pdu of the status report is in the
+     *   extended data ("pdu").
+     */
+    private void sendMultipartTextWithPermit(String destinationAddress, 
+            String scAddress, ArrayList<String> parts,
+            ArrayList<PendingIntent> sentIntents, 
+            ArrayList<PendingIntent> deliveryIntents) {
+        
+        PendingIntent sentIntent = null;
+        PendingIntent deliveryIntent = null;
+        
+        // check if in service
+        int ss = mPhone.getServiceState().getState();
+        if (ss != ServiceState.STATE_IN_SERVICE) {
+            for (int i = 0, count = parts.size(); i < count; i++) {
+                if (sentIntents != null && sentIntents.size() > i) {
+                    sentIntent = sentIntents.get(i);
+                }
+                SmsTracker tracker = new SmsTracker(null, sentIntent, null);
+                handleNotInService(ss, tracker);
+            }
+            return;
+        }
+
         int ref = ++sConcatenatedRef & 0xff;
 
         for (int i = 0, count = parts.size(); i < count; i++) {
@@ -796,9 +788,7 @@ final class SMSDispatcher extends Handler {
             data[2] = (byte) (i + 1);  // 1-based sequence
             SmsHeader header = new SmsHeader();
             header.add(new SmsHeader.Element(SmsHeader.CONCATENATED_8_BIT_REFERENCE, data));
-            PendingIntent sentIntent = null;
-            PendingIntent deliveryIntent = null;
-
+ 
             if (sentIntents != null && sentIntents.size() > i) {
                 sentIntent = sentIntents.get(i);
             }
@@ -809,8 +799,14 @@ final class SMSDispatcher extends Handler {
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
                     parts.get(i), deliveryIntent != null, header.toByteArray());
 
-            sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
-        }
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("smsc", pdus.encodedScAddress);
+            map.put("pdu", pdus.encodedMessage);
+
+            SmsTracker tracker = new SmsTracker(map, sentIntent,
+                    deliveryIntent);
+            sendSms(tracker);
+        }        
     }
 
     /**
@@ -856,7 +852,7 @@ final class SMSDispatcher extends Handler {
             handleNotInService(ss, tracker);
         } else {
             String appName = getAppNameByIntent(sentIntent);
-            if (mCounter.check(appName)) {
+            if (mCounter.check(appName, SINGLE_PART_SMS)) {
                 sendSms(tracker);
             } else {
                 sendMessage(obtainMessage(EVENT_POST_ALERT, tracker));
@@ -913,6 +909,41 @@ final class SMSDispatcher extends Handler {
     }
 
     /**
+     * Send the multi-part SMS based on multipart Sms tracker
+     * 
+     * @param tracker holds the multipart Sms tracker ready to be sent
+     */
+    private void sendMultipartSms (SmsTracker tracker) {
+        ArrayList<String> parts;
+        ArrayList<PendingIntent> sentIntents;
+        ArrayList<PendingIntent> deliveryIntents;
+        
+        HashMap map = tracker.mData;
+        
+        String destinationAddress = (String) map.get("destination");
+        String scAddress = (String) map.get("scaddress");
+        
+        parts = (ArrayList<String>) map.get("parts");
+        sentIntents = (ArrayList<PendingIntent>) map.get("sentIntents");
+        deliveryIntents = (ArrayList<PendingIntent>) map.get("deliveryIntents");
+     
+        sendMultipartTextWithPermit(destinationAddress, 
+                scAddress, parts, sentIntents, deliveryIntents);
+
+    }
+    
+    /**
+     * Check if a SmsTracker holds multi-part Sms
+     * 
+     * @param tracker a SmsTracker could hold a multi-part Sms
+     * @return true for tracker holds Multi-parts Sms
+     */
+    private boolean isMultipartTracker (SmsTracker tracker) {
+        HashMap map = tracker.mData;
+        return ( map.get("parts") != null);
+    }
+    
+    /**
      * Keeps track of an SMS that has been sent to the RIL, until it it has
      * successfully been sent, or we're done trying.
      *
@@ -939,7 +970,7 @@ final class SMSDispatcher extends Handler {
             new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int which) {
-                    if (which == DialogInterface.BUTTON1) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
                         Log.d(TAG, "click YES to send out sms");
                         sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
                     }

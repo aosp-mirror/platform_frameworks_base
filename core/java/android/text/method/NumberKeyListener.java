@@ -24,7 +24,6 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.util.SparseIntArray;
 
 /**
  * For numeric text entry
@@ -100,6 +99,11 @@ public abstract class NumberKeyListener extends BaseKeyListener
 
             selStart = Math.min(a, b);
             selEnd = Math.max(a, b);
+        }
+
+        if (selStart < 0 || selEnd < 0) {
+            selStart = selEnd = 0;
+            Selection.setSelection(content, 0);
         }
 
         int i = event != null ? lookup(event, content) : 0;

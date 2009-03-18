@@ -20,13 +20,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.graphics.RectF;
 
 /**
  * Abstraction for an Animation that can be applied to Views, Surfaces, or
  * other objects. See the {@link android.view.animation animation package
  * description file}.
  */
-public abstract class Animation {
+public abstract class Animation implements Cloneable {
     /**
      * Repeat the animation indefinitely.
      */
@@ -174,8 +175,13 @@ public abstract class Animation {
      */
     private int mZAdjustment;
     
-    // Indicates what was the last value returned by getTransformation()
     private boolean mMore = true;
+    private boolean mOneMoreTime = true;
+
+    RectF mPreviousRegion = new RectF();
+    RectF mRegion = new RectF();
+    Transformation mTransformation = new Transformation();
+    Transformation mPreviousTransformation = new Transformation();
 
     /**
      * Creates a new animation with a duration of 0ms, the default interpolator, with
@@ -217,16 +223,29 @@ public abstract class Animation {
         a.recycle();
     }
 
+    @Override
+    protected Animation clone() throws CloneNotSupportedException {
+        final Animation animation = (Animation) super.clone();
+        animation.mPreviousRegion = new RectF();
+        animation.mRegion = new RectF();
+        animation.mTransformation = new Transformation();
+        animation.mPreviousTransformation = new Transformation();
+        return animation;
+    }
+
     /**
      * Reset the initialization state of this animation.
      *
      * @see #initialize(int, int, int, int)
      */
     public void reset() {
+        mPreviousRegion.setEmpty();
+        mPreviousTransformation.clear();
         mInitialized = false;
         mCycleFlip = false;
         mRepeated = 0;
         mMore = true;
+        mOneMoreTime = true;
     }
 
     /**
@@ -255,10 +274,8 @@ public abstract class Animation {
      * @param parentHeight Height of the animated object's parent
      */
     public void initialize(int width, int height, int parentWidth, int parentHeight) {
+        reset();
         mInitialized = true;
-        mCycleFlip = false;
-        mRepeated = 0;
-        mMore = true;
     }
 
     /**
@@ -323,6 +340,7 @@ public abstract class Animation {
      * to run.
      */
     public void restrictDuration(long durationMillis) {
+        // If we start after the duration, then we just won't run.
         if (mStartOffset > durationMillis) {
             mStartOffset = durationMillis;
             mDuration = 0;
@@ -332,11 +350,26 @@ public abstract class Animation {
         
         long dur = mDuration + mStartOffset;
         if (dur > durationMillis) {
-            mDuration = dur = durationMillis-mStartOffset;
+            mDuration = durationMillis-mStartOffset;
+            dur = durationMillis;
         }
+        // If the duration is 0 or less, then we won't run.
+        if (mDuration <= 0) {
+            mDuration = 0;
+            mRepeatCount = 0;
+            return;
+        }
+        // Reduce the number of repeats to keep below the maximum duration.
+        // The comparison between mRepeatCount and duration is to catch
+        // overflows after multiplying them.
         if (mRepeatCount < 0 || mRepeatCount > durationMillis
                 || (dur*mRepeatCount) > durationMillis) {
-            mRepeatCount = (int)(durationMillis/dur);
+            // Figure out how many times to do the animation.  Subtract 1 since
+            // repeat count is the number of times to repeat so 0 runs once.
+            mRepeatCount = (int)(durationMillis/dur) - 1;
+            if (mRepeatCount < 0) {
+                mRepeatCount = 0;
+            }
         }
     }
     
@@ -399,7 +432,7 @@ public abstract class Animation {
      * Sets how many times the animation should be repeated. If the repeat
      * count is 0, the animation is never repeated. If the repeat count is
      * greater than 0 or {@link #INFINITE}, the repeat mode will be taken
-     * into account. The repeat count if 0 by default.
+     * into account. The repeat count is 0 by default.
      *
      * @param repeatCount the number of times the animation should be repeated
      * @attr ref android.R.styleable#Animation_repeatCount
@@ -707,6 +740,11 @@ public abstract class Animation {
             }
         }
 
+        if (!mMore && mOneMoreTime) {
+            mOneMoreTime = false;
+            return true;
+        }
+
         return mMore;
     }
 
@@ -765,7 +803,59 @@ public abstract class Animation {
                 return value;
         }
     }
-    
+
+    /**
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param invalidate
+     * @param transformation
+     * 
+     * @hide
+     */
+    public void getInvalidateRegion(int left, int top, int right, int bottom,
+            RectF invalidate, Transformation transformation) {
+
+        final RectF tempRegion = mRegion;
+        final RectF previousRegion = mPreviousRegion;
+
+        invalidate.set(left, top, right, bottom);
+        transformation.getMatrix().mapRect(invalidate);
+        // Enlarge the invalidate region to account for rounding errors
+        invalidate.inset(-1.0f, -1.0f);
+        tempRegion.set(invalidate);
+        invalidate.union(previousRegion);
+
+        previousRegion.set(tempRegion);
+
+        final Transformation tempTransformation = mTransformation;
+        final Transformation previousTransformation = mPreviousTransformation;
+
+        tempTransformation.set(transformation);
+        transformation.set(previousTransformation);
+        previousTransformation.set(tempTransformation);
+    }
+
+    /**
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     *
+     * @hide
+     */
+    public void initializeInvalidateRegion(int left, int top, int right, int bottom) {
+        final RectF region = mPreviousRegion;
+        region.set(left, top, right, bottom);
+        // Enlarge the invalidate region to account for rounding errors
+        region.inset(-1.0f, -1.0f);
+        if (mFillBefore) {
+            final Transformation previousTransformation = mPreviousTransformation;
+            applyTransformation(0.0f, previousTransformation);
+        }
+    }
+
     /**
      * Utility class to parse a string description of a size.
      */

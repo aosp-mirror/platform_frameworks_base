@@ -19,6 +19,7 @@
 #define ANDROID_PVMEDIARECORDER_H
 
 #include <media/mediarecorder.h>
+#include <media/IMediaPlayerClient.h>
 
 namespace android {
 
@@ -43,6 +44,9 @@ public:
     status_t setCamera(const sp<ICamera>& camera);
     status_t setPreviewSurface(const sp<ISurface>& surface);
     status_t setOutputFile(const char *path);
+    status_t setOutputFile(int fd, int64_t offset, int64_t length);
+    status_t setParameters(const String8& params);
+    status_t setListener(const sp<IMediaPlayerClient>& listener);
     status_t prepare();
     status_t start();
     status_t stop();

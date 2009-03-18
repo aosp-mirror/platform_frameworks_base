@@ -17,6 +17,7 @@
 package android.test;
 
 import com.google.android.collect.Lists;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -26,7 +27,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @hide - This is part of a framework that is under development and should not be used for
@@ -48,10 +51,25 @@ public class TestCaseUtil {
     }
 
     public static List<? extends Test> getTests(Test test, boolean flatten) {
+        return getTests(test, flatten, new HashSet<Class<?>>());
+    }
+
+    private static List<? extends Test> getTests(Test test, boolean flatten,
+            Set<Class<?>> seen) {
         List<Test> testCases = Lists.newArrayList();
         if (test != null) {
 
-            Test workingTest = invokeSuiteMethodIfPossible(test.getClass());
+            Test workingTest = null;
+            /*
+             * If we want to run a single TestCase method only, we must not
+             * invoke the suite() method, because we will run all test methods
+             * of the class then.
+             */
+            if (test instanceof TestCase &&
+                    ((TestCase)test).getName() == null) {
+                workingTest = invokeSuiteMethodIfPossible(test.getClass(), 
+                        seen);
+            }
             if (workingTest == null) {
                 workingTest = test;
             }
@@ -62,7 +80,7 @@ public class TestCaseUtil {
                 while (enumeration.hasMoreElements()) {
                     Test childTest = (Test) enumeration.nextElement();
                     if (flatten) {
-                        testCases.addAll(getTests(childTest, flatten));
+                        testCases.addAll(getTests(childTest, flatten, seen));
                     } else {
                         testCases.add(childTest);
                     }
@@ -74,11 +92,20 @@ public class TestCaseUtil {
         return testCases;
     }
 
-    private static Test invokeSuiteMethodIfPossible(Class testClass) {
+    private static Test invokeSuiteMethodIfPossible(Class testClass,
+            Set<Class<?>> seen) {
         try {
             Method suiteMethod = testClass.getMethod(
                     BaseTestRunner.SUITE_METHODNAME, new Class[0]);
-            if (Modifier.isStatic(suiteMethod.getModifiers())) {
+            /*
+             * Additional check necessary: If a TestCase contains a suite()
+             * method that returns a TestSuite including the TestCase itself,
+             * we need to stop the recursion. We use a set of classes to
+             * remember which classes' suite() methods were already invoked.
+             */
+            if (Modifier.isStatic(suiteMethod.getModifiers())
+                    && !seen.contains(testClass)) {
+                seen.add(testClass);
                 try {
                     return (Test) suiteMethod.invoke(null, (Object[]) null);
                 } catch (InvocationTargetException e) {
@@ -128,7 +155,8 @@ public class TestCaseUtil {
     public static TestSuite createTestSuite(Class<? extends Test> testClass)
             throws InstantiationException, IllegalAccessException {
 
-        Test test = invokeSuiteMethodIfPossible(testClass);
+        Test test = invokeSuiteMethodIfPossible(testClass, 
+                new HashSet<Class<?>>());
         if (test == null) {
             return new TestSuite(testClass);
 

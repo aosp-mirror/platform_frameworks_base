@@ -87,6 +87,13 @@ protected void onCreate(Bundle savedInstanceState) {
 To do so, create a Drawable from the resource like so:
 <pre>Drawable myImage = Resources.getDrawable(R.drawable.my_image);</pre>
 
+<p class="caution"><strong>Caution:</strong> Each unique resource in your project can maintain only one
+state, no matter how many different objects you may instantiate for it. For example, if you instantiate two
+Drawable objects from the same image resource, then change a property (such as the alpha) for one of the 
+Drawables, then it will also affect the other. So when dealing with multiple instances of an image resource, 
+instead of directly transforming the Drawable, you should perform a <a href="#tween-animation">tween animation</a>.</p>
+
+
 <h4>Example XML</h4>
 <p>The XML snippet below shows how to add a resource Drawable to an 
 {@link android.widget.ImageView} in the XML layout (with some red tint just for fun).
@@ -103,8 +110,8 @@ To do so, create a Drawable from the resource like so:
 
 <h3 id="drawables-from-xml">Creating from resource XML</h3>
 
-<p>By now, you should be familiar with Android's principles of 
-<a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a>. Hence, you understand the power
+<p>By now, you should be familiar with Android's principles of developing a
+<a href="{@docRoot}guide/topics/ui/index.html">User Interface</a>. Hence, you understand the power
 and flexibility inherent in defining objects in XML. This philosophy caries over from Views to Drawables.
 If there is a Drawable object that you'd like to create, which is not initially dependent on variables defined by
 your applicaton code or user interaction, then defining the Drawable in XML is a good option.
@@ -309,14 +316,27 @@ stretches to accommodate it.
 
 <h2 id="tween-animation">Tween Animation</h2>
 
-<p>A tweened animation can perform a series of simple transformations (position, size, rotation, and transparency) on
+<p>A tween animation can perform a series of simple transformations (position, size, rotation, and transparency) on
 the contents of a View object. So, if you have a TextView object, you can move, rotate, grow, or shrink the text. 
-If it has a background image, the background image will be transformed along with the text.</p>
+If it has a background image, the background image will be transformed along with the text.
+The {@link android.view.animation animation package} provides all the classes used in a tween animation.</p>
 
-<p>The animation is achieved with a sequence of animation instructions, defined in either XML or code.
+<p>A sequence of animation instructions defines the twen animation, defined by either XML or Android code.
 Like defining a layout, an XML file is recommended because it's more readable, reusable, and swappable 
-than hard-coding it. In the example below, we use XML. (To define an animation in code, refer to the 
+than hard-coding the animation. In the example below, we use XML. (To learn more about defining an animation 
+in your application code, instead of XML, refer to the 
 {@link android.view.animation.AnimationSet} class and other {@link android.view.animation.Animation} subclasses.)</p>
+
+<p>The animation instructions define the transformations that you want to occur, when they will occur, 
+and how long they should take to apply. Transformations can be sequential or simultaneous &mdash;
+for example, you can have the contents of a TextView move from left to right, and then 
+rotate 180 degrees, or you can have the text move and rotate simultaneously. Each transformation 
+takes a set of parameters specific for that transformation (starting size and ending size
+for size change, starting angle and ending angle for rotation, and so on), and
+also a set of common parameters (for instance, start time and duration). To make
+several transformations happen simultaneously, give them the same start time;
+to make them sequential, calculate the start time plus the duration of the preceding transformation.
+</p>
 
 <p>The animation XML file belongs in the <code>res/anim/</code> directory of your Android project.
 The file must have a single root element: this will be either a single <code>&lt;alpha&gt;</code>,
@@ -389,22 +409,23 @@ spaceshipImage.startAnimation(hyperspaceJumpAnimation);
 <p>As an alternative to <code>startAnimation()</code>, you can define a starting time for the animation with
 <code>{@link android.view.animation.Animation#setStartTime(long) Animation.setStartTime()}</code>, 
 then assign the animation to the View with
-<code>{@link android.view.View#setAnimation(android.view.animation.Animation) View.setAnimation()}</code>.</p>
+<code>{@link android.view.View#setAnimation(android.view.animation.Animation) View.setAnimation()}</code>.
+</p>
 
 <p>For more information on the XML syntax, available tags and attributes, see the discussion on animation 
 in the <a href="{@docRoot}guide/topics/resources/available-resources.html#animation">Available Resources</a>.</p>
 
-<p class="note"><strong>Note:</strong> Animations are drawn in the area designated for the View at the start of 
-the animation; this area does not change to accommodate size or movement, so if your animation moves or expands 
-outside the original boundaries of your object, it will be clipped to the size of the original View, even if 
-the object's LayoutParams are set to WRAP_CONTENT (the object will not resize to accommodate moving or 
-expanding/shrinking animations).</p>
+<p class="note"><strong>Note:</strong> Regardless of how your animation may move or resize, the bounds of the 
+View that holds your animation will not automatically adjust to accomodate it. Even so, the animation will still
+be drawn beyond the bounds of its View and will not be clipped. However, clipping <em>will occur</em>
+if the animation exceeds the bounds of the parent View.</p>
 
 
 <h2 id="frame-animation">Frame Animation</h2>
 
 <p>This is a traditional animation in the sense that it is created with a sequence of different
-images, played in order, like a roll of film.</p>
+images, played in order, like a roll of film. The {@link android.graphics.drawable.AnimationDrawable}
+class is the basis for frame animations.</p>
 
 <p>While you can define the frames of an animation in your code, using the 
 {@link android.graphics.drawable.AnimationDrawable} class API, it's more simply accomplished with a single XML 
@@ -426,7 +447,7 @@ Here's an example XML file for a frame-by-frame animation:</p>
 
 <p>This animation runs for just three frames. By setting the <code>android:oneshot</code> attribute of the 
 list to <var>true</var>, it will cycle just once then stop and hold on the last frame. If it is set <var>false</var> then
-the animation will loop. With this XML saved as <code>rocket_thrust.xml</p> in the <code>res/anim/</code> directory
+the animation will loop. With this XML saved as <code>rocket_thrust.xml</code> in the <code>res/anim/</code> directory
 of the project, it can be added as the background image to a View and then called to play. Here's an example Activity,
 in which the animation is added to an {@link android.widget.ImageView} and then animated when the screen is touched:</p>
 <pre>
@@ -454,6 +475,6 @@ called during the <code>onCreate()</code> method of your Activity, because the A
 to the window. If you want to play the animation immediately, without
 requiring interaction, then you might want to call it from the 
 <code>{@link android.app.Activity#onWindowFocusChanged(boolean) onWindowFocusChanged()}</code> method in 
-your Activity, which will get called when Android brings your window into focus.</p>
+your Activity, which will get called when Android brings your window into focus.</p> 
 
 

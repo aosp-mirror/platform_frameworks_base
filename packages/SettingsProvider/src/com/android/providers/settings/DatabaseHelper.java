@@ -22,11 +22,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.net.ConnectivityManager;
@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 31;
+    private static final int DATABASE_VERSION = 34;
     
     private Context mContext;
 
@@ -332,6 +332,58 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 31;
         }
 
+        if (upgradeVersion == 31) {
+            /*
+             * Animations are now managed in preferences, and may be
+             * enabled or disabled based on product resources.
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.WINDOW_ANIMATION_SCALE + "'");
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultAnimationSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 32;
+        }
+
+        if (upgradeVersion == 32) {
+            // The Wi-Fi watchdog SSID list is now seeded with the value of
+            // the property ro.com.android.wifi-watchlist
+            String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
+            if (!TextUtils.isEmpty(wifiWatchList)) {
+                db.beginTransaction();
+                try {
+                    db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
+                            Settings.Secure.WIFI_WATCHDOG_WATCH_LIST + "','" +
+                            wifiWatchList + "');");
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 33;
+        }
+        
+        if (upgradeVersion == 33) {
+            // Set the default zoom controls to: tap-twice to bring up +/-
+            db.beginTransaction();
+            try {
+                db.execSQL("INSERT INTO system(name,value) values('zoom','2');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 34;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -529,28 +581,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
         
-        loadSetting(stmt, Settings.System.DIM_SCREEN, 1);
+        Resources r = mContext.getResources();
+        loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
+                R.bool.def_dim_screen);
         loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN, 
                 "1".equals(SystemProperties.get("ro.kernel.qemu")) ? 1 : 0);
-        loadSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT, 60000);
-        // Allow airplane mode to turn off cell radio
-        loadSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS, 
-                Settings.System.RADIO_CELL + ","
-                + Settings.System.RADIO_BLUETOOTH + "," + Settings.System.RADIO_WIFI);
+        loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
+                R.integer.def_screen_off_timeout);
         
-        loadSetting(stmt, Settings.System.AIRPLANE_MODE_ON, 0);
+        loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
+                R.bool.def_airplane_mode_on);
         
-        loadSetting(stmt, Settings.System.AUTO_TIME, 1); // Sync time to NITZ
+        loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS,
+                R.string.def_airplane_mode_radios);
         
-        // Set default brightness to 40%
-        loadSetting(stmt, Settings.System.SCREEN_BRIGHTNESS, 
-                (int) (android.os.Power.BRIGHTNESS_ON * 0.4f));
+        loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
+                R.bool.def_auto_time); // Sync time to NITZ
         
-        // Enable normal window animations (menus, toasts); disable
-        // activity transition animations.
-        loadSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE, "1");
-        loadSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE, "1");
+        loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
+                R.integer.def_screen_brightness);
+        
+        loadDefaultAnimationSettings(stmt);
 
+        loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
+                R.bool.def_accelerometer_rotation);
+        
         // Default date format based on build
         loadSetting(stmt, Settings.System.DATE_FORMAT,
                 SystemProperties.get("ro.com.android.dateformat", 
@@ -558,12 +613,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         stmt.close();
     }
     
+    private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
+        loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
+                R.fraction.def_window_animation_scale, 1);
+        loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
+                R.fraction.def_window_transition_scale, 1);
+    }
+    
     private void loadSecureSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                 + " VALUES(?,?);");
         
-        // Bluetooth off
-        loadSetting(stmt, Settings.Secure.BLUETOOTH_ON, 0);
+        loadBooleanSetting(stmt, Settings.Secure.BLUETOOTH_ON,
+                R.bool.def_bluetooth_on);
         
         // Data roaming default, based on build
         loadSetting(stmt, Settings.Secure.DATA_ROAMING, 
@@ -571,26 +633,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         SystemProperties.get("ro.com.android.dataroaming", 
                                 "false")) ? 1 : 0);        
         
-        // Don't allow non-market apps to be installed
-        loadSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS, 0);
+        loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
+                R.bool.def_install_non_market_apps);
         
-        // Set the default location providers to network based (cell-id)
-        loadSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, 
-                LocationManager.NETWORK_PROVIDER);
+        loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                R.string.def_location_providers_allowed);
         
-        loadSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
-            ConnectivityManager.DEFAULT_NETWORK_PREFERENCE);
+        loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
+                R.integer.def_network_preference);
+        
+        loadBooleanSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED,
+                R.bool.def_usb_mass_storage_enabled);
+        
+        loadBooleanSetting(stmt, Settings.Secure.WIFI_ON,
+                R.bool.def_wifi_on);
+        loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                R.bool.def_networks_available_notification_on);
 
-        // USB mass storage on by default
-        loadSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED, 1);
-        
-        // WIFI on, notify about available networks
-        loadSetting(stmt, Settings.Secure.WIFI_ON, 0);
-        loadSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1);
-        
+        String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
+        if (!TextUtils.isEmpty(wifiWatchList)) {
+            loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
+        }
+
         // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
         // persistent system property instead.
         //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
+        
+        // Allow mock locations default, based on build
+        loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION, 
+                "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
         
         stmt.close();
     }
@@ -599,5 +670,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         stmt.bindString(1, key);
         stmt.bindString(2, value.toString());
         stmt.execute();
+    }
+    
+    private void loadStringSetting(SQLiteStatement stmt, String key, int resid) {
+        loadSetting(stmt, key, mContext.getResources().getString(resid));
+    }
+    
+    private void loadBooleanSetting(SQLiteStatement stmt, String key, int resid) {
+        loadSetting(stmt, key,
+                mContext.getResources().getBoolean(resid) ? "1" : "0");
+    }
+    
+    private void loadIntegerSetting(SQLiteStatement stmt, String key, int resid) {
+        loadSetting(stmt, key,
+                Integer.toString(mContext.getResources().getInteger(resid)));
+    }
+    
+    private void loadFractionSetting(SQLiteStatement stmt, String key, int resid, int base) {
+        loadSetting(stmt, key,
+                Float.toString(mContext.getResources().getFraction(resid, base, base)));
     }
 }

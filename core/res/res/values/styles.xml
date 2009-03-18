@@ -84,6 +84,11 @@
     <style name="Animation.Translucent">
     </style>
 
+    <!-- Standard animations for a non-full-screen window or activity. -->
+    <style name="Animation.LockScreen">
+        <item name="windowExitAnimation">@anim/lock_screen_exit</item>
+    </style>
+
     <style name="Animation.OptionsPanel">
         <item name="windowEnterAnimation">@anim/options_panel_enter</item>
         <item name="windowExitAnimation">@anim/options_panel_exit</item>
@@ -126,11 +131,24 @@
         <item name="windowExitAnimation">@anim/input_method_exit</item>
     </style>
 
+    <!-- Special optional fancy IM animations. @hide -->
+    <style name="Animation.InputMethodFancy">
+        <item name="windowEnterAnimation">@anim/input_method_fancy_enter</item>
+        <item name="windowExitAnimation">@anim/input_method_fancy_exit</item>
+    </style>
+
     <!-- Window animations that are applied to the search bar overlay window.
          {@hide Pending API council approval} -->
     <style name="Animation.SearchBar">
         <item name="windowEnterAnimation">@anim/search_bar_enter</item>
         <item name="windowExitAnimation">@anim/search_bar_exit</item>
+    </style>
+
+    <!-- Window animations that are applied to the zoom buttons overlay window.
+         {@hide Pending API council approval} -->
+    <style name="Animation.ZoomButtons">
+        <item name="windowEnterAnimation">@anim/fade_in</item>
+        <item name="windowExitAnimation">@anim/fade_out</item>
     </style>
 
     <!-- Status Bar Styles -->
@@ -158,7 +176,7 @@
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmallInverse</item>
-        <item name="android:textColor">@android:color/primary_text_light_nodisable</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
     </style>
 
@@ -289,13 +307,14 @@
     </style>
     
     <style name="Widget.TextView.ListSeparator">
-        <item name="android:background">@android:drawable/settings_header</item>
+        <item name="android:background">@android:drawable/dark_header</item>
         <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">27dip</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">#FF000000</item>
+        <item name="android:layout_height">25dip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?textColorSecondary</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingLeft">5sp</item>         
+        <item name="android:paddingLeft">5sp</item>
     </style>
 
     <style name="Widget.EditText">
@@ -337,8 +356,9 @@
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
-        <item name="android:dropDownVerticalOffset">-8px</item>
-        <item name="android:dropDownHorizontalOffset">2px</item>
+        <item name="android:dropDownVerticalOffset">-6px</item>
+        <item name="android:dropDownHorizontalOffset">0px</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
     <style name="Widget.Spinner">
@@ -369,6 +389,11 @@
     <style name="Widget.ScrollView">
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
+    </style>
+
+    <style name="Widget.HorizontalScrollView">
+        <item name="android:scrollbars">horizontal</item>
+        <item name="android:fadingEdge">horizontal</item>
     </style>
 
     <style name="Widget.ListView" parent="Widget.AbsListView">
@@ -423,12 +448,27 @@
         <item name="android:popupBackground">@android:drawable/editbox_dropdown_background_dark</item>
     </style>
 
+    <style name="Widget.KeyboardView" parent="android:Widget">
+        <item name="android:background">@android:drawable/keyboard_background</item>
+        <item name="android:keyBackground">@android:drawable/btn_keyboard_key</item>
+        <item name="android:keyTextSize">22sp</item>
+        <item name="android:keyTextColor">#FFFFFFFF</item>
+        <item name="android:keyPreviewLayout">@android:layout/keyboard_key_preview</item>
+        <item name="android:keyPreviewOffset">-12dp</item>
+        <item name="android:keyPreviewHeight">80dp</item>
+        <item name="android:labelTextSize">14sp</item>
+        <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
+        <item name="android:verticalCorrection">-10dip</item>
+        <item name="android:shadowColor">#BB000000</item>
+        <item name="android:shadowRadius">2.75</item>
+    </style>
+
     <!-- Text Appearances -->
     <eat-comment />
 
     <style name="TextAppearance">
         <item name="android:textColor">?textColorPrimary</item>
-        <item name="android:textColorHighlight">#FF1B82EB</item>
+        <item name="android:textColorHighlight">#FFFF9200</item>
         <item name="android:textColorHint">?textColorHint</item>
         <item name="android:textColorLink">#5C5CFF</item>
         <item name="android:textSize">16sp</item>
@@ -542,36 +582,6 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="MediaButton">
-        <item name="android:background">@android:drawable/media_button_background</item>
-        <item name="android:layout_width">71px</item>
-        <item name="android:layout_height">52px</item>
-    </style>
-
-    <style name="MediaButton.Previous">
-        <item name="android:src">@android:drawable/ic_media_previous</item>
-    </style>
-
-    <style name="MediaButton.Next">
-        <item name="android:src">@android:drawable/ic_media_next</item>
-    </style>
-
-    <style name="MediaButton.Play">
-        <item name="android:src">@android:drawable/ic_media_play</item>
-    </style>
-
-    <style name="MediaButton.Ffwd">
-        <item name="android:src">@android:drawable/ic_media_ff</item>
-    </style>
-
-    <style name="MediaButton.Rew">
-        <item name="android:src">@android:drawable/ic_media_rew</item>
-    </style>
-
-    <style name="MediaButton.Pause">
-        <item name="android:src">@android:drawable/ic_media_pause</item>
-    </style>
-
     <!-- Preference Styles -->
 
     <style name="Preference">
@@ -619,19 +629,37 @@
         <item name="android:showDefault">true</item>
     </style>
 
-    <style name="Widget.KeyboardView" parent="android:Widget">
-        <item name="android:background">@android:drawable/keyboard_background</item>
-        <item name="android:keyBackground">@android:drawable/btn_keyboard_key</item>
-        <item name="android:keyTextSize">22sp</item>
-        <item name="android:keyTextColor">#FFFFFFFF</item>
-        <item name="android:keyPreviewLayout">@android:layout/keyboard_key_preview</item>
-        <item name="android:keyPreviewOffset">-12dp</item>
-        <item name="android:keyPreviewHeight">80dp</item>
-        <item name="android:labelTextSize">14sp</item>
-        <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
-        <item name="android:verticalCorrection">-10dip</item>
-        <item name="android:shadowColor">#BB000000</item>
-        <item name="android:shadowRadius">2.75</item>
+    <!-- Other Misc Styles -->
+    <eat-comment />
+
+    <style name="MediaButton">
+        <item name="android:background">@android:drawable/media_button_background</item>
+        <item name="android:layout_width">71px</item>
+        <item name="android:layout_height">52px</item>
+    </style>
+
+    <style name="MediaButton.Previous">
+        <item name="android:src">@android:drawable/ic_media_previous</item>
+    </style>
+
+    <style name="MediaButton.Next">
+        <item name="android:src">@android:drawable/ic_media_next</item>
+    </style>
+
+    <style name="MediaButton.Play">
+        <item name="android:src">@android:drawable/ic_media_play</item>
+    </style>
+
+    <style name="MediaButton.Ffwd">
+        <item name="android:src">@android:drawable/ic_media_ff</item>
+    </style>
+
+    <style name="MediaButton.Rew">
+        <item name="android:src">@android:drawable/ic_media_rew</item>
+    </style>
+
+    <style name="MediaButton.Pause">
+        <item name="android:src">@android:drawable/ic_media_pause</item>
     </style>
 
     <style name="ZoomControls">
@@ -639,5 +667,16 @@
         <item name="android:gravity">bottom</item>
         <item name="android:paddingLeft">15dip</item>
         <item name="android:paddingRight">15dip</item>
+    </style>
+    
+    <!-- Style you can use with a container (typically a horizontal
+         LinearLayout) to get the standard "button bar" background and
+         spacing. @hide -->
+    <style name="ButtonBar">
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+        <item name="android:paddingBottom">1dip</item>
+        <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
 </resources>

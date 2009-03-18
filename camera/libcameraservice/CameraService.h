@@ -82,9 +82,9 @@ private:
         // pass the buffered ISurface to the camera service
         virtual status_t        setPreviewDisplay(const sp<ISurface>& surface);
 
-        // set the frame callback flag to affect how the received frames from
+        // set the preview callback flag to affect how the received frames from
         // preview are handled.
-        virtual void            setFrameCallbackFlag(int frame_callback_flag);
+        virtual void            setPreviewCallbackFlag(int callback_flag);
 
         // start preview mode, must call setPreviewDisplay first
         virtual status_t        startPreview();
@@ -94,6 +94,18 @@ private:
 
         // get preview state
         virtual bool            previewEnabled();
+
+        // start recording mode
+        virtual status_t        startRecording();
+
+        // stop recording mode
+        virtual void            stopRecording();
+
+        // get recording state
+        virtual bool            recordingEnabled();
+
+        // release a recording frame
+        virtual void            releaseRecordingFrame(const sp<IMemory>& mem);
 
         // auto focus
         virtual status_t        autoFocus();
@@ -120,6 +132,7 @@ private:
 
                     status_t    checkPid();
 
+        static      void        recordingCallback(const sp<IMemory>& mem, void* user);
         static      void        previewCallback(const sp<IMemory>& mem, void* user);
         static      void        shutterCallback(void *user);
         static      void        yuvPictureCallback(const sp<IMemory>& mem, void* user);
@@ -130,17 +143,28 @@ private:
                     void        postShutter();
                     void        postRaw(const sp<IMemory>& mem);
                     void        postJpeg(const sp<IMemory>& mem);
-                    void        postFrame(const sp<IMemory>& mem);
+                    void        postPreviewFrame(const sp<IMemory>& mem);
+                    void        postRecordingFrame(const sp<IMemory>& frame);
                     void        copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size);
                     void        postError(status_t error);
                     void        postAutoFocus(bool focused);
 
-                    // Ensures atomicity among the public methods
+        // camera operation mode
+        enum camera_mode {
+            CAMERA_PREVIEW_MODE   = 0,  // frame automatically released
+            CAMERA_RECORDING_MODE = 1,  // frame has to be explicitly released by releaseRecordingFrame()
+        };
+        status_t                startCameraMode(camera_mode mode);
+        status_t                startPreviewMode();
+        status_t                startRecordingMode();
+
+        // Ensures atomicity among the public methods
         mutable     Mutex                       mLock;
+
         // mSurfaceLock synchronizes access to mSurface between
-        // setPreviewSurface() and postFrame().  Note that among
+        // setPreviewSurface() and postPreviewFrame().  Note that among
         // the public methods, all accesses to mSurface are
-        // syncrhonized by mLock.  However, postFrame() is called
+        // syncrhonized by mLock.  However, postPreviewFrame() is called
         // by the CameraHardwareInterface callback, and needs to
         // access mSurface.  It cannot hold mLock, however, because
         // stopPreview() may be holding that lock while attempting
@@ -152,13 +176,14 @@ private:
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
                     sp<MemoryHeapBase>          mPreviewBuffer;
-                    int                         mFrameCallbackFlag;
+                    int                         mPreviewCallbackFlag;
 
                     // these are immutable once the object is created,
                     // they don't need to be protected by a lock
                     sp<ICameraClient>           mCameraClient;
                     sp<CameraHardwareInterface> mHardware;
                     pid_t                       mClientPid;
+                    bool                        mUseOverlay;
     };
 
 // ----------------------------------------------------------------------------

@@ -165,6 +165,7 @@ public abstract class KeyInputQueue {
     public static native int getScancodeState(int deviceId, int sw);
     public static native int getKeycodeState(int sw);
     public static native int getKeycodeState(int deviceId, int sw);
+    public static native boolean hasKeys(int[] keycodes, boolean[] keyExists);
     
     public static KeyEvent newKeyEvent(InputDevice device, long downTime,
             long eventTime, boolean down, int keycode, int repeatCount,

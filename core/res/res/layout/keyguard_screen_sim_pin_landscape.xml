@@ -20,7 +20,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#FF000000"
+    android:background="@android:color/background_dark"
         >
 
     <!-- displays dots as user enters pin -->
@@ -45,11 +45,10 @@
             android:maxLines="1"
             android:background="@null"
             android:textSize="32sp"
-            android:password="true"
+            android:inputType="textPassword"
             />
 
         <ImageButton android:id="@+id/backspace"
-             style="@android:style/Widget.Button.Inset"
              android:src="@android:drawable/ic_input_delete"
              android:layout_width="wrap_content"
              android:layout_height="fill_parent"

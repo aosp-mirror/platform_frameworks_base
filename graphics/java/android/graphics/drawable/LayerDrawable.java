@@ -51,6 +51,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private int[] mPaddingB;
 
     private final Rect mTmpRect = new Rect();
+    private boolean mMutated;
 
     /**
      * Create a new layer drawable with the list of specified layers.
@@ -71,16 +72,16 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     LayerDrawable(Drawable[] layers, LayerState state) {
         this(state);
         int length = layers.length;
-        Rec[] r = new Rec[length];
+        ChildDrawable[] r = new ChildDrawable[length];
 
         for (int i = 0; i < length; i++) {
-            r[i] = new Rec();
+            r[i] = new ChildDrawable();
             r[i].mDrawable = layers[i];
             layers[i].setCallback(this);
             mLayerState.mChildrenChangingConfigurations |= layers[i].getChangingConfigurations();
         }
         mLayerState.mNum = length;
-        mLayerState.mArray = r;
+        mLayerState.mChildren = r;
 
         ensurePadding();
     }
@@ -171,26 +172,26 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     private void addLayer(Drawable layer, int id, int left, int top, int right, int bottom) {
         final LayerState st = mLayerState;
-        int N = st.mArray != null ? st.mArray.length : 0;
+        int N = st.mChildren != null ? st.mChildren.length : 0;
         int i = st.mNum;
         if (i >= N) {
-            Rec[] nu = new Rec[N + 10];
+            ChildDrawable[] nu = new ChildDrawable[N + 10];
             if (i > 0) {
-                System.arraycopy(st.mArray, 0, nu, 0, i);
+                System.arraycopy(st.mChildren, 0, nu, 0, i);
             }
-            st.mArray = nu;
+            st.mChildren = nu;
         }
 
         mLayerState.mChildrenChangingConfigurations |= layer.getChangingConfigurations();
         
-        Rec rec = new Rec();
-        st.mArray[i] = rec;
-        rec.mId = id;
-        rec.mDrawable = layer;
-        rec.mInsetL = left;
-        rec.mInsetT = top;
-        rec.mInsetR = right;
-        rec.mInsetB = bottom;
+        ChildDrawable childDrawable = new ChildDrawable();
+        st.mChildren[i] = childDrawable;
+        childDrawable.mId = id;
+        childDrawable.mDrawable = layer;
+        childDrawable.mInsetL = left;
+        childDrawable.mInsetT = top;
+        childDrawable.mInsetR = right;
+        childDrawable.mInsetB = bottom;
         st.mNum++;
 
         layer.setCallback(this);
@@ -203,7 +204,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @return The {@link Drawable} of the layer that has the given id in the hierarchy or null.
      */
     public Drawable findDrawableByLayerId(int id) {
-        final Rec[] layers = mLayerState.mArray;
+        final ChildDrawable[] layers = mLayerState.mChildren;
         
         for (int i = mLayerState.mNum - 1; i >= 0; i--) {
             if (layers[i].mId == id) {
@@ -221,7 +222,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param id The ID to assign to the layer.
      */
     public void setId(int index, int id) {
-        mLayerState.mArray[index].mId = id;
+        mLayerState.mChildren[index].mId = id;
     }
     
     /**
@@ -240,7 +241,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @return The {@link android.graphics.drawable.Drawable} at the specified layer index.
      */
     public Drawable getDrawable(int index) {
-        return mLayerState.mArray[index].mDrawable;
+        return mLayerState.mChildren[index].mDrawable;
     }
 
     /**
@@ -251,7 +252,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @return The id of the layer or {@link android.view.View#NO_ID} if the layer has no id. 
      */
     public int getId(int index) {
-        return mLayerState.mArray[index].mId;
+        return mLayerState.mChildren[index].mId;
     }
     
     /**
@@ -263,7 +264,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      *         the id was not found).
      */
     public boolean setDrawableByLayerId(int id, Drawable drawable) {
-        final Rec[] layers = mLayerState.mArray;
+        final ChildDrawable[] layers = mLayerState.mChildren;
         
         for (int i = mLayerState.mNum - 1; i >= 0; i--) {
             if (layers[i].mId == id) {
@@ -282,11 +283,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         bottom -= b;
     */
     public void setLayerInset(int index, int l, int t, int r, int b) {
-        Rec rec = mLayerState.mArray[index];
-        rec.mInsetL = l;
-        rec.mInsetT = t;
-        rec.mInsetR = r;
-        rec.mInsetB = b;
+        ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetL = l;
+        childDrawable.mInsetT = t;
+        childDrawable.mInsetR = r;
+        childDrawable.mInsetB = b;
     }
 
     // overrides from Drawable.Callback
@@ -313,7 +314,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void draw(Canvas canvas) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             array[i].mDrawable.draw(canvas);
@@ -336,7 +337,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         padding.top = 0;
         padding.right = 0;
         padding.bottom = 0;
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             reapplyPadding(i, array[i]);
@@ -351,7 +352,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         boolean changed = super.setVisible(visible, restart);
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             array[i].mDrawable.setVisible(visible, restart);
@@ -361,7 +362,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void setDither(boolean dither) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             array[i].mDrawable.setDither(dither);
@@ -370,7 +371,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void setAlpha(int alpha) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             array[i].mDrawable.setAlpha(alpha);
@@ -379,7 +380,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     
     @Override
     public void setColorFilter(ColorFilter cf) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i=0; i<N; i++) {
             array[i].mDrawable.setColorFilter(cf);
@@ -398,12 +399,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     
     @Override
     protected boolean onStateChange(int[] state) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         boolean paddingChanged = false;
         boolean changed = false;
         for (int i=0; i<N; i++) {
-            final Rec r = array[i];
+            final ChildDrawable r = array[i];
             if (r.mDrawable.setState(state)) {
                 changed = true;
             }
@@ -419,12 +420,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     
     @Override
     protected boolean onLevelChange(int level) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         boolean paddingChanged = false;
         boolean changed = false;
         for (int i=0; i<N; i++) {
-            final Rec r = array[i];
+            final ChildDrawable r = array[i];
             if (r.mDrawable.setLevel(level)) {
                 changed = true;
             }
@@ -440,11 +441,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     protected void onBoundsChange(Rect bounds) {
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         int padL=0, padT=0, padR=0, padB=0;
         for (int i=0; i<N; i++) {
-            final Rec r = array[i];
+            final ChildDrawable r = array[i];
             r.mDrawable.setBounds(bounds.left + r.mInsetL + padL,
                                   bounds.top + r.mInsetT + padT,
                                   bounds.right - r.mInsetR - padR,
@@ -459,11 +460,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     @Override
     public int getIntrinsicWidth() {
         int width = -1;
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         int padL=0, padR=0;
         for (int i=0; i<N; i++) {
-            final Rec r = array[i];
+            final ChildDrawable r = array[i];
             int w = r.mDrawable.getIntrinsicWidth()
                   + r.mInsetL + r.mInsetR + padL + padR;
             if (w > width) {
@@ -478,11 +479,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     @Override
     public int getIntrinsicHeight() {
         int height = -1;
-        final Rec[] array = mLayerState.mArray;
+        final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         int padT=0, padB=0;
         for (int i=0; i<N; i++) {
-            final Rec r = array[i];
+            final ChildDrawable r = array[i];
             int h = r.mDrawable.getIntrinsicHeight() + r.mInsetT + r.mInsetB + + padT + padB;
             if (h > height) {
                 height = h;
@@ -493,7 +494,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return height;
     }
 
-    private boolean reapplyPadding(int i, Rec r) {
+    private boolean reapplyPadding(int i, ChildDrawable r) {
         final Rect rect = mTmpRect;
         r.mDrawable.getPadding(rect);
         if (rect.left != mPaddingL[i] || rect.top != mPaddingT[i] ||
@@ -527,7 +528,20 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
-    static class Rec {
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            final ChildDrawable[] array = mLayerState.mChildren;
+            final int N = mLayerState.mNum;
+            for (int i = 0; i < N; i++) {
+                array[i].mDrawable.mutate();
+            }
+            mMutated = true;
+        }
+        return this;
+    }
+
+    static class ChildDrawable {
         public Drawable mDrawable;
         public int mInsetL, mInsetT, mInsetR, mInsetB;
         public int mId;
@@ -535,7 +549,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     static class LayerState extends ConstantState {
         int mNum;
-        Rec[] mArray;
+        ChildDrawable[] mChildren;
 
         int mChangingConfigurations;
         int mChildrenChangingConfigurations;
@@ -551,18 +565,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         LayerState(LayerState orig, LayerDrawable owner) {
             if (orig != null) {
-                final Rec[] origRec = orig.mArray;
+                final ChildDrawable[] origChildDrawable = orig.mChildren;
                 final int N = orig.mNum;
 
                 mNum = N;
-                mArray = new Rec[N];
+                mChildren = new ChildDrawable[N];
 
                 mChangingConfigurations = orig.mChangingConfigurations;
                 mChildrenChangingConfigurations = orig.mChildrenChangingConfigurations;
                 
                 for (int i = 0; i < N; i++) {
-                    final Rec r = mArray[i] = new Rec();
-                    final Rec or = origRec[i];
+                    final ChildDrawable r = mChildren[i] = new ChildDrawable();
+                    final ChildDrawable or = origChildDrawable[i];
                     r.mDrawable = or.mDrawable.getConstantState().newDrawable();
                     r.mDrawable.setCallback(owner);
                     r.mInsetL = or.mInsetL;
@@ -579,7 +593,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 mCheckedConstantState = mCanConstantState = true;
             } else {
                 mNum = 0;
-                mArray = null;
+                mChildren = null;
             }
         }
 
@@ -599,11 +613,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             }
 
             final int N = mNum;
-            int op = N > 0 ? mArray[0].mDrawable.getOpacity()
-                    : PixelFormat.TRANSPARENT;
+            int op = N > 0 ? mChildren[0].mDrawable.getOpacity() : PixelFormat.TRANSPARENT;
             for (int i = 1; i < N; i++) {
-                op = Drawable.resolveOpacity(op, mArray[i].mDrawable
-                        .getOpacity());
+                op = Drawable.resolveOpacity(op, mChildren[i].mDrawable.getOpacity());
             }
             mOpacity = op;
             mHaveOpacity = true;
@@ -618,7 +630,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             boolean stateful = false;
             final int N = mNum;
             for (int i = 0; i < N; i++) {
-                if (mArray[i].mDrawable.isStateful()) {
+                if (mChildren[i].mDrawable.isStateful()) {
                     stateful = true;
                     break;
                 }
@@ -630,11 +642,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         public synchronized boolean canConstantState() {
-            if (!mCheckedConstantState && mArray != null) {
+            if (!mCheckedConstantState && mChildren != null) {
                 mCanConstantState = true;
                 final int N = mNum;
                 for (int i=0; i<N; i++) {
-                    if (mArray[i].mDrawable.getConstantState() == null) {
+                    if (mChildren[i].mDrawable.getConstantState() == null) {
                         mCanConstantState = false;
                         break;
                     }

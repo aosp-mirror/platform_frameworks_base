@@ -1487,7 +1487,7 @@ class ApplicationContext extends Context {
     static final class ApplicationPackageManager extends PackageManager {
         @Override
         public PackageInfo getPackageInfo(String packageName, int flags)
-            throws NameNotFoundException {
+                throws NameNotFoundException {
             try {
                 PackageInfo pi = mPM.getPackageInfo(packageName, flags);
                 if (pi != null) {
@@ -1500,6 +1500,43 @@ class ApplicationContext extends Context {
             throw new NameNotFoundException(packageName);
         }
 
+        public Intent getLaunchIntentForPackage(String packageName)
+                throws NameNotFoundException {
+            // First see if the package has an INFO activity; the existence of
+            // such an activity is implied to be the desired front-door for the
+            // overall package (such as if it has multiple launcher entries).
+            Intent intent = getLaunchIntentForPackageCategory(this, packageName,
+                    Intent.CATEGORY_INFO);
+            if (intent != null) {
+                return intent;
+            }
+            
+            // Otherwise, try to find a main launcher activity.
+            return getLaunchIntentForPackageCategory(this, packageName,
+                    Intent.CATEGORY_LAUNCHER);
+        }
+        
+        // XXX This should be implemented as a call to the package manager,
+        // to reduce the work needed.
+        static Intent getLaunchIntentForPackageCategory(PackageManager pm,
+                String packageName, String category) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intentToResolve = new Intent(Intent.ACTION_MAIN, null);
+            intentToResolve.addCategory(category);
+            final List<ResolveInfo> apps =
+                    pm.queryIntentActivities(intentToResolve, 0);
+            // I wish there were a way to directly get the "main" activity of a
+            // package but ...
+            for (ResolveInfo app : apps) {
+                if (app.activityInfo.packageName.equals(packageName)) {
+                    intent.setClassName(packageName, app.activityInfo.name);
+                    return intent;
+                }
+            }
+            return null;
+        }
+        
         @Override
         public int[] getPackageGids(String packageName)
             throws NameNotFoundException {
@@ -1627,6 +1664,15 @@ class ApplicationContext extends Context {
             }
 
             throw new NameNotFoundException(className.toString());
+        }
+
+        @Override
+        public String[] getSystemSharedLibraryNames() {
+             try {
+                 return mPM.getSystemSharedLibraryNames();
+             } catch (RemoteException e) {
+                 throw new RuntimeException("Package manager has died", e);
+             }
         }
 
         @Override
@@ -1972,6 +2018,18 @@ class ApplicationContext extends Context {
                 String appPackageName) throws NameNotFoundException {
             return getResourcesForApplication(
                 getApplicationInfo(appPackageName, 0));
+        }
+
+        int mCachedSafeMode = -1;
+        @Override public boolean isSafeMode() {
+            try {
+                if (mCachedSafeMode < 0) {
+                    mCachedSafeMode = mPM.isSafeMode() ? 1 : 0;
+                }
+                return mCachedSafeMode != 0;
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
         }
 
         static void configurationChanged() {

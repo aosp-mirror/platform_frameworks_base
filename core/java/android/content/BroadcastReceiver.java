@@ -16,7 +16,11 @@
 
 package android.content;
 
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 /**
@@ -75,7 +79,7 @@ import android.util.Log;
  * <p>The BroadcastReceiver class (when launched as a component through
  * a manifest's {@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}
  * tag) is an important part of an
- * <a href="{@docRoot}intro/lifecycle.html">application's overall lifecycle</a>.</p>
+ * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">application's overall lifecycle</a>.</p>
  * 
  * <p>Topics covered here:
  * <ol>
@@ -131,7 +135,7 @@ import android.util.Log;
  * tag in their <code>AndroidManifest.xml</code>) will be able to send an
  * Intent to the receiver.
  * 
- * <p>See the <a href="{@docRoot}devel/security.html">Security Model</a>
+ * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
  * document for more information on permissions and security in general.
  * 
  * <a name="ProcessLifecycle"></a>
@@ -175,12 +179,34 @@ public abstract class BroadcastReceiver {
      * return a result to you asynchronously -- in particular, for interacting
      * with services, you should use
      * {@link Context#startService(Intent)} instead of
-     * {@link Context#bindService(Intent, ServiceConnection, int)}.
+     * {@link Context#bindService(Intent, ServiceConnection, int)}.  If you wish
+     * to interact with a service that is already running, you can use
+     * {@link #peekService}.
      * 
      * @param context The Context in which the receiver is running.
      * @param intent The Intent being received.
      */
     public abstract void onReceive(Context context, Intent intent);
+
+    /**
+     * Provide a binder to an already-running service.  This method is synchronous
+     * and will not start the target service if it is not present, so it is safe
+     * to call from {@link #onReceive}.
+     * 
+     * @param myContext The Context that had been passed to {@link #onReceive(Context, Intent)}
+     * @param service The Intent indicating the service you wish to use.  See {@link
+     * Context#startService(Intent)} for more information.
+     */
+    public IBinder peekService(Context myContext, Intent service) {
+        IActivityManager am = ActivityManagerNative.getDefault();
+        IBinder binder = null;
+        try {
+            binder = am.peekService(service, service.resolveTypeIfNeeded(
+                    myContext.getContentResolver()));
+        } catch (RemoteException e) {
+        }
+        return binder;
+    }
 
     /**
      * Change the current result code of this broadcast; only works with

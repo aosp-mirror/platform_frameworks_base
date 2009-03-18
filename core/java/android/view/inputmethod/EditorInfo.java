@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Printer;
 
 /**
  * An EditorInfo describes several attributes of a text editing object
@@ -21,20 +22,109 @@ public class EditorInfo implements InputType, Parcelable {
      * @see #TYPE_MASK_VARIATION
      * @see #TYPE_MASK_FLAGS
      */
-    public int inputType = TYPE_CLASS_TEXT;
+    public int inputType = TYPE_NULL;
 
     /**
-     * A string supplying additional information about the content type that
-     * is private to a particular IME implementation.  The string must be
+     * Set of bits in {@link #imeOptions} that provide alternative actions
+     * associated with the "enter" key.  This both helps the IME provide
+     * better feedback about what the enter key will do, and also allows it
+     * to provide alternative mechanisms for providing that command.
+     */
+    public static final int IME_MASK_ACTION = 0x000000ff;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: no specific action has been
+     * associated with this editor, let the editor come up with its own if
+     * it can.
+     */
+    public static final int IME_ACTION_UNSPECIFIED = 0x00000000;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: there is no available action.
+     */
+    public static final int IME_ACTION_NONE = 0x00000001;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "go"
+     * operation to take the user to the target of the text they typed.
+     * Typically used, for example, when entering a URL.
+     */
+    public static final int IME_ACTION_GO = 0x00000002;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "search"
+     * operation, taking the user to the results of searching for the text
+     * the have typed (in whatever context is appropriate).
+     */
+    public static final int IME_ACTION_SEARCH = 0x00000003;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "send"
+     * operation, delivering the text to its target.  This is typically used
+     * when composing a message.
+     */
+    public static final int IME_ACTION_SEND = 0x00000004;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "next"
+     * operation, taking the user to the next field that will accept text.
+     */
+    public static final int IME_ACTION_NEXT = 0x00000005;
+    
+    /**
+     * Bits of {@link #IME_MASK_ACTION}: the action key performs a "done"
+     * operation, typically meaning the IME will be closed.
+     */
+    public static final int IME_ACTION_DONE = 0x00000006;
+    
+    /**
+     * Flag of {@link #imeOptions}: used in conjunction with
+     * {@link #IME_MASK_ACTION}, this indicates that the action should not
+     * be available in-line as the same as a "enter" key.  Typically this is
+     * because the action has such a significant impact or is not recoverable
+     * enough that accidentally hitting it should be avoided, such as sending
+     * a message.
+     */
+    public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
+    
+    /**
+     * Generic unspecified type for {@link #imeOptions}.
+     */
+    public static final int IME_NULL = 0x00000000;
+    
+    /**
+     * Extended type information for the editor, to help the IME better
+     * integrate with it.
+     */
+    public int imeOptions = IME_NULL;
+    
+    /**
+     * A string supplying additional information options that are
+     * private to a particular IME implementation.  The string must be
      * scoped to a package owned by the implementation, to ensure there are
      * no conflicts between implementations, but other than that you can put
      * whatever you want in it to communicate with the IME.  For example,
      * you could have a string that supplies an argument like
      * <code>"com.example.myapp.SpecialMode=3"</code>.  This field is can be
-     * filled in from the {@link android.R.attr#editorPrivateContentType}
+     * filled in from the {@link android.R.attr#privateImeOptions}
      * attribute of a TextView.
      */
-    public String privateContentType = null;
+    public String privateImeOptions = null;
+    
+    /**
+     * In some cases an IME may be able to display an arbitrary label for
+     * a command the user can perform, which you can specify here.  You can
+     * not count on this being used.
+     */
+    public CharSequence actionLabel = null;
+    
+    /**
+     * If {@link #actionLabel} has been given, this is the id for that command
+     * when the user presses its button that is delivered back with
+     * {@link InputConnection#performEditorAction(int)
+     * InputConnection.performEditorAction()}.
+     */
+    public int actionId = 0;
     
     /**
      * The text offset of the start of the selection at the time editing
@@ -71,6 +161,26 @@ public class EditorInfo implements InputType, Parcelable {
     public CharSequence label;
     
     /**
+     * Name of the package that owns this editor.
+     */
+    public String packageName;
+    
+    /**
+     * Identifier for the editor's field.  This is optional, and may be
+     * 0.  By default it is filled in with the result of
+     * {@link android.view.View#getId() View.getId()} on the View that
+     * is being edited.
+     */
+    public int fieldId;
+    
+    /**
+     * Additional name for the editor's field.  This can supply additional
+     * name information for the field.  By default it is null.  The actual
+     * contents have no meaning.
+     */
+    public String fieldName;
+    
+    /**
      * Any extra data to supply to the input method.  This is for extended
      * communication with specific input methods; the name fields in the
      * bundle should be scoped (such as "com.mydomain.im.SOME_FIELD") so
@@ -81,6 +191,27 @@ public class EditorInfo implements InputType, Parcelable {
     public Bundle extras;
     
     /**
+     * Write debug output of this object.
+     */
+    public void dump(Printer pw, String prefix) {
+        pw.println(prefix + "inputType=0x" + Integer.toHexString(inputType)
+                + " imeOptions=0x" + Integer.toHexString(imeOptions)
+                + " privateImeOptions=" + privateImeOptions);
+        pw.println(prefix + "actionLabel=" + actionLabel
+                + " actionId=" + actionId);
+        pw.println(prefix + "initialSelStart=" + initialSelStart
+                + " initialSelEnd=" + initialSelEnd
+                + " initialCapsMode=0x"
+                + Integer.toHexString(initialCapsMode));
+        pw.println(prefix + "hintText=" + hintText
+                + " label=" + label);
+        pw.println(prefix + "packageName=" + packageName
+                + " fieldId=" + fieldId
+                + " fieldName=" + fieldName);
+        pw.println(prefix + "extras=" + extras);
+    }
+    
+    /**
      * Used to package this object into a {@link Parcel}.
      * 
      * @param dest The {@link Parcel} to be written.
@@ -88,12 +219,18 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(inputType);
-        dest.writeString(privateContentType);
+        dest.writeInt(imeOptions);
+        dest.writeString(privateImeOptions);
+        TextUtils.writeToParcel(actionLabel, dest, flags);
+        dest.writeInt(actionId);
         dest.writeInt(initialSelStart);
         dest.writeInt(initialSelEnd);
         dest.writeInt(initialCapsMode);
         TextUtils.writeToParcel(hintText, dest, flags);
         TextUtils.writeToParcel(label, dest, flags);
+        dest.writeString(packageName);
+        dest.writeInt(fieldId);
+        dest.writeString(fieldName);
         dest.writeBundle(extras);
     }
 
@@ -104,12 +241,18 @@ public class EditorInfo implements InputType, Parcelable {
         public EditorInfo createFromParcel(Parcel source) {
             EditorInfo res = new EditorInfo();
             res.inputType = source.readInt();
-            res.privateContentType = source.readString();
+            res.imeOptions = source.readInt();
+            res.privateImeOptions = source.readString();
+            res.actionLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            res.actionId = source.readInt();
             res.initialSelStart = source.readInt();
             res.initialSelEnd = source.readInt();
             res.initialCapsMode = source.readInt();
             res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            res.packageName = source.readString();
+            res.fieldId = source.readInt();
+            res.fieldName = source.readString();
             res.extras = source.readBundle();
             return res;
         }

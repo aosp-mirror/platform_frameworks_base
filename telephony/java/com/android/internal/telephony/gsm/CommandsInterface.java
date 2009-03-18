@@ -283,6 +283,17 @@ public interface CommandsInterface
     void setOnCallRing(Handler h, int what, Object obj);
     
     /**
+     * Sets the handler for RESTRICTED_STATE changed notification, 
+     * eg, for Domain Specific Access Control
+     * unlike the register* methods, there's only one signal strength handler
+     * 
+     * AsyncResult.result is an int[1]     
+     * response.obj.result[0] is a bitmask of RIL_RESTRICTED_STATE_* values 
+     */
+
+    void setOnRestrictedStateChanged(Handler h, int what, Object obj);
+    
+    /**
      * Sets the handler for Supplementary Service Notifications.
      * Unlike the register* methods, there's only one notification handler
      *

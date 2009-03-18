@@ -30,6 +30,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_UPDATE_SELECTION = 90;
     private static final int DO_UPDATE_CURSOR = 95;
     private static final int DO_APP_PRIVATE_COMMAND = 100;
+    private static final int DO_TOGGLE_SOFT_INPUT = 105;
    
     final HandlerCaller mCaller;
     final InputMethodSession mInputMethodSession;
@@ -106,6 +107,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mCaller.recycleArgs(args);
                 return;
             }
+            case DO_TOGGLE_SOFT_INPUT: {
+                mInputMethodSession.toggleSoftInput(msg.arg1, msg.arg2);
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -148,5 +153,9 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     
     public void appPrivateCommand(String action, Bundle data) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_APP_PRIVATE_COMMAND, action, data));
+    }
+    
+    public void toggleSoftInput(int showFlags, int hideFlags) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_TOGGLE_SOFT_INPUT, showFlags, hideFlags));
     }
 }

@@ -7,8 +7,8 @@ page.title=Developing on a Device
   <ol>
     <li><a href="#devices">Available Devices</a>
       <ol>
-        <li><a href="g1">T-Mobile G1</a></li>
-        <li><a href="dev-phone-1">Android Dev Phone 1</a></li>
+        <li><a href="#g1">T-Mobile G1</a></li>
+        <li><a href="#dev-phone-1">Android Dev Phone 1</a></li>
       </ol>
     </li>
     <li><a href="#setting-up">Setting up a Device for Development</a></li>
@@ -41,8 +41,9 @@ href="http://www.t-mobileg1.com">T-Mobile G1 site</a>. </p>
 
 <h3 id="dev-phone-1">Android Dev Phone 1</h3>
 
-<div class="sidebox">
-<p>Selected specs for Android Dev Phone 1: </p>
+<div class="sidebox-wrapper">
+<div class="sidebox-inner">
+<p>Selected specs for Android Dev Phone 1:</p>
 <ul>
 <li>Touch screen</li>
 <li>Trackball</li>
@@ -58,7 +59,7 @@ href="http://www.t-mobileg1.com">T-Mobile G1 site</a>. </p>
 <li>Includes 1GB MicroSD card (can be replaced with up to 16GB card)</li>
 </ul>
 </div> 
-
+</div>
 <p>The Android Dev Phone 1 is a SIM-unlocked and hardware-unlocked device that
 is designed for advanced developers. The device ships with a system image that
 is fully compatible with Android 1.0, so you can rely on it when developing your
@@ -71,19 +72,19 @@ who live outside of T-Mobile geographies. </p>
 <p>To purchase an Android Dev Phone 1 device, you must first register as an
 Android developer on the Android Market site, if you haven't done so already.
 Once you've logged into your developer account on Android Market, you can
-purchase the device by clicking the "Purchase" link. To accommodate demand,
+purchase the device by following the link to "Development phones." To accommodate demand,
 there is a limit of 1 device per developer account, for now.</p>
 
 <p>The device currently costs $399 (USD) (including free shipping in the US),
-and will be available for purchase in 18 international markets, including the
+and is available for purchase in 18 international markets, including the
 US, UK, Germany, Japan, India, Canada, France, Taiwan, Spain, Australia,
 Singapore, Switzerland, Netherlands, Austria, Sweden, Finland, Poland, and
 Hungary.  We will continue to expand this program into new geographies over
 time.  Check this page for updated information.</p>
 
 <p>Note that Android Dev Phone 1 devices are <em>not</em> intended for
-non-developer end users. Since the devices can be configured with system
-software not provided by or supported by Google or any other company, end users
+non-developer end-users. Because the device can be configured with system
+software not provided by or supported by Google or any other company, end-users
 operate these devices at their own risk.</p>
 
 <p>For full device specs and more information about obtaining an Android Dev 
@@ -109,17 +110,28 @@ would on the emulator. There are just a few things to do before you can start.</
   </li>
   <li>Setup your system to detect your device.
     <ul>
-      <li>If you're developing on Windows (32-bit only), you need to install the USB driver for adb:
+      <li>If you're developing on 32-bit Windows, you need to install the 32-bit USB driver for adb. 
+      The USB driver is included in the SDK package. To install it, follow these steps:</p>
         <ol>
-          <li>Download the driver ZIP file 
-          (<a href="http://dl.google.com/android/android_usb_windows.zip">android_usb_windows.zip</a>)
-          and unzip it.</li>
-          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, you'll be asked if you'd like Windows Update to search for software, select <em>No, not this time</em> and click <b>Next</b>.</li>
+          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, 
+          you'll be asked if you'd like Windows Update to search for software. Select <em>No, not this 
+          time</em> and click <b>Next</b>.</li>
 
           <li>Select <em>Install from a list or specified location</em> and click <b>Next</b>.</li>
-          <li>Select <em>Search for the best driver in these locations</em>. Browse and select the unzipped file.</li>
-          <li>Click <b>Finish</b>. You're all set.</li>
+          <li>Select <em>Search for the best driver in these locations</em>. Browse to the <code>usb_driver/x86</code> in the SDK package (<code>&lt;sdk&gt;\usb_driver\x86</code>).</li>
+          <li>Click <b>Finish</b>. The system should install the driver files as necessary. Your machine may require a reboot.</li>
+        </ol>
+      </li>
+      <li>If you're developing on 64-bit Windows Vista, you need to install the 64-bit USB driver for adb. 
+      The USB driver is included in the SDK package. To install it, follow these steps:</p>
+        <ol>
+          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, 
+          you'll be asked if you'd like Windows Update to search for software. Select <em>No, not this 
+          time</em> and click <b>Next</b>.</li>
 
+          <li>Select <em>Install from a list or specified location</em> and click <b>Next</b>.</li>
+          <li>Select <em>Search for the best driver in these locations</em>. Browse to the <code>usb_driver/amd64</code> in the SDK package (<code>&lt;sdk&gt;\usb_driver\amd64</code>).</li>
+          <li>Click <b>Finish</b>. The system should install the driver files as necessary. Your machine may require a reboot.</li>
         </ol>
       </li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>

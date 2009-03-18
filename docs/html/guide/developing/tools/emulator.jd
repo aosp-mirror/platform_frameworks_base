@@ -812,7 +812,7 @@ in the default directory, or in a custom location (if you specified a path with 
 <tr>
   <td><code>userdata-qemu.img</code></td>
   <td>An image to which the emulator writes runtime user-data for a unique user.</td>
-  <td>Override using <code>-data &lt;;filepath&gt;</code>, where <code>&lt;filepath&gt;</code> is the
+  <td>Override using <code>-data &lt;filepath&gt;</code>, where <code>&lt;filepath&gt;</code> is the
 path the image, relative to the current working directory. If you supply a filename only, 
 the emulator looks for the file in the current working directory. If the file at <code>&lt;filepath&gt;</code> does
 not exist, the emulator creates an image from the default userdata.img, stores it under the name you

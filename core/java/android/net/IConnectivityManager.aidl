@@ -44,4 +44,8 @@ interface IConnectivityManager
     int stopUsingNetworkFeature(int networkType, in String feature);
 
     boolean requestRouteToHost(int networkType, int hostAddress);
+
+    boolean getBackgroundDataSetting();
+
+    void setBackgroundDataSetting(boolean allowBackgroundData);
 }

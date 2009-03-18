@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 /**
@@ -54,10 +54,7 @@ public class MediaRecorderResetStateUnitTest extends AndroidTestCase implements 
         recorder.reset();
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
-    @MediumTest
+    @LargeTest
     public void testReset() {
         mTestTemplate.runTestOnMethod(this);
     }

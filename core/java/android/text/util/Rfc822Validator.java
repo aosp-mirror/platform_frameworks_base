@@ -16,6 +16,7 @@
 
 package android.text.util;
 
+import android.text.TextUtils;
 import android.widget.AutoCompleteTextView;
 
 import java.util.regex.Pattern;
@@ -67,7 +68,7 @@ public class Rfc822Validator implements AutoCompleteTextView.Validator {
     
     /**
      * @return a string in which all the characters that are illegal for the username
-     * part of the email address have been removed.
+     * or the domain name part of the email address have been removed.
      */
     private String removeIllegalCharacters(String s) {
         StringBuilder result = new StringBuilder();
@@ -101,6 +102,9 @@ public class Rfc822Validator implements AutoCompleteTextView.Validator {
      * {@inheritDoc}
      */
     public CharSequence fixText(CharSequence cs) {
+        // Return an empty string if the email address only contains spaces, \n or \t
+        if (TextUtils.getTrimmedLength(cs) == 0) return "";
+
         Rfc822Token[] tokens = Rfc822Tokenizer.tokenize(cs);
         StringBuilder sb = new StringBuilder();
 
@@ -111,10 +115,10 @@ public class Rfc822Validator implements AutoCompleteTextView.Validator {
                 // If there is no @, just append the domain of the account
                 tokens[i].setAddress(removeIllegalCharacters(text) + "@" + mDomain);
             } else {
-                // Otherwise, remove everything right of the '@' and append the domain
-                // ("a@b" becomes "a@gmail.com").
+                // Otherwise, remove the illegal characters on both sides of the '@'
                 String fix = removeIllegalCharacters(text.substring(0, index));
-                tokens[i].setAddress(fix + "@" + mDomain);
+                String domain = removeIllegalCharacters(text.substring(index + 1));
+                tokens[i].setAddress(fix + "@" + (domain.length() != 0 ? domain : mDomain));
             }
 
             sb.append(tokens[i].toString());

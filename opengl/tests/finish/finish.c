@@ -20,7 +20,10 @@
 #include <sched.h>
 #include <sys/resource.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 
 long long systemTime()
 {

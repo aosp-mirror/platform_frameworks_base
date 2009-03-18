@@ -44,6 +44,9 @@ import java.io.IOException;
 public class InsetDrawable extends Drawable implements Drawable.Callback
 {
     // Most of this is copied from ScaleDrawable.
+    private InsetState mInsetState;
+    private final Rect mTmpRect = new Rect();
+    private boolean mMutated;
 
     /*package*/ InsetDrawable() {
         this(null);
@@ -239,7 +242,27 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         return null;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mInsetState.mDrawable.mutate();
+            mMutated = true;
+        }
+        return this;
+    }
+
     final static class InsetState extends ConstantState {
+        Drawable mDrawable;
+        int mChangingConfigurations;
+
+        int mInsetLeft;
+        int mInsetTop;
+        int mInsetRight;
+        int mInsetBottom;
+
+        boolean mCheckedConstantState;
+        boolean mCanConstantState;
+
         InsetState(InsetState orig, InsetDrawable owner) {
             if (orig != null) {
                 mDrawable = orig.mDrawable.getConstantState().newDrawable();
@@ -270,25 +293,10 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
 
             return mCanConstantState;
         }
-
-        Drawable mDrawable;
-        int mChangingConfigurations;
-
-        int mInsetLeft;
-        int mInsetTop;
-        int mInsetRight;
-        int mInsetBottom;
-
-        boolean mCheckedConstantState;
-        boolean mCanConstantState;
     }
 
     private InsetDrawable(InsetState state) {
-        InsetState as = new InsetState(state, this);
-        mInsetState = as;
+        mInsetState = new InsetState(state, this);
     }
-
-    private InsetState  mInsetState;
-    private final Rect  mTmpRect = new Rect();
 }
 

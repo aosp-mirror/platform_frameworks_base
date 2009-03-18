@@ -33,6 +33,7 @@
          shadow, plus the desired padding of "8" against the user-visible (grey)
          pixels, minus "1" to correct for positioning of the edittext & button. -->
     <LinearLayout
+        android:id="@+id/search_plate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -77,7 +78,11 @@
                 android:layout_weight="1.0"
                 android:paddingLeft="8dip"
                 android:paddingRight="6dip"
-                android:inputType="text|textAutoComplete" />
+                android:inputType="text|textAutoComplete"
+                android:dropDownWidth="fill_parent"
+                android:dropDownAnchor="@id/search_plate"
+                android:dropDownVerticalOffset="-15dip"
+                />
                 <!-- android:focusableInTouchMode="false" -->
                 <!-- android:singleLine="true" -->
                 <!-- android:selectAllOnFocus="true" -->
@@ -91,6 +96,11 @@
                 android:drawableLeft="@android:drawable/ic_btn_search"
             />
 
+            <ImageButton android:id="@+id/search_voice_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_btn_speak_now"
+            />
         </LinearLayout>
         
     </LinearLayout>

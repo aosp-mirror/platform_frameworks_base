@@ -95,7 +95,7 @@ MapView must extend {@link-fixme com.google.android.maps.MapActivity}. </p>
 
 <p>Also note that you must obtain a MapView API Key from the Google Maps
 service, before your MapView can load maps data. For more information, see 
-<a href="{@docRoot}guide/developing/mapkey.html">Obtaining a MapView API Key</a>.</p>
+<a href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a MapView API Key</a>.</p>
 
 <p>Once you've created a MapView, you'll probably want to use 
 {@link-fixme com.google.android.maps.MapView#getController()} to 

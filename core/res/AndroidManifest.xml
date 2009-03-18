@@ -18,7 +18,8 @@
 */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android" android:sharedUserId="android.uid.system">
+    package="android" android:sharedUserId="android.uid.system"
+    android:sharedUserLabel="@string/android_system_label">
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -549,6 +550,13 @@
         android:label="@string/permlab_mount_unmount_filesystems"
         android:description="@string/permdesc_mount_unmount_filesystems" />
 
+    <!-- Allows formatting file systems for removable storage. -->
+    <permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_mount_format_filesystems"
+        android:description="@string/permdesc_mount_format_filesystems" />
+
     <!-- Allows applications to disable the keyguard -->
     <permission android:name="android.permission.DISABLE_KEYGUARD"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -696,7 +704,7 @@
     <permission android:name="android.permission.STATUS_BAR"
         android:label="@string/permlab_statusBar"
         android:description="@string/permdesc_statusBar"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to force any currently running process to be
          in the foreground. -->
@@ -725,8 +733,9 @@
         android:description="@string/permdesc_fotaUpdate"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to update the collected battery statistics -->
-    <permission android:name="android.permission.BATTERY_STATS"
+    <!-- Allows an application to update device statistics. Not for
+         use by third party apps. -->
+    <permission android:name="android.permission.UPDATE_DEVICE_STATS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
         android:protectionLevel="signature" />
@@ -902,10 +911,43 @@
         android:description="@string/permdesc_checkinProperties"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to collect component usage
+         statistics -->
+    <permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        android:label="@string/permlab_pkgUsageStats"
+        android:description="@string/permdesc_pkgUsageStats"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an application to collect battery statistics -->
+    <permission android:name="android.permission.BATTERY_STATS"
+        android:label="@string/permlab_batteryStats"
+        android:description="@string/permdesc_batteryStats"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an application to tell the AppWidget service which application
+         can access AppWidget's data.  The normal user flow is that a user
+         picks an AppWidget to go into a particular host, thereby giving that
+         host application access to the private data from the AppWidget app.
+         An application that has this permission should honor that contract.
+         Very few applications should need to use this permission. -->
+    <permission android:name="android.permission.BIND_APPWIDGET"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:label="@string/permlab_bindGadget"
+        android:description="@string/permdesc_bindGadget"
+        android:protectionLevel="signature" />
+
+    <!-- Allows applications to change the background data setting
+         @hide pending API council -->
+    <permission android:name="android.permission.CHANGE_BACKGROUND_DATA_SETTING"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:description="@string/permdesc_changeBackgroundDataSetting"
+        android:label="@string/permlab_changeBackgroundDataSetting" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
-                 android:label="Android System"
+                 android:label="@string/android_system_label"
                  android:allowClearUserData="false"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
@@ -930,43 +972,27 @@
                 android:theme="@style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
         </activity>
-        <provider android:name=".server.checkin.CheckinProvider"
-                android:authorities="android.server.checkin"
-                android:multiprocess="false" />
+        <activity android:name="com.android.internal.app.UsbStorageStopActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
+        </activity>
+        <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
+        </activity>
+
         <provider android:name=".content.SyncProvider"
                 android:authorities="sync" android:multiprocess="false" />
 
         <service android:name="com.android.server.LoadAverageService"
             android:exported="true" />
-        <receiver
-            android:name=".server.checkin.UpdateReceiver$DownloadCompletedBroadcastReceiver"
-            android:exported="true" />
-
-          <receiver android:name="com.google.android.server.checkin.SecretCodeReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SECRET_CODE" />
-                <data android:scheme="android_secret_code"
-                        android:host="682" />  <!-- 682 = "OTA" on dialpad -->
-                <data android:scheme="android_secret_code"
-                        android:host="682364" />  <!-- 682364 = "OTAENG" -->
-                <data android:scheme="android_secret_code"
-                        android:host="682226" />  <!-- 682226 = "OTACAN" -->
-                <data android:scheme="android_secret_code"
-                        android:host="682668" />  <!-- 682668 = "OTANOT" -->
-            </intent-filter>
-        </receiver>
 
         <receiver android:name="com.android.server.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.android.server.BrickReceiver"
-            android:permission="android.permission.BRICK" >
-            <intent-filter>
-                <action android:name="android.intent.action.BRICK" />
-            </intent-filter>
-        </receiver>
+
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR" >
             <intent-filter>

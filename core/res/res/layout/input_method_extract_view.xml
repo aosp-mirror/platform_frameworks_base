@@ -18,11 +18,38 @@
 */
 -->
 
-<android.inputmethodservice.ExtractEditText
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/inputExtractEditText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-    >
-</android.inputmethodservice.ExtractEditText>
+        android:orientation="horizontal">
+        
+    <android.inputmethodservice.ExtractEditText
+            android:id="@+id/inputExtractEditText"
+            android:layout_width="0px"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:gravity="top"
+            android:minLines="1"
+            android:inputType="text"
+            android:background="@android:drawable/extract_edit_text"
+        >
+    </android.inputmethodservice.ExtractEditText>
+
+    <FrameLayout
+            android:id="@+id/inputExtractAccessories"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:background="@android:drawable/keyboard_accessory_bg_landscape"
+        >
+        
+        <android.inputmethodservice.ExtractButton android:id="@+id/inputExtractAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+            
+    </FrameLayout>
+    
+</LinearLayout>

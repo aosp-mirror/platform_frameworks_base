@@ -63,11 +63,11 @@ struct audiorecord_callback_cookie {
 #define AUDIORECORD_ERROR                           -1
 #define AUDIORECORD_ERROR_BAD_VALUE                 -2
 #define AUDIORECORD_ERROR_INVALID_OPERATION         -3
-#define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -4
-#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT -5
-#define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -6
-#define AUDIORECORD_ERROR_SETUP_INVALIDSTREAMTYPE   -7
-#define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -8
+#define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -16
+#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT -17
+#define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
+#define AUDIORECORD_ERROR_SETUP_INVALIDSTREAMTYPE   -19
+#define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
 
 jint android_media_translateRecorderErrorCode(int code) {
     switch(code) {
@@ -267,7 +267,7 @@ static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
             (AudioRecord *)env->GetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj);
 
     if (lpRecorder) {
-        //LOGV("About to delete lpRecorder: %x\n", (int)lpRecorder);
+        LOGV("About to delete lpRecorder: %x\n", (int)lpRecorder);
         lpRecorder->stop();
         delete lpRecorder;
     }
@@ -449,6 +449,39 @@ static jint android_media_AudioRecord_get_pos_update_period(JNIEnv *env,  jobjec
 
 
 // ----------------------------------------------------------------------------
+// returns the minimum required size for the successful creation of an AudioRecord instance.
+// returns 0 if the parameter combination is not supported.
+// return -1 if there was an error querying the buffer size.
+static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject thiz,
+    jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
+    
+    size_t inputBuffSize = 0;
+    LOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)", sampleRateInHertz, nbChannels, audioFormat);
+    
+    status_t result = AudioSystem::getInputBufferSize(
+                        sampleRateInHertz, 
+                        (audioFormat == javaAudioRecordFields.PCM16 ? 
+                            AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT), 
+                        nbChannels, &inputBuffSize);
+    switch(result) {
+    case(NO_ERROR):
+        if(inputBuffSize == 0) {
+            LOGV("Recording parameters are not supported: %dHz, %d channel(s), (java) format %d",
+                sampleRateInHertz, nbChannels, audioFormat);
+            return 0;
+        } else {
+            // the minimum buffer size is twice the hardware input buffer size
+            return 2*inputBuffSize;
+        }
+        break;
+    case(PERMISSION_DENIED):
+    default:
+        return -1; 
+    }
+}
+
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
@@ -470,6 +503,8 @@ static JNINativeMethod gMethods[] = {
                              "(I)I",   (void *)android_media_AudioRecord_set_pos_update_period},
     {"native_get_pos_update_period",
                              "()I",    (void *)android_media_AudioRecord_get_pos_update_period},
+    {"native_get_min_buff_size",
+                             "(III)I",   (void *)android_media_AudioRecord_get_min_buff_size},
 };
 
 // field names found in android/media/AudioRecord.java

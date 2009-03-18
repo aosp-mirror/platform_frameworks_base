@@ -18,6 +18,8 @@ package com.android.unit_tests.activity;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ConfigurationInfo;
+import android.content.res.Configuration;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
@@ -88,6 +90,24 @@ public class ActivityManagerTest extends AndroidTestCase {
         checkErrorListSanity(errList);
 
         // test: confirm our ANR'ing application shows up in the list
+    }
+    
+    @SmallTest
+    public void testGetDeviceConfigurationInfo() throws Exception {
+        ConfigurationInfo config = mActivityManager.getDeviceConfigurationInfo();
+        assertNotNull(config);
+        // Validate values against configuration retrieved from resources
+        Configuration vconfig = mContext.getResources().getConfiguration();
+        assertNotNull(vconfig);
+        assertEquals(config.reqKeyboardType, vconfig.keyboard);
+        assertEquals(config.reqTouchScreen, vconfig.touchscreen);
+        assertEquals(config.reqNavigation, vconfig.navigation);
+        if (vconfig.navigation == Configuration.NAVIGATION_NONAV) {
+            assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV);
+        }
+        if (vconfig.keyboard != Configuration.KEYBOARD_UNDEFINED) {
+            assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD);
+        }    
     }
     
     // If any entries in appear in the list, sanity check them against all running applications

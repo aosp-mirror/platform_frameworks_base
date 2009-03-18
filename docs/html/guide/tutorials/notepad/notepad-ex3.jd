@@ -1,4 +1,6 @@
 page.title=Notepad Exercise 3
+parent.title=Notepad Tutorial
+parent.link=index.html
 @jd:body
 
 
@@ -354,4 +356,3 @@ the zip file to compare with your own.</p>
 When you are ready, move on to the <a href="notepad-extra-credit.html">Tutorial
 Extra Credit</a> exercise, where you can use the Eclipse debugger to
 examine the life-cycle events as they happen.</p>
-<p><a href="index.html">Back to the Tutorial main page...</a></p>

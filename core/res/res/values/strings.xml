@@ -240,9 +240,21 @@
     <!-- status message in phone options dialog for when silent mode is disabled -->
     <string name="global_action_silent_mode_off_status">Sound is ON</string>
 
+    <!-- label for item that toggles airplane mode -->
+    <string name="global_actions_toggle_airplane_mode">Airplane mode</string>
+
+    <!-- status message in phone options dialog for when airplane mode is on -->
+    <string name="global_actions_airplane_mode_on_status">Airplane mode is ON</string>
+
+    <!-- status message in phone options dialog for when airplane mode is off -->
+    <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
+
     <!-- Displayed to the user to tell them that they have started up the phone in "safe mode" -->
     <string name="safeMode">Safe mode</string>
 
+    <!-- Label for the Android system components when they are shown to the user. -->
+    <string name="android_system_label">Android System</string>
+    
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -778,6 +790,11 @@
         unmount filesystems for removable storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_mount_format_filesystems">format external storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_mount_format_filesystems">Allows the application to format removable storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibrator</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the application to control
@@ -823,6 +840,15 @@
     <string name="permdesc_checkinProperties">Allows read/write access to
         properties uploaded by the checkin service.  Not for use by normal
         applications.</string>
+
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindGadget">choose widgets</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindGadget">Allows the application to tell the system
+        which widgets can be used by which application.  With this permission,
+        applications can give access to personal data to other applications.
+        Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyPhoneState">modify phone state</string>
@@ -913,6 +939,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_changeNetworkState">Allows an application to change
       the state network connectivity.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_changeBackgroundDataSetting">change background data usage setting</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_changeBackgroundDataSetting">Allows an application to change
+      the background data usage setting.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessWifiState">view Wi-Fi state</string>
@@ -1093,7 +1125,7 @@
 
     <!-- When the lock screen is showing and the phone plugged in, show the current
          charge %.  -->
-    <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d%%</xliff:g>)</string>
+    <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>)</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -1152,7 +1184,7 @@
     <!-- Title of the unlock screen that uses your Google login and password -->
     <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts!</string>
     <!-- In the unlock screen, message telling the user that they need to use their Google login and password to unlock the phone -->
-    <string name="lockscreen_glogin_instructions">To unlock,\nsign in with your Google account</string>
+    <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account</string>
     <!-- Hint caption for the username field when unlocking the phone using login and password -->
     <string name="lockscreen_glogin_username_hint">Username (email)</string>
     <!-- Hint caption for the password field when unlocking the phone using login and password -->
@@ -1439,6 +1471,8 @@
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Cannot play video</string>
+    <!-- Text for error alert when a video container is not valid for progressive download/playback. -->
+    <string name="VideoView_error_text_invalid_progressive_playback">Sorry, this video is not valid for streaming to this device.</string>
     <!-- Text for error alert when a video cannot be played. it can be used by any app. -->
     <string name="VideoView_error_text_unknown">Sorry, this video cannot be played.</string>
     <!-- Button to close error alert when a video cannot be played -->
@@ -1502,50 +1536,38 @@
     <!-- Date format string used in contexts where the user has said they
          want the month first, as used in the USA, with the month fully
          spelled out.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="full_date_month_first"><xliff:g id="month" example="December">MMMM</xliff:g> <xliff:g id="day" example="31">dd</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="full_date_month_first" format="date"><xliff:g id="month" example="December">MMMM</xliff:g> <xliff:g id="day" example="31">d</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
 
     <!-- Date format string used in contexts where the user has said they
          want the day of the month first, as used in Europe, with the month
          fully spelled out.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="full_date_day_first"><xliff:g id="day" example="31">dd</xliff:g> <xliff:g id="month" example="December">MMMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="full_date_day_first" format="date"><xliff:g id="day" example="31">d</xliff:g> <xliff:g id="month" example="December">MMMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
 
     <!-- Date format string used in contexts where the user has said they
          want the month first, as used in the USA, with the month
          abbreviated.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="medium_date_month_first"><xliff:g id="month" example="Dec.">MMM</xliff:g> <xliff:g id="day" example="31">dd</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="medium_date_month_first" format="date"><xliff:g id="month" example="Dec.">MMM</xliff:g> <xliff:g id="day" example="31">d</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
 
     <!-- Date format string used in contexts where the user has said they
          want the day of the month first, as used in Europe, with the month
          abbreviated.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="medium_date_day_first"><xliff:g id="day" example="31">dd</xliff:g> <xliff:g id="month" example="December">MMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="medium_date_day_first" format="date"><xliff:g id="day" example="31">d</xliff:g> <xliff:g id="month" example="December">MMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
 
     <!-- Time format string used in the status bar when the user has said they
          want a 12-hour clock with AM and PM.
          You can remove the colon
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="twelve_hour_time_format"><xliff:g id="hour" example="11">h</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g> <xliff:g id="ampm" example="AM">a</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="twelve_hour_time_format" format="date"><xliff:g id="hour" example="11">h</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g> <xliff:g id="ampm" example="AM">a</xliff:g></string>
 
     <!-- Time format string used in the status bar when the user has said they
          want a 24-hour clock.
          You can remove the colon
-         or make other punctuation changes appropriate for your locale.
-         If you need to add letters, put apostrophes around them to keep
-         them from being interpreted as format characters. -->
-    <string name="twenty_four_hour_time_format"><xliff:g id="hour" example="23">H</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g></string>
+         or make other punctuation changes appropriate for your locale. -->
+    <string name="twenty_four_hour_time_format" format="date"><xliff:g id="hour" example="23">HH</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g></string>
 
     <!-- Quoted name for 12pm, lowercase -->
     <string name="noon">"noon"</string>
@@ -2020,6 +2042,10 @@
     <!-- EditText context menu -->
     <string name="inputMethod">Input Method</string>
 
+    <!-- Item on EditText context menu, used to add a word to the
+         input method dictionary. -->
+    <string name="addToDictionary">"Add \"%s\" to dictionary</string>
+
     <!-- Title for EditText context menu -->
     <string name="editTextMenuTitle">Edit text</string>
 
@@ -2036,6 +2062,9 @@
     <string name="yes">OK</string>
     <!-- Preference framework strings. -->
     <string name="no">Cancel</string>
+    <!-- This is the generic "attention" string to be used in attention dialogs.  Typically
+         combined with setIcon(android.R.drawable.ic_dialog_alert) -->
+    <string name="dialog_alert_title">Attention</string>
 
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_on">ON</string>
@@ -2090,8 +2119,8 @@
     <string name="volume_music_hint_playing_through_bluetooth">Playing through Bluetooth</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume -->
     <string name="volume_call">In-call volume</string>
-    <!-- Hint shown in the volume toast to inform the user that the in-call audio is playing through Bluetooth. -->
-    <string name="volume_call_hint_playing_through_bluetooth">Playing through Bluetooth</string>
+    <!-- Title of the dialog where the user is adjusting the phone call volume when connected on bluetooth-->
+    <string name="volume_bluetooth_call">Bluetooth in-call volume</string>
     <!-- Title of the dialog where the user is adjusting the audio volume for alarms -->
     <string name="volume_alarm">Alarm volume</string>
     <!-- Title of the dialog where the user is adjusting the audio volume for notifications -->
@@ -2165,12 +2194,38 @@
     <string name="usb_storage_button_mount">Mount</string>
     <!-- See USB_STORAGE.   This is the button text to ignore the plugging in of the phone.. -->
     <string name="usb_storage_button_unmount">Don\'t mount</string>
-    <!-- See USB_STORAGE_DIALOG.  IF there was an error mounting, this is hte text. --> 
+    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. --> 
     <string name="usb_storage_error_message">There is a problem using your SD card for USB storage.</string>
-    <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wnats to share files across.  This is the title -->
+    <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
     <!-- See USB_STORAGE. This is the message. -->
     <string name="usb_storage_notification_message">Select to copy files to/from your computer.</string>
+    <!-- USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
+    <string name="usb_storage_stop_notification_title">Turn off USB storage</string>
+    <!-- See USB_STORAGE. This is the message. -->
+    <string name="usb_storage_stop_notification_message">Select to turn off USB storage.</string>
+
+    <!-- USB storage stop dialog strings -->
+    <!-- This is the label for the activity, and should never be visible to the user. -->
+    <!-- See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title. -->
+    <string name="usb_storage_stop_title">Turn off USB storage</string>
+    <!-- See USB_STORAGE_STOP.    This is the message. -->
+    <string name="usb_storage_stop_message">Before turning off USB storage, make sure you have unmounted on the USB host. Select \"Turn Off\" to turn off USB storage.</string>
+    <!-- See USB_STORAGE_STOP.    This is the button text to stop usb storage. -->
+    <string name="usb_storage_stop_button_mount">Turn Off</string>
+    <!-- See USB_STORAGE_STOP.   This is the button text to cancel stoping usb storage. -->
+    <string name="usb_storage_stop_button_unmount">Cancel</string>
+    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. --> 
+    <string name="usb_storage_stop_error_message">We've encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+
+    <!-- External media format dialog strings -->
+    <!-- This is the label for the activity, and should never be visible to the user. -->
+    <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. -->
+    <string name="extmedia_format_title">Format SD card</string>
+    <!-- See EXTMEDIA_FORMAT.   This is the message. -->
+    <string name="extmedia_format_message">Are you sure you want to format the SD card? All data on your card will be lost.</string>
+    <!-- See EXTMEDIA_FORMAT.    This is the button text to format the sd card. -->
+    <string name="extmedia_format_button_format">Format</string>
 
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
@@ -2185,9 +2240,65 @@
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     
-    <string name="candidates_style"><font fgcolor="#ff000000"
-            bgcolor="#ff8080ff"><u>candidates</u>u></font></string>
+    <string name="candidates_style"><u>candidates</u></string>
+
+    <!-- External media notification strings -->
+    <!-- Shown when external media is being checked -->
+    <string name="ext_media_checking_notification_title">Preparing SD card</string>
+    <string name="ext_media_checking_notification_message">Checking for errors</string>
+
+    <!-- Shown when external media is blank (or unsupported filesystem) -->
+    <string name="ext_media_nofs_notification_title">Blank SD card</string>
+    <string name="ext_media_nofs_notification_message">The SD card is blank or using an unsupported filesystem.</string>
+
+    <!-- Shown when external media is unmountable (corrupt)) -->
+    <string name="ext_media_unmountable_notification_title">Damaged SD card</string>
+    <string name="ext_media_unmountable_notification_message">The SD card is damaged. You may have to reformat your card.</string>
+
+    <!-- Shown when external media is unsafely removed -->
+    <string name="ext_media_badremoval_notification_title">SD card unexpectedly removed</string>
+    <string name="ext_media_badremoval_notification_message">Unmount SD card before removing to avoid data loss.</string>
+
+    <!-- Shown when external media has been safely removed -->
+    <string name="ext_media_safe_unmount_notification_title">SD card safe to remove</string>
+    <string name="ext_media_safe_unmount_notification_message">The SD card can now be safely removed.</string>
+
+    <!-- Shown when external media is missing -->
+    <string name="ext_media_nomedia_notification_title">Removed SD card</string>
+    <string name="ext_media_nomedia_notification_message">The SD has been removed. Insert a new SD card to increase your device storage.</string>
+
+    <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
+    <string name="activity_list_empty">No matching activities found</string>
+
+    <!-- permission attributes related to package usage statistics -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_pkgUsageStats">update component usage statistics</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_pkgUsageStats">Allows the modification of collected component usage statistics. Not for use by normal applications.</string>
+
+    <!-- Shown in the tutorial for tap twice for zoom control. -->
+    <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
+
+    <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
+    the gadget. -->
+    <string name="gadget_host_error_inflating">Error inflating widget</string>
+
+    <!-- Long label for a button on a full-screen input method for the "Go" action. -->
+    <string name="ime_action_go">Go</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Search" action. -->
+    <string name="ime_action_search">Search</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Send" action. -->
+    <string name="ime_action_send">Send</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Next" action. -->
+    <string name="ime_action_next">Next</string>
+    
+    <!-- Long label for a button on a full-screen input method for the "Done" action. -->
+    <string name="ime_action_done">Done</string>
+    
+    <!-- Long label for a button on a full-screen input method for an unknown action. -->
+    <string name="ime_action_default">Execute</string>
+    
 </resources>
-
-
-

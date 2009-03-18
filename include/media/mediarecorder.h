@@ -19,6 +19,7 @@
 #define ANDROID_MEDIARECORDER_H
 
 #include <utils.h>
+#include <media/IMediaPlayerClient.h>
 
 namespace android {
 
@@ -87,7 +88,34 @@ enum media_recorder_states {
     MEDIA_RECORDER_RECORDING             = 1 << 4,
 };
 
-class MediaRecorder
+// The "msg" code passed to the listener in notify.
+enum media_recorder_event_type {
+    MEDIA_RECORDER_EVENT_ERROR                    = 1,
+    MEDIA_RECORDER_EVENT_INFO                     = 2
+};
+
+enum media_recorder_error_type {
+    MEDIA_RECORDER_ERROR_UNKNOWN                  = 1
+};
+
+// The codes are distributed as follow:
+//   0xx: Reserved
+//   8xx: General info/warning
+// 
+enum media_recorder_info_type {
+    MEDIA_RECORDER_INFO_UNKNOWN                   = 1,
+    MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800
+};
+
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class MediaRecorderListener: virtual public RefBase
+{
+public:
+    virtual void notify(int msg, int ext1, int ext2) = 0;
+};
+
+class MediaRecorder : public BnMediaPlayerClient
 {
 public:
     MediaRecorder();
@@ -102,8 +130,11 @@ public:
     status_t    setVideoEncoder(int ve);
     status_t    setAudioEncoder(int ae);
     status_t    setOutputFile(const char* path);
+    status_t    setOutputFile(int fd, int64_t offset, int64_t length);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
+    status_t    setParameters(const String8& params);
+    status_t    setListener(const sp<MediaRecorderListener>& listener);
     status_t    prepare();
     status_t    getMaxAmplitude(int* max);
     status_t    start();
@@ -112,18 +143,22 @@ public:
     status_t    init();
     status_t    close();
     status_t    release();
+    void        notify(int msg, int ext1, int ext2);
 
 private:
     void                    doCleanUp();
     status_t                doReset();
 
-    sp<IMediaRecorder>      mMediaRecorder;
-    media_recorder_states   mCurrentState;
-    bool                    mIsAudioSourceSet;
-    bool                    mIsVideoSourceSet;
-    bool                    mIsAudioEncoderSet;
-    bool                    mIsVideoEncoderSet;
-    bool                    mIsOutputFileSet;
+    sp<IMediaRecorder>          mMediaRecorder;
+    sp<MediaRecorderListener>   mListener;
+    media_recorder_states       mCurrentState;
+    bool                        mIsAudioSourceSet;
+    bool                        mIsVideoSourceSet;
+    bool                        mIsAudioEncoderSet;
+    bool                        mIsVideoEncoderSet;
+    bool                        mIsOutputFileSet;
+    Mutex                       mLock;
+    Mutex                       mNotifyLock;
 };
 
 };  // namespace android

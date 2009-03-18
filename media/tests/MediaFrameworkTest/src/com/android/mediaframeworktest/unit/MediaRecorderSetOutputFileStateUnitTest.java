@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 /**
@@ -29,34 +29,29 @@ public class MediaRecorderSetOutputFileStateUnitTest extends AndroidTestCase imp
     private MediaRecorderStateUnitTestTemplate mTestTemplate = new MediaRecorderStateUnitTestTemplate();
     /**
      * 1. It is valid to call setOutputFile() in the following states:
-     *    {DataSourceConfigured}.
+     *    {DataSourceConfigured, Initial, Initialized, Prepared, Recording, Error}.
      * 2. It is invalid to call setOutputFile() in the following states:
-     *    {Initial, Initialized, Prepared, Recording, Error}
+     *    {}
      *    
      * @param stateErrors the MediaRecorderStateErrors to check against.
      */
     public void checkStateErrors(MediaRecorderStateErrors stateErrors) {
         // Valid states.
         assertTrue(!stateErrors.errorInDataSourceConfiguredState);
-
-        // Invalid states.
-        assertTrue(stateErrors.errorInPreparedState);
-        assertTrue(stateErrors.errorInRecordingState);
-        assertTrue(stateErrors.errorInErrorState);
-        assertTrue(stateErrors.errorInInitialState);
-        assertTrue(stateErrors.errorInInitialStateAfterReset);
-        assertTrue(stateErrors.errorInInitialStateAfterStop);
-        assertTrue(stateErrors.errorInInitializedState);
+        assertTrue(!stateErrors.errorInPreparedState);
+        assertTrue(!stateErrors.errorInRecordingState);
+        assertTrue(!stateErrors.errorInErrorState);
+        assertTrue(!stateErrors.errorInInitialState);
+        assertTrue(!stateErrors.errorInInitialStateAfterReset);
+        assertTrue(!stateErrors.errorInInitialStateAfterStop);
+        assertTrue(!stateErrors.errorInInitializedState);
     }
 
     public void invokeMethodUnderTest(MediaRecorder recorder) {
         recorder.setOutputFile(MediaRecorderStateUnitTestTemplate.RECORD_OUTPUT_PATH);
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
-    @MediumTest
+    @LargeTest
     public void testSetOutputFile() {
         mTestTemplate.runTestOnMethod(this);
     }

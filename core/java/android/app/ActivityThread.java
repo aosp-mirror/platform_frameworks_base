@@ -144,13 +144,19 @@ public final class ActivityThread {
         return sPackageManager;
     }
 
-    DisplayMetrics getDisplayMetricsLocked() {
+    DisplayMetrics getDisplayMetricsLocked(boolean forceUpdate) {
+        if (mDisplayMetrics != null && !forceUpdate) {
+            return mDisplayMetrics;
+        }
         if (mDisplay == null) {
             WindowManager wm = WindowManagerImpl.getDefault();
             mDisplay = wm.getDefaultDisplay();
         }
-        DisplayMetrics metrics = new DisplayMetrics();
+        DisplayMetrics metrics = mDisplayMetrics = new DisplayMetrics();
         mDisplay.getMetrics(metrics);
+        //Log.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
+        //        + metrics.heightPixels + " den=" + metrics.density
+        //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
         return metrics;
     }
 
@@ -173,7 +179,7 @@ public final class ActivityThread {
             if (assets.addAssetPath(appDir) == 0) {
                 return null;
             }
-            DisplayMetrics metrics = getDisplayMetricsLocked();
+            DisplayMetrics metrics = getDisplayMetricsLocked(false);
             r = new Resources(assets, metrics, getConfiguration());
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
@@ -235,7 +241,7 @@ public final class ActivityThread {
                         ApplicationContext.createSystemContext(mainThread);
                     mSystemContext.getResources().updateConfiguration(
                             mainThread.getConfiguration(),
-                            mainThread.getDisplayMetricsLocked());
+                            mainThread.getDisplayMetricsLocked(false));
                     //Log.i(TAG, "Created system resources "
                     //        + mSystemContext.getResources() + ": "
                     //        + mSystemContext.getResources().getConfiguration());
@@ -1205,7 +1211,10 @@ public final class ActivityThread {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
-
+        
+        // Formatting for checkin service - update version if row format changes
+        private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
+       
         public final void schedulePauseActivity(IBinder token, boolean finished,
                 boolean userLeaving, int configChanges) {
             queueOrSendMessage(
@@ -1440,6 +1449,10 @@ public final class ActivityThread {
             }
         }
         
+        public void profilerControl(boolean start, String path) {
+            queueOrSendMessage(H.PROFILER_CONTROL, path, start ? 1 : 0);
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1462,7 +1475,101 @@ public final class ActivityThread {
             long dalvikMax = runtime.totalMemory() / 1024;
             long dalvikFree = runtime.freeMemory() / 1024;
             long dalvikAllocated = dalvikMax - dalvikFree;
-
+            long viewInstanceCount = ViewDebug.getViewInstanceCount();
+            long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
+            long appContextInstanceCount = ApplicationContext.getInstanceCount();
+            long activityInstanceCount = Activity.getInstanceCount();
+            int globalAssetCount = AssetManager.getGlobalAssetCount();
+            int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
+            int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
+            int binderProxyObjectCount = Debug.getBinderProxyObjectCount();
+            int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
+            int openSslSocketCount = OpenSSLSocketImpl.getInstanceCount();
+            long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
+            SQLiteDebug.PagerStats stats = new SQLiteDebug.PagerStats();
+            SQLiteDebug.getPagerStats(stats);
+            
+            // Check to see if we were called by checkin server. If so, print terse format.
+            boolean doCheckinFormat = false;
+            if (args != null) {
+                for (String arg : args) {
+                    if ("-c".equals(arg)) doCheckinFormat = true;
+                }
+            }
+            
+            // For checkin, we print one long comma-separated list of values
+            if (doCheckinFormat) {
+                // NOTE: if you change anything significant below, also consider changing
+                // ACTIVITY_THREAD_CHECKIN_VERSION.
+                String processName = (mBoundApplication != null) 
+                        ? mBoundApplication.processName : "unknown";
+                
+                // Header
+                pw.print(ACTIVITY_THREAD_CHECKIN_VERSION); pw.print(',');
+                pw.print(Process.myPid()); pw.print(',');
+                pw.print(processName); pw.print(',');
+                
+                // Heap info - max
+                pw.print(nativeMax); pw.print(',');
+                pw.print(dalvikMax); pw.print(',');
+                pw.print("N/A,");
+                pw.print(nativeMax + dalvikMax); pw.print(',');
+                
+                // Heap info - allocated
+                pw.print(nativeAllocated); pw.print(',');
+                pw.print(dalvikAllocated); pw.print(',');
+                pw.print("N/A,");
+                pw.print(nativeAllocated + dalvikAllocated); pw.print(',');
+                
+                // Heap info - free
+                pw.print(nativeFree); pw.print(',');
+                pw.print(dalvikFree); pw.print(',');
+                pw.print("N/A,");
+                pw.print(nativeFree + dalvikFree); pw.print(',');
+                
+                // Heap info - proportional set size
+                pw.print(memInfo.nativePss); pw.print(',');
+                pw.print(memInfo.dalvikPss); pw.print(',');
+                pw.print(memInfo.otherPss); pw.print(',');
+                pw.print(memInfo.nativePss + memInfo.dalvikPss + memInfo.otherPss); pw.print(',');
+                
+                // Heap info - shared
+                pw.print(nativeShared); pw.print(','); 
+                pw.print(dalvikShared); pw.print(','); 
+                pw.print(otherShared); pw.print(','); 
+                pw.print(nativeShared + dalvikShared + otherShared); pw.print(',');
+                
+                // Heap info - private
+                pw.print(nativePrivate); pw.print(','); 
+                pw.print(dalvikPrivate); pw.print(',');
+                pw.print(otherPrivate); pw.print(',');
+                pw.print(nativePrivate + dalvikPrivate + otherPrivate); pw.print(',');
+                
+                // Object counts
+                pw.print(viewInstanceCount); pw.print(',');
+                pw.print(viewRootInstanceCount); pw.print(',');
+                pw.print(appContextInstanceCount); pw.print(',');
+                pw.print(activityInstanceCount); pw.print(',');
+                
+                pw.print(globalAssetCount); pw.print(',');
+                pw.print(globalAssetManagerCount); pw.print(',');
+                pw.print(binderLocalObjectCount); pw.print(',');
+                pw.print(binderProxyObjectCount); pw.print(',');
+                
+                pw.print(binderDeathObjectCount); pw.print(',');
+                pw.print(openSslSocketCount); pw.print(',');
+                
+                // SQL
+                pw.print(sqliteAllocated); pw.print(',');
+                pw.print(stats.databaseBytes / 1024); pw.print(','); 
+                pw.print(stats.numPagers); pw.print(',');
+                pw.print((stats.totalBytes - stats.referencedBytes) / 1024); pw.print(',');
+                pw.print(stats.referencedBytes / 1024); pw.print('\n');
+                
+                return;
+            }
+            
+            // otherwise, show human-readable format
             printRow(pw, HEAP_COLUMN, "", "native", "dalvik", "other", "total");
             printRow(pw, HEAP_COLUMN, "size:", nativeMax, dalvikMax, "N/A", nativeMax + dalvikMax);
             printRow(pw, HEAP_COLUMN, "allocated:", nativeAllocated, dalvikAllocated, "N/A",
@@ -1480,26 +1587,22 @@ public final class ActivityThread {
 
             pw.println(" ");
             pw.println(" Objects");
-            printRow(pw, TWO_COUNT_COLUMNS, "Views:", ViewDebug.getViewInstanceCount(), "ViewRoots:",
-                    ViewDebug.getViewRootInstanceCount());
+            printRow(pw, TWO_COUNT_COLUMNS, "Views:", viewInstanceCount, "ViewRoots:",
+                    viewRootInstanceCount);
 
-            printRow(pw, TWO_COUNT_COLUMNS, "AppContexts:", ApplicationContext.getInstanceCount(),
-                    "Activities:", Activity.getInstanceCount());
+            printRow(pw, TWO_COUNT_COLUMNS, "AppContexts:", appContextInstanceCount,
+                    "Activities:", activityInstanceCount);
 
-            printRow(pw, TWO_COUNT_COLUMNS, "Assets:", AssetManager.getGlobalAssetCount(),
-                    "AssetManagers:", AssetManager.getGlobalAssetManagerCount());
+            printRow(pw, TWO_COUNT_COLUMNS, "Assets:", globalAssetCount,
+                    "AssetManagers:", globalAssetManagerCount);
 
-            printRow(pw, TWO_COUNT_COLUMNS, "Local Binders:", Debug.getBinderLocalObjectCount(),
-                    "Proxy Binders:", Debug.getBinderProxyObjectCount());
-            printRow(pw, ONE_COUNT_COLUMN, "Death Recipients:", Debug.getBinderDeathObjectCount());
+            printRow(pw, TWO_COUNT_COLUMNS, "Local Binders:", binderLocalObjectCount,
+                    "Proxy Binders:", binderProxyObjectCount);
+            printRow(pw, ONE_COUNT_COLUMN, "Death Recipients:", binderDeathObjectCount);
 
-            printRow(pw, ONE_COUNT_COLUMN, "OpenSSL Sockets:", OpenSSLSocketImpl.getInstanceCount());
-
+            printRow(pw, ONE_COUNT_COLUMN, "OpenSSL Sockets:", openSslSocketCount);
+            
             // SQLite mem info
-            long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
-            SQLiteDebug.PagerStats stats = new SQLiteDebug.PagerStats();
-            SQLiteDebug.getPagerStats(stats);
-
             pw.println(" ");
             pw.println(" SQL");
             printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "dbFiles:",
@@ -1542,6 +1645,7 @@ public final class ActivityThread {
         public static final int LOW_MEMORY              = 124;
         public static final int ACTIVITY_CONFIGURATION_CHANGED = 125;
         public static final int RELAUNCH_ACTIVITY       = 126;
+        public static final int PROFILER_CONTROL        = 127;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1572,6 +1676,7 @@ public final class ActivityThread {
                     case LOW_MEMORY: return "LOW_MEMORY";
                     case ACTIVITY_CONFIGURATION_CHANGED: return "ACTIVITY_CONFIGURATION_CHANGED";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
+                    case PROFILER_CONTROL: return "PROFILER_CONTROL";
                 }
             }
             return "(unknown)";
@@ -1671,6 +1776,9 @@ public final class ActivityThread {
                 case ACTIVITY_CONFIGURATION_CHANGED:
                     handleActivityConfigurationChanged((IBinder)msg.obj);
                     break;
+                case PROFILER_CONTROL:
+                    handleProfilerControl(msg.arg1 != 0, (String)msg.obj);
+                    break;
             }
         }
     }
@@ -1751,6 +1859,7 @@ public final class ActivityThread {
     final HashMap<String, WeakReference<PackageInfo>> mResourcePackages
         = new HashMap<String, WeakReference<PackageInfo>>();
     Display mDisplay = null;
+    DisplayMetrics mDisplayMetrics = null;
     HashMap<String, WeakReference<Resources> > mActiveResources
         = new HashMap<String, WeakReference<Resources> >();
 
@@ -1918,7 +2027,7 @@ public final class ActivityThread {
                 PackageInfo info = new PackageInfo(this, "android", context);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
-                        getConfiguration(), getDisplayMetricsLocked());
+                        getConfiguration(), getDisplayMetricsLocked(false));
                 mSystemContext = context;
                 //Log.i(TAG, "Created system resources " + context.getResources()
                 //        + ": " + context.getResources().getConfiguration());
@@ -2557,7 +2666,10 @@ public final class ActivityThread {
                 a.mDecor = decor;
                 l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
                 l.softInputMode |= forwardBit;
-                wm.addView(decor, l);
+                if (a.mVisibleFromClient) {
+                    a.mWindowAdded = true;
+                    wm.addView(decor, l);
+                }
 
             // If the window has already been added, but during resume
             // we started another activity, then don't yet make the
@@ -2576,7 +2688,8 @@ public final class ActivityThread {
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
                 }
-                Log.v(TAG, "Resuming " + r + " with isForward=" + isForward);
+                if (localLOGV) Log.v(TAG, "Resuming " + r + " with isForward="
+                        + isForward);
                 WindowManager.LayoutParams l = r.window.getAttributes();
                 if ((l.softInputMode
                         & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION)
@@ -2588,8 +2701,11 @@ public final class ActivityThread {
                     View decor = r.window.getDecorView();
                     wm.updateViewLayout(decor, l);
                 }
-                r.activity.mDecor.setVisibility(View.VISIBLE);
+                r.activity.mVisibleFromServer = true;
                 mNumVisibleActivities++;
+                if (r.activity.mVisibleFromClient) {
+                    r.activity.makeVisible();
+                }
             }
 
             r.nextIdle = mNewActivities;
@@ -2800,18 +2916,22 @@ public final class ActivityThread {
         View v = r.activity.mDecor;
         if (v != null) {
             if (show) {
-                if (v.getVisibility() != View.VISIBLE) {
-                    v.setVisibility(View.VISIBLE);
+                if (!r.activity.mVisibleFromServer) {
+                    r.activity.mVisibleFromServer = true;
                     mNumVisibleActivities++;
+                    if (r.activity.mVisibleFromClient) {
+                        r.activity.makeVisible();
+                    }
                 }
                 if (r.newConfig != null) {
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
                 }
             } else {
-                if (v.getVisibility() == View.VISIBLE) {
-                    v.setVisibility(View.INVISIBLE);
+                if (r.activity.mVisibleFromServer) {
+                    r.activity.mVisibleFromServer = false;
                     mNumVisibleActivities--;
+                    v.setVisibility(View.INVISIBLE);
                 }
             }
         }
@@ -3037,11 +3157,13 @@ public final class ActivityThread {
             WindowManager wm = r.activity.getWindowManager();
             View v = r.activity.mDecor;
             if (v != null) {
-                if (v.getVisibility() == View.VISIBLE) {
+                if (r.activity.mVisibleFromServer) {
                     mNumVisibleActivities--;
                 }
                 IBinder wtoken = v.getWindowToken();
-                wm.removeViewImmediate(v);
+                if (r.activity.mWindowAdded) {
+                    wm.removeViewImmediate(v);
+                }
                 if (wtoken != null) {
                     WindowManagerImpl.getDefault().closeAll(wtoken,
                             r.activity.getClass().getName(), "Activity");
@@ -3271,6 +3393,7 @@ public final class ActivityThread {
                 mConfiguration = new Configuration();
             }
             mConfiguration.updateFrom(config);
+            DisplayMetrics dm = getDisplayMetricsLocked(true);
 
             // set it for java, this also affects newly created Resources
             if (config.locale != null) {
@@ -3290,7 +3413,7 @@ public final class ActivityThread {
                     WeakReference<Resources> v = it.next();
                     Resources r = v.get();
                     if (r != null) {
-                        r.updateConfiguration(config, null);
+                        r.updateConfiguration(config, dm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {
@@ -3318,6 +3441,21 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mConfiguration);
     }
 
+    final void handleProfilerControl(boolean start, String path) {
+        if (start) {
+            File file = new File(path);
+            file.getParentFile().mkdirs();
+            try {
+                Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Profiling failed on path " + path
+                        + " -- can the process access this path?");
+            }
+        } else {
+            Debug.stopMethodTracing();
+        }
+    }
+    
     final void handleLowMemory() {
         ArrayList<ComponentCallbacks> callbacks
                 = new ArrayList<ComponentCallbacks>();

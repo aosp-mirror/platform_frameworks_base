@@ -92,7 +92,7 @@ public class KeyEvent implements Parcelable {
     public static final int KEYCODE_SYM             = 63;
     public static final int KEYCODE_EXPLORER        = 64;
     public static final int KEYCODE_ENVELOPE        = 65;
-    public static final int KEYCODE_ENTER         = 66;
+    public static final int KEYCODE_ENTER           = 66;
     public static final int KEYCODE_DEL             = 67;
     public static final int KEYCODE_GRAVE           = 68;
     public static final int KEYCODE_MINUS           = 69;
@@ -117,7 +117,8 @@ public class KeyEvent implements Parcelable {
     public static final int KEYCODE_PREVIOUSSONG    = 88;
     public static final int KEYCODE_REWIND          = 89;
     public static final int KEYCODE_FORWARD         = 90;
-    private static final int LAST_KEYCODE           = KEYCODE_FORWARD;
+    public static final int KEYCODE_MUTE            = 91;
+    private static final int LAST_KEYCODE           = KEYCODE_MUTE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -144,8 +145,12 @@ public class KeyEvent implements Parcelable {
     public static final int ACTION_UP               = 1;
     /**
      * {@link #getAction} value: multiple duplicate key events have
-     * occurred in a row.  The {#link {@link #getRepeatCount()} method returns
-     * the number of duplicates.
+     * occurred in a row, or a complex string is being delivered.  If the
+     * key code is not {#link {@link #KEYCODE_UNKNOWN} then the
+     * {#link {@link #getRepeatCount()} method returns the number of times
+     * the given key code should be executed.
+     * Otherwise, if the key code {@link #KEYCODE_UNKNOWN}, then
+     * this is a sequence of characters as returned by {@link #getCharacters}.
      */
     public static final int ACTION_MULTIPLE         = 2;
 
@@ -224,6 +229,12 @@ public class KeyEvent implements Parcelable {
     public static final int FLAG_SOFT_KEYBOARD = 0x2;
     
     /**
+     * This mask is set if we don't want the key event to cause us to leave
+     * touch mode.
+     */
+    public static final int FLAG_KEEP_TOUCH_MODE = 0x4;
+    
+    /**
      * Returns the maximum keycode.
      */
     public static int getMaxKeyCode() {
@@ -248,6 +259,7 @@ public class KeyEvent implements Parcelable {
     private int mFlags;
     private long mDownTime;
     private long mEventTime;
+    private String mCharacters;
 
     public interface Callback {
         /**
@@ -406,6 +418,28 @@ public class KeyEvent implements Parcelable {
     }
 
     /**
+     * Create a new key event for a string of characters.  The key code,
+     * action, and repeat could will automatically be set to
+     * {@link #KEYCODE_UNKNOWN}, {@link #ACTION_MULTIPLE}, and 0 for you.
+     * 
+     * @param time The time (in {@link android.os.SystemClock#uptimeMillis})
+     * at which this event occured.
+     * @param characters The string of characters.
+     * @param device The device ID that generated the key event.
+     * @param flags The flags for this key event
+     */
+    public KeyEvent(long time, String characters, int device, int flags) {
+        mDownTime = time;
+        mEventTime = time;
+        mCharacters = characters;
+        mAction = ACTION_MULTIPLE;
+        mKeyCode = KEYCODE_UNKNOWN;
+        mRepeatCount = 0;
+        mDeviceId = device;
+        mFlags = flags;
+    }
+
+    /**
      * Copy an existing key event, modifying its time and repeat count.
      * 
      * @param origEvent The existing event to be copied.
@@ -423,6 +457,7 @@ public class KeyEvent implements Parcelable {
         mDeviceId = origEvent.mDeviceId;
         mScancode = origEvent.mScancode;
         mFlags = origEvent.mFlags;
+        mCharacters = origEvent.mCharacters;
     }
 
     /**
@@ -441,6 +476,8 @@ public class KeyEvent implements Parcelable {
         mDeviceId = origEvent.mDeviceId;
         mScancode = origEvent.mScancode;
         mFlags = origEvent.mFlags;
+        // Don't copy mCharacters, since one way or the other we'll lose it
+        // when changing the action.
     }
 
     /**
@@ -472,6 +509,7 @@ public class KeyEvent implements Parcelable {
         case KEYCODE_ENDCALL:
         case KEYCODE_VOLUME_UP:
         case KEYCODE_VOLUME_DOWN:
+        case KEYCODE_MUTE:
         case KEYCODE_POWER:
         case KEYCODE_HEADSETHOOK:
         case KEYCODE_PLAYPAUSE:
@@ -580,7 +618,7 @@ public class KeyEvent implements Parcelable {
 
     /**
      * Retrieve the key code of the key event.  This is the physical key that
-     * was pressed -- not the Unicode character.
+     * was pressed, <em>not</em> the Unicode character.
      * 
      * @return The key code of the event.
      */
@@ -588,6 +626,18 @@ public class KeyEvent implements Parcelable {
         return mKeyCode;
     }
 
+    /**
+     * For the special case of a {@link #ACTION_MULTIPLE} event with key
+     * code of {@link #KEYCODE_UNKNOWN}, this is a raw string of characters
+     * associated with the event.  In all other cases it is null.
+     * 
+     * @return Returns a String of 1 or more characters associated with
+     * the event.
+     */
+    public final String getCharacters() {
+        return mCharacters;
+    }
+    
     /**
      * Retrieve the hardware key id of this key event.  These values are not
      * reliable and vary from device to device.
@@ -772,16 +822,18 @@ public class KeyEvent implements Parcelable {
                 if (receiver.onKeyMultiple(code, count, this)) {
                     return true;
                 }
-                mAction = ACTION_DOWN;
-                mRepeatCount = 0;
-                boolean handled = receiver.onKeyDown(code, this);
-                if (handled) {
-                    mAction = ACTION_UP;
-                    receiver.onKeyUp(code, this);
+                if (code != KeyEvent.KEYCODE_UNKNOWN) {
+                    mAction = ACTION_DOWN;
+                    mRepeatCount = 0;
+                    boolean handled = receiver.onKeyDown(code, this);
+                    if (handled) {
+                        mAction = ACTION_UP;
+                        receiver.onKeyUp(code, this);
+                    }
+                    mAction = ACTION_MULTIPLE;
+                    mRepeatCount = count;
+                    return handled;
                 }
-                mAction = ACTION_MULTIPLE;
-                mRepeatCount = count;
-                return handled;
         }
         return false;
     }

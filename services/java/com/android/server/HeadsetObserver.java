@@ -19,6 +19,8 @@ package com.android.server;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.os.UEventObserver;
 import android.util.Log;
 import android.media.AudioManager;
@@ -40,6 +42,8 @@ class HeadsetObserver extends UEventObserver {
 
     private int mHeadsetState;
     private String mHeadsetName;
+    private boolean mAudioRouteNeedsUpdate;
+    private AudioManager mAudioManager;
 
     public HeadsetObserver(Context context) {
         mContext = context;
@@ -60,7 +64,7 @@ class HeadsetObserver extends UEventObserver {
         }
     }
 
-    private final void init() {
+    private synchronized final void init() {
         char[] buffer = new char[1024];
 
         String newName = mHeadsetName;
@@ -80,21 +84,33 @@ class HeadsetObserver extends UEventObserver {
             Log.e(TAG, "" , e);
         }
 
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         update(newName, newState);
     }
 
     private synchronized final void update(String newName, int newState) {
         if (newName != mHeadsetName || newState != mHeadsetState) {
+            boolean isUnplug = (newState == 0 && mHeadsetState == 1);
             mHeadsetName = newName;
             mHeadsetState = newState;
-            AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            mAudioRouteNeedsUpdate = true;
 
-            audioManager.setWiredHeadsetOn(mHeadsetState == 1);
-            sendIntent();
+            sendIntent(isUnplug);
+
+            if (isUnplug) {
+                // It often takes >200ms to flush the audio pipeline after apps
+                // pause audio playback, but audio route changes are immediate,
+                // so delay the route change by 400ms.
+                // This could be improved once the audio sub-system provides an
+                // interface to clear the audio pipeline.
+                mHandler.sendEmptyMessageDelayed(0, 400);
+            } else {
+                updateAudioRoute();
+            }
         }
     }
 
-    private synchronized final void sendIntent() {
+    private synchronized final void sendIntent(boolean isUnplug) {
         //  Pack up the values and broadcast them to everyone
         Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -104,5 +120,25 @@ class HeadsetObserver extends UEventObserver {
 
         // TODO: Should we require a permission?
         ActivityManagerNative.broadcastStickyIntent(intent, null);
+
+        if (isUnplug) {
+            intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+            mContext.sendBroadcast(intent);
+        }
     }
+
+    private synchronized final void updateAudioRoute() {
+        if (mAudioRouteNeedsUpdate) {
+            mAudioManager.setWiredHeadsetOn(mHeadsetState == 1);
+            mAudioRouteNeedsUpdate = false;
+        }
+    }
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            updateAudioRoute();
+        }
+    };        
+
 }

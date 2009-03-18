@@ -27,6 +27,7 @@ public class DatabaseTests {
         suite.addTestSuite(DatabaseStatementTest.class);
         suite.addTestSuite(DatabaseLocaleTest.class);
         suite.addTestSuite(CursorWindowTest.class);
+        suite.addTestSuite(DatabaseLockTest.class);
 
         return suite;
     }

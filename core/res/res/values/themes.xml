@@ -74,7 +74,7 @@
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
         <!-- List attributes -->
-        <item name="listPreferredItemHeight">64px</item>
+        <item name="listPreferredItemHeight">64dip</item>
         <item name="listDivider">@drawable/divider_horizontal_dark</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator</item>   
         
@@ -122,8 +122,8 @@
         <item name="scrollbarSize">10dip</item>
         <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_horizontal</item>
         <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_vertical</item>
-        <item name="scrollbarTrackHorizontal">@android:drawable/scrollbar_horizontal</item>
-        <item name="scrollbarTrackVertical">@android:drawable/scrollbar_vertical</item>
+        <item name="scrollbarTrackHorizontal">@null</item>
+        <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>
@@ -150,6 +150,7 @@
         <item name="ratingBarStyleSmall">@android:style/Widget.RatingBar.Small</item>
         <item name="radioButtonStyle">@android:style/Widget.CompoundButton.RadioButton</item>
         <item name="scrollViewStyle">@android:style/Widget.ScrollView</item>
+        <item name="horizontalScrollViewStyle">@android:style/Widget.HorizontalScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="starStyleButtonless">@android:style/Widget.CompoundButton.StarButtonless</item>
@@ -276,7 +277,8 @@
         <item name="android:windowBackground">@null</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowDisablePreview">@null</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowNoDisplay">true</item>
     </style>
 
     <!-- Default theme for dialog windows and activities, which is used by the

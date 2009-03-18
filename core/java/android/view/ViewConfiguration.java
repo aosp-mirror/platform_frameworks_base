@@ -16,17 +16,19 @@
 
 package android.view;
 
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.util.SparseArray;
+
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
- *
  */
 public class ViewConfiguration {
-
     /**
      * Defines the width of the horizontal scrollbar and the height of the vertical scrollbar in
      * pixels
      */
-    private static final int SCROLL_BAR_SIZE = 6;
+    private static final int SCROLL_BAR_SIZE = 10;
 
     /**
      * Defines the length of the fading edges in pixels
@@ -54,7 +56,7 @@ public class ViewConfiguration {
     
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event 
-     * is a top or a scroll. If the user does not move within this interval, it is
+     * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
     private static final int TAP_TIMEOUT = 100;
@@ -65,6 +67,13 @@ public class ViewConfiguration {
      * considered to be a tap. 
      */
     private static final int JUMP_TAP_TIMEOUT = 500;
+
+    /**
+     * Defines the duration in milliseconds between the first tap's up event and
+     * the second tap's down event for an interaction to be considered a
+     * double-tap.
+     */
+    private static final int DOUBLE_TAP_TIMEOUT = 300;
     
     /**
      * Defines the duration in milliseconds we want to display zoom controls in response 
@@ -80,7 +89,12 @@ public class ViewConfiguration {
     /**
      * Distance a touch can wander before we think the user is scrolling in pixels
      */
-    private static final int TOUCH_SLOP = 12;
+    private static final int TOUCH_SLOP = 25;
+    
+    /**
+     * Distance between the first touch and second touch to still be considered a double tap
+     */
+    private static final int DOUBLE_TAP_SLOP = 100;
     
     /**
      * Distance a touch needs to be outside of a window's bounds for it to
@@ -97,30 +111,126 @@ public class ViewConfiguration {
      * The maximum size of View's drawing cache, expressed in bytes. This size
      * should be at least equal to the size of the screen in ARGB888 format.
      */
-    private static final int MAXIMUM_DRAWING_CACHE_SIZE = 320 * 480 * 4; // One HVGA screen, ARGB8888
+    @Deprecated
+    private static final int MAXIMUM_DRAWING_CACHE_SIZE = 320 * 480 * 4; // HVGA screen, ARGB8888
 
     /**
      * The coefficient of friction applied to flings/scrolls.
      */
     private static float SCROLL_FRICTION = 0.015f;
 
+    private final int mEdgeSlop;
+    private final int mFadingEdgeLength;
+    private final int mMinimumFlingVelocity;
+    private final int mScrollbarSize;
+    private final int mTouchSlop;
+    private final int mDoubleTapSlop;
+    private final int mWindowTouchSlop;
+    private final int mMaximumDrawingCacheSize;
+
+    private static final SparseArray<ViewConfiguration> sConfigurations =
+            new SparseArray<ViewConfiguration>(2);
+
+    /**
+     * @deprecated Use {@link android.view.ViewConfiguration#get(android.content.Context)} instead.
+     */
+    @Deprecated
+    public ViewConfiguration() {
+        mEdgeSlop = EDGE_SLOP;
+        mFadingEdgeLength = FADING_EDGE_LENGTH;
+        mMinimumFlingVelocity = MINIMUM_FLING_VELOCITY;
+        mScrollbarSize = SCROLL_BAR_SIZE;
+        mTouchSlop = TOUCH_SLOP;
+        mDoubleTapSlop = DOUBLE_TAP_SLOP;
+        mWindowTouchSlop = WINDOW_TOUCH_SLOP;
+        //noinspection deprecation
+        mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
+    }
+
+    /**
+     * Creates a new configuration for the specified context. The configuration depends on
+     * various parameters of the context, like the dimension of the display or the density
+     * of the display.
+     *
+     * @param context The application context used to initialize this view configuration.
+     *
+     * @see #get(android.content.Context) 
+     * @see android.util.DisplayMetrics
+     */
+    private ViewConfiguration(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final float density = metrics.density;
+
+        mEdgeSlop = (int) (density * EDGE_SLOP + 0.5f);
+        mFadingEdgeLength = (int) (density * FADING_EDGE_LENGTH + 0.5f);
+        mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
+        mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
+        mTouchSlop = (int) (density * TOUCH_SLOP + 0.5f);
+        mDoubleTapSlop = (int) (density * DOUBLE_TAP_SLOP + 0.5f);
+        mWindowTouchSlop = (int) (density * WINDOW_TOUCH_SLOP + 0.5f);
+
+        // Size of the screen in bytes, in ARGB_8888 format
+        mMaximumDrawingCacheSize = 4 * metrics.widthPixels * metrics.heightPixels;
+    }
+
+    /**
+     * Returns a configuration for the specified context. The configuration depends on
+     * various parameters of the context, like the dimension of the display or the
+     * density of the display.
+     *
+     * @param context The application context used to initialize the view configuration.
+     */
+    public static ViewConfiguration get(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int density = (int) (100.0f * metrics.density);
+
+        ViewConfiguration configuration = sConfigurations.get(density);
+        if (configuration == null) {
+            configuration = new ViewConfiguration(context);
+            sConfigurations.put(density, configuration);
+        }
+
+        return configuration;
+    }
+
     /**
      * @return The width of the horizontal scrollbar and the height of the vertical
      *         scrollbar in pixels
+     *
+     * @deprecated Use {@link #getScaledScrollBarSize()} instead.
      */
+    @Deprecated
     public static int getScrollBarSize() {
         return SCROLL_BAR_SIZE;
     }
 
     /**
-     * @return Defines the length of the fading edges in pixels
+     * @return The width of the horizontal scrollbar and the height of the vertical
+     *         scrollbar in pixels
      */
+    public int getScaledScrollBarSize() {
+        return mScrollbarSize;
+    }
+
+    /**
+     * @return the length of the fading edges in pixels
+     *
+     * @deprecated Use {@link #getScaledFadingEdgeLength()} instead.
+     */
+    @Deprecated
     public static int getFadingEdgeLength() {
         return FADING_EDGE_LENGTH;
     }
-    
+
     /**
-     * @return Defines the duration in milliseconds of the pressed state in child
+     * @return the length of the fading edges in pixels
+     */
+    public int getScaledFadingEdgeLength() {
+        return mFadingEdgeLength;
+    }
+
+    /**
+     * @return the duration in milliseconds of the pressed state in child
      * components.
      */
     public static int getPressedStateDuration() {
@@ -128,7 +238,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return Defines the duration in milliseconds before a press turns into
+     * @return the duration in milliseconds before a press turns into
      * a long press
      */
     public static int getLongPressTimeout() {
@@ -136,8 +246,8 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return Defines the duration in milliseconds we will wait to see if a touch event 
-     * is a top or a scroll. If the user does not move within this interval, it is
+     * @return the duration in milliseconds we will wait to see if a touch event
+     * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
     public static int getTapTimeout() {
@@ -145,7 +255,7 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return Defines the duration in milliseconds we will wait to see if a touch event 
+     * @return the duration in milliseconds we will wait to see if a touch event
      * is a jump tap. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
@@ -154,34 +264,121 @@ public class ViewConfiguration {
     }
     
     /**
-     * @return Inset in pixels to look for touchable content when the user touches the edge of the
-     *         screen
+     * @return the duration in milliseconds between the first tap's up event and
+     * the second tap's down event for an interaction to be considered a
+     * double-tap.
+     * @hide pending API council
      */
-    public static int getEdgeSlop() {
-        return EDGE_SLOP;
+    public static int getDoubleTapTimeout() {
+        return DOUBLE_TAP_TIMEOUT;
     }
     
     /**
-     * @return Distance a touch can wander before we think the user is scrolling in pixels
+     * @return Inset in pixels to look for touchable content when the user touches the edge of the
+     *         screen
+     *
+     * @deprecated Use {@link #getScaledEdgeSlop()} instead.
      */
+    @Deprecated
+    public static int getEdgeSlop() {
+        return EDGE_SLOP;
+    }
+
+    /**
+     * @return Inset in pixels to look for touchable content when the user touches the edge of the
+     *         screen
+     */
+    public int getScaledEdgeSlop() {
+        return mEdgeSlop;
+    }
+
+    /**
+     * @return Distance a touch can wander before we think the user is scrolling in pixels
+     *
+     * @deprecated Use {@link #getScaledTouchSlop()} instead.
+     */
+    @Deprecated
     public static int getTouchSlop() {
         return TOUCH_SLOP;
     }
+
+    /**
+     * @return Distance a touch can wander before we think the user is scrolling in pixels
+     */
+    public int getScaledTouchSlop() {
+        return mTouchSlop;
+    }
+
+    /**
+     * @return Distance between the first touch and second touch to still be
+     *         considered a double tap
+     * @deprecated Use {@link #getScaledDoubleTapSlop()} instead.
+     * @hide The only client of this should be GestureDetector, which needs this
+     *       for clients that still use its deprecated constructor.
+     */
+    @Deprecated
+    public static int getDoubleTapSlop() {
+        return DOUBLE_TAP_SLOP;
+    }
     
+    /**
+     * @return Distance between the first touch and second touch to still be
+     *         considered a double tap
+     * @hide pending API council
+     */
+    public int getScaledDoubleTapSlop() {
+        return mDoubleTapSlop;
+    }
+
+    /**
+     * @return Distance a touch must be outside the bounds of a window for it
+     * to be counted as outside the window for purposes of dismissing that
+     * window.
+     *
+     * @deprecated Use {@link #getScaledWindowTouchSlop()} instead.
+     */
+    @Deprecated
+    public static int getWindowTouchSlop() {
+        return WINDOW_TOUCH_SLOP;
+    }
+
     /**
      * @return Distance a touch must be outside the bounds of a window for it
      * to be counted as outside the window for purposes of dismissing that
      * window.
      */
-    public static int getWindowTouchSlop() {
-        return WINDOW_TOUCH_SLOP;
+    public int getScaledWindowTouchSlop() {
+        return mWindowTouchSlop;
     }
     
     /**
-     * Minimum velocity to initiate a fling, as measured in pixels per second
+     * @return Minimum velocity to initiate a fling, as measured in pixels per second.
+     *
+     * @deprecated Use {@link #getScaledMinimumFlingVelocity()} instead.
      */
-    public static int getMinimumFlingVelocity() {    
-     return MINIMUM_FLING_VELOCITY;
+    @Deprecated
+    public static int getMinimumFlingVelocity() {
+        return MINIMUM_FLING_VELOCITY;
+    }
+
+    /**
+     * @return Minimum velocity to initiate a fling, as measured in pixels per second.
+     */
+    public int getScaledMinimumFlingVelocity() {
+        return mMinimumFlingVelocity;
+    }
+
+    /**
+     * The maximum drawing cache size expressed in bytes.
+     *
+     * @return the maximum size of View's drawing cache expressed in bytes
+     *
+     * @deprecated Use {@link #getScaledMaximumDrawingCacheSize()} instead.
+     */
+    @Deprecated
+    public static int getMaximumDrawingCacheSize() {
+        //noinspection deprecation
+        return MAXIMUM_DRAWING_CACHE_SIZE;
     }
 
     /**
@@ -189,8 +386,8 @@ public class ViewConfiguration {
      *
      * @return the maximum size of View's drawing cache expressed in bytes
      */
-    public static int getMaximumDrawingCacheSize() {
-        return MAXIMUM_DRAWING_CACHE_SIZE;
+    public int getScaledMaximumDrawingCacheSize() {
+        return mMaximumDrawingCacheSize;
     }
 
     /**

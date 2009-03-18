@@ -16,8 +16,6 @@
 
 package android.content.res;
 
-import com.google.android.collect.Lists;
-
 import com.android.internal.util.ArrayUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -113,7 +111,8 @@ public class ColorStateList implements Parcelable {
      * Create a ColorStateList from an XML document, given a set of {@link Resources}.
      */
     public static ColorStateList createFromXml(Resources r, XmlPullParser parser)
-    throws XmlPullParserException, IOException {
+            throws XmlPullParserException, IOException {
+
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         int type;
@@ -125,19 +124,16 @@ public class ColorStateList implements Parcelable {
             throw new XmlPullParserException("No start tag found");
         }
 
-        final ColorStateList colorStateList = createFromXmlInner(r, parser, attrs);
-
-        return colorStateList;
+        return createFromXmlInner(r, parser, attrs);
     }
 
     /* Create from inside an XML document.  Called on a parser positioned at
      * a tag in an XML document, tries to create a ColorStateList from that tag.
      * Returns null if the tag is not a valid ColorStateList.
      */
-    private static ColorStateList createFromXmlInner(Resources r,
-                                                     XmlPullParser parser,
-                                                     AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    private static ColorStateList createFromXmlInner(Resources r, XmlPullParser parser,
+            AttributeSet attrs) throws XmlPullParserException, IOException {
+
         ColorStateList colorStateList;
 
         final String name = parser.getName();
@@ -146,8 +142,7 @@ public class ColorStateList implements Parcelable {
             colorStateList = new ColorStateList();
         } else {
             throw new XmlPullParserException(
-                parser.getPositionDescription() + ": invalid drawable tag "
-                + name);
+                parser.getPositionDescription() + ": invalid drawable tag " + name);
         }
 
         colorStateList.inflate(r, parser, attrs);
@@ -304,7 +299,11 @@ public class ColorStateList implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeArray(mStateSpecs);
+        final int N = mStateSpecs.length;
+        dest.writeInt(N);
+        for (int i=0; i<N; i++) {
+            dest.writeIntArray(mStateSpecs[i]);
+        }
         dest.writeIntArray(mColors);
     }
 
@@ -315,14 +314,11 @@ public class ColorStateList implements Parcelable {
         }
 
         public ColorStateList createFromParcel(Parcel source) {
-            Object[] o = source.readArray(
-                                    ColorStateList.class.getClassLoader());
-            int[][] stateSpecs = new int[o.length][];
-
-            for (int i = 0; i < o.length; i++) {
-                stateSpecs[i] = (int[]) o[i];
+            final int N = source.readInt();
+            int[][] stateSpecs = new int[N][];
+            for (int i=0; i<N; i++) {
+                stateSpecs[i] = source.createIntArray();
             }
-
             int[] colors = source.createIntArray();
             return new ColorStateList(stateSpecs, colors);
         }

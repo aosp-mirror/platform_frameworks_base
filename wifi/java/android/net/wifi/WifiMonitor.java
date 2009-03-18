@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
  * Listens for events from the wpa_supplicant server, and passes them on
  * to the {@link WifiStateTracker} for handling. Runs in its own thread.
  *
- * {@hide}
+ * @hide
  */
 public class WifiMonitor {
 
@@ -119,14 +119,8 @@ public class WifiMonitor {
 
     private final WifiStateTracker mWifiStateTracker;
 
-    private boolean supplicantConnected;
-
-    private boolean oneShot;
-
     public WifiMonitor(WifiStateTracker tracker) {
         mWifiStateTracker = tracker;
-        supplicantConnected = false;
-        oneShot = true;
     }
 
     public void startMonitoring() {
@@ -144,25 +138,30 @@ public class WifiMonitor {
         
         public void run() {
 
+            if (connectToSupplicant()) {
+                // Send a message indicating that it is now possible to send commands
+                // to the supplicant
+                mWifiStateTracker.notifySupplicantConnection();
+            } else {
+                mWifiStateTracker.notifySupplicantLost();
+                return;
+            }
+
             //noinspection InfiniteLoopStatement
             for (;;) {
-                ensureSupplicantConnection();
-
                 String eventStr = WifiNative.waitForEvent();
 
-                if (Config.LOGD) {
-                    // Skip logging the common but mostly uninteresting scan-results event
-                    if (eventStr.indexOf(scanResultsEvent) == -1) {
-                        Log.v(TAG, "Event [" + eventStr +"]");
-                    }
-                }
                 if (eventStr == null) {
                     continue;
-                } else if (!eventStr.startsWith(eventPrefix)) {
-                    if (eventStr.startsWith(wpaEventPrefix)) {
-                        if (0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
-                            handlePasswordKeyMayBeIncorrect();
-                        }
+                }
+
+                // Skip logging the common but mostly uninteresting scan-results event
+                if (Config.LOGD && eventStr.indexOf(scanResultsEvent) == -1) {
+                    Log.v(TAG, "Event [" + eventStr + "]");
+                }
+                if (!eventStr.startsWith(eventPrefix)) {
+                    if (eventStr.startsWith(wpaEventPrefix) && 0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
+                        handlePasswordKeyMayBeIncorrect();
                     }
                     continue;
                 }
@@ -216,42 +215,32 @@ public class WifiMonitor {
                     handleSupplicantStateChange(eventData);
                 } else if (event == DRIVER_STATE) {
                     handleDriverEvent(eventData);
+                } else if (event == TERMINATING) {
+                    mWifiStateTracker.notifySupplicantLost();
+                    // If supplicant is gone, exit the thread
+                    break;
                 } else {
                     handleEvent(event, eventData);
-                    // If supplicant is gone, exit the thread
-                    if (event == TERMINATING) {
-                        break;
-                    }
                 }
             }
         }
 
-        private void ensureSupplicantConnection() {
-            while (!supplicantConnected) {
-                boolean connected;
+        private boolean connectToSupplicant() {
+            int connectTries = 0;
+
+            while (true) {
                 synchronized (mWifiStateTracker) {
-                    connected = WifiNative.connectToSupplicant();
-                }
-                if (!connected) {
-                    /*
-                     * If we fail to connect on the very first attempt, send a message
-                     * indicating a lost connection to the supplicant, so that the
-                     * receiver can initialize to the proper state.
-                     */
-                    if (oneShot) {
-                        oneShot = false;
-                        mWifiStateTracker.notifySupplicantLost();
+                    if (WifiNative.connectToSupplicant()) {
+                        return true;
                     }
+                }
+                if (connectTries++ < 3) {
                     nap(5);
                 } else {
-                    supplicantConnected = true;
-                    oneShot = false;
-                    // Send a message indicating that it is now possible to send commands
-                    // to the supplicant
-                    mWifiStateTracker.notifySupplicantConnection();
-
+                    break;
                 }
             }
+            return false;
         }
 
         private void handlePasswordKeyMayBeIncorrect() {
@@ -287,11 +276,6 @@ public class WifiMonitor {
 
                 case SCAN_RESULTS:
                     mWifiStateTracker.notifyScanResultsAvailable();
-                    break;
-
-                case TERMINATING:
-                    supplicantConnected = false;
-                    mWifiStateTracker.notifySupplicantLost();
                     break;
 
                 case UNKNOWN:
@@ -372,7 +356,7 @@ public class WifiMonitor {
     private static void nap(int secs) {
         try {
             Thread.sleep(secs * 1000);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignore) {
         }
     }
 }

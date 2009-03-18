@@ -32,11 +32,11 @@ static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
     SkTypeface* face;
 
     if (NULL == name) {
-        face = SkTypeface::Create(NULL, (SkTypeface::Style)style);
+        face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
     }
     else {
         AutoJavaStringToUTF8    str(env, name);
-        face = SkTypeface::Create(str.c_str(), style);
+        face = SkTypeface::CreateFromName(str.c_str(), style);
     }
     return face;
 }
@@ -50,7 +50,7 @@ static void Typeface_unref(JNIEnv* env, jobject obj, SkTypeface* face) {
 }
 
 static int Typeface_getStyle(JNIEnv* env, jobject obj, SkTypeface* face) {
-    return face->getStyle();
+    return face->style();
 }
 
 class AssetStream : public SkStream {

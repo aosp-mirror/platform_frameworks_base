@@ -40,9 +40,15 @@ public abstract class AbsSeekBar extends ProgressBar {
      * Whether this is user seekable.
      */
     boolean mIsUserSeekable = true;
+
+    /**
+     * On key presses (right or left), the amount to increment/decrement the
+     * progress.
+     */
+    private int mKeyProgressIncrement = 1;
     
     private static final int NO_ALPHA = 0xFF;
-    float mDisabledAlpha;
+    private float mDisabledAlpha;
     
     public AbsSeekBar(Context context) {
         super(context);
@@ -99,6 +105,39 @@ public abstract class AbsSeekBar extends ProgressBar {
     public void setThumbOffset(int thumbOffset) {
         mThumbOffset = thumbOffset;
         invalidate();
+    }
+
+    /**
+     * Sets the amount of progress changed via the arrow keys.
+     * 
+     * @param increment The amount to increment or decrement when the user
+     *            presses the arrow keys.
+     */
+    public void setKeyProgressIncrement(int increment) {
+        mKeyProgressIncrement = increment < 0 ? -increment : increment;
+    }
+
+    /**
+     * Returns the amount of progress changed via the arrow keys.
+     * <p>
+     * By default, this will be a value that is derived from the max progress.
+     * 
+     * @return The amount to increment or decrement when the user presses the
+     *         arrow keys. This will be positive.
+     */
+    public int getKeyProgressIncrement() {
+        return mKeyProgressIncrement;
+    }
+    
+    @Override
+    public synchronized void setMax(int max) {
+        super.setMax(max);
+
+        if ((mKeyProgressIncrement == 0) || (getMax() / mKeyProgressIncrement > 20)) {
+            // It will take the user too long to change this via keys, change it
+            // to something more reasonable
+            setKeyProgressIncrement(Math.max(1, Math.round((float) getMax() / 20)));
+        }
     }
 
     @Override
@@ -316,12 +355,12 @@ public abstract class AbsSeekBar extends ProgressBar {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (progress <= 0) break;
-                setProgress(progress - 1, true);
+                setProgress(progress - mKeyProgressIncrement, true);
                 return true;
         
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (progress >= getMax()) break;
-                setProgress(progress + 1, true);
+                setProgress(progress + mKeyProgressIncrement, true);
                 return true;
         }
 

@@ -22,6 +22,7 @@ import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.ProviderInfo;
 import android.content.res.Configuration;
@@ -127,7 +128,8 @@ public interface IActivityManager extends IInterface {
             boolean doRebind) throws RemoteException;
     /* oneway */
     public void serviceDoneExecuting(IBinder token) throws RemoteException;
-
+    public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
+    
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
             throws RemoteException;
@@ -216,6 +218,17 @@ public interface IActivityManager extends IInterface {
     // Retrieve running application processes in the system
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses()
             throws RemoteException;
+    // Get device configuration
+    public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
+    
+    // Turn on/off profiling in a particular process.
+    public boolean profileControl(String process, boolean start,
+            String path) throws RemoteException;
+    
+    /*
+     * Private non-Binder interfaces
+     */
+    /* package */ boolean testIsSystemReady();
     
     /** Information you can retrieve about a particular application. */
     public static class ContentProviderHolder implements Parcelable {
@@ -354,4 +367,7 @@ public interface IActivityManager extends IInterface {
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
     int REPORT_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
     int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;
+    int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
+    int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
+    int PROFILE_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+85;
 }

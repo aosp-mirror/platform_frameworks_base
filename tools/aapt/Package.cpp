@@ -5,6 +5,7 @@
 //
 #include "Main.h"
 #include "AaptAssets.h"
+#include "ResourceTable.h"
 
 #include <utils.h>
 #include <utils/ZipFile.h>
@@ -190,11 +191,20 @@ bail:
 ssize_t processAssets(Bundle* bundle, ZipFile* zip,
                       const sp<AaptAssets>& assets)
 {
+    ResourceFilter filter;
+    status_t status = filter.parse(bundle->getConfigurations());
+    if (status != NO_ERROR) {
+        return -1;
+    }
+
     ssize_t count = 0;
 
     const size_t N = assets->getGroupEntries().size();
     for (size_t i=0; i<N; i++) {
         const AaptGroupEntry& ge = assets->getGroupEntries()[i];
+        if (!filter.match(ge.toParams())) {
+            continue;
+        }
         ssize_t res = processAssets(bundle, zip, assets, ge);
         if (res < 0) {
             return res;

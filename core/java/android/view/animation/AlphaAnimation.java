@@ -31,7 +31,7 @@ public class AlphaAnimation extends Animation {
     private float mToAlpha;
 
     /**
-     * Constructor used whan an AlphaAnimation is loaded from a resource. 
+     * Constructor used when an AlphaAnimation is loaded from a resource. 
      * 
      * @param context Application context to use
      * @param attrs Attribute set from which to read values

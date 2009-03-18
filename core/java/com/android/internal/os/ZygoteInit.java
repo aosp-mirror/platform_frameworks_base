@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.LocalServerSocket;
 import android.os.Debug;
@@ -335,32 +336,18 @@ public class ZygoteInit {
             mResources.startPreloading();
             if (PRELOAD_RESOURCES) {
                 Log.i(TAG, "Preloading resources...");
+
                 long startTime = SystemClock.uptimeMillis();
                 TypedArray ar = mResources.obtainTypedArray(
                         com.android.internal.R.array.preloaded_drawables);
-                int N = ar.length();
-                for (int i=0; i<N; i++) {
-                    if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
-                        if (Config.LOGV) {
-                            Log.v(TAG, " GC at " + Debug.getGlobalAllocSize());
-                        }
-                        runtime.gcSoftReferences();
-                        runtime.runFinalizationSync();
-                        Debug.resetGlobalAllocSize();
-                    }
-                    int id = ar.getResourceId(i, 0);
-                    if (Config.LOGV) {
-                        Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
-                    }
-                    if (id != 0) {
-                        Drawable dr = mResources.getDrawable(id);
-                        if ((dr.getChangingConfigurations()&~ActivityInfo.CONFIG_FONT_SCALE) != 0) {
-                            Log.w(TAG, "Preloaded drawable resource #0x"
-                                    + Integer.toHexString(id)
-                                    + " that varies with configuration!!");
-                        }
-                    }
-                }
+                int N = preloadDrawables(runtime, ar);
+                Log.i(TAG, "...preloaded " + N + " resources in "
+                        + (SystemClock.uptimeMillis()-startTime) + "ms.");
+
+                startTime = SystemClock.uptimeMillis();
+                ar = mResources.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_color_state_lists);
+                N = preloadColorStateLists(runtime, ar);
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
             }
@@ -370,6 +357,56 @@ public class ZygoteInit {
         } finally {
             Debug.stopAllocCounting();
         }
+    }
+
+    private static int preloadColorStateLists(VMRuntime runtime, TypedArray ar) {
+        int N = ar.length();
+        for (int i=0; i<N; i++) {
+            if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
+                if (Config.LOGV) {
+                    Log.v(TAG, " GC at " + Debug.getGlobalAllocSize());
+                }
+                runtime.gcSoftReferences();
+                runtime.runFinalizationSync();
+                Debug.resetGlobalAllocSize();
+            }
+            int id = ar.getResourceId(i, 0);
+            if (Config.LOGV) {
+                Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
+            }
+            if (id != 0) {
+                mResources.getColorStateList(id);
+            }
+        }
+        return N;
+    }
+
+
+    private static int preloadDrawables(VMRuntime runtime, TypedArray ar) {
+        int N = ar.length();
+        for (int i=0; i<N; i++) {
+            if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
+                if (Config.LOGV) {
+                    Log.v(TAG, " GC at " + Debug.getGlobalAllocSize());
+                }
+                runtime.gcSoftReferences();
+                runtime.runFinalizationSync();
+                Debug.resetGlobalAllocSize();
+            }
+            int id = ar.getResourceId(i, 0);
+            if (Config.LOGV) {
+                Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
+            }
+            if (id != 0) {
+                Drawable dr = mResources.getDrawable(id);
+                if ((dr.getChangingConfigurations()&~ActivityInfo.CONFIG_FONT_SCALE) != 0) {
+                    Log.w(TAG, "Preloaded drawable resource #0x"
+                            + Integer.toHexString(id)
+                            + " (" + ar.getString(i) + ") that varies with configuration!!");
+                }
+            }
+        }
+        return N;
     }
 
     /**

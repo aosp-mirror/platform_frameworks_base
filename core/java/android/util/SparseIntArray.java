@@ -73,10 +73,17 @@ public class SparseIntArray {
         int i = binarySearch(mKeys, 0, mSize, key);
 
         if (i >= 0) {
-            System.arraycopy(mKeys, i + 1, mKeys, i, mSize - (i + 1));
-            System.arraycopy(mValues, i + 1, mValues, i, mSize - (i + 1));
-            mSize--;
+            removeAt(i);
         }
+    }
+
+    /**
+     * Removes the mapping at the given index.
+     */
+    public void removeAt(int index) {
+        System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
+        System.arraycopy(mValues, index + 1, mValues, index, mSize - (index + 1));
+        mSize--;
     }
 
     /**

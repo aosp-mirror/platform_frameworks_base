@@ -78,21 +78,10 @@ public class Im {
         String MSN = "MSN";
         String ICQ = "ICQ";
         String AIM = "AIM";
-    }
-
-    /**
-     * The ProviderCategories definitions are used for the Intent category for the Intent
-     *
-     *     Intent intent = new Intent(Intent.ACTION_SENDTO,
-     *             Uri.fromParts("im", data, null)).
-     *                     addCategory(category);
-     */
-    public interface ProviderCategories {
-        String GTALK = "com.android.im.category.GTALK";
-        String AIM = "com.android.im.category.AIM";
-        String MSN = "com.android.im.category.MSN";
-        String YAHOO = "com.android.im.category.YAHOO";
-        String ICQ = "com.android.im.category.ICQ";
+        String XMPP = "XMPP";
+        String JABBER = "JABBER";
+        String SKYPE = "SKYPE";
+        String QQ = "QQ";
     }
 
     /**
@@ -138,54 +127,6 @@ public class Im {
             }
 
             return retVal;
-        }
-
-        /**
-         * This returns the provider name given a provider category.
-         *
-         * @param providerCategory the provider category defined in {@link ProviderCategories}.
-         * @return the corresponding provider name defined in {@link ProviderNames}.
-         */
-        public static String getProviderNameForCategory(String providerCategory) {
-            if (providerCategory != null) {
-                if (providerCategory.equalsIgnoreCase(ProviderCategories.GTALK)) {
-                    return ProviderNames.GTALK;
-                } else if (providerCategory.equalsIgnoreCase(ProviderCategories.AIM)) {
-                    return ProviderNames.AIM;
-                } else if (providerCategory.equalsIgnoreCase(ProviderCategories.MSN)) {
-                    return ProviderNames.MSN;
-                } else if (providerCategory.equalsIgnoreCase(ProviderCategories.YAHOO)) {
-                    return ProviderNames.YAHOO;
-                } else if (providerCategory.equalsIgnoreCase(ProviderCategories.ICQ)) {
-                    return ProviderNames.ICQ;
-                }
-            }
-
-            return null;
-        }
-
-        /**
-         * This returns the provider category given a provider name.
-         *
-         * @param providername the provider name defined in {@link ProviderNames}.
-         * @return the provider category defined in {@link ProviderCategories}.
-         */
-        public static String getProviderCategoryFromName(String providername) {
-            if (providername != null) {
-                if (providername.equalsIgnoreCase(Im.ProviderNames.GTALK)) {
-                    return Im.ProviderCategories.GTALK;
-                } else if (providername.equalsIgnoreCase(Im.ProviderNames.AIM)) {
-                    return Im.ProviderCategories.AIM;
-                } else if (providername.equalsIgnoreCase(Im.ProviderNames.MSN)) {
-                    return Im.ProviderCategories.MSN;
-                } else if (providername.equalsIgnoreCase(Im.ProviderNames.YAHOO)) {
-                    return Im.ProviderCategories.YAHOO;
-                } else if (providername.equalsIgnoreCase(Im.ProviderNames.ICQ)) {
-                    return Im.ProviderCategories.ICQ;
-                }
-            }
-
-            return null;
         }
 
         private static final String[] PROVIDER_PROJECTION = new String[] {
@@ -797,6 +738,13 @@ public class Im {
         String ETAG = "etag";
 
         /**
+         * The OTR etag, computed by the server, stored on the client. There is one OTR etag
+         * per account roster.
+         * <P>Type: TEXT</P>
+         */
+        String OTR_ETAG = "otr_etag";
+
+        /**
          * The account id for the etag.
          * <P> Type: INTEGER </P>
          */
@@ -837,11 +785,37 @@ public class Im {
             return retVal;
         }
 
+        public static final String getOtrEtag(ContentResolver resolver, long accountId) {
+            String retVal = null;
+
+            Cursor c = resolver.query(CONTENT_URI,
+                    CONTACT_OTR_ETAG_PROJECTION,
+                    ACCOUNT + "=" + accountId,
+                    null /* selection args */,
+                    null /* sort order */);
+
+            try {
+                if (c.moveToFirst()) {
+                    retVal = c.getString(COLUMN_OTR_ETAG);
+                }
+            } finally {
+                c.close();
+            }
+
+            return retVal;
+        }
+
         private static final String[] CONTACT_ETAG_PROJECTION = new String[] {
                 Im.ContactsEtag.ETAG    // 0
         };
 
         private static int COLUMN_ETAG = 0;
+
+        private static final String[] CONTACT_OTR_ETAG_PROJECTION = new String[] {
+                Im.ContactsEtag.OTR_ETAG    // 0
+        };
+
+        private static int COLUMN_OTR_ETAG = 0;
 
         /**
          * The content:// style URL for this table
@@ -1271,9 +1245,9 @@ public class Im {
     }
 
     /**
-     * Columns shared between the IM and contacts presence tables
+     * Common presence columns shared between the IM and contacts presence tables
      */
-    interface CommonPresenceColumns {
+    public interface CommonPresenceColumns {
         /**
          * The priority, an integer, used by XMPP presence
          * <P>Type: INTEGER</P>
@@ -2069,5 +2043,38 @@ public class Im {
          * The content:// style URL for this table.
          */
         public static final Uri CONTENT_URI = Uri.parse("content://im/lastRmqId");
+    }
+
+    /**
+     * Columns for IM branding resource map cache table. This table caches the result of
+     * loading the branding resources to speed up IM landing page start.
+     */
+    public interface BrandingResourceMapCacheColumns {
+        /**
+         * The provider ID
+         * <P>Type: INTEGER</P>
+         */
+        String PROVIDER_ID = "provider_id";
+        /**
+         * The application resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String APP_RES_ID = "app_res_id";
+        /**
+         * The plugin resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String PLUGIN_RES_ID = "plugin_res_id";
+    }
+
+    /**
+     * The table for caching the result of loading IM branding resources.
+     */
+    public static final class BrandingResourceMapCache
+        implements BaseColumns, BrandingResourceMapCacheColumns {
+        /**
+         * The content:// style URL for this table.
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://im/brandingResMapCache");
     }
 }

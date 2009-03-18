@@ -18,6 +18,7 @@ package android.content;
 
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.CursorToBulkCursorAdaptor;
@@ -41,8 +42,8 @@ import java.io.FileNotFoundException;
  * multiple applications you can use a database directly via
  * {@link android.database.sqlite.SQLiteDatabase}.
  *
- * <p>See <a href="{@docRoot}devel/data/contentproviders.html">this page</a> for more information on
- * content providers.</p>
+ * <p>For more information, read <a href="{@docRoot}guide/topics/providers/content-providers.html">Content
+ * Providers</a>.</p>
  *
  * <p>When a request is made via
  * a {@link ContentResolver} the system inspects the authority of the given URI and passes the
@@ -162,6 +163,13 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.openFile(uri, mode);
         }
 
+        public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+                throws FileNotFoundException {
+            if (mode != null && mode.startsWith("rw")) checkWritePermission(uri);
+            else checkReadPermission(uri);
+            return ContentProvider.this.openAssetFile(uri, mode);
+        }
+
         public ISyncAdapter getSyncAdapter() {
             checkWritePermission(null);
             return ContentProvider.this.getSyncAdapter().getISyncAdapter();
@@ -226,9 +234,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Return the name of the permission required for read-only access to
      * this content provider.  This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      */
     public final String getReadPermission() {
         return mReadPermission;
@@ -248,9 +256,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Return the name of the permission required for read/write access to
      * this content provider.  This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      */
     public final String getWritePermission() {
         return mWritePermission;
@@ -273,9 +281,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Receives a query request from a client in a local process, and
      * returns a Cursor. This is called internally by the {@link ContentResolver}.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      * <p>
      * Example client call:<p>
      * <pre>// Request a specific record.
@@ -330,9 +338,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * <code>vnd.android.cursor.item</code> for a single record,
      * or <code>vnd.android.cursor.dir/</code> for multiple items.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      *
      * @param uri the URI to query.
      * @return a MIME type string, or null if there is no type.
@@ -344,9 +352,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of the
-     * Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
      * @return The URI for the newly inserted item.
@@ -359,9 +367,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      *
      * @param uri The content:// URI of the insertion request.
      * @param values An array of sets of column_name/value pairs to add to the database.
@@ -382,9 +390,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyDelete()}
      * after deleting.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of the
-     * Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      *
      * <p>The implementation is responsible for parsing out a row ID at the end
      * of the URI, if a specific row is being deleted. That is, the client would
@@ -405,9 +413,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after updating.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of the
-     * Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      *
      * @param uri The URI to query. This can potentially have a record ID if this
      * is an update request for a specific record.
@@ -422,9 +430,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Open a file blob associated with a content URI.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of the
-     * Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      * 
      * <p>Returns a
      * ParcelFileDescriptor, from which you can obtain a
@@ -438,8 +446,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * of this method should create a new ParcelFileDescriptor for each call.
      *
      * @param uri The URI whose file is to be opened.
-     * @param mode Access mode for the file.  May be "r" for read-only access
-     * or "rw" for read and write access.
+     * @param mode Access mode for the file.  May be "r" for read-only access,
+     * "rw" for read and write access, or "rwt" for read and write access
+     * that truncates any existing file.
      *
      * @return Returns a new ParcelFileDescriptor which you can use to access
      * the file.
@@ -448,11 +457,54 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * no file associated with the given URI or the mode is invalid.
      * @throws SecurityException Throws SecurityException if the caller does
      * not have permission to access the file.
-     */
+     * 
+     * @see #openAssetFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     */    
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
         throw new FileNotFoundException("No files supported by provider at "
                 + uri);
+    }
+    
+    /**
+     * This is like {@link #openFile}, but can be implemented by providers
+     * that need to be able to return sub-sections of files, often assets
+     * inside of their .apk.  Note that when implementing this your clients
+     * must be able to deal with such files, either directly with
+     * {@link ContentResolver#openAssetFileDescriptor
+     * ContentResolver.openAssetFileDescriptor}, or by using the higher-level
+     * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
+     * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
+     * methods.
+     * 
+     * <p><em>Note: if you are implementing this to return a full file, you
+     * should create the AssetFileDescriptor with
+     * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
+     * applications that can not handle sub-sections of files.</em></p>
+     *
+     * @param uri The URI whose file is to be opened.
+     * @param mode Access mode for the file.  May be "r" for read-only access,
+     * "w" for write-only access (erasing whatever data is currently in
+     * the file), "wa" for write-only access to append to any existing data,
+     * "rw" for read and write access on any existing data, and "rwt" for read
+     * and write access that truncates any existing file.
+     *
+     * @return Returns a new AssetFileDescriptor which you can use to access
+     * the file.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the file.
+     * 
+     * @see #openFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     */
+    public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+            throws FileNotFoundException {
+        ParcelFileDescriptor fd = openFile(uri, mode);
+        return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
     }
 
     /**
@@ -460,7 +512,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * by looking up a column named "_data" at the given URI.
      *
      * @param uri The URI to be opened.
-     * @param mode The file mode.
+     * @param mode The file mode.  May be "r" for read-only access,
+     * "w" for write-only access (erasing whatever data is currently in
+     * the file), "wa" for write-only access to append to any existing data,
+     * "rw" for read and write access on any existing data, and "rwt" for read
+     * and write access that truncates any existing file.
      *
      * @return Returns a new ParcelFileDescriptor that can be used by the
      * client to access the file.
@@ -489,16 +545,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
             throw new FileNotFoundException("Column _data not found.");
         }
 
-        int modeBits;
-        if ("r".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
-        } else if ("rw".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE;
-        } else {
-            throw new FileNotFoundException("Bad mode for " + uri + ": "
-                    + mode);
-        }
+        int modeBits = ContentResolver.modeToMode(uri, mode);
         return ParcelFileDescriptor.open(new File(path), modeBits);
     }
 
@@ -507,9 +554,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * This is intended for use by the sync system. If null then this
      * content provider is considered not syncable.
      * This method can be called from multiple
-     * threads, as described in the
-     * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of
-     * the Application Model overview</a>.
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
      * 
      * @return the SyncAdapter that is to be used by this ContentProvider, or null
      *   if this ContentProvider is not syncable

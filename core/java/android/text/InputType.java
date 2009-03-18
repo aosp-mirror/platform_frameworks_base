@@ -116,14 +116,17 @@ public interface InputType {
     
     /**
      * Flag for {@link #TYPE_CLASS_TEXT}: multiple lines of text can be
-     * entered into the field.
+     * entered into the field.  If this flag is not set, the text field 
+     * will be constrained to a single line.
      */
     public static final int TYPE_TEXT_FLAG_MULTI_LINE = 0x00020000;
     
     /**
-     * Flag for {@link #TYPE_CLASS_TEXT}: flags any text being used as a search string
+     * Flag for {@link #TYPE_CLASS_TEXT}: the regular text view associated
+     * with this should not be multi-line, but when a fullscreen input method
+     * is providing text it should use multiple lines if it can.
      */
-    public static final int TYPE_TEXT_FLAG_SEARCH = 0x00040000;
+    public static final int TYPE_TEXT_FLAG_IME_MULTI_LINE = 0x00040000;
     
     // ----------------------------------------------------------------------
     
@@ -149,35 +152,54 @@ public interface InputType {
     public static final int TYPE_TEXT_VARIATION_EMAIL_SUBJECT = 0x00000030;
     
     /**
-     * Variation of {@link #TYPE_CLASS_TEXT}: entering the content of
-     * an e-mail.
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering a short, possibly informal
+     * message such as an instant message or a text message.
      */
-    public static final int TYPE_TEXT_VARIATION_EMAIL_CONTENT = 0x00000040;
+    public static final int TYPE_TEXT_VARIATION_SHORT_MESSAGE = 0x00000040;
     
+    /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering the content of a long, possibly 
+     * formal message such as the body of an e-mail.
+     */
+    public static final int TYPE_TEXT_VARIATION_LONG_MESSAGE = 0x00000050;
+
     /**
      * Variation of {@link #TYPE_CLASS_TEXT}: entering the name of a person.
      */
-    public static final int TYPE_TEXT_VARIATION_PERSON_NAME = 0x00000050;
+    public static final int TYPE_TEXT_VARIATION_PERSON_NAME = 0x00000060;
     
     /**
      * Variation of {@link #TYPE_CLASS_TEXT}: entering a postal mailing address.
      */
-    public static final int TYPE_TEXT_VARIATION_POSTAL_ADDRESS = 0x00000060;
+    public static final int TYPE_TEXT_VARIATION_POSTAL_ADDRESS = 0x00000070;
     
     /**
      * Variation of {@link #TYPE_CLASS_TEXT}: entering a password.
      */
-    public static final int TYPE_TEXT_VARIATION_PASSWORD = 0x00000070;
+    public static final int TYPE_TEXT_VARIATION_PASSWORD = 0x00000080;
     
     /**
-     * Variation of {@link #TYPE_CLASS_TEXT}: entering a simple text search (e.g. web search)
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering a password, which should
+     * be visible to the user.
      */
-    public static final int TYPE_TEXT_VARIATION_SEARCH_STRING = 0x00000080;
+    public static final int TYPE_TEXT_VARIATION_VISIBLE_PASSWORD = 0x00000090;
     
     /**
      * Variation of {@link #TYPE_CLASS_TEXT}: entering text inside of a web form.
      */
-    public static final int TYPE_TEXT_VARIATION_WEB_EDIT_TEXT = 0x00000090;
+    public static final int TYPE_TEXT_VARIATION_WEB_EDIT_TEXT = 0x000000a0;
+    
+    /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering text to filter contents
+     * of a list etc.
+     */
+    public static final int TYPE_TEXT_VARIATION_FILTER = 0x000000b0;
+    
+    /**
+     * Variation of {@link #TYPE_CLASS_TEXT}: entering text for phonetic
+     * pronunciation, such as a phonetic name field in contacts.
+     */
+    public static final int TYPE_TEXT_VARIATION_PHONETIC = 0x000000c0;
     
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------

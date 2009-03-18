@@ -42,7 +42,7 @@
 #include <linux/msm_mdp.h>
 #endif
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
 
 #include <pixelflinger/format.h>
 
@@ -71,8 +71,6 @@ EGLDisplaySurface::EGLDisplaySurface()
     egl_native_window_t::incRef = &EGLDisplaySurface::hook_incRef;
     egl_native_window_t::decRef = &EGLDisplaySurface::hook_decRef;
     egl_native_window_t::swapBuffers = &EGLDisplaySurface::hook_swapBuffers;
-    egl_native_window_t::setSwapRectangle = &EGLDisplaySurface::hook_setSwapRectangle;
-    egl_native_window_t::nextBuffer = &EGLDisplaySurface::hook_nextBuffer;
     egl_native_window_t::connect = 0;
     egl_native_window_t::disconnect = 0;
 
@@ -135,15 +133,6 @@ void EGLDisplaySurface::hook_decRef(NativeWindowType window) {
 uint32_t EGLDisplaySurface::hook_swapBuffers(NativeWindowType window) {
     EGLDisplaySurface* that = static_cast<EGLDisplaySurface*>(window);
     return that->swapBuffers();
-}
-uint32_t EGLDisplaySurface::hook_nextBuffer(NativeWindowType window) {
-    EGLDisplaySurface* that = static_cast<EGLDisplaySurface*>(window);
-    return that->nextBuffer();
-}
-void EGLDisplaySurface::hook_setSwapRectangle(NativeWindowType window,
-        int l, int t, int w, int h) {
-    EGLDisplaySurface* that = static_cast<EGLDisplaySurface*>(window);
-    that->setSwapRectangle(l, t, w, h);
 }
 
 void EGLDisplaySurface::setSwapRectangle(int l, int t, int w, int h)
@@ -249,15 +238,6 @@ int32_t EGLDisplaySurface::getPageFlipCount() const
     return mPageFlipCount;
 }
 
-uint32_t EGLDisplaySurface::nextBuffer()
-{
-    // update the address of the buffer to draw to next
-    const GGLSurface& buffer = mFb[mIndex];
-    egl_native_window_t::offset =
-        intptr_t(buffer.data) - egl_native_window_t::base;
-    return 0;
-}
-
 void EGLDisplaySurface::copyFrontToBack(const Region& copyback)
 {
 #if HAVE_ANDROID_OS
@@ -317,6 +297,59 @@ void EGLDisplaySurface::copyFrontToBack(const Region& copyback)
         }
     }
 }
+
+void EGLDisplaySurface::copyFrontToImage(const copybit_image_t& dst)
+{
+#if HAVE_ANDROID_OS
+    if (mBlitEngine) {
+        copybit_image_t src = {
+                w:      egl_native_window_t::stride,
+                h:      egl_native_window_t::height,
+                format: egl_native_window_t::format,
+                offset: mFb[mIndex].data - mFb[0].data,
+                base:   (void*)egl_native_window_t::base,
+                fd:     egl_native_window_t::fd
+        };
+        region_iterator it(Region(Rect(
+                egl_native_window_t::width, egl_native_window_t::height)));
+        mBlitEngine->blit(mBlitEngine, &dst, &src, &it);
+    } else
+#endif
+    {
+        uint8_t* const screen_src = mFb[  mIndex].data;
+        const size_t bpp = bytesPerPixel(egl_native_window_t::format);
+        const size_t bpr = egl_native_window_t::stride * bpp;
+        memcpy((char*)dst.base + dst.offset, screen_src,
+                bpr*egl_native_window_t::height);
+    }
+}
+
+void EGLDisplaySurface::copyBackToImage(const copybit_image_t& dst)
+{
+#if HAVE_ANDROID_OS
+    if (mBlitEngine) {
+        copybit_image_t src = {
+                w:      egl_native_window_t::stride,
+                h:      egl_native_window_t::height,
+                format: egl_native_window_t::format,
+                offset: mFb[1-mIndex].data - mFb[0].data,
+                base:   (void*)egl_native_window_t::base,
+                fd:     egl_native_window_t::fd
+        };
+        region_iterator it(Region(Rect(
+                egl_native_window_t::width, egl_native_window_t::height)));
+        mBlitEngine->blit(mBlitEngine, &dst, &src, &it);
+    } else
+#endif
+    {
+        uint8_t* const screen_src = mFb[1-mIndex].data;
+        const size_t bpp = bytesPerPixel(egl_native_window_t::format);
+        const size_t bpr = egl_native_window_t::stride * bpp;
+        memcpy((char*)dst.base + dst.offset, screen_src,
+                bpr*egl_native_window_t::height);
+    }
+}
+
 
 status_t EGLDisplaySurface::mapFrameBuffer()
 {

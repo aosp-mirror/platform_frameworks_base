@@ -21,7 +21,7 @@ package android.text;
  * will be called to notify it that other markup objects have been
  * added, changed, or removed.
  */
-public interface SpanWatcher {
+public interface SpanWatcher extends NoCopySpan {
     /**
      * This method is called to notify you that the specified object
      * has been attached to the specified range of the text.

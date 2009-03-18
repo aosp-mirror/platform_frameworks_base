@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------*
- *  MicrophoneInputStream.java                                              *
+ *  MicrophoneInputStream.java                                               *
  *                                                                           *
  *  Copyright 2007 Nuance Communciations, Inc.                               *
  *                                                                           *
@@ -45,8 +45,12 @@ public final class MicrophoneInputStream extends InputStream {
      */
     public MicrophoneInputStream(int sampleRate, int fifoDepth) throws IOException {
         mAudioRecord = AudioRecordNew(sampleRate, fifoDepth);
-        if (mAudioRecord == 0) throw new IllegalStateException("not open");
-        AudioRecordStart(mAudioRecord);
+        if (mAudioRecord == 0) throw new IOException("AudioRecord constructor failed - busy?");
+        int status = AudioRecordStart(mAudioRecord);
+        if (status != 0) {
+            close();
+            throw new IOException("AudioRecord start failed: " + status);
+        }
     }
 
     @Override
@@ -99,7 +103,7 @@ public final class MicrophoneInputStream extends InputStream {
     // AudioRecord JNI interface
     //
     private static native int AudioRecordNew(int sampleRate, int fifoDepth);
-    private static native void AudioRecordStart(int audioRecord);
+    private static native int AudioRecordStart(int audioRecord);
     private static native int AudioRecordRead(int audioRecord, byte[] b, int offset, int length) throws IOException;
     private static native void AudioRecordStop(int audioRecord) throws IOException;
     private static native void AudioRecordDelete(int audioRecord) throws IOException;

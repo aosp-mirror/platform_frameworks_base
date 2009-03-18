@@ -32,6 +32,9 @@ class MemoryUsage implements Serializable {
     private static final long serialVersionUID = 0;
 
     static final MemoryUsage NOT_AVAILABLE = new MemoryUsage();
+    
+    static int errorCount = 0;
+    static final int MAXIMUM_ERRORS = 10;        // give up after this many fails
 
     final int nativeSharedPages;
     final int javaSharedPages;
@@ -160,6 +163,13 @@ class MemoryUsage implements Serializable {
      * Measures memory usage for the given class.
      */
     static MemoryUsage forClass(String className) {
+        
+        // This is a coarse approximation for determining that no device is connected,
+        // or that the communication protocol has changed, but we'll keep going and stop whining.
+        if (errorCount >= MAXIMUM_ERRORS) {
+            return NOT_AVAILABLE;
+        }
+        
         MeasureWithTimeout measurer = new MeasureWithTimeout(className);
 
         new Thread(measurer).start();
@@ -237,6 +247,7 @@ class MemoryUsage implements Serializable {
                 if (line == null || !line.startsWith("DECAFBAD,")) {
                     System.err.println("Got bad response for " + className
                             + ": " + line);
+                    errorCount += 1;
                     return NOT_AVAILABLE;
                 }
 

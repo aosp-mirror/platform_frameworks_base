@@ -77,10 +77,10 @@ public class LockPatternUtils {
     public static final int MIN_PATTERN_REGISTER_FAIL = 3;    
 
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
+    private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
+    private final static String PATTERN_EVER_CHOSEN = "lockscreen.patterneverchosen";
 
     private final ContentResolver mContentResolver;
-
-    private long mLockoutDeadline = 0;
 
     private static String sLockPatternFilename;
     
@@ -140,6 +140,16 @@ public class LockPatternUtils {
     }
 
     /**
+     * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
+     * currently cleared.
+     *
+     * @return True if the user has ever chosen a pattern.
+     */
+    public boolean isPatternEverChosen() {
+        return getBoolean(PATTERN_EVER_CHOSEN);
+    }
+
+    /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
      */
@@ -156,6 +166,7 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
+            setBoolean(PATTERN_EVER_CHOSEN, true);
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
             Log.e(TAG, "Unable to save lock pattern to " + sLockPatternFilename);
@@ -270,12 +281,14 @@ public class LockPatternUtils {
     }
 
     /**
-     * Store the lockout deadline, meaning the user can't attempt his/her unlock
-     * pattern until the deadline has passed.  Does not persist across reboots.
-     * @param deadline The elapsed real time in millis in future.
+     * Set and store the lockout deadline, meaning the user can't attempt his/her unlock
+     * pattern until the deadline has passed.
+     * @return the chosen deadline.
      */
-    public void setLockoutAttemptDeadline(long deadline) {
-        mLockoutDeadline = deadline;
+    public long setLockoutAttemptDeadline() {
+        final long deadline = SystemClock.elapsedRealtime() + FAILED_ATTEMPT_TIMEOUT_MS;
+        setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline);
+        return deadline;
     }
 
     /**
@@ -284,7 +297,12 @@ public class LockPatternUtils {
      *   enter a pattern.
      */
     public long getLockoutAttemptDeadline() {
-        return (mLockoutDeadline <= SystemClock.elapsedRealtime()) ? 0 : mLockoutDeadline;
+        final long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L);
+        final long now = SystemClock.elapsedRealtime();
+        if (deadline < now || deadline > (now + FAILED_ATTEMPT_TIMEOUT_MS)) {
+            return 0L;
+        }
+        return deadline;
     }
 
     /**
@@ -339,6 +357,14 @@ public class LockPatternUtils {
                         mContentResolver,
                         systemSettingKey,
                         enabled ? 1 : 0);
+    }
+
+    private long getLong(String systemSettingKey, long def) {
+        return android.provider.Settings.System.getLong(mContentResolver, systemSettingKey, def);
+    }
+
+    private void setLong(String systemSettingKey, long value) {
+        android.provider.Settings.System.putLong(mContentResolver, systemSettingKey, value);
     }
 
 

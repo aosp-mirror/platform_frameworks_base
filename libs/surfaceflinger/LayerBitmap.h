@@ -70,9 +70,6 @@ public:
     void getBitmapSurface(copybit_image_t* img) const;
 
 private:
-    LayerBitmap(const LayerBitmap& rhs);
-    LayerBitmap& operator = (const LayerBitmap& rhs);
-
     sp<MemoryDealer>        mAllocator;
     sp<IMemory>             mBitsMemory;
     uint32_t                mAllocFlags;

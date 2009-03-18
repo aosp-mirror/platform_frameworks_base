@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
 int main(int argc, char** argv)
 {
@@ -40,6 +42,9 @@ int main(int argc, char** argv)
          printf("using pbuffer\n");
          EGLint attribs[] = { EGL_WIDTH, 320, EGL_HEIGHT, 480, EGL_NONE };
          surface = eglCreatePbufferSurface(dpy, config, attribs);
+         if (surface == EGL_NO_SURFACE) {
+             printf("eglCreatePbufferSurface error %x\n", eglGetError());
+         }
      }
      context = eglCreateContext(dpy, config, NULL, NULL);
      eglMakeCurrent(dpy, surface, surface, context);   

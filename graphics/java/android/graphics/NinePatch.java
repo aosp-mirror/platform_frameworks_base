@@ -26,10 +26,10 @@ package android.graphics;
  * way that you define, when content added within the image exceeds the normal
  * bounds of the graphic. For a thorough explanation of a NinePatch image, 
  * read the discussion in the 
- * <a href="{@docRoot}reference/available-resources.html#ninepatch">Available 
- * Resource Types</a> document.
+ * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D
+ * Graphics</a> document.
  * <p>
- * The <a href="{@docRoot}reference/draw9patch.html">Draw 9-patch</a> 
+ * The <a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-Patch</a> 
  * tool offers an extremely handy way to create your NinePatch images,
  * using a WYSIWYG graphics editor.
  * </p>
@@ -48,6 +48,17 @@ public class NinePatch {
         mChunk = chunk;
         mSrcName = srcName;
         validateNinePatchChunk(mBitmap.ni(), chunk);
+    }
+
+    /**
+     * @hide
+     */
+    public NinePatch(NinePatch patch) {
+        mBitmap = patch.mBitmap;
+        mChunk = patch.mChunk;
+        mSrcName = patch.mSrcName;
+        mPaint = new Paint(patch.mPaint);
+        validateNinePatchChunk(mBitmap.ni(), mChunk);
     }
 
     public void setPaint(Paint p) {

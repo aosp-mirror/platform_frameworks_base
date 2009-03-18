@@ -532,7 +532,7 @@ public class GsmAlphabet
      * needed to represent this string. Counts unencodable char as 1 septet.
      */
     public static int
-    countGsmSeptets(String s)
+    countGsmSeptets(CharSequence s)
     {
         try {
             return countGsmSeptets(s, false);
@@ -549,7 +549,7 @@ public class GsmAlphabet
      * char. Otherwise, counts invalid char as 1 septet
      */
     public static int
-    countGsmSeptets(String s, boolean throwsException) throws EncodeException
+    countGsmSeptets(CharSequence s, boolean throwsException) throws EncodeException
     {
         int charIndex = 0;
         int sz = s.length();

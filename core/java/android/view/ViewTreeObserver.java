@@ -35,6 +35,7 @@ public final class ViewTreeObserver {
     private ArrayList<OnPreDrawListener> mOnPreDrawListeners;
     private ArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
     private ArrayList<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
+    private ArrayList<OnScrollChangedListener> mOnScrollChangedListeners;
 
     private boolean mAlive = true;
 
@@ -96,6 +97,20 @@ public final class ViewTreeObserver {
          * @param isInTouchMode True if the view hierarchy is now in touch mode, false  otherwise.
          */
         public void onTouchModeChanged(boolean isInTouchMode);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when
+     * something in the view tree has been scrolled.
+     * 
+     * @hide pending API council approval
+     */
+    public interface OnScrollChangedListener {
+        /**
+         * Callback method to be invoked when something in the view tree
+         * has been scrolled.
+         */
+        public void onScrollChanged();
     }
 
     /**
@@ -361,6 +376,44 @@ public final class ViewTreeObserver {
     }
 
     /**
+     * Register a callback to be invoked when a view has been scrolled.
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @hide pending API council approval
+     */
+    public void addOnScrollChangedListener(OnScrollChangedListener listener) {
+        checkIsAlive();
+
+        if (mOnScrollChangedListeners == null) {
+            mOnScrollChangedListeners = new ArrayList<OnScrollChangedListener>();
+        }
+
+        mOnScrollChangedListeners.add(listener);
+    }
+
+    /**
+     * Remove a previously installed scroll-changed callback
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnScrollChangedListener(OnScrollChangedListener)
+     *
+     * @hide pending API council approval
+     */
+    public void removeOnScrollChangedListener(OnScrollChangedListener victim) {
+        checkIsAlive();
+        if (mOnScrollChangedListeners == null) {
+            return;
+        }
+        mOnScrollChangedListeners.remove(victim);
+    }
+
+    /**
      * Register a callback to be invoked when the invoked when the touch mode changes.
      *
      * @param listener The callback to add
@@ -520,6 +573,19 @@ public final class ViewTreeObserver {
             final int count = touchModeListeners.size();
             for (int i = count - 1; i >= 0; i--) {
                 touchModeListeners.get(i).onTouchModeChanged(inTouchMode);
+            }
+        }
+    }
+
+    /**
+     * Notifies registered listeners that something has scrolled.
+     */
+    final void dispatchOnScrollChanged() {
+        final ArrayList<OnScrollChangedListener> listeners = mOnScrollChangedListeners;
+
+        if (listeners != null) {
+            for (OnScrollChangedListener scl : mOnScrollChangedListeners) {
+                scl.onScrollChanged();
             }
         }
     }

@@ -144,6 +144,10 @@ implements MovementMethod
     }
 
     public boolean onKeyDown(TextView widget, Spannable buffer, int keyCode, KeyEvent event) {
+        return executeDown(widget, buffer, keyCode);
+    }
+
+    private boolean executeDown(TextView widget, Spannable buffer, int keyCode) {
         boolean handled = false;
 
         switch (keyCode) {
@@ -171,6 +175,26 @@ implements MovementMethod
         return false;
     }
 
+    public boolean onKeyOther(TextView view, Spannable text, KeyEvent event) {
+        int code = event.getKeyCode();
+        if (code != KeyEvent.KEYCODE_UNKNOWN
+                && event.getAction() == KeyEvent.ACTION_MULTIPLE) {
+            int repeat = event.getRepeatCount();
+            boolean first = true;
+            boolean handled = false;
+            while ((--repeat) > 0) {
+                if (first && executeDown(view, text, code)) {
+                    handled = true;
+                    MetaKeyKeyListener.adjustMetaAfterKeypress(text);
+                    MetaKeyKeyListener.resetLockedMeta(text);
+                }
+                first = false;
+            }
+            return handled;
+        }
+        return false;
+    }
+    
     public boolean onTrackballEvent(TextView widget, Spannable text,
             MotionEvent event) {
         return false;

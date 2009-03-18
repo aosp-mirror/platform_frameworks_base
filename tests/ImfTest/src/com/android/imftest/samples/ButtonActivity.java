@@ -13,6 +13,8 @@ import android.widget.TextView;
 public class ButtonActivity extends Activity 
 {
     static boolean mKeyboardIsActive = false;
+    public static final int BUTTON_ID = 0;
+    private View mRootView;
     
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -23,6 +25,8 @@ public class ButtonActivity extends Activity
         final Button myButton = new Button(this);
         myButton.setClickable(true);
         myButton.setText("Keyboard UP!");
+        myButton.setId(BUTTON_ID);
+        myButton.setFocusableInTouchMode(true);
         myButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick (View v)
@@ -36,7 +40,8 @@ public class ButtonActivity extends Activity
                 }
                 else
                 {
-                    imm.showSoftInput(null, 0);
+                    myButton.requestFocusFromTouch();
+                    imm.showSoftInput(v, 0);
                     myButton.setText("Keyboard DOWN!");
                 }
                
@@ -48,5 +53,10 @@ public class ButtonActivity extends Activity
        layout.setOrientation(LinearLayout.VERTICAL);
        layout.addView(myButton);
        setContentView(layout);
+       mRootView = layout;
+    }
+    
+    public View getRootView() {
+        return mRootView;
     }
 }

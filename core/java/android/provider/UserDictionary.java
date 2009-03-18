@@ -25,10 +25,13 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 /**
- * 
- * @hide Pending API council approval
+ * A provider of user defined words for input methods to use for predictive text input.
+ * Applications and input methods may add words into the dictionary. Words can have associated
+ * frequency information and locale information.
  */
 public class UserDictionary {
+
+    /** Authority string for this provider. */
     public static final String AUTHORITY = "user_dictionary";
 
     /**
@@ -39,7 +42,6 @@ public class UserDictionary {
 
     /**
      * Contains the user defined words.
-     * @hide Pending API council approval
      */
     public static class Words implements BaseColumns {
         /**
@@ -67,14 +69,14 @@ public class UserDictionary {
         public static final String WORD = "word";
 
         /**
-         * The frequency column. A value between 1 and 255.
+         * The frequency column. A value between 1 and 255. Higher values imply higher frequency.
          * <p>TYPE: INTEGER</p>
          */
         public static final String FREQUENCY = "frequency";
 
         /**
          * The locale that this word belongs to. Null if it pertains to all
-         * locales. Locale is a 5 letter string such as <pre>en_US</pre>.
+         * locales. Locale is as defined by the string returned by Locale.toString().
          * <p>TYPE: TEXT</p>
          */
         public static final String LOCALE = "locale";
@@ -85,8 +87,10 @@ public class UserDictionary {
          */
         public static final String APP_ID = "appid";
 
+        /** The locale type to specify that the word is common to all locales. */
         public static final int LOCALE_TYPE_ALL = 0;
         
+        /** The locale type to specify that the word is for the current locale. */
         public static final int LOCALE_TYPE_CURRENT = 1;
         
         /**
@@ -94,7 +98,14 @@ public class UserDictionary {
          */
         public static final String DEFAULT_SORT_ORDER = FREQUENCY + " DESC";
 
-
+        /** Adds a word to the dictionary, with the given frequency and the specified
+         *  specified locale type.
+         *  @param context the current application context
+         *  @param word the word to add to the dictionary. This should not be null or
+         *  empty.
+         *  @param localeType the locale type for this word. It should be one of
+         *  {@link #LOCALE_TYPE_ALL} or {@link #LOCALE_TYPE_CURRENT}.
+         */
         public static void addWord(Context context, String word, 
                 int frequency, int localeType) {
             final ContentResolver resolver = context.getContentResolver();

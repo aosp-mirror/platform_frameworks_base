@@ -1,0 +1,565 @@
+page.title=&lt;activity&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;activity android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+          android:<a href="#always">alwaysRetainTaskState</a>=["true" | "false"]
+          android:<a href="#clear">clearTaskOnLaunch</a>=["true"" | "false"]
+          android:<a href="#config">configChanges</a>=[<i>one or more of</i>: "mcc" "mnc" "locale" 
+                                 "touchscreen" "keyboard" "keyboardHidden" 
+                                 "navigation" "orientation" "fontScale"]
+          android:<a href="#enabled">enabled</a>=["true" | "false"]
+          android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
+          android:<a href="#exported">exported</a>=["true" | "false"]
+          android:<a href="#finish">finishOnTaskLaunch</a>=["true" | "false"]
+          android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+          android:<a href="#label">label</a>="<i>string resource</i>"
+          android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" | 
+                              "singleTask" | "singleInstance"]
+          android:<a href="#multi">multiprocess</a>=["true" | "false"]
+          android:<a href="#nm">name</a>="<i>string</i>"
+          android:<a href="#prmsn">permission</a>="<i>string</i>"
+          android:<a href="#proc">process</a>="<i>string</i>"
+          android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
+                                     "landscape" | "portrait" | 
+                                     "sensor" | "nonsensor"]
+          android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
+          android:<a href="#aff">taskAffinity</a>="<i>string</i>"
+          android:<a href="#theme">theme</a>="<i>resource or theme</i>" &gt;
+    . . .
+&lt;/activity&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Declares an activity (an {@link android.app.Activity} subclass) that 
+implements part of the application's visual user interface.  All activities 
+must be represented by {@code &lt;activity&gt;} 
+elements in the manifest file.  Any that are not declared there will not be seen 
+by the system and will never be run.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a href name="reparent"></a>{@code android:allowTaskReparenting}</dt>
+<dd>Whether or not the activity can move from the task that started it to 
+the task it has an affinity for when that task is next brought to the 
+front &mdash; "{@code true}" if it can move, and "{@code false}" if it 
+must remain with the task where it started.  
+
+<p>
+If this attribute is not set, the value set by the corresponding 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#reparent">allowTaskReparenting</a></code>
+attribute of the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element 
+applies to the activity.  The default value is "{@code false}".
+</p>
+
+<p>
+Normally when an activity is started, it's associated with the task of 
+the activity that started it and it stays there for its entire lifetime.  
+You can use this attribute to force it to be re-parented to the task it 
+has an affinity for when its current task is no longer displayed.  
+Typically, it's used to cause the activities of an application to move 
+to the main task associated with that application.
+</p>
+
+<p>
+For example, if an e-mail message contains a link to a web page, clicking 
+the link brings up an activity that can display the page.  That activity 
+is defined by the browser application, but is launched as part of the e-mail 
+task.  If it's reparented to the browser task, it will be shown when the 
+browser next comes to the front, and will be absent when the e-mail task 
+again comes forward.
+</p>
+
+<p>
+The affinity of an activity is defined by the 
+<code><a href="#aff">taskAffinity</a></code> attribute.  The affinity 
+of a task is determined by reading the affinity of its root activity.
+Therefore, by definition, a root activity is always in a task with the
+same affinity.  Since activities with "{@code singleTask}" or 
+"{@code singleInstance}" launch modes can only be at the root of a task,
+re-parenting is limited to the "{@code standard}" and "{@code singleTop}" 
+modes.  (See also the <code><a href="#lmode">launchMode</a></code> 
+attribute.)
+</p></dd>
+
+<dt><a name="always"></a>{@code android:alwaysRetainTaskState}</dt>
+<dd>Whether or not the state of the task that the activity is in will always 
+be maintained by the system &mdash; "{@code true}" if it will be, and 
+"{@code false}" if the system is allowed to reset the task to its initial 
+state in certain situations.  The default value is "{@code false}".  This 
+attribute is meaningful only for the root activity of a task; it's ignored 
+for all other activities.
+
+<p>
+Normally, the system clears a task (removes all activities from the stack 
+above the root activity) in certain situations when the user re-selects that 
+task from the home screen.  Typically, this is done if the user hasn't visited 
+the task for a certain amount of time, such as 30 minutes.
+</p>
+
+<p>
+However, when this attribute is "{@code true}", users will always return 
+to the task in its last state, regardless of how they get there.  This is 
+useful, for example, in an application like the web browser where there is 
+a lot of state (such as multiple open tabs) that users would not like to lose.
+</p></dd>
+
+<dt><a name="clear"></a>{@code android:clearTaskOnLaunch}</dt>
+<dd>Whether or not all activities will be removed from the task, except for 
+the root activity, whenever it is re-launched from the home screen &mdash; 
+"{@code true}" if the task is always stripped down to its root activity, and 
+"{@code false}" if not.  The default value is "{@code false}".  This attribute 
+is meaningful only for activities that start a new task (the root activity); 
+it's ignored for all other activities in the task.
+
+<p>
+When the value is "{@code true}", every time users start the task again, they 
+are brought to its root activity, regardless of what they were last doing in 
+the task and regardless of whether they used BACK or HOME to last leave it.  
+When the value is "{@code false}", the task may be cleared of activities in 
+some situations (see the 
+<code><a href="#always">alwaysRetainTaskState</a></code> attribute), but not always.  
+</p>
+
+<p>
+Suppose, for example, that someone launches activity P from the home screen, 
+and from there goes to activity Q.  The user next presses HOME, and then returns 
+to activity P.  Normally, the user would see activity Q, since that is what they 
+were last doing in P's task.  However, if P set this flag to "{@code true}", all 
+of the activities on top of it (Q in this case) were removed when the user pressed 
+HOME and the task went to the background.  So the user sees only P when returning 
+to the task.
+</p>
+
+<p>
+If this attribute and <code><a href="#reparent">allowTaskReparenting</a></code> 
+are both "{@code true}", any activities that can be re-parented are moved to 
+the task they share an affinity with; the remaining activities are then dropped, 
+as described above.
+</p></dd>
+
+<dt><a name="config"></a>{@code android:configChanges}</dt>
+<dd>Lists configuration changes that the activity will handle itself.  When 
+changes that are not listed occur, the activity is shut down and restarted.  
+When a listed change occurs, the activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged onConfigurationChanged()}</code> 
+method is called.
+
+<p>
+Any or all of the following strings can be used to set this attribute.  Values are 
+separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientation}".
+</p>
+
+<table>
+<tr>
+   <td><b>Value</b></td>
+   <td><b>Description</b></td>
+</tr><tr>
+   <td>"{@code mcc}"</td>
+   <td>The IMSI mobile country code (MCC) has changed &mdash; 
+       that is, a SIM has been detected and updated the MCC.</td>
+</tr><tr>
+   <td>"{@code mnc}"</td>
+   <td>The IMSI mobile network code (MNC) has changed &mdash; 
+       that is, a SIM has been detected and updated the MNC.</td>
+</tr><tr>
+   <td>"{@code locale}"</td>
+   <td>The locale has changed &mdash; for example, the user has selected a new 
+       language that text should be displayed in.</td>
+</tr><tr>
+   <td>"{@code touchscreen}"</td>
+   <td>The touchscreen has changed.  (This should never normally happen.)</td>
+</tr><tr>
+   <td>"{@code keyboard}"</td>
+   <td>The keyboard type has changed &mdash; for example, the user has 
+       plugged in an external keyboard.</td>
+</tr><tr>
+   <td>"{@code keyboardHidden}"</td>
+   <td>The keyboard accessibility has changed &mdash; for example, the 
+       user has slid the keyboard out to expose it.</td>
+</tr><tr>
+   <td>"{@code navigation}"</td>
+   <td>The navigation type has changed.  (This should never normally happen.)</td>
+</tr><tr>
+   <td>"{@code orientation}"</td> 
+   <td>The screen orientation has changed &mdash; that is, the user has rotated 
+       the device.</td>
+ </tr><tr>
+  <td>"{@code fontScale}"</td>
+   <td>The font scaling factor has changed &mdash; that is, the user has selected 
+       a new global font size.</td>
+</tr>
+</table>
+
+<p>
+All of these configuration changes can impact the resource values seen by the 
+application.  Therefore, when <code>{@link android.app.Activity#onConfigurationChanged 
+onConfigurationChanged()}</code> is called, it will generally be necessary to again 
+retrieve all resources (including view layouts, drawables, and so on) to correctly 
+handle the change. 
+</p></dd>
+
+<dt><a name="enabled"></a>{@code android:enabled}</dt>
+<dd>Whether or not the activity can be instantiated by the system &mdash; 
+"{@code true}" if it can be, and "{@code false}" if not.  The default value 
+is "{@code true}".
+
+<p>
+The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
+application components, including activities.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;activity&gt;} 
+attributes must both be "{@code true}" (as they both are by default) for 
+the system to be able to instantiate the activity.  If either is 
+"{@code false}", it cannot be instantiated.
+</p></dd>
+
+<dt><a name="exclude"></a>{@code android:excludeFromRecents}</dt>
+<dd>Whether or not the activity should be excluded from the list of recently 
+launched activities that can be displayed to users &mdash; "{@code true}" if 
+it should be excluded, and "{@code false}" if it should be included.  
+The default value is "{@code false}".
+</p></dd>
+
+<dt><a name="exported"></a>{@code android:exported}</dt>
+<dd>Whether or not the activity can be launched by components of other 
+applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+If "{@code false}", the activity can be launched only by components of the 
+same application or applications with the same user ID.  
+
+<p>
+The default value depends on whether the activity contains intent filters.  The 
+absence of any filters means that the activity can be invoked only by specifying 
+its exact class name.  This implies that the activity is intended only for 
+application-internal use (since others would not know the class name).  So in 
+this case, the default value is "{@code false}".
+On the other hand, the presence of at least one filter implies that the activity 
+is intended for external use, so the default value is "{@code true}".
+</p>
+
+<p>
+This attribute is not the only way to limit an activity's exposure to other
+applications.  You can also use a permission to limit the external entities that 
+can invoke the activity  (see the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#prmsn">permission</a></code> 
+attribute).
+</p></dd>
+
+<dt><a name="finish"></a>{@code android:finishOnTaskLaunch}</dt>
+<dd>Whether or not an existing instance of the activity should be shut down 
+(finished) whenever the user again launches its task (chooses the task on the 
+home screen) &mdash; "{@code true}" if it should be shut down, and "{@code false}" 
+if not.  The default value is "{@code false}". 
+
+<p>
+If this attribute and <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code> 
+are both "{@code true}", this attribute trumps the other.  The affinity of the 
+activity is ignored.  The activity is not re-parented, but destroyed.
+</p>
+
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon representing the activity. The icon is displayed to users when 
+a representation of the activity is required on-screen.  For example, icons 
+for activities that initiate tasks are displayed in the launcher window.  
+The icon is often accompanied by a label (see the {@code label} attribute).
+</p>
+
+<p>
+This attribute must be set as a reference to a drawable resource containing 
+the image definition.  If it is not set, the icon specified for the application 
+as a whole is used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#icon">icon</a></code> attribute).
+</p>
+
+<p>
+The activity's icon &mdash; whether set here or by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element &mdash; is also the 
+default icon for all the activity's intent filters (see the 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#icon">icon</a></code> attribute). 
+</p></dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the activity.  The label is displayed on-screen 
+when the activity must be represented to the user. It's often displayed along 
+with the activity icon.
+
+<p>
+If this attribute is not set, the label set for the application as a whole is 
+used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#label">label</a></code> attribute).
+</p>
+
+<p>
+The activity's label &mdash; whether set here or by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element &mdash; is also the 
+default label for all the activity's intent filters (see the 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#label">label</a></code> attribute). 
+</p>
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p></dd>
+
+<dt><a name="lmode"></a>{@code android:launchMode}</dt>
+<dd>An instruction on how the activity should be launched.  There are four modes 
+that work in conjunction with activity flags ({@code FLAG_ACTIVITY_*} constants) 
+in {@link android.content.Intent} objects to determine what should happen when 
+the activity is called upon to handle an intent.  They are:
+
+<p style="margin-left: 2em">"{@code standard}"
+<br>"{@code singleTop}"
+<br>"{@code singleTask}"
+<br>"{@code singleInstance}"</p>
+
+<p>
+The default mode is "{@code standard}".
+</p>
+
+<p>
+The modes fall into two main groups, with "{@code standard}" and 
+"{@code singleTop}" activities on one side, and "{@code singleTask}" and 
+"{@code singleInstance}" activities on the other.  An activity with the 
+"{@code standard}" or "{@code singleTop}" launch mode can be instantiated 
+multiple times.  The instances can belong to any task and can be located 
+anywhere in the activity stack.  Typically, they're launched into the task 
+that called 
+<code>{@link android.content.Context#startActivity startActivity()}</code>
+(unless the Intent object contains a 
+<code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> 
+instruction, in which case a different task is chosen &mdash; see the 
+<a href="#aff">taskAffinity</a> attribute).
+</p>
+
+<p>
+In contrast, "{@code singleTask}" and "{@code singleInstance}" activities 
+can only begin a task.  They are always at the root of the activity stack. 
+Moreover, the device can hold only one instance of the activity at a time 
+&mdash; only one such task.
+</p>
+
+<p>
+The "{@code standard}" and "{@code singleTop}" modes differ from each other 
+in just one respect:  Every time there's new intent for a "{@code standard}" 
+activity, a new instance of the class is created to respond to that intent.  
+Each instance handles a single intent.
+Similarly, a new instance of a "{@code singleTop}" activity may also be 
+created to handle a new intent.  However, if the target task already has an 
+existing instance of the activity at the top of its stack, that instance 
+will receive the new intent (in an 
+<code>{@link android.app.Activity#onNewIntent onNewIntent()}</code> call);
+a new instance is not created.
+In other circumstances &mdash; for example, if an existing instance of the 
+"{@code singleTop}" activity is in the target task, but not at the top of 
+the stack, or if it's at the top of a stack, but not in the target task 
+&mdash; a new instance would be created and pushed on the stack.
+</p>  
+
+<p>
+The "{@code singleTask}" and "{@code singleInstance}" modes also differ from 
+each other in only one respect:  A "{@code singleTask}" activity allows other 
+activities to be part of its task.  It's at the root of the activity stack, 
+but other activities (necessarily "{@code standard}" and "{@code singleTop}" 
+activities) can be launched into the same task.  A "{@code singleInstance}" 
+activity, on the other hand, permits no other activities to be part of its 
+task.  It's the only activity in the task.  If it starts another activity, 
+that activity is assigned to a different task &mdash; as if {@code
+FLAG_ACTIVITY_NEW_TASK} was in the intent.
+</p>
+
+<p>For more information on launch modes and their interaction with Intent
+flags, see the 
+<a href="{@docRoot}guide/topics/fundamentals.html#acttask">Activities and 
+Tasks</a> section of the 
+<a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>
+document.
+</p>
+</dd>
+
+<dt><a name="multi"></a>{@code android:multiprocess}</dt>
+<dd>Whether an instance of the activity can be launched into the process of the component 
+that started it &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
+The default value is "{@code false}".
+
+<p>
+Normally, a new instance of an activity is launched into the process of the 
+application that defined it, so all instances of the activity run in the same 
+process.  However, if this flag is set to "{@code true}", instances of the 
+activity can run in multiple processes, allowing the system to create instances 
+wherever they are used (provided permissions allow it), something that is almost 
+never necessary or desirable.
+</p></dd>
+
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the class that implements the activity, a subclass of 
+{@link android.app.Activity}.  The attribute value should be a fully qualified 
+class name (such as, "{@code com.example.project.ExtracurricularActivity}").  
+However, as a shorthand, if the first character of the name is a period 
+(for example, "{@code .ExtracurricularActivity}"), it is appended to the 
+package name specified in the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+element.
+
+<p>
+There is no default.  The name must be specified.
+</p></dd>
+
+<dt><a name="prmsn"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have to launch the activity 
+or otherwise get it to respond to an intent.  If a caller of 
+<code>{@link android.content.Context#startActivity startActivity()}</code> or
+<code>{@link android.app.Activity#startActivityForResult startActivityForResult()}</code>
+has not been granted the specified permission, its intent will not be 
+delivered to the activity.
+
+<p>
+If this attribute is not set, the permission set by the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#prmsn">permission</a></code> attribute applies 
+to the activity.  If neither attribute is set, the activity is
+not protected by a permission.
+</p>
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
+section in the introduction and another document, 
+<a href="{@docRoot}guide/topics/security/security.html">Security and
+Permissions</a>.
+</p></dd>
+
+<dt><a name="proc"></a>{@code android:process}</dt>
+<dd>The name of the process in which the activity should run.  Normally, 
+all components of an application run in the default process created for the 
+application.  It has the same name as the application package.  The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> attribute can set a different 
+default for all components.  But each component can override the default,
+allowing you to spread your application across multiple processes.
+
+<p>
+If the name assigned to this attribute begins with a colon (':'), a new 
+process, private to the application, is created when it's needed and 
+the activity runs in that process.
+If the process name begins with a lowercase character, the activity will run 
+in a global process of that name, provided that it has permission to do so.
+This allows components in different applications to share a process, reducing 
+resource usage.
+</p></dd>
+
+<dt><a name="screen"></a>{@code android:screenOrientation}</dt>
+<dd>The orientation of the activity's display on the device.
+The value can be any one of the following strings:
+
+<table>
+<tr>
+   <td>"{@code unspecified}"</td>
+   <td>The default value.  The system chooses the orientation.  The policy it
+       uses, and therefore the choices made in specific contexts, may differ 
+       from device to device.</td>
+</tr><tr>
+   <td>"{@code landscape}"</td>
+   <td>Landscape orientation (the display is wider than it is tall).</td>
+</tr><tr>
+   <td>"{@code portrait}"</td>
+   <td>Portrait orientation (the display is taller than it is wide).</td>
+</tr><tr>
+   <td>"{@code user}"</td>
+   <td>The user's current preferred orientation.</td>
+</tr><tr>
+   <td>"{@code behind}"</td>
+   <td>The same orientation as the activity that's immediately beneath it in 
+       the activity stack.</td>
+</tr><tr>
+   <td>"{@code sensor}"</td>
+   <td>The orientation determined by a physical orientation sensor.  The 
+       orientation of the display depends on how the user is holding the device; 
+       it changes when the user rotates the device.</td>
+</tr><tr>
+   <td>"{@code nosensor}"</td>
+   <td>An orientation determined without reference to a physical orientation sensor.  
+       The sensor is ignored, so the display will not rotate based on how the user 
+       moves the device.  Except for this distinction, the system chooses the 
+       orientation using the same policy as for the "{@code unspecified}" setting.</td>
+</tr>
+</table></dd>
+
+<dt><a name="state"></a>{@code android:stateNotNeeded}</dt>
+<dd>Whether or not the activity can be killed and successfully restarted 
+without having saved its state &mdash; "{@code true}" if it can be restarted 
+without reference to its previous state, and "{@code false}" if its previous 
+state is required.  The default value is "{@code false}".
+
+<p>
+Normally, before an activity is temporarily shut down to save resources, its 
+<code>{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}</code> 
+method is called.  This method stores the current state of the activity in a 
+{@link android.os.Bundle} object, which is then passed to 
+<code>{@link android.app.Activity#onCreate onCreate()}</code> when the activity 
+is restarted.  If this attribute is set to "{@code true}", 
+{@code onSaveInstanceState()} may not be called and {@code onCreate()} will 
+be passed {@code null} instead of the Bundle &mdash; just as it was when the 
+activity started for the first time.
+</p>
+
+<p>
+A "{@code true}" setting ensures that the activity can be restarted in the 
+absence of retained state.  For example, the activity that displays the 
+home screen uses this setting to make sure that it does not get removed if it 
+crashes for some reason. 
+</p></dd>
+
+<dt><a name="aff"></a>{@code android:taskAffinity}</dt>
+<dd>The task that the activity has an affinity for.  Activities with 
+the same affinity conceptually belong to the same task (to the same
+"application" from the user's perspective).  The affinity of a task 
+is determined by the affinity of its root activity. 
+
+<p>
+The affinity determines two things &mdash; the task that the activity is re-parented 
+to (see the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code> 
+attribute) and the task that will house the activity when it is launched 
+with the <code>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</code> 
+flag.
+</p>
+
+<p>
+By default, all activities in an application have the same affinity.  You
+can set this attribute to group them differently, and even place
+activities defined in different applications within the same task.  To 
+specify that the activity does not have an affinity for any task, set
+it to an empty string.
+
+<p>
+If this attribute is not set, the activity inherits the affinity set 
+for the application (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">taskAffinity</a></code> attribute).  
+The name of the default affinity for an application is the package name set 
+by the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
+</p>
+
+<dt><a name="theme"></a>{@code android:theme}</dt>
+<dd>A reference to a style resource defining an overall theme for the activity.  
+This automatically sets the activity's context to use this theme (see
+<code>{@link android.content.Context#setTheme setTheme()}</code>, and may also 
+cause "starting" animations prior to the activity being launched (to better 
+match what the activity actually looks like).
+
+<p>
+If this attribute is not set, the activity inherits the theme set for the 
+application as a whole &mdash; see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#theme">theme</a></code> attribute.  If that attribute is 
+also not set, the default system theme is used.
+</p>
+<dd> 
+</dl></dd>
+
+</dl>

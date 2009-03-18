@@ -25,6 +25,8 @@
 #include <utils/RefBase.h>
 #include <ui/PixelFormat.h>
 
+#include <hardware/hardware.h>
+
 namespace android {
 
 typedef int32_t    SurfaceID;
@@ -34,11 +36,48 @@ class OverlayRef;
 
 class ISurface : public IInterface
 {
+protected:
+    enum {
+        REGISTER_BUFFERS = IBinder::FIRST_CALL_TRANSACTION,
+        UNREGISTER_BUFFERS,
+        POST_BUFFER, // one-way transaction
+        CREATE_OVERLAY,
+    };
+
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual status_t registerBuffers(int w, int h, int hstride, int vstride,
-            PixelFormat format, const sp<IMemoryHeap>& heap) = 0;
+    
+    class BufferHeap {
+    public:
+        enum {
+            /* rotate source image 90 degrees */
+            ROT_90    = HAL_TRANSFORM_ROT_90,
+        };
+        BufferHeap();
+        
+        BufferHeap(uint32_t w, uint32_t h,
+                int32_t hor_stride, int32_t ver_stride, 
+                PixelFormat format, const sp<IMemoryHeap>& heap);
+        
+        BufferHeap(uint32_t w, uint32_t h,
+                int32_t hor_stride, int32_t ver_stride, 
+                PixelFormat format, uint32_t transform, uint32_t flags,
+                const sp<IMemoryHeap>& heap);
+        
+        ~BufferHeap(); 
+        
+        uint32_t w;
+        uint32_t h;
+        int32_t hor_stride;
+        int32_t ver_stride;
+        PixelFormat format;
+        uint32_t transform;
+        uint32_t flags;
+        sp<IMemoryHeap> heap;
+    };
+    
+    virtual status_t registerBuffers(const BufferHeap& buffers) = 0;
 
     virtual void postBuffer(ssize_t offset) = 0; // one-way
 

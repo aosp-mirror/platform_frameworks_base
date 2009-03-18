@@ -16,12 +16,24 @@
 
 package android.util;
 
+import android.os.*;
+
 
 /**
  * A structure describing general information about a display, such as its
  * size, density, and font scaling.
  */
 public class DisplayMetrics {
+    /**
+     * The reference density used throughout the system.
+     * 
+     * @hide Pending API council approval
+     */
+    public static final int DEFAULT_DENSITY = 160;
+
+    private static final int sLcdDensity = SystemProperties.getInt("ro.sf.lcd_density",
+            DEFAULT_DENSITY);
+
     /**
      * The absolute width of the display in pixels.
      */
@@ -43,7 +55,9 @@ public class DisplayMetrics {
      * example, a 240x320 screen will have a density of 1 even if its width is 
      * 1.8", 1.3", etc. However, if the screen resolution is increased to 
      * 320x480 but the screen size remained 1.5"x2" then the density would be 
-     * increased (probably to 1.5). 
+     * increased (probably to 1.5).
+     *
+     * @see #DEFAULT_DENSITY
      */
     public float density;
     /**
@@ -60,7 +74,7 @@ public class DisplayMetrics {
      * The exact physical pixels per inch of the screen in the Y dimension.
      */
     public float ydpi;
-    
+
     public DisplayMetrics() {
     }
     
@@ -76,10 +90,9 @@ public class DisplayMetrics {
     public void setToDefaults() {
         widthPixels = 0;
         heightPixels = 0;
-        density = 1;
-        scaledDensity = 1;
-        xdpi = 160;
-        ydpi = 160;
+        density = sLcdDensity / (float) DEFAULT_DENSITY;
+        scaledDensity = density;
+        xdpi = sLcdDensity;
+        ydpi = sLcdDensity;
     }
 }
-

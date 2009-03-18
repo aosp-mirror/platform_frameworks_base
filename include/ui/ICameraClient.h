@@ -32,9 +32,10 @@ public:
     virtual void            shutterCallback() = 0;
     virtual void            rawCallback(const sp<IMemory>& picture) = 0;
     virtual void            jpegCallback(const sp<IMemory>& picture) = 0;
-    virtual void            frameCallback(const sp<IMemory>& frame) = 0;
+    virtual void            previewCallback(const sp<IMemory>& frame) = 0;
     virtual void            errorCallback(status_t error) = 0;
     virtual void            autoFocusCallback(bool focused) = 0;
+    virtual void            recordingCallback(const sp<IMemory>& frame) = 0;
 
 };
 

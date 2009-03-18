@@ -86,6 +86,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
     void requestPss() throws RemoteException;
+    void profilerControl(boolean start, String path) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -115,4 +116,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_ACTIVITY_CONFIGURATION_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+24;
     int SCHEDULE_RELAUNCH_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+25;
     int REQUEST_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+26;
+    int PROFILER_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+27;
 }

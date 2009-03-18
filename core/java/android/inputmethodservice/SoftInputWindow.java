@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.WindowManager;
@@ -139,6 +140,9 @@ class SoftInputWindow extends Dialog {
 
         lp.gravity = Gravity.BOTTOM;
         lp.width = -1;
+        // Let the input method window's orientation follow sensor based rotation
+        // Turn this off for now, it is very problematic.
+        //lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
 
         getWindow().setAttributes(lp);
         getWindow().setFlags(

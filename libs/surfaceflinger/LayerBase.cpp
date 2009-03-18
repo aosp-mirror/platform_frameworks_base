@@ -23,6 +23,11 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
+#include <hardware/hardware.h>
+
 #include "clz.h"
 #include "LayerBase.h"
 #include "LayerBlur.h"
@@ -110,6 +115,12 @@ void LayerBase::commitTransaction(bool skipSize) {
         mDrawingState.w = w;
         mDrawingState.h = h;
     }
+}
+void LayerBase::forceVisibilityTransaction() {
+    // this can be called without SurfaceFlinger.mStateLock, but if we
+    // can atomically increment the sequence number, it doesn't matter.
+    android_atomic_inc(&mCurrentState.sequence);
+    requestTransaction();
 }
 bool LayerBase::requestTransaction() {
     int32_t old = setTransactionFlags(eTransactionNeeded);
@@ -350,6 +361,10 @@ void LayerBase::draw(const Region& inClip) const
             return;
         }        
     }
+
+    // reset GL state
+    glEnable(GL_SCISSOR_TEST);
+
     onDraw(clip);
 
     /*
@@ -391,6 +406,7 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     Rect r;
     Region::iterator iterator(clip);
     if (iterator) {
+        glEnable(GL_SCISSOR_TEST);
         glVertexPointer(2, GL_FIXED, 0, mVertices);
         while (iterator.iterate(&r)) {
             const GLint sy = fbHeight - (r.top + r.height());
@@ -401,7 +417,7 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
 }
 
 void LayerBase::drawWithOpenGL(const Region& clip,
-        GLint textureName, const GGLSurface& t) const
+        GLint textureName, const GGLSurface& t, int transform) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
@@ -473,6 +489,12 @@ void LayerBase::drawWithOpenGL(const Region& clip,
 
             glMatrixMode(GL_TEXTURE);
             glLoadIdentity();
+            
+            if (transform == HAL_TRANSFORM_ROT_90) {
+                glTranslatef(0, 1, 0);
+                glRotatef(-90, 0, 0, 1);
+            }
+
             if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
                 // find the smallest power-of-two that will accommodate our surface
                 GLuint tw = 1 << (31 - clz(t.width));

@@ -30,9 +30,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
 /**
- * Contract class for {@link android.server.checkin.CheckinProvider}.
+ * Contract class for the checkin provider, used to store events and
+ * statistics that will be uploaded to a checkin server eventually.
  * Describes the exposed database schema, and offers methods to add
  * events and statistics to be uploaded.
+ *
+ * TODO: Move this to vendor/google when we have a home for it.
  *
  * @hide
  */
@@ -56,6 +59,15 @@ public final class Checkin {
 
         /** Valid tag values.  Extend as necessary for your needs. */
         public enum Tag {
+            AUTOTEST_FAILURE,
+            AUTOTEST_SEQUENCE_BEGIN,
+            AUTOTEST_SUITE_BEGIN,
+            AUTOTEST_TCPDUMP_BEGIN,
+            AUTOTEST_TCPDUMP_DATA,
+            AUTOTEST_TCPDUMP_END,
+            AUTOTEST_TEST_BEGIN,
+            AUTOTEST_TEST_FAILURE,
+            AUTOTEST_TEST_SUCCESS,
             BROWSER_BUG_REPORT,
             CARRIER_BUG_REPORT,
             CHECKIN_FAILURE,
@@ -88,14 +100,15 @@ public final class Checkin {
             SETUP_RETRIES_EXHAUSTED,
             SETUP_SERVER_ERROR,
             SETUP_SERVER_TIMEOUT,
-            SYSTEM_APP_NOT_RESPONDING,
+            SETUP_NO_DATA_NETWORK,
             SYSTEM_BOOT,
             SYSTEM_LAST_KMSG,
             SYSTEM_RECOVERY_LOG,
             SYSTEM_RESTART,
             SYSTEM_SERVICE_LOOPING,
             SYSTEM_TOMBSTONE,
-            TEST,
+            TEST, 
+            BATTERY_DISCHARGE_INFO,
         }
     }
 
@@ -116,6 +129,9 @@ public final class Checkin {
 
         /** Valid tag values.  Extend as necessary for your needs. */
         public enum Tag {
+            BROWSER_SNAP_CENTER,
+            BROWSER_TEXT_SIZE_CHANGE,
+            BROWSER_ZOOM_OVERVIEW,
             CRASHES_REPORTED,
             CRASHES_TRUNCATED,
             ELAPSED_REALTIME_SEC,
@@ -175,6 +191,9 @@ public final class Checkin {
 
         // The category is used for GTalk service messages
         public static final String CATEGORY = "android.server.checkin.CHECKIN";
+        
+        // If true indicates that the checkin should only transfer market related data
+        public static final String EXTRA_MARKET_ONLY = "market_only";
     }
 
     private static final String TAG = "Checkin";
@@ -195,8 +214,11 @@ public final class Checkin {
             values.put(Events.TAG, tag.toString());
             if (value != null) values.put(Events.VALUE, value);
             return resolver.insert(Events.CONTENT_URI, values);
+        } catch (IllegalArgumentException e) {  // thrown when provider is unavailable.
+            Log.w(TAG, "Can't log event " + tag + ": " + e);
+            return null;
         } catch (SQLException e) {
-            Log.e(TAG, "Can't log event: " + tag, e);  // Database errors are not fatal.
+            Log.e(TAG, "Can't log event " + tag, e);  // Database errors are not fatal.
             return null;
         }
     }
@@ -218,8 +240,11 @@ public final class Checkin {
             if (count != 0) values.put(Stats.COUNT, count);
             if (sum != 0.0) values.put(Stats.SUM, sum);
             return resolver.insert(Stats.CONTENT_URI, values);
+        } catch (IllegalArgumentException e) {  // thrown when provider is unavailable.
+            Log.w(TAG, "Can't update stat " + tag + ": " + e);
+            return null;
         } catch (SQLException e) {
-            Log.e(TAG, "Can't update stat: " + tag, e);  // Database errors are not fatal.
+            Log.e(TAG, "Can't update stat " + tag, e);  // Database errors are not fatal.
             return null;
         }
     }
@@ -285,4 +310,3 @@ public final class Checkin {
         }
     }
 }
-

@@ -114,6 +114,16 @@ static int unmount(const char* path) {
     return -1;
 }
 
+static int format(const char* path) {
+    String16 string(path);
+
+    if (isMounted(path))
+        return -EBUSY;
+    gMountService->formatMedia(string);
+
+    return 0;
+}
+
 static int umsEnable(bool enable) {
     gMountService->setMassStorageEnabled(enable);
     return 0;
@@ -129,6 +139,9 @@ int main(int argc, char **argv)
     if (strcmp(command, "mount") == 0) {
         android::init();
         return android::mount(argument);
+    } else if (strcmp(command, "format") == 0) {
+        android::init();
+        return android::format(argument);
     } else if (strcmp(command, "unmount") == 0) {
         android::init();
         return android::unmount(argument);
@@ -145,6 +158,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "usage:\n"
                     "    sdutil mount <mount path>          - mounts the SD card at the given mount point\n"
                     "    sdutil unmount <mount path>        - unmounts the SD card at the given mount point\n"
+                    "    sdutil format <mount path>         - formats the SD card at the given mount point\n"
                     "    sdutil ums enable                  - enables USB mass storage\n"
                     "    sdutil ums disable                 - disnables USB mass storage\n"
                     );

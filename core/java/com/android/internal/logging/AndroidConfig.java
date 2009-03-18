@@ -34,11 +34,14 @@ public class AndroidConfig {
         super();
         
         try {
-            Logger.global.addHandler(new AndroidHandler());
-            Logger.global.setLevel(Level.ALL);
+            Logger rootLogger = Logger.getLogger("");
+            rootLogger.addHandler(new AndroidHandler());
+            rootLogger.setLevel(Level.INFO);
+
+            // Turn down logging in Apache libraries.
+            Logger.getLogger("org.apache").setLevel(Level.WARNING);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-    
+    }    
 }

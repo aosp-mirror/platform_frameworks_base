@@ -403,12 +403,6 @@ void glGetIntegerv(GLenum pname, GLint *params)
     case GL_IMPLEMENTATION_COLOR_READ_TYPE_OES:
         params[0] = GL_UNSIGNED_SHORT_5_6_5;
         break;
-    case GL_MAX_ELEMENTS_INDICES:
-        params[0] = 65536;
-        break;
-    case GL_MAX_ELEMENTS_VERTICES:
-        params[0] = 0x7FFFFFFF;
-        break;
     case GL_MAX_LIGHTS:
         params[0] = OGLES_MAX_LIGHTS;
         break;

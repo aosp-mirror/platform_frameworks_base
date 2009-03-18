@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,9 +55,10 @@ public class ZoomButton extends ImageButton implements OnLongClickListener {
     public ZoomButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mHandler = new Handler();
-        mGestureDetector = new GestureDetector(new SimpleOnGestureListener() {
+        mGestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 onLongClick(ZoomButton.this);
             }
         });

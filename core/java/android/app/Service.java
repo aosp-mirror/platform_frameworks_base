@@ -42,12 +42,12 @@ import java.io.PrintWriter;
  * thread of their hosting process.  This means that, if your service is going
  * to do any CPU intensive (such as MP3 playback) or blocking (such as
  * networking) operations, it should spawn its own thread in which to do that
- * work.  More information on this can be found in the
- * <a href="{@docRoot}intro/appmodel.html#Threads">Threading section of the
- * Application Model overview</a>.</p>
+ * work.  More information on this can be found in
+ * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+ * Processes and Threads</a>.</p>
  * 
  * <p>The Service class is an important part of an
- * <a href="{@docRoot}intro/lifecycle.html">application's overall lifecycle</a>.</p>
+ * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">application's overall lifecycle</a>.</p>
  * 
  * <p>Topics covered here:
  * <ol>
@@ -79,7 +79,7 @@ import java.io.PrintWriter;
  * to the service.  The service will remain running as long as the connection
  * is established (whether or not the client retains a reference on the
  * service's IBinder).  Usually the IBinder returned is for a complex
- * interface that has been <a href="{@docRoot}reference/aidl.html">written
+ * interface that has been <a href="{@docRoot}guide/developing/tools/aidl.html">written
  * in aidl</a>.
  * 
  * <p>A service can be both started and have connections bound to it.  In such
@@ -106,7 +106,7 @@ import java.io.PrintWriter;
  * {@link #checkCallingPermission}
  * method before executing the implementation of that call.
  * 
- * <p>See the <a href="{@docRoot}devel/security.html">Security Model</a>
+ * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
  * document for more information on permissions and security in general.
  * 
  * <a name="ProcessLifecycle"></a>
@@ -201,14 +201,14 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Return the communication channel to the service.  May return null if 
      * clients can not bind to the service.  The returned
      * {@link android.os.IBinder} is usually for a complex interface
-     * that has been <a href="{@docRoot}reference/aidl.html">described using
+     * that has been <a href="{@docRoot}guide/developing/tools/aidl.html">described using
      * aidl</a>.
      * 
      * <p><em>Note that unlike other application components, calls on to the
      * IBinder interface returned here may not happen on the main thread
      * of the process</em>.  More information about this can be found
-     * in the <a href="{@docRoot}intro/appmodel.html#Threads">Threading section
-     * of the Application Model overview</a>.</p>
+     * in <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.</p>
      * 
      * @param intent The Intent that was used to bind to this service,
      * as given to {@link android.content.Context#bindService
@@ -327,11 +327,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Print the Service's state into the given stream.
+     * Print the Service's state into the given stream.  This gets invoked if
+     * you run "adb shell dumpsys activity service <yourservicename>".
+     * This is distinct from "dumpsys <servicename>", which only works for
+     * named system services and which invokes the {@link IBinder#dump} method
+     * on the {@link IBinder} interface registered with ServiceManager.
      *
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer The PrintWriter to which you should dump your state.  This will be
- * closed for you after you return.
+     * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {

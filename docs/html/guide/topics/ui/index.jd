@@ -1,0 +1,235 @@
+page.title=User Interface
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.widget Widget classes}</li>
+  </ol>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#ViewHierarchy">View Hierarchy</a></li>
+    <li><a href="#Layout">Layout</a></li>
+    <li><a href="#Widgets">Widgets</a></li>
+    <li><a href="#Events">UI Events</a></li>
+    <li><a href="#Menus">Menus</a></li>
+    <li><a href="#Advanced">Advanced Topics</a>
+      <ol>
+        <li><a href="#Adapters">Adapters</a></li>
+        <li><a href="#StylesAndThemes">Styles and Themes</a></li>
+      </ol>
+    </li>
+  </ol>
+</div>
+</div>
+
+<p>In an Android application, the user interface is built using {@link android.view.View} and 
+{@link android.view.ViewGroup} objects. There are many types of views and view groups, each of which 
+is a descendant of the {@link android.view.View} class.</p>
+
+<p>View objects are the basic units of user interface expression on the Android platform. 
+The View class serves as the base for subclasses called "widgets," which offer fully implemented
+UI objects, like text fields and buttons. The ViewGroup class serves as the base for subclasses called "layouts,"
+which offer different kinds of layout architecture, like linear, tabular and relative.</p>
+
+<p>A View object is a data structure whose properties store the layout parameters and content for a specific 
+rectangular area of the screen. A View object handles its own measurement, layout, drawing, focus change, 
+scrolling, and key/gesture interactions for the rectangular area of the screen in which it resides. As an
+object in the user interface, a View is also a point of interaction for the user and the receiver
+of the interaction events.</p>
+
+
+<h2 id="ViewHierarchy">View Hierarchy</h2>
+
+<p>On the Android platform, you define an Activity's UI using a hierarchy of View and ViewGroup nodes, 
+as shown in the diagram below. This hierarchy tree can be as simple or complex as you need it to be, and you 
+can build it up using Android's set of predefined widgets and layouts, or with custom Views that you 
+create yourself.</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" width="312" height="211" align="center"/>
+
+<p>
+In order to attach the view hierarchy tree to the screen for rendering, your Activity must call the
+<code>{@link android.app.Activity#setContentView(int) setContentView()}</code> 
+method and pass a reference to the root node object. The Android system
+receives this reference and uses it to invalidate, measure, and draw the tree. The root node of the hierarchy requests 
+that its child nodes draw themselves &mdash; in turn, each view group node is responsible for calling 
+upon each of its own child views to draw themselves.
+The children may request a size and location within the parent, but the parent object has the final 
+decision on where how big each child can be.  Android parses 
+the elements of your layout in-order (from the top of the hierarchy tree), instantiating the Views and 
+adding them to their parent(s). Because these are drawn in-order, if there are elements that
+overlap positions, the last one to be drawn will lie on top of others previously drawn to that space.</p>
+
+<p>For a more detailed discussion on how view hierarchies are measured
+and drawn, read <a href="how-android-draws.html">How Android Draws Views</a>.</p>
+
+
+<h2 id="Layout">Layout</h2>
+
+<p>The most common way to define your layout and express the view hierarchy is with an XML layout file.
+XML offers a human-readable structure for the layout, much like HTML. Each element in XML is 
+either a View or ViewGroup object (or descendent thereof). View objects are leaves in the tree, 
+ViewGroup objects are branches in the tree (see the View Hierarchy figure above).</p>
+<p>The name of an XML element
+is respective to the Java class that it represents. So a <code>&lt;TextView></code> element creates
+a {@link android.widget.TextView} in your UI, and a <code>&lt;LinearLayout></code> element creates
+a {@link android.widget.LinearLayout} view group. When you load a layout resource, 
+the Android system initializes these run-time objects, corresponding to the elements in your layout.</p>
+
+<p>For example, a simple vertical layout with a text view and a button looks like this:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Notice that the LinearLayout element contains both the TextView and the Button. You can nest
+another LinearLayout (or other type of view group) inside here, to lengthen the view hierarchy and create a more
+complex layout.</p>
+
+<p>For more on building a UI layout, read <a href="declaring-layout.html">Declaring Layout</a>.
+
+<div class="sidebox-wrapper">
+<div class="sidebox-inner">
+  <p><b>Tip:</b> You can also draw View and ViewGroups objects in Java code, 
+  using the <code>{@link android.view.ViewGroup#addView(View)}</code> methods 
+  to dynamically insert new View and ViewGroup objects.</p>
+</div>
+</div>
+
+<p>There are a variety of ways in which you can layout your views. Using more and different kinds of view groups,
+you can structure child views and view groups in an infinite number of ways.
+Some pre-defined view groups offered by Android (called layouts) include LinearLayout, RelativeLayout, AbsoluteLayout,
+TableLayout, GridLayout and others. Each offers a unique set of layout parameters that are used to define the
+positions of child views and layout structure.</p>
+<p>To learn about some of the different kinds of view groups used for a layout, 
+read <a href="layout-objects.html">Common Layout Objects</a>.</p>
+
+
+<h2 id="Widgets">Widgets</h2>
+
+<p>A widget is a View object that serves as an interface for interaction with the user. 
+Android provides a set of fully implemented 
+widgets, like buttons, checkboxes, and text-entry fields, so you can quickly build your UI. 
+Some widgets provided by Android are more complex, like a date picker, a clock, and zoom controls.
+But you're not limited to the kinds of widgets provided by the Android platform. If you'd
+like to do something more customized and create your own actionable elements, you can, by defining your own 
+View object or by extending and combining existing widgets.</p>
+<p>Read more in <a href="custom-components.html">Building Custom Components</a>.</p>
+
+<p>For a list of the widgets provided by Android, see the {@link android.widget} package.</p>
+
+
+<h2 id="Events">UI Events</h2>
+
+<p>Once you've added some Views/widgets to the UI, you probably want to know about the 
+user's interaction with them, so you can perform actions. To be informed of UI events, you need to 
+do one of two things:</p>
+<ul>
+  <li><strong>Define an event listener and register it with the View.</strong> More often than not,
+this is how you'll listen for events. The View class contains a collection of nested interfaces named
+On<em>&lt;something></em>Listener, each with a callback method called <code>On<em>&lt;something></em>()</code>.
+For example, {@link android.view.View.OnClickListener} (for handling "clicks" on a View),
+{@link android.view.View.OnTouchListener} (for handling touch screen events in a View), and
+{@link android.view.View.OnKeyListener} (for handling device key presses within a View). So if you want your View
+to be notified when it is "clicked" (such as when a button is selected), implement OnClickListener and define
+its <code>onClick()</code> callback method (where you perform the action upon click), and register it
+to the View with <code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code>.
+</li>
+  <li><strong>Override an existing callback method for the View.</strong> This is
+what you should do when you've implemented your own View class and want to listen for specific events 
+that occur within it. Example events you can handle include when the
+screen is touched (<code>{@link android.view.View#onTouchEvent(MotionEvent) onTouchEvent()}</code>), when
+the trackball is moved (<code>{@link android.view.View#onTrackballEvent(MotionEvent) onTrackballEvent()}</code>), 
+or when a key on the device is pressed (<code>{@link android.view.View#onKeyDown(int, KeyEvent)
+onKeyDown()}</code>). This allows you to define the default behavior for each event inside your custom View and determine
+whether the event should be passed on to some other child View. Again, these are callbacks to the View class,
+so your only chance to define them is when you 
+<a href="{@docRoot}guide/topics/ui/custom-components.html">build a custom component</a>.
+</li>
+</ul>
+
+<p>Continue reading about handling user interaction with Views in the <a href="ui-events.html">Handling UI Events</a>
+document.</p>
+
+
+<h2 id="Menus">Menus</h2>
+
+<p>Application menus are another important part of an application's UI. Menus offers a reliable interface that reveals
+application functions and settings. The most common application menu is revealed by pressing
+the MENU key on the device. However, you can also add Context Menus, which may be revealed when the user presses
+and holds down on an item.</p>
+
+<p>Menus are also structured using a View hierarchy, but you don't define this structure yourself. Instead,
+you define the <code>{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}</code> or 
+<code>{@link android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo) onCreateContextMenu()}</code> 
+callback methods for your Activity and declare the items that you want to include in your menu. 
+At the appropriate time, Android will automatically create the necessary View hierarchy for the menu and 
+draw each of your menu items in it.</p>
+
+<p>Menus also handle their own events, so there's no need to register event listeners on the items in your menu.
+When an item in your menu is selected, the <code>{@link android.app.Activity#onOptionsItemSelected(MenuItem) 
+onOptionsItemSelected()}</code> or 
+<code>{@link android.app.Activity#onContextItemSelected(MenuItem) onContextItemSelected()}</code>
+method will be called by the framework.</p>
+
+<p>And just like your application layout, you have the option to declare the items for you menu in an XML file.</p>
+
+<p>Read <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a> to learn more.</p>
+
+
+<h2 id="Advanced">Advanced Topics</h2>
+
+<p>Once you've grappled the fundamentals of creating a user interface, you can explore
+some advanced features for creating a more complex application interface.</p>
+
+<h3 id="Adapters">Adapters</h3>
+
+<p>Sometimes you'll want to populate a view group with some information that can't be hard-coded, instead, 
+you want to bind your view to an external source of data. To do this, you use an AdapterView as
+your view group and each child View is initialized and populated with data from the Adapter.</p>
+<p>The AdapterView object is an implementation of ViewGroup that determines its child views
+based on a given Adapter object. The Adapter acts like a courier between your data source (perhaps an
+array of external strings) and the AdapterView, which displays it. There are several implementations
+of the Adapter class, for specific tasks, such as the CursorAdapter for reading database data from a Cursor,
+or an ArrayAdapter for reading from an arbitrary array.</p>
+<p>To learn more about using an Adapter to populate your views, read 
+<a href="binding.html">Binding to Data with AdapterView</a>.</p>
+
+
+<h3 id="StylesAndThemes">Styles and Themes</h3>
+
+<p>Perhaps you're not satisfied with the look of the standard widgets. To revise them, you can create some 
+of your own styles and themes.</p>
+
+<ul>
+  <li>A style is a set of one or more formatting attributes that you can apply as a unit to individual elements 
+in your layout. For example, you could define a style that specifies a certain text size and color, then 
+apply it to only specific View elements.</li>
+  <li>A theme is a set of one or more formatting attributes that you can apply as a unit to all activities in 
+an application, or just a single activity. For example, you could define a theme that sets specific colors for 
+the window frame and the panel background, and sets text sizes and colors for menus. This theme can then be 
+applied to specific activities or the entire application.</li>
+</ul>
+
+<p>Styles and themes are resources. Android provides some default style and theme resources that you can use, 
+or you can declare your own custom style and theme resources.</p>
+<p>Learn more about using styles and themes in the
+<a href="themes.html">Applying Styles and Themes</a> document.</p>

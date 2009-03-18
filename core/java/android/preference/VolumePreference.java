@@ -194,13 +194,6 @@ public class VolumePreference extends SeekBarPreference implements
         }
         
         private void sample() {
-    
-            // Only play a preview sample when controlling the ringer stream
-            if (mStreamType != AudioManager.STREAM_RING
-                    && mStreamType != AudioManager.STREAM_NOTIFICATION) {
-                return;
-            }
-    
             onSampleStarting(this);
             mRingtone.play();
         }

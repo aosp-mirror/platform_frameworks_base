@@ -1,11 +1,11 @@
 package android.content;
 
-import com.google.android.net.NetStats;
-
 import android.database.SQLException;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.NetStat;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Config;
@@ -177,7 +177,8 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
         private final Bundle mExtras;
         private final SyncContext mSyncContext;
         private volatile boolean mIsCanceled = false;
-        private long[] mNetStats;
+        private long mInitialTxBytes;
+        private long mInitialRxBytes;
         private final SyncResult mResult;
 
         SyncThread(SyncContext syncContext, String account, Bundle extras) {
@@ -193,15 +194,18 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             if (mAdapterSyncStarted) onSyncCanceled();
             if (mProviderSyncStarted) mProvider.onSyncCanceled();
             // We may lose the last few sync events when canceling.  Oh well.
-            long[] newNetStats = NetStats.getStats();
-            logSyncDetails(newNetStats[0] - mNetStats[0], newNetStats[1] - mNetStats[1], mResult);
+            int uid = Process.myUid();
+            logSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
+                    NetStat.getUidRxBytes(uid) - mInitialRxBytes, mResult);
         }
         
         @Override
         public void run() {
-            android.os.Process.setThreadPriority(android.os.Process.myTid(),
-                    android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            mNetStats = NetStats.getStats();
+            Process.setThreadPriority(Process.myTid(),
+                    Process.THREAD_PRIORITY_BACKGROUND);
+            int uid = Process.myUid();
+            mInitialTxBytes = NetStat.getUidTxBytes(uid);
+            mInitialRxBytes = NetStat.getUidRxBytes(uid);
             try {
                 sync(mSyncContext, mAccount, mExtras);
             } catch (SQLException e) {
@@ -210,8 +214,8 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             } finally {
                 mSyncThread = null;
                 if (!mIsCanceled) {
-                    long[] newNetStats = NetStats.getStats();
-                    logSyncDetails(newNetStats[0] - mNetStats[0], newNetStats[1] - mNetStats[1], mResult);
+                    logSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
+                    NetStat.getUidRxBytes(uid) - mInitialRxBytes, mResult);
                     mSyncContext.onFinished(mResult);
                 }
             }

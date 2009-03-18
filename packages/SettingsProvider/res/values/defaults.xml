@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+-->
+<resources>
+    <bool name="def_dim_screen">true</bool>
+    <integer name="def_screen_off_timeout">60000</integer>
+    <bool name="def_airplane_mode_on">false</bool>
+    <!-- Comma-separated list of bluetooth, wifi, and cell. -->
+    <string name="def_airplane_mode_radios">cell,bluetooth,wifi</string>
+    <bool name="def_auto_time">true</bool>
+    <bool name="def_accelerometer_rotation">true</bool>
+    <!-- Default screen brightness, from 0 to 255.  102 is 40%. -->
+    <integer name="def_screen_brightness">102</integer>
+    <fraction name="def_window_animation_scale">100%</fraction>
+    <fraction name="def_window_transition_scale">0%</fraction>
+    
+    <bool name="def_bluetooth_on">false</bool>
+    <bool name="def_install_non_market_apps">false</bool>
+    <!-- Comma-separated list of providers. -->
+    <string name="def_location_providers_allowed">network</string>
+    <!--  0 == mobile, 1 == wifi. -->
+    <integer name="def_network_preference">1</integer>
+    <bool name="def_usb_mass_storage_enabled">true</bool>
+    <bool name="def_wifi_on">false</bool>
+    <bool name="def_networks_available_notification_on">true</bool>
+</resources>

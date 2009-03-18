@@ -28,17 +28,20 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.DefaultPhoneNotifier;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneStateIntentReceiver;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.server.am.BatteryStatsService;
 
 
 /**
@@ -55,8 +58,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int events;
     }
 
-    private Context mContext;
-    private ArrayList<Record> mRecords = new ArrayList();
+    private final Context mContext;
+    private final ArrayList<Record> mRecords = new ArrayList();
+    private final IBatteryStats mBatteryStats;
 
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
     private String mCallIncomingNumber = "";
@@ -81,6 +85,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     TelephonyRegistry(Context context) {
         CellLocation.getEmpty().fillInNotifierBundle(mCellLocation);
         mContext = context;
+        mBatteryStats = BatteryStatsService.getService();
     }
 
     public void listen(String pkgForDebug, IPhoneStateListener callback, int events,
@@ -183,6 +188,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCallState(int state, String incomingNumber) {
+        if (!checkPhoneStatePermission("notifyCallState()")) {
+            return;
+        }
         synchronized (mRecords) {
             mCallState = state;
             mCallIncomingNumber = incomingNumber;
@@ -202,6 +210,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyServiceState(ServiceState state) {
+        if (!checkPhoneStatePermission("notifyServiceState()")) {
+            return;
+        }      
         synchronized (mRecords) {
             mServiceState = state;
             final int N = mRecords.size();
@@ -216,6 +227,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifySignalStrength(int signalStrengthASU) {
+        if (!checkPhoneStatePermission("notifySignalStrength()")) {
+            return;
+        }      
         synchronized (mRecords) {
             mSignalStrength = signalStrengthASU;
             final int N = mRecords.size();
@@ -234,6 +248,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyMessageWaitingChanged(boolean mwi) {
+        if (!checkPhoneStatePermission("notifyMessageWaitingChanged()")) {
+            return;
+        }      
         synchronized (mRecords) {
             mMessageWaiting = mwi;
             final int N = mRecords.size();
@@ -251,6 +268,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
+        if (!checkPhoneStatePermission("notifyCallForwardingChanged()")) {
+            return;
+        }   
         synchronized (mRecords) {
             mCallForwarding = cfi;
             final int N = mRecords.size();
@@ -268,6 +288,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataActivity(int state) {
+        if (!checkPhoneStatePermission("notifyDataActivity()")) {
+            return;
+        }   
         synchronized (mRecords) {
             mDataActivity = state;
             final int N = mRecords.size();
@@ -286,6 +309,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPissible,
             String reason, String apn, String interfaceName) {
+        if (!checkPhoneStatePermission("notifyDataConnection()")) {
+            return;
+        }   
         synchronized (mRecords) {
             mDataConnectionState = state;
             mDataConnectionPossible = isDataConnectivityPissible;
@@ -309,6 +335,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnectionFailed(String reason) {
+        if (!checkPhoneStatePermission("notifyDataConnectionFailed()")) {
+            return;
+        }   
         /*
          * This is commented out because there is on onDataConnectionFailed callback
          * on PhoneStateListener.  There should be.
@@ -327,6 +356,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
+        if (!checkPhoneStatePermission("notifyCellLocation()")) {
+            return;
+        } 
         synchronized (mRecords) {
             mCellLocation = cellLocation;
             final int N = mRecords.size();
@@ -363,7 +395,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump telephony.registry from from pid="
                     + Binder.getCallingPid()
@@ -414,6 +446,18 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastCallStateChanged(int state, String incomingNumber) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (state == TelephonyManager.CALL_STATE_IDLE) {
+                mBatteryStats.notePhoneOff();
+            } else {
+                mBatteryStats.notePhoneOn();
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         intent.putExtra(Phone.STATE_KEY,
                 DefaultPhoneNotifier.convertCallState(state).toString());
@@ -442,5 +486,17 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.putExtra(Phone.FAILURE_REASON_KEY, reason);
         mContext.sendStickyBroadcast(intent);
+    }
+    
+    private boolean checkPhoneStatePermission(String method) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        String msg = "Modify Phone State Permission Denial: " + method + " from pid="
+                + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid();
+        Log.w(TAG, msg);
+        return false;
     }
 }

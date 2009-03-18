@@ -1,21 +1,203 @@
-page.title=2D and 3D Graphics
+page.title=Graphics
 @jd:body
 
-
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#options">Consider your Options</a></li>
+    <li><a href="#draw-to-view">Simple Graphics Inside a View</a></li>
+    <li><a href="#draw-with-canvas">Draw with a Canvas</a>
+    <ol>
+      <li><a href="#on-view">On a View</a></li>
+      <li><a href="#on-surfaceview">On a SurfaceView</a></li>
+    </ol>
+    </li>
+  </ol>
+  </div>
+</div>
 <p>Android graphics are powered by a custom 2D graphics library and OpenGL ES 1.0
-for 3D graphics.</p>
+for high performance 3D graphics. The most common 2D graphics APIs can be found in the 
+{@link android.graphics.drawable drawable package}. OpenGL APIs are available
+from the Khronos {@link javax.microedition.khronos.opengles OpenGL ES package},
+plus some Android {@link android.opengl OpenGL utilities}.</p>
 
-<h2>2D Graphics</h2>
-<p>Android offers a custom 2D graphics library for drawing shapes and images.</p>
-<p>The {@link android.graphics} and {@link android.graphics.drawable} 
-packages are where you'll find the classes used for drawing in two-dimensions.
-For common drawing tasks, though, the {@link android.graphics.drawable} package 
-is where you'll find what you need.</p>
-<p>For an introduction to drawing shapes and images, read the 
-<a href="2d-graphics.html">2D Graphics</a> document.</p>
+<p>When starting a project, it's important to consider exactly what your graphical demands will be. 
+Varying graphical tasks are best accomplished with varying techniques. For example, graphics and animations
+for a rather static application should be implemented much differently than graphics and animations
+for an interactive game or 3D rendering.</p>
+
+<p>Here, we'll discuss a few of the options you have for drawing graphics on Android, 
+and which tasks they're best suited for.</p>
+
+<p>If you're specifically looking for information on drawing 3D graphics, this page won't
+help a lot. However, the information below, on <a href="#drawing-with-canvas">Drawing with a Canvas</a>
+(and the section on SurfaceView), 
+will give you a quick idea of how you should draw to the View hierarchy. For more information
+on Android's 3D graphic utilities (provided by the OpenGL ES API), 
+read <a href="opengl.html">3D with OpenGL</a> and refer to other OpenGL documentation.</p>
 
 
-<h2>3D with OpenGL</h2>
-<p>High performance 3D graphic utilities are provided on Android with the OpenGL ES API.
-You'll find the OpenGL APIs in the {@link android.opengl} package.
-Read more about <a href="opengl.html">3D with OpenGL</a>.</p>
+<h2 id="options">Consider your Options</h2>
+
+<p>When drawing 2D graphics, you'll typically do so in one of two ways:</p>
+<ol type="a">
+  <li>Draw your graphics or animations into a View object from your layout. In this manner, 
+  the drawing (and any animation) of your graphics is handled by the system's 
+  normal View hierarchy drawing process &mdash; you simply define the graphics to go inside the View.</li>
+  <li>Draw your graphics directly to a Canvas. This way, you personally call the appropriate class's 
+  <code>draw()</code> method (passing it your Canvas), or one of the Canvas <code>draw...()</code> methods (like 
+  <code>{@link android.graphics.Canvas#drawPicture(Picture,Rect) drawPicture()}</code>). In doing so, you are also in
+  control of any animation.</li>
+</ol>
+
+<p>Option "a," drawing to a View, is your best choice when you want to draw simple graphics that do not
+need to change dynamically and are not part of a performance-intensive game. For example, you should
+draw your graphics into a View when you want to display a static graphic or predefined animation, within 
+an otherwise static application. Read <a href="#draw-to-view">Simple Graphics Inside a View</a>.</li>
+
+<p>Option "b," drawing to a Canvas, is better when you're application needs to regularly re-draw itself.
+Basically, any video game should be drawing to the Canvas on its own. However, there's more than 
+one way to do this: </p>
+<ul>
+  <li>In the same thread as your UI Activity, wherein you create a custom View component in
+  your layout, call <code>{@link android.view.View#invalidate()}</code> and then handle the 
+  <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code> callback..</li>
+  <li>Or, in a separate thread, wherein you manage a {@link android.view.SurfaceView} and 
+  perform draws to the Canvas as fast as your thread is capable 
+  (you do not need to request <code>invalidate()</code>).</li>
+</ul>
+<p>...Begin by reading <a href="#draw-with-canvas">Draw with a Canvas</a>.</p>
+
+<h2 id="draw-to-view">Simple Graphics Inside a View</h2>
+
+<p>If you'll be drawing some simple graphics (images, shapes, colors, pre-defined animations, etc.),
+then you should probably just draw to the background of a View or
+to the content of an {@link android.widget.ImageView} in your layout.
+In this case, you can skip the rest of this document and learn how to
+draw graphics and animations in the <a href="2d-graphics.html">2D Graphics</a> document.
+</p>
+
+
+<h2 id="draw-with-canvas">Draw with a Canvas</h2>
+
+<p>When you're writing an application in which you would like to perform specialized drawing
+and/or control the animation of graphics,
+you should do so by drawing through a {@link android.graphics.Canvas}. A Canvas works for you as
+a pretense, or interface, to the actual surface upon which your graphics will be drawn &mdash; it
+holds all of your "draw" calls. Via the Canvas, your drawing is actually performed upon an 
+underlying {@link android.graphics.Bitmap}, which is placed into the window.</p>
+
+<p>In the event that you're drawing within the <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code>
+callback method, the Canvas is provided for you and you need only place your drawing calls upon it.
+You can also acquire a Canvas from <code>{@link android.view.SurfaceHolder#lockCanvas() SurfaceHolder.lockCanvas()}</code>,
+when dealing with a SurfaceView object. (Both of these scenarios are discussed in the following sections.)
+However, if you need to create a new Canvas, then you must define the {@link android.graphics.Bitmap} 
+upon which drawing will actually be performed. The Bitmap is always required for a Canvas. You can set up
+a new Canvas like this:</p>
+<pre>
+Bitmap b = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+Canvas c = new Canvas(b);
+</pre>
+
+<p>Now your Canvas will draw onto the defined Bitmap. After drawing upon it with the Canvas, you can then carry your 
+Bitmap to another Canvas with one of the <code>{@link android.graphics.Canvas#drawBitmap(Bitmap,Matrix,Paint)
+Canvas.drawBitmap(Bitmap,...)}</code> methods. It's recommended that you ultimately draw your final
+graphics through a Canvas offered to you
+by <code>{@link android.view.View#onDraw(Canvas) View.onDraw()}</code> or 
+<code>{@link android.view.SurfaceHolder#lockCanvas() SurfaceHolder.lockCanvas()}</code> (see the following sections).</p>
+
+<p>The {@link android.graphics.Canvas} class has its own set of drawing methods that you can use, 
+like <code>drawBitmap(...)</code>, <code>drawRect(...)</code>, <code>drawText(...)</code>, and many more.
+Other classes that you might use also have <code>draw()</code> methods. For example, you'll probably
+have some {@link android.graphics.drawable.Drawable} objects that you want to put on the Canvas. Drawable
+has its own <code>{@link android.graphics.drawable.Drawable#draw(Canvas) draw()}</code> method 
+that takes your Canvas as an arguement.</p>
+
+
+<h3 id="on-view">On a View</h3>
+
+<p>If you're application does not require a significant amount of processing or 
+frame-rate speed (perhaps for a chess game, a snake game, 
+or another slowly-animated application), then you should consider creating a custom View component
+and drawing with a Canvas in <code>{@link android.view.View#onDraw(Canvas) View.onDraw()}</code>. 
+The most convenient aspect of doing so is that the Android framework will
+provide you with a pre-defined Canvas to which you will place your drawing calls.</p>
+
+<p>To start, extend the {@link android.view.View} class (or descendent thereof) and define
+the <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code> callback method. This method will be called by the Android 
+framework to request that your View draw itself. This is where you will perform all your calls
+to draw through the {@link android.graphics.Canvas}, which is passed to you through the <code>onDraw()</code> callback.</p>
+
+<p>The Android framework will only call <code>onDraw()</code> as necessary. Each time that 
+your application is prepared to be drawn, you must request your View be invalidated by calling
+<code>{@link android.view.View#invalidate()}</code>. This indicates that you'd like your View to be drawn and
+Android will then call your <code>onDraw()</code> method (though is not guaranteed that the callback will
+be instantaneous). </p>
+
+<p>Inside your View component's <code>onDraw()</code>, use the Canvas given to you for all your drawing,
+using various <code>Canvas.draw...()</code> methods, or other class <code>draw()</code> methods that
+take your Canvas as an argument. Once your <code>onDraw()</code> is complete, the Android framework will 
+use your Canvas to draw a Bitmap handled by the system.</p>
+
+<p class="note"><strong>Note: </strong> In order to request an invalidate from a thread other than your main
+Activity's thread, you must call <code>{@link android.view.View#postInvalidate()}</code>.</p>
+
+<p>Also read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
+for a guide to extending a View class, and <a href="2d-graphics.html">2D Graphics: Drawables</a> for
+information on using Drawable objects like images from your resources and other primitive shapes.</p>
+
+<p>For a sample application, see the Snake game, in the SDK samples folder:
+<code>&lt;your-sdk-directory>/samples/Snake/</code>.</p>
+
+<h3 id="on-surfaceview">On a SurfaceView</h3>
+
+<p>The {@link android.view.SurfaceView} is a special subclass of View that offers a dedicated
+drawing surface within the View hierarchy. The aim is to offer this drawing surface to
+an application's secondary thread, so that the application isn't required
+to wait until the system's View hierarchy is ready to draw. Instead, a secondary thread
+that has reference to a SurfaceView can draw to its own Canvas at its own pace.</p>
+
+<p>To begin, you need to create a new class that extends {@link android.view.SurfaceView}. The class should also 
+implement {@link android.view.SurfaceHolder.Callback}. This subclass is an interface that will notify you
+with information about the underlying {@link android.view.Surface}, such as when it is created, changed, or destroyed. 
+These events  are important so that you know when you can start drawing, whether you need 
+to make adjustments based on new surface properties, and when to stop drawing and potentially 
+kill some tasks. Inside your SurfaceView class is also a good place to define your secondary Thread class, which will
+perform all the drawing procedures to your Canvas.</p>
+
+<p>Instead of handling the Surface object directly, you should handle it via
+a {@link android.view.SurfaceHolder}. So, when your SurfaceView is initialized, get the SurfaceHolder by calling 
+<code>{@link android.view.SurfaceView#getHolder()}</code>. You should then notify the SurfaceHolder that you'd
+like to receive SurfaceHolder callbacks (from {@link android.view.SurfaceHolder.Callback}) by calling 
+{@link android.view.SurfaceHolder#addCallback(SurfaceHolder.Callback) addCallback()} 
+(pass it <var>this</var>). Then override each of the 
+{@link android.view.SurfaceHolder.Callback} methods inside your SurfaceView class.</p>
+
+<p>In order to draw to the Surface Canvas from within your second thread, you must pass the thread your SurfaceHandler
+and retrieve the Canvas with <code>{@link android.view.SurfaceHolder#lockCanvas() lockCanvas()}</code>. 
+You can now take the Canvas given to you by the SurfaceHolder and do your necessary drawing upon it. 
+Once you're done drawing with the Canvas, call 
+<code>{@link android.view.SurfaceHolder#unlockCanvasAndPost(Canvas) unlockCanvasAndPost()}</code>, passing it
+your Canvas object. The Surface will now draw the Canvas as you left it. Perform this sequence of locking and 
+unlocking the canvas each time you want to redraw.</p>
+
+<p class="note"><strong>Note:</strong> On each pass you retrieve the Canvas from the SurfaceHolder, 
+the previous state of the Canvas will be retained. In order to properly animate your graphics, you must re-paint the 
+entire surface. For example, you can clear the previous state of the Canvas by filling in a color
+with <code>{@link android.graphics.Canvas#drawColor(int) drawColor()}</code> or setting a background image
+with <code>{@link android.graphics.Canvas#drawBitmap(Bitmap,Rect,RectF,Paint) drawBitmap()}</code>. Otherwise,
+you will see traces of the drawings you previously performed.</p>
+
+
+<p>For a sample application, see the Lunar Landar game, in the SDK samples folder:
+<code>&lt;your-sdk-directory>/samples/LunarLander/</code>. Or,
+browse the source in the <a href="{@docRoot}guide/samples/index.html">Sample Code</a> section.</p>
+
+
+
+
+
+
+
+

@@ -220,9 +220,9 @@ moveon:
             spanStack.pop();
 
             if (empty) {
-                fprintf(stderr, "%s:%d: WARNING: empty '%s' span found for at text '%s'\n",
+                fprintf(stderr, "%s:%d: WARNING: empty '%s' span found in text '%s'\n",
                         fileName, inXml->getLineNumber(),
-                        String8(*outString).string(), String8(spanTag).string());
+                        String8(spanTag).string(), String8(*outString).string());
 
             }
         } else if (code == ResXMLTree::START_NAMESPACE) {

@@ -50,4 +50,11 @@ public class RectShape extends Shape {
     protected final RectF rect() {
         return mRect;
     }
+
+    @Override
+    public RectShape clone() throws CloneNotSupportedException {
+        final RectShape shape = (RectShape) super.clone();
+        shape.mRect = new RectF(mRect);
+        return shape;
+    }
 }

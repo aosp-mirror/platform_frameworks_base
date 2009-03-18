@@ -58,7 +58,8 @@ public:
                                 int format,
                                 int channelCount,
                                 uint32_t sampleRate,
-                                status_t *status);
+                                status_t *status,
+                                AudioSystem::audio_in_acoustics acoustics);
 
 protected:
     virtual status_t    doRouting();
@@ -77,7 +78,7 @@ private:
         virtual size_t      bufferSize() const { return 512 * 20; }
         virtual int         channelCount() const { return 2; }
         virtual int         format() const { return AudioSystem::PCM_16_BIT; }
-        virtual uint32_t    latency() const { return ((1000*channelCount()*bufferSize())/frameSize())/sampleRate() + 200; }
+        virtual uint32_t    latency() const { return ((1000*bufferSize())/frameSize())/sampleRate() + 200; }
         virtual status_t    setVolume(float volume) { return INVALID_OPERATION; }
         virtual ssize_t     write(const void* buffer, size_t bytes);
                 status_t    standby();
@@ -85,6 +86,8 @@ private:
 
     private:
         friend class A2dpAudioInterface;
+                status_t    init();
+                status_t    close();
         status_t            setAddress(const char* address);
 
     private:
@@ -94,10 +97,9 @@ private:
                 int         mRetryCount;
                 char        mA2dpAddress[20];
                 void*       mData;
-                bool        mInitialized;
+                Mutex       mLock;
     };
 
-    Mutex                   mLock;
     A2dpAudioStreamOut*     mOutput;
 };
 

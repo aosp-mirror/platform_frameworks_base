@@ -28,7 +28,7 @@ namespace android {
 enum {
     DISCONNECT = IBinder::FIRST_CALL_TRANSACTION,
     SET_PREVIEW_DISPLAY,
-    SET_FRAME_CALLBACK_FLAG,
+    SET_PREVIEW_CALLBACK_FLAG,
     START_PREVIEW,
     STOP_PREVIEW,
     AUTO_FOCUS,
@@ -38,7 +38,11 @@ enum {
     CONNECT,
     LOCK,
     UNLOCK,
-    PREVIEW_ENABLED
+    PREVIEW_ENABLED,
+    START_RECORDING,
+    STOP_RECORDING,
+    RECORDING_ENABLED,
+    RELEASE_RECORDING_FRAME,
 };
 
 class BpCamera: public BpInterface<ICamera>
@@ -69,15 +73,15 @@ public:
         return reply.readInt32();
     }
 
-    // set the frame callback flag to affect how the received frames from
-    // preview are handled.
-    void setFrameCallbackFlag(int frame_callback_flag)
+    // set the preview callback flag to affect how the received frames from
+    // preview are handled. See Camera.h for details.
+    void setPreviewCallbackFlag(int flag)
     {
-        LOGV("setFrameCallbackFlag(%d)", frame_callback_flag);
+        LOGV("setPreviewCallbackFlag(%d)", flag);
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
-        data.writeInt32(frame_callback_flag);
-        remote()->transact(SET_FRAME_CALLBACK_FLAG, data, &reply);
+        data.writeInt32(flag);
+        remote()->transact(SET_PREVIEW_CALLBACK_FLAG, data, &reply);
     }
 
     // start preview mode, must call setPreviewDisplay first
@@ -90,6 +94,16 @@ public:
         return reply.readInt32();
     }
 
+    // start recording mode, must call setPreviewDisplay first
+    status_t startRecording()
+    {
+        LOGV("startRecording");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(START_RECORDING, data, &reply);
+        return reply.readInt32();
+    }
+
     // stop preview mode
     void stopPreview()
     {
@@ -99,6 +113,24 @@ public:
         remote()->transact(STOP_PREVIEW, data, &reply);
     }
 
+    // stop recording mode
+    void stopRecording()
+    {
+        LOGV("stopRecording");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(STOP_RECORDING, data, &reply);
+    }
+
+    void releaseRecordingFrame(const sp<IMemory>& mem)
+    {
+        LOGV("releaseRecordingFrame");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        data.writeStrongBinder(mem->asBinder());
+        remote()->transact(RELEASE_RECORDING_FRAME, data, &reply);
+    }
+
     // check preview state
     bool previewEnabled()
     {
@@ -106,6 +138,16 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
         remote()->transact(PREVIEW_ENABLED, data, &reply);
+        return reply.readInt32();
+    }
+
+    // check recording state
+    bool recordingEnabled()
+    {
+        LOGV("recordingEnabled");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(RECORDING_ENABLED, data, &reply);
         return reply.readInt32();
     }
 
@@ -202,11 +244,11 @@ status_t BnCamera::onTransact(
             reply->writeInt32(setPreviewDisplay(surface));
             return NO_ERROR;
         } break;
-        case SET_FRAME_CALLBACK_FLAG: {
-            LOGV("SET_FRAME_CALLBACK_TYPE");
+        case SET_PREVIEW_CALLBACK_FLAG: {
+            LOGV("SET_PREVIEW_CALLBACK_TYPE");
             CHECK_INTERFACE(ICamera, data, reply);
-            int frame_callback_flag = data.readInt32();
-            setFrameCallbackFlag(frame_callback_flag);
+            int callback_flag = data.readInt32();
+            setPreviewCallbackFlag(callback_flag);
             return NO_ERROR;
         } break;
         case START_PREVIEW: {
@@ -215,16 +257,41 @@ status_t BnCamera::onTransact(
             reply->writeInt32(startPreview());
             return NO_ERROR;
         } break;
+        case START_RECORDING: {
+            LOGV("START_RECORDING");
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(startRecording());
+            return NO_ERROR;
+        } break;
         case STOP_PREVIEW: {
             LOGV("STOP_PREVIEW");
             CHECK_INTERFACE(ICamera, data, reply);
             stopPreview();
             return NO_ERROR;
         } break;
+        case STOP_RECORDING: {
+            LOGV("STOP_RECORDING");
+            CHECK_INTERFACE(ICamera, data, reply);
+            stopRecording();
+            return NO_ERROR;
+        } break;
+        case RELEASE_RECORDING_FRAME: {
+            LOGV("RELEASE_RECORDING_FRAME");
+            CHECK_INTERFACE(ICamera, data, reply);
+            sp<IMemory> mem = interface_cast<IMemory>(data.readStrongBinder());
+            releaseRecordingFrame(mem);
+            return NO_ERROR;
+        } break;
         case PREVIEW_ENABLED: {
             LOGV("PREVIEW_ENABLED");
             CHECK_INTERFACE(ICamera, data, reply);
             reply->writeInt32(previewEnabled());
+            return NO_ERROR;
+        } break;
+        case RECORDING_ENABLED: {
+            LOGV("RECORDING_ENABLED");
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(recordingEnabled());
             return NO_ERROR;
         } break;
         case AUTO_FOCUS: {

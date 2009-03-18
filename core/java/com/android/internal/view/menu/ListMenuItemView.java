@@ -220,7 +220,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         mRadioButton =
                 (RadioButton) inflater.inflate(com.android.internal.R.layout.list_menu_item_radio,
                 this, false);
-        addView(mRadioButton, 0);
+        addView(mRadioButton);
     }
     
     private void insertCheckBox() {
@@ -228,7 +228,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         mCheckBox =
                 (CheckBox) inflater.inflate(com.android.internal.R.layout.list_menu_item_checkbox,
                 this, false);
-        addView(mCheckBox, 0);
+        addView(mCheckBox);
     }
 
     public boolean prefersCondensedTitle() {

@@ -526,7 +526,7 @@ void generateMipmap(ogles_context_t* c, GLint level)
 static void texParameterx(
         GLenum target, GLenum pname, GLfixed param, ogles_context_t* c)
 {
-    if (target != GGL_TEXTURE_2D) {
+    if (target != GL_TEXTURE_2D) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
@@ -534,8 +534,7 @@ static void texParameterx(
     EGLTextureObject* textureObject = c->textures.tmu[c->textures.active].texture;    
     switch (pname) {
     case GL_TEXTURE_WRAP_S:
-        if ((param == GL_CLAMP) ||
-            (param == GL_REPEAT) ||
+        if ((param == GL_REPEAT) ||
             (param == GL_CLAMP_TO_EDGE)) {
             textureObject->wraps = param;
         } else {
@@ -543,9 +542,8 @@ static void texParameterx(
         }
         break;
     case GL_TEXTURE_WRAP_T:
-        if ((param == GGL_CLAMP) ||
-            (param == GGL_REPEAT) ||
-            (param == GGL_CLAMP_TO_EDGE)) {
+        if ((param == GL_REPEAT) ||
+            (param == GL_CLAMP_TO_EDGE)) {
             textureObject->wrapt = param;
         } else {
             goto invalid_enum;
@@ -1006,7 +1004,7 @@ void glCompressedTexImage2D(
 
 
 void glTexImage2D(
-        GLenum target, GLint level, GLenum internalformat,
+        GLenum target, GLint level, GLint internalformat,
         GLsizei width, GLsizei height, GLint border,
         GLenum format, GLenum type, const GLvoid *pixels)
 {

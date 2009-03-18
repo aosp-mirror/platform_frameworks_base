@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.core.TestHandler;
 import android.test.suitebuilder.annotation.MediumTest;
 import com.android.internal.telephony.TestPhoneNotifier;
 import com.android.internal.telephony.test.SimulatedCommands;
@@ -38,24 +37,24 @@ public class SMSDispatcherTest extends AndroidTestCase {
         Iterator<SmsHeader.Element> elements;
 
         String[] lines = new String[2];
-        
-        lines[0] = "+CMT: ,158";             
+
+        lines[0] = "+CMT: ,158";
         lines[1] = "07914140279510F6440A8111110301003BF56080426101748A8C0B05040B"
                  + "8423F000035502010106276170706C69636174696F6E2F766E642E776170"
                  + "2E6D6D732D6D65737361676500AF848D0185B4848C8298524F347839776F"
                  + "7547514D4141424C3641414141536741415A4B554141414141008D908918"
                  + "802B31363530323438363137392F545950453D504C4D4E008A808E028000"
                  + "88058103093A8083687474703A2F2F36";
-             
+
         sms = SmsMessage.newFromCMT(lines);
         header = sms.getUserDataHeader();
         assertNotNull(header);
         assertNotNull(sms.getUserData());
-                    
+
         elements = header.getElements().iterator();
         assertNotNull(elements);
     }
-    
+
     @MediumTest
     public void testCMT2() throws Exception {
         SmsMessage sms;
@@ -63,7 +62,7 @@ public class SMSDispatcherTest extends AndroidTestCase {
         Iterator<SmsHeader.Element> elements;
 
         String[] lines = new String[2];
-        
+
 
         lines[0] = "+CMT: ,77";
         lines[1] = "07914140279510F6440A8111110301003BF56080426101848A3B0B05040B8423F"
@@ -75,7 +74,7 @@ public class SMSDispatcherTest extends AndroidTestCase {
         System.out.println("header = " + header);
         assertNotNull(header);
         assertNotNull(sms.getUserData());
-                    
+
         elements = header.getElements().iterator();
         assertNotNull(elements);
     }

@@ -56,43 +56,63 @@ public class InputTypeActivity extends Activity {
         mParent = mLayout;
         
         /* Normal Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_NORMAL, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL, 
                 R.string.normal_edit_text_label));
         
+        /* Normal Edit Text w/Cap Chars Flag*/
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_CAP_CHARACTERS, 
+                R.string.cap_chars_edit_text_label));
+        
+        /* Normal Edit Text w/Cap Words Flag*/
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS, 
+                R.string.cap_words_edit_text_label));
+        
+        /* Normal Edit Text w/Cap Multiline Flag */
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE, 
+                R.string.multiline_edit_text_label));
+        
+        /* Normal Edit Text w/Cap Sentences Flag */
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES, 
+                R.string.cap_sentences_edit_text_label));
+        
+        /* Normal Edit Text w/Auto-complete Flag */
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE, 
+                R.string.auto_complete_edit_text_label));
+        
+        /* Normal Edit Text w/Auto-correct Flag */
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_NORMAL|EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT, 
+                R.string.auto_correct_edit_text_label));
+        
         /* Uri Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_URI, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_URI, 
         		R.string.uri_edit_text_label));
         
         /* Email Address Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, 
         		R.string.email_address_edit_text_label));
         
         /* Email Subject Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT, 
                 R.string.email_subject_edit_text_label));
         
         /* Email Content Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_EMAIL_CONTENT, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_LONG_MESSAGE, 
                 R.string.email_content_edit_text_label));
         
         /* Person Name Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_PERSON_NAME, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_PERSON_NAME, 
                 R.string.person_name_edit_text_label));
         
         /* Postal Address Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_POSTAL_ADDRESS, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_POSTAL_ADDRESS, 
                 R.string.postal_address_edit_text_label));
         
         /* Password Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_PASSWORD, 
                 R.string.password_edit_text_label));
         
-        /* Search String Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_SEARCH_STRING, 
-                R.string.search_string_edit_text_label));
-        
         /* Web Edit Text */
-        mLayout.addView(buildEntryView(EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT, 
+        mLayout.addView(buildEntryView(EditorInfo.TYPE_CLASS_TEXT|EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT, 
                 R.string.web_edit_text_label));
         
         /* Signed Number Edit Text */

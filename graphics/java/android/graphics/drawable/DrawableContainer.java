@@ -21,12 +21,13 @@ import android.graphics.*;
 public class DrawableContainer extends Drawable implements Drawable.Callback {
     
     private DrawableContainerState mDrawableContainerState;
-    private Drawable        mCurrDrawable;
-    private int             mAlpha = 0xFF;
-    private ColorFilter     mColorFilter;
-    private boolean         mDither;
+    private Drawable mCurrDrawable;
+    private int mAlpha = 0xFF;
+    private ColorFilter mColorFilter;
+    private boolean mDither;
 
-    private int             mCurIndex = -1;
+    private int mCurIndex = -1;
+    private boolean mMutated;
 
     // overrides from Drawable
 
@@ -229,6 +230,17 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return null;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            for (Drawable child : mDrawableContainerState.mDrawables) {
+                child.mutate();
+            }
+            mMutated = true;
+        }
+        return this;
+    }
+
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
 
@@ -277,7 +289,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
                 mCheckedConstantState = mCanConstantState = true;
                 mVariablePadding = orig.mVariablePadding;
-                mConstantPadding = orig.mConstantPadding;
+                if (orig.mConstantPadding != null) {
+                    mConstantPadding = new Rect(orig.mConstantPadding);
+                }
                 mConstantSize = orig.mConstantSize;
                 mComputedConstantSize = orig.mComputedConstantSize;
                 mConstantWidth = orig.mConstantWidth;

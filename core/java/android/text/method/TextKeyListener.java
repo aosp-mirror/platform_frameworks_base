@@ -38,10 +38,10 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
     private static TextKeyListener[] sInstance =
         new TextKeyListener[Capitalize.values().length * 2];
 
-    /* package */ static final Object ACTIVE = new Object();
-    /* package */ static final Object CAPPED = new Object();
-    /* package */ static final Object INHIBIT_REPLACEMENT = new Object();
-    /* package */ static final Object LAST_TYPED = new Object();
+    /* package */ static final Object ACTIVE = new NoCopySpan.Concrete();
+    /* package */ static final Object CAPPED = new NoCopySpan.Concrete();
+    /* package */ static final Object INHIBIT_REPLACEMENT = new NoCopySpan.Concrete();
+    /* package */ static final Object LAST_TYPED = new NoCopySpan.Concrete();
 
     private Capitalize mAutoCap;
     private boolean mAutoText;
@@ -140,6 +140,13 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
         return im.onKeyUp(view, content, keyCode, event);
     }
 
+    @Override
+    public boolean onKeyOther(View view, Editable content, KeyEvent event) {
+        KeyListener im = getKeyListener(event);
+
+        return im.onKeyOther(view, content, event);
+    }
+
     /**
      * Clear all the input state (autotext, autocap, multitap, undo)
      * from the specified Editable, going beyond Editable.clear(), which
@@ -202,6 +209,10 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
 
         public boolean onKeyUp(View view, Editable content, int keyCode,
                                         KeyEvent event) {
+            return false;
+        }
+
+        public boolean onKeyOther(View view, Editable content, KeyEvent event) {
             return false;
         }
 

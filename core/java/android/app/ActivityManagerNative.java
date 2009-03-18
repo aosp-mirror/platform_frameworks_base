@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -82,6 +83,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         return gDefault;
     }
 
+    /**
+     * Convenience for checking whether the system is ready.  For internal use only.
+     */
+    static public boolean isSystemReady() {
+        if (!sSystemReady) {
+            sSystemReady = getDefault().testIsSystemReady();
+        }
+        return sSystemReady;
+    }
+    static boolean sSystemReady = false;
+    
     /**
      * Convenience for sending a sticky broadcast.  For internal use only.
      * If you don't care about permission, use null.
@@ -959,6 +971,34 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case GET_DEVICE_CONFIGURATION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ConfigurationInfo config = getDeviceConfigurationInfo();
+            reply.writeNoException();
+            config.writeToParcel(reply, 0);
+            return true;
+        }
+        
+        case PROFILE_CONTROL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String process = data.readString();
+            boolean start = data.readInt() != 0;
+            String path = data.readString();
+            boolean res = profileControl(process, start, path);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+        
+        case PEEK_SERVICE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Intent service = Intent.CREATOR.createFromParcel(data);
+            String resolvedType = data.readString();
+            IBinder binder = peekService(service, resolvedType);
+            reply.writeNoException();
+            reply.writeStrongBinder(binder);
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -1604,6 +1644,20 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
+    
+    public IBinder peekService(Intent service, String resolvedType) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        service.writeToParcel(data, 0);
+        data.writeString(resolvedType);
+        mRemote.transact(PEEK_SERVICE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        IBinder binder = reply.readStrongBinder();
+        reply.recycle();
+        data.recycle();
+        return binder;
+    }
 
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
@@ -2028,6 +2082,11 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
+    public boolean testIsSystemReady()
+    {
+        /* this base class version is never called */
+        return true;
+    }
     public int handleApplicationError(IBinder app, int flags,
             String tag, String shortMsg, String longMsg,
             byte[] crashData) throws RemoteException
@@ -2069,6 +2128,36 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    
+    public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_DEVICE_CONFIGURATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        ConfigurationInfo res = ConfigurationInfo.CREATOR.createFromParcel(reply);
+        reply.recycle();
+        data.recycle();
+        return res;
+    }
+    
+    public boolean profileControl(String process, boolean start,
+            String path) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(process);
+        data.writeInt(start ? 1 : 0);
+        data.writeString(path);
+        mRemote.transact(PROFILE_CONTROL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return res;
     }
     
     private IBinder mRemote;

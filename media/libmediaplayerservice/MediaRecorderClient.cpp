@@ -121,6 +121,17 @@ status_t MediaRecorderClient::setOutputFile(const char* path)
     return mRecorder->setOutputFile(path);
 }
 
+status_t MediaRecorderClient::setOutputFile(int fd, int64_t offset, int64_t length)
+{
+    LOGV("setOutputFile(%d, %lld, %lld)", fd, offset, length);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setOutputFile(fd, offset, length);
+}
+
 status_t MediaRecorderClient::setVideoSize(int width, int height)
 {
     LOGV("setVideoSize(%dx%d)", width, height);
@@ -141,6 +152,16 @@ status_t MediaRecorderClient::setVideoFrameRate(int frames_per_second)
         return NO_INIT;
     }
     return mRecorder->setVideoFrameRate(frames_per_second);
+}
+
+status_t MediaRecorderClient::setParameters(const String8& params) {
+    LOGV("setParameters(%s)", params.string());
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setParameters(params);
 }
 
 status_t MediaRecorderClient::prepare()
@@ -245,6 +266,17 @@ MediaRecorderClient::~MediaRecorderClient()
 {
     LOGV("Client destructor");
     release();
+}
+
+status_t MediaRecorderClient::setListener(const sp<IMediaPlayerClient>& listener)
+{
+    LOGV("setListener");
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setListener(listener);
 }
 
 }; // namespace android

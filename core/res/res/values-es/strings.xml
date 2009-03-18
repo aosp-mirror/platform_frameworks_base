@@ -101,9 +101,17 @@
     <string name="global_action_lock">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off">"Apagar"</string>
     <string name="global_action_toggle_silent_mode">"Modo silencio"</string>
-    <string name="global_action_silent_mode_on_status">"El sonido está desactivado."</string>
-    <string name="global_action_silent_mode_off_status">"El sonido está activado."</string>
+    <string name="global_action_silent_mode_on_status">"El sonido está desactivado. Activar."</string>
+    <string name="global_action_silent_mode_off_status">"El sonido está activado. Desactivar."</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"Modo seguro"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"Servicios por los que tienes que pagar"</string>
     <string name="permgroupdesc_costMoney">"Permite que las aplicaciones realicen acciones por las que puede que tengas que pagar."</string>
     <string name="permgrouplab_messages">"Tus mensajes"</string>
@@ -149,7 +157,7 @@
     <string name="permlab_setDebugApp">"habilitar depuración de aplicación"</string>
     <string name="permdesc_setDebugApp">"Permite que una aplicación active la depuración de otra aplicación. Las aplicaciones malintencionadas pueden utilizar este permiso para desactivar otras aplicaciones."</string>
     <string name="permlab_changeConfiguration">"cambiar la configuración de la interfaz de usuario"</string>
-    <string name="permdesc_changeConfiguration">"Permite que una aplicación cambie la configuración actual como, por ejemplo, la configuración regional o el tamaño de fuente general."</string>
+    <string name="permdesc_changeConfiguration">"Permite que una aplicación cambie la configuración actual como, por ejemplo, la configuración local o el tamaño de fuente general."</string>
     <string name="permlab_restartPackages">"reiniciar otras aplicaciones"</string>
     <string name="permdesc_restartPackages">"Permite que una aplicación reinicie de forma forzosa otras aplicaciones."</string>
     <string name="permlab_setProcessForeground">"impedir su interrupción"</string>
@@ -260,8 +268,10 @@
     <string name="permdesc_brick">"Permite que la aplicación inhabilite todas las funciones del teléfono de forma permanente. Este permiso es muy peligroso."</string>
     <string name="permlab_reboot">"forzar reinicio del teléfono"</string>
     <string name="permdesc_reboot">"Permite que la aplicación fuerce al teléfono a reiniciarse."</string>
-    <string name="permlab_mount_unmount_filesystems">"montar y desmontar sistemas de archivos"</string>
-    <string name="permdesc_mount_unmount_filesystems">"Permite que las aplicaciones monten y desmonten sistemas de archivos para un almacenamiento extraíble."</string>
+    <string name="permlab_mount_unmount_filesystems">"activar y desactivar sistemas de archivos"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Permite que las aplicaciones activen y desactiven sistemas de archivos para un almacenamiento extraíble."</string>
+    <string name="permlab_mount_format_filesystems">"formatear almacenamiento externo"</string>
+    <string name="permdesc_mount_format_filesystems">"Permite a la aplicación formatear un almacenamiento extraíble."</string>
     <string name="permlab_vibrate">"controlar vibración"</string>
     <string name="permdesc_vibrate">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permlab_flashlight">"controlar linterna"</string>
@@ -273,11 +283,13 @@
     <string name="permlab_callPrivileged">"llamar directamente a cualquier número de teléfono"</string>
     <string name="permdesc_callPrivileged">"Permite que la aplicación llame a cualquier número de teléfono, incluidos los números de emergencia, sin que el usuario intervenga. Las aplicaciones malintencionadas pueden realizar llamadas innecesarias e ilícitas a los servicios de emergencias."</string>
     <string name="permlab_locationUpdates">"controlar las notificaciones de actualización de la ubicación"</string>
-    <string name="permdesc_locationUpdates">"Permite habilitar/inhabilitar las notificaciones de actualización de la ubicación de la radio. No está destinado al uso por parte de aplicaciones normales."</string>
+    <string name="permdesc_locationUpdates">"Permite habilitar/inhabilitar las notificaciones de actualización de la señal móvil. No está destinado al uso por parte de aplicaciones normales."</string>
     <string name="permlab_checkinProperties">"acceder a propiedades de registro"</string>
     <string name="permdesc_checkinProperties">"Permite el acceso de lectura/escritura a las propiedades cargadas por el servicio de registro. No está destinado al uso por parte de aplicaciones normales."</string>
+    <string name="permlab_bindGadget">"seleccionar gadgets"</string>
+    <string name="permdesc_bindGadget">"Permite a la aplicación indicar al sistema qué gadgets puede utilizar cada aplicación. Con este permiso, las aplicaciones pueden permitir a otras aplicaciones acceder a datos personales. No está destinado al uso por parte de aplicaciones normales."</string>
     <string name="permlab_modifyPhoneState">"modificar estado del teléfono"</string>
-    <string name="permdesc_modifyPhoneState">"Permite que la aplicación controle las funciones de teléfono del dispositivo. Una aplicación con este permiso puede cambiar redes, activar y desactivar la radio, etc., sin necesidad de notificar al usuario."</string>
+    <string name="permdesc_modifyPhoneState">"Permite que la aplicación controle las funciones de teléfono del dispositivo. Una aplicación con este permiso puede cambiar redes, activar y desactivar la señal móvil, etc., sin necesidad de notificar al usuario."</string>
     <string name="permlab_readPhoneState">"leer el estado del teléfono"</string>
     <string name="permdesc_readPhoneState">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. Una aplicación con este permiso puede determinar el número de teléfono de este teléfono, si una llamada está activa, el número al que está vinculado esa llamada, etc."</string>
     <string name="permlab_wakeLock">"impedir que el teléfono entre en modo de suspensión"</string>
@@ -304,6 +316,8 @@
     <string name="permdesc_writeApnSettings">"Permite que una aplicación modifique los valores de configuración de un APN como, por ejemplo, el proxy y el puerto de cualquier APN."</string>
     <string name="permlab_changeNetworkState">"cambiar la conectividad de red"</string>
     <string name="permdesc_changeNetworkState">"Permite que una aplicación cambie la conectividad de red de estado."</string>
+    <string name="permlab_changeBackgroundDataSetting">"cambiar configuración de uso de datos de referencia"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Permite a una aplicación cambiar la configuración de uso de los datos de referencia."</string>
     <string name="permlab_accessWifiState">"ver estado de la conectividad Wi-Fi"</string>
     <string name="permdesc_accessWifiState">"Permite que una aplicación vea la información sobre el estado de la conectividad Wi-Fi."</string>
     <string name="permlab_changeWifiState">"cambiar estado de Wi-Fi"</string>
@@ -324,14 +338,10 @@
     <string name="permdesc_subscribedFeedsRead">"Permite que una aplicación obtenga detalles sobre los feeds sincronizados en este momento."</string>
     <string name="permlab_subscribedFeedsWrite">"escribir feeds a los que está suscrito el usuario"</string>
     <string name="permdesc_subscribedFeedsWrite">"Permite que una aplicación modifique los feeds sincronizados actualmente. Este permiso podría provocar que una aplicación malintencionada cambie los feeds sincronizados."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"leer diccionario definido por el usuario"</string>
+    <string name="permdesc_readDictionary">"Permite a una aplicación leer cualquier frase, palabra o nombre privado que el usuario haya almacenado en su diccionario."</string>
+    <string name="permlab_writeDictionary">"escribir en el diccionario definido por el usuario"</string>
+    <string name="permdesc_writeDictionary">"Permite a una aplicación escribir palabras nuevas en el diccionario del usuario."</string>
   <string-array name="phoneTypes">
     <item>"Casa"</item>
     <item>"Móvil"</item>
@@ -343,7 +353,7 @@
     <item>"Personalizar"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"Casa"</item>
+    <item>"Personal"</item>
     <item>"Trabajo"</item>
     <item>"Otra"</item>
     <item>"Personalizar"</item>
@@ -377,19 +387,20 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"Introduce el código PIN"</string>
     <string name="keyguard_password_wrong_pin_code">"El código PIN es incorrecto."</string>
-    <string name="keyguard_label_text">"Para desbloquear el teléfono, pulsa \"Menú\" y, a continuación, pulsa 0."</string>
+    <string name="keyguard_label_text">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
     <string name="emergency_call_dialog_number_for_display">"Número de emergencia"</string>
-    <string name="lockscreen_carrier_default">"(Sin servicio)"</string>
-    <string name="lockscreen_screen_locked">"Pantalla bloqueada."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Pulsa \"Menú\" para desbloquear el teléfono o realizar una llamada de emergencia."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Pulsa \"Menú\" para desbloquear el teléfono."</string>
-    <string name="lockscreen_pattern_instructions">"Crear patrón para desbloquear"</string>
+    <string name="lockscreen_carrier_default">"(Sin cobertura)"</string>
+    <string name="lockscreen_screen_locked">"Pantalla bloqueada"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Pulsa la tecla de menú para desbloquear la pantalla."</string>
+    <string name="lockscreen_pattern_instructions">"Dibujar patrón de desbloqueo"</string>
     <string name="lockscreen_emergency_call">"Llamada de emergencia"</string>
     <string name="lockscreen_pattern_correct">"Correcto"</string>
     <string name="lockscreen_pattern_wrong">"Inténtalo de nuevo"</string>
-    <string name="lockscreen_plugged_in">"Cargando (<xliff:g id="NUMBER">%d%%</xliff:g>)..."</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"Conecta el cargador"</string>
-    <string name="lockscreen_missing_sim_message_short">"No hay ninguna tarjeta SIM."</string>
+    <string name="lockscreen_missing_sim_message_short">"Falta la tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_message">"No se ha insertado ninguna tarjeta SIM en el teléfono."</string>
     <string name="lockscreen_missing_sim_instructions">"Inserta una tarjeta SIM."</string>
     <string name="lockscreen_network_locked_message">"Bloqueada para la red"</string>
@@ -410,30 +421,27 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"Cerrar notificaciones"</string>
-    <string name="status_bar_no_notifications_title">"Ninguna notificación"</string>
+    <string name="status_bar_no_notifications_title">"No tienes notificaciones"</string>
     <string name="status_bar_ongoing_events_title">"Entrante"</string>
     <string name="status_bar_latest_events_title">"Notificaciones"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"Cargando..."</string>
     <string name="battery_low_title">"Conecta el cargador"</string>
     <string name="battery_low_subtitle">"Se está agotando la batería:"</string>
-    <string name="battery_low_percent_format">"menos de <xliff:g id="NUMBER">%d%%</xliff:g> disponible."</string>
+    <string name="battery_low_percent_format">"menos del <xliff:g id="NUMBER">%d%%</xliff:g> disponible."</string>
     <string name="factorytest_failed">"Fallo en la prueba de fábrica"</string>
     <string name="factorytest_not_system">"La acción FACTORY_TEST sólo es compatible con los paquetes instalados en /system/app."</string>
     <string name="factorytest_no_action">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST."</string>
     <string name="factorytest_reboot">"Reiniciar"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"La página \"<xliff:g id="TITLE">%s</xliff:g>\" dice:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"¿Quieres salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona \"Aceptar\" para continuar o \"Cancelar\" para permanecer en la página actual."</string>
     <string name="save_password_label">"Confirmar"</string>
     <string name="save_password_message">"¿Deseas que el navegador recuerde esta contraseña?"</string>
     <string name="save_password_notnow">"Ahora no"</string>
@@ -442,7 +450,7 @@
     <string name="open_permission_deny">"No dispones de permiso para abrir esta página."</string>
     <string name="text_copied">"Texto copiado al portapapeles."</string>
     <string name="more_item_label">"Más"</string>
-    <string name="prepend_shortcut_label">"\"Menú\"+"</string>
+    <string name="prepend_shortcut_label">"MENU+"</string>
     <string name="menu_space_shortcut_label">"espacio"</string>
     <string name="menu_enter_shortcut_label">"intro"</string>
     <string name="menu_delete_shortcut_label">"suprimir"</string>
@@ -484,22 +492,38 @@
     <item quantity="one">"mañana"</item>
     <item quantity="other">"dentro de <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"hace 1 segundo"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"hace 1 minuto"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"hace 1 hora"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"ayer"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"dentro de 1 segundo"</item>
+    <item quantity="other">"dentro de <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"dentro de 1 minuto"</item>
+    <item quantity="other">"dentro de <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"dentro de 1 hora"</item>
+    <item quantity="other">"dentro de <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"mañana"</item>
+    <item quantity="other">"dentro de <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
     <string name="preposition_for_date">"el %s"</string>
     <string name="preposition_for_time">"a las %s"</string>
     <string name="preposition_for_year">"en %s"</string>
@@ -532,7 +556,7 @@
     <string name="VideoView_error_button">"Aceptar"</string>
     <string name="am">"a.m."</string>
     <string name="pm">"p.m."</string>
-    <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
@@ -541,60 +565,58 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="DAY">dd</xliff:g> de <xliff:g id="MONTH">MMMM</xliff:g> de <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="MONTH">MMMM</xliff:g> de <xliff:g id="DAY">dd</xliff:g> de <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="DAY">dd</xliff:g> de <xliff:g id="MONTH">MMM</xliff:g> de <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMM</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' de '<xliff:g id="MONTH">MMMM</xliff:g>' de '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' de '<xliff:g id="MONTH">MMMM</xliff:g>' de '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' de '<xliff:g id="MONTH">MMM</xliff:g>' de '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"mediodía"</string>
     <string name="Noon">"Mediodía"</string>
     <string name="midnight">"medianoche"</string>
     <string name="Midnight">"Medianoche"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> de <xliff:g id="MONTH1">%2$s</xliff:g> de <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> de <xliff:g id="MONTH2">%7$s</xliff:g> de <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> de <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> de <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> de <xliff:g id="MONTH1">%2$s</xliff:g> de <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> –  <xliff:g id="DAY2">%8$s</xliff:g> de <xliff:g id="MONTH2">%7$s</xliff:g> de <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g>"</string>
     <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> de <xliff:g id="MONTH1">%2$s</xliff:g> de <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> de <xliff:g id="MONTH2">%7$s</xliff:g> de <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> de <xliff:g id="MONTH">%b</xliff:g> de <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"Domingo"</string>
     <string name="day_of_week_long_monday">"Lunes"</string>
@@ -679,6 +701,7 @@
     <string name="paste">"Pegar"</string>
     <string name="copyUrl">"Copiar URL"</string>
     <string name="inputMethod">"Método de introducción de texto"</string>
+    <string name="addToDictionary">"Añadir \"%s\" al diccionario"</string>
     <string name="editTextMenuTitle">"Editar texto"</string>
     <string name="low_internal_storage_view_title">"Poco espacio"</string>
     <string name="low_internal_storage_view_text">"Se está agotando el espacio de almacenamiento del teléfono."</string>
@@ -686,11 +709,12 @@
     <string name="cancel">"Cancelar"</string>
     <string name="yes">"Aceptar"</string>
     <string name="no">"Cancelar"</string>
+    <string name="dialog_alert_title">"Atención"</string>
     <string name="capital_on">"Activado"</string>
     <string name="capital_off">"Desconectado"</string>
     <string name="whichApplication">"Completar acción utilizando"</string>
     <string name="alwaysUse">"Utilizar de forma predeterminada para esta acción"</string>
-    <string name="clearDefaultHintMsg">"Borrar valores predeterminados en \"Página principal &gt; menú de configuración &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
+    <string name="clearDefaultHintMsg">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
     <string name="chooseActivity">"Seleccionar una acción"</string>
     <string name="noApplications">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title">"Lo sentimos."</string>
@@ -704,12 +728,12 @@
     <string name="force_close">"Forzar cierre"</string>
     <string name="wait">"Esperar"</string>
     <string name="debug">"Depurar"</string>
-    <string name="sendText">"Seleccionar una acción para el texto"</string>
+    <string name="sendText">"Seleccionar la opción para compartir"</string>
     <string name="volume_ringtone">"Volumen del timbre"</string>
     <string name="volume_music">"Volumen multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_call">"Volumen de la llamada"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Reproduciendo a través de Bluetooth"</string>
+    <string name="volume_bluetooth_call">"Volumen de la llamada de Bluetooth"</string>
     <string name="volume_alarm">"Volumen de alarma"</string>
     <string name="volume_notification">"Volumen de notificaciones"</string>
     <string name="volume_unknown">"Volumen"</string>
@@ -739,14 +763,53 @@
     <string name="perms_show_all"><b>"Mostrar todos"</b></string>
     <string name="googlewebcontenthelper_loading">"Cargando..."</string>
     <string name="usb_storage_title">"Conectado por USB"</string>
-    <string name="usb_storage_message">"Has conectado el teléfono al equipo mediante USB. Selecciona \"Montar\" si deseas copiar archivos entre el equipo y la tarjeta SD del teléfono."</string>
-    <string name="usb_storage_button_mount">"Montar"</string>
-    <string name="usb_storage_button_unmount">"No montar"</string>
+    <string name="usb_storage_message">"Has conectado el teléfono al equipo mediante USB. Selecciona \"Activar\" si deseas copiar archivos entre el equipo y la tarjeta SD del teléfono."</string>
+    <string name="usb_storage_button_mount">"Activar"</string>
+    <string name="usb_storage_button_unmount">"No activar"</string>
     <string name="usb_storage_error_message">"Se ha producido un problema al intentar utilizar la tarjeta SD para el almacenamiento USB."</string>
     <string name="usb_storage_notification_title">"Conectado por USB"</string>
     <string name="usb_storage_notification_message">"Seleccionar para copiar archivos al/desde el equipo"</string>
+    <string name="usb_storage_stop_notification_title">"Desactivar almacenar en USB"</string>
+    <string name="usb_storage_stop_notification_message">"Seleccionar para desactivar USB."</string>
+    <string name="usb_storage_stop_title">"Desactivar almacenamiento USB"</string>
+    <string name="usb_storage_stop_message">"Antes de desactivar el almacenamiento USB, asegúrate de haber desactivado el host USB. Selecciona \"Desactivar\" para desactivar el almacenamiento USB."</string>
+    <string name="usb_storage_stop_button_mount">"Desactivar"</string>
+    <string name="usb_storage_stop_button_unmount">"Cancelar"</string>
+    <string name="usb_storage_stop_error_message">"Se ha producido un problema al desactivar el almacenamiento USB. Asegúrate de que has desactivado el host USB e inténtalo de nuevo."</string>
+    <string name="extmedia_format_title">"Formatear tarjeta SD"</string>
+    <string name="extmedia_format_message">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de la tarjeta."</string>
+    <string name="extmedia_format_button_format">"Formato"</string>
     <string name="select_input_method">"Seleccionar método de introducción de texto"</string>
-    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"candidatos"</u>"u&gt;"</font></string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"candidatos"</u></string>
+    <string name="ext_media_checking_notification_title">"Preparando tarjeta SD"</string>
+    <string name="ext_media_checking_notification_message">"Comprobando errores"</string>
+    <string name="ext_media_nofs_notification_title">"Tarjeta SD vacía"</string>
+    <string name="ext_media_nofs_notification_message">"La tarjeta SD está vacía o utiliza un sistema de archivos incompatible."</string>
+    <string name="ext_media_unmountable_notification_title">"Tarjeta SD dañada"</string>
+    <string name="ext_media_unmountable_notification_message">"La tarjeta SD está dañada. Es posible que sea necesario volver a formatearla."</string>
+    <string name="ext_media_badremoval_notification_title">"La tarjeta SD se ha extraído inesperadamente."</string>
+    <string name="ext_media_badremoval_notification_message">"Desactiva la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Es seguro extraer la tarjeta SD."</string>
+    <string name="ext_media_safe_unmount_notification_message">"Ya puedes extraer la tarjeta SD."</string>
+    <string name="ext_media_nomedia_notification_title">"Tarjeta SD extraída"</string>
+    <string name="ext_media_nomedia_notification_message">"La tarjeta SD se ha extraído. Inserta una nueva tarjeta SD para aumentar la capacidad de almacenamiento de tu dispositivo."</string>
+    <string name="activity_list_empty">"No se ha encontrado ninguna actividad coincidente."</string>
+    <string name="permlab_pkgUsageStats">"actualizar estadísticas de uso de componentes"</string>
+    <string name="permdesc_pkgUsageStats">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. No está destinado al uso por parte de aplicaciones normales."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

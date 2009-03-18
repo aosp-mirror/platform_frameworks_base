@@ -42,5 +42,10 @@
          android:targetPackage="com.android.mediaframeworktest"
          android:label="MediaFramework unit tests InstrumentationRunner">
      </instrumentation>
+     
+     <instrumentation android:name=".MediaRecorderStressTestRunner"
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="MediaRecorder stress tests InstrumentationRunner">
+     </instrumentation>
 
 </manifest>

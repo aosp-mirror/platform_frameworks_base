@@ -21,10 +21,10 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
-    <string name="untitled">"&lt;無題&gt;"</string>
+    <string name="untitled">"&lt;新規&gt;"</string>
     <string name="ellipsis">"..."</string>
-    <string name="emptyPhoneNumber">"(電話番号なし)"</string>
-    <string name="unknownName">"(不明)"</string>
+    <string name="emptyPhoneNumber">"（電話番号なし）"</string>
+    <string name="unknownName">"（名前）"</string>
     <string name="defaultVoiceMailAlphaTag">"ボイスメール"</string>
     <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
     <string name="mmiError">"接続に問題があるか、MMIコードが正しくありません。"</string>
@@ -48,11 +48,11 @@
     <string name="BaMmi">"発信制限"</string>
     <string name="PwdMmi">"パスワードの変更"</string>
     <string name="PinMmi">"PINの変更"</string>
-    <string name="CLIRDefaultOnNextCallOn">"デフォルトでは発信者番号は非通知です。次の通話でも非通知です。"</string>
-    <string name="CLIRDefaultOnNextCallOff">"デフォルトでは発信者番号は非通知ですが、次の通話では通知されます。"</string>
-    <string name="CLIRDefaultOffNextCallOn">"デフォルトでは発信者番号は通知されますが、次の通話では非通知です。"</string>
-    <string name="CLIRDefaultOffNextCallOff">"デフォルトでは発信者番号は通知されます。次の通話でも通知されます。"</string>
-    <string name="serviceNotProvisioned">"サービスは提供されません。"</string>
+    <string name="CLIRDefaultOnNextCallOn">"既定: 発信者番号非通知、次の発信: 非通知"</string>
+    <string name="CLIRDefaultOnNextCallOff">"既定: 発信者番号非通知、次の発信: 通知"</string>
+    <string name="CLIRDefaultOffNextCallOn">"既定: 発信者番号通知、次の発信: 非通知"</string>
+    <string name="CLIRDefaultOffNextCallOff">"既定: 発信者番号通知、次の発信: 通知"</string>
+    <string name="serviceNotProvisioned">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent">"発信者番号の設定は変更できません。"</string>
     <string name="serviceClassVoice">"音声"</string>
     <string name="serviceClassData">"データ"</string>
@@ -90,46 +90,54 @@
     <string name="me">"自分"</string>
     <string name="power_dialog">"携帯電話オプション"</string>
     <string name="silent_mode">"マナーモード"</string>
-    <string name="turn_on_radio">"ワイヤレスをオン"</string>
-    <string name="turn_off_radio">"ワイヤレスオフ"</string>
+    <string name="turn_on_radio">"ワイヤレス接続をONにする"</string>
+    <string name="turn_off_radio">"ワイヤレス接続をOFFにする"</string>
     <string name="screen_lock">"画面をロック"</string>
     <string name="power_off">"電源オフ"</string>
     <string name="shutdown_progress">"シャットダウン中..."</string>
     <string name="shutdown_confirm">"携帯電話の電源をオフにします。"</string>
     <string name="no_recent_tasks">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions">"携帯電話オプション"</string>
-    <string name="global_action_lock">"画面をロック"</string>
+    <string name="global_action_lock">"画面ロック"</string>
     <string name="global_action_power_off">"電源オフ"</string>
     <string name="global_action_toggle_silent_mode">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status">"音声オフ"</string>
     <string name="global_action_silent_mode_off_status">"サウンド:オン"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"セーフモード"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"料金の発生するサービス"</string>
     <string name="permgroupdesc_costMoney">"料金の発生する操作をアプリケーションに許可します。"</string>
     <string name="permgrouplab_messages">"送受信したメッセージ"</string>
     <string name="permgroupdesc_messages">"SMS、メールなどのメッセージの読み書き"</string>
     <string name="permgrouplab_personalInfo">"個人情報"</string>
-    <string name="permgroupdesc_personalInfo">"携帯電話に保存した連絡先とカレンダーに直接アクセス"</string>
+    <string name="permgroupdesc_personalInfo">"端末の連絡先とカレンダーに直接アクセス"</string>
     <string name="permgrouplab_location">"現在地"</string>
-    <string name="permgroupdesc_location">"現在地を監視"</string>
+    <string name="permgroupdesc_location">"現在地を追跡"</string>
     <string name="permgrouplab_network">"ネットワーク通信"</string>
     <string name="permgroupdesc_network">"ネットワークのさまざまな機能へのアクセスをアプリケーションに許可します。"</string>
     <string name="permgrouplab_accounts">"Googleアカウント"</string>
     <string name="permgroupdesc_accounts">"利用可能なGoogleアカウントへのアクセス"</string>
     <string name="permgrouplab_hardwareControls">"ハードウェアの制御"</string>
     <string name="permgroupdesc_hardwareControls">"携帯電話のハードウェアに直接アクセスします。"</string>
-    <string name="permgrouplab_phoneCalls">"電話の発信"</string>
+    <string name="permgrouplab_phoneCalls">"電話/通話"</string>
     <string name="permgroupdesc_phoneCalls">"通話の監視、記録、処理"</string>
     <string name="permgrouplab_systemTools">"システムツール"</string>
     <string name="permgroupdesc_systemTools">"システムの低レベルのアクセスと制御"</string>
     <string name="permgrouplab_developmentTools">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools">"アプリケーションのデベロッパーにのみ必要な機能です。"</string>
-    <string name="permlab_statusBar">"ステータスバーを無効にしたり変更する"</string>
-    <string name="permdesc_statusBar">"ステータスバーの無効化や、システムアイコンの追加や削除をアプリケーションに許可します。"</string>
+    <string name="permlab_statusBar">"ステータスバーの無効化や変更"</string>
+    <string name="permdesc_statusBar">"ステータスバーの無効化やシステムアイコンの追加や削除をアプリケーションに許可します。"</string>
     <string name="permlab_expandStatusBar">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar">"ステータスバーの拡大や縮小をアプリケーションに許可します。"</string>
     <string name="permlab_processOutgoingCalls">"発信の傍受"</string>
-    <string name="permdesc_processOutgoingCalls">"発信を処理して、ダイヤルする番号を変更することをアプリケーションに許可します。悪意のあるアプリケーションが発信を監視、転送、阻止する恐れがあります。"</string>
+    <string name="permdesc_processOutgoingCalls">"通話の発信とダイヤルする番号の変更とをアプリケーションに許可します。悪意のあるアプリケーションが発信を監視、転送、阻止する恐れがあります。"</string>
     <string name="permlab_receiveSms">"SMSの受信"</string>
     <string name="permdesc_receiveSms">"SMSメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
     <string name="permlab_receiveMms">"MMSの受信"</string>
@@ -137,7 +145,7 @@
     <string name="permlab_sendSms">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms">"SMSやMMSの読み取り"</string>
-    <string name="permdesc_readSms">"携帯電話またはSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
+    <string name="permdesc_readSms">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
     <string name="permlab_writeSms">"SMSやMMSの編集"</string>
     <string name="permdesc_writeSms">"携帯電話やSIMカードに保存したSMSメッセージへの書き込みをアプリケーションに許可します。悪意のあるアプリケーションがメッセージを削除する恐れがあります。"</string>
     <string name="permlab_receiveWapPush">"WAPの受信"</string>
@@ -147,9 +155,9 @@
     <string name="permlab_reorderTasks">"実行中のアプリケーションの順序の変更"</string>
     <string name="permdesc_reorderTasks">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリケーションに許可します。悪意のあるアプリケーションが優先されて、コントロールできなくなる恐れがあります。"</string>
     <string name="permlab_setDebugApp">"アプリケーションのデバッグを有効にする"</string>
-    <string name="permdesc_setDebugApp">"別のアプリケーションをデバッグモードにすることをアプリケーションに許可します。これにより悪意のあるアプリケーションが、別のアプリケーションを終了させる恐れがあります。"</string>
+    <string name="permdesc_setDebugApp">"別のアプリケーションをデバッグモードにすることをアプリケーションに許可します。悪意のあるアプリケーションが別のアプリケーションを終了させる恐れがあります。"</string>
     <string name="permlab_changeConfiguration">"UI設定の変更"</string>
-    <string name="permdesc_changeConfiguration">"ロケールや全体のフォントのサイズなど、現在の設定の変更をアプリケーションに許可します。"</string>
+    <string name="permdesc_changeConfiguration">"地域/言語やフォントのサイズなど、現在の設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_restartPackages">"他のアプリケーションの再起動"</string>
     <string name="permdesc_restartPackages">"他のアプリケーションの強制的な再起動をアプリケーションに許可します。"</string>
     <string name="permlab_setProcessForeground">"停止の阻止"</string>
@@ -157,47 +165,47 @@
     <string name="permlab_forceBack">"アプリケーションの強制終了"</string>
     <string name="permdesc_forceBack">"フォアグラウンドで実行されている操作を強制終了して戻ることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_dump">"システムの内部状態の取得"</string>
-    <string name="permdesc_dump">"システムの内部状態の取得をアプリケーションに許可します。悪意のあるアプリケーションが、通常は必要のない、広範囲にわたる非公開の機密情報を取得する恐れがあります。"</string>
+    <string name="permdesc_dump">"システムの内部状態の取得をアプリケーションに許可します。悪意のあるアプリケーションが、通常は必要としない広範囲にわたる非公開の機密情報を取得する恐れがあります。"</string>
     <string name="permlab_addSystemService">"低レベルサービスの公開"</string>
     <string name="permdesc_addSystemService">"独自の低レベルのシステムサービスを公開することをアプリケーションに許可します。悪意のあるアプリケーションがシステムを乗っ取って、データの盗用や破壊をする恐れがあります。"</string>
     <string name="permlab_runSetActivityWatcher">"起動中のすべてのアプリケーションの監視と制御"</string>
     <string name="permdesc_runSetActivityWatcher">"システムが起動する操作の監視と制御をアプリケーションに許可します。悪意のあるアプリケーションがシステムを完全に破壊する恐れがあります。この許可は開発にのみ必要で、携帯電話の通常の使用にはまったく必要ありません。"</string>
     <string name="permlab_broadcastPackageRemoved">"パッケージ削除ブロードキャストの送信"</string>
-    <string name="permdesc_broadcastPackageRemoved">"アプリケーションパッケージの削除通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、他の実行中のアプリケーションを強制終了する恐れがあります。"</string>
+    <string name="permdesc_broadcastPackageRemoved">"アプリケーションパッケージの削除の通知を配信することをアプリケーションに許可します。悪意のあるアプリケーションが他の実行中のアプリケーションを強制終了する恐れがあります。"</string>
     <string name="permlab_broadcastSmsReceived">"SMS受信ブロードキャストの送信"</string>
-    <string name="permdesc_broadcastSmsReceived">"SMSメッセージの受信通知の配信をアプリケーションに許可します。これにより悪意のあるアプリケーションが、受信SMSメッセージを偽造する恐れがあります。"</string>
+    <string name="permdesc_broadcastSmsReceived">"SMSメッセージの受信通知の配信をアプリケーションに許可します。悪意のあるアプリケーションが受信SMSメッセージを偽造する恐れがあります。"</string>
     <string name="permlab_broadcastWapPush">"WAP-PUSH受信ブロードキャストの送信"</string>
-    <string name="permdesc_broadcastWapPush">"WAP PUSHメッセージの受信通知を配信することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、MMS受信メッセージを偽造したり、ウェブページのコンテンツを密かに改ざんしたりする恐れがあります。"</string>
+    <string name="permdesc_broadcastWapPush">"WAP PUSHメッセージの受信の通知を配信することをアプリケーションに許可します。悪意のあるアプリケーションがMMS受信メッセージを偽造したり、ウェブページのコンテンツを密かに改ざんする恐れがあります。"</string>
     <string name="permlab_setProcessLimit">"実行中のプロセスの数を制限"</string>
     <string name="permdesc_setProcessLimit">"実行するプロセス数の上限の制御をアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_setAlwaysFinish">"バックグラウンドアプリケーションをすべて終了する"</string>
     <string name="permdesc_setAlwaysFinish">"バックグラウンドになり次第必ず操作を終了させるかどうかの制御をアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_fotaUpdate">"システムアップデートの自動インストール"</string>
-    <string name="permdesc_fotaUpdate">"保留中のシステムアップデートに関する通知を受信してインストールを開始することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、許可なく更新を行ってシステムを破壊したり、更新処理を妨害する恐れがあります。"</string>
-    <string name="permlab_batteryStats">"バッテリ統計の変更"</string>
-    <string name="permdesc_batteryStats">"収集されたバッテリの統計の変更を許可します。通常のアプリケーションでは使用しません。"</string>
+    <string name="permdesc_fotaUpdate">"保留中のシステムアップデートに関する通知の受信とインストールの開始をアプリケーションに許可します。悪意のあるアプリケーションが許可なく更新を行ってシステムを破壊したり、更新処理を妨害する恐れがあります。"</string>
+    <string name="permlab_batteryStats">"電池統計情報の変国"</string>
+    <string name="permdesc_batteryStats">"収集した電池統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_internalSystemWindow">"未許可のウィンドウの表示"</string>
     <string name="permdesc_internalSystemWindow">"内部システムのユーザーインターフェースで使用するためのウィンドウ作成を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_systemAlertWindow">"システムレベルの警告の表示"</string>
-    <string name="permdesc_systemAlertWindow">"システムの警告ウィンドウをアプリケーションで表示できるようにします。悪意のあるアプリケーションが携帯電話の画面全体を偽装する恐れがあります。"</string>
-    <string name="permlab_setAnimationScale">"アニメーション全般の速度の変更"</string>
+    <string name="permdesc_systemAlertWindow">"システムの警告ウィンドウの表示をアプリケーションに許可します。悪意のあるアプリケーションが携帯電話の画面全体を偽装する恐れがあります。"</string>
+    <string name="permlab_setAnimationScale">"アニメーションのプリセット速度の変更"</string>
     <string name="permdesc_setAnimationScale">"いつでもアニメーション全般の速度を変更する (アニメーションを速くまたは遅くする) ことをアプリケーションに許可します。"</string>
     <string name="permlab_manageAppTokens">"アプリケーショントークンの管理"</string>
     <string name="permdesc_manageAppTokens">"通常のZ-orderingを回避して、独自のトークンを作成、管理することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_injectEvents">"キーを押してボタンをコントロール"</string>
     <string name="permdesc_injectEvents">"入力イベント (キーを押すなど) を別のアプリケーションに伝えることをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話を乗っ取る恐れがあります。"</string>
     <string name="permlab_readInputState">"入力や操作の記録"</string>
-    <string name="permdesc_readInputState">"別のアプリケーションへの入力 (パスワードなど) でもキー入力を監視することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
+    <string name="permdesc_readInputState">"別のアプリケーションへの入力（パスワードなど）でもキー入力を監視することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_bindInputMethod">"入力方法に関連付ける"</string>
     <string name="permdesc_bindInputMethod">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_setOrientation">"画面の向きの変更"</string>
     <string name="permdesc_setOrientation">"いつでも画面の回転を変更することをアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_signalPersistentProcesses">"Linuxのシグナルをアプリケーションに送信"</string>
-    <string name="permdesc_signalPersistentProcesses">"すべての永続プロセスに特定の信号を送信するリクエストをアプリケーションに許可します。"</string>
+    <string name="permdesc_signalPersistentProcesses">"受信した電波を継続プロセスに送信することをアプリケーションに許可します。"</string>
     <string name="permlab_persistentActivity">"アプリケーションを常に実行する"</string>
     <string name="permdesc_persistentActivity">"自身を部分的に永続させて、他のアプリケーション用にはその領域をシステムに使わせないようにすることをアプリケーションに許可します。"</string>
     <string name="permlab_deletePackages">"アプリケーションの削除"</string>
-    <string name="permdesc_deletePackages">"Androidパッケージの削除をアプリケーションに許可します。これにより悪意のあるアプリケーションが、重要なアプリケーションを削除する恐れがあります。"</string>
+    <string name="permdesc_deletePackages">"Androidパッケージの削除をアプリケーションに許可します。悪意のあるアプリケーションが、重要なアプリケーションを削除する恐れがあります。"</string>
     <string name="permlab_clearAppUserData">"他のアプリケーションのデータを削除"</string>
     <string name="permdesc_clearAppUserData">"ユーザーデータの消去をアプリケーションに許可します。"</string>
     <string name="permlab_deleteCacheFiles">"他のアプリケーションのキャッシュを削除"</string>
@@ -205,46 +213,46 @@
     <string name="permlab_getPackageSize">"アプリケーションのメモリ容量の計測"</string>
     <string name="permdesc_getPackageSize">"アプリケーションのコード、データ、キャッシュのサイズを取得することを許可します。"</string>
     <string name="permlab_installPackages">"アプリケーションを直接インストール"</string>
-    <string name="permdesc_installPackages">"Androidパッケージを新たにインストールまたは更新することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、勝手に強力な権限を持つ新しいアプリケーションを追加する恐れがあります。"</string>
+    <string name="permdesc_installPackages">"Androidパッケージのインストール/更新をアプリケーションに許可します。悪意のあるアプリケーションが、勝手に強力な権限を持つ新しいアプリケーションを追加する恐れがあります。"</string>
     <string name="permlab_clearAppCache">"アプリケーションキャッシュデータの削除"</string>
     <string name="permdesc_clearAppCache">"アプリケーションのキャッシュディレクトリからファイルを削除して携帯電話のメモリを解放することをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
     <string name="permlab_readLogs">"システムログファイルの読み取り"</string>
     <string name="permdesc_readLogs">"システムのさまざまなログファイルの読み取りをアプリケーションに許可します。これにより携帯電話の使用状況に関する全般情報が取得されますが、個人情報や非公開情報が含まれることはありません。"</string>
     <string name="permlab_diagnostic">"diagが所有するリソースの読み書き"</string>
-    <string name="permdesc_diagnostic">"diagグループが所有するリソース (/dev内のファイルなど) への読み書きをアプリケーションに許可します。これはシステムの安定性とセキュリティに影響する恐れがあります。メーカーまたはオペレータによるハードウェア固有の診断以外には使用しないでください。"</string>
+    <string name="permdesc_diagnostic">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/オペレーターによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState">"アプリケーションのコンポーネントを有効/無効にする"</string>
     <string name="permdesc_changeComponentState">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話の重要な機能を無効にする恐れがあります。アプリケーションコンポーネントが利用できない、整合性が取れない、または不安定な状態になる恐れがあるので、許可には注意が必要です。"</string>
     <string name="permlab_setPreferredApplications">"優先アプリケーションの設定"</string>
-    <string name="permdesc_setPreferredApplications">"優先アプリケーションを変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、実行中のアプリケーションを密かに変更し、既存のアプリケーションになりすまして、非公開データを収集する恐れがあります。"</string>
-    <string name="permlab_writeSettings">"システム全般の設定の変更"</string>
+    <string name="permdesc_setPreferredApplications">"優先アプリケーションを変更することをアプリケーションに許可します。悪意のあるアプリケーションが実行中のアプリケーションを密かに変更し、既存のアプリケーションになりすまして非公開データを収集する恐れがあります。"</string>
+    <string name="permlab_writeSettings">"システムの全般設定の変更"</string>
     <string name="permdesc_writeSettings">"システム設定データの変更をアプリケーションに許可します。悪意のあるアプリケーションがシステム設定を破壊する恐れがあります。"</string>
     <string name="permlab_writeSecureSettings">"システムのセキュリティ設定の変更"</string>
     <string name="permdesc_writeSecureSettings">"システムのセキュリティ設定の変更をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_writeGservices">"Googleサービスの地図の変更"</string>
     <string name="permdesc_writeGservices">"Googleサービスマップの変更をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_receiveBootCompleted">"起動時に自動的に開始"</string>
-    <string name="permdesc_receiveBootCompleted">"システムの起動直後に自動的に起動することをアプリケーションに許可します。これにより携帯電話の起動に時間がかかるようになります。また、アプリケーションが常に実行中となるため、携帯電話の全体的な動作が遅くなります。"</string>
+    <string name="permdesc_receiveBootCompleted">"システムの起動後に自動的に起動することをアプリケーションに許可します。携帯電話の起動に時間がかかるようになり、アプリケーションが常に実行されるために携帯電話の全体的な動作が遅くなります。"</string>
     <string name="permlab_broadcastSticky">"stickyブロードキャストの配信"</string>
     <string name="permdesc_broadcastSticky">"配信が終了してもメモリに残るようなstickyブロードキャストをアプリケーションに許可します。悪意のあるアプリケーションがメモリを使いすぎて、携帯電話の動作が遅くなったり、不安定になる恐れがあります。"</string>
     <string name="permlab_readContacts">"連絡先データの読み取り"</string>
-    <string name="permdesc_readContacts">"携帯電話に保存した連絡先 (アドレス) データをアプリケーションですべて読み取れるようにします。これにより悪意のあるアプリケーションが、そのデータを他人に送信する恐れがあります。"</string>
+    <string name="permdesc_readContacts">"端末に保存した連絡先（アドレス）データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションがデータを他人に送信する恐れがあります。"</string>
     <string name="permlab_writeContacts">"連絡先データの書き込み"</string>
-    <string name="permdesc_writeContacts">"携帯電話に保存した連絡先 (アドレス) データの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、連絡先データを消去や変更する恐れがあります。"</string>
+    <string name="permdesc_writeContacts">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
     <string name="permlab_writeOwnerData">"所有者データの書き込み"</string>
-    <string name="permdesc_writeOwnerData">"携帯電話に保存した所有者のデータの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、所有者のデータを消去または変更する恐れがあります。"</string>
+    <string name="permdesc_writeOwnerData">"端末に保存した所有者のデータの変更をアプリケーションに許可します。悪意のあるアプリケーションが所有者のデータを消去/変更する恐れがあります。"</string>
     <string name="permlab_readOwnerData">"所有者データの読み取り"</string>
-    <string name="permdesc_readOwnerData">"携帯電話に保存した所有者データの読み取りをアプリケーションに許可します。これにより悪意のあるアプリケーションが、所有者データを読み取る恐れがあります。"</string>
+    <string name="permdesc_readOwnerData">"携帯電話に保存した所有者データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが所有者データを読み取る恐れがあります。"</string>
     <string name="permlab_readCalendar">"カレンダーデータの読み取り"</string>
-    <string name="permdesc_readCalendar">"携帯電話に保存したカレンダーのイベントをアプリケーションですべて読み取れるようにします。悪意のあるアプリケーションではこれを利用して、カレンダーのイベントを他人に送信できます。"</string>
+    <string name="permdesc_readCalendar">"端末に保存したカレンダーの予定の読み取りをアプリケーションに許可します。悪意のあるアプリケーションがカレンダーの予定を他人に送信する恐れがあります。"</string>
     <string name="permlab_writeCalendar">"カレンダーデータの書き込み"</string>
-    <string name="permdesc_writeCalendar">"携帯電話に保存したカレンダーイベントの変更をアプリケーションに許可します。これにより悪意のあるアプリケーションが、カレンダーデータを消去や変更する恐れがあります。"</string>
+    <string name="permdesc_writeCalendar">"端末に保存したカレンダーの予定の変更をアプリケーションに許可します。悪意のあるアプリケーションが、カレンダーデータを消去/変更する恐れがあります。"</string>
     <string name="permlab_accessMockLocation">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation">"テスト用に仮の位置情報源を作成します。これにより悪意のあるアプリケーションが、GPS、ネットワークプロバイダなどから返される本当の位置情報や状況を改ざんする恐れがあります。"</string>
     <string name="permlab_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドへのアクセス"</string>
-    <string name="permdesc_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドにアクセスします。これにより悪意のあるアプリケーションが、GPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
-    <string name="permlab_accessFineLocation">"正確な (GPS) 位置"</string>
-    <string name="permdesc_accessFineLocation">"GPSなど、携帯電話の正確な位置情報源に、可能な場合アクセスします。これにより悪意のあるアプリケーションが、ユーザーの現在地を特定したり、バッテリの消費を増やしたりする恐れがあります。"</string>
-    <string name="permlab_accessCoarseLocation">"おおよその (ネットワーク情報による) 位置"</string>
+    <string name="permdesc_accessLocationExtraCommands">"位置情報提供元の追加コマンドにアクセスします。悪意のあるアプリケーションがGPSなどの位置提供の動作を妨害する恐れがあります。"</string>
+    <string name="permlab_accessFineLocation">"精細な位置情報（GPS）"</string>
+    <string name="permdesc_accessFineLocation">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
+    <string name="permlab_accessCoarseLocation">"おおよその位置情報（ネットワーク基地局）"</string>
     <string name="permdesc_accessCoarseLocation">"セルラーネットワークデータベースなど、携帯電話のおおよその位置を特定する情報源が利用可能な場合にアクセスします。これにより悪意のあるアプリケーションが、ユーザーのおおよその位置を特定できる恐れがあります。"</string>
     <string name="permlab_accessSurfaceFlinger">"SurfaceFlingerへのアクセス"</string>
     <string name="permdesc_accessSurfaceFlinger">"SurfaceFlingerの低レベルの機能の使用をアプリケーションに許可します。"</string>
@@ -255,33 +263,37 @@
     <string name="permlab_recordAudio">"録音"</string>
     <string name="permdesc_recordAudio">"オーディオ録音パスへのアクセスをアプリケーションに許可します。"</string>
     <string name="permlab_camera">"写真の撮影"</string>
-    <string name="permdesc_camera">"カメラで写真を撮ることをアプリケーションに許可します。これによりアプリケーションは、カメラに写る画像をいつでも収集できます。"</string>
-    <string name="permlab_brick">"携帯電話を永久に使用できなくする"</string>
+    <string name="permdesc_camera">"カメラでの写真撮影をアプリケーションに許可します。アプリケーションはカメラから画像をいつでも収集できます。"</string>
+    <string name="permlab_brick">"端末を永続的に無効にする"</string>
     <string name="permdesc_brick">"携帯電話全体を永続的に無効にすることをアプリケーションに許可します。この許可は非常に危険です。"</string>
-    <string name="permlab_reboot">"携帯電話の再起動"</string>
-    <string name="permdesc_reboot">"携帯電話の強制的な再起動をアプリケーションに許可します。"</string>
+    <string name="permlab_reboot">"端末の再起動"</string>
+    <string name="permdesc_reboot">"端末の強制的な再起動をアプリケーションに許可します。"</string>
     <string name="permlab_mount_unmount_filesystems">"ファイルシステムのマウントとマウント解除"</string>
     <string name="permdesc_mount_unmount_filesystems">"リムーバブルメモリのファイルシステムのマウントとマウント解除をアプリケーションに許可します。"</string>
-    <string name="permlab_vibrate">"バイブレータの制御"</string>
-    <string name="permdesc_vibrate">"バイブレータのコントロールをアプリケーションに許可します。"</string>
+    <string name="permlab_mount_format_filesystems">"外部ストレージのフォーマット"</string>
+    <string name="permdesc_mount_format_filesystems">"アプリケーションがリムーバブルストレージをフォーマットすることを許可します。"</string>
+    <string name="permlab_vibrate">"バイブレーション制御"</string>
+    <string name="permdesc_vibrate">"バイブレーションの制御をアプリケーションに許可します。"</string>
     <string name="permlab_flashlight">"ライトのコントロール"</string>
     <string name="permdesc_flashlight">"ライトの制御をアプリケーションに許可します。"</string>
     <string name="permlab_hardware_test">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test">"ハードウェアのテストのためにさまざまな周辺機器を制御することをアプリケーションに許可します。"</string>
-    <string name="permlab_callPhone">"電話番号に直接発信"</string>
-    <string name="permdesc_callPhone">"電話を自動でかけることをアプリケーションに許可します。悪意のあるアプリケーションが予想外の電話をかけて、料金が発生する恐れがあります。緊急電話番号への通話は許可しません。"</string>
-    <string name="permlab_callPrivileged">"あらゆる電話番号に直接発信"</string>
-    <string name="permdesc_callPrivileged">"緊急電話を含めてあらゆる電話番号に自動発信することをアプリケーションに許可します。悪意のあるアプリケーションが緊急サービスに不要かつ不正な通話をする恐れがあります。"</string>
-    <string name="permlab_locationUpdates">"位置の更新通知の制御"</string>
+    <string name="permlab_callPhone">"電話番号発信"</string>
+    <string name="permdesc_callPhone">"アプリケーションが電話を自動発信することを許可します。悪意のあるアプリケーションが意図しない電話をかけて料金が発生する恐れがあります。緊急呼への発信は許可しません。"</string>
+    <string name="permlab_callPrivileged">"電話番号発信"</string>
+    <string name="permdesc_callPrivileged">"緊急呼を含めあらゆる電話番号に自動発信することをアプリケーションに許可します。悪意のあるアプリケーションが緊急サービスに不正な通報をする恐れがあります。"</string>
+    <string name="permlab_locationUpdates">"位置情報の更新通知"</string>
     <string name="permdesc_locationUpdates">"無線通信からの位置更新通知を有効/無効にすることを許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_checkinProperties">"チェックインプロパティへのアクセス"</string>
     <string name="permdesc_checkinProperties">"チェックインサービスがアップロードしたプロパティへの読み書きを許可します。通常のアプリケーションでは使用しません。"</string>
-    <string name="permlab_modifyPhoneState">"携帯電話の状態の変更"</string>
-    <string name="permdesc_modifyPhoneState">"携帯端末の電話機能のコントロールをアプリケーションに許可します。この許可を受けたアプリケーションは、ネットワークの切り替え、携帯電話の無線通信のオン/オフなどを通知せずに行うことができます。"</string>
-    <string name="permlab_readPhoneState">"携帯電話の状態の読み取り"</string>
-    <string name="permdesc_readPhoneState">"携帯端末の電話機能へのアクセスをアプリケーションに許可します。これを許可されたアプリケーションは、この携帯電話の電話番号、通話中かどうか、通話相手の電話番号などを特定できます。"</string>
-    <string name="permlab_wakeLock">"携帯電話をスリープ状態にしない"</string>
-    <string name="permdesc_wakeLock">"携帯電話をスリープ状態にしないようにすることをアプリケーションに許可します。"</string>
+    <string name="permlab_bindGadget">"ガジェットの選択"</string>
+    <string name="permdesc_bindGadget">"特定のアプリケーションで使用可能なガジェットをシステムに指定することをアプリケーションに許可します。この許可を受けたアプリケーションは、他のアプリケーションに個人データへのアクセスを許可することができます。通常のアプリケーションでは使用しません。"</string>
+    <string name="permlab_modifyPhoneState">"端末ステータスの変更"</string>
+    <string name="permdesc_modifyPhoneState">"端末の電話機能のコントロールをアプリケーションに許可します。アプリケーションは、ネットワークの切り替え、携帯電話の無線通信のオン/オフなどを通知せずに行うことができます。"</string>
+    <string name="permlab_readPhoneState">"端末ステータスの読み取り"</string>
+    <string name="permdesc_readPhoneState">"端末の電話機能へのアクセスをアプリケーションに許可します。アプリケーションは、この携帯電話の電話番号、通話中かどうか、通話相手の電話番号などを特定できます。"</string>
+    <string name="permlab_wakeLock">"端末のスリープを無効にする"</string>
+    <string name="permdesc_wakeLock">"端末のスリープを無効にすることをアプリケーションに許可します。"</string>
     <string name="permlab_devicePower">"携帯電話の電源のオン/オフ"</string>
     <string name="permdesc_devicePower">"携帯電話の電源のオン/オフをアプリケーションに許可します。"</string>
     <string name="permlab_factoryTest">"出荷時試験モードでの実行"</string>
@@ -290,78 +302,76 @@
     <string name="permdesc_setWallpaper">"システムの壁紙の設定をアプリケーションに許可します。"</string>
     <string name="permlab_setWallpaperHints">"壁紙サイズのヒントの設定"</string>
     <string name="permdesc_setWallpaperHints">"システムの壁紙サイズのヒントの設定をアプリケーションに許可します。"</string>
-    <string name="permlab_masterClear">"システムを出荷時のデフォルトにリセット"</string>
+    <string name="permlab_masterClear">"システムを出荷時設定にリセット"</string>
     <string name="permdesc_masterClear">"データ、設定、インストールしたアプリケーションをすべて消去して、完全に出荷時の設定にシステムをリセットすることをアプリケーションに許可します。"</string>
     <string name="permlab_setTimeZone">"タイムゾーンの設定"</string>
-    <string name="permdesc_setTimeZone">"携帯電話のタイムゾーンの変更をアプリケーションに許可します。"</string>
+    <string name="permdesc_setTimeZone">"端末のタイムゾーンの変更をアプリケーションに許可します。"</string>
     <string name="permlab_getAccounts">"既知のアカウントの取得"</string>
-    <string name="permdesc_getAccounts">"携帯端末内にあるアカウントのリストの取得をアプリケーションに許可します。"</string>
+    <string name="permdesc_getAccounts">"端末内にあるアカウントのリストの取得をアプリケーションに許可します。"</string>
     <string name="permlab_accessNetworkState">"ネットワーク状態の表示"</string>
     <string name="permdesc_accessNetworkState">"すべてのネットワーク状態の表示をアプリケーションに許可します。"</string>
-    <string name="permlab_createNetworkSockets">"インターネットへの完全なアクセス権"</string>
+    <string name="permlab_createNetworkSockets">"完全なインターネットアクセス"</string>
     <string name="permdesc_createNetworkSockets">"ネットワークソケットの作成をアプリケーションに許可します。"</string>
     <string name="permlab_writeApnSettings">"アクセスポイント名設定の書き込み"</string>
     <string name="permdesc_writeApnSettings">"APNのプロキシやポートなどのAPN設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeNetworkState">"ネットワーク接続の変更"</string>
     <string name="permdesc_changeNetworkState">"ネットワークの接続状態の変更をアプリケーションに許可します。"</string>
+    <string name="permlab_changeBackgroundDataSetting">"バックグラウンドデータ使用の設定の変更"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"バックグラウンドデータ使用の設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_accessWifiState">"Wi-Fi状態の表示"</string>
     <string name="permdesc_accessWifiState">"Wi-Fi状態に関する情報の表示をアプリケーションに許可します。"</string>
     <string name="permlab_changeWifiState">"Wi-Fi状態の変更"</string>
     <string name="permdesc_changeWifiState">"Wi-Fiアクセスポイントへの接続や接続の切断、設定されたWi-Fiネットワークの変更をアプリケーションに許可します。"</string>
     <string name="permlab_bluetoothAdmin">"Bluetoothの管理"</string>
-    <string name="permdesc_bluetoothAdmin">"ローカルのBluetooth電話を設定し、リモートデバイスを検出してペアに設定することをアプリケーションに許可します。"</string>
+    <string name="permdesc_bluetoothAdmin">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permlab_bluetooth">"Bluetooth接続の作成"</string>
-    <string name="permdesc_bluetooth">"ローカルBluetooth電話の設定を表示し、デバイスをペアとして設定して接続を承認することをアプリケーションに許可します。"</string>
+    <string name="permdesc_bluetooth">"このBluetooth端末の設定表示、および別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
     <string name="permlab_disableKeyguard">"キーロックを無効にする"</string>
     <string name="permdesc_disableKeyguard">"キーロックや関連するパスワードセキュリティを無効にすることをアプリケーションに許可します。正当な利用の例では、かかってきた電話を受信する際にキーロックを無効にし、通話の終了時にキーロックを有効にし直します。"</string>
     <string name="permlab_readSyncSettings">"同期設定の読み取り"</string>
-    <string name="permdesc_readSyncSettings">"連絡先の同期が有効かどうかなど、同期設定の読み取りをアプリケーションに許可します。"</string>
+    <string name="permdesc_readSyncSettings">"連絡先の同期の有効/無効など、同期設定の読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeSyncSettings">"同期設定の書き込み"</string>
-    <string name="permdesc_writeSyncSettings">"連絡先の同期が有効かどうかなど、同期設定の変更をアプリケーションに許可します。"</string>
+    <string name="permdesc_writeSyncSettings">"連絡先の同期の有効/無効など、同期設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_readSyncStats">"同期統計の読み取り"</string>
-    <string name="permdesc_readSyncStats">"同期状態 (同期履歴など) の読み取りをアプリケーションに許可します。"</string>
+    <string name="permdesc_readSyncStats">"同期状態（同期履歴など）の読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_subscribedFeedsRead">"登録したフィードの読み取り"</string>
     <string name="permdesc_subscribedFeedsRead">"現在同期しているフィードの詳細の取得をアプリケーションに許可します。"</string>
     <string name="permlab_subscribedFeedsWrite">"登録したフィードの書き込み"</string>
     <string name="permdesc_subscribedFeedsWrite">"現在同期しているフィードの変更をアプリケーションに許可します。悪意のあるアプリケーションが同期フィードを変更する恐れがあります。"</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"ユーザー定義辞書の読み込み"</string>
+    <string name="permdesc_readDictionary">"アプリケーションがユーザー辞書に登録されている個人的な語句や名前を読み込むことを許可します。"</string>
+    <string name="permlab_writeDictionary">"ユーザー定義辞書への書き込み"</string>
+    <string name="permdesc_writeDictionary">"アプリケーションがユーザー辞書に新しい語句を書き込むことを許可します。"</string>
   <string-array name="phoneTypes">
     <item>"自宅"</item>
     <item>"携帯"</item>
-    <item>"勤務先"</item>
-    <item>"勤務先FAX"</item>
-    <item>"自宅FAX"</item>
+    <item>"仕事"</item>
+    <item>"FAX（仕事）"</item>
+    <item>"FAX（自宅）"</item>
     <item>"ポケベル"</item>
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item>"自宅"</item>
-    <item>"勤務先"</item>
+    <item>"仕事"</item>
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item>"自宅"</item>
-    <item>"勤務先"</item>
+    <item>"仕事"</item>
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item>"自宅"</item>
-    <item>"勤務先"</item>
+    <item>"仕事"</item>
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item>"勤務先"</item>
+    <item>"仕事"</item>
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
@@ -377,31 +387,32 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"PINコードを入力"</string>
     <string name="keyguard_password_wrong_pin_code">"PINコードが正しくありません。"</string>
-    <string name="keyguard_label_text">"ロックを解除するには、Menu、0キーの順に押します。"</string>
-    <string name="emergency_call_dialog_number_for_display">"緊急電話番号"</string>
-    <string name="lockscreen_carrier_default">"(サービスなし)"</string>
-    <string name="lockscreen_screen_locked">"画面がロックされています。"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Menuキーを押してロックを解除するか、緊急電話をかけます。"</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"ロックを解除するにはMenuキーを押します。"</string>
+    <string name="keyguard_label_text">"ロックを解除するにはMENU、0キーの順に押します。"</string>
+    <string name="emergency_call_dialog_number_for_display">"緊急呼番号"</string>
+    <string name="lockscreen_carrier_default">"（サービス登録なし）"</string>
+    <string name="lockscreen_screen_locked">"画面ロック中"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急呼）"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
-    <string name="lockscreen_emergency_call">"緊急電話"</string>
+    <string name="lockscreen_emergency_call">"緊急呼"</string>
     <string name="lockscreen_pattern_correct">"一致しました"</string>
-    <string name="lockscreen_pattern_wrong">"もう一度試してください"</string>
-    <string name="lockscreen_plugged_in">"充電中 (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <string name="lockscreen_pattern_wrong">"やり直してください"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"充電してください。"</string>
-    <string name="lockscreen_missing_sim_message_short">"SIMカードがありません。"</string>
-    <string name="lockscreen_missing_sim_message">"SIMカードが携帯電話に挿入されていません。"</string>
+    <string name="lockscreen_missing_sim_message_short">"SIMカードが挿入されていません"</string>
+    <string name="lockscreen_missing_sim_message">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_instructions">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_network_locked_message">"ネットワークがロックされました"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIMカードはPUKでロックされています。"</string>
     <string name="lockscreen_sim_puk_locked_instructions">"お客様サポートにお問い合わせください。"</string>
     <string name="lockscreen_sim_locked_message">"SIMカードはロックされています。"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIMカードのロックを解除中..."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIMカードのロック解除中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"ロック解除のパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しく指定されていません。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度指定してください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"指定したパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありません。あと<xliff:g id="NUMBER_1">%d</xliff:g>回指定に失敗すると、携帯電話のロックの解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度指定してください。"</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>秒後にもう一度試してください。"</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"パターンを忘れた場合"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"パターンの指定回数が多すぎる"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"パターンのエラーが多すぎます"</string>
     <string name="lockscreen_glogin_instructions">"ロックを解除するには、"\n"Googleアカウントでログインしてください。"</string>
     <string name="lockscreen_glogin_username_hint">"ユーザー名 (メール)"</string>
     <string name="lockscreen_glogin_password_hint">"パスワード"</string>
@@ -410,39 +421,36 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"通知を消去"</string>
     <string name="status_bar_no_notifications_title">"通知なし"</string>
     <string name="status_bar_ongoing_events_title">"継続中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"充電中..."</string>
     <string name="battery_low_title">"充電してください"</string>
-    <string name="battery_low_subtitle">"バッテリの残量が少なくなっています。"</string>
+    <string name="battery_low_subtitle">"電池が残り少なくなっています:"</string>
     <string name="battery_low_percent_format">"残り<xliff:g id="NUMBER">%d%%</xliff:g>未満"</string>
     <string name="factorytest_failed">"出荷時試験が失敗"</string>
     <string name="factorytest_not_system">"FACTORY_TEST操作は、/system/appにインストールされたパッケージのみが対象です。"</string>
     <string name="factorytest_no_action">"FACTORY_TEST操作を行うパッケージは見つかりませんでした。"</string>
     <string name="factorytest_reboot">"再起動"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"ページ「<xliff:g id="TITLE">%s</xliff:g>」の記述:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"続行する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
     <string name="save_password_label">"確認"</string>
     <string name="save_password_message">"このパスワードをブラウザで保存しますか？"</string>
     <string name="save_password_notnow">"今は保存しない"</string>
     <string name="save_password_remember">"保存"</string>
     <string name="save_password_never">"保存しない"</string>
     <string name="open_permission_deny">"このページへのアクセスは許可されていません。"</string>
-    <string name="text_copied">"テキストがクリップボードにコピーされました。"</string>
+    <string name="text_copied">"テキストをクリップボードにコピーしました。"</string>
     <string name="more_item_label">"その他"</string>
-    <string name="prepend_shortcut_label">"Menu+"</string>
+    <string name="prepend_shortcut_label">"MENU+"</string>
     <string name="menu_space_shortcut_label">"Space"</string>
     <string name="menu_enter_shortcut_label">"Enter"</string>
     <string name="menu_delete_shortcut_label">"Del"</string>
@@ -484,22 +492,38 @@
     <item quantity="one">"明日"</item>
     <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>日後"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1秒前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1分前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>分後"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1時間前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>時間前"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"昨日"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>日前"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"1秒後"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>秒後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"1分後"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>分後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"1時間後"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>時間後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"明日"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>日後"</item>
+  </plurals>
     <string name="preposition_for_date">"%s"</string>
     <string name="preposition_for_time">"%s"</string>
     <string name="preposition_for_year">"%s年"</string>
@@ -515,14 +539,14 @@
     <string name="weeks">"週間"</string>
     <string name="year">"年"</string>
     <string name="years">"年"</string>
-    <string name="sunday">"日曜"</string>
-    <string name="monday">"月曜"</string>
-    <string name="tuesday">"火曜"</string>
-    <string name="wednesday">"水曜"</string>
-    <string name="thursday">"木曜"</string>
-    <string name="friday">"金曜"</string>
-    <string name="saturday">"土曜"</string>
-    <string name="every_weekday">"平日の毎日 (月～金)"</string>
+    <string name="sunday">"日曜日"</string>
+    <string name="monday">"月曜日"</string>
+    <string name="tuesday">"火曜日"</string>
+    <string name="wednesday">"水曜日"</string>
+    <string name="thursday">"木曜日"</string>
+    <string name="friday">"金曜日"</string>
+    <string name="saturday">"土曜日"</string>
+    <string name="every_weekday">"平日（月～金）"</string>
     <string name="daily">"毎日"</string>
     <string name="weekly">"毎週<xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly">"毎月"</string>
@@ -533,97 +557,95 @@
     <string name="am">"AM"</string>
     <string name="pm">"PM"</string>
     <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g> (<xliff:g id="WEEKDAY2">%4$s</xliff:g>) <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="DATE2">%5$s</xliff:g> (<xliff:g id="WEEKDAY2">%4$s</xliff:g>)"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g><xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g>～<xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g> (<xliff:g id="WEEKDAY">%2$s</xliff:g>) <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g> (<xliff:g id="WEEKDAY">%2$s</xliff:g>)"</string>
+    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g><xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>、<xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>、<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
-    <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
-    <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
-    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g>\'年\'<xliff:g id="MONTH">MMM</xliff:g><xliff:g id="DAY">dd</xliff:g>\'日\'"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'/'<xliff:g id="MONTH">MMMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'年'<xliff:g id="MONTH">MMMM</xliff:g>'月'<xliff:g id="DAY">d</xliff:g>'日'"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>'年'"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'/'<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"正午"</string>
     <string name="Noon">"正午"</string>
     <string name="midnight">"午前0時"</string>
     <string name="Midnight">"午前0時"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%B</xliff:g>/<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日 <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g> (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g> (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g> (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g> (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>)～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>)"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g><xliff:g id="DAY1_0">%3$s</xliff:g>日 (<xliff:g id="WEEKDAY1">%1$s</xliff:g>) <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g><xliff:g id="DAY2_1">%8$s</xliff:g>日 (<xliff:g id="WEEKDAY2">%6$s</xliff:g>) <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%b</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%b</xliff:g>/<xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
-    <string name="day_of_week_long_sunday">"日曜"</string>
-    <string name="day_of_week_long_monday">"月曜"</string>
-    <string name="day_of_week_long_tuesday">"火曜"</string>
-    <string name="day_of_week_long_wednesday">"水曜"</string>
-    <string name="day_of_week_long_thursday">"木曜"</string>
-    <string name="day_of_week_long_friday">"金曜"</string>
-    <string name="day_of_week_long_saturday">"土曜"</string>
-    <string name="day_of_week_medium_sunday">"日"</string>
-    <string name="day_of_week_medium_monday">"月"</string>
-    <string name="day_of_week_medium_tuesday">"火"</string>
-    <string name="day_of_week_medium_wednesday">"水"</string>
-    <string name="day_of_week_medium_thursday">"木"</string>
-    <string name="day_of_week_medium_friday">"金"</string>
-    <string name="day_of_week_medium_saturday">"土"</string>
-    <string name="day_of_week_short_sunday">"日"</string>
-    <string name="day_of_week_short_monday">"月"</string>
-    <string name="day_of_week_short_tuesday">"火"</string>
-    <string name="day_of_week_short_wednesday">"水"</string>
-    <string name="day_of_week_short_thursday">"木"</string>
-    <string name="day_of_week_short_friday">"金"</string>
-    <string name="day_of_week_short_saturday">"土"</string>
-    <string name="day_of_week_shorter_sunday">"日"</string>
+    <string name="day_of_week_long_sunday">"日曜日"</string>
+    <string name="day_of_week_long_monday">"月曜日"</string>
+    <string name="day_of_week_long_tuesday">"火曜日"</string>
+    <string name="day_of_week_long_wednesday">"水曜日"</string>
+    <string name="day_of_week_long_thursday">"木曜日"</string>
+    <string name="day_of_week_long_friday">"金曜日"</string>
+    <string name="day_of_week_long_saturday">"土曜日"</string>
+    <string name="day_of_week_medium_sunday">"（日）"</string>
+    <string name="day_of_week_medium_monday">"（月）"</string>
+    <string name="day_of_week_medium_tuesday">"（火）"</string>
+    <string name="day_of_week_medium_wednesday">"（水）"</string>
+    <string name="day_of_week_medium_thursday">"（木）"</string>
+    <string name="day_of_week_medium_friday">"（金）"</string>
+    <string name="day_of_week_medium_saturday">"（土）"</string>
+    <string name="day_of_week_short_sunday">"（日）"</string>
+    <string name="day_of_week_short_monday">"（月）"</string>
+    <string name="day_of_week_short_tuesday">"（火）"</string>
+    <string name="day_of_week_short_wednesday">"（水）"</string>
+    <string name="day_of_week_short_thursday">"（木）"</string>
+    <string name="day_of_week_short_friday">"（金）"</string>
+    <string name="day_of_week_short_saturday">"（土）"</string>
+    <string name="day_of_week_shorter_sunday">"（日）"</string>
     <string name="day_of_week_shorter_monday">"月"</string>
-    <string name="day_of_week_shorter_tuesday">"火"</string>
+    <string name="day_of_week_shorter_tuesday">"（火）"</string>
     <string name="day_of_week_shorter_wednesday">"水"</string>
-    <string name="day_of_week_shorter_thursday">"木"</string>
+    <string name="day_of_week_shorter_thursday">"（木）"</string>
     <string name="day_of_week_shorter_friday">"金"</string>
-    <string name="day_of_week_shorter_saturday">"土"</string>
+    <string name="day_of_week_shorter_saturday">"（土）"</string>
     <string name="day_of_week_shortest_sunday">"日"</string>
     <string name="day_of_week_shortest_monday">"月"</string>
     <string name="day_of_week_shortest_tuesday">"火"</string>
@@ -657,7 +679,7 @@
     <string name="month_medium_december">"12月"</string>
     <string name="month_shortest_january">"1"</string>
     <string name="month_shortest_february">"2"</string>
-    <string name="month_shortest_march">"月"</string>
+    <string name="month_shortest_march">"3"</string>
     <string name="month_shortest_april">"4"</string>
     <string name="month_shortest_may">"5"</string>
     <string name="month_shortest_june">"6"</string>
@@ -679,6 +701,7 @@
     <string name="paste">"貼り付け"</string>
     <string name="copyUrl">"URLをコピー"</string>
     <string name="inputMethod">"入力方法"</string>
+    <string name="addToDictionary">"辞書に「%s」を追加"</string>
     <string name="editTextMenuTitle">"テキストを編集"</string>
     <string name="low_internal_storage_view_title">"空き容量低下"</string>
     <string name="low_internal_storage_view_text">"携帯電話の空き容量が少なくなっています。"</string>
@@ -686,41 +709,42 @@
     <string name="cancel">"キャンセル"</string>
     <string name="yes">"OK"</string>
     <string name="no">"キャンセル"</string>
+    <string name="dialog_alert_title">"注意"</string>
     <string name="capital_on">"オン"</string>
     <string name="capital_off">"オフ"</string>
     <string name="whichApplication">"操作の完了に使用"</string>
-    <string name="alwaysUse">"この操作にデフォルトで使用します。"</string>
-    <string name="clearDefaultHintMsg">"ホームの[設定]&gt;[アプリケーション]&gt;[アプリケーションを管理]で、デフォルトをクリアします。"</string>
+    <string name="alwaysUse">"常にこの操作で使用する"</string>
+    <string name="clearDefaultHintMsg">"ホームの[設定]&gt;[アプリケーション]&gt;[アプリケーションの管理]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity">"操作の選択"</string>
     <string name="noApplications">"この操作を実行できるアプリケーションはありません。"</string>
     <string name="aerr_title">"エラー"</string>
-    <string name="aerr_application">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>プロセス) が予期せず停止しました。もう一度試してください。"</string>
-    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>プロセスが予期せず停止しました。もう一度試してください。"</string>
+    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g>）が予期せず停止しました。やり直してください。"</string>
+    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>が予期せず停止しました。やり直してください。"</string>
     <string name="anr_title">"エラー"</string>
-    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g>操作 (アプリケーション<xliff:g id="APPLICATION">%2$s</xliff:g>) は応答していません。"</string>
-    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g>操作 (プロセス:<xliff:g id="PROCESS">%2$s</xliff:g>) は応答していません。"</string>
-    <string name="anr_application_process">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>プロセス) は応答していません。"</string>
-    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>プロセスは応答していません。"</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g>（<xliff:g id="APPLICATION">%2$s</xliff:g>）は応答していません。"</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g>（プロセス: <xliff:g id="PROCESS">%2$s</xliff:g>）は応答していません。"</string>
+    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g>）は応答していません。"</string>
+    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>は応答していません。"</string>
     <string name="force_close">"強制終了"</string>
     <string name="wait">"待機"</string>
     <string name="debug">"デバッグ"</string>
-    <string name="sendText">"テキストの操作の選択"</string>
+    <string name="sendText">"テキストの操作"</string>
     <string name="volume_ringtone">"着信音の音量"</string>
     <string name="volume_music">"メディアの音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
     <string name="volume_call">"着信音の音量"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
+    <string name="volume_bluetooth_call">"Bluetooth着信音の音量"</string>
     <string name="volume_alarm">"アラームの音量"</string>
     <string name="volume_notification">"通知音の音量"</string>
     <string name="volume_unknown">"音量"</string>
     <string name="ringtone_default">"デフォルトの着信音"</string>
-    <string name="ringtone_default_with_actual">"デフォルトの着信音 (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual">"端末既定の着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>）"</string>
     <string name="ringtone_silent">"無音"</string>
     <string name="ringtone_picker_title">"着信音"</string>
-    <string name="ringtone_unknown">"不明時着信音"</string>
+    <string name="ringtone_unknown">"不明な着信音"</string>
   <plurals name="wifi_available">
-    <item quantity="one">"Wi-Fiネットワークが利用可能"</item>
-    <item quantity="other">"Wi-Fiネットワークが利用可能"</item>
+    <item quantity="one">"Wi-Fiを利用できます"</item>
+    <item quantity="other">"Wi-Fiを利用できます"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
     <item quantity="one">"Wi-Fiオープンネットワークが利用できます"</item>
@@ -729,12 +753,12 @@
     <string name="select_character">"文字を挿入"</string>
     <string name="sms_control_default_app_name">"不明なアプリケーション"</string>
     <string name="sms_control_title">"SMSメッセージの送信中"</string>
-    <string name="sms_control_message">"大量のSMSメッセージが送信されます。送信するには[OK]、中止するには[キャンセル]を選択します。"</string>
+    <string name="sms_control_message">"大量のSMSメッセージを送信しようとしています。[OK]で送信、[キャンセル]で中止します。"</string>
     <string name="sms_control_yes">"OK"</string>
     <string name="sms_control_no">"キャンセル"</string>
     <string name="date_time_set">"設定"</string>
-    <string name="default_permission_group">"デフォルト"</string>
-    <string name="no_permissions">"許可は必要ありません"</string>
+    <string name="default_permission_group">"端末既定"</string>
+    <string name="no_permissions">"権限付与の必要はありません"</string>
     <string name="perms_hide"><b>"隠す"</b></string>
     <string name="perms_show_all"><b>"すべて表示"</b></string>
     <string name="googlewebcontenthelper_loading">"読み込み中..."</string>
@@ -745,8 +769,47 @@
     <string name="usb_storage_error_message">"USBメモリにSDカードを使用する際に問題が発生しました。"</string>
     <string name="usb_storage_notification_title">"USB接続"</string>
     <string name="usb_storage_notification_message">"パソコンとの間でファイルをコピーします。"</string>
+    <string name="usb_storage_stop_notification_title">"USBストレージをOFFにする"</string>
+    <string name="usb_storage_stop_notification_message">"USBストレージをOFFにする場合に選択します。"</string>
+    <string name="usb_storage_stop_title">"USBストレージをOFFにする"</string>
+    <string name="usb_storage_stop_message">"USBストレージをOFFにする前にUSBホストのマウントを解除したことを確認してください。USBストレージをOFFにするには[OFF]を選択します。"</string>
+    <string name="usb_storage_stop_button_mount">"OFF"</string>
+    <string name="usb_storage_stop_button_unmount">"キャンセル"</string>
+    <string name="usb_storage_stop_error_message">"USBストレージをOFFにする際に問題が発生しました。USBホストのマウントが解除されていることを確認してからもう一度お試しください。"</string>
+    <string name="extmedia_format_title">"SDカードをフォーマット"</string>
+    <string name="extmedia_format_message">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
+    <string name="extmedia_format_button_format">"フォーマット"</string>
     <string name="select_input_method">"入力方法の選択"</string>
-    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"候補"</u></font></string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"候補"</u></string>
+    <string name="ext_media_checking_notification_title">"SDカードの準備中"</string>
+    <string name="ext_media_checking_notification_message">"エラーを確認中"</string>
+    <string name="ext_media_nofs_notification_title">"空のSDカード"</string>
+    <string name="ext_media_nofs_notification_message">"SDカードが空か、サポート対象外のファイルシステムを使用しています。"</string>
+    <string name="ext_media_unmountable_notification_title">"破損したSDカード"</string>
+    <string name="ext_media_unmountable_notification_message">"SDカードが破損しています。カードのフォーマットが必要な可能性があります。"</string>
+    <string name="ext_media_badremoval_notification_title">"SDカードが予期せず取り外されました"</string>
+    <string name="ext_media_badremoval_notification_message">"データの喪失を防ぐためSDカードを取り外す前にマウントを解除してください。"</string>
+    <string name="ext_media_safe_unmount_notification_title">"SDカードを安全に取り外しました"</string>
+    <string name="ext_media_safe_unmount_notification_message">"SDカードを安全に取り外せます。"</string>
+    <string name="ext_media_nomedia_notification_title">"SDカードが取り外されています"</string>
+    <string name="ext_media_nomedia_notification_message">"SDカードが取り外されました。新しいSDカードを挿入して端末のメモリを増やしてください。"</string>
+    <string name="activity_list_empty">"一致するアクティビティが見つかりません"</string>
+    <string name="permlab_pkgUsageStats">"コンポーネント使用状況に関する統計情報の更新"</string>
+    <string name="permdesc_pkgUsageStats">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

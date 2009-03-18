@@ -50,6 +50,8 @@ public class Canvas {
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
     private int         mSurfaceFormat;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private float       mDensityScale = 1.0f;
 
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
@@ -74,6 +76,8 @@ public class Canvas {
         throwIfRecycled(bitmap);
         mNativeCanvas = initRaster(bitmap.ni());
         mBitmap = bitmap;
+        mDensityScale = bitmap.getDensityScale();
+        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
     }
     
     /*package*/ Canvas(int nativeCanvas) {
@@ -126,6 +130,8 @@ public class Canvas {
 
         native_setBitmap(mNativeCanvas, bitmap.ni());
         mBitmap = bitmap;
+        mDensityScale = bitmap.getDensityScale();
+        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
     }
     
     /**
@@ -162,6 +168,51 @@ public class Canvas {
      * @return the height of the current drawing layer
      */
     public native int getHeight();
+
+    /**
+     * <p>Returns the density scale for this Canvas' backing bitmap, expressed as a
+     * factor of the default density (160dpi.) For instance, a bitmap designed for
+     * 240dpi displays will have a density scale of 1.5 whereas a bitmap
+     * designed for 160dpi will have a density scale of 1.0.</p>
+     *
+     * <p>The default density scale is {@link Bitmap#DENSITY_SCALE_UNKNOWN}.</p>
+     *
+     * @return A scaling factor of the default density (160dpi) or
+     *        {@link Bitmap#DENSITY_SCALE_UNKNOWN} if the scaling factor is unknown.
+     *
+     * @see #setDensityScale(float)
+     * @see Bitmap#getDensityScale() 
+     *
+     * @hide pending API council approval
+     */
+    public float getDensityScale() {
+        if (mBitmap != null) {
+            return mBitmap.getDensityScale();
+        }
+        return mDensityScale;
+    }
+
+    /**
+     * <p>Specifies the density scale for this Canvas' backing bitmap, expressed as a
+     * factor of the default density (160dpi.) For instance, a bitmap designed for
+     * 240dpi displays will have a density scale of 1.5 whereas a bitmap
+     * designed for 160dpi will have a density scale of 1.0.</p>
+     *
+     * @param densityScale The density scaling factor to use with this bitmap or
+     *        {@link Bitmap#DENSITY_SCALE_UNKNOWN} if the factor is unknown.
+     *
+     * @see #getDensityScale()
+     * @see Bitmap#setDensityScale(float) 
+     *
+     * @hide pending API council approval
+     */
+    public void setDensityScale(float densityScale) {
+        if (mBitmap != null) {
+            mBitmap.setDensityScale(densityScale);
+        }
+        mDensityScale = densityScale;
+        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
+    }
 
     // the SAVE_FLAG constants must match their native equivalents
 
@@ -910,7 +961,8 @@ public class Canvas {
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), left, top,
-                          paint != null ? paint.mNativePaint : 0);
+                paint != null ? paint.mNativePaint : 0, bitmap.isAutoScalingEnabled(),
+                bitmap.getDensityScale());
     }
 
     /**
@@ -982,8 +1034,8 @@ public class Canvas {
      *                 be 0xFF for every pixel).
      * @param paint  May be null. The paint used to draw the bitmap
      */
-    public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
-                           int width, int height, boolean hasAlpha,
+    public void drawBitmap(int[] colors, int offset, int stride, float x,
+                           float y, int width, int height, boolean hasAlpha,
                            Paint paint) {
         // check for valid input
         if (width < 0) {
@@ -1006,11 +1058,20 @@ public class Canvas {
             return;
         }
         // punch down to native for the actual draw
-        native_drawBitmap(mNativeCanvas, colors, offset, stride, x, y,
-                          width, height, hasAlpha,
-                          paint != null ? paint.mNativePaint : 0);
+        native_drawBitmap(mNativeCanvas, colors, offset, stride, x, y, width, height, hasAlpha,
+                paint != null ? paint.mNativePaint : 0);
     }
     
+    /** Legacy version of drawBitmap(int[] colors, ...) that took ints for x,y
+     */
+    public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
+                           int width, int height, boolean hasAlpha,
+                           Paint paint) {
+        // call through to the common float version
+        drawBitmap(colors, offset, stride, (float)x, (float)y, width, height,
+                   hasAlpha, paint);
+    }
+        
     /**
      * Draw the bitmap using the specified matrix.
      *
@@ -1020,7 +1081,7 @@ public class Canvas {
      */
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         nativeDrawBitmapMatrix(mNativeCanvas, bitmap.ni(), matrix.ni(),
-                               paint != null ? paint.mNativePaint : 0);
+                paint != null ? paint.mNativePaint : 0);
     }
     
     private static void checkRange(int length, int offset, int count) {
@@ -1416,25 +1477,27 @@ public class Canvas {
                                                     float ry, int paint);
     private static native void native_drawPath(int nativeCanvas, int path,
                                                int paint);
-    private static native void native_drawBitmap(int nativeCanvas, int bitmap,
+    private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  float left, float top,
-                                                 int nativePaintOrZero);
-    private static native void native_drawBitmap(int nativeCanvas, int bitmap,
+                                                 int nativePaintOrZero, boolean autoScale,
+                                                 float densityScale);
+    private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  Rect src, RectF dst,
                                                  int nativePaintOrZero);
     private static native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  Rect src, Rect dst,
                                                  int nativePaintOrZero);
     private static native void native_drawBitmap(int nativeCanvas, int[] colors,
-                                                 int offset, int stride, int x,
-                                                 int y, int width, int height,
+                                                int offset, int stride, float x,
+                                                 float y, int width, int height,
                                                  boolean hasAlpha,
                                                  int nativePaintOrZero);
     private static native void nativeDrawBitmapMatrix(int nCanvas, int nBitmap,
                                                       int nMatrix, int nPaint);
     private static native void nativeDrawBitmapMesh(int nCanvas, int nBitmap,
-                int meshWidth, int meshHeight, float[] verts, int vertOffset,
-                                    int[] colors, int colorOffset, int nPaint);
+                                                    int meshWidth, int meshHeight,
+                                                    float[] verts, int vertOffset,
+                                                    int[] colors, int colorOffset, int nPaint);
     private static native void nativeDrawVertices(int nCanvas, int mode, int n,
                    float[] verts, int vertOffset, float[] texs, int texOffset,
                    int[] colors, int colorOffset, short[] indices,

@@ -29,8 +29,8 @@ import android.annotation.SdkConstant.SdkConstantType;
  * @hide
  */
 public interface BluetoothIntent {
-    public static final String MODE =
-        "android.bluetooth.intent.MODE";
+    public static final String SCAN_MODE =
+        "android.bluetooth.intent.SCAN_MODE";
     public static final String ADDRESS =
         "android.bluetooth.intent.ADDRESS";
     public static final String NAME =
@@ -45,6 +45,8 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.HEADSET_STATE";
     public static final String HEADSET_PREVIOUS_STATE =
         "android.bluetooth.intent.HEADSET_PREVIOUS_STATE";
+    public static final String HEADSET_AUDIO_STATE =
+        "android.bluetooth.intent.HEADSET_AUDIO_STATE";
     public static final String BOND_STATE =
         "android.bluetooth.intent.BOND_STATE";
     public static final String BOND_PREVIOUS_STATE =
@@ -62,9 +64,14 @@ public interface BluetoothIntent {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NAME_CHANGED_ACTION  =
         "android.bluetooth.intent.action.NAME_CHANGED";
+
+    /**
+     * Broadcast when the scan mode changes. Always contains an int extra
+     * named SCAN_MODE that contains the new scan mode.
+     */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String MODE_CHANGED_ACTION         =
-        "android.bluetooth.intent.action.MODE_CHANGED";
+    public static final String SCAN_MODE_CHANGED_ACTION         =
+        "android.bluetooth.intent.action.SCAN_MODE_CHANGED";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String DISCOVERY_STARTED_ACTION          =
@@ -104,12 +111,6 @@ public interface BluetoothIntent {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String REMOTE_NAME_FAILED_ACTION         =
         "android.bluetooth.intent.action.REMOTE_NAME_FAILED";
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String REMOTE_ALIAS_CHANGED_ACTION       =
-        "android.bluetooth.intent.action.REMOTE_ALIAS_CHANGED";
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String REMOTE_ALIAS_CLEARED_ACTION       =
-        "android.bluetooth.intent.action.REMOTE_ALIAS_CLEARED";
 
     /**
      * Broadcast when the bond state of a remote device changes.
@@ -123,7 +124,18 @@ public interface BluetoothIntent {
     public static final String BOND_STATE_CHANGED_ACTION      =
         "android.bluetooth.intent.action.BOND_STATE_CHANGED_ACTION";
 
+    /**
+     * TODO(API release): Move into BluetoothHeadset
+     */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String HEADSET_STATE_CHANGED_ACTION      =
         "android.bluetooth.intent.action.HEADSET_STATE_CHANGED";
+
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String HEADSET_AUDIO_STATE_CHANGED_ACTION =
+        "android.bluetooth.intent.action.HEADSET_ADUIO_STATE_CHANGED";
 }

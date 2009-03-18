@@ -24,13 +24,19 @@ public class FileFilter {
 
     public static boolean ignoreTest(String file) {
       // treat files like directories for the time being.
-      int size = ignoreTestList.length;
-      for (int i = 0; i < size; i ++) {
-          if (file.startsWith(ignoreTestList[i])) {
+      for (int i = 0; i < ignoreTestList.length; i ++) {
+          if (file.endsWith(ignoreTestList[i])) {
              Log.e("FileFilter", "File path in IgnoreTest: " + file); 
              return true;
           }
       }
+      for (int i = 0; i < ignoreTestDirs.length; i++) {
+          if (file.endsWith(ignoreTestDirs[i])) {
+              Log.e("FileFilter", "File path in ignore list: " + file);
+              return true;
+          }
+      }
+      
       return false;
     }
  
@@ -64,33 +70,19 @@ public class FileFilter {
         fillIgnoreResultSet();
         fillBugTable();
     }
- 
-    static final String [] ignoreTestList = {
+
+    static final String[] ignoreTestDirs = {
         ".", // ignore hidden directories and files
         "resources", // ignore resource directories
         "AppleScript", // AppleScript not supported
-        "xpath", // xpath requires libxml2, not supported
-        "xsl", //xsl requires libxml2 & libxslt, not sup.
-        "kde", // don't run kde tests.
         ".svn", // don't run anything under .svn folder
-        "gradients", //known crash
-        "toString-stack-overflow.html", // Crashes #606688
-        "frame-limit.html", // generates too many GREFs
-        "css-insert-import-rule.html", // Crashes, #717414
-        "input-text-enter.html", // Crashes. #735088
-        "text-shadow-extreme-value.html", // Crashes #571671
-        "001.html",
-        "reflection-masks.html",
-        "frame-creation-removal.html",
-        "large-expressions.html",
-        "null-page-show-modal-dialog-crash.html",
-        "font-face-implicit-local-font.html",
-        "font-face-locally-installed.html",
-        "beforeSelectorOnCodeElement.html",
-        "cssTarget-crash.html",
-        "searchfield-heights.html", // Bug 1570692
-        "tabindex-focus-blur-all.html",
-        "search-rtl.html" // fast/forms/search-rtl.html
+        "profiler",  // profiler is not supported
+        "svg",  // svg is not supported
+        "platform",  // platform specific
+        "http"  // requires local http(s) server
+    };
+        
+    static final String [] ignoreTestList = {
         };
     
     static void fillIgnoreResultSet() {
@@ -203,6 +195,8 @@ public class FileFilter {
         ignoreResultList.add("fast/loader/local-iFrame-source-from-local.html");
         // extra spacing because iFrames rendered next to each other on Apple
         ignoreResultList.add("fast/loader/opaque-base-url.html");
+        // RegExp is too large, causing OOM
+        ignoreResultList.add("fast/js/regexp-charclass-crash.html");
         ignoreResultList.add("fast/text/plain-text-line-breaks.html");
         
         

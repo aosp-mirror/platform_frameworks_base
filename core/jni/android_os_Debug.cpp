@@ -88,93 +88,101 @@ static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 #endif
 }
 
-static int read_mapinfo(FILE *fp, stats_t* stats)
+static void read_mapinfo(FILE *fp, stats_t* stats)
 {
     char line[1024];
     int len;
-    int skip;
+    bool skip, done = false;
 
     unsigned start = 0, size = 0, resident = 0, pss = 0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
     unsigned referenced = 0;
+    unsigned temp;
 
     int isNativeHeap;
     int isDalvikHeap;
     int isSqliteHeap;
 
-again:
-    isNativeHeap = 0;
-    isDalvikHeap = 0;
-    isSqliteHeap = 0;
-    skip = 0;
-    
-    if(fgets(line, 1024, fp) == 0) return 0;
+    if(fgets(line, 1024, fp) == 0) return;
 
-    len = strlen(line);
-    if (len < 1) return 0;
-    line[--len] = 0;
+    while (!done) {
+        isNativeHeap = 0;
+        isDalvikHeap = 0;
+        isSqliteHeap = 0;
+        skip = false;
 
-    /* ignore guard pages */
-    if (line[18] == '-') skip = 1;
+        len = strlen(line);
+        if (len < 1) return;
+        line[--len] = 0;
 
-    start = strtoul(line, 0, 16);
+        /* ignore guard pages */
+        if (len > 18 && line[17] == '-') skip = true;
 
-    if (len >= 50) {
-        if (!strcmp(line + 49, "[heap]")) {
+        start = strtoul(line, 0, 16);
+
+        if (strstr(line, "[heap]")) {
             isNativeHeap = 1;
-        } else if (!strncmp(line + 49, "/dalvik-LinearAlloc", strlen("/dalvik-LinearAlloc"))) {
+        } else if (strstr(line, "/dalvik-LinearAlloc")) {
             isDalvikHeap = 1;
-        } else if (!strncmp(line + 49, "/mspace/dalvik-heap", strlen("/mspace/dalvik-heap"))) {
+        } else if (strstr(line, "/mspace/dalvik-heap")) {
             isDalvikHeap = 1;
-        } else if (!strncmp(line + 49, "/dalvik-heap-bitmap/", strlen("/dalvik-heap-bitmap/"))) {
+        } else if (strstr(line, "/dalvik-heap-bitmap/")) {
             isDalvikHeap = 1;    
-        } else if (!strncmp(line + 49, "/tmp/sqlite-heap", strlen("/tmp/sqlite-heap"))) {
+        } else if (strstr(line, "/tmp/sqlite-heap")) {
             isSqliteHeap = 1;
         }
-    }
 
-    // TODO: This needs to be fixed to be less fragile. If the order of this file changes or a new
-    // line is add, this method will return without filling out any of the information.
+        //LOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
+        //    isSqliteHeap, line);
+            
+        while (true) {
+            if (fgets(line, 1024, fp) == 0) {
+                done = true;
+                break;
+            }
 
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Size: %d kB", &size) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Rss: %d kB", &resident) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Pss: %d kB", &pss) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Shared_Clean: %d kB", &shared_clean) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Shared_Dirty: %d kB", &shared_dirty) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Private_Clean: %d kB", &private_clean) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Private_Dirty: %d kB", &private_dirty) != 1) return 0;
-    if (fgets(line, 1024, fp) == 0) return 0;
-    if (sscanf(line, "Referenced: %d kB", &referenced) != 1) return 0;
-    
-    if (skip) {
-        goto again;
-    }
+            if (sscanf(line, "Size: %d kB", &temp) == 1) {
+                size = temp;
+            } else if (sscanf(line, "Rss: %d kB", &temp) == 1) {
+                resident = temp;
+            } else if (sscanf(line, "Pss: %d kB", &temp) == 1) {
+                pss = temp;
+            } else if (sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
+                shared_clean = temp;
+            } else if (sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
+                shared_dirty = temp;
+            } else if (sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
+                private_clean = temp;
+            } else if (sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
+                private_dirty = temp;
+            } else if (sscanf(line, "Referenced: %d kB", &temp) == 1) {
+                referenced = temp;
+            } else if (strlen(line) > 40 && line[8] == '-' && line[17] == ' ') {
+                // looks like a new mapping
+                // example: "0000a000-00232000 rwxp 0000a000 00:00 0          [heap]"
+                break;
+            }
+        }
 
-    if (isNativeHeap) {
-        stats->nativePss += pss;
-        stats->nativePrivateDirty += private_dirty;
-        stats->nativeSharedDirty += shared_dirty;
-    } else if (isDalvikHeap) {
-        stats->dalvikPss += pss;
-        stats->dalvikPrivateDirty += private_dirty;
-        stats->dalvikSharedDirty += shared_dirty;
-    } else if (isSqliteHeap) {
-        // ignore
-    } else {
-        stats->otherPss += pss;
-        stats->otherPrivateDirty += shared_dirty;
-        stats->otherSharedDirty += private_dirty;
+        if (!skip) {
+            if (isNativeHeap) {
+                stats->nativePss += pss;
+                stats->nativePrivateDirty += private_dirty;
+                stats->nativeSharedDirty += shared_dirty;
+            } else if (isDalvikHeap) {
+                stats->dalvikPss += pss;
+                stats->dalvikPrivateDirty += private_dirty;
+                stats->dalvikSharedDirty += shared_dirty;
+            } else if ( isSqliteHeap) {
+                // ignore
+            } else {
+                stats->otherPss += pss;
+                stats->otherPrivateDirty += shared_dirty;
+                stats->otherSharedDirty += private_dirty;
+            }
+        }
     }
-    
-    return 1;
 }
 
 static void load_maps(int pid, stats_t* stats)
@@ -185,10 +193,8 @@ static void load_maps(int pid, stats_t* stats)
     sprintf(tmp, "/proc/%d/smaps", pid);
     fp = fopen(tmp, "r");
     if (fp == 0) return;
-    
-    while (read_mapinfo(fp, stats) != 0) {
-        // Do nothing
-    }
+
+    read_mapinfo(fp, stats);
     fclose(fp);
 }
 

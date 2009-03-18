@@ -17,7 +17,6 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
-import android.text.Spanned;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -32,6 +31,21 @@ import android.view.KeyEvent;
  */
 public interface InputConnection {
     /**
+     * Flag for use with {@link #getTextAfterCursor} and
+     * {@link #getTextBeforeCursor} to have style information returned along
+     * with the text.  If not set, you will receive only the raw text.  If
+     * set, you may receive a complex CharSequence of both text and style
+     * spans.
+     */
+    static final int GET_TEXT_WITH_STYLES = 0x0001;
+    
+    /**
+     * Flag for use with {@link #getExtractedText} to indicate you would
+     * like to receive updates when the extracted text changes.
+     */
+    public static final int GET_EXTRACTED_TEXT_MONITOR = 0x0001;
+    
+    /**
      * Get <var>n</var> characters of text before the current cursor position.
      * 
      * <p>This method may fail either if the input connection has become invalid
@@ -40,11 +54,13 @@ public interface InputConnection {
      * In either case, a null is returned.
      * 
      * @param n The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is
+     * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * 
      * @return Returns the text before the cursor position; the length of the
      * returned text might be less than <var>n</var>.
      */
-    public CharSequence getTextBeforeCursor(int n);
+    public CharSequence getTextBeforeCursor(int n, int flags);
 
     /**
      * Get <var>n</var> characters of text after the current cursor position.
@@ -55,11 +71,13 @@ public interface InputConnection {
      * In either case, a null is returned.
      * 
      * @param n The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is
+     * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * 
      * @return Returns the text after the cursor position; the length of the
      * returned text might be less than <var>n</var>.
      */
-    public CharSequence getTextAfterCursor(int n);
+    public CharSequence getTextAfterCursor(int n, int flags);
 
     /**
      * Retrieve the current capitalization mode in effect at the current
@@ -82,8 +100,6 @@ public interface InputConnection {
      */
     public int getCursorCapsMode(int reqModes);
     
-    public static final int EXTRACTED_TEXT_MONITOR = 0x0001;
-    
     /**
      * Retrieve the current text in the input connection's editor, and monitor
      * for any changes to it.  This function returns with the current text,
@@ -97,7 +113,7 @@ public interface InputConnection {
      * 
      * @param request Description of how the text should be returned.
      * @param flags Additional options to control the client, either 0 or
-     * {@link #EXTRACTED_TEXT_MONITOR}.
+     * {@link #GET_EXTRACTED_TEXT_MONITOR}.
      * 
      * @return Returns an ExtractedText object describing the state of the
      * text view and containing the extracted text itself.
@@ -118,7 +134,7 @@ public interface InputConnection {
      * @return Returns true on success, false if the input connection is no longer
      * valid.
      */
-    boolean deleteSurroundingText(int leftLength, int rightLength);
+    public boolean deleteSurroundingText(int leftLength, int rightLength);
 
     /**
      * Set composing text around the current cursor position with the given text,
@@ -131,8 +147,14 @@ public interface InputConnection {
      *        object to the text. {#link android.text.SpannableString} and
      *        {#link android.text.SpannableStringBuilder} are two
      *        implementations of the interface {#link android.text.Spanned}.
-     * @param newCursorPosition The new cursor position within the
-     *        <var>text</var>.
+     * @param newCursorPosition The new cursor position around the text.  If
+     *        > 0, this is relative to the end of the text - 1; if <= 0, this
+     *        is relative to the start of the text.  So a value of 1 will
+     *        always advance you to the position after the full text being
+     *        inserted.  Note that this means you can't position the cursor
+     *        within the text, because the editor can make modifications to
+     *        the text you are providing so it is not possible to correctly
+     *        specify locations there.
      * 
      * @return Returns true on success, false if the input connection is no longer
      * valid.
@@ -141,7 +163,7 @@ public interface InputConnection {
 
     /**
      * Have the text editor finish whatever composing text is currently
-     * active.  This simple leaves the text as-is, removing any special
+     * active.  This simply leaves the text as-is, removing any special
      * composing styling or other state that was around it.  The cursor
      * position remains unchanged.
      */
@@ -153,8 +175,14 @@ public interface InputConnection {
      * automatically.
      * 
      * @param text The committed text.
-     * @param newCursorPosition The new cursor position within the
-     *        <var>text</var>.
+     * @param newCursorPosition The new cursor position around the text.  If
+     *        > 0, this is relative to the end of the text - 1; if <= 0, this
+     *        is relative to the start of the text.  So a value of 1 will
+     *        always advance you to the position after the full text being
+     *        inserted.  Note that this means you can't position the cursor
+     *        within the text, because the editor can make modifications to
+     *        the text you are providing so it is not possible to correctly
+     *        specify locations there.
      * 
      *        
      * @return Returns true on success, false if the input connection is no longer
@@ -176,6 +204,36 @@ public interface InputConnection {
      */
     public boolean commitCompletion(CompletionInfo text);
 
+    /**
+     * Set the selection of the text editor.  To set the cursor position,
+     * start and end should have the same value.
+     * @return Returns true on success, false if the input connection is no longer
+     * valid.
+     */
+    public boolean setSelection(int start, int end);
+    
+    /**
+     * Have the editor perform an action it has said it can do.
+     * 
+     * @param editorAction This must be one of the action constants for
+     * {@link EditorInfo#imeOptions EditorInfo.editorType}, such as
+     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}.
+     * 
+     * @return Returns true on success, false if the input connection is no longer
+     * valid.
+     */
+    public boolean performEditorAction(int editorAction);
+    
+    /**
+     * Perform a context menu action on the field.  The given id may be one of:
+     * {@link android.R.id#selectAll},
+     * {@link android.R.id#startSelectingText}, {@link android.R.id#stopSelectingText},
+     * {@link android.R.id#cut}, {@link android.R.id#copy},
+     * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
+     * or {@link android.R.id#switchInputMethod}
+     */
+    public boolean performContextMenuAction(int id);
+    
     /**
      * Tell the editor that you are starting a batch of editor operations.
      * The editor will try to avoid sending you updates about its state
@@ -234,6 +292,13 @@ public interface InputConnection {
     public boolean clearMetaKeyStates(int states);
     
     /**
+     * Called by the IME to tell the client when it switches between fullscreen
+     * and normal modes.  This will normally be called for you by the standard
+     * implementation of {@link android.inputmethodservice.InputMethodService}.
+     */
+    public boolean reportFullscreenMode(boolean enabled);
+    
+    /**
      * API to send private commands from an input method to its connected
      * editor.  This can be used to provide domain-specific features that are
      * only known between certain input methods and their clients.  Note that
@@ -251,23 +316,4 @@ public interface InputConnection {
      * valid.
      */
     public boolean performPrivateCommand(String action, Bundle data);
-    
-    /**
-     * Show an icon in the status bar.
-     * 
-     * @param packageName The package holding the icon resource to be shown.
-     * @param resId The resource id of the icon to show.
-     *        
-     * @return Returns true on success, false if the input connection is no longer
-     * valid.
-     */
-    public boolean showStatusIcon(String packageName, int resId);
-    
-    /**
-     * Hide the icon shown in the status bar.
-     *        
-     * @return Returns true on success, false if the input connection is no longer
-     * valid.
-     */
-    public boolean hideStatusIcon();
 }

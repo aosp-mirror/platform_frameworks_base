@@ -132,7 +132,19 @@ public class Keyboard {
 
     /** Keyboard mode, or zero, if none.  */
     private int mKeyboardMode;
+
+    // Variables for pre-computing nearest keys.
     
+    private static final int GRID_WIDTH = 10;
+    private static final int GRID_HEIGHT = 5;
+    private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+    private int mCellWidth;
+    private int mCellHeight;
+    private int[][] mGridNeighbors;
+    private int mProximityThreshold;
+    /** Number of key widths from current touch point to search for nearest keys. */
+    private static float SEARCH_DISTANCE = 1.4f;
+
     /**
      * Container for keys in the keyboard. All keys in a row are at the same Y-coordinate. 
      * Some of the key size defaults can be overridden per row from what the {@link Keyboard}
@@ -177,13 +189,13 @@ public class Keyboard {
                     parent.mDisplayWidth, parent.mDefaultWidth);
             defaultHeight = getDimensionOrFraction(a, 
                     com.android.internal.R.styleable.Keyboard_keyHeight, 
-                    parent.mDisplayWidth, parent.mDefaultHeight);
-            defaultHorizontalGap = getDimensionOrFraction(a, 
+                    parent.mDisplayHeight, parent.mDefaultHeight);
+            defaultHorizontalGap = getDimensionOrFraction(a,
                     com.android.internal.R.styleable.Keyboard_horizontalGap, 
                     parent.mDisplayWidth, parent.mDefaultHorizontalGap);
             verticalGap = getDimensionOrFraction(a, 
                     com.android.internal.R.styleable.Keyboard_verticalGap, 
-                    parent.mDisplayWidth, parent.mDefaultVerticalGap);
+                    parent.mDisplayHeight, parent.mDefaultVerticalGap);
             a.recycle();
             a = res.obtainAttributes(Xml.asAttributeSet(parser),
                     com.android.internal.R.styleable.Keyboard_Row);
@@ -540,7 +552,6 @@ public class Keyboard {
         row.defaultHorizontalGap = mDefaultHorizontalGap;
         row.verticalGap = mDefaultVerticalGap;
         row.rowEdgeFlags = EDGE_TOP | EDGE_BOTTOM;
-        
         final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
         for (int i = 0; i < characters.length(); i++) {
             char c = characters.charAt(i);
@@ -637,6 +648,52 @@ public class Keyboard {
 
     public int getShiftKeyIndex() {
         return mShiftKeyIndex;
+    }
+    
+    private void computeNearestNeighbors() {
+        // Round-up so we don't have any pixels outside the grid
+        mCellWidth = (getMinWidth() + GRID_WIDTH - 1) / GRID_WIDTH;
+        mCellHeight = (getHeight() + GRID_HEIGHT - 1) / GRID_HEIGHT;
+        mGridNeighbors = new int[GRID_SIZE][];
+        int[] indices = new int[mKeys.size()];
+        final int gridWidth = GRID_WIDTH * mCellWidth;
+        final int gridHeight = GRID_HEIGHT * mCellHeight;
+        for (int x = 0; x < gridWidth; x += mCellWidth) {
+            for (int y = 0; y < gridHeight; y += mCellHeight) {
+                int count = 0;
+                for (int i = 0; i < mKeys.size(); i++) {
+                    final Key key = mKeys.get(i);
+                    if (key.squaredDistanceFrom(x, y) < mProximityThreshold ||
+                            key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold ||
+                            key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1) 
+                                < mProximityThreshold ||
+                            key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold) {
+                        indices[count++] = i;
+                    }
+                }
+                int [] cell = new int[count];
+                System.arraycopy(indices, 0, cell, 0, count);
+                mGridNeighbors[(y / mCellHeight) * GRID_WIDTH + (x / mCellWidth)] = cell;
+            }
+        }
+    }
+    
+    /**
+     * Returns the indices of the keys that are closest to the given point.
+     * @param x the x-coordinate of the point
+     * @param y the y-coordinate of the point
+     * @return the array of integer indices for the nearest keys to the given point. If the given
+     * point is out of range, then an array of size zero is returned.
+     */
+    public int[] getNearestKeys(int x, int y) {
+        if (mGridNeighbors == null) computeNearestNeighbors();
+        if (x >= 0 && x < getMinWidth() && y >= 0 && y < getHeight()) {
+            int index = (y / mCellHeight) * GRID_WIDTH + (x / mCellWidth);
+            if (index < GRID_SIZE) {
+                return mGridNeighbors[index];
+            }
+        }
+        return new int[0];
     }
 
     protected Row createRowFromXml(Resources res, XmlResourceParser parser) {
@@ -739,6 +796,8 @@ public class Keyboard {
         mDefaultVerticalGap = getDimensionOrFraction(a,
                 com.android.internal.R.styleable.Keyboard_verticalGap,
                 mDisplayHeight, 0);
+        mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
+        mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
         a.recycle();
     }
     

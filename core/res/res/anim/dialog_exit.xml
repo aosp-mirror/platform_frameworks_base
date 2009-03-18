@@ -19,10 +19,10 @@
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/accelerate_interpolator">
-    <scale android:fromXScale="1.0" android:toXScale="0.5"
-           android:fromYScale="1.0" android:toYScale="0.5"
+    <scale android:fromXScale="1.0" android:toXScale="0.9"
+           android:fromYScale="1.0" android:toYScale="0.9"
            android:pivotX="50%" android:pivotY="50%"
-           android:duration="200" />
+           android:duration="@android:integer/config_shortAnimTime" />
     <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
-            android:duration="200"/>
+            android:duration="@android:integer/config_shortAnimTime"/>
 </set>

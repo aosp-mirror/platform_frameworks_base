@@ -16,34 +16,35 @@
 
 package com.android.server;
 
+import com.android.server.am.ActivityManagerService;
+import com.android.server.status.StatusBarService;
+
+import dalvik.system.PathClassLoader;
+import dalvik.system.VMRuntime;
+
 import android.app.ActivityManagerNative;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentService;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.IBinder;
-import android.provider.Settings;
 import android.provider.Contacts.People;
-import android.server.BluetoothDeviceService;
+import android.provider.Settings;
 import android.server.BluetoothA2dpService;
-import android.server.checkin.FallbackCheckinService;
+import android.server.BluetoothDeviceService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
-
-import dalvik.system.TouchDex;
-import dalvik.system.VMRuntime;
-
-import com.android.server.am.ActivityManagerService;
-import com.android.server.status.StatusBarService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -180,13 +181,13 @@ class ServerThread extends Thread {
 
         StatusBarService statusBar = null;
         InputMethodManagerService imm = null;
-        
+        AppWidgetService appWidget = null;
+
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
                 Log.i(TAG, "Starting Status Bar Service.");
                 statusBar = new StatusBarService(context);
                 ServiceManager.addService("statusbar", statusBar);
-                com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting StatusBarService", e);
             }
@@ -205,7 +206,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Input Manager Service", e);
             }
-            
+
             try {
                 Log.i(TAG, "Starting Hardware Service.");
                 ServiceManager.addService("hardware", new HardwareService(context));
@@ -272,9 +273,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Checkin Service");
-                addService(context, "checkin", "com.google.android.server.checkin.CheckinService",
-                        FallbackCheckinService.class);
+                Log.i(TAG, "Starting Checkin Service.");
+                Intent intent = new Intent().setComponent(new ComponentName(
+                        "com.google.android.server.checkin",
+                        "com.google.android.server.checkin.CheckinService"));
+                if (context.startService(intent) == null) {
+                    Log.w(TAG, "Using fallback Checkin Service.");
+                    ServiceManager.addService("checkin", new FallbackCheckinService(context));
+                }
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Checkin Service", e);
             }
@@ -302,10 +308,17 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Gadget Service");
-                ServiceManager.addService(Context.GADGET_SERVICE, new GadgetService(context));
+                Log.i(TAG, "Starting AppWidget Service");
+                appWidget = new AppWidgetService(context);
+                ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
             } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Gadget Service", e);
+                Log.e(TAG, "Failure starting AppWidget Service", e);
+            }
+
+            try {
+                com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure installing status bar icons", e);
             }
         }
 
@@ -318,6 +331,7 @@ class ServerThread extends Thread {
                 false, new AdbSettingsObserver());
 
         // It is now time to start up the app processes...
+        boolean safeMode = wm.detectSafeMode();
         if (statusBar != null) {
             statusBar.systemReady();
         }
@@ -330,6 +344,9 @@ class ServerThread extends Thread {
             pm.systemReady();
         } catch (RemoteException e) {
         }
+        if (appWidget != null) {
+            appWidget.systemReady(safeMode);
+        }
 
         // After making the following code, third party code may be running...
         try {
@@ -341,51 +358,6 @@ class ServerThread extends Thread {
 
         Looper.loop();
         Log.d(TAG, "System ServerThread is exiting!");
-    }
-
-    private void addService(Context context, String name, String serviceClass,
-            Class<? extends IBinder> fallback) {
-
-        final IBinder service = findService(context, serviceClass, fallback);
-        if (service != null) {
-            ServiceManager.addService(name, service);
-        } else {
-            Log.e(TAG, "Failure starting service '" + name + "' with class " + serviceClass);
-        }
-    }
-
-    private IBinder findService(Context context, String serviceClass,
-            Class<? extends IBinder> fallback) {
-
-        IBinder service = null;
-        try {
-            Class<?> klass = Class.forName(serviceClass);
-            Constructor<?> c = klass.getConstructor(Context.class);
-            service = (IBinder) c.newInstance(context);
-        } catch (ClassNotFoundException e) {
-            // Ignore
-        } catch (IllegalAccessException e) {
-            // Ignore
-        } catch (NoSuchMethodException e) {
-            // Ignore
-        } catch (InvocationTargetException e) {
-            // Ignore
-        } catch (InstantiationException e) {
-            // Ignore
-        }
-
-        if (service == null && fallback != null) {
-            Log.w(TAG, "Could not find " + serviceClass + ", trying fallback");
-            try {
-                service = fallback.newInstance();
-            } catch (IllegalAccessException e) {
-                // Ignore
-            } catch (InstantiationException e) {
-                // Ignore
-            }
-        }
-
-        return service;
     }
 }
 

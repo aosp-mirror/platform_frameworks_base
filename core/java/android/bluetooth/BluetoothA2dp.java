@@ -49,6 +49,7 @@ import java.util.List;
  */
 public class BluetoothA2dp {
     private static final String TAG = "BluetoothA2dp";
+    private static final boolean DBG = false;
 
     /** int extra for SINK_STATE_CHANGED_ACTION */
     public static final String SINK_STATE =
@@ -103,6 +104,7 @@ public class BluetoothA2dp {
      *  @hide
      */
     public int connectSink(String address) {
+        if (DBG) log("connectSink(" + address + ")");
         try {
             return mService.connectSink(address);
         } catch (RemoteException e) {
@@ -119,6 +121,7 @@ public class BluetoothA2dp {
      *  @hide
      */
     public int disconnectSink(String address) {
+        if (DBG) log("disconnectSink(" + address + ")");
         try {
             return mService.disconnectSink(address);
         } catch (RemoteException e) {
@@ -133,6 +136,7 @@ public class BluetoothA2dp {
      *  @hide
      */
     public boolean isSinkConnected(String address) {
+        if (DBG) log("isSinkConnected(" + address + ")");
         int state = getSinkState(address);
         return state == STATE_CONNECTED || state == STATE_PLAYING;
     }
@@ -142,6 +146,7 @@ public class BluetoothA2dp {
      * @hide
      */
     public List<String> listConnectedSinks() {
+        if (DBG) log("listConnectedSinks()");
         try {
             return mService.listConnectedSinks();
         } catch (RemoteException e) {
@@ -156,6 +161,7 @@ public class BluetoothA2dp {
      *  @hide
      */
     public int getSinkState(String address) {
+        if (DBG) log("getSinkState(" + address + ")");
         try {
             return mService.getSinkState(address);
         } catch (RemoteException e) {
@@ -177,6 +183,7 @@ public class BluetoothA2dp {
      * @return Result code, negative indicates an error
      */
     public int setSinkPriority(String address, int priority) {
+        if (DBG) log("setSinkPriority(" + address + ", " + priority + ")");
         try {
             return mService.setSinkPriority(address, priority);
         } catch (RemoteException e) {
@@ -191,6 +198,7 @@ public class BluetoothA2dp {
      * @return non-negative priority, or negative error code on error.
      */
     public int getSinkPriority(String address) {
+        if (DBG) log("getSinkPriority(" + address + ")");
         try {
             return mService.getSinkPriority(address);
         } catch (RemoteException e) {
@@ -243,5 +251,9 @@ public class BluetoothA2dp {
         default:
             return "<unknown state " + state + ">";
         }
+    }
+
+    private static void log(String msg) {
+        Log.d(TAG, msg);
     }
 }

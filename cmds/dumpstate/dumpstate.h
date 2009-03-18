@@ -19,8 +19,8 @@
 
 #include <time.h>
 
-// Commands time out after 15 seconds
-#define TIMEOUT     15
+// Commands time out after 60 seconds
+#define TIMEOUT     60
 
 #define PRINT(s) printf("%s\n", s)
 
@@ -38,6 +38,24 @@
 {                               \
     static struct Command c = { \
         "/system/bin/" cmd,     \
+        { cmd, 0 }              \
+    };                          \
+    run_command(&c, TIMEOUT);   \
+}
+
+#define EXEC_TIMEOUT(cmd, tmout)\
+{                               \
+    static struct Command c = { \
+        "/system/bin/" cmd,     \
+        { cmd, 0 }              \
+    };                          \
+    run_command(&c, tmout);     \
+}
+
+#define EXEC_XBIN(cmd)          \
+{                               \
+    static struct Command c = { \
+        "/system/xbin/" cmd,    \
         { cmd, 0 }              \
     };                          \
     run_command(&c, TIMEOUT);   \
@@ -68,6 +86,15 @@
         { cmd, a1, a2, a3, a4, a5, a6, 0 }  \
     };                                      \
     run_command(&c, TIMEOUT);               \
+}
+
+#define EXEC7(cmd, a1, a2, a3, a4, a5, a6, a7)  \
+{                                               \
+    static struct Command c = {                 \
+        "/system/bin/" cmd,                     \
+        { cmd, a1, a2, a3, a4, a5, a6, a7, 0 }  \
+    };                                          \
+    run_command(&c, TIMEOUT);                   \
 }
 
 #define EXEC8(cmd, a1, a2, a3, a4, a5, a6, a7, a8)  \

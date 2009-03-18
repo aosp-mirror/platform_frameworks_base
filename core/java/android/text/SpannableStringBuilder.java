@@ -70,6 +70,10 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             Object[] spans = sp.getSpans(start, end, Object.class);
 
             for (int i = 0; i < spans.length; i++) {
+                if (spans[i] instanceof NoCopySpan) {
+                    continue;
+                }
+                
                 int st = sp.getSpanStart(spans[i]) - start;
                 int en = sp.getSpanEnd(spans[i]) - start;
                 int fl = sp.getSpanFlags(spans[i]);

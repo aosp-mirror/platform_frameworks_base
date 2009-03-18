@@ -20,6 +20,12 @@
 #include <utils/Errors.h>
 #include <media/MediaPlayerInterface.h>
 
+#define MAX_OPENCORE_INSTANCES 25
+
+#ifdef MAX_OPENCORE_INSTANCES
+#include <cutils/atomic.h>
+#endif
+
 class PlayerDriver;
 
 namespace android {
@@ -31,7 +37,6 @@ public:
     virtual             ~PVPlayer();
 
     virtual status_t    initCheck();
-    virtual status_t    setSigBusHandlerStructTLSKey(pthread_key_t key);
     virtual status_t    setDataSource(const char *url);
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length);
     virtual status_t    setVideoSurface(const sp<ISurface>& surface);
@@ -48,8 +53,8 @@ public:
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return PV_PLAYER; }
 
-            // make available to PlayerDriver
-            void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }
+    // make available to PlayerDriver
+    void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }
 
 private:
     static void         do_nothing(status_t s, void *cookie, bool cancelled) { }
@@ -62,10 +67,13 @@ private:
     char *                      mDataSourcePath;
     bool                        mIsDataSourceSet;
     sp<ISurface>                mSurface;
-    void *                      mMemBase;
-    off_t                       mMemSize;
+    int                         mSharedFd;
     status_t                    mInit;
     int                         mDuration;
+
+#ifdef MAX_OPENCORE_INSTANCES
+    static volatile int32_t     sNumInstances;
+#endif
 };
 
 }; // namespace android

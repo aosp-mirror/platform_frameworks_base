@@ -76,6 +76,11 @@ public class ParcelFileDescriptor implements Parcelable {
     public static final int MODE_TRUNCATE = 0x04000000;
     
     /**
+     * For use with {@link #open}: append to end of file while writing.
+     */
+    public static final int MODE_APPEND = 0x02000000;
+    
+    /**
      * Create a new ParcelFileDescriptor accessing a given file.
      * 
      * @param file The file to be opened.
@@ -136,6 +141,19 @@ public class ParcelFileDescriptor implements Parcelable {
     public FileDescriptor getFileDescriptor() {
         return mFileDescriptor;
     }
+    
+    /**
+     * Return the total size of the file representing this fd, as determined
+     * by stat().  Returns -1 if the fd is not a file.
+     */
+    public native long getStatSize();
+    
+    /**
+     * This is needed for implementing AssetFileDescriptor.AutoCloseOutputStream,
+     * and I really don't think we want it to be public.
+     * @hide
+     */
+    public native long seekTo(long pos);
     
     /**
      * Close the ParcelFileDescriptor. This implementation closes the underlying

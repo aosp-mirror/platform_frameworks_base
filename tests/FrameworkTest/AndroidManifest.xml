@@ -571,6 +571,14 @@
             </intent-filter>                                    
         </activity>
 
+        <activity android:name=".listview.ListWithFirstScreenUnSelectable" android:label="ListWithFirstScreenUnSelectable">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+
         <activity android:name=".listview.ListWithSeparators" android:label="ListWithSeparators">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -839,6 +847,13 @@
         </activity>
 
         <activity android:name=".drawable.DrawableBgMinSize" android:label="DrawableBgMinSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".drawable.MutateDrawable" android:label="MutateDrawable">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />

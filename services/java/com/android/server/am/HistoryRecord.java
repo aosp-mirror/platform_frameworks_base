@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -54,6 +55,8 @@ class HistoryRecord extends IApplicationToken.Stub {
     final String taskAffinity; // as per ActivityInfo.taskAffinity
     final boolean stateNotNeeded; // As per ActivityInfo.flags
     final boolean fullscreen;     // covers the full screen?
+    final boolean componentSpecified;  // did caller specifiy an explicit component?
+    final boolean isHomeActivity; // do we consider this to be a home activity?
     final String baseDir;   // where activity source (resources etc) located
     final String resDir;   // where public activity source (public resources etc) located
     final String dataDir;   // where activity data should go
@@ -101,8 +104,8 @@ class HistoryRecord extends IApplicationToken.Stub {
         pw.println(prefix + this);
         pw.println(prefix + "packageName=" + packageName
               + " processName=" + processName);
-        pw.println(prefix + "app=" + app);
-        pw.println(prefix + "launchedFromUid=" + launchedFromUid);
+        pw.println(prefix + "launchedFromUid=" + launchedFromUid
+                + " app=" + app);
         pw.println(prefix + intent);
         pw.println(prefix + "frontOfTask=" + frontOfTask + " task=" + task);
         pw.println(prefix + "taskAffinity=" + taskAffinity);
@@ -111,6 +114,9 @@ class HistoryRecord extends IApplicationToken.Stub {
         pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
                 + " icon=0x" + Integer.toHexString(icon)
                 + " theme=0x" + Integer.toHexString(theme));
+        pw.println(prefix + "stateNotNeeded=" + stateNotNeeded
+                + " componentSpecified=" + componentSpecified
+                + " isHomeActivity=" + isHomeActivity);
         pw.println(prefix + "configuration=" + configuration);
         pw.println(prefix + "resultTo=" + resultTo
               + " resultWho=" + resultWho + " resultCode=" + requestCode);
@@ -139,13 +145,15 @@ class HistoryRecord extends IApplicationToken.Stub {
     HistoryRecord(ActivityManagerService _service, ProcessRecord _caller,
             int _launchedFromUid, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
-            HistoryRecord _resultTo, String _resultWho, int _reqCode) {
+            HistoryRecord _resultTo, String _resultWho, int _reqCode,
+            boolean _componentSpecified) {
         service = _service;
         info = aInfo;
         launchedFromUid = _launchedFromUid;
         intent = _intent;
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
+        componentSpecified = _componentSpecified;
         configuration = _configuration;
         resultTo = _resultTo;
         resultWho = _resultWho;
@@ -184,6 +192,11 @@ class HistoryRecord extends IApplicationToken.Stub {
             dataDir = aInfo.applicationInfo.dataDir;
             nonLocalizedLabel = aInfo.nonLocalizedLabel;
             labelRes = aInfo.labelRes;
+            if (nonLocalizedLabel == null && labelRes == 0) {
+                ApplicationInfo app = aInfo.applicationInfo;
+                nonLocalizedLabel = app.nonLocalizedLabel;
+                labelRes = app.labelRes;
+            }
             icon = aInfo.getIconResource();
             theme = aInfo.getThemeResource();
             if ((aInfo.flags&ActivityInfo.FLAG_MULTIPROCESS) != 0
@@ -210,6 +223,29 @@ class HistoryRecord extends IApplicationToken.Stub {
                     && !ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsTranslucent, false);
             
+            if (!_componentSpecified || _launchedFromUid == Process.myUid()
+                    || _launchedFromUid == 0) {
+                // If we know the system has determined the component, then
+                // we can consider this to be a home activity...
+                if (Intent.ACTION_MAIN.equals(_intent.getAction()) &&
+                        _intent.hasCategory(Intent.CATEGORY_HOME) &&
+                        _intent.getCategories().size() == 1 &&
+                        _intent.getData() == null &&
+                        _intent.getType() == null &&
+                        (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
+                        !"android".equals(realActivity.getClassName())) {
+                    // This sure looks like a home activity!
+                    // Note the last check is so we don't count the resolver
+                    // activity as being home...  really, we don't care about
+                    // doing anything special with something that comes from
+                    // the core framework package.
+                    isHomeActivity = true;
+                } else {
+                    isHomeActivity = false;
+                }
+            } else {
+                isHomeActivity = false;
+            }
         } else {
             realActivity = null;
             taskAffinity = null;
@@ -220,6 +256,7 @@ class HistoryRecord extends IApplicationToken.Stub {
             processName = null;
             packageName = null;
             fullscreen = true;
+            isHomeActivity = false;
         }
     }
 

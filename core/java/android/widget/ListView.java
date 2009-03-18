@@ -26,7 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
-import android.util.SparseArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -127,13 +126,7 @@ public class ListView extends AbsListView {
     private SparseBooleanArray mCheckStates;
 
     // used for temporary calculations.
-    private Rect mTempRect = new Rect();
-
-    /**
-     * Used to save / restore the state of the focused child in {@link #layoutChildren()}
-     */
-    private SparseArray<Parcelable> mfocusRestoreChildState = new SparseArray<Parcelable>();
-
+    private final Rect mTempRect = new Rect();
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
@@ -1011,34 +1004,13 @@ public class ListView extends AbsListView {
         if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED ||
                 heightMode == MeasureSpec.UNSPECIFIED)) {
             final View child = obtainView(0);
-            final int childViewType = mAdapter.getItemViewType(0);
 
-            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
-            if (lp == null) {
-                lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT, 0);
-                child.setLayoutParams(lp);
-            }
-            lp.viewType = childViewType;
-
-            final int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
-                    mListPadding.left + mListPadding.right, lp.width);
-
-            int lpHeight = lp.height;
-
-            int childHeightSpec;
-            if (lpHeight > 0) {
-                childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
-            } else {
-                childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            }
-
-            child.measure(childWidthSpec, childHeightSpec);
+            measureScrapChild(child, 0, widthMeasureSpec);
 
             childWidth = child.getMeasuredWidth();
             childHeight = child.getMeasuredHeight();
 
-            if (mRecycler.shouldRecycleViewType(childViewType)) {
+            if (recycleOnMeasure()) {
                 mRecycler.addScrapView(child);
             }
         }
@@ -1055,13 +1027,41 @@ public class ListView extends AbsListView {
 
         if (heightMode == MeasureSpec.AT_MOST) {
             // TODO: after first layout we should maybe start at the first visible position, not 0
-            heightSize = measureHeightOfChildren(
-                    MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY),
-                    0, NO_POSITION, heightSize, -1);
+            heightSize = measureHeightOfChildren(widthMeasureSpec, 0, NO_POSITION, heightSize, -1);
         }
 
         setMeasuredDimension(widthSize, heightSize);
-        mWidthMeasureSpec = widthMeasureSpec;
+        mWidthMeasureSpec = widthMeasureSpec;        
+    }
+
+    private void measureScrapChild(View child, int position, int widthMeasureSpec) {
+        LayoutParams p = (LayoutParams) child.getLayoutParams();
+        if (p == null) {
+            p = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+            child.setLayoutParams(p);
+        }
+        p.viewType = mAdapter.getItemViewType(position);
+
+        int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
+                mListPadding.left + mListPadding.right, p.width);
+        int lpHeight = p.height;
+        int childHeightSpec;
+        if (lpHeight > 0) {
+            childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight, MeasureSpec.EXACTLY);
+        } else {
+            childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        }
+        child.measure(childWidthSpec, childHeightSpec);
+    }
+
+    /**
+     * @return True to recycle the views used to measure this ListView in
+     *         UNSPECIFIED/AT_MOST modes, false otherwise.
+     * @hide
+     */
+    protected boolean recycleOnMeasure() {
+        return true;
     }
 
     /**
@@ -1090,8 +1090,8 @@ public class ListView extends AbsListView {
      *            startPosition is 0).
      * @return The height of this ListView with the given children.
      */
-    final int measureHeightOfChildren(final int widthMeasureSpec, final int startPosition,
-            int endPosition, final int maxHeight, int disallowPartialChildPosition) {
+    final int measureHeightOfChildren(int widthMeasureSpec, int startPosition, int endPosition,
+            final int maxHeight, int disallowPartialChildPosition) {
 
         final ListAdapter adapter = mAdapter;
         if (adapter == null) {
@@ -1110,29 +1110,20 @@ public class ListView extends AbsListView {
         // mItemCount - 1 since endPosition parameter is inclusive
         endPosition = (endPosition == NO_POSITION) ? adapter.getCount() - 1 : endPosition;
         final AbsListView.RecycleBin recycleBin = mRecycler;
+        final boolean recyle = recycleOnMeasure();
+
         for (i = startPosition; i <= endPosition; ++i) {
             child = obtainView(i);
-            final int childViewType = adapter.getItemViewType(i);
 
-            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
-            if (lp == null) {
-                lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT, 0);
-                child.setLayoutParams(lp);
-            }
-            lp.viewType = childViewType;
+            measureScrapChild(child, i, widthMeasureSpec);
 
             if (i > 0) {
                 // Count the divider for all but one child
                 returnedHeight += dividerHeight;
             }
 
-            child.measure(widthMeasureSpec, lp.height >= 0
-                    ? MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY)
-                            : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-
             // Recycle the view before we possibly return from the method
-            if (recycleBin.shouldRecycleViewType(childViewType)) {
+            if (recyle) {
                 recycleBin.addScrapView(child);
             }
 
@@ -1329,6 +1320,8 @@ public class ListView extends AbsListView {
         final boolean blockLayoutRequests = mBlockLayoutRequests;
         if (!blockLayoutRequests) {
             mBlockLayoutRequests = true;
+        } else {
+            return;
         }
 
         try {
@@ -1438,14 +1431,12 @@ public class ListView extends AbsListView {
                 // we can remember the focused view to restore after relayout if the
                 // data hasn't changed, or if the focused position is a header or footer
                 if (!dataChanged || isDirectChildHeaderOrFooter(focusedChild)) {
-                    focusLayoutRestoreDirectChild = getFocusedChild();
-                    if (focusLayoutRestoreDirectChild != null) {
-
-                        // remember its state
-                        focusLayoutRestoreDirectChild.saveHierarchyState(mfocusRestoreChildState);
-
-                        // remember the specific view that had focus
-                        focusLayoutRestoreView = findFocus();
+                    focusLayoutRestoreDirectChild = focusedChild;
+                    // remember the specific view that had focus
+                    focusLayoutRestoreView = findFocus();
+                    if (focusLayoutRestoreView != null) {
+                        // tell it we are going to mess with it
+                        focusLayoutRestoreView.onStartTemporaryDetach();
                     }
                 }
                 requestFocus();
@@ -1528,10 +1519,6 @@ public class ListView extends AbsListView {
                        sel.setSelected(false);
                        mSelectorRect.setEmpty();
                    }
-
-                   if (sel == focusLayoutRestoreDirectChild) {
-                       focusLayoutRestoreDirectChild.restoreHierarchyState(mfocusRestoreChildState);
-                   }
                } else {
                    positionSelector(sel);
                }
@@ -1544,10 +1531,16 @@ public class ListView extends AbsListView {
                // focus (i.e. something focusable in touch mode)
                if (hasFocus() && focusLayoutRestoreView != null) {
                    focusLayoutRestoreView.requestFocus();
-                   focusLayoutRestoreDirectChild.restoreHierarchyState(mfocusRestoreChildState);
                }
             }
 
+            // tell focus view we are done mucking with it, if it is still in
+            // our view hierarchy.
+            if (focusLayoutRestoreView != null
+                    && focusLayoutRestoreView.getWindowToken() != null) {
+                focusLayoutRestoreView.onFinishTemporaryDetach();
+            }
+            
             mLayoutMode = LAYOUT_NORMAL;
             mDataChanged = false;
             mNeedSync = false;
@@ -1656,16 +1649,20 @@ public class ListView extends AbsListView {
 
         // Respect layout params that are already in the view. Otherwise make some up...
         // noinspection unchecked
-        AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
+        AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
         if (p == null) {
             p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled) {
+        if (recycled || (p.recycledHeaderFooter &&
+                p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
+            if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                p.recycledHeaderFooter = true;
+            }
             addViewInLayout(child, flowDown ? -1 : 0, p, true);
         }
 
@@ -1675,7 +1672,7 @@ public class ListView extends AbsListView {
 
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
             if (child instanceof Checkable) {
-                ((Checkable)child).setChecked(mCheckStates.get(position));
+                ((Checkable) child).setChecked(mCheckStates.get(position));
             }
         }
 
@@ -1718,12 +1715,11 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Sets the currently selected item
+     * Sets the currently selected item. If in touch mode, the item will not be selected
+     * but it will still be positioned appropriately. If the specified selection position
+     * is less than 0, then the item at position 0 will be selected.
      *
      * @param position Index (starting at 0) of the data item to be selected.
-     *
-     * If in touch mode, the item will not be selected but it will still be positioned
-     * appropriately.
      */
     @Override
     public void setSelection(int position) {
@@ -1773,10 +1769,8 @@ public class ListView extends AbsListView {
      */
     @Override
     void setSelectionInt(int position) {
-        mBlockLayoutRequests = true;
         setNextSelectedPositionInt(position);
         layoutChildren();
-        mBlockLayoutRequests = false;
     }
 
     /**
@@ -2180,6 +2174,10 @@ public class ListView extends AbsListView {
                 && !isViewAncestorOf(selectedView, this)) {
             selectedView = null;
             hideSelector();
+
+            // but we don't want to set the ressurect position (that would make subsequent
+            // unhandled key events bring back the item we just scrolled off!)
+            mResurrectToPosition = INVALID_POSITION;
         }
 
         if (needToRedraw) {
@@ -2646,6 +2644,7 @@ public class ListView extends AbsListView {
 
         final int listBottom = getHeight() - mListPadding.bottom;
         final int listTop = mListPadding.top;
+        final AbsListView.RecycleBin recycleBin = mRecycler;
 
         if (amount < 0) {
             // shifted items up
@@ -2673,8 +2672,13 @@ public class ListView extends AbsListView {
             // top views may be panned off screen
             View first = getChildAt(0);
             while (first.getBottom() < listTop) {
-                removeViewInLayout(first);
-                mRecycler.addScrapView(first);
+                AbsListView.LayoutParams layoutParams = (LayoutParams) first.getLayoutParams();
+                if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
+                    removeViewInLayout(first);
+                    recycleBin.addScrapView(first);
+                } else {
+                    detachViewFromParent(first);
+                }
                 first = getChildAt(0);
                 mFirstPosition++;
             }
@@ -2699,8 +2703,13 @@ public class ListView extends AbsListView {
 
             // bottom view may be panned off screen
             while (last.getTop() > listBottom) {
-                removeViewInLayout(last);
-                mRecycler.addScrapView(last);
+                AbsListView.LayoutParams layoutParams = (LayoutParams) last.getLayoutParams();
+                if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
+                    removeViewInLayout(last);
+                    recycleBin.addScrapView(last);
+                } else {
+                    detachViewFromParent(last);
+                }
                 last = getChildAt(--lastIndex);
             }
         }

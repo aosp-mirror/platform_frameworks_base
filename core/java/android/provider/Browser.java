@@ -43,6 +43,18 @@ public class Browser {
      */
     public static final String INITIAL_ZOOM_LEVEL = "browser.initialZoomLevel";
 
+    /**
+     * The name of the extra data when starting the Browser from another
+     * application.
+     * <p>
+     * The value is a unique identification string that will be used to
+     * indentify the calling application. The Browser will attempt to reuse the
+     * same window each time the application launches the Browser with the same
+     * identifier.
+     */
+    public static final String EXTRA_APPLICATION_ID =
+            "com.android.browser.application_id";
+
     /* if you change column order you must also change indices
        below */
     public static final String[] HISTORY_PROJECTION = new String[] {

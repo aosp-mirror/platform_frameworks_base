@@ -74,6 +74,7 @@ import android.util.AttributeSet;
 public class AnimationDrawable extends DrawableContainer implements Runnable {
     private final AnimationState mAnimationState;
     private int mCurFrame = -1;
+    private boolean mMutated;
 
     public AnimationDrawable() {
         this(null);
@@ -281,6 +282,15 @@ public class AnimationDrawable extends DrawableContainer implements Runnable {
         }
 
         setFrame(0, true, false);
+    }
+
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mAnimationState.mDurations = mAnimationState.mDurations.clone();
+            mMutated = true;
+        }
+        return this;
     }
 
     private final static class AnimationState extends DrawableContainerState {

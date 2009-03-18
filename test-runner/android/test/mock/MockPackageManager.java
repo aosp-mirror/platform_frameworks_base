@@ -34,6 +34,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -55,6 +56,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Intent getLaunchIntentForPackage(String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -391,6 +398,16 @@ public class MockPackageManager extends PackageManager {
     @Override
     public int getPreferredActivities(List<IntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public String[] getSystemSharedLibraryNames() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean isSafeMode() {
         throw new UnsupportedOperationException();
     }
 }

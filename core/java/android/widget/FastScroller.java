@@ -26,7 +26,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 
 /**
@@ -34,7 +33,8 @@ import android.view.MotionEvent;
  */
 class FastScroller {
    
-    
+    // Minimum number of pages to justify showing a fast scroll thumb
+    private static int MIN_PAGES = 4;
     // Scroll thumb not showing
     private static final int STATE_NONE = 0;
     // Not implemented yet - fade-in transition
@@ -61,6 +61,8 @@ class FastScroller {
     private int mVisibleItem;
     private Paint mPaint;
     private int mListOffset;
+    private int mItemCount = -1;
+    private boolean mLongList;
     
     private Object [] mSections;
     private String mSectionText;
@@ -154,6 +156,10 @@ class FastScroller {
         setState(STATE_NONE);
     }
     
+    boolean isVisible() {
+        return !(mState == STATE_NONE);
+    }
+    
     public void draw(Canvas canvas) {
         
         if (mState == STATE_NONE) {
@@ -214,7 +220,17 @@ class FastScroller {
     
     void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, 
             int totalItemCount) {
-        
+        // Are there enough pages to require fast scroll? Recompute only if total count changes
+        if (mItemCount != totalItemCount && visibleItemCount > 0) {
+            mItemCount = totalItemCount;
+            mLongList = mItemCount / visibleItemCount >= MIN_PAGES;
+        }
+        if (!mLongList) {
+            if (mState != STATE_NONE) {
+                setState(STATE_NONE);
+            }
+            return;
+        }
         if (totalItemCount - visibleItemCount > 0 && mState != STATE_DRAGGING ) {
             mThumbY = ((mList.getHeight() - mThumbH) * firstVisibleItem) 
                     / (totalItemCount - visibleItemCount);
@@ -296,12 +312,17 @@ class FastScroller {
                 // Non-existent letter
                 while (section > 0) {
                     section--;
-                     prevIndex = mSectionIndexer.getPositionForSection(section);
-                     if (prevIndex != index) {
-                         prevSection = section;
-                         sectionIndex = section;
-                         break;
-                     }
+                    prevIndex = mSectionIndexer.getPositionForSection(section);
+                    if (prevIndex != index) {
+                        prevSection = section;
+                        sectionIndex = section;
+                        break;
+                    } else if (section == 0) {
+                        // When section reaches 0 here, sectionIndex must follow it.
+                        // Assuming mSectionIndexer.getPositionForSection(0) == 0.
+                        sectionIndex = 0;
+                        break;
+                    }
                 }
             }
             // Find the next index, in case the assumed next index is not

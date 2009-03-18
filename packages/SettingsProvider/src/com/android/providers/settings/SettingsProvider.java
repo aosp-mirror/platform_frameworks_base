@@ -40,6 +40,9 @@ public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
     private static final boolean LOCAL_LOGV = false;
 
+    private static final String TABLE_FAVORITES = "favorites";
+    private static final String TABLE_OLD_FAVORITES = "old_favorites";
+
     protected DatabaseHelper mOpenHelper;
 
     /**
@@ -47,7 +50,7 @@ public class SettingsProvider extends ContentProvider {
      * used to access the corresponding database rows.
      */
     private static class SqlArguments {
-        public final String table;
+        public String table;
         public final String where;
         public final String[] args;
 
@@ -175,17 +178,30 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public Cursor query(Uri url, String[] select, String where, String[] whereArgs, String sort) {
         SqlArguments args = new SqlArguments(url, where, whereArgs);
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+
         // The favorites table was moved from this provider to a provider inside Home
         // Home still need to query this table to upgrade from pre-cupcake builds
         // However, a cupcake+ build with no data does not contain this table which will
         // cause an exception in the SQL stack. The following line is a special case to
         // let the caller of the query have a chance to recover and avoid the exception
-        if ("favorites".equals(args.table)) return null;
+        if (TABLE_FAVORITES.equals(args.table)) {
+            return null;
+        } else if (TABLE_OLD_FAVORITES.equals(args.table)) {
+            args.table = TABLE_FAVORITES;
+            Cursor cursor = db.rawQuery("PRAGMA table_info(favorites);", null);
+            if (cursor != null) {
+                boolean exists = cursor.getCount() > 0;
+                cursor.close();
+                if (!exists) return null;
+            } else {
+                return null;
+            }
+        }
 
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(args.table);
 
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor ret = qb.query(db, select, args.where, args.args, null, null, sort);
         ret.setNotificationUri(getContext().getContentResolver(), url);
         return ret;
@@ -206,6 +222,9 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         SqlArguments args = new SqlArguments(uri);
+        if (TABLE_FAVORITES.equals(args.table)) {
+            return 0;
+        }
         checkWritePermissions(args);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -228,6 +247,9 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public Uri insert(Uri url, ContentValues initialValues) {
         SqlArguments args = new SqlArguments(url);
+        if (TABLE_FAVORITES.equals(args.table)) {
+            return null;
+        }
         checkWritePermissions(args);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -243,6 +265,11 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public int delete(Uri url, String where, String[] whereArgs) {
         SqlArguments args = new SqlArguments(url, where, whereArgs);
+        if (TABLE_FAVORITES.equals(args.table)) {
+            return 0;
+        } else if (TABLE_OLD_FAVORITES.equals(args.table)) {
+            args.table = TABLE_FAVORITES;
+        }
         checkWritePermissions(args);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -255,6 +282,9 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public int update(Uri url, ContentValues initialValues, String where, String[] whereArgs) {
         SqlArguments args = new SqlArguments(url, where, whereArgs);
+        if (TABLE_FAVORITES.equals(args.table)) {
+            return 0;
+        }
         checkWritePermissions(args);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();

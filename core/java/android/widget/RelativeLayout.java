@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Gravity;
+import android.view.ViewDebug;
 import android.widget.RemoteViews.RemoteView;
 import android.graphics.Rect;
 import com.android.internal.R;
@@ -152,7 +153,7 @@ public class RelativeLayout extends ViewGroup {
 
     private void initFromAttributes(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RelativeLayout);
-        mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, 0);
+        mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();
     }
@@ -168,6 +169,7 @@ public class RelativeLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
      */
+    @android.view.RemotableViewMethod
     public void setIgnoreGravity(int viewId) {
         mIgnoreGravity = viewId;
     }
@@ -183,6 +185,7 @@ public class RelativeLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#RelativeLayout_gravity
      */
+    @android.view.RemotableViewMethod
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
             if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
@@ -198,6 +201,7 @@ public class RelativeLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
         final int gravity = horizontalGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != gravity) {
@@ -206,6 +210,7 @@ public class RelativeLayout extends ViewGroup {
         }
     }
 
+    @android.view.RemotableViewMethod
     public void setVerticalGravity(int verticalGravity) {
         final int gravity = verticalGravity & Gravity.VERTICAL_GRAVITY_MASK;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != gravity) {
@@ -263,7 +268,7 @@ public class RelativeLayout extends ViewGroup {
         int right = Integer.MIN_VALUE;
         int bottom = Integer.MIN_VALUE;
 
-        if ((horizontalGravity || verticalGravity) && mIgnoreGravity != 0) {
+        if ((horizontalGravity || verticalGravity) && mIgnoreGravity != View.NO_ID) {
             ignore = findViewById(mIgnoreGravity);
         }
 
@@ -799,13 +804,33 @@ public class RelativeLayout extends ViewGroup {
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_centerVertical
      */
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        @ViewDebug.ExportedProperty(resolveId = true, indexMapping = {
+            @ViewDebug.IntToString(from = ABOVE,               to = "above"),
+            @ViewDebug.IntToString(from = ALIGN_BASELINE,      to = "alignBaseline"),
+            @ViewDebug.IntToString(from = ALIGN_BOTTOM,        to = "alignBottom"),
+            @ViewDebug.IntToString(from = ALIGN_LEFT,          to = "alignLeft"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_BOTTOM, to = "alignParentBottom"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_LEFT,   to = "alignParentLeft"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_RIGHT,  to = "alignParentRight"),
+            @ViewDebug.IntToString(from = ALIGN_PARENT_TOP,    to = "alignParentTop"),
+            @ViewDebug.IntToString(from = ALIGN_RIGHT,         to = "alignRight"),
+            @ViewDebug.IntToString(from = ALIGN_TOP,           to = "alignTop"),
+            @ViewDebug.IntToString(from = BELOW,               to = "below"),
+            @ViewDebug.IntToString(from = CENTER_HORIZONTAL,   to = "centerHorizontal"),
+            @ViewDebug.IntToString(from = CENTER_IN_PARENT,    to = "center"),
+            @ViewDebug.IntToString(from = CENTER_VERTICAL,     to = "centerVertical"),
+            @ViewDebug.IntToString(from = LEFT_OF,             to = "leftOf"),
+            @ViewDebug.IntToString(from = RIGHT_OF,            to = "rightOf")
+        }, mapping = { @ViewDebug.IntToString(from = TRUE, to = "true") })
         private int[] mRules = new int[VERB_COUNT];
+
         private int mLeft, mTop, mRight, mBottom;
 
         /**
          * When true, uses the parent as the anchor if the anchor doesn't exist or if
          * the anchor's visibility is GONE.
          */
+        @ViewDebug.ExportedProperty
         public boolean alignWithParent;
 
         public LayoutParams(Context c, AttributeSet attrs) {

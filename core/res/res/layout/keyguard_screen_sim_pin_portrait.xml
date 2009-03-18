@@ -16,231 +16,251 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#FF000000"
+    android:background="@android:color/background_dark"
         >
 
-    <!-- header text ('Enter Pin Code') -->
-    <TextView android:id="@+id/headerText"
+    <LinearLayout android:id="@+id/topDisplayGroup"
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="26sp"
-            />
+        android:layout_height="115dip"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+            >
 
-    <!-- displays dots as user enters pin -->
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:addStatesFromChildren="true"
-        android:gravity="center_vertical"
-        android:baselineAligned="false"
-        android:paddingRight="0dip"
-        android:layout_marginTop="8dip"
-        android:layout_marginBottom="5dip"
-        android:layout_marginLeft="5dip"
-        android:background="@android:drawable/edit_text"
-    >
+        <!-- header text ('Enter Pin Code') -->
+        <TextView android:id="@+id/headerText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dip"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+                />
 
-        <EditText android:id="@+id/pinDisplay"
-            android:layout_width="0dip"
-            android:layout_weight="1"
-            android:layout_height="fill_parent"
-            android:maxLines="1"
-            android:background="@null"
-            android:password="true"
-            />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dip"
+            android:layout_marginRight="6dip"
+            android:layout_marginLeft="6dip"
+            android:background="@android:drawable/edit_text"
+            >
 
-        <ImageButton android:id="@+id/backspace"
-             style="@android:style/Widget.Button.Inset"
-             android:src="@android:drawable/ic_input_delete"
-             android:layout_width="wrap_content"
-             android:layout_height="fill_parent"
-             android:layout_marginTop="2dip"
-             android:layout_marginRight="2dip"
-             android:layout_marginBottom="2dip"
-             android:gravity="center"
-            />
+            <!-- displays dots as user enters pin -->
+            <TextView android:id="@+id/pinDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="64dip"
+                android:layout_centerInParent="true"
+                android:maxLines="1"
+                android:textAppearance="?android:attr/textAppearanceLargeInverse"
+                android:textStyle="bold"
+                android:inputType="textPassword"
+                />
+
+            <ImageButton android:id="@+id/backspace"
+                android:src="@android:drawable/ic_input_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="1dip"
+                    />
+        </RelativeLayout>
+
 
     </LinearLayout>
 
     <!-- Keypad section -->
-    <LinearLayout
+    <LinearLayout android:id="@+id/keyPad"
         android:layout_width="fill_parent"
-        android:layout_height="0sp"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dip"
-        android:layout_marginRight="4dip"
-        android:orientation="horizontal"
-    >
+        android:layout_height="wrap_content"
+        android:layout_below="@id/topDisplayGroup"
+        android:orientation="vertical"
+        >
 
-        <Button android:id="@+id/one"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="64dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:orientation="horizontal"
+        >
 
-        <Button android:id="@+id/two"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+            <Button android:id="@+id/one"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-        <Button android:id="@+id/three"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
-    </LinearLayout>
+            <Button android:id="@+id/two"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0sp"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dip"
-        android:layout_marginRight="4dip"
-        android:orientation="horizontal"
-    >
+            <Button android:id="@+id/three"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
+        </LinearLayout>
 
-        <Button android:id="@+id/four"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="64dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:orientation="horizontal"
+        >
 
-        <Button android:id="@+id/five"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+            <Button android:id="@+id/four"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-        <Button android:id="@+id/six"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
-    </LinearLayout>
+            <Button android:id="@+id/five"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0sp"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dip"
-        android:layout_marginRight="4dip"
-        android:orientation="horizontal"
-    >
+            <Button android:id="@+id/six"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
+        </LinearLayout>
 
-        <Button android:id="@+id/seven"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="64dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:orientation="horizontal"
+        >
 
-        <Button android:id="@+id/eight"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+            <Button android:id="@+id/seven"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-        <Button android:id="@+id/nine"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
-    </LinearLayout>
+            <Button android:id="@+id/eight"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0sp"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dip"
-        android:layout_marginRight="4dip"
-        android:orientation="horizontal"
-    >
+            <Button android:id="@+id/nine"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
+        </LinearLayout>
 
-        <Button android:id="@+id/ok"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="18sp"
-            android:text="@android:string/ok"
-        />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="64dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:orientation="horizontal"
+        >
 
-        <Button android:id="@+id/zero"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="22sp"
-        />
+            <Button android:id="@+id/ok"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:text="@android:string/ok"
+            />
 
-        <Button android:id="@+id/cancel"
-            android:layout_width="0sp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:paddingLeft="4dip"
-            style="?android:attr/buttonStyleSmall"
-            android:textSize="18sp"
-            android:text="@android:string/cancel"
-        />
+            <Button android:id="@+id/zero"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+            />
+
+            <Button android:id="@+id/cancel"
+                android:layout_width="0sp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:text="@android:string/cancel"
+            />
+        </LinearLayout>
+
+    <!-- end keypad -->
     </LinearLayout>
 
 
     <!-- emergency call button -->
-    <RelativeLayout
+    <Button
+        android:id="@+id/emergencyCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:drawableLeft="@android:drawable/ic_emergency"
+        android:drawablePadding="3dip"
+        android:text="@android:string/lockscreen_emergency_call"
+        />
+
+    <!-- spacer below keypad -->
+    <View
+        android:id="@+id/spacerBottom"
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        >
+        android:layout_height="1dip"
+        android:layout_marginBottom="6dip"
+        android:layout_above="@id/emergencyCall"
+        android:background="@android:drawable/divider_horizontal_dark"/>
 
-        <Button
-            android:id="@+id/emergencyCall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:drawableLeft="@drawable/ic_emergency"
-            android:drawablePadding="3dip"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip"
-            android:text="@android:string/lockscreen_emergency_call"
-            />
 
-    </RelativeLayout>
-
-</LinearLayout>
+</RelativeLayout>

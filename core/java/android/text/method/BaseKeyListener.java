@@ -18,7 +18,6 @@ package android.text.method;
 
 import android.view.KeyEvent;
 import android.view.View;
-import android.text.InputType;
 import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.widget.TextView;
@@ -26,7 +25,7 @@ import android.widget.TextView;
 public abstract class BaseKeyListener
 extends MetaKeyKeyListener
 implements KeyListener {
-    /* package */ static final Object OLD_SEL_START = new Object();
+    /* package */ static final Object OLD_SEL_START = new NoCopySpan.Concrete();
 
     /**
      * Performs the action that happens when you press the DEL key in
@@ -126,6 +125,36 @@ implements KeyListener {
         }
         
         return super.onKeyDown(view, content, keyCode, event);
+    }
+    
+    /**
+     * Base implementation handles ACTION_MULTIPLE KEYCODE_UNKNOWN by inserting
+     * the event's text into the content.
+     */
+    public boolean onKeyOther(View view, Editable content, KeyEvent event) {
+        if (event.getAction() != KeyEvent.ACTION_MULTIPLE
+                || event.getKeyCode() != KeyEvent.KEYCODE_UNKNOWN) {
+            // Not something we are interested in.
+            return false;
+        }
+        
+        int selStart, selEnd;
+
+        {
+            int a = Selection.getSelectionStart(content);
+            int b = Selection.getSelectionEnd(content);
+
+            selStart = Math.min(a, b);
+            selEnd = Math.max(a, b);
+        }
+
+        CharSequence text = event.getCharacters();
+        if (text == null) {
+            return false;
+        }
+        
+        content.replace(selStart, selEnd, text);
+        return true;
     }
 }
 

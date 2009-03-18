@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_READ" />
     <uses-permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE" />
-        
+
     <application android:process="system"
                  android:allowClearUserData="false"
                  android:icon="@drawable/app_icon"
@@ -17,7 +17,7 @@
                 android:multiprocess="false"
                 android:readPermission="android.permission.SUBSCRIBED_FEEDS_READ"
                 android:writePermission="android.permission.SUBSCRIBED_FEEDS_WRITE" />
-        <receiver android:name="SubscribedFeedsService">
+        <receiver android:name="SubscribedFeedsBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.GTALK_DATA_MESSAGE_RECEIVED" />
                 <category android:name="GSYNC_TICKLE"/>
@@ -29,5 +29,6 @@
                 <action android:name="com.android.subscribedfeeds.action.REFRESH" />
             </intent-filter>
         </receiver>
+        <service android:name="SubscribedFeedsIntentService"/>
     </application>
 </manifest>

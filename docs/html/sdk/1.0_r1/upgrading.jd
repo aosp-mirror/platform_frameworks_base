@@ -1,37 +1,12 @@
 page.title=Upgrading the SDK
+sdk.version=1.0_r1
 @jd:body
 
-<div class="sidebox-wrapper">
-  <div class="sidebox-inner">
-
-     <h2>Useful Links</h2>
-
-      <ul class="noindent">
-        <li><a href="migrating/0.9-1.0/changes-overview.html">Overview of Changes</a>
-		      <p>A high-level look at what's changed in Android, with 
-		       discussion of how the changes may affect your apps.</p></li>
-
-        <li><a href="migrating/0.9-1.0/changes.html">API Diff Report</a> 
-                <p>A detailed report that lists all the specific changes in the latest SDK.</p></li>
-
-        <li><a href="RELEASENOTES.html">Release Notes</a> 
-                <p>Version details, known issues, and resolved issues. </p></li>
-
-        <li><a href="http://groups.google.com/group/android-developers">Android Developers Group</a> 
-            <p>A forum where you can discuss migration issues and learn from other Android developers. </p></li>
- 
-        <li><a href="http://code.google.com/p/android/issues/list">Android Issue Tracker</a>
-            <p>If you think you may have found a bug, use the issue tracker to report it.</p></li>
-      </ul>
-
-   </div>
-</div><!-- class-sidebox -->
-
+<p>For the current SDK release, see the links under <strong>Current SDK Release</strong> in the side navigation.</p>
 
 <p>This guide will help you migrate your development environment and applications
-to the latest version of the SDK. Use this guide if you've been developing applications
-on a previous version of the Android SDK. 
-</p>
+to <strong>version 1.0, release 1</strong>, of the Android SDK. Use this guide if you've been developing applications
+on a different version of the Android SDK.</p>
 
 <p>To ensure that your applications are compliant with the Android 1.0 system available 
 on mobile devices, you need to install the new SDK and port your existing Android 
@@ -39,9 +14,7 @@ applications to the updated API. The sections below guide you through the proces
 
 <h2 id="install-new">Install the new SDK</h2>
 
-<p><a href="{@docRoot}download.html">Download the SDK</a> and unpack it into a safe location.</p>
-
-<p>After unpacking the new SDK, you should:</p>
+<p>After unpacking the SDK, you should:</p>
 
 <ul>
   <li>Wipe your emulator data. <p>Some data formats have changed since the last
@@ -60,27 +33,58 @@ applications to the updated API. The sections below guide you through the proces
 
 <h2 id="update-plugin">Update your ADT Eclipse Plugin</h2>
 
-<p>If you develop on Eclipse and are using the ADT plugin, follow these steps to install the new plugin that accompanies the latest SDK.</p>
+<p>If you develop on Eclipse and are using the ADT plugin, follow these steps to install the
+plugin that's required for this version of the SDK.</p>
 
 <table style="font-size:100%">
 <tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
 <tr>
-<td width="50%">
+<td width="45%">
 <ol>
-    <li> Select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt; <strong>Find and Install...</strong>. </li>
-    <li> Select <strong>Search for updates of the currently installed features</strong> and click <strong>Finish</strong>. </li>
-    <li> If any update for ADT is available, select and install. </li>
-    <li> Restart Eclipse.</li>
+    <li><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">Download the ADT v0.8.0 zip 
+      file</a> (do not unpack it).</li>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt; <strong>Find
+            and Install...</strong>. </li>
+    <li>In the dialog that appears, select <strong>Search for new features to install</strong> and click 
+      <strong>Next</strong>. </li>
+    <li>Click <strong>New Archive Site...</strong></li>
+    <li>Browse and select the downloaded the zip file.</li>
+    <li>You should now see the new site added to the search list (and checked).
+        Click <strong>Finish</strong>. </li>
+    <li>In the subsequent Search Results dialog box, select the checkbox for
+    <strong>Android Plugin</strong> &gt; <strong>Developer Tools</strong>.
+    This will check both features:  "Android Developer Tools", and "Android
+    Editors". The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>. </li>
+    <li>Read the license agreement and then select <strong>Accept terms of the license agreement</strong>. 
+     Click <strong>Next</strong>. </li>
+    <li>Click <strong>Finish</strong>. </li>
+    <li>The ADT plugin is not signed; you can accept the installation anyway
+        by clicking <strong>Install All</strong>. </li>
+    <li>Restart Eclipse. </li>
 </ol>
+
 </td>
 <td>
+
 <ol>
-    <li>Select <strong>Help</strong> &gt; <strong>Software Updates...</strong></li>
-    <li>Select the <strong>Installed Software</strong> tab.</li>
-    <li>Click <strong>Update...</strong></li>
-    <li>If an update for ADT is available, select it and click <strong>Finish</strong>.</li>
-    <li>Restart Eclipse.</li>
+    <li><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">Download the ADT v0.8.0 zip 
+      file</a> (do not unpack it).</li>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>.</li>
+    <li>In the dialog that appears, click the <strong>Available Software</strong> tab.</li>
+    <li>Click <strong>Add Site...</strong>, then <strong>Archive...</strong>.</li>
+    <li>Browse and select the downloaded the zip file.</li>
+    <li>Back in the Available Software view, you should see the plugin. Select the checkbox next to 
+      <em>Developer Tools</em>  and click <strong>Install...</strong></li>
+    <li>On the subsequent Install window, "Android Developer Tools", and "Android Editors" should both be checked. 
+    The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>.</li>
+    <li>Accept the license agreement and click <strong>Finish</strong>.</li>
+    <li>Restart Eclipse. </li>
 </ol>
+
 </td>
 </tr>
 </table>
@@ -99,7 +103,7 @@ applications to the updated API. The sections below guide you through the proces
 the ADT plugin and the Ant-based build tools support this requirement by signing compiled 
 .apk files with a debug key. To do so, the build tools use the Keytool utility included 
 in the JDK to to create a keystore and a key with a known alias and password. For more 
-information, see <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.
+information, see "Signing and Publishing Your App" in the documentation included with the SDK.
 
 <p>To support signing, you should first make sure that Keytool is available to the SDK build 
 tools. In most cases, you can tell the SDK build tools how to find Keytool by making sure that 
@@ -133,10 +137,7 @@ to place 3rd jar files, which are now automatically handled by the Ant script.</
 framework and API changes. You'll need to update your code to match changes in the Android APIs.</p>
 
 <p>One way to start is to open your project in Eclipse and see where the ADT
-identifies errors in your application. From there, you can lookup
-respective changes in the 
-<a href="migrating/changes-overview.html">Overview of Changes</a>
-and <a href="migrating/changes.html">API Diffs Report</a>.</p>
+identifies errors in your application.</p>
 
 <p>If you have additional trouble updating your code, visit the 
 <a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
@@ -144,8 +145,4 @@ to seek help from other Android developers.</p>
 
 <p>If you have modified one of the ApiDemos applications and would like to migrate it 
 to the new SDK, note that you will need to uninstall the version of ApiDemos that comes 
-preinstalled in the emulator. For more information, or if you encounter an "reinstallation" 
-error when running or installing ApiDemos, see the troubleshooting topic 
-<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
-apps in my IDE because of a signing error</a> for information about how to solve the problem.</p>
-
+preinstalled in the emulator.</p>

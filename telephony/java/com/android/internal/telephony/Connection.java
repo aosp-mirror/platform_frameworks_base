@@ -37,7 +37,10 @@ public abstract class Connection
         OUT_OF_SERVICE,     /* out of service */
         SIM_ERROR,          /* No SIM, SIM locked, or other SIM error */
         CALL_BARRED,        /* call was blocked by call barrring */
-        FDN_BLOCKED         /* call was blocked by fixed dial number */
+        FDN_BLOCKED,        /* call was blocked by fixed dial number */
+        CS_RESTRICTED,      /* call was blocked by restricted all voice access */
+        CS_RESTRICTED_NORMAL,/* call was blocked by restricted normal voice access */
+        CS_RESTRICTED_EMERGENCY/* call was blocked by restricted emergency voice access */
     }
 
     Object userData;

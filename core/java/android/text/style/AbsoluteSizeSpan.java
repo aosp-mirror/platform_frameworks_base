@@ -16,15 +16,33 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
-public class AbsoluteSizeSpan extends MetricAffectingSpan {
+public class AbsoluteSizeSpan extends MetricAffectingSpan implements ParcelableSpan {
 
-    private int mSize;
+    private final int mSize;
 
     public AbsoluteSizeSpan(int size) {
         mSize = size;
+    }
+
+    public AbsoluteSizeSpan(Parcel src) {
+        mSize = src.readInt();
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.ABSOLUTE_SIZE_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mSize);
     }
 
     public int getSize() {

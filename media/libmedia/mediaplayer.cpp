@@ -82,7 +82,7 @@ MediaPlayer::MediaPlayer()
     mListener = NULL;
     mCookie = NULL;
     mDuration = -1;
-    mStreamType = AudioTrack::MUSIC;
+    mStreamType = AudioSystem::MUSIC;
     mCurrentPosition = -1;
     mSeekPosition = -1;
     mCurrentState = MEDIA_PLAYER_IDLE;
@@ -172,7 +172,7 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
 status_t MediaPlayer::setDataSource(const char *url)
 {
     LOGV("setDataSource(%s)", url);
-    status_t err = UNKNOWN_ERROR;
+    status_t err = BAD_VALUE;
     if (url != NULL) {
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
@@ -199,7 +199,7 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
-    if (mPlayer == 0) return UNKNOWN_ERROR;
+    if (mPlayer == 0) return NO_INIT;
     return  mPlayer->setVideoSurface(surface->getISurface());
 }
 
@@ -215,11 +215,15 @@ status_t MediaPlayer::prepareAsync_l()
     return INVALID_OPERATION;
 }
 
+// TODO: In case of error, prepareAsync provides the caller with 2 error codes,
+// one defined in the Android framework and one provided by the implementation
+// that generated the error. The sync version of prepare returns only 1 error
+// code.
 status_t MediaPlayer::prepare()
 {
     LOGV("prepare");
     Mutex::Autolock _l(mLock);
-    if (mPrepareSync) return UNKNOWN_ERROR;
+    if (mPrepareSync) return -EALREADY;
     mPrepareSync = true;
     status_t ret = prepareAsync_l();
     if (ret != NO_ERROR) return ret;
@@ -253,7 +257,6 @@ status_t MediaPlayer::start()
         status_t ret = mPlayer->start();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             if (mCurrentState == MEDIA_PLAYER_PLAYBACK_COMPLETE) {
                 LOGV("playback completed immediately following start()");
@@ -275,7 +278,6 @@ status_t MediaPlayer::stop()
         status_t ret = mPlayer->stop();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_STOPPED;
         }
@@ -295,7 +297,6 @@ status_t MediaPlayer::pause()
         status_t ret = mPlayer->pause();
         if (ret != NO_ERROR) {
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_PAUSED;
         }
@@ -422,7 +423,6 @@ status_t MediaPlayer::reset()
         if (ret != NO_ERROR) {
             LOGE("reset() failed with return code (%d)", ret);
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
-            ret = UNKNOWN_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_IDLE;
         }
@@ -516,7 +516,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         }
         break;
     case MEDIA_ERROR:
-        // Always log errors
+        // Always log errors.
+        // ext1: Media framework error code.
+        // ext2: Implementation dependant error code.
         LOGE("error (%d, %d)", ext1, ext2);
         mCurrentState = MEDIA_PLAYER_STATE_ERROR;
         if (mPrepareSync)
@@ -527,6 +529,11 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
             mSignal.signal();
             send = false;
         }
+        break;
+    case MEDIA_INFO:
+        // ext1: Media framework error code.
+        // ext2: Implementation dependant error code.
+        LOGW("info/warning (%d, %d)", ext1, ext2);
         break;
     case MEDIA_SEEK_COMPLETE:
         LOGV("Received seek complete");

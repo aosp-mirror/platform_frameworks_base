@@ -4,7 +4,9 @@
 //
 // Ported from a Java version by Google.
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

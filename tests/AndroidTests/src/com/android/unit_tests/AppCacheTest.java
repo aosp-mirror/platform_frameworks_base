@@ -44,7 +44,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 
 public class AppCacheTest extends AndroidTestCase {
-    private static final boolean localLOGV = true;
+    private static final boolean localLOGV = false;
     public static final String TAG="AppCacheTest";
     public final long MAX_WAIT_TIME=60*1000;
     public final long WAIT_TIME_INCR=10*1000;
@@ -121,6 +121,7 @@ public class AppCacheTest extends AndroidTestCase {
     }
     @LargeTest
     public void testFreeApplicationCacheAllFiles() throws Exception {
+        boolean TRACKING = true;
         StatFs st = new StatFs("/data");
         long blks1 = getFreeStorageBlks(st);
         long availableMem = getFreeStorageSize(st);
@@ -128,11 +129,11 @@ public class AppCacheTest extends AndroidTestCase {
         assertNotNull(cacheDir);
         createTestFiles1(cacheDir, "testtmpdir", 5);
         long blks2 = getFreeStorageBlks(st);
-        if(localLOGV) Log.i(TAG, "blk1="+blks1+", blks2="+blks2);
+        if(localLOGV || TRACKING) Log.i(TAG, "blk1="+blks1+", blks2="+blks2);
         //this should free up the test files that were created earlier
         invokePMFreeApplicationCache(availableMem);
         long blks3 = getFreeStorageBlks(st);
-        if(localLOGV) Log.i(TAG, "blks3="+blks3);
+        if(localLOGV || TRACKING) Log.i(TAG, "blks3="+blks3);
         verifyTestFiles1(cacheDir, "testtmpdir", 5);
     }
     
@@ -593,6 +594,20 @@ public class AppCacheTest extends AndroidTestCase {
                 ", cache="+stats.cacheSize);
     }
     
+    @SmallTest
+    public void testGetSystemSharedLibraryNames() throws Exception {
+        try {
+            String[] sharedLibs = getPm().getSystemSharedLibraryNames();
+            if (localLOGV) {
+                for (String str : sharedLibs) {
+                    Log.i(TAG, str);
+                }
+            }
+        } catch (RemoteException e) {
+            fail("Failed invoking getSystemSharedLibraryNames with exception:" + e);
+        }   
+    }
+    
     class FreeStorageReceiver extends BroadcastReceiver {
         public static final String ACTION_FREE = "com.android.unit_tests.testcallback";
         private boolean doneFlag = false;
@@ -615,15 +630,16 @@ public class AppCacheTest extends AndroidTestCase {
     
     @SmallTest
     public void testFreeStorage() throws Exception {
+        boolean TRACKING = true;
         StatFs st = new StatFs("/data");
         long blks1 = getFreeStorageBlks(st);
-        if(localLOGV) Log.i(TAG, "Available free blocks="+blks1);
+        if(localLOGV || TRACKING) Log.i(TAG, "Available free blocks="+blks1);
         long availableMem = getFreeStorageSize(st);
         File cacheDir = mContext.getCacheDir();
         assertNotNull(cacheDir);
         createTestFiles1(cacheDir, "testtmpdir", 5);
         long blks2 = getFreeStorageBlks(st);
-        if(localLOGV) Log.i(TAG, "Available blocks after writing test files in application cache="+blks2);
+        if(localLOGV || TRACKING) Log.i(TAG, "Available blocks after writing test files in application cache="+blks2);
         // Create receiver and register it
         FreeStorageReceiver receiver = new FreeStorageReceiver();
         mContext.registerReceiver(receiver, new IntentFilter(FreeStorageReceiver.ACTION_FREE));
@@ -632,7 +648,7 @@ public class AppCacheTest extends AndroidTestCase {
         // Invoke PackageManager api
         invokePMFreeStorage(availableMem, receiver, pi);
         long blks3 = getFreeStorageBlks(st);
-        if(localLOGV) Log.i(TAG, "Available blocks after freeing cache"+blks3);
+        if(localLOGV || TRACKING) Log.i(TAG, "Available blocks after freeing cache"+blks3);
         assertEquals(receiver.getResultCode(), 1);
         mContext.unregisterReceiver(receiver);
         // Verify result  

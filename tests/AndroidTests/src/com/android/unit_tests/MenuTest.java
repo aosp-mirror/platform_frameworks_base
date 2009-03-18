@@ -131,20 +131,7 @@ public class MenuTest extends AndroidTestCase {
                                               makeKeyEvent(KeyEvent.KEYCODE_A,
                                                            KeyEvent.META_SYM_ON)));
     }
-
-    @LargeTest
-    public void testIsNotShortcutWithMultipleMetas() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertFalse(mMenu.isShortcutKey(
-                'a',
-                makeKeyEvent(KeyEvent.KEYCODE_A, KeyEvent.META_SYM_ON & KeyEvent.META_ALT_ON)));
-        Assert.assertFalse(mMenu.isShortcutKey(
-                'a', makeKeyEvent(KeyEvent.KEYCODE_A, KeyEvent.META_SYM_ON)));
-        Assert.assertFalse(mMenu.isShortcutKey(
-                'a', makeKeyEvent(KeyEvent.KEYCODE_A, KeyEvent.META_SHIFT_ON)));
-    }
-
+    
     @SmallTest
     public void testIsShortcutWithUpperCaseAlpha() throws Exception {
         mMenu.setQwertyMode(true);

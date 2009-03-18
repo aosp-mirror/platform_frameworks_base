@@ -27,12 +27,33 @@
 
 namespace android {
 
-enum {
-    REGISTER_BUFFERS = IBinder::FIRST_CALL_TRANSACTION,
-    UNREGISTER_BUFFERS,
-    POST_BUFFER, // one-way transaction
-    CREATE_OVERLAY,
-};
+ISurface::BufferHeap::BufferHeap() 
+    : w(0), h(0), hor_stride(0), ver_stride(0), format(0),
+    transform(0), flags(0) 
+{     
+}
+
+ISurface::BufferHeap::BufferHeap(uint32_t w, uint32_t h,
+        int32_t hor_stride, int32_t ver_stride,
+        PixelFormat format, const sp<IMemoryHeap>& heap)
+    : w(w), h(h), hor_stride(hor_stride), ver_stride(ver_stride),
+      format(format), transform(0), flags(0), heap(heap) 
+{
+}
+
+ISurface::BufferHeap::BufferHeap(uint32_t w, uint32_t h,
+        int32_t hor_stride, int32_t ver_stride,
+        PixelFormat format, uint32_t transform, uint32_t flags,
+        const sp<IMemoryHeap>& heap)
+        : w(w), h(h), hor_stride(hor_stride), ver_stride(ver_stride),
+          format(format), transform(transform), flags(flags), heap(heap) 
+{
+}
+
+
+ISurface::BufferHeap::~BufferHeap() 
+{     
+}
 
 class BpSurface : public BpInterface<ISurface>
 {
@@ -42,17 +63,18 @@ public:
     {
     }
 
-    virtual status_t registerBuffers(int w, int h, int hstride, int vstride,
-            PixelFormat format, const sp<IMemoryHeap>& heap)
+    virtual status_t registerBuffers(const BufferHeap& buffers)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
-        data.writeInt32(w);
-        data.writeInt32(h);
-        data.writeInt32(hstride);
-        data.writeInt32(vstride);
-        data.writeInt32(format);
-        data.writeStrongBinder(heap->asBinder());
+        data.writeInt32(buffers.w);
+        data.writeInt32(buffers.h);
+        data.writeInt32(buffers.hor_stride);
+        data.writeInt32(buffers.ver_stride);
+        data.writeInt32(buffers.format);
+        data.writeInt32(buffers.transform);
+        data.writeInt32(buffers.flags);
+        data.writeStrongBinder(buffers.heap->asBinder());
         remote()->transact(REGISTER_BUFFERS, data, &reply);
         status_t result = reply.readInt32();
         return result;
@@ -102,13 +124,16 @@ status_t BnSurface::onTransact(
     switch(code) {
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);
-            int w = data.readInt32();
-            int h = data.readInt32();
-            int hs= data.readInt32();
-            int vs= data.readInt32();
-            PixelFormat f = data.readInt32();
-            sp<IMemoryHeap> heap(interface_cast<IMemoryHeap>(data.readStrongBinder()));
-            status_t err = registerBuffers(w,h,hs,vs,f,heap);
+            BufferHeap buffer;
+            buffer.w = data.readInt32();
+            buffer.h = data.readInt32();
+            buffer.hor_stride = data.readInt32();
+            buffer.ver_stride= data.readInt32();
+            buffer.format = data.readInt32();
+            buffer.transform = data.readInt32();
+            buffer.flags = data.readInt32();
+            buffer.heap = interface_cast<IMemoryHeap>(data.readStrongBinder());
+            status_t err = registerBuffers(buffer);
             reply->writeInt32(err);
             return NO_ERROR;
         } break;

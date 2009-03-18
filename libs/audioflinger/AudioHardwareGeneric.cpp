@@ -93,7 +93,8 @@ void AudioHardwareGeneric::closeOutputStream(AudioStreamOutGeneric* out) {
 }
 
 AudioStreamIn* AudioHardwareGeneric::openInputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status)
+        int format, int channelCount, uint32_t sampleRate, status_t *status,
+        AudioSystem::audio_in_acoustics acoustics)
 {
     AutoMutex lock(mLock);
 
@@ -107,7 +108,7 @@ AudioStreamIn* AudioHardwareGeneric::openInputStream(
 
     // create new output stream
     AudioStreamInGeneric* in = new AudioStreamInGeneric();
-    status_t lStatus = in->set(this, mFd, format, channelCount, sampleRate);
+    status_t lStatus = in->set(this, mFd, format, channelCount, sampleRate, acoustics);
     if (status) {
         *status = lStatus;
     }
@@ -246,7 +247,8 @@ status_t AudioStreamInGeneric::set(
         int fd,
         int format,
         int channels,
-        uint32_t rate)
+        uint32_t rate,
+        AudioSystem::audio_in_acoustics acoustics)
 {
     // FIXME: remove logging
     LOGD("AudioStreamInGeneric::set(%p, %d, %d, %d, %u)", hw, fd, format, channels, rate);

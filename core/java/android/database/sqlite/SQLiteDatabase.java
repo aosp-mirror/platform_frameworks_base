@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
+import android.util.EventLog;
 
 import java.io.File;
 import java.util.HashMap;
@@ -51,7 +52,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * is the Unicode Collation Algorithm and not tailored to the current locale.
  */
 public class SQLiteDatabase extends SQLiteClosable {
-    private final static String TAG = "Database";
+    private static final String TAG = "Database";
+    private static final int DB_OPERATION_EVENT = 52000;
 
     /**
      * Algorithms used in ON CONFLICT clause
@@ -207,6 +209,11 @@ public class SQLiteDatabase extends SQLiteClosable {
     private WeakHashMap<SQLiteClosable, Object> mPrograms;
  
     private final RuntimeException mLeakedException;
+
+    // package visible, since callers will access directly to minimize overhead in the case
+    // that logging is not enabled.
+    /* package */ final boolean mLogStats;
+    
     /**
      * @param closable
      */
@@ -436,7 +443,14 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (mTransactionIsSuccessful) {
                 execSQL("COMMIT;");
             } else {
-                execSQL("ROLLBACK;");
+                try {
+                    execSQL("ROLLBACK;");
+                } catch (SQLException e) {
+                    if (Config.LOGD) {
+                        Log.d(TAG, "exception during rollback, maybe the DB previously "
+                                + "performed an auto-rollback");
+                    }
+                }
             }
         } finally {
             unlockForced();
@@ -764,9 +778,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Returns the maximum size the database may grow to.
+     * Returns the current database page size, in bytes.
      *
-     * @return the new maximum database size
+     * @return the database page size, in bytes
      */
     public long getPageSize() {
         SQLiteStatement prog = null;
@@ -1472,10 +1486,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
-        long timeStart = 0;
-        if (Config.LOGV) {
-            timeStart = System.currentTimeMillis();
-        }
+        boolean logStats = mLogStats;
+        long timeStart = logStats ? SystemClock.elapsedRealtime() : 0;
         lock();
         try {
             native_execSQL(sql);
@@ -1485,9 +1497,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         } finally {
             unlock();
         }
-        if (Config.LOGV) {
-            long timeEnd = System.currentTimeMillis();
-            Log.v(TAG, "Executed (" + (timeEnd - timeStart) + " ms):" + sql);
+        if (logStats) {
+            logTimeStat(false /* not a read */, timeStart, SystemClock.elapsedRealtime());
         }
     }
 
@@ -1504,10 +1515,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
-        long timeStart = 0;
-        if (Config.LOGV) {
-            timeStart = System.currentTimeMillis();
-        }
+
+        boolean logStats = mLogStats;
+        long timeStart = logStats ? SystemClock.elapsedRealtime() : 0;
         lock();
         SQLiteStatement statement = null;
         try {
@@ -1528,9 +1538,8 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             unlock();
         }
-        if (Config.LOGV) {
-            long timeEnd = System.currentTimeMillis();
-            Log.v(TAG, "Executed (" + (timeEnd - timeStart) + " ms):" + sql);
+        if (logStats) {
+            logTimeStat(false /* not a read */, timeStart, SystemClock.elapsedRealtime());
         }
     }
 
@@ -1550,7 +1559,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Private constructor. See {@link createDatabase} and {@link openDatabase}.
+     * Private constructor. See {@link #create} and {@link #openDatabase}.
      *
      * @param path The full path to the database
      * @param factory The factory to use when creating cursors, may be NULL.
@@ -1563,6 +1572,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         mFlags = flags;
         mPath = path;
+        mLogStats = "1".equals(android.os.SystemProperties.get("db.logstats"));
+        
         mLeakedException = new IllegalStateException(path +
             " SQLiteDatabase created and never closed");
         mFactory = factory;
@@ -1605,6 +1616,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         return mPath;
     }
 
+    /* package */ void logTimeStat(boolean read, long begin, long end) {
+        EventLog.writeEvent(DB_OPERATION_EVENT, mPath, read ? 0 : 1, end - begin);
+    }
+
     /**
      * Sets the locale for this database.  Does nothing if this database has
      * the NO_LOCALIZED_COLLATORS flag set or was opened read only.
@@ -1629,7 +1644,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private native void dbopen(String path, int flags);
 
     /**
-     * Native call to execute a raw SQL statement. {@link mLock} must be held
+     * Native call to execute a raw SQL statement. {@link #lock} must be held
      * when calling this method.
      *
      * @param sql The raw SQL string
@@ -1638,7 +1653,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ native void native_execSQL(String sql) throws SQLException;
 
     /**
-     * Native call to set the locale.  {@link mLock} must be held when calling
+     * Native call to set the locale.  {@link #lock} must be held when calling
      * this method.
      * @throws SQLException
      */

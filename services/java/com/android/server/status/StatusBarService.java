@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -175,11 +176,11 @@ public class StatusBarService extends IStatusBar.Stub
     WindowManager.LayoutParams mExpandedParams;
     ScrollView mScrollView;
     View mNotificationLinearLayout;
-    View mOngoingTitle;
+    TextView mOngoingTitle;
     LinearLayout mOngoingItems;
-    View mLatestTitle;
+    TextView mLatestTitle;
     LinearLayout mLatestItems;
-    View mNoNotificationsTitle;
+    TextView mNoNotificationsTitle;
     TextView mSpnLabel;
     TextView mPlmnLabel;
     TextView mClearButton;
@@ -269,11 +270,11 @@ public class StatusBarService extends IStatusBar.Stub
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
-        mOngoingTitle = expanded.findViewById(R.id.ongoingTitle);
+        mOngoingTitle = (TextView)expanded.findViewById(R.id.ongoingTitle);
         mOngoingItems = (LinearLayout)expanded.findViewById(R.id.ongoingItems);
-        mLatestTitle = expanded.findViewById(R.id.latestTitle);
+        mLatestTitle = (TextView)expanded.findViewById(R.id.latestTitle);
         mLatestItems = (LinearLayout)expanded.findViewById(R.id.latestItems);
-        mNoNotificationsTitle = expanded.findViewById(R.id.noNotificationsTitle);
+        mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mSpnLabel = (TextView)expanded.findViewById(R.id.spnLabel);
@@ -322,9 +323,11 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     public void systemReady() {
+        final StatusBarView view = mStatusBarView;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT,
-                25,
+                view.getContext().getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height),
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
                 WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
@@ -333,7 +336,7 @@ public class StatusBarService extends IStatusBar.Stub
         lp.setTitle("StatusBar");
         lp.windowAnimations = R.style.Animation_StatusBar;
 
-        WindowManagerImpl.getDefault().addView(mStatusBarView, lp);
+        WindowManagerImpl.getDefault().addView(view, lp);
     }
     
     // ================================================================================
@@ -1324,80 +1327,89 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump StatusBar from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+        
         synchronized (mQueue) {
-            pw.println("mExpanded=" + mExpanded
+            pw.println("Current Status Bar state:");
+            pw.println("  mExpanded=" + mExpanded
                     + ", mExpandedVisible=" + mExpandedVisible);
-            pw.println("mTicking=" + mTicking);
-            pw.println("mTracking=" + mTracking);
-            pw.println("mAnimating=" + mAnimating
+            pw.println("  mTicking=" + mTicking);
+            pw.println("  mTracking=" + mTracking);
+            pw.println("  mAnimating=" + mAnimating
                     + ", mAnimY=" + mAnimY + ", mAnimVel=" + mAnimVel
                     + ", mAnimAccel=" + mAnimAccel);
-            pw.println("mCurAnimationTime=" + mCurAnimationTime
+            pw.println("  mCurAnimationTime=" + mCurAnimationTime
                     + " mAnimLastTime=" + mAnimLastTime);
-            pw.println("mDisplayHeight=" + mDisplayHeight
+            pw.println("  mDisplayHeight=" + mDisplayHeight
                     + " mAnimatingReveal=" + mAnimatingReveal
                     + " mViewDelta=" + mViewDelta);
-            pw.println("mDisplayHeight=" + mDisplayHeight);
+            pw.println("  mDisplayHeight=" + mDisplayHeight);
             final int N = mQueue.size();
-            pw.println("mQueue.size=" + N);
+            pw.println("  mQueue.size=" + N);
             for (int i=0; i<N; i++) {
                 PendingOp op = mQueue.get(i);
-                pw.println("  [" + i + "] key=" + op.key + " code=" + op.code + " visible="
+                pw.println("    [" + i + "] key=" + op.key + " code=" + op.code + " visible="
                         + op.visible);
-                pw.println("         iconData=" + op.iconData);
-                pw.println("         notificationData=" + op.notificationData);
+                pw.println("           iconData=" + op.iconData);
+                pw.println("           notificationData=" + op.notificationData);
             }
-            pw.println("mExpandedParams: " + mExpandedParams);
-            pw.println("mExpandedView: " + viewInfo(mExpandedView));
-            pw.println("mExpandedDialog: " + mExpandedDialog);
-            pw.println("mTrackingParams: " + mTrackingParams);
-            pw.println("mTrackingView: " + viewInfo(mTrackingView));
-            pw.println("mOngoingTitle: " + viewInfo(mOngoingTitle));
-            pw.println("mOngoingItems: " + viewInfo(mOngoingItems));
-            pw.println("mLatestTitle: " + viewInfo(mLatestTitle));
-            pw.println("mLatestItems: " + viewInfo(mLatestItems));
-            pw.println("mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
-            pw.println("mCloseView: " + viewInfo(mCloseView));
-            pw.println("mTickerView: " + viewInfo(mTickerView));
-            pw.println("mScrollView: " + viewInfo(mScrollView)
+            pw.println("  mExpandedParams: " + mExpandedParams);
+            pw.println("  mExpandedView: " + viewInfo(mExpandedView));
+            pw.println("  mExpandedDialog: " + mExpandedDialog);
+            pw.println("  mTrackingParams: " + mTrackingParams);
+            pw.println("  mTrackingView: " + viewInfo(mTrackingView));
+            pw.println("  mOngoingTitle: " + viewInfo(mOngoingTitle));
+            pw.println("  mOngoingItems: " + viewInfo(mOngoingItems));
+            pw.println("  mLatestTitle: " + viewInfo(mLatestTitle));
+            pw.println("  mLatestItems: " + viewInfo(mLatestItems));
+            pw.println("  mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
+            pw.println("  mCloseView: " + viewInfo(mCloseView));
+            pw.println("  mTickerView: " + viewInfo(mTickerView));
+            pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
         }
         synchronized (mIconMap) {
             final int N = mIconMap.size();
-            pw.println("mIconMap.size=" + N);
+            pw.println("  mIconMap.size=" + N);
             Set<IBinder> keys = mIconMap.keySet();
             int i=0;
             for (IBinder key: keys) {
                 StatusBarIcon icon = mIconMap.get(key);
-                pw.println("  [" + i + "] key=" + key);
-                pw.println("         data=" + icon.mData);
+                pw.println("    [" + i + "] key=" + key);
+                pw.println("           data=" + icon.mData);
                 i++;
             }
         }
         synchronized (mNotificationData) {
             int N = mNotificationData.ongoingCount();
-            pw.println("ongoingCount.size=" + N);
+            pw.println("  ongoingCount.size=" + N);
             for (int i=0; i<N; i++) {
                 StatusBarNotification n = mNotificationData.getOngoing(i);
-                pw.println("  [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("         data=" + n.data);
+                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
+                pw.println("           data=" + n.data);
             }
             N = mNotificationData.latestCount();
-            pw.println("ongoingCount.size=" + N);
+            pw.println("  ongoingCount.size=" + N);
             for (int i=0; i<N; i++) {
                 StatusBarNotification n = mNotificationData.getLatest(i);
-                pw.println("  [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("         data=" + n.data);
+                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
+                pw.println("           data=" + n.data);
             }
         }
         synchronized (mDisableRecords) {
             final int N = mDisableRecords.size();
-            pw.println("mDisableRecords.size=" + N
+            pw.println("  mDisableRecords.size=" + N
                     + " mDisabled=0x" + Integer.toHexString(mDisabled));
             for (int i=0; i<N; i++) {
                 DisableRecord tok = mDisableRecords.get(i);
-                pw.println("  [" + i + "] what=0x" + Integer.toHexString(tok.what)
+                pw.println("    [" + i + "] what=0x" + Integer.toHexString(tok.what)
                                 + " pkg=" + tok.pkg + " token=" + tok.token);
             }
         }
@@ -1693,6 +1705,9 @@ public class StatusBarService extends IStatusBar.Stub
      */
     void updateResources() {
         mClearButton.setText(mContext.getText(R.string.status_bar_clear_all_button));
+        mOngoingTitle.setText(mContext.getText(R.string.status_bar_ongoing_events_title));
+        mLatestTitle.setText(mContext.getText(R.string.status_bar_latest_events_title));
+        mNoNotificationsTitle.setText(mContext.getText(R.string.status_bar_no_notifications_title));
         Log.d(TAG, "updateResources");
     }
 

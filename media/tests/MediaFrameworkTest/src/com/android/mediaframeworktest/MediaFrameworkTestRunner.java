@@ -21,6 +21,7 @@ import com.android.mediaframeworktest.functional.SimTonesTest;
 import com.android.mediaframeworktest.functional.MediaMetadataTest;
 import com.android.mediaframeworktest.functional.CameraTest;
 import com.android.mediaframeworktest.functional.MediaRecorderTest;
+import com.android.mediaframeworktest.functional.MediaAudioTrackTest;
 
 import junit.framework.TestSuite;
 
@@ -48,6 +49,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaMetadataTest.class);
         suite.addTestSuite(CameraTest.class);
         suite.addTestSuite(MediaRecorderTest.class);
+        suite.addTestSuite(MediaAudioTrackTest.class);
         return suite;
     }
 
@@ -56,4 +58,5 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         return MediaFrameworkTestRunner.class.getClassLoader();
     }
 }
+
 

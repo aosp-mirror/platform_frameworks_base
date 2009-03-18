@@ -1,77 +1,101 @@
 page.title=Search Results
 @jd:body
 
-
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script src="/assets/jquery-history.js" type="text/javascript"></script>
 <script type="text/javascript">
       google.load('search', '1');
-      
-      // the cse class encapsulates a left and right search control
-      // both controls are driven by a shared search form
-      function cse() {
-        var sFormDiv = document.getElementById("searchForm");
-        var leftScDiv = document.getElementById("leftSearchControl");
-
-        // create a left, right search control
-        // create a custom search form
-        this.leftControl = new google.search.SearchControl();
-        this.searchForm = new google.search.SearchForm(true, sFormDiv);
-
-        // bind clear and submit functions
-        this.searchForm.setOnSubmitCallback(this, cse.prototype.onSubmit);
-        this.searchForm.setOnClearCallback(this, cse.prototype.onClear);
-
-        // set up for small result sets
-        this.leftControl.setResultSetSize(google.search.Search.LARGE_RESULTSET);
-
-        var searcher;
-        var options;
-
-        // configure left control
-        // Site Restrict to CSE ID for reviews
-        searcher = new google.search.WebSearch();
-        options = new google.search.SearcherOptions();
-        //searcher.setSiteRestriction("000455696194071821846:reviews");
-        //searcher.setUserDefinedLabel("Product Reviews");
-        options.setExpandMode(GSearchControl.EXPAND_MODE_OPEN);
-        this.leftControl.addSearcher(searcher, options);
-
-        // draw the left and right controls
-        this.leftControl.draw(leftScDiv);
-
-        // execute a starter search
-		urlquery=location.href.split("?");
-		urlterms=urlquery[1].split(",");
-		document.getElementById("searchTitle").innerHTML = urlterms[0];
-        this.searchForm.execute(urlterms[0]);
-
-      }
-
-      // when the form fires a submit, grab its
-      // value and call the left and right control
-      cse.prototype.onSubmit = function(form) {
-        var q = form.input.value;
-        if (q && q!= "") {
-          this.leftControl.execute(q);
-		  
-		document.getElementById("searchTitle").innerHTML = "search results for \"" + q + "\"";
-        }
-        return false;
-      }
-
-      // when the form fires a clear, call the left and right control
-      cse.prototype.onClear = function(form) {
-        //this.leftControl.clearAllResults();
-        //form.input.value = "";
-		document.getElementById("searchTitle").innerHTML = form.input.value;
-        return false;
-      }
 
       function OnLoad() {
-        new cse();
+        document.getElementById("search_autocomplete").style.color = "#000";
+
+        // create search control
+        searchControl = new google.search.SearchControl();
+
+        // use our existing search form and use tabs when multiple searchers are used
+        drawOptions = new google.search.DrawOptions();
+        drawOptions.setDrawMode(google.search.SearchControl.DRAW_MODE_TABBED);
+        drawOptions.setInput(document.getElementById("search_autocomplete"));
+
+        // configure search result options
+        searchOptions = new google.search.SearcherOptions();
+        searchOptions.setExpandMode(GSearchControl.EXPAND_MODE_OPEN);
+
+        // configure each of the searchers, for each tab
+        devSiteSearcher = new google.search.WebSearch();
+        devSiteSearcher.setUserDefinedLabel("All Developers Site");
+        devSiteSearcher.setSiteRestriction("http://developer.android.com/");
+
+        devGuideSearcher = new google.search.WebSearch();
+        devGuideSearcher.setUserDefinedLabel("Dev Guide");
+        devGuideSearcher.setSiteRestriction("http://developer.android.com/guide/");
+
+        referenceSearcher = new google.search.WebSearch();
+        referenceSearcher.setUserDefinedLabel("Reference");
+        referenceSearcher.setSiteRestriction("http://developer.android.com/reference/");
+
+        blogSearcher = new google.search.WebSearch();
+        blogSearcher.setUserDefinedLabel("Blog");
+        blogSearcher.setSiteRestriction("http://android-developers.blogspot.com");
+
+        groupsSearcher = new google.search.WebSearch();
+        groupsSearcher.setUserDefinedLabel("Developer Groups");
+        groupsSearcher.setSiteRestriction("001283715400630100512:ggqrtvkztwm");
+
+        sourceSiteSearcher = new google.search.WebSearch();
+        sourceSiteSearcher.setUserDefinedLabel("Android Source");
+        sourceSiteSearcher.setSiteRestriction("http://source.android.com");
+
+        homeSiteSearcher = new google.search.WebSearch();
+        homeSiteSearcher.setUserDefinedLabel("Android Home");
+        homeSiteSearcher.setSiteRestriction("http://www.android.com");
+ 
+        // add each searcher to the search control
+        searchControl.addSearcher(devSiteSearcher, searchOptions);
+        searchControl.addSearcher(devGuideSearcher, searchOptions);
+        searchControl.addSearcher(referenceSearcher, searchOptions);
+        searchControl.addSearcher(groupsSearcher, searchOptions);
+        searchControl.addSearcher(sourceSiteSearcher, searchOptions);
+        searchControl.addSearcher(blogSearcher, searchOptions);
+
+        // configure result options
+        searchControl.setResultSetSize(google.search.Search.LARGE_RESULTSET);
+        searchControl.setLinkTarget(google.search.Search.LINK_TARGET_SELF);
+        searchControl.setTimeoutInterval(google.search.SearchControl.TIMEOUT_LONG);
+        searchControl.setNoResultsString(google.search.SearchControl.NO_RESULTS_DEFAULT_STRING);
+
+        // upon ajax search, refresh the url and search title
+        searchControl.setSearchStartingCallback(this, function(control, searcher, query) {
+            $("#searchTitle").html("search results for <em>" + query + "</em>");
+            $.history.add('q=' + query); // add the current query to the browser history
+        });
+
+        // draw the search results box
+        searchControl.draw(document.getElementById("leftSearchControl"), drawOptions);
+
+        // execute a search upon page load, from url hash query
+        if (location.href.indexOf("#q=") != -1) {
+          url = location.href.split("#q=");
+          searchControl.execute(decodeURI(url[1]));
+        }
+        document.getElementById("search_autocomplete").focus();
       }
+
       google.setOnLoadCallback(OnLoad, true);
+
+      // when an event on the browser history occurs (back, forward, load) perform a search
+      $(window).history(function(e, hash) {
+        hashParts = hash.split('=');
+        searchControl.execute(decodeURI(hashParts[1]));
+        $("#searchTitle").html("search results for <em>" + decodeURI(hashParts[1]) + "</em>");
+      });
+
+      // forcefully regain key-up event control (previously jacked by search api)
+      $("#search_autocomplete").keyup(function(event) {
+        return search_changed(event, false, '/');
+      });
 </script>
+
   <div id="mainBodyFixed" style="width:auto; margin:20px">
           <h2 id="searchTitle">search results</h2>
           <img src="{@docRoot}assets/images/hr_gray_main.jpg" />

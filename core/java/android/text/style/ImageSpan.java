@@ -44,8 +44,9 @@ public class ImageSpan extends DynamicDrawableSpan {
     public ImageSpan(Bitmap b, int verticalAlignment) {
         super(verticalAlignment);
         mDrawable = new BitmapDrawable(b);
-        mDrawable.setBounds(0, 0, mDrawable.getIntrinsicWidth(),
-                mDrawable.getIntrinsicHeight());
+        int width = mDrawable.getIntrinsicWidth();
+        int height = mDrawable.getIntrinsicHeight();
+        mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0); 
     }
 
     public ImageSpan(Drawable d) {
@@ -87,6 +88,7 @@ public class ImageSpan extends DynamicDrawableSpan {
         super(verticalAlignment);
         mContext = context;
         mContentUri = uri;
+        mSource = uri.toString();
     }
 
     public ImageSpan(Context context, int resourceId) {
@@ -116,6 +118,8 @@ public class ImageSpan extends DynamicDrawableSpan {
                         mContentUri);
                 bitmap = BitmapFactory.decodeStream(is);
                 drawable = new BitmapDrawable(bitmap);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight());
                 is.close();
             } catch (Exception e) {
                 Log.e("sms", "Failed to loaded content " + mContentUri, e);

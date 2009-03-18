@@ -167,15 +167,6 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         c.close();
 
         c = mDatabase.query("phones", null,
-                "PHONE_NUMBERS_EQUAL(num, '+1 (617).555-1212p1234')", null, null, null, null);
-        assertNotNull(c);
-        assertEquals(1, c.getCount());
-        c.moveToFirst();
-        number = c.getString(c.getColumnIndexOrThrow("num"));
-        assertEquals("+" + PHONE_NUMBER, number);
-        c.close();
-
-        c = mDatabase.query("phones", null,
                 "PHONE_NUMBERS_EQUAL(num, '" + PHONE_NUMBER + "')", null, null, null, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());

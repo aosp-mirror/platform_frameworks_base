@@ -21,13 +21,15 @@
 #include <string.h>
 #include <math.h>
 
-#include <GLES/egl.h>
-
 #include <cutils/properties.h>
 
 #include <utils/Log.h>
 
 #include <ui/EGLDisplaySurface.h>
+
+#include <GLES/gl.h>
+#include <EGL/eglext.h>
+
 
 #include "DisplayHardware/DisplayHardware.h"
 
@@ -136,26 +138,19 @@ void DisplayHardware::init(uint32_t dpy)
     const char* const egl_extensions = eglQueryString(
             display, EGL_EXTENSIONS);
     
-    const char* egl_extensions_config = egl_extensions;
-    
-    if (strstr(egl_extensions, "EGL_ANDROID_query_string_config")) {
-        egl_extensions_config = eglQueryStringConfigANDROID(
-                display, config, EGL_EXTENSIONS);
-    }
-
     LOGI("EGL informations:");
     LOGI("# of configs : %d", numConfigs);
     LOGI("vendor    : %s", eglQueryString(display, EGL_VENDOR));
     LOGI("version   : %s", eglQueryString(display, EGL_VERSION));
     LOGI("extensions: %s", egl_extensions);
-    LOGI("ext/config: %s", egl_extensions_config);
     LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
 
-    if (strstr(egl_extensions_config, "EGL_ANDROID_swap_rectangle")) {
-        mFlags |= SWAP_RECTANGLE_EXTENSION;
-        // TODO: get the real "update_on_demand" behavior
-        mFlags |= UPDATE_ON_DEMAND;
-    }
+    // TODO: get this from the devfb driver (probably should be HAL module)
+    mFlags |= SWAP_RECTANGLE_EXTENSION;
+    
+    // TODO: get the real "update_on_demand" behavior (probably should be HAL module)
+    mFlags |= UPDATE_ON_DEMAND;
+
     if (eglGetConfigAttrib(display, config, EGL_CONFIG_CAVEAT, &dummy) == EGL_TRUE) {
         if (dummy == EGL_SLOW_CONFIG)
             mFlags |= SLOW_CONFIG;
@@ -173,9 +168,6 @@ void DisplayHardware::init(uint32_t dpy)
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
             mFlags |= BUFFER_PRESERVED;
-            if (strstr(egl_extensions_config, "EGL_ANDROID_copy_front_to_back")) {
-                mFlags |= COPY_BACK_EXTENSION;
-            }
         }
     }
     
@@ -330,8 +322,7 @@ void DisplayHardware::flip(const Region& dirty) const
 
     if (mFlags & SWAP_RECTANGLE_EXTENSION) {
         const Rect& b(newDirty.bounds());
-        eglSwapRectangleANDROID(
-                dpy, surface,
+        mDisplaySurface->setSwapRectangle(
                 b.left, b.top, b.width(), b.height());
     }
 
@@ -351,4 +342,12 @@ uint32_t DisplayHardware::getFlags() const
 void DisplayHardware::makeCurrent() const
 {
     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
+}
+
+void DisplayHardware::copyFrontToImage(const copybit_image_t& front) const {
+    mDisplaySurface->copyFrontToImage(front);
+}
+
+void DisplayHardware::copyBackToImage(const copybit_image_t& front) const {
+    mDisplaySurface->copyBackToImage(front);
 }

@@ -174,6 +174,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * Return the raw information about the Service implementing this
+     * input method.  Do not modify the returned object.
+     */
+    public ServiceInfo getServiceInfo() {
+        return mService.serviceInfo;
+    }
+
+    /**
      * Return the component of the service that implements this input
      * method.
      */
@@ -223,15 +231,6 @@ public final class InputMethodInfo implements Parcelable {
      */
     public int getIsDefaultResourceId() {
         return mIsDefaultResId;
-    }
-    
-    /**
-     * Returns true if this input method is one of the components that is
-     * built in to the system.
-     */
-    public boolean isBuiltin() {
-        return mService.serviceInfo.packageName.equals(
-                InputMethodManager.BUILDIN_INPUTMETHOD_PACKAGE);
     }
     
     public void dump(Printer pw, String prefix) {

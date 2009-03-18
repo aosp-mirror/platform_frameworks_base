@@ -16,8 +16,13 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
 
     <pre>&lt;uses-library android:name="com.google.android.maps" /></pre>
       </li>
-
-   <li>Open the layout file. Define the layout with a MapView inside a RelativeLayout:
+   <li>We also need access to the internet in order to retrieve the Google Maps tiles,
+    so the application must request the {@link android.Manifest.permission#INTERNET INTERNET} permissions.
+    In the manifest file, add the following as a child of the <code>&lt;manifest></code> element:
+    <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
+   </li>
+   <li>Now open the main layout file for your project. Define a layout with a com.google.android.maps.MapView 
+    inside a android.widget.RelativeLayout:
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
@@ -32,22 +37,21 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:clickable="true"
-        android:apiKey="INSERT YOUR KEY HERE"
+        android:apiKey="<em>Your Maps API Key</em>"
     />
 
-&lt;RelativeLayout>
+&lt;/RelativeLayout>
 </pre>
-      <p>Setting <code>clickable</code> is important. Otherwise, the map does not allow any user interaction.</p>
+      <p>The <code>clickable</code> attribute defines whether you want to allow user-interaction with the map.
+      In this case, we set it "true" so that the user can navigate.</p>
 
-      <p>The <code>android:apiKey</code> must contain an authentic Android Maps API key.
-      The API key is generated using the MD5 fingerprint of your application certificate. For the purposes of 
-      this exercise, you should use the fingerprint of your debug certificate (which cannot be used to release
-      your application for Android devices, but will work while developing). See how to 
-      <a href="{@docRoot}guide/topics/geo/mapkey.html#getdebugfingerprint">generate a fingerprint from your 
-      debug certificate</a>, then <a href="http://code.google.com/android/maps-api-signup.html">register the 
-      certificate</a> to retieve an API key.
-      Insert the API key as the value of the <code>apiKey</code> attribute. If you do not insert a valid
-      Maps API key, the application will still run, but no map tiles will load.</p></li>
+      <p>The <code>apiKey</code> attribute holds the Google Maps API Key that proves your application and signer
+      certificate has been registered with the Google Maps service. Because MapView uses Google Maps data, this key is required
+      in order to receive the map data, even while you are developing. Registration is free and it only takes a couple
+      minutes to register your certificate and receive a Maps API Key. For instructions on getting a key, read
+      <a href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a Maps API Key</a>.
+      (For the purpose of this tutorial, you should register with the fingerprint of the SDK debug certificate.)
+      Once you've acquired the Maps API Key, insert it for the <code>apiKey</code> value.</p></li>
 
    <li>Now open the HelloMapView.java file. For this Activity, we're going to extend the special sub-class of 
       Activity called MapActivity, so change the class declaration to extend 

@@ -25,7 +25,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RectF;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -74,6 +76,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // The current transformation to apply on the child being drawn
     private Transformation mChildTransformation;
+    private RectF mInvalidateRegion;
 
     // Target of Motion events
     private View mMotionTarget;
@@ -1021,6 +1024,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     void dispatchDetachedFromWindow() {
+        // If we still have a motion target, we are still in the process of
+        // dispatching motion events to a child; we need to get rid of that
+        // child to avoid dispatching events to it after the window is torn
+        // down. To make sure we keep the child in a consistent state, we
+        // first send it an ACTION_CANCEL motion event.
+        if (mMotionTarget != null) {
+            final long now = SystemClock.uptimeMillis();
+            final MotionEvent event = MotionEvent.obtain(now, now,
+                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+            mMotionTarget.dispatchTouchEvent(event);
+            event.recycle();
+            mMotionTarget = null;
+        }
+
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
@@ -1199,6 +1216,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         }
 
+        // We will draw our child's animation, let's reset the flag
+        mPrivateFlags &= ~DRAW_ANIMATION;
         mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
 
         boolean more = false;
@@ -1327,9 +1346,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final Animation a = child.getAnimation();
         boolean concatMatrix = false;
 
+        final int childWidth = cr - cl;
+        final int childHeight = cb - ct;
+
         if (a != null) {
-            if (!a.isInitialized()) {
-                a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
+            if (mInvalidateRegion == null) {
+                mInvalidateRegion = new RectF();
+            }
+            final RectF region = mInvalidateRegion;
+
+            final boolean initialized = a.isInitialized();
+            if (!initialized) {
+                a.initialize(childWidth, childHeight, getWidth(), getHeight());
+                a.initializeInvalidateRegion(0, 0, childWidth, childHeight);
                 child.onAnimationStart();
             }
 
@@ -1347,10 +1376,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             FLAG_OPTIMIZE_INVALIDATE) {
                         mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
                     } else if ((flags & FLAG_INVALIDATE_REQUIRED) == 0) {
+                        // The child need to draw an animation, potentially offscreen, so
+                        // make sure we do not cancel invalidate requests
+                        mPrivateFlags |= DRAW_ANIMATION;
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+                    a.getInvalidateRegion(0, 0, childWidth, childHeight, region, transformToApply);
+
+                    // The child need to draw an animation, potentially offscreen, so
+                    // make sure we do not cancel invalidate requests
+                    mPrivateFlags |= DRAW_ANIMATION;
+
+                    final int left = cl + (int) region.left;
+                    final int top = ct + (int) region.top;
+                    invalidate(left, top, left + (int) region.width(), top + (int) region.height());
                 }
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
@@ -1367,7 +1407,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW)) {
+        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
+                (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
         }
 
@@ -1429,16 +1470,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
             if (hasNoCache) {
-                canvas.clipRect(sx, sy, sx + cr - cl, sy + cb - ct);
+                canvas.clipRect(sx, sy, sx + childWidth, sy + childHeight);
             } else {
-                canvas.clipRect(0, 0, cr - cl, cb - ct);
+                canvas.clipRect(0, 0, childWidth, childHeight);
             }
         }
+
+        // Clear the flag as early as possible to allow draw() implementations
+        // to call invalidate() successfully when doing animations
+        child.mPrivateFlags |= DRAWN;
 
         if (hasNoCache) {
             // Fast path for layouts with no backgrounds
             if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                child.mPrivateFlags |= DRAWN;
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
@@ -1455,7 +1499,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
             }
-            child.mPrivateFlags |= DRAWN;
             if (ViewRoot.PROFILE_DRAWING) {
                 EventLog.writeEvent(60003, hashCode());
             }
@@ -1922,8 +1965,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         LayoutAnimationController.AnimationParameters animationParams =
                     params.layoutAnimationParameters;
         if (animationParams == null) {
-            animationParams =
-                    new LayoutAnimationController.AnimationParameters();
+            animationParams = new LayoutAnimationController.AnimationParameters();
             params.layoutAnimationParameters = animationParams;
         }
 
@@ -2278,8 +2320,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int[] location = attachInfo.mInvalidateChildLocation;
             location[CHILD_LEFT_INDEX] = child.mLeft;
             location[CHILD_TOP_INDEX] = child.mTop;
+
+            // If the child is drawing an animation, we want to copy this flag onto
+            // ourselves and the parent to make sure the invalidate request goes
+            // through
+            final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
     
             do {
+                if (drawAnimation && parent instanceof View) {
+                    ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                }
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);
         }
@@ -2307,7 +2357,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int left = mLeft;
                 final int top = mTop;
 
-                if (dirty.intersect(0, 0, mRight - left, mBottom - top)) {
+                if (dirty.intersect(0, 0, mRight - left, mBottom - top) ||
+                        (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
 
                     location[CHILD_LEFT_INDEX] = left;

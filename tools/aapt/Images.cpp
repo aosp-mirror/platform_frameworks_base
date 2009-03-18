@@ -332,8 +332,8 @@ static status_t do_9patch(const char* imageName, image_info* image)
     int H = image->height;
     int i, j;
 
-    int maxSizeXDivs = (W / 2 + 1) * sizeof(int32_t);
-    int maxSizeYDivs = (H / 2 + 1) * sizeof(int32_t);
+    int maxSizeXDivs = W * sizeof(int32_t);
+    int maxSizeYDivs = H * sizeof(int32_t);
     int32_t* xDivs = (int32_t*) malloc(maxSizeXDivs);
     int32_t* yDivs = (int32_t*) malloc(maxSizeYDivs);
     uint8_t  numXDivs = 0;
@@ -600,9 +600,21 @@ static bool patch_equals(Res_png_9patch& patch1, Res_png_9patch& patch2) {
     return true;
 }
 
-static void dump_image(int w, int h, png_bytepp rows, int bpp)
+static void dump_image(int w, int h, png_bytepp rows, int color_type)
 {
     int i, j, rr, gg, bb, aa;
+
+    int bpp;
+    if (color_type == PNG_COLOR_TYPE_PALETTE || color_type == PNG_COLOR_TYPE_GRAY) {
+        bpp = 1;
+    } else if (color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
+        bpp = 2;
+    } else if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
+	    // We use a padding byte even when there is no alpha
+        bpp = 4;
+    } else {
+        printf("Unknown color type %d.\n", color_type);
+    }
 
     for (j = 0; j < h; j++) {
         png_bytep row = rows[j];
@@ -640,7 +652,7 @@ static void dump_image(int w, int h, png_bytepp rows, int bpp)
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define ABS(a)   ((a)<0?-(a):(a))
 
-static void analyze_image(image_info &imageInfo, int grayscaleTolerance,
+static void analyze_image(const char *imageName, image_info &imageInfo, int grayscaleTolerance,
                           png_colorp rgbPalette, png_bytep alphaPalette,
                           int *paletteEntries, bool *hasTransparency, int *colorType,
                           png_bytepp outRows)
@@ -662,7 +674,7 @@ static void analyze_image(image_info &imageInfo, int grayscaleTolerance,
     // 3. There are no more than 256 distinct RGBA colors
 
     // NOISY(printf("Initial image data:\n"));
-    // dump_image(w, h, imageInfo.rows, 4);
+    // dump_image(w, h, imageInfo.rows, PNG_COLOR_TYPE_RGB_ALPHA);
 
     for (j = 0; j < h; j++) {
         png_bytep row = imageInfo.rows[j];
@@ -763,7 +775,7 @@ static void analyze_image(image_info &imageInfo, int grayscaleTolerance,
         *colorType = PNG_COLOR_TYPE_PALETTE;
     } else {
         if (maxGrayDeviation <= grayscaleTolerance) {
-            NOISY(printf("Forcing image to gray (max deviation = %d)\n", maxGrayDeviation));
+            printf("%s: forcing image to gray (max deviation = %d)\n", imageName, maxGrayDeviation);
             *colorType = isOpaque ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_GRAY_ALPHA;
         } else {
             *colorType = isOpaque ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA;
@@ -845,8 +857,16 @@ static void write_png(const char* imageName,
     bool hasTransparency;
     int paletteEntries;
 
-    analyze_image(imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
+    analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
                   &paletteEntries, &hasTransparency, &color_type, outRows);
+
+    // If the image is a 9-patch, we need to preserve it as a ARGB file to make
+    // sure the pixels will not be pre-dithered/clamped until we decide they are
+    if (imageInfo.is9Patch && (color_type == PNG_COLOR_TYPE_RGB ||
+            color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)) {
+        color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+    }
+
     switch (color_type) {
     case PNG_COLOR_TYPE_PALETTE:
         NOISY(printf("Image %s has %d colors%s, using PNG_COLOR_TYPE_PALETTE\n",
@@ -910,21 +930,8 @@ static void write_png(const char* imageName,
     }
     png_write_image(write_ptr, rows);
 
-//     int bpp;
-//     if (color_type == PNG_COLOR_TYPE_PALETTE || color_type == PNG_COLOR_TYPE_GRAY) {
-//         bpp = 1;
-//     } else if (color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
-//         bpp = 2;
-//     } else if (color_type == PNG_COLOR_TYPE_RGB) {
-//         bpp = 4;
-//     } else if (color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
-//         bpp = 4;
-//     } else {
-//         printf("Uknknown color type %d, exiting.\n", color_type);
-//         exit(1);
-//     }
 //     NOISY(printf("Final image data:\n"));
-//     dump_image(imageInfo.width, imageInfo.height, rows, bpp);
+//     dump_image(imageInfo.width, imageInfo.height, rows, color_type);
 
     png_write_end(write_ptr, write_info);
 

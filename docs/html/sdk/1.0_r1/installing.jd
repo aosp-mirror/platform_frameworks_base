@@ -1,29 +1,27 @@
 page.title=Installing the SDK
+sdk.version=1.0_r1
 @jd:body
 
+<p>For the current SDK release, see the links under <strong>Current SDK Release</strong> in the side navigation.</p>
 
-<p>This page describes how to install the Android SDK and set up your development environment. If you haven't 
-downloaded the SDK yet, follow the link below.</p>
+<p>This page describes how to install the Android 1.0 SDK, Release 1, and set up your development environment. 
+If you haven't downloaded the SDK yet, you can so from the <a href="{@docRoot}sdk/1.0_r1/index.html">Download</a> page.</p>
 
-<div class="linkbox"><a href="http://developer.android.com/sdk/">Download the SDK</a></div>
+<p>Before you begin, be sure that your development environment meets the SDK
+<a href="{@docRoot}sdk/1.0_r1/requirements.html">System Requirements</a>. If you encounter any problems during installation,
+see the <a href="#installnotes">Installation Notes</a> at the bottom of this page.</p>
 
-<p>Before you begin, be sure that you're development environment meets the SDK
-<a href="requirements.html">System and Software Requirements</a>.</p>
-
-<div class="special">
 <h4 style="margin-top">Upgrading?</h4>
 <p>If you have already developed applications using an earlier version of the 
 SDK, please skip this page and read the 
-<b><a href="upgrading.html">Upgrading the SDK</a></b> document.  
+<a href="{@docRoot}sdk/1.0_r1/upgrading.html"><strong>Upgrading the SDK</strong></a></b> document instead.
 </p>
-</div>
-
 
 <a name="installingsdk"></a>
 <a name="setup"></a>
 <h2>Installing the SDK</h2>
 
-	<p>After downloading the SDK, unpack the .zip archive to a suitable location on your machine. By default, the SDK files are unpacked into a directory named  <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em>_<em>&lt;build&gt;</em></code>. The directory contains the subdirectories <code>tools/</code>, <code>samples/</code>, and others. </p>
+	<p>After downloading the SDK, unpack the .zip archive to a suitable location on your machine. By default, the SDK files are unpacked into a directory named  <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em>_<em>&lt;build&gt;</em></code>. The directory contains a link to a local copy of the documentation and the subdirectories <code>tools/</code>, <code>samples/</code>, and others. </p>
 	
 	<p>Make a note of the name and location of the unpacked SDK directory on your system &mdash; you will need to refer to the SDK directory later, when setting up the Android plugin or using SDK tools. </p>
 
@@ -47,10 +45,86 @@ SDK, please skip this page and read the
 
         <p>Adding <code>tools</code> to your path lets you run Android Debug Bridge (adb) and the other command line <a href="{@docRoot}guide/developing/tools/index.html">tools</a> without needing to supply the full path to the tools directory. Note that, if you update your SDK, you should remember to update your PATH settings to point to the new location, if different.</p>
 
-<h3>Setting up Eclipse</h3>
-<p>If you'll be developing with the Eclipse IDE, follow the following procedure to setup the IDE
-to use the Android SDK.</p>
-<p>Basically, you just need to update your Eclipse preferences to point to the Android SDK directory:</p>
+
+<p>If you will be using the Eclipse IDE as your environment for developing Android applications, continue reading the next
+section in order to install the Android Development Tools plugin and setup Eclipse. If you choose not to use Eclipse, you can 
+develop Android applications using other tools &mdash; read the guide to developing 
+<a href="{@docRoot}guide/developing/other-ide.html">In other IDEs</a>.</p>
+
+
+<h2>Setting up Eclipse</h2>
+
+<p>First, you should install a custom plugin called Android Development Tools (ADT), which adds integrated support for Android projects and tools. The ADT plugin includes a variety of powerful extensions that make creating, running, and debugging Android applications faster and easier. Developing in ADT/Eclipse is highly recommended for Eclipse users and those new to Android.</p>
+
+<p>To download and install the ADT plugin, follow the steps below for your respective Eclipse version. </p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
+<tr>
+<td width="45%">
+<ol>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt; <strong>Find
+            and Install...</strong>. </li>
+
+    <li>In the dialog that appears, select <strong>Search for new features to install</strong> and click <strong>Next</strong>. </li>
+    <li>Click <strong>New Remote Site</strong>. </li>
+    <li>In the resulting dialog box, enter a name for the remote site (e.g. Android Plugin) and enter this as its URL:
+        <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+        <p>Alternatively, you can use http in the Location URL, if you are having 
+         trouble with https (https is preferred for security reasons).</p>
+        <pre>http://dl-ssl.google.com/android/eclipse/</pre>
+        <p>Click <strong>OK</strong>.</p> </li>
+    <li>You should now see the new site added to the search list (and checked).
+        Click <strong>Finish</strong>. </li>
+    <li>In the subsequent Search Results dialog box, select the checkbox for
+    <strong>Android Plugin</strong> &gt; <strong>Developer Tools</strong>.
+    This will check both features:  "Android Developer Tools", and "Android
+    Editors". The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>. </li>
+    <li>Read the license agreement and then select <strong>Accept terms of the license agreement</strong>. 
+     Click <strong>Next</strong>. </li>
+    <li>Click <strong>Finish</strong>. </li>
+
+    <li>The ADT plugin is not signed; you can accept the installation anyway
+        by clicking <strong>Install All</strong>. </li>
+    <li>Restart Eclipse. </li>
+</ol>
+
+</td>
+<td>
+
+<ol>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>.
+    </li>
+    <li>In the dialog that appears, click the <strong>Available Software</strong> tab.
+    </li>
+    <li>Click <strong>Add Site...</strong>
+    </li>
+    <li>Enter this as the Location:
+      <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+      <p>Alternatively, you can use http in the Location URL, if you are having 
+         trouble with https (https is preferred for security reasons).</p>
+      <pre>http://dl-ssl.google.com/android/eclipse/</pre>
+      <p>Click <strong>OK</strong>.</p></li>
+    <li>Back in the Available Software view, you should see the plugin. Select the checkbox next to 
+      <em>Developer Tools</em>  and click <strong>Install...</strong>
+    </li>
+    <li>On the subsequent Install window, "Android Developer Tools", and "Android Editors" should both be checked. 
+    The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>.
+     </li>
+    <li>Accept the license agreement and click <strong>Finish</strong>.</li>
+    <li>Restart Eclipse. </li>
+</ol>
+
+</td>
+</tr>
+</table>
+
+
+<p>Now, you just need to modify your Eclipse preferences to point to the Android SDK directory:</p>
 <ol>
     <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
         panel. (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>) </li>
@@ -58,16 +132,55 @@ to use the Android SDK.</p>
     <li>For the SDK Location in the main panel, click <strong>Browse...</strong> and locate the SDK directory. </li>
     <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
 </ol>
-<p>Done! We now recommend that you install the ADT Eclipse plugin, which will provide some much-appreciated assistance in developing Android apps with Eclipse...</p>
 
-<a name="installingplugin"></a>
-<h2>Installing the Eclipse Plugin (ADT)</h2>
+<p>Done! If you haven't encountered any problems, then you're ready to begin developing Android applications.
+We recommend you begin with the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial,
+which will teach you some basics about Android applications and how to create projects using Eclipse.</p>
 
-<p>If you will be using the Eclipse IDE as your environment for developing Android applications, you can install a custom plugin called Android Development Tools (ADT), which adds integrated support for Android projects and tools. The ADT plugin includes a variety of powerful extensions that make creating, running, and debugging Android applications faster and easier. This plugin is highly recommended for Eclipse users.</p>
 
-<p>If you <em>will not</em> be using the Eclipse IDE, you do not need to download or install the ADT plugin.</p>
+<h3 id="troubleshooting">Troubleshooting ADT Installation</h3>
+<p> 
+If you are having trouble downloading the ADT plugin after following the steps above, here are some suggestions: </p>
 
-<p><strong>Follow this guide to install the ADT Plugin</strong></p>
+<ul>
+	<li>If Eclipse can not find the remote update site containing the ADT plugin, try changing the remote site URL to use http, rather than https. That is, set the Location for the remote site to:
+        <pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
+	<li>If you are behind a firewall (such as a corporate firewall), make
+        sure that you have properly configured your proxy settings in Eclipse.
+        In Eclipse 3.3/3.4, you can configure proxy information from the main
+        Eclipse menu in <strong>Window</strong> (on Mac, <strong>Eclipse</strong>) &gt; <strong>Preferences</strong> &gt; <strong>General</strong> &gt; <strong>Network Connections</strong>.</li>
+</ul>
+<p> 
+If you are still unable to use Eclipse to download the ADT plugin as a remote update site, you can download the ADT files to your local machine using a browser and the install the files in Eclipse from there:
+</p>
+<ol>
+<li><a href="{@docRoot}sdk/adt_download.html">Download the ADT zip file</a> (do not unpack it).
+<li>Follow steps 1 and 2 in the default install instructions (above).
+<li>In Eclipse 3.3, click <strong>New Archive Site...</strong>. <br/>
+    In Eclipse 3.4, click <strong>Add Site...</strong>, then <strong>Archive...</strong>
+<li>Browse and select the downloaded the zip file.
+<li>Follow the remaining procedures, above, starting from steps 5.
+</ol>
+<p> 
+Note that to update your plugin, you will have to follow these steps again instead of the default update instructions.</p>
+
+<p>Note that the "Android Editors" feature of ADT requires several optional 
+Eclipse components (for example, WST). If you encounter an error when 
+installing ADT, your Eclipse installion might not include those components. 
+For information about how to quickly add the necessary components to your 
+Eclipse installation, see the troubleshooting topic 
+<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
+
+<h4>For Linux users</h4>
+<p>If you encounter this error when installing the ADT Plugin for Eclipse: 
+<pre>
+An error occurred during provisioning.
+Cannot connect to keystore.
+JKS</pre>
+<p>
+...then your development machine lacks a suitable Java VM. Installing Sun
+Java 6 will resolve this issue and you can then reinstall the ADT
+Plugin.</p>
 
 <a name="installnotes"></a>
 <h2>Installation Notes</h2>
@@ -106,19 +219,3 @@ at the top of this page. In particular, note that some Linux
 distributions may include JDK 1.4 or Gnu Compiler for Java, both of
 which are not supported for Android development.</li>
 </ul>
-
-<a name="developingwitheclipse"></a>
-<a name="existingcode"></a>
-<a name="creatingaproject" id="creatingaproject"></a>
-<a name="launchconfig" id="launchconfig"></a>
-<a name="installingrunningdebugging" id="installingrunningdebugging"></a>
-<a name="otherides" id="otherides"></a>
-<a name="buildingwithant"></a>
-<a name="debugging" id="debugging"></a>
-<a name="additionaldebugging" id="additionaldebugging"></a>
-<a name="toptips" id="toptips"></a>
-<a name="debughelpers"></a>
-<a name="uninstalling" id="uninstalling"></a>
-<a name="tips" id="tips"></a>
-<a name="eclipse" id="eclipse"></a> 
-<a name="building"></a>

@@ -116,7 +116,7 @@ public interface Adapter {
      *         can be converted to the other in {@link #getView}. Note: Integers must be in the
      *         range 0 to {@link #getViewTypeCount} - 1. {@link #IGNORE_ITEM_VIEW_TYPE} can
      *         also be returned.
-     * @see IGNORE_ITEM_VIEW_TYPE
+     * @see #IGNORE_ITEM_VIEW_TYPE
      */
     int getItemViewType(int position);
     

@@ -16,38 +16,45 @@
 
 package android.net;
 
-import android.util.Log;
-import android.util.Config;
 import android.net.http.DomainNameChecker;
 import android.os.SystemProperties;
+import android.util.Config;
+import android.util.Log;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.GeneralSecurityException;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
 
+/**
+ * SSLSocketFactory that provides optional (on debug devices, only) skipping of ssl certificfate
+ * chain validation and custom read timeouts used just when connecting to the server/negotiating
+ * an ssl session.
+ *
+ * You can skip the ssl certificate checking at runtime by setting socket.relaxsslcheck=yes on
+ * devices that do not have have ro.secure set.
+ */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
-    private static final boolean DBG = true;
     private static final String LOG_TAG = "SSLCertificateSocketFactory";
-    
-    private static X509TrustManager sDefaultTrustManager;
 
-    private final int socketReadTimeoutForSslHandshake;
+    private static X509TrustManager sDefaultTrustManager;
 
     static {
         try {
@@ -83,27 +90,56 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     };
 
-    private SSLSocketFactory factory;
+    private final SSLSocketFactory mFactory;
 
+    private final int mSocketReadTimeoutForSslHandshake;
+
+    /**
+     * Do not use this constructor (will be deprecated).  Use {@link #getDefault(int)} instead.
+     */
     public SSLCertificateSocketFactory(int socketReadTimeoutForSslHandshake)
-            throws NoSuchAlgorithmException, KeyManagementException {  
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, TRUST_MANAGER, new java.security.SecureRandom());
-        factory = (SSLSocketFactory) context.getSocketFactory();
-        this.socketReadTimeoutForSslHandshake = socketReadTimeoutForSslHandshake;
+            throws NoSuchAlgorithmException, KeyManagementException {
+        this(socketReadTimeoutForSslHandshake, null /* cache */);
+    }
+
+    private SSLCertificateSocketFactory(int socketReadTimeoutForSslHandshake,
+            SSLClientSessionCache cache) throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContextImpl sslContext = new SSLContextImpl();
+        sslContext.engineInit(null /* kms */,
+            TRUST_MANAGER, new java.security.SecureRandom(),
+            cache /* client cache */, null /* server cache */);
+        this.mFactory = sslContext.engineGetSocketFactory();
+        this.mSocketReadTimeoutForSslHandshake = socketReadTimeoutForSslHandshake;
     }
 
     /**
-     * Returns a default instantiation of a new socket factory which
-     * only allows SSL connections with valid certificates.
+     * Returns a new instance of a socket factory using the specified socket read
+     * timeout while connecting with the server/negotiating an ssl session.
      *
      * @param socketReadTimeoutForSslHandshake the socket read timeout used for performing
      *        ssl handshake. The socket read timeout is set back to 0 after the handshake.
      * @return a new SocketFactory, or null on error
      */
     public static SocketFactory getDefault(int socketReadTimeoutForSslHandshake) {
+        return getDefault(socketReadTimeoutForSslHandshake, null /* cache */);
+    }
+
+    /**
+     * Returns a new instance of a socket factory using the specified socket read
+     * timeout while connecting with the server/negotiating an ssl session.
+     * Persists ssl sessions using the provided {@link SSLClientSessionCache}.
+     *
+     * @param socketReadTimeoutForSslHandshake the socket read timeout used for performing
+     *        ssl handshake. The socket read timeout is set back to 0 after the handshake.
+     * @param cache The {@link SSLClientSessionCache} to use, if any.
+     * @return a new SocketFactory, or null on error
+     *
+     * @hide
+    */
+    public static SocketFactory getDefault(int socketReadTimeoutForSslHandshake,
+            SSLClientSessionCache cache) {
         try {
-            return new SSLCertificateSocketFactory(socketReadTimeoutForSslHandshake);
+            return new SSLCertificateSocketFactory(socketReadTimeoutForSslHandshake, cache);
         } catch (NoSuchAlgorithmException e) {
             Log.e(LOG_TAG, 
                     "SSLCertifcateSocketFactory.getDefault" +
@@ -217,10 +253,10 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     public Socket createSocket(String s, int i, InetAddress inaddr, int j) throws IOException {
-        SSLSocket sslSock = (SSLSocket) factory.createSocket(s, i, inaddr, j);
+        SSLSocket sslSock = (SSLSocket) mFactory.createSocket(s, i, inaddr, j);
 
-        if (socketReadTimeoutForSslHandshake >= 0) {
-            sslSock.setSoTimeout(socketReadTimeoutForSslHandshake);
+        if (mSocketReadTimeoutForSslHandshake >= 0) {
+            sslSock.setSoTimeout(mSocketReadTimeoutForSslHandshake);
         }
 
         validateSocket(sslSock,s);
@@ -230,10 +266,10 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     public Socket createSocket(String s, int i) throws IOException {
-        SSLSocket sslSock = (SSLSocket) factory.createSocket(s, i);
+        SSLSocket sslSock = (SSLSocket) mFactory.createSocket(s, i);
 
-        if (socketReadTimeoutForSslHandshake >= 0) {
-            sslSock.setSoTimeout(socketReadTimeoutForSslHandshake);
+        if (mSocketReadTimeoutForSslHandshake >= 0) {
+            sslSock.setSoTimeout(mSocketReadTimeoutForSslHandshake);
         }
         
         validateSocket(sslSock,s);
@@ -243,11 +279,11 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     public String[] getDefaultCipherSuites() {
-        return factory.getSupportedCipherSuites();
+        return mFactory.getSupportedCipherSuites();
     }
 
     public String[] getSupportedCipherSuites() {
-        return factory.getSupportedCipherSuites();
+        return mFactory.getSupportedCipherSuites();
     }
 }
 

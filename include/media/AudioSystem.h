@@ -29,8 +29,27 @@ class AudioSystem
 {
 public:
 
+    enum stream_type {
+        DEFAULT         =-1,
+        VOICE_CALL      = 0,
+        SYSTEM          = 1,
+        RING            = 2,
+        MUSIC           = 3,
+        ALARM           = 4,
+        NOTIFICATION    = 5,
+        BLUETOOTH_SCO   = 6,
+        NUM_STREAM_TYPES
+    };
+
+    enum audio_output_type {
+        AUDIO_OUTPUT_DEFAULT      =-1,
+        AUDIO_OUTPUT_HARDWARE     = 0,
+        AUDIO_OUTPUT_A2DP         = 1,
+        NUM_AUDIO_OUTPUT_TYPES
+    };
+
     enum audio_format {
-        DEFAULT = 0,
+        FORMAT_DEFAULT = 0,
         PCM_16_BIT,
         PCM_8_BIT,
         INVALID_FORMAT
@@ -51,7 +70,16 @@ public:
         ROUTE_BLUETOOTH_SCO  = (1 << 2),
         ROUTE_HEADSET        = (1 << 3),
         ROUTE_BLUETOOTH_A2DP = (1 << 4),
-        ROUTE_ALL       = 0xFFFFFFFF
+        ROUTE_ALL            = -1UL,
+    };
+
+    enum audio_in_acoustics {
+        AGC_ENABLE    = 0x0001,
+        AGC_DISABLE   = 0,
+        NS_ENABLE     = 0x0002,
+        NS_DISABLE    = 0,
+        TX_IIR_ENABLE = 0x0004,
+        TX_DISABLE    = 0
     };
 
     /* These are static methods to control the system-wide AudioFlinger
@@ -96,33 +124,52 @@ public:
     static float linearToLog(int volume);
     static int logToLinear(float volume);
 
-    static status_t getOutputSamplingRate(int* samplingRate);
-    static status_t getOutputFrameCount(int* frameCount);
-    static status_t getOutputLatency(uint32_t* latency);
+    static status_t getOutputSamplingRate(int* samplingRate, int stream = DEFAULT);
+    static status_t getOutputFrameCount(int* frameCount, int stream = DEFAULT);
+    static status_t getOutputLatency(uint32_t* latency, int stream = DEFAULT);
+
+    static bool routedToA2dpOutput(int streamType);
+    
+    static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount, 
+        size_t* buffSize);
 
     // ----------------------------------------------------------------------------
 
 private:
 
-    class DeathNotifier: public IBinder::DeathRecipient
+    class AudioFlingerClient: public IBinder::DeathRecipient, public BnAudioFlingerClient
     {
     public:
-        DeathNotifier() {      
+        AudioFlingerClient() {      
         }
         
+        // DeathRecipient
         virtual void binderDied(const wp<IBinder>& who);
+        
+        // IAudioFlingerClient
+        virtual void a2dpEnabledChanged(bool enabled);
+        
     };
+    static int getOutput(int streamType);
 
-    static sp<DeathNotifier> gDeathNotifier;
+    static sp<AudioFlingerClient> gAudioFlingerClient;
 
-    friend class DeathNotifier;
+    friend class AudioFlingerClient;
 
     static Mutex gLock;
     static sp<IAudioFlinger> gAudioFlinger;
     static audio_error_callback gAudioErrorCallback;
-    static int gOutSamplingRate;
-    static int gOutFrameCount;
-    static uint32_t gOutLatency;
+    static int gOutSamplingRate[NUM_AUDIO_OUTPUT_TYPES];
+    static int gOutFrameCount[NUM_AUDIO_OUTPUT_TYPES];
+    static uint32_t gOutLatency[NUM_AUDIO_OUTPUT_TYPES];
+    static bool gA2dpEnabled;
+    
+    static size_t gInBuffSize;
+    // previous parameters for recording buffer size queries
+    static uint32_t gPrevInSamplingRate;
+    static int gPrevInFormat;
+    static int gPrevInChannelCount;
+
 };
 
 };  // namespace android

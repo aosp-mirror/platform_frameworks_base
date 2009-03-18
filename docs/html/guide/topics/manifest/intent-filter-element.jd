@@ -1,0 +1,130 @@
+page.title=&lt;intent-filter&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;intent-filter android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+               android:<a href="#label">label</a>="<i>string resource</i>"
+               android:<a href="#priority">priority</a>="<i>integer</i>" &gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code></dd>
+
+<dt>must contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Specifies the types of intents that an activity, service, or broadcast 
+receiver can respond to.  An intent filter declares the capabilities of its
+parent component &mdash; what an activity or service can do and what types 
+of broadcasts a receiver can handle.  It opens the component to receiving 
+intents of the advertised type, while filtering out those that are not 
+meaningful for the component.
+
+<p>
+Most of the contents of the filter are described by its 
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>, and
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code> subelements.
+</p>
+
+<p>
+For a more detailed discussion of filters, see the separate  
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+and Intent Filters</a> document, as well as the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#ifs">Intents Filters</a> 
+section in the introduction.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="icon"></a>{@code android:icon}</dt>
+<dd>An icon that represents the parent activity, service, or broadcast
+receiver when that component is presented to the user as having the 
+capability described by the filter.
+
+<p>
+This attribute must be set as a reference to a drawable resource 
+containing the image definition.  The default value is the icon set 
+by the parent component's {@code icon} attribute.  If the parent 
+does not specify an icon, the default is the icon set by the
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element.
+</p>
+
+<p>
+For more on intent filter icons, see 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#iconlabel">Icons and Labels</a>
+in the introduction.
+</p></dd>
+
+<dt><a name="label"></a>{@code android:label}</dt>
+<dd>A user-readable label for the parent component.  This label, rather than
+the one set by the parent component, is used when the component is presented
+to the user as having the capability described by the filter.
+
+<p>
+The label should be set as a reference to a string resource, so that
+it can be localized like other strings in the user interface.  
+However, as a convenience while you're developing the application, 
+it can also be set as a raw string.
+</p>
+
+<p>
+The default value is the label set by the parent component.  If the 
+parent does not specify a label, the default is the label set by the
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#label"> label</a></code> attribute.
+</p>
+
+<p>
+For more on intent filter labels, see 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#iconlabel">Icons and Labels</a>
+in the introduction.
+</p></dd>
+
+<dt><a name="priority"></a>{@code android:priority}</dt>
+<dd>The priority that should be given to the parent component with regard
+to handling intents of the type described by the filter.  This attribute has 
+meaning for both activities and broadcast receivers:
+
+<ul>
+<li>It provides information about how able an activity is to respond to 
+an intent that matches the filter, relative to other activities that could
+also respond to the intent.  When an intent could be handled by multiple 
+activities with different priorities, Android will consider only those with
+higher priority values as potential targets for the intent.</li>
+
+<li><p>It controls the order in which broadcast receivers are executed to
+receive broadcast messages.  Those with higher priority 
+values are called before those with lower values.  (The order applies only 
+to synchronous messages; it's ignored for asynchronous messages.)</p></li>
+</ul>
+
+<p>
+Use this attribute only if you really need to impose a specific order in 
+which the broadcasts are received, or want to force Android to prefer
+one activity over others.
+</p>
+
+<p>
+The value must be an integer, such as "{@code 100}".  Higher numbers have a
+higher priority.
+</p></dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code></dd>
+
+</dl>

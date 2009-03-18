@@ -1,0 +1,32 @@
+page.title=&lt;uses-library&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre>&lt;uses-library android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Specifies a shared library that the application must be linked against. 
+This element tells the system to include the library's code in the class 
+loader for the package.
+
+<p>
+All of the {@code android} packages (such as {@link android.app}, 
+{@link android.content}, {@link android.view}, and {@link android.widget}) 
+are in the default library that all applications are automatically linked 
+against.  However, some packages (such as {@code maps} and {@code awt} are 
+in separate libraries that are not automatically linked.  Consult the 
+documentation for the packages you're using to determine which library 
+contains the package code.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the library.</dd>
+</dl></dd>
+
+</dl>

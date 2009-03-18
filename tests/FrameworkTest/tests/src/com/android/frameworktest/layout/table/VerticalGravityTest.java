@@ -21,6 +21,7 @@ import com.android.frameworktest.R;
 
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.test.ViewAsserts;
 import android.view.View;
 
@@ -73,6 +74,7 @@ public class VerticalGravityTest extends ActivityInstrumentationTestCase<Vertica
         ViewAsserts.assertVerticalCenterAligned(mReference2, mCenter);
     }
 
+    @Suppress
     @MediumTest
     public void testBottomGravity() throws Exception {
         ViewAsserts.assertBottomAligned(mReference3, mBottom);

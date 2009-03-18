@@ -33,7 +33,10 @@
 
 #include <utils/threads.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
 #include <pixelflinger/format.h>
 #include <pixelflinger/pixelflinger.h>
@@ -149,7 +152,6 @@ struct egl_surface_t
     virtual     EGLint      getRefreshRate() const;
     virtual     EGLint      getSwapBehavior() const;
     virtual     EGLBoolean  swapBuffers();
-    virtual     EGLBoolean  swapRectangle(EGLint l, EGLint t, EGLint w, EGLint h);
 protected:
     GGLSurface              depth;
 };
@@ -169,10 +171,6 @@ egl_surface_t::~egl_surface_t()
     free(depth.data);
 }
 EGLBoolean egl_surface_t::swapBuffers() {
-    return EGL_FALSE;
-}
-EGLBoolean egl_surface_t::swapRectangle(
-        EGLint l, EGLint t, EGLint w, EGLint h) {
     return EGL_FALSE;
 }
 EGLint egl_surface_t::getHorizontalResolution() const {
@@ -201,7 +199,6 @@ struct egl_window_surface_t : public egl_surface_t
 
     virtual     bool        isValid() const { return nativeWindow->magic == 0x600913; }    
     virtual     EGLBoolean  swapBuffers();
-    virtual     EGLBoolean  swapRectangle(EGLint l, EGLint t, EGLint w, EGLint h);
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     EGLint      getWidth() const    { return nativeWindow->width;  }
@@ -243,7 +240,6 @@ EGLBoolean egl_window_surface_t::swapBuffers()
     if (flags & EGL_NATIVES_FLAG_SIZE_CHANGED) {
         // TODO: we probably should reset the swap rect here
         // if the window size has changed
-        //    window->setSwapRectangle(Rect(info.w, info.h));
         if (depth.data) {
             free(depth.data);
             depth.width   = nativeWindow->width;
@@ -259,12 +255,6 @@ EGLBoolean egl_window_surface_t::swapBuffers()
     return EGL_TRUE;
 }
 
-EGLBoolean egl_window_surface_t::swapRectangle(
-        EGLint l, EGLint t, EGLint w, EGLint h)
-{
-    nativeWindow->setSwapRectangle(nativeWindow, l, t, w, h);
-    return EGL_TRUE;
-}
 EGLBoolean egl_window_surface_t::bindDrawSurface(ogles_context_t* gl)
 {
     GGLSurface buffer;
@@ -473,24 +463,21 @@ struct config_management_t {
 
 // ----------------------------------------------------------------------------
 
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 2
 static char const * const gVendorString     = "Google Inc.";
 static char const * const gVersionString    = "1.2 Android Driver";
 static char const * const gClientApiString  = "OpenGL ES";
-static char const * const gExtensionsString =
-    "EGL_ANDROID_swap_rectangle"                " "
-    "EGL_ANDROID_copy_front_to_back"            " "
-    "EGL_ANDROID_get_render_buffer_address"
-    ;
+static char const * const gExtensionsString = "";
 
 // ----------------------------------------------------------------------------
 
 struct extention_map_t {
     const char * const name;
-    void (*address)(void);
+    __eglMustCastToProperFunctionPointerType address;
 };
 
 static const extention_map_t gExtentionMap[] = {
-    { "eglSwapRectangleANDROID",    (void(*)())&eglSwapRectangleANDROID },
     { "glDrawTexsOES",              (void(*)())&glDrawTexsOES },
     { "glDrawTexiOES",              (void(*)())&glDrawTexiOES },
     { "glDrawTexfOES",              (void(*)())&glDrawTexfOES },
@@ -1017,8 +1004,8 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     }
 
     if (res == EGL_TRUE) {
-        if (major != NULL) *major = 1;
-        if (minor != NULL) *minor = 2;
+        if (major != NULL) *major = VERSION_MAJOR;
+        if (minor != NULL) *minor = VERSION_MINOR;
     }
     return res;
 }
@@ -1553,16 +1540,4 @@ void (*eglGetProcAddress (const char *procname))()
         }
     }
     return NULL;
-}
-
-EGLBoolean eglSwapRectangleANDROID(
-        EGLDisplay dpy, EGLSurface draw,
-        EGLint l, EGLint t, EGLint w, EGLint h)
-{    
-    if (egl_display_t::is_valid(dpy) == EGL_FALSE)
-        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    egl_surface_t* surface = (egl_surface_t*)draw;
-    if (surface->dpy != dpy)
-        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    return surface->swapRectangle(l, t, w, h);
 }

@@ -235,6 +235,35 @@ public final class Settings {
             "android.settings.LOCALE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to configure input methods, in particular
+     * allowing the user to enable input methods.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INPUT_METHOD_SETTINGS =
+            "android.settings.INPUT_METHOD_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to manage the user input dictionary.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_USER_DICTIONARY_SETTINGS =
+            "android.settings.USER_DICTIONARY_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of application-related settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -850,15 +879,6 @@ public final class Settings {
         public static final String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
 
         /**
-         * The interval in milliseconds after which Wi-Fi is considered idle.
-         * When idle, it is possible for the device to be switched from Wi-Fi to
-         * the mobile data network.
-         * 
-         * @hide pending API Council approval
-         */
-        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
-
-        /**
          * The policy for deciding when Wi-Fi should go to sleep (which will in
          * turn switch to using the mobile data as an Internet connection).
          * <p>
@@ -1233,6 +1253,13 @@ public final class Settings {
         public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
 
         /**
+         * Scaling factor for normal window animations. Setting to 0 will disable window
+         * animations.
+         * @hide
+         */
+        public static final String FANCY_IME_ANIMATIONS = "fancy_ime_animations";
+
+        /**
          * Control whether the accelerometer will be used to change screen
          * orientation.  If 0, it will not be used unless explicitly requested
          * by the application; if 1, it will be used by default unless explicitly
@@ -1251,6 +1278,12 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
+        
+        /**
+         * Whether the haptic feedback (long presses, ...) are enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
         
         // Settings moved to Settings.Secure
 
@@ -2008,6 +2041,14 @@ public final class Settings {
          */
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
             "wifi_mobile_data_transition_wakelock_timeout_ms";
+
+        /**
+         * Whether background data usage is allowed by the user. See
+         * ConnectivityManager for more info.
+         * 
+         * @hide pending API council
+         */
+        public static final String BACKGROUND_DATA = "background_data";
     }
     
     /**
@@ -2130,11 +2171,22 @@ public final class Settings {
          * Event tags from the kernel event log to upload during checkin.
          */
         public static final String CHECKIN_EVENTS = "checkin_events";
+        
+        /**
+         * Event tags for list of services to upload during checkin.
+         */
+        public static final String CHECKIN_DUMPSYS_LIST = "checkin_dumpsys_list";
 
         /**
          * The interval (in seconds) between periodic checkin attempts.
          */
         public static final String CHECKIN_INTERVAL = "checkin_interval";
+
+        /**
+         * Boolean indicating if the market app should force market only checkins on
+         * install/uninstall. Any non-0 value is considered true.
+         */
+        public static final String MARKET_FORCE_CHECKIN = "market_force_checkin";
 
         /**
          * How frequently (in seconds) to check the memory status of the
@@ -2275,6 +2327,13 @@ public final class Settings {
         public static final String GMAIL_SEND_IMMEDIATELY = "gmail_send_immediately";
 
         /**
+         * Controls whether gmail buffers server responses.  Possible values are "memory", for a
+         * memory-based buffer, or "file", for a temp-file-based buffer.  All other values
+         * (including not set) disable buffering.
+         */
+        public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
+
+        /**
          * Hostname of the GTalk server.
          */
         public static final String GTALK_SERVICE_HOSTNAME = "gtalk_hostname";
@@ -2402,6 +2461,14 @@ public final class Settings {
                 "gtalk_ssl_handshake_timeout_ms";
 
         /**
+         * Enable use of ssl session caching.
+         * 'db' - save each session in a (per process) database
+         * 'file' - save each session in a (per process) file
+         * not set or any other value - normal java in-memory caching
+         */
+        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
+
+        /**
          * How many bytes long a message has to be, in order to be gzipped.
          */
         public static final String SYNC_MIN_GZIP_BYTES =
@@ -2496,28 +2563,28 @@ public final class Settings {
          */
         public static final String SETTINGS_CONTRIBUTORS_PRETTY_URL =
                 "settings_contributors_pretty_url";
-        
+
         /**
          * URL that points to the Terms Of Service for the device.
          * <p>
-         * This should be a pretty http URL. 
+         * This should be a pretty http URL.
          */
         public static final String SETUP_GOOGLE_TOS_URL = "setup_google_tos_url";
-        
+
         /**
          * URL that points to the Android privacy policy for the device.
          * <p>
          * This should be a pretty http URL.
          */
         public static final String SETUP_ANDROID_PRIVACY_URL = "setup_android_privacy_url";
-        
+
         /**
          * URL that points to the Google privacy policy for the device.
          * <p>
-         * This should be a pretty http URL. 
+         * This should be a pretty http URL.
          */
         public static final String SETUP_GOOGLE_PRIVACY_URL = "setup_google_privacy_url";
-        
+
         /**
          * Request an MSISDN token for various Google services.
          */
@@ -2683,6 +2750,13 @@ public final class Settings {
                 "gprs_register_check_period_ms";
 
         /**
+         * The interval in milliseconds after which Wi-Fi is considered idle.
+         * When idle, it is possible for the device to be switched from Wi-Fi to
+         * the mobile data network.
+         */
+        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
+
+        /**
          * Screen timeout in milliseconds corresponding to the
          * PowerManager's POKE_LOCK_SHORT_TIMEOUT flag (i.e. the fastest
          * possible screen timeout behavior.)
@@ -2704,8 +2778,59 @@ public final class Settings {
          * Speech encoding used with voice search on WIFI networks. To be factored out of this class.
          */
         public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
+
+        /**
+         * Whether to use automatic gain control in voice search (0 = disable, 1 = enable).
+         * To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_ENABLE_AGC = "voice_search_enable_agc";
+
+        /**
+         * Whether to use noise suppression in voice search (0 = disable, 1 = enable).
+         * To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_ENABLE_NS = "voice_search_enable_ns";
+
+        /**
+         * Whether to use the IIR filter in voice search (0 = disable, 1 = enable).
+         * To be factored out of this class.
+         */
+        public static final String VOICE_SEARCH_ENABLE_IIR = "voice_search_enable_iir";
+
+        /**
+         * List of test suites (local disk filename) for the automatic instrumentation test runner.
+         * The file format is similar to automated_suites.xml, see AutoTesterService.
+         * If this setting is missing or empty, the automatic test runner will not start.
+         */
+        public static final String AUTOTEST_SUITES_FILE = "autotest_suites_file";
+
+        /**
+         * Interval between synchronous checkins forced by the automatic test runner.
+         * If you set this to a value smaller than CHECKIN_INTERVAL, then the test runner's
+         * frequent checkins will prevent asynchronous background checkins from interfering
+         * with any performance measurements.
+         */
+        public static final String AUTOTEST_CHECKIN_SECONDS = "autotest_checkin_seconds";
+
+        /**
+         * Interval between reboots forced by the automatic test runner.
+         */
+        public static final String AUTOTEST_REBOOT_SECONDS = "autotest_reboot_seconds";
+
+
+        /**
+         * Threshold values for the duration and level of a discharge cycle, under
+         * which we log discharge cycle info.
+         */
+        public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
+                "battery_discharge_duration_threshold";
+        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
         
-        
+        /**
+         * An email address that anr bugreports should be sent to.
+         */
+        public static final String ANR_BUGREPORT_RECIPIENT = "anr_bugreport_recipient";
+
         /**
          * @deprecated
          * @hide
@@ -2772,7 +2897,7 @@ public final class Settings {
          * Arbitrary string (displayed to the user) that allows bookmarks to be
          * organized into categories.  There are some special names for
          * standard folders, which all start with '@'.  The label displayed for
-         * the folder changes with the locale (via {@link #labelForFolder}) but
+         * the folder changes with the locale (via {@link #getLabelForFolder}) but
          * the folder name does not change so you can consistently query for
          * the folder regardless of the current locale.
          *
@@ -2912,9 +3037,10 @@ public final class Settings {
          * 
          * @param context A context.
          * @param cursor A cursor pointing to the row whose title should be
-         *            returned. The cursor must contain at least the
-         *            {@link #TITLE} and {@link #INTENT} columns.
-         * @return A title that is localized and can be displayed to the user.
+         *        returned. The cursor must contain at least the {@link #TITLE}
+         *        and {@link #INTENT} columns.
+         * @return A title that is localized and can be displayed to the user,
+         *         or the empty string if one could not be found.
          */
         public static CharSequence getTitle(Context context, Cursor cursor) {
             int titleColumn = cursor.getColumnIndex(TITLE);
@@ -2943,7 +3069,7 @@ public final class Settings {
             
             PackageManager packageManager = context.getPackageManager();
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
-            return info.loadLabel(packageManager);
+            return info != null ? info.loadLabel(packageManager) : "";
         }
     }
 

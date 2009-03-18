@@ -25,18 +25,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
-import android.os.Handler;
-import android.os.Message;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
-import android.text.method.PasswordTransformationMethod;
-import android.text.method.TextKeyListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyCharacterMap;
@@ -44,8 +39,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
-import android.view.ViewConfiguration;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -69,10 +62,8 @@ import java.util.ArrayList;
     // on the enter key.  The method for blocking unmatched key ups prevents
     // the shift key from working properly.
     private boolean         mGotEnterDown;
-    // Determines whether we allow calls to requestRectangleOnScreen to
-    // propagate.  We only want to scroll if the user is typing.  If the
-    // user is simply navigating through a textfield, we do not want to
-    // scroll.
+    // mScrollToAccommodateCursor being set to false prevents us from scrolling
+    // the cursor on screen when using the trackball to select a textfield.
     private boolean         mScrollToAccommodateCursor;
     private int             mMaxLength;
     // Keep track of the text before the change so we know whether we actually
@@ -86,22 +77,6 @@ import java.util.ArrayList;
     // FIXME: This can be replaced with TextView.NO_FILTERS if that
     // is made public/protected.
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
-    // The time of the last enter down, so we know whether to perform a long
-    // press.
-    private long            mDownTime;
-
-    private boolean         mTrackballDown = false;
-    private static int      LONGPRESS = 1;
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            if (msg.what == LONGPRESS) {
-                if (mTrackballDown) {
-                    performLongClick();
-                    mTrackballDown = false;
-                }
-            }
-        }
-    };
 
     /**
      * Create a new TextDialog.
@@ -136,6 +111,7 @@ import java.util.ArrayList;
         // that other applications that use embedded WebViews will properly
         // display the text in textfields.
         setTextColor(Color.BLACK);
+        setImeOptions(EditorInfo.IME_ACTION_NONE);
     }
 
     @Override
@@ -156,38 +132,33 @@ import java.util.ArrayList;
             return true;
         }
 
-        // For single-line textfields, return key should not be handled
-        // here.  Instead, the WebView is passed the key up, so it may fire a
-        // submit/onClick.
-        // Center key should always be passed to a potential onClick
-        if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)
-                || KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+        if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)) {
             if (isPopupShowing()) {
-                super.dispatchKeyEvent(event);
-                return true;
+                return super.dispatchKeyEvent(event);
             }
-            if (down) {
-                if (event.getRepeatCount() == 0) {
-                    mGotEnterDown = true;
-                    mDownTime = event.getEventTime();
-                    // Send the keydown when the up comes, so that we have
-                    // a chance to handle a long press.
-                } else if (mGotEnterDown && event.getEventTime() - mDownTime >
-                        ViewConfiguration.getLongPressTimeout()) {
-                    performLongClick();
-                    mGotEnterDown = false;
-                }
-            } else if (mGotEnterDown) {
-                mGotEnterDown = false;
-                if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-                    mWebView.shortPressOnTextField();
-                    return true;
-                }
+            if (!down) {
+                // Hide the keyboard, since the user has just submitted this
+                // form.  The submission happens thanks to the two calls
+                // to sendDomEvent.
+                InputMethodManager.getInstance(mContext)
+                        .hideSoftInputFromWindow(getWindowToken(), 0);
                 sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
                 sendDomEvent(event);
             }
-            return true;
+            return super.dispatchKeyEvent(event);
+        } else if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
+            // Note that this handles center key and trackball.
+            if (isPopupShowing()) {
+                return super.dispatchKeyEvent(event);
+            }
+            // Center key should be passed to a potential onClick
+            if (!down) {
+                mWebView.shortPressOnTextField();
+            }
+            // Pass to super to handle longpress.
+            return super.dispatchKeyEvent(event);
         }
+
         // Ensure there is a layout so arrow keys are handled properly.
         if (getLayout() == null) {
             measure(mWidthSpec, mHeightSpec);
@@ -224,9 +195,8 @@ import java.util.ArrayList;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                     isArrowKey = true;
                     break;
-                case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
-                    // For multi-line text boxes, newlines and dpad center will
+                    // For multi-line text boxes, newlines will
                     // trigger onTextChanged for key down (which will send both
                     // key up and key down) but not key up.
                     mGotEnterDown = true;
@@ -268,7 +238,7 @@ import java.util.ArrayList;
         // with WebCore's notion of the current selection, reset the selection
         // to what it was before the key event.
         Selection.setSelection(text, oldStart, oldEnd);
-        // Ignore the key up event for newlines or dpad center. This prevents
+        // Ignore the key up event for newlines. This prevents
         // multiple newlines in the native textarea.
         if (mGotEnterDown && !down) {
             return true;
@@ -287,6 +257,25 @@ import java.util.ArrayList;
                     .onKeyUp(keyCode, event);
         }
         return false;
+    }
+
+    /**
+     *  Create a fake touch up event at (x,y) with respect to this TextDialog.
+     *  This is used by WebView to act as though a touch event which happened
+     *  before we placed the TextDialog actually hit it, so that it can place
+     *  the cursor accordingly.
+     */
+    /* package */ void fakeTouchEvent(float x, float y) {
+        // We need to ensure that there is a Layout, since the Layout is used
+        // in determining where to place the cursor.
+        if (getLayout() == null) {
+            measure(mWidthSpec, mHeightSpec);
+        }
+        // Create a fake touch up, which is used to place the cursor.
+        MotionEvent ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
+                x, y, 0);
+        onTouchEvent(ev);
+        ev.recycle();
     }
 
     /**
@@ -371,27 +360,8 @@ import java.util.ArrayList;
         if (isPopupShowing()) {
             return super.onTrackballEvent(event);
         }
-        int action = event.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                if (!mTrackballDown) {
-                    mTrackballDown = true;
-                    mHandler.sendEmptyMessageDelayed(LONGPRESS, 
-                            ViewConfiguration.getLongPressTimeout());
-                }
-                return true;
-            case MotionEvent.ACTION_UP:
-                if (mTrackballDown) {
-                    mWebView.shortPressOnTextField();
-                    mTrackballDown = false;
-                    mHandler.removeMessages(LONGPRESS);
-                }
-                return true;
-            case MotionEvent.ACTION_CANCEL:
-                mTrackballDown = false;
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                // fall through
+        if (event.getAction() != MotionEvent.ACTION_MOVE) {
+            return false;
         }
         Spannable text = (Spannable) getText();
         MovementMethod move = getMovementMethod();
@@ -405,6 +375,12 @@ import java.util.ArrayList;
             //mWebView.setSelection(start, end);
             return true;
         }
+        // If the user is in a textfield, and the movement method is not
+        // handling the trackball events, it means they are at the end of the
+        // field and continuing to move the trackball.  In this case, we should
+        // not scroll the cursor on screen bc the user may be attempting to
+        // scroll the page, possibly in the opposite direction of the cursor.
+        mScrollToAccommodateCursor = false;
         return false;
     }
 
@@ -416,9 +392,19 @@ import java.util.ArrayList;
         // hide the soft keyboard when the edit text is out of focus
         InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
                 getWindowToken(), 0);
-        mHandler.removeMessages(LONGPRESS);
         mWebView.removeView(this);
         mWebView.requestFocus();
+        mScrollToAccommodateCursor = false;
+    }
+
+    /* package */ void enableScrollOnScreen(boolean enable) {
+        mScrollToAccommodateCursor = enable;
+    }
+
+    /* package */ void bringIntoView() {
+        if (getLayout() != null) {
+            bringPointIntoView(Selection.getSelectionEnd(getText()));
+        }
     }
 
     @Override
@@ -437,8 +423,15 @@ import java.util.ArrayList;
         mWebView.passToJavaScript(getText().toString(), event);
     }
 
+    /**
+     *  Always use this instead of setAdapter, as this has features specific to
+     *  the TextDialog.
+     */
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
-        adapter.setTextView(this);
+        if (adapter != null) {
+            setInputType(EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+            adapter.setTextView(this);
+        }
         super.setAdapter(adapter);
     }
 
@@ -480,15 +473,10 @@ import java.util.ArrayList;
      * @param   inPassword  True if the textfield is a password field.
      */
     /* package */ void setInPassword(boolean inPassword) {
-        PasswordTransformationMethod method;
         if (inPassword) {
-            method = PasswordTransformationMethod.getInstance();
-        } else {
-            method = null;
+            setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
+                    TYPE_TEXT_VARIATION_PASSWORD);
         }
-        setTransformationMethod(method);
-        setInputType(inPassword ? EditorInfo.TYPE_TEXT_VARIATION_PASSWORD :
-                EditorInfo.TYPE_CLASS_TEXT);
     }
 
     /* package */ void setMaxLength(int maxLength) {
@@ -539,7 +527,6 @@ import java.util.ArrayList;
         // Set up a measure spec so a layout can always be recreated.
         mWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
         mHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-        mScrollToAccommodateCursor = false;
         requestFocus();
     }
 
@@ -547,19 +534,19 @@ import java.util.ArrayList;
      * Set whether this is a single-line textfield or a multi-line textarea.
      * Textfields scroll horizontally, and do not handle the enter key.
      * Textareas behave oppositely.
+     * Do NOT call this after calling setInPassword(true).  This will result in
+     * removing the password input type.
      */
     public void setSingleLine(boolean single) {
-        if (mSingle != single) {
-            TextKeyListener.Capitalize cap;
-            if (single) {
-                cap = TextKeyListener.Capitalize.NONE;
-            } else {
-                cap = TextKeyListener.Capitalize.SENTENCES;
-            }
-            setKeyListener(TextKeyListener.getInstance(!single, cap));
-            mSingle = single;
-            setHorizontallyScrolling(single);
+        int inputType = EditorInfo.TYPE_CLASS_TEXT;
+        if (!single) {
+            inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                    | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
+                    | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
         }
+        mSingle = single;
+        setHorizontallyScrolling(single);
+        setInputType(inputType);
     }
 
     /**

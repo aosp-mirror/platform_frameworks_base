@@ -67,6 +67,7 @@ class DeviceStorageMonitorService extends Binder {
     private static final int EVENT_LOG_LOW_STORAGE_NOTIFICATION = 2745;
     private static final int EVENT_LOG_FREE_STORAGE_LEFT = 2746;
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
+    private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
     private long mFreeMem;
     private long mLastReportedFreeMem;
     private long mLastReportedFreeMemTime;
@@ -82,6 +83,9 @@ class DeviceStorageMonitorService extends Binder {
     boolean mClearingCache;
     private Intent mStorageLowIntent;
     private Intent mStorageOkIntent;
+    private CachePackageDataObserver mClearCacheObserver;
+    private static final int _TRUE = 1;
+    private static final int _FALSE = 0;
     
     /**
      * This string is used for ServiceManager access to this class.
@@ -100,7 +104,7 @@ class DeviceStorageMonitorService extends Binder {
                 Log.e(TAG, "Will not process invalid message");
                 return;
             }
-            checkMemory();
+            checkMemory(msg.arg1 == _TRUE);
         }
     };
     
@@ -109,7 +113,8 @@ class DeviceStorageMonitorService extends Binder {
             mClearSucceeded = succeeded;
             mClearingCache = false;
             if(localLOGV) Log.i(TAG, " Clear succeeded:"+mClearSucceeded
-                    +", mClearingCache:"+mClearingCache);
+                    +", mClearingCache:"+mClearingCache+" Forcing memory check");
+            postCheckMemoryMsg(false, 0);
         }        
     }
     
@@ -145,11 +150,15 @@ class DeviceStorageMonitorService extends Binder {
     }
     
     private final void clearCache() {
-        CachePackageDataObserver observer = new CachePackageDataObserver();
+        if (mClearCacheObserver == null) {
+            // Lazy instantiation
+            mClearCacheObserver = new CachePackageDataObserver();
+        }
         mClearingCache = true;
         try {
+            if (localLOGV) Log.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(getMemThreshold(), observer);
+                    freeStorageAndNotify(getMemThreshold(), mClearCacheObserver);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
@@ -157,7 +166,7 @@ class DeviceStorageMonitorService extends Binder {
         }
     }
     
-    private final void checkMemory() {
+    private final void checkMemory(boolean checkCache) {
         //if the thread that was started to clear cache is still running do nothing till its 
         //finished clearing cache. Ideally this flag could be modified by clearCache 
         // and should be accessed via a lock but even if it does this test will fail now and
@@ -172,16 +181,23 @@ class DeviceStorageMonitorService extends Binder {
         } else {
             restatDataDir();
             if (localLOGV)  Log.v(TAG, "freeMemory="+mFreeMem);
+            
             //post intent to NotificationManager to display icon if necessary
             long memThreshold = getMemThreshold();
             if (mFreeMem < memThreshold) {
                 if (!mLowMemFlag) {
-                    //see if clearing cache helps
-                    mThreadStartTime = System.currentTimeMillis();
-                    clearCache();
-                    Log.i(TAG, "Running low on memory. Sending notification");
-                    sendNotification();
-                    mLowMemFlag = true;
+                    if (checkCache) {
+                        // See if clearing cache helps
+                        // Note that clearing cache is asynchronous and so we do a
+                        // memory check again once the cache has been cleared.
+                        mThreadStartTime = System.currentTimeMillis();
+                        mClearSucceeded = false;
+                        clearCache();
+                    } else {
+                        Log.i(TAG, "Running low on memory. Sending notification");
+                        sendNotification();
+                        mLowMemFlag = true;
+                    }
                 } else {
                     if (localLOGV) Log.v(TAG, "Running low on memory " +
                             "notification already sent. do nothing");
@@ -196,8 +212,15 @@ class DeviceStorageMonitorService extends Binder {
         }
         if(localLOGV) Log.i(TAG, "Posting Message again");
         //keep posting messages to itself periodically
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(DEVICE_MEMORY_WHAT), 
-                MONITOR_INTERVAL*60*1000);
+        postCheckMemoryMsg(true, DEFAULT_CHECK_INTERVAL);
+    }
+    
+    private void postCheckMemoryMsg(boolean clearCache, long delay) {
+        // Remove queued messages
+        mHandler.removeMessages(DEVICE_MEMORY_WHAT);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(DEVICE_MEMORY_WHAT,
+                clearCache ?_TRUE : _FALSE, 0),
+                delay);
     }
     
     /*
@@ -231,7 +254,7 @@ class DeviceStorageMonitorService extends Binder {
         mTotalMemory = (mFileStats.getBlockCount()*mBlkSize)/100;
         mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
-        checkMemory();
+        checkMemory(true);
     }
     
 
@@ -281,14 +304,11 @@ class DeviceStorageMonitorService extends Binder {
     }
     
     public void updateMemory() {
-        ActivityManagerService ams = (ActivityManagerService)ServiceManager.getService("activity");
         int callingUid = getCallingUid();
         if(callingUid != Process.SYSTEM_UID) {
             return;
         }
-        //remove queued messages
-        mHandler.removeMessages(DEVICE_MEMORY_WHAT);
-        //force an early check
-        checkMemory();
+        // force an early check
+        postCheckMemoryMsg(true, 0);
     }
 }

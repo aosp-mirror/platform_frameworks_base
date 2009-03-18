@@ -18,6 +18,7 @@ package android.hardware;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.io.IOException;
 
 import android.util.Log;
@@ -47,7 +48,6 @@ public class Camera {
     private static final int ERROR_CALLBACK = 5;
 
     private int mNativeContext; // accessed by native methods
-    private int mListenerContext;
     private EventHandler mEventHandler;
     private ShutterCallback mShutterCallback;
     private PictureCallback mRawImageCallback;
@@ -494,11 +494,17 @@ public class Camera {
          */
         public void unflatten(String flattened) {
             mMap.clear();
-            String[] pairs = flattened.split(";");
-            for (String p : pairs) {
-                String[] kv = p.split("=");
-                if (kv.length == 2)
-                    mMap.put(kv[0], kv[1]);
+            
+            StringTokenizer tokenizer = new StringTokenizer(flattened, ";");
+            while (tokenizer.hasMoreElements()) {
+                String kv = tokenizer.nextToken();
+                int pos = kv.indexOf('=');
+                if (pos == -1) {
+                    continue;
+                }
+                String k = kv.substring(0, pos);
+                String v = kv.substring(pos + 1);
+                mMap.put(k, v);
             }
         }
         

@@ -40,6 +40,18 @@ static void dumpstate(int full) {
         PRINT("========================================================");
         PRINT("== dumpstate");
         PRINT("========================================================");
+        PRINT("------ MEMORY INFO ------");
+        DUMP("/proc/meminfo");
+        PRINT("------ CPU INFO ------");
+        EXEC7("top", "-n", "1", "-d", "1", "-m", "30", "-t");
+        PRINT("------ PROCRANK ------");
+        EXEC_XBIN("procrank");
+        PRINT("------ VIRTUAL MEMORY STATS ------");
+        DUMP("/proc/vmstat");
+        PRINT("------ SLAB INFO ------");
+        DUMP("/proc/slabinfo");
+        PRINT("------ ZONEINFO ------");
+        DUMP("/proc/zoneinfo");
         PRINT("------ SYSTEM LOG ------");
         EXEC4("logcat", "-v", "time", "-d", "*:v");
         PRINT("------ VM TRACES ------");
@@ -67,20 +79,8 @@ static void dumpstate(int full) {
         EXEC("ps");
         PRINT("------ PROCESSES AND THREADS ------");
         EXEC2("ps", "-t", "-p");
-        PRINT("------ MEMORY INFO ------");
-        DUMP("/proc/meminfo");
-        PRINT("------ PSS INFO ------");
-        EXEC8("top", "-n", "1", "-d", "0", "-m", "15", "-s", "pss");
-        PRINT("------ PROCRANK ------");
-        EXEC("procrank");
         PRINT("------ LIBRANK ------");
-        EXEC("librank");
-        PRINT("------ VIRTUAL MEMORY STATS ------");
-        DUMP("/proc/vmstat");
-        PRINT("------ SLAB INFO ------");
-        DUMP("/proc/slabinfo");
-        PRINT("------ ZONEINFO ------");
-        DUMP("/proc/zoneinfo");
+        EXEC_XBIN("librank");
         PRINT("------ BINDER FAILED TRANSACTION LOG ------");
         DUMP("/proc/binder/failed_transaction_log");
         PRINT("");
@@ -127,7 +127,10 @@ static void dumpstate(int full) {
         PRINT("========================================================");
         PRINT("== dumpsys");
         PRINT("========================================================");
-        EXEC("dumpsys");
+        /* the full dumpsys is starting to take a long time, so we need
+           to increase its timeout.  we really need to do the timeouts in
+           dumpsys itself... */
+        EXEC_TIMEOUT("dumpsys", 60);
     }
 }
 
@@ -224,6 +227,8 @@ int main(int argc, char *argv[]) {
         }
         if (compress)
             strcat(path, ".gz");
+        else
+            strcat(path, ".txt");
 
         /* ensure that all directories in the path exist */ 
         create_directories(path);

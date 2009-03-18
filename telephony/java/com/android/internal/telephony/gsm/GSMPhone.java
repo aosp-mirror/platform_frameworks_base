@@ -91,6 +91,8 @@ public class GSMPhone extends PhoneBase {
     public static final String VM_NUMBER = "vm_number_key";
     // Key used to read/write the SIM IMSI used for storing the voice mail
     public static final String VM_SIM_IMSI = "vm_sim_imsi_key";
+    // Key used to read/write "disable DNS server check" pref (used for testing)
+    public static final String DNS_SERVER_CHECK_DISABLED_KEY = "dns_server_check_disabled_key";
 
     //***** Instance Variables
 
@@ -108,6 +110,8 @@ public class GSMPhone extends PhoneBase {
     SimPhoneBookInterfaceManager mSimPhoneBookIntManager;
     SimSmsInterfaceManager mSimSmsIntManager;
     PhoneSubInfo mSubInfo;
+    boolean mDnsCheckDisabled = false;
+
 
     Registrant mPostDialHandler;
 
@@ -194,6 +198,9 @@ public class GSMPhone extends PhoneBase {
         mCM.setOnSuppServiceNotification(h, EVENT_SSN, null);
         mCM.setOnCallRing(h, EVENT_CALL_RING, null);
         mSST.registerForNetworkAttach(h, EVENT_REGISTERED_TO_NETWORK, null);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);
 
         if (false) {
             try {
@@ -1151,6 +1158,26 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.getAllPdps();
     }
 
+    /**
+     * Disables the DNS check (i.e., allows "0.0.0.0").
+     * Useful for lab testing environment.
+     * @param b true disables the check, false enables.
+     */
+    public void disableDnsCheck(boolean b) {
+        mDnsCheckDisabled = b;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);        
+        editor.commit();
+    }
+
+    /**
+     * Returns true if the DNS check is currently disabled.
+     */
+    public boolean isDnsCheckDisabled() {
+        return mDnsCheckDisabled;
+    }
+
     public void updateServiceLocation(Message response) {
         mSST.getLacAndCid(response);
     }
@@ -1356,18 +1383,8 @@ public class GSMPhone extends PhoneBase {
                     break;
 
                 case EVENT_SIM_RECORDS_LOADED:
-                    mSIMRecords.getSIMOperatorNumeric();
-
-                    try {
-                        //set the current field the telephony provider according to
-                        //the SIM's operator
-                        Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
-                        ContentValues map = new ContentValues();
-                        map.put(Telephony.Carriers.NUMERIC, mSIMRecords.getSIMOperatorNumeric());
-                        mContext.getContentResolver().insert(uri, map);
-                    } catch (SQLException e) {
-                        Log.e(LOG_TAG, "Can't store current operator", e);
-                    }
+                    updateCurrentCarrierInProvider();
+                    
                     // Check if this is a different SIM than the previous one. If so unset the
                     // voice mail number.
                     String imsi = getVmSimImsi();
@@ -1508,7 +1525,27 @@ public class GSMPhone extends PhoneBase {
             }
         }
     }
-    
+
+    /**
+     * Sets the "current" field in the telephony provider according to the SIM's operator
+     * 
+     * @return true for success; false otherwise.
+     */
+    boolean updateCurrentCarrierInProvider() {
+        if (mSIMRecords != null) {
+            try {
+                Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
+                ContentValues map = new ContentValues();
+                map.put(Telephony.Carriers.NUMERIC, mSIMRecords.getSIMOperatorNumeric());
+                mContext.getContentResolver().insert(uri, map);
+                return true;
+            } catch (SQLException e) {
+                Log.e(LOG_TAG, "Can't store current operator", e);
+            }
+        }
+        return false;
+    }
+
     /**
      * Used to track the settings upon completion of the network change.
      */

@@ -937,11 +937,12 @@
      =============================================================== -->
   <eat-comment />
 
+  <public type="attr" name="windowNoDisplay" id="0x0101021e" />
   <public type="attr" name="backgroundDimEnabled" id="0x0101021f" />
   <public type="attr" name="inputType" id="0x01010220" />
   <public type="attr" name="isDefault" id="0x01010221" />
   <public type="attr" name="windowDisablePreview" id="0x01010222" />
-  <public type="attr" name="editorPrivateContentType" id="0x01010223" />
+  <public type="attr" name="privateImeOptions" id="0x01010223" />
   <public type="attr" name="editorExtras" id="0x01010224" />
   <public type="attr" name="settingsActivity" id="0x01010225" />
   <public type="attr" name="fastScrollEnabled" id="0x01010226" />
@@ -964,30 +965,51 @@
   <public type="attr" name="keyPreviewLayout" id="0x01010237" />
   <public type="attr" name="keyPreviewOffset" id="0x01010238" />
   <public type="attr" name="keyPreviewHeight" id="0x01010239" />
-  <public type="attr" name="verticalCorrection" id="0x01010240" />
-  <public type="attr" name="popupLayout" id="0x01010241" />
-  <public type="attr" name="state_long_pressable" id="0x01010242" />
-  <public type="attr" name="keyWidth" id="0x01010243" />
-  <public type="attr" name="keyHeight" id="0x01010244" />
-  <public type="attr" name="horizontalGap" id="0x01010245" />
-  <public type="attr" name="verticalGap" id="0x01010246" />
-  <public type="attr" name="rowEdgeFlags" id="0x01010247" />
-  <public type="attr" name="codes" id="0x01010248" />
-  <public type="attr" name="popupKeyboard" id="0x01010249" />
-  <public type="attr" name="popupCharacters" id="0x0101024a" />
-  <public type="attr" name="keyEdgeFlags" id="0x0101024b" />
-  <public type="attr" name="isModifier" id="0x0101024c" />
-  <public type="attr" name="isSticky" id="0x0101024d" />
-  <public type="attr" name="isRepeatable" id="0x0101024e" />
-  <public type="attr" name="iconPreview" id="0x0101024f" />
-  <public type="attr" name="keyOutputText" id="0x01010250" />
-  <public type="attr" name="keyLabel" id="0x01010251" />
-  <public type="attr" name="keyIcon" id="0x01010252" />
-  <public type="attr" name="keyboardMode" id="0x01010253" />
-  <public type="attr" name="isScrollContainer" id="0x01010254" />
-  <public type="attr" name="fillEnabled" id="0x01010255" />
-  <public type="attr" name="updatePeriodMillis" id="0x01010256" />
-  <public type="attr" name="initialLayout" id="0x01010257" />
+  <public type="attr" name="verticalCorrection" id="0x0101023a" />
+  <public type="attr" name="popupLayout" id="0x0101023b" />
+  <public type="attr" name="state_long_pressable" id="0x0101023c" />
+  <public type="attr" name="keyWidth" id="0x0101023d" />
+  <public type="attr" name="keyHeight" id="0x0101023e" />
+  <public type="attr" name="horizontalGap" id="0x0101023f" />
+  <public type="attr" name="verticalGap" id="0x01010240" />
+  <public type="attr" name="rowEdgeFlags" id="0x01010241" />
+  <public type="attr" name="codes" id="0x01010242" />
+  <public type="attr" name="popupKeyboard" id="0x01010243" />
+  <public type="attr" name="popupCharacters" id="0x01010244" />
+  <public type="attr" name="keyEdgeFlags" id="0x01010245" />
+  <public type="attr" name="isModifier" id="0x01010246" />
+  <public type="attr" name="isSticky" id="0x01010247" />
+  <public type="attr" name="isRepeatable" id="0x01010248" />
+  <public type="attr" name="iconPreview" id="0x01010249" />
+  <public type="attr" name="keyOutputText" id="0x0101024a" />
+  <public type="attr" name="keyLabel" id="0x0101024b" />
+  <public type="attr" name="keyIcon" id="0x0101024c" />
+  <public type="attr" name="keyboardMode" id="0x0101024d" />
+  <public type="attr" name="isScrollContainer" id="0x0101024e" />
+  <public type="attr" name="fillEnabled" id="0x0101024f" />
+  <public type="attr" name="updatePeriodMillis" id="0x01010250" />
+  <public type="attr" name="initialLayout" id="0x01010251" />
+  <public type="attr" name="voiceSearchMode" id="0x01010252" />
+  <public type="attr" name="voiceLanguageModel" id="0x01010253" />
+  <public type="attr" name="voicePromptText" id="0x01010254" />
+  <public type="attr" name="voiceLanguage" id="0x01010255" />
+  <public type="attr" name="voiceMaxResults" id="0x01010256" />
+  <public type="attr" name="bottomOffset" id="0x01010257" />
+  <public type="attr" name="topOffset" id="0x01010258" />
+  <public type="attr" name="allowSingleTap" id="0x01010259" />
+  <public type="attr" name="handle" id="0x0101025a" />
+  <public type="attr" name="content" id="0x0101025b" />
+  <public type="attr" name="animateOnClick" id="0x0101025c" />
+  <public type="attr" name="configure" id="0x0101025d" />
+  <public type="attr" name="hapticFeedbackEnabled" id="0x0101025e" />
+  <public type="attr" name="innerRadius" id="0x0101025f" />
+  <public type="attr" name="thickness" id="0x01010260" />
+  <public type="attr" name="sharedUserLabel" id="0x01010261" />
+  <public type="attr" name="dropDownWidth" id="0x01010262" />
+  <public type="attr" name="dropDownAnchor" id="0x01010263" />
+  <public type="attr" name="imeOptions" id="0x01010264" />
+  <public type="attr" name="imeActionLabel" id="0x01010265" />
+  <public type="attr" name="imeActionId" id="0x01010266" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the
@@ -1022,7 +1044,7 @@
   <!-- Context menu ID for the "Input Method" menu item to being up the
        input method picker dialog, allowing the user to switch to another
        input method. -->
-  <public type="id" name="inputMethod" id="0x01020024" />
+  <public type="id" name="switchInputMethod" id="0x01020024" />
   <!-- View ID of the text editor inside of an extracted text layout. -->
   <public type="id" name="inputExtractEditText" id="0x01020025" />
 
@@ -1032,10 +1054,21 @@
   <!-- View ID of a {@link android.view.View} to close a popup keyboard -->
   <public type="id" name="button_close" id="0x01020027" />
 
+  <!-- Menu ID to perform a "start selecting text" operation. -->
+  <public type="id" name="startSelectingText" id="0x01020028" />
+  <!-- Menu ID to perform a "stop selecting text" operation. -->
+  <public type="id" name="stopSelectingText" id="0x01020029" />
+  <!-- Menu ID to perform a "add to dictionary" operation. -->
+  <public type="id" name="addToDictionary" id="0x0102002a" />
+  
   <public type="style" name="Theme.InputMethod" id="0x01030054" />
   <public type="style" name="Theme.NoDisplay" id="0x01030055" />
   <public type="style" name="Animation.InputMethod" id="0x01030056" />
   <public type="style" name="Widget.KeyboardView" id="0x01030057" />
+  <public type="style" name="ButtonBar" id="0x01030058" />
+  
+  <public type="string" name="dialog_alert_title" id="0x01040014" />
+  <public type="string" name="VideoView_error_text_invalid_progressive_playback" id="0x01040015" />
 
   <public type="drawable" name="emo_im_angel"               id="0x010800a4" />
   <public type="drawable" name="emo_im_cool"                id="0x010800a5" />
@@ -1054,4 +1087,16 @@
   <public type="drawable" name="emo_im_winking"             id="0x010800b2" />
   <public type="drawable" name="emo_im_wtf"                 id="0x010800b3" />
   <public type="drawable" name="emo_im_yelling"             id="0x010800b4" />
+  
+  <public type="drawable" name="ic_btn_speak_now" id="0x010800b5" />
+
+  <!--  Drawable to use as a background for separators on a list with a dark background -->
+  <public type="drawable" name="dark_header" id="0x010800b6" />
+
+  <!--  Drawable to use as a background for a taller version of the titlebar -->
+  <public type="drawable" name="title_bar_tall" id="0x010800b7" />
+  
+  <public type="integer" name="config_shortAnimTime" id="0x010e0000" />
+  <public type="integer" name="config_mediumAnimTime" id="0x010e0001" />
+  <public type="integer" name="config_longAnimTime" id="0x010e0002" />
 </resources>

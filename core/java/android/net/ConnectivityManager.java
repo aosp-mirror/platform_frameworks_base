@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.os.RemoteException;
 
 /**
@@ -99,6 +101,18 @@ public class ConnectivityManager
      * it with {@link android.content.Intent#getStringExtra(String)}.
      */
     public static final String EXTRA_EXTRA_INFO = "extraInfo";
+
+    /**
+     * Broadcast Action: The setting for background data usage has changed
+     * values. Use {@link #getBackgroundDataSetting()} to get the current value.
+     * <p>
+     * If an application uses the network in the background, it should listen
+     * for this broadcast and stop using the background data if the value is
+     * false.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BACKGROUND_DATA_SETTING_CHANGED =
+            "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
     public static final int TYPE_MOBILE = 0;
     public static final int TYPE_WIFI   = 1;
@@ -223,6 +237,43 @@ public class ConnectivityManager
         }
     }
 
+    /**
+     * Returns the value of the setting for background data usage. If false,
+     * applications should not use the network if the application is not in the
+     * foreground. Developers should respect this setting, and check the value
+     * of this before performing any background data operations.
+     * <p>
+     * All applications that have background services that use the network
+     * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
+     * 
+     * @return Whether background data usage is allowed.
+     */
+    public boolean getBackgroundDataSetting() {
+        try {
+            return mService.getBackgroundDataSetting();
+        } catch (RemoteException e) {
+            // Err on the side of safety 
+            return false;
+        }
+    }
+
+    /**
+     * Sets the value of the setting for background data usage.
+     * 
+     * @param allowBackgroundData Whether an application should use data while
+     *            it is in the background.
+     *            
+     * @attr ref android.Manifest.permission#CHANGE_BACKGROUND_DATA_SETTING
+     * @see #getBackgroundDataSetting()
+     * @hide
+     */
+    public void setBackgroundDataSetting(boolean allowBackgroundData) {
+        try {
+            mService.setBackgroundDataSetting(allowBackgroundData);
+        } catch (RemoteException e) {
+        }
+    }
+    
     /**
      * Don't allow use of default constructor.
      */

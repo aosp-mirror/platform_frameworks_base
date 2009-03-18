@@ -33,6 +33,7 @@ import android.util.Config;
 import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
+import android.util.DisplayMetrics;
 import android.view.View.MeasureSpec;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -61,7 +62,7 @@ import static javax.microedition.khronos.opengles.GL10.*;
  */
 @SuppressWarnings({"EmptyCatchBlock"})
 public final class ViewRoot extends Handler implements ViewParent,
-        View.AttachInfo.SoundEffectPlayer {
+        View.AttachInfo.Callbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
     @SuppressWarnings({"ConstantConditionalExpression"})
@@ -142,6 +143,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
+    boolean mLastWasImTarget;
 
     boolean mWindowAttributesChanged = false;
 
@@ -177,12 +179,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mUseGL;
     boolean mGlWanted;
 
+    final ViewConfiguration mViewConfiguration;    
+
     /**
      * see {@link #playSoundEffect(int)}
      */
     AudioManager mAudioManager;
 
-
+    private final float mDensity;
 
     public ViewRoot(Context context) {
         super();
@@ -215,7 +219,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mVisRect = new Rect();
         mVisPoint = new Point();
         mWinFrame = new Rect();
-        mWindow = new W(this);
+        mWindow = new W(this, context);
         mInputMethodCallback = new InputMethodCallback(this);
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
@@ -224,6 +228,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         mSurface = new Surface();
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
+        mViewConfiguration = ViewConfiguration.get(context);
+        mDensity = context.getResources().getDisplayMetrics().density;
     }
 
     @Override
@@ -993,6 +999,21 @@ public final class ViewRoot extends Handler implements ViewParent,
         mNewSurfaceNeeded = false;
         mViewVisibility = viewVisibility;
 
+        if (mAttachInfo.mHasWindowFocus) {
+            final boolean imTarget = WindowManager.LayoutParams
+                    .mayUseInputMethod(mWindowAttributes.flags);
+            if (imTarget != mLastWasImTarget) {
+                mLastWasImTarget = imTarget;
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null && imTarget) {
+                    imm.startGettingWindowFocus(mView);
+                    imm.onWindowFocus(mView, mView.findFocus(),
+                            mWindowAttributes.softInputMode,
+                            !mHasHadWindowFocus, mWindowAttributes.flags);
+                }
+            }
+        }
+        
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw();
 
         if (!cancelDraw && !newSurface) {
@@ -1075,6 +1096,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         scrollToRectOrFocus(null, false);
+
+        if (mAttachInfo.mViewScrollChanged) {
+            mAttachInfo.mViewScrollChanged = false;
+            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
+        }
         
         int yoff;
         final boolean scrolling = mScroller != null
@@ -1088,7 +1114,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             mCurScrollY = yoff;
             fullRedrawNeeded = true;
         }
-        
+
         Rect dirty = mDirty;
         if (mUseGL) {
             if (!dirty.isEmpty()) {
@@ -1101,6 +1127,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                     canvas.translate(0, -yoff);
+                    mView.mPrivateFlags |= View.DRAWN;
                     mView.draw(canvas);
                     canvas.translate(0, yoff);
 
@@ -1123,7 +1150,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
-
         if (fullRedrawNeeded)
             dirty.union(0, 0, mWidth, mHeight);
 
@@ -1135,20 +1161,22 @@ public final class ViewRoot extends Handler implements ViewParent,
                     + surface + " surface.isValid()=" + surface.isValid());
         }
 
-        if (!dirty.isEmpty()) {
-            Canvas canvas;
-            try {
-                canvas = surface.lockCanvas(dirty);
-            } catch (Surface.OutOfResourcesException e) {
-                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
-                // TODO: we should ask the window manager to do something!
-                // for now we just do nothing
-                return;
-            }
+        Canvas canvas;
+        try {
+            canvas = surface.lockCanvas(dirty);
+            // TODO: Do this in native
+            canvas.setDensityScale(mDensity);
+        } catch (Surface.OutOfResourcesException e) {
+            Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
+            // TODO: we should ask the window manager to do something!
+            // for now we just do nothing
+            return;
+        }
 
-            long startTime;
+        try {
+            if (!dirty.isEmpty()) {
+                long startTime;
 
-            try {
                 if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                     Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
                             + canvas.getWidth() + ", h=" + canvas.getHeight());
@@ -1164,7 +1192,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // properly re-composite its drawing on a transparent
                 // background. This automatically respects the clip/dirty region
                 if (!canvas.isOpaque()) {
-                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
                 } else if (yoff != 0) {
                     // If we are applying an offset, we need to clear the area
                     // where the offset doesn't appear to avoid having garbage
@@ -1175,6 +1203,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 dirty.setEmpty();
                 mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 canvas.translate(0, -yoff);
+                mView.mPrivateFlags |= View.DRAWN;                    
                 mView.draw(canvas);
                 canvas.translate(0, yoff);
 
@@ -1186,17 +1215,17 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sDrawTime = now;
                 }
 
-            } finally {
-                surface.unlockCanvasAndPost(canvas);
+                if (PROFILE_DRAWING) {
+                    EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+                }
             }
+            
+        } finally {
+            surface.unlockCanvasAndPost(canvas);
+        }
 
-            if (PROFILE_DRAWING) {
-                EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-            }
-
-            if (LOCAL_LOGV) {
-                Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
-            }
+        if (LOCAL_LOGV) {
+            Log.v("ViewRoot", "Surface " + surface + " unlockCanvasAndPost");
         }
         
         if (scrolling) {
@@ -1378,13 +1407,21 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     void dispatchDetachedFromWindow() {
         if (Config.LOGV) Log.v("ViewRoot", "Detaching in " + this + " of " + mSurface);
+
         if (mView != null) {
             mView.dispatchDetachedFromWindow();
         }
+
         mView = null;
         mAttachInfo.mRootView = null;
+
         if (mUseGL) {
             destroyGL();
+        }
+
+        try {
+            sWindowSession.remove(mWindow);
+        } catch (RemoteException e) {
         }
     }
     
@@ -1414,6 +1451,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int FINISHED_EVENT = 1010;
     public final static int DISPATCH_KEY_FROM_IME = 1011;
     public final static int FINISH_INPUT_CONNECTION = 1012;
+    public final static int CHECK_FOCUS = 1013;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1422,11 +1460,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             ((View) msg.obj).invalidate();
             break;
         case View.AttachInfo.INVALIDATE_RECT_MSG:
-            int left = msg.arg1 >>> 16;
-            int top = msg.arg1 & 0xFFFF;
-            int right = msg.arg2 >>> 16;
-            int bottom = msg.arg2 & 0xFFFF;
-            ((View) msg.obj).invalidate(left, top, right, bottom);
+            final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
+            info.target.invalidate(info.left, info.top, info.right, info.bottom);
+            info.release();
             break;
         case DO_TRAVERSAL:
             if (mProfile) {
@@ -1478,7 +1514,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     event.offsetLocation(0, mCurScrollY);
                     handled = mView.dispatchTouchEvent(event);
                     if (!handled && isDown) {
-                        int edgeSlop = ViewConfiguration.getEdgeSlop();
+                        int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
 
                         final int edgeFlags = event.getEdgeFlags();
                         int direction = View.FOCUS_UP;
@@ -1587,16 +1623,23 @@ public final class ViewRoot extends Handler implements ViewParent,
                         }
                     }
                 }
+                
+                mLastWasImTarget = WindowManager.LayoutParams
+                        .mayUseInputMethod(mWindowAttributes.flags);
+                
+                InputMethodManager imm = InputMethodManager.peekInstance();
                 if (mView != null) {
+                    if (hasWindowFocus && imm != null && mLastWasImTarget) {
+                        imm.startGettingWindowFocus(mView);
+                    }
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
                 }
                 
                 // Note: must be done after the focus change callbacks,
                 // so all of the view state is set up correctly.
                 if (hasWindowFocus) {
-                    InputMethodManager imm = InputMethodManager.peekInstance();
-                    if (imm != null) {
-                        imm.onWindowFocus(mView.findFocus(),
+                    if (imm != null && mLastWasImTarget) {
+                        imm.onWindowFocus(mView, mView.findFocus(),
                                 mWindowAttributes.softInputMode,
                                 !mHasHadWindowFocus, mWindowAttributes.flags);
                     }
@@ -1624,6 +1667,12 @@ public final class ViewRoot extends Handler implements ViewParent,
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
                 imm.reportFinishInputConnection((InputConnection)msg.obj);
+            }
+        } break;
+        case CHECK_FOCUS: {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.checkFocus();
             }
         } break;
         }
@@ -1787,6 +1836,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (event != null) {
                     event.recycle();
                 }
+                // If we reach this, we delivered a trackball event to mView and
+                // mView consumed it. Because we will not translate the trackball
+                // event into a key event, touch mode will not exit, so we exit
+                // touch mode here.
+                ensureTouchMode(false);
                 //noinspection ReturnInsideFinallyBlock
                 return;
             }
@@ -1941,6 +1995,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return false;
         }
+        if ((event.getFlags()&KeyEvent.FLAG_KEEP_TOUCH_MODE) != 0) {
+            return false;
+        }
 
         // only relevant if we are in touch mode
         if (!mAttachInfo.mInTouchMode) {
@@ -2042,8 +2099,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
     
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
-        boolean handled = false;
-        handled = mView.dispatchKeyEventPreIme(event);
+        // If mView is null, we just consume the key event because it doesn't
+        // make sense to do anything else with it.
+        boolean handled = mView != null
+                ? mView.dispatchKeyEventPreIme(event) : true;
         if (handled) {
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
@@ -2058,10 +2117,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         // If it is possible for this window to interact with the input
         // method window, then we want to first dispatch our key events
         // to the input method.
-        if (WindowManager.LayoutParams.mayUseInputMethod(
-                mWindowAttributes.flags)) {
+        if (mLastWasImTarget) {
             InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null && mView != null && imm.isActive()) {
+            if (imm != null && mView != null) {
                 int seq = enqueuePendingEvent(event, sendDone);
                 if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
                         + seq + " event=" + event);
@@ -2089,6 +2147,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sWindowSession.finishKey(mWindow);
                 } catch (RemoteException e) {
                 }
+            } else {
+                Log.w("ViewRoot", "handleFinishedEvent(seq=" + seq
+                        + " handled=" + handled + " ev=" + event
+                        + ") neither delivering nor finishing key");
             }
         }
     }
@@ -2108,7 +2170,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 boolean keyHandled = mView.dispatchKeyEvent(event);
 
-                if ((!keyHandled && isDown) || (action == KeyEvent.ACTION_MULTIPLE)) {
+                if (!keyHandled && isDown) {
                     int direction = 0;
                     switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -2208,6 +2270,17 @@ public final class ViewRoot extends Handler implements ViewParent,
     /**
      * {@inheritDoc}
      */
+    public boolean performHapticFeedback(int effectId, boolean always) {
+        try {
+            return sWindowSession.performHapticFeedback(mWindow, effectId, always);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public View focusSearch(View focused, int direction) {
         checkThread();
         if (!(mView instanceof ViewGroup)) {
@@ -2248,10 +2321,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             if (mAdded) {
                 mAdded = false;
-                try {
-                    sWindowSession.remove(mWindow);
-                } catch (RemoteException e) {
-                }
                 if (immediate) {
                     dispatchDetachedFromWindow();
                 } else if (mView != null) {
@@ -2384,11 +2453,71 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
     
+    static class EventCompletion extends Handler {
+        final IWindow mWindow;
+        final KeyEvent mKeyEvent;
+        final boolean mIsPointer;
+        final MotionEvent mMotionEvent;
+        
+        EventCompletion(Looper looper, IWindow window, KeyEvent key,
+                boolean isPointer, MotionEvent motion) {
+            super(looper);
+            mWindow = window;
+            mKeyEvent = key;
+            mIsPointer = isPointer;
+            mMotionEvent = motion;
+            sendEmptyMessage(0);
+        }
+        
+        @Override
+        public void handleMessage(Message msg) {
+            if (mKeyEvent != null) {
+                try {
+                    sWindowSession.finishKey(mWindow);
+                 } catch (RemoteException e) {
+                 }
+            } else if (mIsPointer) {
+                boolean didFinish;
+                MotionEvent event = mMotionEvent;
+                if (event == null) {
+                    try {
+                        event = sWindowSession.getPendingPointerMove(mWindow);
+                    } catch (RemoteException e) {
+                    }
+                    didFinish = true;
+                } else {
+                    didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
+                }
+                if (!didFinish) {
+                    try {
+                        sWindowSession.finishKey(mWindow);
+                     } catch (RemoteException e) {
+                     }
+                }
+            } else {
+                MotionEvent event = mMotionEvent;
+                if (event == null) {
+                    try {
+                        event = sWindowSession.getPendingTrackballMove(mWindow);
+                    } catch (RemoteException e) {
+                    }
+                } else {
+                    try {
+                        sWindowSession.finishKey(mWindow);
+                     } catch (RemoteException e) {
+                     }
+                }
+            }
+        }
+    }
+    
     static class W extends IWindow.Stub {
-        private WeakReference<ViewRoot> mViewRoot;
+        private final WeakReference<ViewRoot> mViewRoot;
+        private final Looper mMainLooper;
 
-        public W(ViewRoot viewRoot) {
+        public W(ViewRoot viewRoot, Context context) {
             mViewRoot = new WeakReference<ViewRoot>(viewRoot);
+            mMainLooper = context.getMainLooper();
         }
 
         public void resized(int w, int h, Rect coveredInsets,
@@ -2404,6 +2533,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchKey(event);
+            } else {
+                Log.w("ViewRoot.W", "Key event " + event + " but no ViewRoot available!");
+                new EventCompletion(mMainLooper, this, event, false, null);
             }
         }
 
@@ -2411,6 +2543,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchPointer(event, eventTime);
+            } else {
+                new EventCompletion(mMainLooper, this, null, true, event);
             }
         }
 
@@ -2418,6 +2552,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchTrackball(event, eventTime);
+            } else {
+                new EventCompletion(mMainLooper, this, null, false, event);
             }
         }
 
@@ -2502,7 +2638,7 @@ public final class ViewRoot extends Handler implements ViewParent,
          * for us to consider the user to be doing fast trackball movements,
          * and thus apply an acceleration.
          */
-        static final long FAST_MOVE_TIME = 100;
+        static final long FAST_MOVE_TIME = 150;
         
         /**
          * Scaling factor to the time (in milliseconds) between events to how
@@ -2510,7 +2646,7 @@ public final class ViewRoot extends Handler implements ViewParent,
          * is < FAST_MOVE_TIME this multiplies the acceleration; when >
          * FAST_MOVE_TIME it divides it.
          */
-        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/50);
+        static final float ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
         
         float position;
         float absPosition;
@@ -2748,7 +2884,6 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             synchronized (mActions) {
                 final ArrayList<HandlerAction> actions = mActions;
-                final int count = actions.size();
 
                 while (actions.remove(handlerAction)) {
                     // Keep going
@@ -2776,7 +2911,20 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             @Override
             public boolean equals(Object o) {
-                return action.equals(o);
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                HandlerAction that = (HandlerAction) o;
+
+                return !(action != null ? !action.equals(that.action) : that.action != null);
+
+            }
+
+            @Override
+            public int hashCode() {
+                int result = action != null ? action.hashCode() : 0;
+                result = 31 * result + (int) (delay ^ (delay >>> 32));
+                return result;
             }
         }
     }

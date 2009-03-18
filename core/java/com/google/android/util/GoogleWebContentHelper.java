@@ -206,7 +206,7 @@ public class GoogleWebContentHelper {
         WebSettings settings = mWebView.getSettings();
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         
-        mProgressBar = mLayout.findViewById(com.android.internal.R.id.progress);
+        mProgressBar = mLayout.findViewById(com.android.internal.R.id.progressContainer);
         TextView message = (TextView) mProgressBar.findViewById(com.android.internal.R.id.message);
         message.setText(com.android.internal.R.string.googlewebcontenthelper_loading);
         

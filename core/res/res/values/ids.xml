@@ -59,9 +59,10 @@
   <item type="id" name="copy" />
   <item type="id" name="paste" />
   <item type="id" name="copyUrl" />
-  <item type="id" name="inputMethod" />
+  <item type="id" name="switchInputMethod" />
   <item type="id" name="keyboardView" />
   <item type="id" name="button_close" />
-  <item type="id" name="selectText" />
+  <item type="id" name="startSelectingText" />
   <item type="id" name="stopSelectingText" />
+  <item type="id" name="addToDictionary" />
 </resources>

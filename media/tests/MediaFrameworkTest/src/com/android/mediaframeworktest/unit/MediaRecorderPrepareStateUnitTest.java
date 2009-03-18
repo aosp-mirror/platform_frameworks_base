@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import java.io.IOException;
 
@@ -55,14 +55,11 @@ public class MediaRecorderPrepareStateUnitTest extends AndroidTestCase implement
         try {
             recorder.prepare();
         } catch (IOException exception) {
-            fail("recorder.prepare() failed");
+            throw new RuntimeException();
         }
     }
 
-    //TODO(elaurent)
-    //reactivate the test until bug#1495237 fix
-    @Suppress
-    @MediumTest
+    @LargeTest
     public void testPrepare() {
         mTestTemplate.runTestOnMethod(this);
     }

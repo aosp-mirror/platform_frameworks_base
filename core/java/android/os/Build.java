@@ -26,6 +26,9 @@ public class Build {
     /** Either a changelist number, or a label like "M4-rc20". */
     public static final String ID = getString("ro.build.id");
 
+    /** A build ID string meant for displaying to the user */
+    public static final String DISPLAY = getString("ro.build.display.id");
+
     /** The name of the overall product. */
     public static final String PRODUCT = getString("ro.product.name");
 

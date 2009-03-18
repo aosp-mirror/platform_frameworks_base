@@ -84,8 +84,10 @@ void Camera::init()
     mRawCallbackCookie = 0;
     mJpegCallback = 0;
     mJpegCallbackCookie = 0;
-    mFrameCallback = 0;
-    mFrameCallbackCookie = 0;
+    mPreviewCallback = 0;
+    mPreviewCallbackCookie = 0;
+    mRecordingCallback = 0;
+    mRecordingCallbackCookie = 0;
     mErrorCallback = 0;
     mErrorCallbackCookie = 0;
     mAutoFocusCallback = 0;
@@ -108,6 +110,8 @@ sp<Camera> Camera::connect()
     if (c->mCamera != 0) {
         c->mCamera->asBinder()->linkToDeath(c);
         c->mStatus = NO_ERROR;
+    } else {
+        c.clear();
     }
     return c;
 }
@@ -184,6 +188,15 @@ status_t Camera::startPreview()
     return c->startPreview();
 }
 
+// start recording mode, must call setPreviewDisplay first
+status_t Camera::startRecording()
+{
+    LOGV("startRecording");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->startRecording();
+}
+
 // stop preview mode
 void Camera::stopPreview()
 {
@@ -193,6 +206,24 @@ void Camera::stopPreview()
     c->stopPreview();
 }
 
+// stop recording mode
+void Camera::stopRecording()
+{
+    LOGV("stopRecording");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return;
+    c->stopRecording();
+}
+
+// release a recording frame
+void Camera::releaseRecordingFrame(const sp<IMemory>& mem)
+{
+    LOGV("releaseRecordingFrame");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return;
+    c->releaseRecordingFrame(mem);
+}
+
 // get preview state
 bool Camera::previewEnabled()
 {
@@ -200,6 +231,15 @@ bool Camera::previewEnabled()
     sp <ICamera> c = mCamera;
     if (c == 0) return false;
     return c->previewEnabled();
+}
+
+// get recording state
+bool Camera::recordingEnabled()
+{
+    LOGV("recordingEnabled");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return false;
+    return c->recordingEnabled();
 }
 
 status_t Camera::autoFocus()
@@ -266,14 +306,21 @@ void Camera::setJpegCallback(frame_callback cb, void *cookie)
     mJpegCallbackCookie = cookie;
 }
 
-void Camera::setFrameCallback(frame_callback cb, void *cookie, int frame_callback_flag)
+void Camera::setPreviewCallback(frame_callback cb, void *cookie, int flag)
 {
-    LOGV("setFrameCallback");
-    mFrameCallback = cb;
-    mFrameCallbackCookie = cookie;
+    LOGV("setPreviewCallback");
+    mPreviewCallback = cb;
+    mPreviewCallbackCookie = cookie;
     sp <ICamera> c = mCamera;
     if (c == 0) return;
-    mCamera->setFrameCallbackFlag(frame_callback_flag);
+    mCamera->setPreviewCallbackFlag(flag);
+}
+
+void Camera::setRecordingCallback(frame_callback cb, void *cookie)
+{
+    LOGV("setRecordingCallback");
+    mRecordingCallback = cb;
+    mRecordingCallbackCookie = cookie;
 }
 
 void Camera::setErrorCallback(error_callback cb, void *cookie)
@@ -316,12 +363,21 @@ void Camera::jpegCallback(const sp<IMemory>& picture)
     }
 }
 
-// callback from camera service when video frame is ready
-void Camera::frameCallback(const sp<IMemory>& frame)
+// callback from camera service when preview frame is ready
+void Camera::previewCallback(const sp<IMemory>& frame)
 {
     LOGV("frameCallback");
-    if (mFrameCallback) {
-        mFrameCallback(frame, mFrameCallbackCookie);
+    if (mPreviewCallback) {
+        mPreviewCallback(frame, mPreviewCallbackCookie);
+    }
+}
+
+// callback from camera service when a recording frame is ready
+void Camera::recordingCallback(const sp<IMemory>& frame)
+{
+    LOGV("recordingCallback");
+    if (mRecordingCallback) {
+        mRecordingCallback(frame, mRecordingCallbackCookie);
     }
 }
 

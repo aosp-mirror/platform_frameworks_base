@@ -25,6 +25,7 @@ import android.os.Hardware;
 import android.os.IHardwareService;
 import android.os.Power;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Binder;
@@ -35,6 +36,10 @@ public class HardwareService extends IHardwareService.Stub {
     private static final String TAG = "HardwareService";
 
     HardwareService(Context context) {
+        // Reset the hardware to a default state, in case this is a runtime
+        // restart instead of a fresh boot.
+        vibratorOff();
+
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(
                 Context.POWER_SERVICE);
@@ -201,7 +206,7 @@ public class HardwareService extends IHardwareService.Stub {
                     mThread.notify();
                 }
                 mThread = null;
-                off();
+                vibratorOff();
             }
         }
     }
@@ -217,48 +222,65 @@ public class HardwareService extends IHardwareService.Stub {
             mWakeLock.acquire();
         }
 
+        private void delay(long duration) {
+            if (duration > 0) {
+                long bedtime = SystemClock.uptimeMillis();
+                do {
+                    try {
+                        this.wait(duration);
+                    }
+                    catch (InterruptedException e) {
+                    }
+                    if (mDone) {
+                        break;
+                    }
+                    duration = duration
+                            - SystemClock.uptimeMillis() - bedtime;
+                } while (duration > 0);
+            }
+        }
+
         public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             synchronized (this) {
                 int index = 0;
-                boolean nextState = false;
                 long[] pattern = mPattern;
-                if (pattern[0] == 0) {
-                    index++;
-                    nextState = true;
-                }
                 int len = pattern.length;
-                long start = SystemClock.uptimeMillis();
+                long duration = 0;
 
                 while (!mDone) {
-                    if (nextState) {
-                        HardwareService.this.on();
-                    } else {
-                        HardwareService.this.off();
+                    // add off-time duration to any accumulated on-time duration 
+                    if (index < len) {
+                        duration += pattern[index++];
                     }
-                    nextState = !nextState;
-                    long bedtime = SystemClock.uptimeMillis();
-                    long duration = pattern[index];
-                    do {
-                        try {
-                            this.wait(duration);
+
+                    // sleep until it is time to start the vibrator
+                    delay(duration);
+                    if (mDone) {
+                        break;
+                    }
+
+                    if (index < len) {
+                        // read on-time duration and start the vibrator
+                        // duration is saved for delay() at top of loop
+                        duration = pattern[index++];
+                        if (duration > 0) {
+                            HardwareService.this.vibratorOn(duration);
                         }
-                        catch (InterruptedException e) {
-                        }
-                        if (mDone) {
-                            break;
-                        }
-                        duration = duration
-                                - SystemClock.uptimeMillis() - bedtime;
-                    } while (duration > 0);
-                    index++;
-                    if (index >= len) {
+                    } else {
                         if (mRepeat < 0) {
-                            HardwareService.this.off();
                             break;
                         } else {
                             index = mRepeat;
+                            duration = 0;
                         }
                     }
+                }
+                if (mDone) {
+                    // make sure vibrator is off if we were cancelled.
+                    // otherwise, it will turn off automatically 
+                    // when the last timeout expires.
+                    HardwareService.this.vibratorOff();
                 }
                 mWakeLock.release();
             }
@@ -301,6 +323,6 @@ public class HardwareService extends IHardwareService.Stub {
     volatile Death mDeath;
     volatile IBinder mToken;
 
-    native static void on();
-    native static void off();
+    native static void vibratorOn(long milliseconds);
+    native static void vibratorOff();
 }

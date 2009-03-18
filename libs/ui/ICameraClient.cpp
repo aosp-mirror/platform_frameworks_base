@@ -28,9 +28,10 @@ enum {
     SHUTTER_CALLBACK = IBinder::FIRST_CALL_TRANSACTION,
     RAW_CALLBACK,
     JPEG_CALLBACK,
-    FRAME_CALLBACK,
+    PREVIEW_CALLBACK,
     ERROR_CALLBACK,
-    AUTOFOCUS_CALLBACK
+    AUTOFOCUS_CALLBACK,
+    RECORDING_CALLBACK,
 };
 
 class BpCameraClient: public BpInterface<ICameraClient>
@@ -70,14 +71,24 @@ public:
         remote()->transact(JPEG_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
-    // callback from camera service to app with video frame data
-    void frameCallback(const sp<IMemory>& frame)
+    // callback from camera service to app with preview frame data
+    void previewCallback(const sp<IMemory>& frame)
     {
-        LOGV("frameCallback");
+        LOGV("previewCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeStrongBinder(frame->asBinder());
-        remote()->transact(FRAME_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
+        remote()->transact(PREVIEW_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
+    }
+
+    // callback from camera service to app with recording frame data
+    void recordingCallback(const sp<IMemory>& frame)
+    {
+        LOGV("recordingCallback");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
+        data.writeStrongBinder(frame->asBinder());
+        remote()->transact(RECORDING_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
     // callback from camera service to app to report error
@@ -135,11 +146,18 @@ status_t BnCameraClient::onTransact(
             jpegCallback(picture);
             return NO_ERROR;
         } break;
-        case FRAME_CALLBACK: {
-            LOGV("FRAME_CALLBACK");
+        case PREVIEW_CALLBACK: {
+            LOGV("PREVIEW_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             sp<IMemory> frame = interface_cast<IMemory>(data.readStrongBinder());
-            frameCallback(frame);
+            previewCallback(frame);
+            return NO_ERROR;
+        } break;
+        case RECORDING_CALLBACK: {
+            LOGV("RECORDING_CALLBACK");
+            CHECK_INTERFACE(ICameraClient, data, reply);
+            sp<IMemory> frame = interface_cast<IMemory>(data.readStrongBinder());
+            recordingCallback(frame);
             return NO_ERROR;
         } break;
         case ERROR_CALLBACK: {

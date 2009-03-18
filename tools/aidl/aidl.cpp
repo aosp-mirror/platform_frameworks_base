@@ -610,6 +610,62 @@ generate_dep_file(const Options& options)
 }
 
 // ==========================================================
+static string
+generate_outputFileName(const Options& options, const document_item_type* items)
+{
+    string result;
+
+    // items has already been checked to have only one interface.
+    if (items->item_type == INTERFACE_TYPE) {
+        interface_type* type = (interface_type*)items;
+
+        // create the path to the destination folder based on the
+        // interface package name
+        result = options.outputBaseFolder;
+        result += OS_PATH_SEPARATOR;
+
+        string package = type->package;
+        size_t len = package.length();
+        for (size_t i=0; i<len; i++) {
+            if (package[i] == '.') {
+                package[i] = OS_PATH_SEPARATOR;
+            }
+        }
+
+        result += package;
+        
+        // add the filename by replacing the .aidl extension to .java
+        const char* p = strchr(type->name.data, '.');
+        len = p ? p-type->name.data : strlen(type->name.data);
+
+        result += OS_PATH_SEPARATOR;
+        result.append(type->name.data, len);
+        result += ".java";
+    }
+
+    return result;
+}
+
+// ==========================================================
+static void
+check_outputFileName(const string& path) {
+    size_t len = path.length();
+    for (size_t i=0; i<len ; i++) {
+        if (path[i] == OS_PATH_SEPARATOR) {
+            string p = path.substr(0, i);
+            if (access(path.data(), F_OK) != 0) {
+#ifdef HAVE_MS_C_RUNTIME
+                _mkdir(p.data());
+#else
+                mkdir(p.data(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
+#endif
+            }
+        }
+    }
+}
+
+
+// ==========================================================
 static int
 parse_preprocessed_file(const string& filename)
 {
@@ -617,7 +673,7 @@ parse_preprocessed_file(const string& filename)
 
     FILE* f = fopen(filename.c_str(), "rb");
     if (f == NULL) {
-        fprintf(stderr, "aidl: can't open preprocessd file: %s\n",
+        fprintf(stderr, "aidl: can't open preprocessed file: %s\n",
                 filename.c_str());
         return 1;
     }
@@ -804,7 +860,17 @@ compile_aidl(const Options& options)
         generate_dep_file(options);
     }
 
-    err = generate_java(options.outputFileName, options.inputFileName.c_str(),
+    // if needed, generate the outputFileName from the outputBaseFolder
+    string outputFileName = options.outputFileName;
+    if (outputFileName.length() == 0 &&
+            options.outputBaseFolder.length() > 0) {
+        outputFileName = generate_outputFileName(options, mainDoc);
+    }
+    
+    // make sure the folders of the output file all exists
+    check_outputFileName(outputFileName);
+
+    err = generate_java(outputFileName, options.inputFileName.c_str(),
                         (interface_type*)mainDoc);
 
     return err;

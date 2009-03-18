@@ -16,9 +16,29 @@
 
 package android.text.style;
 
+import android.os.Parcel;
+import android.text.ParcelableSpan;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
-public class SubscriptSpan extends MetricAffectingSpan {
+public class SubscriptSpan extends MetricAffectingSpan implements ParcelableSpan {
+    public SubscriptSpan() {
+    }
+    
+    public SubscriptSpan(Parcel src) {
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.SUBSCRIPT_SPAN;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+    }
+
     @Override
     public void updateDrawState(TextPaint tp) {
         tp.baselineShift -= (int) (tp.ascent() / 2);

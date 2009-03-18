@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Checkin;
+
 import java.lang.SecurityException;
 import android.content.pm.PackageManager;
 
@@ -136,7 +138,7 @@ public class WebSettings {
     private int             mDefaultFixedFontSize = 13;
     private boolean         mLoadsImagesAutomatically = true;
     private boolean         mBlockNetworkImage = false;
-    private boolean         mBlockNetworkLoads = false;
+    private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
     private boolean         mPluginsEnabled = false;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
@@ -250,7 +252,9 @@ public class WebSettings {
         mUserAgent = getCurrentUserAgent();
         mUseDefaultUserAgent = true;
 
-        verifyNetworkAccess();
+        mBlockNetworkLoads = mContext.checkPermission(
+                "android.permission.INTERNET", android.os.Process.myPid(),
+                android.os.Process.myUid()) != PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -320,10 +324,15 @@ public class WebSettings {
             buffer.append("en");
         }
         
-        final String device = Build.DEVICE;
-        if (device.length() > 0) {
+        final String model = Build.MODEL;
+        if (model.length() > 0) {
             buffer.append("; ");
-            buffer.append(device);
+            buffer.append(model);
+        }
+        final String id = Build.ID;
+        if (id.length() > 0) {
+            buffer.append(" Build/");
+            buffer.append(id);
         }
         final String base = mContext.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
@@ -407,6 +416,10 @@ public class WebSettings {
      * @see WebSettings.TextSize
      */
     public synchronized void setTextSize(TextSize t) {
+        if (WebView.mLogEvent && mTextSize != t ) {
+            Checkin.updateStats(mContext.getContentResolver(),
+                    Checkin.Stats.Tag.BROWSER_TEXT_SIZE_CHANGE, 1, 0.0);
+        }
         mTextSize = t;
         postSync();
     }
@@ -827,7 +840,7 @@ public class WebSettings {
     private void verifyNetworkAccess() {
         if (!mBlockNetworkLoads) {
             if (mContext.checkPermission("android.permission.INTERNET", 
-                    android.os.Process.myPid(), 0) != 
+                    android.os.Process.myPid(), android.os.Process.myUid()) != 
                         PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException
                         ("Permission denied - " +

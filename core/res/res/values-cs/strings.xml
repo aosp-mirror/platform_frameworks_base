@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status">"Zvuk je zapnutý"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"Nouzový režim"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"Zpoplatněné služby"</string>
     <string name="permgroupdesc_costMoney">"Umožňuje aplikacím provádět činnosti, které vás mohou stát peníze."</string>
     <string name="permgrouplab_messages">"Vaše zprávy"</string>
@@ -262,6 +270,8 @@
     <string name="permdesc_reboot">"Umožňuje aplikaci vynutit restartování telefonu."</string>
     <string name="permlab_mount_unmount_filesystems">"připojení a odpojení souborových systémů"</string>
     <string name="permdesc_mount_unmount_filesystems">"Umožňuje aplikaci připojit či odpojit souborové systémy ve vyměnitelných úložištích."</string>
+    <string name="permlab_mount_format_filesystems">"formátovat externí úložiště"</string>
+    <string name="permdesc_mount_format_filesystems">"Umožňuje aplikaci formátovat vyměnitelná úložiště."</string>
     <string name="permlab_vibrate">"ovládání vibrací"</string>
     <string name="permdesc_vibrate">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_flashlight">"ovládání kontrolky"</string>
@@ -276,6 +286,8 @@
     <string name="permdesc_locationUpdates">"Umožňuje povolit či zakázat aktualizace polohy prostřednictvím bezdrátového připojení. Aplikace toto nastavení obvykle nepoužívají."</string>
     <string name="permlab_checkinProperties">"přístup k vlastnostem Checkin"</string>
     <string name="permdesc_checkinProperties">"Umožňuje čtení i zápis vlastností nahraných službou Checkin. Běžné aplikace toto nastavení obvykle nevyužívají."</string>
+    <string name="permlab_bindGadget">"zvolit gadgety"</string>
+    <string name="permdesc_bindGadget">"Umožňuje aplikaci sdělit systému, které aplikace mohou použít které gadgety. Aplikace s tímto oprávněním mohou zpřístupnit osobní údaje jiným aplikacím. Není určeno pro normální aplikace."</string>
     <string name="permlab_modifyPhoneState">"změny stavu telefonu"</string>
     <string name="permdesc_modifyPhoneState">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním může přepínat sítě nebo zapnout či vypnout bezdrátové připojení telefonu bez vašeho svolení."</string>
     <string name="permlab_readPhoneState">"zjistit stav telefonu"</string>
@@ -304,6 +316,8 @@
     <string name="permdesc_writeApnSettings">"Umožňuje aplikaci změnit nastavení APN, jako je například proxy či port APN."</string>
     <string name="permlab_changeNetworkState">"změna připojení k síti"</string>
     <string name="permdesc_changeNetworkState">"Umožňuje aplikaci změnit stav připojení k síti."</string>
+    <string name="permlab_changeBackgroundDataSetting">"změnit nastavení použití dat na pozadí"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Umožňuje aplikaci změnit nastavení použití dat na pozadí."</string>
     <string name="permlab_accessWifiState">"zobrazení stavu WiFi"</string>
     <string name="permdesc_accessWifiState">"Umožňuje aplikaci zobrazit informace o stavu připojení WiFi."</string>
     <string name="permlab_changeWifiState">"Změnit stav WiFi"</string>
@@ -324,14 +338,10 @@
     <string name="permdesc_subscribedFeedsRead">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
     <string name="permlab_subscribedFeedsWrite">"zápis odebíraných zdrojů"</string>
     <string name="permdesc_subscribedFeedsWrite">"Umožňuje aplikaci upravit vaše aktuálně synchronizované zdroje. To může škodlivým aplikacím umožnit změnu vašich synchronizovaných zdrojů."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"číst slovník definovaný uživatelem"</string>
+    <string name="permdesc_readDictionary">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
+    <string name="permlab_writeDictionary">"zapisovat do slovníku definovaného uživatelem"</string>
+    <string name="permdesc_writeDictionary">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
   <string-array name="phoneTypes">
     <item>"Domů"</item>
     <item>"Mobil"</item>
@@ -387,9 +397,10 @@
     <string name="lockscreen_emergency_call">"Tísňové volání"</string>
     <string name="lockscreen_pattern_correct">"Správně!"</string>
     <string name="lockscreen_pattern_wrong">"Zkuste to prosím znovu"</string>
-    <string name="lockscreen_plugged_in">"Nabíjení (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"Připojte dobíjecí zařízení."</string>
-    <string name="lockscreen_missing_sim_message_short">"Není vložena karta SIM."</string>
+    <string name="lockscreen_missing_sim_message_short">"Není vložena SIM karta."</string>
     <string name="lockscreen_missing_sim_message">"V telefonu není žádná karta SIM."</string>
     <string name="lockscreen_missing_sim_instructions">"Prosím vložte kartu SIM."</string>
     <string name="lockscreen_network_locked_message">"Síť je blokována"</string>
@@ -397,8 +408,8 @@
     <string name="lockscreen_sim_puk_locked_instructions">"Prosím kontaktujte podporu zákazníků."</string>
     <string name="lockscreen_sim_locked_message">"Karta SIM je zablokována."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Odblokování karty SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste použili nesprávné gesto pro odemčení. "\n\n"Opakujte prosím akci za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své gesto odemknutí. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádání o odemčení telefonu pomocí přihlášení Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nakreslili nesprávné bezpečnostní gesto. "\n\n"Opakujte prosím akci za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své bezpečnostní gesto. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení do účtu Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Zapomněli jste gesto?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Gesta: Příliš mnoho pokusů"</string>
@@ -410,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"Vymazat oznámení"</string>
     <string name="status_bar_no_notifications_title">"Žádná oznámení"</string>
     <string name="status_bar_ongoing_events_title">"Probíhající"</string>
     <string name="status_bar_latest_events_title">"Oznámení"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"Nabíjení..."</string>
     <string name="battery_low_title">"Prosím připojte dobíjecí zařízení"</string>
@@ -428,12 +439,9 @@
     <string name="factorytest_not_system">"Test FACTORY_TEST lze provést pouze u balíčků nainstalovaných ve složce /system/app."</string>
     <string name="factorytest_no_action">"Nebyl nalezen žádný balíček umožňující test FACTORY_TEST."</string>
     <string name="factorytest_reboot">"Restartovat"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"Stránka <xliff:g id="TITLE">%s</xliff:g> uvádí:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label">"Potvrdit"</string>
     <string name="save_password_message">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow">"Nyní ne"</string>
@@ -484,22 +492,38 @@
     <item quantity="one">"zítra"</item>
     <item quantity="other">"zbývající počet dní: <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"před 1 s"</item>
+    <item quantity="other">"před <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"před 1 min."</item>
+    <item quantity="other">"před <xliff:g id="COUNT">%d</xliff:g> min."</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"před 1 hodinou"</item>
+    <item quantity="other">"před <xliff:g id="COUNT">%d</xliff:g> hod."</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"včera"</item>
+    <item quantity="other">"před <xliff:g id="COUNT">%d</xliff:g> dny"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"za 1 s"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"za 1 min."</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> min."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"za 1 hodinu"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> hod."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"zítra"</item>
+    <item quantity="other">"zbývající počet dní: <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
     <string name="preposition_for_date">"%s"</string>
     <string name="preposition_for_time">"%s"</string>
     <string name="preposition_for_year">"v roce %s"</string>
@@ -541,27 +565,25 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="DAY">dd</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g>. <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"poledne"</string>
     <string name="Noon">"Poledne"</string>
     <string name="midnight">"půlnoc"</string>
     <string name="Midnight">"Půlnoc"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -590,11 +612,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"neděle"</string>
     <string name="day_of_week_long_monday">"pondělí"</string>
@@ -679,6 +701,7 @@
     <string name="paste">"Vložit"</string>
     <string name="copyUrl">"Kopírovat adresu URL"</string>
     <string name="inputMethod">"Metoda zadávání dat"</string>
+    <string name="addToDictionary">"Přidat „%s“ do slovníku"</string>
     <string name="editTextMenuTitle">"Úpravy textu"</string>
     <string name="low_internal_storage_view_title">"Málo paměti"</string>
     <string name="low_internal_storage_view_text">"V telefonu zbývá málo místa pro ukládání dat."</string>
@@ -686,6 +709,7 @@
     <string name="cancel">"Zrušit"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Zrušit"</string>
+    <string name="dialog_alert_title">"Upozornění"</string>
     <string name="capital_on">"ZAPNUTO"</string>
     <string name="capital_off">"VYPNOUT"</string>
     <string name="whichApplication">"Dokončit akci pomocí aplikace"</string>
@@ -698,8 +722,8 @@
     <string name="aerr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> byl neočekávaně ukončen. Opakujte prosím akci."</string>
     <string name="anr_title">"Omlouváme se"</string>
     <string name="anr_activity_application">"Činnost <xliff:g id="ACTIVITY">%1$s</xliff:g> (v aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>) neodpovídá."</string>
-    <string name="anr_activity_process">"Činnost <xliff:g id="ACTIVITY">%1$s</xliff:g> (v procesu <xliff:g id="PROCESS">%2$s</xliff:g>) neodpovídá."</string>
-    <string name="anr_application_process">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (v procesu <xliff:g id="PROCESS">%2$s</xliff:g>) neodpovídá."</string>
+    <string name="anr_activity_process">"Služba <xliff:g id="ACTIVITY">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>) nereaguje."</string>
+    <string name="anr_application_process">"Služba <xliff:g id="APPLICATION">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>) nereaguje."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> neodpovídá."</string>
     <string name="force_close">"Ukončit aplikaci"</string>
     <string name="wait">"Počkat"</string>
@@ -709,7 +733,7 @@
     <string name="volume_music">"Hlasitost médií"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Přehrávání pomocí rozhraní Bluetooth"</string>
     <string name="volume_call">"Hlasitost hovoru"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Přehrávání pomocí rozhraní Bluetooth"</string>
+    <string name="volume_bluetooth_call">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
     <string name="volume_alarm">"Hlasitost upozornění a budíku"</string>
     <string name="volume_notification">"Hlasitost oznámení"</string>
     <string name="volume_unknown">"Hlasitost"</string>
@@ -719,11 +743,11 @@
     <string name="ringtone_picker_title">"Vyzváněcí tóny"</string>
     <string name="ringtone_unknown">"Neznámý vyzváněcí tón"</string>
   <plurals name="wifi_available">
-    <item quantity="one">"Je k dispozici síť WiFi."</item>
+    <item quantity="one">"K dispozici je síť WiFi."</item>
     <item quantity="other">"Jsou k dispozici sítě WiFi."</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one">"Je k dispozici veřejná síť WiFi"</item>
+    <item quantity="one">"K dispozici je veřejná síť WiFi"</item>
     <item quantity="other">"Jsou k dispozici veřejné sítě WiFi"</item>
   </plurals>
     <string name="select_character">"Vkládání znaků"</string>
@@ -745,8 +769,47 @@
     <string name="usb_storage_error_message">"Při používání vaší karty SD jako úložiště USB došlo k problému."</string>
     <string name="usb_storage_notification_title">"USB připojeno"</string>
     <string name="usb_storage_notification_message">"Vyberte, chcete-li kopírovat soubory do nebo z počítače."</string>
+    <string name="usb_storage_stop_notification_title">"Vypnout úložiště USB"</string>
+    <string name="usb_storage_stop_notification_message">"Vyberte, chcete-li vypnout úložiště USB."</string>
+    <string name="usb_storage_stop_title">"Vypnout úložiště USB"</string>
+    <string name="usb_storage_stop_message">"Před vypnutím úložiště USB se přesvědčte, zda byl hostitel USB odpojen. Úložiště USB vypnete volbou Vypnout."</string>
+    <string name="usb_storage_stop_button_mount">"Vypnout"</string>
+    <string name="usb_storage_stop_button_unmount">"Zrušit"</string>
+    <string name="usb_storage_stop_error_message">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
+    <string name="extmedia_format_title">"Formátovat kartu SD"</string>
+    <string name="extmedia_format_message">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
+    <string name="extmedia_format_button_format">"Formátovat"</string>
     <string name="select_input_method">"Výběr metody zadávání dat"</string>
-    <string name="fast_scroll_alphabet">"AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"kandidáti"</u>"u&gt;"</font></string>
+    <string name="fast_scroll_alphabet">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
+    <string name="candidates_style"><u>"kandidáti"</u></string>
+    <string name="ext_media_checking_notification_title">"Příprava karty SD"</string>
+    <string name="ext_media_checking_notification_message">"Kontrola chyb"</string>
+    <string name="ext_media_nofs_notification_title">"Prázdná karta SD"</string>
+    <string name="ext_media_nofs_notification_message">"Karta SD je prázdná nebo používá nepodporovaný systém souborů."</string>
+    <string name="ext_media_unmountable_notification_title">"Poškozená karta SD"</string>
+    <string name="ext_media_unmountable_notification_message">"Karta SD je poškozena. Pravděpodobně ji bude nutné znovu formátovat."</string>
+    <string name="ext_media_badremoval_notification_title">"Karta SD byla neočekávaně odebrána"</string>
+    <string name="ext_media_badremoval_notification_message">"Chcete-li zabránit ztrátě dat, kartu SD před odebráním odpojte."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Kartu SD je možné bezpečně odebrat"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Kartu SD lze nyní bezpečně vyjmout."</string>
+    <string name="ext_media_nomedia_notification_title">"Karta SD byla odstraněna"</string>
+    <string name="ext_media_nomedia_notification_message">"Karta SD byla odebrána. Chcete-li zvětšit úložiště svého zařízení, vložte kartu SD."</string>
+    <string name="activity_list_empty">"Nebyly nalezeny žádné odpovídající aktivity."</string>
+    <string name="permlab_pkgUsageStats">"aktualizovat statistiku použití součástí"</string>
+    <string name="permdesc_pkgUsageStats">"Umožňuje změnu shromážděných statistických údajů o použití součástí. Není určeno pro běžné aplikace."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

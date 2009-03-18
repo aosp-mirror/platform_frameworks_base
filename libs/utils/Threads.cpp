@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// #define LOG_NDEBUG 0
 #define LOG_TAG "libutils.threads"
 
 #include <utils/threads.h>
@@ -838,146 +839,6 @@ void Condition::broadcast()
 #error "condition variables not supported on this platform"
 #endif
 
-
-/*
- * ===========================================================================
- *      ReadWriteLock class
- * ===========================================================================
- */
-
-#if 0
-#pragma mark -
-#pragma mark ReadWriteLock
-#endif
-
-/*
- * Add a reader.  Readers are nice.  They share.
- */
-void ReadWriteLock::lockForRead()
-{
-    mLock.lock();
-    while (mNumWriters > 0) {
-        LOG(LOG_DEBUG, "thread", "+++ lockForRead: waiting\n");
-        mReadWaiter.wait(mLock);
-    }
-    assert(mNumWriters == 0);
-    mNumReaders++;
-#if defined(PRINT_RENDER_TIMES)
-    if (mNumReaders == 1)
-        mDebugTimer.start();
-#endif
-    mLock.unlock();
-}
-
-/*
- * Try to add a reader.  If it doesn't work right away, return "false".
- */
-bool ReadWriteLock::tryLockForRead()
-{
-    mLock.lock();
-    if (mNumWriters > 0) {
-        mLock.unlock();
-        return false;
-    }
-    assert(mNumWriters == 0);
-    mNumReaders++;
-#if defined(PRINT_RENDER_TIMES)
-    if (mNumReaders == 1)
-        mDebugTimer.start();
-#endif
-    mLock.unlock();
-    return true;
-}
-
-/*
- * Remove a reader.
- */
-void ReadWriteLock::unlockForRead()
-{
-    mLock.lock();
-    if (mNumReaders == 0) {
-        LOG(LOG_WARN, "thread",
-            "WARNING: unlockForRead requested, but not locked\n");
-        return;
-    }
-    assert(mNumReaders > 0);
-    assert(mNumWriters == 0);
-    mNumReaders--;
-    if (mNumReaders == 0) {           // last reader?
-#if defined(PRINT_RENDER_TIMES)
-        mDebugTimer.stop();
-        printf(" rdlk held %.3f msec\n",
-            (double) mDebugTimer.durationUsecs() / 1000.0);
-#endif
-        //printf("+++ signaling writers (if any)\n");
-        mWriteWaiter.signal();      // wake one writer (if any)
-    }
-    mLock.unlock();
-}
-
-/*
- * Add a writer.  This requires exclusive access to the object.
- */
-void ReadWriteLock::lockForWrite()
-{
-    mLock.lock();
-    while (mNumReaders > 0 || mNumWriters > 0) {
-        LOG(LOG_DEBUG, "thread", "+++ lockForWrite: waiting\n");
-        mWriteWaiter.wait(mLock);
-    }
-    assert(mNumReaders == 0);
-    assert(mNumWriters == 0);
-    mNumWriters++;
-#if defined(PRINT_RENDER_TIMES)
-    mDebugTimer.start();
-#endif
-    mLock.unlock();
-}
-
-/*
- * Try to add a writer.  If it doesn't work right away, return "false".
- */
-bool ReadWriteLock::tryLockForWrite()
-{
-    mLock.lock();
-    if (mNumReaders > 0 || mNumWriters > 0) {
-        mLock.unlock();
-        return false;
-    }
-    assert(mNumReaders == 0);
-    assert(mNumWriters == 0);
-    mNumWriters++;
-#if defined(PRINT_RENDER_TIMES)
-    mDebugTimer.start();
-#endif
-    mLock.unlock();
-    return true;
-}
-
-/*
- * Remove a writer.
- */
-void ReadWriteLock::unlockForWrite()
-{
-    mLock.lock();
-    if (mNumWriters == 0) {
-        LOG(LOG_WARN, "thread",
-            "WARNING: unlockForWrite requested, but not locked\n");
-        return;
-    }
-    assert(mNumWriters == 1);
-    mNumWriters--;
-#if defined(PRINT_RENDER_TIMES)
-    mDebugTimer.stop();
-    //printf(" wrlk held %.3f msec\n",
-    //    (double) mDebugTimer.durationUsecs() / 1000.0);
-#endif
-    // mWriteWaiter.signal();       // should other writers get first dibs?
-    //printf("+++ signaling readers (if any)\n");
-    mReadWaiter.broadcast();        // wake all readers (if any)
-    mLock.unlock();
-}
-
 // ----------------------------------------------------------------------------
 
 #if 0
@@ -1025,6 +886,8 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
     // hold a strong reference on ourself
     mHoldSelf = this;
 
+    mRunning = true;
+
     bool res;
     if (mCanCallJava) {
         res = createThreadEtc(_threadLoop,
@@ -1038,14 +901,16 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
         mStatus = UNKNOWN_ERROR;   // something happened!
         mRunning = false;
         mThread = thread_id_t(-1);
+        mHoldSelf.clear();  // "this" may have gone away after this.
+
+        return UNKNOWN_ERROR;
     }
     
-    if (mStatus < 0) {
-        // something happened, don't leak
-        mHoldSelf.clear();
-    }
-    
-    return mStatus;
+    // Do not refer to mStatus here: The thread is already running (may, in fact
+    // already have exited with a valid mStatus result). The NO_ERROR indication
+    // here merely indicates successfully starting the thread and does not
+    // imply successful termination/execution.
+    return NO_ERROR;
 }
 
 int Thread::_threadLoop(void* user)
@@ -1055,20 +920,32 @@ int Thread::_threadLoop(void* user)
     wp<Thread> weak(strong);
     self->mHoldSelf.clear();
 
-    // we're about to run...
-    self->mStatus = self->readyToRun();
-    if (self->mStatus!=NO_ERROR || self->mExitPending) {
-        // pretend the thread never started...
-        self->mExitPending = false;
-        self->mRunning = false;
-        return 0;
-    }
-    
-    // thread is running now
-    self->mRunning = true;
+    bool first = true;
 
     do {
-        bool result = self->threadLoop();
+        bool result;
+        if (first) {
+            first = false;
+            self->mStatus = self->readyToRun();
+            result = (self->mStatus == NO_ERROR);
+
+            if (result && !self->mExitPending) {
+                // Binder threads (and maybe others) rely on threadLoop
+                // running at least once after a successful ::readyToRun()
+                // (unless, of course, the thread has already been asked to exit
+                // at that point).
+                // This is because threads are essentially used like this:
+                //   (new ThreadSubclass())->run();
+                // The caller therefore does not retain a strong reference to
+                // the thread and the thread would simply disappear after the
+                // successful ::readyToRun() call instead of entering the
+                // threadLoop at least once.
+                result = self->threadLoop();
+            }
+        } else {
+            result = self->threadLoop();
+        }
+
         if (result == false || self->mExitPending) {
             self->mExitPending = true;
             self->mLock.lock();
@@ -1095,24 +972,23 @@ void Thread::requestExit()
 
 status_t Thread::requestExitAndWait()
 {
-    if (mStatus == OK) {
+    if (mThread == getThreadId()) {
+        LOGW(
+        "Thread (this=%p): don't call waitForExit() from this "
+        "Thread object's thread. It's a guaranteed deadlock!",
+        this);
 
-        if (mThread == getThreadId()) {
-            LOGW(
-            "Thread (this=%p): don't call waitForExit() from this "
-            "Thread object's thread. It's a guaranteed deadlock!",
-            this);
-            return WOULD_BLOCK;
-        }
-        
-        requestExit();
-
-        Mutex::Autolock _l(mLock);
-        while (mRunning == true) {
-            mThreadExitedCondition.wait(mLock);
-        }
-        mExitPending = false;
+        return WOULD_BLOCK;
     }
+    
+    requestExit();
+
+    Mutex::Autolock _l(mLock);
+    while (mRunning == true) {
+        mThreadExitedCondition.wait(mLock);
+    }
+    mExitPending = false;
+
     return mStatus;
 }
 

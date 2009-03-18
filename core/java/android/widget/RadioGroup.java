@@ -122,6 +122,23 @@ public class RadioGroup extends LinearLayout {
         }
     }
 
+    @Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        if (child instanceof RadioButton) {
+            final RadioButton button = (RadioButton) child;
+            if (button.isChecked()) {
+                mProtectFromCheckedChange = true;
+                if (mCheckedId != -1) {
+                    setCheckedStateForView(mCheckedId, false);
+                }
+                mProtectFromCheckedChange = false;
+                setCheckedId(button.getId());
+            }
+        }
+
+        super.addView(child, index, params);
+    }
+
     /**
      * <p>Sets the selection to the radio button whose identifier is passed in
      * parameter. Using -1 as the selection identifier clears the selection;

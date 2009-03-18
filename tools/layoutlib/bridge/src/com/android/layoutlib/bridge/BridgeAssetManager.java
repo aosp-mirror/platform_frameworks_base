@@ -24,9 +24,36 @@ import java.util.Locale;
 public class BridgeAssetManager extends AssetManager {
     
     /**
-     * Change the configuation used when retrieving resources.  Not for use by
-     * applications.
-     * {@hide}
+     * This initializes the static field {@link AssetManager#mSystem} which is used
+     * by methods who get a global asset manager using {@link AssetManager#getSystem()}.
+     * <p/>
+     * They will end up using our bridge asset manager.
+     * <p/>
+     * {@link Bridge} calls this method after setting up a new bridge.
+     */
+    /*package*/ static AssetManager initSystem() {
+        if (!(AssetManager.mSystem instanceof BridgeAssetManager)) {
+            // Note that AssetManager() creates a system AssetManager and we override it
+            // with our BridgeAssetManager.
+            AssetManager.mSystem = new BridgeAssetManager();
+            AssetManager.mSystem.makeStringBlocks(false);
+        }
+        return AssetManager.mSystem;
+    }
+    
+    /**
+     * Clears the static {@link AssetManager#mSystem} to make sure we don't leave objects
+     * around that would prevent us from unloading the library.
+     */
+    /*package*/ static void clearSystem() {
+        AssetManager.mSystem = null;
+    }
+    
+    private BridgeAssetManager() {
+    }
+    
+    /**
+     * Change the configuration used when retrieving resources.  Not for use by applications.
      */
     @Override
     public void setConfiguration(int mcc, int mnc, String locale,

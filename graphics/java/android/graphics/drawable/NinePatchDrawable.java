@@ -17,6 +17,15 @@
 package android.graphics.drawable;
 
 import android.graphics.*;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * 
@@ -26,14 +35,28 @@ import android.graphics.*;
  *
  */
 public class NinePatchDrawable extends Drawable {
+    private NinePatchState mNinePatchState;
+    private NinePatch mNinePatch;
+    private Rect mPadding;
+    private Paint mPaint;
+    private boolean mMutated;
 
-    public NinePatchDrawable(Bitmap bitmap, byte[] chunk,
-                             Rect padding, String srcName) {
+    NinePatchDrawable() {
+    }
+
+    public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
     }
     
     public NinePatchDrawable(NinePatch patch) {
         this(new NinePatchState(patch, null));
+    }
+
+    private void setNinePatchState(NinePatchState state) {
+        mNinePatchState = state;
+        mNinePatch = state.mNinePatch;
+        mPadding = state.mPadding;
+        if (state.mDither) setDither(state.mDither);
     }
 
     // overrides
@@ -45,8 +68,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mNinePatchState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mNinePatchState.mChangingConfigurations;
     }
     
     @Override
@@ -69,6 +91,55 @@ public class NinePatchDrawable extends Drawable {
     public void setDither(boolean dither) {
         getPaint().setDither(dither);
     }
+
+    @Override
+    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+            throws XmlPullParserException, IOException {
+        super.inflate(r, parser, attrs);
+
+        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.NinePatchDrawable);
+
+        final int id = a.getResourceId(com.android.internal.R.styleable.NinePatchDrawable_src, 0);
+        if (id == 0) {
+            throw new XmlPullParserException(parser.getPositionDescription() +
+                    ": <nine-patch> requires a valid src attribute");
+        }
+
+        final boolean dither = a.getBoolean(
+                com.android.internal.R.styleable.NinePatchDrawable_dither, false);
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        if (dither) {
+            options.inDither = false;
+        }
+
+        final Rect padding = new Rect();        
+        Bitmap bitmap = null;
+
+        try {
+            final TypedValue value = new TypedValue();
+            final InputStream is = r.openRawResource(id, value);
+
+            bitmap = BitmapFactory.decodeStream(r, value, is, padding, options);
+
+            is.close();
+        } catch (IOException e) {
+            // Ignore
+        }
+
+        if (bitmap == null) {
+            throw new XmlPullParserException(parser.getPositionDescription() +
+                    ": <nine-patch> requires a valid src attribute");
+        } else if (bitmap.getNinePatchChunk() == null) {
+            throw new XmlPullParserException(parser.getPositionDescription() +
+                    ": <nine-patch> requires a valid 9-patch source image");
+        }
+
+        setNinePatchState(new NinePatchState(
+                new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"), padding, dither));
+
+        a.recycle();
+    }
+
 
     public Paint getPaint() {
         if (mPaint == null) {
@@ -104,12 +175,13 @@ public class NinePatchDrawable extends Drawable {
     }
 
     /**
-     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat} value of OPAQUE or TRANSLUCENT.
+     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat}
+     * value of OPAQUE or TRANSLUCENT.
      */
     @Override
     public int getOpacity() {
-        return mNinePatch.hasAlpha() || (mPaint != null && mPaint.getAlpha() < 255)
-            ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+        return mNinePatch.hasAlpha() || (mPaint != null && mPaint.getAlpha() < 255) ?
+                PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
     }
 
     @Override
@@ -123,16 +195,42 @@ public class NinePatchDrawable extends Drawable {
         return mNinePatchState;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mNinePatchState = new NinePatchState(mNinePatchState);
+            mNinePatch = mNinePatchState.mNinePatch;
+            mPadding = mNinePatchState.mPadding;
+            mMutated = true;
+        }
+        return this;
+    }
+
     final static class NinePatchState extends ConstantState {
-        NinePatchState(NinePatch ninePatch, Rect padding)
-        {
+        final NinePatch mNinePatch;
+        final Rect mPadding;
+        final boolean mDither;
+        int mChangingConfigurations;
+
+        NinePatchState(NinePatch ninePatch, Rect padding) {
+            this(ninePatch, padding, false);
+        }
+
+        NinePatchState(NinePatch ninePatch, Rect rect, boolean dither) {
             mNinePatch = ninePatch;
-            mPadding = padding;
+            mPadding = rect;
+            mDither = dither;
+        }
+
+        NinePatchState(NinePatchState state) {
+            mNinePatch = new NinePatch(state.mNinePatch);
+            mPadding = new Rect(state.mPadding);
+            mChangingConfigurations = state.mChangingConfigurations;
+            mDither = state.mDither;
         }
 
         @Override
-        public Drawable newDrawable()
-        {
+        public Drawable newDrawable() {
             return new NinePatchDrawable(this);
         }
         
@@ -140,21 +238,10 @@ public class NinePatchDrawable extends Drawable {
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }
-
-        final NinePatch mNinePatch;
-        final Rect      mPadding;
-        int             mChangingConfigurations;
     }
 
     private NinePatchDrawable(NinePatchState state) {
-        mNinePatchState = state;
-        mNinePatch = state.mNinePatch;
-        mPadding = state.mPadding;
+        setNinePatchState(state);
     }
-
-    private final NinePatchState    mNinePatchState;
-    private final NinePatch         mNinePatch;
-    private final Rect              mPadding;
-    private Paint                   mPaint;
 }
 

@@ -16,18 +16,17 @@
 
 package android.view;
 
-import android.media.ToneGenerator;
+import android.bluetooth.HeadsetBase;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
+import android.media.ToneGenerator;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 import android.widget.ImageView;
@@ -39,7 +38,7 @@ import android.widget.Toast;
  * Handle the volume up and down keys.
  *
  * This code really should be moved elsewhere.
- * 
+ *
  * @hide
  */
 public class VolumePanel extends Handler
@@ -54,7 +53,7 @@ public class VolumePanel extends Handler
      * PhoneWindow will implement this part.
      */
     public static final int PLAY_SOUND_DELAY = 300;
-    
+
     /**
      * The delay before vibrating. This small period exists so if the user is
      * moving to silent mode, it will not emit a short vibrate (it normally
@@ -64,28 +63,30 @@ public class VolumePanel extends Handler
     public static final int VIBRATE_DELAY = 300;
 
     private static final int VIBRATE_DURATION = 300;
-    private static final int BEEP_DURATION = 150; 
+    private static final int BEEP_DURATION = 150;
     private static final int MAX_VOLUME = 100;
     private static final int FREE_DELAY = 10000;
-    
+
     private static final int MSG_VOLUME_CHANGED = 0;
     private static final int MSG_FREE_RESOURCES = 1;
     private static final int MSG_PLAY_SOUND = 2;
     private static final int MSG_STOP_SOUNDS = 3;
     private static final int MSG_VIBRATE = 4;
-    
+
     private static final int RINGTONE_VOLUME_TEXT = com.android.internal.R.string.volume_ringtone;
     private static final int MUSIC_VOLUME_TEXT = com.android.internal.R.string.volume_music;
     private static final int INCALL_VOLUME_TEXT = com.android.internal.R.string.volume_call;
     private static final int ALARM_VOLUME_TEXT = com.android.internal.R.string.volume_alarm;
     private static final int UNKNOWN_VOLUME_TEXT = com.android.internal.R.string.volume_unknown;
     private static final int NOTIFICATION_VOLUME_TEXT =
-            com.android.internal.R.string.volume_notification; 
-    
+            com.android.internal.R.string.volume_notification;
+    private static final int BLUETOOTH_INCALL_VOLUME_TEXT =
+            com.android.internal.R.string.volume_bluetooth_call;
+
     protected Context mContext;
     private AudioManager mAudioManager;
     protected AudioService mAudioService;
-    
+
     private final Toast mToast;
     private final View mView;
     private final TextView mMessage;
@@ -117,13 +118,13 @@ public class VolumePanel extends Handler
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = new Vibrator();
     }
-    
+
     public void postVolumeChanged(int streamType, int flags) {
         if (hasMessages(MSG_VOLUME_CHANGED)) return;
         removeMessages(MSG_FREE_RESOURCES);
         obtainMessage(MSG_VOLUME_CHANGED, streamType, flags).sendToTarget();
     }
-    
+
     /**
      * Override this if you have other work to do when the volume changes (for
      * example, vibrating, playing a sound, etc.). Make sure to call through to
@@ -132,31 +133,31 @@ public class VolumePanel extends Handler
     protected void onVolumeChanged(int streamType, int flags) {
 
         if (LOGD) Log.d(TAG, "onVolumeChanged(streamType: " + streamType + ", flags: " + flags + ")");
-        
+
         if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
             onShowVolumeChanged(streamType, flags);
         }
-        
+
         if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
             removeMessages(MSG_PLAY_SOUND);
             sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
         }
-        
+
         if ((flags & AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE) != 0) {
             removeMessages(MSG_PLAY_SOUND);
             removeMessages(MSG_VIBRATE);
             onStopSounds();
         }
-        
+
         removeMessages(MSG_FREE_RESOURCES);
-        sendMessageDelayed(obtainMessage(MSG_FREE_RESOURCES), FREE_DELAY); 
+        sendMessageDelayed(obtainMessage(MSG_FREE_RESOURCES), FREE_DELAY);
     }
 
     protected void onShowVolumeChanged(int streamType, int flags) {
         int index = mAudioService.getStreamVolume(streamType);
         int message = UNKNOWN_VOLUME_TEXT;
         int additionalMessage = 0;
-        
+
         if (LOGD) {
             Log.d(TAG, "onShowVolumeChanged(streamType: " + streamType
                     + ", flags: " + flags + "), index: " + index);
@@ -166,13 +167,13 @@ public class VolumePanel extends Handler
         int max = mAudioService.getStreamMaxVolume(streamType);
 
         switch (streamType) {
-            
+
             case AudioManager.STREAM_RING: {
                 message = RINGTONE_VOLUME_TEXT;
                 setRingerIcon(index);
                 break;
             }
-                
+
             case AudioManager.STREAM_MUSIC: {
                 message = MUSIC_VOLUME_TEXT;
                 if (mAudioManager.isBluetoothA2dpOn()) {
@@ -184,7 +185,7 @@ public class VolumePanel extends Handler
                 }
                 break;
             }
-                
+
             case AudioManager.STREAM_VOICE_CALL: {
                 /*
                  * For in-call voice call volume, there is no inaudible volume.
@@ -194,13 +195,7 @@ public class VolumePanel extends Handler
                 index++;
                 max++;
                 message = INCALL_VOLUME_TEXT;
-                if (mAudioManager.isBluetoothScoOn()) {
-                    additionalMessage =
-                        com.android.internal.R.string.volume_call_hint_playing_through_bluetooth;
-                    setLargeIcon(com.android.internal.R.drawable.ic_volume_bluetooth_in_call);
-                } else {
-                    setSmallIcon(index);
-                }
+                setSmallIcon(index);
                 break;
             }
 
@@ -209,10 +204,23 @@ public class VolumePanel extends Handler
                 setSmallIcon(index);
                 break;
             }
-            
+
             case AudioManager.STREAM_NOTIFICATION: {
                 message = NOTIFICATION_VOLUME_TEXT;
                 setSmallIcon(index);
+                break;
+            }
+
+            case AudioManager.STREAM_BLUETOOTH_SCO: {
+                /*
+                 * For in-call voice call volume, there is no inaudible volume.
+                 * Rescale the UI control so the progress bar doesn't go all
+                 * the way to zero and don't show the mute icon.
+                 */
+                index++;
+                max++;
+                message = BLUETOOTH_INCALL_VOLUME_TEXT;
+                setLargeIcon(com.android.internal.R.drawable.ic_volume_bluetooth_in_call);
                 break;
             }
         }
@@ -228,25 +236,25 @@ public class VolumePanel extends Handler
             mAdditionalMessage.setVisibility(View.VISIBLE);
             mAdditionalMessage.setText(Resources.getSystem().getString(additionalMessage));
         }
-        
+
         if (max != mLevel.getMax()) {
             mLevel.setMax(max);
         }
         mLevel.setProgress(index);
-        
+
         mToast.setView(mView);
         mToast.setDuration(Toast.LENGTH_SHORT);
         mToast.setGravity(Gravity.TOP, 0, 0);
         mToast.show();
-        
+
         // Do a little vibrate if applicable (only when going into vibrate mode)
-        if ((flags & AudioManager.FLAG_VIBRATE) != 0 && 
+        if ((flags & AudioManager.FLAG_VIBRATE) != 0 &&
                 mAudioService.isStreamAffectedByRingerMode(streamType) &&
                 mAudioService.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE &&
                 mAudioService.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
             sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
         }
-        
+
     }
 
     protected void onPlaySound(int streamType, int flags) {
@@ -256,7 +264,7 @@ public class VolumePanel extends Handler
             // Force stop right now
             onStopSounds();
         }
-        
+
         synchronized (this) {
             ToneGenerator toneGen = getOrCreateToneGenerator(streamType);
             toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
@@ -266,7 +274,7 @@ public class VolumePanel extends Handler
     }
 
     protected void onStopSounds() {
-        
+
         synchronized (this) {
             int numStreamTypes = AudioSystem.getNumStreamTypes();
             for (int i = numStreamTypes - 1; i >= 0; i--) {
@@ -277,17 +285,17 @@ public class VolumePanel extends Handler
             }
         }
     }
-    
+
     protected void onVibrate() {
-        
+
         // Make sure we ended up in vibrate ringer mode
         if (mAudioService.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
             return;
         }
-        
+
         mVibrator.vibrate(VIBRATE_DURATION);
     }
-    
+
     /**
      * Lock on this VolumePanel instance as long as you use the returned ToneGenerator.
      */
@@ -303,13 +311,13 @@ public class VolumePanel extends Handler
 
     /**
      * Makes the small icon visible, and hides the large icon.
-     * 
+     *
      * @param index The volume index, where 0 means muted.
      */
     private void setSmallIcon(int index) {
         mLargeStreamIcon.setVisibility(View.GONE);
         mSmallStreamIcon.setVisibility(View.VISIBLE);
-        
+
         mSmallStreamIcon.setImageResource(index == 0
                 ? com.android.internal.R.drawable.ic_volume_off_small
                 : com.android.internal.R.drawable.ic_volume_small);
@@ -317,7 +325,7 @@ public class VolumePanel extends Handler
 
     /**
      * Makes the large image view visible with the given icon.
-     * 
+     *
      * @param resId The icon to display.
      */
     private void setLargeIcon(int resId) {
@@ -329,7 +337,7 @@ public class VolumePanel extends Handler
     /**
      * Makes the ringer icon visible with an icon that is chosen
      * based on the current ringer mode.
-     * 
+     *
      * @param index
      */
     private void setRingerIcon(int index) {
@@ -350,13 +358,13 @@ public class VolumePanel extends Handler
         }
         mLargeStreamIcon.setImageResource(icon);
     }
-    
+
     protected void onFreeResources() {
         // We'll keep the views, just ditch the cached drawable and hence
         // bitmaps
         mSmallStreamIcon.setImageDrawable(null);
         mLargeStreamIcon.setImageDrawable(null);
-        
+
         synchronized (this) {
             for (int i = mToneGenerators.length - 1; i >= 0; i--) {
                 if (mToneGenerators[i] != null) {
@@ -366,26 +374,26 @@ public class VolumePanel extends Handler
             }
         }
     }
-    
+
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            
+
             case MSG_VOLUME_CHANGED: {
                 onVolumeChanged(msg.arg1, msg.arg2);
                 break;
             }
-            
+
             case MSG_FREE_RESOURCES: {
                 onFreeResources();
                 break;
             }
-            
+
             case MSG_STOP_SOUNDS: {
                 onStopSounds();
                 break;
             }
-            
+
             case MSG_PLAY_SOUND: {
                 onPlaySound(msg.arg1, msg.arg2);
                 break;
@@ -395,8 +403,8 @@ public class VolumePanel extends Handler
                 onVibrate();
                 break;
             }
-            
+
         }
     }
-    
+
 }

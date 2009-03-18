@@ -24,14 +24,19 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+
+import java.lang.ref.WeakReference;
 
 /**
  * <p>A popup window that can be used to display an arbitrary view. The popup
@@ -98,6 +103,8 @@ public class PopupWindow {
     private Rect mTempRect = new Rect();
     
     private Drawable mBackground;
+    private Drawable mAboveAnchorBackgroundDrawable;
+    private Drawable mBelowAnchorBackgroundDrawable;
 
     private boolean mAboveAnchor;
     
@@ -109,7 +116,23 @@ public class PopupWindow {
     private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
         com.android.internal.R.attr.state_above_anchor
     };
-    
+
+    private WeakReference<View> mAnchor;
+    private OnScrollChangedListener mOnScrollChangedListener =
+        new OnScrollChangedListener() {
+            public void onScrollChanged() {
+                View anchor = mAnchor.get();
+                if (anchor != null && mPopupView != null) {
+                    WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                            mPopupView.getLayoutParams();
+
+                    mAboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff);
+                    update(p.x, p.y, -1, -1, true);
+                }
+            }
+        };
+    private int mAnchorXoff, mAnchorYoff;
+
     /**
      * <p>Create a new empty, non focusable popup window of dimension (0,0).</p>
      *
@@ -144,6 +167,43 @@ public class PopupWindow {
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
 
+        // If this is a StateListDrawable, try to find and store the drawable to be
+        // used when the drop-down is placed above its anchor view, and the one to be
+        // used when the drop-down is placed below its anchor view. We extract
+        // the drawables ourselves to work around a problem with using refreshDrawableState
+        // that it will take into account the padding of all drawables specified in a
+        // StateListDrawable, thus adding superfluous padding to drop-down views.
+        //
+        // We assume a StateListDrawable will have a drawable for ABOVE_ANCHOR_STATE_SET and
+        // at least one other drawable, intended for the 'below-anchor state'.
+        if (mBackground instanceof StateListDrawable) {
+            StateListDrawable background = (StateListDrawable) mBackground;
+
+            // Find the above-anchor view - this one's easy, it should be labeled as such.
+            int aboveAnchorStateIndex = background.getStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
+            
+            // Now, for the below-anchor view, look for any other drawable specified in the
+            // StateListDrawable which is not for the above-anchor state and use that.
+            int count = background.getStateCount();
+            int belowAnchorStateIndex = -1;
+            for (int i = 0; i < count; i++) {
+                if (i != aboveAnchorStateIndex) {
+                    belowAnchorStateIndex = i;
+                    break;
+                }
+            }
+            
+            // Store the drawables we found, if we found them. Otherwise, set them both
+            // to null so that we'll just use refreshDrawableState.
+            if (aboveAnchorStateIndex != -1 && belowAnchorStateIndex != -1) {
+                mAboveAnchorBackgroundDrawable = background.getStateDrawable(aboveAnchorStateIndex);
+                mBelowAnchorBackgroundDrawable = background.getStateDrawable(belowAnchorStateIndex);
+            } else {
+                mBelowAnchorBackgroundDrawable = null;
+                mAboveAnchorBackgroundDrawable = null;
+            }
+        }
+        
         a.recycle();
     }
 
@@ -579,6 +639,8 @@ public class PopupWindow {
             return;
         }
 
+        unregisterForScrollChanged();
+
         mIsShowing = true;
         mIsDropdown = false;
 
@@ -617,6 +679,8 @@ public class PopupWindow {
      * the popup in its entirety, this method tries to find a parent scroll
      * view to scroll. If no parent scroll view can be scrolled, the bottom-left
      * corner of the popup is pinned at the top left corner of the anchor view.</p>
+     * <p>If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.</p>
      *
      * @param anchor the view on which to pin the popup window
      *
@@ -627,19 +691,51 @@ public class PopupWindow {
             return;
         }
 
+        registerForScrollChanged(anchor, xoff, yoff);
+
         mIsShowing = true;
         mIsDropdown = true;
 
         WindowManager.LayoutParams p = createPopupLayout(anchor.getWindowToken());
         preparePopup(p);
-        if (mBackground != null) {
-            mPopupView.refreshDrawableState();
-        }
         mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
+
+        if (mBackground != null) {
+            // If the background drawable provided was a StateListDrawable with above-anchor
+            // and below-anchor states, use those. Otherwise rely on refreshDrawableState to
+            // do the job.
+            if (mAboveAnchorBackgroundDrawable != null) {
+                if (mAboveAnchor) {
+                    mPopupView.setBackgroundDrawable(mAboveAnchorBackgroundDrawable);
+                } else {
+                    mPopupView.setBackgroundDrawable(mBelowAnchorBackgroundDrawable);
+                }
+            } else {
+                mPopupView.refreshDrawableState();
+            }
+        }
+
         if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
         if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
+
         p.windowAnimations = computeAnimationResource();
+
         invokePopup(p);
+    }
+
+    /**
+     * Indicates whether the popup is showing above (the y coordinate of the popup's bottom
+     * is less than the y coordinate of the anchor) or below the anchor view (the y coordinate
+     * of the popup is greater than y coordinate of the anchor's bottom).
+     *
+     * The value returned
+     * by this method is meaningful only after {@link #showAsDropDown(android.view.View)}
+     * or {@link #showAsDropDown(android.view.View, int, int)} was invoked.
+     *
+     * @return True if this popup is showing above the anchor view, false otherwise.
+     */
+    public boolean isAboveAnchor() {
+        return mAboveAnchor;
     }
 
     /**
@@ -652,28 +748,22 @@ public class PopupWindow {
      */
     private void preparePopup(WindowManager.LayoutParams p) {
         if (mBackground != null) {
+            final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
+            int height = ViewGroup.LayoutParams.FILL_PARENT;
+            if (layoutParams != null &&
+                    layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            }
+
             // when a background is available, we embed the content view
             // within another view that owns the background drawable
             PopupViewContainer popupViewContainer = new PopupViewContainer(mContext);
             PopupViewContainer.LayoutParams listParams = new PopupViewContainer.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.FILL_PARENT
+                    ViewGroup.LayoutParams.FILL_PARENT, height
             );
             popupViewContainer.setBackgroundDrawable(mBackground);
             popupViewContainer.addView(mContentView, listParams);
 
-            if (p.height >= 0) {
-                // accomodate the popup's height to take into account the
-                // background's padding
-                p.height += popupViewContainer.getPaddingTop() +
-                        popupViewContainer.getPaddingBottom();
-            }
-            if (p.width >= 0) {
-                // accomodate the popup's width to take into account the
-                // background's padding
-                p.width += popupViewContainer.getPaddingLeft() +
-                        popupViewContainer.getPaddingRight();
-            }
             mPopupView = popupViewContainer;
         } else {
             mPopupView = mContentView;
@@ -720,7 +810,8 @@ public class PopupWindow {
         p.flags = computeFlags(p.flags);
         p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
         p.token = token;
-        
+        p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
+
         return p;
     }
 
@@ -746,7 +837,7 @@ public class PopupWindow {
         if (!mTouchable) {
             curFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
-        if (mTouchable) {
+        if (mOutsideTouchable) {
             curFlags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
         if (!mClippingEnabled) {
@@ -781,7 +872,9 @@ public class PopupWindow {
      *
      * @return true if the popup is translated upwards to fit on screen
      */
-    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p, int xoff, int yoff) {
+    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
+            int xoff, int yoff) {
+
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
         p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
@@ -795,8 +888,7 @@ public class PopupWindow {
         anchor.getWindowVisibleDisplayFrame(displayFrame);
         
         final View root = anchor.getRootView();
-        if (mScreenLocation[1] + anchor.getMeasuredHeight() + yoff + mPopupHeight > displayFrame.bottom
-                || p.x + mPopupWidth - root.getWidth() > 0) {
+        if (p.y + mPopupHeight > displayFrame.bottom || p.x + mPopupWidth - root.getWidth() > 0) {
             // if the drop down disappears at the bottom of the screen. we try to
             // scroll a parent scrollview or move the drop down back up on top of
             // the edit box
@@ -815,11 +907,11 @@ public class PopupWindow {
             // determine whether there is more space above or below the anchor
             anchor.getLocationOnScreen(mScreenLocation);
             
-            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getMeasuredHeight() - yoff)
-                    < (mScreenLocation[1] - yoff - displayFrame.top);
+            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getMeasuredHeight() - yoff) <
+                    (mScreenLocation[1] - yoff - displayFrame.top);
             if (onTop) {
                 p.gravity = Gravity.LEFT | Gravity.BOTTOM;
-                p.y = root.getHeight() - mDrawingLocation[1] - yoff;
+                p.y = root.getHeight() - mDrawingLocation[1] + yoff;
             } else {
                 p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
             }
@@ -841,15 +933,30 @@ public class PopupWindow {
      *         shown.
      */
     public int getMaxAvailableHeight(View anchor) {
+        return getMaxAvailableHeight(anchor, 0);
+    }
+
+    /**
+     * Returns the maximum height that is available for the popup to be
+     * completely shown. It is recommended that this height be the maximum for
+     * the popup's height, otherwise it is possible that the popup will be
+     * clipped.
+     *
+     * @param anchor The view on which the popup window must be anchored.
+     * @param yOffset y offset from the view's bottom edge
+     * @return The maximum available height for the popup to be completely
+     *         shown.
+     */
+    public int getMaxAvailableHeight(View anchor, int yOffset) {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
         
-        final int distanceToBottom = displayFrame.bottom
-                - (anchorPos[1] + anchor.getHeight());
-        final int distanceToTop = anchorPos[1] - displayFrame.top;
+        final int distanceToBottom = displayFrame.bottom -
+                (anchorPos[1] + anchor.getHeight()) - yOffset;
+        final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
 
         // anchorPos[1] is distance from anchor to top of screen
         int returnedHeight = Math.max(distanceToBottom, distanceToTop);
@@ -870,6 +977,8 @@ public class PopupWindow {
      */
     public void dismiss() {
         if (isShowing() && mPopupView != null) {
+            unregisterForScrollChanged();
+
             mWindowManager.removeView(mPopupView);
             if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                 ((ViewGroup) mPopupView).removeView(mContentView);
@@ -938,11 +1047,32 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(int x, int y, int width, int height) {
+        update(x, y, width, height, false);
+    }
+
+    /**
+     * <p>Updates the position and the dimension of the popup window. Width and
+     * height can be set to -1 to update location only.  Calling this function
+     * also updates the window with the current popup state as
+     * described for {@link #update()}.</p>
+     *
+     * @param x the new x location
+     * @param y the new y location
+     * @param width the new width, can be -1 to ignore
+     * @param height the new height, can be -1 to ignore
+     * @param force reposition the window even if the specified position
+     *              already seems to correspond to the LayoutParams
+     * 
+     * @hide pending API council approval
+     */
+    public void update(int x, int y, int width, int height, boolean force) {
         if (width != -1) {
+            mLastWidth = width;
             setWidth(width);
         }
 
         if (height != -1) {
+            mLastHeight = height;
             setHeight(height);
         }
 
@@ -953,7 +1083,7 @@ public class PopupWindow {
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                 mPopupView.getLayoutParams();
 
-        boolean update = false;
+        boolean update = force;
 
         final int finalWidth = mWidthMode < 0 ? mWidthMode : mLastWidth;
         if (width != -1 && p.width != finalWidth) {
@@ -990,22 +1120,6 @@ public class PopupWindow {
         }
         
         if (update) {
-            if (mPopupView != mContentView) {
-                final View popupViewContainer = mPopupView;
-                if (p.height >= 0) {
-                    // accomodate the popup's height to take into account the
-                    // background's padding
-                    p.height += popupViewContainer.getPaddingTop() +
-                            popupViewContainer.getPaddingBottom();
-                }
-                if (p.width >= 0) {
-                    // accomodate the popup's width to take into account the
-                    // background's padding
-                    p.width += popupViewContainer.getPaddingLeft() +
-                            popupViewContainer.getPaddingRight();
-                }
-            }
-
             mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
@@ -1029,6 +1143,8 @@ public class PopupWindow {
      * height can be set to -1 to update location only.  Calling this function
      * also updates the window with the current popup state as
      * described for {@link #update()}.</p>
+     * <p>If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.</p>
      *
      * @param anchor the popup's anchor view
      * @param xoff x offset from the view's left edge
@@ -1039,6 +1155,12 @@ public class PopupWindow {
     public void update(View anchor, int xoff, int yoff, int width, int height) {
         if (!isShowing() || mContentView == null) {
             return;
+        }
+
+        WeakReference<View> oldAnchor = mAnchor;
+        if (oldAnchor == null || oldAnchor.get() != anchor ||
+            mAnchorXoff != xoff || mAnchorYoff != yoff) {
+            registerForScrollChanged(anchor, xoff, yoff);
         }
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
@@ -1055,10 +1177,10 @@ public class PopupWindow {
             mPopupHeight = height;
         }
         
-        findDropDownPosition(anchor, p, xoff, yoff);
+        mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
         update(p.x, p.y, width, height);
     }
-    
+
     /**
      * Listener that is called when this popup window is dismissed.
      */
@@ -1068,7 +1190,33 @@ public class PopupWindow {
          */
         public void onDismiss();
     }
-    
+
+    private void unregisterForScrollChanged() {
+        WeakReference<View> anchorRef = mAnchor;
+        View anchor = null;
+        if (anchorRef != null) {
+            anchor = anchorRef.get();
+        }
+        if (anchor != null) {
+            ViewTreeObserver vto = anchor.getViewTreeObserver();
+            vto.removeOnScrollChangedListener(mOnScrollChangedListener);
+        }
+        mAnchor = null;
+    }
+
+    private void registerForScrollChanged(View anchor, int xoff, int yoff) {
+        unregisterForScrollChanged();
+
+        mAnchor = new WeakReference<View>(anchor);
+        ViewTreeObserver vto = anchor.getViewTreeObserver();
+        if (vto != null) {
+            vto.addOnScrollChangedListener(mOnScrollChangedListener);
+        }
+
+        mAnchorXoff = xoff;
+        mAnchorYoff = yoff;
+    }
+
     private class PopupViewContainer extends FrameLayout {
 
         public PopupViewContainer(Context context) {

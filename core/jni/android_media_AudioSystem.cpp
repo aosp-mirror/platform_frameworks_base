@@ -53,11 +53,8 @@ static int
 android_media_AudioSystem_setVolume(JNIEnv *env, jobject clazz, jint type, jint volume)
 {
     LOGV("setVolume(%d)", int(volume));
-    if (int(type) == AudioTrack::VOICE_CALL) {
-        return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, float(volume) / 100.0));
-    } else {
-        return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, AudioSystem::linearToLog(volume)));
-    }
+    
+    return check_AudioSystem_Command(AudioSystem::setStreamVolume(type, AudioSystem::linearToLog(volume)));
 }
 
 static int
@@ -66,12 +63,7 @@ android_media_AudioSystem_getVolume(JNIEnv *env, jobject clazz, jint type)
     float v;
     int v_int = -1;
     if (AudioSystem::getStreamVolume(int(type), &v) == NO_ERROR) {
-        // voice call volume is converted to log scale in the hardware
-        if (int(type) == AudioTrack::VOICE_CALL) {
-            v_int = lrint(v * 100.0);
-        } else {
-            v_int = AudioSystem::logToLinear(v);
-        }
+        v_int = AudioSystem::logToLinear(v);
     }
     return v_int;
 }

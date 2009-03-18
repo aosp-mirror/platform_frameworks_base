@@ -17,6 +17,7 @@
 package android.os;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
@@ -28,12 +29,13 @@ import dalvik.bytecode.Opcodes;
 import dalvik.system.VMDebug;
 
 
-/** Provides various debugging functions for Android applications, including
+/**
+ * Provides various debugging functions for Android applications, including
  * tracing and allocation counts.
  * <p><strong>Logging Trace Files</strong></p>
  * <p>Debug can create log files that give details about an application, such as
  * a call stack and start/stop times for any running methods. See <a
-href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Program</a> for
+href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
  * information about reading trace files. To start logging trace files, call one
  * of the startMethodTracing() methods. To stop tracing, call
  * {@link #stopMethodTracing()}.
@@ -285,7 +287,7 @@ public final class Debug
 
     /**
      * Start method tracing with default log name and buffer size. See <a
-href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Program</a> for
+href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
      * information about reading these files. Call stopMethodTracing() to stop
      * tracing.
      */
@@ -297,7 +299,7 @@ href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Progra
      * Start method tracing, specifying the trace log file name.  The trace
      * file will be put under "/sdcard" unless an absolute path is given.
      * See <a
-       href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Program</a> for
+       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
      * information about reading trace files.
      *
      * @param traceName Name for the trace log file to create.
@@ -313,7 +315,7 @@ href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Progra
      * Start method tracing, specifying the trace log file name and the
      * buffer size. The trace files will be put under "/sdcard" unless an
      * absolute path is given. See <a
-       href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Program</a> for
+       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
      * information about reading trace files.
      * @param traceName    Name for the trace log file to create.
      * If no name argument is given, this value defaults to "/sdcard/dmtrace.trace".
@@ -330,7 +332,7 @@ href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Progra
      * Start method tracing, specifying the trace log file name and the
      * buffer size. The trace files will be put under "/sdcard" unless an
      * absolute path is given. See <a
-       href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Program</a> for
+       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
      * information about reading trace files.
      *
      * <p>
@@ -578,6 +580,18 @@ href="{@docRoot}reference/traceview.html">Running the Traceview Debugging Progra
      */
     public static int getLoadedClassCount() {
         return VMDebug.getLoadedClassCount();
+    }
+
+    /**
+     * Dump "hprof" data to the specified file.  This will cause a GC.
+     *
+     * @param fileName Full pathname of output file (e.g. "/sdcard/dump.hprof").
+     * @throws UnsupportedOperationException if the VM was built without
+     *         HPROF support.
+     * @throws IOException if an error occurs while opening or writing files.
+     */
+    public static void dumpHprofData(String fileName) throws IOException {
+        VMDebug.dumpHprofData(fileName);
     }
 
     /**

@@ -1,37 +1,42 @@
+
 <ul>
-
-  <li><h2>Android 1.0</h2>
+  <li><?cs 
+   if:android.whichdoc != "online" ?>
+    <h2>Android 1.1 SDK, r1</h2><?cs 
+   else ?>
+    <h2>Current SDK Release</h2><?cs 
+   /if ?>
+    <ul><?cs 
+     if:android.whichdoc == "online" ?>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Download</a></li><?cs 
+     /if ?>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/installing.html">Installing</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/upgrading.html">Upgrading</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/requirements.html">System Requirements</a></li>
+    </ul>
     <ul>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Release 1</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.0_r1/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Release 2</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.0_r2/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-
+      <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
+    </ul><?cs 
+ if:android.whichdoc == "online" ?>
+  <li>
+    <h2>Android System Images</h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
     </ul>
   </li>
-<!-- just a template
-  <li><h2>Android 1.1</h2>
+  <li>
+    <h2>Previous SDK Releases</h2>
     <ul>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Release 1</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.1_r1/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
-      <li><strong><a href="<?cs var:toroot ?>sdk/1.1_r2/index.html">Release 2</a></strong>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/1.1_r2/RELEASENOTES.html">Release Notes</a></li>
-        </ul>
-      </li>
+      <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, release 2</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Android 1.0 SDK, release 1</a></li>
     </ul>
-  </li>
--->
-  <li><a href="<?cs var:toroot ?>sdk/terms.html">Terms and Conditions</a></li>
+  </li><?cs 
+ /if ?>
 </ul>
 
+<script type="text/javascript">
+<!--
+    buildToggleLists();
+//-->
+</script>

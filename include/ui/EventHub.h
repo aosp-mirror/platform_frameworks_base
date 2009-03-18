@@ -76,6 +76,9 @@ public:
         DEVICE_REMOVED = 0x20000000
     };
     
+    // examine key input devices for specific framework keycode support
+    bool hasKeys(size_t numCodes, int32_t* keyCodes, uint8_t* outFlags);
+
     virtual bool getEvent(int32_t* outDeviceId, int32_t* outType,
             int32_t* outScancode, int32_t* outKeycode, uint32_t *outFlags,
             int32_t* outValue, nsecs_t* outWhen);
@@ -100,6 +103,7 @@ private:
         const String8   path;
         String8         name;
         uint32_t        classes;
+        uint8_t*        keyBitmask;
         KeyLayoutMap*   layoutMap;
         String8         keylayoutFilename;
         device_t*       next;
@@ -134,8 +138,6 @@ private:
 #ifdef EV_SW
     int32_t         mSwitches[SW_MAX+1];
 #endif
-
-    KeyLayoutMap * mLayoutMap;
 };
 
 }; // namespace android

@@ -139,4 +139,16 @@ public interface InputMethodSession {
      * @param data Any data to include with the command.
      */
     public void appPrivateCommand(String action, Bundle data);
+    
+    /**
+     * Toggle the soft input window. 
+     * Applications can toggle the state of the soft input window.
+     * @param showFlags Provides additional operating flags.  May be
+     * 0 or have the {@link InputMethodManager#SHOW_IMPLICIT},
+     * {@link InputMethodManager#SHOW_FORCED} bit set.
+     * @param hideFlags Provides additional operating flags.  May be
+     * 0 or have the {@link  InputMethodManager#HIDE_IMPLICIT_ONLY},
+     * {@link  InputMethodManager#HIDE_NOT_ALWAYS} bit set.
+     */
+    public void toggleSoftInput(int showFlags, int hideFlags);
 }

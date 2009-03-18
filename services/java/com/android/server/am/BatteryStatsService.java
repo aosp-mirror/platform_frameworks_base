@@ -22,8 +22,10 @@ import com.android.internal.os.BatteryStatsImpl;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.util.PrintWriterPrinter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -58,14 +60,23 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     /**
      * @return the current statistics object, which may be modified
-     * to reflect events that affect battery usage.
+     * to reflect events that affect battery usage.  You must lock the
+     * stats object before doing anything with it.
      */
     public BatteryStatsImpl getActiveStatistics() {
         return mStats;
     }
     
-    public BatteryStatsImpl getStatistics() {
-        return mStats;
+    public byte[] getStatistics() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
+        //Log.i("foo", "SENDING BATTERY INFO:");
+        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo"));
+        Parcel out = Parcel.obtain();
+        mStats.writeToParcel(out, 0);
+        byte[] data = out.marshall();
+        out.recycle();
+        return data;
     }
     
     public void noteStartWakelock(int uid, String name, int type) {
@@ -95,6 +106,48 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.getUidStatsLocked(uid).noteStopSensor(sensor);
         }
     }
+    
+    public void noteStartGps(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStartGps(uid);
+        }
+    }
+    
+    public void noteStopGps(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteStopGps(uid);
+        }
+    }
+        
+    public void noteScreenOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScreenOnLocked();
+        }
+    }
+    
+    public void noteScreenOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScreenOffLocked();
+        }
+    }
+
+    public void notePhoneOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneOnLocked();
+        }
+    }
+    
+    public void notePhoneOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneOffLocked();
+        }
+    }
 
     public boolean isOnBattery() {
         return mStats.isOnBattery();
@@ -106,10 +159,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     public long getAwakeTimeBattery() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
         return mStats.getAwakeTimeBattery();
     }
 
     public long getAwakeTimePlugged() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
         return mStats.getAwakeTimePlugged();
     }
 
@@ -117,14 +174,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
         }
-        mContext.enforcePermission(android.Manifest.permission.BATTERY_STATS,
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (this) {
-            mStats.dumpLocked(fd, pw, args);
+        synchronized (mStats) {
+            boolean isCheckin = false;
+            if (args != null) {
+                for (String arg : args) {
+                    if ("-c".equals(arg)) {
+                        isCheckin = true;
+                        break;
+                    }
+                }
+            }
+            if (isCheckin) mStats.dumpCheckinLocked(pw, args);
+            else mStats.dumpLocked(new PrintWriterPrinter(pw));
         }
     }
 }

@@ -182,7 +182,7 @@ public class Contacts {
          * <p>Type: TEXT</P>
          */
         public static final String PHONETIC_NAME = "phonetic_name";
-
+        
         /**
          * The display name. If name is not null name, else if number is not null number,
          * else if email is not null email.
@@ -190,6 +190,14 @@ public class Contacts {
          */
         public static final String DISPLAY_NAME = "display_name";
 
+        /**
+         * The field for sorting list phonetically. The content of this field
+         * may not be human readable but phonetically sortable.
+         * <P>Type: TEXT</p>
+         * @hide Used only in Contacts application for now.
+         */
+        public static final String SORT_STRING = "sort_string";
+        
         /**
          * Notes about the person.
          * <P>Type: TEXT</P>
@@ -231,7 +239,7 @@ public class Contacts {
          * The server version of the photo
          * <P>Type: TEXT (the version number portion of the photo URI)</P>
          */
-        public static final String PHOTO_VERSION = "photo_version";
+        public static final String PHOTO_VERSION = "photo_version";       
     }
 
     /**
@@ -932,27 +940,33 @@ public class Contacts {
         }
         
         /**
-         * This looks up the provider category defined in
-         * {@link android.provider.Im.ProviderCategories} from the predefined IM protocol id.
+         * This looks up the provider name defined in
+         * {@link android.provider.Im.ProviderNames} from the predefined IM protocol id.
          * This is used for interacting with the IM application.
-         * 
+         *
          * @param protocol the protocol ID
-         * @return the provider category the IM app uses for the given protocol, or null if no
+         * @return the provider name the IM app uses for the given protocol, or null if no
          * provider is defined for the given protocol
          * @hide
          */
-        public static String lookupProviderCategoryFromId(int protocol) {
+        public static String lookupProviderNameFromId(int protocol) {
             switch (protocol) {
                 case PROTOCOL_GOOGLE_TALK:
-                    return Im.ProviderCategories.GTALK;
+                    return Im.ProviderNames.GTALK;
                 case PROTOCOL_AIM:
-                    return Im.ProviderCategories.AIM;
+                    return Im.ProviderNames.AIM;
                 case PROTOCOL_MSN:
-                    return Im.ProviderCategories.MSN;
+                    return Im.ProviderNames.MSN;
                 case PROTOCOL_YAHOO:
-                    return Im.ProviderCategories.YAHOO;
+                    return Im.ProviderNames.YAHOO;
                 case PROTOCOL_ICQ:
-                    return Im.ProviderCategories.ICQ;
+                    return Im.ProviderNames.ICQ;
+                case PROTOCOL_JABBER:
+                    return Im.ProviderNames.JABBER;
+                case PROTOCOL_SKYPE:
+                    return Im.ProviderNames.SKYPE;
+                case PROTOCOL_QQ:
+                    return Im.ProviderNames.QQ;
             }
             return null;
         }
@@ -1417,7 +1431,42 @@ public class Contacts {
          */
         public static final String ATTACH_IMAGE =
                 "com.android.contacts.action.ATTACH_IMAGE";
-        
+
+        /**
+         * Takes as input a data URI with a mailto: or tel: scheme. If a single
+         * contact exists with the given data it will be shown. If no contact
+         * exists, a dialog will ask the user if they want to create a new
+         * contact with the provided details filled in. If multiple contacts
+         * share the data the user will be prompted to pick which contact they
+         * want to view.
+         * <p>
+         * For <code>mailto:</code> URIs, the scheme specific portion must be a
+         * raw email address, such as one built using
+         * {@link Uri#fromParts(String, String, String)}.
+         * <p>
+         * For <code>tel:</code> URIs, the scheme specific portion is compared
+         * to existing numbers using the standard caller ID lookup algorithm.
+         * The number must be properly encoded, for example using
+         * {@link Uri#fromParts(String, String, String)}.
+         * <p>
+         * Any extras from the {@link Insert} class will be passed along to the
+         * create activity if there are no contacts to show.
+         * <p>
+         * Passing true for the {@link #EXTRA_FORCE_CREATE} extra will skip
+         * prompting the user when the contact doesn't exist.
+         */
+        public static final String SHOW_OR_CREATE_CONTACT =
+                "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
+
+        /**
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new contact if no matching
+         * contact found.  Otherwise, default behavior is to prompt user with dialog before creating.
+         *
+         * <P>Type: BOOLEAN</P>
+         */
+        public static final String EXTRA_FORCE_CREATE =
+                "com.android.contacts.action.FORCE_CREATE";
+
         /**
          * Intents related to the Contacts app UI.
          */

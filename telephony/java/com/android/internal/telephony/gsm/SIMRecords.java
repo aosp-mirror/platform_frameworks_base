@@ -56,6 +56,7 @@ public final class SIMRecords extends Handler implements SimConstants
     AdnRecordCache adnCache;
 
     VoiceMailConstants mVmConfig;
+    SpnOverride mSpnOverride;
     
     //***** Cached SIM State; cleared on channel close
 
@@ -167,6 +168,7 @@ public final class SIMRecords extends Handler implements SimConstants
         adnCache = new AdnRecordCache(phone);
 
         mVmConfig = new VoiceMailConstants();
+        mSpnOverride = new SpnOverride();
 
         recordsRequested = false;  // No load request is made till SIM ready
 
@@ -202,7 +204,6 @@ public final class SIMRecords extends Handler implements SimConstants
         spnDisplayCondition = -1;
         efMWIS = null;
         efCPHS_MWI = null; 
-        spn = null;
         spdiNetworks = null;
         pnnHomeName = null;
 
@@ -284,7 +285,7 @@ public final class SIMRecords extends Handler implements SimConstants
      * Return Service Provider Name stored in SIM
      * @return null if SIM is not yet ready
      */
-    public String getServiceProvideName()
+    String getServiceProviderName()
     {
         return spn;
     }
@@ -1191,11 +1192,6 @@ public final class SIMRecords extends Handler implements SimConstants
             SmsMessage message = SmsMessage.newFromCMT(
                                 new String[] { "", pdu });
 
-            Log.i("ENF", "message from " +
-                message.getOriginatingAddress());
-            Log.i("ENF", "message text " +
-                message.getMessageBody());
-
             phone.mSMS.dispatchMessage(message);
         }
     }
@@ -1225,11 +1221,6 @@ public final class SIMRecords extends Handler implements SimConstants
                 // XXX first line is bogus
                 SmsMessage message = SmsMessage.newFromCMT(
                         new String[] { "", pdu });
-
-                Log.i("ENF", "message from " +
-                    message.getOriginatingAddress());
-                Log.i("ENF", "message text " +
-                    message.getMessageBody());
 
                 phone.mSMS.dispatchMessage(message);
 
@@ -1267,10 +1258,11 @@ public final class SIMRecords extends Handler implements SimConstants
     {
         Log.d(LOG_TAG, "SIMRecords: record load complete");
 
+        String operator = getSIMOperatorNumeric();
+
         // Some fields require more than one SIM record to set
 
-        phone.setSystemProperty(PROPERTY_SIM_OPERATOR_NUMERIC, 
-                                getSIMOperatorNumeric());
+        phone.setSystemProperty(PROPERTY_SIM_OPERATOR_NUMERIC, operator);
 
         if (imsi != null) {
             phone.setSystemProperty(PROPERTY_SIM_OPERATOR_ISO_COUNTRY,
@@ -1281,12 +1273,19 @@ public final class SIMRecords extends Handler implements SimConstants
             Log.e("SIM", "[SIMRecords] onAllRecordsLoaded: imsi is NULL!");
         }
 
-        setVoiceMailByCountry(getSIMOperatorNumeric());
+        setVoiceMailByCountry(operator);
+        setSpnFromConfig(operator);
 
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
         phone.mSimCard.broadcastSimStateChangedIntent(
                 SimCard.INTENT_VALUE_SIM_LOADED, null);
+    }
+
+    private void setSpnFromConfig(String carrier) {
+        if (mSpnOverride.containsCarrier(carrier)) {
+            spn = mSpnOverride.getSpn(carrier);
+        }
     }
 
     private void setVoiceMailByCountry (String spn) {

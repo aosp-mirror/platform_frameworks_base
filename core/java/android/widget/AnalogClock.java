@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.RemoteViews.RemoteView;
 
 import java.util.TimeZone;
 
@@ -35,6 +36,7 @@ import java.util.TimeZone;
  * This widget display an analogic clock with two hands for hours and
  * minutes.
  */
+@RemoteView
 public class AnalogClock extends View {
     private Time mCalendar;
 
@@ -46,7 +48,6 @@ public class AnalogClock extends View {
     private int mDialHeight;
 
     private boolean mAttached;
-    private long mLastTime;
 
     private final Handler mHandler = new Handler();
     private float mMinutes;
@@ -94,7 +95,6 @@ public class AnalogClock extends View {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        onTimeChanged();
         if (!mAttached) {
             mAttached = true;
             IntentFilter filter = new IntentFilter();
@@ -105,6 +105,15 @@ public class AnalogClock extends View {
 
             getContext().registerReceiver(mIntentReceiver, filter, null, mHandler);
         }
+
+        // NOTE: It's safe to do these after registering the receiver since the receiver always runs
+        // in the main thread, therefore the receiver can't run before this method returns.
+
+        // The time zone may have changed while the receiver wasn't registered, so update the Time
+        mCalendar = new Time();
+
+        // Make sure we update to the current time
+        onTimeChanged();
     }
 
     @Override
@@ -210,9 +219,7 @@ public class AnalogClock extends View {
     }
 
     private void onTimeChanged() {
-        long time = System.currentTimeMillis();
-        mCalendar.set(time);
-        mLastTime = time;
+        mCalendar.setToNow();
 
         int hour = mCalendar.hour;
         int minute = mCalendar.minute;
@@ -229,8 +236,6 @@ public class AnalogClock extends View {
             if (intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
                 mCalendar = new Time(TimeZone.getTimeZone(tz).getID());
-            } else {
-                mCalendar = new Time(); 
             }
 
             onTimeChanged();

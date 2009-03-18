@@ -55,7 +55,7 @@ public class RequestHandle {
     private final static String AUTHORIZATION_HEADER = "Authorization";
     private final static String PROXY_AUTHORIZATION_HEADER = "Proxy-Authorization";
 
-    private final static int MAX_REDIRECT_COUNT = 16;
+    public final static int MAX_REDIRECT_COUNT = 16;
 
     /**
      * Creates a new request session.
@@ -104,6 +104,14 @@ public class RequestHandle {
      */
     public boolean isRedirectMax() {
         return mRedirectCount >= MAX_REDIRECT_COUNT;
+    }
+
+    public int getRedirectCount() {
+        return mRedirectCount;
+    }
+
+    public void setRedirectCount(int count) {
+        mRedirectCount = count;
     }
 
     /**

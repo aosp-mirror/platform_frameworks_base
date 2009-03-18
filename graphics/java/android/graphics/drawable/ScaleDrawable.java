@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.*;
 import android.view.Gravity;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -44,6 +43,7 @@ import java.io.IOException;
  */
 public class ScaleDrawable extends Drawable implements Drawable.Callback {
     private ScaleState mScaleState;
+    private boolean mMutated;
     private final Rect mTmpRect = new Rect();
 
     ScaleDrawable() {
@@ -61,6 +61,13 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         if (drawable != null) {
             drawable.setCallback(this);
         }
+    }
+
+    /**
+     * Returns the drawable scaled by this ScaleDrawable.
+     */
+    public Drawable getDrawable() {
+        return mScaleState.mDrawable;
     }
 
     private static float getPercent(TypedArray a, int name) {
@@ -234,7 +241,25 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mScaleState.mDrawable.mutate();
+            mMutated = true;
+        }
+        return this;
+    }
+
     final static class ScaleState extends ConstantState {
+        Drawable mDrawable;
+        int mChangingConfigurations;
+        float mScaleWidth;
+        float mScaleHeight;
+        int mGravity;
+
+        private boolean mCheckedConstantState;
+        private boolean mCanConstantState;
+
         ScaleState(ScaleState orig, ScaleDrawable owner) {
             if (orig != null) {
                 mDrawable = orig.mDrawable.getConstantState().newDrawable();
@@ -264,15 +289,6 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
 
             return mCanConstantState;
         }
-
-        Drawable mDrawable;
-        int mChangingConfigurations;
-        float mScaleWidth;
-        float mScaleHeight;
-        int mGravity;
-
-        private boolean mCheckedConstantState;
-        private boolean mCanConstantState;
     }
 
     private ScaleDrawable(ScaleState state) {

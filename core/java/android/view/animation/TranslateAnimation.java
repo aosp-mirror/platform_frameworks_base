@@ -45,7 +45,7 @@ public class TranslateAnimation extends Animation {
     private float mToYDelta;
 
     /**
-     * Constructor used when an TranslateAnimation is loaded from a resource.
+     * Constructor used when a TranslateAnimation is loaded from a resource.
      * 
      * @param context Application context to use
      * @param attrs Attribute set from which to read values

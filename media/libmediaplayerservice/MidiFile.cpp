@@ -40,8 +40,6 @@ static pid_t myTid() { return getpid(); }
 
 // ----------------------------------------------------------------------------
 
-extern pthread_key_t EAS_sigbuskey;
-
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -60,7 +58,7 @@ static const S_EAS_LIB_CONFIG* pLibConfig = NULL;
 MidiFile::MidiFile() :
     mEasData(NULL), mEasHandle(NULL), mAudioBuffer(NULL),
     mPlayTime(-1), mDuration(-1), mState(EAS_STATE_ERROR),
-    mStreamType(AudioTrack::MUSIC), mLoop(false), mExit(false),
+    mStreamType(AudioSystem::MUSIC), mLoop(false), mExit(false),
     mPaused(false), mRender(false), mTid(-1)
 {
     LOGV("constructor");
@@ -132,7 +130,7 @@ status_t MidiFile::setDataSource(const char* path)
     mFileLocator.fd = -1;
     mFileLocator.offset = 0;
     mFileLocator.length = 0;
-    EAS_RESULT result = EAS_OpenFile(mEasData, &mFileLocator, &mEasHandle, &mMemFailedVar);
+    EAS_RESULT result = EAS_OpenFile(mEasData, &mFileLocator, &mEasHandle);
     if (result == EAS_SUCCESS) {
         updateState();
     }
@@ -146,12 +144,6 @@ status_t MidiFile::setDataSource(const char* path)
     mState = EAS_STATE_OPEN;
     mPlayTime = 0;
     return NO_ERROR;
-}
-
-status_t MidiFile::setSigBusHandlerStructTLSKey(pthread_key_t key)
-{
-    EAS_sigbuskey = key;
-    return 0;
 }
 
 status_t MidiFile::setDataSource(int fd, int64_t offset, int64_t length)
@@ -168,7 +160,7 @@ status_t MidiFile::setDataSource(int fd, int64_t offset, int64_t length)
     mFileLocator.fd = dup(fd);
     mFileLocator.offset = offset;
     mFileLocator.length = length;
-    EAS_RESULT result = EAS_OpenFile(mEasData, &mFileLocator, &mEasHandle, &mMemFailedVar);
+    EAS_RESULT result = EAS_OpenFile(mEasData, &mFileLocator, &mEasHandle);
     updateState();
 
     if (result != EAS_SUCCESS) {
@@ -332,7 +324,7 @@ status_t MidiFile::getDuration(int* duration)
         EAS_HANDLE easHandle = NULL;
         EAS_RESULT result = EAS_Init(&easData);
         if (result == EAS_SUCCESS) {
-            result = EAS_OpenFile(easData, &mFileLocator, &easHandle, NULL);
+            result = EAS_OpenFile(easData, &mFileLocator, &easHandle);
         }
         if (result == EAS_SUCCESS) {
             result = EAS_Prepare(easData, easHandle);
@@ -451,8 +443,6 @@ int MidiFile::render() {
 
     LOGV("MidiFile::render");
 
-    struct mediasigbushandler sigbushandler;
-
     // allocate render buffer
     mAudioBuffer = new EAS_PCM[pLibConfig->mixBufferSize * pLibConfig->numChannels * NUM_BUFFERS];
     if (!mAudioBuffer) {
@@ -467,10 +457,6 @@ int MidiFile::render() {
         LOGV("render thread(%d) signal", mTid);
         mCondition.signal();
     }
-
-    sigbushandler.handlesigbus = NULL;
-    sigbushandler.sigbusvar = mMemFailedVar;
-    pthread_setspecific(EAS_sigbuskey, &sigbushandler);
 
     while (1) {
         mMutex.lock();

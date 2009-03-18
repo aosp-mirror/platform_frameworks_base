@@ -93,11 +93,7 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
 
     mState = TONE_IDLE;
 
-    if (AudioSystem::getOutputSamplingRate(&mSamplingRate) != NO_ERROR) {
-        LOGE("Unable to marshal AudioFlinger");
-        return;
-    }
-    if (AudioSystem::getOutputFrameCount(&mBufferSize) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&mSamplingRate, streamType) != NO_ERROR) {
         LOGE("Unable to marshal AudioFlinger");
         return;
     }
@@ -179,38 +175,42 @@ bool ToneGenerator::startTone(int toneType) {
     if (mState == TONE_INIT) {
         if (prepareWave()) {
             LOGV("Immediate start, time %d\n", (unsigned int)(systemTime()/1000000));
-
+            lResult = true;
             mState = TONE_STARTING;
             mLock.unlock();
             mpAudioTrack->start();
             mLock.lock();
             if (mState == TONE_STARTING) {
-                if (mWaitCbkCond.waitRelative(mLock, seconds(1)) != NO_ERROR) {
-                    LOGE("--- timed out");
+                LOGV("Wait for start callback");
+                status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+                if (lStatus != NO_ERROR) {
+                    LOGE("--- Immediate start timed out, status %d", lStatus);
                     mState = TONE_IDLE;
+                    lResult = false;
                 }
             }
-
-            if (mState == TONE_PLAYING)
-                lResult = true;
+        } else {
+            mState == TONE_IDLE;
         }
     } else {
         LOGV("Delayed start\n");
 
         mState = TONE_RESTARTING;
-        if (mWaitCbkCond.waitRelative(mLock, seconds(1)) == NO_ERROR) {
-            if (mState != TONE_INIT) {
+        status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        if (lStatus == NO_ERROR) {
+            if (mState != TONE_IDLE) {
                 lResult = true;
             }
             LOGV("cond received");
         } else {
-            LOGE("--- timed out");
+            LOGE("--- Delayed start timed out, status %d", lStatus);
             mState = TONE_IDLE;
         }
     }
     mLock.unlock();
 
-    LOGV("Tone started, time %d\n", (unsigned int)(systemTime()/1000000));
+    LOGV_IF(lResult, "Tone started, time %d\n", (unsigned int)(systemTime()/1000000));
+    LOGW_IF(!lResult, "Tone start failed!!!, time %d\n", (unsigned int)(systemTime()/1000000));
 
     return lResult;
 }
@@ -239,7 +239,7 @@ void ToneGenerator::stopTone() {
         if (lStatus == NO_ERROR) {
             LOGV("track stop complete, time %d", (unsigned int)(systemTime()/1000000));
         } else {
-            LOGE("--- timed out");
+            LOGE("--- Stop timed out");
             mState = TONE_IDLE;
             mpAudioTrack->stop();
         }
@@ -275,9 +275,9 @@ bool ToneGenerator::initAudioTrack() {
         mpAudioTrack = 0;
     }
 
-   // Open audio track in mono, PCM 16bit, default sampling rate, 2 buffers of
+   // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack
-            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, NUM_PCM_BUFFERS*mBufferSize, 0, audioCallback, this, mBufferSize);
+            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, 0, 0, audioCallback, this, 0);
 
     if (mpAudioTrack == 0) {
         LOGE("AudioTrack allocation failed");
@@ -370,6 +370,8 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             break;
         default:
             LOGV("Extra Cbk");
+            // Force loop exit
+            lNumSmp = 0;
             goto audioCallback_EndLoop;
         }
         
@@ -461,8 +463,11 @@ audioCallback_EndLoop:
             if (lpToneGen->prepareWave()) {
                 lpToneGen->mState = TONE_STARTING;
             } else {
-                lpToneGen->mState = TONE_INIT;
+                LOGW("Cbk restarting prepareWave() failed\n");
+                lpToneGen->mState = TONE_IDLE;
                 lpToneGen->mpAudioTrack->stop();
+                // Force loop exit
+                lNumSmp = 0;
             }
             lSignal = true;
             break;

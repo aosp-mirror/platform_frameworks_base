@@ -58,7 +58,7 @@ public class ListSetSelectionTest extends ActivityInstrumentationTestCase2<ListS
         }
     }
     
-    /** Confirm that you can unset the selection using the same API */
+    /** Confirm that you cannot unset the selection using the same API */
     @MediumTest
     @UiThreadTest
     public void testClearSelection() {
@@ -68,7 +68,6 @@ public class ListSetSelectionTest extends ActivityInstrumentationTestCase2<ListS
 
         // Clear the selection
         mListView.setSelection(ListView.INVALID_POSITION);
-        assertEquals("Set selection", 
-                ListView.INVALID_POSITION, mListView.getSelectedItemPosition());
+        assertEquals("Set selection", 0, mListView.getSelectedItemPosition());
     }
 }

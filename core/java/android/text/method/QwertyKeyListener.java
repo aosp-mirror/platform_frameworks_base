@@ -16,18 +16,12 @@
 
 package android.text.method;
 
-import android.os.Message;
-import android.os.Handler;
 import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
-
-import java.util.HashMap;
 
 /**
  * This is the standard key listener for alphabetic input on qwerty
@@ -302,20 +296,29 @@ public class QwertyKeyListener extends BaseKeyListener {
                 String old = new String(repl[0].mText);
 
                 content.removeSpan(repl[0]);
-                content.setSpan(TextKeyListener.INHIBIT_REPLACEMENT,
-                                en, en, Spannable.SPAN_POINT_POINT);
-                content.replace(st, en, old);
 
-                en = content.getSpanStart(TextKeyListener.INHIBIT_REPLACEMENT);
-                if (en - 1 >= 0) {
+                // only cancel the autocomplete if the cursor is at the end of
+                // the replaced span (or after it, because the user is
+                // backspacing over the space after the word, not the word
+                // itself).
+                if (selStart >= en) {
                     content.setSpan(TextKeyListener.INHIBIT_REPLACEMENT,
-                                    en - 1, en,
-                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                } else {
-                    content.removeSpan(TextKeyListener.INHIBIT_REPLACEMENT);
-                }
+                                    en, en, Spannable.SPAN_POINT_POINT);
+                    content.replace(st, en, old);
 
-                adjustMetaAfterKeypress(content);
+                    en = content.getSpanStart(TextKeyListener.INHIBIT_REPLACEMENT);
+                    if (en - 1 >= 0) {
+                        content.setSpan(TextKeyListener.INHIBIT_REPLACEMENT,
+                                        en - 1, en,
+                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    } else {
+                        content.removeSpan(TextKeyListener.INHIBIT_REPLACEMENT);
+                    }
+                    adjustMetaAfterKeypress(content);
+                } else {
+                    adjustMetaAfterKeypress(content);
+                    return super.onKeyDown(view, content, keyCode, event);
+                }
 
                 return true;
             }
@@ -442,7 +445,7 @@ public class QwertyKeyListener extends BaseKeyListener {
         return Character.toUpperCase(src.charAt(0)) + src.substring(1);
     }
 
-    /* package */ static class Replaced
+    /* package */ static class Replaced implements NoCopySpan
     {
         public Replaced(char[] text) {
             mText = text;

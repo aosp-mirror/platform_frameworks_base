@@ -244,7 +244,6 @@ void terminate_string16()
 
 // ---------------------------------------------------------------------------
 
-// Note: not dealing with generating surrogate pairs.
 static char16_t* allocFromUTF8(const char* in, size_t len)
 {
     if (len == 0) return getEmptyString();
@@ -255,7 +254,10 @@ static char16_t* allocFromUTF8(const char* in, size_t len)
     
     while (p < end) {
         chars++;
-        p += utf8_char_len(*p);
+        int utf8len = utf8_char_len(*p);
+        uint32_t codepoint = utf8_to_utf32((const uint8_t*)p, utf8len);
+        if (codepoint > 0xFFFF) chars++; // this will be a surrogate pair in utf16
+        p += utf8len;
     }
     
     SharedBuffer* buf = SharedBuffer::alloc((chars+1)*sizeof(char16_t));
@@ -265,7 +267,19 @@ static char16_t* allocFromUTF8(const char* in, size_t len)
         char16_t* d = str;
         while (p < end) {
             size_t len = utf8_char_len(*p);
-            *d++ = (char16_t)utf8_to_utf32((const uint8_t*)p, len);
+            uint32_t codepoint = utf8_to_utf32((const uint8_t*)p, len);
+
+            // Convert the UTF32 codepoint to one or more UTF16 codepoints
+            if (codepoint <= 0xFFFF) {
+                // Single UTF16 character
+                *d++ = (char16_t) codepoint;
+            } else {
+                // Multiple UTF16 characters with surrogates
+                codepoint = codepoint - 0x10000;
+                *d++ = (char16_t) ((codepoint >> 10) + 0xD800);
+                *d++ = (char16_t) ((codepoint & 0x3FF) + 0xDC00);
+            }
+
             p += len;
         }
         *d = 0;
@@ -388,7 +402,7 @@ status_t String16::setTo(const char16_t* other, size_t len)
         ->editResize((len+1)*sizeof(char16_t));
     if (buf) {
         char16_t* str = (char16_t*)buf->data();
-        memcpy(str, other, len*sizeof(char16_t));
+        memmove(str, other, len*sizeof(char16_t));
         str[len] = 0;
         mString = str;
         return NO_ERROR;

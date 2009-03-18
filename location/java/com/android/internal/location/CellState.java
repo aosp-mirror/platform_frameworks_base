@@ -168,15 +168,8 @@ public class CellState {
         }
     }
 
-    public void updateRadioType(TelephonyManager telephonyManager) {
-        // Get radio type
-        int radioType = telephonyManager.getNetworkType();
-        if (radioType == TelephonyManager.NETWORK_TYPE_GPRS ||
-            radioType == TelephonyManager.NETWORK_TYPE_EDGE) {
-            mRadioType = RADIO_TYPE_GPRS;
-        } else if (radioType == TelephonyManager.NETWORK_TYPE_UMTS) {
-            mRadioType = RADIO_TYPE_WCDMA;
-        }
+    public void updateRadioType(int radioType) {
+        mRadioType = radioType;
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.d(TAG, "updateRadioType(): " + mLac +"," + mCid + "," + mMnc +"," + mMcc + "," +

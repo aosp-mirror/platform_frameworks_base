@@ -91,14 +91,14 @@ public final class MediaStore
     public static final String EXTRA_SCREEN_ORIENTATION = "android.intent.extra.screenOrientation";
 
     /**
-     * The name of the Intent-extra used to control the orientation of a ViewImage.
+     * The name of an Intent-extra used to control the UI of a ViewImage.
      * This is a boolean property that overrides the activity's default fullscreen state.
      * @hide
      */
     public static final String EXTRA_FULL_SCREEN = "android.intent.extra.fullScreen";
 
     /**
-     * The name of the Intent-extra used to control the orientation of a ViewImage.
+     * The name of an Intent-extra used to control the UI of a ViewImage.
      * This is a boolean property that specifies whether or not to show action icons.
      * @hide
      */
@@ -117,25 +117,36 @@ public final class MediaStore
      */
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
 
-
     /**
      * The name of the Intent action used to launch a camera in video mode.
      */
     public static final String INTENT_ACTION_VIDEO_CAMERA = "android.media.action.VIDEO_CAMERA";
 
     /**
-     * Standard Intent action that can be sent to have the media application
-     * capture an image and return it.  The image is returned as a Bitmap
-     * object in the extra field.
-     * @hide
+     * Standard Intent action that can be sent to have the camera application
+     * capture an image and return it.
+     * <p>
+     * The caller may pass an extra EXTRA_OUTPUT to control where this image will be written.
+     * If the EXTRA_OUTPUT is not present, then a small sized image is returned as a Bitmap
+     * object in the extra field. This is useful for applications that only need a small image.
+     * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
+     * value of EXTRA_OUTPUT.
+     * @see #EXTRA_OUTPUT
+     * @see #EXTRA_VIDEO_QUALITY
      */
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
 
     /**
-     * Standard Intent action that can be sent to have the media application
-     * capture an video and return it.  The caller may pass in an extra EXTRA_VIDEO_QUALITY
-     * control the video quality.
-     * @hide
+     * Standard Intent action that can be sent to have the camera application
+     * capture an video and return it.
+     * <p>
+     * The caller may pass in an extra EXTRA_VIDEO_QUALITY to control the video quality.
+     * <p>
+     * The caller may pass in an extra EXTRA_OUTPUT to control
+     * where the video is written. If EXTRA_OUTPUT is not present the video will be
+     * written to the standard location for videos, and the Uri of that location will be
+     * returned in the data field of the Uri.
+     * @see #EXTRA_OUTPUT
      */
     public final static String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
 
@@ -143,14 +154,18 @@ public final class MediaStore
      * The name of the Intent-extra used to control the quality of a recorded video. This is an
      * integer property. Currently value 0 means low quality, suitable for MMS messages, and
      * value 1 means high quality. In the future other quality levels may be added.
-     * @hide
      */
     public final static String EXTRA_VIDEO_QUALITY = "android.intent.extra.videoQuality";
 
     /**
-     * The name of the Intent-extra used to indicate a Uri to be used to
-     * store the requested image or video.
+     * Specify the maximum allowed size.
      * @hide
+     */
+    public final static String EXTRA_SIZE_LIMIT = "android.intent.extra.sizeLimit";
+
+    /**
+     * The name of the Intent-extra used to indicate a content resolver Uri to be used to
+     * store the requested image or video.
      */
     public final static String EXTRA_OUTPUT = "output";
 
@@ -471,7 +486,7 @@ public final class MediaStore
             /**
              * The default sort order for this table
              */
-            public static final String DEFAULT_SORT_ORDER = "name ASC";
+            public static final String DEFAULT_SORT_ORDER = ImageColumns.BUCKET_DISPLAY_NAME;
        }
 
         public static class Thumbnails implements BaseColumns
@@ -582,6 +597,14 @@ public final class MediaStore
             public static final String DURATION = "duration";
 
             /**
+             * The position, in ms, playback was at when playback for this file
+             * was last stopped.
+             * <P>Type: INTEGER (long)</P>
+             * @hide
+             */
+            public static final String BOOKMARK = "bookmark";
+
+            /**
              * The id of the artist who created the audio file, if any
              * <P>Type: INTEGER (long)</P>
              */
@@ -652,6 +675,13 @@ public final class MediaStore
              * <P>Type: INTEGER (boolean)</P>
              */
             public static final String IS_MUSIC = "is_music";
+
+            /**
+             * Non-zero if the audio file is a podcast
+             * <P>Type: INTEGER (boolean)</P>
+             * @hide
+             */
+            public static final String IS_PODCAST = "is_podcast";
 
             /**
              * Non-zero id the audio file may be a ringtone
@@ -1198,22 +1228,15 @@ public final class MediaStore
     }
 
     public static final class Video {
-        /**
-         *  deprecated  Replaced by DEFAULT_SORT_ORDER2
-         *  This variable is a mistake that is retained for backwards compatibility.
-         *  (There is no "name" column in the Video table.)
-         */
-        public static final String DEFAULT_SORT_ORDER = "name ASC";
 
         /**
-         * The default sort order for this table
-         * @hide
+         * The default sort order for this table.
          */
-        public static final String DEFAULT_SORT_ORDER2 = MediaColumns.DISPLAY_NAME;
+        public static final String DEFAULT_SORT_ORDER = MediaColumns.DISPLAY_NAME;
 
         public static final Cursor query(ContentResolver cr, Uri uri, String[] projection)
         {
-            return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER2);
+            return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
         }
 
         public interface VideoColumns extends MediaColumns {
@@ -1316,7 +1339,6 @@ public final class MediaStore
              * video should start playing at the next time it is opened. If the value is null or
              * out of the range 0..DURATION-1 then the video should start playing from the
              * beginning.
-             * @hide
              * <P>Type: INTEGER</P>
              */
             public static final String BOOKMARK = "bookmark";

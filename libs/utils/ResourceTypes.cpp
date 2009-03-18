@@ -176,7 +176,9 @@ size_t Res_png_9patch::serializedSize()
 
 void* Res_png_9patch::serialize()
 {
-    void* newData = malloc(serializedSize());
+    // Use calloc since we're going to leave a few holes in the data
+    // and want this to run cleanly under valgrind
+    void* newData = calloc(1, serializedSize());
     serialize(newData);
     return newData;
 }
@@ -1736,7 +1738,7 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
 }
 
 ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag,
-        uint32_t* outSpecFlags) const
+        uint32_t* outSpecFlags, ResTable_config* outConfig) const
 {
     if (mError != NO_ERROR) {
         return mError;
@@ -1809,7 +1811,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
             (const Res_value*)(((const uint8_t*)type) + offset);
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(type->config);
-        
+
         if (outSpecFlags != NULL) {
             if (typeClass->typeSpecFlags != NULL) {
                 *outSpecFlags |= dtohl(typeClass->typeSpecFlags[e]);
@@ -1834,6 +1836,9 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         outValue->res0 = bestValue->res0;
         outValue->dataType = bestValue->dataType;
         outValue->data = dtohl(bestValue->data);
+        if (outConfig != NULL) {
+            *outConfig = bestItem;
+        }
         TABLE_NOISY(size_t len;
               printf("Found value: pkg=%d, type=%d, str=%s, int=%d\n",
                      bestPackage->header->index,
@@ -3147,13 +3152,13 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
             const char16_t* pos = s;
             while (pos < end && !failed) {
                 const char16_t* start = pos;
-                end++;
+                pos++;
                 while (pos < end && *pos != '|') {
                     pos++;
                 }
-				//printf("Looking for: %s\n", String8(start, pos-start).string());
+                //printf("Looking for: %s\n", String8(start, pos-start).string());
                 const bag_entry* bagi = bag;
-				ssize_t i;
+                ssize_t i;
                 for (i=0; i<cnt; i++, bagi++) {
                     if (!Res_INTERNALID(bagi->map.name.ident)) {
                         //printf("Trying attr #%08x\n", bagi->map.name.ident);
@@ -3181,7 +3186,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
             }
             unlockBag(bag);
             if (!failed) {
-				//printf("Final flag value: 0x%lx\n", outValue->data);
+                //printf("Final flag value: 0x%lx\n", outValue->data);
                 return true;
             }
         }
@@ -3189,7 +3194,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
 
         if (fromAccessor) {
             if (accessor->getAttributeFlags(attrID, s, len, outValue)) {
-				//printf("Final flag value: 0x%lx\n", outValue->data);
+                //printf("Final flag value: 0x%lx\n", outValue->data);
                 return true;
             }
         }
@@ -3484,7 +3489,7 @@ ssize_t ResTable::getEntry(
         
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(thisType->config);
-        
+
         TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): imsi:%d/%d=%d/%d lang:%c%c=%c%c cnt:%c%c=%c%c "
                             "orien:%d=%d touch:%d=%d density:%d=%d key:%d=%d inp:%d=%d nav:%d=%d w:%d=%d h:%d=%d\n",
                            entryIndex, typeIndex+1, dtohl(thisType->config.size),

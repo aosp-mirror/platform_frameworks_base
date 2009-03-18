@@ -140,7 +140,6 @@ public class RecurrenceSet {
             recurrence = recurrence.substring(tzidx + 1);
         }
         Time time = new Time(tz);
-        boolean rdateNotInUtc = !tz.equals(Time.TIMEZONE_UTC);
         String[] rawDates = recurrence.split(",");
         int n = rawDates.length;
         long[] dates = new long[n];

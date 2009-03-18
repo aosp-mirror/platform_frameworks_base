@@ -13,12 +13,20 @@ page.title=Versioning Your Applications
 <li>Determine your versioning strategy early in the development process, including considerations for future releases.</li>
 </ul>
 
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#appversion">Setting Application Version</a></li>
+<li><a href="#minsdkversion">Specifying Minimum System API Version</a>
+</ol>
+
+
 <h2>See also</h2>
 
 <ol>
 <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish Your Application</a></li>
 <li><a href="{@docRoot}guide/publishing/publishing.html#market">Publishing On Android Market</a></li>
-<li><a href="{@docRoot}guide/topics/manifest/manifest.html">The Manifest File</a></li>
+<li><a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></li>
 </ol>
 
 </div>
@@ -40,11 +48,17 @@ users. A publishing service may also need to check the application version to
 determine compatibility and establish upgrade/downgrade relationships.</li>
 </ul>
 
-<p>The Android system itself <em>does not ever</em> check the version
+<p>The Android system itself <em>does not ever</em> check the application version
 information for an application, such as to enforce restrictions on upgrades,
 compatibility, and so on. Instead, only users or applications themselves are
-responsible for enforcing any version restrictions. </p>
+responsible for enforcing any version restrictions for applications themselves. </p>
 
+<p>The Android system <em>does</em> check any system version compatibility expressed 
+by an application in its manifest, in the <code>minSdkVersion</code> attribute. This
+allows an application to specify the minimum system API with which is compatible. 
+For more information see <a href="#minsdkversion">Specifying Minimum System API Version</a>.
+
+<h2 id="appversioning">Setting Application Version</h2>
 <p>To define the version information for your application, you set attributes in
 the application's manifest file. Two attributes are available, and you should
 always define values for both of them: </p>
@@ -111,8 +125,15 @@ applications use the
 {@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)} 
 method of {@link android.content.pm.PackageManager PackageManager}. </p>
 
+<h2 id="minsdkversion">Specifying Minimum System API Version</h2>
+
 <p>If your application requires a specific minimum version of the Android
-platform, you can also specify that in the manifest file: </p>
+platform, you can specify that version as an API Level identifier 
+in the application's manifest file. Doing so ensures that your 
+application can only be installed on devices that
+are running a compatible version of the Android system. </p>
+
+<p>To specify the minimum system version in the manifest, use this attribute: </p>
 
 <ul>
 <li><code>android:minSdkVersion</code> &mdash; An integer value corresponding to
@@ -129,7 +150,6 @@ that your application is compatible with all platform versions.</p></li>
 <p>To specify a minimum platform version for your application, add a
 <code>&lt;uses-sdk&gt;</code> element as a child of
 <code>&lt;manifest&gt;</code>, then define the
-<code>android:minSdkVersion</code> as an attribute. Currently, only one platform
-version has been released for mobile devices &mdash; that version is "1". For
-this reason, you do not need to define this attribute in your application and,
-at this point, defining it is <em>not recommended</em>.</p>
+<code>android:minSdkVersion</code> as an attribute. </p>
+
+<p>For more information, also see the <a href="{@docRoot}sdk/android-1.1.html">Android System Image 1.1 Version Notes</a>.</p>

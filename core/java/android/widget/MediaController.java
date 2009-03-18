@@ -451,6 +451,7 @@ public class MediaController extends FrameLayout {
         public void onProgressChanged(SeekBar bar, int progress, boolean fromtouch) {
             if (fromtouch) {
                 mDragging = true;
+                duration = mPlayer.getDuration();
                 long newposition = (duration * progress) / 1000L;
                 mPlayer.seekTo( (int) newposition);
                 if (mCurrentTime != null)

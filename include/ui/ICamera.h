@@ -48,9 +48,9 @@ public:
     // pass the buffered ISurface to the camera service
     virtual status_t        setPreviewDisplay(const sp<ISurface>& surface) = 0;
 
-    // set the frame callback flag to affect how the received frames from
+    // set the preview callback flag to affect how the received frames from
     // preview are handled.
-    virtual void            setFrameCallbackFlag(int frame_callback_flag) = 0;
+    virtual void            setPreviewCallbackFlag(int flag) = 0;
 
     // start preview mode, must call setPreviewDisplay first
     virtual status_t        startPreview() = 0;
@@ -60,6 +60,18 @@ public:
 
     // get preview state
     virtual bool            previewEnabled() = 0;
+
+    // start recording mode
+    virtual status_t        startRecording() = 0;
+
+    // stop recording mode
+    virtual void            stopRecording() = 0;    
+
+    // get recording state
+    virtual bool            recordingEnabled() = 0;
+
+    // release a recording frame
+    virtual void            releaseRecordingFrame(const sp<IMemory>& mem) = 0;
 
     // auto focus
     virtual status_t        autoFocus() = 0;

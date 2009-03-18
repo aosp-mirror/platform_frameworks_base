@@ -53,7 +53,7 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
         graphical reader called Traceview. See the linked topic for more information. </li>
 </ul>
 <ul>
-    <li><a href="#developingwitheclipse"><strong>Eclipse plugin</strong></a> - The ADT Plugin
+    <li><a href="{@docRoot}guide/developing/eclipse-adt.html"><strong>Eclipse plugin</strong></a> - The ADT Plugin
         for Eclipse integrates a number of these tools (ADB, DDMS, logcat output,
     and other functionality). See the linked topic for more information. </li>
     <li><strong>Debug and Test Device Settings</strong> - Android exposes several settings

@@ -182,6 +182,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private long mScreenOnTime;
     private long mScreenOnStartTime;
     private boolean mPreventScreenOn;
+    private int mScreenBrightnessOverride = -1;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -245,7 +246,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         public void acquire() {
             if (!mRefCounted || mCount++ == 0) {
-                PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken, mTag);
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
+                            MY_UID, mTag);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
@@ -486,12 +493,18 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     public void acquireWakeLock(int flags, IBinder lock, String tag) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        synchronized (mLocks) {
-            acquireWakeLockLocked(flags, lock, tag);
+        int uid = Binder.getCallingUid();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLocks) {
+                acquireWakeLockLocked(flags, lock, uid, tag);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
-    public void acquireWakeLockLocked(int flags, IBinder lock, String tag) {
+    public void acquireWakeLockLocked(int flags, IBinder lock, int uid, String tag) {
         int acquireUid = -1;
         String acquireName = null;
         int acquireType = -1;
@@ -504,7 +517,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         WakeLock wl;
         boolean newlock;
         if (index < 0) {
-            wl = new WakeLock(flags, lock, tag, Binder.getCallingUid());
+            wl = new WakeLock(flags, lock, tag, uid);
             switch (wl.flags & LOCK_MASK)
             {
                 case PowerManager.FULL_WAKE_LOCK:
@@ -573,9 +586,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         if (acquireType >= 0) {
             try {
-                long origId = Binder.clearCallingIdentity();
                 mBatteryStats.noteStartWakelock(acquireUid, acquireName, acquireType);
-                Binder.restoreCallingIdentity(origId);
             } catch (RemoteException e) {
                 // Ignore
             }
@@ -627,12 +638,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         releaseType = wl.monitorType;
 
         if (releaseType >= 0) {
+            long origId = Binder.clearCallingIdentity();
             try {
-                long origId = Binder.clearCallingIdentity();
                 mBatteryStats.noteStopWakelock(releaseUid, releaseName, releaseType);
-                Binder.restoreCallingIdentity(origId);
             } catch (RemoteException e) {
                 // Ignore
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
     }
@@ -757,7 +769,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DUMP)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump PowerManager from from pid="
                     + Binder.getCallingPid()
@@ -790,6 +802,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 + " mUserActivityAllowed=" + mUserActivityAllowed);
         pw.println("  mKeylightDelay=" + mKeylightDelay + " mDimDelay=" + mDimDelay
                 + " mScreenOffDelay=" + mScreenOffDelay);
+        pw.println("  mPreventScreenOn=" + mPreventScreenOn
+                + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride);
         pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
@@ -959,7 +973,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 if (mSpew) {
                     Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
                 }
-                if (mContext != null) {
+                if (mContext != null && ActivityManagerNative.isSystemReady()) {
                     mContext.sendOrderedBroadcast(mScreenOnIntent, null,
                             mScreenOnBroadcastDone, mHandler, 0, null, null);
                 } else {
@@ -980,7 +994,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     // ignore it.
                 }
 
-                if (mContext != null) {
+                if (mContext != null && ActivityManagerNative.isSystemReady()) {
                     mContext.sendOrderedBroadcast(mScreenOffIntent, null,
                             mScreenOffBroadcastDone, mHandler, 0, null, null);
                 } else {
@@ -992,11 +1006,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             else {
-                synchronized (mLocks) {
-                    EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 4,
-                            mBroadcastWakeLock.mCount);
-                    mBroadcastWakeLock.release();
-                }
+                // If we're in this case, then this handler is running for a previous
+                // paired transaction.  mBroadcastWakeLock will already have been released
+                // in sendNotificationLocked.
             }
         }
     };
@@ -1070,7 +1082,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
      * lock (rather than an IPowerManager call).
      */
     public void preventScreenOn(boolean prevent) {
-        // TODO: use a totally new permission (separate from DEVICE_POWER) for this?
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         synchronized (mLocks) {
@@ -1119,6 +1130,17 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
 
+    public void setScreenBrightnessOverride(int brightness) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        synchronized (mLocks) {
+            if (mScreenBrightnessOverride != brightness) {
+                mScreenBrightnessOverride = brightness;
+                updateLightsLocked(mPowerState, SCREEN_ON_BIT);
+            }
+        }
+    }
+    
     /**
      * Sanity-check that gets called 5 seconds after any call to
      * preventScreenOn(true).  This ensures that the original call
@@ -1204,7 +1226,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             }
 
             if (mPowerState != newState) {
-                err = updateLightsLocked(newState, becauseOfUser);
+                err = updateLightsLocked(newState, 0);
                 if (err != 0) {
                     return;
                 }
@@ -1232,6 +1254,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     }
                     if (reallyTurnScreenOn) {
                         err = Power.setScreenState(true);
+                        long identity = Binder.clearCallingIdentity();
+                        try {
+                            mBatteryStats.noteScreenOn();
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     } else {
                         Power.setScreenState(false);
                         // But continue as if we really did turn the screen on...
@@ -1250,8 +1280,17 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     }
                 } else {
                     mScreenOffTime = SystemClock.elapsedRealtime();
+                    long identity = Binder.clearCallingIdentity();
+                    try {
+                        mBatteryStats.noteScreenOff();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException calling noteScreenOff on BatteryStatsService", e);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                    mPowerState &= ~SCREEN_ON_BIT;
                     if (!mScreenBrightness.animating) {
-                        err = turnScreenOffLocked(becauseOfUser);
+                        err = screenOffFinishedAnimating(becauseOfUser);
                     } else {
                         mOffBecauseOfUser = becauseOfUser;
                         err = 0;
@@ -1262,24 +1301,25 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
     
-    private int turnScreenOffLocked(boolean becauseOfUser) {
-        if ((mPowerState&SCREEN_ON_BIT) != 0) {
-            EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
-                    mTotalTouchDownTime, mTouchCycles);
-            mLastTouchDown = 0;
-            int err = Power.setScreenState(false);
+    private int screenOffFinishedAnimating(boolean becauseOfUser) {
+        // I don't think we need to check the current state here because all of these
+        // Power.setScreenState and sendNotificationLocked can both handle being 
+        // called multiple times in the same state. -joeo
+        EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
+                mTotalTouchDownTime, mTouchCycles);
+        mLastTouchDown = 0;
+        int err = Power.setScreenState(false);
+        if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
-            if (err == 0) {
-                mPowerState &= ~SCREEN_ON_BIT;
-                int why = becauseOfUser
-                        ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
-                        : WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
-                sendNotificationLocked(false, why);
-            }
-            return err;
         }
-        return 0;
+        if (err == 0) {
+            int why = becauseOfUser
+                    ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
+                    : WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
+            sendNotificationLocked(false, why);
+        }
+        return err;
     }
 
     private boolean batteryIsLow() {
@@ -1287,9 +1327,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 mBatteryService.getBatteryLevel() <= Power.LOW_BATTERY_THRESHOLD);
     }
 
-    private int updateLightsLocked(int newState, boolean becauseOfUser) {
+    private int updateLightsLocked(int newState, int forceState) {
         int oldState = mPowerState;
-        int difference = newState ^ oldState;
+        int difference = (newState ^ oldState) | forceState;
         if (difference == 0) {
             return 0;
         }
@@ -1494,7 +1534,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             animating = more;
             if (!more) {
                 if (mask == Power.SCREEN_LIGHT && curIntValue == Power.BRIGHTNESS_OFF) {
-                    turnScreenOffLocked(mOffBecauseOfUser);
+                    screenOffFinishedAnimating(mOffBecauseOfUser);
                 }
             }
             return more;
@@ -1521,6 +1561,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     
     private int getPreferredBrightness() {
         try {
+            if (mScreenBrightnessOverride >= 0) {
+                return mScreenBrightnessOverride;
+            }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
                                                           SCREEN_BRIGHTNESS);
              // Don't let applications turn the screen all the way off

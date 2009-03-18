@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"kB"</string>
+    <string name="megabyteShort">"MB"</string>
+    <string name="gigabyteShort">"GB"</string>
+    <string name="terabyteShort">"TB"</string>
+    <string name="petabyteShort">"PB"</string>
+    <string name="untitled">"&lt;uten navn&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(Mangler telefonnummer)"</string>
+    <string name="unknownName">"(Ukjent)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Telefonsvarer"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Tilkoblingsproblem eller ugyldig MMI-kode."</string>
+    <string name="serviceEnabled">"Tjenesten ble aktivert."</string>
+    <string name="serviceEnabledFor">"Tjenesten ble aktivert for:"</string>
+    <string name="serviceDisabled">"Tjenesten ble deaktivert."</string>
+    <string name="serviceRegistered">"Registreringen er vellykket."</string>
+    <string name="serviceErased">"Registreringen ble fjernet."</string>
+    <string name="passwordIncorrect">"Ugyldig passord."</string>
+    <string name="mmiComplete">"MMI utført."</string>
+    <string name="badPin">"Den gamle PIN-koden du skrev inn er feil."</string>
+    <string name="badPuk">"PUK-koden du skrev inn er feil."</string>
+    <string name="mismatchPin">"PIN-kodene stemmer ikke overens."</string>
+    <string name="invalidPin">"PIN-koden må være mellom fire og åtte siffer."</string>
+    <string name="needPuk">"SIM-kortet ditt er PUK-låst. Skriv inn PUK-koden for å låse det opp."</string>
+    <string name="needPuk2">"Skriv inn PUK2 for å låse opp SIM-kortet."</string>
+    <string name="ClipMmi">"Inngående nummervisning"</string>
+    <string name="ClirMmi">"Utgående nummervisning"</string>
+    <string name="CfMmi">"Viderekobling"</string>
+    <string name="CwMmi">"Samtale venter"</string>
+    <string name="BaMmi">"Samtaleblokkering"</string>
+    <string name="PwdMmi">"Passordbytte"</string>
+    <string name="PinMmi">"PIN-kode-bytte"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Nummervisning er begrenset som standard. Neste anrop: Begrenset"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Nummervisning er begrenset som standard. Neste anrop: Ikke begrenset"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Nummervisning er ikke begrenset som standard. Neste anrop: Begrenset"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Nummervisning er ikke begrenset som standard. Neste anrop: Ikke begrenset"</string>
+    <string name="serviceNotProvisioned">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
+    <string name="CLIRPermanent">"Kunne ikke endre innstilling for nummervisning."</string>
+    <string name="serviceClassVoice">"Tale"</string>
+    <string name="serviceClassData">"Data"</string>
+    <string name="serviceClassFAX">"Fax"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Asynkron"</string>
+    <string name="serviceClassDataSync">"Synkron"</string>
+    <string name="serviceClassPacket">"Pakkedata"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> etter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
+    <string name="httpErrorOk">"OK"</string>
+    <string name="httpError">"Nettsiden inneholder en feil."</string>
+    <string name="httpErrorLookup">"Kunne ikke finne adressen."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Støtter ikke sidens autentiseringsmetode."</string>
+    <string name="httpErrorAuth">"Autentiseringen feilet."</string>
+    <string name="httpErrorProxyAuth">"Autentisering via mellomtjeneren feilet."</string>
+    <string name="httpErrorConnect">"Kunne ikke koble til tjeneren."</string>
+    <string name="httpErrorIO">"Klarte ikke å kommunisere med tjeneren. Prøv igjen senere."</string>
+    <string name="httpErrorTimeout">"Det oppsto et tidsavbrudd under tilkobling til tjeneren."</string>
+    <string name="httpErrorRedirectLoop">"Siden inneholder for mange videresendinger."</string>
+    <string name="httpErrorUnsupportedScheme">"Protokollen er ikke støttet."</string>
+    <string name="httpErrorFailedSslHandshake">"Kunne ikke opprette en sikker tilkobling."</string>
+    <string name="httpErrorBadUrl">"Kunne ikke åpne siden, siden adressen er ugyldig."</string>
+    <string name="httpErrorFile">"Kunne ikke åpne filen."</string>
+    <string name="httpErrorFileNotFound">"Fant ikke den forespurte filen."</string>
+    <string name="httpErrorTooManyRequests">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
+    <string name="contentServiceSync">"Synkronisering"</string>
+    <string name="contentServiceSyncNotificationTitle">"Synkronisering"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"For mange slettinger av <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="low_memory">"Telefonens lagringsminne er fullt! Slett noen filer for å frigjøre plass."</string>
+    <string name="me">"Meg"</string>
+    <string name="power_dialog">"Telefoninnstillinger"</string>
+    <string name="silent_mode">"Stillemodus"</string>
+    <string name="turn_on_radio">"Slå på trådløst nett"</string>
+    <string name="turn_off_radio">"Slå av trådløst nett"</string>
+    <string name="screen_lock">"Lås skjermen"</string>
+    <string name="power_off">"Slå av"</string>
+    <string name="shutdown_progress">"Avslutter…"</string>
+    <string name="shutdown_confirm">"Telefonen vil bli slått av."</string>
+    <string name="no_recent_tasks">"Ingen nylig brukte applikasjoner."</string>
+    <string name="global_actions">"Telefoninnstillinger"</string>
+    <string name="global_action_lock">"Lås skjermen"</string>
+    <string name="global_action_power_off">"Slå av"</string>
+    <string name="global_action_toggle_silent_mode">"Stillemodus"</string>
+    <string name="global_action_silent_mode_on_status">"Lyden er av"</string>
+    <string name="global_action_silent_mode_off_status">"Lyden er på"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
+    <string name="safeMode">"Sikkermodus"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
+    <string name="permgrouplab_costMoney">"Betaltjenester"</string>
+    <string name="permgroupdesc_costMoney">"Lar applikasjoner utføre operasjoner som kan koste deg penger."</string>
+    <string name="permgrouplab_messages">"Meldinger"</string>
+    <string name="permgroupdesc_messages">"Lese og skrive SMS, e-post og andre meldinger på telefonen."</string>
+    <string name="permgrouplab_personalInfo">"Personlig informasjon"</string>
+    <string name="permgroupdesc_personalInfo">"Direkte tilgang til kontakter og kalendre lagret på telefonen."</string>
+    <string name="permgrouplab_location">"Plassering"</string>
+    <string name="permgroupdesc_location">"Overvåking av telefonens fysiske plassering"</string>
+    <string name="permgrouplab_network">"Nettverkstilgang"</string>
+    <string name="permgroupdesc_network">"Gir applikasjoner tilgang til diverse nettverksfunksjoner."</string>
+    <string name="permgrouplab_accounts">"Google-kontoer"</string>
+    <string name="permgroupdesc_accounts">"Tilgang til tilgjengelige Google-kontoer."</string>
+    <string name="permgrouplab_hardwareControls">"Maskinvarekontroll"</string>
+    <string name="permgroupdesc_hardwareControls">"Direkte tilgang til maskinvaren på telefonen."</string>
+    <string name="permgrouplab_phoneCalls">"Telefonsamtaler"</string>
+    <string name="permgroupdesc_phoneCalls">"Overvåk, ta opp, og behandle telefonsamtaler."</string>
+    <string name="permgrouplab_systemTools">"Systemverktøy"</string>
+    <string name="permgroupdesc_systemTools">"Lavnivå tilgang og kontroll over systemet."</string>
+    <string name="permgrouplab_developmentTools">"Utviklingsverktøy"</string>
+    <string name="permgroupdesc_developmentTools">"Funksjonalitet kun utviklere trenger."</string>
+    <string name="permlab_statusBar">"deaktivere eller endre statusfeltet"</string>
+    <string name="permdesc_statusBar">"Lar applikasjonen deaktivere statusfeltet, samt legge til og fjerne systemikoner."</string>
+    <string name="permlab_expandStatusBar">"utvide/slå sammen statusfeltet"</string>
+    <string name="permdesc_expandStatusBar">"Lar applikasjonen utvide eller slå sammen statusfeltet."</string>
+    <string name="permlab_processOutgoingCalls">"avskjære utgående anrop"</string>
+    <string name="permdesc_processOutgoingCalls">"Lar applikasjonen behandle utgående anrop og endre nummeret som ringes. Ondsinnede applikasjoner kan overvåke, videresende, eller hindre utgående anrop."</string>
+    <string name="permlab_receiveSms">"motta SMS"</string>
+    <string name="permdesc_receiveSms">"Lar applikasjonen motta og behandle SMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <string name="permlab_receiveMms">"motta MMS"</string>
+    <string name="permdesc_receiveMms">"Lar applikasjonen motta og behandle MMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <string name="permlab_sendSms">"sende SMS-meldinger"</string>
+    <string name="permdesc_sendSms">"Lar applikasjonen sende SMS-meldinger. Ondsinnede applikasjoner kan koste deg penger ved å sende meldinger uten bekreftelse."</string>
+    <string name="permlab_readSms">"lese SMS- og MMS-meldinger"</string>
+    <string name="permdesc_readSms">"Lar applikasjonen lese SMS-meldinger lagret i telefonen eller på SIM-kortet. Ondsinnede applikasjoner kan lese private meldinger."</string>
+    <string name="permlab_writeSms">"redigere SMS- og MMS-meldinger"</string>
+    <string name="permdesc_writeSms">"Lar applikasjonen skrive til SMS-meldinger lagret i telefonen eller på SIM-kortet. Ondsinnede applikasjoner kan slette meldinger."</string>
+    <string name="permlab_receiveWapPush">"motta WAP"</string>
+    <string name="permdesc_receiveWapPush">"Lar applikasjonen motta og behandle WAP-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <string name="permlab_getTasks">"se kjørende applikasjoner"</string>
+    <string name="permdesc_getTasks">"Tillater applikasjonen å hente informasjon om aktive og nylig kjørte programmer. Kan tillate ondsinnede applikasjoner å oppdage privat informasjon om andre applikasjoner."</string>
+    <string name="permlab_reorderTasks">"omordne kjørende applikasjoner"</string>
+    <string name="permdesc_reorderTasks">"Tillater applikasjonen å flytte programmer til forgrunnen eller bakgrunnen. Ondsinnede applikasjoner kan tvinge seg selv til fronten."</string>
+    <string name="permlab_setDebugApp">"aktiver applikasjonsdebugging"</string>
+    <string name="permdesc_setDebugApp">"Lar applikasjonen skru på debugging for en annen applikasjon. Ondsinnede applikasjoner kan bruke dette til å drepe andre applikasjoner."</string>
+    <string name="permlab_changeConfiguration">"endre innstillingene for brukergrensesnitt"</string>
+    <string name="permdesc_changeConfiguration">"Tillater applikasjonen å endre gjeldende innstillinger, slik som språk eller skriftstørrelse."</string>
+    <string name="permlab_restartPackages">"omstarte andre applikasjoner"</string>
+    <string name="permdesc_restartPackages">"Lar applikasjonen tvinge andre applikasjoner til å starte på nytt."</string>
+    <string name="permlab_setProcessForeground">"unngå å bli stoppet"</string>
+    <string name="permdesc_setProcessForeground">"Lar applikasjonen sette en vilkårlig prosess i forgrunnen, så den ikke kan bli drept. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_forceBack">"tvinge applikasjoner til å lukkes"</string>
+    <string name="permdesc_forceBack">"Lar applikasjonen tvinge enhver aktivitet som er i forgrunnen til å lukkes og gå tilbake. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_dump">"hente intern systemtilstand"</string>
+    <string name="permdesc_dump">"Lar applikasjonen hente intern tilstand fra systemet. Onsdinnede applikasjoner kan hente et bredt spekter av privat og sikker informasjon som de vanligvis aldri burde ha behov for."</string>
+    <string name="permlab_addSystemService">"publisere lavnivåtjenester"</string>
+    <string name="permdesc_addSystemService">"Lar applikasjonen publisere sine egne lavnivås systemtjenester. Ondsinnede applikasjoner kan kapre systemet, og stjele eller ødelegge alle data på det."</string>
+    <string name="permlab_runSetActivityWatcher">"overvåke og kontrollere all applikasjonsoppstart"</string>
+    <string name="permdesc_runSetActivityWatcher">"Lar applikasjonen overvåke og kontrollere hvordan systemet starter applikasjoner. Ondsinnede applikasjoner kan ta over systemet helt. Denne rettigheten behøves bare for utvikling, aldri for vanlig bruk av telefonen."</string>
+    <string name="permlab_broadcastPackageRemoved">"kringkaste melding om fjernet pakke"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Lar applikasjonen kringkaste en melding om at en applikasjonspakke er blitt fjernet. Ondsinnede applikasjoner kan bruke dette til å drepe vilkårlige andre kjørende applikasjoner."</string>
+    <string name="permlab_broadcastSmsReceived">"kringkaste melding om mottatt SMS"</string>
+    <string name="permdesc_broadcastSmsReceived">"Lar applikasjonen kringkaste en melding om at en SMS-melding er mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske innkommende SMS-meldinger."</string>
+    <string name="permlab_broadcastWapPush">"kringkaste melding om mottatt WAP-PUSH"</string>
+    <string name="permdesc_broadcastWapPush">"Lar applikasjonen kringkaste en melding om at en WAP-PUSH-melding er blitt mottatt. Ondsinnede applikasjoner kan bruke dette for å forfalske MMS-kvitteringer eller i det stille erstatte innholdet av vilkårlige nettsider med ondsinnede varianter."</string>
+    <string name="permlab_setProcessLimit">"begrense antallet kjørende prosesser"</string>
+    <string name="permdesc_setProcessLimit">"Lar applikasjonen kontrollere maksimalt antall kjørende prosesser. Behøves aldri for vanlige applikasjoner."</string>
+    <string name="permlab_setAlwaysFinish">"få alle bakgrunnsapplikasjoner til å lukkes"</string>
+    <string name="permdesc_setAlwaysFinish">"Lar applikasjonen kontrollere om aktiviteter alltid avsluttes når de sendes til bakgrunnen. Behøves aldri for vanlige applikasjoner."</string>
+    <string name="permlab_fotaUpdate">"installere systemoppdateringer automatisk"</string>
+    <string name="permdesc_fotaUpdate">"Lar applikasjonen motta meldinger om pågående systemoppdateringer, og starte installeringen av dem. Ondsinnede applikasjoner kan bruke dette for å skade systemet med uautoriserte oppdateringer, eller generelt forstyrre oppdateringsprosessen."</string>
+    <string name="permlab_batteryStats">"endre batteristatistikk"</string>
+    <string name="permdesc_batteryStats">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
+    <string name="permlab_internalSystemWindow">"vis uautoriserte vinduer"</string>
+    <string name="permdesc_internalSystemWindow">"Tillater at det opprettes vinduer ment for bruk av systemets interne brukergrensesnitt. Ikke ment for vanlige applikasjoner."</string>
+    <string name="permlab_systemAlertWindow">"vise advarsler på systemnivå"</string>
+    <string name="permdesc_systemAlertWindow">"Lar applikasjonen vise systemadvarselvinduer. Ondsinnede applikasjoner kan ta over hele skjermen."</string>
+    <string name="permlab_setAnimationScale">"endre global animasjonshastighet"</string>
+    <string name="permdesc_setAnimationScale">"Lar applikasjonen endre den globale animasjonshastigheten (raskere eller tregere animasjoner) når som helst."</string>
+    <string name="permlab_manageAppTokens">"styre applikasjonssymboler"</string>
+    <string name="permdesc_manageAppTokens">"Lar applikasjoner lage og vedlikeholde sine egne symboler, noe som lar dem overstyre den vanlige Z-ordningen. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_injectEvents">"trykke taster og kontrolknapper"</string>
+    <string name="permdesc_injectEvents">"Lar applikasjonen levere sine egne inndatahendelser (tastetrykk osv.) til andre applikasjoner. Ondsinnede applikasjoner kan bruke dette for å ta over telefonen."</string>
+    <string name="permlab_readInputState">"ta opp hva som skrives og gjøres"</string>
+    <string name="permdesc_readInputState">"Lar applikasjonen overvåke tastetrykk selv når interaksjonen er med et annet program (som å skrive inn et passord). Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_bindInputMethod">"binde til en inndatametode"</string>
+    <string name="permdesc_bindInputMethod">"Lar applikasjonen binde til toppnivågrensesnittet for en inndatametode. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_setOrientation">"snu skjermen"</string>
+    <string name="permdesc_setOrientation">"Lar applikasjonen rotere skjermen når som helst. Vanlige applikasjoner bør aldri trenge dette."</string>
+    <string name="permlab_signalPersistentProcesses">"sende Linux-signaler til applikasjoner"</string>
+    <string name="permdesc_signalPersistentProcesses">"Lar applikasjonen spørre om at et gitt signal blir sendt til alle varige prosesser."</string>
+    <string name="permlab_persistentActivity">"forbli kjørende"</string>
+    <string name="permdesc_persistentActivity">"Lar applikasjonen gjøre deler av seg selv varig, så systemet ikke kan bruke det til andre applikasjoner."</string>
+    <string name="permlab_deletePackages">"slette applikasjoner"</string>
+    <string name="permdesc_deletePackages">"Lar applikasjonen slette Android-pakker. Ondsinnede applikasjoner kan bruke dette for å slette viktige applikasjoner."</string>
+    <string name="permlab_clearAppUserData">"slette andre applikasjoners data"</string>
+    <string name="permdesc_clearAppUserData">"Lar applikasjonen fjerne brukerdata."</string>
+    <string name="permlab_deleteCacheFiles">"slette andre applikasjoners hurtigbuffer"</string>
+    <string name="permdesc_deleteCacheFiles">"Lar applikasjonen to slette hurtigbufferfiler."</string>
+    <string name="permlab_getPackageSize">"måle lagringsplass for applikasjon"</string>
+    <string name="permdesc_getPackageSize">"Lar applikasjonen hente kode-, data- og hurtigbufferstørrelser"</string>
+    <string name="permlab_installPackages">"installere applikasjoner direkte"</string>
+    <string name="permdesc_installPackages">"Lar applikasjonen installere nye eller oppdaterte Android-pakker. Ondsinnede applikasjoner kan bruke dette for å legge til nye applikasjoner med vilkårlig kraftige rettigheter."</string>
+    <string name="permlab_clearAppCache">"slette hurtigbufferdata for alle applikasjoner"</string>
+    <string name="permdesc_clearAppCache">"Lar applikasjonen frigjøre lagringsplass ved å slette filer i applikasjoners hurtigbufferkatalog. Tilgangen er vanligvis sterkt begrenset, til systemprosesser."</string>
+    <string name="permlab_readLogs">"lese systemets loggfiler"</string>
+    <string name="permdesc_readLogs">"Lar applikasjonen to lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, men skal ikke inneholde personlig eller privat informasjon."</string>
+    <string name="permlab_diagnostic">"lese/skrive ressurser eid av diag"</string>
+    <string name="permdesc_diagnostic">"Lar applikasjonen to lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
+    <string name="permlab_changeComponentState">"aktivere eller deaktigere applikasjonskomponenter"</string>
+    <string name="permdesc_changeComponentState">"Lar applikasjonen endre om en komponent i en annen applikasjon er aktivert eller ikke. Ondsinnede applikasjoner kan bruke dette for å deaktivere viktige telefonfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
+    <string name="permlab_setPreferredApplications">"velge foretrukne applikasjoner"</string>
+    <string name="permdesc_setPreferredApplications">"Lar applikasjonen endre valgene for foretrukne applikasjoner. Dette kan gi ondsinnede applikasjoner tilgang til i det stille å endre hvilke applikasjoner som kjøres, og slik gi seg ut for å være en eksisterende applikasjon og samle private data."</string>
+    <string name="permlab_writeSettings">"endre globale systeminnstillinger"</string>
+    <string name="permdesc_writeSettings">"Lar applikasjonen endre systemets innstillingsdata. Ondsinnede applikasjoner kan skade systemets innstillinger."</string>
+    <string name="permlab_writeSecureSettings">"endre sikre systeminnstillinger"</string>
+    <string name="permdesc_writeSecureSettings">"Lar applikasjonen endre systemets sikre innstillingsdata. Ikke ment for bruk av vanlige applikasjoner."</string>
+    <string name="permlab_writeGservices">"redigere Google-tjenestekartet"</string>
+    <string name="permdesc_writeGservices">"Lar applikasjonen redigere Google-tjenestekartet. Ikke ment for bruk av vanlige applikasjoner."</string>
+    <string name="permlab_receiveBootCompleted">"starte automatisk sammen med systemet"</string>
+    <string name="permdesc_receiveBootCompleted">"Lar applikasjonen sette opp at den selv skal starte så fort systemet er ferdig med å slå seg på. Dette kan gjøre at det tar lengre tid å starte telefonen, og at den kan bli tregere fordi applikasjonen alltid kjører."</string>
+    <string name="permlab_broadcastSticky">"sende varige kringkastinger"</string>
+    <string name="permdesc_broadcastSticky">"Lar applikasjonen sende varige kringkastinger, som forblir på systemet etter at kringkastingen er avsluttet. Ondsinnede applikasjoner kan gjøre telefonen treg eller ustabil ved å få den til å bruke for mye minne."</string>
+    <string name="permlab_readContacts">"lese kontaktinformasjon"</string>
+    <string name="permdesc_readContacts">"Lar applikasjonen lese all kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette for å sende personlige data til andre."</string>
+    <string name="permlab_writeContacts">"skrive kontaktinformasjon"</string>
+    <string name="permdesc_writeContacts">"Lar applikasjonen endre kontakt- og adresseinformasjon lagret på telefonen. Ondsinnede applikasjoner kan bruke dette for å redigere eller endre kontaktinformasjonen."</string>
+    <string name="permlab_writeOwnerData">"skrive eierinformasjon"</string>
+    <string name="permdesc_writeOwnerData">"Lar applikasjonen endre dataene om telefoneieren. Ondsinnede applikasjoner kan bruke dette til å slette eller redigere telefonens eierdata."</string>
+    <string name="permlab_readOwnerData">"lese eierinformasjon"</string>
+    <string name="permdesc_readOwnerData">"Lar applikasjonen lese dataene om telefoneieren. Ondsinnede applikasjoner kan bruke dette til å lese telefonens eierdata."</string>
+    <string name="permlab_readCalendar">"lese kalenderinformasjon"</string>
+    <string name="permdesc_readCalendar">"Lar applikasjonen lese alle kalenderhendelser lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å sende kalenderhendelser til andre."</string>
+    <string name="permlab_writeCalendar">"skrive kalenderinformasjon"</string>
+    <string name="permdesc_writeCalendar">"Lar applikasjonen endre kalenderhendelser lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å slette eller endre kalenderinformasjon."</string>
+    <string name="permlab_accessMockLocation">"lage falske plasseringskilder for testing"</string>
+    <string name="permdesc_accessMockLocation">"Lage falske plassingskilder for testing. Ondsinnede applikasjoner kan bruke dette for å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører."</string>
+    <string name="permlab_accessLocationExtraCommands">"få tilgang til ekstra plasseringskommandoer"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Få tilgang til ekstra kommandoer for plasseringskilder. Ondsinnede applikasjoner kan bruke dette til å forstyrre GPS eller andre plasseringskilder."</string>
+    <string name="permlab_accessFineLocation">"nøyaktig (GPS-) plassering"</string>
+    <string name="permdesc_accessFineLocation">"Få tilgang til nøyaktige plasseringskilder som Global Positioning System (GPS) på telefonen, når det er tilgjengelig. Ondsinnede applikasjoner kan bruke dette for å finne ut hvor du er, og kan bruke mer batteri."</string>
+    <string name="permlab_accessCoarseLocation">"grov (nettverksbasert) plassering"</string>
+    <string name="permdesc_accessCoarseLocation">"Få tilgang til grove plasseringskilder som databasen over basestasjoner for å finne ut omtrent hvor telefonen er, når det er tilgjengelig. Ondsinnede applikasjoner kan bruke dette for å finne ut omtrent hvor du er."</string>
+    <string name="permlab_accessSurfaceFlinger">"få tilgang til SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Lar applikasjonen bruke lavnivåfunksjonalitet i SurfaceFlinger."</string>
+    <string name="permlab_readFrameBuffer">"lese skjermbufferet"</string>
+    <string name="permdesc_readFrameBuffer">"Lar applikasjonen lese innholdet i skjermbufferet."</string>
+    <string name="permlab_modifyAudioSettings">"endre lydinnstillinger"</string>
+    <string name="permdesc_modifyAudioSettings">"Lar applikasjonen endre globale lydinnstillinger som volum og ruting."</string>
+    <string name="permlab_recordAudio">"ta opp lyd"</string>
+    <string name="permdesc_recordAudio">"Gir applikasjonen tilgang til opptaksstien for lyd."</string>
+    <string name="permlab_camera">"ta bilder"</string>
+    <string name="permdesc_camera">"Lar applikasjonen ta bilder med kameraet. Dette gir applikasjonen til når som helst å se og lagre det kameraet ser."</string>
+    <string name="permlab_brick">"deaktivere telefonen permanent"</string>
+    <string name="permdesc_brick">"Lar applikasjonen deaktivere hele telefonen permanent. Dette er svært farlig."</string>
+    <string name="permlab_reboot">"tvinge omstart av telefon"</string>
+    <string name="permdesc_reboot">"Lar applikasjonen tvinge telefonen til å starte på nytt."</string>
+    <string name="permlab_mount_unmount_filesystems">"montere og avmontere filsystemer"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Lar applikasjonen montere og avmontere filsystemer for uttagbar lagring."</string>
+    <string name="permlab_mount_format_filesystems">"formatere ekstern lagringsplass"</string>
+    <string name="permdesc_mount_format_filesystems">"Lar applikasjonen formatere ekstern lagringsplass."</string>
+    <string name="permlab_vibrate">"kontrollere vibratoren"</string>
+    <string name="permdesc_vibrate">"Lar applikasjonen kontrollere vibratoren."</string>
+    <string name="permlab_flashlight">"kontrollere lommelykten"</string>
+    <string name="permdesc_flashlight">"Lar applikasjonen kontrollere lommelykten."</string>
+    <string name="permlab_hardware_test">"teste maskinvare"</string>
+    <string name="permdesc_hardware_test">"Lar applikasjonen styre diverse enheter med det formål å teste maskinvaren."</string>
+    <string name="permlab_callPhone">"ringe telefonnummer direkte"</string>
+    <string name="permdesc_callPhone">"Lar applikasjonen ringe telefonnummer uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake uventede oppringinger på telefonregningen. Merk at dette ikke gir applikasjonen lov til å ringe nødnummer."</string>
+    <string name="permlab_callPrivileged">"ringe vilkårlige telefonnummer direkte"</string>
+    <string name="permdesc_callPrivileged">"Lar applikasjonen ringe hvilket som helst telefonnummer, inkludert nødnummer, uten inngripen fra brukeren. Ondsinnede applikasjoner kan forårsake unødvendige og ulovlige samtaler til nødtjenester."</string>
+    <string name="permlab_locationUpdates">"kontrollere varsling for plasseringsendring"</string>
+    <string name="permdesc_locationUpdates">"Lar applikasjonen slå av/på varsling om plasseringsendringer fra radioen. Ikke ment for vanlige applikasjoner."</string>
+    <string name="permlab_checkinProperties">"få tilgang til egenskaper for innsjekking"</string>
+    <string name="permdesc_checkinProperties">"Gir lese- og skrivetilgang til egenskaper lastet opp av innsjekkingstjenesten. Ikke ment for vanlige applikasjoner."</string>
+    <string name="permlab_bindGadget">"velg gadgeter"</string>
+    <string name="permdesc_bindGadget">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
+    <string name="permlab_modifyPhoneState">"endre telefontilstand"</string>
+    <string name="permdesc_modifyPhoneState">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
+    <string name="permlab_readPhoneState">"lese telefontilstand"</string>
+    <string name="permdesc_readPhoneState">"Lar applikasjonen få tilgang til telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan få vite enhetens telefonnummer, om en samtale pågår, nummeret samtalen er koblet til og lignende."</string>
+    <string name="permlab_wakeLock">"forhindre telefonen fra å sove"</string>
+    <string name="permdesc_wakeLock">"Lar applikasjonen forhindre telefonen fra å gå i hvilemodus."</string>
+    <string name="permlab_devicePower">"slå telefonen av eller på"</string>
+    <string name="permdesc_devicePower">"Lar applikasjonen skru telefonen av eller på."</string>
+    <string name="permlab_factoryTest">"kjøre i fabrikktestmodus"</string>
+    <string name="permdesc_factoryTest">"Kjøre som en lavnivås produsenttest, med full tilgang til telefonens maskinvare. Kun tilgjengelig når telefonen kjører i produsenttestmodus."</string>
+    <string name="permlab_setWallpaper">"endre bakgrunnsbilde"</string>
+    <string name="permdesc_setWallpaper">"Lar applikasjonen sette systemets bakgrunnsbilde."</string>
+    <string name="permlab_setWallpaperHints">"sette størrelseshint for bakgrunn"</string>
+    <string name="permdesc_setWallpaperHints">"Lar applikasjonen sette størrelseshint for systemets bakgrunnsbilde."</string>
+    <string name="permlab_masterClear">"nullstille systemet til fabrikkinnstillinger"</string>
+    <string name="permdesc_masterClear">"Lar applikasjonen nullstille systemet til fabrikkinnstillinger, noe som vil fjerne alle data, alt oppsett, og alle installerte applikasjoner."</string>
+    <string name="permlab_setTimeZone">"endre tidssone"</string>
+    <string name="permdesc_setTimeZone">"Lar applikasjonen endre telefonens tidssone."</string>
+    <string name="permlab_getAccounts">"oppdage kjente kontoer"</string>
+    <string name="permdesc_getAccounts">"Lar applikasjonen hente listen over kontoer telefonen kjenner til."</string>
+    <string name="permlab_accessNetworkState">"se nettverkstilstand"</string>
+    <string name="permdesc_accessNetworkState">"Lar applikasjonen se tilstanden til alle nettverk."</string>
+    <string name="permlab_createNetworkSockets">"full internett-tilgang"</string>
+    <string name="permdesc_createNetworkSockets">"Lar applikasjonen opprette vilkårlige nettverkstilkoblinger."</string>
+    <string name="permlab_writeApnSettings">"skrive APN-innstillinger"</string>
+    <string name="permdesc_writeApnSettings">"Lar applikasjonen to endre APN-innstillinger slik som mellomtjener eller port for hvilket som helst aksesspunkt."</string>
+    <string name="permlab_changeNetworkState">"endre nettverkskonnektivitet"</string>
+    <string name="permdesc_changeNetworkState">"Lar applikasjonen endre tilstanden til nettverkskonnektivitet."</string>
+    <string name="permlab_changeBackgroundDataSetting">"endre innstilling for bakgrunnsdata"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Lar applikasjonen endre innstillingen for bakgrunnsdata."</string>
+    <string name="permlab_accessWifiState">"se tilstand for trådløse nettverk"</string>
+    <string name="permdesc_accessWifiState">"Lar applikasjonen få se informasjon om tilstanden til de trådløse nettene."</string>
+    <string name="permlab_changeWifiState">"endre tilstand for trådløse nettverk"</string>
+    <string name="permdesc_changeWifiState">"Lar applikasjonen koble til og fra trådløse aksesspunkt, og å gjøre endringer i konfigurerte trådløse nettverk."</string>
+    <string name="permlab_bluetoothAdmin">"Bluetooth-administrasjon"</string>
+    <string name="permdesc_bluetoothAdmin">"Lar applikasjonen konfigurere den lokale Bluetooth-telefonen, og å oppdage og pare med andre enheter."</string>
+    <string name="permlab_bluetooth">"opprette Bluetooth-tilkoblinger"</string>
+    <string name="permdesc_bluetooth">"Lar applikasjonen se konfigurasjonen til den lokale Bluetooth-telefonen, og å opprette og godta tilkoblinger med parede enheter."</string>
+    <string name="permlab_disableKeyguard">"slå av tastaturlås"</string>
+    <string name="permdesc_disableKeyguard">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
+    <string name="permlab_readSyncSettings">"lese synkroniseringsinnstillinger"</string>
+    <string name="permdesc_readSyncSettings">"Lar applikasjonen lese synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
+    <string name="permlab_writeSyncSettings">"skrive synkroniseringsinnstillinger"</string>
+    <string name="permdesc_writeSyncSettings">"Lar applikasjonen to endre på synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
+    <string name="permlab_readSyncStats">"lese synkroniseringsstatistikk"</string>
+    <string name="permdesc_readSyncStats">"Lar applikasjonen lese synkroniseringsstatistikk, som for eksempel historien over alle synkroniseringer utført."</string>
+    <string name="permlab_subscribedFeedsRead">"lese abonnement på nyhetskilder"</string>
+    <string name="permdesc_subscribedFeedsRead">"Lar applikasjonen hente detaljer om hvilke nyhetskilder som synkroniseres."</string>
+    <string name="permlab_subscribedFeedsWrite">"endre abonnement på nyhetskilder"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Lar applikasjonen redigere hvilke nyhetskilder som synkroniseres. Dette kan gi en ondsinnet applikasjon tilgang til å endre hvilke nyhetskilder som synkroniseres."</string>
+    <string name="permlab_readDictionary">"lese brukerdefinert ordliste"</string>
+    <string name="permdesc_readDictionary">"Lar applikasjonen lese private ord, navn og uttrykk som brukeren har lagret i den brukerdefinerte ordlisten."</string>
+    <string name="permlab_writeDictionary">"skrive til brukerdefinert ordliste"</string>
+    <string name="permdesc_writeDictionary">"Lar applikasjonen skrive nye ord til den brukerdefinerte ordlisten."</string>
+  <string-array name="phoneTypes">
+    <item>"Hjemme"</item>
+    <item>"Mobil"</item>
+    <item>"Arbeid"</item>
+    <item>"Faks arbeid"</item>
+    <item>"Faks hjemme"</item>
+    <item>"Personsøker"</item>
+    <item>"Annen"</item>
+    <item>"Egendefinert…"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Hjemme"</item>
+    <item>"Arbeid"</item>
+    <item>"Annen"</item>
+    <item>"Egendefinert…"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Hjemme"</item>
+    <item>"Arbeid"</item>
+    <item>"Annen"</item>
+    <item>"Egendefinert…"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Hjemme"</item>
+    <item>"Arbeid"</item>
+    <item>"Annen"</item>
+    <item>"Egendefinert…"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Arbeid"</item>
+    <item>"Annen"</item>
+    <item>"Egendefinert…"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"Skriv inn PIN-kode:"</string>
+    <string name="keyguard_password_wrong_pin_code">"Gal PIN-kode!"</string>
+    <string name="keyguard_label_text">"For å låse opp, trykk menuknappen fulgt av 0."</string>
+    <string name="emergency_call_dialog_number_for_display">"Nødnummer"</string>
+    <string name="lockscreen_carrier_default">"(Ingen operatør)"</string>
+    <string name="lockscreen_screen_locked">"Skjermen er låst"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Trykk på menyknappen for å låse opp eller ringe et nødnummer."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Trykk på menyknappen for å låse opp."</string>
+    <string name="lockscreen_pattern_instructions">"Tegn mønster for å låse opp"</string>
+    <string name="lockscreen_emergency_call">"Nødanrop"</string>
+    <string name="lockscreen_pattern_correct">"Riktig!"</string>
+    <string name="lockscreen_pattern_wrong">"Beklager, prøv igjen:"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
+    <string name="lockscreen_low_battery">"Koble til en batterilader."</string>
+    <string name="lockscreen_missing_sim_message_short">"Mangler SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message">"Ikke noe SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions">"Sett inn et SIM-kort."</string>
+    <string name="lockscreen_network_locked_message">"Nettverk ikke tillatt"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM-kortet er PUK-låst."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Vennligst ring kundeservice."</string>
+    <string name="lockscreen_sim_locked_message">"SIM-kortet er låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser opp SIM-kort…"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using your Google sign-in."\n\n" Please try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Glemt mønsteret?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Too many pattern attempts!"</string>
+    <string name="lockscreen_glogin_instructions">"To unlock,"\n"sign in with your Google account"</string>
+    <string name="lockscreen_glogin_username_hint">"Username (email)"</string>
+    <string name="lockscreen_glogin_password_hint">"Password"</string>
+    <string name="lockscreen_glogin_submit_button">"Sign in"</string>
+    <string name="lockscreen_glogin_invalid_input">"Invalid username or password."</string>
+    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
+    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
+    <skip />
+    <string name="status_bar_clear_all_button">"Fjern varslinger"</string>
+    <string name="status_bar_no_notifications_title">"Ingen varslinger"</string>
+    <string name="status_bar_ongoing_events_title">"Aktiviteter"</string>
+    <string name="status_bar_latest_events_title">"Varslinger"</string>
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
+    <skip />
+    <string name="battery_status_charging">"Lader…"</string>
+    <string name="battery_low_title">"Koble til en lader"</string>
+    <string name="battery_low_subtitle">"Batteriet er nesten tomt:"</string>
+    <string name="battery_low_percent_format">"mindre enn <xliff:g id="NUMBER">%d%%</xliff:g> igjen."</string>
+    <string name="factorytest_failed">"Factory test failed"</string>
+    <string name="factorytest_not_system">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
+    <string name="factorytest_no_action">"No package was found that provides the FACTORY_TEST action."</string>
+    <string name="factorytest_reboot">"Reboot"</string>
+    <string name="js_dialog_title">"Siden \'<xliff:g id="TITLE">%s</xliff:g> sier:\""</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
+    <string name="save_password_label">"Bekreft"</string>
+    <string name="save_password_message">"Ønsker du at nettleseren skal huske dette passordet?"</string>
+    <string name="save_password_notnow">"Ikke nå"</string>
+    <string name="save_password_remember">"Husk"</string>
+    <string name="save_password_never">"Aldri"</string>
+    <string name="open_permission_deny">"Du har ikke de nødvendige rettighetene til å åpne denne siden."</string>
+    <string name="text_copied">"Kopierte tekst til utklippstavlen."</string>
+    <string name="more_item_label">"Mer"</string>
+    <string name="prepend_shortcut_label">"menyknapp+"</string>
+    <string name="menu_space_shortcut_label">"mellomrom"</string>
+    <string name="menu_enter_shortcut_label">"enter"</string>
+    <string name="menu_delete_shortcut_label">"slett"</string>
+    <string name="search_go">"Søk"</string>
+    <string name="today">"I dag"</string>
+    <string name="yesterday">"I går"</string>
+    <string name="tomorrow">"I morgen"</string>
+    <string name="oneMonthDurationPast">"For en måned siden"</string>
+    <string name="beforeOneMonthDurationPast">"For over en måned siden"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"for et sekund siden"</item>
+    <item quantity="other">"for <xliff:g id="COUNT">%d</xliff:g> sekunder siden"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"for et minutt siden"</item>
+    <item quantity="other">"for <xliff:g id="COUNT">%d</xliff:g> minutter siden"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"for en time siden"</item>
+    <item quantity="other">"for <xliff:g id="COUNT">%d</xliff:g> timer siden"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"i går"</item>
+    <item quantity="other">"for <xliff:g id="COUNT">%d</xliff:g> dager siden"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"om et sekund"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"om et minutt"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> minutter"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"om et minutt"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> timer"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"i morgen"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> dager"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 sek siden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> sek siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 min siden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> min siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 t siden"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> t siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"i går"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> d siden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"om 1 sek"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sek"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"om 1 min"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"om 1 t"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> t"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"i morgen"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> d"</item>
+  </plurals>
+    <string name="preposition_for_date">"%s"</string>
+    <string name="preposition_for_time">"%s"</string>
+    <string name="preposition_for_year">"%s"</string>
+    <string name="day">"dag"</string>
+    <string name="days">"dager"</string>
+    <string name="hour">"time"</string>
+    <string name="hours">"timer"</string>
+    <string name="minute">"min"</string>
+    <string name="minutes">"min"</string>
+    <string name="second">"s"</string>
+    <string name="seconds">"s"</string>
+    <string name="week">"uke"</string>
+    <string name="weeks">"uker"</string>
+    <string name="year">"år"</string>
+    <string name="years">"år"</string>
+    <string name="sunday">"søndag"</string>
+    <string name="monday">"mandag"</string>
+    <string name="tuesday">"tirsdag"</string>
+    <string name="wednesday">"onsdag"</string>
+    <string name="thursday">"torsdag"</string>
+    <string name="friday">"fredag"</string>
+    <string name="saturday">"lørdag"</string>
+    <string name="every_weekday">"Hverdager (man–fre)"</string>
+    <string name="daily">"Hver dag"</string>
+    <string name="weekly">"Hver <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"En gang i måneden"</string>
+    <string name="yearly">"En gang i året"</string>
+    <string name="VideoView_error_title">"Cannot play video"</string>
+    <string name="VideoView_error_text_unknown">"Sorry, this video cannot be played."</string>
+    <string name="VideoView_error_button">"OK"</string>
+    <string name="am">"AM"</string>
+    <string name="pm">"PM"</string>
+    <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g>-<xliff:g id="MONTH">%m</xliff:g>-<xliff:g id="DAY">%d</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="DATE">%3$s</xliff:g>PLACEHOLDERplaceholder"</string>
+    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'., '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="noon">"middag"</string>
+    <string name="Noon">"Middag"</string>
+    <string name="midnight">"midnatt"</string>
+    <string name="Midnight">"Midnatt"</string>
+    <!-- no translation found for month_day (3693060561170538204) -->
+    <skip />
+    <!-- no translation found for month (1976700695144952053) -->
+    <skip />
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for month_year (2106203387378728384) -->
+    <skip />
+    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>."</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>."</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>. <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>. <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>. <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>.<xliff:g id="MONTH1">%2$s</xliff:g>.<xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>.<xliff:g id="MONTH2">%7$s</xliff:g>.<xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>.–<xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>.–<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
+    <skip />
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
+    <skip />
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <skip />
+    <string name="day_of_week_long_sunday">"søndag"</string>
+    <string name="day_of_week_long_monday">"mandag"</string>
+    <string name="day_of_week_long_tuesday">"tirsdag"</string>
+    <string name="day_of_week_long_wednesday">"onsdag"</string>
+    <string name="day_of_week_long_thursday">"torsdag"</string>
+    <string name="day_of_week_long_friday">"fredag"</string>
+    <string name="day_of_week_long_saturday">"lørdag"</string>
+    <string name="day_of_week_medium_sunday">"søn"</string>
+    <string name="day_of_week_medium_monday">"man"</string>
+    <string name="day_of_week_medium_tuesday">"tir"</string>
+    <string name="day_of_week_medium_wednesday">"ons"</string>
+    <string name="day_of_week_medium_thursday">"tor"</string>
+    <string name="day_of_week_medium_friday">"fre"</string>
+    <string name="day_of_week_medium_saturday">"lør"</string>
+    <string name="day_of_week_short_sunday">"sø"</string>
+    <string name="day_of_week_short_monday">"ma"</string>
+    <string name="day_of_week_short_tuesday">"ti"</string>
+    <string name="day_of_week_short_wednesday">"on"</string>
+    <string name="day_of_week_short_thursday">"to"</string>
+    <string name="day_of_week_short_friday">"fr"</string>
+    <string name="day_of_week_short_saturday">"lø"</string>
+    <string name="day_of_week_shorter_sunday">"S"</string>
+    <string name="day_of_week_shorter_monday">"M"</string>
+    <string name="day_of_week_shorter_tuesday">"Ti"</string>
+    <string name="day_of_week_shorter_wednesday">"O"</string>
+    <string name="day_of_week_shorter_thursday">"To"</string>
+    <string name="day_of_week_shorter_friday">"F"</string>
+    <string name="day_of_week_shorter_saturday">"L"</string>
+    <string name="day_of_week_shortest_sunday">"S"</string>
+    <string name="day_of_week_shortest_monday">"M"</string>
+    <string name="day_of_week_shortest_tuesday">"T"</string>
+    <string name="day_of_week_shortest_wednesday">"O"</string>
+    <string name="day_of_week_shortest_thursday">"T"</string>
+    <string name="day_of_week_shortest_friday">"F"</string>
+    <string name="day_of_week_shortest_saturday">"L"</string>
+    <string name="month_long_january">"januar"</string>
+    <string name="month_long_february">"februar"</string>
+    <string name="month_long_march">"mars"</string>
+    <string name="month_long_april">"april"</string>
+    <string name="month_long_may">"mai"</string>
+    <string name="month_long_june">"juni"</string>
+    <string name="month_long_july">"juli"</string>
+    <string name="month_long_august">"august"</string>
+    <string name="month_long_september">"september"</string>
+    <string name="month_long_october">"oktober"</string>
+    <string name="month_long_november">"november"</string>
+    <string name="month_long_december">"desember"</string>
+    <string name="month_medium_january">"jan"</string>
+    <string name="month_medium_february">"feb"</string>
+    <string name="month_medium_march">"mar"</string>
+    <string name="month_medium_april">"apr"</string>
+    <string name="month_medium_may">"mai"</string>
+    <string name="month_medium_june">"jun"</string>
+    <string name="month_medium_july">"jul"</string>
+    <string name="month_medium_august">"aug"</string>
+    <string name="month_medium_september">"sep"</string>
+    <string name="month_medium_october">"okt"</string>
+    <string name="month_medium_november">"nov"</string>
+    <string name="month_medium_december">"des"</string>
+    <string name="month_shortest_january">"J"</string>
+    <string name="month_shortest_february">"F"</string>
+    <string name="month_shortest_march">"M"</string>
+    <string name="month_shortest_april">"A"</string>
+    <string name="month_shortest_may">"M"</string>
+    <string name="month_shortest_june">"J"</string>
+    <string name="month_shortest_july">"J"</string>
+    <string name="month_shortest_august">"A"</string>
+    <string name="month_shortest_september">"S"</string>
+    <string name="month_shortest_october">"O"</string>
+    <string name="month_shortest_november">"N"</string>
+    <string name="month_shortest_december">"D"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Merk alt"</string>
+    <string name="selectText">"Merk tekst"</string>
+    <string name="stopSelectingText">"Slutt å merke tekst"</string>
+    <string name="cut">"Klipp ut"</string>
+    <string name="cutAll">"Klipp ut alt"</string>
+    <string name="copy">"Kopier"</string>
+    <string name="copyAll">"Kopier alt"</string>
+    <string name="paste">"Lim inn"</string>
+    <string name="copyUrl">"Kopier URL"</string>
+    <string name="inputMethod">"Inndatametode"</string>
+    <string name="addToDictionary">"Legg \\\"%s\\\" til ordlisten"</string>
+    <string name="editTextMenuTitle">"Rediger tekst"</string>
+    <string name="low_internal_storage_view_title">"Lite plass"</string>
+    <string name="low_internal_storage_view_text">"Det begynner å bli lite lagringsplass på telefonen."</string>
+    <string name="ok">"OK"</string>
+    <string name="cancel">"Avbryt"</string>
+    <string name="yes">"OK"</string>
+    <string name="no">"Avbryt"</string>
+    <string name="dialog_alert_title">"Merk"</string>
+    <string name="capital_on">"På"</string>
+    <string name="capital_off">"Av"</string>
+    <string name="whichApplication">"Complete action using"</string>
+    <string name="alwaysUse">"Use by default for this action."</string>
+    <string name="clearDefaultHintMsg">"Clear default in Home Settings &gt; Applications &gt; Manage applications."</string>
+    <string name="chooseActivity">"Select an action"</string>
+    <string name="noApplications">"No applications can perform this action."</string>
+    <string name="aerr_title">"Sorry!"</string>
+    <string name="aerr_application">"The application <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) has stopped unexpectedly. Please try again."</string>
+    <string name="aerr_process">"The process <xliff:g id="PROCESS">%1$s</xliff:g> has stopped unexpectedly. Please try again."</string>
+    <string name="anr_title">"Sorry!"</string>
+    <string name="anr_activity_application">"Activity <xliff:g id="ACTIVITY">%1$s</xliff:g> (in application <xliff:g id="APPLICATION">%2$s</xliff:g>) is not responding."</string>
+    <string name="anr_activity_process">"Activity <xliff:g id="ACTIVITY">%1$s</xliff:g> (in process <xliff:g id="PROCESS">%2$s</xliff:g>) is not responding."</string>
+    <string name="anr_application_process">"Application <xliff:g id="APPLICATION">%1$s</xliff:g> (in process <xliff:g id="PROCESS">%2$s</xliff:g>) is not responding."</string>
+    <string name="anr_process">"Process <xliff:g id="PROCESS">%1$s</xliff:g> is not responding."</string>
+    <string name="force_close">"Force close"</string>
+    <string name="wait">"Wait"</string>
+    <string name="debug">"Debug"</string>
+    <string name="sendText">"Select an action for text"</string>
+    <string name="volume_ringtone">"Ringetonevolum"</string>
+    <string name="volume_music">"Medievolum"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Spiller over Bluetooth"</string>
+    <string name="volume_call">"Samtalevolum"</string>
+    <string name="volume_bluetooth_call">"Bluetooth-samtalevolum"</string>
+    <string name="volume_alarm">"Alarmvolum"</string>
+    <string name="volume_notification">"Varslingsvolum"</string>
+    <string name="volume_unknown">"Volum"</string>
+    <string name="ringtone_default">"Standard ringetone"</string>
+    <string name="ringtone_default_with_actual">"Standard ringetone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Stille"</string>
+    <string name="ringtone_picker_title">"Ringetoner"</string>
+    <string name="ringtone_unknown">"Ukjent ringetone"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Trådløsnett i nærheten"</item>
+    <item quantity="other">"Trådløsnett i nærheten"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Åpent trådløsnett i nærheten"</item>
+    <item quantity="other">"Åpne trådløsnett i nærheten"</item>
+  </plurals>
+    <string name="select_character">"Sett inn tegn"</string>
+    <string name="sms_control_default_app_name">"Ukjent applikasjon"</string>
+    <string name="sms_control_title">"Sending SMS messages"</string>
+    <string name="sms_control_message">"A large number of SMS messages are being sent. Select \"OK\" to continue, or \"Cancel\" to stop sending."</string>
+    <string name="sms_control_yes">"OK"</string>
+    <string name="sms_control_no">"Avbryt"</string>
+    <string name="date_time_set">"Lagre"</string>
+    <string name="default_permission_group">"Standard"</string>
+    <string name="no_permissions">"Trenger ingen rettigheter"</string>
+    <string name="perms_hide"><b>"Skjul"</b></string>
+    <string name="perms_show_all"><b>"Vis alle"</b></string>
+    <string name="googlewebcontenthelper_loading">"Laster inn…"</string>
+    <string name="usb_storage_title">"USB koblet til"</string>
+    <string name="usb_storage_message">"Du har koblet telefonen til en datamaskin via USB. Velg \"Monter\" dersom du ønsker å kopiere filer mellom datmaskinen og minnekortet i telefonen."</string>
+    <string name="usb_storage_button_mount">"Monter"</string>
+    <string name="usb_storage_button_unmount">"Ikke monter"</string>
+    <string name="usb_storage_error_message">"Det oppsto et problem med å bruke minnekortet ditt for USB-lagring."</string>
+    <string name="usb_storage_notification_title">"USB tilkoblet"</string>
+    <string name="usb_storage_notification_message">"Velg om du ønsker å kopiere filer til/fra en datamaskin."</string>
+    <string name="usb_storage_stop_notification_title">"Slå av USB-lagring"</string>
+    <string name="usb_storage_stop_notification_message">"Velg for å slå av USB-lagring."</string>
+    <string name="usb_storage_stop_title">"Slå av USB-lagring"</string>
+    <string name="usb_storage_stop_message">"Før du slår av USB-lagring, sjekk at du har avmontert enheten i USB-verten. Velg «slå av» for å slå av USB-lagring."</string>
+    <string name="usb_storage_stop_button_mount">"Slå av"</string>
+    <string name="usb_storage_stop_button_unmount">"Avbryt"</string>
+    <string name="usb_storage_stop_error_message">"Det oppsto et problem under avslutningen av USB-lagring. Sjekk at USB-verten har avmontert og prøv igjen."</string>
+    <string name="extmedia_format_title">"Formatere minnekort"</string>
+    <string name="extmedia_format_message">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
+    <string name="extmedia_format_button_format">"Format"</string>
+    <string name="select_input_method">"Velg inndatametode"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
+    <string name="candidates_style">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
+    <string name="ext_media_checking_notification_title">"Forbereder minnekort"</string>
+    <string name="ext_media_checking_notification_message">"Sjekker for feil"</string>
+    <string name="ext_media_nofs_notification_title">"Tomt minnekort"</string>
+    <string name="ext_media_nofs_notification_message">"Minnekortet er tomt eller bruker et ustøttet filsystem."</string>
+    <string name="ext_media_unmountable_notification_title">"Skadet minnekort"</string>
+    <string name="ext_media_unmountable_notification_message">"Minnekortet er skadet. Det kan være du må formatere kortet."</string>
+    <string name="ext_media_badremoval_notification_title">"Minnekortet ble tatt ut uventet"</string>
+    <string name="ext_media_badremoval_notification_message">"Avmonter minnekortet før det tas ut, for å unngå datatap."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Trygt å ta ut minnekort"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Minnekortet kan nå trygt tas ut."</string>
+    <string name="ext_media_nomedia_notification_title">"Minnekortet ble tatt ut"</string>
+    <string name="ext_media_nomedia_notification_message">"Minnekortet ble tatt ut. Sett inn et nytt minnekort for å øke lagringsplassen."</string>
+    <string name="activity_list_empty">"Fant ingen tilsvarende aktiviteter"</string>
+    <string name="permlab_pkgUsageStats">"oppdater statistikk over komponentbruk"</string>
+    <string name="permdesc_pkgUsageStats">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
+</resources>

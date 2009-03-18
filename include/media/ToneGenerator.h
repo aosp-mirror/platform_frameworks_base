@@ -85,8 +85,6 @@ private:
         TONE_RESTARTING  //
     };
 
-    static const unsigned int NUM_PCM_BUFFERS = 2; // Number of AudioTrack pcm buffers
-    
     static const unsigned int TONEGEN_MAX_WAVES = 3;
     static const unsigned int TONEGEN_MAX_SEGMENTS = 4;  // Maximun number of elenemts in
     static const unsigned int TONEGEN_INF = 0xFFFFFFFF;  // Represents infinite time duration
@@ -127,7 +125,6 @@ private:
     const ToneDescriptor *mpNewToneDesc;  // pointer to next active tone descriptor
 
     int mSamplingRate;  // AudioFlinger Sampling rate
-    int mBufferSize;  // PCM buffer size in frames
     AudioTrack *mpAudioTrack;  // Pointer to audio track used for playback
     Mutex mLock;  // Mutex to control concurent access to ToneGenerator object from audio callback and application API
     Mutex mCbkCondLock; // Mutex associated to mWaitCbkCond

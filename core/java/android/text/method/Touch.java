@@ -17,6 +17,7 @@
 package android.text.method;
 
 import android.text.Layout;
+import android.text.NoCopySpan;
 import android.text.Layout.Alignment;
 import android.text.Spannable;
 import android.view.MotionEvent;
@@ -103,7 +104,7 @@ public class Touch {
 
             if (ds.length > 0) {
                 if (ds[0].mFarEnough == false) {
-                    int slop = ViewConfiguration.getTouchSlop();
+                    int slop = ViewConfiguration.get(widget.getContext()).getScaledTouchSlop();
 
                     if (Math.abs(event.getX() - ds[0].mX) >= slop ||
                         Math.abs(event.getY() - ds[0].mY) >= slop) {
@@ -141,7 +142,7 @@ public class Touch {
         return false;
     }
 
-    private static class DragState {
+    private static class DragState implements NoCopySpan {
         public float mX;
         public float mY;
         public boolean mFarEnough;

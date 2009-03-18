@@ -251,7 +251,12 @@ public abstract class CompoundButton extends Button implements Checkable {
             invalidate();
         }
     }
-    
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return super.verifyDrawable(who) || who == mButtonDrawable;
+    }
+
     static class SavedState extends BaseSavedState {
         boolean checked;
 

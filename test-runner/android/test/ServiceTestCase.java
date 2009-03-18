@@ -48,7 +48,7 @@ import java.util.Random;
  * the test case will call onCreate(), and then call the corresponding entry point in your service.
  * It will record any parameters or other support values necessary to support the lifecycle.</li>
  * <li>After your test completes, the test case {@link #tearDown} function is
- * automatically called, and it will stop & destroy your service with the appropriate
+ * automatically called, and it will stop and destroy your service with the appropriate
  * calls (depending on how your test invoked the service.)</li>
  * </ul>
  * 
@@ -172,7 +172,7 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
      * Return the communication channel to the service.  May return null if 
      * clients can not bind to the service.  The returned
      * {@link android.os.IBinder} is usually for a complex interface
-     * that has been <a href="{@docRoot}reference/aidl.html">described using
+     * that has been <a href="{@docRoot}guide/developing/tools/aidl.html">described using
      * aidl</a>. 
      * 
      * Note:  In order to test with this interface, your service must implement a getService()

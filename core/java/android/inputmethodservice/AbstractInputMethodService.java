@@ -24,6 +24,9 @@ import android.view.MotionEvent;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * AbstractInputMethodService provides a abstract base class for input methods.
  * Normal input method implementations will not derive from this directly,
@@ -156,6 +159,13 @@ public abstract class AbstractInputMethodService extends Service
      */
     public abstract AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
     
+    /**
+     * Implement this to handle {@link android.os.Binder#dump Binder.dump()}
+     * calls on your input method.
+     */
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    }
+
     @Override
     final public IBinder onBind(Intent intent) {
         if (mInputMethod == null) {

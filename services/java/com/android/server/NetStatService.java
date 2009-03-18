@@ -26,20 +26,35 @@ public class NetStatService extends INetStatService.Stub {
 
     }
 
-    public int getTxPackets() {
-        return NetStat.netStatGetTxPkts();
+    public long getMobileTxPackets() {
+        return NetStat.getMobileTxPkts();
     }
 
-    public int getRxPackets() {
-        return NetStat.netStatGetRxPkts();
+    public long getMobileRxPackets() {
+        return NetStat.getMobileRxPkts();
     }
 
-    public int getTxBytes() {
-        return NetStat.netStatGetTxBytes();
+    public long getMobileTxBytes() {
+        return NetStat.getMobileTxBytes();
     }
 
-    public int getRxBytes() {
-        return NetStat.netStatGetRxBytes();
+    public long getMobileRxBytes() {
+        return NetStat.getMobileRxBytes();
     }
 
+    public long getTotalTxPackets() {
+        return NetStat.getTotalTxPkts();
+    }
+
+    public long getTotalRxPackets() {
+        return NetStat.getTotalRxPkts();
+    }
+
+    public long getTotalTxBytes() {
+        return NetStat.getTotalTxBytes();
+    }
+
+    public long getTotalRxBytes() {
+        return NetStat.getTotalRxBytes();
+    }
 }

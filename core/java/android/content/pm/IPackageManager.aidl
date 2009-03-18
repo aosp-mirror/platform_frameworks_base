@@ -255,8 +255,15 @@ interface IPackageManager {
      * retrieval of information is complete.
      */
     void getPackageSizeInfo(in String packageName, IPackageStatsObserver observer);
+    
+    /**
+     * Get a list of shared libraries that are available on the
+     * system.
+     */
+    String[] getSystemSharedLibraryNames();
 
     void enterSafeMode();
+    boolean isSafeMode();
     void systemReady();
     boolean hasSystemUidErrors();
 }

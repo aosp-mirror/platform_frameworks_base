@@ -380,7 +380,6 @@ public class Paint extends _Original_Paint {
         int filterNative = 0;
         if (filter != null)
             filterNative = filter.native_instance;
-        native_setColorFilter(mNativePaint, filterNative);
         mColorFilter = filter;
         return filter;
     }

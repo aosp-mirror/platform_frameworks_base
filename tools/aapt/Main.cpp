@@ -146,9 +146,11 @@ int handleCommand(Bundle* bundle)
  */
 int main(int argc, char* const argv[])
 {
+    char *prog = argv[0];
     Bundle bundle;
     bool wantUsage = false;
     int result = 1;    // pessimistically assume an error.
+    int tolerance = 0;
 
     /* default to compression */
     bundle.setCompressionMethod(ZipEntry::kCompressDeflated);
@@ -214,7 +216,9 @@ int main(int argc, char* const argv[])
                     wantUsage = true;
                     goto bail;
                 }
-                bundle.setGrayscaleTolerance(atoi(argv[0]));
+                tolerance = atoi(argv[0]);
+                bundle.setGrayscaleTolerance(tolerance);
+                printf("%s: Images with deviation <= %d will be forced to grayscale.\n", prog, tolerance);
                 break;
             case 'm':
                 bundle.setMakePackageDirs(true);

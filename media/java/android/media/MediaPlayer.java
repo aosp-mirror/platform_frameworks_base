@@ -39,11 +39,11 @@ import java.lang.ref.WeakReference;
 /**
  * MediaPlayer class can be used to control playback
  * of audio/video files and streams. An example on how to use the methods in
- * this class can be found in <a href="../widget/VideoView.html">VideoView</a>.
- * Please see <a href="../../../toolbox/apis/media.html">Android Media APIs</a>
+ * this class can be found in {@link android.widget.VideoView}.
+ * Please see <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
  * for additional help using MediaPlayer.
  *
- * <p>Topics covered are:
+ * <p>Topics covered here are:
  * <ol>
  * <li><a href="#StateDiagram">State Diagram</a>
  * <li><a href="#Valid_and_Invalid_States">Valid and Invalid States</a>
@@ -584,14 +584,21 @@ public class MediaPlayer
             return;
         }
 
-        ParcelFileDescriptor fd = null;
+        AssetFileDescriptor fd = null;
         try {
             ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openFileDescriptor(uri, "r");
+            fd = resolver.openAssetFileDescriptor(uri, "r");
             if (fd == null) {
                 return;
             }
-            setDataSource(fd.getFileDescriptor());
+            // Note: using getDeclaredLength so that our behavior is the same
+            // as previous versions when the content provider is returning
+            // a full file.
+            if (fd.getDeclaredLength() < 0) {
+                setDataSource(fd.getFileDescriptor());
+            } else {
+                setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
+            }
             return;
         } catch (SecurityException ex) {
         } catch (IOException ex) {
@@ -825,13 +832,14 @@ public class MediaPlayer
      * done using the MediaPlayer.
      */
     public void release() {
-        if (mWakeLock != null) mWakeLock.release();
+        stayAwake(false);
         updateSurfaceScreenOn();
         mOnPreparedListener = null;
         mOnBufferingUpdateListener = null;
         mOnCompletionListener = null;
         mOnSeekCompleteListener = null;
         mOnErrorListener = null;
+        mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         _release();
     }
@@ -844,6 +852,7 @@ public class MediaPlayer
      * data source and calling prepare().
      */
     public void reset() {
+        stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore
         mEventHandler.removeCallbacksAndMessages(null);
@@ -910,18 +919,7 @@ public class MediaPlayer
     private static final int MEDIA_SEEK_COMPLETE = 4;
     private static final int MEDIA_SET_VIDEO_SIZE = 5;
     private static final int MEDIA_ERROR = 100;
-
-    // error codes from framework that indicate content issues
-    // contained in arg1 of error message
-
-    // Seek not supported - live stream
-    private static final int ERROR_SEEK_NOT_SUPPORTED = 42;
-
-    // A/V interleave exceeds the progressive streaming buffer
-    private static final int ERROR_CONTENT_IS_POORLY_INTERLEAVED = 43;
-
-    // video decoder is falling behind - content is too complex
-    private static final int ERROR_VIDEO_TRACK_IS_FALLING_BEHIND = 44;
+    private static final int MEDIA_INFO = 200;
 
     private class EventHandler extends Handler
     {
@@ -966,6 +964,8 @@ public class MediaPlayer
               return;
 
             case MEDIA_ERROR:
+                // For PV specific error values (msg.arg2) look in
+                // opencore/pvmi/pvmf/include/pvmf_return_codes.h
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 boolean error_was_handled = false;
                 if (mOnErrorListener != null) {
@@ -976,6 +976,17 @@ public class MediaPlayer
                 }
                 stayAwake(false);
                 return;
+
+            case MEDIA_INFO:
+                // For PV specific code values (msg.arg2) look in
+                // opencore/pvmi/pvmf/include/pvmf_return_codes.h
+                Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                if (mOnInfoListener != null) {
+                    mOnInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
+                }
+                // No real default action so far.
+                return;
+
             case MEDIA_NOP: // interface test message - ignore
                 break;
 
@@ -1157,12 +1168,19 @@ public class MediaPlayer
      * @see android.media.MediaPlayer.OnErrorListener
      */
     public static final int MEDIA_ERROR_UNKNOWN = 1;
+
     /** Media server died. In this case, the application must release the
      * MediaPlayer object and instantiate a new one. 
      * @see android.media.MediaPlayer.OnErrorListener
      */
     public static final int MEDIA_ERROR_SERVER_DIED = 100;
     
+    /** The video is streamed and its container is not valid for progressive
+     * playback i.e the video's index (e.g moov atom) is not at the start of the
+     * file.
+      * @hide pending API council approval. Replace with @see tag after.
+     */
+    public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
 
     /**
      * Interface definition of a callback to be invoked when there
@@ -1180,7 +1198,8 @@ public class MediaPlayer
          * <li>{@link #MEDIA_ERROR_UNKNOWN}
          * <li>{@link #MEDIA_ERROR_SERVER_DIED}
          * </ul>
-         * @param extra   an extra code, specific to the error type
+         * @param extra an extra code, specific to the error. Typically
+         * implementation dependant.
          * @return True if the method handled the error, false if it didn't.
          * Returning false, or not having an OnErrorListener at all, will
          * cause the OnCompletionListener to be called.
@@ -1192,12 +1211,83 @@ public class MediaPlayer
      * Register a callback to be invoked when an error has happened
      * during an asynchronous operation.
      * 
-     * @param l the callback that will be run
+     * @param listener the callback that will be run
      */
-    public void setOnErrorListener(OnErrorListener l)
+    public void setOnErrorListener(OnErrorListener listener)
     {
-        mOnErrorListener = l;
+        mOnErrorListener = listener;
     }
 
     private OnErrorListener mOnErrorListener;
+
+
+    /* Do not change these values without updating their counterparts
+     * in include/media/mediaplayer.h!
+     */
+    /** Unspecified media player info.
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide pending API council approval.
+     */
+    public static final int MEDIA_INFO_UNKNOWN = 1;
+
+    /** The video is too complex for the decoder: it can't decode frames fast
+     *  enough. Possibly only the audio plays fine at this stage.
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide pending API council approval.
+     */
+    public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
+
+    /** Bad interleaving means that a media has been improperly interleaved or
+     * not interleaved at all, e.g has all the video samples first then all the
+     * audio ones. Video is playing but a lot of disk seeks may be happening.
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide pending API council approval.
+     */
+    public static final int MEDIA_INFO_BAD_INTERLEAVING = 800;
+
+    /** The media cannot be seeked (e.g live stream)
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide pending API council approval.
+     */
+    public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
+
+    /**
+     * Interface definition of a callback to be invoked to communicate some
+     * info and/or warning about the media or its playback.
+     * @hide pending API council approval.
+     */
+    public interface OnInfoListener
+    {
+        /**
+         * Called to indicate an info or a warning.
+         * 
+         * @param mp      the MediaPlayer the info pertains to.
+         * @param what    the type of info or warning.
+         * <ul>
+         * <li>{@link #MEDIA_INFO_UNKNOWN}
+         * <li>{@link #MEDIA_INFO_VIDEO_TRACK_LAGGING}
+         * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
+         * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
+         * </ul>
+         * @param extra an extra code, specific to the info. Typically
+         * implementation dependant.
+         * @return True if the method handled the info, false if it didn't.
+         * Returning false, or not having an OnErrorListener at all, will
+         * cause the info to be discarded.
+         */
+        boolean onInfo(MediaPlayer mp, int what, int extra);
+    }
+
+    /**
+     * Register a callback to be invoked when an info/warning is available.
+     * 
+     * @param listener the callback that will be run
+     * @hide pending API council approval.
+     */
+    public void setOnInfoListener(OnInfoListener listener)
+    {
+        mOnInfoListener = listener;
+    }
+
+    private OnInfoListener mOnInfoListener;
 }

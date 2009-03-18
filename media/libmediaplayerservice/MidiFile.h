@@ -30,7 +30,6 @@ public:
                         ~MidiFile();
 
     virtual status_t    initCheck();
-    virtual status_t    setSigBusHandlerStructTLSKey(pthread_key_t key);
     virtual status_t    setDataSource(const char* path);
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length);
     virtual status_t    setVideoSurface(const sp<ISurface>& surface) { return UNKNOWN_ERROR; }
@@ -57,7 +56,6 @@ private:
 
     Mutex               mMutex;
     Condition           mCondition;
-    int*                mMemFailedVar;
     EAS_DATA_HANDLE     mEasData;
     EAS_HANDLE          mEasHandle;
     EAS_PCM*            mAudioBuffer;

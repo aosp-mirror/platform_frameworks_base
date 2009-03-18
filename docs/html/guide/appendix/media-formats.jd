@@ -20,7 +20,7 @@ page.title=Android Supported Media Formats
 </tr>
 
 <tr>
-<td rowspan="8">Audio</td>
+<td rowspan="9">Audio</td>
 <td>AAC LC/LTP</td>
 <td>&nbsp;</td>
 <td style="text-align: center;">X</td>
@@ -80,6 +80,14 @@ page.title=Android Supported Media Formats
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>Ogg (.ogg)</td>
+</tr>
+
+<tr>
+<td>PCM/WAVE</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>8- and 16-bit linear PCM (rates up to limit of hardware)</td>
+<td>WAVE (.wav)</td>
 </tr>
 
 <tr>

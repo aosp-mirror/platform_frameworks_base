@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<!-- Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -19,4 +19,5 @@
     <favorite package="com.android.contacts" class="com.android.contacts.DialtactsContactsEntryActivity" screen="1" x="1" y="3" />
     <favorite package="com.android.browser" class="com.android.browser.BrowserActivity" screen="1" x="2" y="3" />
     <favorite package="com.google.android.apps.maps" class="com.google.android.maps.MapsActivity" screen="1" x="3" y="3" />
+    <favorite package="com.android.vending" class="com.android.vending.AssetBrowserActivity" screen="1" x="0" y="2" />
 </favorites>

@@ -428,36 +428,6 @@ static void disconnectRemoteDeviceNative(JNIEnv *env, jobject object, jstring ad
 #endif
 }
 
-static jboolean isConnectableNative(JNIEnv *env, jobject object) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, nat->adapter,
-                           DBUS_CLASS_NAME, "IsConnectable",
-                           DBUS_TYPE_INVALID);
-        return reply ? dbus_returns_boolean(env, reply) : JNI_FALSE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
-static jboolean isDiscoverableNative(JNIEnv *env, jobject object) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, nat->adapter,
-                           DBUS_CLASS_NAME, "IsDiscoverable",
-                           DBUS_TYPE_INVALID);
-        return reply ? dbus_returns_boolean(env, reply) : JNI_FALSE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
 static jstring getModeNative(JNIEnv *env, jobject object) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
@@ -495,26 +465,6 @@ static jboolean setModeNative(JNIEnv *env, jobject object, jstring mode) {
     return JNI_FALSE;
 }
 
-static void common_Bonding(JNIEnv *env, jobject object, int timeout_ms,
-                           const char *func, jstring address) {
-#ifdef HAVE_BLUETOOTH
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        const char *c_address = env->GetStringUTFChars(address, NULL);
-        LOGV("... address = %s", c_address);
-        DBusMessage *reply =
-            dbus_func_args_timeout(env, nat->conn, timeout_ms, nat->adapter,
-                                   DBUS_CLASS_NAME, func,
-                                   DBUS_TYPE_STRING, &c_address,
-                                   DBUS_TYPE_INVALID);
-        env->ReleaseStringUTFChars(address, c_address);
-        if (reply) {
-            dbus_message_unref(reply);
-        }
-    }
-#endif
-}
-
 static jboolean createBondingNative(JNIEnv *env, jobject object,
                                     jstring address, jint timeout_ms) {
     LOGV(__FUNCTION__);
@@ -540,15 +490,64 @@ static jboolean createBondingNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
-static void cancelBondingProcessNative(JNIEnv *env, jobject object,
+static jboolean cancelBondingProcessNative(JNIEnv *env, jobject object,
                                        jstring address) {
     LOGV(__FUNCTION__);
-    common_Bonding(env, object, -1, "CancelBondingProcess", address);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_address = env->GetStringUTFChars(address, NULL);
+        LOGV("... address = %s", c_address);
+        DBusMessage *reply =
+            dbus_func_args_timeout(env, nat->conn, -1, nat->adapter,
+                                   DBUS_CLASS_NAME, "CancelBondingProcess",
+                                   DBUS_TYPE_STRING, &c_address,
+                                   DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(address, c_address);
+        if (reply) {
+            dbus_message_unref(reply);
+        }
+        return JNI_TRUE;
+    }
+#endif
+    return JNI_FALSE;
 }
 
-static void removeBondingNative(JNIEnv *env, jobject object, jstring address) {
+static jboolean removeBondingNative(JNIEnv *env, jobject object, jstring address) {
     LOGV(__FUNCTION__);
-    common_Bonding(env, object, -1, "RemoveBonding", address);
+    jboolean result = JNI_FALSE;
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_address = env->GetStringUTFChars(address, NULL);
+        LOGV("... address = %s", c_address);
+        DBusError err;
+        dbus_error_init(&err);
+        DBusMessage *reply =
+            dbus_func_args_error(env, nat->conn, &err, nat->adapter,
+                                 DBUS_CLASS_NAME, "RemoveBonding",
+                                 DBUS_TYPE_STRING, &c_address,
+                                 DBUS_TYPE_INVALID);
+        if (dbus_error_is_set(&err)) {
+            if (dbus_error_has_name(&err,
+                    BLUEZ_DBUS_BASE_IFC ".Error.DoesNotExist")) {
+                LOGW("%s: Warning: %s (%s)", __FUNCTION__, err.message,
+                     c_address);
+                result = JNI_TRUE;
+            } else {
+                LOGE("%s: D-Bus error %s (%s)", __FUNCTION__, err.name,
+                        err.message);
+            }
+        } else {
+            result = JNI_TRUE;
+        }
+
+        env->ReleaseStringUTFChars(address, c_address);
+        dbus_error_free(&err);
+        if (reply) dbus_message_unref(reply);
+    }
+#endif
+    return result;
 }
 
 static jobjectArray listBondingsNative(JNIEnv *env, jobject object) {
@@ -660,14 +659,6 @@ static jboolean setNameNative(JNIEnv *env, jobject obj, jstring name) {
     return JNI_FALSE;
 }
 
-static jstring getMajorClassNative(JNIEnv *env, jobject obj) {
-    return common_Get(env, obj, "GetMajorClass");
-}
-
-static jstring getMinorClassNative(JNIEnv *env, jobject obj) {
-    return common_Get(env, obj, "GetMinorClass");
-}
-
 static jstring common_getRemote(JNIEnv *env, jobject object, const char *func,
                                 jstring address) {
     LOGV("%s:%s", __FUNCTION__, func);
@@ -704,66 +695,6 @@ static jstring common_getRemote(JNIEnv *env, jobject object, const char *func,
     return NULL;
 }
 
-static jstring getRemoteAliasNative(JNIEnv *env, jobject obj, jstring address) {
-    return common_getRemote(env, obj, "GetRemoteAlias", address);
-}
-
-static jboolean setRemoteAliasNative(JNIEnv *env, jobject obj,
-                                     jstring address, jstring alias) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, obj);
-    if (nat) {
-        const char *c_address = env->GetStringUTFChars(address, NULL);
-        const char *c_alias = env->GetStringUTFChars(alias, NULL);
-
-        LOGV("... address = %s alias = %s", c_address, c_alias);
-
-        DBusMessage *reply = dbus_func_args(env, nat->conn, nat->adapter,
-                                            DBUS_CLASS_NAME, "SetRemoteAlias",
-                                            DBUS_TYPE_STRING, &c_address,
-                                            DBUS_TYPE_STRING, &c_alias,
-                                            DBUS_TYPE_INVALID);
-
-        env->ReleaseStringUTFChars(address, c_address);
-        env->ReleaseStringUTFChars(alias, c_alias);
-        if (reply)
-        {
-            dbus_message_unref(reply);
-            return JNI_TRUE;
-        }
-        return JNI_FALSE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
-static jboolean clearRemoteAliasNative(JNIEnv *env, jobject obj, jstring address) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, obj);
-    if (nat) {
-        const char *c_address = env->GetStringUTFChars(address, NULL);
-
-        LOGV("... address = %s", c_address);
-
-        DBusMessage *reply = dbus_func_args(env, nat->conn, nat->adapter,
-                                            DBUS_CLASS_NAME, "ClearRemoteAlias",
-                                            DBUS_TYPE_STRING, &c_address,
-                                            DBUS_TYPE_INVALID);
-
-        env->ReleaseStringUTFChars(address, c_address);
-        if (reply)
-        {
-            dbus_message_unref(reply);
-            return JNI_TRUE;
-        }
-        return JNI_FALSE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
 static jstring getRemoteVersionNative(JNIEnv *env, jobject obj, jstring address) {
     return common_getRemote(env, obj, "GetRemoteVersion", address);
 }
@@ -780,14 +711,6 @@ static jstring getRemoteCompanyNative(JNIEnv *env, jobject obj, jstring address)
     return common_getRemote(env, obj, "GetRemoteCompany", address);
 }
 
-static jstring getRemoteMajorClassNative(JNIEnv *env, jobject obj, jstring address) {
-    return common_getRemote(env, obj, "GetRemoteMajorClass", address);
-}
-
-static jstring getRemoteMinorClassNative(JNIEnv *env, jobject obj, jstring address) {
-    return common_getRemote(env, obj, "GetRemoteMinorClass", address);
-}
-
 static jstring getRemoteNameNative(JNIEnv *env, jobject obj, jstring address) {
     return common_getRemote(env, obj, "GetRemoteName", address);
 }
@@ -798,28 +721,6 @@ static jstring lastSeenNative(JNIEnv *env, jobject obj, jstring address) {
 
 static jstring lastUsedNative(JNIEnv *env, jobject obj, jstring address) {
     return common_getRemote(env, obj, "LastUsed", address);
-}
-
-static jobjectArray getRemoteServiceClassesNative(JNIEnv *env, jobject object,
-                                                   jstring address) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        const char *c_address = env->GetStringUTFChars(address, NULL);
-
-        LOGV("... address = %s", c_address);
-
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, nat->adapter,
-                           DBUS_CLASS_NAME, "GetRemoteServiceClasses",
-                           DBUS_TYPE_STRING, &c_address,
-                           DBUS_TYPE_INVALID);
-        env->ReleaseStringUTFChars(address, c_address);
-        return reply ? dbus_returns_array_of_strings(env, reply) : NULL;
-    }
-#endif
-    return NULL;
 }
 
 static jint getRemoteClassNative(JNIEnv *env, jobject object, jstring address) {
@@ -1070,8 +971,6 @@ static JNINativeMethod sMethods[] = {
     {"getAddressNative", "()Ljava/lang/String;", (void *)getAddressNative},
     {"getNameNative", "()Ljava/lang/String;", (void*)getNameNative},
     {"setNameNative", "(Ljava/lang/String;)Z", (void *)setNameNative},
-    {"getMajorClassNative", "()Ljava/lang/String;", (void *)getMajorClassNative},
-    {"getMinorClassNative", "()Ljava/lang/String;", (void *)getMinorClassNative},
     {"getVersionNative", "()Ljava/lang/String;", (void *)getVersionNative},
     {"getRevisionNative", "()Ljava/lang/String;", (void *)getRevisionNative},
     {"getManufacturerNative", "()Ljava/lang/String;", (void *)getManufacturerNative},
@@ -1100,17 +999,11 @@ static JNINativeMethod sMethods[] = {
     {"removeBondingNative", "(Ljava/lang/String;)Z", (void *)removeBondingNative},
 
     {"getRemoteNameNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteNameNative},
-    {"getRemoteAliasNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteAliasNative},
-    {"setRemoteAliasNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)setRemoteAliasNative},
-    {"clearRemoteAliasNative", "(Ljava/lang/String;)Z", (void *)clearRemoteAliasNative},
     {"getRemoteVersionNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteVersionNative},
     {"getRemoteRevisionNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteRevisionNative},
     {"getRemoteClassNative", "(Ljava/lang/String;)I", (void *)getRemoteClassNative},
     {"getRemoteManufacturerNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteManufacturerNative},
     {"getRemoteCompanyNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteCompanyNative},
-    {"getRemoteMajorClassNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteMajorClassNative},
-    {"getRemoteMinorClassNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)getRemoteMinorClassNative},
-    {"getRemoteServiceClassesNative", "(Ljava/lang/String;)[Ljava/lang/String;", (void *)getRemoteServiceClassesNative},
     {"getRemoteServiceChannelNative", "(Ljava/lang/String;S)Z", (void *)getRemoteServiceChannelNative},
     {"getRemoteFeaturesNative", "(Ljava/lang/String;)[B", (void *)getRemoteFeaturesNative},
     {"lastSeenNative", "(Ljava/lang/String;)Ljava/lang/String;", (void *)lastSeenNative},

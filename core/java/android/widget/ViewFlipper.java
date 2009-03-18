@@ -22,11 +22,14 @@ import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.widget.RemoteViews.RemoteView;
 
 /**
  * Simple {@link ViewAnimator} that will animate between two or more views
  * that have been added to it.  Only one child is shown at a time.  If
  * requested, can automatically flip between each child at a regular interval.
+ *
+ * @attr ref android.R.styleable#ViewFlipper_flipInterval
  */
 public class ViewFlipper extends ViewAnimator {
     private int mFlipInterval = 3000;
@@ -52,6 +55,7 @@ public class ViewFlipper extends ViewAnimator {
      * @param milliseconds
      *            time in milliseconds
      */
+    @android.view.RemotableViewMethod
     public void setFlipInterval(int milliseconds) {
         mFlipInterval = milliseconds;
     }

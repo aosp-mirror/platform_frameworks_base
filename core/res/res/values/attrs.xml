@@ -224,15 +224,18 @@
             <!-- Leave the soft input window as-is, in whatever state it
                  last was. -->
             <flag name="stateUnchanged" value="1" />
-            <!-- Don't display the soft input area, there is no reason to
-                 do so on this window. -->
+            <!-- Make the soft input area hidden when normally appropriate
+                 (when the user is navigating forward to your window). -->
             <flag name="stateHidden" value="2" />
+            <!-- Always make the soft input area hidden when this window
+                 has input focus. -->
+            <flag name="stateAlwaysHidden" value="3" />
             <!-- Make the soft input area visible when normally appropriate
                  (when the user is navigating forward to your window). -->
-            <flag name="stateVisible" value="3" />
+            <flag name="stateVisible" value="4" />
             <!-- Always make the soft input area visible when this window
                  has input focus. -->
-            <flag name="stateAlwaysVisible" value="4" />
+            <flag name="stateAlwaysVisible" value="5" />
             
             <!-- The window resize/pan adjustment has not been specified,
                  the system will automatically select between resize and pan
@@ -260,6 +263,14 @@
              use the window's theme to show a preview of it before your
              actual instance is shown to the user. -->
         <attr name="windowDisablePreview" format="boolean" />
+        
+        <!-- Flag indicating that this window should not be displayed at all.
+             The default value is false; if set to true, and this window is
+             the main window of an Activity, then it will never actually
+             be added to the window manager.  This means that your activity
+             must immediately quit without waiting for user interaction,
+             because there will be no such interaction coming. -->
+        <attr name="windowNoDisplay" format="boolean" />
         
         <!-- ============ -->
         <!-- Alert Dialog styles -->
@@ -336,6 +347,8 @@
         <attr name="radioButtonStyle" format="reference" />
         <!-- Default ScrollView style. -->
         <attr name="scrollViewStyle" format="reference" />
+        <!-- Default HorizontalScrollView style. -->
+        <attr name="horizontalScrollViewStyle" format="reference" />
         <!-- Default Spinner style. -->
         <attr name="spinnerStyle" format="reference" />
         <!-- Default Star style. -->
@@ -392,7 +405,8 @@
     <!-- **************************************************************** -->
     <eat-comment />
 
-    <!-- Size of text (example: 15sp). Supported values include the following:<p/>
+    <!-- Size of text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp).
+         Supported values include the following:<p/>
     <ul>
         <li><b>px</b> Pixels</li>
         <li><b>sp</b> Scaled pixels (scaled to relative pixel size on screen). See {@link android.util.DisplayMetrics} for more information.</li>
@@ -401,6 +415,7 @@
     </ul>
         -->
     <attr name="textSize" format="dimension" />
+    
     <!-- Default text typeface. -->
     <attr name="typeface">
         <enum name="normal" value="0" />
@@ -408,20 +423,26 @@
         <enum name="serif" value="2" />
         <enum name="monospace" value="3" />
     </attr>
+    
     <!-- Default text typeface style. -->
     <attr name="textStyle">
         <flag name="normal" value="0" />
         <flag name="bold" value="1" />
         <flag name="italic" value="2" />
     </attr>
+    
     <!-- Color of text (usually same as colorForeground). -->
     <attr name="textColor" format="reference|color" />
+    
     <!-- Color of highlighted text. -->
     <attr name="textColorHighlight" format="reference|color" />
+    
     <!-- Color of hint text (displayed when the field is empty). -->
     <attr name="textColorHint" format="reference|color" />
+    
     <!-- Color of link text (URLs). -->
     <attr name="textColorLink" format="reference|color" />
+    
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
         <enum name="none" value="0" />
@@ -430,6 +451,7 @@
         <enum name="end" value="3" />
         <enum name="marquee" value="4" />
     </attr>
+    
     <!-- The type of data being placed in a text field, used to help an
          input method decide how to let the user enter text.  The constants
          here correspond to those defined by
@@ -466,13 +488,15 @@
              {@link android.text.InputType#TYPE_TEXT_FLAG_AUTO_COMPLETE}. -->
         <flag name="textAutoComplete" value="0x00010001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             allow multiple lines of text in the field.  Corresponds to
+             allow multiple lines of text in the field.  If this flag is not set,
+             the text field will be constrained to a single line.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_MULTI_LINE}. -->
         <flag name="textMultiLine" value="0x00020001" />
         <!-- Can be combined with <var>text</var> and its variations to
-             indicate that a search string is being entered.  Corresponds to
-             {@link android.text.InputType#TYPE_TEXT_FLAG_SEARCH}. -->
-        <flag name="textSearch" value="0x00040001" />
+             indicate that though the regular text view should not be multiple
+             lines, the IME should provide multiple lines if it can.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_IME_MULTI_LINE}. -->
+        <flag name="textImeMultiLine" value="0x00040001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
@@ -485,31 +509,43 @@
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_EMAIL_SUBJECT}. -->
         <flag name="textEmailSubject" value="0x00000031" />
-        <!-- Text that is being supplied as the content of an e-mail.  Corresponds to
+        <!-- Text that is the content of a short message.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
-             {@link android.text.InputType#TYPE_TEXT_VARIATION_EMAIL_CONTENT}. -->
-        <flag name="textEmailContent" value="0x00000041" />
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_SHORT_MESSAGE}. -->
+        <flag name="textShortMessage" value="0x00000041" />
+        <!-- Text that is the content of a long message.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_LONG_MESSAGE}. -->
+        <flag name="textLongMessage" value="0x00000051" />
         <!-- Text that is the name of a person.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_PERSON_NAME}. -->
-        <flag name="textPersonName" value="0x00000051" />
+        <flag name="textPersonName" value="0x00000061" />
         <!-- Text that is being supplied as a postal mailing address.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS}. -->
-        <flag name="textPostalAddress" value="0x00000061" />
+        <flag name="textPostalAddress" value="0x00000071" />
         <!-- Text that is a password.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_PASSWORD}. -->
-        <flag name="textPassword" value="0x00000071" />
-        <!-- Text that will be used for free form search strings.  Corresponds to
+        <flag name="textPassword" value="0x00000081" />
+        <!-- Text that is a password that should be visible.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
-             {@link android.text.InputType#TYPE_TEXT_VARIATION_SEARCH_STRING} |
-             {@link android.text.InputType#TYPE_TEXT_FLAG_SEARCH}. -->
-        <flag name="textSearchString" value="0x00040081" />
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_VISIBLE_PASSWORD}. -->
+        <flag name="textVisiblePassword" value="0x00000091" />
         <!-- Text that is being supplied as text in a web form.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}. -->
-        <flag name="textWebEditText" value="0x00000091" />
+        <flag name="textWebEditText" value="0x000000a1" />
+        <!-- Text that is filtering some other data.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_FILTER}. -->
+        <flag name="textFilter" value="0x000000b1" />
+        <!-- Text that is for phonetic pronunciation, such as a phonetic name
+             field in a contact entry.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_PHONETIC}. -->
+        <flag name="textPhonetic" value="0x000000c1" />
         <!-- A numeric only field.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_NUMBER}. -->
         <flag name="number" value="0x00000002" />
@@ -538,6 +574,61 @@
              {@link android.text.InputType#TYPE_CLASS_DATETIME} |
              {@link android.text.InputType#TYPE_DATETIME_VARIATION_TIME}. -->
         <flag name="time" value="0x00000024" />
+    </attr>
+
+    <!-- Additional features you can enable in an IME associated with an editor,
+         to improve the integration with your application.  The constants
+         here correspond to those defined by
+         {@link android.view.inputmethod.EditorInfo#imeOptions}. -->
+    <attr name="imeOptions">
+        <!-- There are no special semantics associated with this editor. -->
+        <flag name="normal" value="0x00000000" />
+        <!-- There is no specific action associated with this editor, let the
+             editor come up with its own if it can.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_NULL}. -->
+        <flag name="actionUnspecified" value="0x00000000" />
+        <!-- This editor has no action associated with it.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_NONE}. -->
+        <flag name="actionNone" value="0x00000001" />
+        <!-- The action key performs a "go"
+             operation to take the user to the target of the text they typed.
+             Typically used, for example, when entering a URL.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_GO}. -->
+        <flag name="actionGo" value="0x00000002" />
+        <!-- The action key performs a "search"
+             operation, taking the user to the results of searching for the text
+             the have typed (in whatever context is appropriate).
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEARCH}. -->
+        <flag name="actionSearch" value="0x00000003" />
+        <!-- The action key performs a "send"
+             operation, delivering the text to its target.  This is typically used
+             when composing a message.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_SEND}. -->
+        <flag name="actionSend" value="0x00000004" />
+        <!-- The action key performs a "next"
+             operation, taking the user to the next field that will accept text.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_NEXT}. -->
+        <flag name="actionNext" value="0x00000005" />
+        <!-- The action key performs a "done"
+             operation, closing the soft input method.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE}. -->
+        <flag name="actionDone" value="0x00000006" />
+        <!-- Used in conjunction with a custom action,
+             this indicates that the action should not
+             be available in-line as the same as a "enter" key.  Typically this is
+             because the action has such a significant impact or is not recoverable
+             enough that accidentally hitting it should be avoided, such as sending
+             a message.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ENTER_ACTION}. -->
+        <flag name="flagNoEnterAction" value="0x40000000" />
     </attr>
 
     <!-- A coordinate in the X dimension. -->
@@ -744,6 +835,7 @@
         <enum name="KEYCODE_PREVIOUSSONG" value="88" />
         <enum name="KEYCODE_REWIND" value="89" />
         <enum name="KEYCODE_FORWARD" value="90" />
+        <enum name="KEYCODE_MUTE" value="91" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -767,6 +859,7 @@
         <attr name="windowAnimationStyle" />
         <attr name="windowSoftInputMode" />
         <attr name="windowDisablePreview" />
+        <attr name="windowNoDisplay" />
         <attr name="textColor" />
         <attr name="backgroundDimEnabled" />
         <attr name="backgroundDimAmount" />
@@ -1039,6 +1132,10 @@
         <!-- Boolean that controls whether a view should have sound effects
              enabled for events such as clicking and touching. -->
         <attr name="soundEffectsEnabled" format="boolean" />
+
+        <!-- Boolean that controls whether a view should have haptic feedback
+             enabled for events such as long presses. -->
+        <attr name="hapticFeedbackEnabled" format="boolean" />
 
     </declare-styleable>
 
@@ -1578,7 +1675,7 @@
     <declare-styleable name="TextAppearance">
         <!-- Text color. -->
         <attr name="textColor" />
-        <!-- Size of the text. -->
+        <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
         <attr name="textSize" />
         <!-- Style (bold, italic, bolditalic) for the text. -->
         <attr name="textStyle" />
@@ -1619,7 +1716,7 @@
         <attr name="textColorHint" />
         <!-- Base text color, typeface, size, and style. -->
         <attr name="textAppearance" />
-        <!-- Size of the text. -->
+        <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
         <attr name="textSize" />
         <!-- Sets the horizontal scaling factor for the text -->
         <attr name="textScaleX" format="float" />
@@ -1673,9 +1770,15 @@
              instead of letting it wrap onto multiple lines, and advances
              focus instead of inserting a newline when you press the
              enter key.  Note: for editable text views, it is better
-             to set this using the textMultiLine flag in inputType;
-             if both this and inputType are supplied, the input
-             type overrides the value here. -->
+             to control this using the textMultiLine flag in the inputType
+             attribute.  (If both singleLine and inputType are supplied,
+             the inputType flags will override the value of singleLine.)
+             {@deprecated This attribute is deprecated and is replaced by the textMultiLine flag
+             in the inputType attribute.  Use caution when altering existing layouts, as the 
+             default value of singeLine is false (multi-line mode), but if you specify any 
+             value for inputType, the default is single-line mode.  (If both singleLine and 
+             inputType attributes are found,  the inputType flags will override the value of 
+             singleLine.) } -->
         <attr name="singleLine" format="boolean" />
         <!-- {@deprecated Use state_enabled instead.} -->
         <attr name="enabled" format="boolean" />
@@ -1785,13 +1888,22 @@
             <enum name="marquee_forever" value="-1" />
         </attr>
         <attr name="inputType" />
+        <attr name="imeOptions" />
         <!-- An addition content type description to supply to the input
              method attached to the text view, which is private to the
              implementation of the input method.  This simply fills in
-             the {@link android.view.inputmethod.EditorInfo#privateContentType
-             EditorInfo.privateContentType} field when the input
+             the {@link android.view.inputmethod.EditorInfo#privateImeOptions
+             EditorInfo.privateImeOptions} field when the input
              method is connected. -->
-        <attr name="editorPrivateContentType" format="string" />
+        <attr name="privateImeOptions" format="string" />
+        <!-- Supply a value for
+             {@link android.view.inputmethod.EditorInfo#actionLabel EditorInfo.actionLabel}
+             used when an input method is connected to the text view. -->
+        <attr name="imeActionLabel" format="string" />
+        <!-- Supply a value for
+             {@link android.view.inputmethod.EditorInfo#actionId EditorInfo.actionId}
+             used when an input method is connected to the text view. -->
+        <attr name="imeActionId" format="integer" />
         <!-- Reference to an
              {@link android.R.styleable#InputExtras &lt;input-extras&gt;}
              XML resource containing additional data to
@@ -1821,6 +1933,19 @@
         <attr name="dropDownVerticalOffset" format="dimension" />
         <!-- Amount of pixels by which the drop down should be offset horizontally. -->
         <attr name="dropDownHorizontalOffset" format="dimension" />
+        <!-- View to anchor the auto-complete dropdown to. If not specified, the text view itself
+             is used. -->
+        <attr name="dropDownAnchor" format="reference" />
+        <!-- Specifies the basic width of the dropdown. Its value may
+             be a dimension (such as "12dip") for a constant width, fill_parent
+             to fill the width of the screen, or wrap_content to match the width
+             of the anchored view. -->
+        <attr name="dropDownWidth" format="dimension">
+            <!-- The dropdown should fill the width of the screen. -->
+            <enum name="fill_parent" value="-1" />
+            <!-- The dropdown should fit the width of its anchor. -->
+            <enum name="wrap_content" value="-2" />
+        </attr>
         <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
@@ -1838,6 +1963,10 @@
     <declare-styleable name="ScrollView">
         <!-- Defines whether the scrollview should stretch its content to fill the viewport. -->
         <attr name="fillViewport" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="HorizontalScrollView">
+        <!-- Defines whether the scrollview should stretch its content to fill the viewport. -->
+        <attr name="fillViewport" />
     </declare-styleable>
     <declare-styleable name="Spinner">
         <!-- The prompt to display when the spinner's dialog is shown. -->
@@ -1936,10 +2065,10 @@
             Accommodates top margin. -->
         <attr name="layout_alignParentTop" format="boolean" />
         <!-- If true, makes the right edge of this view match the right edge of the parent.
-            Accommodates top margin. -->
+            Accommodates right margin. -->
         <attr name="layout_alignParentRight" format="boolean" />
-        <!-- f true, makes the bottom edge of this view match the bottom edge of the parent.
-            Accommodates top margin. -->
+        <!-- If true, makes the bottom edge of this view match the bottom edge of the parent.
+            Accommodates bottom margin. -->
         <attr name="layout_alignParentBottom" format="boolean" />
         <!-- If true, centers this child horizontally and vertically within its parent. -->
         <attr name="layout_centerInParent" format="boolean" />
@@ -2009,8 +2138,18 @@
             <enum name="line" value="2" />
             <enum name="ring" value="3" />
         </attr>
+        <!-- Inner radius of the ring expressed as a ratio of the ring's width. For instance,
+             if innerRadiusRatio=9, then the inner radius equals the ring's width divided by 9.
+             This value is ignored if innerRadius is defined. Default value is 9. -->
         <attr name="innerRadiusRatio" format="float" />
+        <!-- Thickness of the ring expressed as a ratio of the ring's width. For instance,
+             if thicknessRatio=3, then the thickness equals the ring's width divided by 3.
+             This value is ignored if innerRadius is defined. Default value is 3. -->
         <attr name="thicknessRatio" format="float" />
+        <!-- Inner radius of the ring. When defined, innerRadiusRatio is ignored. -->
+        <attr name="innerRadius" format="dimension" />
+        <!-- Thickness of the ring. When defined, thicknessRatio is ignored. -->
+        <attr name="thickness" format="dimension" />
         <attr name="useLevel" />
     </declare-styleable>
     
@@ -2072,7 +2211,9 @@
     </declare-styleable>
     
     <declare-styleable name="LevelListDrawableItem">
+        <!-- The minimum level allowed for this item. -->
         <attr name="minLevel" format="integer" />
+        <!-- The maximum level allowed for this item. -->
         <attr name="maxLevel" format="integer" />
         <attr name="drawable" />
     </declare-styleable>
@@ -2124,6 +2265,16 @@
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
+    </declare-styleable>
+
+    <!-- Drawable used to draw 9-patches. -->
+    <declare-styleable name="NinePatchDrawable">
+        <!-- Identifier of the bitmap file. This attribute is mandatory. -->
+        <attr name="src" />
+        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
+             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
+             an RGB 565 screen.) -->
+        <attr name="dither" />
     </declare-styleable>
 
     <!-- Drawable used to draw a single color. -->
@@ -2490,6 +2641,7 @@
                        changing to use only icons for its buttons.}-->
         <attr name="searchButtonText" format="string" />
         <attr name="inputType" />
+        <attr name="imeOptions" />
         
         <!-- Additional features are controlled by mode bits in this field.  Omitting
             this field, or setting to zero, provides default behavior.  <i>Optional attribute.</i> 
@@ -2513,6 +2665,43 @@
                values are not suitable for user inspection and editing. -->
           <flag name="queryRewriteFromText" value="0x20" />
         </attr>
+        
+        <!-- Voice search features are controlled by mode bits in this field.  Omitting
+            this field, or setting to zero, provides default behavior.
+            If showVoiceSearchButton is set, then launchWebSearch or launchRecognizer must
+            also be set.  <i>Optional attribute.</i> 
+        -->
+        <attr name="voiceSearchMode">
+          <!-- If set, display a voice search button.  This only takes effect if voice search is
+               available on the device. -->
+          <flag name="showVoiceSearchButton" value="0x01" />
+          <!-- If set, the voice search button will take the user directly to a built-in
+               voice web search activity.  Most applications will not use this flag, as it
+               will take the user away from your searchable activity. -->
+          <flag name="launchWebSearch" value="0x02" />
+          <!-- If set, the voice search button will take the user directly to a built-in
+               voice recording activity.  This activity will prompt the user to speak,
+               transcribe the spoke text, and forward the resulting query text to your
+               searchable activity, just as if the user had typed it into the search UI. -->
+          <flag name="launchRecognizer" value="0x04" />
+        </attr>
+
+        <!-- If provided, this specifies the language model that should be used by the
+             voice recognition system.  See 
+             {@link android.speech.RecognizerIntent#EXTRA_LANGUAGE_MODEL } for more information. 
+             If not provided, the default value 
+             {@link android.speech.RecognizerIntent#LANGUAGE_MODEL_FREE_FORM } will be used. -->
+        <attr name="voiceLanguageModel" format="string" />
+        <!-- If provided, this specifies a prompt that will be displayed during voice input. -->
+        <attr name="voicePromptText" format="string" />
+        <!-- If provided, this specifies the spoken language to be expected, and that it will be
+             different than the one set in the {@link java.util.Locale#getDefault()}. -->
+        <attr name="voiceLanguage" format="string" />
+        <!-- If provided, enforces the maximum number of results to return, including the "best"
+             result which will always be provided as the SEARCH intent's primary query.  Must be one
+             or greater.  If not provided, the recognizer will choose how many results to return. 
+             -->
+        <attr name="voiceMaxResults" format="integer" />
 
         <!-- If provided, this is the trigger indicating that the searchable activity
             provides suggestions as well.  The value must be a fully-qualified content provider
@@ -2936,18 +3125,25 @@
     </declare-styleable>
 
     <!-- =============================== -->
-    <!-- Gadget package class attributes -->
+    <!-- AppWidget package class attributes -->
     <!-- =============================== -->
 
-    <!-- Use <code>gadget-provider</code> as the root tag of the XML resource that
-         describes a gadget provider.  See TODO android.gadget android.gadget package
+    <!-- Use <code>appwidget-provider</code> as the root tag of the XML resource that
+         describes an AppWidget provider.  See TODO android.appwidget package
          for more info.
      -->
-    <declare-styleable name="GadgetProviderInfo">
+    <declare-styleable name="AppWidgetProviderInfo">
+        <!-- Minimum width of the AppWidget. -->
         <attr name="minWidth"/>
+        <!-- Minimum height of the AppWidget. -->
         <attr name="minHeight"/>
+        <!-- Update period in milliseconds, or 0 if the AppWidget will update itself. -->
         <attr name="updatePeriodMillis" format="integer" />
+        <!-- A resource id of a layout. -->
         <attr name="initialLayout" format="reference" />
+        <!-- A class name in the AppWidget's package to be launched to configure.
+             If not supplied, then no activity will be launched. -->
+        <attr name="configure" format="string" />
     </declare-styleable>
     
     

@@ -18,7 +18,7 @@
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight">
     
-    <!-- Icon, checkbox, and/or radio button will be inserted here. -->
+    <!-- Icon will be inserted here. -->
     
     <!-- The title and summary have some gap between them, and this 'group' should be centered vertically. -->
     <RelativeLayout
@@ -54,4 +54,6 @@
 
     </RelativeLayout>
 
+    <!-- Checkbox, and/or radio button will be inserted here. -->
+    
 </com.android.internal.view.menu.ListMenuItemView>

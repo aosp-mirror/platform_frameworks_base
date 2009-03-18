@@ -18,9 +18,11 @@ page.title=Preparing to Publish: A Checklist
 <p>Publishing an application means testing it, packaging it appropriately, and 
 making it available to users of Android-powered mobile devices.</p>
 
-<p>If you plan to publish your application for installation on Android-powered devices,
-there are several things you need to do, to get your application ready. This document 
-the significant checkpoints for preparing your application for a successful release. </p>
+<p>If you plan to publish your application for installation on
+Android-powered devices, there are several things you need to do, to get
+your application ready. This document highlights the significant
+checkpoints for preparing your application for a successful release.
+</p>
 
 <p>If you will publish your application on Android Market, please also see <a
 href="{@docRoot}guide/publishing/publishing.html#market">Publishing on Android Market</a> 
@@ -67,7 +69,7 @@ testing classes and tools. You can use
 {@link android.app.Instrumentation Instrumentation} to run JUnit and other 
 test cases, and you can use testing
 tools such as the <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application
-Exerciser Monkey</a>. </p>
+Exerciser Monkey</a>.  </p>
 
 <ul>
 <li>To ensure that your application will run properly for users, you should make
@@ -94,12 +96,12 @@ orientation changes. </li>
 </ul>
 
 <h3 id="eula">2. Consider adding an End User License Agreement in your 
-application</h4>
+application</h3>
 
 <p>To protect your person, organization, and intellectual property, you may want
 to provide an End User License Agreement (EULA) with your application. 
 
-<h3 id="iconlabel">3. Specify an icon and label in the application's manifest</h4>
+<h3 id="iconlabel">3. Specify an icon and label in the application's manifest</h3>
 
 <p>The icon and label that you specify in an application's manifest are
 important because they are displayed to users as your application's icon and
@@ -114,7 +116,7 @@ display the icon and label to users. </p>
 <p>As regards the design of your icon, you should try to make it match as much
 as possible the style used by the built-in Android applications.</p>
 
-<h3 id="logging">4. Turn off logging and debugging and clean up data/files</h4>
+<h3 id="logging">4. Turn off logging and debugging and clean up data/files</h3>
 
 <p>For release, you should make sure that debug facilities are turned off and
 that debug and other unnecessary data/files are removed from your application
@@ -129,9 +131,9 @@ application project.</li>
 code.</li>
 </ul>
 
-<h2 id="finalcompile">Before you do the final compile of your application</h3>
+<h2 id="finalcompile">Before you do the final compile of your application</h2>
 
-<h3 id="versionapp">5. Version Your Application</h4>
+<h3 id="versionapp">5. Version your application</h3>
 
 <p>Before you compile your application, you must make sure that you have defined
 a version number for your application, specifying an appropriate value for both
@@ -147,9 +149,10 @@ increment both the <code>android:versionCode</code> and
 element in the application's manifest file, using appropriate values. </p>
 
 <p>For detailed information about how to define version information for your
-application, see <a href="{@docRoot}guide/publishing/versioning.html">Versioning Your Applications</a>.</p>
+application, see <a href="{@docRoot}guide/publishing/versioning.html">Versioning 
+Your Applications</a>.</p>
 
-<h3 id="cryptokey">6. Obtain a suitable cryptographic key</h4>
+<h3 id="cryptokey">6. Obtain a suitable cryptographic key</h3>
 
 <p>If you have read and followed all of the preparation steps up to this point,
 your application is compiled and ready for signing. Inside the .apk, the
@@ -158,7 +161,8 @@ private data, as described above. </p>
 
 <p>Before you sign your application, you need to make sure that you have a
 suitable private key. For complete information about how to obtain (or generate)
-a private key, see <a href="#cert">Obtaining a Private Key</a>.</p>
+a private key, see <a href="{@docRoot}guide/publishing/app-signing.html#cert">
+Obtaining a Suitable Private Key</a>.</p>
 
 <p>Once you have obtained (or generated) a suitable private key, you will use it
 to:</p>
@@ -166,20 +170,18 @@ to:</p>
 <ul>
 <li>Register for a Maps API Key (see below), if your application uses MapView
 elements.</li>
-<li>Sign your application for release</li>
+<li>Sign your application for release, later in the preparation process</li>
 </ul>
-
 
 <h3 id="mapsApiKey">7. Register for a Maps API Key, if your application is using
 MapView elements</h3>
 
-<div class="sidebox" style="margin-bottom:.5em;"><p>For complete information
-about getting a Maps API Key, see <a
-href="{@docRoot}guide/developing/mapkey.html">Obtaining a Maps API
+<div class="sidebox" style="margin-bottom:.5em;padding:1em;"><p>
+For complete information about getting a Maps API Key, see <a
+href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a Maps API
 Key</a>.<br></p></div>
 
-<p>If your application uses one or more 
-{@link-fixme com.google.android.maps.MapView Mapview} elements, you will need to 
+<p>If your application uses one or more Mapview elements, you will need to 
 register your application with the Google
 Maps service and obtain a Maps API Key, before your MapView(s) will be able to
 retrieve data from Google Maps. To do so, you supply an MD5 fingerprint of your
@@ -222,20 +224,20 @@ to download Maps data. </li>
 href="#signing">Signing Your Applications</a>.</p>
 
 
-<h2 id="compile">Compile Your Application</h3>
+<h2 id="compile">Compile your application</h2>
 
 <p>When you've prepared your application as described in the previous sections,
 you can compile your application for release. </p>
 
-<h2 id="post-compile">After Compiling Your Application</h3>
+<h2 id="post-compile">After compiling your application</h2>
 
-<h3 id="signapp">8. Sign Your Application</h4>
+<h3 id="signapp">8. Sign your application</h3>
 
 <p>Sign your application using your private key. Signing your application
 correctly is critically important. Please see <a href="#signing">Signing Your
 Applications</a> for complete information. </p>
 
-<h3 id="testapp">9. Test Your Compiled and Signed Application</h4>
+<h3 id="testapp">9. Test your compiled and signed application</h3>
 
 <p>Before you release your compiled application, you should thoroughly test it
 on the target mobile device (and target network, if possible). In particular,

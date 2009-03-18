@@ -48,6 +48,7 @@ import android.widget.RemoteViews.RemoteView;
  * @attr ref android.R.styleable#ImageView_maxHeight
  * @attr ref android.R.styleable#ImageView_tint
  * @attr ref android.R.styleable#ImageView_scaleType
+ * @attr ref android.R.styleable#ImageView_cropToPadding
  */
 @RemoteView
 public class ImageView extends View {
@@ -192,6 +193,7 @@ public class ImageView extends View {
      * 
      * @attr ref android.R.styleable#ImageView_adjustViewBounds
      */
+    @android.view.RemotableViewMethod
     public void setAdjustViewBounds(boolean adjustViewBounds) {
         mAdjustViewBounds = adjustViewBounds;
         if (adjustViewBounds) {
@@ -216,6 +218,7 @@ public class ImageView extends View {
      * 
      * @attr ref android.R.styleable#ImageView_maxWidth
      */
+    @android.view.RemotableViewMethod
     public void setMaxWidth(int maxWidth) {
         mMaxWidth = maxWidth;
     }
@@ -237,6 +240,7 @@ public class ImageView extends View {
      * 
      * @attr ref android.R.styleable#ImageView_maxHeight
      */
+    @android.view.RemotableViewMethod
     public void setMaxHeight(int maxHeight) {
         mMaxHeight = maxHeight;
     }
@@ -255,6 +259,7 @@ public class ImageView extends View {
      * 
      * @attr ref android.R.styleable#ImageView_src
      */
+    @android.view.RemotableViewMethod
     public void setImageResource(int resId) {
         if (mUri != null || mResource != resId) {
             updateDrawable(null);
@@ -271,6 +276,7 @@ public class ImageView extends View {
      * 
      * @param uri The Uri of an image
      */
+    @android.view.RemotableViewMethod
     public void setImageURI(Uri uri) {
         if (mResource != 0 ||
                 (mUri != uri &&
@@ -305,6 +311,7 @@ public class ImageView extends View {
      * 
      * @param bm The bitmap to set
      */
+    @android.view.RemotableViewMethod
     public void setImageBitmap(Bitmap bm) {
         // if this is used frequently, may handle bitmaps explicitly
         // to reduce the intermediate drawable object
@@ -326,6 +333,13 @@ public class ImageView extends View {
         resizeFromDrawable();
     }
 
+    /**
+     * Sets the image level, when it is constructed from a 
+     * {@link android.graphics.drawable.LevelListDrawable}.
+     *
+     * @param level The new level for the image.
+     */
+    @android.view.RemotableViewMethod
     public void setImageLevel(int level) {
         mLevel = level;
         if (mDrawable != null) {
@@ -832,7 +846,7 @@ public class ImageView extends View {
 
     @Override
     public int getBaseline() {
-        return mBaselineAligned ? getHeight() : -1;
+        return mBaselineAligned ? getMeasuredHeight() : -1;
     }
     
     /**

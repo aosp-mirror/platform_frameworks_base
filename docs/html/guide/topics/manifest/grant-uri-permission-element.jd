@@ -1,0 +1,85 @@
+page.title=&lt;grant-uri-permission&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;grant-uri-permission android:<a href="#path">path</a>="<i>string</i>"
+                      android:<a href="#path">pathPattern</a>="<i>string</i>"
+                      android:<a href="#path">pathPrefix</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Specifies which data subsets of the parent content provider permission
+can be granted for.  Data subsets are indicated by the path part of a 
+{@code content:} URI.  (The authority part of the URI identifies the
+content provider.)  
+Granting permission is a way of enabling clients of the provider that don't 
+normally have permission to access its data to overcome that restriction on 
+a one-time basis.
+
+<p> 
+If a content provider's <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmns">grantUriPermissions</a></code> 
+attribute is "{@code true}", permission can be granted for any the data under 
+the provider's purview.  However, if that attribute is "{@code false}", permission 
+can be granted only to data subsets that are specified by this element.  
+A provider can contain any number of {@code &lt;grant-uri-permission&gt;} elements.  
+Each one can specify only one path (only one of the three possible attributes).
+</p>
+
+<p>
+For information on how permission is granted, see the 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">grantUriPermissions</a></code> attribute.
+</p></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="path"></a>{@code android:path}
+<br/>{@code android:pathPrefix}
+<br/>{@code android:pathPattern}</dt>
+<dd>A path identifying the data subset or subsets that permission can be 
+granted for.  The {@code path} attribute specifies a complete path; 
+permission can be granted only to the particular data subset identified 
+by that path.  
+The {@code pathPrefix} attribute specifies the initial part of a path; 
+permission can be granted to all data subsets with paths that share that 
+initial part.   
+The {@code pathPattern} attribute specifies a complete path, but one 
+that can contain the following wildcards:
+
+<ul>
+<li>An asterisk ('{@code *}') matches a sequence of 0 to many occurrences of
+the immediately preceding character.</li>
+
+<li><p>A period followed by an asterisk ("{@code .*}") matches any sequence of 
+0 to many characters.</p></li>
+</ul>
+
+<p>
+Because '{@code \}' is used as an escape character when the string is read 
+from XML (before it is parsed as a pattern), you will need to double-escape:  
+For example, a literal '{@code *}' would be written as "{@code \\*}" and a 
+literal '{@code \}' would be written as "{@code \\\\}".  This is basically 
+the same as what you would need to write if constructing the string in Java code.
+</p>
+
+<p>
+For more information on these types of patterns, see the descriptions of 
+{@link android.os.PatternMatcher#PATTERN_LITERAL},
+{@link android.os.PatternMatcher#PATTERN_PREFIX}, and
+{@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB} in the
+{@link android.os.PatternMatcher} class.
+</p></dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd>the 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmns">grantUriPermissions</a></code>
+attribute of the 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 
+element</dd>
+
+
+</dl>

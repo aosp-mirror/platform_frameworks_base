@@ -87,19 +87,19 @@
     <!-- Specify a permission that a client is required to have in order to
     	 use the associated object.  If the client does not hold the named
     	 permission, its request will fail.  See the
-         <a href="{@docRoot}devel/security.html">Security Model</a>
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions. -->
     <attr name="permission" format="string" />
     
     <!-- A specific {@link android.R.attr#permission} name for read-only
          access to a {@link android.content.ContentProvider}.  See the
-         <a href="{@docRoot}devel/security.html">Security Model</a>
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions. -->
     <attr name="readPermission" format="string" />
     
     <!-- A specific {@link android.R.attr#permission} name for write
          access to a {@link android.content.ContentProvider}.  See the
-         <a href="{@docRoot}devel/security.html">Security Model</a>
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions. -->
     <attr name="writePermission" format="string" />
     
@@ -169,6 +169,12 @@
          in the same process.  Note that for them to actually get the same
          user ID, they must also be signed with the same signature. -->
     <attr name="sharedUserId" format="string" />
+    
+    <!-- Specify a label for the shared user UID of this package.  This is
+         only used if you have also used android:sharedUserId.  This must
+         be a reference to a string resource; it can not be an explicit
+         string. -->
+    <attr name="sharedUserLabel" format="reference" />
     
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
@@ -376,7 +382,7 @@
     <attr name="priority" format="integer" />
     
     <!-- Specify how an activity should be launched.  See the
-         <a href="{@docRoot}intro/appmodel.html">Application Model</a>
+         <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
          documentation for important information on how these options impact
          the behavior of your application.
          
@@ -413,7 +419,7 @@
             of the activity being started at the top of the stack, it will
             receive the Intent as described there (without the
             FLAG_ACTIVITY_BROUGHT_TO_FRONT flag set).  See the
-            <a href="{@docRoot}intro/appmodel.html">Application Model</a>
+            <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
             documentation for more details on tasks.-->
         <enum name="singleTask" value="2" />
         <!-- Only allow one instance of this activity to ever be 
@@ -424,7 +430,7 @@
             method called.  If this 
             activity tries to start a new activity, that new activity will be 
             launched in a separate task.  See the
-            <a href="{@docRoot}intro/appmodel.html">Application Model</a>
+            <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
             documentation for more details on tasks. -->
         <enum name="singleInstance" value="3" />
     </attr>
@@ -579,6 +585,7 @@
         <attr name="versionCode" />
         <attr name="versionName" />
         <attr name="sharedUserId" />
+        <attr name="sharedUserLabel" />
     </declare-styleable>
     
     <!-- The <code>application</code> tag describes application-level components
@@ -633,7 +640,7 @@
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the
-         <a href="{@docRoot}devel/security.html">Security Model</a>
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions.
          
          <p>This appears as a child tag of the root
@@ -705,7 +712,7 @@
     <!-- The <code>uses-permission</code> tag requests a
          {@link #AndroidManifestPermission &lt;permission&gt;} that the containing
          package must be granted in order for it to operate correctly.
-         See the <a href="{@docRoot}devel/security.html">Security Model</a>
+         See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions.  Also available is a
          {@link android.Manifest.permission list of permissions} included
          with the base platform.

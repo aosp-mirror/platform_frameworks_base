@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.res.AssetFileDescriptor;
 import android.database.BulkCursorNative;
 import android.database.BulkCursorToCursorAdaptor;
 import android.database.Cursor;
@@ -176,6 +177,25 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
 
                     ParcelFileDescriptor fd;
                     fd = openFile(url, mode);
+                    reply.writeNoException();
+                    if (fd != null) {
+                        reply.writeInt(1);
+                        fd.writeToParcel(reply,
+                                Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                    } else {
+                        reply.writeInt(0);
+                    }
+                    return true;
+                }
+
+                case OPEN_ASSET_FILE_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    String mode = data.readString();
+
+                    AssetFileDescriptor fd;
+                    fd = openAssetFile(url, mode);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -406,6 +426,29 @@ final class ContentProviderProxy implements IContentProvider
         DatabaseUtils.readExceptionWithFileNotFoundExceptionFromParcel(reply);
         int has = reply.readInt();
         ParcelFileDescriptor fd = has != 0 ? reply.readFileDescriptor() : null;
+
+        data.recycle();
+        reply.recycle();
+
+        return fd;
+    }
+
+    public AssetFileDescriptor openAssetFile(Uri url, String mode)
+            throws RemoteException, FileNotFoundException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+
+        url.writeToParcel(data, 0);
+        data.writeString(mode);
+
+        mRemote.transact(IContentProvider.OPEN_ASSET_FILE_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionWithFileNotFoundExceptionFromParcel(reply);
+        int has = reply.readInt();
+        AssetFileDescriptor fd = has != 0
+                ? AssetFileDescriptor.CREATOR.createFromParcel(reply) : null;
 
         data.recycle();
         reply.recycle();

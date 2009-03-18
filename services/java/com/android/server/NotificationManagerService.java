@@ -311,6 +311,17 @@ class NotificationManagerService extends INotificationManager.Stub
                     mBatteryFull = batteryFull;
                     updateLights();
                 }
+            } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+                    || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
+                Uri uri = intent.getData();
+                if (uri == null) {
+                    return;
+                }
+                String pkgName = uri.getSchemeSpecificPart();
+                if (pkgName == null) {
+                    return;
+                }
+                cancelAllNotifications(pkgName);
             }
         }
     };
@@ -331,6 +342,8 @@ class NotificationManagerService extends INotificationManager.Stub
         // register for battery changed notifications
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         mContext.registerReceiver(mIntentReceiver, filter);
     }
 
@@ -865,7 +878,7 @@ class NotificationManagerService extends INotificationManager.Stub
     // ======================================================================
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission("android.permission.DUMP")
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump NotificationManager from from pid="
                     + Binder.getCallingPid()

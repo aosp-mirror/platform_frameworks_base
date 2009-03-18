@@ -19,6 +19,8 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android" android:interpolator="@anim/accelerate_interpolator">
-	<translate android:fromYDelta="0" android:toYDelta="-100%" android:duration="400"/>
-	<alpha android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="400" />
+	<translate android:fromYDelta="0" android:toYDelta="-75%"
+        android:startOffset="100" android:duration="@android:integer/config_mediumAnimTime"/>
+	<alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+        android:startOffset="100" android:duration="@android:integer/config_mediumAnimTime" />
 </set>

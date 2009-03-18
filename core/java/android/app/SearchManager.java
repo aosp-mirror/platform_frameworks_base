@@ -168,7 +168,8 @@ import android.view.KeyEvent;
  * <p><b>Managing focus and knowing if Search is active.</b>  The search UI is not a separate
  * activity, and when the UI is invoked or dismissed, your activity will not typically be paused,
  * resumed, or otherwise notified by the methods defined in 
- * <a href="android.app.Activity#ActivityLifecycle">Activity Lifecycle</a>.  The search UI is
+ * <a href="{@docRoot}guide/topics/fundamentals.html#actlife">Application Fundamentals: 
+ * Activity Lifecycle</a>.  The search UI is
  * handled in the same way as other system UI elements which may appear from time to time, such as 
  * notifications, screen locks, or other system alerts:  
  * <p>When the search UI appears, your activity will lose input focus.
@@ -212,11 +213,11 @@ import android.view.KeyEvent;
  * {@link #QUERY getStringExtra(SearchManager.QUERY)}.</li>
  * <li>To identify and support your searchable activity, you'll need to 
  * provide an XML file providing searchability configuration parameters, a reference to that 
- * in your searchable activity's <a href="../../../devel/bblocks-manifest.html">manifest</a>
+ * in your searchable activity's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>
  * entry, and an intent-filter declaring that you can 
  * receive ACTION_SEARCH intents.  This is described in more detail in the 
  * <a href="#SearchabilityMetadata">Searchability Metadata</a> section.</li>
- * <li>Your <a href="../../../devel/bblocks-manifest.html">manifest</a> also needs a metadata entry
+ * <li>Your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> also needs a metadata entry
  * providing a global reference to the searchable activity.  This is the "glue" directing the search
  * UI, when invoked from any of your <i>other</i> activities, to use your application as the
  * default search context.  This is also described in more detail in the 
@@ -359,7 +360,7 @@ import android.view.KeyEvent;
  * <li>Implement a Content Provider that provides suggestions.  If you already have one, and it 
  * has access to your suggestions data.  If not, you'll have to create one.
  * You'll also provide information about your Content Provider in your 
- * package's <a href="../../../devel/bblocks-manifest.html">manifest</a>.</li>
+ * package's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.</li>
  * <li>Update your searchable activity's XML configuration file.  There are two categories of
  * information used for suggestions:
  * <ul><li>The first is (required) data that the search manager will
@@ -634,7 +635,7 @@ import android.view.KeyEvent;
  *
  * <p><b>Metadata for searchable activity.</b>  As with your search implementations described 
  * above, you must first identify which of your activities is searchable.  In the 
- * <a href="../../../devel/bblocks-manifest.html">manifest</a> entry for this activity, you must 
+ * <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> entry for this activity, you must 
  * provide two elements:
  * <ul><li>An intent-filter specifying that you can receive and process the 
  * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} {@link android.content.Intent Intent}.
@@ -643,7 +644,7 @@ import android.view.KeyEvent;
  * remaining configuration information for how your application implements search.</li></ul>
  * 
  * <p>Here is a snippet showing the necessary elements in the 
- * <a href="../../../devel/bblocks-manifest.html">manifest</a> entry for your searchable activity.
+ * <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> entry for your searchable activity.
  * <pre class="prettyprint">
  *        &lt;!-- Search Activity - searchable --&gt;
  *        &lt;activity android:name="MySearchActivity" 
@@ -746,6 +747,14 @@ import android.view.KeyEvent;
  *             <a href="../R.attr.html#inputType">inputType</a> attribute.</td>
  *         <td align="center">No</td>
  *     </tr>
+ *     <tr><th>android:imeOptions</th>
+ *         <td>If provided, supplies additional options for the input method.
+ *             For most searches, in which free form text is expected, this attribute
+ *             need not be provided, and will default to "actionSearch".
+ *             Suitable values for this attribute are described in the
+ *             <a href="../R.attr.html#imeOptions">imeOptions</a> attribute.</td>
+ *         <td align="center">No</td>
+ *     </tr>
  *     
  *     </tbody>
  * </table>
@@ -765,9 +774,8 @@ import android.view.KeyEvent;
  * <li>.../res/values/strings.xml</li></ul>
  * 
  * <p>For more complete documentation on this capability, see
- * <a href="../../../devel/resources-i18n.html#AlternateResources">Resources and 
- * Internationalization: Supporting Alternate Resources for Alternate Languages and Configurations
- * </a>.
+ * <a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">Resources and 
+ * Internationalization: Alternate Resources</a>.
  *
  * <p><b>Metadata for non-searchable activities.</b>  Activities which are part of a searchable
  * application, but don't implement search itself, require a bit of "glue" in order to cause
@@ -775,7 +783,7 @@ import android.view.KeyEvent;
  * provided, then searches from these activities will use the system default search context.
  * 
  * <p>The simplest way to specify this is to add a <i>search reference</i> element to the
- * application entry in the <a href="../../../devel/bblocks-manifest.html">manifest</a> file.  
+ * application entry in the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> file.  
  * The value of this reference can be either of:
  * <ul><li>The name of your searchable activity.  
  * It is typically prefixed by '.' to indicate that it's in the same package.</li>
@@ -803,7 +811,7 @@ import android.view.KeyEvent;
  * to generate search suggestions, you'll need to publish it to the system, and you'll need to 
  * provide a bit of additional XML metadata in order to configure communications with it.
  * 
- * <p>First, in your <a href="../../../devel/bblocks-manifest.html">manifest</a>, you'll add the
+ * <p>First, in your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>, you'll add the
  * following lines.
  * <pre class="prettyprint">
  *        &lt;!-- Content provider for search suggestions --&gt;
@@ -832,7 +840,7 @@ import android.view.KeyEvent;
  *     <tbody>
  *     <tr><th>android:searchSuggestAuthority</th>
  *         <td>This value must match the authority string provided in the <i>provider</i> section 
- *             of your <a href="../../../devel/bblocks-manifest.html">manifest</a>.</td>
+ *             of your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.</td>
  *         <td align="center">Yes</td>
  *     </tr>
  *     

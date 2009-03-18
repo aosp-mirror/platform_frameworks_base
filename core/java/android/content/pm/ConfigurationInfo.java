@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -60,12 +59,12 @@ public class ConfigurationInfo implements Parcelable {
     
     /**
      * Value for {@link #reqInputFeatures}: if set, indicates that the application
-     * requires a hard keyboard
+     * requires a five way navigation device
      */
     public static final int INPUT_FEATURE_FIVE_WAY_NAV = 0x00000002;
     
     /**
-     * Flags associated with the application.  Any combination of
+     * Flags associated with the input features.  Any combination of
      * {@link #INPUT_FEATURE_HARD_KEYBOARD},
      * {@link #INPUT_FEATURE_FIVE_WAY_NAV}
      */

@@ -46,8 +46,10 @@ import java.io.IOException;
  * such as scaling and tinting.
  */
 public class VideoView extends SurfaceView implements MediaPlayerControl {
+    private String TAG = "VideoView";
     // settable by the client
     private Uri         mUri;
+    private int         mDuration;
 
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
@@ -184,6 +186,8 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mIsPrepared = false;
+            Log.v(TAG, "reset duration to -1 in openVideo");
+            mDuration = -1;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
@@ -195,10 +199,10 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.prepareAsync();
             attachMediaController();
         } catch (IOException ex) {
-            Log.w("VideoView", "Unable to open content: " + mUri, ex);
+            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         } catch (IllegalArgumentException ex) {
-            Log.w("VideoView", "Unable to open content: " + mUri, ex);
+            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         }
     }
@@ -298,15 +302,15 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
 
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
-        public boolean onError(MediaPlayer mp, int a, int b) {
-            Log.d("VideoView", "Error: " + a + "," + b);
+        public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
+            Log.d(TAG, "Error: " + framework_err + "," + impl_err);
             if (mMediaController != null) {
                 mMediaController.hide();
             }
 
             /* If an error handler has been supplied, use it and finish. */
             if (mOnErrorListener != null) {
-                if (mOnErrorListener.onError(mMediaPlayer, a, b)) {
+                if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
                     return true;
                 }
             }
@@ -318,9 +322,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
              */
             if (getWindowToken() != null) {
                 Resources r = mContext.getResources();
+                int messageId;
+
+                if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+                    messageId = com.android.internal.R.string.VideoView_error_text_invalid_progressive_playback;
+                } else {
+                    messageId = com.android.internal.R.string.VideoView_error_text_unknown;
+                }
+
                 new AlertDialog.Builder(mContext)
                         .setTitle(com.android.internal.R.string.VideoView_error_title)
-                        .setMessage(com.android.internal.R.string.VideoView_error_text_unknown)
+                        .setMessage(messageId)
                         .setPositiveButton(com.android.internal.R.string.VideoView_error_button,
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -497,9 +509,14 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     
     public int getDuration() {
         if (mMediaPlayer != null && mIsPrepared) {
-            return mMediaPlayer.getDuration();
+            if (mDuration > 0) {
+                return mDuration;
+            }
+            mDuration = mMediaPlayer.getDuration();
+            return mDuration;
         }
-        return -1;
+        mDuration = -1;
+        return mDuration;
     }
     
     public int getCurrentPosition() {

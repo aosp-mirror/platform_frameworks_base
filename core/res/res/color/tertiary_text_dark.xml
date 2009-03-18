@@ -18,7 +18,7 @@
     <item android:state_enabled="false" android:color="#808080"/>
 ﻿	<item android:state_window_focused="false" android:color="#808080"/>
     <item android:state_pressed="true" android:color="#808080"/>
-    <item android:state_selected="true" android:color="#808080"/>
+    <item android:state_selected="true" android:color="@android:color/dim_foreground_light"/>
     <item android:color="#808080"/> <!-- not selected -->
 </selector>
 

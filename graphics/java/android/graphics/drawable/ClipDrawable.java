@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.*;
 import android.view.Gravity;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -100,9 +99,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         mClipState.mDrawable = dr;
         mClipState.mOrientation = orientation;
         mClipState.mGravity = g;
-        if (dr != null) {
-            dr.setCallback(this);
-        }
+
+        dr.setCallback(this);
     }
 
     // overrides from Drawable.Callback
@@ -168,8 +166,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     protected boolean onStateChange(int[] state) {
-        boolean changed = mClipState.mDrawable.setState(state);
-        return changed;
+        return mClipState.mDrawable.setState(state);
     }
 
     @Override
@@ -233,7 +230,17 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
+    
+
     final static class ClipState extends ConstantState {
+        Drawable mDrawable;
+        int mChangingConfigurations;
+        int mOrientation;
+        int mGravity;
+
+        private boolean mCheckedConstantState;
+        private boolean mCanConstantState;
+
         ClipState(ClipState orig, ClipDrawable owner) {
             if (orig != null) {
                 mDrawable = orig.mDrawable.getConstantState().newDrawable();
@@ -262,14 +269,6 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
             return mCanConstantState;
         }
-
-        Drawable mDrawable;
-        int mChangingConfigurations;
-        int mOrientation;
-        int mGravity;
-
-        private boolean mCheckedConstantState;
-        private boolean mCanConstantState;
     }
 
     private ClipDrawable(ClipState state) {

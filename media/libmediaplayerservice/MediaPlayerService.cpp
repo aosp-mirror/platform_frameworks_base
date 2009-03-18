@@ -61,112 +61,31 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-/*
-    When USE_SIGBUS_HANDLER is set to 1, a handler for SIGBUS will be
-    installed, which allows us to recover when there is a read error
-    when accessing an mmap'ed file. However, since the kernel folks
-    don't seem to like it when non kernel folks install signal handlers
-    in their own process, this is currently disabled.
-    Without the handler, the process hosting this service will die and
-    then be restarted. This is mostly OK right now because the process is
-    not being shared with any other services, and clients of the service
-    will be notified of its death in their MediaPlayer.onErrorListener
-    callback, assuming they have installed one, and can then attempt to
-    do their own recovery.
-    It does open us up to a DOS attack against the media server, where
-    a malicious application can trivially force the media server to
-    restart continuously.
-*/
-#define USE_SIGBUS_HANDLER 0
-
-// TODO: Temp hack until we can register players
-static const char* MIDI_FILE_EXTS[] =
-{
-        ".mid",
-        ".smf",
-        ".xmf",
-        ".imy",
-        ".rtttl",
-        ".rtx",
-        ".ota"
-};
 
 namespace android {
+
+// TODO: Temp hack until we can register players
+typedef struct {
+    const char *extension;
+    const player_type playertype;
+} extmap;
+extmap FILE_EXTS [] =  {
+        {".mid", SONIVOX_PLAYER},
+        {".midi", SONIVOX_PLAYER},
+        {".smf", SONIVOX_PLAYER},
+        {".xmf", SONIVOX_PLAYER},
+        {".imy", SONIVOX_PLAYER},
+        {".rtttl", SONIVOX_PLAYER},
+        {".rtx", SONIVOX_PLAYER},
+        {".ota", SONIVOX_PLAYER},
+        {".ogg", VORBIS_PLAYER},
+        {".oga", VORBIS_PLAYER},
+};
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
 /* static */ const uint32_t MediaPlayerService::AudioOutput::kAudioVideoDelayMs = 96;
 /* static */ int MediaPlayerService::AudioOutput::mMinBufferCount = 4;
 /* static */ bool MediaPlayerService::AudioOutput::mIsOnEmulator = false;
-
-static struct sigaction oldact;
-static pthread_key_t sigbuskey;
-
-static void sigbushandler(int signal, siginfo_t *info, void *context)
-{
-    char *faultaddr = (char*) info->si_addr;
-    LOGE("SIGBUS at %p\n", faultaddr);
-
-    struct mediasigbushandler* h = (struct mediasigbushandler*) pthread_getspecific(sigbuskey);
-
-    if (h) {
-        if (h->len) {
-            if (faultaddr < h->base || faultaddr >= h->base + h->len) {
-                // outside specified range, call old handler
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-                return;
-            }
-        }
-
-        // no range specified or address was in range
-
-        if (h->handlesigbus) {
-            if (h->handlesigbus(info, h)) {
-                // thread's handler didn't handle the signal
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-            }
-            return;
-        }
-
-        if (h->sigbusvar) {
-            // map in a zeroed out page so the operation can succeed
-            long pagesize = sysconf(_SC_PAGE_SIZE);
-            long pagemask = ~(pagesize - 1);
-            void * pageaddr = (void*) (((long)(faultaddr)) & pagemask);
-
-            void * bar = mmap( pageaddr, pagesize, PROT_READ, MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED, -1, 0);
-            if (bar == MAP_FAILED) {
-                LOGE("couldn't map zero page at %p: %s", pageaddr, strerror(errno));
-                if (oldact.sa_flags & SA_SIGINFO) {
-                    oldact.sa_sigaction(signal, info, context);
-                } else {
-                    oldact.sa_handler(signal);
-                }
-                return;
-            }
-
-            LOGE("setting sigbusvar at %p", h->sigbusvar);
-            *(h->sigbusvar) = 1;
-            return;
-        }
-    }
-
-    LOGE("SIGBUS: no handler, or improperly configured handler (%p)", h);
-
-    if (oldact.sa_flags & SA_SIGINFO) {
-        oldact.sa_sigaction(signal, info, context);
-    } else {
-        oldact.sa_handler(signal);
-    }
-    return;
-}
 
 void MediaPlayerService::instantiate() {
     defaultServiceManager()->addService(
@@ -177,25 +96,10 @@ MediaPlayerService::MediaPlayerService()
 {
     LOGV("MediaPlayerService created");
     mNextConnId = 1;
-
-    pthread_key_create(&sigbuskey, NULL);
-
-
-#if USE_SIGBUS_HANDLER
-    struct sigaction act;
-    memset(&act,0, sizeof act);
-    act.sa_sigaction = sigbushandler;
-    act.sa_flags = SA_SIGINFO;
-    sigaction(SIGBUS, &act, &oldact);
-#endif
 }
 
 MediaPlayerService::~MediaPlayerService()
 {
-#if USE_SIGBUS_HANDLER
-    sigaction(SIGBUS, &oldact, NULL);
-#endif
-    pthread_key_delete(sigbuskey);
     LOGV("MediaPlayerService destroyed");
 }
 
@@ -314,6 +218,104 @@ static int myTid() {
 #endif
 }
 
+#if defined(__arm__)
+extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
+        size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
+extern "C" void free_malloc_leak_info(uint8_t* info);
+
+void memStatus(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    typedef struct {
+        size_t size;
+        size_t dups;
+        intptr_t * backtrace;
+    } AllocEntry;
+
+    uint8_t *info = NULL;
+    size_t overallSize = 0;
+    size_t infoSize = 0;
+    size_t totalMemory = 0;
+    size_t backtraceSize = 0;
+
+    get_malloc_leak_info(&info, &overallSize, &infoSize, &totalMemory, &backtraceSize);
+    if (info) {
+        uint8_t *ptr = info;
+        size_t count = overallSize / infoSize;
+
+        snprintf(buffer, SIZE, " Allocation count %i\n", count);
+        result.append(buffer);
+
+        AllocEntry * entries = new AllocEntry[count];
+
+        for (size_t i = 0; i < count; i++) {
+            // Each entry should be size_t, size_t, intptr_t[backtraceSize]
+            AllocEntry *e = &entries[i];
+
+            e->size = *reinterpret_cast<size_t *>(ptr);
+            ptr += sizeof(size_t);
+
+            e->dups = *reinterpret_cast<size_t *>(ptr);
+            ptr += sizeof(size_t);
+
+            e->backtrace = reinterpret_cast<intptr_t *>(ptr);
+            ptr += sizeof(intptr_t) * backtraceSize;
+        }
+
+        // Now we need to sort the entries.  They come sorted by size but
+        // not by stack trace which causes problems using diff.
+        bool moved;
+        do {
+            moved = false;
+            for (size_t i = 0; i < (count - 1); i++) {
+                AllocEntry *e1 = &entries[i];
+                AllocEntry *e2 = &entries[i+1];
+
+                bool swap = e1->size < e2->size;
+                if (e1->size == e2->size) {
+                    for(size_t j = 0; j < backtraceSize; j++) {
+                        if (e1->backtrace[j] == e2->backtrace[j]) {
+                            continue;
+                        }
+                        swap = e1->backtrace[j] < e2->backtrace[j];
+                        break;
+                    }
+                }
+                if (swap) {
+                    AllocEntry t = entries[i];
+                    entries[i] = entries[i+1];
+                    entries[i+1] = t;
+                    moved = true;
+                }
+            }
+        } while (moved);
+
+        for (size_t i = 0; i < count; i++) {
+            AllocEntry *e = &entries[i];
+
+            snprintf(buffer, SIZE, "size %8i, dup %4i", e->size, e->dups);
+            result.append(buffer);
+            for (size_t ct = 0; (ct < backtraceSize) && e->backtrace[ct]; ct++) {
+                if (ct) {
+                    result.append(", ");
+                }
+                snprintf(buffer, SIZE, "0x%08x", e->backtrace[ct]);
+                result.append(buffer);
+            }
+            result.append("\n");
+        }
+
+        delete[] entries;
+        free_malloc_leak_info(info);
+    }
+
+    write(fd, result.string(), result.size());
+}
+#endif
+
 status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 256;
@@ -396,6 +398,18 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
             result.append("\n");
         }
+
+#if defined(__arm__)
+        bool dumpMem = false;
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i] == String16("-m")) {
+                dumpMem = true;
+            }
+        }
+        if (dumpMem) {
+            memStatus(fd, args);
+        }
+#endif
     }
     write(fd, result.string(), result.size());
     return NO_ERROR;
@@ -481,7 +495,7 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
         locator.offset = offset;
         locator.length = length;
         EAS_HANDLE  eashandle;
-        if (EAS_OpenFile(easdata, &locator, &eashandle, NULL) == EAS_SUCCESS) {
+        if (EAS_OpenFile(easdata, &locator, &eashandle) == EAS_SUCCESS) {
             EAS_CloseFile(easdata, eashandle);
             EAS_Shutdown(easdata);
             return SONIVOX_PLAYER;
@@ -498,20 +512,14 @@ static player_type getPlayerType(const char* url)
 
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
-    for (int i = 0; i < NELEM(MIDI_FILE_EXTS); ++i) {
-        int len = strlen(MIDI_FILE_EXTS[i]);
+    for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
+        int len = strlen(FILE_EXTS[i].extension);
         int start = lenURL - len;
         if (start > 0) {
-            if (!strncmp(url + start, MIDI_FILE_EXTS[i], len)) {
-                LOGV("Type is MIDI");
-                return SONIVOX_PLAYER;
+            if (!strncmp(url + start, FILE_EXTS[i].extension, len)) {
+                return FILE_EXTS[i].playertype;
             }
         }
-    }
-
-    if (strcmp(url + strlen(url) - 4, ".ogg") == 0) {
-        LOGV("Type is Vorbis");
-        return VORBIS_PLAYER;
     }
 
     // Fall through to PV
@@ -539,7 +547,6 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
     if (p != NULL) {
         if (p->initCheck() == NO_ERROR) {
             p->setNotifyCallback(cookie, notifyFunc);
-            p->setSigBusHandlerStructTLSKey(sigbuskey);
         } else {
             p.clear();
         }
@@ -921,7 +928,7 @@ Exit:
 MediaPlayerService::AudioOutput::AudioOutput()
 {
     mTrack = 0;
-    mStreamType = AudioTrack::MUSIC;
+    mStreamType = AudioSystem::MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
     mLatency = 0;
@@ -1003,15 +1010,15 @@ status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelC
     int afFrameCount;
     int frameCount;
 
-    if (AudioSystem::getOutputFrameCount(&afFrameCount) != NO_ERROR) {
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
 
-    frameCount = (sampleRate*afFrameCount)/afSampleRate;
-    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount*bufferCount);
+    frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
+    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount);
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
         LOGE("Unable to create audio track");
         delete t;

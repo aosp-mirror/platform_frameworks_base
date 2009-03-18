@@ -16,6 +16,13 @@ public class ExtractedTextRequest implements Parcelable {
     public int token;
     
     /**
+     * Additional request flags, having the same possible values as the
+     * flags parameter of {@link InputConnection#getTextBeforeCursor
+     * InputConnection.getTextBeforeCursor()}.
+     */
+    public int flags;
+    
+    /**
      * Hint for the maximum number of lines to return.
      */
     public int hintMaxLines;
@@ -33,6 +40,7 @@ public class ExtractedTextRequest implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(token);
+        dest.writeInt(this.flags);
         dest.writeInt(hintMaxLines);
         dest.writeInt(hintMaxChars);
     }
@@ -45,6 +53,7 @@ public class ExtractedTextRequest implements Parcelable {
         public ExtractedTextRequest createFromParcel(Parcel source) {
             ExtractedTextRequest res = new ExtractedTextRequest();
             res.token = source.readInt();
+            res.flags = source.readInt();
             res.hintMaxLines = source.readInt();
             res.hintMaxChars = source.readInt();
             return res;

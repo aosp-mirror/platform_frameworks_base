@@ -4,53 +4,115 @@ page.title=Community
 
 	<div id="mainBodyFluid">
 			<h1>Community</h1>
-			<p>Welcome to the Android community! We're glad you're here and invite you to participate in these discussions. Before posting, please red the <a href="#">Groups Charter</a> that covers the community guidelines.</p>
-			<p>To get the most out of this group, please do the following before you post:</p>
-			<ol>
-				<li><a href="{@docRoot}guide/appendix/faq/index.html">Read the FAQs</a> The most common questions are addressed in this frequently updated list.</li>
-				<li><strong>Type in keywords of your questions in the main Android site's search bar</strong> (such as the one above). This search encompasses all previous discussions, across all groups, as well as the full contents of the site, documentation, and blogs. Chances are good that somebody has run into the same issue before.</li>
-				<li><strong>Be very clear</strong> about your question in the subject - it helps everyone, both those trying to answer your question as well as those who may be looking for information in the future. Also <strong>give plenty of details</strong> in your post to help others understand your problem. Code or log snippets, as well as pointers to screenshots, may also be helpful.</li>
-                        </ol>
-			<p>For a great guide to phrasing your questions, please read: <a href="#">How to Ask Questions The Smart Way</a>.</p>
+			<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in these discussions. Before posting, please read the <a href="http://source.android.com/discuss/android-discussion-groups-charter">Groups Charter</a> that covers the community guidelines.</p>
 
-<h2>Subscribe to a Group</h2>
-<p>You can subscribe to these groups in one of two ways:</p>
-  <ul>
-    <li>Follow the web access link (in the first column below) and then click "Join this group" on the right-side of the Groups page. If you'd rather read posts via email, sign in to Groups and click "edit my membership" on the right hand side. Select "email" under "How do you want to read this group?".</li>
-    <li>Or simply subscribe via email by clicking the subscribe link (in the last column below).</li>
-  </ul>
+<p class="note"><strong>Note:</strong> If you are seeking discussion about Android source code (not application development),
+then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
 
-<h3 class="green">Available Groups</h3>
-			<table class="groupTable">
-				<tr>
-					<th>Group - Web Access</th>
-					<th>Description</th>
-					<th>Subscribe by email</th>
-				</tr>
-				<tr class="oddRow">
-					<td><a href="http://groups.google.com/group/android-beginners">android-beginners</a></td>
-					<td>Discuss developing Android applications using the Android framework. Get help with troubleshooting apps, advice on implementation, and strategies for improving your app's speed and user experience.</td>
-					<td><a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a></td>
-				</tr>
-				<tr class="evenRow">
-					<td><a href="http://groups.google.com/group/android-developers">android-developers</a></td>
-					<td>New to ANdroid development? Start here. Open to any discussion around beginner-type questions; this is a great way to get up and running with your new App on the Android platform.</td>
-					<td><a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a></td>
-				</tr>
-				<tr class="oddRow">
-					<td><a href="http://groups.google.com/group/android-discuss">android-discuss</a></td>
-					<td>The "water cooler" of Android discussion. Free-wheeling discussion from ideas about the Android platform to your announcements on other Android resources.</td>
-					<td><a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a></td>
-				</tr>
-				<tr class="evenRow">
-					<td><a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a></td>
-					<td>A place for open discussion on secure development, emerging security concerns, and best practices for and by android developers.</td>
-					<td><a href="mailto:android-security-discuss-subscribe@googlegroups.com">android-security-discuss-subscribe@googlegroups.com</a></td>
-				</tr>
-				<tr class="oddRow">
-					<td><nobr><a href="http://groups.google.com/group/android-security-announce">android-security-announce</a></nobr></td>
-					<td>A low-volume group for security-related announcements by the Android Security Team.</td>
-					<td><a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a></td>
-				</tr>
-			</table>
+<p style="margin-bottom".5em"><strong>Contents</strong></p>
+<ol class="toc">
+  <li><a href="#BeforeYouPost">Before you post</a></li>
+  <li><a href="#ApplicationDeveloperLists">Application developer mailing lists</a></li>
+  <li><a href="#UsingEmail">Using email with the mailing lists</a></li>
+  <li><a href="#UsingIRC">Using IRC</a></li>
+</ol>
+
+<h2 id="BeforeYouPost">Before you post</h2>
+<p>Before writing a post, please try the following:</p>
+
+<ol>
+<li><a href="{@docRoot}guide/appendix/faq/index.html">Read the FAQs</a> The most common questions about developing Android applications are addressed in this frequently updated list.</li>
+<li><strong>Type in keywords of your questions in the main Android site's search bar</strong> (such as the one above). This search encompasses all previous discussions, across all groups, as well as the full contents of the site, documentation, and blogs. Chances are good that somebody has run into the same issue before.</li>
+<li><b>Search the mailing list archives</b> to see whether your questions have already been discussed.
+  </li>
+</ol>
+
+<p>If you can't find your answer, then we encourage you to address the community.
+As you write your post, please do the following:
+<ol>
+<li><b>Read
+the <a href="http://sites.google.com/a/android.com/opensource/discuss/android-discussion-groups-charter">mailing list charter</a></b> that covers the community guidelines. 
+</li>
+<li><b>Select the most appropriate mailing list for your question</b>. There are several different lists for 
+developers, described below.</li>
+<li>
+    <b>Be very clear</b> about your question
+in the subject -- it helps everyone, both those trying to answer your
+question as well as those who may be looking for information in the
+future.</li>
+<li><b>Give plenty of details</b> in your post to
+help others understand your problem. Code or log snippets, as well as
+pointers to screenshots, may also be helpful. For a great guide to
+phrasing your questions, read <a href="http://www.catb.org/%7Eesr/faqs/smart-questions.html">How To Ask Questions The Smart Way</a>.
+  </li>
+</ol>
+
+
+<h3 id="ApplicationDeveloperLists">Application developer mailing lists</h3>
+<ul>
+<li><b>Android beginners</b> - You're new to Android application development. You want to figure out how to get started with the Android SDK and the basic Android APIs? Start here. This list is open to any discussion around beginner-type questions for developers using the SDK; this is a great way to get up and running with your new application on the Android platform. Ask about getting your development environment set up, get help with the first steps of Android development (your first User Interface, your first permission, your first file on the Android filesystem, your first app on the Android Market...). Be sure to check the archives first before asking new questions. Please avoid advanced subjects, which belong on android-developers, and user questions, which will get a better reception on android-discuss.
+<ul>
+<li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-beginners">android-beginners</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
+</a></li>
+</ul>
+</li>
+
+<li><b>Android developers</b> - You're now an experienced Android application developer. You've grasped the basics of Android app development, you're comfortable using the SDK, now you want to move to advanced topics. Get help here with troubleshooting applications, advice on implementation, and strategies for improving your application's performance and user experience. This is the not the right place to discuss user issues (use android-discuss for that) or beginner questions with the Android SDK (use android-beginners for that).
+<ul>
+<li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-developers">android-developers</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
+</a></li>
+</ul>
+</li>
+
+<li><b>Android discuss</b> - The "water cooler" of Android discussion. You can discuss just about anything Android-related here, ideas for the Android platform, announcements about your applications, discussions about Android devices, community resources... As long as your discussion is related to Android, it's on-topic here. However, if you have a discussion here that could belong on another list, you are probably not reaching all of your target audience here and may want to consider shifting to a more targeted list.
+<ul>
+<li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-discuss">android-discuss</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
+    </a></li>
+</ul>
+</li>
+
+<li><b>Android security discuss</b> - A place for open discussion on secure development, emerging security concerns, and best practices for and by android developers. Please don't disclose vulnerabilities directly on this list, you'd be putting all Android users at risk.
+<ul>
+<li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-security-discuss@googlegroups.com">android-secuirty-discuss@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
+    </a></li>
+</ul>
+</li>
+
+<li><b>Android security announce</b> - A low-volume group for security-related announcements by the Android Security Team.
+<ul>
+<li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-security-announce">android-security-announce</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a>
+<a href="mailto:android-platform-subscribe@googlegroups.com">    </a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<h2 id="UsingEmail">Using email with the mailing lists</h2>
+<p>Instead of using the <a href="http://groups.google.com/">Google Groups</a> site, you can use your email client of choice to participate in the mailing lists.</p>
+<p>To subscribe to a group without using the Google Groups site, use the link under "subscribe via email" in the lists above.</p>
+<p>To set up how you receive mailing list postings by email:</p>
+
+<ol><li>Sign into the group via the Google Groups site. For example, for the android-framework group you would visit <a href="http://groups.google.com/group/android-framework">http://groups.google.com/group/android-framework</a>.</li>
+<li>Click "Edit
+my membership" on the right side.</li>
+<li>Under "How do
+you want to read this group?" select one of the email options. </li>
+</ol>
+
+<h2 id="UsingIRC">Using IRC</h2>
+<p>The Android community is using the #android channel on the irc.freenode.net server.
+</p>
+
+
+
+
+
+
+
 </div>

@@ -42,6 +42,10 @@ public abstract class BaseAdapter implements ListAdapter, SpinnerAdapter {
         mDataSetObservable.unregisterObserver(observer);
     }
     
+    /**
+     * Notifies the attached View that the underlying data has been changed
+     * and it should refresh itself.
+     */
     public void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
     }

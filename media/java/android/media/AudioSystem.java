@@ -43,15 +43,17 @@ public class AudioSystem
     public static final int STREAM_ALARM = 4;
     /* The audio stream for notifications */
     public static final int STREAM_NOTIFICATION = 5;
+    /* @hide The audio stream for phone calls when connected on bluetooth */
+    public static final int STREAM_BLUETOOTH_SCO = 6;
     /**
      * @deprecated Use {@link #numStreamTypes() instead}
      */
     public static final int NUM_STREAMS = 5;
 
     // Expose only the getter method publicly so we can change it in the future
-    private static final int NUM_STREAM_TYPES = 6;
+    private static final int NUM_STREAM_TYPES = 7;
     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
-    
+
     /* max and min volume levels */
     /* Maximum volume setting, for use with setVolume(int,int) */
     public static final int MAX_VOLUME = 100;
@@ -78,7 +80,7 @@ public class AudioSystem
     /*
      * Sets the microphone mute on or off.
      *
-     * param on set <var>true</var> to mute the microphone; 
+     * param on set <var>true</var> to mute the microphone;
      *           <var>false</var> to turn mute off
      * return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
      */
@@ -116,18 +118,18 @@ public class AudioSystem
     public static final int MODE_RINGTONE           = 1;
     public static final int MODE_IN_CALL            = 2;
     public static final int NUM_MODES               = 3;
-    
+
 
     /* Routing bits for setRouting/getRouting API */
     public static final int ROUTE_EARPIECE          = (1 << 0);
     public static final int ROUTE_SPEAKER           = (1 << 1);
-     
-    /** @deprecated use {@link #ROUTE_BLUETOOTH_SCO} */        
+
+    /** @deprecated use {@link #ROUTE_BLUETOOTH_SCO} */
     @Deprecated public static final int ROUTE_BLUETOOTH = (1 << 2);
     public static final int ROUTE_BLUETOOTH_SCO     = (1 << 2);
     public static final int ROUTE_HEADSET           = (1 << 3);
     public static final int ROUTE_BLUETOOTH_A2DP    = (1 << 4);
-    public static final int ROUTE_ALL               = 0xFFFFFFFF;  
+    public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
     /*
      * Sets the audio routing for a specified mode
@@ -185,7 +187,7 @@ public class AudioSystem
     public static final int AUDIO_STATUS_ERROR = 1;
     /* Media server died. see ErrorCallback */
     public static final int AUDIO_STATUS_SERVER_DIED = 100;
-    
+
     private static ErrorCallback mErrorCallback;
 
     /*
@@ -211,7 +213,7 @@ public class AudioSystem
     {
         mErrorCallback = cb;
     }
-    
+
     private static void errorCallbackFromNative(int error)
     {
         if (mErrorCallback != null) {

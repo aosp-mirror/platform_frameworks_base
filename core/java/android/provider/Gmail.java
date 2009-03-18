@@ -370,6 +370,25 @@ public final class Gmail {
                 "maxAttachmentSize";
     }
 
+    /**
+     * These flags can be included as Selection Arguments when
+     * querying the provider.
+     */
+    public static class SelectionArguments {
+        private SelectionArguments() {
+            // forbid instantiation
+        }
+
+        /**
+         * Specifies that you do NOT wish the returned cursor to
+         * become the Active Network Cursor.  If you do not include
+         * this flag as a selectionArg, the new cursor will become the
+         * Active Network Cursor by default.
+         */
+        public static final String DO_NOT_BECOME_ACTIVE_NETWORK_CURSOR =
+                "SELECTION_ARGUMENT_DO_NOT_BECOME_ACTIVE_NETWORK_CURSOR";
+    }
+
     // These are the projections that we need when getting cursors from the
     // content provider.
     private static String[] CONVERSATION_PROJECTION = {
@@ -436,6 +455,28 @@ public final class Gmail {
     }
 
     /**
+     * Behavior for a new cursor: should it become the Active Network
+     * Cursor?  This could potentially lead to bad behavior if someone
+     * else is using the Active Network Cursor, since theirs will stop
+     * being the Active Network Cursor.
+     */
+    public static enum BecomeActiveNetworkCursor {
+        /**
+         * The new cursor should become the one and only Active
+         * Network Cursor.  Any other cursor that might already be the
+         * Active Network Cursor will cease to be so.
+         */
+        YES,
+
+        /**
+         * The new cursor should not become the Active Network
+         * Cursor. Any other cursor that might already be the Active
+         * Network Cursor will continue to be so.
+         */
+        NO
+    }
+
+    /**
      * Wraps a Cursor in a ConversationCursor
      *
      * @param account the account the cursor is associated with
@@ -450,6 +491,20 @@ public final class Gmail {
     }
 
     /**
+     * Creates an array of SelectionArguments suitable for passing to the provider's query.
+     * Currently this only handles one flag, but it could be expanded in the future.
+     */
+    private static String[] getSelectionArguments(
+            BecomeActiveNetworkCursor becomeActiveNetworkCursor) {
+        if (BecomeActiveNetworkCursor.NO == becomeActiveNetworkCursor) {
+            return new String[] {SelectionArguments.DO_NOT_BECOME_ACTIVE_NETWORK_CURSOR};
+        } else {
+            // Default behavior; no args required.
+            return null;
+        }
+    }
+
+    /**
      * Asynchronously gets a cursor over all conversations matching a query. The
      * query is in Gmail's query syntax. When the operation is complete the handler's
      * onQueryComplete() method is called with the resulting Cursor.
@@ -458,14 +513,17 @@ public final class Gmail {
      * @param handler An AsyncQueryHanlder that will be used to run the query
      * @param token The token to pass to startQuery, which will be passed back to onQueryComplete
      * @param query a query in Gmail's query syntax
+     * @param becomeActiveNetworkCursor whether or not the returned
+     * cursor should become the Active Network Cursor
      */
     public void runQueryForConversations(String account, AsyncQueryHandler handler, int token,
-            String query) {
+            String query, BecomeActiveNetworkCursor becomeActiveNetworkCursor) {
         if (TextUtils.isEmpty(account)) {
             throw new IllegalArgumentException("account is empty");
         }
+        String[] selectionArgs = getSelectionArguments(becomeActiveNetworkCursor);
         handler.startQuery(token, null, Uri.withAppendedPath(CONVERSATIONS_URI, account),
-                CONVERSATION_PROJECTION, query, null, null);
+                CONVERSATION_PROJECTION, query, selectionArgs, null);
     }
 
     /**
@@ -474,11 +532,15 @@ public final class Gmail {
      *
      * @param account run the query on this account
      * @param query a query in Gmail's query syntax
+     * @param becomeActiveNetworkCursor whether or not the returned
+     * cursor should become the Active Network Cursor
      */
-    public ConversationCursor getConversationCursorForQuery(String account, String query) {
+    public ConversationCursor getConversationCursorForQuery(
+            String account, String query, BecomeActiveNetworkCursor becomeActiveNetworkCursor) {
+        String[] selectionArgs = getSelectionArguments(becomeActiveNetworkCursor);
         Cursor cursor = mContentResolver.query(
                 Uri.withAppendedPath(CONVERSATIONS_URI, account), CONVERSATION_PROJECTION,
-                query, null, null);
+                query, selectionArgs, null);
         return new ConversationCursor(this, account, cursor);
     }
 
@@ -559,12 +621,10 @@ public final class Gmail {
      *   server message id.
      * @param label the label to add or remove
      * @param add true to add the label, false to remove it
-     * @throws NonexistentLabelException thrown if the label does not exist
      */
     public void addOrRemoveLabelOnConversation(
             String account, long conversationId, long maxServerMessageId, String label,
-            boolean add)
-            throws NonexistentLabelException {
+            boolean add) {
         if (TextUtils.isEmpty(account)) {
             throw new IllegalArgumentException("account is empty");
         }
@@ -599,7 +659,6 @@ public final class Gmail {
      * @param messageId the id of the message to whose labels should be changed
      * @param label the label to add or remove
      * @param add true to add the label, false to remove it
-     * @throws NonexistentLabelException thrown if the label does not exist
      */
     public static void addOrRemoveLabelOnMessage(ContentResolver contentResolver, String account,
             long conversationId, long messageId, String label, boolean add) {
@@ -1175,19 +1234,6 @@ public final class Gmail {
     }
 
     /**
-     * Thrown when an operation is requested with a label that does not exist.
-     *
-     * TODO: this is here because I wanted a checked exception. However, I don't
-     * think that that is appropriate. In fact, I don't think that we should
-     * throw an exception at all because the label might have been valid when
-     * the caller presented it to the user but removed as a result of a sync.
-     * Maybe we should kill this and eat the errors.
-     */
-    public static class NonexistentLabelException extends Exception {
-        // TODO: Add label name?
-    }
-
-    /**
      * A cursor over labels.
      */
     public final class LabelCursor extends MailCursor {
@@ -1431,8 +1477,18 @@ public final class Gmail {
                         LABEL_OUTBOX, LABEL_DRAFT, LABEL_ALL,
                         LABEL_SPAM, LABEL_TRASH);
 
+
+        private static final Set<String> USER_MEANINGFUL_SYSTEM_LABELS_SET =
+                Sets.newHashSet(
+                        SORTED_USER_MEANINGFUL_SYSTEM_LABELS.toArray(
+                                new String[]{}));
+
         public static List<String> getSortedUserMeaningfulSystemLabels() {
             return SORTED_USER_MEANINGFUL_SYSTEM_LABELS;
+        }
+
+        public static Set<String> getUserMeaningfulSystemLabelsSet() {
+            return USER_MEANINGFUL_SYSTEM_LABELS_SET;
         }
 
         /**
@@ -1484,7 +1540,15 @@ public final class Gmail {
 
         /** Returns the number of unread conversation with a given label. */
         public int getNumUnreadConversations(long labelId) {
-            return getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
+            Integer unreadConversations =
+                    getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
+            // There seems to be a race condition here that can get the label maps into a bad
+            // state and lose state on a particular label.
+            if (unreadConversations == null) {
+                return 0;
+            } else {
+                return unreadConversations;
+            }
         }
 
         /**
@@ -2021,10 +2085,8 @@ public final class Gmail {
          *
          * @param label the label to add or remove
          * @param add whether to add or remove the label
-         * @throws NonexistentLabelException thrown if the named label does not
-         *         exist
          */
-        public void addOrRemoveLabel(String label, boolean add) throws NonexistentLabelException {
+        public void addOrRemoveLabel(String label, boolean add) {
             addOrRemoveLabelOnMessage(mContentResolver, mAccount, getConversationId(),
                     getMessageId(), label, add);
         }

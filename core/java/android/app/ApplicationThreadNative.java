@@ -322,6 +322,15 @@ public abstract class ApplicationThreadNative extends Binder
             requestPss();
             return true;
         }
+        
+        case PROFILER_CONTROL_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            boolean start = data.readInt() != 0;
+            String path = data.readString();
+            profilerControl(start, path);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -654,5 +663,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
     
+    public void profilerControl(boolean start, String path) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeInt(start ? 1 : 0);
+        data.writeString(path);
+        mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
 }
 

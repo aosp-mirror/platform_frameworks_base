@@ -467,7 +467,7 @@ public class SmsMessage {
      *         units remaining until the next message. int[3] is the encoding
      *         type that should be used for the message.
      */
-    public static int[] calculateLength(String messageBody, boolean use7bitOnly) {
+    public static int[] calculateLength(CharSequence messageBody, boolean use7bitOnly) {
         int ret[] = new int[4];
 
         try {
@@ -502,6 +502,25 @@ public class SmsMessage {
         return ret;
     }
 
+    /**
+     * Calculates the number of SMS's required to encode the message body and
+     * the number of characters remaining until the next message, given the
+     * current encoding.
+     *
+     * @param messageBody the message to encode
+     * @param use7bitOnly if true, characters that are not part of the GSM
+     *         alphabet are counted as a single space char.  If false, a
+     *         messageBody containing non-GSM alphabet characters is calculated
+     *         for 16-bit encoding.
+     * @return an int[4] with int[0] being the number of SMS's required, int[1]
+     *         the number of code units used, and int[2] is the number of code
+     *         units remaining until the next message. int[3] is the encoding
+     *         type that should be used for the message.
+     */
+    public static int[] calculateLength(String messageBody, boolean use7bitOnly) {
+        return calculateLength((CharSequence)messageBody, use7bitOnly);
+    }
+    
 
     /**
      * Get an SMS-SUBMIT PDU for a destination address and a message
@@ -541,7 +560,12 @@ public class SmsMessage {
 
             // TP-Data-Coding-Scheme
             // Default encoding, uncompressed
-            bo.write(0x00);
+            // To test writing messages to the SIM card, change this value 0x00 to 0x12, which
+            // means "bits 1 and 0 contain message class, and the class is 2". Note that this
+            // takes effect for the sender. In other words, messages sent by the phone with this
+            // change will end up on the receiver's SIM card. You can then send messages to
+            // yourself (on a phone with this change) and they'll end up on the SIM card.
+            bo.write(0x00); 
 
             // (no TP-Validity-Period)
 

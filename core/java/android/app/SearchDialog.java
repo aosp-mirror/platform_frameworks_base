@@ -16,11 +16,14 @@
 
 package android.app;
 
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -29,11 +32,11 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.server.search.SearchableInfo;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -50,6 +53,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -94,6 +98,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private TextView mBadgeLabel;
     private AutoCompleteTextView mSearchTextField;
     private Button mGoButton;
+    private ImageButton mVoiceButton;
 
     // interaction with searchable application
     private ComponentName mLaunchComponent;
@@ -115,9 +120,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private Uri mSuggestionData = null;
     private String mSuggestionQuery = null;
     
+    // For voice searching
+    private Intent mVoiceWebSearchIntent;
+    private Intent mVoiceAppSearchIntent;
+
     // support for AutoCompleteTextView suggestions display
     private SuggestionsAdapter mSuggestionsAdapter;
-
 
     /**
      * Constructor - fires it up and makes it look like the search UI.
@@ -153,12 +161,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchTextField = (AutoCompleteTextView) 
                 findViewById(com.android.internal.R.id.search_src_text);
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
+        mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
         
         // attach listeners
         mSearchTextField.addTextChangedListener(mTextWatcher);
         mSearchTextField.setOnKeyListener(mTextKeyListener);
         mGoButton.setOnClickListener(mGoButtonClickListener);
         mGoButton.setOnKeyListener(mButtonsKeyListener);
+        mVoiceButton.setOnClickListener(mVoiceButtonClickListener);
+        mVoiceButton.setOnKeyListener(mButtonsKeyListener);
 
         // pre-hide all the extraneous elements
         mBadgeLabel.setVisibility(View.GONE);
@@ -169,13 +180,19 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         setCanceledOnTouchOutside(true);
         
         // Set up broadcast filters
-        mCloseDialogsFilter = new
-        IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        mCloseDialogsFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mPackageFilter = new IntentFilter();
         mPackageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         mPackageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         mPackageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mPackageFilter.addDataScheme("package");
+        
+        // Save voice intent for later queries/launching
+        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+        
+        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
     }
 
     /**
@@ -236,7 +253,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mSearchTextField.setAdapter(mSuggestionsAdapter);
             mSearchTextField.setText(initialQuery);
         } else {
-            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable);
+            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable, 
+                    mSearchTextField);
             mSearchTextField.setAdapter(mSuggestionsAdapter);
 
             // finally, load the user's initial text (which may trigger suggestions)
@@ -261,16 +279,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
-     * Dismiss the search dialog.
+     * The search dialog is being dismissed, so handle all of the local shutdown operations.
      * 
-     * This function is designed to be idempotent so it can be safely called at any time
+     * This function is designed to be idempotent so that dismiss() can be safely called at any time
      * (even if already closed) and more likely to really dump any memory.  No leaks!
      */
     @Override
-    public void dismiss() {
-        if (isShowing()) {
-            super.dismiss();
-        }
+    public void onStop() {
+        super.onStop();
+        
         setOnCancelListener(null);
         setOnDismissListener(null);
         
@@ -279,6 +296,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             getContext().unregisterReceiver(mBroadcastReceiver);
         } catch (RuntimeException e) {
             // This is OK - it just means we didn't have any registered
+        }
+        
+        // close any leftover cursor
+        if (mSuggestionsAdapter != null) {
+            mSuggestionsAdapter.changeCursor(null);
         }
         
         // dump extra memory we're hanging on to
@@ -408,6 +430,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchButton();
             updateSearchBadge();
             updateQueryHint();
+            updateVoiceButton();
             
             // In order to properly configure the input method (if one is being used), we
             // need to let it know if we'll be providing suggestions.  Although it would be
@@ -426,6 +449,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
             }
             mSearchTextField.setInputType(inputType);
+            mSearchTextField.setImeOptions(mSearchable.getImeOptions());
         }
     }
 
@@ -499,6 +523,30 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
     }
 
+    /**
+     * Update the visibility of the voice button.  There are actually two voice search modes, 
+     * either of which will activate the button.
+     */
+    private void updateVoiceButton() {
+        int visibility = View.GONE;
+        if (mSearchable.getVoiceSearchEnabled()) {
+            Intent testIntent = null;
+            if (mSearchable.getVoiceSearchLaunchWebSearch()) {
+                testIntent = mVoiceWebSearchIntent;
+            } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
+                testIntent = mVoiceAppSearchIntent;
+            }      
+            if (testIntent != null) {
+                ResolveInfo ri = getContext().getPackageManager().
+                        resolveActivity(testIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                if (ri != null) {
+                    visibility = View.VISIBLE;
+                }
+            }
+        }
+        mVoiceButton.setVisibility(visibility);
+    }
+    
     /**
      * Listeners of various types
      */
@@ -642,11 +690,97 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     };
     
     /**
+     * React to a click in the voice search button.
+     */
+    View.OnClickListener mVoiceButtonClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            try {
+                if (mSearchable.getVoiceSearchLaunchWebSearch()) {
+                    getContext().startActivity(mVoiceWebSearchIntent);
+                    dismiss();
+                } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
+                    Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent);
+                    getContext().startActivity(appSearchIntent);
+                    dismiss();
+                }
+            } catch (ActivityNotFoundException e) {
+                // Should not happen, since we check the availability of
+                // voice search before showing the button. But just in case...
+                Log.w(LOG_TAG, "Could not find voice search activity");
+            }
+         }
+    };
+    
+    /**
+     * Create and return an Intent that can launch the voice search activity, perform a specific
+     * voice transcription, and forward the results to the searchable activity.
+     * 
+     * @param baseIntent The voice app search intent to start from
+     * @return A completely-configured intent ready to send to the voice search activity
+     */
+    private Intent createVoiceAppSearchIntent(Intent baseIntent) {
+        // create the necessary intent to set up a search-and-forward operation
+        // in the voice search system.   We have to keep the bundle separate,
+        // because it becomes immutable once it enters the PendingIntent
+        Intent queryIntent = new Intent(Intent.ACTION_SEARCH);
+        queryIntent.setComponent(mSearchable.mSearchActivity);
+        PendingIntent pending = PendingIntent.getActivity(
+                getContext(), 0, queryIntent, PendingIntent.FLAG_ONE_SHOT);
+        
+        // Now set up the bundle that will be inserted into the pending intent
+        // when it's time to do the search.  We always build it here (even if empty)
+        // because the voice search activity will always need to insert "QUERY" into
+        // it anyway.
+        Bundle queryExtras = new Bundle();
+        if (mAppSearchData != null) {
+            queryExtras.putBundle(SearchManager.APP_DATA, mAppSearchData);
+        }
+        
+        // Now build the intent to launch the voice search.  Add all necessary
+        // extras to launch the voice recognizer, and then all the necessary extras
+        // to forward the results to the searchable activity
+        Intent voiceIntent = new Intent(baseIntent);
+        
+        // Add all of the configuration options supplied by the searchable's metadata
+        String languageModel = RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
+        String prompt = null;
+        String language = null;
+        int maxResults = 1;
+        Resources resources = mActivityContext.getResources();
+        if (mSearchable.getVoiceLanguageModeId() != 0) {
+            languageModel = resources.getString(mSearchable.getVoiceLanguageModeId());
+        }
+        if (mSearchable.getVoicePromptTextId() != 0) {
+            prompt = resources.getString(mSearchable.getVoicePromptTextId());
+        }
+        if (mSearchable.getVoiceLanguageId() != 0) {
+            language = resources.getString(mSearchable.getVoiceLanguageId());
+        }
+        if (mSearchable.getVoiceMaxResults() != 0) {
+            maxResults = mSearchable.getVoiceMaxResults();
+        }
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, languageModel);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
+        
+        // Add the values that configure forwarding the results
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT_BUNDLE, queryExtras);
+        
+        return voiceIntent;
+    }
+
+    /**
      * React to the user typing "enter" or other hardwired keys while typing in the search box.
      * This handles these special keys while the edit box has focus.
      */
     View.OnKeyListener mTextKeyListener = new View.OnKeyListener() {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                cancel();
+                return true;
+            }
             // also guard against possible race conditions (late arrival after dismiss)
             if (mSearchable != null && 
                     TextUtils.getTrimmedLength(mSearchTextField.getText()) > 0) {
@@ -661,7 +795,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // otherwise, dispatch an "edit view" key
                 switch (keyCode) {
                 case KeyEvent.KEYCODE_ENTER:
-                case KeyEvent.KEYCODE_DPAD_CENTER:
                     if (event.getAction() == KeyEvent.ACTION_UP) {
                         v.cancelLongPress();
                         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);                    
@@ -700,9 +833,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // also guard against possible race conditions (late arrival after dismiss)
         if (mSearchable != null) {
             handled = doSuggestionsKey(v, keyCode, event);
-            if (!handled) {
-                handled = refocusingKeyListener(v, keyCode, event);
-            }
         }
         return handled;
     }
@@ -792,24 +922,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
     };
 
-    /**
-     * UI-thread handling of dialog dismiss.  Called by mBroadcastReceiver.onReceive().
-     *
-     * TODO: This is a really heavyweight solution for something that should be so simple.
-     * For example, we already have a handler, in our superclass, why aren't we sharing that?
-     * I think we need to investigate simplifying this entire methodology, or perhaps boosting
-     * it up into the Dialog class.
-     */
-    private static final int MESSAGE_DISMISS = 0;
-    private Handler mDismissHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MESSAGE_DISMISS) {
-                dismiss();
-            }
-        }
-    };
-    
     /**
      * Various ways to launch searches
      */
@@ -907,6 +1019,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @param jamQuery True means to set the query, false means to reset it to the user's choice
      */
     private void jamSuggestionQuery(boolean jamQuery, AdapterView<?> parent, int position) {
+        // quick check against race conditions
+        if (mSearchable == null) {
+            return;
+        }
+        
         mSuggestionsAdapter.setNonUserQuery(true);       // disables any suggestions processing
         if (jamQuery) {
             CursorAdapter ca = getSuggestionsAdapter(parent);
@@ -1180,10 +1297,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // These private variables are shared by the filter thread and must be protected
         private WeakReference<Cursor> mRecentCursor = new WeakReference<Cursor>(null);
         private boolean mNonUserQuery = false;
+        private AutoCompleteTextView mParentView;
 
-        public SuggestionsAdapter(Context context, SearchableInfo searchable) {
+        public SuggestionsAdapter(Context context, SearchableInfo searchable,
+                AutoCompleteTextView actv) {
             super(context, -1, null, null, null);
             mSearchable = searchable;
+            mParentView = actv;
             
             // set up provider resources (gives us icons, etc.)
             Context activityContext = mSearchable.getActivityContext(mContext);
@@ -1296,9 +1416,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                         to = ONE_LINE_TO;
                     }
                 }
+                // Force the underlying ListView to discard and reload all layouts
+                // (Note, this should be optimized for cases where layout/cursor remain same)
+                mParentView.resetListAndClearViews();
                 // Now actually set up the cursor, columns, and the list view
                 changeCursorAndColumns(c, from, to);
-                setViewResource(layout);              
+                setViewResource(layout);          
             } else {
                 // Provide some help for developers instead of just silently discarding
                 Log.w(LOG_TAG, "Suggestions cursor discarded due to missing required columns.");

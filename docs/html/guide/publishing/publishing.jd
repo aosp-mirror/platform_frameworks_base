@@ -21,10 +21,10 @@ page.title=Publishing Your Applications
     <li><a href="#marketupgrade">Publishing Upgrades on Android Market</a>
     <li><a href="#marketintent">Using Intents to Launch the Market Application</a></li>
     </ol></li>
-
+<!--
 <li><span style="color:ccc">Publishing on Other Hosted Services</a></li>
 <li><span style="color:ccc">Publishing through a Web Server</a></li>
-
+-->
 </ol>
 
 <h2>See also</h2>
@@ -84,7 +84,7 @@ that it meets the requirements listed below, which are enforced by the Market
 server when you upload the application.</p>
 
 <div class="special">
-<p>Requirements enforced by the Android Market server</p>
+<p>Requirements enforced by the Android Market server:</p>
 <ol>
 <li>Your application must be signed with a cryptographic private key whose
 validity period ends after <span style="color:red">22 October 2033</span>. </li>

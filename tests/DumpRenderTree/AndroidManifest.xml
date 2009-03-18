@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="HTMLHostActivity">
+        <activity android:name="TestShellActivity" android:launchMode="singleTop">
         </activity>
     </application>
 

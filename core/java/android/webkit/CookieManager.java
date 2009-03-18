@@ -171,6 +171,10 @@ public final class CookieManager {
         boolean pathMatch(String urlPath) {
             if (urlPath.startsWith(path)) {
                 int len = path.length();
+                if (len == 0) {
+                    Log.w(LOGTAG, "Empty cookie path");
+                    return false;
+                }
                 int urlLen = urlPath.length();
                 if (path.charAt(len-1) != PATH_DELIM && urlLen > len) {
                     // make sure /wee doesn't match /we
@@ -739,9 +743,14 @@ public final class CookieManager {
              * Note: in the case of "foo=bluh, bar=bluh;path=/", we interpret
              * it as one cookie instead of two cookies.
              */
+            int semicolonIndex = cookieString.indexOf(SEMICOLON, index);
             int equalIndex = cookieString.indexOf(EQUAL, index);
             if (equalIndex == -1) {
                 // bad format, force return
+                break;
+            }
+            if (semicolonIndex > -1 && semicolonIndex < equalIndex) {
+                // empty cookie, like "; path=/", return
                 break;
             }
             cookie = new Cookie(host, path);
@@ -753,7 +762,7 @@ public final class CookieManager {
                     break;
                 }
             }
-            int semicolonIndex = cookieString.indexOf(SEMICOLON, index);
+            semicolonIndex = cookieString.indexOf(SEMICOLON, index);
             if (semicolonIndex == -1) {
                 semicolonIndex = length;
             }
@@ -864,7 +873,10 @@ public final class CookieManager {
                                     "illegal format for max-age: " + value);
                         }
                     } else if (name.equals(PATH)) {
-                        cookie.path = value;
+                        // only allow non-empty path value
+                        if (value.length() > 0) {
+                            cookie.path = value;
+                        }
                     } else if (name.equals(DOMAIN)) {
                         int lastPeriod = value.lastIndexOf(PERIOD);
                         if (lastPeriod == 0) {

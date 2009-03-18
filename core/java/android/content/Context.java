@@ -127,7 +127,7 @@ public abstract class Context {
      * current process.
      */
     public abstract Context getApplicationContext();
-    
+
     /**
      * Return a localized, styled CharSequence from the application's package's
      * default string table.
@@ -428,7 +428,7 @@ public abstract class Context {
      *     cursor when query is called.
      *
      * @return The contents of a newly created database with the given name.
-     * @throws SQLiteException if the database file could not be opened.
+     * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
      *
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
@@ -1064,7 +1064,7 @@ public abstract class Context {
      * @see #AUDIO_SERVICE
      * @see android.media.AudioManager
      * @see #TELEPHONY_SERVICE
-     * @see android.internal.TelephonyManager
+     * @see android.telephony.TelephonyManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      */
@@ -1250,12 +1250,12 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@blink android.gadget.GadgetManager} for accessing wallpapers.
+     * {@blink android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
      * @hide
      * @see #getSystemService
      */
-    public static final String GADGET_SERVICE = "gadget";
+    public static final String APPWIDGET_SERVICE = "appwidget";
     
     /**
      * Determine whether the given permission is allowed for a particular

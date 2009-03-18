@@ -2,17 +2,20 @@ page.title=Hello, World
 @jd:body
 
 <p>As a developer, you know that the first impression
-you get of a development framework is how easy it is to write "Hello,
-World." Well, on Android, it's pretty easy. </p>
-
-<p>It's particularly easy if you're using Eclipse as your IDE, because we've provided a
+of a development framework is how easy it is to write "Hello,
+World." Well, on Android, it's pretty easy. 
+It's particularly easy if you're using Eclipse as your IDE, because we've provided a
 great plugin that handles your project creation and management to greatly speed up your
-development cycles. Get <a href="http://www.eclipse.org/downloads/">Eclipse</a> and visit the 
-<a href="{@docRoot}guide/developing/tools/adt.html">ADT Plugin</a> page to install it.</p>
+development cycles.</p>
 
 <p>If you're not using Eclipse, that's okay. Familiarize yourself with 
 <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.
 You can then come back here and ignore anything about Eclipse.</p>
+
+<p>Before you start, you should already have the latest SDK installed, and if you're using
+Eclipse, you should have installed the ADT plugin as well. See 
+<a href="{@docRoot}sdk/1.1_r1/installing.html">Installing the Android SDK</a> to get these
+installed.</p>
 
 <p class="note"><strong>Note:</strong>
 In some cases, you might want to click the screenshots below to get a bigger view.
@@ -20,19 +23,19 @@ In some cases, you might want to click the screenshots below to get a bigger vie
 
 <h2 id="create">Create the Project</h2>
 
-<ol class="listhead">
-    <li>Create a new Android Project.
+<ol>
+    <li><strong>Open a new Android Project.</strong>
         <p>From Eclipse, select the <strong>File &gt; New &gt; Project</strong> menu item. If the Android
             Plugin for Eclipse has been successfully installed, the resulting dialog
             should have a folder labeled "Android" which should contain a single entry:
             "Android Project".</p>
+        <p>Selected "Android Project" and click <strong>Next</strong>.</p>
             
             <a href="images/hello_world_0.png"><img src="images/hello_world_0.png" style="height:230px" alt="" /></a>
 
-            <p>Once you've selected "Android Project", click <strong>Next</strong>.</p>
     </li>
 
-    <li>Fill out the project details.
+    <li><strong>Fill out the project details.</strong>
         <p>The next screen allows you to enter the relevant details for your project:</p>
         <ul>
           <li><em>Project name:</em> HelloAndroid</li>
@@ -40,7 +43,7 @@ In some cases, you might want to click the screenshots below to get a bigger vie
           <li><em>Activity name:</em> HelloAndroid</li>
           <li><em>Application name:</em> Hello, Android</li>
         </ul>
-
+        <p>Click <strong>Finish</strong>.</p>
         <a href="images/hello_world_1.png"><img src="images/hello_world_1.png" style="height:230px" alt="" /></a>
 
         <p>Here's what each field on this screen means:</p>
@@ -74,12 +77,18 @@ In some cases, you might want to click the screenshots below to get a bigger vie
 
     </li>
 
-<li>Edit the auto-generated source code.
-<p>After the plugin runs, you'll have a class named <code>HelloAndroid</code> 
-(found in your package, <em>HelloAndroid > src > com.android.hello</em>). It should look like
+<li><strong>View the auto-generated source code.</strong>
+<p>After the plugin completes your project creations, you'll have a class named <code>HelloAndroid</code> 
+(found in your project package, <em>HelloAndroid > src > com.android.hello</em>). It should look like
 this:</p>
 
-<pre>public class HelloAndroid extends Activity {
+<pre>
+package com.example.hello;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+public class HelloAndroid extends Activity {
     /** Called when the activity is first created. */
     &#64;Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,9 +97,7 @@ this:</p>
     }
 }</pre>
 
-<p>Now, you <em>could</em> run this right away, but let's go a little further, 
-so we understand more about what's happening.
-So, the next step is to modify some code! </p>
+<p>Now let's modify some code! </p>
 </li>
 </ol>
 
@@ -105,16 +112,16 @@ package com.android.hello;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.TextView;
+<strong>import android.widget.TextView;</strong>
 
 public class HelloAndroid extends Activity {
    /** Called when the activity is first created. */
    &#64;Override
    public void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
-       TextView tv = new TextView(this);
+       <strong>TextView tv = new TextView(this);
        tv.setText(&quot;Hello, Android&quot;);
-       setContentView(tv);
+       setContentView(tv);</strong>
    }
 }</pre>
 
@@ -122,16 +129,21 @@ public class HelloAndroid extends Activity {
 press <strong>Ctrl-Shift-O</strong> (<strong>Cmd-Shift-O</strong>, on Mac). This is an Eclipse 
 shortcut to organize imports&mdash;it identifies missing packages and adds them for you.</p>
 
-<p>In Android, user interfaces are composed of hierarchies of classes called
-Views. A View is simply a drawable object, such as a radio button, an
+<p>Notice that our class is based on the {@link android.app.Activity} class. An Activity is a 
+single application entity that is used to perform actions. An application may have many, but the user
+interacts with them only one at a time. An Activity is not required to actually have a user interface,
+but usually will.</p>
+
+<p>An Android user interface is composed of hierarchies of objects called
+Views. A {@link android.view.View} is simply a drawable object, such as a radio button, an
 animation, or (in our case) a text label. The specific name for the View
-subclass that handles text is simply TextView.</p>
+subclass that handles text, which we use here, is {@link android.widget.TextView}.</p>
 
 <p>Here's how you construct a TextView:</p>
 
 <pre>TextView tv = new TextView(this);</pre>
 
-<p>The argument to TextView's constructor is an Android Context instance. The
+<p>The argument to TextView's constructor is an Android {@link android.content.Context} instance. The
 Context is simply a handle to the system; it provides services like
 resolving resources, obtaining access to databases and preferences, and so
 on. The Activity class inherits from Context.  Since our
@@ -189,15 +201,18 @@ simply continue.</p>
 
   <a href="images/hello_world_4.png"><img src="images/hello_world_4.png" style="height:230px" alt="" /></a>
 
-<p>That's it &mdash; you're done! Click the Run button, and the Android Emulator
-should start.  Once it's booted up your application will appear.  When all is said and done, you should
+<p>Now click <strong>Run</strong>, and the Android Emulator should start and open the application.  
+Once it's booted up your application will appear. (Once booted, you may need to unlock the emulator's phone screen
+by pressing the device MENU key.) When all is said and done, you should
 see something like this:</p>
 
   <a href="images/hello_world_5.png"><img src="images/hello_world_5.png" style="height:230px" alt="" /></a>
 
+
 <p>That's "Hello, World" in Android. Pretty straightforward, eh?
 The next sections of the tutorial offer more detailed information that you may find valuable as you
 learn more about Android.</p>
+
 
 
 
@@ -220,12 +235,12 @@ programmatically-constructed example you just completed:</p>
 &lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
-  android:text=&quot;Hello, Android&quot;/&gt;</pre>
+  android:text=&quot;@string/hello&quot;/&gt;</pre>
 
 <p>The general structure of an Android XML layout file is simple: it's a tree
 of XML elements, where each element is the name of a View class 
 (this example, however, is just one element). You can use the
-name of any class that extends View as an element in your XML layouts,
+name of any class that extends {@link android.view.View} as an element in your XML layouts,
 including custom View classes you define in your own code. This
 structure makes it very easy to quickly build up UIs, using a more simple
 structure and syntax than you would in source code. This model is inspired
@@ -274,14 +289,20 @@ which has four XML attributes.  Here's a summary of what they mean:</p>
                 <code>android:text</code>
             </td>
             <td>
-                This sets the text that the TextView should contain. In this example, it's our usual "Hello, Android" message.
+                This sets the text that the TextView should display. In this example, we use a string 
+                resource instead of a hard-coded string value.
+                The <em>hello</em> string is defined in the <em>res/values/strings.xml</em> file. This is the
+                recommended practice for inserting strings to your application, because it makes the localization
+                of your application to other languages graceful, without need to hard-code changes to the layout file.
+                For more information, see <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources
+                and Internationalization</a>.
             </td>
         </tr>
     </tbody>
 </table>
 
 
-<p>This layout file belongs in the <code>res/layout/</code> directory in your project. The "res" is
+<p>These layout files belong in the <em>res/layout/</em> directory in your project. The "res" is
 short for "resources" and that directory contains all the non-code assets that
 your application requires. Resources also include things like images, localized
 strings, and XML layout files.</p>
@@ -293,17 +314,43 @@ strings, and XML layout files.</p>
   Without it the layout will just be stretched.</p>
 </div>
 
-<p>The Eclipse plugin creates one of these XML files for you (<code>main.xml</code>). In our example
-above, we just ignored it and created our layout programmatically.  In the Eclipse Package Explorer, expand the
-folder res/layout/, and open the file <code>main.xml</code> (once opened, you might need to click 
+<p>The Eclipse plugin automatically creates one of these layout files for you (<code>main.xml</code>). In our example
+above, we just ignored it and created our layout programmatically. We did so just to teach you a little more
+about the framework, but you should almost always define your layout in an XML file instead of in your code.</p>
+
+<p>So, let's put it to use and change the "Hello, Android" sample to use the XML layout.</p>
+
+<ol>
+  <li>In the Eclipse Package Explorer, expand the
+folder <em>res/layout/</em>, and open the file <code>main.xml</code> (once opened, you might need to click 
 the "main.xml" tab at the bottom to see the XML source). Replace its contents with
-the sample XML above and save your changes.</p>
+the following XML:
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+  android:layout_width=&quot;fill_parent&quot;
+  android:layout_height=&quot;fill_parent&quot;
+  android:text=&quot;@string/hello&quot;/&gt;</pre>
+<p>Save the file.</p>
+</li>
 
-<p>Now open and modify your <code>HelloAndroid</code> class source code to read the
-XML layout, instead of the hard-coded version. Edit the file to look like this:</p>
-
+<li>Inside the project folder <em>res/values/</em>, open the file <code>strings.xml</code>.
+This is where you should save all default text strings for your user interface. If you're using Eclipse, then
+ADT will have started you with two strings, <em>hello</em> and <em>app_name</em>. 
+Revise <em>hello</em> to something else. Perhaps "Hello, Android! I am a string resource!"
+The entire file should now look like this:
 <pre>
-package com.android.hello;
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello, Android! I am a string resource!&lt;/string>
+    &lt;string name="app_name">Hello, Android&lt;/string>
+&lt;/resources>
+</pre>
+</li>
+
+<li>Now open and modify your <code>HelloAndroid</code> class source code to read the
+XML layout, instead of the hard-coded version. Edit the file to look like this:
+<pre>
+package com.example.hello;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -319,39 +366,50 @@ public class HelloAndroid extends Activity {
 
 <p>When you make this change, type it by hand to try the code-completion feature on that R class. You'll probably find that it helps a lot.</p>
 
-<p>The <code>setContentView()</code> method we're now using expects a reference to a layout resource.
-We pass it <code>R.layout.main</code>, which is the reference to the <code>layout/main.xml</code> once it's
-compiled into our R class by the Eclipse plugin. (More about the R class in a moment.)</p>
+<p>Now, instead of passing <code>setContentView()</code> a View object, we give it a reference to our layout resource.
+The resource is identified as <code>R.layout.main</code>, which is actually a compiled object representation of
+the layout defined in <em>layout/main.xml</em>. The Eclipse plugin automatically creates this reference for
+us inside the project's R.java class. If you're not using Eclipse, then the R.java class will be generated for you
+when you run Ant to build the application. (More about the R class in a moment.)</p>
+</li>
+</ol>
 
 <p>Now that you've made this change, go ahead and re-run your application &mdash; all
 you need to do is click the green Run arrow icon, or select 
-<strong>Run &gt; Run History &gt; Hello, Android</strong>  from the menu. You should see.... well, exactly the same thing
+<strong>Run &gt; Run History &gt; Hello, Android</strong>  from the menu. You should see pretty much the same thing
 you saw before! After all, the point was to show that the two different
 layout approaches produce identical results.</p>
 
-<p>There's a lot more to creating these XML layouts, but that's as far as we'll go
-here. Read the <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> documentation for more 
-information on creating layouts.</p>
+<p class="note"><strong>Tip:</strong> Use the shortcut <strong>Ctrl-Shift-F11</strong> 
+(<strong>Cmd-Shift-F11</strong>, on Mac) to run your currently visible application.</p>
+
+<p>You've just completed your first Android application! Continue reading for an introduction
+to debugging and a little more information on using other IDEs. Once you're ready to move on,
+please begin by reading <a href="{@docRoot}guide/topics/fundamentals.html">Application
+Fundamentals</a>. Also refer to the <a href="{@docRoot}guide/index.html">Developer's Guide</a>
+introduction page for an overview of the <em>Dev Guide</em> documentation.</p>
+
 
 <div class="special">
 <h3>R class</h3>
-<p>Open the file named R.java in your source code folder in the Package
+<p>In Eclipse, open the file named R.java in your source code folder in the Package
 Explorer. It should look something like this:</p>
 
 <pre>
 public final class R {
     public static final class attr {
-    };
+    }
     public static final class drawable {
         public static final int icon=0x7f020000;
-    };
+    }
     public static final class layout {
         public static final int main=0x7f030000;
-    };
+    }
     public static final class string {
-        public static final int app_name=0x7f040000;
-    };
-};
+        public static final int app_name=0x7f040001;
+        public static final int hello=0x7f040000;
+    }
+}
 </pre>
 
 <p>A project's R.java file is an index into all the resources defined in the
@@ -361,10 +419,13 @@ particularly powerful with the code-completion features of IDEs like Eclipse
 because it lets you quickly and interactively locate the specific reference
 you're looking for.</p>
 
-<p>For now, notice the inner class named "layout", and its
+<p>It's possible yours looks slighly different than this (perhaps the hexadecimal values are different). 
+For now, notice the inner class named "layout", and its
 member field "main". The Eclipse plugin noticed the XML
 layout file named main.xml and generated a class for it here.  As you add other
-resources to your project (in the <code>res/</code> directory), you'll see R.java change to keep up.</p>
+resources to your project (such as strings in the <em>res/values/string.xml</em> file or drawables inside
+the <em>res/drawable/</em> direcory) you'll see R.java change to keep up.</p>
+<p>When not using Eclipse, this class file will be generated for you at build time (with the Ant tool).</p>
 <p><em>You should never edit this file by hand.</em></p>
 </div>
 

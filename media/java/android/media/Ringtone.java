@@ -164,9 +164,16 @@ public class Ringtone {
         } else if (mFileDescriptor != null) {
             mAudio.setDataSource(mFileDescriptor);
         } else if (mAssetFileDescriptor != null) {
-            mAudio.setDataSource(mAssetFileDescriptor.getFileDescriptor(),
-                    mAssetFileDescriptor.getStartOffset(),
-                    mAssetFileDescriptor.getLength());
+            // Note: using getDeclaredLength so that our behavior is the same
+            // as previous versions when the content provider is returning
+            // a full file.
+            if (mAssetFileDescriptor.getDeclaredLength() < 0) {
+                mAudio.setDataSource(mAssetFileDescriptor.getFileDescriptor());
+            } else {
+                mAudio.setDataSource(mAssetFileDescriptor.getFileDescriptor(),
+                        mAssetFileDescriptor.getStartOffset(),
+                        mAssetFileDescriptor.getDeclaredLength());
+            }
         } else {
             throw new IOException("No data source set.");
         }

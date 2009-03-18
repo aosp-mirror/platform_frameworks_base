@@ -15,14 +15,44 @@
 -->
 
 <bookmarks>
-    <bookmark package="com.android.browser" class="com.android.browser.BrowserActivity" shortcut="b" />
-    <bookmark package="com.android.calendar" class="com.android.calendar.LaunchActivity" shortcut="l" />
-    <bookmark package="com.android.contacts" class="com.android.contacts.DialtactsContactsEntryActivity" shortcut="c" />
-    <bookmark package="com.google.android.gm" class="com.google.android.gm.ConversationListActivityGmail" shortcut="g" />
-    <bookmark package="com.android.email" class="com.android.email.activity.Welcome" shortcut="e" />
-    <bookmark package="com.android.im" class="com.android.im.app.ChooseAccountActivity" shortcut="i" />
-    <bookmark package="com.google.android.apps.maps" class="com.google.android.maps.MapsActivity" shortcut="m" />
-    <bookmark package="com.android.music" class="com.android.music.MusicBrowserActivity" shortcut="p" />
-    <bookmark package="com.android.mms" class="com.android.mms.ui.ConversationList" shortcut="s" />
-    <bookmark package="com.google.android.youtube" class="com.google.android.youtube.HomePage" shortcut="y" />
+    <bookmark
+        package="com.android.browser"
+        class="com.android.browser.BrowserActivity"
+        shortcut="b" />
+    <bookmark
+        package="com.android.contacts"
+        class="com.android.contacts.DialtactsContactsEntryActivity"
+        shortcut="c" />
+    <bookmark
+        package="com.android.email"
+        class="com.android.email.activity.Welcome"
+        shortcut="e" />
+    <bookmark
+        package="com.google.android.gm"
+        class="com.google.android.gm.ConversationListActivityGmail"
+        shortcut="g" />
+    <bookmark
+        package="com.android.providers.im"
+        class="com.android.providers.im.LandingPage"
+        shortcut="i" />
+    <bookmark
+        package="com.android.calendar"
+        class="com.android.calendar.LaunchActivity"
+        shortcut="l" />
+    <bookmark
+        package="com.google.android.apps.maps"
+        class="com.google.android.maps.MapsActivity"
+        shortcut="m" />
+    <bookmark
+        package="com.android.music"
+        class="com.android.music.MusicBrowserActivity"
+        shortcut="p" />
+    <bookmark
+        package="com.android.mms"
+        class="com.android.mms.ui.ConversationList"
+        shortcut="s" />
+    <bookmark
+        package="com.google.android.youtube"
+        class="com.google.android.youtube.HomePage"
+        shortcut="y" />
 </bookmarks>

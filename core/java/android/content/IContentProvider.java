@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.IBulkCursor;
@@ -52,6 +53,8 @@ public interface IContentProvider extends IInterface {
             String[] selectionArgs) throws RemoteException;
     public ParcelFileDescriptor openFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException;
+    public AssetFileDescriptor openAssetFile(Uri url, String mode)
+            throws RemoteException, FileNotFoundException;
     public ISyncAdapter getSyncAdapter() throws RemoteException;
 
     /* IPC constants */
@@ -65,4 +68,5 @@ public interface IContentProvider extends IInterface {
     static final int GET_SYNC_ADAPTER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 10;
     static final int BULK_INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 12;
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
+    static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
 }

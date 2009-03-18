@@ -45,7 +45,7 @@ class SensorService extends ISensorService.Stub {
     private static final int SENSOR_DISABLE = -1;
     
     /**
-     * Battery statistics to be updated when sensors are enabled and diabled.
+     * Battery statistics to be updated when sensors are enabled and disabled.
      */
     final IBatteryStats mBatteryStats = BatteryStatsService.getService();
 
@@ -105,9 +105,9 @@ class SensorService extends ISensorService.Stub {
         return _sensors_control_open();
     }
     
-    public boolean enableSensor(IBinder binder, int sensor, int enable)
+    public boolean enableSensor(IBinder binder, String name, int sensor, int enable)
              throws RemoteException {
-        if (localLOGV) Log.d(TAG, "enableSensor " + sensor + " " + enable);
+        if (localLOGV) Log.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
         
         // Inform battery statistics service of status change
         int uid = Binder.getCallingUid();
@@ -119,7 +119,10 @@ class SensorService extends ISensorService.Stub {
         }
         Binder.restoreCallingIdentity(identity);
 
-        if (binder == null) throw new NullPointerException("listener is null in enableSensor");
+        if (binder == null) {
+            Log.w(TAG, "listener is null (sensor=" + name + ", id=" + sensor + ")");
+            return false;
+        }
 
         synchronized(mListeners) {
             if (enable!=SENSOR_DISABLE && !_sensors_control_activate(sensor, true)) {
@@ -145,7 +148,11 @@ class SensorService extends ISensorService.Stub {
             }
             
             if (l == null) {
-                throw new NullPointerException("no Listener object in enableSensor");
+                // by construction, this means we're disabling a listener we
+                // don't know about...
+                Log.w(TAG, "listener with binder " + binder + 
+                        ", doesn't exist (sensor=" + name + ", id=" + sensor + ")");
+                return false;
             }
             
             if (minDelay >= 0) {

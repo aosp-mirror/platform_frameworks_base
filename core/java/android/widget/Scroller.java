@@ -132,6 +132,26 @@ public class Scroller  {
     }
     
     /**
+     * Returns the start X offset in the scroll. 
+     * 
+     * @return The start X offset as an absolute distance from the origin.
+     * @hide pending API council
+     */
+    public final int getStartX() {
+        return mStartX;
+    }
+    
+    /**
+     * Returns the start Y offset in the scroll. 
+     * 
+     * @return The start Y offset as an absolute distance from the origin.
+     * @hide pending API council
+     */
+    public final int getStartY() {
+        return mStartY;
+    }
+    
+    /**
      * Returns where the scroll will end. Valid only for "fling" scrolls.
      * 
      * @return The final X offset as an absolute distance from the origin.

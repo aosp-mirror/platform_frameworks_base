@@ -151,11 +151,11 @@ public class InputConnectionWrapper implements InputConnection {
         mIInputContext = inputContext;
     }
 
-    public CharSequence getTextAfterCursor(int length) {
+    public CharSequence getTextAfterCursor(int length, int flags) {
         CharSequence value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getTextAfterCursor(length, callback.mSeq, callback);
+            mIInputContext.getTextAfterCursor(length, flags, callback.mSeq, callback);
             synchronized (callback) {
                 callback.waitForResultLocked();
                 if (callback.mHaveValue) {
@@ -169,11 +169,11 @@ public class InputConnectionWrapper implements InputConnection {
         return value;
     }
     
-    public CharSequence getTextBeforeCursor(int length) {
+    public CharSequence getTextBeforeCursor(int length, int flags) {
         CharSequence value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getTextBeforeCursor(length, callback.mSeq, callback);
+            mIInputContext.getTextBeforeCursor(length, flags, callback.mSeq, callback);
             synchronized (callback) {
                 callback.waitForResultLocked();
                 if (callback.mHaveValue) {
@@ -241,6 +241,33 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
+    public boolean setSelection(int start, int end) {
+        try {
+            mIInputContext.setSelection(start, end);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+    
+    public boolean performEditorAction(int actionCode) {
+        try {
+            mIInputContext.performEditorAction(actionCode);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+    
+    public boolean performContextMenuAction(int id) {
+        try {
+            mIInputContext.performContextMenuAction(id);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+    
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         try {
             mIInputContext.setComposingText(text, newCursorPosition);
@@ -304,18 +331,9 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public boolean hideStatusIcon() {
+    public boolean reportFullscreenMode(boolean enabled) {
         try {
-            mIInputContext.showStatusIcon(null, 0);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    public boolean showStatusIcon(String packageName, int resId) {
-        try {
-            mIInputContext.showStatusIcon(packageName, resId);
+            mIInputContext.reportFullscreenMode(enabled);
             return true;
         } catch (RemoteException e) {
             return false;

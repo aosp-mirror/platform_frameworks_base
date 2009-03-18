@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.widget.ArrayAdapter;
 import android.view.View;
 import android.widget.ListView;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -188,7 +189,8 @@ public class NotificationTestList extends TestActivity
             {
                 Notification n = new Notification();
                 n.sound = Uri.parse(
-                        "android.resource://com.android.notificationtest/raw/ringer");
+                        ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                        getPackageName() + "/raw/ringer");
                 Log.d(TAG, "n.sound=" + n.sound);
 
                 mNM.notify(1, n);

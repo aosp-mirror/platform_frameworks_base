@@ -114,9 +114,6 @@ public class PdpConnection extends Handler {
     private static final int EVENT_DEACTIVATE_DONE = 4;
     private static final int EVENT_FORCE_RETRY = 5;
 
-    //***** Tag IDs for EventLog
-    private static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
-
     //***** Instance Variables
     private GSMPhone phone;
     private String pdp_name;
@@ -301,7 +298,7 @@ public class PdpConnection extends Handler {
 
     private void notifyDisconnect(Message msg) {
         if (DBG) log("Notify PDP disconnect");
-        
+
         if (msg != null) {
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
@@ -378,7 +375,7 @@ public class PdpConnection extends Handler {
 
                 if (ar.exception != null) {
                     Log.e(LOG_TAG, "PDP Context Init failed " + ar.exception);
-                    
+
                     if (receivedDisconnectReq) {
                         // Don't bother reporting the error if there's already a
                         // pending disconnect request, since DataConnectionTracker
@@ -406,7 +403,7 @@ public class PdpConnection extends Handler {
                     } else {
                         String[] response = ((String[]) ar.result);
                         cid = Integer.parseInt(response[0]);
-                        
+
                         if (response.length > 2) {
                             interfaceName = response[1];
                             ipAddress = response[2];
@@ -420,7 +417,8 @@ public class PdpConnection extends Handler {
                                     + " DNS2=" + dnsServers[1]);
                             }
 
-                            if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])) {
+                            if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])
+                                    && !phone.isDnsCheckDisabled()) {
                                 // Work around a race condition where QMI does not fill in DNS:
                                 // Deactivate PDP and let DataConnectionTracker retry.
                                 // Do not apply the race condition workaround for MMS APN
@@ -428,20 +426,21 @@ public class PdpConnection extends Handler {
                                 // Otherwise, the default APN will not be restored anymore.
                                 if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
                                         || !isIpAddress(apn.mmsProxy)) {
-                                    EventLog.writeEvent(EVENT_LOG_BAD_DNS_ADDRESS, dnsServers[0]);
+                                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_BAD_DNS_ADDRESS,
+                                            dnsServers[0]);
                                     phone.mCM.deactivateDefaultPDP(cid,
                                             obtainMessage(EVENT_FORCE_RETRY));
                                     break;
                                 }
                             }
                         }
-                        
+
                         if (dataLink != null) {
                             dataLink.connect();
                         } else {
                             onLinkStateChanged(DataLink.LinkState.LINK_UP);
                         }
-                        
+
                         if (DBG) log("PDP setup on cid = " + cid);
                     }
                 }
@@ -463,7 +462,7 @@ public class PdpConnection extends Handler {
                 } else {
                     ar = (AsyncResult) msg.obj;
                     PdpFailCause cause = PdpFailCause.UNKNOWN;
-                    
+
                     if (ar.exception == null) {
                         int rilFailCause = ((int[]) (ar.result))[0];
                         cause = getFailCauseFromRequest(rilFailCause);

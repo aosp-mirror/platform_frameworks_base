@@ -17,9 +17,6 @@
 #ifndef ANDROID_MEDIAPLAYERINTERFACE_H
 #define ANDROID_MEDIAPLAYERINTERFACE_H
 
-#include <pthread.h>
-#include <signal.h>
-
 #ifdef __cplusplus
 
 #include <ui/ISurface.h>
@@ -74,7 +71,6 @@ public:
     virtual             ~MediaPlayerBase() {}
     virtual status_t    initCheck() = 0;
     virtual bool        hardwareOutput() = 0;
-    virtual status_t    setSigBusHandlerStructTLSKey(pthread_key_t key) { return 0; }
     virtual status_t    setDataSource(const char *url) = 0;
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
     virtual status_t    setVideoSurface(const sp<ISurface>& surface) = 0;
@@ -124,34 +120,6 @@ public:
 }; // namespace android
 
 #endif // __cplusplus
-
-// A thread can set the thread local variable identified by the pthread_key_t
-// that was passed to the player using the setSigBusHandlerStructTLSKey()
-// method to the address of the following structure.
-// If 'handlesigbus' is non-NULL, the function it points to will be called,
-// and if it returns 0, the signal will be assumed to have been handled,
-// and no other action will be taken. If it returns non-zero, the old SIGBUS
-// handler will be called.
-// If 'handlesigbus is NULL, then sigbusvar must be non NULL. The system's
-// SIGBUS handler will map an accessible page filled with zeroes at the
-// location that caused the original fault, set the variable pointed to by
-// sigbusvar to a non-zero value, and exit (which causes the operation to
-// be retried, which should now succeed).
-// If base and len are non zero, which is strongly recommended, they will
-// be used as additional constraints on the signal handler. That is, when
-// specified, the fault address must be in the range specified by base and
-// len in order for handlesigbus() to be called or sigbusvar to be set.
-// If the fault address is outside of the range, the old SIGBUS handler
-// will be called.
-struct mediasigbushandler {
-    int (*handlesigbus)(siginfo_t *, struct mediasigbushandler *);
-    int  *sigbusvar;
-    char *base;
-    int len;
-    // these next two are free for application use
-    struct mediasigbushandler *next;
-    void *data;
-};
 
 
 #endif // ANDROID_MEDIAPLAYERINTERFACE_H

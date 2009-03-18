@@ -45,6 +45,10 @@ import java.io.IOException;
  * @attr ref android.R.styleable#RotateDrawable_drawable
  */
 public class RotateDrawable extends Drawable implements Drawable.Callback {
+    private static final float MAX_LEVEL = 10000.0f;
+
+    private RotateState mState;
+    private boolean mMutated;
 
     /**
      * <p>Create a new rotating drawable with an empty state.</p>
@@ -82,6 +86,13 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         st.mDrawable.draw(canvas);
 
         canvas.restoreToCount(saveCount);
+    }
+
+    /**
+     * Returns the drawable rotated by this RotateDrawable.
+     */
+    public Drawable getDrawable() {
+        return mState.mDrawable;
     }
 
     @Override
@@ -248,6 +259,15 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mState.mDrawable.mutate();
+            mMutated = true;
+        }
+        return this;
+    }
+
     /**
      * <p>Represents the state of a rotation for a given drawable. The same
      * rotate drawable can be invoked with different states to drive several
@@ -267,6 +287,9 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         float mToDegrees;
 
         float mCurrentDegrees;
+
+        private boolean mCanConstantState;
+        private boolean mCheckedConstantState;        
 
         public RotateState(RotateState source, RotateDrawable owner) {
             if (source != null) {
@@ -300,12 +323,5 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
             return mCanConstantState;
         }
-
-        private boolean mCanConstantState;
-        private boolean mCheckedConstantState;
     }
-
-    private static final float MAX_LEVEL = 10000.0f;
-
-    private RotateState mState;
 }

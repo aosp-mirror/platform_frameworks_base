@@ -19,6 +19,7 @@ package com.android.dumprendertree;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.File;
 
@@ -42,12 +43,12 @@ public class Menu extends FileList {
     }
     
     void processFile(String filename, boolean selection)
-    {
-        Intent result = new Intent(null, Uri.parse(filename));
-        result.setClass(this, HTMLHostActivity.class);
-        result.putExtra("ReturnWhenFinished", selection);
-        startActivity(result);
+    {        
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setClass(this, TestShellActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(TestShellActivity.TEST_URL, "file://" + filename);
+        startActivity(intent);
     }
-   
 }
 

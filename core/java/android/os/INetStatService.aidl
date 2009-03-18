@@ -17,14 +17,19 @@
 package android.os;
 
 /**
- * Retrieves packet and byte counts for the phone data interface.
+ * Retrieves packet and byte counts for the phone data interface,
+ * and for all interfaces.
  * Used for the data activity icon and the phone status in Settings.
  *
  * {@hide}
  */
 interface INetStatService {
-    int getTxPackets();
-    int getRxPackets();
-    int getTxBytes();
-    int getRxBytes();
+    long getMobileTxPackets();
+    long getMobileRxPackets();
+    long getMobileTxBytes();
+    long getMobileRxBytes();
+    long getTotalTxPackets();
+    long getTotalRxPackets();
+    long getTotalTxBytes();
+    long getTotalRxBytes();
 }

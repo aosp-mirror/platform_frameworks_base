@@ -16,8 +16,6 @@
 
 package android.net.http;
 
-import android.os.SystemClock;
-
 import java.io.IOException;
 
 import java.security.cert.Certificate;
@@ -28,22 +26,12 @@ import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-
-import org.apache.http.HttpHost;
-
-import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * Class responsible for all server certificate validation functionality
@@ -51,9 +39,6 @@ import org.bouncycastle.asn1.x509.X509Name;
  * {@hide}
  */
 class CertificateChainValidator {
-
-    private static long sTotal = 0;
-    private static long sTotalReused = 0;
 
     /**
      * The singleton instance of the certificate chain validator
@@ -110,91 +95,42 @@ class CertificateChainValidator {
      * @return An SSL error object if there is an error and null otherwise
      */
     public SslError doHandshakeAndValidateServerCertificates(
-        HttpsConnection connection, SSLSocket sslSocket, String domain)
-        throws SSLHandshakeException, IOException {
-
-        ++sTotal;
-
-        SSLContext sslContext = HttpsConnection.getContext();
-        if (sslContext == null) {
-            closeSocketThrowException(sslSocket, "SSL context is null");
-        }
-
+            HttpsConnection connection, SSLSocket sslSocket, String domain)
+            throws IOException {
         X509Certificate[] serverCertificates = null;
 
-        long sessionBeforeHandshakeLastAccessedTime = 0;
-        byte[] sessionBeforeHandshakeId = null;
-
-        SSLSession sessionAfterHandshake = null;
-
-        synchronized(sslContext) {
-            // get SSL session before the handshake
-            SSLSession sessionBeforeHandshake =
-                getSSLSession(sslContext, connection.getHost());
-            if (sessionBeforeHandshake != null) {
-                sessionBeforeHandshakeLastAccessedTime =
-                    sessionBeforeHandshake.getLastAccessedTime();
-
-                sessionBeforeHandshakeId =
-                    sessionBeforeHandshake.getId();
-            }
-
-            // start handshake, close the socket if we fail
-            try {
-                sslSocket.setUseClientMode(true);
-                sslSocket.startHandshake();
-            } catch (IOException e) {
-                closeSocketThrowException(
-                    sslSocket, e.getMessage(),
-                    "failed to perform SSL handshake");
-            }
-
-            // retrieve the chain of the server peer certificates
-            Certificate[] peerCertificates =
-                sslSocket.getSession().getPeerCertificates();
-
-            if (peerCertificates == null || peerCertificates.length <= 0) {
-                closeSocketThrowException(
-                    sslSocket, "failed to retrieve peer certificates");
-            } else {
-                serverCertificates =
-                    new X509Certificate[peerCertificates.length];
-                for (int i = 0; i < peerCertificates.length; ++i) {
-                    serverCertificates[i] =
-                        (X509Certificate)(peerCertificates[i]);
-                }
-
-                // update the SSL certificate associated with the connection
-                if (connection != null) {
-                    if (serverCertificates[0] != null) {
-                        connection.setCertificate(
-                            new SslCertificate(serverCertificates[0]));
-                    }
-                }
-            }
-
-            // get SSL session after the handshake
-            sessionAfterHandshake =
-                getSSLSession(sslContext, connection.getHost());
+        // start handshake, close the socket if we fail
+        try {
+            sslSocket.setUseClientMode(true);
+            sslSocket.startHandshake();
+        } catch (IOException e) {
+            closeSocketThrowException(
+                sslSocket, e.getMessage(),
+                "failed to perform SSL handshake");
         }
 
-        if (sessionBeforeHandshakeLastAccessedTime != 0 &&
-            sessionAfterHandshake != null &&
-            Arrays.equals(
-                sessionBeforeHandshakeId, sessionAfterHandshake.getId()) &&
-            sessionBeforeHandshakeLastAccessedTime <
-            sessionAfterHandshake.getLastAccessedTime()) {
+        // retrieve the chain of the server peer certificates
+        Certificate[] peerCertificates =
+            sslSocket.getSession().getPeerCertificates();
 
-            if (HttpLog.LOGV) {
-                HttpLog.v("SSL session was reused: total reused: "
-                          + sTotalReused
-                          + " out of total of: " + sTotal);
-
-                ++sTotalReused;
+        if (peerCertificates == null || peerCertificates.length <= 0) {
+            closeSocketThrowException(
+                sslSocket, "failed to retrieve peer certificates");
+        } else {
+            serverCertificates =
+                new X509Certificate[peerCertificates.length];
+            for (int i = 0; i < peerCertificates.length; ++i) {
+                serverCertificates[i] =
+                    (X509Certificate)(peerCertificates[i]);
             }
 
-            // no errors!!!
-            return null;
+            // update the SSL certificate associated with the connection
+            if (connection != null) {
+                if (serverCertificates[0] != null) {
+                    connection.setCertificate(
+                        new SslCertificate(serverCertificates[0]));
+                }
+            }
         }
 
         // check if the first certificate in the chain is for this site
@@ -216,7 +152,6 @@ class CertificateChainValidator {
             }
         }
 
-        //
         // first, we validate the chain using the standard validation
         // solution; if we do not find any errors, we are done; if we
         // fail the standard validation, we re-validate again below,
@@ -393,14 +328,14 @@ class CertificateChainValidator {
     }
 
     private void closeSocketThrowException(
-        SSLSocket socket, String errorMessage, String defaultErrorMessage)
-        throws SSLHandshakeException, IOException {
+            SSLSocket socket, String errorMessage, String defaultErrorMessage)
+            throws IOException {
         closeSocketThrowException(
             socket, errorMessage != null ? errorMessage : defaultErrorMessage);
     }
 
-    private void closeSocketThrowException(SSLSocket socket, String errorMessage)
-        throws SSLHandshakeException, IOException {
+    private void closeSocketThrowException(SSLSocket socket,
+            String errorMessage) throws IOException {
         if (HttpLog.LOGV) {
             HttpLog.v("validation error: " + errorMessage);
         }
@@ -415,30 +350,5 @@ class CertificateChainValidator {
         }
 
         throw new SSLHandshakeException(errorMessage);
-    }
-
-    /**
-     * @param sslContext The SSL context shared accross all the SSL sessions
-     * @param host The host associated with the session
-     * @return A suitable SSL session from the SSL context
-     */
-    private SSLSession getSSLSession(SSLContext sslContext, HttpHost host) {
-        if (sslContext != null && host != null) {
-            Enumeration en = sslContext.getClientSessionContext().getIds();
-            while (en.hasMoreElements()) {
-                byte[] id = (byte[]) en.nextElement();
-                if (id != null) {
-                    SSLSession session =
-                        sslContext.getClientSessionContext().getSession(id);
-                    if (session.isValid() &&
-                        host.getHostName().equals(session.getPeerHost()) &&
-                        host.getPort() == session.getPeerPort()) {
-                        return session;
-                    }
-                }
-            }
-        }
-
-        return null;
     }
 }

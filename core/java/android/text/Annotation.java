@@ -16,18 +16,38 @@
 
 package android.text;
 
+import android.os.Parcel;
+
 /**
  * Annotations are simple key-value pairs that are preserved across
  * TextView save/restore cycles and can be used to keep application-specific
  * data that needs to be maintained for regions of text.
  */
-public class Annotation {
-    private String mKey;
-    private String mValue;
+public class Annotation implements ParcelableSpan {
+    private final String mKey;
+    private final String mValue;
 
     public Annotation(String key, String value) {
         mKey = key;
         mValue = value;
+    }
+
+    public Annotation(Parcel src) {
+        mKey = src.readString();
+        mValue = src.readString();
+    }
+    
+    public int getSpanTypeId() {
+        return TextUtils.ANNOTATION;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mKey);
+        dest.writeString(mValue);
     }
 
     public String getKey() {

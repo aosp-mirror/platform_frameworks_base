@@ -853,7 +853,7 @@ of an <code>&lt;item></code> (to create a Sub Menu).</p>
 </dl>
 
 <p>For more discussion on how to create menus in XML and inflate them in your application, 
-read <a href="{@docRoot}guide/topics/views/menus.html">Creating Menus</a>.</p>
+read <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>.</p>
 
 
 
@@ -877,7 +877,7 @@ the Android namespace "http://schemas.android.com/apk/res/android" defined in
 the root element.</p>
 
 <p>For a complete discussion on creating layouts, see the 
-<a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> topic.</p>
+<a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> topic.</p>
 
 <p> <strong>Source file format:</strong> XML file
 requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code>
@@ -971,7 +971,7 @@ res/layout/<em>some_file</em>.xml.</p>
         <strong>Attributes exposed by all the superclasses of that element.</strong> For example, the TextView class extends the View class, so the <code>&lt;TextView&gt;</code> element supports all the attributes that the <code>&lt;View&gt;</code> element exposes &mdash; a long list, including <code>View_paddingBottom</code> and <code>View_scrollbars</code>. These too are used without the class name: <code>&lt;TextView android:paddingBottom="20" android:scrollbars="horizontal" /&gt;</code>.
     </li>
     <li>
-        <strong>Attributes of the object's {@link android.view.ViewGroup.LayoutParams} subclass.</strong> All View objects support a LayoutParams member (see <a href="{@docRoot}guide/topics/views/layout.html">LayoutParams in Implementing a UI</a>). To set properties on an element's LayoutParams member, the attribute to use is "android:layout_<em>layoutParamsProperty</em>". For example: <code>android:layout_gravity</code> for an object wrapped by a <code>&lt;LinearLayout&gt;</code> element. Remember that each LayoutParams subclass also supports inherited attributes. Attributes exposed by each subclass are given in the format <em>someLayoutParamsSubclass</em>_Layout_layout_<em>someproperty</em>. This defines an attribute "android:layout_<em>someproperty</em>". Here is an example of how Android documentation lists the properties of the {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams} class:
+        <strong>Attributes of the object's {@link android.view.ViewGroup.LayoutParams} subclass.</strong> All View objects support a LayoutParams member (see <a href="{@docRoot}guide/topics/ui/declaring-layout.html#layout-params">Declaring Layout</a>). To set properties on an element's LayoutParams member, the attribute to use is "android:layout_<em>layoutParamsProperty</em>". For example: <code>android:layout_gravity</code> for an object wrapped by a <code>&lt;LinearLayout&gt;</code> element. Remember that each LayoutParams subclass also supports inherited attributes. Attributes exposed by each subclass are given in the format <em>someLayoutParamsSubclass</em>_Layout_layout_<em>someproperty</em>. This defines an attribute "android:layout_<em>someproperty</em>". Here is an example of how Android documentation lists the properties of the {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams} class:
     </li>
 </ul>
 <ul>
@@ -1032,7 +1032,7 @@ setContentView(R.layout.main_screen);
     However, layout elements can also represent repeating elements used as templates.
 </p>
 
-<p>Also see <a href="{@docRoot}guide/topics/views/index.html">Views and Layout</a> for more information on layouts.</p>
+<p>Also see <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> for more information on layouts.</p>
 
 
 
@@ -1078,7 +1078,7 @@ setContentView(R.layout.main_screen);
 </p>
 
 <p>For a complete discussion on styles and themes, read 
-<a href="{@docRoot}guide/topics/views/themes.html">Applying Styles and Themes</a>.</p>
+<a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
 
 <p>
     <strong>Source file format:</strong> XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root <code>&lt;resources&gt;</code> element containing one or more <code>&lt;style&gt;</code> tags.
@@ -1132,4 +1132,4 @@ setContentView(R.layout.main_screen);
 </dl>
 
 <p>For examples of how to declare and apply styles and themes, read 
-<a href="{@docRoot}guide/topics/views/themes.html">Applying Styles and Themes</a>.</p>
+<a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>

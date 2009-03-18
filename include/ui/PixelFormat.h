@@ -71,6 +71,10 @@ enum {
 
     PIXEL_FORMAT_YCbCr_422_SP= GGL_PIXEL_FORMAT_YCbCr_422_SP,
     PIXEL_FORMAT_YCbCr_420_SP= GGL_PIXEL_FORMAT_YCbCr_420_SP,
+    PIXEL_FORMAT_YCbCr_422_P = GGL_PIXEL_FORMAT_YCbCr_422_P,
+    PIXEL_FORMAT_YCbCr_420_P = GGL_PIXEL_FORMAT_YCbCr_420_P,
+    PIXEL_FORMAT_YCbCr_422_I = GGL_PIXEL_FORMAT_YCbCr_422_I,
+    PIXEL_FORMAT_YCbCr_420_I = GGL_PIXEL_FORMAT_YCbCr_420_I,
 
     // New formats can be added if they're also defined in
     // pixelflinger/format.h
@@ -80,7 +84,19 @@ typedef int32_t PixelFormat;
 
 struct PixelFormatInfo
 {
+    enum { // components
+        ALPHA               = 1,
+        RGB                 = 2,
+        RGBA                = 3,
+        LUMINANCE           = 4,
+        LUMINANCE_ALPHA     = 5,
+        Y_CB_CR_SP          = 6,
+        Y_CB_CR_P           = 7,
+        Y_CB_CR_I           = 8,
+    };
+
     inline PixelFormatInfo() : version(sizeof(PixelFormatInfo)) { }
+    size_t getScanlineSize(unsigned int width) const;
     size_t      version;
     PixelFormat format;
     size_t      bytesPerPixel;
@@ -93,7 +109,9 @@ struct PixelFormatInfo
     uint8_t     l_green;
     uint8_t     h_blue;
     uint8_t     l_blue;
-    uint32_t    reserved[2];
+    uint8_t     components;
+    uint8_t     reserved0[3];
+    uint32_t    reserved1;
 };
 
 // Consider caching the results of these functions are they're not

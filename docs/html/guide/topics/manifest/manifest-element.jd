@@ -1,0 +1,94 @@
+page.title=&lt;manifest&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;manifest xmlns:<a href="#nspace">android</a>="http://schemas.android.com/apk/res/android"
+          <a href="#package">package</a>="<i>string</i>"
+          android:<a href="#uid">sharedUserId</a>="<i>string</i>"
+          android:<a href="#vcode">versionCode</a>="<i>integer</i>"
+          android:<a href="#vname">versionName</a>="<i>string</i>" &gt;
+    . . .
+&lt;/manifest&gt;</pre></dd>
+
+<p>
+<dt>contained in:</dt>
+<dd><i>none</i></dd>
+
+<p>
+<p>
+<dt>must contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+<dt>can contain:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></dd>
+
+<p>
+<dt>description:</dt>
+<dd>The root element of the AndroidManifest.xml file.  It must 
+contain an <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element 
+and specify {@code xlmns:android} and {@code package} attributes.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nspace"></a>{@code xmlns:android}</dt>
+<dd>Defines the Android namespace.  This attribute should always be set 
+to "{@code http://schemas.android.com/apk/res/android}".</dd>
+
+<dt><a name="package"></a>{@code package}</dt>
+<dd>A full Java package name for the application.  The name should 
+be unique.  For example, applications published by Google could have 
+names in the form <code>com.google.app.<i>application_name</i></code>.
+
+<p>
+The package name serves as a unique identifier for the application.  
+It's also the default name for the application process (see the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+element's
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">process</a></code>
+process</a></code> attribute) and the default task affinity of an activity
+(see the 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+element's
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> attribute).
+</p></dd>
+
+<dt><a name="uid"></a>{@code android:sharedUserId}</dt>
+<dd>The name of a Linux user ID that will be shared with other applications.  
+By default, Android assigns each application its own unique user ID.  
+However, if this attribute is set to the same value for two or more applications, 
+they will all share the same ID &mdash; provided that they are also signed 
+by the same certificate.  Application with the same user ID can access each 
+other's data and, if desired, run in the same  process.</dd>  
+
+<dt><a name="vcode"></a>{@code android:versionCode}</dt>
+<dd>An internal version number.  This number is used only to determine whether 
+one version is more recent than another, with higher numbers indicating more 
+recent versions.  This is not the version number shown to users; that number 
+is set by the {@code versionName} attribute.
+
+<p>
+The value must be set as an integer, such as "100".  You can define it however
+you want, as long as each successive version has a higher number.  For example, 
+it could be a build number.  Or you could translate a version number in "x.y" 
+format to an integer by encoding the "x" and "y" separately in the lower and 
+upper 16 bits.  Or you could simply increase the number by one each time a new 
+version is released.
+</p></dd>
+
+<dt><a name="vname"></a>{@code android:versionName}</dt>
+<dd>The version number shown to users.  This attribute can be set as a raw 
+string or as a reference to a string resource.  The string has no other purpose 
+than to be displayed to users.  The {@code versionCode} attribute holds 
+the significant version number used internally.
+</dl></dd>
+
+<p>
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+
+</dl>

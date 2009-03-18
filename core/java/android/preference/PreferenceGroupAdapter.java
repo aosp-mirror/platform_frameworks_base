@@ -88,6 +88,9 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
 
     public PreferenceGroupAdapter(PreferenceGroup preferenceGroup) {
         mPreferenceGroup = preferenceGroup;
+        // If this group gets or loses any children, let us know
+        mPreferenceGroup.setOnPreferenceChangeInternalListener(this);
+        
         mPreferenceList = new ArrayList<Preference>();
         mPreferenceClassNames = new ArrayList<String>();
         
@@ -239,7 +242,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             mHasReturnedViewTypeCount = true;
         }
         
-        return mPreferenceClassNames.size();
+        return Math.max(1, mPreferenceClassNames.size());
     }
 
 }

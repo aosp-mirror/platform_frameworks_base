@@ -1,0 +1,283 @@
+page.title=Handling UI Events
+parent.title=User Interface
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#EventListeners">Event Listeners</a></li>
+    <li><a href="#EventHandlers">Event Handlers</a></li>
+    <li><a href="#TouchMode">Touch Mode</a></li>
+    <li><a href="#HandlingFocus">Handling Focus</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/tutorials/views/hello-formstuff.html">Hello Form Stuff tutorial</a></li>
+  </ol>
+</div>
+</div>
+
+<p>On Android, there's more than one way to intercept the events from a user's interaction with your application.
+When considering events within your user interface, the approach is to capture the events from
+the specific View object that the user interacts with. The View class provides the means to do so.</p>
+
+<p>Within the various View classes that you'll use to compose your layout, you may notice several public callback 
+methods that look useful for UI events. These methods are called by the Android framework when the 
+respective action occurs on that object. For instance, when a View (such as a Button) is touched,
+the <code>onTouchEvent()</code> method is called on that object. However, in order to intercept this, you must extend
+the class and override the method. Obviously, extending every View object
+you want to use (just to handle an event) would be obsurd. This is why the View class also contains
+a collection of nested interfaces with callbacks that you can much more easily define. These interfaces,
+called <a href="#EventListeners">event listeners</a>, are your ticket to capturing the user interaction with your UI.</p>
+
+<p>While you will more commonly use the event listeners to listen for user interaction, there may
+come a time when you do want to extend a View class, in order to build a custom component. 
+Perhaps you want to extend the {@link android.widget.Button}
+class to make something more fancy. In this case, you'll be able to define the default event behaviors for your
+class using the class <a href="#EventHandlers">event handlers</a>.</p>
+
+
+<h2 id="EventListeners">Event Listeners</h2>
+
+<p>An event listener is an interface in the {@link android.view.View} class that contains a single 
+callback method. These methods will be called by the Android framework when the View to which the listener has
+been registered is triggered by user interaction with the item in the UI.</p>
+
+<p>Included in the event listener interfaces are the following callback methods:</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>From {@link android.view.View.OnClickListener}. 
+    This is called when the user either touches the item 
+    (when in touch mode), or focuses upon the item with the navigation-keys or trackball and
+    presses the suitable "enter" key or presses down on the trackball.</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>From {@link android.view.View.OnLongClickListener}. 
+    This is called when the user either touches and holds the item (when in touch mode), or 
+    focuses upon the item with the navigation-keys or trackball and
+    presses and holds the suitable "enter" key or presses and holds down on the trackball (for one second).</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>From {@link android.view.View.OnFocusChangeListener}. 
+    This is called when the user navigates onto or away from the item, using the navigation-keys or trackball.</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>From {@link android.view.View.OnKeyListener}. 
+    This is called when the user is focused on the item and presses or releases a key on the device.</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>From {@link android.view.View.OnTouchListener}. 
+    This is called when the user performs an action qualified as a touch event, including a press, a release,
+    or any movement gesture on the screen (within the bounds of the item).</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>From {@link android.view.View.OnCreateContextMenuListener}. 
+    This is called when a Context Menu is being built (as the result of a sustained "long click"). See the discussion
+    on context menus in <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Creating Menus</a> for more information.</dd>
+</dl>
+
+<p>These methods are the sole inhabitants of their respective interface. To define one of these methods
+and handle your events, implement the nested interface in your Activity or define it as an anonymous class.
+Then, pass an instance of your implementation
+to the respective <code>View.set...Listener()</code> method. (E.g., call 
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code> 
+and pass it your implementation of the {@link android.view.View.OnClickListener OnClickListener}.)</p>
+
+<p>The example below shows how to register an on-click listener for a Button. </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>You may also find it more conventient to implement OnClickListener as a part of your Activity.
+This will avoid the extra class load and object allocation. For example:</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>Notice that the <code>onClick()</code> callback in the above example has
+no return value, but some other event listener methods must return a boolean. The reason
+depends on the event. For the few that do, here's why:</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> - 
+    This returns a boolean to indicate whether you have consumed the event and it should not be carried further. 
+    That is, return <em>true</em> to indicate that you have handled the event and it should stop here; 
+    return <em>false</em> if you have not handled it and/or the event should continue to any other
+    on-click listeners.</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> - 
+    This returns a boolean to indicate whether you have consumed the event and it should not be carried further.
+    That is, return <em>true</em> to indicate that you have handled the event and it should stop here; 
+    return <em>false</em> if you have not handled it and/or the event should continue to any other
+    on-key listeners.</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> - 
+    This returns a boolean to indicate whether your listener consumes this event. The important thing is that
+    this event can have multiple actions that follow each other. So, if you return <em>false</em> when the
+    down action event is received, you indicate that you have not consumed the event and are also
+    not interested in subsequent actions from this event. Thus, you will not be called for any other actions
+    within the event, such as a fingure gesture, or the eventual up action event.</li>
+</ul>
+
+<p>Remember that key events are always delivered to the View currently in focus. They are dispatched starting from the top
+of the View hierarchy, and then down, until they reach the appropriate destination. If your View (or a child of your View)
+currently has focus, then you can see the event travel through the <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code> method. As an alternative to capturing key events through your View, you can also receive 
+all of the events inside your Activity with <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>
+and <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code>.</p>
+
+<p class="note"><strong>Note:</strong> Android will call event handlers first and then the appropriate default
+handlers from the class definition second. As such, returning <em>true</em> from these event listeners will stop
+the propagation of the event to other event listeners and will also block the callback to the
+default event handler in the View. So be certain that you want to terminate the event when you return <em>true</em>.</p>
+
+
+<h2 id="EventHandlers">Event Handlers</h2>
+
+<p>If you're building a custom component from  View, then you'll be able to define several callback methods
+used as default event handlers.
+In the document on <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>,
+you'll learn see some of the common callbacks used for event handling, including:</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - Called when a new key event occurs.</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - Called when a key up event occurs.</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - Called when a trackball motion event occurs.</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - Called when a touch screen motion event occurs.</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - Called when the view gains or loses focus.</li>
+</ul>
+<p>There are some other methods that you should be awere of, which are not part of the View class, 
+but can directly impact the way you're able to handle events. So, when managing more complex events inside 
+a layout, consider these other methods:</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - This allows your {@link 
+    android.app.Activity} to intercept all touch events before they are dispatched to the window.</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - This allows a {@link
+    android.view.ViewGroup} to watch events as they are dispatched to child Views.</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - Call this
+    upon a parent View to indicate that it should not intercept touch events with <code>{@link 
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code>.</li>
+</ul>
+
+<h2 id="TouchMode">Touch Mode</h2>
+<p>
+When a user is navigating a user interface with directional keys or a trackball, it is
+necessary to give focus to actionable items (like buttons) so the user can see
+what will accept input.  If the device has touch capabilities, however, and the user
+begins interacting with the interface by touching it, then it is no longer necessary to
+highlight items, or give focus to a particular View.  Thus, there is a mode
+for interaction named "touch mode." 
+</p>
+<p>
+For a touch-capable device, once the user touches the screen, the device
+will enter touch mode.  From this point onward, only Views for which
+{@link android.view.View#isFocusableInTouchMode} is true will be focusable, such as text editing widgets.
+Other Views that are touchable, like buttons, will not take focus when touched; they will
+simply fire their on-click listeners when pressed.
+</p>
+<p>
+Any time a user hits a directional key or scrolls with a trackball, the device will
+exit touch mode, and find a view to take focus. Now, the user may resume interacting
+with the user interface without touching the screen.
+</p>
+<p>
+The touch mode state is maintained throughout the entire system (all windows and activities). 
+To query the current state, you can call
+{@link android.view.View#isInTouchMode} to see whether the device is currently in touch mode.
+</p>
+
+
+<h2 id="HandlingFocus">Handling Focus</h2>
+
+<p>The framework will handle routine focus movement in response to user input.
+This includes changing the focus as Views are removed or hidden, or as new
+Views become available. Views indicate their willingness to take focus
+through the <code>{@link android.view.View#isFocusable()}</code> method. To change whether a View can take
+focus, call <code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code>.  When in touch mode,
+you may query whether a View allows focus with <code>{@link android.view.View#isFocusableInTouchMode()}</code>.
+You can change this with <code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code>.
+</p>
+
+<p>Focus movement is based on an algorithm which finds the nearest neighbor in a
+given direction. In rare cases, the default algorithm may not match the
+intended behavior of the developer. In these situations, you can provide
+explicit overrides with the following XML attributes in the layout file:
+<var>nextFocusDown</var>, <var>nextFocusLeft</var>, <var>nextFocusRight</var>, and
+<var>nextFocusUp</var>. Add one of these attributes to the View <em>from</em> which
+the focus is leaving. Define the value of the attribute to be the id of the View
+<em>to</em> which focus should be given. For example:</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>Ordinarily, in this vertical layout, navigating up from the first Button would not go
+anywhere, nor would navigating down from the second Button. Now that the top Button has
+defined the bottom one as the <var>nextFocusUp</var> (and vice versa), the navigation focus will 
+cycle from top-to-bottom and bottom-to-top.</p>
+
+<p>If you'd like to declare a View as focusable in your UI (when it is traditionally not), 
+add the <code>android:focusable</code> XML attribute to the View, in your layout declaration.
+Set the value <var>true</var>. You can also declare a View
+as focusable while in Touch Mode with <code>android:focusableInTouchMode</code>.</p>
+<p>To request a particular View to take focus, call <code>{@link android.view.View#requestFocus()}</code>.</p>
+<p>To listen for focus events (be notified when a View receives or looses focus), use
+<code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code>,
+as discussed in the <a href="#EventListeners">Event Listeners</a> section, above.</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

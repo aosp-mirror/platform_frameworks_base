@@ -480,6 +480,26 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
+     * Return a "good" intent to launch a front-door activity in a package,
+     * for use for example to implement an "open" button when browsing through
+     * packages.  The current implementation will look first for a main
+     * activity in the category {@link Intent#CATEGORY_INFO}, next for a
+     * main activity in the category {@link Intent#CATEGORY_LAUNCHER}, or return
+     * null if neither are found.
+     * 
+     * <p>Throws {@link NameNotFoundException} if a package with the given
+     * name can not be found on the system.
+     *
+     * @param packageName The name of the package to inspect.
+     * 
+     * @return Returns either a fully-qualified Intent that can be used to
+     * launch the main activity in the package, or null if the package does
+     * not contain such an activity.
+     */
+    public abstract Intent getLaunchIntentForPackage(String packageName)
+            throws NameNotFoundException;
+    
+    /**
      * Return an array of all of the secondary group-ids that have been
      * assigned to a package.
      *
@@ -851,6 +871,16 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract List<ApplicationInfo> getInstalledApplications(int flags);
+    
+    /**
+     * Get a list of shared libraries that are available on the
+     * system.
+     * 
+     * @return An array of shared library names that are
+     * available on the system, or null if none are installed.
+     * 
+     */
+    public abstract String[] getSystemSharedLibraryNames();
 
     /**
      * Determine the best action to perform for a given Intent.  This is how
@@ -1608,4 +1638,9 @@ public abstract class PackageManager {
      * the manifest as found in {@link ComponentInfo}.
      */
     public abstract int getApplicationEnabledSetting(String packageName);
+
+    /**
+     * Return whether the device has been booted into safe mode.
+     */
+    public abstract boolean isSafeMode();
 }

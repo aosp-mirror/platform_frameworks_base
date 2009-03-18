@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"Беззвучный режим"</string>
     <string name="global_action_silent_mode_on_status">"Звук выключен"</string>
     <string name="global_action_silent_mode_off_status">"Звук включен"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"Безопасный режим"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"Платные службы"</string>
     <string name="permgroupdesc_costMoney">"Разрешить приложениям выполнять действия, за которые может взиматься плата."</string>
     <string name="permgrouplab_messages">"Сообщения"</string>
@@ -262,6 +270,8 @@
     <string name="permdesc_reboot">"Разрешает приложению принудительно перезагружать телефон."</string>
     <string name="permlab_mount_unmount_filesystems">"подключаться и отключаться от файловых систем"</string>
     <string name="permdesc_mount_unmount_filesystems">"Разрешает приложению подключаться и отключаться от файловых систем съемных устройств хранения."</string>
+    <string name="permlab_mount_format_filesystems">"форматировать внешний накопитель"</string>
+    <string name="permdesc_mount_format_filesystems">"Позволяет приложению форматировать съемный накопитель."</string>
     <string name="permlab_vibrate">"управлять вибрацией"</string>
     <string name="permdesc_vibrate">"Разрешает приложению управлять вибровызовом."</string>
     <string name="permlab_flashlight">"управлять фонарем"</string>
@@ -276,6 +286,8 @@
     <string name="permdesc_locationUpdates">"Разрешает включение/отключение уведомлений о местоположении по радиосвязи. Не используется обычными приложениями."</string>
     <string name="permlab_checkinProperties">"открывать свойства проверки"</string>
     <string name="permdesc_checkinProperties">"Разрешает доступ на чтение и запись к свойствам, загруженным службой проверки. Не используется обычными приложениями."</string>
+    <string name="permlab_bindGadget">"выбирать гаджеты"</string>
+    <string name="permdesc_bindGadget">"Позволяет приложению сообщить системе, какие приложения могут использовать какие гаджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_modifyPhoneState">"изменять состояние телефона"</string>
     <string name="permdesc_modifyPhoneState">"Позволяет приложению управлять телефонными функциями устройства. Приложение с такими полномочиями может переключать сети, включать и выключать радиосвязь и т.д., не сообщая вам об этом."</string>
     <string name="permlab_readPhoneState">"считывать состояние телефона"</string>
@@ -304,6 +316,8 @@
     <string name="permdesc_writeApnSettings">"Разрешает приложению изменять настройки APN, например прокси и порт любого APN."</string>
     <string name="permlab_changeNetworkState">"изменять подключение к сети"</string>
     <string name="permdesc_changeNetworkState">"Позволяет приложению изменять подключение к сети."</string>
+    <string name="permlab_changeBackgroundDataSetting">"изменить настройку использования фоновых данных"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Позволяет приложению изменять настройку использования фоновых данных."</string>
     <string name="permlab_accessWifiState">"просматривать состояние Wi-Fi"</string>
     <string name="permdesc_accessWifiState">"Разрешает приложению просматривать сведения о состоянии Wi-Fi."</string>
     <string name="permlab_changeWifiState">"изменять состояние Wi-Fi"</string>
@@ -324,14 +338,10 @@
     <string name="permdesc_subscribedFeedsRead">"Позволяет приложению получать сведения о синхронизированных фидах."</string>
     <string name="permlab_subscribedFeedsWrite">"записывать фиды с подпиской"</string>
     <string name="permdesc_subscribedFeedsWrite">"Разрешает приложению изменять ваши синхронизированные фиды. Это может позволить вредоносному ПО изменять ваши синхронизированные фиды."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"выполнять чтение из пользовательского словаря"</string>
+    <string name="permdesc_readDictionary">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
+    <string name="permlab_writeDictionary">"записывать в пользовательский словарь"</string>
+    <string name="permdesc_writeDictionary">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
   <string-array name="phoneTypes">
     <item>"Домашний"</item>
     <item>"Мобильный"</item>
@@ -387,7 +397,8 @@
     <string name="lockscreen_emergency_call">"Экстренный вызов"</string>
     <string name="lockscreen_pattern_correct">"Верно!"</string>
     <string name="lockscreen_pattern_wrong">"Неверно, попробуйте еще раз"</string>
-    <string name="lockscreen_plugged_in">"Зарядка (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"Подключите зарядное устройство."</string>
     <string name="lockscreen_missing_sim_message_short">"Нет SIM-карты."</string>
     <string name="lockscreen_missing_sim_message">"В телефоне нет SIM-карты."</string>
@@ -410,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"Очистить уведомления"</string>
     <string name="status_bar_no_notifications_title">"Нет уведомлений"</string>
     <string name="status_bar_ongoing_events_title">"Текущие"</string>
     <string name="status_bar_latest_events_title">"Уведомления"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"Идет зарядка..."</string>
     <string name="battery_low_title">"Подключите зарядное устройство"</string>
@@ -428,12 +439,9 @@
     <string name="factorytest_not_system">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в папке /system/app."</string>
     <string name="factorytest_no_action">"Пакет, предоставляющий действие FACTORY_TEST, не найден."</string>
     <string name="factorytest_reboot">"Перезагрузить"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label">"Подтверждение"</string>
     <string name="save_password_message">"Сохранить этот пароль в браузере?"</string>
     <string name="save_password_notnow">"Не сейчас"</string>
@@ -484,22 +492,38 @@
     <item quantity="one">"завтра"</item>
     <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 сек. назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> сек. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 мин. назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 час назад"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"вчера"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"через 1 сек."</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"через 1 мин."</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"через 1 час"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> час."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"завтра"</item>
+    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+  </plurals>
     <string name="preposition_for_date">"%s"</string>
     <string name="preposition_for_time">"в %s"</string>
     <string name="preposition_for_year">"в %s"</string>
@@ -541,27 +565,25 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"полдень"</string>
     <string name="Noon">"Полдень"</string>
     <string name="midnight">"полночь"</string>
     <string name="Midnight">"Полночь"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -590,11 +612,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"воскресенье"</string>
     <string name="day_of_week_long_monday">"понедельник"</string>
@@ -679,6 +701,7 @@
     <string name="paste">"Вставить"</string>
     <string name="copyUrl">"Копировать URL"</string>
     <string name="inputMethod">"Способ ввода"</string>
+    <string name="addToDictionary">"Добавить \"%s\" в словарь"</string>
     <string name="editTextMenuTitle">"Правка текста"</string>
     <string name="low_internal_storage_view_title">"Недостаточно места"</string>
     <string name="low_internal_storage_view_text">"В памяти телефона осталось мало места."</string>
@@ -686,6 +709,7 @@
     <string name="cancel">"Отмена"</string>
     <string name="yes">"ОК"</string>
     <string name="no">"Отмена"</string>
+    <string name="dialog_alert_title">"Внимание"</string>
     <string name="capital_on">"ВКЛ"</string>
     <string name="capital_off">"ВЫКЛ"</string>
     <string name="whichApplication">"Выполнить действие с помощью"</string>
@@ -709,7 +733,7 @@
     <string name="volume_music">"Громкость звука мультимедиа"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Воспроизводится через Bluetooth"</string>
     <string name="volume_call">"Громкость звонка"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Воспроизводится через Bluetooth"</string>
+    <string name="volume_bluetooth_call">"Громкость входящего вызова Bluetooth"</string>
     <string name="volume_alarm">"Громкость будильника"</string>
     <string name="volume_notification">"Громкость уведомления"</string>
     <string name="volume_unknown">"Громкость"</string>
@@ -745,8 +769,47 @@
     <string name="usb_storage_error_message">"Не удается использовать карту SD в качестве USB-хранилища."</string>
     <string name="usb_storage_notification_title">"Подключение через USB"</string>
     <string name="usb_storage_notification_message">"Выберите для копирования файлов на/с компьютера."</string>
+    <string name="usb_storage_stop_notification_title">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_notification_message">"Выберите, чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_title">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_message">"Перед выключением USB-накопителя обязательно отключите USB-хост. Выберите \"Выключить\", чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_button_mount">"Выключить"</string>
+    <string name="usb_storage_stop_button_unmount">"Отмена"</string>
+    <string name="usb_storage_stop_error_message">"При выключении USB-накопителя произошла проблема. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
+    <string name="extmedia_format_title">"Форматировать карту SD"</string>
+    <string name="extmedia_format_message">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
+    <string name="extmedia_format_button_format">"Формат"</string>
     <string name="select_input_method">"Выбор способа ввода"</string>
-    <string name="fast_scroll_alphabet">"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"кандидаты"</u>"u&gt;"</font></string>
+    <string name="fast_scroll_alphabet">" АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ"</string>
+    <string name="candidates_style"><u>"кандидаты"</u></string>
+    <string name="ext_media_checking_notification_title">"Подготовка карты SD"</string>
+    <string name="ext_media_checking_notification_message">"Поиск ошибок"</string>
+    <string name="ext_media_nofs_notification_title">"Пустая карта SD"</string>
+    <string name="ext_media_nofs_notification_message">"Карта SD пуста или использует неподдерживаемую файловую систему."</string>
+    <string name="ext_media_unmountable_notification_title">"Поврежденная карта SD"</string>
+    <string name="ext_media_unmountable_notification_message">"Карта SD повреждена. Может потребоваться переформатировать ее."</string>
+    <string name="ext_media_badremoval_notification_title">"Карта SD неожиданно извлечена"</string>
+    <string name="ext_media_badremoval_notification_message">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Безопасное удаление карты SD"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Теперь карту SD можно безопасно удалить."</string>
+    <string name="ext_media_nomedia_notification_title">"Карта SD удалена"</string>
+    <string name="ext_media_nomedia_notification_message">"Карта SD была удалена. Для увеличения емкости устройства вставьте новую карту SD."</string>
+    <string name="activity_list_empty">"Подходящих действий не найдено"</string>
+    <string name="permlab_pkgUsageStats">"обновлять статистику использования компонентов"</string>
+    <string name="permdesc_pkgUsageStats">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

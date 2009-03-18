@@ -1,0 +1,46 @@
+page.title=&lt;action&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;action android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
+
+<p>
+<dt>description:</dt>
+<dd>Adds an action to an intent filter. 
+An <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element must contain 
+one or more {@code &lt;action&gt;} elements.  If it doesn't contain any, no
+Intent objects will get through the filter.  See 
+<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and 
+Intent Filters</a> for details on intent filters and the role of action
+specifications within a filter.
+</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the action.  Some standard actions are defined in the
+{@link android.content.Intent#ACTION_CHOOSER Intent} class as 
+{@code ACTION_<i>string</i>} constants.  To assign one of these actions to 
+this attribute, prepend "{@code android.intent.action.}" to the 
+{@code <i>string</i>} that follows {@code ACTION_}.
+For example, for {@code ACTION_MAIN}, use "{@code android.intent.action.MAIN}"
+and for {@code ACTION_WEB_SEARCH}, use "{@code android.intent.action.WEB_SEARCH}".
+
+<p>
+For actions you define, it's best to use the package name as a prefix to
+ensure uniqueness.  For example, a {@code TRANSMOGRIFY} action might be specified 
+as follows:
+</p>
+
+<pre>&lt;action android:name="com.example.project.TRANSMOGRIFY" /&gt;</pre>
+</dd>
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
+
+</dl>

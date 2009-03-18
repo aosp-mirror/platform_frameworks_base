@@ -317,7 +317,7 @@ final class WebViewCore {
         should this be called nativeSetViewPortSize?
     */
     private native void nativeSetSize(int width, int height, int screenWidth,
-            float scale);
+            float scale, int realScreenWidth, int screenHeight);
 
     private native int nativeGetContentMinPrefWidth();
     
@@ -330,8 +330,7 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSaveDocumentState(int frame, int node, int x,
-            int y);
+    private native void nativeSaveDocumentState(int frame);
 
     private native void nativeSetFinalFocus(int framePtr, int nodePtr, int x,
             int y, boolean block);
@@ -502,6 +501,51 @@ final class WebViewCore {
         int mY;
     }
 
+        static final String[] HandlerDebugString = {
+            "LOAD_URL", // = 100;
+            "STOP_LOADING", // = 101;
+            "RELOAD", // = 102;
+            "KEY_DOWN", // = 103;
+            "KEY_UP", // = 104;
+            "VIEW_SIZE_CHANGED", // = 105;
+            "GO_BACK_FORWARD", // = 106;
+            "SET_SCROLL_OFFSET", // = 107;
+            "RESTORE_STATE", // = 108;
+            "PAUSE_TIMERS", // = 109;
+            "RESUME_TIMERS", // = 110;
+            "CLEAR_CACHE", // = 111;
+            "CLEAR_HISTORY", // = 112;
+            "SET_SELECTION", // = 113;
+            "REPLACE_TEXT", // = 114;
+            "PASS_TO_JS", // = 115;
+            "SET_GLOBAL_BOUNDS", // = 116;
+            "UPDATE_CACHE_AND_TEXT_ENTRY", // = 117;
+            "CLICK", // = 118;
+            "119",
+            "DOC_HAS_IMAGES", // = 120;
+            "SET_SNAP_ANCHOR", // = 121;
+            "DELETE_SELECTION", // = 122;
+            "LISTBOX_CHOICES", // = 123;
+            "SINGLE_LISTBOX_CHOICE", // = 124;
+            "125",
+            "SET_BACKGROUND_COLOR", // = 126;
+            "UNBLOCK_FOCUS", // = 127;
+            "SAVE_DOCUMENT_STATE", // = 128;
+            "GET_SELECTION", // = 129;
+            "WEBKIT_DRAW", // = 130;
+            "SYNC_SCROLL", // = 131;
+            "REFRESH_PLUGINS", // = 132;
+            "SPLIT_PICTURE_SET", // = 133;
+            "CLEAR_CONTENT", // = 134;
+            "SET_FINAL_FOCUS", // = 135;
+            "SET_KIT_FOCUS", // = 136;
+            "REQUEST_FOCUS_HREF", // = 137;
+            "ADD_JS_INTERFACE", // = 138;
+            "LOAD_DATA", // = 139;
+            "TOUCH_UP", // = 140;
+            "TOUCH_EVENT", // = 141;
+        };
+
     class EventHub {
         // Message Ids
         static final int LOAD_URL = 100;
@@ -596,6 +640,11 @@ final class WebViewCore {
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
+                    if (LOGV_ENABLED) {
+                        Log.v(LOGTAG, msg.what < LOAD_URL || msg.what 
+                                > TOUCH_EVENT ? Integer.toString(msg.what)
+                                : HandlerDebugString[msg.what - LOAD_URL]);
+                    }
                     switch (msg.what) {
                         case WEBKIT_DRAW:
                             webkitDraw();
@@ -777,8 +826,7 @@ final class WebViewCore {
 
                         case SAVE_DOCUMENT_STATE: {
                             FocusData fDat = (FocusData) msg.obj;
-                            nativeSaveDocumentState(fDat.mFrame, fDat.mNode,
-                                    fDat.mX, fDat.mY);
+                            nativeSaveDocumentState(fDat.mFrame);
                             break;
                         }
 
@@ -799,12 +847,11 @@ final class WebViewCore {
 
                         case TOUCH_EVENT: {
                             TouchEventData ted = (TouchEventData) msg.obj;
-                            if (nativeHandleTouchEvent(ted.mAction, ted.mX,
-                                    ted.mY)) {
-                                Message.obtain(mWebView.mPrivateHandler,
-                                        WebView.PREVENT_TOUCH_ID)
-                                        .sendToTarget();
-                            }
+                            Message.obtain(
+                                    mWebView.mPrivateHandler,
+                                    WebView.PREVENT_TOUCH_ID, ted.mAction,
+                                    nativeHandleTouchEvent(ted.mAction, ted.mX,
+                                            ted.mY) ? 1 : 0).sendToTarget();
                             break;
                         }
 
@@ -1137,6 +1184,10 @@ final class WebViewCore {
     // notify webkit that our virtual view size changed size (after inv-zoom)
     private void viewSizeChanged(int w, int h, float scale) {
         if (LOGV_ENABLED) Log.v(LOGTAG, "CORE onSizeChanged");
+        if (w == 0) {
+            Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
+            return;
+        }
         if (mSettings.getUseWideViewPort()
                 && (w < mViewportWidth || mViewportWidth == -1)) {
             int width = mViewportWidth;
@@ -1160,9 +1211,10 @@ final class WebViewCore {
                     width = Math.max(w, nativeGetContentMinPrefWidth());
                 }
             }
-            nativeSetSize(width, Math.round((float) width * h / w), w, scale);
+            nativeSetSize(width, Math.round((float) width * h / w), w, scale,
+                    w, h);
         } else {
-            nativeSetSize(w, h, w, scale);
+            nativeSetSize(w, h, w, scale, w, h);
         }
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
@@ -1327,7 +1379,9 @@ final class WebViewCore {
         for (int i = 0; i < size; i++) {
             list.getItemAtIndex(i).inflate(mBrowserFrame.mNativeFrame);
         }
+        mBrowserFrame.mLoadInitFromJava = true;
         list.restoreIndex(mBrowserFrame.mNativeFrame, index);
+        mBrowserFrame.mLoadInitFromJava = false;
     }
 
     //-------------------------------------------------------------------------
@@ -1352,14 +1406,15 @@ final class WebViewCore {
     }
     
     // called by JNI
-    private void contentScrollBy(int dx, int dy) {
+    private void contentScrollBy(int dx, int dy, boolean animate) {
         if (!mBrowserFrame.firstLayoutDone()) {
             // Will this happen? If yes, we need to do something here.
             return;
         }
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_BY_MSG_ID, dx, dy).sendToTarget();
+                    WebView.SCROLL_BY_MSG_ID, dx, dy, 
+                    new Boolean(animate)).sendToTarget();
         }
     }
 
@@ -1434,10 +1489,15 @@ final class WebViewCore {
         }
     }
 
-    // called by JNI
+    /*  Called by JNI. The coordinates are in doc coordinates, so they need to
+        be scaled before they can be used by the view system, which happens
+        in WebView since it (and its thread) know the current scale factor.
+     */
     private void sendViewInvalidate(int left, int top, int right, int bottom) {
         if (mWebView != null) {
-            mWebView.postInvalidate(left, top, right, bottom);
+            Message.obtain(mWebView.mPrivateHandler,
+                           WebView.INVAL_RECT_MSG_ID,
+                           new Rect(left, top, right, bottom)).sendToTarget();
         }
     }
 

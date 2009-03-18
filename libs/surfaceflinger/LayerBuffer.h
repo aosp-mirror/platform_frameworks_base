@@ -22,7 +22,7 @@
 
 #include <utils/IMemory.h>
 #include <private/ui/LayerState.h>
-#include <GLES/eglnatives.h>
+#include <EGL/eglnatives.h>
 
 #include "LayerBase.h"
 #include "LayerBitmap.h"
@@ -46,6 +46,7 @@ class LayerBuffer : public LayerBaseClient
         virtual void onVisibilityResolved(const Transform& planeTransform);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
+        virtual bool transformed() const;
     protected:
         LayerBuffer& mLayer;
     };
@@ -67,9 +68,9 @@ public:
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
+    virtual bool transformed() const;
 
-    status_t registerBuffers(int w, int h, int hstride, int vstride,
-            PixelFormat format, const sp<IMemoryHeap>& heap);
+    status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
     void unregisterBuffers();
     sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format);
@@ -89,10 +90,9 @@ private:
 
     class Buffer : public LightRefBase<Buffer> {
     public:
-        Buffer(const sp<IMemoryHeap>& heap, ssize_t offset,
-                int w, int h, int hs, int vs, int f);
+        Buffer(const ISurface::BufferHeap& buffers, ssize_t offset);
         inline status_t getStatus() const {
-            return mHeap!=0 ? NO_ERROR : NO_INIT;
+            return mBufferHeap.heap!=0 ? NO_ERROR : NO_INIT;
         }
         inline const NativeBuffer& getBuffer() const {
             return mNativeBuffer;
@@ -103,15 +103,13 @@ private:
         Buffer(const Buffer& rhs);
         ~Buffer();
     private:
-        sp<IMemoryHeap>    mHeap;
-        NativeBuffer       mNativeBuffer;
+        ISurface::BufferHeap    mBufferHeap;
+        NativeBuffer            mNativeBuffer;
     };
 
     class BufferSource : public Source {
     public:
-        BufferSource(LayerBuffer& layer,
-                int w, int h, int hstride, int vstride,
-                PixelFormat format, const sp<IMemoryHeap>& heap);
+        BufferSource(LayerBuffer& layer, const ISurface::BufferHeap& buffers);
         virtual ~BufferSource();
 
         status_t getStatus() const { return mStatus; }
@@ -121,16 +119,13 @@ private:
         virtual void onDraw(const Region& clip) const;
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
+        virtual bool transformed() const;
     private:
         mutable Mutex   mLock;
-        sp<IMemoryHeap> mHeap;
         sp<Buffer>      mBuffer;
         status_t        mStatus;
-        int             mWidth;
-        int             mHeight;
-        int             mHStride;
-        int             mVStride;
-        int             mFormat;
+        ISurface::BufferHeap mBufferHeap;
+        size_t          mBufferSize;
         mutable sp<MemoryDealer> mTemporaryDealer;
         mutable LayerBitmap mTempBitmap;
         mutable GLuint  mTextureName;
@@ -186,8 +181,9 @@ private:
     public:
                 SurfaceBuffer(SurfaceID id, LayerBuffer* owner);
         virtual ~SurfaceBuffer();
-        virtual status_t registerBuffers(int w, int h, int hstride, int vstride,
-                PixelFormat format, const sp<IMemoryHeap>& heap);
+        virtual status_t onTransact(
+            uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
+        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual sp<OverlayRef> createOverlay(

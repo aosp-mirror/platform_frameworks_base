@@ -94,7 +94,7 @@ you can run Keytool manually to generate your own keystore/key and then sign you
 application with Jarsigner.</li>
 </ul>
 
-<h2 id="strategies">Signing Strategies</h3>
+<h2 id="strategies">Signing Strategies</h2>
 
 <p>Some aspects of application signing may affect how you approach the development
 of your application, especially if you are planning to release multiple

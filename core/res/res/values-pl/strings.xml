@@ -43,8 +43,8 @@
     <string name="needPuk2">"Wprowadź kod PUK2, aby odblokować kartę SIM."</string>
     <string name="ClipMmi">"Identyfikator dzwoniącego przy połączeniach przychodzących"</string>
     <string name="ClirMmi">"Identyfikator dzwoniącego przy połączeniach wychodzących"</string>
-    <string name="CfMmi">"Przekierowanie połączeń"</string>
-    <string name="CwMmi">"Połączenie oczekujące"</string>
+    <string name="CfMmi">"Przekierowania połączeń"</string>
+    <string name="CwMmi">"Połączenia oczekujące"</string>
     <string name="BaMmi">"Blokada dzwonienia"</string>
     <string name="PwdMmi">"Zmiana hasła"</string>
     <string name="PinMmi">"Zmiana kodu PIN"</string>
@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"Tryb cichy"</string>
     <string name="global_action_silent_mode_on_status">"Dźwięk jest wyłączony"</string>
     <string name="global_action_silent_mode_off_status">"Dźwięk jest włączony"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"Tryb awaryjny"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"Usługi płatne"</string>
     <string name="permgroupdesc_costMoney">"Pozwól aplikacjom na wykonywanie płatnych operacji."</string>
     <string name="permgrouplab_messages">"Twoje wiadomości"</string>
@@ -244,7 +252,7 @@
     <string name="permdesc_accessLocationExtraCommands">"Dostęp do dodatkowych poleceń dostawcy informacji o położeniu. Szkodliwe aplikacje mogą go wykorzystać, aby wpływać na działanie urządzenia GPS lub innych źródeł ustalania położenia."</string>
     <string name="permlab_accessFineLocation">"dokładne położenie (GPS)"</string>
     <string name="permdesc_accessFineLocation">"Uzyskiwanie dostępu do dokładnych źródeł ustalania położenia w telefonie, takich jak system GPS, tam, gdzie są one dostępne. Szkodliwe aplikacje mogą to wykorzystać do określenia położenia użytkownika oraz mogą zużywać więcej energii baterii."</string>
-    <string name="permlab_accessCoarseLocation">"zgrubne (oparte o sieć) ustalanie położenia"</string>
+    <string name="permlab_accessCoarseLocation">"przybliżone ustalanie położenia (oparte o sieć)"</string>
     <string name="permdesc_accessCoarseLocation">"Dostęp do źródeł, takich jak bazy danych sieci komórkowych, jeśli są dostępne, które pozwalają określić przybliżone położenie telefonu. Szkodliwe aplikacje mogą go wykorzystać do określenia, gdzie w przybliżeniu znajduje się użytkownik."</string>
     <string name="permlab_accessSurfaceFlinger">"dostęp do usługi SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"Pozwala aplikacji na wykorzystanie funkcji niskiego poziomu usługi SurfaceFlinger."</string>
@@ -260,8 +268,10 @@
     <string name="permdesc_brick">"Pozwala aplikacji na wyłączenie całego telefonu na stałe. Jest to bardzo niebezpieczne."</string>
     <string name="permlab_reboot">"wymuszanie ponownego uruchomienia telefonu"</string>
     <string name="permdesc_reboot">"Pozwala aplikacji na wymuszenie ponownego uruchomienia telefonu."</string>
-    <string name="permlab_mount_unmount_filesystems">"montowanie i odmontowanie systemów plików"</string>
+    <string name="permlab_mount_unmount_filesystems">"podłączanie i odłączanie systemów plików"</string>
     <string name="permdesc_mount_unmount_filesystems">"Pozwala aplikacjom na podłączanie i odłączanie systemów plików w pamięciach przenośnych."</string>
+    <string name="permlab_mount_format_filesystems">"formatowanie pamięci zewnętrznej"</string>
+    <string name="permdesc_mount_format_filesystems">"Zezwala aplikacji na formatowanie wymiennych nośników."</string>
     <string name="permlab_vibrate">"kontrolowanie wibracji"</string>
     <string name="permdesc_vibrate">"Pozwala aplikacjom na kontrolowanie wibracji."</string>
     <string name="permlab_flashlight">"kontrolowanie latarki"</string>
@@ -276,6 +286,8 @@
     <string name="permdesc_locationUpdates">"Pozwala włączyć/wyłączyć powiadomienia o aktualizacji położenia przez radio. Nie wykorzystywane przez normalne aplikacje."</string>
     <string name="permlab_checkinProperties">"dostęp do właściwości usługi rezerwacji"</string>
     <string name="permdesc_checkinProperties">"Pozwala na dostęp z uprawnieniami do odczytu/zapisu do właściwości przesłanych przez usługę rezerwacji. Nie wykorzystywane przez normalne aplikacje."</string>
+    <string name="permlab_bindGadget">"wybieranie gadżetów"</string>
+    <string name="permdesc_bindGadget">"Zezwala aplikacjom na wskazywanie systemowi, które gadżety mogą być używane przez inne aplikacje. Z użyciem tego pozwolenia aplikacje mogą udzielać dostępu do danych osobistych innym aplikacjom. Nie jest ono przeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_modifyPhoneState">"zmiana stanu telefonu"</string>
     <string name="permdesc_modifyPhoneState">"Pozwala aplikacji na kontrolowanie funkcji telefonu w urządzeniu. Aplikacja z tymi uprawnieniami może przełączać sieci, włączać i wyłączać radio itp. bez informowania użytkownika."</string>
     <string name="permlab_readPhoneState">"czytanie stanu telefonu"</string>
@@ -304,6 +316,8 @@
     <string name="permdesc_writeApnSettings">"Pozwala aplikacji na zmianę ustawień APN, takich jak serwer proxy oraz port dowolnego APN."</string>
     <string name="permlab_changeNetworkState">"zmienianie połączeń sieci"</string>
     <string name="permdesc_changeNetworkState">"Pozwala aplikacji na zmianę stanu połączeń sieciowych."</string>
+    <string name="permlab_changeBackgroundDataSetting">"zmienianie ustawienia używania danych w tle"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Zezwala aplikacji na zmianę ustawień użycia danych w tle."</string>
     <string name="permlab_accessWifiState">"wyświetlanie stanu Wi-Fi"</string>
     <string name="permdesc_accessWifiState">"Pozwala aplikacji na wyświetlanie informacji o stanie Wi-Fi."</string>
     <string name="permlab_changeWifiState">"zmiana stanu Wi-Fi"</string>
@@ -324,16 +338,12 @@
     <string name="permdesc_subscribedFeedsRead">"Pozwala aplikacjom na pobieranie informacji szczegółowych na temat obecnie zsynchronizowanych źródeł."</string>
     <string name="permlab_subscribedFeedsWrite">"zapisywanie subskrybowanych źródeł"</string>
     <string name="permdesc_subscribedFeedsWrite">"Umożliwia aplikacji zmianę obecnie zsynchronizowanych źródeł. Może to pozwolić szkodliwej aplikacji na zmianę zsynchronizowanych źródeł."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"odczytywanie słownika zdefiniowanego przez użytkownika"</string>
+    <string name="permdesc_readDictionary">"Zezwala aplikacji na odczytywanie wszelkich prywatnych słów, nazw i wyrażeń zapisanych przez użytkownika w swoim słowniku."</string>
+    <string name="permlab_writeDictionary">"zapisywanie w słowniku zdefiniowanym przez użytkownika"</string>
+    <string name="permdesc_writeDictionary">"Zezwala aplikacjom na zapisywanie nowych słów w słowniku użytkownika."</string>
   <string-array name="phoneTypes">
-    <item>"Strona główna"</item>
+    <item>"Dom"</item>
     <item>"Komórka"</item>
     <item>"Praca"</item>
     <item>"Faks w pracy"</item>
@@ -343,19 +353,19 @@
     <item>"Niestandardowy"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"Strona główna"</item>
+    <item>"Dom"</item>
     <item>"Praca"</item>
     <item>"Inne"</item>
     <item>"Niestandardowy"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item>"Strona główna"</item>
+    <item>"Dom"</item>
     <item>"Praca"</item>
     <item>"Inny"</item>
     <item>"Niestandardowy"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"Strona główna"</item>
+    <item>"Dom"</item>
     <item>"Praca"</item>
     <item>"Inne"</item>
     <item>"Niestandardowy"</item>
@@ -377,17 +387,18 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"Wprowadź kod PIN"</string>
     <string name="keyguard_password_wrong_pin_code">"Błędny kod PIN!"</string>
-    <string name="keyguard_label_text">"Aby odblokować, naciśnij przycisk Menu, a następnie 0."</string>
+    <string name="keyguard_label_text">"Aby odblokować, naciśnij Menu, a następnie 0."</string>
     <string name="emergency_call_dialog_number_for_display">"Numer alarmowy"</string>
     <string name="lockscreen_carrier_default">"(Brak usługi)"</string>
     <string name="lockscreen_screen_locked">"Ekran zablokowany."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Naciśnij przycisk Menu, aby odblokować lub wykonać połączenie alarmowe."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Naciśnij przycisk Menu, aby odblokować."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Naciśnij Menu, aby odblokować lub wykonać połączenie alarmowe."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Naciśnij Menu, aby odblokować."</string>
     <string name="lockscreen_pattern_instructions">"Narysuj wzór, aby odblokować"</string>
     <string name="lockscreen_emergency_call">"Połączenie alarmowe"</string>
     <string name="lockscreen_pattern_correct">"Poprawnie!"</string>
     <string name="lockscreen_pattern_wrong">"Niestety, spróbuj ponownie"</string>
-    <string name="lockscreen_plugged_in">"Ładowanie (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"Podłącz ładowarkę."</string>
     <string name="lockscreen_missing_sim_message_short">"Brak karty SIM."</string>
     <string name="lockscreen_missing_sim_message">"Brak karty SIM w telefonie."</string>
@@ -410,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"Wyczyść powiadomienia"</string>
     <string name="status_bar_no_notifications_title">"Brak powiadomień"</string>
     <string name="status_bar_ongoing_events_title">"Trwające"</string>
     <string name="status_bar_latest_events_title">"Powiadomienia"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"Ładowanie..."</string>
     <string name="battery_low_title">"Podłącz ładowarkę"</string>
@@ -428,12 +439,9 @@
     <string name="factorytest_not_system">"Czynność FACTORY_TEST jest obsługiwana tylko dla pakietów zainstalowanych w katalogu /system/app."</string>
     <string name="factorytest_no_action">"Nie znaleziono żadnego pakietu, który zapewnia działanie FACTORY_TEST."</string>
     <string name="factorytest_reboot">"Uruchom ponownie"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"Komunikat ze strony pod adresem „<xliff:g id="TITLE">%s</xliff:g>”:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Czy opuścić tę stronę?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wybierz opcję OK, aby kontynuować, lub opcję Anuluj, aby pozostać na tej stronie."</string>
     <string name="save_password_label">"Potwierdź"</string>
     <string name="save_password_message">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
     <string name="save_password_notnow">"Nie teraz"</string>
@@ -450,7 +458,7 @@
     <string name="today">"Dzisiaj"</string>
     <string name="yesterday">"Wczoraj"</string>
     <string name="tomorrow">"Jutro"</string>
-    <string name="oneMonthDurationPast">"miesiąc temu"</string>
+    <string name="oneMonthDurationPast">"1 miesiąc temu"</string>
     <string name="beforeOneMonthDurationPast">"Ponad 1 miesiąc temu"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one">"sekundę temu"</item>
@@ -484,22 +492,38 @@
     <item quantity="one">"jutro"</item>
     <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"sekundę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> sek. temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"minutę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> min temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"godzinę temu"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"wczoraj"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dni temu"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"za sekundę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"za minutę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"za godzinę"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> godz."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"jutro"</item>
+    <item quantity="other">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
+  </plurals>
     <string name="preposition_for_date">"dnia %s"</string>
     <string name="preposition_for_time">"o %s"</string>
     <string name="preposition_for_year">"w %s"</string>
@@ -515,13 +539,13 @@
     <string name="weeks">"tygodni"</string>
     <string name="year">"rok"</string>
     <string name="years">"lat"</string>
-    <string name="sunday">"Niedziela"</string>
-    <string name="monday">"Poniedziałek"</string>
-    <string name="tuesday">"Wtorek"</string>
-    <string name="wednesday">"Środa"</string>
-    <string name="thursday">"Czwartek"</string>
-    <string name="friday">"Piątek"</string>
-    <string name="saturday">"Sobota"</string>
+    <string name="sunday">"niedziela"</string>
+    <string name="monday">"poniedziałek"</string>
+    <string name="tuesday">"wtorek"</string>
+    <string name="wednesday">"środa"</string>
+    <string name="thursday">"czwartek"</string>
+    <string name="friday">"piątek"</string>
+    <string name="saturday">"sobota"</string>
     <string name="every_weekday">"W każdy dzień roboczy (pon–pt)"</string>
     <string name="daily">"Codziennie"</string>
     <string name="weekly">"Co tydzień w <xliff:g id="DAY">%s</xliff:g>"</string>
@@ -541,27 +565,25 @@
     <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="DAY">dd</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMMM</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first">"<xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="DAY">dd</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g> <xliff:g id="MONTH">MMM</xliff:g>, <xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"południe"</string>
     <string name="Noon">"Południe"</string>
     <string name="midnight">"północ"</string>
     <string name="Midnight">"Północ"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -590,19 +612,19 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
-    <string name="day_of_week_long_sunday">"Niedziela"</string>
-    <string name="day_of_week_long_monday">"Poniedziałek"</string>
-    <string name="day_of_week_long_tuesday">"Wtorek"</string>
-    <string name="day_of_week_long_wednesday">"Środa"</string>
-    <string name="day_of_week_long_thursday">"Czwartek"</string>
-    <string name="day_of_week_long_friday">"Piątek"</string>
-    <string name="day_of_week_long_saturday">"Sobota"</string>
+    <string name="day_of_week_long_sunday">"niedziela"</string>
+    <string name="day_of_week_long_monday">"poniedziałek"</string>
+    <string name="day_of_week_long_tuesday">"wtorek"</string>
+    <string name="day_of_week_long_wednesday">"środa"</string>
+    <string name="day_of_week_long_thursday">"czwartek"</string>
+    <string name="day_of_week_long_friday">"piątek"</string>
+    <string name="day_of_week_long_saturday">"sobota"</string>
     <string name="day_of_week_medium_sunday">"Nie"</string>
     <string name="day_of_week_medium_monday">"Pon"</string>
     <string name="day_of_week_medium_tuesday">"Wt"</string>
@@ -670,7 +692,7 @@
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Zaznacz wszystko"</string>
-    <string name="selectText">"Wybierz tekst"</string>
+    <string name="selectText">"Zaznacz tekst"</string>
     <string name="stopSelectingText">"Zatrzymaj wybieranie tekstu"</string>
     <string name="cut">"Wytnij"</string>
     <string name="cutAll">"Wytnij wszystko"</string>
@@ -678,7 +700,8 @@
     <string name="copyAll">"Kopiuj wszystko"</string>
     <string name="paste">"Wklej"</string>
     <string name="copyUrl">"Kopiuj adres URL"</string>
-    <string name="inputMethod">"Metoda wejściowa"</string>
+    <string name="inputMethod">"Wprowadzanie tekstu"</string>
+    <string name="addToDictionary">"Dodaj „%s” do słownika"</string>
     <string name="editTextMenuTitle">"Edytuj tekst"</string>
     <string name="low_internal_storage_view_title">"Mało miejsca"</string>
     <string name="low_internal_storage_view_text">"Maleje ilość dostępnej pamięci telefonu."</string>
@@ -686,9 +709,10 @@
     <string name="cancel">"Anuluj"</string>
     <string name="yes">"OK"</string>
     <string name="no">"Anuluj"</string>
+    <string name="dialog_alert_title">"Uwaga"</string>
     <string name="capital_on">"Włącz"</string>
     <string name="capital_off">"Wyłącz"</string>
-    <string name="whichApplication">"Zakończ działanie, korzystając z"</string>
+    <string name="whichApplication">"Zakończ czynność korzystając z"</string>
     <string name="alwaysUse">"Używaj domyślnie dla tej czynności."</string>
     <string name="clearDefaultHintMsg">"Wyczyść domyślne w: Ustawienia strony głównej &gt; Aplikacje &gt; Zarządzaj aplikacjami."</string>
     <string name="chooseActivity">"Wybierz czynność"</string>
@@ -697,8 +721,8 @@
     <string name="aerr_application">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) została niespodziewanie zatrzymana. Spróbuj ponownie."</string>
     <string name="aerr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> został niespodziewanie zatrzymany. Spróbuj ponownie."</string>
     <string name="anr_title">"Przepraszamy!"</string>
-    <string name="anr_activity_application">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>) nie odpowiada."</string>
-    <string name="anr_activity_process">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>) nie odpowiada."</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
     <string name="anr_application_process">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nie odpowiada."</string>
     <string name="force_close">"Wymuś zamknięcie"</string>
@@ -709,7 +733,7 @@
     <string name="volume_music">"Głośność multimediów"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Odtwarzanie przez Bluetooth"</string>
     <string name="volume_call">"Głośność podczas połączenia"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"Odtwarzanie przez Bluetooth"</string>
+    <string name="volume_bluetooth_call">"Głośność Bluetooth w czasie połączenia"</string>
     <string name="volume_alarm">"Głośność alarmu"</string>
     <string name="volume_notification">"Głośność powiadomienia"</string>
     <string name="volume_unknown">"Głośność"</string>
@@ -739,14 +763,53 @@
     <string name="perms_show_all"><b>"Pokaż wszystko"</b></string>
     <string name="googlewebcontenthelper_loading">"Ładowanie..."</string>
     <string name="usb_storage_title">"Połączenie przez USB"</string>
-    <string name="usb_storage_message">"Telefon został podłączony do komputera przez port USB. Wybierz polecenie „Montuj”, jeśli chcesz skopiować pliki między komputerem a kartą SD w telefonie."</string>
-    <string name="usb_storage_button_mount">"Zamontuj"</string>
-    <string name="usb_storage_button_unmount">"Nie montuj"</string>
+    <string name="usb_storage_message">"Telefon został podłączony do komputera przez port USB. Wybierz polecenie „Podłącz”, jeśli chcesz skopiować pliki między komputerem a kartą SD w telefonie."</string>
+    <string name="usb_storage_button_mount">"Podłącz"</string>
+    <string name="usb_storage_button_unmount">"Nie podłączaj"</string>
     <string name="usb_storage_error_message">"Wystąpił problem z wykorzystaniem karty SD dla pamięci USB."</string>
     <string name="usb_storage_notification_title">"Połączenie przez USB"</string>
     <string name="usb_storage_notification_message">"Wybierz, aby skopiować pliki do/z komputera"</string>
-    <string name="select_input_method">"Wybierz metodę wejściową"</string>
-    <string name="fast_scroll_alphabet">"AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"kandydaci"</u></font></string>
+    <string name="usb_storage_stop_notification_title">"Wyłącz nośnik USB"</string>
+    <string name="usb_storage_stop_notification_message">"Wybierz, aby wyłączyć nośnik USB."</string>
+    <string name="usb_storage_stop_title">"Wyłącz nośnik USB"</string>
+    <string name="usb_storage_stop_message">"Przed wyłączeniem nośnika USB upewnij się, że odłączono go od hosta USB. Wybierz „Wyłącz”, aby wyłączyć nośnik USB."</string>
+    <string name="usb_storage_stop_button_mount">"Wyłącz"</string>
+    <string name="usb_storage_stop_button_unmount">"Anuluj"</string>
+    <string name="usb_storage_stop_error_message">"Napotkano problem przy wyłączaniu nośnika USB. Sprawdź, czy host USB został odłączony i spróbuj ponownie."</string>
+    <string name="extmedia_format_title">"Formatuj kartę SD"</string>
+    <string name="extmedia_format_message">"Czy na pewno sformatować kartę SD? Wszystkie dane na karcie zostaną utracone."</string>
+    <string name="extmedia_format_button_format">"Formatuj"</string>
+    <string name="select_input_method">"Sposób wprowadzania tekstu"</string>
+    <string name="fast_scroll_alphabet">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"kandydaci"</u></string>
+    <string name="ext_media_checking_notification_title">"Przygotowywanie karty SD"</string>
+    <string name="ext_media_checking_notification_message">"Sprawdzanie w poszukiwaniu błędów"</string>
+    <string name="ext_media_nofs_notification_title">"Pusta karta SD"</string>
+    <string name="ext_media_nofs_notification_message">"Karta SD jest pusta lub używa nieobsługiwanego systemu plików."</string>
+    <string name="ext_media_unmountable_notification_title">"Uszkodzona karta SD"</string>
+    <string name="ext_media_unmountable_notification_message">"Karta SD jest uszkodzona. Konieczne może być przeformatowanie karty."</string>
+    <string name="ext_media_badremoval_notification_title">"Karta SD została nieoczekiwanie wyjęta"</string>
+    <string name="ext_media_badremoval_notification_message">"Odłącz kartę SD przed jej wyjęciem, aby uniknąć utraty danych."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Można bezpiecznie usunąć kartę SD"</string>
+    <string name="ext_media_safe_unmount_notification_message">"Można teraz bezpiecznie usunąć kartę SD."</string>
+    <string name="ext_media_nomedia_notification_title">"Usunięta karta SD"</string>
+    <string name="ext_media_nomedia_notification_message">"Karta SD została usunięta. Włóż nową kartę SD, aby zwiększyć pamięć urządzenia."</string>
+    <string name="activity_list_empty">"Nie znaleziono pasujących działań"</string>
+    <string name="permlab_pkgUsageStats">"aktualizowanie statystyk użycia komponentu"</string>
+    <string name="permdesc_pkgUsageStats">"Zezwala na modyfikacje zebranych statystyk użycia komponentu. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

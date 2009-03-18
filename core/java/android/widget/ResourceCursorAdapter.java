@@ -46,9 +46,29 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
     public ResourceCursorAdapter(Context context, int layout, Cursor c) {
         super(context, c);
         mLayout = mDropDownLayout = layout;
-        mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
     
+    /**
+     * Constructor.
+     * 
+     * @param context The context where the ListView associated with this
+     *            SimpleListItemFactory is running
+     * @param layout resource identifier of a layout file that defines the views
+     *            for this list item.  Unless you override them later, this will
+     *            define both the item views and the drop down views.
+     * @param c The cursor from which to get the data.
+     * @param autoRequery If true the adapter will call requery() on the
+     *                    cursor whenever it changes so the most recent
+     *                    data is always displayed.
+     * @hide Pending API Council approval
+     */
+    public ResourceCursorAdapter(Context context, int layout, Cursor c, boolean autoRequery) {
+        super(context, c, autoRequery);
+        mLayout = mDropDownLayout = layout;
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
     /**
      * Inflates view(s) from the specified XML file.
      * 

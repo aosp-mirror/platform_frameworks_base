@@ -34,21 +34,26 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Config;
+import android.text.format.Time;
+import android.util.EventLog;
 import android.util.Log;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
 class AlarmManagerService extends IAlarmManager.Stub {
+    // The threshold for how long an alarm can be late before we print a
+    // warning message.  The time duration is in milliseconds.
+    private static final long LATE_ALARM_THRESHOLD = 10 * 1000;
+    
     private static final int RTC_WAKEUP_MASK = 1 << AlarmManager.RTC_WAKEUP;
     private static final int RTC_MASK = 1 << AlarmManager.RTC;
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << AlarmManager.ELAPSED_REALTIME_WAKEUP; 
@@ -72,6 +77,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private final ArrayList<Alarm> mRtcAlarms = new ArrayList<Alarm>();
     private final ArrayList<Alarm> mElapsedRealtimeWakeupAlarms = new ArrayList<Alarm>();
     private final ArrayList<Alarm> mElapsedRealtimeAlarms = new ArrayList<Alarm>();
+    private final IncreasingTimeOrder mIncreasingTimeOrder = new IncreasingTimeOrder();
     
     // slots corresponding with the inexact-repeat interval buckets,
     // ordered from shortest to longest
@@ -250,12 +256,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 if (localLOGV) Log.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
                 timeZoneWasChanged = true; 
                 SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
-                
-                // Update the kernel timezone information
-                // Kernel tracks time offsets as 'minutes west of GMT'
-                int gmtOffset = (zone.getRawOffset() + zone.getDSTSavings()) / 60000;
-                setKernelTimezone(mDescriptor, -(gmtOffset));
             }
+            
+            // Update the kernel timezone information
+            // Kernel tracks time offsets as 'minutes west of GMT'
+            int gmtOffset = (zone.getRawOffset() + zone.getDSTSavings()) / 60000;
+            setKernelTimezone(mDescriptor, -(gmtOffset));
         }
 
         TimeZone.setDefault(null);
@@ -338,11 +344,26 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private int addAlarmLocked(Alarm alarm) {
         ArrayList<Alarm> alarmList = getAlarmList(alarm.type);
         
-        int index = Collections.binarySearch(alarmList, alarm);
-        index = (index < 0) ? ((index + 1) * -1) : index;
-        if (localLOGV) Log.v(
-            TAG, "Adding alarm " + alarm + " at " + index);
+        int index = Collections.binarySearch(alarmList, alarm, mIncreasingTimeOrder);
+        if (index < 0) {
+            index = 0 - index - 1;
+        }
+        if (localLOGV) Log.v(TAG, "Adding alarm " + alarm + " at " + index);
         alarmList.add(index, alarm);
+
+        if (localLOGV) {
+            // Display the list of alarms for this alarm type
+            Log.v(TAG, "alarms: " + alarmList.size() + " type: " + alarm.type);
+            int position = 0;
+            for (Alarm a : alarmList) {
+                Time time = new Time();
+                time.set(a.when);
+                String timeStr = time.format("%b %d %I:%M:%S %p");
+                Log.v(TAG, position + ": " + timeStr
+                        + " " + a.operation.getTargetPackage());
+                position += 1;
+            }
+        }
         
         return index;
     }
@@ -382,7 +403,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingPermission("android.permission.DUMP")
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump AlarmManager from from pid="
                     + Binder.getCallingPid()
@@ -459,14 +480,22 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
             if (localLOGV) Log.v(TAG, "Checking active alarm when=" + alarm.when + " " + alarm);
 
-            if (alarm.when > now)
-            {
+            if (alarm.when > now) {
                 // don't fire alarms in the future
                 break;
             }
+            
+            // If the alarm is late, then print a warning message.
+            // Note that this can happen if the user creates a new event on
+            // the Calendar app with a reminder that is in the past. In that
+            // case, the reminder alarm will fire immediately.
+            if (localLOGV && now - alarm.when > LATE_ALARM_THRESHOLD) {
+                Log.v(TAG, "alarm is late! alarm time: " + alarm.when
+                        + " now: " + now + " delay (in seconds): "
+                        + (now - alarm.when) / 1000);
+            }
 
-            // add it to the trigger list so we can trigger it without the lock held.
-            // recurring alarms may have passed several alarm intervals while the
+            // Recurring alarms may have passed several alarm intervals while the
             // phone was asleep or off, so pass a trigger count when sending them.
             if (localLOGV) Log.v(TAG, "Alarm triggering: " + alarm);
             alarm.count = 1;
@@ -481,28 +510,42 @@ class AlarmManagerService extends IAlarmManager.Stub {
             it.remove();
             
             // if it repeats queue it up to be read-added to the list
-            if (alarm.repeatInterval > 0)
-            {
+            if (alarm.repeatInterval > 0) {
                 repeats.add(alarm);
             }
         }
 
         // reset any repeating alarms.
         it = repeats.iterator();
-        while (it.hasNext())
-        {
+        while (it.hasNext()) {
             Alarm alarm = it.next();
             alarm.when += alarm.count * alarm.repeatInterval;
             addAlarmLocked(alarm);
         }
         
-        if (alarmList.size() > 0)
-        {
+        if (alarmList.size() > 0) {
             setLocked(alarmList.get(0));
         }
     }
     
-    private class Alarm implements Comparable<Alarm> {
+    /**
+     * This Comparator sorts Alarms into increasing time order.
+     */
+    public static class IncreasingTimeOrder implements Comparator<Alarm> {
+        public int compare(Alarm a1, Alarm a2) {
+            long when1 = a1.when;
+            long when2 = a2.when;
+            if (when1 - when2 > 0) {
+                return 1;
+            }
+            if (when1 - when2 < 0) {
+                return -1;
+            }
+            return 0;
+        }
+    }
+    
+    private static class Alarm {
         public int type;
         public int count;
         public long when;
@@ -515,15 +558,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             operation = null;
         }
         
-        public int compareTo(Alarm obj)
-        {
-            if (obj.when > this.when) return -1;
-            if (obj.when < this.when) return 1;
-            if (obj.operation.equals(this.operation)
-                    && obj.repeatInterval == this.repeatInterval) return 0;
-            return -1;
-        }
-        
+        @Override
         public String toString()
         {
             return "Alarm{"
@@ -701,11 +736,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
         public void scheduleDateChangedEvent() {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.HOUR, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
       
             set(AlarmManager.RTC, calendar.getTimeInMillis(), mDateChangeSender);
         }

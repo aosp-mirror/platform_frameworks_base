@@ -19,7 +19,7 @@
 -->
 <resources>
 	<drawable name="screen_background_light">#ffffffff</drawable>
-	<drawable name="screen_background_dark">#ff191919</drawable>
+	<drawable name="screen_background_dark">#ff1a1a1a</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
     <drawable name="search_bar_default_color">#ff000000</drawable>
@@ -28,7 +28,7 @@
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>
     <color name="transparent">#00000000</color>
-    <color name="background_dark">#ff191919</color>
+    <color name="background_dark">#ff1a1a1a</color>
     <color name="bright_foreground_dark">#ffffffff</color>
     <color name="bright_foreground_dark_disabled">#80ffffff</color>
     <color name="bright_foreground_dark_inverse">#ff000000</color>

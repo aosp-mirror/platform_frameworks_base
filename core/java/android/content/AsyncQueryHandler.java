@@ -146,6 +146,20 @@ public abstract class AsyncQueryHandler extends Handler {
      * @param token A token passed into {@link #onQueryComplete} to identify
      *  the query.
      * @param cookie An object that gets passed into {@link #onQueryComplete}
+     * @param uri The URI, using the content:// scheme, for the content to
+     *         retrieve.
+     * @param projection A list of which columns to return. Passing null will
+     *         return all columns, which is discouraged to prevent reading data
+     *         from storage that isn't going to be used.
+     * @param selection A filter declaring which rows to return, formatted as an
+     *         SQL WHERE clause (excluding the WHERE itself). Passing null will
+     *         return all rows for the given URI.
+     * @param selectionArgs You may include ?s in selection, which will be
+     *         replaced by the values from selectionArgs, in the order that they
+     *         appear in the selection. The values will be bound as Strings.
+     * @param orderBy How to order the rows, formatted as an SQL ORDER BY
+     *         clause (excluding the ORDER BY itself). Passing null will use the
+     *         default sort order, which may be unordered.
      */
     public void startQuery(int token, Object cookie, Uri uri,
             String[] projection, String selection, String[] selectionArgs,

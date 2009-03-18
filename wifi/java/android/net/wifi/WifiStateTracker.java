@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.app.ActivityManagerNative;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
@@ -37,6 +38,7 @@ import android.util.Config;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothA2dp;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
@@ -159,7 +161,16 @@ public class WifiStateTracker extends NetworkStateTracker {
     private boolean mHaveIPAddress;
     private boolean mObtainingIPAddress;
     private boolean mTornDownByConnMgr;
+    /**
+     * A DISCONNECT event has been received, but processing it
+     * is being deferred.
+     */
     private boolean mDisconnectPending;
+    /**
+     * An operation has been performed as a result of which we expect the next event
+     * will be a DISCONNECT.
+     */
+    private boolean mDisconnectExpected;
     private DhcpHandler mDhcpTarget;
     private DhcpInfo mDhcpInfo;
     private int mLastSignalLevel = -1;
@@ -234,6 +245,10 @@ public class WifiStateTracker extends NetworkStateTracker {
     private int mRunState;
 
     private boolean mIsScanOnly;
+
+    private BluetoothA2dp mBluetoothA2dp;
+
+    private boolean mBluetoothScanMode;
     
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
@@ -379,8 +394,11 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     public synchronized boolean isAvailable() {
         /*
-         * TODO: Should we also look at scan results to see whether we're
-         * in range of any access points?
+         * TODO: Need to also look at scan results to see whether we're
+         * in range of any access points. If we have scan results that
+         * are no more than N seconds old, use those, otherwise, initiate
+         * a scan and wait for the results. This only matters if we
+         * allow mobile to be the preferred network.
          */
         SupplicantState suppState = mWifiInfo.getSupplicantState();
         return suppState != SupplicantState.UNINITIALIZED &&
@@ -564,6 +582,30 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
+    /**
+     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
+     * some of the low-level scan parameters used by the driver are changed to
+     * reduce interference with A2DP streaming.
+     *
+     * @param isBluetoothPlaying whether to enable or disable this mode
+     */
+    public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
+        WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
+    }
+
+    private void checkIsBluetoothPlaying() {
+        boolean isBluetoothPlaying = false;
+        List<String> connected = mBluetoothA2dp.listConnectedSinks();
+
+        for (String address : connected) {
+            if (mBluetoothA2dp.getSinkState(address) == BluetoothA2dp.STATE_PLAYING) {
+                isBluetoothPlaying = true;
+                break;
+            }
+        }
+        setBluetoothScanMode(isBluetoothPlaying);
+    }
+
     @Override
     public void releaseWakeLock() {
         if (mReleaseWakeLockCallback != null) {
@@ -653,14 +695,29 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mLastSsid = mWifiInfo.getSSID();
                     configureInterface();
                 }
-                intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-                intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, true);
-                mContext.sendBroadcast(intent);
+                if (ActivityManagerNative.isSystemReady()) {
+                    intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+                    intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, true);
+                    mContext.sendBroadcast(intent);
+                }
                 if (supplState == SupplicantState.COMPLETED && mHaveIPAddress) {
                     setDetailedState(DetailedState.CONNECTED);
                 } else {
                     setDetailedState(WifiInfo.getDetailedStateOf(supplState));
                 }
+                /*
+                 * Filter out multicast packets. This saves battery power, since
+                 * the CPU doesn't have to spend time processing packets that
+                 * are going to end up being thrown away. Obviously, if we
+                 * ever want to support multicast, this will have to change.
+                 */
+                if (mBluetoothA2dp == null) {
+                    mBluetoothA2dp = new BluetoothA2dp(mContext);
+                }
+                synchronized (this) {
+                    WifiNative.startPacketFiltering();
+                }
+                checkIsBluetoothPlaying();
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:
@@ -689,13 +746,18 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mDhcpTarget = null;
                 }
                 mContext.removeStickyBroadcast(new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-                intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-                intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-                mContext.sendBroadcast(intent);
+                if (ActivityManagerNative.isSystemReady()) {
+                    intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+                    intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+                    mContext.sendBroadcast(intent);
+                }
                 setDetailedState(DetailedState.DISCONNECTED);
                 setSupplicantState(SupplicantState.UNINITIALIZED);
                 mHaveIPAddress = false;
                 mObtainingIPAddress = false;
+                if (died) {
+                    mWM.setWifiEnabled(false);
+                }
                 break;
 
             case EVENT_SUPPLICANT_STATE_CHANGED:
@@ -749,13 +811,12 @@ public class WifiStateTracker extends NetworkStateTracker {
                     setSupplicantState(newState);
                     if (newState == SupplicantState.DORMANT) {
                         DetailedState newDetailedState;
-                        if (!mIsScanOnly) {
-                            newDetailedState = DetailedState.FAILED;
-                        } else {
+                        if (mIsScanOnly || mRunState == RUN_STATE_STOPPING) {
                             newDetailedState = DetailedState.IDLE;
+                        } else {
+                            newDetailedState = DetailedState.FAILED;
                         }
                         handleDisconnectedState(newDetailedState);
-                        sendNetworkStateChangeBroadcast();
                         if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly) {
                             sendEmptyMessageDelayed(EVENT_DEFERRED_RECONNECT, RECONNECT_DELAY_MSECS);
                         } else if (mRunState == RUN_STATE_STOPPING) {
@@ -768,9 +829,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                             }
                         }
                     } else if (newState == SupplicantState.DISCONNECTED) {
-                        if (isDriverStopped()) {
+                        if (isDriverStopped() || mDisconnectExpected) {
                             handleDisconnectedState(DetailedState.DISCONNECTED);
-                            sendNetworkStateChangeBroadcast();
                         } else {
                             scheduleDisconnect();
                         }
@@ -788,7 +848,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                         }
                     }
 
+                    mDisconnectExpected = false;
                     intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)newState);
                     if (failedToAuthenticate) {
                         if (LOCAL_LOGD) Log.d(TAG, "Failed to authenticate, disabling network " + networkId);
@@ -872,7 +934,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                          * The connection is fully configured as far as link-level
                          * connectivity is concerned, but we may still need to obtain
                          * an IP address. But do this only if we are connecting to
-                         * a different access point than we were connected to previously.
+                         * a different network than we were connected to previously.
                          */
                         if (wasDisconnectPending) {
                             DetailedState saveState = getNetworkInfo().getDetailedState();
@@ -890,11 +952,13 @@ public class WifiStateTracker extends NetworkStateTracker {
                         setDetailedState(DetailedState.OBTAINING_IPADDR);
                     }
                 }
-                sendNetworkStateChangeBroadcast();
+                sendNetworkStateChangeBroadcast(mWifiInfo.getBSSID());
                 break;
 
             case EVENT_SCAN_RESULTS_AVAILABLE:
-                mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+                if (ActivityManagerNative.isSystemReady()) {
+                    mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+                }
                 sendScanResultsAvailable();
                 /**
                  * On receiving the first scan results after connecting to
@@ -956,7 +1020,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 mLastSignalLevel = -1; // force update of signal strength
                 if (mNetworkInfo.getDetailedState() != DetailedState.CONNECTED) {
                     setDetailedState(DetailedState.CONNECTED);
-                    sendNetworkStateChangeBroadcast();
+                    sendNetworkStateChangeBroadcast(mWifiInfo.getBSSID());
                 } else {
                     mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
                 }
@@ -1083,16 +1147,13 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (mDisconnectPending) {
             cancelDisconnect();
         }
-        Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-        if (mLastBssid != null)
-            intent.putExtra(WifiManager.EXTRA_BSSID, mLastBssid);
+        mDisconnectExpected = false;
+        resetInterface();
+        setDetailedState(newState);
+        sendNetworkStateChangeBroadcast(mLastBssid);
         mWifiInfo.setBSSID(null);
         mLastBssid = null;
         mLastSsid = null;
-        resetInterface();
-        mContext.sendStickyBroadcast(intent);
-        setDetailedState(newState);
         mDisconnectPending = false;
     }
 
@@ -1114,6 +1175,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         // Stop DHCP
         if (mDhcpTarget != null) {
             mDhcpTarget.setCancelCallback(true);
+            mDhcpTarget.removeMessages(EVENT_DHCP_START);
         }
         if (!NetworkUtils.stopDhcp(mInterfaceName)) {
             Log.e(TAG, "Could not stop DHCP");
@@ -1246,16 +1308,19 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     private void sendRssiChangeBroadcast(final int newRssi) {
-        Intent intent = new Intent(WifiManager.RSSI_CHANGED_ACTION);
-        intent.putExtra(WifiManager.EXTRA_NEW_RSSI, newRssi);
-        mContext.sendBroadcast(intent);
+        if (ActivityManagerNative.isSystemReady()) {
+            Intent intent = new Intent(WifiManager.RSSI_CHANGED_ACTION);
+            intent.putExtra(WifiManager.EXTRA_NEW_RSSI, newRssi);
+            mContext.sendBroadcast(intent);
+        }
     }
 
-    private void sendNetworkStateChangeBroadcast() {
+    private void sendNetworkStateChangeBroadcast(String bssid) {
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-        if (mWifiInfo.getBSSID() != null)
-            intent.putExtra(WifiManager.EXTRA_BSSID, mWifiInfo.getBSSID());
+        if (bssid != null)
+            intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
         mContext.sendStickyBroadcast(intent);
     }
 
@@ -1292,11 +1357,28 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     public synchronized boolean disconnectAndStop() {
-        // Take down any open network notifications
-        setNotificationVisible(false, 0, false, 0);
+        if (mRunState != RUN_STATE_STOPPING && mRunState != RUN_STATE_STOPPED) {
+            // Take down any open network notifications
+            setNotificationVisible(false, 0, false, 0);
 
-        mRunState = RUN_STATE_STOPPING;
-        return WifiNative.disconnectCommand();
+            mRunState = RUN_STATE_STOPPING;
+            return WifiNative.disconnectCommand();
+        } else {
+            /*
+             * The "driver-stop" wake lock normally is released from the
+             * connectivity manager after the mobile data connection has
+             * been established, or after a timeout period, if that never
+             * happens. Because WifiService.updateWifiState() can get called
+             * multiple times, we can end up acquiring the wake lock and calling
+             * disconnectAndStop() even when a disconnect or stop operation
+             * is already in progress. In that case, we want to ignore the
+             * disconnectAndStop request and release the (ref-counted) wake
+             * lock, so that eventually, when the mobile data connection is
+             * established, the ref count will drop to zero.
+             */
+            releaseWakeLock();
+        }
+        return true;
     }
 
     public synchronized boolean restart() {
@@ -1307,6 +1389,10 @@ public class WifiStateTracker extends NetworkStateTracker {
             mRunState = RUN_STATE_STARTING;
         }
         return true;
+    }
+
+    public synchronized boolean removeNetwork(int networkId) {
+        return mDisconnectExpected = WifiNative.removeNetworkCommand(networkId);
     }
 
     public boolean setRadio(boolean turnOn) {
@@ -1468,8 +1554,9 @@ public class WifiStateTracker extends NetworkStateTracker {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+        sb.append("interface ").append(mInterfaceName).
+                append(" runState=").append(mRunState).append(LS);
         sb.append(mWifiInfo).append(LS);
-        sb.append("interface ").append(mInterfaceName).append(LS);
         sb.append(mDhcpInfo).append(LS);
         sb.append("haveIpAddress=").append(mHaveIPAddress).
                 append(", obtainingIpAddress=").append(mObtainingIPAddress).

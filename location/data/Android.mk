@@ -13,7 +13,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := nmea
 
-LOCAL_MODULE_TAGS := development
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_PATH := $(local_target_dir)/gps
@@ -27,7 +27,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := location
 
-LOCAL_MODULE_TAGS := development
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_PATH := $(local_target_dir)/gps
@@ -41,7 +41,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := properties
 
-LOCAL_MODULE_TAGS := development
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_PATH := $(local_target_dir)/gps

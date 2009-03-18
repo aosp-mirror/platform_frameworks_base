@@ -66,6 +66,13 @@ public interface KeyListener {
                            int keyCode, KeyEvent event);
     
     /**
+     * If the key listener wants to other kinds of key events, return true,
+     * otherwise return false and the caller (i.e. the widget host)
+     * will handle the key.
+     */
+    public boolean onKeyOther(View view, Editable text, KeyEvent event);
+    
+    /**
      * Remove the given shift states from the edited text.
      */
     public void clearMetaKeyState(View view, Editable content, int states);

@@ -106,6 +106,14 @@ extends CharSequence
     public static final int SPAN_COMPOSING = 0x100;
     
     /**
+     * This flag will be set for intermediate span changes, meaning there
+     * is guaranteed to be another change following it.  Typically it is
+     * used for {@link Selection} which automatically uses this with the first
+     * offset it sets when updating the selection.
+     */
+    public static final int SPAN_INTERMEDIATE = 0x200;
+    
+    /**
      * The bits numbered SPAN_USER_SHIFT and above are available
      * for callers to use to store scalar data associated with their
      * span object.

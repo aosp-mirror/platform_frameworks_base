@@ -28,12 +28,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
+import android.widget.LinearLayout;
+import android.widget.EditText;
 
 import com.android.internal.R;
 
@@ -71,25 +68,18 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     private final Runnable mRunnable = new Runnable() {
         public void run() {
             if (mIncrement) {
-                changeCurrent(mCurrent + 1, mSlideUpInAnimation, mSlideUpOutAnimation);
+                changeCurrent(mCurrent + 1);
                 mHandler.postDelayed(this, mSpeed);
             } else if (mDecrement) {
-                changeCurrent(mCurrent - 1, mSlideDownInAnimation, mSlideDownOutAnimation);
+                changeCurrent(mCurrent - 1);
                 mHandler.postDelayed(this, mSpeed);
             }
         }
     };
-    
-    private final LayoutInflater mInflater;
-    private final TextView mText;
-    private final InputFilter mInputFilter;
+
+    private final EditText mText;
     private final InputFilter mNumberInputFilter;
-    
-    private final Animation mSlideUpOutAnimation;
-    private final Animation mSlideUpInAnimation;
-    private final Animation mSlideDownOutAnimation;
-    private final Animation mSlideDownInAnimation;
-    
+
     private String[] mDisplayedValues;
     private int mStart;
     private int mEnd;
@@ -110,14 +100,14 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         this(context, attrs, 0);
     }
 
-    public NumberPicker(Context context, AttributeSet attrs,
-            int defStyle) {
+    @SuppressWarnings({"UnusedDeclaration"})
+    public NumberPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
         setOrientation(VERTICAL);
-        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);        
-        mInflater.inflate(R.layout.number_picker, this, true);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.number_picker, this, true);
         mHandler = new Handler();
-        mInputFilter = new NumberPickerInputFilter();
+        InputFilter inputFilter = new NumberPickerInputFilter();
         mNumberInputFilter = new NumberRangeKeyListener();
         mIncrementButton = (NumberPickerButton) findViewById(R.id.increment);
         mIncrementButton.setOnClickListener(this);
@@ -128,32 +118,11 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mDecrementButton.setOnLongClickListener(this);
         mDecrementButton.setNumberPicker(this);
         
-        mText = (TextView) findViewById(R.id.timepicker_input);
+        mText = (EditText) findViewById(R.id.timepicker_input);
         mText.setOnFocusChangeListener(this);
-        mText.setFilters(new InputFilter[] { mInputFilter });
+        mText.setFilters(new InputFilter[] {inputFilter});
         mText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
-        
-        mSlideUpOutAnimation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF,
-                0, Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, -100);
-        mSlideUpOutAnimation.setDuration(200);
-        mSlideUpInAnimation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF,
-                0, Animation.RELATIVE_TO_SELF, 100,
-                Animation.RELATIVE_TO_SELF, 0);
-        mSlideUpInAnimation.setDuration(200);
-        mSlideDownOutAnimation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF,
-                0, Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 100);
-        mSlideDownOutAnimation.setDuration(200);
-        mSlideDownInAnimation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF,
-                0, Animation.RELATIVE_TO_SELF, -100,
-                Animation.RELATIVE_TO_SELF, 0);
-        mSlideDownInAnimation.setDuration(200);
-        
+
         if (!isEnabled()) {
             setEnabled(false);
         }
@@ -220,17 +189,14 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     }
     
     public void onClick(View v) {
-        
-        /* The text view may still have focus so clear it's focus which will
-         * trigger the on focus changed and any typed values to be pulled.
-         */
-        mText.clearFocus();
+        validateInput(mText);
+        if (!mText.hasFocus()) mText.requestFocus();
 
         // now perform the increment/decrement
         if (R.id.increment == v.getId()) {
-            changeCurrent(mCurrent + 1, mSlideUpInAnimation, mSlideUpOutAnimation);
+            changeCurrent(mCurrent + 1);
         } else if (R.id.decrement == v.getId()) {
-            changeCurrent(mCurrent - 1, mSlideDownInAnimation, mSlideDownOutAnimation);
+            changeCurrent(mCurrent - 1);
         }
     }
     
@@ -240,7 +206,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
                 : String.valueOf(value);
     }
  
-    private void changeCurrent(int current, Animation in, Animation out) {
+    private void changeCurrent(int current) {
         
         // Wrap around the values if we go past the start or end
         if (current > mEnd) {
@@ -271,6 +237,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         } else {
             mText.setText(mDisplayedValues[mCurrent - mStart]);
         }
+        mText.setSelection(mText.getText().length());
     }
     
     private void validateCurrentView(CharSequence str) {
@@ -289,16 +256,20 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
          * has valid values.
          */
         if (!hasFocus) {
-            String str = String.valueOf(((TextView) v).getText());
-            if ("".equals(str)) {
-                
-                // Restore to the old value as we don't allow empty values
-                updateView();
-            } else {
-                
-                // Check the new value and ensure it's in range
-                validateCurrentView(str);
-            }
+            validateInput(v);
+        }
+    }
+
+    private void validateInput(View v) {
+        String str = String.valueOf(((TextView) v).getText());
+        if ("".equals(str)) {
+
+            // Restore to the old value as we don't allow empty values
+            updateView();
+        } else {
+
+            // Check the new value and ensure it's in range
+            validateCurrentView(str);
         }
     }
 

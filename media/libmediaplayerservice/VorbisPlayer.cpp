@@ -55,7 +55,7 @@ static status_t STATE_OPEN = 2;
 
 VorbisPlayer::VorbisPlayer() :
     mAudioBuffer(NULL), mPlayTime(-1), mDuration(-1), mState(STATE_ERROR),
-    mStreamType(AudioTrack::MUSIC), mLoop(false), mAndroidLoop(false),
+    mStreamType(AudioSystem::MUSIC), mLoop(false), mAndroidLoop(false),
     mExit(false), mPaused(false), mRender(false), mRenderTid(-1)
 {
     LOGV("constructor\n");
@@ -455,12 +455,14 @@ int VorbisPlayer::render() {
                     current_section = 0;
                     numread = ov_read(&mVorbisFile, mAudioBuffer, AUDIOBUFFER_SIZE, &current_section);
                 } else {
-                    sendEvent(MEDIA_PLAYBACK_COMPLETE);
                     mAudioSink->stop();
                     audioStarted = false;
                     mRender = false;
                     mPaused = true;
                     int endpos = ov_time_tell(&mVorbisFile);
+
+                    LOGV("send MEDIA_PLAYBACK_COMPLETE");
+                    sendEvent(MEDIA_PLAYBACK_COMPLETE);
 
                     // wait until we're started again
                     LOGV("playback complete - wait for signal");

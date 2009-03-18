@@ -531,33 +531,34 @@ public class WebViewDatabase {
      * @param url The url
      * @return CacheResult The CacheManager.CacheResult
      */
-    @SuppressWarnings("deprecation")
     CacheResult getCache(String url) {
         if (url == null || mCacheDatabase == null) {
             return null;
         }
 
-        CacheResult ret = null;
-        final String s = "SELECT filepath, lastmodify, etag, expires, mimetype, encoding, httpstatus, location, contentlength FROM cache WHERE url = ";
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(s);
-        DatabaseUtils.appendEscapedSQLString(sb, url);
-        Cursor cursor = mCacheDatabase.rawQuery(sb.toString(), null);
+        Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath, lastmodify, etag, expires, "
+                    + "mimetype, encoding, httpstatus, location, contentlength "
+                    + "FROM cache WHERE url = ?",
+                new String[] { url });
 
-        if (cursor.moveToFirst()) {
-            ret = new CacheResult();
-            ret.localPath = cursor.getString(0);
-            ret.lastModified = cursor.getString(1);
-            ret.etag = cursor.getString(2);
-            ret.expires = cursor.getLong(3);
-            ret.mimeType = cursor.getString(4);
-            ret.encoding = cursor.getString(5);
-            ret.httpStatusCode = cursor.getInt(6);
-            ret.location = cursor.getString(7);
-            ret.contentLength = cursor.getLong(8);
+        try {
+            if (cursor.moveToFirst()) {
+                CacheResult ret = new CacheResult();
+                ret.localPath = cursor.getString(0);
+                ret.lastModified = cursor.getString(1);
+                ret.etag = cursor.getString(2);
+                ret.expires = cursor.getLong(3);
+                ret.mimeType = cursor.getString(4);
+                ret.encoding = cursor.getString(5);
+                ret.httpStatusCode = cursor.getInt(6);
+                ret.location = cursor.getString(7);
+                ret.contentLength = cursor.getLong(8);
+                return ret;
+            }
+        } finally {
+            if (cursor != null) cursor.close();
         }
-        cursor.close();
-        return ret;
+        return null;
     }
 
     /**
@@ -565,16 +566,12 @@ public class WebViewDatabase {
      * 
      * @param url The url
      */
-    @SuppressWarnings("deprecation")
     void removeCache(String url) {
         if (url == null || mCacheDatabase == null) {
             return;
         }
 
-        StringBuilder sb = new StringBuilder(256);
-        sb.append("DELETE FROM cache WHERE url = ");
-        DatabaseUtils.appendEscapedSQLString(sb, url);
-        mCacheDatabase.execSQL(sb.toString());
+        mCacheDatabase.execSQL("DELETE FROM cache WHERE url = ?", new String[] { url });
     }
 
     /**

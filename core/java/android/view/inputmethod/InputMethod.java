@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -113,12 +114,15 @@ public interface InputMethod {
      * is ready for this input method to process received events and send result
      * text back to the application.
      * 
-     * @param attribute The attribute of the text box (typically, a EditText)
+     * @param inputConnection Optional specific input connection for
+     * communicating with the text box; if null, you should use the generic
+     * bound input connection.
+     * @param info Information about the text box (typically, an EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
-    public void startInput(EditorInfo attribute);
+    public void startInput(InputConnection inputConnection, EditorInfo info);
 
     /**
      * This method is called when the state of this input method needs to be
@@ -128,12 +132,15 @@ public interface InputMethod {
      * Typically, this method is called when the input focus is moved from one
      * text box to another.
      * 
+     * @param inputConnection Optional specific input connection for
+     * communicating with the text box; if null, you should use the generic
+     * bound input connection.
      * @param attribute The attribute of the text box (typically, a EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
-    public void restartInput(EditorInfo attribute);
+    public void restartInput(InputConnection inputConnection, EditorInfo attribute);
 
     /**
      * Create a new {@link InputMethodSession} that can be handed to client
@@ -165,7 +172,7 @@ public interface InputMethod {
     public void revokeSession(InputMethodSession session);
     
     /**
-     * Flag for {@link #showSoftInput(int)}: this show has been explicitly
+     * Flag for {@link #showSoftInput}: this show has been explicitly
      * requested by the user.  If not set, the system has decided it may be
      * a good idea to show the input method based on a navigation operation
      * in the UI.
@@ -173,15 +180,38 @@ public interface InputMethod {
     public static final int SHOW_EXPLICIT = 0x00001;
     
     /**
+     * Flag for {@link #showSoftInput}: this show has been forced to
+     * happen by the user.  If set, the input method should remain visible
+     * until deliberated dismissed by the user in its UI.
+     */
+    public static final int SHOW_FORCED = 0x00002;
+    
+    /**
      * Request that any soft input part of the input method be shown to the user.
      * 
-     * @param flags Provide additional information about the show request.
+     * @param flags Provides additional information about the show request.
      * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
-    public void showSoftInput(int flags);
+    public void showSoftInput(int flags, ResultReceiver resultReceiver);
     
     /**
      * Request that any soft input part of the input method be hidden from the user.
+     * @param flags Provides additional information about the show request.
+     * Currently always 0.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
-    public void hideSoftInput();
+    public void hideSoftInput(int flags, ResultReceiver resultReceiver);
 }

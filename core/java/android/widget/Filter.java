@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 /**
  * <p>A filter constrains data with a filtering pattern.</p>
@@ -36,14 +37,16 @@ import android.os.Message;
  * @see android.widget.Filterable
  */
 public abstract class Filter {
+    private static final String LOG_TAG = "Filter";
+    
     private static final String THREAD_NAME = "Filter";
     private static final int FILTER_TOKEN = 0xD0D0F00D;
     private static final int FINISH_TOKEN = 0xDEADBEEF;
-    
+
     private Handler mThreadHandler;
     private Handler mResultHandler;
-    private String mConstraint;
-    private boolean mConstraintIsValid = false;
+
+    private final Object mLock = new Object();
 
     /**
      * <p>Creates a new asynchronous filter.</p>
@@ -80,15 +83,7 @@ public abstract class Filter {
      * @see #publishResults(CharSequence, android.widget.Filter.FilterResults)
      */
     public final void filter(CharSequence constraint, FilterListener listener) {
-        synchronized (this) {
-            String constraintAsString = constraint != null ? constraint.toString() : null;
-            if (mConstraintIsValid && (
-                    (constraintAsString == null && mConstraint == null) ||
-                    (constraintAsString != null && constraintAsString.equals(mConstraint)))) {
-                // nothing to do
-                return;
-            }
-
+        synchronized (mLock) {
             if (mThreadHandler == null) {
                 HandlerThread thread = new HandlerThread(THREAD_NAME);
                 thread.start();
@@ -100,16 +95,13 @@ public abstract class Filter {
             RequestArguments args = new RequestArguments();
             // make sure we use an immutable copy of the constraint, so that
             // it doesn't change while the filter operation is in progress
-            args.constraint = constraintAsString;
+            args.constraint = constraint != null ? constraint.toString() : null;
             args.listener = listener;
             message.obj = args;
     
             mThreadHandler.removeMessages(FILTER_TOKEN);
             mThreadHandler.removeMessages(FINISH_TOKEN);
             mThreadHandler.sendMessage(message);
-            
-            mConstraint = constraintAsString;
-            mConstraintIsValid = true;
         }
     }
 
@@ -221,13 +213,16 @@ public abstract class Filter {
                     RequestArguments args = (RequestArguments) msg.obj;
                     try {
                         args.results = performFiltering(args.constraint);
+                    } catch (Exception e) {
+                        args.results = new FilterResults();
+                        Log.w(LOG_TAG, "An exception occured during performFiltering()!", e);
                     } finally {
                         message = mResultHandler.obtainMessage(what);
                         message.obj = args;
                         message.sendToTarget();
                     }
 
-                    synchronized (this) {
+                    synchronized (mLock) {
                         if (mThreadHandler != null) {
                             Message finishMessage = mThreadHandler.obtainMessage(FINISH_TOKEN);
                             mThreadHandler.sendMessageDelayed(finishMessage, 3000);
@@ -235,7 +230,7 @@ public abstract class Filter {
                     }
                     break;
                 case FINISH_TOKEN:
-                    synchronized (this) {
+                    synchronized (mLock) {
                         if (mThreadHandler != null) {
                             mThreadHandler.getLooper().quit();
                             mThreadHandler = null;

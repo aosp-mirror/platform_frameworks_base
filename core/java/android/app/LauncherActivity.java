@@ -18,14 +18,23 @@ package android.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -43,33 +52,59 @@ import java.util.List;
  *
  */
 public abstract class LauncherActivity extends ListActivity {
+
+    Intent mIntent;
+    PackageManager mPackageManager;
     
+    /**
+     * An item in the list
+     */
+    public static class ListItem {
+        public CharSequence label;
+        //public CharSequence description;
+        public Drawable icon;
+        public String packageName;
+        public String className;
+        
+        ListItem(PackageManager pm, ResolveInfo resolveInfo, IconResizer resizer) {
+            label = resolveInfo.loadLabel(pm);
+            if (label == null && resolveInfo.activityInfo != null) {
+                label = resolveInfo.activityInfo.name;
+            }
+            
+            /*
+            if (resolveInfo.activityInfo != null &&
+                    resolveInfo.activityInfo.applicationInfo != null) {
+                description = resolveInfo.activityInfo.applicationInfo.loadDescription(pm);
+            }
+            */
+            
+            icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
+            packageName = resolveInfo.activityInfo.applicationInfo.packageName;
+            className = resolveInfo.activityInfo.name;
+        }
+
+        public ListItem() {
+        }
+    }
+
     /**
      * Adapter which shows the set of activities that can be performed for a given intent.
      */
     private class ActivityAdapter extends BaseAdapter implements Filterable {
         private final Object lock = new Object();
-        private ArrayList<ResolveInfo> mOriginalValues;
+        private ArrayList<ListItem> mOriginalValues;
 
-        protected final Context mContext;
-        protected final Intent mIntent;
         protected final LayoutInflater mInflater;
 
-        protected List<ResolveInfo> mActivitiesList;
+        protected List<ListItem> mActivitiesList;
 
         private Filter mFilter;
-
-        public ActivityAdapter(Context context, Intent intent) {
-            mContext = context;
-            mIntent = new Intent(intent);
-            mIntent.setComponent(null);
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            PackageManager pm = context.getPackageManager();
-            mActivitiesList = pm.queryIntentActivities(intent, 0);
-            if (mActivitiesList != null) {
-                Collections.sort(mActivitiesList, new ResolveInfo.DisplayNameComparator(pm));
-            }
+        
+        public ActivityAdapter() {
+            mInflater = (LayoutInflater) LauncherActivity.this.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            mActivitiesList = makeListItems();
         }
 
         public Intent intentForPosition(int position) {
@@ -78,8 +113,8 @@ public abstract class LauncherActivity extends ListActivity {
             }
 
             Intent intent = new Intent(mIntent);
-            ActivityInfo ai = mActivitiesList.get(position).activityInfo;
-            intent.setClassName(ai.applicationInfo.packageName, ai.name);
+            ListItem item = mActivitiesList.get(position);
+            intent.setClassName(item.packageName, item.className);
             return intent;
         }
 
@@ -99,7 +134,7 @@ public abstract class LauncherActivity extends ListActivity {
             View view;
             if (convertView == null) {
                 view = mInflater.inflate(
-                        com.android.internal.R.layout.simple_list_item_1, parent, false);
+                        com.android.internal.R.layout.activity_list_item_2, parent, false);
             } else {
                 view = convertView;
             }
@@ -107,35 +142,22 @@ public abstract class LauncherActivity extends ListActivity {
             return view;
         }
 
-        private char getCandidateLetter(ResolveInfo info) {
-            PackageManager pm = mContext.getPackageManager();
-            CharSequence label = info.loadLabel(pm);
-
-            if (label == null) {
-                label = info.activityInfo.name;
-            }
-
-            return Character.toLowerCase(label.charAt(0));
+        private void bindView(View view, ListItem item) {
+            TextView text = (TextView) view;
+            text.setText(item.label);
+            text.setCompoundDrawablesWithIntrinsicBounds(item.icon, null, null, null);
         }
-
-        private void bindView(View view, ResolveInfo info) {
-            TextView text = (TextView) view.findViewById(com.android.internal.R.id.text1);
-
-            PackageManager pm = mContext.getPackageManager();
-            CharSequence label = info.loadLabel(pm);
-            text.setText(label != null ? label : info.activityInfo.name);
-        }
-
+        
         public Filter getFilter() {
             if (mFilter == null) {
                 mFilter = new ArrayFilter();
             }
             return mFilter;
         }
-
+        
         /**
-         * <p>An array filters constrains the content of the array adapter with a prefix. Each item that
-         * does not start with the supplied prefix is removed from the list.</p>
+         * An array filters constrains the content of the array adapter with a prefix. Each
+         * item that does not start with the supplied prefix is removed from the list.
          */
         private class ArrayFilter extends Filter {
             @Override
@@ -144,39 +166,35 @@ public abstract class LauncherActivity extends ListActivity {
 
                 if (mOriginalValues == null) {
                     synchronized (lock) {
-                        mOriginalValues = new ArrayList<ResolveInfo>(mActivitiesList);
+                        mOriginalValues = new ArrayList<ListItem>(mActivitiesList);
                     }
                 }
 
                 if (prefix == null || prefix.length() == 0) {
                     synchronized (lock) {
-                        ArrayList<ResolveInfo> list = new ArrayList<ResolveInfo>(mOriginalValues);
+                        ArrayList<ListItem> list = new ArrayList<ListItem>(mOriginalValues);
                         results.values = list;
                         results.count = list.size();
                     }
                 } else {
-                    final PackageManager pm = mContext.getPackageManager();
                     final String prefixString = prefix.toString().toLowerCase();
 
-                    ArrayList<ResolveInfo> values = mOriginalValues;
+                    ArrayList<ListItem> values = mOriginalValues;
                     int count = values.size();
 
-                    ArrayList<ResolveInfo> newValues = new ArrayList<ResolveInfo>(count);
+                    ArrayList<ListItem> newValues = new ArrayList<ListItem>(count);
 
                     for (int i = 0; i < count; i++) {
-                        ResolveInfo value = values.get(i);
+                        ListItem item = values.get(i);
 
-                        final CharSequence label = value.loadLabel(pm);
-                        final CharSequence name = label != null ? label : value.activityInfo.name;
-
-                        String[] words = name.toString().toLowerCase().split(" ");
+                        String[] words = item.label.toString().toLowerCase().split(" ");
                         int wordCount = words.length;
 
                         for (int k = 0; k < wordCount; k++) {
                             final String word = words[k];
 
                             if (word.startsWith(prefixString)) {
-                                newValues.add(value);
+                                newValues.add(item);
                                 break;
                             }
                         }
@@ -192,7 +210,7 @@ public abstract class LauncherActivity extends ListActivity {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 //noinspection unchecked
-                mActivitiesList = (List<ResolveInfo>) results.values;
+                mActivitiesList = (List<ListItem>) results.values;
                 if (results.count > 0) {
                     notifyDataSetChanged();
                 } else {
@@ -201,18 +219,118 @@ public abstract class LauncherActivity extends ListActivity {
             }
         }
     }
-    
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         
-        mAdapter = new ActivityAdapter(this, getTargetIntent());
+    /**
+     * Utility class to resize icons to match default icon size.  
+     */
+    public class IconResizer {
+        // Code is borrowed from com.android.launcher.Utilities. 
+        private int mIconWidth = -1;
+        private int mIconHeight = -1;
+
+        private final Rect mOldBounds = new Rect();
+        private Canvas mCanvas = new Canvas();
+        
+        public IconResizer() {
+            mCanvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.DITHER_FLAG,
+                    Paint.FILTER_BITMAP_FLAG));
+            
+            final Resources resources = LauncherActivity.this.getResources();
+            mIconWidth = mIconHeight = (int) resources.getDimension(
+                    android.R.dimen.app_icon_size);
+        }
+
+        /**
+         * Returns a Drawable representing the thumbnail of the specified Drawable.
+         * The size of the thumbnail is defined by the dimension
+         * android.R.dimen.launcher_application_icon_size.
+         *
+         * This method is not thread-safe and should be invoked on the UI thread only.
+         *
+         * @param icon The icon to get a thumbnail of.
+         *
+         * @return A thumbnail for the specified icon or the icon itself if the
+         *         thumbnail could not be created. 
+         */
+        public Drawable createIconThumbnail(Drawable icon) {
+            int width = mIconWidth;
+            int height = mIconHeight;
+
+            final int iconWidth = icon.getIntrinsicWidth();
+            final int iconHeight = icon.getIntrinsicHeight();
+
+            if (icon instanceof PaintDrawable) {
+                PaintDrawable painter = (PaintDrawable) icon;
+                painter.setIntrinsicWidth(width);
+                painter.setIntrinsicHeight(height);
+            }
+
+            if (width > 0 && height > 0) {
+                if (width < iconWidth || height < iconHeight) {
+                    final float ratio = (float) iconWidth / iconHeight;
+
+                    if (iconWidth > iconHeight) {
+                        height = (int) (width / ratio);
+                    } else if (iconHeight > iconWidth) {
+                        width = (int) (height * ratio);
+                    }
+
+                    final Bitmap.Config c = icon.getOpacity() != PixelFormat.OPAQUE ?
+                                Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+                    final Bitmap thumb = Bitmap.createBitmap(mIconWidth, mIconHeight, c);
+                    final Canvas canvas = mCanvas;
+                    canvas.setBitmap(thumb);
+                    // Copy the old bounds to restore them later
+                    // If we were to do oldBounds = icon.getBounds(),
+                    // the call to setBounds() that follows would
+                    // change the same instance and we would lose the
+                    // old bounds
+                    mOldBounds.set(icon.getBounds());
+                    final int x = (mIconWidth - width) / 2;
+                    final int y = (mIconHeight - height) / 2;
+                    icon.setBounds(x, y, x + width, y + height);
+                    icon.draw(canvas);
+                    icon.setBounds(mOldBounds);
+                    icon = new BitmapDrawable(thumb);
+                } else if (iconWidth < width && iconHeight < height) {
+                    final Bitmap.Config c = Bitmap.Config.ARGB_8888;
+                    final Bitmap thumb = Bitmap.createBitmap(mIconWidth, mIconHeight, c);
+                    final Canvas canvas = mCanvas;
+                    canvas.setBitmap(thumb);
+                    mOldBounds.set(icon.getBounds());
+                    final int x = (width - iconWidth) / 2;
+                    final int y = (height - iconHeight) / 2;
+                    icon.setBounds(x, y, x + iconWidth, y + iconHeight);
+                    icon.draw(canvas);
+                    icon.setBounds(mOldBounds);
+                    icon = new BitmapDrawable(thumb);
+                }
+            }
+
+            return icon;
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        
+        mPackageManager = getPackageManager();
+    
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setProgressBarIndeterminateVisibility(true);
+        setContentView(com.android.internal.R.layout.activity_list);
+        
+            
+        mIntent = new Intent(getTargetIntent());
+        mIntent.setComponent(null);
+        mAdapter = new ActivityAdapter();
         
         setListAdapter(mAdapter);
         getListView().setTextFilterEnabled(true);
+        
+        setProgressBarIndeterminateVisibility(false);
     }
-
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -221,6 +339,42 @@ public abstract class LauncherActivity extends ListActivity {
         startActivity(intent);
     }
     
-    protected abstract Intent getTargetIntent();
-   
+    /**
+     * Return the actual Intent for a specific position in our
+     * {@link android.widget.ListView}.
+     * @param position The item whose Intent to return
+     */
+    protected Intent intentForPosition(int position) {
+        ActivityAdapter adapter = (ActivityAdapter) mAdapter;
+        return adapter.intentForPosition(position);
+    }
+    
+    /**
+     * Get the base intent to use when running
+     * {@link PackageManager#queryIntentActivities(Intent, int)}.
+     */
+    protected Intent getTargetIntent() {
+        return new Intent();
+    }
+
+    /**
+     * Perform the query to determine which results to show and return a list of them.
+     */
+    public List<ListItem> makeListItems() {
+        // Load all matching activities and sort correctly
+        List<ResolveInfo> list = mPackageManager.queryIntentActivities(mIntent,
+                /* no flags */ 0);
+        Collections.sort(list, new ResolveInfo.DisplayNameComparator(mPackageManager));
+        
+        IconResizer resizer = new IconResizer();
+        
+        ArrayList<ListItem> result = new ArrayList<ListItem>(list.size());
+        int listSize = list.size();
+        for (int i = 0; i < listSize; i++) {
+            ResolveInfo resolveInfo = list.get(i);
+            result.add(new ListItem(mPackageManager, resolveInfo, resizer));
+        }
+
+        return result;
+    }
 }

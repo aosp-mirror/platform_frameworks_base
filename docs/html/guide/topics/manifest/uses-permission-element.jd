@@ -1,0 +1,39 @@
+page.title=&lt;uses-permission&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-permission android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Requests a permission that the application must be granted in 
+order for it to operate correctly.  Permissions are granted when the 
+application is installed, not while it's running.
+
+<p>
+For more information on permissions, see the 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a></code> 
+section in the introduction and the separate 
+<a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> document.  
+A list of permissions defined by the base platform can be found at 
+{@link android.Manifest.permission android.Manifest.permission}.
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="nm"></a>{@code android:name}</dt>
+<dd>The name of the permission.  It can be a permission defined by the 
+application with the <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+element, a permission defined by another application, or one of the 
+standard system permissions, such as "{@code android.permission.CAMERA}" 
+or "{@code android.permission.READ_CONTACTS}".  As these examples show, 
+a permission name typically includes the package name as a prefix.</dd>
+
+</dl></dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code></dd>
+
+</dl>

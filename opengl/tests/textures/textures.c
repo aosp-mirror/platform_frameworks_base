@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <GLES/egl.h>
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
 int main(int argc, char** argv)
 {

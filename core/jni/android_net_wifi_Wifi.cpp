@@ -287,6 +287,24 @@ static jboolean android_net_wifi_stopDriverCommand(JNIEnv* env, jobject clazz)
     return doBooleanCommand("DRIVER STOP", "OK");
 }
 
+static jboolean android_net_wifi_startPacketFiltering(JNIEnv* env, jobject clazz)
+{
+    return doBooleanCommand("DRIVER RXFILTER-ADD 0", "OK")
+	&& doBooleanCommand("DRIVER RXFILTER-ADD 1", "OK")
+	&& doBooleanCommand("DRIVER RXFILTER-START", "OK");
+}
+
+static jboolean android_net_wifi_stopPacketFiltering(JNIEnv* env, jobject clazz)
+{
+    jboolean result = doBooleanCommand("DRIVER RXFILTER-STOP", "OK");
+    if (result) {
+	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 1", "OK");
+	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 0", "OK");
+    }
+
+    return result;
+}
+
 static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
 {
     char reply[256];
@@ -374,6 +392,16 @@ static jboolean android_net_wifi_setBluetoothCoexistenceModeCommand(JNIEnv* env,
     char cmdstr[256];
 
     int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER BTCOEXMODE %d", mode);
+    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
+
+    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
+}
+
+static jboolean android_net_wifi_setBluetoothCoexistenceScanModeCommand(JNIEnv* env, jobject clazz, jboolean setCoexScanMode)
+{
+    char cmdstr[256];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER BTCOEXSCAN-%s", setCoexScanMode ? "START" : "STOP");
     int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
 
     return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
@@ -478,11 +506,15 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanModeCommand", "(Z)Z", (void*) android_net_wifi_setScanModeCommand },
     { "startDriverCommand", "()Z", (void*) android_net_wifi_startDriverCommand },
     { "stopDriverCommand", "()Z", (void*) android_net_wifi_stopDriverCommand },
+    { "startPacketFiltering", "()Z", (void*) android_net_wifi_startPacketFiltering },
+    { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
     { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceModeCommand },
+    { "setBluetoothCoexistenceScanModeCommand", "(Z)Z",
+    		(void*) android_net_wifi_setBluetoothCoexistenceScanModeCommand },
     { "getRssiCommand", "()I", (void*) android_net_wifi_getRssiCommand },
     { "getLinkSpeedCommand", "()I", (void*) android_net_wifi_getLinkSpeedCommand },
     { "getMacAddressCommand", "()Ljava/lang/String;", (void*) android_net_wifi_getMacAddressCommand },

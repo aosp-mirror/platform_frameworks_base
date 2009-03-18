@@ -93,6 +93,7 @@ public class FrameLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#FrameLayout_foregroundGravity
      */
+    @android.view.RemotableViewMethod
     public void setForegroundGravity(int foregroundGravity) {
         if (mForegroundGravity != foregroundGravity) {
             if ((foregroundGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
@@ -348,6 +349,7 @@ public class FrameLayout extends ViewGroup {
      * 
      * @attr ref android.R.styleable#FrameLayout_measureAllChildren
      */
+    @android.view.RemotableViewMethod
     public void setMeasureAllChildren(boolean measureAll) {
         mMeasureAllChildren = measureAll;
     }

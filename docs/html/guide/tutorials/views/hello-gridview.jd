@@ -25,6 +25,7 @@ are acquired from a {@link android.widget.ListAdapter}.</p>
     android:stretchMode="columnWidth"
     android:gravity="center"
 />
+</pre>
 </li>
   <li>Open the HelloGridView Java file. Insert the following for the <code>onCreate()</code> method:
 <pre>

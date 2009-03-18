@@ -525,6 +525,21 @@ public abstract class Window {
     }
 
     /**
+     * Specify custom animations to use for the window, as per
+     * {@link WindowManager.LayoutParams#windowAnimations
+     * WindowManager.LayoutParams.windowAnimations}.  Providing anything besides
+     * 0 here will override the animations the window would
+     * normally retrieve from its theme.
+     */
+    public void setWindowAnimations(int resId) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.windowAnimations = resId;
+        if (mCallback != null) {
+            mCallback.onWindowAttributesChanged(attrs);
+        }
+    }
+
+    /**
      * Specify an explicit soft input mode to use for the window, as per
      * {@link WindowManager.LayoutParams#softInputMode
      * WindowManager.LayoutParams.softInputMode}.  Providing anything besides

@@ -104,7 +104,7 @@ Emulator 2, adb: 5557 ...
 
     <pre>adb [-d|-e|-s &lt;serialNumber&gt;] &lt;command&gt; </pre>
 
-<p>When you issue a command, the program invokes an adb client. The client is not specifically associated with any emulator instance, so if multiple emulators/devices are running, you need to use the <code>-d</code> option to specify the target instance to which the command should be directed. For more information about using this option, see <a href"#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a>. </p>
+<p>When you issue a command, the program invokes an adb client. The client is not specifically associated with any emulator instance, so if multiple emulators/devices are running, you need to use the <code>-d</code> option to specify the target instance to which the command should be directed. For more information about using this option, see <a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a>. </p>
 
 <a name="devicestatus"></a>
 

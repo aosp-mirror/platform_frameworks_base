@@ -103,7 +103,15 @@
     <string name="global_action_toggle_silent_mode">"静音模式"</string>
     <string name="global_action_silent_mode_on_status">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status">"声音已开启"</string>
+    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
+    <skip />
+    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
+    <skip />
     <string name="safeMode">"安全模式"</string>
+    <!-- no translation found for android_system_label (6577375335728551336) -->
+    <skip />
     <string name="permgrouplab_costMoney">"需要您支付费用的服务"</string>
     <string name="permgroupdesc_costMoney">"允许应用程序执行可能需要您支付费用的操作。"</string>
     <string name="permgrouplab_messages">"您的信息"</string>
@@ -262,6 +270,8 @@
     <string name="permdesc_reboot">"允许应用程序强制手机重新引导。"</string>
     <string name="permlab_mount_unmount_filesystems">"装载和卸载文件系统"</string>
     <string name="permdesc_mount_unmount_filesystems">"允许应用程序装载和卸载文件系统以进行可移动存储。"</string>
+    <string name="permlab_mount_format_filesystems">"格式化外部存储设备"</string>
+    <string name="permdesc_mount_format_filesystems">"允许应用程序格式化可移除的存储设备。"</string>
     <string name="permlab_vibrate">"控制振动器"</string>
     <string name="permdesc_vibrate">"允许应用程序控制振动器。"</string>
     <string name="permlab_flashlight">"控制闪光灯"</string>
@@ -276,6 +286,8 @@
     <string name="permdesc_locationUpdates">"允许启用/禁用来自收音机的位置更新通知。普通应用程序不能使用此权限。"</string>
     <string name="permlab_checkinProperties">"访问检入属性"</string>
     <string name="permdesc_checkinProperties">"允许对检入服务上传的属性进行读/写访问。普通应用程序不能使用此权限。"</string>
+    <string name="permlab_bindGadget">"选择小工具"</string>
+    <string name="permdesc_bindGadget">"允许应用程序告诉系统哪些应用程序可以使用哪些小工具。应用程序可以借此授予其他应用程序访问个人数据的权限。普通应用程序不能使用此权限。"</string>
     <string name="permlab_modifyPhoneState">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState">"允许应用程序控制设备的手机功能。具有此权限的应用程序可能会切换网络，打开和关闭手机收音机以及类似操作，而不会通知您。"</string>
     <string name="permlab_readPhoneState">"读取手机状态"</string>
@@ -304,6 +316,8 @@
     <string name="permdesc_writeApnSettings">"允许应用程序修改 APN 设置，例如任何 APN 的代理和端口。"</string>
     <string name="permlab_changeNetworkState">"更改网络连接性"</string>
     <string name="permdesc_changeNetworkState">"允许应用程序更改状态网络连接性。"</string>
+    <string name="permlab_changeBackgroundDataSetting">"更改背景数据使用设置"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"允许应用程序更改背景数据使用设置。"</string>
     <string name="permlab_accessWifiState">"查看 Wi-Fi 状态"</string>
     <string name="permdesc_accessWifiState">"允许应用程序查看有关 Wi-Fi 状态的信息。"</string>
     <string name="permlab_changeWifiState">"更改 Wi-Fi 状态"</string>
@@ -324,14 +338,10 @@
     <string name="permdesc_subscribedFeedsRead">"允许应用程序获取有关当前同步的供稿的详情。"</string>
     <string name="permlab_subscribedFeedsWrite">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite">"允许应用程序修改您当前同步的供稿。这样恶意程序可以更改您同步的供稿。"</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permlab_readDictionary">"读取用户定义的词典"</string>
+    <string name="permdesc_readDictionary">"允许应用程序读取用户在用户词典中存储的任意私有字词、名称和短语。"</string>
+    <string name="permlab_writeDictionary">"写入用户定义的词典"</string>
+    <string name="permdesc_writeDictionary">"允许应用程序向用户词典中写入新词。"</string>
   <string-array name="phoneTypes">
     <item>"家庭"</item>
     <item>"手机"</item>
@@ -387,7 +397,8 @@
     <string name="lockscreen_emergency_call">"紧急电话"</string>
     <string name="lockscreen_pattern_correct">"正确！"</string>
     <string name="lockscreen_pattern_wrong">"很抱歉，请重试"</string>
-    <string name="lockscreen_plugged_in">"正在充电 (<xliff:g id="NUMBER">%d%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
+    <skip />
     <string name="lockscreen_low_battery">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short">"没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message">"手机中无 SIM 卡。"</string>
@@ -410,15 +421,15 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <!-- no translation found for hour_ampm (4329881288269772723) -->
     <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
     <skip />
     <string name="status_bar_clear_all_button">"清除通知"</string>
     <string name="status_bar_no_notifications_title">"无通知"</string>
     <string name="status_bar_ongoing_events_title">"正在进行的"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
-    <!-- no translation found for battery_status_text_percent_format (8818848472818880005) -->
+    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
     <string name="battery_status_charging">"正在充电..."</string>
     <string name="battery_low_title">"请连接充电器"</string>
@@ -428,12 +439,9 @@
     <string name="factorytest_not_system">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action">"未发现支持 FACTORY_TEST 操作的包。"</string>
     <string name="factorytest_reboot">"重新引导"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"“<xliff:g id="TITLE">%s</xliff:g>”处的页面表明："</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"是否从该页面导航至它处？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"选择“确定”继续，或选择“取消”留在当前页面。"</string>
     <string name="save_password_label">"确认"</string>
     <string name="save_password_message">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow">"暂不保存"</string>
@@ -484,22 +492,38 @@
     <item quantity="one">"明天"</item>
     <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 秒前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 分钟前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 分钟前"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 小时前"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"昨天"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"1 秒后"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 秒后"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"1 分钟后"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 分钟后"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"1 小时后"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 小时后"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"明天"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
+  </plurals>
     <string name="preposition_for_date">"在 %s"</string>
     <string name="preposition_for_time">"在 %s"</string>
     <string name="preposition_for_year">"%s 年内"</string>
@@ -541,27 +565,25 @@
     <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
-    <string name="full_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
-    <string name="medium_date_month_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="MONTH">MMM</xliff:g> 月 <xliff:g id="DAY">dd</xliff:g> 日"</string>
-    <string name="medium_date_day_first">"<xliff:g id="YEAR">yyyy</xliff:g> 年 <xliff:g id="DAY">dd</xliff:g> 月 <xliff:g id="MONTH">MMM</xliff:g> 日"</string>
-    <string name="twelve_hour_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format">"<xliff:g id="HOUR">H</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="DAY">d</xliff:g>' 月 '<xliff:g id="MONTH">MMM</xliff:g>' 日'"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <!-- no translation found for month_day (5565829181417740906) -->
+    <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (7026169712234774086) -->
+    <!-- no translation found for month (1976700695144952053) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for month_year (9219019380312413367) -->
+    <!-- no translation found for month_year (2106203387378728384) -->
     <skip />
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日 <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
@@ -590,11 +612,11 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for abbrev_month_year (3856424847226891943) -->
+    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (5028815883653985933) -->
+    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <!-- no translation found for abbrev_month (7304935052615731208) -->
     <skip />
     <string name="day_of_week_long_sunday">"周日"</string>
     <string name="day_of_week_long_monday">"周一"</string>
@@ -679,6 +701,7 @@
     <string name="paste">"粘贴"</string>
     <string name="copyUrl">"复制网址"</string>
     <string name="inputMethod">"输入方法"</string>
+    <string name="addToDictionary">"将“%s”添加到词典"</string>
     <string name="editTextMenuTitle">"编辑文本"</string>
     <string name="low_internal_storage_view_title">"存储空间不足"</string>
     <string name="low_internal_storage_view_text">"手机存储空间在减少。"</string>
@@ -686,6 +709,7 @@
     <string name="cancel">"取消"</string>
     <string name="yes">"正常"</string>
     <string name="no">"取消"</string>
+    <string name="dialog_alert_title">"注意事项"</string>
     <string name="capital_on">"开启"</string>
     <string name="capital_off">"关闭"</string>
     <string name="whichApplication">"使用以下内容完成操作"</string>
@@ -709,7 +733,7 @@
     <string name="volume_music">"媒体音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"正通过蓝牙播放"</string>
     <string name="volume_call">"来电音量"</string>
-    <string name="volume_call_hint_playing_through_bluetooth">"正通过蓝牙播放"</string>
+    <string name="volume_bluetooth_call">"使用蓝牙时的通话音量"</string>
     <string name="volume_alarm">"警告音量"</string>
     <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
@@ -745,8 +769,47 @@
     <string name="usb_storage_error_message">"使用 SD 卡进行 USB 存储时出现问题。"</string>
     <string name="usb_storage_notification_title">"USB 已连接"</string>
     <string name="usb_storage_notification_message">"选择以将文件复制到计算机或从计算机复制文件。"</string>
+    <string name="usb_storage_stop_notification_title">"关闭 USB 存储设备"</string>
+    <string name="usb_storage_stop_notification_message">"选中以关闭 USB 存储设备。"</string>
+    <string name="usb_storage_stop_title">"关闭 USB 存储设备"</string>
+    <string name="usb_storage_stop_message">"在关闭 USB 存储设备前，请确保您已卸载了 USB 主设备。选择“关闭”关闭 USB 存储设备。"</string>
+    <string name="usb_storage_stop_button_mount">"关闭"</string>
+    <string name="usb_storage_stop_button_unmount">"取消"</string>
+    <string name="usb_storage_stop_error_message">"关闭 USB 存储设备时遇到问题。请检查是否卸载了 USB 主设备，然后重试。"</string>
+    <string name="extmedia_format_title">"格式化 SD 卡"</string>
+    <string name="extmedia_format_message">"您确定要格式化 SD 卡？卡上的所有数据都会丢失。"</string>
+    <string name="extmedia_format_button_format">"格式化"</string>
     <string name="select_input_method">"选择输入方法"</string>
-    <string name="fast_scroll_alphabet">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><font fgcolor="#ff000000" bgcolor="#ff8080ff"><u>"候选人"</u>"u&gt;"</font></string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"候选"</u></string>
+    <string name="ext_media_checking_notification_title">"正在准备 SD 卡"</string>
+    <string name="ext_media_checking_notification_message">"检查是否有错误"</string>
+    <string name="ext_media_nofs_notification_title">"空 SD 卡"</string>
+    <string name="ext_media_nofs_notification_message">"SD 卡为空或使用不支持的文件系统。"</string>
+    <string name="ext_media_unmountable_notification_title">"SD 卡受损"</string>
+    <string name="ext_media_unmountable_notification_message">"SD 卡受损。您可能需要重新格式化您的卡。"</string>
+    <string name="ext_media_badremoval_notification_title">"SD 卡被意外拔除"</string>
+    <string name="ext_media_badremoval_notification_message">"先卸载 SD 卡再拔除，以避免数据丢失。"</string>
+    <string name="ext_media_safe_unmount_notification_title">"SD 卡已安全移除"</string>
+    <string name="ext_media_safe_unmount_notification_message">"现在可以安全移除 SD 卡。"</string>
+    <string name="ext_media_nomedia_notification_title">"已移除 SD 卡"</string>
+    <string name="ext_media_nomedia_notification_message">"SD 卡已移除。请插入新 SD 卡来增加您的设备存储空间。"</string>
+    <string name="activity_list_empty">"找不到匹配的活动"</string>
+    <string name="permlab_pkgUsageStats">"更新组件使用情况统计"</string>
+    <string name="permdesc_pkgUsageStats">"允许修改收集的组件使用情况统计。普通应用程序不能使用此权限。"</string>
+    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <skip />
+    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <skip />
+    <!-- no translation found for ime_action_go (8320845651737369027) -->
+    <skip />
+    <!-- no translation found for ime_action_search (658110271822807811) -->
+    <skip />
+    <!-- no translation found for ime_action_send (2316166556349314424) -->
+    <skip />
+    <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
 </resources>

@@ -118,6 +118,7 @@ public class MediaScanner
     private static final String NOTIFICATIONS_DIR = "/notifications/";
     private static final String ALARMS_DIR = "/alarms/";
     private static final String MUSIC_DIR = "/music/";
+    private static final String PODCAST_DIR = "/podcasts/";
     
     private static final String[] ID3_GENRES = {
         // ID3v1 Genres
@@ -455,8 +456,9 @@ public class MediaScanner
                     boolean ringtones = (path.indexOf(RINGTONES_DIR) > 0);
                     boolean notifications = (path.indexOf(NOTIFICATIONS_DIR) > 0);
                     boolean alarms = (path.indexOf(ALARMS_DIR) > 0);
+                    boolean podcasts = (path.indexOf(PODCAST_DIR) > 0);
                     boolean music = (path.indexOf(MUSIC_DIR) > 0) ||
-                        (!ringtones && !notifications && !alarms);
+                        (!ringtones && !notifications && !alarms && !podcasts);
 
                     if (mFileType == MediaFile.FILE_TYPE_MP3 ||
                             mFileType == MediaFile.FILE_TYPE_MP4 ||
@@ -473,7 +475,7 @@ public class MediaScanner
                         // we used to compute the width and height but it's not worth it
                     }
                     
-                    result = endFile(entry, ringtones, notifications, alarms, music);
+                    result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
@@ -586,7 +588,8 @@ public class MediaScanner
             return map;
         }
     
-        public Uri endFile(FileCacheEntry entry, boolean ringtones, boolean notifications, boolean alarms, boolean music) 
+        private Uri endFile(FileCacheEntry entry, boolean ringtones, boolean notifications,
+                boolean alarms, boolean music, boolean podcasts) 
                 throws RemoteException {
             // update database
             Uri tableUri;
@@ -634,6 +637,7 @@ public class MediaScanner
                 values.put(Audio.Media.IS_NOTIFICATION, notifications);
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
+                values.put(Audio.Media.IS_PODCAST, podcasts);
             } else if (isImage) {
                 // nothing right now
             }

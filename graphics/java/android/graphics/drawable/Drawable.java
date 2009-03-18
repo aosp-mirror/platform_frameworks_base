@@ -29,6 +29,7 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.util.StateSet;
 import android.util.Xml;
+import android.util.TypedValue;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -91,7 +92,7 @@ import android.util.Xml;
  *     whose overall size is modified based on the current level.
  * </ul>
  * <p>For information and examples of creating drawable resources (XML or bitmap files that
- * can be loaded in code), see <a href="{@docRoot}devel/resources-i18n.html">Resources
+ * can be loaded in code), see <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources
  * and Internationalization</a>.
  */
 public abstract class Drawable {
@@ -102,7 +103,7 @@ public abstract class Drawable {
     private Rect mBounds = new Rect();
     /*package*/ Callback mCallback = null;
     private boolean mVisible = true;
-    
+
     /**
      * Draw in its bounds (set via setBounds) respecting optional effects such
      * as alpha (set via setAlpha) and color filter (set via setColorFilter).
@@ -618,9 +619,36 @@ public abstract class Drawable {
     }
 
     /**
+     * Make this drawable mutable. This operation cannot be reversed. A mutable
+     * drawable is guaranteed to not share its state with any other drawable.
+     * This is especially useful when you need to modify properties of drawables
+     * loaded from resources. By default, all drawables instances loaded from
+     * the same resource share a common state; if you modify the state of one
+     * instance, all the other instances will receive the same modification.
+     *
+     * Calling this method on a mutable Drawable will have no effect.
+     *
+     * @return This drawable.
+     */
+    public Drawable mutate() {
+        return this;
+    }
+
+    /**
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
+        return createFromResourceStream(null, null, is, srcName);
+    }
+
+    /**
+     * Create a drawable from an inputstream
+     * 
+     * @hide pending API council approval
+     */
+    public static Drawable createFromResourceStream(Resources res, TypedValue value,
+            InputStream is, String srcName) {
+
         if (is == null) {
             return null;
         }
@@ -632,14 +660,14 @@ public abstract class Drawable {
             Rects only to drop them on the floor.
         */
         Rect pad = new Rect();
-        Bitmap  bm = BitmapFactory.decodeStream(is, pad, null);
+        Bitmap  bm = BitmapFactory.decodeStream(res, value, is, pad, null);
         if (bm != null) {
             byte[] np = bm.getNinePatchChunk();
             if (np == null || !NinePatch.isNinePatchChunk(np)) {
                 np = null;
                 pad = null;
             }
-            return drawableFromBitmap(bm, np, pad, srcName);
+            return drawableFromBitmap(res, bm, np, pad, srcName);
         }
         return null;
     }
@@ -647,7 +675,7 @@ public abstract class Drawable {
     /**
      * Create a drawable from an XML document. For more information on how to
      * create resources in XML, see
-     * <a href="{@docRoot}devel/resources-i18n.html">Resources and
+     * <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources and
      * Internationalization</a>.
      */
     public static Drawable createFromXml(Resources r, XmlPullParser parser)
@@ -708,6 +736,11 @@ public abstract class Drawable {
             drawable = new InsetDrawable();
         } else if (name.equals("bitmap")) {
             drawable = new BitmapDrawable();
+            if (r != null) {
+               ((BitmapDrawable) drawable).setDensityScale(r.getDisplayMetrics());
+            }
+        } else if (name.equals("nine-patch")) {
+            drawable = new NinePatchDrawable();
         } else {
             throw new XmlPullParserException(parser.getPositionDescription() +
                     ": invalid drawable tag " + name);
@@ -728,7 +761,7 @@ public abstract class Drawable {
 
         Bitmap bm = BitmapFactory.decodeFile(pathName);
         if (bm != null) {
-            return drawableFromBitmap(bm, null, null, pathName);
+            return drawableFromBitmap(null, bm, null, null, pathName);
         }
 
         return null;
@@ -758,11 +791,19 @@ public abstract class Drawable {
         return null;
     }
 
-    private static Drawable drawableFromBitmap(Bitmap bm, byte[] np, Rect pad, String srcName) {
+    private static Drawable drawableFromBitmap(Resources res, Bitmap bm, byte[] np,
+            Rect pad, String srcName) {
+
         if (np != null) {
             return new NinePatchDrawable(bm, np, pad, srcName);
         }
-        return new BitmapDrawable(bm);
+
+        final BitmapDrawable drawable = new BitmapDrawable(bm);
+        if (res != null) {
+            drawable.setDensityScale(res.getDisplayMetrics());
+        }
+
+        return drawable;
     }
 }
 

@@ -141,6 +141,8 @@ final class StringBlock {
             int type = style[i];
             if (localLOGV) Log.v(TAG, "Applying style span id=" + type
                     + ", start=" + style[i+1] + ", end=" + style[i+2]);
+
+
             if (type == ids.boldId) {
                 buffer.setSpan(new StyleSpan(Typeface.BOLD),
                                style[i+1], style[i+2]+1,
@@ -178,9 +180,8 @@ final class StringBlock {
                                style[i+1], style[i+2]+1,
                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (type == ids.listItemId) {
-                buffer.setSpan(new BulletSpan(10),
-                               style[i+1], style[i+2]+1,
-                               Spannable.SPAN_PARAGRAPH);
+                addParagraphSpan(buffer, new BulletSpan(10),
+                                style[i+1], style[i+2]+1);
             } else if (type == ids.marqueeId) {
                 buffer.setSpan(TextUtils.TruncateAt.MARQUEE,
                                style[i+1], style[i+2]+1,
@@ -194,9 +195,8 @@ final class StringBlock {
                     sub = subtag(tag, ";height=");
                     if (sub != null) {
                         int size = Integer.parseInt(sub);
-                        buffer.setSpan(new Height(size),
-                                       style[i+1], style[i+2]+1,
-                                       Spannable.SPAN_PARAGRAPH);
+                        addParagraphSpan(buffer, new Height(size),
+                                       style[i+1], style[i+2]+1);
                     }
 
                     sub = subtag(tag, ";size=");
@@ -231,12 +231,62 @@ final class StringBlock {
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
+                } else if (tag.startsWith("annotation;")) {
+                    int len = tag.length();
+                    int next;
+
+                    for (int t = tag.indexOf(';'); t < len; t = next) {
+                        int eq = tag.indexOf('=', t);
+                        if (eq < 0) {
+                            break;
+                        }
+
+                        next = tag.indexOf(';', eq);
+                        if (next < 0) {
+                            next = len;
+                        }
+
+                        String key = tag.substring(t + 1, eq);
+                        String value = tag.substring(eq + 1, next);
+
+                        buffer.setSpan(new Annotation(key, value),
+                                       style[i+1], style[i+2]+1,
+                                       Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
                 }
             }
 
             i += 3;
         }
         return new SpannedString(buffer);
+    }
+
+    /**
+     * If a translator has messed up the edges of paragraph-level markup,
+     * fix it to actually cover the entire paragraph that it is attached to
+     * instead of just whatever range they put it on.
+     */
+    private static void addParagraphSpan(Spannable buffer, Object what,
+                                         int start, int end) {
+        int len = buffer.length();
+
+        if (start != 0 && start != len && buffer.charAt(start - 1) != '\n') {
+            for (start--; start > 0; start--) {
+                if (buffer.charAt(start - 1) == '\n') {
+                    break;
+                }
+            }
+        }
+
+        if (end != 0 && end != len && buffer.charAt(end - 1) != '\n') {
+            for (end++; end < len; end++) {
+                if (buffer.charAt(end - 1) == '\n') {
+                    break;
+                }
+            }
+        }
+
+        buffer.setSpan(what, start, end, Spannable.SPAN_PARAGRAPH);
     }
 
     private static String subtag(String full, String attribute) {

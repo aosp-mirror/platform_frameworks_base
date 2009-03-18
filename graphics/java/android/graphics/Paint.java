@@ -109,13 +109,13 @@ public class Paint {
          */
         BUTT    (0),
         /**
-         * The stroke projects out as a square, with the center at the end
-         * of the path.
+         * The stroke projects out as a semicircle, with the center at the
+         * end of the path.
          */
         ROUND   (1),
         /**
-         * The stroke projects out as a semicircle, with the center at the
-         * end of the path.
+         * The stroke projects out as a square, with the center at the end
+         * of the path.
          */
         SQUARE  (2);
         

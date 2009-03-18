@@ -405,13 +405,15 @@ public class ICalendar {
     // TODO: get rid of this -- handle all of the parsing in one pass through
     // the text.
     private static String normalizeText(String text) {
-        // first we deal with line folding, by replacing all "\r\n " strings
-        // with nothing
-        text = text.replaceAll("\r\n ", "");
-
         // it's supposed to be \r\n, but not everyone does that
         text = text.replaceAll("\r\n", "\n");
         text = text.replaceAll("\r", "\n");
+
+        // we deal with line folding, by replacing all "\n " strings
+        // with nothing.  The RFC specifies "\r\n " to be folded, but
+        // we handle "\n " and "\r " too because we can get those.
+        text = text.replaceAll("\n ", "");
+
         return text;
     }
 
@@ -440,7 +442,7 @@ public class ICalendar {
                 current = parseLine(line, state, current);
                 // if the provided component was null, we will return the root
                 // NOTE: in this case, if the first line is not a BEGIN, a
-                // FormatException will get thrown.
+                // FormatException will get thrown.   
                 if (component == null) {
                     component = current;
                 }
@@ -524,8 +526,7 @@ public class ICalendar {
     private static String extractValue(ParserState state)
             throws FormatException {
         String line = state.line;
-        char c = line.charAt(state.index);
-        if (c != ':') {
+        if (state.index >= line.length() || line.charAt(state.index) != ':') {
             throw new FormatException("Expected ':' before end of line in "
                     + line);
         }

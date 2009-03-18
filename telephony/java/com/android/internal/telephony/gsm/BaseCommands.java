@@ -67,6 +67,8 @@ public abstract class BaseCommands implements CommandsInterface
     protected Registrant mSimRefreshRegistrant;
     /** Registrant for handling RING notifications */
     protected Registrant mRingRegistrant;
+    /** Registrant for handling RESTRICTED STATE changed notification */
+    protected Registrant mRestrictedStateRegistrant;
 
     public BaseCommands(Context context) {
         mContext = context;  // May be null (if so we won't log statistics)
@@ -277,6 +279,12 @@ public abstract class BaseCommands implements CommandsInterface
     
     public void setOnCallRing(Handler h, int what, Object obj) {
         mRingRegistrant = new Registrant (h, what, obj);
+    }
+    
+    public void
+    setOnRestrictedStateChanged(Handler h, int what, Object obj)
+    {
+        mRestrictedStateRegistrant = new Registrant (h, what, obj);
     }
     
     //***** Protected Methods

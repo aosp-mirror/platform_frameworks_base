@@ -348,6 +348,21 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
         mFilterQueryProvider = filterQueryProvider;
     }
 
+    /**
+     * Called when the {@link ContentObserver} on the cursor receives a change notification.
+     * The default implementation provides the auto-requery logic, but may be overridden by
+     * sub classes.
+     * 
+     * @see ContentObserver#onChange(boolean)
+     * @hide pending API Council approval
+     */
+    protected void onContentChanged() {
+        if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {
+            if (Config.LOGV) Log.v("Cursor", "Auto requerying " + mCursor + " due to update");
+            mDataValid = mCursor.requery();
+        }
+    }
+
     private class ChangeObserver extends ContentObserver {
         public ChangeObserver() {
             super(new Handler());
@@ -360,10 +375,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
 
         @Override
         public void onChange(boolean selfChange) {
-            if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {
-                if (Config.LOGV) Log.v("Cursor", "Auto requerying " + mCursor + " due to update");
-                mDataValid = mCursor.requery();
-            }
+            onContentChanged();
         }
     }
 

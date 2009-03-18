@@ -56,11 +56,14 @@ public:
                 break;  // eof
             }
             
-            const jbyte* array = env->GetByteArrayElements(fJavaByteArray,
-                                                           NULL);
-            memcpy(buffer, array, n);
-            env->ReleaseByteArrayElements(fJavaByteArray,
-                                          const_cast<jbyte*>(array), JNI_ABORT);
+            env->GetByteArrayRegion(fJavaByteArray, 0, n,
+                                    reinterpret_cast<jbyte*>(buffer));
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                SkDebugf("---- read:GetByteArrayRegion threw an exception\n");
+                return 0;
+            }
             
             buffer = (void*)((char*)buffer + n);
             bytesRead += n;
@@ -189,10 +192,15 @@ public:
                 requested = fCapacity;
             }
 
-            jbyte* array = env->GetByteArrayElements(storage, NULL);
-            memcpy(array, buffer, requested);
-            env->ReleaseByteArrayElements(storage, array, 0);
-
+            env->SetByteArrayRegion(storage, 0, requested,
+                                    reinterpret_cast<const jbyte*>(buffer));
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+                SkDebugf("--- write:SetByteArrayElements threw an exception\n");
+                return false;
+            }
+            
             fEnv->CallVoidMethod(fJavaOutputStream, gOutputStream_writeMethodID,
                                  storage, 0, requested);
             if (env->ExceptionCheck()) {

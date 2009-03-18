@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.webkit.CacheManager.CacheResult;
+import android.webkit.PluginData;
 import android.webkit.UrlInterceptHandler;
 
 import java.util.Iterator;
@@ -82,23 +83,50 @@ public final class UrlInterceptRegistry {
             UrlInterceptHandler handler) {
         return getHandlers().remove(handler);
     }
-    
+
     /**
      * Given an url, returns the CacheResult of the first
      * UrlInterceptHandler interested, or null if none are.
-     * 
+     *
      * @return A CacheResult containing surrogate content.
+     * @Deprecated Use PluginData getPluginData( String url,
+     * Map<String, String> headers) instead.
      */
+    @Deprecated
     public static synchronized CacheResult getSurrogate(
             String url, Map<String, String> headers) {
-        if (urlInterceptDisabled())
+        if (urlInterceptDisabled()) {
             return null;
+        }
         Iterator iter = getHandlers().listIterator();
         while (iter.hasNext()) {
             UrlInterceptHandler handler = (UrlInterceptHandler) iter.next();
             CacheResult result = handler.service(url, headers);
             if (result != null) {
                 return result;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Given an url, returns the PluginData of the first
+     * UrlInterceptHandler interested, or null if none are or if
+     * intercepts are disabled.
+     *
+     * @return A PluginData instance containing surrogate content.
+     */
+    public static synchronized PluginData getPluginData(
+            String url, Map<String, String> headers) {
+        if (urlInterceptDisabled()) {
+            return null;
+        }
+        Iterator iter = getHandlers().listIterator();
+        while (iter.hasNext()) {
+            UrlInterceptHandler handler = (UrlInterceptHandler) iter.next();
+            PluginData data = handler.getPluginData(url, headers);
+            if (data != null) {
+                return data;
             }
         }
         return null;

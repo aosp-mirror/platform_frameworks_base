@@ -27,8 +27,8 @@ import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.ILayoutResult.ILayoutViewInfo;
 import com.android.layoutlib.bridge.LayoutResult.LayoutViewInfo;
 import com.android.ninepatch.NinePatch;
-import com.android.tools.layoutlib.create.OverrideMethod;
 import com.android.tools.layoutlib.create.MethodAdapter;
+import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -40,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.IWindow;
@@ -55,6 +56,7 @@ import android.view.View.MeasureSpec;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -72,6 +74,8 @@ public final class Bridge implements ILayoutBridge {
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
     
     public static class StaticMethodNotImplementedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public StaticMethodNotImplementedException(String msg) {
             super(msg);
         }
@@ -91,14 +95,15 @@ public final class Bridge implements ILayoutBridge {
     private final static Map<String, Map<String, Integer>> sRFullMap =
         new HashMap<String, Map<String,Integer>>();
     
-    private final static Map<Object, Map<String, Bitmap>> sProjectBitmapCache =
-        new HashMap<Object, Map<String, Bitmap>>();
-    private final static Map<Object, Map<String, NinePatch>> sProject9PatchCache =
-        new HashMap<Object, Map<String, NinePatch>>();
+    private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
+        new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
+    private final static Map<Object, Map<String, SoftReference<NinePatch>>> sProject9PatchCache =
+        new HashMap<Object, Map<String, SoftReference<NinePatch>>>();
 
-    private final static Map<String, Bitmap> sFrameworkBitmapCache = new HashMap<String, Bitmap>();
-    private final static Map<String, NinePatch> sFramework9PatchCache =
-        new HashMap<String, NinePatch>();
+    private final static Map<String, SoftReference<Bitmap>> sFrameworkBitmapCache =
+        new HashMap<String, SoftReference<Bitmap>>();
+    private final static Map<String, SoftReference<NinePatch>> sFramework9PatchCache =
+        new HashMap<String, SoftReference<NinePatch>>();
     
     private static Map<String, Map<String, Integer>> sEnumValueMap;
 
@@ -277,17 +282,37 @@ public final class Bridge implements ILayoutBridge {
             isProjectTheme = true;
         }
         
-        return computeLayout(layoutDescription, projectKey, screenWidth, screenHeight, themeName, isProjectTheme,
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
+                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                themeName, isProjectTheme,
+                projectResources, frameworkResources, customViewLoader, logger);
+    }
+
+    /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     */
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
+                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                themeName, isProjectTheme,
                 projectResources, frameworkResources, customViewLoader, logger);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
             IProjectCallback customViewLoader, ILayoutLog logger) {
@@ -298,7 +323,7 @@ public final class Bridge implements ILayoutBridge {
         synchronized (sDefaultLogger) {
             sLogger = logger;
         }
-        
+
         // find the current theme and compute the style inheritance map
         Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
             new HashMap<IStyleResourceValue, IStyleResourceValue>();
@@ -307,32 +332,42 @@ public final class Bridge implements ILayoutBridge {
                 projectResources.get(BridgeConstants.RES_STYLE),
                 frameworkResources.get(BridgeConstants.RES_STYLE), styleParentMap);
         
-        BridgeContext context = new BridgeContext(projectKey, currentTheme, projectResources,
-                frameworkResources, styleParentMap, customViewLoader, logger);
-        BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
-        context.setBridgeInflater(inflater);
-        
-        IResourceValue windowBackground = null;
-        int screenOffset = 0;
-        if (currentTheme != null) {
-            windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
-            windowBackground = context.resolveResValue(windowBackground);
-
-            screenOffset = getScreenOffset(currentTheme, context);
-        }
-        
-        // we need to make sure the Looper has been initialized for this thread.
-        // this is required for View that creates Handler objects.
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-        
-        BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
-                context, false /* platformResourceFlag */);
-        
-        ViewGroup root = new FrameLayout(context);
-        
+        BridgeContext context = null; 
         try {
+            // setup the display Metrics.
+            DisplayMetrics metrics = new DisplayMetrics();
+            metrics.density = density / (float) DisplayMetrics.DEFAULT_DENSITY;
+            metrics.scaledDensity = metrics.density;
+            metrics.widthPixels = screenWidth;
+            metrics.heightPixels = screenHeight;
+            metrics.xdpi = xdpi;
+            metrics.ydpi = ydpi;
+
+            context = new BridgeContext(projectKey, metrics, currentTheme, projectResources,
+                    frameworkResources, styleParentMap, customViewLoader, logger);
+            BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
+            context.setBridgeInflater(inflater);
+            
+            IResourceValue windowBackground = null;
+            int screenOffset = 0;
+            if (currentTheme != null) {
+                windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
+                windowBackground = context.resolveResValue(windowBackground);
+    
+                screenOffset = getScreenOffset(currentTheme, context);
+            }
+            
+            // we need to make sure the Looper has been initialized for this thread.
+            // this is required for View that creates Handler objects.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+            
+            BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
+                    context, false /* platformResourceFlag */);
+            
+            ViewGroup root = new FrameLayout(context);
+        
             View view = inflater.inflate(parser, root);
             
             // set the AttachInfo on the root view.
@@ -381,6 +416,10 @@ public final class Bridge implements ILayoutBridge {
             return new LayoutResult(ILayoutResult.ERROR,
                     t.getClass().getSimpleName() + ": " + t.getMessage());
         } finally {
+            // Make sure to remove static references, otherwise we could not unload the lib
+            BridgeResources.clearSystem();
+            BridgeAssetManager.clearSystem();
+            
             // Remove the global logger
             synchronized (sDefaultLogger) {
                 sLogger = sDefaultLogger;
@@ -680,15 +719,21 @@ public final class Bridge implements ILayoutBridge {
      */
     static Bitmap getCachedBitmap(String value, Object projectKey) {
         if (projectKey != null) {
-            Map<String, Bitmap> map = sProjectBitmapCache.get(projectKey);
+            Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
             if (map != null) {
-                return map.get(value);
+                SoftReference<Bitmap> ref = map.get(value);
+                if (ref != null) {
+                    return ref.get();
+                }
             }
-            
-            return null;
+        } else {
+            SoftReference<Bitmap> ref = sFrameworkBitmapCache.get(value);
+            if (ref != null) {
+                return ref.get();
+            }
         }
-        
-        return sFrameworkBitmapCache.get(value);
+
+        return null;
     }
 
     /**
@@ -699,17 +744,17 @@ public final class Bridge implements ILayoutBridge {
      */
     static void setCachedBitmap(String value, Bitmap bmp, Object projectKey) {
         if (projectKey != null) {
-            Map<String, Bitmap> map = sProjectBitmapCache.get(projectKey);
+            Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
 
             if (map == null) {
-                map = new HashMap<String, Bitmap>();
+                map = new HashMap<String, SoftReference<Bitmap>>();
                 sProjectBitmapCache.put(projectKey, map);
             }
             
-            map.put(value, bmp);
+            map.put(value, new SoftReference<Bitmap>(bmp));
+        } else {
+            sFrameworkBitmapCache.put(value, new SoftReference<Bitmap>(bmp));
         }
-        
-        sFrameworkBitmapCache.put(value, bmp);
     }
 
     /**
@@ -721,16 +766,22 @@ public final class Bridge implements ILayoutBridge {
      */
     static NinePatch getCached9Patch(String value, Object projectKey) {
         if (projectKey != null) {
-            Map<String, NinePatch> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
             
             if (map != null) {
-                return map.get(value);
+                SoftReference<NinePatch> ref = map.get(value);
+                if (ref != null) {
+                    return ref.get();
+                }
             }
-            
-            return null;
+        } else {
+            SoftReference<NinePatch> ref = sFramework9PatchCache.get(value);
+            if (ref != null) {
+                return ref.get();
+            }
         }
         
-        return sFramework9PatchCache.get(value);
+        return null;
     }
 
     /**
@@ -741,19 +792,19 @@ public final class Bridge implements ILayoutBridge {
      */
     static void setCached9Patch(String value, NinePatch ninePatch, Object projectKey) {
         if (projectKey != null) {
-            Map<String, NinePatch> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
 
             if (map == null) {
-                map = new HashMap<String, NinePatch>();
+                map = new HashMap<String, SoftReference<NinePatch>>();
                 sProject9PatchCache.put(projectKey, map);
             }
             
-            map.put(value, ninePatch);
+            map.put(value, new SoftReference<NinePatch>(ninePatch));
+        } else {
+            sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
         }
-        
-        sFramework9PatchCache.put(value, ninePatch);
     }
-    
+
     /**
      * Implementation of {@link IWindowSession} so that mSession is not null in
      * the {@link SurfaceView}.
@@ -783,6 +834,12 @@ public final class Bridge implements ILayoutBridge {
             return false;
         }
 
+        @SuppressWarnings("unused")
+        public boolean performHapticFeedback(IWindow window, int effectId, boolean always) {
+            // pass for now.
+            return false;
+        }
+        
         @SuppressWarnings("unused")
         public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
             // pass for now.

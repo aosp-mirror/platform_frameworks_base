@@ -71,10 +71,10 @@ public abstract class MetaKeyKeyListener {
             | META_SYM_LOCKED | META_SYM_USED
             | META_SYM_PRESSED | META_SYM_RELEASED;
     
-    private static final Object CAP = new Object();
-    private static final Object ALT = new Object();
-    private static final Object SYM = new Object();
-    private static final Object SELECTING = new Object();
+    private static final Object CAP = new NoCopySpan.Concrete();
+    private static final Object ALT = new NoCopySpan.Concrete();
+    private static final Object SYM = new NoCopySpan.Concrete();
+    private static final Object SELECTING = new NoCopySpan.Concrete();
 
     /**
      * Resets all meta state to inactive.
@@ -159,11 +159,19 @@ public abstract class MetaKeyKeyListener {
 
     /**
      * Returns true if this object is one that this class would use to
-     * keep track of meta state in the specified text.
+     * keep track of any meta state in the specified text.
      */
     public static boolean isMetaTracker(CharSequence text, Object what) {
         return what == CAP || what == ALT || what == SYM ||
                what == SELECTING;
+    }
+
+    /**
+     * Returns true if this object is one that this class would use to
+     * keep track of the selecting meta state in the specified text.
+     */
+    public static boolean isSelectingMetaTracker(CharSequence text, Object what) {
+        return what == SELECTING;
     }
 
     private static void adjust(Spannable content, Object what) {
@@ -283,10 +291,14 @@ public abstract class MetaKeyKeyListener {
     }
 
     public void clearMetaKeyState(View view, Editable content, int states) {
-        if ((states&META_SHIFT_ON) != 0) resetLock(content, CAP);
-        if ((states&META_ALT_ON) != 0) resetLock(content, ALT);
-        if ((states&META_SYM_ON) != 0) resetLock(content, SYM);
-        if ((states&META_SELECTING) != 0) resetLock(content, SELECTING);
+        clearMetaKeyState(content, states);
+    }
+
+    public static void clearMetaKeyState(Editable content, int states) {
+        if ((states&META_SHIFT_ON) != 0) content.removeSpan(CAP);
+        if ((states&META_ALT_ON) != 0) content.removeSpan(ALT);
+        if ((states&META_SYM_ON) != 0) content.removeSpan(SYM);
+        if ((states&META_SELECTING) != 0) content.removeSpan(SELECTING);
     }
 
     /**

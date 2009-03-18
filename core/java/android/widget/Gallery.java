@@ -27,6 +27,7 @@ import android.util.Config;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -180,7 +181,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     public Gallery(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         
-        mGestureDetector = new GestureDetector(this);
+        mGestureDetector = new GestureDetector(context, this);
         mGestureDetector.setIsLongpressEnabled(true);
         
         TypedArray a = context.obtainStyledAttributes(
@@ -994,6 +995,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             return;
         }
         
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         long id = getItemIdAtPosition(mDownTouchPosition);
         dispatchLongPress(mDownTouchView, mDownTouchPosition, id);
     }
@@ -1086,6 +1088,10 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             handled = super.showContextMenuForChild(this);
         }
 
+        if (handled) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
+        
         return handled;
     }
     

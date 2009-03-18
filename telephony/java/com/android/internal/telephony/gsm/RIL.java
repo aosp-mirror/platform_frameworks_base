@@ -1980,6 +1980,7 @@ public final class RIL extends BaseCommands implements CommandsInterface
             case RIL_UNSOL_SIM_SMS_STORAGE_FULL: ret =  responseVoid(p); break;
             case RIL_UNSOL_SIM_REFRESH: ret =  responseInts(p); break;
             case RIL_UNSOL_CALL_RING: ret =  responseVoid(p); break;
+            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: ret = responseInts(p); break;
             default: 
                 throw new RuntimeException("Unrecognized unsol response: " + response); 
             //break; (implied)
@@ -2170,6 +2171,13 @@ public final class RIL extends BaseCommands implements CommandsInterface
                     mRingRegistrant.notifyRegistrant();
                 }
                 break;
+                
+            case RIL_UNSOL_RESTRICTED_STATE_CHANGED:
+                if (RILJ_LOGD) unsljLogvRet(response, ret);
+                if (mRestrictedStateRegistrant != null) {
+                    mRestrictedStateRegistrant.notifyRegistrant(
+                                        new AsyncResult (null, ret, null));
+                }
         }
     }
 
@@ -2553,6 +2561,7 @@ public final class RIL extends BaseCommands implements CommandsInterface
             case RIL_UNSOL_SIM_SMS_STORAGE_FULL: return "UNSOL_SIM_SMS_STORAGE_FULL";
             case RIL_UNSOL_SIM_REFRESH: return "UNSOL_SIM_REFRESH";
             case RIL_UNSOL_CALL_RING: return "UNSOL_CALL_RING";
+            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: return "RIL_UNSOL_RESTRICTED_STATE_CHANGED";
             default: return "<unknown reponse>";
         }
     }

@@ -236,6 +236,13 @@ public class TextUtils {
         return match;
     }
 
+    /**
+     * Create a new String object containing the given range of characters
+     * from the source string.  This is different than simply calling
+     * {@link CharSequence#subSequence(int, int) CharSequence.subSequence}
+     * in that it does not preserve any style runs in the source sequence,
+     * allowing a more efficient implementation.
+     */
     public static String substring(CharSequence source, int start, int end) {
         if (source instanceof String)
             return ((String) source).substring(start, end);
@@ -447,13 +454,26 @@ public class TextUtils {
 
     /**
      * Returns true if a and b are equal, including if they are both null.
-     *
+     * <p><i>Note: In platform versions 1.1 and earlier, this method only worked well if
+     * both the arguments were instances of String.</i></p>
      * @param a first CharSequence to check
      * @param b second CharSequence to check
      * @return true if a and b are equal
      */
     public static boolean equals(CharSequence a, CharSequence b) {
-        return a == b || (a != null && a.equals(b));
+        if (a == b) return true;
+        int length;
+        if (a != null && b != null && (length = a.length()) == b.length()) {
+            if (a instanceof String && b instanceof String) {
+                return a.equals(b);
+            } else {
+                for (int i = 0; i < length; i++) {
+                    if (a.charAt(i) != b.charAt(i)) return false;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     // XXX currently this only reverses chars, not spans
@@ -510,24 +530,42 @@ public class TextUtils {
         private int mEnd;
     }
 
-    private static final int ALIGNMENT_SPAN = 1;
-    private static final int FOREGROUND_COLOR_SPAN = 2;
-    private static final int RELATIVE_SIZE_SPAN = 3;
-    private static final int SCALE_X_SPAN = 4;
-    private static final int STRIKETHROUGH_SPAN = 5;
-    private static final int UNDERLINE_SPAN = 6;
-    private static final int STYLE_SPAN = 7;
-    private static final int BULLET_SPAN = 8;
-    private static final int QUOTE_SPAN = 9;
-    private static final int LEADING_MARGIN_SPAN = 10;
-    private static final int URL_SPAN = 11;
-    private static final int BACKGROUND_COLOR_SPAN = 12;
-    private static final int TYPEFACE_SPAN = 13;
-    private static final int SUPERSCRIPT_SPAN = 14;
-    private static final int SUBSCRIPT_SPAN = 15;
-    private static final int ABSOLUTE_SIZE_SPAN = 16;
-    private static final int TEXT_APPEARANCE_SPAN = 17;
-    private static final int ANNOTATION = 18;
+    /** @hide */
+    public static final int ALIGNMENT_SPAN = 1;
+    /** @hide */
+    public static final int FOREGROUND_COLOR_SPAN = 2;
+    /** @hide */
+    public static final int RELATIVE_SIZE_SPAN = 3;
+    /** @hide */
+    public static final int SCALE_X_SPAN = 4;
+    /** @hide */
+    public static final int STRIKETHROUGH_SPAN = 5;
+    /** @hide */
+    public static final int UNDERLINE_SPAN = 6;
+    /** @hide */
+    public static final int STYLE_SPAN = 7;
+    /** @hide */
+    public static final int BULLET_SPAN = 8;
+    /** @hide */
+    public static final int QUOTE_SPAN = 9;
+    /** @hide */
+    public static final int LEADING_MARGIN_SPAN = 10;
+    /** @hide */
+    public static final int URL_SPAN = 11;
+    /** @hide */
+    public static final int BACKGROUND_COLOR_SPAN = 12;
+    /** @hide */
+    public static final int TYPEFACE_SPAN = 13;
+    /** @hide */
+    public static final int SUPERSCRIPT_SPAN = 14;
+    /** @hide */
+    public static final int SUBSCRIPT_SPAN = 15;
+    /** @hide */
+    public static final int ABSOLUTE_SIZE_SPAN = 16;
+    /** @hide */
+    public static final int TEXT_APPEARANCE_SPAN = 17;
+    /** @hide */
+    public static final int ANNOTATION = 18;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -555,136 +593,10 @@ public class TextUtils {
                     prop = ((CharacterStyle) prop).getUnderlying();
                 }
 
-                if (prop instanceof AlignmentSpan) {
-                    p.writeInt(ALIGNMENT_SPAN);
-                    p.writeString(((AlignmentSpan) prop).getAlignment().name());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof ForegroundColorSpan) {
-                    p.writeInt(FOREGROUND_COLOR_SPAN);
-                    p.writeInt(((ForegroundColorSpan) prop).getForegroundColor());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof RelativeSizeSpan) {
-                    p.writeInt(RELATIVE_SIZE_SPAN);
-                    p.writeFloat(((RelativeSizeSpan) prop).getSizeChange());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof ScaleXSpan) {
-                    p.writeInt(SCALE_X_SPAN);
-                    p.writeFloat(((ScaleXSpan) prop).getScaleX());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof StrikethroughSpan) {
-                    p.writeInt(STRIKETHROUGH_SPAN);
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof UnderlineSpan) {
-                    p.writeInt(UNDERLINE_SPAN);
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof StyleSpan) {
-                    p.writeInt(STYLE_SPAN);
-                    p.writeInt(((StyleSpan) prop).getStyle());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof LeadingMarginSpan) {
-                    if (prop instanceof BulletSpan) {
-                        p.writeInt(BULLET_SPAN);
-                        writeWhere(p, sp, o);
-                    } else if (prop instanceof QuoteSpan) {
-                        p.writeInt(QUOTE_SPAN);
-                        p.writeInt(((QuoteSpan) prop).getColor());
-                        writeWhere(p, sp, o);
-                    } else {
-                        p.writeInt(LEADING_MARGIN_SPAN);
-                        p.writeInt(((LeadingMarginSpan) prop).
-                                           getLeadingMargin(true));
-                        p.writeInt(((LeadingMarginSpan) prop).
-                                           getLeadingMargin(false));
-                        writeWhere(p, sp, o);
-                    }
-                }
-
-                if (prop instanceof URLSpan) {
-                    p.writeInt(URL_SPAN);
-                    p.writeString(((URLSpan) prop).getURL());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof BackgroundColorSpan) {
-                    p.writeInt(BACKGROUND_COLOR_SPAN);
-                    p.writeInt(((BackgroundColorSpan) prop).getBackgroundColor());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof TypefaceSpan) {
-                    p.writeInt(TYPEFACE_SPAN);
-                    p.writeString(((TypefaceSpan) prop).getFamily());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof SuperscriptSpan) {
-                    p.writeInt(SUPERSCRIPT_SPAN);
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof SubscriptSpan) {
-                    p.writeInt(SUBSCRIPT_SPAN);
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof AbsoluteSizeSpan) {
-                    p.writeInt(ABSOLUTE_SIZE_SPAN);
-                    p.writeInt(((AbsoluteSizeSpan) prop).getSize());
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof TextAppearanceSpan) {
-                    TextAppearanceSpan tas = (TextAppearanceSpan) prop;
-                    p.writeInt(TEXT_APPEARANCE_SPAN);
-
-                    String tf = tas.getFamily();
-                    if (tf != null) {
-                        p.writeInt(1);
-                        p.writeString(tf);
-                    } else {
-                        p.writeInt(0);
-                    }
-
-                    p.writeInt(tas.getTextStyle());
-                    p.writeInt(tas.getTextSize());
-
-                    ColorStateList csl = tas.getTextColor();
-                    if (csl == null) {
-                        p.writeInt(0);
-                    } else {
-                        p.writeInt(1);
-                        csl.writeToParcel(p, parcelableFlags);
-                    }
-
-                    csl = tas.getLinkTextColor();
-                    if (csl == null) {
-                        p.writeInt(0);
-                    } else {
-                        p.writeInt(1);
-                        csl.writeToParcel(p, parcelableFlags);
-                    }
-
-                    writeWhere(p, sp, o);
-                }
-
-                if (prop instanceof Annotation) {
-                    p.writeInt(ANNOTATION);
-                    p.writeString(((Annotation) prop).getKey());
-                    p.writeString(((Annotation) prop).getValue());
+                if (prop instanceof ParcelableSpan) {
+                    ParcelableSpan ps = (ParcelableSpan)prop;
+                    p.writeInt(ps.getSpanTypeId());
+                    ps.writeToParcel(p, parcelableFlags);
                     writeWhere(p, sp, o);
                 }
             }
@@ -707,8 +619,7 @@ public class TextUtils {
     }
 
     public static final Parcelable.Creator<CharSequence> CHAR_SEQUENCE_CREATOR
-            = new Parcelable.Creator<CharSequence>()
-    {
+            = new Parcelable.Creator<CharSequence>() {
         /**
          * Read and return a new CharSequence, possibly with styles,
          * from the parcel.
@@ -729,89 +640,75 @@ public class TextUtils {
 
                 switch (kind) {
                 case ALIGNMENT_SPAN:
-                    readSpan(p, sp, new AlignmentSpan.Standard(
-                            Layout.Alignment.valueOf(p.readString())));
+                    readSpan(p, sp, new AlignmentSpan.Standard(p));
                     break;
 
                 case FOREGROUND_COLOR_SPAN:
-                    readSpan(p, sp, new ForegroundColorSpan(p.readInt()));
+                    readSpan(p, sp, new ForegroundColorSpan(p));
                     break;
 
                 case RELATIVE_SIZE_SPAN:
-                    readSpan(p, sp, new RelativeSizeSpan(p.readFloat()));
+                    readSpan(p, sp, new RelativeSizeSpan(p));
                     break;
 
                 case SCALE_X_SPAN:
-                    readSpan(p, sp, new ScaleXSpan(p.readFloat()));
+                    readSpan(p, sp, new ScaleXSpan(p));
                     break;
 
                 case STRIKETHROUGH_SPAN:
-                    readSpan(p, sp, new StrikethroughSpan());
+                    readSpan(p, sp, new StrikethroughSpan(p));
                     break;
 
                 case UNDERLINE_SPAN:
-                    readSpan(p, sp, new UnderlineSpan());
+                    readSpan(p, sp, new UnderlineSpan(p));
                     break;
 
                 case STYLE_SPAN:
-                    readSpan(p, sp, new StyleSpan(p.readInt()));
+                    readSpan(p, sp, new StyleSpan(p));
                     break;
 
                 case BULLET_SPAN:
-                    readSpan(p, sp, new BulletSpan());
+                    readSpan(p, sp, new BulletSpan(p));
                     break;
 
                 case QUOTE_SPAN:
-                    readSpan(p, sp, new QuoteSpan(p.readInt()));
+                    readSpan(p, sp, new QuoteSpan(p));
                     break;
 
                 case LEADING_MARGIN_SPAN:
-                    readSpan(p, sp, new LeadingMarginSpan.Standard(p.readInt(),
-                                                                   p.readInt()));
+                    readSpan(p, sp, new LeadingMarginSpan.Standard(p));
                 break;
 
                 case URL_SPAN:
-                    readSpan(p, sp, new URLSpan(p.readString()));
+                    readSpan(p, sp, new URLSpan(p));
                     break;
 
                 case BACKGROUND_COLOR_SPAN:
-                    readSpan(p, sp, new BackgroundColorSpan(p.readInt()));
+                    readSpan(p, sp, new BackgroundColorSpan(p));
                     break;
 
                 case TYPEFACE_SPAN:
-                    readSpan(p, sp, new TypefaceSpan(p.readString()));
+                    readSpan(p, sp, new TypefaceSpan(p));
                     break;
 
                 case SUPERSCRIPT_SPAN:
-                    readSpan(p, sp, new SuperscriptSpan());
+                    readSpan(p, sp, new SuperscriptSpan(p));
                     break;
 
                 case SUBSCRIPT_SPAN:
-                    readSpan(p, sp, new SubscriptSpan());
+                    readSpan(p, sp, new SubscriptSpan(p));
                     break;
 
                 case ABSOLUTE_SIZE_SPAN:
-                    readSpan(p, sp, new AbsoluteSizeSpan(p.readInt()));
+                    readSpan(p, sp, new AbsoluteSizeSpan(p));
                     break;
 
                 case TEXT_APPEARANCE_SPAN:
-                    readSpan(p, sp, new TextAppearanceSpan(
-                        p.readInt() != 0
-                            ? p.readString()
-                            : null,
-                        p.readInt(), // style
-                        p.readInt(), // size
-                        p.readInt() != 0
-                            ? ColorStateList.CREATOR.createFromParcel(p)
-                            : null,
-                        p.readInt() != 0
-                            ? ColorStateList.CREATOR.createFromParcel(p)
-                            : null));
+                    readSpan(p, sp, new TextAppearanceSpan(p));
                     break;
 
                 case ANNOTATION:
-                    readSpan(p, sp,
-                             new Annotation(p.readString(), p.readString()));
+                    readSpan(p, sp, new Annotation(p));
                     break;
 
                 default:

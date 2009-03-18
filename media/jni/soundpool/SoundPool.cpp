@@ -64,13 +64,6 @@ SoundPool::SoundPool(jobject soundPoolRef, int maxChannels, int streamType, int 
         mChannels.push_back(&mChannelPool[i]);
     }
 
-    if (AudioSystem::getOutputFrameCount(&mFrameCount) != NO_ERROR) {
-        mFrameCount = kDefaultFrameCount;
-    }
-    if (AudioSystem::getOutputSamplingRate(&mSampleRate) != NO_ERROR) {
-        mSampleRate = kDefaultSampleRate;
-    }
-
     // start decode thread
     startThreads();
 }
@@ -481,8 +474,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
 {
     AudioTrack* oldTrack;
 
-    LOGV("play: sampleID=%d, channelID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f",
-            sample->sampleID(), nextChannelID, leftVolume, rightVolume, priority, loop, rate);
+    LOGV("play %p: sampleID=%d, channelID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f",
+            this, sample->sampleID(), nextChannelID, leftVolume, rightVolume, priority, loop, rate);
 
     // if not idle, this voice is being stolen
     if (mState != IDLE) {
@@ -496,9 +489,18 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     }
 
     // initialize track
+    int afFrameCount;
+    int afSampleRate;
+    int streamType = mSoundPool->streamType();
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+        afFrameCount = kDefaultFrameCount;
+    }
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+        afSampleRate = kDefaultSampleRate;
+    }
     int numChannels = sample->numChannels();
     uint32_t sampleRate = uint32_t(float(sample->sampleRate()) * rate + 0.5);
-    uint32_t bufferFrames = (mSoundPool->mFrameCount * sampleRate) / mSoundPool->mSampleRate;
+    uint32_t bufferFrames = (afFrameCount * sampleRate) / afSampleRate;
     uint32_t frameCount = 0;
 
     if (loop) {
@@ -511,12 +513,21 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     }
 
     AudioTrack* newTrack;
+    
+    // mToggle toggles each time a track is started on a given channel.
+    // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
+    // as callback user data. This enables the detection of callbacks received from the old
+    // audio track while the new one is being started and avoids processing them with 
+    // wrong audio audio buffer size  (mAudioBufferSize)
+    unsigned long toggle = mToggle ^ 1;
+    void *userData = (void *)((unsigned long)this | toggle);
+    
 #ifdef USE_SHARED_MEM_BUFFER
-    newTrack = new AudioTrack(mSoundPool->streamType(), sampleRate, sample->format(),
-            numChannels, sample->getIMemory(), 0, callback, this);
+    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+            numChannels, sample->getIMemory(), 0, callback, userData);
 #else
-    newTrack = new AudioTrack(mSoundPool->streamType(), sampleRate, sample->format(),
-            numChannels, frameCount, 0, callback, this, bufferFrames);
+    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+            numChannels, frameCount, 0, callback, userData, bufferFrames);
 #endif
     if (newTrack->initCheck() != NO_ERROR) {
         LOGE("Error creating AudioTrack");
@@ -529,6 +540,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
 
     {
         Mutex::Autolock lock(&mLock);
+        // From now on, AudioTrack callbacks recevieved with previous toggle value will be ignored.
+        mToggle = toggle;
         oldTrack = mAudioTrack;
         mAudioTrack = newTrack;
         mPos = 0;
@@ -583,7 +596,13 @@ void SoundChannel::nextEvent()
 
 void SoundChannel::callback(int event, void* user, void *info)
 {
-    SoundChannel* channel = static_cast<SoundChannel*>(user);
+    unsigned long toggle = (unsigned long)user & 1;
+    SoundChannel* channel = static_cast<SoundChannel*>((void *)((unsigned long)user & ~1));
+    
+    if (channel->mToggle != toggle) {
+        LOGV("callback with wrong toggle");
+        return;
+    }
     channel->process(event, info);
 }
 
@@ -592,7 +611,7 @@ void SoundChannel::process(int event, void *info)
     //LOGV("process(%d)", mChannelID);
     sp<Sample> sample = mSample;
 
-    LOGV("SoundChannel::process event %d", event);
+//    LOGV("SoundChannel::process event %d", event);
 
     if (event == AudioTrack::EVENT_MORE_DATA) {
        AudioTrack::Buffer* b = static_cast<AudioTrack::Buffer *>(info);
