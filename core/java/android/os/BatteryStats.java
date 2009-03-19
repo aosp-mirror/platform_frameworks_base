@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Map;
 
+import com.android.internal.os.BatteryStatsImpl.Timer;
+
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -39,6 +41,20 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public static final int SENSOR = 3;
+    
+    /**
+     * A constant indicating a full wifi lock timer
+     *
+     * {@hide}
+     */
+    public static final int FULL_WIFI_LOCK = 4;
+    
+    /**
+     * A constant indicating a scan wifi lock timer
+     *
+     * {@hide}
+     */
+    public static final int SCAN_WIFI_LOCK = 5;
 
     /**
      * Include all of the data in the stats, including previously saved data.
@@ -74,6 +90,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String WAKELOCK_DATA = "wakelock";
     private static final String NETWORK_DATA = "network";
     private static final String BATTERY_DATA = "battery";
+    private static final String WIFI_LOCK_DATA = "wifilock";
     private static final String MISC_DATA = "misc";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(8);
@@ -162,6 +179,13 @@ public abstract class BatteryStats implements Parcelable {
          * {@hide}
          */
         public abstract long getTcpBytesSent(int which);
+        
+        public abstract void noteFullWifiLockAcquiredLocked();
+        public abstract void noteFullWifiLockReleasedLocked();
+        public abstract void noteScanWifiLockAcquiredLocked();
+        public abstract void noteScanWifiLockReleasedLocked();
+        public abstract long getFullWifiLockTime(long batteryRealtime, int which);
+        public abstract long getScanWifiLockTime(long batteryRealtime, int which);
 
         public static abstract class Sensor {
             // Magic sensor number for the GPS.
@@ -270,6 +294,22 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getPhoneOnTime(long batteryRealtime, int which);
     
     /**
+     * Returns the time in milliseconds that wifi has been on while the device was
+     * running on battery.
+     * 
+     * {@hide}
+     */
+    public abstract long getWifiOnTime(long batteryRealtime, int which);
+    
+    /**
+     * Returns the time in milliseconds that bluetooth has been on while the device was
+     * running on battery.
+     * 
+     * {@hide}
+     */
+    public abstract long getBluetoothOnTime(long batteryRealtime, int which);
+    
+    /**
      * Return whether we are currently running on battery.
      */
     public abstract boolean getIsOnBattery();
@@ -292,6 +332,17 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime the amount of elapsed realtime in microseconds.
      */
     public abstract long getBatteryRealtime(long curTime);
+    
+    /**
+     * Returns the battery percentage level at the last time the device was unplugged from power, 
+     * or the last time it was booted while unplugged.
+     */
+    public abstract int getUnpluggedStartLevel();
+    
+    /**
+     * Returns the battery percentage level at the last time the device was plugged into power.
+     */
+    public abstract int getPluggedStartLevel();
 
     /**
      * Returns the total, last, or current battery uptime in microseconds.
@@ -483,6 +534,8 @@ public abstract class BatteryStats implements Parcelable {
         final long totalUptime = computeUptime(rawUptime, which);
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
+        final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
+        final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
        
         StringBuilder sb = new StringBuilder(128);
         
@@ -496,7 +549,12 @@ public abstract class BatteryStats implements Parcelable {
         
         // Dump misc stats
         dumpLine(pw, 0 /* uid */, category, MISC_DATA,
-                screenOnTime / 1000, phoneOnTime / 1000);
+                screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000, bluetoothOnTime / 1000);
+        
+        if (which == STATS_UNPLUGGED) {
+            dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getUnpluggedStartLevel(), 
+                    getPluggedStartLevel());
+        }
         
         SparseArray<? extends Uid> uidStats = getUidStats();
         final int NU = uidStats.size();
@@ -506,7 +564,15 @@ public abstract class BatteryStats implements Parcelable {
             // Dump Network stats per uid, if any
             long rx = u.getTcpBytesReceived(which);
             long tx = u.getTcpBytesSent(which);
+            long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
+            long scanWifiLockOnTime = u.getScanWifiLockTime(batteryRealtime, which);
+            
             if (rx > 0 || tx > 0) dumpLine(pw, uid, category, NETWORK_DATA, rx, tx);
+            
+            if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0) {
+                dumpLine(pw, uid, category, WIFI_LOCK_DATA, 
+                        fullWifiLockOnTime, scanWifiLockOnTime);
+            }
 
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
             if (wakelocks.size() > 0) {
@@ -624,13 +690,35 @@ public abstract class BatteryStats implements Parcelable {
                 + formatTimeMs(totalRealtime / 1000)
                 + "realtime");
         
-        long screenOnTime = getScreenOnTime(batteryRealtime, which);
-        long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
+        final long screenOnTime = getScreenOnTime(batteryRealtime, which);
+        final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
+        final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
+        final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
         pw.println(prefix
                 + "  Time with screen on: " + formatTimeMs(screenOnTime / 1000)
                 + "(" + formatRatioLocked(screenOnTime, whichBatteryRealtime)
                 + "), time with phone on: " + formatTimeMs(phoneOnTime / 1000)
-                + "(" + formatRatioLocked(phoneOnTime, whichBatteryRealtime) + ")");
+                + "(" + formatRatioLocked(phoneOnTime, whichBatteryRealtime)
+                + "), time with wifi on: " + formatTimeMs(wifiOnTime / 1000)
+                + "(" + formatRatioLocked(wifiOnTime, whichBatteryRealtime)
+                + "), time with bluetooth on: " + formatTimeMs(bluetoothOnTime / 1000)
+                + "(" + formatRatioLocked(bluetoothOnTime, whichBatteryRealtime)+ ")");
+        
+        pw.println(" ");
+
+        if (which == STATS_UNPLUGGED) {
+            if (getIsOnBattery()) {
+                pw.println(prefix + "  Device is currently unplugged");
+                pw.println(prefix + "    Discharge cycle start level: " + 
+                        getUnpluggedStartLevel());
+            } else {
+                pw.println(prefix + "  Device is currently plugged into power");
+                pw.println(prefix + "    Last discharge cycle start level: " + 
+                        getUnpluggedStartLevel());
+                pw.println(prefix + "    Last discharge cycle end level: " + 
+                        getPluggedStartLevel());
+            }
+        }
         
         pw.println(" ");
 
@@ -644,9 +732,22 @@ public abstract class BatteryStats implements Parcelable {
             
             long tcpReceived = u.getTcpBytesReceived(which);
             long tcpSent = u.getTcpBytesSent(which);
+            long fullWifiLockOnTime = u.getFullWifiLockTime(batteryRealtime, which);
+            long scanWifiLockOnTime = u.getScanWifiLockTime(batteryRealtime, which);
+            
             if (tcpReceived != 0 || tcpSent != 0) {
                 pw.println(prefix + "    Network: " + tcpReceived + " bytes received, "
                         + tcpSent + " bytes sent");
+            }
+            if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0) {
+                pw.println(prefix + "    Full Wifi Lock Time: " 
+                        + formatTime(fullWifiLockOnTime / 1000) 
+                        + "(" + formatRatioLocked(fullWifiLockOnTime, 
+                                whichBatteryRealtime)+ ")");
+                pw.println(prefix + "    Scan Wifi Lock Time: " 
+                        + formatTime(scanWifiLockOnTime / 1000)
+                        + "(" + formatRatioLocked(scanWifiLockOnTime, 
+                                whichBatteryRealtime)+ ")");
             }
 
             Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();

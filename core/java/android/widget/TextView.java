@@ -224,7 +224,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private CharSequence mError;
     private boolean mErrorWasChanged;
-    private PopupWindow mPopup;
+    private ErrorPopup mPopup;
     /**
      * This flag is set if the TextView tries to display an error before it
      * is attached to the window (so its position is still unknown).
@@ -3039,12 +3039,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return;
                 }
             }
-        }
-        if (ict != null || !shouldAdvanceFocusOnEnter()) {
+            
             // This is the handling for some default action.
             // Note that for backwards compatibility we don't do this
             // default handling if explicit ime options have not been given,
-            // to instead turn this into the normal enter key codes that an
+            // instead turning this into the normal enter key codes that an
             // app may be expecting.
             if (actionCode == EditorInfo.IME_ACTION_NEXT) {
                 View v = focusSearch(FOCUS_DOWN);
@@ -3066,15 +3065,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         
         Handler h = getHandler();
-        long eventTime = SystemClock.uptimeMillis();
-        h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
-                new KeyEvent(eventTime, eventTime,
-                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
-                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
-        h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
-                new KeyEvent(SystemClock.uptimeMillis(), eventTime,
-                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
-                KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
+        if (h != null) {
+            long eventTime = SystemClock.uptimeMillis();
+            h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                    new KeyEvent(eventTime, eventTime,
+                    KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
+                    | KeyEvent.FLAG_EDITOR_ACTION)));
+            h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                    new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+                    KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
+                    | KeyEvent.FLAG_EDITOR_ACTION)));
+        }
     }
     
     /**
@@ -3222,25 +3225,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final TextView err = (TextView) inflater.inflate(com.android.internal.R.layout.textview_hint,
                     null);
 
-            mPopup = new PopupWindow(err, 200, 50) {
-                private boolean mAbove = false;
-
-                @Override
-                public void update(int x, int y, int w, int h, boolean force) {
-                    super.update(x, y, w, h, force);
-
-                    boolean above = isAboveAnchor();
-                    if (above != mAbove) {
-                        mAbove = above;
-
-                        if (above) {
-                            err.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error_above);
-                        } else {
-                            err.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error);
-                        }
-                    }
-                }
-            };
+            mPopup = new ErrorPopup(err, 200, 50);
             mPopup.setFocusable(false);
             // The user is entering text, so the input method is needed.  We
             // don't want the popup to be displayed on top of it.
@@ -3252,6 +3237,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         tv.setText(mError);
 
         mPopup.showAsDropDown(this, getErrorX(), getErrorY());
+        mPopup.fixDirection(mPopup.isAboveAnchor());
+    }
+
+    private static class ErrorPopup extends PopupWindow {
+        private boolean mAbove = false;
+        private TextView mView;
+
+        ErrorPopup(TextView v, int width, int height) {
+            super(v, width, height);
+            mView = v;
+        }
+
+        void fixDirection(boolean above) {
+            mAbove = above;
+
+            if (above) {
+                mView.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error_above);
+            } else {
+                mView.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error);
+            }
+        }
+
+        @Override
+        public void update(int x, int y, int w, int h, boolean force) {
+            super.update(x, y, w, h, force);
+
+            boolean above = isAboveAnchor();
+            if (above != mAbove) {
+                fixDirection(above);
+            }
+        }
     }
 
     /**
@@ -4001,7 +4017,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
-        KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
+        KeyEvent down = KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
 
         int which = doKeyDown(keyCode, down, event);
         if (which == 0) {
@@ -4020,7 +4036,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // of down and up events until we have done the complete repeatCount.
         // It would be nice if those interfaces had an onKeyMultiple() method,
         // but adding that is a more complicated change.
-        KeyEvent up = new KeyEvent(event, KeyEvent.ACTION_UP);
+        KeyEvent up = KeyEvent.changeAction(event, KeyEvent.ACTION_UP);
         if (which == 1) {
             mInput.onKeyUp(this, (Editable)mText, keyCode, up);
             while (--repeatCount > 0) {
@@ -4069,19 +4085,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    private boolean isInterestingEnter(KeyEvent event) {
-        if ((event.getFlags() & KeyEvent.FLAG_SOFT_KEYBOARD) != 0 &&
-                mInputContentType != null &&
-                (mInputContentType.imeOptions &
-                        EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0) {
-            // If this enter key came from a soft keyboard, and the
-            // text editor has been configured to not do a default
-            // action for software enter keys, then we aren't interested.
-            return false;
-        }
-        return true;
-    }
-    
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
         if (!isEnabled()) {
             return 0;
@@ -4089,18 +4092,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
-                if (!isInterestingEnter(event)) {
-                    // Ignore enter key we aren't interested in.
-                    return -1;
+                // If ALT modifier is held, then we always insert a
+                // newline character.
+                if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0) {
+                    
+                    // When mInputContentType is set, we know that we are
+                    // running in a "modern" cupcake environment, so don't need
+                    // to worry about the application trying to capture
+                    // enter key events.
+                    if (mInputContentType != null) {
+                        
+                        // If there is an action listener, given them a
+                        // chance to consume the event.
+                        if (mInputContentType.onEditorActionListener != null &&
+                                mInputContentType.onEditorActionListener.onEditorAction(
+                                this, EditorInfo.IME_NULL, event)) {
+                            mInputContentType.enterDown = true;
+                            // We are consuming the enter key for them.
+                            return -1;
+                        }
+                    }
+                    
+                    // If our editor should move focus when enter is pressed, or
+                    // this is a generated event from an IME action button, then
+                    // don't let it be inserted into the text.
+                    if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
+                            || shouldAdvanceFocusOnEnter()) {
+                        return -1;
+                    }
                 }
-                if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0
-                        && mInputContentType != null
-                        && mInputContentType.onEditorActionListener != null) {
-                    mInputContentType.enterDown = true;
-                    // We are consuming the enter key for them.
-                    return -1;
-                }
-                // fall through...
+                break;
+                
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (shouldAdvanceFocusOnEnter()) {
                     return 0;
@@ -4215,7 +4237,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
                 
-                if (shouldAdvanceFocusOnEnter()) {
+                if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
+                        || shouldAdvanceFocusOnEnter()) {
                     /*
                      * If there is a click listener, just call through to
                      * super, which will invoke it.
@@ -4243,7 +4266,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             super.onKeyUp(keyCode, event);
                             return true;
                         } else if ((event.getFlags()
-                                & KeyEvent.FLAG_SOFT_KEYBOARD) != 0) {
+                                & KeyEvent.FLAG_EDITOR_ACTION) != 0) {
                             // No target for next focus, but make sure the IME
                             // if this came from it.
                             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -4301,6 +4324,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (!shouldAdvanceFocusOnEnter()) {
                     outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 }
+            }
+            if ((outAttrs.inputType & (InputType.TYPE_MASK_CLASS
+                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE))
+                    == (InputType.TYPE_CLASS_TEXT
+                            | InputType.TYPE_TEXT_FLAG_MULTI_LINE)) {
+                // Multi-line text editors should always show an enter key.
+                outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
             }
             outAttrs.hintText = mHint;
             if (mText instanceof Editable) {

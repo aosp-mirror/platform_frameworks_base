@@ -821,7 +821,10 @@ public class RelativeLayout extends ViewGroup {
             @ViewDebug.IntToString(from = CENTER_VERTICAL,     to = "centerVertical"),
             @ViewDebug.IntToString(from = LEFT_OF,             to = "leftOf"),
             @ViewDebug.IntToString(from = RIGHT_OF,            to = "rightOf")
-        }, mapping = { @ViewDebug.IntToString(from = TRUE, to = "true") })
+        }, mapping = {
+            @ViewDebug.IntToString(from = TRUE, to = "true"),
+            @ViewDebug.IntToString(from = 0,    to = "NO_ID")
+        })
         private int[] mRules = new int[VERB_COUNT];
 
         private int mLeft, mTop, mRight, mBottom;

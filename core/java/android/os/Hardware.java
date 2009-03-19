@@ -21,22 +21,29 @@ package android.os;
  */
 public class Hardware 
 {
-    /**
-     * Control the LED.
-     */
-    public static native int setLedState(int colorARGB, int onMS, int offMS);
-    
-    /**
-     * Control the Flashlight
-     */
+
+
+    /* ********************************************************************************
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *   Don't add anything else to this class.  Add it to HardwareService instead.
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     * ********************************************************************************/
+
+
     public static native boolean getFlashlightEnabled();
     public static native void setFlashlightEnabled(boolean on);
     public static native void enableCameraFlash(int milliseconds);
-
-    /**
-     * Control the backlights
-     */
-    public static native void setScreenBacklight(int brightness);
-    public static native void setKeyboardBacklight(boolean on);
-    public static native void setButtonBacklight(boolean on);
 }

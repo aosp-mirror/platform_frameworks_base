@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent">"発信者番号の設定は変更できません。"</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"音声"</string>
     <string name="serviceClassData">"データ"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -69,7 +79,7 @@
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"ウェブページにエラーがあります。"</string>
-    <string name="httpErrorLookup">"URLが見つかりませんでした。"</string>
+    <string name="httpErrorLookup">"URLが見つかりません。"</string>
     <string name="httpErrorUnsupportedAuthScheme">"このサイトの認証方式には対応していません。"</string>
     <string name="httpErrorAuth">"認証できませんでした。"</string>
     <string name="httpErrorProxyAuth">"プロキシサーバーを使用した認証に失敗しました。"</string>
@@ -279,15 +289,17 @@
     <string name="permlab_hardware_test">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test">"ハードウェアのテストのためにさまざまな周辺機器を制御することをアプリケーションに許可します。"</string>
     <string name="permlab_callPhone">"電話番号発信"</string>
-    <string name="permdesc_callPhone">"アプリケーションが電話を自動発信することを許可します。悪意のあるアプリケーションが意図しない電話をかけて料金が発生する恐れがあります。緊急呼への発信は許可しません。"</string>
+    <string name="permdesc_callPhone">"電話番号の自動発信をアプリケーションに許可します。悪意のあるアプリケーションが意図しない電話をかけて料金が発生する恐れがあります。緊急通報への発信は許可しません。"</string>
     <string name="permlab_callPrivileged">"電話番号発信"</string>
-    <string name="permdesc_callPrivileged">"緊急呼を含めあらゆる電話番号に自動発信することをアプリケーションに許可します。悪意のあるアプリケーションが緊急サービスに不正な通報をする恐れがあります。"</string>
+    <string name="permdesc_callPrivileged">"緊急通報を含めあらゆる電話番号に自動発信することをアプリケーションに許可します。悪意のあるアプリケーションが緊急サービスに不正な通報をする恐れがあります。"</string>
     <string name="permlab_locationUpdates">"位置情報の更新通知"</string>
     <string name="permdesc_locationUpdates">"無線通信からの位置更新通知を有効/無効にすることを許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_checkinProperties">"チェックインプロパティへのアクセス"</string>
     <string name="permdesc_checkinProperties">"チェックインサービスがアップロードしたプロパティへの読み書きを許可します。通常のアプリケーションでは使用しません。"</string>
-    <string name="permlab_bindGadget">"ガジェットの選択"</string>
-    <string name="permdesc_bindGadget">"特定のアプリケーションで使用可能なガジェットをシステムに指定することをアプリケーションに許可します。この許可を受けたアプリケーションは、他のアプリケーションに個人データへのアクセスを許可することができます。通常のアプリケーションでは使用しません。"</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"端末ステータスの変更"</string>
     <string name="permdesc_modifyPhoneState">"端末の電話機能のコントロールをアプリケーションに許可します。アプリケーションは、ネットワークの切り替え、携帯電話の無線通信のオン/オフなどを通知せずに行うことができます。"</string>
     <string name="permlab_readPhoneState">"端末ステータスの読み取り"</string>
@@ -316,7 +328,7 @@
     <string name="permdesc_writeApnSettings">"APNのプロキシやポートなどのAPN設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeNetworkState">"ネットワーク接続の変更"</string>
     <string name="permdesc_changeNetworkState">"ネットワークの接続状態の変更をアプリケーションに許可します。"</string>
-    <string name="permlab_changeBackgroundDataSetting">"バックグラウンドデータ使用の設定の変更"</string>
+    <string name="permlab_changeBackgroundDataSetting">"バックグラウンドデータ使用設定の変更"</string>
     <string name="permdesc_changeBackgroundDataSetting">"バックグラウンドデータ使用の設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_accessWifiState">"Wi-Fi状態の表示"</string>
     <string name="permdesc_accessWifiState">"Wi-Fi状態に関する情報の表示をアプリケーションに許可します。"</string>
@@ -388,13 +400,13 @@
     <string name="keyguard_password_enter_pin_code">"PINコードを入力"</string>
     <string name="keyguard_password_wrong_pin_code">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text">"ロックを解除するにはMENU、0キーの順に押します。"</string>
-    <string name="emergency_call_dialog_number_for_display">"緊急呼番号"</string>
+    <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
     <string name="lockscreen_carrier_default">"（サービス登録なし）"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急呼）"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急通報）"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
-    <string name="lockscreen_emergency_call">"緊急呼"</string>
+    <string name="lockscreen_emergency_call">"緊急通報"</string>
     <string name="lockscreen_pattern_correct">"一致しました"</string>
     <string name="lockscreen_pattern_wrong">"やり直してください"</string>
     <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_network_locked_message">"ネットワークがロックされました"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIMカードはPUKでロックされています。"</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"お客様サポートにお問い合わせください。"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIMカードはロックされています。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIMカードのロック解除中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"ロック解除のパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しく指定されていません。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度指定してください。"</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"パターンを忘れた場合"</string>
     <string name="lockscreen_glogin_too_many_attempts">"パターンのエラーが多すぎます"</string>
-    <string name="lockscreen_glogin_instructions">"ロックを解除するには、"\n"Googleアカウントでログインしてください。"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"ユーザー名 (メール)"</string>
     <string name="lockscreen_glogin_password_hint">"パスワード"</string>
     <string name="lockscreen_glogin_submit_button">"ログイン"</string>
@@ -427,7 +441,7 @@
     <skip />
     <string name="status_bar_clear_all_button">"通知を消去"</string>
     <string name="status_bar_no_notifications_title">"通知なし"</string>
-    <string name="status_bar_ongoing_events_title">"継続中"</string>
+    <string name="status_bar_ongoing_events_title">"操作中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
     <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
     <skip />
@@ -441,7 +455,7 @@
     <string name="factorytest_reboot">"再起動"</string>
     <string name="js_dialog_title">"ページ「<xliff:g id="TITLE">%s</xliff:g>」の記述:"</string>
     <string name="js_dialog_title_default">"JavaScript"</string>
-    <string name="js_dialog_before_unload">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"続行する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
+    <string name="js_dialog_before_unload">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"移動する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
     <string name="save_password_label">"確認"</string>
     <string name="save_password_message">"このパスワードをブラウザで保存しますか？"</string>
     <string name="save_password_notnow">"今は保存しない"</string>
@@ -498,7 +512,7 @@
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one">"1分前"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>分後"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g>分前"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
     <item quantity="one">"1時間前"</item>
@@ -552,6 +566,8 @@
     <string name="monthly">"毎月"</string>
     <string name="yearly">"毎年"</string>
     <string name="VideoView_error_title">"動画を再生できません"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"この動画は再生できません。"</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
@@ -565,22 +581,22 @@
     <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g><xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>、<xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>、<xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'/'<xliff:g id="MONTH">MMMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>"</string>
     <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'年'<xliff:g id="MONTH">MMMM</xliff:g>'月'<xliff:g id="DAY">d</xliff:g>'日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>'年'"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'/'<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"正午"</string>
     <string name="Noon">"正午"</string>
     <string name="midnight">"午前0時"</string>
     <string name="Midnight">"午前0時"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"日曜日"</string>
     <string name="day_of_week_long_monday">"月曜日"</string>
@@ -632,20 +648,20 @@
     <string name="day_of_week_medium_thursday">"（木）"</string>
     <string name="day_of_week_medium_friday">"（金）"</string>
     <string name="day_of_week_medium_saturday">"（土）"</string>
-    <string name="day_of_week_short_sunday">"（日）"</string>
-    <string name="day_of_week_short_monday">"（月）"</string>
-    <string name="day_of_week_short_tuesday">"（火）"</string>
-    <string name="day_of_week_short_wednesday">"（水）"</string>
-    <string name="day_of_week_short_thursday">"（木）"</string>
-    <string name="day_of_week_short_friday">"（金）"</string>
-    <string name="day_of_week_short_saturday">"（土）"</string>
-    <string name="day_of_week_shorter_sunday">"（日）"</string>
+    <string name="day_of_week_short_sunday">"日"</string>
+    <string name="day_of_week_short_monday">"月"</string>
+    <string name="day_of_week_short_tuesday">"火"</string>
+    <string name="day_of_week_short_wednesday">"水"</string>
+    <string name="day_of_week_short_thursday">"木"</string>
+    <string name="day_of_week_short_friday">"金"</string>
+    <string name="day_of_week_short_saturday">"土"</string>
+    <string name="day_of_week_shorter_sunday">"日"</string>
     <string name="day_of_week_shorter_monday">"月"</string>
-    <string name="day_of_week_shorter_tuesday">"（火）"</string>
+    <string name="day_of_week_shorter_tuesday">"火"</string>
     <string name="day_of_week_shorter_wednesday">"水"</string>
-    <string name="day_of_week_shorter_thursday">"（木）"</string>
+    <string name="day_of_week_shorter_thursday">"木"</string>
     <string name="day_of_week_shorter_friday">"金"</string>
-    <string name="day_of_week_shorter_saturday">"（土）"</string>
+    <string name="day_of_week_shorter_saturday">"土"</string>
     <string name="day_of_week_shortest_sunday">"日"</string>
     <string name="day_of_week_shortest_monday">"月"</string>
     <string name="day_of_week_shortest_tuesday">"火"</string>
@@ -712,7 +728,7 @@
     <string name="dialog_alert_title">"注意"</string>
     <string name="capital_on">"オン"</string>
     <string name="capital_off">"オフ"</string>
-    <string name="whichApplication">"操作の完了に使用"</string>
+    <string name="whichApplication">"アプリケーションを選択"</string>
     <string name="alwaysUse">"常にこの操作で使用する"</string>
     <string name="clearDefaultHintMsg">"ホームの[設定]&gt;[アプリケーション]&gt;[アプリケーションの管理]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity">"操作の選択"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

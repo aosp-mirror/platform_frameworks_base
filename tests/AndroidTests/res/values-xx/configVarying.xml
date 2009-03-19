@@ -19,8 +19,4 @@
     <bag type="configVarying" name="bag">
         <item name="testString">bag xx</item>
     </bag>
-    <item type="configVarying" name="simple_xx">only simple xx</item>
-    <bag type="configVarying" name="bag_xx">
-        <item name="testString">only bag xx</item>
-    </bag>
 </resources>

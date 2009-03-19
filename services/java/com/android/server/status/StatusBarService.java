@@ -57,6 +57,8 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.FrameLayout;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1476,9 +1478,11 @@ public class StatusBarService extends IStatusBar.Stub
 
         /// ---------- Expanded View --------------
         pixelFormat = PixelFormat.TRANSLUCENT;
-        bg = mExpandedView.getBackground();
-        if (bg != null) {
-            pixelFormat = bg.getOpacity();
+        if (false) {
+            bg = mExpandedView.getBackground();
+            if (bg != null) {
+                pixelFormat = bg.getOpacity();
+            }
         }
 
         lp = mExpandedDialog.getWindow().getAttributes();
@@ -1490,11 +1494,13 @@ public class StatusBarService extends IStatusBar.Stub
         lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_DITHER;
         lp.format = pixelFormat;
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBarExpanded");
         mExpandedDialog.getWindow().setAttributes(lp);
+        mExpandedDialog.getWindow().setFormat(pixelFormat);
         mExpandedParams = lp;
 
         mExpandedDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
@@ -1503,7 +1509,8 @@ public class StatusBarService extends IStatusBar.Stub
                                            ViewGroup.LayoutParams.WRAP_CONTENT));
         mExpandedDialog.show();
         mExpandedDialog.hide();
-        View hack = (View)mExpandedView.getParent();
+        FrameLayout hack = (FrameLayout)mExpandedView.getParent();
+        hack.setForeground(null);
     }
 
     void setDateViewVisibility(boolean visible, int anim) {

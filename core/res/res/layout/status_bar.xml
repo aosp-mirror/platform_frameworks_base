@@ -97,7 +97,7 @@
         android:gravity="center_vertical|left"
         android:paddingLeft="6px"
         android:paddingRight="6px"
-        android:textColor="#ff000000"
+        android:textColor="?android:attr/textColorPrimaryInverse"
         android:background="@drawable/statusbar_background"
         />
 </com.android.server.status.StatusBarView>

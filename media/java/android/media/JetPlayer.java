@@ -68,21 +68,22 @@ public class JetPlayer
     //--------------------------------------------
     // Member variables
     //------------------------
-    private EventHandler            mNativeEventHandler = null;
+    /**
+     * Handler for jet events and status updates coming from the native code
+     */
+    private NativeEventHandler mEventHandler = null;
     
     /**
-     * Lock to protect status listener updates against status change notifications
+     * Looper associated with the thread that creates the AudioTrack instance
      */
-    private final Object mStatusListenerLock = new Object();
+    private Looper mInitializationLooper = null;
     
     /**
      * Lock to protect the event listener updates against event notifications
      */
     private final Object mEventListenerLock = new Object();
     
-    private JetStatusUpdateListener mJetStatusUpdateListener = null;
-    
-    private JetEventListener mJetEventListener = null;
+    private OnJetEventListener mJetEventListener = null;
     
     private static JetPlayer singletonRef;
     
@@ -115,6 +116,11 @@ public class JetPlayer
     
 
     private JetPlayer() {
+
+        // remember which looper is associated with the JetPlayer instanciation
+        if ((mInitializationLooper = Looper.myLooper()) == null) {
+            mInitializationLooper = Looper.getMainLooper();
+        }
                 
         native_setup(new WeakReference<JetPlayer>(this),
                 JetPlayer.getMaxTracks(), 
@@ -129,18 +135,6 @@ public class JetPlayer
     
     public void release() {
         native_release();
-    }
-    
-    
-    private void createNativeEventHandler() {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mNativeEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mNativeEventHandler = new EventHandler(this, looper);
-        } else {
-            mNativeEventHandler = null;
-        }
     }
     
     
@@ -235,24 +229,27 @@ public class JetPlayer
     //---------------------------------------------------------
     // Internal class to handle events posted from native code
     //------------------------
-    private class EventHandler extends Handler
+    private class NativeEventHandler extends Handler
     {
         private JetPlayer mJet;
 
-        public EventHandler(JetPlayer jet, Looper looper) {
+        public NativeEventHandler(JetPlayer jet, Looper looper) {
             super(looper);
             mJet = jet;
         }
 
         @Override
         public void handleMessage(Message msg) {
+            OnJetEventListener listener = null;
+            synchronized (mEventListenerLock) {
+                listener = mJet.mJetEventListener;
+            }
             switch(msg.what) {
             case JET_EVENT:
-                synchronized (mEventListenerLock) {
-                    if (mJetEventListener != null) {
-                        // call the appropriate listener after decoding the event parameters
-                        // encoded in msg.arg1
-                        mJetEventListener.onJetEvent(
+                if (listener != null) {
+                    // call the appropriate listener after decoding the event parameters
+                    // encoded in msg.arg1
+                    mJetEventListener.onJetEvent(
                             mJet,
                             (short)((msg.arg1 & JET_EVENT_SEG_MASK)   >> JET_EVENT_SEG_SHIFT),
                             (byte) ((msg.arg1 & JET_EVENT_TRACK_MASK) >> JET_EVENT_TRACK_SHIFT),
@@ -261,28 +258,21 @@ public class JetPlayer
                             (byte)(((msg.arg1 & JET_EVENT_CHAN_MASK)  >> JET_EVENT_CHAN_SHIFT) + 1),
                             (byte) ((msg.arg1 & JET_EVENT_CTRL_MASK)  >> JET_EVENT_CTRL_SHIFT),
                             (byte)  (msg.arg1 & JET_EVENT_VAL_MASK) );
-                    }
                 }
                 return;
             case JET_USERID_UPDATE:
-                synchronized (mStatusListenerLock) {
-                    if (mJetStatusUpdateListener != null) {
-                        mJetStatusUpdateListener.onJetUserIdUpdate(mJet, msg.arg1, msg.arg2);
-                    }
+                if (listener != null) {
+                    listener.onJetUserIdUpdate(mJet, msg.arg1, msg.arg2);
                 }
                 return;
             case JET_NUMQUEUEDSEGMENT_UPDATE:
-                synchronized (mStatusListenerLock) {
-                    if (mJetStatusUpdateListener != null) {
-                        mJetStatusUpdateListener.onJetNumQueuedSegmentUpdate(mJet, msg.arg1);
-                    }
+                if (listener != null) {
+                    listener.onJetNumQueuedSegmentUpdate(mJet, msg.arg1);
                 }
                 return;
             case JET_PAUSE_UPDATE:
-                synchronized (mStatusListenerLock) {
-                    if (mJetStatusUpdateListener != null)
-                        mJetStatusUpdateListener.onJetPauseUpdate(mJet, msg.arg1);
-                }
+                if (listener != null)
+                    listener.onJetPauseUpdate(mJet, msg.arg1);
                 return;
 
             default:
@@ -294,22 +284,48 @@ public class JetPlayer
     
     
     //--------------------------------------------
-    // Jet status update listener
+    // Jet event listener
     //------------------------
-    public void setStatusUpdateListener(JetStatusUpdateListener listener) {
-        synchronized(mStatusListenerLock) {
-            mJetStatusUpdateListener = listener;
-        }
-        
-        if ((listener != null) && (mNativeEventHandler == null)) {
-            createNativeEventHandler();
+    public void setEventListener(OnJetEventListener listener) {
+        setEventListener(listener, null);
+    }
+    
+    public void setEventListener(OnJetEventListener listener, Handler handler) {
+        synchronized(mEventListenerLock) {
+            
+            mJetEventListener = listener;
+            
+            if (listener != null) {
+                if (handler != null) {
+                    mEventHandler = new NativeEventHandler(this, handler.getLooper());
+                } else {
+                    // no given handler, use the looper the AudioTrack was created in
+                    mEventHandler = new NativeEventHandler(this, mInitializationLooper);
+                }
+            } else {
+                mEventHandler = null;
+            }
+            
         }
     }
     
+    
     /**
-     * Handles the notification when the JET status is updated.
+     * Handles the notification when the JET engine generates an event.
      */
-    public interface JetStatusUpdateListener {
+    public interface OnJetEventListener {
+        /**
+         * Callback for when the JET engine generates a new event.
+         * 
+         * @param player the JET player the event is coming from
+         * @param segment 8 bit unsigned value
+         * @param track 6 bit unsigned value
+         * @param channel 4 bit unsigned value
+         * @param controller 7 bit unsigned value
+         * @param value 7 bit unsigned value
+         */
+        void onJetEvent(JetPlayer player,
+                short segment, byte track, byte channel, byte controller, byte value);
         /**
          * Callback for when JET's currently playing segment userID is updated.
          * 
@@ -334,38 +350,6 @@ public class JetPlayer
          * @param paused indicates whether JET is paused or not
          */
         void onJetPauseUpdate(JetPlayer player, int paused);
-    }
-    
-    
-    //--------------------------------------------
-    // Jet event listener
-    //------------------------
-    public void setEventListener(JetEventListener listener) {
-        synchronized(mEventListenerLock) {
-            mJetEventListener = listener;
-        }
-        
-        if ((listener != null) && (mNativeEventHandler == null)) {
-            createNativeEventHandler();
-        }
-    }
-    
-    /**
-     * Handles the notification when the JET engine generates an event.
-     */
-    public interface JetEventListener {
-        /**
-         * Callback for when the JET engine generates a new event.
-         * 
-         * @param player the JET player the event is coming from
-         * @param segment 8 bit unsigned value
-         * @param track 6 bit unsigned value
-         * @param channel 4 bit unsigned value
-         * @param controller 7 bit unsigned value
-         * @param value 7 bit unsigned value
-         */
-        void onJetEvent(JetPlayer player,
-                short segment, byte track, byte channel, byte controller, byte value);
     }
     
     
@@ -397,13 +381,15 @@ public class JetPlayer
     @SuppressWarnings("unused")
     private static void postEventFromNative(Object jetplayer_ref,
             int what, int arg1, int arg2) {
-        
+        //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
         JetPlayer jet = (JetPlayer)((WeakReference)jetplayer_ref).get();
 
-        if( (jet!=null) && (jet.mNativeEventHandler!=null) ){
-            Message m = jet.mNativeEventHandler.obtainMessage(what, arg1, arg2, null);
-            jet.mNativeEventHandler.sendMessage(m);
+        if ((jet != null) && (jet.mEventHandler != null)) {
+            Message m = 
+                jet.mEventHandler.obtainMessage(what, arg1, arg2, null);
+            jet.mEventHandler.sendMessage(m);
         }
+        
     }
     
  

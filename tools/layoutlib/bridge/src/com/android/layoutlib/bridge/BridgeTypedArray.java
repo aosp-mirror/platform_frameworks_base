@@ -690,14 +690,15 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         String value = mData[index].getValue();
-        if (value == null) {
-            return null;
+        if (value != null) {
+            return new CharSequence[] { value };
         }
         
-        throw new UnsupportedOperationException(
-                String.format("BridgeTypedArray: UNKNOWN VALUE FOR getTextArray(%d) => %s", //DEBUG
-                index, value));
+        mContext.getLogger().warning(String.format(
+                String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
+                index, mData[index].getName())));
 
+        return null;
     }
 
     /**

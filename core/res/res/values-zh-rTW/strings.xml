@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"預設顯示本機號碼，下一通也顯示。"</string>
     <string name="serviceNotProvisioned">"服務未設定完成。"</string>
     <string name="CLIRPermanent">"本機號碼設定無法變更。"</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"語音"</string>
     <string name="serviceClassData">"資料"</string>
     <string name="serviceClassFAX">"傳真"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"允許啟用/停用無線通訊位置更新通知。一般應用程式不會使用此功能。"</string>
     <string name="permlab_checkinProperties">"存取登機選項"</string>
     <string name="permdesc_checkinProperties">"允許讀寫登機服務上傳的資料。一般應用程式不會使用此功能。"</string>
-    <string name="permlab_bindGadget">"選擇小工具"</string>
-    <string name="permdesc_bindGadget">"允許應用程式告知系統哪些應用程式可以使用哪些小工具。擁有此權限的應用程式可以讓其他應用程式使用個人資料。一般應用程式不會使用此功能。"</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"修改手機狀態"</string>
     <string name="permdesc_modifyPhoneState">"允許應用程式控制電話功能。擁有此權限的程式可自行切換網路、開關無線通訊功能。"</string>
     <string name="permlab_readPhoneState">"讀取手機狀態"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"請插入 SIM 卡。"</string>
     <string name="lockscreen_network_locked_message">"網路已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM 的 PUK 已鎖定。"</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"請聯絡客服中心。"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM 卡已鎖定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"解鎖 SIM 卡中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n" 請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再嘗試。"</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"忘記解鎖圖形？"</string>
     <string name="lockscreen_glogin_too_many_attempts">"解鎖圖形出錯次數過多！"</string>
-    <string name="lockscreen_glogin_instructions">"若要解鎖，"\n"請以您的 Google 帳戶登入"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"使用者名稱 (電子郵件)"</string>
     <string name="lockscreen_glogin_password_hint">"密碼"</string>
     <string name="lockscreen_glogin_submit_button">"登入"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"每月"</string>
     <string name="yearly">"每年"</string>
     <string name="VideoView_error_title">"無法播放影片"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"抱歉，無法撥放此影片。"</string>
     <string name="VideoView_error_button">"確定"</string>
     <string name="am">"上午"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"星期日"</string>
     <string name="day_of_week_long_monday">"星期一"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

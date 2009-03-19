@@ -30,6 +30,7 @@
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, release 2</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Android 1.0 SDK, release 1</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Older Releases</a></li>
     </ul>
   </li><?cs 
  /if ?>

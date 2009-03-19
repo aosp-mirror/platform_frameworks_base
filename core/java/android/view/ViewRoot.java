@@ -470,10 +470,19 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
+            int oldSoftInputMode = mWindowAttributes.softInputMode;
             mWindowAttributes.copyFrom(attrs);
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
                 requestLayout();
+            }
+            // Don't lose the mode we last auto-computed.
+            if ((attrs.softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                    == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
+                mWindowAttributes.softInputMode = (mWindowAttributes.softInputMode
+                        & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                        | (oldSoftInputMode
+                                & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
             }
             mWindowAttributesChanged = true;
             scheduleTraversals();
@@ -1485,7 +1494,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 + msg.obj + " to " + mView);
             deliverKeyEvent((KeyEvent)msg.obj, true);
             break;
-        case DISPATCH_POINTER:
+        case DISPATCH_POINTER: {
             MotionEvent event = (MotionEvent)msg.obj;
 
             boolean didFinish;
@@ -1571,7 +1580,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // Let the exception fall through -- the looper will catch
                 // it and take care of the bad app for us.
             }
-            break;
+        } break;
         case DISPATCH_TRACKBALL:
             deliverTrackballEvent((MotionEvent)msg.obj);
             break;
@@ -1657,12 +1666,19 @@ public final class ViewRoot extends Handler implements ViewParent,
         case DIE:
             dispatchDetachedFromWindow();
             break;
-        case DISPATCH_KEY_FROM_IME:
+        case DISPATCH_KEY_FROM_IME: {
             if (LOCAL_LOGV) Log.v(
                 "ViewRoot", "Dispatching key "
                 + msg.obj + " from IME to " + mView);
+            KeyEvent event = (KeyEvent)msg.obj;
+            if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
+                // The IME is trying to say this event is from the
+                // system!  Bad bad bad!
+                event = KeyEvent.changeFlags(event,
+                        event.getFlags()&~KeyEvent.FLAG_FROM_SYSTEM);
+            }
             deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
-            break;
+        } break;
         case FINISH_INPUT_CONNECTION: {
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {

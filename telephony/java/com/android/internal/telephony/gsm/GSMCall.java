@@ -37,7 +37,7 @@ class GSMCall extends Call
     {
         switch (dcState) {
             case ACTIVE:        return State.ACTIVE;
-            case HOLDING:          return State.HOLDING;
+            case HOLDING:       return State.HOLDING;
             case DIALING:       return State.DIALING;
             case ALERTING:      return State.ALERTING;
             case INCOMING:      return State.INCOMING;

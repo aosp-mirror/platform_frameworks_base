@@ -113,6 +113,17 @@
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">The caller ID setting cannot be changed.</string>
 
+    <!-- Notification title to tell the user that restricted state is changed by access control. -->
+    <string name="RestrictedChangedTitle">Restricted access changed</string>
+    <!-- Displayed to tell the user that data service is blocked by access control. -->
+    <string name="RestrictedOnData">Data service is blocked.</string>
+    <!-- Displayed to tell the user that emergency service is blocked by access control. -->
+    <string name="RestrictedOnEmergency">Emergency service is blocked.</string>
+    <!-- Displayed to tell the user that normal service is blocked by access control. -->
+    <string name="RestrictedOnNormal">Voice/SMS service is blocked.</string>
+    <!-- Displayed to tell the user that all voice service is blocked by access control. -->
+    <string name="RestrictedOnAll">All voice/SMS services are blocked.</string>
+    
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
     <string name="serviceClassVoice">Voice</string>
@@ -1148,7 +1159,7 @@
          PUK locked (Pin Unlock Kode) -->
     <string name="lockscreen_sim_puk_locked_message">SIM card is PUK-locked.</string>
     <!-- Shown in the lock screen when the SIM has become PUK locked and the user must call customer care to unlock it. -->
-    <string name="lockscreen_sim_puk_locked_instructions">Please contact Customer Care.</string>
+    <string name="lockscreen_sim_puk_locked_instructions">Please see the User Guide or contact Customer Care.</string>
 
     <!-- Shown in the lock screen to tell the user that their SIM is locked and they must unlock it. -->
     <string name="lockscreen_sim_locked_message">SIM card is locked.</string>

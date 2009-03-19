@@ -56,17 +56,20 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.TextDialog.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.widget.AbsoluteLayout;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Scroller;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
+import android.widget.ZoomControls;
 import android.widget.AdapterView.OnItemClickListener;
 
 import java.io.File;
@@ -85,6 +88,9 @@ import java.util.List;
  * It uses the WebKit rendering engine to display
  * web pages and includes methods to navigate forward and backward
  * through a history, zoom in and out, perform text searches and more.</p>
+ * <p>To enable the built-in zoom, set
+ * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
+ * (introduced in API version 3).
  * <p>Note that, in order for your Activity to access the Internet and load web pages
  * in a WebView, you must add the <var>INTERNET</var> permissions to your 
  * Android Manifest file:</p>
@@ -106,6 +112,57 @@ public class WebView extends AbsoluteLayout
     static final boolean DEBUG = false;
     static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
+    private class ExtendedZoomControls extends FrameLayout {
+        public ExtendedZoomControls(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            LayoutInflater inflater = (LayoutInflater)
+                    context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(com.android.internal.R.layout.zoom_magnify, this, true);
+            mZoomControls = (ZoomControls) findViewById(com.android.internal.R.id.zoomControls);
+            mZoomMagnify = (ImageView) findViewById(com.android.internal.R.id.zoomMagnify);
+        }
+        
+        public void show(boolean showZoom, boolean canZoomOut) {
+            mZoomControls.setVisibility(showZoom ? View.VISIBLE : View.GONE);
+            mZoomMagnify.setVisibility(canZoomOut ? View.VISIBLE : View.GONE);
+            fade(View.VISIBLE, 0.0f, 1.0f);
+        }
+        
+        public void hide() {
+            fade(View.GONE, 1.0f, 0.0f);
+        }
+        
+        private void fade(int visibility, float startAlpha, float endAlpha) {
+            AlphaAnimation anim = new AlphaAnimation(startAlpha, endAlpha);
+            anim.setDuration(500);
+            startAnimation(anim);
+            setVisibility(visibility);
+        }
+        
+        public void setIsZoomMagnifyEnabled(boolean isEnabled) {
+            mZoomMagnify.setEnabled(isEnabled);
+        }
+        
+        public boolean hasFocus() {
+            return mZoomControls.hasFocus() || mZoomMagnify.hasFocus();
+        }
+        
+        public void setOnZoomInClickListener(OnClickListener listener) {
+            mZoomControls.setOnZoomInClickListener(listener);
+        }
+            
+        public void setOnZoomOutClickListener(OnClickListener listener) {
+            mZoomControls.setOnZoomOutClickListener(listener);
+        }
+            
+        public void setOnZoomMagnifyClickListener(OnClickListener listener) {
+            mZoomMagnify.setOnClickListener(listener);
+        }
+
+        ZoomControls mZoomControls;
+        ImageView mZoomMagnify;
+    }
+    
     /**
      *  Transportation object for returning WebView across thread boundaries.
      */
@@ -232,6 +289,9 @@ public class WebView extends AbsoluteLayout
     private static final int LONG_PRESS_TIMEOUT = 1000;
     // needed to avoid flinging after a pause of no movement
     private static final int MIN_FLING_TIME = 250;
+    // The time that the Zoom Controls are visible before fading away
+    private static final long ZOOM_CONTROLS_TIMEOUT = 
+            ViewConfiguration.getZoomControlsTimeout();
     // The amount of content to overlap between two screens when going through
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
@@ -472,6 +532,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    // The View containing the zoom controls
+    private ExtendedZoomControls mZoomControls;
+    private Runnable mZoomControlRunnable;
+
     private ZoomButtonsController mZoomButtonsController; 
     private ImageView mZoomOverviewButton;
     private ImageView mZoomFitPageButton;
@@ -483,11 +547,6 @@ public class WebView extends AbsoluteLayout
 
     private ZoomButtonsController.OnZoomListener mZoomListener =
             new ZoomButtonsController.OnZoomListener() {
-
-        public void onCenter(int x, int y) {
-            // Don't translate when the control is invoked, hence we do nothing
-            // in this callback
-        }
 
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
@@ -582,10 +641,26 @@ public class WebView extends AbsoluteLayout
     }
 
     private void updateZoomButtonsEnabled() {
-        mZoomButtonsController.setZoomInEnabled(mActualScale < mMaxZoomScale);
-        mZoomButtonsController.setZoomOutEnabled(mActualScale > mMinZoomScale);
-        mZoomFitPageButton.setEnabled(mActualScale != 1);
-        mZoomOverviewButton.setEnabled(canZoomScrollOut());
+        boolean canZoomIn = mActualScale < mMaxZoomScale;
+        boolean canZoomOut = mActualScale > mMinZoomScale;
+        if (!canZoomIn && !canZoomOut) {
+            // Hide the zoom in and out buttons, as well as the fit to page
+            // button, if the page cannot zoom
+            mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
+            mZoomFitPageButton.setVisibility(View.GONE);
+        } else {
+            // Bring back the hidden zoom controls.
+            mZoomButtonsController.getZoomControls()
+                    .setVisibility(View.VISIBLE);
+            mZoomFitPageButton.setVisibility(View.VISIBLE);
+            // Set each one individually, as a page may be able to zoom in
+            // or out.
+            mZoomButtonsController.setZoomInEnabled(canZoomIn);
+            mZoomButtonsController.setZoomOutEnabled(canZoomOut);
+            mZoomFitPageButton.setEnabled(mActualScale != 1);
+        }
+        mZoomOverviewButton.setVisibility(canZoomScrollOut() ? View.VISIBLE:
+                View.GONE);
     }
 
     private void init() {
@@ -1332,7 +1407,13 @@ public class WebView extends AbsoluteLayout
             return;
         }
         clearTextEntry();
-        mZoomButtonsController.setVisible(true);
+        if (getSettings().getBuiltInZoomControls()) {
+            mZoomButtonsController.setVisible(true);
+        } else {
+            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+            mPrivateHandler.postDelayed(mZoomControlRunnable,
+                    ZOOM_CONTROLS_TIMEOUT);
+        }
     }
 
     /**
@@ -2535,8 +2616,17 @@ public class WebView extends AbsoluteLayout
     private void startZoomScrollOut() {
         setHorizontalScrollBarEnabled(false);
         setVerticalScrollBarEnabled(false);
-        if (mZoomButtonsController.isVisible()) {
-            mZoomButtonsController.setVisible(false);
+        if (getSettings().getBuiltInZoomControls()) {
+            if (mZoomButtonsController.isVisible()) {
+                mZoomButtonsController.setVisible(false);
+            }
+        } else {
+            if (mZoomControlRunnable != null) {
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+            }
+            if (mZoomControls != null) {
+                mZoomControls.hide();
+            }
         }
         int width = getViewWidth();
         int height = getViewHeight();
@@ -3206,7 +3296,6 @@ public class WebView extends AbsoluteLayout
 
         // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
-        ZoomButtonsController.finishZoomTutorial(mContext, false);
     }
     
     // Implementation for OnHierarchyChangeListener
@@ -3255,7 +3344,7 @@ public class WebView extends AbsoluteLayout
                 // false for the first parameter
             }
         } else {
-            if (!mZoomButtonsController.isVisible()) {
+            if (getSettings().getBuiltInZoomControls() && !mZoomButtonsController.isVisible()) {
                 /*
                  * The zoom controls come in their own window, so our window
                  * loses focus. Our policy is to not draw the focus ring if
@@ -3527,7 +3616,9 @@ public class WebView extends AbsoluteLayout
                         mWebViewCore
                                 .sendMessage(EventHub.SET_SNAP_ANCHOR, 0, 0);
                     }
-                    if (getSettings().supportZoom()
+                    WebSettings settings = getSettings();
+                    if (settings.supportZoom()
+                            && settings.getBuiltInZoomControls()
                             && !mZoomButtonsController.isVisible()
                             && (canZoomScrollOut() || 
                                     mMinZoomScale < mMaxZoomScale)) {
@@ -3594,6 +3685,21 @@ public class WebView extends AbsoluteLayout
                     mLastTouchTime = eventTime;
                     mUserScroll = true;
                 }
+
+                if (!getSettings().getBuiltInZoomControls()) {
+                    boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
+                    boolean showMagnify = canZoomScrollOut();
+                    if (mZoomControls != null && (showPlusMinus || showMagnify)) {
+                        if (mZoomControls.getVisibility() == View.VISIBLE) {
+                            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                        } else {
+                            mZoomControls.show(showPlusMinus, showMagnify);
+                        }
+                        mPrivateHandler.postDelayed(mZoomControlRunnable,
+                                ZOOM_CONTROLS_TIMEOUT);
+                    }
+                }
+
                 if (done) {
                     // return false to indicate that we can't pan out of the
                     // view space
@@ -4050,18 +4156,83 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // TODO: deprecate
     /**
      * Returns a view containing zoom controls i.e. +/- buttons. The caller is
      * in charge of installing this view to the view hierarchy. This view will
      * become visible when the user starts scrolling via touch and fade away if
      * the user does not interact with it.
      * <p/>
-     * From 1.5, WebView change to use ZoomButtonsController. This will return
-     * an invisible dummy view for backwards compatibility.
+     * API version 3 introduces a built-in zoom mechanism that is shown
+     * automatically by the MapView. This is the preferred approach for
+     * showing the zoom UI.
+     *
+     * @deprecated The built-in zoom mechanism is preferred, see
+     *             {@link WebSettings#setBuiltInZoomControls(boolean)}.
      */
+    @Deprecated
     public View getZoomControls() {
-        return mZoomButtonsController.getDummyZoomControls();
+        if (!getSettings().supportZoom()) {
+            Log.w(LOGTAG, "This WebView doesn't support zoom.");
+            return null;
+        }
+        if (mZoomControls == null) {
+            mZoomControls = createZoomControls();
+            
+            /*
+             * need to be set to VISIBLE first so that getMeasuredHeight() in
+             * {@link #onSizeChanged()} can return the measured value for proper
+             * layout.
+             */
+            mZoomControls.setVisibility(View.VISIBLE);
+            mZoomControlRunnable = new Runnable() {
+                public void run() {
+                    
+                    /* Don't dismiss the controls if the user has
+                     * focus on them. Wait and check again later.
+                     */
+                    if (!mZoomControls.hasFocus()) {
+                        mZoomControls.hide();
+                    } else {
+                        mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                        mPrivateHandler.postDelayed(mZoomControlRunnable,
+                                ZOOM_CONTROLS_TIMEOUT);
+                    }
+                }
+            };
+        }
+        return mZoomControls;
+    }
+
+    private ExtendedZoomControls createZoomControls() {
+        ExtendedZoomControls zoomControls = new ExtendedZoomControls(mContext
+            , null);
+        zoomControls.setOnZoomInClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // reset time out
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                mPrivateHandler.postDelayed(mZoomControlRunnable,
+                        ZOOM_CONTROLS_TIMEOUT);
+                zoomIn();
+            }
+        });
+        zoomControls.setOnZoomOutClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // reset time out
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                mPrivateHandler.postDelayed(mZoomControlRunnable,
+                        ZOOM_CONTROLS_TIMEOUT);
+                zoomOut();
+            }
+        });
+        zoomControls.setOnZoomMagnifyClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                mPrivateHandler.postDelayed(mZoomControlRunnable,
+                        ZOOM_CONTROLS_TIMEOUT);
+                zoomScrollOut();
+            }
+        });
+        return zoomControls;
     }
 
     /**
@@ -4070,7 +4241,7 @@ public class WebView extends AbsoluteLayout
      * 
      * @return The instance of {@link ZoomButtonsController} used by this class,
      *         or null if it is unavailable.
-     * @hide pending API council
+     * @hide
      */
     public ZoomButtonsController getZoomButtonsController() {
         return mZoomButtonsController;

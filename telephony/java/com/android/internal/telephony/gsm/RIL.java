@@ -201,7 +201,7 @@ public final class RIL extends BaseCommands implements CommandsInterface
     private Context mContext;
     WakeLock mWakeLock;
     int mRequestMessagesPending;
-
+    
     // Is this the first radio state change?
     private boolean mInitialRadioStateChange = true;
 
@@ -2319,7 +2319,9 @@ public final class RIL extends BaseCommands implements CommandsInterface
             case RIL_SIM_NETWORK_PERSONALIZATION:   
                                     return SimStatus.SIM_NETWORK_PERSONALIZATION;
             default:
-                throw new RuntimeException ("Invalid RIL_REQUEST_GET_SIM_STATUS result: " + status);
+                // Unrecognized SIM status.  Treat it like a missing SIM.
+                Log.e(LOG_TAG, "Unrecognized RIL_REQUEST_GET_SIM_STATUS result: " + status);
+                return SimStatus.SIM_ABSENT;
         }
     }
 
@@ -2345,7 +2347,10 @@ public final class RIL extends BaseCommands implements CommandsInterface
             dc.als = p.readInt();
             dc.isVoice = (0 == p.readInt()) ? false : true;
             dc.number = p.readString();
-
+            
+            // TODO get presentation from p.readInt() after checkin new RIL
+            dc.numberPresentation = DriverCall.presentationFromCLIP(0);
+            
             // Make sure there's a leading + on addresses with a TOA
             // of 145
 

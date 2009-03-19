@@ -171,6 +171,10 @@ public class AudioTrack
      */
     private NativeEventHandlerDelegate mEventHandlerDelegate = null;
     /**
+     * Looper associated with the thread that creates the AudioTrack instance
+     */
+    private Looper mInitializationLooper = null;
+    /**
      * The audio data sampling rate in Hz.
      */
     private int mSampleRate = 22050;
@@ -248,6 +252,11 @@ public class AudioTrack
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         mState = STATE_UNINITIALIZED;
+        
+        // remember which looper is associated with the AudioTrack instanciation
+        if ((mInitializationLooper = Looper.myLooper()) == null) {
+            mInitializationLooper = Looper.getMainLooper();
+        }
 
         audioParamCheck(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
 
@@ -902,11 +911,10 @@ public class AudioTrack
             if (handler != null) {
                 looper = handler.getLooper();
             } else {
-                // no given handler, look for main looper
-                if ((looper = Looper.myLooper()) == null) {
-                    looper = Looper.getMainLooper();
-                }
+                // no given handler, use the looper the AudioTrack was created in
+                looper = mInitializationLooper;
             }
+            
             // construct the event handler with this looper
             if (looper != null) {
                 // implement the event handler delegate

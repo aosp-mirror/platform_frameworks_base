@@ -1036,11 +1036,11 @@ public class MediaPlayer
      * Register a callback to be invoked when the media source is ready
      * for playback.
      *
-     * @param l the callback that will be run
+     * @param listener the callback that will be run
      */
-    public void setOnPreparedListener(OnPreparedListener l)
+    public void setOnPreparedListener(OnPreparedListener listener)
     {
-        mOnPreparedListener = l;
+        mOnPreparedListener = listener;
     }
 
     private OnPreparedListener mOnPreparedListener;
@@ -1063,11 +1063,11 @@ public class MediaPlayer
      * Register a callback to be invoked when the end of a media source
      * has been reached during playback.
      *
-     * @param l the callback that will be run
+     * @param listener the callback that will be run
      */
-    public void setOnCompletionListener(OnCompletionListener l)
+    public void setOnCompletionListener(OnCompletionListener listener)
     {
-        mOnCompletionListener = l;
+        mOnCompletionListener = listener;
     }
 
     private OnCompletionListener mOnCompletionListener;
@@ -1092,11 +1092,11 @@ public class MediaPlayer
      * Register a callback to be invoked when the status of a network
      * stream's buffer has changed.
      *
-     * @param l the callback that will be run
+     * @param listener the callback that will be run.
      */
-    public void setOnBufferingUpdateListener(OnBufferingUpdateListener l)
+    public void setOnBufferingUpdateListener(OnBufferingUpdateListener listener)
     {
-        mOnBufferingUpdateListener = l;
+        mOnBufferingUpdateListener = listener;
     }
 
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
@@ -1119,11 +1119,11 @@ public class MediaPlayer
      * Register a callback to be invoked when a seek operation has been
      * completed.
      * 
-     * @param l the callback that will be run
+     * @param listener the callback that will be run
      */
-    public void setOnSeekCompleteListener(OnSeekCompleteListener l)
+    public void setOnSeekCompleteListener(OnSeekCompleteListener listener)
     {
-        mOnSeekCompleteListener = l;
+        mOnSeekCompleteListener = listener;
     }
     
     private OnSeekCompleteListener mOnSeekCompleteListener;
@@ -1151,12 +1151,12 @@ public class MediaPlayer
      * Register a callback to be invoked when the video size is
      * known or updated.
      * 
-     * @param l the callback that will be run
+     * @param listener the callback that will be run
      * @hide
      */
-    public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener l)
+    public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener)
     {
-        mOnVideoSizeChangedListener = l;
+        mOnVideoSizeChangedListener = listener;
     }
     
     private OnVideoSizeChangedListener mOnVideoSizeChangedListener;

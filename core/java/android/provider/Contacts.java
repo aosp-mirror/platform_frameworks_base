@@ -1459,13 +1459,24 @@ public class Contacts {
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
 
         /**
-         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new contact if no matching
-         * contact found.  Otherwise, default behavior is to prompt user with dialog before creating.
-         *
-         * <P>Type: BOOLEAN</P>
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
+         * contact if no matching contact found. Otherwise, default behavior is
+         * to prompt user with dialog before creating.
+         * <p>
+         * Type: BOOLEAN
          */
         public static final String EXTRA_FORCE_CREATE =
                 "com.android.contacts.action.FORCE_CREATE";
+        
+        /**
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to specify an exact
+         * description to be shown when prompting user about creating a new
+         * contact.
+         * <p>
+         * Type: STRING
+         */
+        public static final String EXTRA_CREATE_DESCRIPTION =
+            "com.android.contacts.action.CREATE_DESCRIPTION";
 
         /**
          * Intents related to the Contacts app UI.

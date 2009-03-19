@@ -259,11 +259,32 @@ public class MediaRecorder
     /**
      * Sets the maximum duration (in ms) of the recording session.
      * Call this after setOutFormat() but before prepare().
+     * After recording reaches the specified duration, a notification
+     * will be sent to the {@link android.media.MediaRecorder.OnInfoListener}
+     * with a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_DURATION_REACHED}
+     * and recording will be stopped. Stopping happens asynchronously, there
+     * is no guarantee that the recorder will have stopped by the time the
+     * listener is notified.
      *
      * @param max_duration_ms the maximum duration in ms (if zero or negative, disables the duration limit)
      *
      */
     public native void setMaxDuration(int max_duration_ms) throws IllegalArgumentException;
+
+    /**
+     * Sets the maximum filesize (in bytes) of the recording session.
+     * Call this after setOutFormat() but before prepare().
+     * After recording reaches the specified filesize, a notification
+     * will be sent to the {@link android.media.MediaRecorder.OnInfoListener}
+     * with a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}
+     * and recording will be stopped. Stopping happens asynchronously, there
+     * is no guarantee that the recorder will have stopped by the time the
+     * listener is notified.
+     *
+     * @param max_filesize_bytes the maximum filesize in bytes (if zero or negative, disables the limit)
+     *
+     */
+    public native void setMaxFileSize(long max_filesize_bytes) throws IllegalArgumentException;
 
     /**
      * Sets the audio encoder to be used for recording. If this method is not
@@ -441,6 +462,10 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.OnInfoListener
      */
     public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800;
+    /** A maximum filesize had been setup and has now been reached.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED = 801;
 
     /**
      * Interface definition for a callback to be invoked when an error
@@ -455,6 +480,8 @@ public class MediaRecorder
          * @param what    the type of error that has occurred:
          * <ul>
          * <li>{@link #MEDIA_RECORDER_INFO_UNKNOWN}
+         * <li>{@link #MEDIA_RECORDER_INFO_MAX_DURATION_REACHED}
+         * <li>{@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}
          * </ul>
          * @param extra   an extra code, specific to the error type
          */

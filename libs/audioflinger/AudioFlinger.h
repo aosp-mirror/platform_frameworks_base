@@ -165,7 +165,6 @@ private:
     void                    checkA2dpEnabledChange_l();
 #endif
     static bool             streamForcedToSpeaker(int streamType);
-    static bool             streamDisablesA2dp(int streamType);
     
     // Management of forced route to speaker for certain track types.
     enum force_speaker_command {
@@ -176,7 +175,7 @@ private:
     };
     void                    handleForcedSpeakerRoute(int command);
 #ifdef WITH_A2DP
-    void                    handleStreamDisablesA2dp_l(int command);
+    void                    handleRouteDisablesA2dp_l(int routes);
 #endif
 
     // Internal dump utilites.

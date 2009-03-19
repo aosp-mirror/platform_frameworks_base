@@ -814,7 +814,7 @@ struct ResTable_config
         ORIENTATION_ANY  = 0x0000,
         ORIENTATION_PORT = 0x0001,
         ORIENTATION_LAND = 0x0002,
-        ORIENTATION_SQUARE = 0x0002,
+        ORIENTATION_SQUARE = 0x0003,
     };
     
     enum {

@@ -3250,8 +3250,21 @@ public final class ActivityThread {
         r.window = null;
         r.hideForNow = false;
         r.nextIdle = null;
-        r.pendingResults = tmp.pendingResults;
-        r.pendingIntents = tmp.pendingIntents;
+        // Merge any pending results and pending intents; don't just replace them
+        if (tmp.pendingResults != null) {
+            if (r.pendingResults == null) {
+                r.pendingResults = tmp.pendingResults;
+            } else {
+                r.pendingResults.addAll(tmp.pendingResults);
+            }
+        }
+        if (tmp.pendingIntents != null) {
+            if (r.pendingIntents == null) {
+                r.pendingIntents = tmp.pendingIntents;
+            } else {
+                r.pendingIntents.addAll(tmp.pendingIntents);
+            }
+        }
         r.startsNotResumed = tmp.startsNotResumed;
         if (savedState != null) {
             r.state = savedState;

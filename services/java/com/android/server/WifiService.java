@@ -50,6 +50,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -61,6 +62,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.am.BatteryStatsService;
 
 /**
  * WifiService handles remote WiFi operation requests by implementing
@@ -86,6 +91,9 @@ public class WifiService extends IWifiManager.Stub {
     private int mPluggedType;
 
     private final LockList mLocks = new LockList();
+
+    private final IBatteryStats mBatteryStats;
+    
     /**
      * See {@link Settings.Gservices#WIFI_IDLE_MS}. This is the default value if a
      * Settings.Gservices value is not present. This timeout value is chosen as
@@ -168,7 +176,8 @@ public class WifiService extends IWifiManager.Stub {
     WifiService(Context context, WifiStateTracker tracker) {
         mContext = context;
         mWifiStateTracker = tracker;
-
+        mBatteryStats = BatteryStatsService.getService();
+        
         /*
          * Initialize the hidden-networks state
          */
@@ -532,6 +541,18 @@ public class WifiService extends IWifiManager.Stub {
     private void setWifiEnabledState(int wifiState) {
         final int previousWifiState = mWifiState;
 
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (wifiState == WIFI_STATE_ENABLED) {
+                mBatteryStats.noteWifiOn();
+            } else if (wifiState == WIFI_STATE_DISABLED) {
+                mBatteryStats.noteWifiOff();
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
         // Update state
         mWifiState = wifiState;
 
@@ -1828,6 +1849,19 @@ public class WifiService extends IWifiManager.Stub {
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
         mLocks.addLock(wifiLock);
+        
+        int uid = Binder.getCallingUid();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            switch(wifiLock.mLockMode) {
+            case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockAcquired(uid);
+            case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockAcquired(uid);
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
         updateWifiState();
         return true;
     }
@@ -1841,7 +1875,22 @@ public class WifiService extends IWifiManager.Stub {
 
     private boolean releaseWifiLockLocked(IBinder lock) {
         boolean result;
-        result = (mLocks.removeLock(lock) != null);
+        
+        WifiLock wifiLock = mLocks.removeLock(lock);
+        result = (wifiLock != null);
+        
+        int uid = Binder.getCallingUid();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            switch(wifiLock.mLockMode) {
+            case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockReleased(uid);
+            case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockReleased(uid);
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
         updateWifiState();
         return result;
     }

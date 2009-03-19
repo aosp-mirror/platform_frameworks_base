@@ -53,18 +53,18 @@
             android:textSize="18sp"/>
     </LinearLayout>
 
-    <!--View
+    <View
          android:background="@android:drawable/code_lock_top"
          android:layout_width="fill_parent"
-         android:layout_height="2dip" /-->
+         android:layout_height="2dip" />
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          />
-    <!--View
+    <View
          android:background="@android:drawable/code_lock_bottom"
          android:layout_width="fill_parent"
-         android:layout_height="8dip" /-->
+         android:layout_height="8dip" />
 
     <!-- footer -->
     <FrameLayout

@@ -620,12 +620,35 @@
              Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE}. -->
         <flag name="actionDone" value="0x00000006" />
+        <!-- Used to specify that the IME does not need
+             to show its extracted text UI.  For input methods that may be fullscreen,
+             often when in landscape mode, this allows them to be smaller and let part
+             of the application be shown behind.  Though there will likely be limited
+             access to the application available from the user, it can make the
+             experience of a (mostly) fullscreen IME less jarring.  Note that when
+             this flag is specified the IME may <em>not</em> be set up to be able
+             to display text, so it should only be used in situations where this is
+             not needed.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_EXTRACT_UI}. -->
+        <flag name="flagNoExtractUi" value="0x10000000" />
+        <!-- Used in conjunction with a custom action, this indicates that the
+             action should not be available as an accessory button when the
+             input method is full-screen.
+             Note that by setting this flag, there can be cases where the action
+             is simply never available to the user.  Setting this generally means
+             that you think showing text being edited is more important than the
+             action you have supplied.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ACCESSORY_ACTION}. -->
+        <flag name="flagNoAccessoryAction" value="0x20000000" />
         <!-- Used in conjunction with a custom action,
-             this indicates that the action should not
-             be available in-line as the same as a "enter" key.  Typically this is
+             this indicates that the action should not be available in-line as
+             a replacement for the "enter" key.  Typically this is
              because the action has such a significant impact or is not recoverable
              enough that accidentally hitting it should be avoided, such as sending
-             a message.
+             a message.    Note that {@link android.widget.TextView} will
+             automatically set this flag for you on multi-line text views.
              <p>Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ENTER_ACTION}. -->
         <flag name="flagNoEnterAction" value="0x40000000" />
@@ -1372,7 +1395,8 @@
     </declare-styleable>
     <declare-styleable name="FrameLayout">
         <!-- Defines the drawable to draw over the content. This can be used as an overlay.
-             The foreground drawable participates in the padding of the content. -->
+             The foreground drawable participates in the padding of the content if the gravity
+             is set to fill. -->
         <attr name="foreground" format="reference|color" />
         <!-- Defines the gravity to apply to the foreground drawable. The gravity defaults
              to fill. -->
@@ -1408,6 +1432,9 @@
                  edge, a right gravity will clip the left edge, and neither will clip both edges. -->
             <flag name="clip_horizontal" value="0x08" />
         </attr>
+        <!-- Defines whether the foreground drawable should be drawn inside the padding.
+             This property is turned on by default. -->
+        <attr name="foregroundInsidePadding" format="boolean" />
         <!-- Determines whether to measure all children or just those in 
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
         <attr name="measureAllChildren" format="boolean" />
@@ -3024,6 +3051,22 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="InputMethodService">
+        <!-- Background to use for entire input method when it is being
+             shown in fullscreen mode with the extract view, to ensure
+             that it completely covers the application.  This allows,
+             for example, the candidate view to be hidden
+             while in fullscreen mode without having the application show through
+             behind it.-->
+        <attr name="imeFullscreenBackground" format="reference|color" />
+        <!-- Animation to use when showing the fullscreen extract UI after
+             it had previously been hidden. -->
+        <attr name="imeExtractEnterAnimation" format="reference" />
+        <!-- Animation to use when hiding the fullscreen extract UI after
+             it had previously been shown. -->
+        <attr name="imeExtractExitAnimation" format="reference" />
+    </declare-styleable>
+    
     <declare-styleable name="KeyboardView">
         <!-- Default KeyboardView style. -->
         <attr name="keyboardViewStyle" format="reference" />

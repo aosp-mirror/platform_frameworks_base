@@ -19,8 +19,4 @@
     <bag type="configVarying" name="bag">
         <item name="testString">bag 480x320</item>
     </bag>
-    <item type="configVarying" name="simple_480x320">only simple 480x320</item>
-    <bag type="configVarying" name="bag_480x320">
-        <item name="testString">only bag 480x320</item>
-    </bag>
 </resources>

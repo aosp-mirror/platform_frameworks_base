@@ -308,6 +308,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mScreenOn = true;
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
+            } else if (intent.getAction().equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                hideInputMethodMenu();
+                return;
             } else {
                 Log.w(TAG, "Unexpected intent " + intent);
             }
@@ -436,6 +439,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         IntentFilter screenOnOffFilt = new IntentFilter();
         screenOnOffFilt.addAction(Intent.ACTION_SCREEN_ON);
         screenOnOffFilt.addAction(Intent.ACTION_SCREEN_OFF);
+        screenOnOffFilt.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(new ScreenOnOffReceiver(), screenOnOffFilt);
         
         buildInputMethodListLocked(mMethodList, mMethodMap);
@@ -585,6 +589,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + mCurClient.pid + " uid " + mCurClient.uid);
             }
             mCurClient = null;
+            
+            hideInputMethodMenuLocked();
         }
     }
     
@@ -820,6 +826,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurToken = null;
         }
         
+        mCurId = null;
         clearCurMethodLocked();
         
         if (reportToClient && mCurClient != null) {
@@ -896,10 +903,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id);
             } catch (IllegalArgumentException e) {
                 Log.w(TAG, "Unknown input method from prefs: " + id, e);
+                mCurMethodId = null;
                 unbindCurrentMethodLocked(true);
             }
         } else {
             // There is no longer an input method set, so stop any current one.
+            mCurMethodId = null;
             unbindCurrentMethodLocked(true);
         }
     }
@@ -1436,18 +1445,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
     
     void hideInputMethodMenu() {
+        synchronized (mMethodMap) {
+            hideInputMethodMenuLocked();
+        }
+    }
+    
+    void hideInputMethodMenuLocked() {
         if (DEBUG) Log.v(TAG, "Hide switching menu");
 
-        synchronized (mMethodMap) {
-            if (mSwitchingDialog != null) {
-                mSwitchingDialog.dismiss();
-                mSwitchingDialog = null;
-            }
-            
-            mDialogBuilder = null;
-            mItems = null;
-            mIms = null;
+        if (mSwitchingDialog != null) {
+            mSwitchingDialog.dismiss();
+            mSwitchingDialog = null;
         }
+        
+        mDialogBuilder = null;
+        mItems = null;
+        mIms = null;
     }
     
     // ----------------------------------------------------------------------
@@ -1584,7 +1597,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             p.println("  mInputMethodIcon=" + mInputMethodIcon);
             p.println("  mInputMethodData=" + mInputMethodData);
-            p.println("  mCurrentMethod=" + mCurMethodId);
+            p.println("  mCurMethodId=" + mCurMethodId);
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
             p.println("  mCurFocusedWindow=" + mCurFocusedWindow);

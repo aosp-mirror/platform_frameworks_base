@@ -57,7 +57,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.pm.PackageParser.Package;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -129,6 +128,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_FORCE_DEX = 1<<2;
     static final int SCAN_UPDATE_SIGNATURE = 1<<3;
     static final int SCAN_FORWARD_LOCKED = 1<<4;
+    static final int SCAN_NEW_INSTALL = 1<<5;
     
     static final int LOG_BOOT_PROGRESS_PMS_START = 3060;
     static final int LOG_BOOT_PROGRESS_PMS_SYSTEM_SCAN_START = 3070;
@@ -1963,6 +1963,31 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 removeExisting = true;
             }
+            
+            // Verify that this new package doesn't have any content providers
+            // that conflict with existing packages.  Only do this if the
+            // package isn't already installed, since we don't want to break
+            // things that are installed.
+            if ((scanMode&SCAN_NEW_INSTALL) != 0) {
+                int N = pkg.providers.size();
+                int i;
+                for (i=0; i<N; i++) {
+                    PackageParser.Provider p = pkg.providers.get(i);
+                    String names[] = p.info.authority.split(";");
+                    for (int j = 0; j < names.length; j++) {
+                        if (mProviders.containsKey(names[j])) {
+                            PackageParser.Provider other = mProviders.get(names[j]);
+                            Log.w(TAG, "Can't install because provider name " + names[j] +
+                                    " (in package " + pkg.applicationInfo.packageName +
+                                    ") is already used by "
+                                    + ((other != null && other.component != null)
+                                            ? other.component.getPackageName() : "?"));
+                            mLastScanError = PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
+                            return null;
+                        }
+                    }
+                }
+            }
         }
 
         if (removeExisting) {
@@ -2181,9 +2206,12 @@ class PackageManagerService extends IPackageManager.Stub {
                             ", className = " + p.info.name +
                             ", isSyncable = " + p.info.isSyncable);
                     } else {
+                        PackageParser.Provider other = mProviders.get(names[j]);
                         Log.w(TAG, "Skipping provider name " + names[j] +
                               " (in package " + pkg.applicationInfo.packageName +
-                              "): name already used");
+                              "): name already used by "
+                              + ((other != null && other.component != null)
+                                      ? other.component.getPackageName() : "?"));
                     }
                 }
                 if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
@@ -3205,7 +3233,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 mHandler.removeCallbacks(this);
                 PackageInstalledInfo res;
                 synchronized (mInstallLock) {
-                    res = installPackageLI(packageURI, flags);
+                    res = installPackageLI(packageURI, flags, true);
                 }
                 if (observer != null) {
                     try {
@@ -3246,7 +3274,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private void installNewPackageLI(String pkgName,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked,
+            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
             PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
         boolean dataDirExists = (new File(mAppDataDir, pkgName)).exists();
@@ -3270,7 +3298,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 destResourceFile, pkg, 0,
                 SCAN_MONITOR | SCAN_FORCE_DEX
                 | SCAN_UPDATE_SIGNATURE 
-                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0));
+                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
+                | (newInstall ? SCAN_NEW_INSTALL : 0));
         if (newPackage == null) {
             Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -3302,7 +3331,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private void replacePackageLI(String pkgName,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked,
+            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
             PackageInstalledInfo res) {
         PackageParser.Package deletedPackage;
         // First find the old package info and check signatures
@@ -3317,17 +3346,19 @@ class PackageManagerService extends IPackageManager.Stub {
         if(sysPkg) {
             replaceSystemPackageLI(deletedPackage, 
                     tmpPackageFile, destFilePath, 
-                    destPackageFile, destResourceFile, pkg, forwardLocked, res);
+                    destPackageFile, destResourceFile, pkg, forwardLocked,
+                    newInstall, res);
         } else {
             replaceNonSystemPackageLI(deletedPackage, tmpPackageFile, destFilePath, 
-                    destPackageFile, destResourceFile, pkg, forwardLocked, res);
+                    destPackageFile, destResourceFile, pkg, forwardLocked,
+                    newInstall, res);
         }
     }
     
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked,
+            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
             PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
@@ -3347,7 +3378,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     destResourceFile, pkg, parseFlags,
                     SCAN_MONITOR | SCAN_FORCE_DEX
                     | SCAN_UPDATE_SIGNATURE 
-                    | (forwardLocked ? SCAN_FORWARD_LOCKED : 0));
+                    | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
+                    | (newInstall ? SCAN_NEW_INSTALL : 0));
             if (newPackage == null) {
                     Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
                 if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -3404,7 +3436,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         Uri.fromFile(new File(deletedPackage.mPath)),
                         isForwardLocked(deletedPackage)
                         ? PackageManager.FORWARD_LOCK_PACKAGE
-                                : 0);
+                                : 0, false);
             }
         }
     }
@@ -3412,7 +3444,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked,
+            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
             PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
@@ -3450,7 +3482,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 destResourceFile, pkg, parseFlags,
                 SCAN_MONITOR | SCAN_FORCE_DEX
                 | SCAN_UPDATE_SIGNATURE 
-                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0));
+                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
+                | (newInstall ? SCAN_NEW_INSTALL : 0));
         if (newPackage == null) {
             Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
@@ -3484,8 +3517,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     oldPkgSetting.resourcePath,
                     oldPkg, parseFlags,
                     SCAN_MONITOR
-                    | SCAN_UPDATE_SIGNATURE
-                    | (forwardLocked ? SCAN_FORWARD_LOCKED : 0));
+                    | SCAN_UPDATE_SIGNATURE);
             // Restore the old system information in Settings
             synchronized(mPackages) {
                 if(updatedSettings) {
@@ -3556,7 +3588,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
     
-    private PackageInstalledInfo installPackageLI(Uri pPackageURI, int pFlags) {
+    private PackageInstalledInfo installPackageLI(Uri pPackageURI,
+            int pFlags, boolean newInstall) {
         File tmpPackageFile = null;
         String pkgName = null;
         boolean forwardLocked = false;
@@ -3669,21 +3702,21 @@ class PackageManagerService extends IPackageManager.Stub {
                 replacePackageLI(pkgName,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked,
+                        pkg, forwardLocked, newInstall,
                         res);
             } else {
                 installNewPackageLI(pkgName,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked,
+                        pkg, forwardLocked, newInstall,
                         res);
             }
         } finally {
             if (tmpPackageFile != null && tmpPackageFile.exists()) {
                 tmpPackageFile.delete();
             }
-            return res;
         }
+        return res;
     }
     
     private int setPermissionsLI(String pkgName,

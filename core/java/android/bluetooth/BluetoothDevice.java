@@ -31,6 +31,12 @@ import java.io.UnsupportedEncodingException;
  * @hide
  */
 public class BluetoothDevice {
+
+    public static final int BLUETOOTH_STATE_OFF = 0;
+    public static final int BLUETOOTH_STATE_TURNING_ON = 1;
+    public static final int BLUETOOTH_STATE_ON = 2;
+    public static final int BLUETOOTH_STATE_TURNING_OFF = 3;
+
     /** Inquiry scan and page scan are both off.
      *  Device is neither discoverable nor connectable */
     public static final int SCAN_MODE_NONE = 0;
@@ -83,7 +89,7 @@ public class BluetoothDevice {
     }
 
     /**
-     * Get the current status of Bluetooth hardware.
+     * Is Bluetooth currently turned on.
      *
      * @return true if Bluetooth enabled, false otherwise.
      */
@@ -95,37 +101,30 @@ public class BluetoothDevice {
     }
 
     /**
+     * Get the current state of Bluetooth.
+     *
+     * @return One of BLUETOOTH_STATE_ or BluetoothError.ERROR.
+     */
+    public int getBluetoothState() {
+        try {
+            return mService.getBluetoothState();
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return BluetoothError.ERROR;
+    }
+
+    /**
      * Enable the Bluetooth device.
      * Turn on the underlying hardware.
-     * This is an asynchronous call, BluetoothIntent.ENABLED_ACTION will be
-     * sent if and when the device is successfully enabled.
+     * This is an asynchronous call,
+     * BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION can be used to check if
+     * and when the device is sucessfully enabled.
      * @return false if we cannot enable the Bluetooth device. True does not
      * imply the device was enabled, it only implies that so far there were no
      * problems.
      */
     public boolean enable() {
-        return enable(null);
-    }
-
-    /**
-     * Enable the Bluetooth device.
-     * Turns on the underlying hardware.
-     * This is an asynchronous call. onEnableResult() of your callback will be
-     * called when the call is complete, with either RESULT_SUCCESS or
-     * RESULT_FAILURE.
-     *
-     * Your callback will be called from a binder thread, not the main thread.
-     *
-     * In addition to the callback, BluetoothIntent.ENABLED_ACTION will be
-     * broadcast if the device is successfully enabled.
-     *
-     * @param callback Your callback, null is ok.
-     * @return true if your callback was successfully registered, or false if
-     * there was an error, implying your callback will never be called.
-     */
-    public boolean enable(IBluetoothDeviceCallback callback) {
         try {
-            return mService.enable(callback);
+            return mService.enable();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -138,7 +137,7 @@ public class BluetoothDevice {
      */
     public boolean disable() {
         try {
-            return mService.disable();
+            return mService.disable(true);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -551,7 +550,6 @@ public class BluetoothDevice {
         }
         return pinBytes;
     }
-    
 
     private static final int ADDRESS_LENGTH = 17;
     /** Sanity check a bluetooth address, such as "00:43:A8:23:10:F0" */

@@ -905,10 +905,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 ((Filterable) getAdapter()).getFilter() == null) {
             return false;
         }
-        final Context context = mContext;
-        final InputMethodManager inputManager = (InputMethodManager)
-                context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        return !inputManager.isFullscreenMode();
+        return true;
     }
 
     /**
@@ -2904,7 +2901,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             KeyEvent forwardEvent = event;
             if (forwardEvent.getRepeatCount() > 0) {
-                forwardEvent = new KeyEvent(event, event.getEventTime(), 0);
+                forwardEvent = KeyEvent.changeTimeRepeat(event, event.getEventTime(), 0);
             }
 
             int action = event.getAction();
@@ -2967,6 +2964,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // want to figure out why this is.
             mTextFilter.setRawInputType(EditorInfo.TYPE_CLASS_TEXT
                     | EditorInfo.TYPE_TEXT_VARIATION_FILTER);
+            mTextFilter.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
             mTextFilter.addTextChangedListener(this);
             p.setFocusable(false);
             p.setTouchable(false);

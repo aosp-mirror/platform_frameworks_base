@@ -160,7 +160,7 @@ public class AudioManager {
         16, // STREAM_MUSIC
         8,  // STREAM_ALARM
         8,  // STREAM_NOTIFICATION
-        15, // STREAM_BLUETOOTH_SCO
+        16, // STREAM_BLUETOOTH_SCO
     };
 
     /**  @hide Default volume index values for audio streams */
@@ -220,7 +220,7 @@ public class AudioManager {
      * By default this is on for the ring stream. If this flag is included,
      * this behavior will be present regardless of the stream type being
      * affected by the ringer mode.
-     * 
+     *
      * @see #adjustVolume(int, int)
      * @see #adjustStreamVolume(int, int, int)
      */
@@ -954,25 +954,21 @@ public class AudioManager {
     /**
      * IME standard keypress sound
      * @see #playSoundEffect(int)
-     * @hide FIXME: Unhide before release
      */
     public static final int FX_KEYPRESS_STANDARD = 5;
     /**
      * IME spacebar keypress sound
      * @see #playSoundEffect(int)
-     * @hide FIXME: Unhide before release
      */
     public static final int FX_KEYPRESS_SPACEBAR = 6;
     /**
      * IME delete keypress sound
      * @see #playSoundEffect(int)
-     * @hide FIXME: Unhide before release
      */
     public static final int FX_KEYPRESS_DELETE = 7;
     /**
      * IME return_keypress sound
      * @see #playSoundEffect(int)
-     * @hide FIXME: Unhide before release
      */
     public static final int FX_KEYPRESS_RETURN = 8;
     /**
@@ -988,11 +984,10 @@ public class AudioManager {
      *            {@link #FX_FOCUS_NAVIGATION_DOWN},
      *            {@link #FX_FOCUS_NAVIGATION_LEFT},
      *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            FIXME: include links before release
-     *            {link #FX_KEYPRESS_STANDARD},
-     *            {link #FX_KEYPRESS_SPACEBAR},
-     *            {link #FX_KEYPRESS_DELETE},
-     *            {link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_STANDARD},
+     *            {@link #FX_KEYPRESS_SPACEBAR},
+     *            {@link #FX_KEYPRESS_DELETE},
+     *            {@link #FX_KEYPRESS_RETURN},
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
@@ -1021,15 +1016,13 @@ public class AudioManager {
      *            {@link #FX_FOCUS_NAVIGATION_DOWN},
      *            {@link #FX_FOCUS_NAVIGATION_LEFT},
      *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            FIXME: include links before release
-     *            {link #FX_KEYPRESS_STANDARD},
-     *            {link #FX_KEYPRESS_SPACEBAR},
-     *            {link #FX_KEYPRESS_DELETE},
-     *            {link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_STANDARD},
+     *            {@link #FX_KEYPRESS_SPACEBAR},
+     *            {@link #FX_KEYPRESS_DELETE},
+     *            {@link #FX_KEYPRESS_RETURN},
      * @param volume Sound effect volume
      * NOTE: This version is for applications that have their own
      * settings panel for enabling and controlling volume.
-     *  @hide FIXME: Unhide before release
      */
     public void  playSoundEffect(int effectType, float volume) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {

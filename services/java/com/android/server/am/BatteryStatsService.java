@@ -148,14 +148,70 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.notePhoneOffLocked();
         }
     }
+    
+    public void noteWifiOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiOnLocked();
+        }
+    }
+    
+    public void noteWifiOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiOffLocked();
+        }
+    }
+    
+    public void noteBluetoothOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteBluetoothOnLocked();
+        }
+    }
+    
+    public void noteBluetoothOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteBluetoothOffLocked();
+        }
+    }
+    
+    public void noteFullWifiLockAcquired(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockAcquiredLocked(uid);
+        }
+    }
+    
+    public void noteFullWifiLockReleased(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockReleasedLocked(uid);
+        }
+    }
+    
+    public void noteScanWifiLockAcquired(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockAcquiredLocked(uid);
+        }
+    }
+    
+    public void noteScanWifiLockReleased(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockReleasedLocked(uid);
+        }
+    }
 
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
     
-    public void setOnBattery(boolean onBattery) {
+    public void setOnBattery(boolean onBattery, int level) {
         enforceCallingPermission();
-        mStats.setOnBattery(onBattery);
+        mStats.setOnBattery(onBattery, level);
     }
     
     public long getAwakeTimeBattery() {

@@ -201,8 +201,6 @@ public class GestureDetector {
 
     private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
-    // TODO make new double-tap timeout, and define its events (i.e. either time
-    // between down-down or time between up-down)
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
 
     // constants for Message.what used by GestureHandler below

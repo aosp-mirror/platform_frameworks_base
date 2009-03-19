@@ -387,12 +387,10 @@ void AudioTrack::flush()
     LOGV("flush");
 
     if (!mActive) {
-        mCblk->lock.lock();
         mAudioTrack->flush();
         // Release AudioTrack callback thread in case it was waiting for new buffers
         // in AudioTrack::obtainBuffer()
         mCblk->cv.signal();
-        mCblk->lock.unlock();
     }
 }
 
@@ -443,7 +441,7 @@ void AudioTrack::setSampleRate(int rate)
     if (rate > afSamplingRate*2) rate = afSamplingRate*2;
     if (rate > MAX_SAMPLE_RATE) rate = MAX_SAMPLE_RATE;
 
-    mCblk->sampleRate = rate;
+    mCblk->sampleRate = (uint16_t)rate;
 }
 
 uint32_t AudioTrack::getSampleRate()

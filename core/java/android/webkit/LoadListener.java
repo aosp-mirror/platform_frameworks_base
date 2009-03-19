@@ -377,10 +377,6 @@ class LoadListener extends Handler implements EventHandler {
             }
         }
 
-        // if there is buffered data, commit them in the end
-        boolean needToCommit = mAuthHeader != null && !mustAuthenticate
-                && mNativeLoader != 0 && !mDataBuilder.isEmpty();
-
         // it is only here that we can reset the last mAuthHeader object
         // (if existed) and start a new one!!!
         mAuthHeader = null;
@@ -415,10 +411,6 @@ class LoadListener extends Handler implements EventHandler {
             }
         }
         commitHeadersCheckRedirect();
-
-        if (needToCommit) {
-            commitLoad();
-        }
     }
 
     /**
@@ -452,6 +444,8 @@ class LoadListener extends Handler implements EventHandler {
         status.put("minor", minorVersion);
         status.put("code", code);
         status.put("reason", reasonPhrase);
+        // New status means new data. Clear the old.
+        mDataBuilder.clear();
         sendMessageInternal(obtainMessage(MSG_STATUS, status));
     }
 
@@ -613,7 +607,6 @@ class LoadListener extends Handler implements EventHandler {
                 // ask for it, so make sure we have a valid CacheLoader
                 // before calling it.
                 if (mCacheLoader != null) {
-                    detachRequestHandle();
                     mCacheLoader.load();
                     if (Config.LOGV) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
@@ -738,10 +731,16 @@ class LoadListener extends Handler implements EventHandler {
         if (mRequestHandle != null) {
             mRequestHandle.handleSslErrorResponse(proceed);
         }
+        if (!proceed) {
+            // Commit whatever data we have and tear down the loader.
+            commitLoad();
+            tearDown();
+        }
     }
 
     /**
-     * Uses user-supplied credentials to restar a request.
+     * Uses user-supplied credentials to restart a request. If the credentials
+     * are null, cancel the request.
      */
     void handleAuthResponse(String username, String password) {
         if (Config.LOGV) {
@@ -780,6 +779,10 @@ class LoadListener extends Handler implements EventHandler {
                     }
                 }
             }
+        } else {
+            // Commit whatever data we have and tear down the loader.
+            commitLoad();
+            tearDown();
         }
     }
 
@@ -944,13 +947,12 @@ class LoadListener extends Handler implements EventHandler {
      * @return native response pointer
      */
     private int createNativeResponse() {
-        // The reason we change HTTP_NOT_MODIFIED to HTTP_OK is because we know
-        // that WebCore never sends the if-modified-since header. Our
-        // CacheManager does it for us. If the server responds with a 304, then
-        // we treat it like it was a 200 code and proceed with loading the file
-        // from the cache.
-        int statusCode = mStatusCode == HTTP_NOT_MODIFIED
-                ? HTTP_OK : mStatusCode;
+        // If WebCore sends if-modified-since, mCacheLoader is null. If 
+        // CacheManager sends it, mCacheLoader is not null. In this case, if the
+        // server responds with a 304, then we treat it like it was a 200 code 
+        // and proceed with loading the file from the cache.
+        int statusCode = (mStatusCode == HTTP_NOT_MODIFIED &&
+                mCacheLoader != null) ? HTTP_OK : mStatusCode;
         // pass content-type content-length and content-encoding
         final int nativeResponse = nativeCreateResponse(
                 mUrl, statusCode, mStatusText,
@@ -1181,8 +1183,6 @@ class LoadListener extends Handler implements EventHandler {
                 // sync. Add 1 to account for the current redirect.
                 mCacheRedirectCount = mRequestHandle.getRedirectCount() + 1;
             }
-            // Clear the buffered data since the redirect is valid.
-            mDataBuilder.clear();
         } else {
             commitHeaders();
             commitLoad();
@@ -1197,9 +1197,10 @@ class LoadListener extends Handler implements EventHandler {
 
     /**
      * Parses the content-type header.
+     * The first part only allows '-' if it follows x or X.
      */
     private static final Pattern CONTENT_TYPE_PATTERN =
-            Pattern.compile("^([a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
+            Pattern.compile("^((?:[xX]-)?[a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
 
     private void parseContentTypeHeader(String contentType) {
         if (Config.LOGV) {

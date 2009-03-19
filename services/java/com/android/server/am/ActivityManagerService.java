@@ -121,6 +121,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
+    static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -1536,6 +1537,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // just restarting it anyway.
         if (checkConfig) {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                    mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r : null);
             updateConfigurationLocked(config, r);
         }
@@ -2336,6 +2338,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                    mConfiguration,
                     next.mayFreezeScreenLocked(next.app) ? next : null);
             if (config != null) {
                 next.frozenBeforeDestroy = true;
@@ -2364,7 +2367,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (a != null) {
                     final int N = a.size();
                     if (!next.finishing && N > 0) {
-                        if (localLOGV) Log.v(
+                        if (DEBUG_RESULTS) Log.v(
                                 TAG, "Delivering results to " + next
                                 + ": " + a);
                         next.app.thread.scheduleSendResult(next, a);
@@ -2701,7 +2704,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord resultRecord = null;
         if (resultTo != null) {
             int index = indexOfTokenLocked(resultTo, false);
-            if (localLOGV) Log.v(
+            if (DEBUG_RESULTS) Log.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
                 sourceRecord = (HistoryRecord)mHistory.get(index);
@@ -3358,6 +3361,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             final long origId = Binder.clearCallingIdentity();
             mWindowManager.setAppOrientation(r, requestedOrientation);
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                    mConfiguration,
                     r.mayFreezeScreenLocked(r.app) ? r : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
@@ -3486,7 +3490,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // send the result
         HistoryRecord resultTo = r.resultTo;
         if (resultTo != null) {
-            if (localLOGV) Log.v(TAG, "Adding result to " + resultTo);
+            if (DEBUG_RESULTS) Log.v(TAG, "Adding result to " + resultTo);
             if (r.info.applicationInfo.uid > 0) {
                 grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
                         r.packageName, resultData, r);
@@ -3652,6 +3656,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     data, r);
         }
 
+        if (DEBUG_RESULTS) Log.v(TAG, "Send activity result to " + r
+                + " : who=" + resultWho + " req=" + requestCode
+                + " res=" + resultCode + " data=" + data);
         if (mResumedActivity == r && r.app != null && r.app.thread != null) {
             try {
                 ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
@@ -9013,7 +9020,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         r.app = app;
-        r.restartTime = SystemClock.uptimeMillis();
+        r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
         app.services.add(r);
         bumpServiceExecutingLocked(r);
@@ -10133,8 +10140,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // installed.  Maybe in the future we want to have a special install
             // broadcast or such for apps, but we'd like to deliberately make
             // this decision.
-            String skipPackage = (intent.ACTION_PACKAGE_ADDED.equals(
-                    intent.getAction()) && intent.getData() != null)
+            boolean skip = false;
+            if (intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
+                // If this is replacing an existing package, then we allow it
+                // to see the broadcast for it to restart itself.
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    skip = true;
+                }
+            } else if (intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())) {
+                skip = true;
+            } else if (intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
+                skip = true;
+            }
+            String skipPackage = (skip && intent.getData() != null)
                     ? intent.getData().getSchemeSpecificPart()
                     : null;
             if (skipPackage != null && receivers != null) {
@@ -11306,6 +11324,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // XXX should compute this based on the max of
                         // all connected clients.
                         ConnectionRecord cr = kt.next();
+                        if (cr.binding.client == app) {
+                            // Binding to ourself is not interesting.
+                            continue;
+                        }
                         if ((cr.flags&Context.BIND_AUTO_CREATE) != 0) {
                             ProcessRecord client = cr.binding.client;
                             int myHiddenAdj = hiddenAdj;
@@ -11352,6 +11374,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Iterator<ProcessRecord> kt = cpr.clients.iterator();
                     while (kt.hasNext() && adj > FOREGROUND_APP_ADJ) {
                         ProcessRecord client = kt.next();
+                        if (client == app) {
+                            // Being our own client is not interesting.
+                            continue;
+                        }
                         int myHiddenAdj = hiddenAdj;
                         if (myHiddenAdj > client.hiddenAdj) {
                             if (client.hiddenAdj > FOREGROUND_APP_ADJ) {

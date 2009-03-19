@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Nummervisning er ikke begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="serviceNotProvisioned">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
     <string name="CLIRPermanent">"Kunne ikke endre innstilling for nummervisning."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Tale"</string>
     <string name="serviceClassData">"Data"</string>
     <string name="serviceClassFAX">"Fax"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"Lar applikasjonen slå av/på varsling om plasseringsendringer fra radioen. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_checkinProperties">"få tilgang til egenskaper for innsjekking"</string>
     <string name="permdesc_checkinProperties">"Gir lese- og skrivetilgang til egenskaper lastet opp av innsjekkingstjenesten. Ikke ment for vanlige applikasjoner."</string>
-    <string name="permlab_bindGadget">"velg gadgeter"</string>
-    <string name="permdesc_bindGadget">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"endre telefontilstand"</string>
     <string name="permdesc_modifyPhoneState">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
     <string name="permlab_readPhoneState">"lese telefontilstand"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"Sett inn et SIM-kort."</string>
     <string name="lockscreen_network_locked_message">"Nettverk ikke tillatt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-kortet er PUK-låst."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Vennligst ring kundeservice."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM-kortet er låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser opp SIM-kort…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Glemt mønsteret?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Too many pattern attempts!"</string>
-    <string name="lockscreen_glogin_instructions">"To unlock,"\n"sign in with your Google account"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"Username (email)"</string>
     <string name="lockscreen_glogin_password_hint">"Password"</string>
     <string name="lockscreen_glogin_submit_button">"Sign in"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"En gang i måneden"</string>
     <string name="yearly">"En gang i året"</string>
     <string name="VideoView_error_title">"Cannot play video"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"Sorry, this video cannot be played."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"middag"</string>
     <string name="Noon">"Middag"</string>
     <string name="midnight">"midnatt"</string>
     <string name="Midnight">"Midnatt"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"søndag"</string>
     <string name="day_of_week_long_monday">"mandag"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

@@ -405,6 +405,8 @@ public class MediaController extends FrameLayout {
             return super.dispatchKeyEvent(event);
         } else if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU) {
             hide();
+
+            return true;
         } else {
             show(sDefaultTimeout);
         }

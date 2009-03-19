@@ -24,6 +24,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERAT
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OPERATOR_ALPHA;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_OPERATOR_NUMERIC;
 
+import com.android.internal.telephony.SimCard;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.gsm.DataConnectionTracker.State;
@@ -175,16 +176,17 @@ final class ServiceStateTracker extends Handler
     // waiting period before recheck gprs and voice registration
     static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
-    // notification type
+    // restricted state type
     static final int PS_ENABLED = 1001;             // Access Control blocks data service
     static final int PS_DISABLED = 1002;            // Access Control enables data service
     static final int CS_ENABLED = 1003;             // Access Control blocks all voice/sms service
     static final int CS_DISABLED = 1004;            // Access Control enables all voice/sms service
     static final int CS_NORMAL_ENABLED = 1005;      // Access Control blocks normal voice/sms service
-    static final int CS_NORMAL_DISABLED = 1006;     // Access Control enables normal voice/sms service
-    static final int CS_EMERGENCY_ENABLED = 1007;   // Access Control blocks emergency call service
-    static final int CS_EMERGENCY_DISABLED  = 1008; // Access Control enables emergency call service       
+    static final int CS_EMERGENCY_ENABLED = 1006;   // Access Control blocks emergency call service
     
+    // notification id
+    static final int PS_NOTIFICATION = 888; //id to update and cancel PS restricted 
+    static final int CS_NOTIFICATION = 999; //id to update and cancel CS restricted
     
     //***** Events
     static final int EVENT_RADIO_STATE_CHANGED       = 1;
@@ -1181,7 +1183,8 @@ final class ServiceStateTracker extends Handler
     /**
      * Set restricted state based on the OnRestrictedStateChanged notification
      * If any voice or packet restricted state changes, trigger a UI
-     * notification and notify registrants.
+     * notification and notify registrants when sim is ready.
+     * 
      * @param ar an int value of RIL_RESTRICTED_STATE_*
      */
     private void onRestrictedStateChanged(AsyncResult ar)
@@ -1198,38 +1201,78 @@ final class ServiceStateTracker extends Handler
             newRs.setCsEmergencyRestricted(
                     ((state & RILConstants.RIL_RESTRICTED_STATE_CS_EMERGENCY) != 0) ||
                     ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
-            newRs.setCsNormalRestricted(
-                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_NORMAL) != 0) ||
-                    ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
-            newRs.setPsRestricted(
-                    (state & RILConstants.RIL_RESTRICTED_STATE_PS_ALL)!= 0);
+            
+
+            //ignore the normal call and data restricted state before SIM READY
+            if (phone.getSimCard().getState() == SimCard.State.READY){ 
+                newRs.setCsNormalRestricted(
+                        ((state & RILConstants.RIL_RESTRICTED_STATE_CS_NORMAL) != 0) ||
+                        ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
+                newRs.setPsRestricted(
+                        (state & RILConstants.RIL_RESTRICTED_STATE_PS_ALL)!= 0);
+            }
             
             Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);         
             
             if (!rs.isPsRestricted() && newRs.isPsRestricted()) {
                 psRestrictEnabledRegistrants.notifyRegistrants();
-                setNotification(PS_ENABLED, false);
+                setNotification(PS_ENABLED);
             } else if (rs.isPsRestricted() && !newRs.isPsRestricted()) {
                 psRestrictDisabledRegistrants.notifyRegistrants();
-                setNotification(PS_DISABLED, false);
+                setNotification(PS_DISABLED);
             }
             
-            if (!rs.isCsRestricted() && newRs.isCsRestricted()) {
-                setNotification(CS_ENABLED, false);
-            } else if (rs.isCsRestricted() && !newRs.isCsRestricted()) {
-                setNotification(CS_DISABLED, false);
-            } else {
-                if (!rs.isCsEmergencyRestricted() && newRs.isCsEmergencyRestricted()) {
-                    setNotification(CS_EMERGENCY_ENABLED, false); 
-                } else if (rs.isCsEmergencyRestricted() && !newRs.isCsEmergencyRestricted()) {
-                    setNotification(CS_EMERGENCY_DISABLED, false); 
+            /**
+             * There are two kind of cs restriction, normal and emergency. So 
+             * there are 4 x 4 combinations in current and new restricted states
+             * and we only need to notify when state is changed.
+             */
+            if (rs.isCsRestricted()) {
+                if (!newRs.isCsRestricted()) {
+                    // remove all restriction
+                    setNotification(CS_DISABLED);
+                } else if (!newRs.isCsNormalRestricted()) {
+                    // remove normal restriction
+                    setNotification(CS_EMERGENCY_ENABLED); 
+                } else if (!newRs.isCsEmergencyRestricted()) {
+                    // remove emergency restriction
+                    setNotification(CS_NORMAL_ENABLED); 
                 }
-                if (!rs.isCsNormalRestricted() && newRs.isCsNormalRestricted()) {
-                    setNotification(CS_NORMAL_ENABLED, false); 
-                } else if (rs.isCsEmergencyRestricted() && !newRs.isCsEmergencyRestricted()) {
-                    setNotification(CS_NORMAL_DISABLED, false); 
+            } else if (rs.isCsEmergencyRestricted() && !rs.isCsNormalRestricted()) {
+                if (!newRs.isCsRestricted()) {
+                    // remove all restriction
+                    setNotification(CS_DISABLED); 
+                } else if (newRs.isCsRestricted()) {
+                    // enable all restriction
+                    setNotification(CS_ENABLED);
+                } else if (newRs.isCsNormalRestricted()) {
+                    // remove emergency restriction and enable normal restriction
+                    setNotification(CS_NORMAL_ENABLED); 
+                }
+            } else if (!rs.isCsEmergencyRestricted() && rs.isCsNormalRestricted()) {
+                if (!newRs.isCsRestricted()) {
+                    // remove all restriction
+                    setNotification(CS_DISABLED); 
+                } else if (newRs.isCsRestricted()) {
+                    // enable all restriction
+                    setNotification(CS_ENABLED);
+                } else if (newRs.isCsEmergencyRestricted()) {
+                    // remove normal restriction and enable emergency restriction
+                    setNotification(CS_EMERGENCY_ENABLED); 
+                }
+            } else {
+                if (newRs.isCsRestricted()) {
+                    // enable all restriction
+                    setNotification(CS_ENABLED);
+                } else if (newRs.isCsEmergencyRestricted()) {
+                    // enable emergency restriction
+                    setNotification(CS_EMERGENCY_ENABLED); 
+                } else if (newRs.isCsNormalRestricted()) {
+                    // enable normal restriction
+                    setNotification(CS_NORMAL_ENABLED); 
                 }
             }
+            
             rs = newRs;
         }
         Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at return "+ rs);
@@ -1593,67 +1636,61 @@ final class ServiceStateTracker extends Handler
      * Post a notification to NotificationManager for restricted state
      * 
      * @param notifyType is one state of PS/CS_*_ENABLE/DISABLE
-     * @param isCancel true to cancel the previous posted notification 
-     *                 (current is not implemented yet)
      */
-    private void setNotification(int notifyType, boolean isCancel) {
+    private void setNotification(int notifyType) {
 
         Log.d(LOG_TAG, "[DSAC DEB] " + "create notification " + notifyType);
+        
+        Context context = phone.getContext();
+
         mNotification = new Notification();
         mNotification.when = System.currentTimeMillis();
         mNotification.flags = Notification.FLAG_AUTO_CANCEL;
-        mNotification.icon = com.android.internal.R.drawable.icon_highlight_square;
+        mNotification.icon = com.android.internal.R.drawable.stat_sys_warning;
         Intent intent = new Intent();
         mNotification.contentIntent = PendingIntent
-        .getActivity(phone.getContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        // TODO 
-        // should use getResources().getText(com.android.internal.R.)
-        CharSequence title = "Restricted State Changed";
         CharSequence details = "";
+        CharSequence title = context.getText(com.android.internal.R.string.RestrictedChangedTitle);
+        int notificationId = CS_NOTIFICATION;
+        
         switch (notifyType) {
         case PS_ENABLED:
-            details = "Access Control blocks data service.";
+            notificationId = PS_NOTIFICATION;
+            details = context.getText(com.android.internal.R.string.RestrictedOnData);;
             break;
         case PS_DISABLED:
-            details = "Access Control enables data service.";
+            notificationId = PS_NOTIFICATION;
             break;
         case CS_ENABLED:
-            details = "Access Control blocks all voice/sms service.";
+            details = context.getText(com.android.internal.R.string.RestrictedOnAll);;
+            break;   
+        case CS_NORMAL_ENABLED:
+            details = context.getText(com.android.internal.R.string.RestrictedOnNormal);;
+            break;   
+        case CS_EMERGENCY_ENABLED:
+            details = context.getText(com.android.internal.R.string.RestrictedOnEmergency);;
             break;   
         case CS_DISABLED:
-            details = "Access Control enables all voice/sms service.";
-            break;  
-        case CS_NORMAL_ENABLED:
-            details = "Access Control blocks normal voice/sms service.";
-            break;   
-        case CS_NORMAL_DISABLED:
-            details = "Access Control enables normal voice/sms service.";
-            break; 
-        case CS_EMERGENCY_ENABLED:
-            details = "Access Control blocks emergency call service.";
-            break;   
-        case CS_EMERGENCY_DISABLED:
-            details = "Access Control enables emergency call service.";
+            // do nothing and cancel the notification later
             break;  
         }
         
         Log.d(LOG_TAG, "[DSAC DEB] " + "put notification " + title + " / " +details);
         mNotification.tickerText = title;
-        mNotification.setLatestEventInfo(phone.getContext(), title, details, 
+        mNotification.setLatestEventInfo(context, title, details, 
                 mNotification.contentIntent);
         
         NotificationManager notificationManager = (NotificationManager) 
-            phone.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (isCancel) {
-            // TODO
-            //if we go the notification route, probably want to only put up a single
-            //notification if both CS+PS is restricted, instead of one for each.nnnnn
-            //Anyway, need UX team input on UI.
-            //notificationManager.cancel(notifyType);
+        if (notifyType == PS_DISABLED || notifyType == CS_DISABLED) {
+            // cancel previous post notification
+            notificationManager.cancel(notificationId);
+        } else {
+            // update restricted state notification
+            notificationManager.notify(notificationId, mNotification);
         }
-        notificationManager.notify(notifyType, mNotification);
     }
-
 }

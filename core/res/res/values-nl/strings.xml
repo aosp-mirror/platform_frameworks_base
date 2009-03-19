@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
     <string name="serviceNotProvisioned">"Service niet voorzien."</string>
     <string name="CLIRPermanent">"De instelling voor beller-id kan niet worden gewijzigd."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Spraak"</string>
     <string name="serviceClassData">"Gegevens"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties">"toegang tot checkin-eigenschappen"</string>
     <string name="permdesc_checkinProperties">"Hiermee wordt lees-/schrijftoegang gegeven tot eigenschappen die door de checkin-service zijn geüpload. Niet voor gebruik door normale toepassingen."</string>
-    <string name="permlab_bindGadget">"gadgets kiezen"</string>
-    <string name="permdesc_bindGadget">"Hiermee kan een toepassing het systeem melden welke gadgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"telefoonstatus wijzigen"</string>
     <string name="permdesc_modifyPhoneState">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
     <string name="permlab_readPhoneState">"telefoonstatus lezen"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"Plaats een SIM-kaart."</string>
     <string name="lockscreen_network_locked_message">"Netwerk geblokkeerd"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-kaart is geblokkeerd met PUK-code."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Neem contact op met de klantenservice."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM-kaart is geblokkeerd."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-kaart ontgrendelen..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Patroon vergeten?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Te veel patroonpogingen!"</string>
-    <string name="lockscreen_glogin_instructions">"U moet zich aanmelden bij uw Google-account"\n"om te ontgrendelen"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"Gebruikersnaam (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button">"Aanmelden"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"Maandelijks"</string>
     <string name="yearly">"Jaarlijks"</string>
     <string name="VideoView_error_title">"Video kan niet worden afgespeeld"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"Deze video kan niet worden afgespeeld."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"am"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"twaalf uur \'s middags"</string>
     <string name="Noon">"Twaalf uur \'s middags"</string>
     <string name="midnight">"middernacht"</string>
     <string name="Midnight">"Middernacht"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Zondag"</string>
     <string name="day_of_week_long_monday">"Maandag"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

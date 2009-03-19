@@ -22,7 +22,8 @@ enabled.
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-     android:id="@android:id/content"
-     android:fitsSystemWindows="true">
-</FrameLayout>
-
+    android:id="@android:id/content"
+    android:fitsSystemWindows="true"
+    android:foregroundInsidePadding="false"
+    android:foregroundGravity="fill_horizontal|top"
+    android:foreground="?android:attr/windowContentOverlay" />

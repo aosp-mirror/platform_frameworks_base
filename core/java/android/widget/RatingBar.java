@@ -296,7 +296,13 @@ public class RatingBar extends AbsSeekBar {
             dispatchRatingChange(true);
         }
     }
-    
+
+    @Override
+    void onKeyChange() {
+        super.onKeyChange();
+        dispatchRatingChange(true);
+    }
+
     void dispatchRatingChange(boolean fromUser) {
         if (mOnRatingBarChangeListener != null) {
             mOnRatingBarChangeListener.onRatingChanged(this, getRating(),

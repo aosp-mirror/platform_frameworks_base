@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Идентификатор звонящего по умолчанию не ограничен. Следующий вызов: не ограничен"</string>
     <string name="serviceNotProvisioned">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent">"Нельзя изменить настройки идентификатора звонящего."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Голос"</string>
     <string name="serviceClassData">"Данные"</string>
     <string name="serviceClassFAX">"ФАКС"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"Разрешает включение/отключение уведомлений о местоположении по радиосвязи. Не используется обычными приложениями."</string>
     <string name="permlab_checkinProperties">"открывать свойства проверки"</string>
     <string name="permdesc_checkinProperties">"Разрешает доступ на чтение и запись к свойствам, загруженным службой проверки. Не используется обычными приложениями."</string>
-    <string name="permlab_bindGadget">"выбирать гаджеты"</string>
-    <string name="permdesc_bindGadget">"Позволяет приложению сообщить системе, какие приложения могут использовать какие гаджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"изменять состояние телефона"</string>
     <string name="permdesc_modifyPhoneState">"Позволяет приложению управлять телефонными функциями устройства. Приложение с такими полномочиями может переключать сети, включать и выключать радиосвязь и т.д., не сообщая вам об этом."</string>
     <string name="permlab_readPhoneState">"считывать состояние телефона"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"Вставьте SIM-карту."</string>
     <string name="lockscreen_network_locked_message">"Заблокирована сетью"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-карта заблокирована PUK-кодом."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Свяжитесь со службой поддержки."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM-карта заблокирована."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Разблокировка SIM-карты..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Вы неправильно воспроизвели комбинацию разблокировки <xliff:g id="NUMBER_0">%d</xliff:g> раз. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Забыли комбинацию?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Слишком много попыток ввести комбинацию!"</string>
-    <string name="lockscreen_glogin_instructions">"Для разблокировки"\n"войдите с помощью своего аккаунта Google"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"Имя пользователя (адрес электронной почты)"</string>
     <string name="lockscreen_glogin_password_hint">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button">"Войти"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"Ежемесячно"</string>
     <string name="yearly">"Ежегодно"</string>
     <string name="VideoView_error_title">"Не удается воспроизвести видео"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"К сожалению, это видео нельзя воспроизвести."</string>
     <string name="VideoView_error_button">"ОК"</string>
     <string name="am">"AM"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"полдень"</string>
     <string name="Noon">"Полдень"</string>
     <string name="midnight">"полночь"</string>
     <string name="Midnight">"Полночь"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"воскресенье"</string>
     <string name="day_of_week_long_monday">"понедельник"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

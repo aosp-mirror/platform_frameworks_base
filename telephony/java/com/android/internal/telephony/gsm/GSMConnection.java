@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.gsm;
 import com.android.internal.telephony.*;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -71,6 +72,7 @@ public class GSMConnection extends Connection {
 
     DisconnectCause cause = DisconnectCause.NOT_DISCONNECTED;
     PostDialState postDialState = PostDialState.NOT_STARTED;
+    int numberPresentation = Connection.PRESENTATION_ALLOWED;
 
     Handler h;
 
@@ -124,6 +126,7 @@ public class GSMConnection extends Connection {
 
         isIncoming = dc.isMT;
         createTime = System.currentTimeMillis();
+        numberPresentation = dc.numberPresentation;
 
         this.index = index;
 
@@ -755,5 +758,10 @@ public class GSMConnection extends Connection {
     
     private void log(String msg) {
         Log.d(LOG_TAG, "[GSMConn] " + msg);
+    }
+
+    @Override
+    public int getNumberPresentation() {
+        return numberPresentation;
     }
 }

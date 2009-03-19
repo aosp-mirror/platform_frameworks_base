@@ -56,6 +56,7 @@ public class FrameLayout extends ViewGroup {
     private final Rect mSelfBounds = new Rect();
     private final Rect mOverlayBounds = new Rect();
     private int mForegroundGravity = Gravity.FILL;
+    private boolean mForegroundInPadding = true;
 
     public FrameLayout(Context context) {
         super(context);
@@ -71,6 +72,9 @@ public class FrameLayout extends ViewGroup {
         TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.FrameLayout,
                     defStyle, 0);
 
+        mForegroundGravity = a.getInt(
+                com.android.internal.R.styleable.FrameLayout_foregroundGravity, mForegroundGravity);
+
         final Drawable d = a.getDrawable(com.android.internal.R.styleable.FrameLayout_foreground);
         if (d != null) {
             setForeground(d);
@@ -80,8 +84,8 @@ public class FrameLayout extends ViewGroup {
             setMeasureAllChildren(true);
         }
 
-        mForegroundGravity = a.getInt(com.android.internal.R.styleable.FrameLayout_foregroundGravity,
-                mForegroundGravity);
+        mForegroundInPadding = a.getBoolean(
+                com.android.internal.R.styleable.FrameLayout_foregroundInsidePadding, true);
 
         a.recycle();
     }
@@ -105,6 +109,23 @@ public class FrameLayout extends ViewGroup {
             }
 
             mForegroundGravity = foregroundGravity;
+
+
+            if (mForegroundGravity == Gravity.FILL && mForeground != null) {
+                Rect padding = new Rect();
+                if (mForeground.getPadding(padding)) {
+                    mForegroundPaddingLeft = padding.left;
+                    mForegroundPaddingTop = padding.top;
+                    mForegroundPaddingRight = padding.right;
+                    mForegroundPaddingBottom = padding.bottom;
+                }
+            } else {
+                mForegroundPaddingLeft = 0;
+                mForegroundPaddingTop = 0;
+                mForegroundPaddingRight = 0;
+                mForegroundPaddingBottom = 0;
+            }
+
             requestLayout();
         }
     }
@@ -167,12 +188,14 @@ public class FrameLayout extends ViewGroup {
                 if (drawable.isStateful()) {
                     drawable.setState(getDrawableState());
                 }
-                Rect padding = new Rect();
-                if (drawable.getPadding(padding)) {
-                    mForegroundPaddingLeft = padding.left;
-                    mForegroundPaddingTop = padding.top;
-                    mForegroundPaddingRight = padding.right;
-                    mForegroundPaddingBottom = padding.bottom;
+                if (mForegroundGravity == Gravity.FILL) {
+                    Rect padding = new Rect();
+                    if (drawable.getPadding(padding)) {
+                        mForegroundPaddingLeft = padding.left;
+                        mForegroundPaddingTop = padding.top;
+                        mForegroundPaddingRight = padding.right;
+                        mForegroundPaddingBottom = padding.bottom;
+                    }
                 }
             }  else {
                 setWillNotDraw(true);
@@ -309,10 +332,14 @@ public class FrameLayout extends ViewGroup {
             final Rect selfBounds = mSelfBounds;
             final Rect overlayBounds = mOverlayBounds;
 
-            selfBounds.set(0, 0, w, h);
+            if (mForegroundInPadding) {
+                selfBounds.set(0, 0, w, h);
+            } else {
+                selfBounds.set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
+            }
+
             Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
                     foreground.getIntrinsicHeight(), selfBounds, overlayBounds);
-
             foreground.setBounds(overlayBounds);
         }
     }

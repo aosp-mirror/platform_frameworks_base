@@ -361,10 +361,13 @@ public class AlertController {
         if (mView != null) {
             customPanel = (FrameLayout) mWindow.findViewById(R.id.customPanel);
             FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
-            custom.addView(mView, new LayoutParams(FILL_PARENT, WRAP_CONTENT));
+            custom.addView(mView, new LayoutParams(FILL_PARENT, FILL_PARENT));
             if (mViewSpacingSpecified) {
                 custom.setPadding(mViewSpacingLeft, mViewSpacingTop, mViewSpacingRight,
                         mViewSpacingBottom);
+            }
+            if (mListView != null) {
+                ((LinearLayout.LayoutParams) customPanel.getLayoutParams()).weight = 0;
             }
         } else {
             mWindow.findViewById(R.id.customPanel).setVisibility(View.GONE);
@@ -456,7 +459,9 @@ public class AlertController {
             
             if (mListView != null) {
                 contentPanel.removeView(mWindow.findViewById(R.id.scrollView));
-                contentPanel.addView(mListView, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT));
+                contentPanel.addView(mListView,
+                        new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT));
+                contentPanel.setLayoutParams(new LinearLayout.LayoutParams(FILL_PARENT, 0, 1.0f));
             } else {
                 contentPanel.setVisibility(View.GONE);
             }

@@ -78,12 +78,37 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_ACTION_DONE = 0x00000006;
     
     /**
+     * Flag of {@link #imeOptions}: used to specify that the IME does not need
+     * to show its extracted text UI.  For input methods that may be fullscreen,
+     * often when in landscape mode, this allows them to be smaller and let part
+     * of the application be shown behind.  Though there will likely be limited
+     * access to the application available from the user, it can make the
+     * experience of a (mostly) fullscreen IME less jarring.  Note that when
+     * this flag is specified the IME may <em>not</em> be set up to be able
+     * to display text, so it should only be used in situations where this is
+     * not needed.
+     */
+    public static final int IME_FLAG_NO_EXTRACT_UI = 0x10000000;
+    
+    /**
      * Flag of {@link #imeOptions}: used in conjunction with
      * {@link #IME_MASK_ACTION}, this indicates that the action should not
-     * be available in-line as the same as a "enter" key.  Typically this is
+     * be available as an accessory button when the input method is full-screen.
+     * Note that by setting this flag, there can be cases where the action
+     * is simply never available to the user.  Setting this generally means
+     * that you think showing text being edited is more important than the
+     * action you have supplied. 
+     */
+    public static final int IME_FLAG_NO_ACCESSORY_ACTION = 0x20000000;
+    
+    /**
+     * Flag of {@link #imeOptions}: used in conjunction with
+     * {@link #IME_MASK_ACTION}, this indicates that the action should not
+     * be available in-line as a replacement for "enter" key.  Typically this is
      * because the action has such a significant impact or is not recoverable
      * enough that accidentally hitting it should be avoided, such as sending
-     * a message.
+     * a message.  Note that {@link android.widget.TextView} will automatically set this
+     * flag for you on multi-line text views.
      */
     public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
     

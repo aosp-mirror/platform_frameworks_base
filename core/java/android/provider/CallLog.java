@@ -22,6 +22,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.provider.Contacts.People;
 import com.android.internal.telephony.CallerInfo;
+import com.android.internal.telephony.Connection;
+
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -137,7 +139,8 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
-         * @param isPrivateNumber <code>true</code> if the call was marked as private by the network
+         * @param presentation the number presenting rules set by the network for 
+         *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
          * @param start time stamp for the call in milliseconds
          * @param duration call duration in seconds
@@ -145,12 +148,14 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number, 
-                boolean isPrivateNumber, int callType, long start, int duration) {
+                int presentation, int callType, long start, int duration) {
             final ContentResolver resolver = context.getContentResolver();
 
             if (TextUtils.isEmpty(number)) {
-                if (isPrivateNumber) {
+                if (presentation == Connection.PRESENTATION_RESTRICTED) {
                     number = CallerInfo.PRIVATE_NUMBER;
+                } else if (presentation == Connection.PRESENTATION_PAYPHONE) {
+                    number = CallerInfo.PAYPHONE_NUMBER;
                 } else {
                     number = CallerInfo.UNKNOWN_NUMBER;
                 }

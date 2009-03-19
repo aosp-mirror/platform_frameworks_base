@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent">"발신자 번호 설정을 변경할 수 없습니다."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"음성"</string>
     <string name="serviceClassData">"데이터"</string>
     <string name="serviceClassFAX">"팩스"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"무선의 위치 업데이트 알림을 활성화하거나 비활성화할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
     <string name="permlab_checkinProperties">"체크인 속성 액세스"</string>
     <string name="permdesc_checkinProperties">"체크인 서비스에서 업로드한 속성에 대한 읽기/쓰기 액세스를 허용합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
-    <string name="permlab_bindGadget">"가젯 선택"</string>
-    <string name="permdesc_bindGadget">"어느 응용프로그램이 어느 가젯을 사용할 수 있는지 시스템에 알려 주는 권한을 본 응용프로그램에 부여합니다. 이 권한을 사용하면 응용프로그램이 개인 데이터에 대한 액세스 권한을 다른 응용프로그램에 제공할 수 있습니다. 일반 응용프로그램은 이 권한을 사용할 수 없습니다."</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"전화기 상태 수정"</string>
     <string name="permdesc_modifyPhoneState">"응용프로그램이 장치의 전화 기능을 제어할 수 있습니다. 이 권한을 갖는 응용프로그램은 사용자에게 알리지 않고 네트워크를 전환하거나, 전화 무선 기능을 켜고 끌 수 있습니다."</string>
     <string name="permlab_readPhoneState">"전화기 상태 읽기"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_network_locked_message">"네트워크 잠김"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM 카드의 PUK가 잠겨 있습니다."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"고객지원팀에 문의하세요."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM 카드가 잠겨 있습니다."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM 카드 잠금해제 중..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 가져왔습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 입력하세요."</string>
     <string name="lockscreen_forgot_pattern_button_text">"패턴을 잊으셨나요?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"패턴을 너무 많이 시도했습니다."</string>
-    <string name="lockscreen_glogin_instructions">"잠금해제하려면"\n"Google 계정으로 로그인하세요."</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"사용자 이름(이메일)"</string>
     <string name="lockscreen_glogin_password_hint">"비밀번호"</string>
     <string name="lockscreen_glogin_submit_button">"로그인"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"매월"</string>
     <string name="yearly">"매년"</string>
     <string name="VideoView_error_title">"동영상 재생 안 됨"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"죄송합니다. 동영상을 재생할 수 없습니다."</string>
     <string name="VideoView_error_button">"확인"</string>
     <string name="am">"AM"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"정오"</string>
     <string name="Noon">"정오"</string>
     <string name="midnight">"자정"</string>
     <string name="Midnight">"자정"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>, <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"일요일"</string>
     <string name="day_of_week_long_monday">"월요일"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

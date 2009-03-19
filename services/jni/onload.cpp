@@ -7,7 +7,7 @@ namespace android {
 int register_android_server_AlarmManagerService(JNIEnv* env);
 int register_android_server_BatteryService(JNIEnv* env);
 int register_android_server_KeyInputQueue(JNIEnv* env);
-int register_android_os_Vibrator(JNIEnv* env);
+int register_android_server_HardwareService(JNIEnv* env);
 int register_android_server_SensorService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
 };
@@ -26,7 +26,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     LOG_ASSERT(env, "Could not retrieve the env!");
 
     register_android_server_KeyInputQueue(env);
-    register_android_os_Vibrator(env);
+    register_android_server_HardwareService(env);
     register_android_server_AlarmManagerService(env);
     register_android_server_BatteryService(env);
     register_android_server_SensorService(env);

@@ -62,7 +62,8 @@ interface IWindowManager
     void addAppToken(int addPos, IApplicationToken token,
             int groupId, int requestedOrientation, boolean fullscreen);
     void setAppGroupId(IBinder token, int groupId);
-    Configuration updateOrientationFromAppTokens(IBinder freezeThisOneIfNeeded);
+    Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
+            IBinder freezeThisOneIfNeeded);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);

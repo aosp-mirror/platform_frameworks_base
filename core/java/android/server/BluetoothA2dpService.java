@@ -63,6 +63,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private final IntentFilter mIntentFilter;
     private HashMap<String, SinkState> mAudioDevices;
     private final AudioManager mAudioManager;
+    private final BluetoothDevice mBluetooth;
 
     private class SinkState {
         public String address;
@@ -75,9 +76,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        BluetoothDevice device =
-                (BluetoothDevice)mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (device == null) {
+        mBluetooth = (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (mBluetooth == null) {
             throw new RuntimeException("Platform does not support Bluetooth");
         }
 
@@ -85,13 +85,12 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             throw new RuntimeException("Could not init BluetoothA2dpService");
         }
 
-        mIntentFilter = new IntentFilter(BluetoothIntent.ENABLED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.DISABLED_ACTION);
+        mIntentFilter = new IntentFilter(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
-        if (device.isEnabled()) {
+        if (mBluetooth.isEnabled()) {
             onBluetoothEnable();
         }
     }
@@ -110,10 +109,17 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             String address = intent.getStringExtra(BluetoothIntent.ADDRESS);
-            if (action.equals(BluetoothIntent.ENABLED_ACTION)) {
-                onBluetoothEnable();
-            } else if (action.equals(BluetoothIntent.DISABLED_ACTION)) {
-                onBluetoothDisable();
+            if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
+                int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
+                                               BluetoothError.ERROR);
+                switch (state) {
+                case BluetoothDevice.BLUETOOTH_STATE_ON:
+                    onBluetoothEnable();
+                    break;
+                case BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF:
+                    onBluetoothDisable();
+                    break;
+                }
             } else if (action.equals(BluetoothIntent.BOND_STATE_CHANGED_ACTION)) {
                 int bondState = intent.getIntExtra(BluetoothIntent.BOND_STATE,
                                                    BluetoothError.ERROR);
@@ -145,9 +151,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             switch (msg.what) {
             case MESSAGE_CONNECT_TO:
                 String address = (String)msg.obj;
-                // check device is still preferred, and nothing is currently
-                // connected
-                if (getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF &&
+                // check bluetooth is still on, device is still preferred, and
+                // nothing is currently connected
+                if (mBluetooth.isEnabled() &&
+                        getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF &&
                         lookupSinksMatchingStates(new int[] {
                             BluetoothA2dp.STATE_CONNECTING,
                             BluetoothA2dp.STATE_CONNECTED,

@@ -29,12 +29,10 @@ interface IHardwareService
     void setFlashlightEnabled(boolean on);
     void enableCameraFlash(int milliseconds);
     
-    // backlight support
-    void setScreenBacklight(int brightness);
-    void setKeyboardBacklight(boolean on);
-    void setButtonBacklight(boolean on);
-    
-    // LED support
-    void setLedState(int colorARGB, int onMS, int offMS);
+    // sets the brightness of the backlights (screen, keyboard, button) 0-255
+    void setBacklights(int brightness);
+
+    // for the phone
+    void setAttentionLight(boolean on);
 }
 

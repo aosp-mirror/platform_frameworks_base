@@ -1294,7 +1294,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // Update Orientation after adding a window, only if the window needs to be
             // displayed right away
             if (win.isVisibleOrAdding()) {
-                if (updateOrientationFromAppTokens(null) != null) {
+                if (updateOrientationFromAppTokens(null, null) != null) {
                     sendNewConfiguration();
                 }
             }
@@ -1663,7 +1663,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (assignLayers) {
                 assignLayersLocked();
             }
-            newConfig = updateOrientationFromAppTokensLocked(null);
+            newConfig = updateOrientationFromAppTokensLocked(null, null);
             performLayoutAndPlaceSurfacesLocked();
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -2079,6 +2079,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
+                // if we're about to tear down this window, don't use it for orientation
+                if (!wtoken.hidden && wtoken.hiddenRequested) {
+                    continue;
+                }
+
                 if (!haveGroup) {
                     // We ignore any hidden applications on the top.
                     if (wtoken.hiddenRequested || wtoken.willBeHidden) {
@@ -2119,11 +2124,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     }
     
     public Configuration updateOrientationFromAppTokens(
-        IBinder freezeThisOneIfNeeded) {
+            Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
         Configuration config;
         long ident = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
-            config = updateOrientationFromAppTokensLocked(freezeThisOneIfNeeded);
+            config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded);
         }
         if (config != null) {
             mLayoutNeeded = true;
@@ -2141,7 +2146,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * android.os.IBinder)
      */
     Configuration updateOrientationFromAppTokensLocked(
-            IBinder freezeThisOneIfNeeded) {
+            Configuration appConfig, IBinder freezeThisOneIfNeeded) {
         boolean changed = false;
         long ident = Binder.clearCallingIdentity();
         try {
@@ -2168,6 +2173,15 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         }
                     }
                     return computeNewConfiguration();
+                }
+            }
+
+            // No obvious action we need to take, but if our current
+            // state mismatches the activity maanager's, update it
+            if (appConfig != null) {
+                Configuration wmConfig = computeNewConfiguration();
+                if (wmConfig.diff(appConfig) != 0) {
+                    return wmConfig;
                 }
             }
         } finally {
@@ -4053,7 +4067,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         if (downTime == 0) downTime = eventTime;
 
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode);
+                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
 
         boolean result = dispatchKey(newEvent, Binder.getCallingPid(), Binder.getCallingUid());
         if (sync) {
@@ -5107,7 +5121,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         if (DEBUG_INPUT) Log.v(
                             TAG, "Key repeat: count=" + keyRepeatCount
                             + ", next @ " + nextKeyTime);
-                        dispatchKey(new KeyEvent(lastKey, curTime, keyRepeatCount), 0, 0);
+                        dispatchKey(KeyEvent.changeTimeRepeat(lastKey, curTime, keyRepeatCount), 0, 0);
                         
                     } else {
                         curTime = SystemClock.uptimeMillis();
@@ -5361,6 +5375,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         final Session mSession;
         final IWindow mClient;
         WindowToken mToken;
+        WindowToken mRootToken;
         AppWindowToken mAppToken;
         AppWindowToken mTargetAppToken;
         final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
@@ -5573,6 +5588,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
                 appToken = parent;
             }
+            mRootToken = appToken;
             mAppToken = appToken.appWindowToken;
 
             mSurface = null;
@@ -6231,7 +6247,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
          */
         boolean isVisibleNow() {
             return mSurface != null && mPolicyVisibility && !mAttachedHidden
-                    && !mToken.hidden && !mExiting && !mDestroying;
+                    && !mRootToken.hidden && !mExiting && !mDestroying;
         }
 
         /**
@@ -6272,7 +6288,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             final AppWindowToken atoken = mAppToken;
             final boolean animating = atoken != null ? atoken.animating : false;
             return mSurface != null && mPolicyVisibility && !mDestroying
-                    && ((!mAttachedHidden && !mToken.hidden)
+                    && ((!mAttachedHidden && !mRootToken.hidden)
                             || mAnimating || animating);
         }
 
@@ -6431,6 +6447,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                   + " mLastLayer=" + mLastLayer);
             pw.println(prefix + "mSurface=" + mSurface);
             pw.println(prefix + "mToken=" + mToken);
+            pw.println(prefix + "mRootToken=" + mRootToken);
             pw.println(prefix + "mAppToken=" + mAppToken);
             pw.println(prefix + "mTargetAppToken=" + mTargetAppToken);
             pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
@@ -7279,7 +7296,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
                 
                 case COMPUTE_AND_SEND_NEW_CONFIGURATION: {
-                    if (updateOrientationFromAppTokens(null) != null) {
+                    if (updateOrientationFromAppTokens(null, null) != null) {
                         sendNewConfiguration();
                     }
                     break;
@@ -7458,7 +7475,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
                 boolean gone = win.mViewVisibility == View.GONE
                         || !win.mRelayoutCalled
-                        || win.mToken.hidden;
+                        || win.mRootToken.hidden;
 
                 // If this view is GONE, then skip it -- keep the current
                 // frame, and let the caller know so they can ignore it

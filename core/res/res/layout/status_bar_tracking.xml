@@ -20,13 +20,12 @@
     android:visibility="gone"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
-    android:background="@drawable/status_bar_background"
     android:paddingBottom="0px"
     android:paddingLeft="0px"
     android:paddingRight="0px"
     >
 
-    <View
+    <com.android.server.status.TrackingPatternView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -37,11 +36,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
-
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="5dp"
-            />
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

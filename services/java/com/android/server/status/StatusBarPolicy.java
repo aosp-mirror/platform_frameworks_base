@@ -24,6 +24,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.content.BroadcastReceiver;
@@ -222,8 +223,7 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 updateBattery(intent);
             }
-            else if (action.equals(BluetoothIntent.ENABLED_ACTION) ||
-                    action.equals(BluetoothIntent.DISABLED_ACTION) ||
+            else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
                 updateBluetooth(intent);
@@ -345,8 +345,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
-        filter.addAction(BluetoothIntent.ENABLED_ACTION);
-        filter.addAction(BluetoothIntent.DISABLED_ACTION);
+        filter.addAction(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -796,10 +795,10 @@ public class StatusBarPolicy {
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
 
         String action = intent.getAction();
-        if (action.equals(BluetoothIntent.DISABLED_ACTION)) {
-            mBluetoothEnabled = false;
-        } else if (action.equals(BluetoothIntent.ENABLED_ACTION)) {
-            mBluetoothEnabled = true;
+        if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
+            int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
+                                           BluetoothError.ERROR);
+            mBluetoothEnabled = state == BluetoothDevice.BLUETOOTH_STATE_ON;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                     BluetoothHeadset.STATE_ERROR);

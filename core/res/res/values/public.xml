@@ -1010,6 +1010,9 @@
   <public type="attr" name="imeOptions" id="0x01010264" />
   <public type="attr" name="imeActionLabel" id="0x01010265" />
   <public type="attr" name="imeActionId" id="0x01010266" />
+  <public type="attr" name="imeFullscreenBackground" id="0x01010267" />
+  <public type="attr" name="imeExtractEnterAnimation" id="0x01010268" />
+  <public type="attr" name="imeExtractExitAnimation" id="0x01010269" />
 
   <!-- The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the

@@ -26,8 +26,9 @@ import android.bluetooth.IBluetoothDeviceCallback;
 interface IBluetoothDevice
 {
     boolean isEnabled();
-    boolean enable(in IBluetoothDeviceCallback callback);  // async
-    boolean disable();
+    int getBluetoothState();
+    boolean enable();
+    boolean disable(boolean persistSetting);
 
     String getAddress();
     String getName();

@@ -154,6 +154,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private final LockList mLocks = new LockList();
     private Intent mScreenOffIntent;
     private Intent mScreenOnIntent;
+    private HardwareService mHardware;
     private Context mContext;
     private UnsynchronizedWakeLock mBroadcastWakeLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock;
@@ -164,11 +165,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private TimeoutTask mTimeoutTask = new TimeoutTask();
     private LightAnimator mLightAnimator = new LightAnimator();
     private final BrightnessState mScreenBrightness
-            = new BrightnessState(Power.SCREEN_LIGHT);
+            = new BrightnessState(SCREEN_BRIGHT_BIT);
     private final BrightnessState mKeyboardBrightness
-            = new BrightnessState(Power.KEYBOARD_LIGHT);
+            = new BrightnessState(KEYBOARD_BRIGHT_BIT);
     private final BrightnessState mButtonBrightness
-            = new BrightnessState(Power.BUTTON_LIGHT);
+            = new BrightnessState(BUTTON_BRIGHT_BIT);
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
@@ -357,7 +358,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     private ContentQueryMap mSettings;
 
-    void init(Context context, IActivityManager activity, BatteryService battery) {
+    void init(Context context, HardwareService hardware, IActivityManager activity,
+            BatteryService battery) {
+        mHardware = hardware;
         mContext = context;
         mActivityService = activity;
         mBatteryStats = BatteryStatsService.getService();
@@ -1226,10 +1229,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             }
 
             if (mPowerState != newState) {
-                err = updateLightsLocked(newState, 0);
-                if (err != 0) {
-                    return;
-                }
+                updateLightsLocked(newState, 0);
                 mPowerState = (mPowerState & ~LIGHTS_MASK) | (newState & LIGHTS_MASK);
             }
 
@@ -1327,11 +1327,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 mBatteryService.getBatteryLevel() <= Power.LOW_BATTERY_THRESHOLD);
     }
 
-    private int updateLightsLocked(int newState, int forceState) {
+    private void updateLightsLocked(int newState, int forceState) {
         int oldState = mPowerState;
         int difference = (newState ^ oldState) | forceState;
         if (difference == 0) {
-            return 0;
+            return;
         }
         
         int offMask = 0;
@@ -1353,9 +1353,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 startAnimation = true;
             } else {
                 if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
-                    offMask |= Power.KEYBOARD_LIGHT;
+                    offMask |= KEYBOARD_BRIGHT_BIT;
                 } else {
-                    onMask |= Power.KEYBOARD_LIGHT;
+                    onMask |= KEYBOARD_BRIGHT_BIT;
                 }
             }
         }
@@ -1372,9 +1372,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 startAnimation = true;
             } else {
                 if ((newState & BUTTON_BRIGHT_BIT) == 0) {
-                    offMask |= Power.BUTTON_LIGHT;
+                    offMask |= BUTTON_BRIGHT_BIT;
                 } else {
-                    onMask |= Power.BUTTON_LIGHT;
+                    onMask |= BUTTON_BRIGHT_BIT;
                 }
             }
         }
@@ -1428,12 +1428,12 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
                     if ((newState & SCREEN_ON_BIT) == 0) {
-                        offMask |= Power.SCREEN_LIGHT;
+                        offMask |= SCREEN_BRIGHT_BIT;
                     } else {
-                        dimMask |= Power.SCREEN_LIGHT;
+                        dimMask |= SCREEN_BRIGHT_BIT;
                     }
                 } else {
-                    onMask |= Power.SCREEN_LIGHT;
+                    onMask |= SCREEN_BRIGHT_BIT;
                 }
             }
         }
@@ -1446,10 +1446,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             mHandler.post(mLightAnimator);
         }
         
-        int err = 0;
         if (offMask != 0) {
             //Log.i(TAG, "Setting brightess off: " + offMask);
-            err |= Power.setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
+            setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
             int brightness = Power.BRIGHTNESS_DIM;
@@ -1458,7 +1457,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
             //Log.i(TAG, "Setting brightess dim " + brightness + ": " + offMask);
-            err |= Power.setLightBrightness(dimMask, brightness);
+            setLightBrightness(dimMask, brightness);
         }
         if (onMask != 0) {
             int brightness = getPreferredBrightness();
@@ -1467,10 +1466,20 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
             //Log.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
-            err |= Power.setLightBrightness(onMask, brightness);
+            setLightBrightness(onMask, brightness);
         }
+    }
 
-        return err;
+    private void setLightBrightness(int mask, int value) {
+        if ((mask & SCREEN_BRIGHT_BIT) != 0) {
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, value);
+        }
+        if ((mask & BUTTON_BRIGHT_BIT) != 0) {
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, value);
+        }
+        if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, value);
+        }
     }
 
     class BrightnessState {
@@ -1530,10 +1539,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             //Log.i(TAG, "Animating brightess " + curIntValue + ": " + mask);
-            Power.setLightBrightness(mask, curIntValue);
+            setLightBrightness(mask, curIntValue);
             animating = more;
             if (!more) {
-                if (mask == Power.SCREEN_LIGHT && curIntValue == Power.BRIGHTNESS_OFF) {
+                if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
                     screenOffFinishedAnimating(mOffBecauseOfUser);
                 }
             }

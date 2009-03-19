@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.gsm;
 import com.android.internal.telephony.*;
+
 import android.util.Log;
 import java.lang.Comparable;
 import android.telephony.PhoneNumberUtils;
@@ -36,7 +37,7 @@ public class DriverCall implements Comparable
         WAITING;    // MT call only
         // If you add a state, make sure to look for the switch()
         // statements that use this enum
-    };
+    }
 
     public int index;
     public boolean isMT;
@@ -46,6 +47,7 @@ public class DriverCall implements Comparable
     public int TOA;
     public boolean isVoice;
     public int als;
+    public int numberPresentation;
   
     /** returns null on error */
     static DriverCall
@@ -64,7 +66,10 @@ public class DriverCall implements Comparable
 
             ret.isVoice = (0 == p.nextInt());
             ret.isMpty = p.nextBoolean();
-
+            
+            // use ALLOWED as default presentation while parsing CLCC
+            ret.numberPresentation = Connection.PRESENTATION_ALLOWED;
+            
             if (p.hasMore()) {
                 // Some lame implementations return strings
                 // like "NOT AVAILABLE" in the CLCC line
@@ -105,7 +110,7 @@ public class DriverCall implements Comparable
                 + state + ","
                 + (isVoice ? "voice" : "no_voc") + ","
                 + (isMpty ? "conf" : "norm") + ","
-                + TOA + "," + als;
+                + TOA + "," + als + ",cli " + numberPresentation;
     }
 
     public static State
@@ -120,6 +125,19 @@ public class DriverCall implements Comparable
             case 5: return State.WAITING;
             default:
                 throw new ATParseEx("illegal call state " + state);
+        }
+    }
+    
+    public static int
+    presentationFromCLIP(int cli) throws ATParseEx
+    {
+        switch(cli) {
+            case 0: return Connection.PRESENTATION_ALLOWED;
+            case 1: return Connection.PRESENTATION_RESTRICTED;
+            case 2: return Connection.PRESENTATION_UNKNOWN;
+            case 3: return Connection.PRESENTATION_PAYPHONE;
+            default:
+                throw new ATParseEx("illegal presentation " + cli);
         }
     }
 

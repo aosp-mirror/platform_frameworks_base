@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
     <string name="serviceNotProvisioned">"Servizio non fornito."</string>
     <string name="CLIRPermanent">"Impossibile modificare l\'impostazione dell\'ID del chiamante."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Voce"</string>
     <string name="serviceClassData">"Dati"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -286,8 +296,10 @@
     <string name="permdesc_locationUpdates">"Consente l\'attivazione/disattivazione delle notifiche di aggiornamento della posizione dal segnale cellulare. Da non usare per normali applicazioni."</string>
     <string name="permlab_checkinProperties">"accesso a proprietà di archiviazione"</string>
     <string name="permdesc_checkinProperties">"Consente l\'accesso di lettura/scrittura alle proprietà caricate dal servizio di archiviazione. Da non usare per normali applicazioni."</string>
-    <string name="permlab_bindGadget">"scegliere gadget"</string>
-    <string name="permdesc_bindGadget">"Consente all\'applicazione di indicare al sistema quali gadget possono essere utilizzati e da quale applicazione. Con questa autorizzazione, le applicazioni possono consentire ad altre applicazioni di accedere a dati personali. Da non usare per normali applicazioni."</string>
+    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
+    <skip />
+    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
+    <skip />
     <string name="permlab_modifyPhoneState">"modifica stato del telefono"</string>
     <string name="permdesc_modifyPhoneState">"Consente all\'applicazione di controllare le funzioni telefoniche del dispositivo. Un\'applicazione con questa autorizzazione può cambiare rete, attivare e disattivare il segnale cellulare e così via, senza alcuna notifica."</string>
     <string name="permlab_readPhoneState">"lettura stato del telefono"</string>
@@ -405,7 +417,8 @@
     <string name="lockscreen_missing_sim_instructions">"Inserisci una SIM."</string>
     <string name="lockscreen_network_locked_message">"Rete bloccata"</string>
     <string name="lockscreen_sim_puk_locked_message">"La SIM è bloccata tramite PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Contatta il servizio clienti."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"La SIM è bloccata."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Sblocco SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi di inserimento della sequenza di sblocco. "\n\n"Riprova fra <xliff:g id="NUMBER_1">%d</xliff:g> secondi."</string>
@@ -413,7 +426,8 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Riprova fra <xliff:g id="NUMBER">%d</xliff:g> secondi."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Hai dimenticato la sequenza?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Troppi tentativi di inserimento della sequenza."</string>
-    <string name="lockscreen_glogin_instructions">"Per sbloccare,"\n"accedi tramite il tuo account Google"</string>
+    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
+    <skip />
     <string name="lockscreen_glogin_username_hint">"Nome utente (email)"</string>
     <string name="lockscreen_glogin_password_hint">"Password"</string>
     <string name="lockscreen_glogin_submit_button">"Accedi"</string>
@@ -552,6 +566,8 @@
     <string name="monthly">"Mensilmente"</string>
     <string name="yearly">"Annualmente"</string>
     <string name="VideoView_error_title">"Impossibile riprodurre il video"</string>
+    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
+    <skip />
     <string name="VideoView_error_text_unknown">"Spiacenti. Impossibile riprodurre il video."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
@@ -573,14 +589,14 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"mezzogiorno"</string>
     <string name="Noon">"Mezzogiorno"</string>
     <string name="midnight">"mezzanotte"</string>
     <string name="Midnight">"Mezzanotte"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (2106203387378728384) -->
@@ -616,7 +632,7 @@
     <skip />
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Domenica"</string>
     <string name="day_of_week_long_monday">"Lunedì"</string>
@@ -725,7 +741,7 @@
     <string name="anr_activity_process">"L\'attività <xliff:g id="ACTIVITY">%1$s</xliff:g> (nel processo <xliff:g id="PROCESS">%2$s</xliff:g>) non risponde."</string>
     <string name="anr_application_process">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (nel processo <xliff:g id="PROCESS">%2$s</xliff:g>) non risponde."</string>
     <string name="anr_process">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> non risponde."</string>
-    <string name="force_close">"Forza chiusura"</string>
+    <string name="force_close">"Termina"</string>
     <string name="wait">"Attendi"</string>
     <string name="debug">"Debug"</string>
     <string name="sendText">"Seleziona un\'azione per il testo"</string>
@@ -809,6 +825,8 @@
     <!-- no translation found for ime_action_send (2316166556349314424) -->
     <skip />
     <!-- no translation found for ime_action_next (3138843904009813834) -->
+    <skip />
+    <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />

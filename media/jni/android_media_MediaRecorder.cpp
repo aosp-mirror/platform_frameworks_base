@@ -268,6 +268,19 @@ android_media_MediaRecorder_setMaxDuration(JNIEnv *env, jobject thiz, jint max_d
 }
 
 static void
+android_media_MediaRecorder_setMaxFileSize(
+        JNIEnv *env, jobject thiz, jlong max_filesize_bytes)
+{
+    LOGV("setMaxFileSize(%lld)", max_filesize_bytes);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+
+    char params[64];
+    sprintf(params, "max-filesize=%lld", max_filesize_bytes);
+
+    process_media_recorder_call(env, mr->setParameters(String8(params)), "java/lang/RuntimeException", "setMaxFileSize failed.");
+}
+
+static void
 android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
 {
     LOGV("prepare");
@@ -370,6 +383,7 @@ static JNINativeMethod gMethods[] = {
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},
     {"setMaxDuration",       "(I)V",                            (void *)android_media_MediaRecorder_setMaxDuration},
+    {"setMaxFileSize",       "(J)V",                            (void *)android_media_MediaRecorder_setMaxFileSize},
     {"_prepare",             "()V",                             (void *)android_media_MediaRecorder_prepare},
     {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
     {"start",                "()V",                             (void *)android_media_MediaRecorder_start},

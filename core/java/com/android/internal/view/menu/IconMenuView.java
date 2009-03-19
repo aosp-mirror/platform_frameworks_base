@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -278,14 +277,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
      * Adds an IconMenuItemView to this icon menu view.
      * @param itemView The item's view to add
      */
-    private void addItemView(IconMenuItemView itemView) {
-        LayoutParams lp = (LayoutParams) itemView.getLayoutParams();
-        
-        if (lp == null) {
-            // Default layout parameters
-            lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-        }
-        
+    private void addItemView(IconMenuItemView itemView) {   
         // Set ourselves on the item view
         itemView.setIconMenuView(this);
         
@@ -295,10 +287,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         // This class is the invoker for all its item views 
         itemView.setItemInvoker(this);
         
-        // Set the desired width of item
-        lp.desiredWidth = (int) Layout.getDesiredWidth(itemView.getText(), itemView.getPaint());
-        
-        addView(itemView, lp);
+        addView(itemView, itemView.getTextAppropriateLayoutParams());
     }
 
     /**

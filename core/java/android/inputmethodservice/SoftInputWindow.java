@@ -31,18 +31,6 @@ import android.view.WindowManager;
  */
 class SoftInputWindow extends Dialog {
 
-    /**
-     * Create a DockWindow that uses the default style.
-     * 
-     * @param context The Context the DockWindow is to run it. In particular, it
-     *        uses the window manager and theme in this context to present its
-     *        UI.
-     */
-    public SoftInputWindow(Context context) {
-        super(context, com.android.internal.R.style.Theme_InputMethod);
-        initDockWindow();
-    }
-
     public void setToken(IBinder token) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.token = token;

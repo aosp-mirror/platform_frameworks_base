@@ -16,6 +16,8 @@
 
 package android.text;
 
+import android.emoji.EmojiFactory;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -36,6 +38,20 @@ import android.view.KeyEvent;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+    /* package */ static final EmojiFactory EMOJI_FACTORY =
+        EmojiFactory.newAvailableInstance();
+    /* package */ static final int MIN_EMOJI, MAX_EMOJI;
+
+    static {
+        if (EMOJI_FACTORY != null) {
+            MIN_EMOJI = EMOJI_FACTORY.getMinimumAndroidPua();
+            MAX_EMOJI = EMOJI_FACTORY.getMaximumAndroidPua();
+        } else {
+            MIN_EMOJI = -1;
+            MAX_EMOJI = -1;
+        }
+    };
+
     /**
      * Return how wide a layout would be necessary to display the
      * specified text with one line per paragraph.
@@ -445,7 +461,9 @@ public abstract class Layout {
     public abstract int getParagraphDirection(int line);
 
     /**
-     * Returns whether the specified line contains one or more tabs.
+     * Returns whether the specified line contains one or more
+     * characters that need to be handled specially, like tabs
+     * or emoji.
      */
     public abstract boolean getLineContainsTab(int line);
 
@@ -1352,6 +1370,26 @@ public abstract class Layout {
                         h = dir * nextTab(text, start, end, h * dir, parspans);
 
                     segstart = j + 1;
+                } else if (hasTabs && buf[j] >= 0xD800 && buf[j] <= 0xDFFF && j + 1 < there) {
+                    int emoji = Character.codePointAt(buf, j);
+
+                    if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
+                        Bitmap bm = EMOJI_FACTORY.
+                            getBitmapFromAndroidPua(emoji);
+
+                        if (bm != null) {
+                            h += Styled.drawText(canvas, text,
+                                                 start + segstart, start + j,
+                                                 dir, (i & 1) != 0, x + h,
+                                                 top, y, bottom, paint, workPaint,
+                                                 start + j != end);
+
+                            canvas.drawBitmap(bm, x + h, y - bm.getHeight(), paint);
+                            h += bm.getWidth();
+                            j++;
+                            segstart = j + 1;
+                        }
+                    }
                 }
             }
 
@@ -1394,7 +1432,22 @@ public abstract class Layout {
 
             int segstart = here;
             for (int j = hasTabs ? here : there; j <= there; j++) {
-                if (j == there || buf[j] == '\t') {
+                int codept = 0;
+                Bitmap bm = null;
+
+                if (hasTabs && j < there) {
+                    codept = buf[j];
+                }
+
+                if (codept >= 0xD800 && codept <= 0xDFFF && j + 1 < there) {
+                    codept = Character.codePointAt(buf, j);
+
+                    if (codept >= MIN_EMOJI && codept <= MAX_EMOJI) {
+                        bm = EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
+                    }
+                }
+
+                if (j == there || codept == '\t' || bm != null) {
                     float segw;
 
                     if (offset < start + j ||
@@ -1449,6 +1502,16 @@ public abstract class Layout {
                         h = dir * nextTab(text, start, end, h * dir, tabs);
                     }
 
+                    if (bm != null) {
+                        if (dir == DIR_RIGHT_TO_LEFT) {
+                            h -= bm.getWidth();
+                        } else {
+                            h += bm.getWidth();
+                        }
+
+                        j++;
+                    }
+
                     segstart = j + 1;
                 }
             }
@@ -1488,7 +1551,22 @@ public abstract class Layout {
         }
 
         for (int i = hasTabs ? 0 : len; i <= len; i++) {
-            if (i == len || buf[i] == '\t') {
+            int codept = 0;
+            Bitmap bm = null;
+
+            if (hasTabs && i < len) {
+                codept = buf[i];
+            }
+
+            if (codept >= 0xD800 && codept <= 0xDFFF && i < len) {
+                codept = Character.codePointAt(buf, i);
+
+                if (codept >= MIN_EMOJI && codept <= MAX_EMOJI) {
+                    bm = EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
+                }
+            }
+
+            if (i == len || codept == '\t' || bm != null) {
                 workPaint.baselineShift = 0;
 
                 h += Styled.measureText(paint, workPaint, text,
@@ -1505,8 +1583,14 @@ public abstract class Layout {
                     }
                 }
 
-                if (i != len)
-                    h = nextTab(text, start, end, h, tabs);
+                if (i != len) {
+                    if (bm == null) {
+                        h = nextTab(text, start, end, h, tabs);
+                    } else {
+                        h += bm.getWidth();
+                        i++;
+                    }
+                }
 
                 if (fm != null) {
                     if (fm.ascent < ab) {
@@ -1521,6 +1605,17 @@ public abstract class Layout {
                     }
                     if (fm.bottom > bot) {
                         bot = fm.bottom;
+                    }
+
+                    if (bm != null) {
+                        int ht = -bm.getHeight();
+
+                        if (ht < ab) {
+                            ab = ht;
+                        }
+                        if (ht < top) {
+                            top = ht;
+                        }
                     }
                 }
 

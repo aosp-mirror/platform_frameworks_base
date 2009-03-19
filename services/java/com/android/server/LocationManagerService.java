@@ -86,6 +86,7 @@ import com.android.server.am.BatteryStatsService;
 public class LocationManagerService extends ILocationManager.Stub
         implements INetworkLocationManager {
     private static final String TAG = "LocationManagerService";
+    private static final boolean LOCAL_LOGV = false;
 
     // Minimum time interval between last known location writes, in milliseconds.
     private static final long MIN_LAST_KNOWN_LOCATION_TIME = 60L * 1000L;
@@ -338,8 +339,8 @@ public class LocationManagerService extends ILocationManager.Stub
         }
 
         public void binderDied() {
-            if (Config.LOGD) {
-                Log.d(TAG, "Location listener died");
+            if (LOCAL_LOGV) {
+                Log.v(TAG, "Location listener died");
             }
             synchronized (mLocationListeners) {
                 removeUpdatesLocked(this);
@@ -486,9 +487,9 @@ public class LocationManagerService extends ILocationManager.Stub
 
                 String name = subdirs[i].getName();
 
-                if (Config.LOGD) {
-                    Log.d(TAG, "Found dir " + subdirs[i].getAbsolutePath());
-                    Log.d(TAG, "name = " + name);
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "Found dir " + subdirs[i].getAbsolutePath());
+                    Log.v(TAG, "name = " + name);
                 }
 
                 // Don't create a fake provider if a real provider exists
@@ -551,8 +552,8 @@ public class LocationManagerService extends ILocationManager.Stub
         mContext = context;
         mLocationHandler = new LocationWorkerHandler();
 
-        if (Config.LOGD) {
-            Log.d(TAG, "Constructed LocationManager Service");
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "Constructed LocationManager Service");
         }
 
         // Alarm manager, needs to be done before calling loadProviders() below
@@ -731,8 +732,8 @@ public class LocationManagerService extends ILocationManager.Stub
     }
 
     private List<String> _getAllProvidersLocked() {
-        if (Config.LOGD) {
-            Log.d(TAG, "getAllProviders");
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "getAllProviders");
         }
         List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
         ArrayList<String> out = new ArrayList<String>(providers.size());
@@ -751,14 +752,14 @@ public class LocationManagerService extends ILocationManager.Stub
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "getProviders gotString exception:", e);
+            Log.e(TAG, "getProviders got exception:", e);
             return null;
         }
     }
 
     private List<String> _getProvidersLocked(boolean enabledOnly) {
-        if (Config.LOGD) {
-            Log.d(TAG, "getProviders");
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "getProviders");
         }
         List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
         ArrayList<String> out = new ArrayList<String>();
@@ -990,8 +991,8 @@ public class LocationManagerService extends ILocationManager.Stub
 
     private void requestLocationUpdatesLocked(String provider,
             long minTime, float minDistance, Receiver receiver) {
-        if (Config.LOGD) {
-            Log.d(TAG, "_requestLocationUpdates: listener = " + receiver);
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "_requestLocationUpdates: listener = " + receiver);
         }
 
         LocationProviderImpl impl = LocationProviderImpl.getProvider(provider);
@@ -1088,8 +1089,8 @@ public class LocationManagerService extends ILocationManager.Stub
     }
 
     private void removeUpdatesLocked(Receiver receiver) {
-        if (Config.LOGD) {
-            Log.d(TAG, "_removeUpdates: listener = " + receiver);
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "_removeUpdates: listener = " + receiver);
         }
 
         // so wakelock calls will succeed
@@ -1292,8 +1293,8 @@ public class LocationManagerService extends ILocationManager.Stub
                     boolean inProximity =
                         alert.isInProximity(latitude, longitude);
                     if (!entered && inProximity) {
-                        if (Config.LOGD) {
-                            Log.i(TAG, "Entered alert");
+                        if (LOCAL_LOGV) {
+                            Log.v(TAG, "Entered alert");
                         }
                         mProximitiesEntered.add(alert);
                         Intent enteredIntent = new Intent();
@@ -1301,8 +1302,8 @@ public class LocationManagerService extends ILocationManager.Stub
                         try {
                             intent.send(mContext, 0, enteredIntent, null, null);
                         } catch (PendingIntent.CanceledException e) {
-                            if (Config.LOGD) {
-                                Log.i(TAG, "Canceled proximity alert: " + alert, e);
+                            if (LOCAL_LOGV) {
+                                Log.v(TAG, "Canceled proximity alert: " + alert, e);
                             }
                             if (intentsToRemove == null) {
                                 intentsToRemove = new ArrayList<PendingIntent>();
@@ -1310,8 +1311,8 @@ public class LocationManagerService extends ILocationManager.Stub
                             intentsToRemove.add(intent);
                         }
                     } else if (entered && !inProximity) {
-                        if (Config.LOGD) {
-                            Log.i(TAG, "Exited alert");
+                        if (LOCAL_LOGV) {
+                            Log.v(TAG, "Exited alert");
                         }
                         mProximitiesEntered.remove(alert);
                         Intent exitedIntent = new Intent();
@@ -1319,8 +1320,8 @@ public class LocationManagerService extends ILocationManager.Stub
                         try {
                             intent.send(mContext, 0, exitedIntent, null, null);
                         } catch (PendingIntent.CanceledException e) {
-                            if (Config.LOGD) {
-                                Log.i(TAG, "Canceled proximity alert: " + alert, e);
+                            if (LOCAL_LOGV) {
+                                Log.v(TAG, "Canceled proximity alert: " + alert, e);
                             }
                             if (intentsToRemove == null) {
                                 intentsToRemove = new ArrayList<PendingIntent>();
@@ -1330,8 +1331,8 @@ public class LocationManagerService extends ILocationManager.Stub
                     }
                 } else {
                     // Mark alert for expiration
-                    if (Config.LOGD) {
-                        Log.i(TAG, "Expiring proximity alert: " + alert);
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "Expiring proximity alert: " + alert);
                     }
                     if (intentsToRemove == null) {
                         intentsToRemove = new ArrayList<PendingIntent>();
@@ -1387,8 +1388,8 @@ public class LocationManagerService extends ILocationManager.Stub
 
     private void addProximityAlertLocked(double latitude, double longitude,
         float radius, long expiration, PendingIntent intent) {
-        if (Config.LOGD) {
-            Log.d(TAG, "addProximityAlert: latitude = " + latitude +
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "addProximityAlert: latitude = " + latitude +
                     ", longitude = " + longitude +
                     ", expiration = " + expiration +
                     ", intent = " + intent);
@@ -1439,8 +1440,8 @@ public class LocationManagerService extends ILocationManager.Stub
     }
 
     private void removeProximityAlertLocked(PendingIntent intent) {
-        if (Config.LOGD) {
-            Log.d(TAG, "removeProximityAlert: intent = " + intent);
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "removeProximityAlert: intent = " + intent);
         }
 
         mProximityAlerts.remove(intent);

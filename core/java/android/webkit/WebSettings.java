@@ -153,6 +153,7 @@ public class WebSettings {
     private boolean         mNeedInitialFocus = true;
     private boolean         mNavDump = false;
     private boolean         mSupportZoom = true;
+    private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
 
     // Class to handle messages before WebCore is ready.
@@ -363,6 +364,20 @@ public class WebSettings {
         return mSupportZoom;
     }
 
+    /**
+     * Sets whether the zoom mechanism built into WebView is used.
+     */
+    public void setBuiltInZoomControls(boolean enabled) {
+        mBuiltInZoomControls = enabled;
+    }
+    
+    /**
+     * Returns true if the zoom mechanism built into WebView is being used.
+     */
+    public boolean getBuiltInZoomControls() {
+        return mBuiltInZoomControls;
+    }
+    
     /**
      * Enable or disable file access within WebView. File access is enabled by
      * default.
