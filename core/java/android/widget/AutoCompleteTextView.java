@@ -211,6 +211,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
      * 
      * @return the width for the drop down list
+     * 
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
      */
     public int getDropDownWidth() {
         return mDropDownWidth;
@@ -222,6 +224,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
      * 
      * @param width the width to use
+     * 
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
      */
     public void setDropDownWidth(int width) {
         mDropDownWidth = width;
@@ -231,6 +235,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Returns the id for the view that the auto-complete drop down list is anchored to.</p>
      *  
      * @return the view's id, or {@link View#NO_ID} if none specified
+     * 
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
      */
     public int getDropDownAnchor() {
         return mDropDownAnchorId;
@@ -242,12 +248,83 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * loading a view which is not yet instantiated.</p>
      * 
      * @param id the id to anchor the drop down list view to
+     * 
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor 
      */
     public void setDropDownAnchor(int id) {
         mDropDownAnchorId = id;
         mDropDownAnchorView = null;
     }
-
+    
+    /**
+     * <p>Gets the background of the auto-complete drop-down list.</p>
+     * 
+     * @return the background drawable
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     */
+    public Drawable getDropDownBackground() {
+        return mPopup.getBackground();
+    }
+    
+    /**
+     * <p>Sets the background of the auto-complete drop-down list.</p>
+     * 
+     * @param d the drawable to set as the background
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     */
+    public void setDropDownBackgroundDrawable(Drawable d) {
+        mPopup.setBackgroundDrawable(d);
+    }
+    
+    /**
+     * <p>Sets the background of the auto-complete drop-down list.</p>
+     * 
+     * @param id the id of the drawable to set as the background
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     */
+    public void setDropDownBackgroundResource(int id) {
+        mPopup.setBackgroundDrawable(getResources().getDrawable(id));
+    }
+    
+    /**
+     * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the vertical offset
+     */
+    public void setDropDownVerticalOffset(int offset) {
+        mDropDownVerticalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the vertical offset
+     */
+    public int getDropDownVerticalOffset() {
+        return mDropDownVerticalOffset;
+    }
+    
+    /**
+     * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the horizontal offset
+     */
+    public void setDropDownHorizontalOffset(int offset) {
+        mDropDownHorizontalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the horizontal offset
+     */
+    public int getDropDownHorizontalOffset() {
+        return mDropDownHorizontalOffset;
+    }
+	
     /**
      * <p>Returns the number of characters the user must type before the drop
      * down list is shown.</p>

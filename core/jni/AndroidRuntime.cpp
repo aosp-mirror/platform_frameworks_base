@@ -642,6 +642,10 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         if (opc != NULL) {
             opt.optionString = "-Xgenregmap";
             mOptions.add(opt);
+
+            /* turn on precise GC while we're at it */
+            opt.optionString = "-Xgc:precise";
+            mOptions.add(opt);
         }
     }
 

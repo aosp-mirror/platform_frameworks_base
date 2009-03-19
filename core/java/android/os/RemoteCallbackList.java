@@ -22,7 +22,7 @@ import java.util.HashMap;
  * Takes care of the grunt work of maintaining a list of remote interfaces,
  * typically for the use of performing callbacks from a
  * {@link android.app.Service} to its clients.  In particular, this:
- * 
+ *
  * <ul>
  * <li> Keeps track of a set of registered {@link IInterface} callbacks,
  * taking care to identify them through their underlying unique {@link IBinder}
@@ -34,13 +34,13 @@ import java.util.HashMap;
  * multithreaded incoming calls, and a thread-safe way to iterate over a
  * snapshot of the list without holding its lock.
  * </ul>
- * 
+ *
  * <p>To use this class, simply create a single instance along with your
  * service, and call its {@link #register} and {@link #unregister} methods
  * as client register and unregister with your service.  To call back on to
  * the registered clients, use {@link #beginBroadcast},
  * {@link #getBroadcastItem}, and {@link #finishBroadcast}.
- * 
+ *
  * <p>If a registered callback's process goes away, this class will take
  * care of automatically removing it from the list.  If you want to do
  * additional work in this situation, you can create a subclass that
@@ -51,14 +51,14 @@ public class RemoteCallbackList<E extends IInterface> {
             = new HashMap<IBinder, Callback>();
     private IInterface[] mActiveBroadcast;
     private boolean mKilled = false;
-    
+
     private final class Callback implements IBinder.DeathRecipient {
         final E mCallback;
-        
+
         Callback(E callback) {
             mCallback = callback;
         }
-        
+
         public void binderDied() {
             synchronized (mCallbacks) {
                 mCallbacks.remove(mCallback.asBinder());
@@ -66,7 +66,7 @@ public class RemoteCallbackList<E extends IInterface> {
             onCallbackDied(mCallback);
         }
     }
-    
+
     /**
      * Add a new callback to the list.  This callback will remain in the list
      * until a corresponding call to {@link #unregister} or its hosting process
@@ -75,17 +75,17 @@ public class RemoteCallbackList<E extends IInterface> {
      * object is already in the list), then it will be left as-is.
      * Registrations are not counted; a single call to {@link #unregister}
      * will remove a callback after any number calls to register it.
-     * 
+     *
      * @param callback The callback interface to be added to the list.  Must
      * not be null -- passing null here will cause a NullPointerException.
      * Most services will want to check for null before calling this with
      * an object given from a client, so that clients can't crash the
      * service with bad data.
-     * 
+     *
      * @return Returns true if the callback was successfully added to the list.
      * Returns false if it was not added, either because {@link #kill} had
      * previously been called or the callback's process has gone away.
-     * 
+     *
      * @see #unregister
      * @see #kill
      * @see #onCallbackDied
@@ -106,7 +106,7 @@ public class RemoteCallbackList<E extends IInterface> {
             }
         }
     }
-    
+
     /**
      * Remove from the list a callback that was previously added with
      * {@link #register}.  This uses the
@@ -114,14 +114,14 @@ public class RemoteCallbackList<E extends IInterface> {
      * find the previous registration.
      * Registrations are not counted; a single unregister call will remove
      * a callback after any number calls to {@link #register} for it.
-     * 
+     *
      * @param callback The callback to be removed from the list.  Passing
      * null here will cause a NullPointerException, so you will generally want
      * to check for null before calling.
-     * 
+     *
      * @return Returns true if the callback was found and unregistered.  Returns
      * false if the given callback was not found on the list.
-     * 
+     *
      * @see #register
      */
     public boolean unregister(E callback) {
@@ -134,13 +134,13 @@ public class RemoteCallbackList<E extends IInterface> {
             return false;
         }
     }
-    
+
     /**
      * Disable this callback list.  All registered callbacks are unregistered,
      * and the list is disabled so that future calls to {@link #register} will
      * fail.  This should be used when a Service is stopping, to prevent clients
      * from registering callbacks after it is stopped.
-     * 
+     *
      * @see #register
      */
     public void kill() {
@@ -152,21 +152,21 @@ public class RemoteCallbackList<E extends IInterface> {
             mKilled = true;
         }
     }
-    
+
     /**
      * Called when the process hosting a callback in the list has gone away.
      * The default implementation does nothing.
-     * 
+     *
      * @param callback The callback whose process has died.  Note that, since
      * its process has died, you can not make any calls on to this interface.
      * You can, however, retrieve its IBinder and compare it with another
      * IBinder to see if it is the same object.
-     * 
+     *
      * @see #register
      */
     public void onCallbackDied(E callback) {
     }
-    
+
     /**
      * Prepare to start making calls to the currently registered callbacks.
      * This creates a copy of the callback list, which you can retrieve items
@@ -175,12 +175,12 @@ public class RemoteCallbackList<E extends IInterface> {
      * same thread (usually by scheduling with {@link Handler} or
      * do your own synchronization.  You must call {@link #finishBroadcast}
      * when done.
-     * 
+     *
      * <p>A typical loop delivering a broadcast looks like this:
-     * 
+     *
      * <pre>
      * final int N = callbacks.beginBroadcast();
-     * for (int i=0; i<N; i++) {
+     * for (int i=0; i&lt;N; i++) {
      *     try {
      *         callbacks.getBroadcastItem(i).somethingHappened();
      *     } catch (RemoteException e) {
@@ -189,11 +189,11 @@ public class RemoteCallbackList<E extends IInterface> {
      *     }
      * }
      * callbacks.finishBroadcast();</pre>
-     * 
+     *
      * @return Returns the number of callbacks in the broadcast, to be used
      * with {@link #getBroadcastItem} to determine the range of indices you
      * can supply.
-     * 
+     *
      * @see #getBroadcastItem
      * @see #finishBroadcast
      */
@@ -214,37 +214,37 @@ public class RemoteCallbackList<E extends IInterface> {
             return i;
         }
     }
-    
+
     /**
      * Retrieve an item in the active broadcast that was previously started
      * with {@link #beginBroadcast}.  This can <em>only</em> be called after
      * the broadcast is started, and its data is no longer valid after
      * calling {@link #finishBroadcast}.
-     * 
+     *
      * <p>Note that it is possible for the process of one of the returned
      * callbacks to go away before you call it, so you will need to catch
      * {@link RemoteException} when calling on to the returned object.
      * The callback list itself, however, will take care of unregistering
      * these objects once it detects that it is no longer valid, so you can
      * handle such an exception by simply ignoring it.
-     * 
+     *
      * @param index Which of the registered callbacks you would like to
      * retrieve.  Ranges from 0 to 1-{@link #beginBroadcast}.
-     * 
+     *
      * @return Returns the callback interface that you can call.  This will
      * always be non-null.
-     * 
+     *
      * @see #beginBroadcast
      */
     public E getBroadcastItem(int index) {
         return (E)mActiveBroadcast[index];
     }
-    
+
     /**
      * Clean up the state of a broadcast previously initiated by calling
      * {@link #beginBroadcast}.  This must always be called when you are done
      * with a broadcast.
-     * 
+     *
      * @see #beginBroadcast
      */
     public void finishBroadcast() {
