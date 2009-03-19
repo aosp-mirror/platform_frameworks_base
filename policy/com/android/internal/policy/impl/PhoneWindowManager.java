@@ -101,6 +101,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean DEBUG_LAYOUT = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
     
@@ -992,6 +993,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
                 mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
+                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockBottom="
+                        + mDockBottom + " mContentBottom="
+                        + mContentBottom + " mCurBottom=" + mCurBottom);
             }
         }
     }
@@ -1152,11 +1156,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             df.right = df.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
         }
 
+        if (DEBUG_LAYOUT) Log.v(TAG, "Compute frame " + attrs.getTitle()
+                + ": sim=#" + Integer.toHexString(sim)
+                + " pf=" + pf.toShortString() + " df=" + df.toShortString()
+                + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
+        
         if (false) {
             if ("com.google.android.youtube".equals(attrs.packageName)
                     && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
                 if (true || localLOGV) Log.v(TAG, "Computing frame of " + win +
-                        ": pf=" + pf.toShortString() + " df=" + df.toShortString()
+                        ": sim=#" + Integer.toHexString(sim)
+                        + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                         + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
             }
         }
@@ -1176,6 +1186,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mCurBottom > top) {
                 mCurBottom = top;
             }
+            if (DEBUG_LAYOUT) Log.v(TAG, "Input method: mDockBottom="
+                    + mDockBottom + " mContentBottom="
+                    + mContentBottom + " mCurBottom=" + mCurBottom);
         }
     }
 
