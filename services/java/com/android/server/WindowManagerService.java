@@ -19,6 +19,8 @@ package com.android.server;
 import static android.os.LocalPowerManager.CHEEK_EVENT;
 import static android.os.LocalPowerManager.OTHER_EVENT;
 import static android.os.LocalPowerManager.TOUCH_EVENT;
+import static android.os.LocalPowerManager.LONG_TOUCH_EVENT;
+import static android.os.LocalPowerManager.TOUCH_UP_EVENT;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
@@ -2363,6 +2365,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         ttoken.startingWindow = null;
                         ttoken.startingMoved = true;
                         startingWindow.mToken = wtoken;
+                        startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
                         mWindows.remove(startingWindow);
                         ttoken.windows.remove(startingWindow);
@@ -3678,6 +3681,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private static final float CHEEK_THRESHOLD = 0.6f;
     private int mEventState = EVENT_NONE;
     private float mEventSize;
+
     private int eventType(MotionEvent ev) {
         float size = ev.getSize();
         switch (ev.getAction()) {
@@ -3686,7 +3690,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_EVENT;
         case MotionEvent.ACTION_UP:
             if (size > mEventSize) mEventSize = size;
-            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : OTHER_EVENT;
+            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_UP_EVENT;
         case MotionEvent.ACTION_MOVE:
             final int N = ev.getHistorySize();
             if (size > mEventSize) mEventSize = size;
@@ -3699,7 +3703,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (ev.getEventTime() < ev.getDownTime() + EVENT_IGNORE_DURATION) {
                 return TOUCH_EVENT;
             } else {
-                return OTHER_EVENT;
+                return LONG_TOUCH_EVENT;
             }
         default:
             // not good

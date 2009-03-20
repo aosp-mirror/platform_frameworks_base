@@ -259,6 +259,7 @@ status_t AudioTrack::set(
     mLatency = afLatency + (1000*mFrameCount) / mSampleRate;
     mLoopCount = 0;
     mMarkerPosition = 0;
+    mMarkerReached = false;
     mNewPosition = 0;
     mUpdatePeriod = 0;
 
@@ -360,6 +361,9 @@ void AudioTrack::stop()
         // Cancel loops (If we are in the middle of a loop, playback
         // would not stop until loopCount reaches 0).
         setLoop(0, 0, 0);
+        // the playback head position will reset to 0, so if a marker is set, we need
+        // to activate it again
+        mMarkerReached = false;
         // Force flush if a shared buffer is used otherwise audioflinger
         // will not stop before end of buffer is reached.
         if (mSharedBuffer != 0) {
@@ -385,6 +389,12 @@ bool AudioTrack::stopped() const
 void AudioTrack::flush()
 {
     LOGV("flush");
+    
+    // clear playback marker and periodic update counter
+    mMarkerPosition = 0;
+    mMarkerReached = false;
+    mUpdatePeriod = 0;
+    
 
     if (!mActive) {
         mAudioTrack->flush();
@@ -508,6 +518,7 @@ status_t AudioTrack::setMarkerPosition(uint32_t marker)
     if (mCbf == 0) return INVALID_OPERATION;
 
     mMarkerPosition = marker;
+    mMarkerReached = false;
 
     return NO_ERROR;
 }
@@ -755,10 +766,10 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     }
 
     // Manage marker callback
-    if(mMarkerPosition > 0) {
+    if (!mMarkerReached && (mMarkerPosition > 0)) {
         if (mCblk->server >= mMarkerPosition) {
             mCbf(EVENT_MARKER, mUserData, (void *)&mMarkerPosition);
-            mMarkerPosition = 0;
+            mMarkerReached = true;
         }
     }
 

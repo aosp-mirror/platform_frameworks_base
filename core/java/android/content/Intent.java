@@ -1125,7 +1125,8 @@ public class Intent implements Parcelable {
     public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     /**
      * Broadcast Action: A new application package has been installed on the
-     * device. The data contains the name of the package.
+     * device. The data contains the name of the package.  Note that the
+     * newly installed package does <em>not</em> receive this broadcast.
      * <p>My include the following extras:
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
@@ -1135,6 +1136,17 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
+    /**
+     * Broadcast Action: A new version of an application package has been
+     * installed, replacing an existing version that was previously installed.
+     * The data contains the name of the package.
+     * <p>My include the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
     /**
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
@@ -1163,7 +1175,9 @@ public class Intent implements Parcelable {
      * Broadcast Action: The user has restarted a package, and all of its
      * processes have been killed.  All runtime state
      * associated with it (processes, alarms, notifications, etc) should
-     * be removed.  The data contains the name of the package.
+     * be removed.  Note that the restarted package does <em>not</em>
+     * receive this broadcast.
+     * The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
@@ -1173,8 +1187,9 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: The user has cleared the data of a package.  This should
      * be preceded by {@link #ACTION_PACKAGE_RESTARTED}, after which all of
-     * its persistent data is erased and this broadcast sent.  The data contains
-     * the name of the package.
+     * its persistent data is erased and this broadcast sent.
+     * Note that the cleared package does <em>not</em>
+     * receive this broadcast. The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>

@@ -151,26 +151,22 @@ public class Html {
         for (int i = 0; i < text.length(); i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
             ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
-            if (style.length > 0) {
-                out.append("<div ");
-            }
+            String elements = " ";
             for(int j = 0; j < style.length; j++) {
                 if (style[j] instanceof AlignmentSpan) {
-                    out.append("align=\"");
                     Layout.Alignment align = 
                         ((AlignmentSpan) style[j]).getAlignment();
                     if (align == Layout.Alignment.ALIGN_CENTER) {
-                        out.append("center");
+                        elements = "align=\"center\" " + elements;
                     } else if (align == Layout.Alignment.ALIGN_OPPOSITE) {
-                        out.append("right");
+                        elements = "align=\"right\" " + elements;
                     } else {
-                        out.append("left");
+                        elements = "align=\"left\" " + elements;
                     }
-                    out.append("\" ");
                 }
             }
             if (style.length > 0) {
-                out.append(">");
+                out.append("<div " + elements + ">");
             }
 
             withinDiv(out, text, i, next);

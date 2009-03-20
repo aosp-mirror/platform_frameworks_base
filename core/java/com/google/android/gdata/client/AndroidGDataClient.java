@@ -51,7 +51,7 @@ public class AndroidGDataClient implements GDataClient {
     private static final String X_HTTP_METHOD_OVERRIDE =
         "X-HTTP-Method-Override";
 
-    private static final String USER_AGENT_APP_VERSION = "Android-GData/1.0";
+    private static final String DEFAULT_USER_AGENT_APP_VERSION = "Android-GData/1.1";
 
     private static final int MAX_REDIRECTS = 10;
 
@@ -121,7 +121,7 @@ public class AndroidGDataClient implements GDataClient {
      * @deprecated Use AndroidGDAtaClient(Context) instead.
      */
     public AndroidGDataClient(ContentResolver resolver) {
-        mHttpClient = new GoogleHttpClient(resolver, USER_AGENT_APP_VERSION,
+        mHttpClient = new GoogleHttpClient(resolver, DEFAULT_USER_AGENT_APP_VERSION,
                 true /* gzip capable */);
         mHttpClient.enableCurlLogging(TAG, Log.VERBOSE);
         mResolver = resolver;
@@ -136,7 +136,21 @@ public class AndroidGDataClient implements GDataClient {
      * SSL session persistence.
      */
     public AndroidGDataClient(Context context) {
-        mHttpClient = new GoogleHttpClient(context, USER_AGENT_APP_VERSION,
+       this(context, DEFAULT_USER_AGENT_APP_VERSION);
+    }
+
+    /**
+     * Creates a new AndroidGDataClient.
+     *
+     * @param context The ContentResolver to get URL rewriting rules from
+     * through the Android proxy server, using null to indicate not using proxy.
+     * The context will also be used by GoogleHttpClient for configuration of
+     * SSL session persistence.
+     * @param appAndVersion The application name and version to be used as the basis of the
+     * User-Agent.  e.g., Android-GData/1.5.0.
+     */
+    public AndroidGDataClient(Context context, String appAndVersion) {
+        mHttpClient = new GoogleHttpClient(context, appAndVersion,
                 true /* gzip capable */);
         mHttpClient.enableCurlLogging(TAG, Log.VERBOSE);
         mResolver = context.getContentResolver();

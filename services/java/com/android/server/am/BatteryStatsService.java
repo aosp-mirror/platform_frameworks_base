@@ -162,7 +162,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.noteWifiOffLocked();
         }
     }
-    
+
+    public void noteWifiRunning() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiRunningLocked();
+        }
+    }
+
+    public void noteWifiStopped() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiStoppedLocked();
+        }
+    }
+
     public void noteBluetoothOn() {
         enforceCallingPermission();
         synchronized (mStats) {

@@ -135,8 +135,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     private boolean mDoneBooting = false;
     private int mStayOnConditions = 0;
-    private int mNotificationQueue = -1;
-    private int mNotificationWhy;
+    private int[] mBroadcastQueue = new int[] { -1, -1, -1 };
+    private int[] mBroadcastWhy = new int[3];
     private int mPartialCount = 0;
     private int mPowerState;
     private boolean mOffBecauseOfUser;
@@ -170,6 +170,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             = new BrightnessState(KEYBOARD_BRIGHT_BIT);
     private final BrightnessState mButtonBrightness
             = new BrightnessState(BUTTON_BRIGHT_BIT);
+    private boolean mStillNeedSleepNotification;
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
@@ -390,7 +391,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         mHandler = new Handler();
 
         mBroadcastWakeLock = new UnsynchronizedWakeLock(
-                                PowerManager.PARTIAL_WAKE_LOCK, "sleep_notification", true);
+                                PowerManager.PARTIAL_WAKE_LOCK, "sleep_broadcast", true);
         mStayOnWhilePluggedInScreenDimLock = new UnsynchronizedWakeLock(
                                 PowerManager.SCREEN_DIM_WAKE_LOCK, "StayOnWhilePluggedIn Screen Dim", false);
         mStayOnWhilePluggedInPartialLock = new UnsynchronizedWakeLock(
@@ -798,8 +799,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 + " mStayOnConditions=" + mStayOnConditions);
         pw.println("  mOffBecauseOfUser=" + mOffBecauseOfUser
                 + " mUserState=" + mUserState);
-        pw.println("  mNotificationQueue=" + mNotificationQueue
-                + " mNotificationWhy=" + mNotificationWhy);
+        pw.println("  mBroadcastQueue={" + mBroadcastQueue[0] + ',' + mBroadcastQueue[1]
+                + ',' + mBroadcastQueue[2] + "}");
+        pw.println("  mBroadcastWhy={" + mBroadcastWhy[0] + ',' + mBroadcastWhy[1]
+                + ',' + mBroadcastWhy[2] + "}");
         pw.println("  mPokey=" + mPokey + " mPokeAwakeonSet=" + mPokeAwakeOnSet);
         pw.println("  mKeyboardVisible=" + mKeyboardVisible
                 + " mUserActivityAllowed=" + mUserActivityAllowed);
@@ -840,6 +843,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             pw.println("    poke lock '" + p.tag + "':"
                     + ((p.pokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0
                             ? " POKE_LOCK_IGNORE_CHEEK_EVENTS" : "")
+                    + ((p.pokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0
+                            ? " POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS" : "")
                     + ((p.pokey & POKE_LOCK_SHORT_TIMEOUT) != 0
                             ? " POKE_LOCK_SHORT_TIMEOUT" : "")
                     + ((p.pokey & POKE_LOCK_MEDIUM_TIMEOUT) != 0
@@ -924,29 +929,56 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     private void sendNotificationLocked(boolean on, int why)
     {
-                    
         if (!on) {
-            mNotificationWhy = why;
+            mStillNeedSleepNotification = false;
         }
 
-        int value = on ? 1 : 0;
-        if (mNotificationQueue == -1) {
-            // empty
-            // Acquire the broadcast wake lock before changing the power
-            // state. It will be release after the broadcast is sent.
-            mBroadcastWakeLock.acquire();
-            EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_SEND, mBroadcastWakeLock.mCount);
-            mNotificationQueue = value;
-            mHandler.post(mNotificationTask);
-        } else if (mNotificationQueue != value) {
-            // it's a pair, so cancel it
-            mNotificationQueue = -1;
-            mHandler.removeCallbacks(mNotificationTask);
+        // Add to the queue.
+        int index = 0;
+        while (mBroadcastQueue[index] != -1) {
+            index++;
+        }
+        mBroadcastQueue[index] = on ? 1 : 0;
+        mBroadcastWhy[index] = why;
+
+        // If we added it position 2, then there is a pair that can be stripped.
+        // If we added it position 1 and we're turning the screen off, we can strip
+        // the pair and do nothing, because the screen is already off, and therefore
+        // keyguard has already been enabled.
+        // However, if we added it at position 1 and we're turning it on, then position
+        // 0 was to turn it off, and we can't strip that, because keyguard needs to come
+        // on, so have to run the queue then.
+        if (index == 2) {
+            // Also, while we're collapsing them, if it's going to be an "off," and one
+            // is off because of user, then use that, regardless of whether it's the first
+            // or second one.
+            if (!on && why == WindowManagerPolicy.OFF_BECAUSE_OF_USER) {
+                mBroadcastWhy[0] = WindowManagerPolicy.OFF_BECAUSE_OF_USER;
+            }
+            mBroadcastQueue[0] = on ? 1 : 0;
+            mBroadcastQueue[1] = -1;
+            mBroadcastQueue[2] = -1;
+            index = 0;
+        }
+        if (index == 1 && !on) {
+            mBroadcastQueue[0] = -1;
+            mBroadcastQueue[1] = -1;
+            index = -1;
+            // The wake lock was being held, but we're not actually going to do any
+            // broadcasts, so release the wake lock.
             EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 1, mBroadcastWakeLock.mCount);
             mBroadcastWakeLock.release();
-        } else {
-            // else, same so do nothing -- maybe we should warn?
-            Log.w(TAG, "Duplicate notification: on=" + on + " why=" + why);
+        }
+
+        // Now send the message.
+        if (index >= 0) {
+            // Acquire the broadcast wake lock before changing the power
+            // state. It will be release after the broadcast is sent.
+            // We always increment the ref count for each notification in the queue
+            // and always decrement when that notification is handled.
+            mBroadcastWakeLock.acquire();
+            EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_SEND, mBroadcastWakeLock.mCount);
+            mHandler.post(mNotificationTask);
         }
     }
 
@@ -954,64 +986,69 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     {
         public void run()
         {
-            int value;
-            int why;
-            WindowManagerPolicy policy;
-            synchronized (mLocks) {
-                policy = getPolicyLocked();
-                value = mNotificationQueue;
-                why = mNotificationWhy;
-                mNotificationQueue = -1;
-            }
-            if (value == 1) {
-                mScreenOnStart = SystemClock.uptimeMillis();
-                
-                policy.screenTurnedOn();
-                try {
-                    ActivityManagerNative.getDefault().wakingUp();
-                } catch (RemoteException e) {
-                    // ignore it
+            while (true) {
+                int value;
+                int why;
+                WindowManagerPolicy policy;
+                synchronized (mLocks) {
+                    value = mBroadcastQueue[0];
+                    why = mBroadcastWhy[0];
+                    for (int i=0; i<2; i++) {
+                        mBroadcastQueue[i] = mBroadcastQueue[i+1];
+                        mBroadcastWhy[i] = mBroadcastWhy[i+1];
+                    }
+                    policy = getPolicyLocked();
                 }
+                if (value == 1) {
+                    mScreenOnStart = SystemClock.uptimeMillis();
+                    
+                    policy.screenTurnedOn();
+                    try {
+                        ActivityManagerNative.getDefault().wakingUp();
+                    } catch (RemoteException e) {
+                        // ignore it
+                    }
 
-                if (mSpew) {
-                    Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
-                }
-                if (mContext != null && ActivityManagerNative.isSystemReady()) {
-                    mContext.sendOrderedBroadcast(mScreenOnIntent, null,
-                            mScreenOnBroadcastDone, mHandler, 0, null, null);
-                } else {
-                    synchronized (mLocks) {
-                        EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 2,
-                                mBroadcastWakeLock.mCount);
-                        mBroadcastWakeLock.release();
+                    if (mSpew) {
+                        Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
+                    }
+                    if (mContext != null && ActivityManagerNative.isSystemReady()) {
+                        mContext.sendOrderedBroadcast(mScreenOnIntent, null,
+                                mScreenOnBroadcastDone, mHandler, 0, null, null);
+                    } else {
+                        synchronized (mLocks) {
+                            EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 2,
+                                    mBroadcastWakeLock.mCount);
+                            mBroadcastWakeLock.release();
+                        }
                     }
                 }
-            }
-            else if (value == 0) {
-                mScreenOffStart = SystemClock.uptimeMillis();
-                
-                policy.screenTurnedOff(why);
-                try {
-                    ActivityManagerNative.getDefault().goingToSleep();
-                } catch (RemoteException e) {
-                    // ignore it.
-                }
+                else if (value == 0) {
+                    mScreenOffStart = SystemClock.uptimeMillis();
+                    
+                    policy.screenTurnedOff(why);
+                    try {
+                        ActivityManagerNative.getDefault().goingToSleep();
+                    } catch (RemoteException e) {
+                        // ignore it.
+                    }
 
-                if (mContext != null && ActivityManagerNative.isSystemReady()) {
-                    mContext.sendOrderedBroadcast(mScreenOffIntent, null,
-                            mScreenOffBroadcastDone, mHandler, 0, null, null);
-                } else {
-                    synchronized (mLocks) {
-                        EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 3,
-                                mBroadcastWakeLock.mCount);
-                        mBroadcastWakeLock.release();
+                    if (mContext != null && ActivityManagerNative.isSystemReady()) {
+                        mContext.sendOrderedBroadcast(mScreenOffIntent, null,
+                                mScreenOffBroadcastDone, mHandler, 0, null, null);
+                    } else {
+                        synchronized (mLocks) {
+                            EventLog.writeEvent(LOG_POWER_SCREEN_BROADCAST_STOP, 3,
+                                    mBroadcastWakeLock.mCount);
+                            mBroadcastWakeLock.release();
+                        }
                     }
                 }
-            }
-            else {
-                // If we're in this case, then this handler is running for a previous
-                // paired transaction.  mBroadcastWakeLock will already have been released
-                // in sendNotificationLocked.
+                else {
+                    // If we're in this case, then this handler is running for a previous
+                    // paired transaction.  mBroadcastWakeLock will already have been released.
+                    break;
+                }
             }
         }
     };
@@ -1235,6 +1272,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
             if (oldScreenOn != newScreenOn) {
                 if (newScreenOn) {
+                    // When the user presses the power button, we need to always send out the
+                    // notification that it's going to sleep so the keyguard goes on.  But
+                    // we can't do that until the screen fades out, so we don't show the keyguard
+                    // too early.
+                    if (mStillNeedSleepNotification) {
+                        sendNotificationLocked(false, WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+                    }
+
                     // Turn on the screen UNLESS there was a prior
                     // preventScreenOn(true) request.  (Note that the lifetime
                     // of a single preventScreenOn() request is limited to 5
@@ -1290,7 +1335,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     }
                     mPowerState &= ~SCREEN_ON_BIT;
                     if (!mScreenBrightness.animating) {
-                        err = screenOffFinishedAnimating(becauseOfUser);
+                        err = screenOffFinishedAnimatingLocked(becauseOfUser);
                     } else {
                         mOffBecauseOfUser = becauseOfUser;
                         err = 0;
@@ -1301,7 +1346,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
     
-    private int screenOffFinishedAnimating(boolean becauseOfUser) {
+    private int screenOffFinishedAnimatingLocked(boolean becauseOfUser) {
         // I don't think we need to check the current state here because all of these
         // Power.setScreenState and sendNotificationLocked can both handle being 
         // called multiple times in the same state. -joeo
@@ -1345,10 +1390,12 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (ANIMATE_KEYBOARD_LIGHTS) {
                 if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
                     mKeyboardBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS);
+                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
+                            preferredBrightness);
                 } else {
                     mKeyboardBrightness.setTargetLocked(preferredBrightness,
-                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS);
+                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
+                            Power.BRIGHTNESS_OFF);
                 }
                 startAnimation = true;
             } else {
@@ -1364,10 +1411,12 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (ANIMATE_BUTTON_LIGHTS) {
                 if ((newState & BUTTON_BRIGHT_BIT) == 0) {
                     mButtonBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS);
+                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            preferredBrightness);
                 } else {
                     mButtonBrightness.setTargetLocked(preferredBrightness,
-                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS);
+                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            Power.BRIGHTNESS_OFF);
                 }
                 startAnimation = true;
             } else {
@@ -1381,6 +1430,23 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         if ((difference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
             if (ANIMATE_SCREEN_LIGHTS) {
+                int nominalCurrentValue;
+                switch (oldState & (SCREEN_BRIGHT_BIT|SCREEN_ON_BIT)) {
+                    case SCREEN_BRIGHT_BIT | SCREEN_ON_BIT:
+                        nominalCurrentValue = preferredBrightness;
+                        break;
+                    case SCREEN_ON_BIT:
+                        nominalCurrentValue = Power.BRIGHTNESS_DIM;
+                        break;
+                    case 0:
+                        nominalCurrentValue = Power.BRIGHTNESS_OFF;
+                        break;
+                    case SCREEN_BRIGHT_BIT:
+                    default:
+                        // not possible
+                        nominalCurrentValue = (int)mScreenBrightness.curValue;
+                        break;
+                }
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
                     // the scale is because the brightness ramp isn't linear and this biases
@@ -1398,7 +1464,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             steps = (int)(ANIM_STEPS*ratio*scale);
                         }
                         mScreenBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                                steps, INITIAL_SCREEN_BRIGHTNESS);
+                                steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
                     } else {
                         int steps;
                         if ((oldState & SCREEN_ON_BIT) != 0) {
@@ -1417,11 +1483,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             mScreenOffTime = SystemClock.elapsedRealtime();
                         }
                         mScreenBrightness.setTargetLocked(Power.BRIGHTNESS_DIM,
-                                steps, INITIAL_SCREEN_BRIGHTNESS);
+                                steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
                     }
                 } else {
                     mScreenBrightness.setTargetLocked(preferredBrightness,
-                            ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS);
+                            ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
                 }
                 startAnimation = true;
             } else {
@@ -1502,16 +1568,20 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     + " delta=" + delta);
         }
         
-        void setTargetLocked(int target, int stepsToTarget, int initialValue) {
+        void setTargetLocked(int target, int stepsToTarget, int initialValue,
+                int nominalCurrentValue) {
             if (!initialized) {
                 initialized = true;
                 curValue = (float)initialValue;
             }
             targetValue = target;
-            delta = (targetValue-curValue) / stepsToTarget;
+            delta = (targetValue-nominalCurrentValue) / stepsToTarget;
             if (mSpew) {
+                String noticeMe = nominalCurrentValue == curValue ? "" : "  ******************";
                 Log.i(TAG, "Setting target " + mask + ": cur=" + curValue
-                        + " target=" + targetValue + " delta=" + delta);
+                        + " target=" + targetValue + " delta=" + delta
+                        + " nominalCurrentValue=" + nominalCurrentValue
+                        + noticeMe);
             }
             animating = true;
         }
@@ -1543,7 +1613,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             animating = more;
             if (!more) {
                 if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
-                    screenOffFinishedAnimating(mOffBecauseOfUser);
+                    screenOffFinishedAnimatingLocked(mOffBecauseOfUser);
                 }
             }
             return more;
@@ -1611,12 +1681,22 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         //mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
-            && !((eventType == OTHER_EVENT) || (eventType == BUTTON_EVENT))) {
+                && (eventType == CHEEK_EVENT || eventType == TOUCH_EVENT)) {
             if (false) {
-                Log.d(TAG, "dropping mPokey=0x" + Integer.toHexString(mPokey));
+                Log.d(TAG, "dropping cheek or short event mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
         }
+
+        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0)
+                && (eventType == TOUCH_EVENT || eventType == TOUCH_UP_EVENT
+                    || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT)) {
+            if (false) {
+                Log.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
+            }
+            return;
+        }
+
 
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
@@ -1695,6 +1775,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             EventLog.writeEvent(LOG_POWER_SLEEP_REQUESTED, numCleared);
+            mStillNeedSleepNotification = true;
             mUserState = SCREEN_OFF;
             setPowerState(SCREEN_OFF, false, true);
             cancelTimerLocked();

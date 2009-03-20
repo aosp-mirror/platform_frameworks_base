@@ -21,7 +21,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="14dip"
-    android:paddingRight="15dip">
+    android:paddingRight="15dip"
+    android:orientation="vertical">
     
     <CheckBox
         android:id="@+id/alwaysUse"

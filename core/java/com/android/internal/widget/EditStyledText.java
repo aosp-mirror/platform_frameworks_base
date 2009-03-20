@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import java.util.ArrayList;
+
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,14 +25,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
+import android.text.Layout;
 import android.text.Spannable;
+import android.text.method.ArrowKeyMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AlignmentSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 /**
  * EditStyledText extends EditText for managing the flow and status to edit
@@ -57,6 +66,10 @@ public class EditStyledText extends EditText {
     public static final int MODE_COLOR = 4;
     /** The mode of selection. */
     public static final int MODE_SELECT = 5;
+    /** The mode of changing alignment. */
+    public static final int MODE_ALIGN = 6;
+    /** The mode of changing cut. */
+    public static final int MODE_CUT = 7;
 
     /**
      * The state of selection.
@@ -85,6 +98,7 @@ public class EditStyledText extends EditText {
      */
     public interface EditStyledTextNotifier {
         public void notifyHintMsg(int msgId);
+        public void notifyStateChanged(int mode, int state);
     }
 
     private EditStyledTextNotifier mESTInterface;
@@ -167,14 +181,23 @@ public class EditStyledText extends EditText {
                 sizesendints);
     }
 
+    public void setAlignAlertParams(CharSequence aligntitle,
+            CharSequence[] alignnames) {
+        mToast.setAlignAlertParams(aligntitle, alignnames);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mManager.isSoftKeyBlocked() &&
+                event.getAction() == MotionEvent.ACTION_UP) {
+            cancelLongPress();
+        }
         final boolean superResult = super.onTouchEvent(event);
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onTouchEvent");
             }
-            mManager.onTouchScreen();
+            mManager.onCursorMoved();
         }
         return superResult;
     }
@@ -202,6 +225,13 @@ public class EditStyledText extends EditText {
     }
 
     /**
+     * Start "Cut" action.
+     */
+    public void onStartCut() {
+        mManager.onStartCut();
+    }
+
+    /**
      * Start "Paste" action.
      */
     public void onStartPaste() {
@@ -223,6 +253,13 @@ public class EditStyledText extends EditText {
     }
 
     /**
+     * Start changing "Alignment" action.
+     */
+    public void onStartAlign() {
+        mManager.onStartAlign();
+    }
+
+    /**
      * Start "Select" action.
      */
     public void onStartSelect() {
@@ -234,6 +271,13 @@ public class EditStyledText extends EditText {
      */
     public void onStartSelectAll() {
         mManager.onStartSelectAll();
+    }
+
+    /**
+     * Fix Selected Item.
+     */
+    public void onFixSelectedItem() {
+        mManager.onFixSelectedItem();
     }
 
     /**
@@ -257,13 +301,6 @@ public class EditStyledText extends EditText {
     }
 
     /**
-     * Fix Selected Item.
-     */
-    public void fixSelectedItem() {
-        mManager.onFixSelectItem();
-    }
-
-    /**
      * Set Size of the Item.
      * 
      * @param size
@@ -283,21 +320,26 @@ public class EditStyledText extends EditText {
         mManager.setItemColor(color);
     }
 
-    public void onShowColorAlert() {
-        mToast.onShowColorAlertDialog();
-    }
-
-    public void onShowSizeAlert() {
-        mToast.onShowSizeAlertDialog();
+    public void setAlignment(Layout.Alignment align) {
+        mManager.setAlignment(align);
     }
 
     /**
-     * Check editing is started.
+     * Check whether editing is started or not.
      * 
      * @return Whether editing is started or not.
      */
     public boolean isEditting() {
         return mManager.isEditting();
+    }
+
+    /**
+     * Check whether SoftKey is Blocked or not.
+     * 
+     * @return whether SoftKey is Blocked or not.
+     */
+    public boolean isSoftKeyBlocked() {
+        return mManager.isSoftKeyBlocked();
     }
 
     /**
@@ -318,7 +360,33 @@ public class EditStyledText extends EditText {
         return mManager.getSelectState();
     }
 
-    public String getBody() {
+    @Override
+    public Bundle getInputExtras(boolean create) {
+        Bundle bundle = super.getInputExtras(create);
+        if (bundle != null) {
+            bundle.putBoolean("allowEmoji", true);
+        }
+        return bundle;
+    }
+
+    /**
+     * Get the state of the selection.
+     * 
+     * @return The state of the selection.
+     */
+    public String getHtml() {
+        return mConverter.getConvertedBody();
+    }
+
+    /**
+     * Get the state of the selection.
+     * 
+     * @param uris
+     *            The array of used uris.
+     * @return The state of the selection.
+     */
+    public String getHtml(ArrayList<Uri> uris) {
+        mConverter.getUriArray(uris, this.getText());
         return mConverter.getConvertedBody();
     }
 
@@ -333,6 +401,28 @@ public class EditStyledText extends EditText {
         mManager = new EditorManager(this);
         mConverter = new StyledTextConverter(this);
         mToast = new StyledTextToast(this);
+        setMovementMethod(new StyledTextArrowKeyMethod(mManager));
+    }
+
+    /**
+     * Show Color Selecting Dialog.
+     */
+    private void onShowColorAlert() {
+        mToast.onShowColorAlertDialog();
+    }
+
+    /**
+     * Show Size Selecting Dialog.
+     */
+    private void onShowSizeAlert() {
+        mToast.onShowSizeAlertDialog();
+    }
+
+    /**
+     * Show Alignment Selecting Dialog.
+     */
+    private void onShowAlignAlert() {
+        mToast.onShowAlignAlertDialog();
     }
 
     /**
@@ -347,27 +437,31 @@ public class EditStyledText extends EditText {
         }
     }
 
-    @Override
-    public Bundle getInputExtras(boolean create) {
-        Bundle bundle = super.getInputExtras(create);
-        if (bundle != null) {
-            bundle.putBoolean("allowEmoji", true);
+    /**
+     * Notify the event that the mode and state are changed.
+     * 
+     * @param mode
+     *            Mode of the editing action.
+     * @param state
+     *            Mode of the selection state.
+     */
+    private void notifyStateChanged(int mode, int state) {
+        if (mESTInterface != null) {
+            mESTInterface.notifyStateChanged(mode, state);
         }
-        return bundle;
     }
 
     /**
-     * Object which manages the flow and status of editing actions.
+     * EditorManager manages the flow and status of editing actions.
      */
     private class EditorManager {
         private boolean mEditFlag = false;
+        private boolean mSoftKeyBlockFlag = false;
         private int mMode = 0;
         private int mState = 0;
         private int mCurStart = 0;
         private int mCurEnd = 0;
         private EditStyledText mEST;
-        private Editable mTextSelectBuffer;
-        private CharSequence mTextCopyBufer;
 
         EditorManager(EditStyledText est) {
             mEST = est;
@@ -375,37 +469,133 @@ public class EditStyledText extends EditText {
 
         public void onStartEdit() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onEdit");
+                Log.d(LOG_TAG, "--- onStartEdit");
             }
+            Log.d(LOG_TAG, "--- onstartedit:" + this.getSelectionStart() + this.getSelectionEnd());
             handleResetEdit();
+            mEST.notifyStateChanged(mMode, mState);
         }
 
         public void onEndEdit() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onClickCancel");
+                Log.d(LOG_TAG, "--- onEndEdit");
             }
             handleCancel();
+            mEST.notifyStateChanged(mMode, mState);
         }
 
         public void onStartCopy() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onClickCopy");
+                Log.d(LOG_TAG, "--- onStartCopy");
             }
             handleCopy();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onStartCut() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onStartCut");
+            }
+            handleCut();
+            mEST.notifyStateChanged(mMode, mState);
         }
 
         public void onStartPaste() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onClickPaste");
+                Log.d(LOG_TAG, "--- onStartPaste");
             }
             handlePaste();
+            mEST.notifyStateChanged(mMode, mState);
         }
 
         public void onStartSize() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onClickSize");
+                Log.d(LOG_TAG, "--- onStartSize");
             }
             handleSize();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onStartAlign() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onStartAlignRight");
+            }
+            handleAlign();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onStartColor() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickColor");
+            }
+            handleColor();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onStartSelect() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickSelect");
+            }
+            mMode = MODE_SELECT;
+            if (mState == STATE_SELECT_OFF) {
+                handleSelect();
+            } else {
+                unsetSelect();
+                handleSelect();
+            }
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onCursorMoved() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickView");
+            }
+            if (mState == STATE_SELECT_ON || mState == STATE_SELECTED) {
+                handleSelect();
+                mEST.notifyStateChanged(mMode, mState);
+            }
+        }
+
+        public void onStartSelectAll() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickSelectAll");
+            }
+            handleSelectAll();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onFixSelectedItem() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickComplete");
+            }
+            handleComplete();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onInsertImage(Uri uri) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onInsertImage by URI: " + uri.getPath()
+                        + "," + uri.toString());
+            }
+            int curpos = mEST.getSelectionStart();
+            mEST.getText().insert(curpos, "a");
+            ImageSpan is = new ImageSpan(mEST.getContext(), uri);
+            mEST.getText().setSpan(is,
+                    curpos, curpos + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onInsertImage(int resID) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onInsertImage by resID");
+            }
+            int curpos = mEST.getSelectionStart();
+            mEST.getText().insert(curpos, "a");
+            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), resID),
+                    curpos, curpos + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mEST.notifyStateChanged(mMode, mState);
         }
 
         public void setItemSize(int size) {
@@ -428,73 +618,22 @@ public class EditStyledText extends EditText {
             }
         }
 
-        public void onStartColor() {
+        public void setAlignment(Layout.Alignment align) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onClickColor");
+                Log.d(LOG_TAG, "--- onClickColorItem");
             }
-            handleColor();
-        }
-
-        public void onStartSelect() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onClickSelect");
+            if (mState == STATE_SELECTED || mState == STATE_SELECT_FIX) {
+                changeAlign(align);
+                handleResetEdit();
             }
-            mMode = MODE_SELECT;
-            if (mState == STATE_SELECT_OFF) {
-                handleSelect();
-            } else {
-                offSelect();
-                handleSelect();
-            }
-        }
-
-        public void onStartSelectAll() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onClickSelectAll");
-            }
-            handleSelectAll();
-        }
-
-        public void onTouchScreen() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onClickView");
-            }
-            if (mState == STATE_SELECT_ON || mState == STATE_SELECTED) {
-                handleSelect();
-            }
-        }
-
-        public void onFixSelectItem() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onClickComplete");
-            }
-            handleComplete();
-        }
-
-        public void onInsertImage(Uri uri) {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onInsertImage by URI: " + uri.getPath()
-                        + "," + uri.toString());
-            }
-
-            mEST.getText().append("a");
-            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), uri),
-                    mEST.getText().length() - 1, mEST.getText().length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        public void onInsertImage(int resID) {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- onInsertImage by resID");
-            }
-            mEST.getText().append("b");
-            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), resID),
-                    mEST.getText().length() - 1, mEST.getText().length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         public boolean isEditting() {
             return mEditFlag;
+        }
+
+        public boolean isSoftKeyBlocked() {
+            return this.mSoftKeyBlockFlag;
         }
 
         public int getEditMode() {
@@ -505,6 +644,42 @@ public class EditStyledText extends EditText {
             return mState;
         }
 
+        public int getSelectionStart() {
+            return mCurStart;
+        }
+
+        public int getSelectionEnd() {
+            return mCurEnd;
+        }
+
+        private void doNextHandle() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- doNextHandle: " + mMode + "," + mState);
+            }
+            switch (mMode) {
+            case MODE_COPY:
+                handleCopy();
+                break;
+            case MODE_CUT:
+                handleCut();
+                break;
+            case MODE_PASTE:
+                handlePaste();
+                break;
+            case MODE_SIZE:
+                handleSize();
+                break;
+            case MODE_COLOR:
+                handleColor();
+                break;
+            case MODE_ALIGN:
+                handleAlign();
+                break;
+            default:
+                break;
+            }
+        }
+
         private void handleCancel() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- handleCancel");
@@ -512,7 +687,9 @@ public class EditStyledText extends EditText {
             mMode = MODE_NOTHING;
             mState = STATE_SELECT_OFF;
             mEditFlag = false;
-            offSelect();
+            Log.d(LOG_TAG, "--- handleCancel:" + mEST.getInputType());
+            unblockSoftKey();
+            unsetSelect();
         }
 
         private void handleComplete() {
@@ -525,18 +702,32 @@ public class EditStyledText extends EditText {
             if (mState == STATE_SELECTED) {
                 mState = STATE_SELECT_FIX;
             }
-            switch (mMode) {
-            case MODE_COPY:
-                handleCopy();
-                break;
-            case MODE_COLOR:
-                handleColor();
-                break;
-            case MODE_SIZE:
-                handleSize();
-                break;
-            default:
-                break;
+            doNextHandle();
+        }
+
+        private void handleTextViewFunc(int mode, int id) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- handleTextView: " + mMode + "," + mState +
+                        "," + id);
+            }
+            if (!mEditFlag) {
+                return;
+            }
+            if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
+                mMode = mode;
+                if (mState == STATE_SELECTED) {
+                    mState = STATE_SELECT_FIX;
+                    handleTextViewFunc(mode, id);
+                } else {
+                    handleSelect();
+                }
+            } else if (mMode != mode) {
+                handleCancel();
+                mMode = mode;
+                handleTextViewFunc(mode, id);
+            } else if (mState == STATE_SELECT_FIX) {
+                mEST.onTextContextMenuItem(id);
+                handleResetEdit();
             }
         }
 
@@ -544,26 +735,14 @@ public class EditStyledText extends EditText {
             if (DBG) {
                 Log.d(LOG_TAG, "--- handleCopy: " + mMode + "," + mState);
             }
-            if (!mEditFlag) {
-                return;
+            handleTextViewFunc(MODE_COPY, android.R.id.copy);
+        }
+
+        private void handleCut() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- handleCopy: " + mMode + "," + mState);
             }
-            if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
-                mMode = MODE_COPY;
-                if (mState == STATE_SELECTED) {
-                    mState = STATE_SELECT_FIX;
-                    storeSelectedText();
-                } else {
-                    handleSelect();
-                }
-            } else if (mMode != MODE_COPY) {
-                handleCancel();
-                mMode = MODE_COPY;
-                handleCopy();
-            } else if (mState == STATE_SELECT_FIX) {
-                mEST.setHintMessage(HINT_MSG_NULL);
-                storeSelectedText();
-                handleResetEdit();
-            }
+            handleTextViewFunc(MODE_CUT, android.R.id.cut);
         }
 
         private void handlePaste() {
@@ -573,72 +752,63 @@ public class EditStyledText extends EditText {
             if (!mEditFlag) {
                 return;
             }
-            if (mTextSelectBuffer != null && mTextCopyBufer.length() > 0) {
-                mTextSelectBuffer.insert(mEST.getSelectionStart(),
-                        mTextCopyBufer);
+            mEST.onTextContextMenuItem(android.R.id.paste);
+        }
+
+        private void handleSetSpan(int mode) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- handleSetSpan:" + mEditFlag + ","
+                        + mState + ',' + mMode);
+            }
+            if (!mEditFlag) {
+                Log.e(LOG_TAG, "--- handleSetSpan: Editing is not started.");
+                return;
+            }
+            if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
+                mMode = mode;
+                if (mState == STATE_SELECTED) {
+                    mState = STATE_SELECT_FIX;
+                    handleSetSpan(mode);
+                } else {
+                    handleSelect();
+                }
+            } else if (mMode != mode) {
+                handleCancel();
+                mMode = mode;
+                handleSetSpan(mode);
             } else {
-                mEST.setHintMessage(HINT_MSG_COPY_BUF_BLANK);
+                if (mState == STATE_SELECT_FIX) {
+                    mEST.setHintMessage(HINT_MSG_NULL);
+                    switch (mode) {
+                    case MODE_COLOR:
+                        mEST.onShowColorAlert();
+                        break;
+                    case MODE_SIZE:
+                        mEST.onShowSizeAlert();
+                        break;
+                    case MODE_ALIGN:
+                        mEST.onShowAlignAlert();
+                        break;
+                    default:
+                        Log.e(LOG_TAG, "--- handleSetSpan: invalid mode.");
+                        break;
+                    }
+                } else {
+                    Log.d(LOG_TAG, "--- handleSetSpan: do nothing.");
+                }
             }
         }
 
         private void handleSize() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- handleSize: " + mMode + "," + mState);
-            }
-            if (!mEditFlag) {
-                Log.e(LOG_TAG, "--- Editing is not started for handlesize.");
-                return;
-            }
-            if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
-                mMode = MODE_SIZE;
-                if (mState == STATE_SELECTED) {
-                    mState = STATE_SELECT_FIX;
-                    handleSize();
-                } else {
-                    handleSelect();
-                }
-            } else if (mMode != MODE_SIZE) {
-                handleCancel();
-                mMode = MODE_SIZE;
-                handleSize();
-            } else {
-                if (mState == STATE_SELECT_FIX) {
-                    mEST.setHintMessage(HINT_MSG_NULL);
-                    mEST.onShowSizeAlert();
-                } else {
-                    Log.d(LOG_TAG, "--- handlesize: do nothing");
-                }
-            }
+            handleSetSpan(MODE_SIZE);
         }
 
         private void handleColor() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- handleSize: " + mMode + "," + mState);
-            }
-            if (!mEditFlag) {
-                Log.e(LOG_TAG, "--- Editing is not started for handlecolor.");
-                return;
-            }
-            if (mMode == MODE_NOTHING || mMode == MODE_SELECT) {
-                mMode = MODE_COLOR;
-                if (mState == STATE_SELECTED) {
-                    mState = STATE_SELECT_FIX;
-                    handleColor();
-                } else {
-                    handleSelect();
-                }
-            } else if (mMode != MODE_COLOR) {
-                handleCancel();
-                mMode = MODE_COLOR;
-                handleSize();
-            } else {
-                if (mState == STATE_SELECT_FIX) {
-                    mEST.setHintMessage(HINT_MSG_NULL);
-                    mEST.onShowColorAlert();
-                } else {
-                    Log.d(LOG_TAG, "--- handlecolor: do nothing");
-                }
-            }
+            handleSetSpan(MODE_COLOR);
+        }
+
+        private void handleAlign() {
+            handleSetSpan(MODE_ALIGN);
         }
 
         private void handleSelect() {
@@ -653,19 +823,20 @@ public class EditStyledText extends EditText {
                     Log.e(LOG_TAG, "Selection is off, but selected");
                 }
                 setSelectStartPos();
+                blockSoftKey();
                 mEST.setHintMessage(HINT_MSG_SELECT_END);
             } else if (mState == STATE_SELECT_ON) {
                 if (isTextSelected()) {
                     Log.e(LOG_TAG, "Selection now start, but selected");
                 }
-                setSelectEndPos();
+                setSelectedEndPos();
                 mEST.setHintMessage(HINT_MSG_PUSH_COMPETE);
                 doNextHandle();
             } else if (mState == STATE_SELECTED) {
                 if (!isTextSelected()) {
                     Log.e(LOG_TAG, "Selection is done, but not selected");
                 }
-                setSelectEndPos();
+                setSelectedEndPos();
                 doNextHandle();
             }
         }
@@ -678,47 +849,30 @@ public class EditStyledText extends EditText {
                 return;
             }
             mEST.selectAll();
-        }
-
-        private void doNextHandle() {
-            if (DBG) {
-                Log.d(LOG_TAG, "--- doNextHandle: " + mMode + "," + mState);
-            }
-            switch (mMode) {
-            case MODE_COPY:
-                handleCopy();
-                break;
-            case MODE_PASTE:
-                handlePaste();
-                break;
-            case MODE_SIZE:
-                handleSize();
-                break;
-            case MODE_COLOR:
-                handleColor();
-                break;
-            default:
-                break;
-            }
+            mState = STATE_SELECTED;
         }
 
         private void handleResetEdit() {
             if (DBG) {
                 Log.d(LOG_TAG, "Reset Editor");
             }
+            blockSoftKey();
             handleCancel();
             mEditFlag = true;
             mEST.setHintMessage(HINT_MSG_SELECT_START);
         }
 
-        // Methods of selection
-        private void onSelect() {
+        private void setSelection() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onSelect:" + mCurStart + "," + mCurEnd);
             }
             if (mCurStart >= 0 && mCurStart <= mEST.getText().length()
                     && mCurEnd >= 0 && mCurEnd <= mEST.getText().length()) {
-                mEST.setSelection(mCurStart, mCurEnd);
+                if (mCurStart < mCurEnd) {
+                    mEST.setSelection(mCurStart, mCurEnd);
+                } else {
+                    mEST.setSelection(mCurEnd, mCurStart);
+                }
                 mState = STATE_SELECTED;
             } else {
                 Log.e(LOG_TAG,
@@ -728,7 +882,7 @@ public class EditStyledText extends EditText {
             }
         }
 
-        private void offSelect() {
+        private void unsetSelect() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- offSelect");
             }
@@ -745,22 +899,23 @@ public class EditStyledText extends EditText {
             mState = STATE_SELECT_ON;
         }
 
-        private void setSelectEndPos() {
+        private void setSelectedEndPos() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- setSelectEndPos:"
-                        + mEST.getSelectionStart());
+                Log.d(LOG_TAG, "--- setSelectEndPos:");
             }
-            int curpos = mEST.getSelectionStart();
-            if (curpos < mCurStart) {
-                if (DBG) {
-                    Log.d(LOG_TAG, "--- setSelectEndPos: swap is done.");
-                }
-                mCurEnd = mCurStart;
-                mCurStart = curpos;
+            if (mEST.getSelectionStart() == mCurStart) {
+                setSelectedEndPos(mEST.getSelectionEnd());
             } else {
-                mCurEnd = curpos;
+                setSelectedEndPos(mEST.getSelectionStart());
             }
-            onSelect();
+        }
+
+        public void setSelectedEndPos(int pos) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- setSelectedEndPos:");
+            }
+            mCurEnd = pos;
+            setSelection();
         }
 
         private boolean isTextSelected() {
@@ -773,30 +928,96 @@ public class EditStyledText extends EditText {
                             mState == STATE_SELECT_FIX);
         }
 
-        private void storeSelectedText() {
+        private void setStyledTextSpan(Object span, int start, int end) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- storeSelectedText");
+                Log.d(LOG_TAG, "--- setStyledTextSpan:" + mMode + ","
+                        + start + "," + end);
             }
-            mTextSelectBuffer = mEST.getText();
-            mTextCopyBufer = mTextSelectBuffer.subSequence(mCurStart, mCurEnd);
+            if (start < end) {
+                mEST.getText().setSpan(span, start, end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                mEST.getText().setSpan(span, end, start,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         private void changeSizeSelectedText(int size) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- changeSizeSelectedText:" + size + ","
-                        + mCurStart + "," + mCurEnd);
+                Log.d(LOG_TAG, "--- changeAlign:" + size);
             }
-            mEST.getText().setSpan(new AbsoluteSizeSpan(size), mCurStart,
-                    mCurEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            setStyledTextSpan(new AbsoluteSizeSpan(size),
+                mCurStart, mCurEnd);
         }
 
         private void changeColorSelectedText(int color) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- changeCollorSelectedText:" + color + ","
-                        + mCurStart + "," + mCurEnd);
+                Log.d(LOG_TAG, "--- changeAlign:" + color);
             }
-            mEST.getText().setSpan(new ForegroundColorSpan(color), mCurStart,
-                    mCurEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            setStyledTextSpan(new ForegroundColorSpan(color),
+                mCurStart, mCurEnd);
+        }
+
+        private void changeAlign(Layout.Alignment align) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- changeAlign:" + align);
+            }
+            setStyledTextSpan(new AlignmentSpan.Standard(align),
+                    findLineStart(mEST.getText(), mCurStart),
+                    findLineEnd(mEST.getText(), mCurEnd));
+        }
+
+        private int findLineStart(Editable text, int current) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- findLineStart: curr:" + current +
+                        ", length:" + text.length());
+            }
+            int pos = current;
+            for (; pos > 0; pos--) {
+                if (text.charAt(pos - 1) == '\n') {
+                    break;
+                }
+            }
+            return pos;
+        }
+
+        private int findLineEnd(Editable text, int current) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- findLineEnd: curr:" + current +
+                        ", length:" + text.length());
+            }
+            int pos = current;
+            for (; pos < text.length(); pos++) {
+                if (pos > 0 && text.charAt(pos - 1) == '\n') {
+                    break;
+                }
+            }
+            return pos;
+        }
+
+        private void blockSoftKey() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- blockSoftKey:");
+            }
+            InputMethodManager imm = (InputMethodManager) mEST.getContext().
+            getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mEST.getWindowToken(), 0);
+            mEST.setOnClickListener(
+                    new OnClickListener() {
+                        public void onClick(View v) {
+                            Log.d(LOG_TAG, "--- ontrackballclick:");
+                            onFixSelectedItem();
+                        }
+            });
+            mSoftKeyBlockFlag = true;
+        }
+
+        private void unblockSoftKey() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- unblockSoftKey:");
+            }
+            mEST.setOnClickListener(null);
+            this.mSoftKeyBlockFlag = false;
         }
     }
 
@@ -809,7 +1030,31 @@ public class EditStyledText extends EditText {
 
         public String getConvertedBody() {
             String htmlBody = Html.toHtml(mEST.getText());
+            if (DBG) {
+                Log.d(LOG_TAG, "--- getConvertedBody:" + htmlBody);
+            }
             return htmlBody;
+        }
+
+        public void getUriArray(ArrayList<Uri> uris, Editable text) {
+            uris.clear();
+            if (DBG) {
+                Log.d(LOG_TAG, "--- getUriArray:");
+            }
+            int len = text.length();
+            int next;
+            for (int i = 0; i < text.length(); i = next) {
+                next = text.nextSpanTransition(i, len, ImageSpan.class);
+                ImageSpan[] images = text.getSpans(i, next, ImageSpan.class);
+                for (int j = 0; j < images.length; j++) {
+                    if (DBG) {
+                        Log.d(LOG_TAG, "--- getUriArray: foundArray" +
+                                ((ImageSpan) images[j]).getSource());
+                    }
+                    uris.add(Uri.parse(
+                            ((ImageSpan) images[j]).getSource()));
+                }
+            }
         }
     }
 
@@ -817,11 +1062,13 @@ public class EditStyledText extends EditText {
         Builder mBuilder;
         CharSequence mColorTitle;
         CharSequence mSizeTitle;
+        CharSequence mAlignTitle;
         CharSequence[] mColorNames;
         CharSequence[] mColorInts;
         CharSequence[] mSizeNames;
         CharSequence[] mSizeDisplayInts;
         CharSequence[] mSizeSendInts;
+        CharSequence[] mAlignNames;
         EditStyledText mEST;
 
         public StyledTextToast(EditStyledText est) {
@@ -846,6 +1093,12 @@ public class EditStyledText extends EditText {
             mSizeNames = sizenames;
             mSizeDisplayInts = sizedisplayints;
             mSizeSendInts = sizesendints;
+        }
+
+        public void setAlignAlertParams(CharSequence aligntitle,
+                CharSequence[] alignnames) {
+            mAlignTitle = aligntitle;
+            mAlignNames = alignnames;
         }
 
         public boolean checkColorAlertParams() {
@@ -873,13 +1126,30 @@ public class EditStyledText extends EditText {
             }
             if (mBuilder == null) {
                 Log.e(LOG_TAG, "--- builder is null.");
+                return false;
             } else if (mSizeTitle == null || mSizeNames == null
                     || mSizeDisplayInts == null || mSizeSendInts == null) {
                 Log.e(LOG_TAG, "--- size alert params are null.");
+                return false;
             } else if (mSizeNames.length != mSizeDisplayInts.length
                     && mSizeSendInts.length != mSizeDisplayInts.length) {
                 Log.e(LOG_TAG, "--- the length of size alert params are "
                         + "different.");
+                return false;
+            }
+            return true;
+        }
+
+        public boolean checkAlignAlertParams() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- checkAlignAlertParams");
+            }
+            if (mBuilder == null) {
+                Log.e(LOG_TAG, "--- builder is null.");
+                return false;
+            } else if (mAlignTitle == null) {
+                Log.e(LOG_TAG, "--- align alert params are null.");
+                return false;
             }
             return true;
         }
@@ -919,13 +1189,173 @@ public class EditStyledText extends EditText {
             setItems(mSizeNames,
                     new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    Log.d("EETVM", "mBuilder.onclick:" + which);
+                    Log.d(LOG_TAG, "mBuilder.onclick:" + which);
                     int size = Integer
                     .parseInt((String) mSizeDisplayInts[which]);
                     mEST.setItemSize(size);
                 }
             });
             mBuilder.show();
+        }
+
+        private void onShowAlignAlertDialog() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onShowAlertDialog");
+            }
+            if (!checkAlignAlertParams()) {
+                return;
+            }
+            mBuilder.setTitle(mAlignTitle);
+            mBuilder.setIcon(0);
+            mBuilder.
+            setItems(mAlignNames,
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Log.d(LOG_TAG, "mBuilder.onclick:" + which);
+                    Layout.Alignment align = Layout.Alignment.ALIGN_NORMAL;
+                    switch (which) {
+                    case 0:
+                        align = Layout.Alignment.ALIGN_NORMAL;
+                        break;
+                    case 1:
+                        align = Layout.Alignment.ALIGN_CENTER;
+                        break;
+                    case 2:
+                        align = Layout.Alignment.ALIGN_OPPOSITE;
+                        break;
+                    default:
+                        break;
+                    }
+                    mEST.setAlignment(align);
+                }
+            });
+            mBuilder.show();
+        }
+    }
+
+    private class StyledTextArrowKeyMethod extends ArrowKeyMovementMethod {
+        EditorManager mManager;
+        StyledTextArrowKeyMethod(EditorManager manager) {
+            super();
+            mManager = manager;
+        }
+
+        @Override
+        public boolean onKeyDown(TextView widget, Spannable buffer,
+                int keyCode, KeyEvent event) {
+            if (!mManager.isSoftKeyBlocked()) {
+                return super.onKeyDown(widget, buffer, keyCode, event);
+            }
+            if (executeDown(widget, buffer, keyCode)) {
+                return true;
+            }
+            return false;
+        }
+
+        private int getEndPos(TextView widget) {
+            int end;
+            if (widget.getSelectionStart() == mManager.getSelectionStart()) {
+                end = widget.getSelectionEnd();
+            } else {
+                end = widget.getSelectionStart();
+            }
+            return end;
+        }
+
+        private boolean up(TextView widget, Spannable buffer) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- up:");
+            }
+            Layout layout = widget.getLayout();
+            int end = getEndPos(widget);
+            int line = layout.getLineForOffset(end);
+            if (line > 0) {
+                int to;
+                if (layout.getParagraphDirection(line) ==
+                    layout.getParagraphDirection(line - 1)) {
+                    float h = layout.getPrimaryHorizontal(end);
+                    to = layout.getOffsetForHorizontal(line - 1, h);
+                } else {
+                    to = layout.getLineStart(line - 1);
+                }
+                mManager.setSelectedEndPos(to);
+                mManager.onCursorMoved();
+                return true;
+            }
+            return false;
+        }
+
+        private boolean down(TextView widget, Spannable buffer) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- down:");
+            }
+            Layout layout = widget.getLayout();
+            int end = getEndPos(widget);
+            int line = layout.getLineForOffset(end);
+            if (line < layout.getLineCount() - 1) {
+                int to;
+                if (layout.getParagraphDirection(line) ==
+                    layout.getParagraphDirection(line + 1)) {
+                    float h = layout.getPrimaryHorizontal(end);
+                    to = layout.getOffsetForHorizontal(line + 1, h);
+                } else {
+                    to = layout.getLineStart(line + 1);
+                }
+                mManager.setSelectedEndPos(to);
+                mManager.onCursorMoved();
+                return true;
+            }
+            return false;
+        }
+
+        private boolean left(TextView widget, Spannable buffer) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- left:");
+            }
+            Layout layout = widget.getLayout();
+            int to = layout.getOffsetToLeftOf(getEndPos(widget));
+            mManager.setSelectedEndPos(to);
+            mManager.onCursorMoved();
+            return true;
+        }
+
+        private boolean right(TextView widget, Spannable buffer) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- right:");
+            }
+            Layout layout = widget.getLayout();
+            int to = layout.getOffsetToRightOf(getEndPos(widget));
+            mManager.setSelectedEndPos(to);
+            mManager.onCursorMoved();
+            return true;
+        }
+
+        private boolean executeDown(TextView widget, Spannable buffer,
+                int keyCode) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- executeDown: " + keyCode);
+            }
+            boolean handled = false;
+
+            switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_UP:
+                handled |= up(widget, buffer);
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                handled |= down(widget, buffer);
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                handled |= left(widget, buffer);
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                handled |= right(widget, buffer);
+                break;
+                case KeyEvent.KEYCODE_DPAD_CENTER:
+                    mManager.onFixSelectedItem();
+                    handled = true;
+                    break;
+            }
+            return handled;
         }
     }
 }

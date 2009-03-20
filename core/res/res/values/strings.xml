@@ -2312,4 +2312,14 @@
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>
     
+    <!-- Strings for search suggestions. These are going here because they are referenced by both 
+         ContactsProvider and GoogleContactsProvider -->
+    <skip />
+
+    <!-- This string appears (on two lines) when you type a number into contacts search, to let you dial the phone number you typed.  The first line will be in bigger type than the second. -->
+    <string name="dial_number_using">Dial number\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
+
+    <!-- This string appears (on two lines) when you type a number into contacts search, to let you create a contact whose phone number is the number you typed.  The first line will be in bigger type than the second. -->
+    <string name="create_contact_using">Create contact\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
+    
 </resources>

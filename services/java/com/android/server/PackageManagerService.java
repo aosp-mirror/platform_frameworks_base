@@ -3248,12 +3248,18 @@ class PackageManagerService extends IPackageManager.Stub {
                     res.removedInfo.sendBroadcast(false, true);
                     Bundle extras = new Bundle(1);
                     extras.putInt(Intent.EXTRA_UID, res.uid);
-                    if (res.removedInfo.removedPackage != null) {
+                    final boolean update = res.removedInfo.removedPackage != null;
+                    if (update) {
                         extras.putBoolean(Intent.EXTRA_REPLACING, true);
                     }
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                          res.pkg.applicationInfo.packageName,
                                          extras);
+                    if (update) {
+                        sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                                res.pkg.applicationInfo.packageName,
+                                extras);
+                    }
                 }
                 Runtime.getRuntime().gc();
             }
@@ -3894,14 +3900,26 @@ class PackageManagerService extends IPackageManager.Stub {
     private boolean deletePackageX(String packageName, boolean sendBroadCast,
                                    boolean deleteCodeAndResources, int flags) {
         PackageRemovedInfo info = new PackageRemovedInfo();
-        boolean res = false;
+        boolean res;
 
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName, deleteCodeAndResources, flags, info);
         }
         
         if(res && sendBroadCast) {
-            info.sendBroadcast(deleteCodeAndResources, false);
+            boolean systemUpdate = info.isRemovedPackageSystemUpdate;
+            info.sendBroadcast(deleteCodeAndResources, systemUpdate);
+
+            // If the removed package was a system update, the old system packaged
+            // was re-enabled; we need to broadcast this information
+            if (systemUpdate) {
+                Bundle extras = new Bundle(1);
+                extras.putInt(Intent.EXTRA_UID, info.removedUid >= 0 ? info.removedUid : info.uid);
+                extras.putBoolean(Intent.EXTRA_REPLACING, true);
+
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName, extras);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras);
+            }
         }
         return res;
     }
@@ -3910,7 +3928,8 @@ class PackageManagerService extends IPackageManager.Stub {
         String removedPackage;
         int uid = -1;
         int removedUid = -1;
-        
+        boolean isRemovedPackageSystemUpdate = false;
+
         void sendBroadcast(boolean fullRemove, boolean replacing) {
             Bundle extras = new Bundle(1);
             extras.putInt(Intent.EXTRA_UID, removedUid >= 0 ? removedUid : uid);
@@ -3996,6 +4015,7 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.i(TAG, "Deleting system pkg from data partition");
         }
         // Delete the updated package
+        outInfo.isRemovedPackageSystemUpdate = true;
         boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
         if (!ret) {
             return false;

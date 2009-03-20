@@ -30,6 +30,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemProperties;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -43,6 +45,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
 import android.database.ContentObserver;
+import com.android.internal.app.IBatteryStats;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -244,12 +247,12 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static final int RUN_STATE_STOPPED  = 4;
     private int mRunState;
 
+    private final IBatteryStats mBatteryStats;
+
     private boolean mIsScanOnly;
 
     private BluetoothA2dp mBluetoothA2dp;
 
-    private boolean mBluetoothScanMode;
-    
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
 
@@ -316,6 +319,8 @@ public class WifiStateTracker extends NetworkStateTracker {
             "dhcp." + mInterfaceName + ".dns1",
             "dhcp." + mInterfaceName + ".dns2"
         };
+        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
+
     }
 
     /**
@@ -501,7 +506,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Send the tracker a notification that the Wi-Fi driver has been stopped.
      */
     void notifyDriverStopped() {
-       mRunState = RUN_STATE_STOPPED;
+        mRunState = RUN_STATE_STOPPED;
 
         // Send a driver stopped message to our handler
         Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 0, 0).sendToTarget();
@@ -528,6 +533,17 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private synchronized boolean isDriverStopped() {
         return mRunState == RUN_STATE_STOPPED || mRunState == RUN_STATE_STOPPING;
+    }
+
+    private void noteRunState() {
+        try {
+            if (mRunState == RUN_STATE_RUNNING) {
+                mBatteryStats.noteWifiRunning();
+            } else if (mRunState == RUN_STATE_STOPPED) {
+                mBatteryStats.noteWifiStopped();
+            }
+        } catch (RemoteException ignore) {
+        }
     }
 
     /**
@@ -654,6 +670,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         switch (msg.what) {
             case EVENT_SUPPLICANT_CONNECTION:
                 mRunState = RUN_STATE_RUNNING;
+                noteRunState();
                 checkUseStaticIp();
                 /*
                  * DHCP requests are blocking, so run them in a separate thread.
@@ -721,6 +738,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:
+                mRunState = RUN_STATE_STOPPED;
+                noteRunState();
                 int wifiState = mWM.getWifiState();
                 boolean died = wifiState != WifiManager.WIFI_STATE_DISABLED &&
                         wifiState != WifiManager.WIFI_STATE_DISABLING;
@@ -1079,6 +1098,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         }
                     }
                 }
+                noteRunState();
                 break;
 
             case EVENT_PASSWORD_KEY_MAY_BE_INCORRECT:

@@ -1131,8 +1131,6 @@ public class MediaPlayer
     /**
      * Interface definition of a callback to be invoked when the
      * video size is first known or updated
-     * FIXME: Unhide this API after approval
-     * @hide
      */
     public interface OnVideoSizeChangedListener
     {
@@ -1142,7 +1140,6 @@ public class MediaPlayer
          * @param mp        the MediaPlayer associated with this callback
          * @param width     the width of the video
          * @param height    the height of the video
-         * @hide
          */
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height);
     }
@@ -1152,7 +1149,6 @@ public class MediaPlayer
      * known or updated.
      * 
      * @param listener the callback that will be run
-     * @hide
      */
     public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener)
     {
@@ -1178,7 +1174,7 @@ public class MediaPlayer
     /** The video is streamed and its container is not valid for progressive
      * playback i.e the video's index (e.g moov atom) is not at the start of the
      * file.
-      * @hide pending API council approval. Replace with @see tag after.
+     * @see android.media.MediaPlayer.OnErrorListener
      */
     public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
 
@@ -1226,14 +1222,12 @@ public class MediaPlayer
      */
     /** Unspecified media player info.
      * @see android.media.MediaPlayer.OnInfoListener
-     * @hide pending API council approval.
      */
     public static final int MEDIA_INFO_UNKNOWN = 1;
 
     /** The video is too complex for the decoder: it can't decode frames fast
      *  enough. Possibly only the audio plays fine at this stage.
      * @see android.media.MediaPlayer.OnInfoListener
-     * @hide pending API council approval.
      */
     public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
 
@@ -1241,20 +1235,17 @@ public class MediaPlayer
      * not interleaved at all, e.g has all the video samples first then all the
      * audio ones. Video is playing but a lot of disk seeks may be happening.
      * @see android.media.MediaPlayer.OnInfoListener
-     * @hide pending API council approval.
      */
     public static final int MEDIA_INFO_BAD_INTERLEAVING = 800;
 
     /** The media cannot be seeked (e.g live stream)
      * @see android.media.MediaPlayer.OnInfoListener
-     * @hide pending API council approval.
      */
     public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
 
     /**
      * Interface definition of a callback to be invoked to communicate some
      * info and/or warning about the media or its playback.
-     * @hide pending API council approval.
      */
     public interface OnInfoListener
     {
@@ -1282,7 +1273,6 @@ public class MediaPlayer
      * Register a callback to be invoked when an info/warning is available.
      * 
      * @param listener the callback that will be run
-     * @hide pending API council approval.
      */
     public void setOnInfoListener(OnInfoListener listener)
     {

@@ -200,6 +200,7 @@ status_t AudioRecord::set(
     // TODO: add audio hardware input latency here
     mLatency = (1000*mFrameCount) / mSampleRate;
     mMarkerPosition = 0;
+    mMarkerReached = false;
     mNewPosition = 0;
     mUpdatePeriod = 0;
 
@@ -293,6 +294,9 @@ status_t AudioRecord::stop()
 
     if (android_atomic_and(~1, &mActive) == 1) {
         mAudioRecord->stop();
+        // the record head position will reset to 0, so if a marker is set, we need
+        // to activate it again
+        mMarkerReached = false;
         if (t != 0) {
             t->requestExit();
         } else {
@@ -317,6 +321,7 @@ status_t AudioRecord::setMarkerPosition(uint32_t marker)
     if (mCbf == 0) return INVALID_OPERATION;
 
     mMarkerPosition = marker;
+    mMarkerReached = false;
 
     return NO_ERROR;
 }
@@ -492,10 +497,10 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
     size_t readSize;
 
     // Manage marker callback
-    if (mMarkerPosition > 0) {
+    if (!mMarkerReached && (mMarkerPosition > 0)) {
         if (mCblk->user >= mMarkerPosition) {
             mCbf(EVENT_MARKER, mUserData, (void *)&mMarkerPosition);
-            mMarkerPosition = 0;
+            mMarkerReached = true;
         }
     }
 
