@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <cstdio>
 #include <host/Directories.h>
 #include "log.h"
 
