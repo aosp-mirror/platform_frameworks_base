@@ -177,9 +177,6 @@ android.graphics.drawable.TransitionDrawable$TransitionState
 android.graphics.drawable.shapes.RoundRectShape
 android.location.ILocationManager$Stub
 android.media.AudioManager
-android.media.MediaPlayer
-android.media.MediaRecorder
-android.media.MediaScanner
 android.net.LocalSocket
 android.net.LocalSocketAddress
 android.net.LocalSocketAddress$Namespace
