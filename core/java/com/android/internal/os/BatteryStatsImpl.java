@@ -47,7 +47,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 27;
+    private static final int VERSION = 28;
 
     private final File mFile;
     private final File mBackupFile;
@@ -94,6 +94,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     boolean mWifiOn;
     Timer mWifiOnTimer;
+
+    boolean mWifiRunning;
+    Timer mWifiRunningTimer;
     
     boolean mBluetoothOn;
     Timer mBluetoothOnTimer;
@@ -497,6 +500,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
+    public void noteWifiRunningLocked() {
+        if (!mWifiRunning) {
+            mWifiRunning = true;
+            mWifiRunningTimer.startRunningLocked(this);
+        }
+    }
+
+    public void noteWifiStoppedLocked() {
+        if (mWifiRunning) {
+            mWifiRunning = false;
+            mWifiRunningTimer.stopRunningLocked(this);
+        }
+    }
+
     public void noteBluetoothOnLocked() {
         if (!mBluetoothOn) {
             mBluetoothOn = true;
@@ -551,6 +568,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mWifiOnTimer.getTotalTime(batteryRealtime, which);
     }
     
+    @Override public long getWifiRunningTime(long batteryRealtime, int which) {
+        return mWifiRunningTimer.getTotalTime(batteryRealtime, which);
+    }
+
     @Override public long getBluetoothOnTime(long batteryRealtime, int which) {
         return mBluetoothOnTimer.getTotalTime(batteryRealtime, which);
     }
@@ -1597,7 +1618,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mScreenOnTimer = new Timer(-1, null, mUnpluggables);
         mPhoneOnTimer = new Timer(-2, null, mUnpluggables);
         mWifiOnTimer = new Timer(-3, null, mUnpluggables);
-        mBluetoothOnTimer = new Timer(-4, null, mUnpluggables);
+        mWifiRunningTimer = new Timer(-4, null, mUnpluggables);
+        mBluetoothOnTimer = new Timer(-5, null, mUnpluggables);
         mOnBattery = mOnBatteryInternal = false;
         mTrackBatteryPastUptime = 0;
         mTrackBatteryPastRealtime = 0;
@@ -1935,6 +1957,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
         mWifiOn = false;
         mWifiOnTimer.readSummaryFromParcelLocked(in);
+        mWifiRunning = false;
+        mWifiRunningTimer.readSummaryFromParcelLocked(in);
         mBluetoothOn = false;
         mBluetoothOnTimer.readSummaryFromParcelLocked(in);
 
@@ -2038,6 +2062,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        mWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
 
         final int NU = mUidStats.size();
@@ -2163,6 +2188,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneOnTimer = new Timer(-2, null, mUnpluggables, in);
         mWifiOn = false;
         mWifiOnTimer = new Timer(-2, null, mUnpluggables, in);
+        mWifiRunning = false;
+        mWifiRunningTimer = new Timer(-2, null, mUnpluggables, in);
         mBluetoothOn = false;
         mBluetoothOnTimer = new Timer(-2, null, mUnpluggables, in);
         mUptime = in.readLong();
@@ -2217,6 +2244,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mScreenOnTimer.writeToParcel(out, batteryRealtime);
         mPhoneOnTimer.writeToParcel(out, batteryRealtime);
         mWifiOnTimer.writeToParcel(out, batteryRealtime);
+        mWifiRunningTimer.writeToParcel(out, batteryRealtime);
         mBluetoothOnTimer.writeToParcel(out, batteryRealtime);
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
@@ -2264,6 +2292,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneOnTimer.logState();
             Log.i(TAG, "*** Wifi timer:");
             mWifiOnTimer.logState();
+            Log.i(TAG, "*** WifiRunning timer:");
+            mWifiRunningTimer.logState();
             Log.i(TAG, "*** Bluetooth timer:");
             mBluetoothOnTimer.logState();
         }

@@ -292,7 +292,7 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getPhoneOnTime(long batteryRealtime, int which);
-    
+
     /**
      * Returns the time in milliseconds that wifi has been on while the device was
      * running on battery.
@@ -300,7 +300,15 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getWifiOnTime(long batteryRealtime, int which);
-    
+
+    /**
+     * Returns the time in milliseconds that wifi has been on and the driver has
+     * been in the running state while the device was running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getWifiRunningTime(long batteryRealtime, int which);
+
     /**
      * Returns the time in milliseconds that bluetooth has been on while the device was
      * running on battery.
@@ -535,6 +543,7 @@ public abstract class BatteryStats implements Parcelable {
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
         final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
+        final long wifiRunningTime = getWifiRunningTime(batteryRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
        
         StringBuilder sb = new StringBuilder(128);
@@ -549,7 +558,8 @@ public abstract class BatteryStats implements Parcelable {
         
         // Dump misc stats
         dumpLine(pw, 0 /* uid */, category, MISC_DATA,
-                screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000, bluetoothOnTime / 1000);
+                screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
+                wifiRunningTime / 1000, bluetoothOnTime / 1000);
         
         if (which == STATS_UNPLUGGED) {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getUnpluggedStartLevel(), 
@@ -667,7 +677,7 @@ public abstract class BatteryStats implements Parcelable {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
-        final long batteryRealtime = getBatteryUptime(rawRealtime);
+        final long batteryRealtime = getBatteryRealtime(rawRealtime);
 
         final long whichBatteryUptime = computeBatteryUptime(rawUptime, which);
         final long whichBatteryRealtime = computeBatteryRealtime(rawRealtime, which);
@@ -692,6 +702,7 @@ public abstract class BatteryStats implements Parcelable {
         
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
+        final long wifiRunningTime = getWifiRunningTime(batteryRealtime, which);
         final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
         pw.println(prefix
@@ -701,6 +712,8 @@ public abstract class BatteryStats implements Parcelable {
                 + "(" + formatRatioLocked(phoneOnTime, whichBatteryRealtime)
                 + "), time with wifi on: " + formatTimeMs(wifiOnTime / 1000)
                 + "(" + formatRatioLocked(wifiOnTime, whichBatteryRealtime)
+                + "), time with wifi running: " + formatTimeMs(wifiRunningTime / 1000)
+                + "(" + formatRatioLocked(wifiRunningTime, whichBatteryRealtime)
                 + "), time with bluetooth on: " + formatTimeMs(bluetoothOnTime / 1000)
                 + "(" + formatRatioLocked(bluetoothOnTime, whichBatteryRealtime)+ ")");
         
