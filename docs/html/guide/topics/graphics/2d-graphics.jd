@@ -85,7 +85,10 @@ protected void onCreate(Bundle savedInstanceState) {
 <p>In other cases, you may want to handle your image resource as a 
 {@link android.graphics.drawable.Drawable} object.
 To do so, create a Drawable from the resource like so:
-<pre>Drawable myImage = Resources.getDrawable(R.drawable.my_image);</pre>
+<pre>
+Resources res = mContext.getResources();
+Drawable myImage = res.getDrawable(R.drawable.my_image);
+</pre>
 
 <p class="caution"><strong>Caution:</strong> Each unique resource in your project can maintain only one
 state, no matter how many different objects you may instantiate for it. For example, if you instantiate two
