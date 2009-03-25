@@ -590,7 +590,6 @@ android.widget.ZoomButton
 android.widget.ZoomControls
 com.android.internal.database.ArrayListCursor
 com.android.internal.database.SortCursor
-com.android.internal.gadget.IGadgetService$Stub
 com.android.internal.http.multipart.FilePart
 com.android.internal.http.multipart.MultipartEntity
 com.android.internal.http.multipart.Part
