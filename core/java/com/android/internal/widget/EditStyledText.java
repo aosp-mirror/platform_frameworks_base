@@ -1046,7 +1046,7 @@ public class EditStyledText extends EditText {
                                 ((ImageSpan) images[j]).getSource());
                     }
                     uris.add(Uri.parse(
-                            ((ImageSpan) images[j]).toString()));
+                            ((ImageSpan) images[j]).getSource()));
                 }
             }
         }
