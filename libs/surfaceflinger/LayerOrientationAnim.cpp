@@ -55,6 +55,7 @@ LayerOrientationAnim::LayerOrientationAnim(
     mOrientationCompleted = false;
     mFirstRedraw = false;
     mLastNormalizedTime = 0;
+    mLastAngle = 0;
     mLastScale = 0;
     mNeedsBlending = false;
 }
@@ -94,10 +95,6 @@ void LayerOrientationAnim::validateVisibility(const Transform&)
     transparentRegionScreen.clear();
     mTransformed = true;
     mCanUseCopyBit = false;
-    copybit_device_t* copybit = mFlinger->getBlitEngine();
-    if (copybit) { 
-        mCanUseCopyBit = true;
-    }
 }
 
 void LayerOrientationAnim::onOrientationCompleted()
@@ -109,35 +106,33 @@ void LayerOrientationAnim::onOrientationCompleted()
     mFlinger->invalidateLayerVisibility(this);
 }
 
+const float ROTATION = M_PI * 0.5f;
+const float ROTATION_FACTOR = 1.0f; // 1.0 or 2.0
+const float DURATION = ms2ns(200);
+const float BOUNCES_PER_SECOND = 1.618f;
+const float BOUNCES_AMPLITUDE = (5.0f/180.f) * M_PI;
+
 void LayerOrientationAnim::onDraw(const Region& clip) const
 {
     // Animation...
-    const float MIN_SCALE = 0.5f;
-    const float DURATION = ms2ns(200);
-    const float BOUNCES_PER_SECOND = 1.618f;
-    const float BOUNCES_AMPLITUDE = 1.0f/32.0f;
 
+    // FIXME: works only for portrait framebuffers
+    const Point size(getPhysicalSize());
+    const float TARGET_SCALE = size.x * (1.0f / size.y);
+    
     const nsecs_t now = systemTime();
-    float scale, alpha;
+    float angle, scale, alpha;
     
     if (mOrientationCompleted) {
         if (mFirstRedraw) {
-            mFirstRedraw = false;
-            
             // make a copy of what's on screen
             copybit_image_t image;
             mBitmapIn.getBitmapSurface(&image);
             const DisplayHardware& hw(graphicPlane(0).displayHardware());
             hw.copyBackToImage(image);
-
-            // and erase the screen for this round
-            glDisable(GL_BLEND);
-            glDisable(GL_DITHER);
-            glDisable(GL_SCISSOR_TEST);
-            glClearColor(0,0,0,0);
-            glClear(GL_COLOR_BUFFER_BIT);
             
             // FIXME: code below is gross
+            mFirstRedraw = false; 
             mNeedsBlending = false;
             LayerOrientationAnim* self(const_cast<LayerOrientationAnim*>(this));
             mFlinger->invalidateLayerVisibility(self);
@@ -148,36 +143,39 @@ void LayerOrientationAnim::onDraw(const Region& clip) const
         const float normalizedTime = (float(now - mFinishTime) / duration);
         if (normalizedTime <= 1.0f) {
             const float squaredTime = normalizedTime*normalizedTime;
+            angle = (ROTATION*ROTATION_FACTOR - mLastAngle)*squaredTime + mLastAngle;
             scale = (1.0f - mLastScale)*squaredTime + mLastScale;
-            alpha = (1.0f - normalizedTime);
-            alpha *= alpha;
-            alpha *= alpha;
+            alpha = normalizedTime;
         } else {
             mAnim->onAnimationFinished();
+            angle = ROTATION;
+            alpha = 1.0f;
             scale = 1.0f;
-            alpha = 0.0f;
         }
     } else {
         const float normalizedTime = float(now - mStartTime) / DURATION;
         if (normalizedTime <= 1.0f) {
             mLastNormalizedTime = normalizedTime;
             const float squaredTime = normalizedTime*normalizedTime;
-            scale = (MIN_SCALE-1.0f)*squaredTime + 1.0f;
-            alpha = 1.0f;
+            angle = ROTATION * squaredTime;
+            scale = (TARGET_SCALE - 1.0f)*squaredTime + 1.0f;
+            alpha = 0;
         } else {
             mLastNormalizedTime = 1.0f;
             const float to_seconds = DURATION / seconds(1);
             const float phi = BOUNCES_PER_SECOND * 
-                    (((normalizedTime - 1.0f) * to_seconds)*M_PI*2);
-            scale = MIN_SCALE + BOUNCES_AMPLITUDE * (1.0f - cosf(phi));
-            alpha = 1.0f;
+            (((normalizedTime - 1.0f) * to_seconds)*M_PI*2);
+            angle = ROTATION + BOUNCES_AMPLITUDE * sinf(phi);
+            scale = TARGET_SCALE;
+            alpha = 0;
         }
+        mLastAngle = angle;
         mLastScale = scale;
     }
-    drawScaled(scale, alpha);
+    drawScaled(angle, scale, alpha);
 }
 
-void LayerOrientationAnim::drawScaled(float f, float alpha) const
+void LayerOrientationAnim::drawScaled(float f, float s, float alpha) const
 {
     copybit_image_t dst;
     const GraphicPlane& plane(graphicPlane(0));
@@ -187,98 +185,83 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
     // clear screen
     // TODO: with update on demand, we may be able 
     // to not erase the screen at all during the animation 
-    if (!mOrientationCompleted) {
-        glDisable(GL_BLEND);
-        glDisable(GL_DITHER);
-        glDisable(GL_SCISSOR_TEST);
-        glClearColor(0,0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    glDisable(GL_BLEND);
+    glDisable(GL_DITHER);
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT);
     
-    const int w = dst.w*f; 
-    const int h = dst.h*f; 
-    const int xc = uint32_t(dst.w-w)/2;
-    const int yc = uint32_t(dst.h-h)/2;
-    const copybit_rect_t drect = { xc, yc, xc+w, yc+h }; 
+    const int w = dst.w; 
+    const int h = dst.h; 
 
     copybit_image_t src;
     mBitmap.getBitmapSurface(&src);
     const copybit_rect_t srect = { 0, 0, src.w, src.h };
 
-    int err = NO_ERROR;
-    const int can_use_copybit = canUseCopybit();
-    if (can_use_copybit)  {
-        copybit_device_t* copybit = mFlinger->getBlitEngine();
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
 
-        if (alpha < 1.0f) {
-            copybit_image_t srcIn;
-            mBitmapIn.getBitmapSurface(&srcIn);
-            region_iterator it(Region(Rect( drect.l, drect.t, drect.r, drect.b )));
-            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-            err = copybit->stretch(copybit, &dst, &srcIn, &drect, &srect, &it);
-        }
+    GGLSurface t;
+    t.version = sizeof(GGLSurface);
+    t.width  = src.w;
+    t.height = src.h;
+    t.stride = src.w;
+    t.vstride= src.h;
+    t.format = src.format;
+    t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
 
-        if (!err && alpha > 0.0f) {
-            region_iterator it(Region(Rect( drect.l, drect.t, drect.r, drect.b )));
-            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, int(alpha*255));
-            err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
-        }
-        LOGE_IF(err != NO_ERROR, "copybit failed (%s)", strerror(err));
+    const int targetOrientation = plane.getOrientation(); 
+    if (!targetOrientation) {
+        f = -f;
     }
-    if (!can_use_copybit || err) {   
-        GGLSurface t;
-        t.version = sizeof(GGLSurface);
-        t.width  = src.w;
-        t.height = src.h;
-        t.stride = src.w;
-        t.vstride= src.h;
-        t.format = src.format;
-        t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
 
-        Transform tr;
-        tr.set(f,0,0,f);
-        tr.set(xc, yc);
-        
-        // FIXME: we should not access mVertices and mDrawingState like that,
-        // but since we control the animation, we know it's going to work okay.
-        // eventually we'd need a more formal way of doing things like this.
-        LayerOrientationAnim& self(const_cast<LayerOrientationAnim&>(*this));
+    Transform tr;
+    tr.set(f, w*0.5f, h*0.5f);
+    tr.scale(s, w*0.5f, h*0.5f);
+
+    // FIXME: we should not access mVertices and mDrawingState like that,
+    // but since we control the animation, we know it's going to work okay.
+    // eventually we'd need a more formal way of doing things like this.
+    LayerOrientationAnim& self(const_cast<LayerOrientationAnim&>(*this));
+    tr.transform(self.mVertices[0], 0, 0);
+    tr.transform(self.mVertices[1], 0, src.h);
+    tr.transform(self.mVertices[2], src.w, src.h);
+    tr.transform(self.mVertices[3], src.w, 0);
+
+    if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
+        // Too slow to do this in software
+        self.mDrawingState.flags |= ISurfaceComposer::eLayerFilter;
+    }
+
+    if (UNLIKELY(mTextureName == -1LU)) {
+        mTextureName = createTexture();
+        GLuint w=0, h=0;
+        const Region dirty(Rect(t.width, t.height));
+        loadTexture(dirty, mTextureName, t, w, h);
+    }
+    self.mDrawingState.alpha = 255; //-int(alpha*255);
+    const Region clip(Rect( srect.l, srect.t, srect.r, srect.b ));
+    drawWithOpenGL(clip, mTextureName, t);
+    
+    if (alpha > 0) {
+        const float sign = (!targetOrientation) ? 1.0f : -1.0f;
+        tr.set(f + sign*(M_PI * 0.5f * ROTATION_FACTOR), w*0.5f, h*0.5f);
+        tr.scale(s, w*0.5f, h*0.5f);
         tr.transform(self.mVertices[0], 0, 0);
         tr.transform(self.mVertices[1], 0, src.h);
         tr.transform(self.mVertices[2], src.w, src.h);
         tr.transform(self.mVertices[3], src.w, 0);
-        if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
-            // Too slow to do this in software
-            self.mDrawingState.flags |= ISurfaceComposer::eLayerFilter;
-        }
 
-        if (alpha < 1.0f) {
-            copybit_image_t src;
-            mBitmapIn.getBitmapSurface(&src);
-            t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
-            if (UNLIKELY(mTextureNameIn == -1LU)) {
-                mTextureNameIn = createTexture();
-                GLuint w=0, h=0;
-                const Region dirty(Rect(t.width, t.height));
-                loadTexture(dirty, mTextureNameIn, t, w, h);
-            }
-            self.mDrawingState.alpha = 255;
-            const Region clip(Rect( drect.l, drect.t, drect.r, drect.b ));
-            drawWithOpenGL(clip, mTextureName, t);
-        }
-
+        copybit_image_t src;
+        mBitmapIn.getBitmapSurface(&src);
         t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
-        if (UNLIKELY(mTextureName == -1LU)) {
-            mTextureName = createTexture();
+        if (UNLIKELY(mTextureNameIn == -1LU)) {
+            mTextureNameIn = createTexture();
             GLuint w=0, h=0;
             const Region dirty(Rect(t.width, t.height));
-            loadTexture(dirty, mTextureName, t, w, h);
+            loadTexture(dirty, mTextureNameIn, t, w, h);
         }
         self.mDrawingState.alpha = int(alpha*255);
-        const Region clip(Rect( drect.l, drect.t, drect.r, drect.b ));
-        drawWithOpenGL(clip, mTextureName, t);
+        const Region clip(Rect( srect.l, srect.t, srect.r, srect.b ));
+        drawWithOpenGL(clip, mTextureNameIn, t);
     }
 }
 

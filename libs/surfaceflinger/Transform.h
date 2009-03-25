@@ -60,7 +60,9 @@ public:
             void    reset();
             void    set(float xx, float xy, float yx, float yy);
             void    set(int tx, int ty);
-
+            void    set(float radian, float x, float y);
+            void    scale(float s, float x, float y);
+            
             Rect    makeBounds(int w, int h) const;
             void    transform(GLfixed* point, int x, int y) const;
             Region  transform(const Region& reg) const;
