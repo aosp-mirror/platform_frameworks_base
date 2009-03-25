@@ -245,6 +245,7 @@ EventHub::device_t* EventHub::getDevice(int32_t deviceId) const
     int32_t id = deviceId & ID_MASK;
     if (id >= mNumDevicesById || id < 0) return NULL;
     device_t* dev = mDevicesById[id].device;
+    if (dev == NULL) return NULL;
     if (dev->id == deviceId) {
         return dev;
     }
