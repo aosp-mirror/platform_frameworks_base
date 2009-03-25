@@ -797,7 +797,7 @@
     <permission android:name="android.permission.INSTALL_PACKAGES"
         android:label="@string/permlab_installPackages"
         android:description="@string/permdesc_installPackages"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to clear user data -->
     <permission android:name="android.permission.CLEAR_APP_USER_DATA"
@@ -815,7 +815,7 @@
     <permission android:name="android.permission.DELETE_PACKAGES"
         android:label="@string/permlab_deletePackages"
         android:description="@string/permdesc_deletePackages"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to change whether an application component (other than its own) is
          enabled or not. -->
@@ -909,7 +909,7 @@
     <permission android:name="android.permission.ACCESS_CHECKIN_PROPERTIES"
         android:label="@string/permlab_checkinProperties"
         android:description="@string/permdesc_checkinProperties"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to collect component usage
          statistics -->
