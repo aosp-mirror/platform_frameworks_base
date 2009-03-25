@@ -10142,11 +10142,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // this decision.
             boolean skip = false;
             if (intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
-                // If this is replacing an existing package, then we allow it
-                // to see the broadcast for it to restart itself.
-                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    skip = true;
-                }
+                skip = true;
             } else if (intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())) {
                 skip = true;
             } else if (intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
