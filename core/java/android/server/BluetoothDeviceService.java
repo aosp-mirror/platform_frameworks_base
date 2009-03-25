@@ -63,8 +63,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private BluetoothEventLoop mEventLoop;
     private IntentFilter mIntentFilter;
     private boolean mIsAirplaneSensitive;
-    private final BondState mBondState = new BondState();  // local cache of bondings
     private int mBluetoothState;
+    private boolean mRestart = false;  // need to call enable() after disable()
+
+    private final BondState mBondState = new BondState();  // local cache of bondings
     private boolean mIsDiscovering;
     private final IBatteryStats mBatteryStats;
 
@@ -218,6 +220,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
+        if (mRestart) {
+            mRestart = false;
+            enable();
+        }
     }
 
     /** Bring up BT and persist BT on in settings */
@@ -251,6 +258,17 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         mEnableThread.start();
         return true;
     }
+
+    /** Forcibly restart Bluetooth if it is on */
+    /* package */ synchronized void restart() {
+        if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_ON) {
+            return;
+        }
+        mRestart = true;
+        if (!disable(false)) {
+            mRestart = false;
+        }
+    }   
 
     private synchronized void setBluetoothState(int state) {
         if (state == mBluetoothState) {
