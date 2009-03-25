@@ -3248,12 +3248,18 @@ class PackageManagerService extends IPackageManager.Stub {
                     res.removedInfo.sendBroadcast(false, true);
                     Bundle extras = new Bundle(1);
                     extras.putInt(Intent.EXTRA_UID, res.uid);
-                    if (res.removedInfo.removedPackage != null) {
+                    final boolean update = res.removedInfo.removedPackage != null;
+                    if (update) {
                         extras.putBoolean(Intent.EXTRA_REPLACING, true);
                     }
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                          res.pkg.applicationInfo.packageName,
                                          extras);
+                    if (update) {
+                        sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                                res.pkg.applicationInfo.packageName,
+                                extras);
+                    }
                 }
                 Runtime.getRuntime().gc();
             }
