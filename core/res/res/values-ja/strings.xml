@@ -103,22 +103,20 @@
     <string name="turn_on_radio">"ワイヤレス接続をONにする"</string>
     <string name="turn_off_radio">"ワイヤレス接続をOFFにする"</string>
     <string name="screen_lock">"画面をロック"</string>
-    <string name="power_off">"電源オフ"</string>
+    <string name="power_off">"電源を切る"</string>
     <string name="shutdown_progress">"シャットダウン中..."</string>
     <string name="shutdown_confirm">"携帯電話の電源を切ります。"</string>
     <string name="no_recent_tasks">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions">"携帯電話オプション"</string>
     <string name="global_action_lock">"画面ロック"</string>
-    <string name="global_action_power_off">"電源オフ"</string>
+    <string name="global_action_power_off">"電源を切る"</string>
     <string name="global_action_toggle_silent_mode">"マナーモード"</string>
-    <string name="global_action_silent_mode_on_status">"音声オフ"</string>
-    <string name="global_action_silent_mode_off_status">"サウンド:オン"</string>
+    <string name="global_action_silent_mode_on_status">"サウンドOFF"</string>
+    <string name="global_action_silent_mode_off_status">"サウンドON"</string>
     <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
     <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_airplane_mode_on_status">"機内モードON"</string>
+    <string name="global_actions_airplane_mode_off_status">"機内モードOFF"</string>
     <string name="safeMode">"セーフモード"</string>
     <!-- no translation found for android_system_label (6577375335728551336) -->
     <skip />
@@ -306,7 +304,7 @@
     <string name="permdesc_readPhoneState">"端末の電話機能へのアクセスをアプリケーションに許可します。アプリケーションは、この携帯電話の電話番号、通話中かどうか、通話相手の電話番号などを特定できます。"</string>
     <string name="permlab_wakeLock">"端末のスリープを無効にする"</string>
     <string name="permdesc_wakeLock">"端末のスリープを無効にすることをアプリケーションに許可します。"</string>
-    <string name="permlab_devicePower">"携帯電話の電源のオン/オフ"</string>
+    <string name="permlab_devicePower">"電源のON/OFF"</string>
     <string name="permdesc_devicePower">"携帯電話の電源のオン/オフをアプリケーションに許可します。"</string>
     <string name="permlab_factoryTest">"出荷時試験モードでの実行"</string>
     <string name="permdesc_factoryTest">"携帯電話のハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストとして実行します。メーカーのテストモードで携帯電話を使用するときのみ利用できます。"</string>
@@ -577,7 +575,7 @@
     <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g>～<xliff:g id="DATE2">%5$s</xliff:g>"</string>
-    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g>～<xliff:g id="TIME2">%2$s</xliff:g>"</string>
+    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> - <xliff:g id="TIME2">%2$s</xliff:g>"</string>
     <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g><xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
     <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
@@ -595,7 +593,7 @@
     <string name="midnight">"午前0時"</string>
     <string name="Midnight">"午前0時"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
+    <skip />
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
@@ -725,8 +723,8 @@
     <string name="yes">"OK"</string>
     <string name="no">"キャンセル"</string>
     <string name="dialog_alert_title">"注意"</string>
-    <string name="capital_on">"オン"</string>
-    <string name="capital_off">"オフ"</string>
+    <string name="capital_on">"ON"</string>
+    <string name="capital_off">"OFF"</string>
     <string name="whichApplication">"アプリケーションを選択"</string>
     <string name="alwaysUse">"常にこの操作で使用する"</string>
     <string name="clearDefaultHintMsg">"ホームの[設定]&gt;[アプリケーション]&gt;[アプリケーションの管理]でデフォルト設定をクリアします。"</string>
@@ -750,7 +748,7 @@
     <string name="volume_call">"着信音量"</string>
     <string name="volume_bluetooth_call">"Bluetooth着信音量"</string>
     <string name="volume_alarm">"アラームの音量"</string>
-    <string name="volume_notification">"通知音の音量"</string>
+    <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
     <string name="ringtone_default">"デフォルトの着信音"</string>
     <string name="ringtone_default_with_actual">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -828,5 +826,9 @@
     <!-- no translation found for ime_action_done (8971516117910934605) -->
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <skip />
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
+    <skip />
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>
