@@ -338,6 +338,7 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.SearchBar</item>
+        <item name="windowContentOverlay">@null</item>        
     </style>
 
     <!-- Menu Themes -->
