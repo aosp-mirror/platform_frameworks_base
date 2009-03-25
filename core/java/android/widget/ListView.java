@@ -2769,6 +2769,8 @@ public class ListView extends AbsListView {
             final boolean headerDividers = mHeaderDividersEnabled;
             final boolean footerDividers = mFooterDividersEnabled;
             final int first = mFirstPosition;
+            final boolean areAllItemsSelectable = mAreAllItemsSelectable;
+            final ListAdapter adapter = mAdapter;
 
             if (!mStackFromBottom) {
                 int bottom;
@@ -2779,7 +2781,10 @@ public class ListView extends AbsListView {
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
-                        if (bottom < listBottom) {
+                        // Don't draw dividers next to items that are not enabled
+                        if (bottom < listBottom && (areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
                             bounds.top = bottom;
                             bounds.bottom = bottom + dividerHeight;
                             drawDivider(canvas, bounds, i);
@@ -2795,7 +2800,10 @@ public class ListView extends AbsListView {
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         top = child.getTop();
-                        if (top > listTop) {
+                        // Don't draw dividers next to items that are not enabled
+                        if (top > listTop && (areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
                             bounds.top = top - dividerHeight;
                             bounds.bottom = top;
                             // Give the method the child ABOVE the divider, so we
