@@ -2054,18 +2054,19 @@ public class ListView extends AbsListView {
      */
     private boolean handleHorizontalFocusWithinListItem(int direction) {
         if (direction != View.FOCUS_LEFT && direction != View.FOCUS_RIGHT)  {
-            throw new IllegalArgumentException("direction must be one of {View.FOCUS_LEFT, View.FOCUS_RIGHT}");
+            throw new IllegalArgumentException("direction must be one of"
+                    + " {View.FOCUS_LEFT, View.FOCUS_RIGHT}");
         }
 
         final int numChildren = getChildCount();
         if (mItemsCanFocus && numChildren > 0 && mSelectedPosition != INVALID_POSITION) {
             final View selectedView = getSelectedView();
-            if (selectedView.hasFocus() && selectedView instanceof ViewGroup) {
+            if (selectedView != null && selectedView.hasFocus() &&
+                    selectedView instanceof ViewGroup) {
+
                 final View currentFocus = selectedView.findFocus();
                 final View nextFocus = FocusFinder.getInstance().findNextFocus(
-                        (ViewGroup) selectedView,
-                        currentFocus,
-                        direction);
+                        (ViewGroup) selectedView, currentFocus, direction);
                 if (nextFocus != null) {
                     // do the math to get interesting rect in next focus' coordinates
                     currentFocus.getFocusedRect(mTempRect);
@@ -2079,11 +2080,8 @@ public class ListView extends AbsListView {
                 // if the global result is going to be some other view within this
                 // list.  this is to acheive the overall goal of having
                 // horizontal d-pad navigation remain in the current item.
-                final View globalNextFocus = FocusFinder.getInstance()
-                        .findNextFocus(
-                                (ViewGroup) getRootView(),
-                                currentFocus,
-                                direction);
+                final View globalNextFocus = FocusFinder.getInstance().findNextFocus(
+                        (ViewGroup) getRootView(), currentFocus, direction);
                 if (globalNextFocus != null) {
                     return isViewAncestorOf(globalNextFocus, this);
                 }
