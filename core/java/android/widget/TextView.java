@@ -5421,6 +5421,62 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return changed;
     }
 
+    /**
+     * Move the cursor, if needed, so that it is at an offset that is visible
+     * to the user.  This will not move the cursor if it represents more than
+     * one character (a selection range).  This will only work if the
+     * TextView contains spannable text; otherwise it will do nothing.
+     */
+    public boolean moveCursorToVisibleOffset() {
+        if (!(mText instanceof Spannable)) {
+            return false;
+        }
+        int start = Selection.getSelectionStart(mText);
+        int end = Selection.getSelectionEnd(mText);
+        if (start != end) {
+            return false;
+        }
+        
+        // First: make sure the line is visible on screen:
+        
+        int line = mLayout.getLineForOffset(start);
+
+        final int top = mLayout.getLineTop(line);
+        final int bottom = mLayout.getLineTop(line+1);
+        final int vspace = mBottom - mTop - getExtendedPaddingTop() - getExtendedPaddingBottom();
+        int vslack = (bottom - top) / 2;
+        if (vslack > vspace / 4)
+            vslack = vspace / 4;
+        final int vs = mScrollY;
+
+        if (top < (vs+vslack)) {
+            line = mLayout.getLineForVertical(vs+vslack+(bottom-top));
+        } else if (bottom > (vspace+vs-vslack)) {
+            line = mLayout.getLineForVertical(vspace+vs-vslack-(bottom-top));
+        }
+        
+        // Next: make sure the character is visible on screen:
+        
+        final int hspace = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();
+        final int hs = mScrollX;
+        final int leftChar = mLayout.getOffsetForHorizontal(line, hs);
+        final int rightChar = mLayout.getOffsetForHorizontal(line, hspace+hs);
+        
+        int newStart = start;
+        if (newStart < leftChar) {
+            newStart = leftChar;
+        } else if (newStart > rightChar) {
+            newStart = rightChar;
+        }
+        
+        if (newStart != start) {
+            Selection.setSelection((Spannable)mText, newStart);
+            return true;
+        }
+        
+        return false;
+    }
+
     @Override
     public void computeScroll() {
         if (mScroller != null) {
