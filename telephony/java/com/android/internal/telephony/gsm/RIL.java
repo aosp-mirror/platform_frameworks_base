@@ -2347,9 +2347,7 @@ public final class RIL extends BaseCommands implements CommandsInterface
             dc.als = p.readInt();
             dc.isVoice = (0 == p.readInt()) ? false : true;
             dc.number = p.readString();
-            
-            // TODO get presentation from p.readInt() after checkin new RIL
-            dc.numberPresentation = DriverCall.presentationFromCLIP(0);
+            dc.numberPresentation = DriverCall.presentationFromCLIP(p.readInt());
             
             // Make sure there's a leading + on addresses with a TOA
             // of 145
