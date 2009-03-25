@@ -51,7 +51,6 @@ public class BaseInputConnection implements InputConnection {
     static final Object COMPOSING = new ComposingText();
     
     final InputMethodManager mIMM;
-    final Handler mH;
     final View mTargetView;
     final boolean mDummyMode;
     
@@ -60,19 +59,17 @@ public class BaseInputConnection implements InputConnection {
     Editable mEditable;
     KeyCharacterMap mKeyCharacterMap;
     
-    BaseInputConnection(InputMethodManager mgr, boolean dummyMode) {
+    BaseInputConnection(InputMethodManager mgr, boolean fullEditor) {
         mIMM = mgr;
         mTargetView = null;
-        mH = null;
-        mDummyMode = dummyMode;
+        mDummyMode = !fullEditor;
     }
     
-    public BaseInputConnection(View targetView, boolean dummyMode) {
+    public BaseInputConnection(View targetView, boolean fullEditor) {
         mIMM = (InputMethodManager)targetView.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
-        mH = targetView.getHandler();
         mTargetView = targetView;
-        mDummyMode = dummyMode;
+        mDummyMode = !fullEditor;
     }
     
     public static final void removeComposingSpans(Spannable text) {
@@ -403,7 +400,7 @@ public class BaseInputConnection implements InputConnection {
      */
     public boolean sendKeyEvent(KeyEvent event) {
         synchronized (mIMM.mH) {
-            Handler h = mH;
+            Handler h = mTargetView != null ? mTargetView.getHandler() : null;
             if (h == null) {
                 if (mIMM.mServedView != null) {
                     h = mIMM.mServedView.getHandler();

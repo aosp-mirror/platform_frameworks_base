@@ -41,8 +41,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ContextMenu.ContextMenuInfo;
 
@@ -429,6 +431,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private float mDensityScale;
 
+    private InputConnection mDefInputConnection;
+    private InputConnectionWrapper mPublicInputConnection;
+    
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -2932,7 +2937,46 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // InputConnection to proxy to.  Unfortunately this means we pretty
             // much need to make it as soon as a list view gets focus.
             createTextFilter(false);
-            return mTextFilter.onCreateInputConnection(outAttrs);
+            if (mPublicInputConnection == null) {
+                mDefInputConnection = new BaseInputConnection(this, false);
+                mPublicInputConnection = new InputConnectionWrapper(
+                        mTextFilter.onCreateInputConnection(outAttrs), true) {
+                    @Override
+                    public boolean reportFullscreenMode(boolean enabled) {
+                        // Use our own input connection, since it is
+                        // the "real" one the IME is talking with.
+                        return mDefInputConnection.reportFullscreenMode(enabled);
+                    }
+
+                    @Override
+                    public boolean performEditorAction(int editorAction) {
+                        // The editor is off in its own window; we need to be
+                        // the one that does this.
+                        if (editorAction == EditorInfo.IME_ACTION_DONE) {
+                            InputMethodManager imm = (InputMethodManager)
+                                    getContext().getSystemService(
+                                            Context.INPUT_METHOD_SERVICE);
+                            if (imm != null) {
+                                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean sendKeyEvent(KeyEvent event) {
+                        // Use our own input connection, since the filter
+                        // text view may not be shown in a window so has
+                        // no ViewRoot to dispatch events with.
+                        return mDefInputConnection.sendKeyEvent(event);
+                    }
+                };
+            }
+            outAttrs.inputType = EditorInfo.TYPE_CLASS_TEXT
+                    | EditorInfo.TYPE_TEXT_VARIATION_FILTER;
+            outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
+            return mPublicInputConnection;
         }
         return null;
     }
@@ -3019,14 +3063,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * For our text watcher that associated with the text filter
+     * For our text watcher that is associated with the text filter.  Does
+     * nothing.
      */
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
     }
 
     /**
-     * For our text watcher that associated with the text filter. Performs the actual
-     * filtering as the text changes.
+     * For our text watcher that is associated with the text filter. Performs
+     * the actual filtering as the text changes, and takes care of hiding and
+     * showing the popup displaying the currently entered filter text.
      */
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mPopup != null && isTextFilterEnabled()) {
@@ -3038,7 +3084,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mFiltered = true;
             } else if (showing && length == 0) {
                 // Remove the filter popup if the user has cleared all text
-                mPopup.dismiss();
+                dismissPopup();
                 mFiltered = false;
             }
             if (mAdapter instanceof Filterable) {
@@ -3055,7 +3101,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * For our text watcher that associated with the text filter
+     * For our text watcher that is associated with the text filter.  Does
+     * nothing.
      */
     public void afterTextChanged(Editable s) {
     }

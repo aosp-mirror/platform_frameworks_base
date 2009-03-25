@@ -24,9 +24,21 @@ import android.view.KeyEvent;
  * and have fun!
  */
 public class InputConnectionWrapper implements InputConnection {
-    private final InputConnection mTarget;
+    private InputConnection mTarget;
+    final boolean mMutable;
     
-    public InputConnectionWrapper(InputConnection target) {
+    public InputConnectionWrapper(InputConnection target, boolean mutable) {
+        mMutable = mutable;
+        mTarget = target;
+    }
+
+    /**
+     * Change the target of the input connection.
+     */
+    public void setTarget(InputConnection target) {
+        if (mTarget != null && !mMutable) {
+            throw new SecurityException("not mutable");
+        }
         mTarget = target;
     }
     
