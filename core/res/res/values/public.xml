@@ -1109,5 +1109,18 @@
      =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="accountType" id="0x01010270" />
+   <public type="attr" name="tension" id="0x01010270" />
+   <public type="attr" name="extraTension" id="0x01010271" />
+
+   <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
+   <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
+   <public type="anim" name="anticipate_overshoot_interpolator" id="0x010a0009" />
+   <public type="anim" name="bounce_interpolator" id="0x010a000a" />
+
+<!-- ===============================================================
+     Resources added in version 5 of the platform.
+     =============================================================== -->
+  <eat-comment />
+
+  <public type="attr" name="accountType" id="0x01010272" />
 </resources>
