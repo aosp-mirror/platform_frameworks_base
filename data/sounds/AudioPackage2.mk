@@ -45,6 +45,8 @@ PRODUCT_COPY_FILES += \
 	$(local_path)/effects/KeypressSpacebar.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
 	$(local_path)/effects/KeypressDelete.ogg:system/media/audio/ui/KeypressDelete.ogg \
 	$(local_path)/effects/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
+        $(LOCAL_PATH)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
+	$(LOCAL_PATH)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
 	$(local_path)/newwavelabs/Big_Easy.ogg:system/media/audio/ringtones/Big_Easy.ogg \
 	$(local_path)/newwavelabs/Bollywood.ogg:system/media/audio/ringtones/Bollywood.ogg \
 	$(local_path)/newwavelabs/Cairo.ogg:system/media/audio/ringtones/Cairo.ogg \

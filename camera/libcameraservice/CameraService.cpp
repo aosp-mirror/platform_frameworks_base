@@ -28,6 +28,8 @@
 #include <utils/MemoryHeapBase.h>
 #include <ui/ICameraService.h>
 
+#include <media/mediaplayer.h>
+#include <media/AudioSystem.h>
 #include "CameraService.h"
 
 namespace android {
@@ -151,6 +153,19 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
     }
 }
 
+static sp<MediaPlayer> newMediaPlayer(const char *file) 
+{
+    sp<MediaPlayer> mp = new MediaPlayer();
+    if (mp->setDataSource(file) == NO_ERROR) {
+        mp->setAudioStreamType(AudioSystem::ALARM);
+        mp->prepare();
+    } else {
+        mp.clear();
+        LOGE("Failed to load CameraService sounds.");
+    }
+    return mp;
+}
+
 CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient, pid_t clientPid)
 {
@@ -160,6 +175,9 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mClientPid = clientPid;
     mHardware = openCameraHardware();
     mUseOverlay = mHardware->useOverlay();
+
+    mMediaPlayerClick = newMediaPlayer("/system/media/audio/ui/camera_click.ogg");
+    mMediaPlayerBeep = newMediaPlayer("/system/media/audio/ui/VideoRecord.ogg");
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
@@ -264,6 +282,9 @@ CameraService::Client::~Client()
         mSurface->unregisterBuffers();
 #endif
     }
+
+    mMediaPlayerBeep.clear();
+    mMediaPlayerClick.clear();
 
     // make sure we tear down the hardware
     mClientPid = IPCThreadState::self()->getCallingPid();
@@ -464,6 +485,9 @@ status_t CameraService::Client::startPreview()
 
 status_t CameraService::Client::startRecording()
 {
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->start();
+    }
     return startCameraMode(CAMERA_RECORDING_MODE);
 }
 
@@ -502,6 +526,9 @@ void CameraService::Client::stopRecording()
         return;
     }
 
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->start();
+    }
     mHardware->stopRecording();
     LOGV("stopRecording(), hardware stopped OK");
     mPreviewBuffer.clear();
@@ -684,6 +711,9 @@ status_t CameraService::Client::takePicture()
         return INVALID_OPERATION;
     }
 
+    if (mMediaPlayerClick.get() != NULL) {
+        mMediaPlayerClick->start();
+    }
     return mHardware->takePicture(shutterCallback,
                                   yuvPictureCallback,
                                   jpegPictureCallback,
