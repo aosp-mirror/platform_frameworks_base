@@ -3607,9 +3607,6 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.pauseUpdate(mWebViewCore);
                     int contentX = viewToContent((int) x + mScrollX);
                     int contentY = viewToContent((int) y + mScrollY);
-                    if (inEditingMode()) {
-                        mTextEntry.updateCachedTextfield();
-                    }
                     nativeClearFocus(contentX, contentY);
                     // remove the zoom anchor if there is any
                     if (mZoomScale != 0) {
@@ -3787,9 +3784,6 @@ public class WebView extends AbsoluteLayout
                 mTouchMode = TOUCH_DONE_MODE;
                 int contentX = viewToContent((int) mLastTouchX + mScrollX);
                 int contentY = viewToContent((int) mLastTouchY + mScrollY);
-                if (inEditingMode()) {
-                    mTextEntry.updateCachedTextfield();
-                }
                 nativeClearFocus(contentX, contentY);
                 break;
             }
@@ -4276,10 +4270,6 @@ public class WebView extends AbsoluteLayout
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
         Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
                 contentX + mNavSlop, contentY + mNavSlop);
-        // If we were already focused on a textfield, update its cache.
-        if (inEditingMode()) {
-            mTextEntry.updateCachedTextfield();
-        }
         nativeSelectBestAt(rect);
     }
 

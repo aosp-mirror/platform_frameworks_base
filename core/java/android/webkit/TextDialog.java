@@ -341,18 +341,17 @@ import java.util.ArrayList;
             // trackball or auto-correct.
             mWebView.setSelection(start, start + before);
         }
-        updateCachedTextfield();
-        if (cannotUseKeyEvents) {
-            return;
-        }
-        int length = events.length;
-        for (int i = 0; i < length; i++) {
-            // We never send modifier keys to native code so don't send them
-            // here either.
-            if (!KeyEvent.isModifierKey(events[i].getKeyCode())) {
-                sendDomEvent(events[i]);
+        if (!cannotUseKeyEvents) {
+            int length = events.length;
+            for (int i = 0; i < length; i++) {
+                // We never send modifier keys to native code so don't send them
+                // here either.
+                if (!KeyEvent.isModifierKey(events[i].getKeyCode())) {
+                    sendDomEvent(events[i]);
+                }
             }
         }
+        updateCachedTextfield();
     }
     
     @Override
